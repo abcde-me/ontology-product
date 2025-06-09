@@ -51,20 +51,20 @@ initI18n();
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
 const hiddenTopBarRoutes = [
-   "/login",
-  "/tenant/compute/appforge/login",
-  "/tenant/compute/appforge/appCreate",
-  "/tenant/compute/appforge/appConfig",
-  "/tenant/compute/appforge/appChat",
-  "/tenant/compute/appforge/configurationpage",
-  "/tenant/compute/appforge/workflowConfig",
-  "/tenant/compute/appforge/workflowPublic",
-  "/tenant/compute/appforge/agentCreate"
+  '/login',
+  '/tenant/compute/modaforge/login',
+  '/tenant/compute/modaforge/appCreate',
+  '/tenant/compute/modaforge/appConfig',
+  '/tenant/compute/modaforge/appChat',
+  '/tenant/compute/modaforge/configurationpage',
+  '/tenant/compute/modaforge/workflowConfig',
+  '/tenant/compute/modaforge/workflowPublic',
+  '/tenant/compute/modaforge/agentCreate'
 ];
 
 function App() {
   const localLayout = useSelector(
-    (state: GlobalState) => state?.plugins?.consolePluginAppForge?.localLayout
+    (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
   );
   const location = useLocation();
   const { pushPath } = usePathChange();
@@ -85,7 +85,7 @@ function App() {
         <Switch>
           <Route
             key="login"
-            path="/tenant/compute/appforge/login"
+            path="/tenant/compute/modaforge/login"
             component={Login}
             exact
           />
@@ -99,8 +99,8 @@ function App() {
               />
             );
           })}
-          <Redirect from="/login" to="/tenant/compute/appforge/login" exact />
-          <Redirect from="/" to="/tenant/compute/appforge/home" exact />
+          <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
+          <Redirect from="/" to="/tenant/compute/modaforge/home" exact />
           <Route key="*" path="*" component={Page404} />
         </Switch>
       </Layout.Content>
@@ -151,7 +151,13 @@ function Index() {
 }
 
 ReactDOM.render(
-  <Suspense fallback={<div className='flex items-center justify-center h-screen w-screen'><Spin block /></div>}>
+  <Suspense
+    fallback={
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Spin block />
+      </div>
+    }
+  >
     <Index />
   </Suspense>,
   document.getElementById('root')

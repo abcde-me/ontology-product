@@ -1,13 +1,12 @@
 {
-  "name": "console-plugin-appforge",
+  "name": "modaforge-front",
   "version": "0.1.1",
   "private": true,
   "description": "CCXD Pro",
   "scripts": {
     "clean": "rimraf dist build",
     "start": "yarn clean && node --max-old-space-size=4096 ./scripts/start",
-    "dev:cp": "cross-env NODE_RUN_TYPE=ConsolePlugin PORT=9001 GENERATE_SOURCEMAP=false yarn start",
-    "build:cp": "cross-env NODE_RUN_TYPE=ConsolePlugin yarn build",
+    "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
     "build": "yarn clean && cross-env NODE_ENV=production GENERATE_SOURCEMAP=false node ./scripts/build",
     "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
     "stylelint": "stylelint \"src/**/*.less\" \"src/**/*.scss\" \"src/**/*.css\" --fix --cache",
@@ -18,8 +17,8 @@
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'",
     "start:http-server": "yarn build:cp && ./node_modules/.bin/http-server ./dist -p 9001",
     "i18n-parse": "node --experimental-modules ./scripts/tools/i18n/index.js",
-    "test-cypress-console-plugin-appforge": "cd integration-tests-cypress && cypress open --env ccos=true",
-    "test-cypress-console-plugin-appforge-headless": "cd integration-tests-cypress && cypress run --env ccos=true --browser ${BRIDGE_E2E_BROWSER_NAME:=chrome} --headless",
+    "test-cypress-modaforge-front": "cd integration-tests-cypress && cypress open --env ccos=true",
+    "test-cypress-modaforge-front-headless": "cd integration-tests-cypress && cypress run --env ccos=true --browser ${BRIDGE_E2E_BROWSER_NAME:=chrome} --headless",
     "cypress-merge": "mochawesome-merge ./gui_test_screenshots/cypress_report*.json > ./gui_test_screenshots/cypress.json",
     "cypress-generate": "marge -o ./gui_test_screenshots/ -f cypress-report -t 'Ccos Console Cypress Test Results' -p 'Ccos Cypress Test Results' --showPassed false --assetsDir ./gui_test_screenshots/cypress/assets ./gui_test_screenshots/cypress.json",
     "cypress-postreport": "yarn cypress-merge && yarn cypress-generate"
@@ -240,7 +239,7 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "consolePlugin": {
-    "name": "console-plugin-appforge",
+    "name": "modaforge-front",
     "version": "0.0.1",
     "displayName": "CCOS Console Plugin Template",
     "description": "Template project for CCOS console plugins. Edit package.json to change this message and the plugin name.",

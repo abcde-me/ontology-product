@@ -25,7 +25,7 @@ const Header: React.FC<CommonModalProps> = (props) => {
     onChildReset();
   };
   return (
-    <div className="appforge-header mb-4 flex">
+    <div className="modaforge-header mb-4 flex">
       <div className="header-left flex-1 items-center ">
         <InputSearch
           value={value}

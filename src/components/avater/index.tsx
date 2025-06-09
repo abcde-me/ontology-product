@@ -53,7 +53,7 @@ export default function Avatar(props: {
         onClick={(evt) => evt.stopPropagation()}
       >
         {imgData ? (
-          <Image src={imgData} className="appforge-avatar h-full  w-full" />
+          <Image src={imgData} className="modaforge-avatar h-full  w-full" />
         ) : (
           defaultIcon
         )}
@@ -114,7 +114,7 @@ export default function Avatar(props: {
       >
         {value ? (
           <div className="group relative" style={sizeStyle}>
-            <Image src={imgData} className="appforge-avatar h-full w-full" />
+            <Image src={imgData} className="modaforge-avatar h-full w-full" />
             {loading ? (
               <IconLoading
                 spin

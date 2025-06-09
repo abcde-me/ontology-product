@@ -1,9 +1,4 @@
-import AppstoreIcon from '@/assets/appstore.svg';
-import ToolstoreIcon from '@/assets/toolstore.svg';
-import WorkspaceIcon from '@/assets/workspace.svg';
-import UserSpaceIcon from '@/assets/user-space.svg';
 import SpaceIcon1 from '@/assets/space-icon1.svg';
-import SpaceIcon2 from '@/assets/space-icon2.svg';
 import IconApps from '@/assets/home.svg';
 import { useQueryParams } from '@/utils';
 import {
@@ -25,7 +20,6 @@ import {
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { isSingleApp } from '@/utils/env';
 import { CreateSpaceModal } from '@/pages/systemMgmt/createSpaceModal';
 import { getFlatRoutes, routes } from '../route';
 import './sider.css';
@@ -46,338 +40,66 @@ type MenuModel = {
   type?: string;
 };
 const customHeader = {
-  '/tenant/compute/appforge/appConfig': () =>
+  '/tenant/compute/modaforge/appConfig': () =>
     import('@/pages/appCreate/header'),
-  '/tenant/compute/appforge/appCreate': () =>
+  '/tenant/compute/modaforge/appCreate': () =>
     import('@/pages/appCreate/header'),
-  '/tenant/compute/appforge/appChat': () => import('@/pages/appChat/header'),
-  // '/tenant/compute/appforge/workflowConfig': () =>
-  //   import('@/pages/workflowConfig/customHeader'),
-  '/tenant/compute/appforge/workflowPublic': () =>
+  '/tenant/compute/modaforge/appChat': () => import('@/pages/appChat/header'),
+  '/tenant/compute/modaforge/workflowPublic': () =>
     import('@/pages/workflowPublic/customHeader')
 };
-// const menus: MenuModel[] = [
-//   {
-//     title: '主页',
-//     icon: (
-//       <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-//     ),
-//     path: '/tenant/compute/appforge/home',
-//     key: 'home'
-//   },
-//   //智能体v2
-//   {
-//     title: '智能体',
-//     icon: (
-//       <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-//     ),
-//     path: '/tenant/compute/appforge/agentTwo',
-//     key: 'agentTwo'
-//   },
-//   //知识库v2
-//   {
-//     title: '知识库',
-//     icon: (
-//       <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-//     ),
-//     path: '/tenant/compute/appforge/knowledgeBaseTwo',
-//     key: 'knowledgeBaseTwo'
-//   },
-
-//   //工作流v2
-//   {
-//     title: '工作流',
-//     icon: (
-//       <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-//     ),
-//     path: '/tenant/compute/appforge/workFolwTwo',
-//     key: 'workFolwTwo'
-//   },
-//   {
-//     title: '应用',
-//     icon: (
-//       // <WorkspaceIcon className="appforge-sider-icon mr-[12px] flex-none  text-[22px] " />
-//       <AppstoreIcon className="appforge-sider-icon mr-[12px] flex-none  text-[22px]" />
-//     ),
-//     key: 'workspace',
-//     children: [
-//       {
-//         title: '我的应用',
-//         children: [],
-//         icon: null,
-//         path: '/tenant/compute/appforge/appList',
-//         activePaths: [
-//           '/tenant/compute/appforge/appList',
-//           '/tenant/compute/appforge/appConfig',
-//           '/tenant/compute/appforge/appCreate'
-//         ],
-//         key: 'myapp'
-//       },
-//       {
-//         title: '应用广场',
-//         icon: null,
-//         key: 'appstore',
-//         path: '/tenant/compute/appforge/appStore'
-//       },
-//       {
-//         title: 'Prompt工程',
-//         icon: null,
-//         key: 'prompt',
-//         path: '/tenant/compute/appforge/prompt'
-//       },
-//       {
-//         title: '自定义插件',
-//         children: [],
-//         icon: null,
-//         path: '/tenant/compute/appforge/toolList',
-//         key: 'tools',
-//         activePaths: [
-//           '/tenant/compute/appforge/toolList',
-//           '/tenant/compute/appforge/toolCreate',
-//           '/tenant/compute/appforge/toolDetail'
-//         ]
-//       },
-//       {
-//         title: '工作流管理',
-//         icon: null,
-//         key: 'workflowList',
-//         path: '/tenant/compute/appforge/workflowList',
-//         activePaths: [
-//           '/tenant/compute/appforge/workflowList',
-//           '/tenant/compute/appforge/workflowConfig',
-//           '/tenant/compute/appforge/workflowPublic'
-//         ]
-//       }
-//     ]
-//   },
-//   {
-//     title: '模型',
-//     icon: (
-//       <ToolstoreIcon className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-//     ),
-//     key: 'modelMenu',
-//     path: '/tenant/compute/appforge/toolStore',
-//     activePaths: [
-//       '/tenant/compute/appforge/toolStore',
-//       '/tenant/compute/appforge/toolStoreDetail'
-//     ],
-//     children: [
-//       {
-//         title: '模型xxx',
-//         icon: null,
-//         key: 'modelxxxx',
-//         path: '/tenant/compute/appforge/appStore'
-//       }
-//     ]
-//   },
-//   {
-//     title: '知识',
-//     icon: (
-//       <WorkspaceIcon className="appforge-sider-icon mr-[12px] flex-none  text-[22px] " />
-//     ),
-//     key: 'knowledgeMenu',
-//     path: '/tenant/compute/appforge/toolStore',
-//     activePaths: [
-//       '/tenant/compute/appforge/toolStore',
-//       '/tenant/compute/appforge/toolStoreDetail'
-//     ],
-//     children: [
-//       {
-//         title: '数据接入',
-//         children: [],
-//         icon: null,
-//         path: '/tenant/compute/appforge/dataConnection',
-//         activePaths: [
-//           '/tenant/compute/appforge/dataSource',
-//           '/tenant/compute/appforge/textDetailPage'
-//         ],
-//         key: 'dataConnection'
-//       },
-//       {
-//         title: '数据集',
-//         children: [],
-//         icon: null,
-//         path: '/tenant/compute/appforge/knowledgeBase',
-//         activePaths: [],
-//         key: 'dataset'
-//       },
-//       {
-//         title: '知识库',
-//         children: [],
-//         icon: null,
-//         path: '/tenant/compute/appforge/knowledgeBase',
-//         activePaths: [
-//           '/tenant/compute/appforge/knowledgeBase',
-//           '/tenant/compute/appforge/knowledgeCreate',
-//           '/tenant/compute/appforge/knowledgeConfig'
-//           // '/tenant/compute/appforge/knowledgeDetail',
-//           // '/tenant/compute/appforge/knowledgeTest',
-//           // '/tenant/compute/appforge/addDocument'
-//         ],
-//         key: 'knowledgeBase'
-//       }
-//     ]
-//   },
-//   {
-//     title: '评测',
-//     icon: (
-//       <ToolstoreIcon className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-//     ),
-//     key: 'estimateMenu',
-//     path: '/tenant/compute/appforge/toolStore',
-//     activePaths: [
-//       '/tenant/compute/appforge/toolStore',
-//       '/tenant/compute/appforge/toolStoreDetail'
-//     ],
-//     children: [
-//       {
-//         title: '评测xxx',
-//         icon: null,
-//         key: 'testxxxx',
-//         path: '/tenant/compute/appforge/appStore'
-//       }
-//     ]
-//   },
-//   {
-//     title: '系统管理',
-//     icon: (
-//       <IconSettings className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-//     ),
-//     key: 'systemMgmtMenu',
-//     children: [
-//       {
-//         title: '空间管理',
-//         icon: null,
-//         key: 'spaceMgmt',
-//         path: '/tenant/compute/appforge/spaceMgmt',
-//         activePaths: ['/tenant/compute/appforge/spaceDetail']
-//       },
-//       {
-//         title: '角色管理',
-//         icon: null,
-//         key: 'roleMgmt',
-//         path: '/tenant/compute/appforge/appStore'
-//       },
-//       {
-//         title: '权限管理',
-//         icon: null,
-//         key: 'permissoinMgmt',
-//         path: '/tenant/compute/appforge/appStore'
-//       }
-//     ]
-//   }
-//   // {
-//   //   title: '插件商店',
-//   //   icon: (
-//   //     <ToolstoreIcon className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-//   //   ),
-//   //   key: 'toolstore',
-//   //   path: '/tenant/compute/appforge/toolStore',
-//   //   activePaths: [
-//   //     '/tenant/compute/appforge/toolStore',
-//   //     '/tenant/compute/appforge/toolStoreDetail'
-//   //   ]
-//   // }
-// ];
 
 const menus: MenuModel[] = [
   {
     type: 'itemGroup',
-    title: '项目开发',
-    key: 'projectDevGroup',
+    title: '数据连接',
+    key: 'dataConnection',
     children: [
       {
-        title: '应用广场',
+        title: '连接器',
         icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
         ),
-        key: 'appstore',
-        path: '/tenant/compute/appforge/appStoreTwo'
+        key: 'connection',
+        path: '/tenant/compute/modaforge/connection'
       },
       {
-        title: '智能体',
+        title: '数据载入',
         icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
         ),
-        path: '/tenant/compute/appforge/agentV2',
-        key: 'agentV2'
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '资源管理',
-    key: 'resMgmtGroup',
-    children: [
-       {
-        title: '插件广场',
-        icon: (
-          <ToolstoreIcon className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-        ),
-        key: 'toolStore',
-        path: '/tenant/compute/appforge/plugins',
-        activePaths: [
-          '/tenant/compute/appforge/plugins',
-          '/tenant/compute/appforge/plugin/detail'
-        ]
-      },
-      // {
-      //   title: '插件广场',
-      //   icon: (
-      //     <ToolstoreIcon className="appforge-sider-icon mr-[12px]  flex-none text-[22px]" />
-      //   ),
-      //   key: 'toolStore',
-      //   path: '/tenant/compute/appforge/toolStore',
-      //   activePaths: [
-      //     '/tenant/compute/appforge/toolStore',
-      //     '/tenant/compute/appforge/toolStoreDetail'
-      //   ]
-      // },
-      {
-        title: '工作流',
-        icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        path: '/tenant/compute/appforge/workflowList',
-        key: 'workflowList'
-      },
-      {
-        title: '知识库',
-        icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        path: '/tenant/compute/appforge/knowledgeBaseV2',
-        key: 'knowledgeBaseV2'
+        path: '/tenant/compute/modaforge/dataLoad',
+        key: 'dataLoad'
       }
     ]
   },
   {
     type: 'itemGroup',
     title: '平台管理',
-    key: 'platformMgmtGroup',
+    key: 'mgmtGroup',
     children: [
       {
         title: '组织管理',
         icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
         ),
         key: 'orgMgmt',
-        path: '/tenant/compute/appforge/organization'
+        path: '/tenant/compute/modaforge/organization'
       },
       {
         title: '用户管理',
         icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
         ),
-        path: '/tenant/compute/appforge/member',
+        path: '/tenant/compute/modaforge/member',
         key: 'userMgmt'
       },
       {
         title: 'API-KEY',
         icon: (
-          <IconApps className="appforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
         ),
-        path: '/tenant/compute/appforge/apiKey',
+        path: '/tenant/compute/modaforge/apiKey',
         key: 'apiKey'
       }
     ]
@@ -387,42 +109,42 @@ const menus: MenuModel[] = [
 const knowledgeDetailMenus: MenuModel[] = [
   {
     title: '文档列表',
-    path: '/tenant/compute/appforge/knowledgeDetail',
+    path: '/tenant/compute/modaforge/knowledgeDetail',
     key: 'knowledgeDetail',
     className: 'ml-[30px]',
     activePaths: [
-      '/tenant/compute/appforge/knowledgeDetail',
-      '/tenant/compute/appforge/addDocument',
-      '/tenant/compute/appforge/documentDetail'
+      '/tenant/compute/modaforge/knowledgeDetail',
+      '/tenant/compute/modaforge/addDocument',
+      '/tenant/compute/modaforge/documentDetail'
     ]
   },
   {
     title: '命中测试',
-    path: '/tenant/compute/appforge/knowledgeTest',
+    path: '/tenant/compute/modaforge/knowledgeTest',
     key: 'knowledgeTest',
     className: 'ml-[30px]'
   }
 ];
 
 const hideSidebarPaths = [
-  '/tenant/compute/appforge/configurationpage',
-  '/tenant/compute/appforge/appChat',
-  '/tenant/compute/appforge/workflowConfig',
-  '/tenant/compute/appforge/workflowPublic',
-  '/tenant/compute/appforge/agentCreate',
-  "/tenant/compute/appforge/agentPage",
-  '/tenant/compute/appforge/login',
-  '/tenant/compute/appforge/userinfo'
+  '/tenant/compute/modaforge/configurationpage',
+  '/tenant/compute/modaforge/appChat',
+  '/tenant/compute/modaforge/workflowConfig',
+  '/tenant/compute/modaforge/workflowPublic',
+  '/tenant/compute/modaforge/agentCreate',
+  '/tenant/compute/modaforge/agentPage',
+  '/tenant/compute/modaforge/login',
+  '/tenant/compute/modaforge/userinfo'
 ];
 const collapseSidebarPaths = [
-  '/tenant/compute/appforge/appCreate',
-  '/tenant/compute/appforge/appConfig'
+  '/tenant/compute/modaforge/appCreate',
+  '/tenant/compute/modaforge/appConfig'
 ];
 const knowledgeDetailSidebarPaths = [
-  '/tenant/compute/appforge/knowledgeDetail',
-  '/tenant/compute/appforge/addDocument',
-  '/tenant/compute/appforge/knowledgeTest',
-  '/tenant/compute/appforge/documentDetail'
+  '/tenant/compute/modaforge/knowledgeDetail',
+  '/tenant/compute/modaforge/addDocument',
+  '/tenant/compute/modaforge/knowledgeTest',
+  '/tenant/compute/modaforge/documentDetail'
 ];
 
 function LayoutWithSider(props: { children }) {
@@ -628,76 +350,26 @@ function LayoutWithSider(props: { children }) {
             collapsible
             trigger={
               collapsed ? (
-                <IconMenuUnfold className="appforge-icon-clickable" />
+                <IconMenuUnfold className="modaforge-icon-clickable" />
               ) : (
-                <IconMenuFold className="appforge-icon-clickable" />
+                <IconMenuFold className="modaforge-icon-clickable" />
               )
             }
             breakpoint="xl"
             className={cn(
-              'appforge-sider bg-transparent shadow-none',
+              'modaforge-sider bg-transparent shadow-none',
               collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
             )}
           >
-            <div className="mb-[18px] mt-[26px] pl-[20px] text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-              {collapsed ? '' : '应用开发平台'}
-            </div>
-            {/* <div className={cn(collapsed ? 'px-[6px]' : 'px-[8px]')}>
-              {!knowledgeDetailSidebar ? (
-                collapsed ? (
-                  // <Button
-                  //   type="primary"
-                  //   icon={<IconPlus />}
-                  //   className="mb-[8px]"
-                  //   onClick={() => {
-                  //     history.push('/tenant/compute/appforge/appCreate');
-                  //   }}
-                  // />
-                  <Trigger
-                    popup={renderUserSpaceMenu}
-                    trigger="hover"
-                    position="bottom"
-                    classNames="zoomInTop"
-                  >
-                    <UserSpaceIcon className="menu-icon mb-[8px] ml-[6px] size-[20px] cursor-pointer" />
-                  </Trigger>
-                ) : (
-                  // <Button
-                  //   long
-                  //   type="primary"
-                  //   className="mb-[8px]"
-                  //   icon={<IconPlus />}
-                  //   onClick={() => {
-                  //     history.push('/tenant/compute/appforge/appCreate');
-                  //   }}
-                  // >
-                  //   新建应用
-                  // </Button>
-                  <Trigger
-                    popup={renderUserSpaceMenu}
-                    trigger="hover"
-                    position="bottom"
-                    classNames="zoomInTop"
-                  >
-                    <div className="user-space">
-                      <span>
-                        <UserSpaceIcon className="menu-icon" />
-                        <span className="menu-title">用户默认空间</span>
-                      </span>
-                      <IconDown
-                        style={{ fontSize: '16px', color: '#334155' }}
-                      />
-                    </div>
-                  </Trigger>
-                )
-              ) : null}
+            {/* <div className="mb-[18px] mt-[26px] pl-[20px] text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+              {collapsed ? '' : '多模态治理平台'}
             </div> */}
             {knowledgeDetailSidebar &&
               (collapsed ? (
                 <div
                   className="border-b-[var(--color-border-2))] ml-[8px] mr-[12px] flex cursor-pointer items-center border-b py-[11px]"
                   onClick={() =>
-                    history.push('/tenant/compute/appforge/knowledgeBase')
+                    history.push('/tenant/compute/modaforge/knowledgeBase')
                   }
                 >
                   <IconLeftCircle className="text-[22px] text-[var(--color-text-4)]" />
@@ -706,7 +378,7 @@ function LayoutWithSider(props: { children }) {
                 <div
                   className="border-b-[var(--color-border-2))] ml-[8px] mr-[12px] flex cursor-pointer items-center border-b py-[11px]"
                   onClick={() =>
-                    history.push('/tenant/compute/appforge/knowledgeBase')
+                    history.push('/tenant/compute/modaforge/knowledgeBase')
                   }
                 >
                   <IconLeftCircle className="ml-[12px] mr-[8px] text-[22px] text-[var(--color-text-4)]" />

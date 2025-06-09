@@ -80,7 +80,7 @@ const ChatInput: FC<ChatInputProps> = ({
         className={cn(
           'flex max-h-[150px] flex-auto items-end overflow-y-auto rounded-[8px] border-[2px] border-transparent bg-white p-[12px_19px]',
           'hover:border-[#40b0fe]',
-          'appforge-input-container'
+          'modaforge-input-container'
         )}
         style={{ boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.1)' }}
       >

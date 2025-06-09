@@ -14,7 +14,7 @@ AppForge（用于构建适用于特定用途或业务场景的定制化模型的
 
 ```
 // 初始化项目
-yarn install
+yarn install --frozen-lockfile
 
 // 开发模式
 yarn run dev
@@ -22,43 +22,6 @@ yarn run dev
 // 构建
 yarn run build
 ```
-
-### 以 console 插件运行
-
-建议也放到虚机上
-
-```
-// 初始化项目
-yarn install
-
-// 开发模式
-yarn run dev:cp
-
-// 构建
-yarn run start:http-server
-```
-
-然后在 console 项目运行
-
-```
-# 登录环境
-oc login https://console-ccos-console.apps.cc-ccos56209.ccos.test:6443 -u admin -p admin@123
-
-# 首次运行设置端口
-firewall-cmd --zone=public --add-port=9001/tcp --permanent
-firewall-cmd --reload
-firewall-cmd --list-ports
-
-# 后端
-source contrib/oc-environment.sh
-./bin/bridge  -plugins console-plugin-appforge=http://虚机IP:9001
-
-# 前端
-cd frontend/
-yarn run dev
-```
-
-最后访问 虚机 IP:9000 可见左侧菜单
 
 ## 单元测试
 
