@@ -1,0 +1,31 @@
+@tailwind components;
+
+@layer components {
+  .btn {
+    @apply inline-flex h-9 cursor-pointer content-center items-center justify-center rounded-lg px-4 py-2 text-base leading-5;
+  }
+
+  .btn-default {
+    @apply cursor-pointer border border-solid border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-white hover:shadow-sm;
+  }
+
+  .btn-default-disabled {
+    @apply cursor-not-allowed border border-solid border-gray-200 bg-gray-200 text-gray-800;
+  }
+
+  .btn-primary {
+    @apply cursor-pointer bg-primary-600 text-white hover:bg-primary-600/75 hover:shadow-sm;
+  }
+
+  .btn-primary-disabled {
+    @apply cursor-not-allowed bg-primary-200 text-white;
+  }
+
+  .btn-warning {
+    @apply cursor-pointer bg-red-600 text-white hover:bg-red-600/75 hover:shadow-sm;
+  }
+
+  .btn-warning-disabled {
+    @apply cursor-not-allowed bg-red-600/75 text-white;
+  }
+}

@@ -1,0 +1,23 @@
+{
+    "type": "code",
+    "config": {
+        "variables": [
+            {
+                "variable": "arg1",
+                "value_selector": []
+            },
+            {
+                "variable": "arg2",
+                "value_selector": []
+            }
+        ],
+        "code_language": "python3",
+        "code": "# 在这里，您可以通过 ‘args’  获取节点中的输入变量，并通过 'ret' 输出结果\n# 'args' 和 'ret' 已经被正确地注入到环境中\n# 下面是一个示例，首先获取节点的全部输入参数params，其次获取其中参数名为‘input’的值：\n# params = args.params; \n# input = params.input;\n# 下面是一个示例，输出一个包含多种数据类型的 'ret' 对象：\n# ret: Output =  { \"name\": ‘小明’, \"hobbies\": [“看书”, “旅游”] };\ndef main(arg1: str, arg2: str) -> dict:\n    return {\n        \"result\": arg1 + arg2,\n    }\n",
+        "outputs": {
+            "result": {
+                "type": "string",
+                "children": null
+            }
+        }
+    }
+}

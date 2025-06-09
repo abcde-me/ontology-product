@@ -1,0 +1,21 @@
+{
+  "integrationFolder": "tests",
+  "screenshotsFolder": "../gui_test_screenshots/cypress/screenshots",
+  "videosFolder": "../gui_test_screenshots/cypress/videos",
+  "video": false,
+  "reporter": "../node_modules/cypress-multi-reporters",
+  "reporterOptions": {
+    "configFile": "reporter-config.json"
+  },
+  "supportFile": "./support/index.ts",
+  "pluginsFile": "./plugins/index.js",
+  "fixturesFolder": "./fixtures",
+  "defaultCommandTimeout": 30000,
+  "pageLoadTimeout": 120000,
+  "retries": {
+    "runMode": 1,
+    "openMode": 0
+  },
+  "viewportWidth": 1600,
+  "viewportHeight": 960
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/帮助提示</title>
+    <g id="4.数据展示/图标/帮助提示" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="？" stroke="#334155">
+            <circle id="1-FL" cx="8" cy="8" r="6.5"></circle>
+            <path d="M7.99492588,9.49436238 L8,8.5 C9.1045695,8.5 10,7.6045695 10,6.5 C10,5.3954305 9.1045695,4.5 8,4.5 C6.8954305,4.5 6,5.3954305 6,6.5" id="2-LW" stroke-linecap="round" stroke-linejoin="round"></path>
+            <line x1="8" y1="11.2880861" x2="8" y2="11.7880861" id="3-LW" stroke-linecap="round"></line>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "paths": {
+      "react": ["./node_modules/@types/react"],
+      "@/*": ["src/*"]
+    },
+    "baseUrl": "."
+  },
+  "include": ["src"]
+}

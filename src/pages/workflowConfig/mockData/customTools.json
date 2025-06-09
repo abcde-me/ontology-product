@@ -1,0 +1,744 @@
+[
+    {
+        "id": "25ab6a45-63d9-4c95-875d-1724816494c2",
+        "author": "liuxin",
+        "name": "\u6536\u5230\u53d1\u65af\u8482\u82ac",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Your OpenAPI specification",
+            "en_US": "Your OpenAPI specification",
+            "pt_BR": "Your OpenAPI specification",
+            "ja_JP": "Your OpenAPI specification"
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "\u6536\u5230\u53d1\u65af\u8482\u82ac",
+            "en_US": "\u6536\u5230\u53d1\u65af\u8482\u82ac",
+            "pt_BR": "\u6536\u5230\u53d1\u65af\u8482\u82ac",
+            "ja_JP": "\u6536\u5230\u53d1\u65af\u8482\u82ac"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [],
+        "labels": []
+    },
+    {
+        "id": "9abebb78-6f31-4b0b-bfc2-903db586c21c",
+        "author": "jiangjunjie",
+        "name": "234asasf",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "234asasf",
+            "en_US": "234asasf",
+            "pt_BR": "234asasf",
+            "ja_JP": "234asasf"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "e7f119db-b5c2-462d-ab61-89e924f2013f",
+        "author": "jiangjunjie",
+        "name": "werw",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "werw",
+            "en_US": "werw",
+            "pt_BR": "werw",
+            "ja_JP": "werw"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "54cf76d8-8502-4bda-8a3b-84ad402f1b2f",
+        "author": "jiangjunjie",
+        "name": "adfas45454",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "adfas45454",
+            "en_US": "adfas45454",
+            "pt_BR": "adfas45454",
+            "ja_JP": "adfas45454"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "fb4b3143-d235-44b3-8cbb-162a0bea16bf",
+        "author": "jiangjunjie",
+        "name": "23af",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "23af",
+            "en_US": "23af",
+            "pt_BR": "23af",
+            "ja_JP": "23af"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "e5712b7e-ee56-4a7e-a89d-6afc8eb7816b",
+        "author": "jiangjunjie",
+        "name": "adfaasdf",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "adfaasdf",
+            "en_US": "adfaasdf",
+            "pt_BR": "adfaasdf",
+            "ja_JP": "adfaasdf"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "3db9437b-d3dd-43b3-9eb1-9f12871efcac",
+        "author": "jiangjunjie",
+        "name": "adfaafadf",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "adfaafadf",
+            "en_US": "adfaafadf",
+            "pt_BR": "adfaafadf",
+            "ja_JP": "adfaafadf"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "4bf51425-7907-4f10-96c8-4edf7a39e571",
+        "author": "jiangjunjie",
+        "name": "adfsf",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "adfsf",
+            "en_US": "adfsf",
+            "pt_BR": "adfsf",
+            "ja_JP": "adfsf"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    },
+    {
+        "id": "0b132e8c-7a15-46db-ba4c-b3adfcb05832",
+        "author": "jiangjunjie",
+        "name": "5555",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Your OpenAPI specification",
+            "en_US": "Your OpenAPI specification",
+            "pt_BR": "Your OpenAPI specification",
+            "ja_JP": "Your OpenAPI specification"
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "5555",
+            "en_US": "5555",
+            "pt_BR": "5555",
+            "ja_JP": "5555"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [],
+        "labels": []
+    },
+    {
+        "id": "dc123566-3db7-4944-bd90-3de0e443025d",
+        "author": "jiangjunjie",
+        "name": "\u5929\u6c14",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "Retrieves current weather data for a location.",
+            "en_US": "Retrieves current weather data for a location.",
+            "pt_BR": "Retrieves current weather data for a location.",
+            "ja_JP": "Retrieves current weather data for a location."
+        },
+        "icon": {
+            "content": "\ud83d\udd75\ufe0f",
+            "background": "#FEF7C3"
+        },
+        "label": {
+            "zh_Hans": "\u5929\u6c14",
+            "en_US": "\u5929\u6c14",
+            "pt_BR": "\u5929\u6c14",
+            "ja_JP": "\u5929\u6c14"
+        },
+        "type": "api",
+        "team_credentials": {
+            "auth_type": "none"
+        },
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "",
+                "name": "GetCurrentWeather",
+                "label": {
+                    "en_US": "GetCurrentWeather",
+                    "zh_Hans": "GetCurrentWeather",
+                    "pt_BR": "GetCurrentWeather",
+                    "ja_JP": "GetCurrentWeather"
+                },
+                "description": {
+                    "en_US": "Get temperature for a specific location",
+                    "zh_Hans": "Get temperature for a specific location",
+                    "pt_BR": "Get temperature for a specific location",
+                    "ja_JP": "Get temperature for a specific location"
+                },
+                "parameters": [
+                    {
+                        "name": "location",
+                        "label": {
+                            "en_US": "location",
+                            "zh_Hans": "location",
+                            "pt_BR": "location",
+                            "ja_JP": "location"
+                        },
+                        "placeholder": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "The city and state to retrieve the weather for",
+                            "zh_Hans": "The city and state to retrieve the weather for",
+                            "pt_BR": "The city and state to retrieve the weather for",
+                            "ja_JP": "The city and state to retrieve the weather for"
+                        },
+                        "form": "llm",
+                        "llm_description": "The city and state to retrieve the weather for"
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    }
+]

@@ -1,0 +1,27 @@
+{
+    "type": "code",
+    "config": {
+        "variables": [
+            {
+                "variable": "arg1",
+                "value_selector": []
+            },
+            {
+                "variable": "arg2",
+                "value_selector": []
+            },
+            {
+                "variable": "p",
+                "value_selector": []
+            }
+        ],
+        "code_language": "javascript",
+        "code": "// 在这里，您可以通过 ‘params’  获取节点中的输入变量，并通过 'ret' 输出结果\n// 'params' 和 'ret' 已经被正确地注入到环境中\n// 下面是一个示例，获取节点输入中参数名为‘input’的值：\n// const input = params.input; \n// 下面是一个示例，输出一个包含多种数据类型的 'ret' 对象：\n// const ret = { \"name\": ‘小明’, \"hobbies\": [“看书”, “旅游”] };\nfunction main({arg1, arg2,p}) {\n    return {\n        result: arg1 + arg2+p\n    }\n}\n",
+        "outputs": {
+            "result": {
+                "type": "string",
+                "children": null
+            }
+        }
+    }
+}

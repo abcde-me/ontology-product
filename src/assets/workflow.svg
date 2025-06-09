@@ -1,0 +1,11 @@
+<svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/工作流icon</title>
+    <g id="4.数据展示/图标/工作流icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" fill="#E6FFFD" x="0" y="0" width="28" height="28" rx="6"></rect>
+        <g id="编组-7" transform="translate(7.000000, 8.000000)">
+            <rect id="矩形备份-7" fill="#00BFBF" x="0" y="0" width="9.43564212" height="4" rx="1.02154676"></rect>
+            <rect id="矩形备份-7" fill="#00BFBF" x="4.56435788" y="8" width="9.43564212" height="4" rx="1.02154676"></rect>
+            <path d="M3.70351931,4.01174056 C3.70351931,5.2846942 4.73545213,6.31662702 6.00840577,6.31662702 L7.59880596,6.31662702 C8.52850718,6.31662702 9.28217894,7.07029877 9.28217894,8 L9.28217894,8 L9.28217894,8" id="路径-3" stroke="#57D9D4" stroke-width="1.02154676"></path>
+        </g>
+    </g>
+</svg>

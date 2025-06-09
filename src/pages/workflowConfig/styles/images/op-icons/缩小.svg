@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8. 图标/工具栏/缩小</title>
+    <g id="8.-图标/工具栏/缩小" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="编组" transform="translate(1.750000, 1.750000)" stroke="#151B26">
+            <rect id="1-FL" x="0" y="0" width="12.5" height="12.5"></rect>
+            <line x1="3.11538462" y1="6.25" x2="8.88461539" y2="6.25" id="2-LW"></line>
+        </g>
+    </g>
+</svg>

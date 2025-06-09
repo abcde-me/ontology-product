@@ -1,0 +1,73 @@
+@tailwind components;
+
+@layer components {
+  .custom-radio-card {
+    @apply box-border  flex w-full items-center rounded-[12px] border border-[var(--color-border-2)] bg-white px-[16px] py-[8px];
+  }
+
+  .custom-radio-card-mask {
+    @apply box-border inline-flex h-[14px] w-[14px] items-center justify-center rounded-full border border-[var(--color-border-1)];
+  }
+
+  .custom-radio-card-mask-dot {
+    @apply h-[8px] w-[8px] rounded-full;
+  }
+
+  .custom-radio-card-title {
+    @apply text-[14px] font-[600] leading-[22px] text-[var(--color-text-2)];
+  }
+
+  .custom-radio-card-des {
+    @apply text-[12px] leading-[18px] text-[var(--color-text-4)];
+  }
+
+  input[name='card-radio-group']:focus-visible + .custom-radio-card {
+    @apply shadow-[0_0_0_2px_var(--color-primary-light-3)];
+  }
+
+  .custom-radio-card:hover,
+  .custom-radio-card-checked,
+  .custom-radio-card:hover .custom-radio-card-mask,
+  .custom-radio-card-checked .custom-radio-card-mask {
+    @apply border-[rgb(var(--primary-6))];
+  }
+
+  .custom-radio-card-checked {
+    @apply bg-[var(--color-primary-light-1)];
+  }
+
+  .custom-radio-card:hover .custom-radio-card-title,
+  .custom-radio-card-checked .custom-radio-card-title {
+    @apply text-[rgb(var(--primary-6))];
+  }
+
+  .custom-radio-card-checked .custom-radio-card-mask-dot {
+    @apply bg-[rgb(var(--primary-6))];
+  }
+
+  .custom-radio-card-disable {
+    @apply bg-[var(--color-fill-2)];
+
+    .custom-radio-card-title {
+      @apply text-[var(--color-text-6)];
+    }
+
+    .custom-radio-card-des {
+      @apply text-[var(--color-text-6)];
+    }
+  }
+
+  .custom-radio-card-disable:hover {
+    @apply border-[transparent];
+    .custom-radio-card-mask {
+      @apply border-[var(--color-border-1)];
+    }
+    .custom-radio-card-title {
+      @apply text-[var(--color-text-6)];
+    }
+  }
+
+  .knowledge-form .arco-form-label-item svg {
+    @apply inline-block align-baseline;
+  }
+}

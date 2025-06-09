@@ -1,0 +1,146 @@
+{
+    "data": [
+        {
+            "id": "31e4967c-6316-4db1-8299-4aec5a7065eb",
+            "name": "curl httplocalhost...4444",
+            "description": "useful for when you want to answer queries about the curl httplocalhost9997v1rerank.txt",
+            "provider": "vendor",
+            "permission": "only_me",
+            "data_source_type": "upload_file",
+            "indexing_technique": "high_quality",
+            "app_count": 0,
+            "document_count": 2,
+            "word_count": 23967,
+            "created_by": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+            "created_at": 1742806509,
+            "updated_by": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+            "updated_at": 1742884186,
+            "embedding_model": "text-embedding-v1",
+            "embedding_model_provider": "langgenius/tongyi/tongyi",
+            "embedding_available": true,
+            "retrieval_model_dict": {
+                "search_method": "semantic_search",
+                "reranking_enable": true,
+                "reranking_mode": null,
+                "reranking_model": {
+                    "reranking_provider_name": "langgenius/tongyi/tongyi",
+                    "reranking_model_name": "gte-rerank"
+                },
+                "weights": null,
+                "top_k": 3,
+                "score_threshold_enabled": false,
+                "score_threshold": 0.0
+            },
+            "tags": [],
+            "doc_form": "text_model",
+            "external_knowledge_info": {
+                "external_knowledge_id": null,
+                "external_knowledge_api_id": null,
+                "external_knowledge_api_name": null,
+                "external_knowledge_api_endpoint": null
+            },
+            "external_retrieval_model": {
+                "top_k": 3,
+                "score_threshold": 0.0,
+                "score_threshold_enabled": false
+            },
+            "partial_member_list": []
+        },
+        {
+            "id": "30e90377-56e6-4917-9598-41307283ba47",
+            "name": "curl httplocalhost...",
+            "description": "useful for when you want to answer queries about the curl httplocalhost9997v1rerank.txt",
+            "provider": "vendor",
+            "permission": "only_me",
+            "data_source_type": "upload_file",
+            "indexing_technique": "high_quality",
+            "app_count": 0,
+            "document_count": 1,
+            "word_count": 415,
+            "created_by": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+            "created_at": 1742805806,
+            "updated_by": null,
+            "updated_at": 1742805806,
+            "embedding_model": "text-embedding-v1",
+            "embedding_model_provider": "langgenius/tongyi/tongyi",
+            "embedding_available": true,
+            "retrieval_model_dict": {
+                "search_method": "semantic_search",
+                "reranking_enable": true,
+                "reranking_mode": null,
+                "reranking_model": {
+                    "reranking_provider_name": "langgenius/tongyi/tongyi",
+                    "reranking_model_name": "gte-rerank"
+                },
+                "weights": null,
+                "top_k": 3,
+                "score_threshold_enabled": false,
+                "score_threshold": 0.5
+            },
+            "tags": [],
+            "doc_form": "text_model",
+            "external_knowledge_info": {
+                "external_knowledge_id": null,
+                "external_knowledge_api_id": null,
+                "external_knowledge_api_name": null,
+                "external_knowledge_api_endpoint": null
+            },
+            "external_retrieval_model": {
+                "top_k": 3,
+                "score_threshold": 0.5,
+                "score_threshold_enabled": false
+            },
+            "partial_member_list": []
+        },
+        {
+            "id": "e080a043-b7f6-41ca-87bb-6c2481ae327c",
+            "name": "test",
+            "description": "",
+            "provider": "vendor",
+            "permission": "only_me",
+            "data_source_type": "upload_file",
+            "indexing_technique": "high_quality",
+            "app_count": 0,
+            "document_count": 3,
+            "word_count": 31744,
+            "created_by": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+            "created_at": 1742531175,
+            "updated_by": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+            "updated_at": 1742531251,
+            "embedding_model": "text-embedding-v1",
+            "embedding_model_provider": "langgenius/tongyi/tongyi",
+            "embedding_available": true,
+            "retrieval_model_dict": {
+                "search_method": "semantic_search",
+                "reranking_enable": false,
+                "reranking_mode": null,
+                "reranking_model": {
+                    "reranking_provider_name": "",
+                    "reranking_model_name": ""
+                },
+                "weights": null,
+                "top_k": 2,
+                "score_threshold_enabled": false,
+                "score_threshold": 0.0
+            },
+            "tags": [],
+            "doc_form": "text_model",
+            "external_knowledge_info": {
+                "external_knowledge_id": null,
+                "external_knowledge_api_id": null,
+                "external_knowledge_api_name": null,
+                "external_knowledge_api_endpoint": null
+            },
+            "external_retrieval_model": {
+                "top_k": 2,
+                "score_threshold": 0.0,
+                "score_threshold_enabled": false
+            },
+            "partial_member_list": []
+        }
+    ],
+    "has_more": false,
+    "limit": 20,
+    "total": 3,
+    "page": 1
+}

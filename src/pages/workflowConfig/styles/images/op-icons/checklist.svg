@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8. 图标/工具栏/节点检查</title>
+    <g id="8.-图标/工具栏/节点检查" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linejoin="round">
+        <g id="编组" transform="translate(2.500000, 1.500000)" stroke="#151B26">
+            <polyline id="1-FL" stroke-linecap="round" points="4.71784898 13 0 13 0 0 11 0 11 6.00630668"></polyline>
+            <rect id="2-FL" stroke-linecap="round" x="5.59150351" y="7.32051626" width="5.40849649" height="5.40849649" rx="2.70424825"></rect>
+            <polyline id="3-LW" stroke-linecap="round" transform="translate(8.386847, 9.743460) scale(-1, 1) rotate(45.000000) translate(-8.386847, -9.743460) " points="9.45685414 9.19693579 9.45685414 10.289985 7.31683921 10.289985"></polyline>
+            <rect id="4-LW" x="1.78705843" y="1.72951634" width="2.93079055" height="1.64103253"></rect>
+            <rect id="5-LW" x="1.78705843" y="5.67948374" width="2.93079055" height="1.64103253"></rect>
+        </g>
+    </g>
+</svg>

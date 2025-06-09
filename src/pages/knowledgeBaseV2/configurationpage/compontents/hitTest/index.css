@@ -1,0 +1,171 @@
+.PageContentFalse {
+  display: flex;
+  height: calc(100vh - 72px);
+  .leftList {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 0px 14px 16px 16px;
+    overflow-y: auto;
+    .test-header {
+      height: 24px;
+      margin: 14px 0px;
+      .one {
+        font-family: PingFangSC-Medium;
+        font-size: 16px;
+        color: #151b26;
+        line-height: 24px;
+        font-weight: 500;
+      }
+      .two {
+        font-family: PingFangSC-Regular;
+        font-size: 12px;
+        color: #7f8c9f;
+        letter-spacing: 0;
+        line-height: 18px;
+        font-weight: 400;
+        margin-left: 18px;
+      }
+    }
+    .test-content {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      width: 100%;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      .test-content-text {
+        flex: 1;
+        padding: 8px;
+        overflow-y: auto;
+        .input-box {
+          width: 100%;
+          height: 95%;
+          border: none;
+          padding: 10px;
+          resize: none; /* 禁用用户调整文本框大小 */
+          box-sizing: border-box;
+        }
+      }
+      .test-content-button {
+        height: 32px;
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        justify-content: flex-end;
+        .cl {
+          margin-right: 8px;
+        }
+      }
+    }
+    .history-header {
+      height: 24px;
+      margin: 14px 0px;
+      font-family: PingFangSC-Medium;
+      font-size: 16px;
+      color: #151b26;
+      line-height: 24px;
+      font-weight: 500;
+    }
+    .history-content {
+      overflow-y: auto;
+      .arco-table-th {
+        background-color: var(--color-bg-3);
+      }
+      .selected-row-mz {
+        border: 1px solid blue !important; /* 设置选中行的边框为1px实线蓝色 */
+      }
+    }
+  }
+  .rightContent {
+    overflow-y: auto;
+    flex: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 0px 16px 14px 16px;
+    margin-left: 16px;
+    .rightContent-header {
+      height: 52px;
+      /* padding: 0 0 12px 0; */
+      display: flex;
+      align-items: center;
+      .header-left {
+        width: 150px;
+        height: 24px;
+        font-family: PingFangSC-Medium;
+        font-size: 16px;
+        color: #151b26;
+        font-weight: 500;
+        line-height: 24px;
+      }
+      .header-right {
+        flex: 1;
+        text-align: right;
+        .inp {
+          width: 240px;
+          height: 32px;
+        }
+      }
+    }
+    .rightContent-scoll {
+      height: calc(100% - 68px);
+      padding-bottom: 12px;
+      overflow-y: auto;
+      .segmentation-box {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        /* padding: 0 8px; */
+        margin-bottom: 12px;
+        .segmentation-header {
+          height: 40px;
+          padding: 8px;
+          display: flex;
+          align-items: center;
+          .s-l {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            .nm {
+              width: 96px;
+              white-space: nowrap; /* 禁止换行 */
+              overflow: hidden; /* 超出部分隐藏 */
+              text-overflow: ellipsis; /* 超出部分显示省略号 */
+              cursor: pointer; /* 鼠标悬停时显示手型 */
+            }
+            .sp {
+              margin-left: 12px;
+            }
+          }
+          .s-r {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            .s-r-t {
+              background: #e6f0ff;
+              border-radius: 6px;
+              width: 80px;
+              height: 20px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-family: PingFangSC-Medium;
+              font-size: 14px;
+              color: #2468f2;
+              line-height: 20px;
+              font-weight: 500;
+            }
+          }
+        }
+        .segmentation-content {
+          padding-bottom: 12px;
+          padding: 0 8px 8px;
+          max-height: 100px;
+          overflow-y: auto;
+        }
+      }
+    }
+  }
+}

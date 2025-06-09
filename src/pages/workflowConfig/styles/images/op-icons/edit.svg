@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="4.数据展示/图标/编辑" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组-2" transform="translate(2.000000, 2.243528)">
+            <line x1="0" y1="11.747203" x2="12" y2="11.747203" id="1-L" stroke="#334155" stroke-linecap="round"></line>
+            <polygon id="2-FL" stroke="#334155" stroke-linejoin="round"
+                transform="translate(6.025771, 5.303301) rotate(45.000000) translate(-6.025771, -5.303301) "
+                points="4.52577069 -0.696699141 7.52577069 -0.696699141 7.52577069 9.54238988 5.9729969 11.3033009 4.52577069 9.54238988">
+            </polygon>
+            <polygon id="3-FW-F" fill="#334155" fill-rule="nonzero"
+                transform="translate(8.675647, 2.601883) rotate(45.000000) translate(-8.675647, -2.601883) "
+                points="10.6234499 2.10188334 10.6234499 3.10188334 6.72784381 3.10188334 6.72784381 2.10188334">
+            </polygon>
+        </g>
+    </g>
+</svg>

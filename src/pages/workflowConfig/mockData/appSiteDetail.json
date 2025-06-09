@@ -1,0 +1,26 @@
+{
+  "app_id": "7c740276-5ea8-49bd-bd0b-8b190148e290",
+  "end_user_id": "853cba0c-b5da-473d-acc4-f934a4c84de1",
+  "enable_site": true,
+  "site": {
+      "title": "qwe",
+      "chat_color_theme": null,
+      "chat_color_theme_inverted": false,
+      "icon_type": "emoji",
+      "icon": "\ud83e\udd16",
+      "icon_background": "#FFEAD5",
+      "icon_url": null,
+      "description": null,
+      "copyright": null,
+      "privacy_policy": null,
+      "custom_disclaimer": "",
+      "default_language": "en-US",
+      "prompt_public": false,
+      "show_workflow_steps": true,
+      "use_icon_as_answer_icon": false
+  },
+  "model_config": null,
+  "plan": "basic",
+  "can_replace_logo": false,
+  "custom_config": null
+}

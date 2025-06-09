@@ -1,0 +1,256 @@
+.PageContentTrue {
+  display: flex;
+  height: calc(100vh - 72px);
+  .leftList {
+    width: 200px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    .arco-upload-list-type-text .arco-upload-list-item:first-of-type,
+    .arco-upload-list-type-picture-list .arco-upload-list-item:first-of-type {
+      /* margin-top: 12px; */
+    }
+    .arco-upload-list-type-text .arco-upload-list-item:first-of-type,
+    .arco-upload-list-type-picture-list .arco-upload-list-item:first-of-type {
+      margin-top: 0px;
+    }
+    .arco-upload-list-item-done .arco-upload-list-item-text {
+      background-color: #ffffff;
+    }
+    .but,
+    .inp {
+      width: 100%;
+      height: 32px;
+    }
+    .inp {
+      margin-bottom: 12px;
+    }
+    .file {
+      height: calc(100% - 84px);
+      overflow-y: auto;
+    }
+    .docx {
+      width: 100%;
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      ._img {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+      }
+
+      ._value {
+        flex: 1;
+        white-space: nowrap; /* 禁止换行 */
+        overflow: hidden; /* 超出部分隐藏 */
+        text-overflow: ellipsis; /* 超出部分显示省略号 */
+        cursor: pointer; /* 鼠标悬停时显示手型 */
+        font-family: PingFangSC-Regular;
+        font-size: 14px;
+        color: #1e293b;
+        letter-spacing: 0;
+        line-height: 24px;
+        font-weight: 400;
+      }
+
+      ._imgtype {
+        width: 12px;
+        height: 12px;
+      }
+    }
+    .file-item {
+      transition: all 0.3s;
+      padding: 0 4px;
+      margin-top: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      &.selected-file {
+        background-color: #e6f4ff;
+        border: 1px solid #91caff;
+      }
+    }
+  }
+
+  .rightContent {
+    flex: 1;
+    background: #ffffff;
+    margin-left: 16px;
+    display: flex;
+    flex-direction: column;
+    .rightContent-header {
+      display: flex;
+      height: 52px;
+      width: 100%;
+      padding: 10px 16px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      border-bottom: 0.5px solid #eaeaea;
+      .lefttitle {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        .title {
+          font-family: PingFang SC;
+          font-size: 16px;
+          color: #151b26;
+          line-height: 24px;
+          font-weight: 500;
+        }
+        ._img {
+          width: 16px;
+          height: 16px;
+          margin-left: 8px;
+        }
+        ._img svg {
+          width: 100%; /* 图标宽度填充 div 容器 */
+          height: 100%; /* 图标高度填充 div 容器 */
+        }
+      }
+      .rightbutton {
+        flex: 1;
+        text-align: right;
+        .btn {
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  .rightContent-content {
+    flex: 1;
+    display: flex;
+    /* height: calc(100% - 52px); */
+    /* height: 100%; */
+    .content-left {
+      /* flex: 1; */
+      overflow-x: auto;
+      /* padding: 16px; */
+      height: 100%;
+      width: 500px;
+    }
+    .content-right {
+      flex: 1;
+      border-left: 0.5px solid #eaeaea;
+      padding: 0 16px;
+      height: 100%;
+      .segmentation {
+        height: 52px;
+        /* padding: 0 0 12px 0; */
+        display: flex;
+        align-items: center;
+        .tation-left {
+          width: 90px;
+          height: 24px;
+          font-family: PingFangSC-Medium;
+          font-size: 16px;
+          color: #151b26;
+          font-weight: 500;
+          line-height: 24px;
+        }
+        .tation-right {
+          flex: 1;
+          text-align: right;
+          .inp {
+            width: 240px;
+            height: 32px;
+          }
+        }
+      }
+      .segmentationscoll {
+        padding-bottom: 12px;
+        overflow-y: auto;
+        height: calc(100vh - 176px); /* 使用 calc() 计算最大高度 */
+        .segmentation-box {
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          /* padding: 0 8px; */
+          margin-bottom: 12px;
+          transition: all 0.3s ease; /* 平滑过渡效果 */
+          .segmentation-header {
+            height: 40px;
+            padding: 8px 0px;
+            display: flex;
+            align-items: center;
+            .s-l {
+              flex: 1;
+              padding-left: 8px;
+              .sp {
+                margin-left: 12px;
+              }
+            }
+            .s-r {
+              flex: 1;
+              display: flex;
+              justify-content: flex-end;
+              .s-r-f {
+                display: none;
+                width: 100px;
+                padding: 0 8px;
+                align-items: center;
+                justify-content: space-between;
+              }
+
+              .s-r-f.show {
+                display: flex;
+                cursor: pointer;
+              }
+
+              .s-r-t {
+                padding: 0 8px;
+                cursor: pointer;
+              }
+              .s-r-t.show {
+                display: none;
+              }
+            }
+          }
+          .segmentation-content {
+            padding-bottom: 12px;
+            padding: 0 8px 8px;
+            max-height: 100px;
+            overflow-y: auto;
+          }
+        }
+        .segmentation-box:hover {
+          cursor: pointer;
+          border: 1px solid #2468f2; /* 点击时边框变为深蓝色 */
+          background-color: #eef3fe; /* 点击时背景变为深蓝色 */
+        }
+        .segmentation-box:active {
+          border: 1px solid #2468f2; /* 点击时边框变为深蓝色 */
+          background-color: #eef3fe; /* 点击时背景变为深蓝色 */
+        }
+        .arco-pagination {
+          flex-wrap: wrap;
+        }
+        .highlight-blue {
+          border: 1px solid #2468f2; /* 点击时边框变为深蓝色 */
+          background-color: #eef3fe; /* 点击时背景变为深蓝色 */
+        }
+      }
+    }
+  }
+}
+.PageContentTrue-addmodel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  .input-box {
+    width: 100%;
+    height: 95%;
+    border: none;
+    padding: 10px;
+    resize: none; /* 禁用用户调整文本框大小 */
+    box-sizing: border-box;
+  }
+}

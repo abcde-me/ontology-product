@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8. 图标/工具栏/撤销</title>
+    <g id="8.-图标/工具栏/撤销" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="状态" transform="translate(1.500000, 2.500000)" stroke="#151B26">
+            <path d="M2.52495412,1.99773237 L8.48886585,1.99773237 C10.9802965,1.99773237 13,3.98005962 13,6.47767225 C13,8.97528486 10.9802965,11 8.48886585,11 L0,11" id="1-L"></path>
+            <polyline id="2-L" points="5.00533595 0 1.98940451 2.00924474 5.00533595 3.99546474"></polyline>
+        </g>
+    </g>
+</svg>

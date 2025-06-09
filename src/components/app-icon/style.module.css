@@ -1,0 +1,23 @@
+.appIcon {
+  @apply relative flex h-9 w-9 shrink-0 grow-0 items-center justify-center rounded-[4px] bg-teal-100 text-lg;
+}
+
+.appIcon.large {
+  @apply h-10 w-10;
+}
+
+.appIcon.small {
+  @apply h-8 w-8;
+}
+
+.appIcon.tiny {
+  @apply h-6 w-6 text-base;
+}
+
+.appIcon.xs {
+  @apply h-3 w-3 text-base;
+}
+
+.appIcon.rounded {
+  @apply rounded-full;
+}

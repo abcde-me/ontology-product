@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .appforge-icon {
+    @apply text-[16px] text-[var(--color-text-3)];
+  }
+
+  .appforge-icon-clickable {
+    @apply appforge-icon cursor-pointer hover:text-[rgb(var(--link-6))];
+  }
+
+  .appforge-spin {
+    @apply block h-full;
+
+    > .arco-spin-children {
+      @apply h-full;
+    }
+  }
+}
+
+.arco-switch {
+  background-color: var(--color-fill-1);
+}
+
+.arco-switch-checked {
+  background-color: rgb(var(--primary-6));
+}
+
+svg {
+  display: inline;
+}
+
+.two-row-ellipse {
+  word-break: break-all;
+  text-overflow: ellipsis;
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* 这里是超出几行省略 */
+  overflow: hidden;
+}
+
+.one-row-ellipse-box {
+  word-break: break-all;
+  text-overflow: ellipsis;
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* 这里是超出几行省略 */
+  overflow: hidden;
+}
+
+.one-row-ellipse {
+  word-break: break-all;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.arco-btn-outline.primary:not(.arco-btn-disabled) {
+  color: rgb(var(--primary-6));
+  border: 1px solid rgb(var(--primary-6));
+}
+.arco-btn-outline.primary:not(.arco-btn-disabled):not(.arco-btn-loading):hover {
+  border-color: rgb(var(--primary-5));
+  color: rgb(var(--primary-5));
+  background-color: transparent;
+}
+.bold-form-label .arco-form-label-item label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #0f172a;
+}
+
+.custom-radio-card {
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 216px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.custom-radio-card-mask {
+  height: 14px;
+  width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  border: 1px solid #cbd5e1;
+  box-sizing: border-box;
+}
+
+.custom-radio-card-mask-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+}
+
+.custom-radio-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #1e293b;
+}
+
+input[name='card-radio-group']:focus-visible + .custom-radio-card {
+  box-shadow: 0 0 0 2px var(--color-primary-light-3);
+}
+
+.custom-radio-card:hover,
+.custom-radio-card-checked {
+  border-color: rgb(var(--primary-6));
+  border-width: 2px;
+}
+
+.custom-radio-card:hover .custom-radio-card-mask,
+.custom-radio-card-checked .custom-radio-card-mask {
+  background-color: rgb(var(--primary-6));
+  border-width: 0px;
+}
+
+.custom-radio-card-checked {
+  background-color: var(--color-primary-light-1);
+}
+
+.custom-radio-card:hover .custom-radio-card-title,
+.custom-radio-card-checked .custom-radio-card-title {
+  color: rgb(var(--primary-6));
+}
+
+.custom-radio-card:hover .custom-radio-card-mask-dot,
+.custom-radio-card-checked .custom-radio-card-mask-dot {
+  background-color: white;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shadow-border {
+  box-shadow: -1px 0 0 0 #e8e9eb;
+}

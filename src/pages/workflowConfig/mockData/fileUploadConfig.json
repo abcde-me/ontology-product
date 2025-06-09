@@ -1,0 +1,8 @@
+{
+    "file_size_limit": 200,
+    "batch_count_limit": 5,
+    "image_file_size_limit": 50,
+    "video_file_size_limit": 200,
+    "audio_file_size_limit": 200,
+    "workflow_file_upload_limit": 10
+}

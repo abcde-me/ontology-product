@@ -1,0 +1,85 @@
+[
+    {
+        "id": "12f3469a-dff8-4ea1-b9ca-73ecbbc70d5f",
+        "author": "jiangjunjie",
+        "name": "wktool",
+        "plugin_id": null,
+        "plugin_unique_identifier": null,
+        "description": {
+            "zh_Hans": "wktool",
+            "en_US": "wktool",
+            "pt_BR": "wktool",
+            "ja_JP": "wktool"
+        },
+        "icon": {
+            "content": "\ud83e\udd16",
+            "background": "#FFEAD5"
+        },
+        "label": {
+            "zh_Hans": "wktool",
+            "en_US": "wktool",
+            "pt_BR": "wktool",
+            "ja_JP": "wktool"
+        },
+        "type": "workflow",
+        "team_credentials": {},
+        "is_team_authorization": true,
+        "allow_delete": true,
+        "tools": [
+            {
+                "author": "jiangjunjie",
+                "name": "wktool",
+                "label": {
+                    "en_US": "wktool",
+                    "zh_Hans": "wktool",
+                    "pt_BR": "wktool",
+                    "ja_JP": "wktool"
+                },
+                "description": {
+                    "en_US": "wktool",
+                    "zh_Hans": "wktool",
+                    "pt_BR": "wktool",
+                    "ja_JP": "wktool"
+                },
+                "parameters": [
+                    {
+                        "name": "iput1",
+                        "label": {
+                            "en_US": "iput1",
+                            "zh_Hans": "iput1",
+                            "pt_BR": "iput1",
+                            "ja_JP": "iput1"
+                        },
+                        "placeholder": {
+                            "en_US": "",
+                            "zh_Hans": "",
+                            "pt_BR": "",
+                            "ja_JP": ""
+                        },
+                        "scope": null,
+                        "auto_generate": null,
+                        "template": null,
+                        "required": true,
+                        "default": null,
+                        "min": null,
+                        "max": null,
+                        "precision": null,
+                        "options": [],
+                        "type": "string",
+                        "human_description": {
+                            "en_US": "",
+                            "zh_Hans": "",
+                            "pt_BR": "",
+                            "ja_JP": ""
+                        },
+                        "form": "llm",
+                        "llm_description": ""
+                    }
+                ],
+                "labels": [],
+                "output_schema": null
+            }
+        ],
+        "labels": []
+    }
+]

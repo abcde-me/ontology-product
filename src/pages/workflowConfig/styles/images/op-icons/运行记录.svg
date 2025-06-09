@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8. 图标/工具栏/运行记录</title>
+    <g id="8.-图标/工具栏/运行记录" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="编组" transform="translate(2.500000, 1.500000)" stroke="#151B26">
+            <polyline id="1-L" points="4.71960359 13 0 13 0 0 11 0 11 5.98114602"></polyline>
+            <line x1="2.5" y1="2.85110838" x2="8.5" y2="2.85110838" id="2-L"></line>
+            <line x1="2.5" y1="5.57238073" x2="5.5" y2="5.57238073" id="3-L"></line>
+            <rect id="4-FL" x="5.59150351" y="7.59150351" width="5.40849649" height="5.40849649" rx="2.70424825"></rect>
+            <polyline id="5-LW" points="8.29575175 9.23612945 8.29575175 10.3250552 9.29575175 10.7361295"></polyline>
+        </g>
+    </g>
+</svg>

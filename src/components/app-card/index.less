@@ -1,0 +1,23 @@
+.app-card {
+  background: #fff;
+  display: flex;
+  width: 100%;
+  max-width: 469px;
+  min-width: 334px;
+  border-radius: 8px;
+  border: 1px solid #e5e6eb;
+  overflow: hidden;
+
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0px 2px 8px 0px #00000014;
+  }
+
+  .app-card__content {
+    margin: 24px;
+
+    &.app-card__content--with-top-img {
+      margin-top: -64px;
+    }
+  }
+}

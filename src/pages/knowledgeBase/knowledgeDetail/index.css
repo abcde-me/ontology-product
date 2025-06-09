@@ -1,0 +1,18 @@
+@tailwind components;
+
+@layer components {
+  .knowledge-form .arco-form-label-item svg {
+    @apply inline-block align-baseline;
+  }
+  .kb-detail-page {
+    .tag-visible {
+      border-radius: 4px;
+      padding: 1px 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #FFEDD5;
+      color: #E9A13B;
+    }
+  }
+}

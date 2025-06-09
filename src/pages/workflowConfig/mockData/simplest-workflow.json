@@ -1,0 +1,237 @@
+{
+    "id": "e22d19b3-18f6-479e-ae81-c8adfcfca080",
+    "graph": {
+        "nodes": [
+            {
+                "id": "1744870385070",
+                "type": "custom",
+                "data": {
+                    "type": "start",
+                    "title": "Start",
+                    "desc": "start desc",
+                    "variables": [
+                        {
+                            "variable": "query",
+                            "label": "query",
+                            "type": "text-input",
+                            "max_length": 48,
+                            "required": true,
+                            "options": []
+                        },
+                        {
+                            "variable": "text",
+                            "label": "text",
+                            "type": "paragraph",
+                            "max_length": 48,
+                            "required": false,
+                            "options": []
+                        },
+                        {
+                            "variable": "choices",
+                            "label": "choices",
+                            "type": "select",
+                            "max_length": 48,
+                            "required": false,
+                            "options": [
+                                "1",
+                                "2",
+                                "3"
+                            ]
+                        },
+                        {
+                            "variable": "number",
+                            "label": "number",
+                            "type": "number",
+                            "max_length": 48,
+                            "required": false,
+                            "options": []
+                        },
+                        {
+                            "variable": "file",
+                            "label": "file",
+                            "type": "file",
+                            "max_length": 48,
+                            "required": false,
+                            "options": [],
+                            "allowed_file_upload_methods": [
+                                "local_file",
+                                "remote_url"
+                            ],
+                            "allowed_file_types": [
+                                "image",
+                                "document"
+                            ],
+                            "allowed_file_extensions": []
+                        },
+                        {
+                            "variable": "files",
+                            "label": "files",
+                            "type": "file-list",
+                            "max_length": 5,
+                            "required": false,
+                            "options": [],
+                            "allowed_file_upload_methods": [
+                                "local_file",
+                                "remote_url"
+                            ],
+                            "allowed_file_types": [
+                                "image",
+                                "document"
+                            ],
+                            "allowed_file_extensions": []
+                        }
+                    ],
+                    "selected": false
+                },
+                "position": {
+                    "x": 374.2,
+                    "y": 21
+                },
+                "targetPosition": "left",
+                "sourcePosition": "right",
+                "positionAbsolute": {
+                    "x": 374.2,
+                    "y": 21
+                },
+                "width": 242,
+                "height": 264,
+                "selected": false
+            },
+            {
+                "id": "1744871070325",
+                "type": "custom",
+                "data": {
+                    "type": "end",
+                    "title": "End",
+                    "desc": "",
+                    "outputs": [
+                        {
+                            "variable": "query",
+                            "value_selector": [
+                                "1744870385070",
+                                "query"
+                            ]
+                        }
+                    ],
+                    "selected": false
+                },
+                "position": {
+                    "x": 755.4000000000001,
+                    "y": 21
+                },
+                "targetPosition": "left",
+                "sourcePosition": "right",
+                "positionAbsolute": {
+                    "x": 755.4000000000001,
+                    "y": 21
+                },
+                "width": 242,
+                "height": 84,
+                "selected": true
+            }
+        ],
+        "edges": [
+            {
+                "id": "1744870385070-source-1744871070325-target",
+                "type": "custom",
+                "source": "1744870385070",
+                "sourceHandle": "source",
+                "target": "1744871070325",
+                "targetHandle": "target",
+                "data": {
+                    "sourceType": "start",
+                    "targetType": "end",
+                    "isInIteration": false,
+                    "isInLoop": false
+                },
+                "markerEnd": {
+                    "type": "arrowclosed",
+                    "width": 14,
+                    "height": 14,
+                    "color": "#007DFA"
+                },
+                "zIndex": 0
+            }
+        ],
+        "viewport": {
+            "x": -225.20000000000007,
+            "y": 151,
+            "zoom": 1
+        }
+    },
+    "features": {
+        "opening_statement": "",
+        "suggested_questions": [],
+        "suggested_questions_after_answer": {
+            "enabled": false
+        },
+        "text_to_speech": {
+            "enabled": false,
+            "voice": "",
+            "language": ""
+        },
+        "speech_to_text": {
+            "enabled": false
+        },
+        "retriever_resource": {
+            "enabled": true
+        },
+        "sensitive_word_avoidance": {
+            "enabled": false
+        },
+        "file_upload": {
+            "image": {
+                "enabled": false,
+                "number_limits": 3,
+                "transfer_methods": [
+                    "local_file",
+                    "remote_url"
+                ]
+            },
+            "enabled": false,
+            "allowed_file_types": [
+                "image"
+            ],
+            "allowed_file_extensions": [
+                ".JPG",
+                ".JPEG",
+                ".PNG",
+                ".GIF",
+                ".WEBP",
+                ".SVG"
+            ],
+            "allowed_file_upload_methods": [
+                "local_file",
+                "remote_url"
+            ],
+            "number_limits": 3,
+            "fileUploadConfig": {
+                "file_size_limit": 15,
+                "batch_count_limit": 5,
+                "image_file_size_limit": 10,
+                "video_file_size_limit": 100,
+                "audio_file_size_limit": 50,
+                "workflow_file_upload_limit": 10
+            }
+        }
+    },
+    "hash": "af4afd53dbae10308567cc1e506d3ba5516abcb180a0b245fc65bb90a9e41e10",
+    "version": "draft",
+    "marked_name": "",
+    "marked_comment": "",
+    "created_by": {
+        "id": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+        "name": "jiangjunjie",
+        "email": "jiangjunjie@cestc.cn"
+    },
+    "created_at": 1744867956,
+    "updated_by": {
+        "id": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+        "name": "jiangjunjie",
+        "email": "jiangjunjie@cestc.cn"
+    },
+    "updated_at": 1744869028,
+    "tool_published": false,
+    "environment_variables": [],
+    "conversation_variables": []
+}

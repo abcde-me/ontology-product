@@ -1,0 +1,8 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="4.数据展示/图标/添加" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+        <g id="图标-颜色" stroke="currentColor">
+            <line x1="3" y1="8" x2="13" y2="8" id="1-L"></line>
+            <line x1="3" y1="8" x2="13" y2="8" id="2-L" transform="translate(8.000000, 8.000000) rotate(90.000000) translate(-8.000000, -8.000000) "></line>
+        </g>
+    </g>
+</svg>

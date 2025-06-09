@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/等待2</title>
+    <g id="4.数据展示/图标/等待2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+        <g id="未发布">
+            <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+            <path d="M8,1.5 C11.5898509,1.5 14.5,4.41014913 14.5,8 C14.5,11.5898509 11.5898509,14.5 8,14.5 C4.41014913,14.5 1.5,11.5898509 1.5,8 C1.5,4.41014913 4.41014913,1.5 8,1.5 Z" id="路径" fill="#D8E7FF" fill-rule="nonzero"></path>
+            <path d="M8,4.5 C8.27614237,4.5 8.5,4.72385763 8.5,5 L8.5,7.5 L11,7.5 C11.2454599,7.5 11.4496084,7.67687516 11.4919443,7.91012437 L11.5,8 C11.5,8.27614237 11.2761424,8.5 11,8.5 L8,8.5 C7.72385763,8.5 7.5,8.27614237 7.5,8 L7.5,5 C7.5,4.72385763 7.72385763,4.5 8,4.5 Z" id="2-LW" fill="#007DFA" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

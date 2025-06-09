@@ -1,0 +1,168 @@
+{
+    "data": [
+        {
+            "tenant_id": "cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca",
+            "provider": "langgenius/tongyi/tongyi",
+            "label": {
+                "zh_Hans": "\u901a\u4e49\u5343\u95ee",
+                "en_US": "TONGYI"
+            },
+            "icon_small": {
+                "zh_Hans": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/tongyi/tongyi/icon_small/zh_Hans",
+                "en_US": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/tongyi/tongyi/icon_small/en_US"
+            },
+            "icon_large": {
+                "zh_Hans": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/tongyi/tongyi/icon_large/zh_Hans",
+                "en_US": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/tongyi/tongyi/icon_large/en_US"
+            },
+            "status": "active",
+            "models": [
+                {
+                    "model": "deepseek-r1-distill-qwen-14b",
+                    "label": {
+                        "zh_Hans": "DeepSeek-R1-Distill-Qwen-14B",
+                        "en_US": "DeepSeek-R1-Distill-Qwen-14B"
+                    },
+                    "model_type": "llm",
+                    "features": [
+                        "agent-thought"
+                    ],
+                    "fetch_from": "predefined-model",
+                    "model_properties": {
+                        "context_size": 32000,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                },
+                {
+                    "model": "qwen-vl-plus",
+                    "label": {
+                        "zh_Hans": "qwen-vl-plus",
+                        "en_US": "qwen-vl-plus"
+                    },
+                    "model_type": "llm",
+                    "features": [
+                        "vision",
+                        "agent-thought",
+                        "video"
+                    ],
+                    "fetch_from": "predefined-model",
+                    "model_properties": {
+                        "context_size": 8000,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                },
+                {
+                    "model": "qwen2.5-32b-instruct",
+                    "label": {
+                        "zh_Hans": "qwen2.5-32b-instruct",
+                        "en_US": "qwen2.5-32b-instruct"
+                    },
+                    "model_type": "llm",
+                    "features": [
+                        "agent-thought"
+                    ],
+                    "fetch_from": "predefined-model",
+                    "model_properties": {
+                        "context_size": 131072,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                },
+                {
+                    "model": "qwq-32b",
+                    "label": {
+                        "zh_Hans": "\u901a\u4e49\u5343\u95eeQWQ-32B",
+                        "en_US": "qwq-32b"
+                    },
+                    "model_type": "llm",
+                    "features": [
+                        "agent-thought"
+                    ],
+                    "fetch_from": "predefined-model",
+                    "model_properties": {
+                        "context_size": 32000,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                }
+            ]
+        },
+        {
+            "tenant_id": "cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca",
+            "provider": "langgenius/openai_api_compatible/openai_api_compatible",
+            "label": {
+                "zh_Hans": "OpenAI-API-compatible",
+                "en_US": "OpenAI-API-compatible"
+            },
+            "icon_small": {
+                "zh_Hans": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/openai_api_compatible/openai_api_compatible/icon_small/zh_Hans",
+                "en_US": "/console/api/workspaces/cf4731c1-4c9b-4dd3-a8c0-3070df6d98ca/model-providers/langgenius/openai_api_compatible/openai_api_compatible/icon_small/en_US"
+            },
+            "icon_large": null,
+            "status": "active",
+            "models": [
+                {
+                    "model": "4bd107bff85941239e27b1509exndx97",
+                    "label": {
+                        "zh_Hans": "4bd107bff85941239e27b1509exndx97",
+                        "en_US": "4bd107bff85941239e27b1509exndx97"
+                    },
+                    "model_type": "llm",
+                    "features": [],
+                    "fetch_from": "customizable-model",
+                    "model_properties": {
+                        "context_size": 4096,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                },
+                {
+                    "model": "deepseek",
+                    "label": {
+                        "zh_Hans": "deepseek",
+                        "en_US": "deepseek"
+                    },
+                    "model_type": "llm",
+                    "features": [],
+                    "fetch_from": "customizable-model",
+                    "model_properties": {
+                        "context_size": 4096,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                },
+                {
+                    "model": "4bd107bff85941239e27b1509eccfe98",
+                    "label": {
+                        "zh_Hans": "4bd107bff85941239e27b1509eccfe98",
+                        "en_US": "4bd107bff85941239e27b1509eccfe98"
+                    },
+                    "model_type": "llm",
+                    "features": [],
+                    "fetch_from": "customizable-model",
+                    "model_properties": {
+                        "context_size": 4096,
+                        "mode": "chat"
+                    },
+                    "deprecated": false,
+                    "status": "active",
+                    "load_balancing_enabled": false
+                }
+            ]
+        }
+    ]
+}

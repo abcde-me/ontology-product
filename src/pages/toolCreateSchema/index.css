@@ -1,0 +1,5 @@
+.toolconfig-collapse {
+  .arco-collapse-item-header {
+    @apply border-none;
+  }
+}

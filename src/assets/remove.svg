@@ -1,0 +1,9 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/删除</title>
+    <g id="4.数据展示/图标/删除" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组" stroke="currentColor">
+            <circle id="1-FL" cx="8" cy="8" r="6.5"></circle>
+            <line x1="5" y1="8" x2="11" y2="8" id="2-LW" stroke-linecap="round"></line>
+        </g>
+    </g>
+</svg>

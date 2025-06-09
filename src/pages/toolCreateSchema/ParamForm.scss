@@ -1,0 +1,9 @@
+.params-table {
+  .arco-table-cell {
+    @apply flex items-center;
+
+    .arco-table-cell-wrap-value {
+      @apply flex-auto;
+    }
+  }
+}

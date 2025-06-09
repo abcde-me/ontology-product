@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>8. 图标/工具栏/放大</title>
+    <g id="8.-图标/工具栏/放大" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="编组" transform="translate(1.750000, 1.750000)" stroke="#151B26">
+            <rect id="1-FL" x="0" y="0" width="12.5" height="12.5"></rect>
+            <line x1="3.5" y1="6.5" x2="9.50000001" y2="6.5" id="2-LW"></line>
+            <line x1="3.49999979" y1="6.50000038" x2="9.4999998" y2="6.50000038" id="3-LW-" transform="translate(6.500000, 6.500000) rotate(90.000000) translate(-6.500000, -6.500000) "></line>
+        </g>
+    </g>
+</svg>

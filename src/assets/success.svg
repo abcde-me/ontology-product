@@ -1,0 +1,8 @@
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/成功2</title>
+    <g id="4.数据展示/图标/成功2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+        <circle id="1-FL" fill="#DBF4EE" cx="8" cy="8" r="6"></circle>
+        <polyline id="2-LW" stroke="#0AB58D" stroke-linecap="round" stroke-linejoin="round" transform="translate(8.153085, 7.295943) rotate(-45.000000) translate(-8.153085, -7.295943) " points="5.58160941 6.01437412 5.58160941 8.5775116 10.7245613 8.5775116"></polyline>
+    </g>
+</svg>

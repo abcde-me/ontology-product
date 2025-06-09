@@ -1,0 +1,175 @@
+{
+    "id": "e4022450-ecde-49f9-9f2c-837ccfc97c3f",
+    "graph": {
+        "nodes": [
+            {
+                "id": "1743741468661",
+                "type": "custom",
+                "data": {
+                    "type": "start",
+                    "title": "\u5f00\u59cb",
+                    "desc": "",
+                    "variables": [
+                        {
+                            "variable": "test",
+                            "label": "test",
+                            "type": "text-input",
+                            "max_length": 48,
+                            "required": true,
+                            "options": []
+                        }
+                    ],
+                    "selected": false
+                },
+                "position": {
+                    "x": 80,
+                    "y": 282
+                },
+                "targetPosition": "left",
+                "sourcePosition": "right",
+                "positionAbsolute": {
+                    "x": 80,
+                    "y": 282
+                },
+                "width": 242,
+                "height": 84,
+                "selected": false
+            },
+            {
+                "id": "1743849887914",
+                "type": "custom",
+                "data": {
+                    "type": "end",
+                    "title": "\u7ed3\u675f",
+                    "desc": "",
+                    "outputs": [
+                        {
+                            "variable": "wwww",
+                            "value_selector": [
+                                "1743741468661",
+                                "wwww"
+                            ]
+                        }
+                    ],
+                    "selected": false
+                },
+                "position": {
+                    "x": 497,
+                    "y": 238
+                },
+                "targetPosition": "left",
+                "sourcePosition": "right",
+                "positionAbsolute": {
+                    "x": 497,
+                    "y": 238
+                },
+                "width": 242,
+                "height": 84,
+                "selected": true
+            }
+        ],
+        "edges": [
+            {
+                "id": "1743741468661-source-1743849887914-target",
+                "type": "custom",
+                "source": "1743741468661",
+                "sourceHandle": "source",
+                "target": "1743849887914",
+                "targetHandle": "target",
+                "data": {
+                    "sourceType": "start",
+                    "targetType": "end",
+                    "isInIteration": false,
+                    "isInLoop": false
+                },
+                "markerEnd": {
+                    "type": "arrowclosed",
+                    "width": 14,
+                    "height": 14,
+                    "color": "#007DFA"
+                },
+                "zIndex": 0
+            }
+        ],
+        "viewport": {
+            "x": 7.5,
+            "y": 73.5,
+            "zoom": 1
+        }
+    },
+    "features": {
+        "opening_statement": "",
+        "suggested_questions": [],
+        "suggested_questions_after_answer": {
+            "enabled": false
+        },
+        "text_to_speech": {
+            "enabled": false,
+            "voice": "",
+            "language": ""
+        },
+        "speech_to_text": {
+            "enabled": false
+        },
+        "retriever_resource": {
+            "enabled": true
+        },
+        "sensitive_word_avoidance": {
+            "enabled": false
+        },
+        "file_upload": {
+            "image": {
+                "enabled": false,
+                "number_limits": 3,
+                "transfer_methods": [
+                    "local_file",
+                    "remote_url"
+                ]
+            },
+            "enabled": false,
+            "allowed_file_types": [
+                "image"
+            ],
+            "allowed_file_extensions": [
+                ".JPG",
+                ".JPEG",
+                ".PNG",
+                ".GIF",
+                ".WEBP",
+                ".SVG"
+            ],
+            "allowed_file_upload_methods": [
+                "local_file",
+                "remote_url"
+            ],
+            "number_limits": 3,
+            "fileUploadConfig": {
+                "file_size_limit": 15,
+                "batch_count_limit": 5,
+                "image_file_size_limit": 10,
+                "video_file_size_limit": 100,
+                "audio_file_size_limit": 50,
+                "workflow_file_upload_limit": 10
+            }
+        }
+    },
+    "hash": "75b8393c3786d261acf017e440cb6effdeb0d0522c8b3b428b64be12c2ce9366",
+    "version": "draft",
+    "marked_name": "",
+    "marked_comment": "",
+    "created_by": {
+        "id": "452c7077-e5a5-4cd5-b76d-b21caab35e30",
+        "name": "liuxin001",
+        "email": "liuxin001@cestc.cn"
+    },
+    "created_at": 1743739069,
+    "updated_by": {
+        "id": "9287e1de-376a-4e75-bdf0-7b1e2ab6d347",
+        "name": "jiangjunjie",
+        "email": "jiangjunjie@cestc.cn"
+    },
+    "updated_at": 1743899704,
+    "tool_published": false,
+    "environment_variables": [],
+    "conversation_variables": []
+}

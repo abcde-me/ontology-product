@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/失败</title>
+    <g id="4.数据展示/图标/失败" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+        <g id="失败" transform="translate(2.000000, 2.000000)">
+            <path d="M6,0 C9.3137085,0 12,2.6862915 12,6 C12,9.3137085 9.3137085,12 6,12 C2.6862915,12 0,9.3137085 0,6 C0,2.6862915 2.6862915,0 6,0 Z" id="形状结合" stroke="#EF4D29" fill="#EF4D29" fill-rule="nonzero"></path>
+            <line x1="3.48781535" y1="6.20214881" x2="8.63076728" y2="6.20214881" id="2-LW备份" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(6.059291, 6.202149) rotate(-45.000000) translate(-6.059291, -6.202149) "></line>
+            <line x1="4.24098322" y1="4.38384072" x2="7.87759941" y2="8.0204569" id="2-LW备份-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></line>
+        </g>
+    </g>
+</svg>

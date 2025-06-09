@@ -1,0 +1,5 @@
+.appcreate-tabs {
+  .arco-tabs-header-title {
+    @apply !ml-[16px]  !mr-[16px] h-[44px] px-0;
+  }
+}

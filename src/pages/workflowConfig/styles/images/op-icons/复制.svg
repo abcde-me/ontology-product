@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4.数据展示/图标/复制</title>
+    <g id="4.数据展示/图标/复制" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="编组" stroke="#334155">
+            <rect id="1-FL" x="4" y="4" width="10" height="10"></rect>
+            <polyline id="2-L" points="2.01982807 10 2.01982807 2 10.0198281 2"></polyline>
+        </g>
+    </g>
+</svg>

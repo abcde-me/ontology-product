@@ -1,0 +1,224 @@
+import { ComparisonOperator } from './types'
+import { VarType } from '@/pages/workflowConfig/workflow/types'
+import type { Branch } from '@/pages/workflowConfig/workflow/types'
+
+export const isEmptyRelatedOperator = (operator: ComparisonOperator) => {
+  return [ComparisonOperator.empty, ComparisonOperator.notEmpty, ComparisonOperator.isNull, ComparisonOperator.isNotNull, ComparisonOperator.exists, ComparisonOperator.notExists].includes(operator)
+}
+
+const notTranslateKey = [
+  ComparisonOperator.equal, ComparisonOperator.notEqual,
+  ComparisonOperator.largerThan, ComparisonOperator.largerThanOrEqual,
+  ComparisonOperator.lessThan, ComparisonOperator.lessThanOrEqual,
+]
+
+export const isComparisonOperatorNeedTranslate = (operator?: ComparisonOperator) => {
+  if (!operator)
+    return false
+  return !notTranslateKey.includes(operator)
+}
+
+export const getOperators = (type?: VarType, file?: { key: string }) => {
+  const isFile = !!file
+  if (isFile) {
+    const { key } = file
+
+    switch (key) {
+      case 'name':
+        return [
+          ComparisonOperator.contains,
+          ComparisonOperator.notContains,
+          ComparisonOperator.startWith,
+          ComparisonOperator.endWith,
+          ComparisonOperator.is,
+          ComparisonOperator.isNot,
+          ComparisonOperator.empty,
+          ComparisonOperator.notEmpty,
+        ]
+      case 'type':
+        return [
+          ComparisonOperator.in,
+          ComparisonOperator.notIn,
+        ]
+      case 'size':
+        return [
+          ComparisonOperator.largerThan,
+          ComparisonOperator.largerThanOrEqual,
+          ComparisonOperator.lessThan,
+          ComparisonOperator.lessThanOrEqual,
+        ]
+      case 'extension':
+        return [
+          ComparisonOperator.is,
+          ComparisonOperator.isNot,
+          ComparisonOperator.contains,
+          ComparisonOperator.notContains,
+        ]
+      case 'mime_type':
+        return [
+          ComparisonOperator.contains,
+          ComparisonOperator.notContains,
+          ComparisonOperator.startWith,
+          ComparisonOperator.endWith,
+          ComparisonOperator.is,
+          ComparisonOperator.isNot,
+          ComparisonOperator.empty,
+          ComparisonOperator.notEmpty,
+        ]
+      case 'transfer_method':
+        return [
+          ComparisonOperator.in,
+          ComparisonOperator.notIn,
+        ]
+      case 'url':
+        return [
+          ComparisonOperator.contains,
+          ComparisonOperator.notContains,
+          ComparisonOperator.startWith,
+          ComparisonOperator.endWith,
+          ComparisonOperator.is,
+          ComparisonOperator.isNot,
+          ComparisonOperator.empty,
+          ComparisonOperator.notEmpty,
+        ]
+    }
+    return []
+  }
+  switch (type) {
+    case VarType.string:
+      return [
+        ComparisonOperator.contains,
+        ComparisonOperator.notContains,
+        ComparisonOperator.startWith,
+        ComparisonOperator.endWith,
+        ComparisonOperator.is,
+        ComparisonOperator.isNot,
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+    case VarType.number:
+      return [
+        ComparisonOperator.equal,
+        ComparisonOperator.notEqual,
+        ComparisonOperator.largerThan,
+        ComparisonOperator.lessThan,
+        ComparisonOperator.largerThanOrEqual,
+        ComparisonOperator.lessThanOrEqual,
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+    case VarType.file:
+      return [
+        ComparisonOperator.exists,
+        ComparisonOperator.notExists,
+      ]
+    case VarType.arrayString:
+    case VarType.arrayNumber:
+      return [
+        ComparisonOperator.contains,
+        ComparisonOperator.notContains,
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+    case VarType.array:
+    case VarType.arrayObject:
+      return [
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+    case VarType.arrayFile:
+      return [
+        ComparisonOperator.contains,
+        ComparisonOperator.notContains,
+        ComparisonOperator.allOf,
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+    default:
+      return [
+        ComparisonOperator.is,
+        ComparisonOperator.isNot,
+        ComparisonOperator.empty,
+        ComparisonOperator.notEmpty,
+      ]
+  }
+}
+
+export const getOperatorsByType = (type?: VarType) => {
+  switch (type) {
+    case VarType.string:
+      return [
+        ['等于', ComparisonOperator.equal],
+        ['不等于', ComparisonOperator.equal],
+        ['包含', ComparisonOperator.contains],
+        ['不包含', ComparisonOperator.notContains],
+        ['长度大于', ComparisonOperator.lenLargerThan],
+        ['长度大于等于', ComparisonOperator.lenLargerThanOrEqual],
+        ['长度小于', ComparisonOperator.lenLessThan],
+        ['长度小于等于', ComparisonOperator.lenLessThanOrEqual],
+        ['为空', ComparisonOperator.empty],
+        ['不为空', ComparisonOperator.notEmpty]
+      ]
+    case VarType.integer:
+    case VarType.number:
+      return [
+        ['等于', ComparisonOperator.equal],
+        ['不等于', ComparisonOperator.notEqual],
+        ['大于', ComparisonOperator.largerThan],
+        ['大于等于', ComparisonOperator.largerThanOrEqual],
+        ['小于', ComparisonOperator.lessThan],
+        ['小于等于', ComparisonOperator.lessThanOrEqual],
+        ['为空', ComparisonOperator.empty],
+        ['不为空', ComparisonOperator.notEmpty],
+      ]
+    case VarType.boolean:
+      return [
+        ['等于', ComparisonOperator.equal],
+        ['不等于', ComparisonOperator.notEqual],
+        ['为空',ComparisonOperator.empty],
+        ['不为空', ComparisonOperator.notEmpty],
+        ['为True', ComparisonOperator.isTrue],
+        ['为False', ComparisonOperator.isFalse],
+      ]
+    case VarType.array:
+      return [
+        ['包含', ComparisonOperator.contains],
+        ['不包含', ComparisonOperator.notContains],
+        ['长度大于', ComparisonOperator.lenLargerThan],
+        ['长度大于等于', ComparisonOperator.lenLargerThanOrEqual],
+        ['长度小于', ComparisonOperator.lenLessThan],
+        ['长度小于等于', ComparisonOperator.lenLessThanOrEqual],
+        ['为空', ComparisonOperator.empty],
+        ['不为空', ComparisonOperator.notEmpty]
+      ]
+  }
+}
+
+export const comparisonOperatorNotRequireValue = (operator?: ComparisonOperator) => {
+  if (!operator)
+    return false
+
+  return [ComparisonOperator.empty, ComparisonOperator.notEmpty, ComparisonOperator.isNull, ComparisonOperator.isNotNull, ComparisonOperator.exists, ComparisonOperator.notExists, ComparisonOperator.isFalse, ComparisonOperator.isTrue].includes(operator)
+}
+
+export const branchNameCorrect = (branches: Branch[]) => {
+  const branchLength = branches.length
+  if (branchLength < 2)
+    throw new Error('if-else node branch number must than 2')
+
+  if (branchLength === 2) {
+    return branches.map((branch) => {
+      return {
+        ...branch,
+        name: branch.id === 'false' ? 'ELSE' : 'IF',
+      }
+    })
+  }
+
+  return branches.map((branch, index) => {
+    return {
+      ...branch,
+      name: branch.id === 'false' ? 'ELSE' : `CASE ${index + 1}`,
+    }
+  })
+}

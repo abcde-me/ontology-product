@@ -1,0 +1,26 @@
+{
+    "allowed_extensions": [
+        "txt",
+        "markdown",
+        "md",
+        "mdx",
+        "pdf",
+        "html",
+        "htm",
+        "xlsx",
+        "xls",
+        "docx",
+        "csv",
+        "TXT",
+        "MARKDOWN",
+        "MD",
+        "MDX",
+        "PDF",
+        "HTML",
+        "HTM",
+        "XLSX",
+        "XLS",
+        "DOCX",
+        "CSV"
+    ]
+}
