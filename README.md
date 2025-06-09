@@ -4,9 +4,9 @@ AppForge（用于构建适用于特定用途或业务场景的定制化模型的
 
 # CCXD Pro
 
-## 编码约定
+## 开发规范
 
-[基于 arco pro 而来的动态插件](./docs/README-Arco.md)
+[开发SOP](./docs/DEV.md)
 
 ## 运行方式
 
