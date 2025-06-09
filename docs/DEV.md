@@ -73,5 +73,5 @@ git checkout -b feature/PROJ-123-day1-work
 # 当天工作结束后
 git push origin feature/PROJ-123-day1-work
 
-# 创建MR到develop分支，并将mr链接复制到群里同步
+# 创建MR到develop分支，并将MR链接复制到群里同步
 ```
