@@ -50,6 +50,7 @@ initI18n();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
+console.log('李帆测试，111',flattenRoutes)
 const hiddenTopBarRoutes = [
   '/login',
   '/tenant/compute/modaforge/login',

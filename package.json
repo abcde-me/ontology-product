@@ -118,6 +118,7 @@
     "@arco-themes/react-arco-pro": "^0.0.7",
     "@arco-themes/react-ocean-design": "^0.0.56",
     "@babel/core": "^7.16.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@cypress/webpack-preprocessor": "^5.5.0",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.6",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
