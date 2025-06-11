@@ -120,14 +120,8 @@ export const ResourceEndpoints = {
 // todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
 
 // 研发环境部署
-export const PrefixV2 = 'https://10.252.26.5:31708/api/aiap/v1'; // '/api/aiap/v1';
-export const PrefixAuth = 'https://10.252.20.4:31000/api/auth/v1';
-export const PrefixTestAuth = 'https://10.252.26.5:31708/api/auth/v1';
-// 测试环境部署
-// const ReqHost = 'https://10.252.26.23:31708';
-// export const PrefixV2 = `${ReqHost}/api/aiap/v1`;
-// export const PrefixAuth = `${ReqHost}/api/auth/v1`;
-// export const PrefixTestAuth = `${ReqHost}/api/auth/v1`;
+export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
+export const PrefixAuth = '/api/auth/v1';
 
 export const ResourceEndpointsV2 = {
   datasets: PrefixV2 + '/datasets',

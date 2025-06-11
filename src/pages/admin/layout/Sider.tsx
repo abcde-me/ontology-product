@@ -312,56 +312,6 @@ function LayoutWithSider(props: { children }) {
     setCollapsed(collapse);
   }, [location.pathname]);
 
-  const renderUserSpaceMenu = () => {
-    return (
-      <div className="user-space-menu">
-        <Input.Search
-          className="mb-[8px]"
-          placeholder="输入空间名称"
-          onChange={(val) => console.log(val)}
-        />
-        <div className="recent-txt">最近使用</div>
-        <div className="recent-spaces space-list">
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <Popover position="top" content={<span>成员与设置</span>}>
-              <IconSettings className="setting-icon" />
-            </Popover>
-          </div>
-        </div>
-        <div className="user-spaces space-list">
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <IconSettings className="setting-icon" />
-          </div>
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <IconSettings className="setting-icon" />
-          </div>
-        </div>
-        <div className="space-actions">
-          <div className="space-btn" onClick={() => setShowCreateModel(true)}>
-            <IconPlus />
-            新增空间
-          </div>
-          <div className="space-btn">
-            <IconSettings />
-            空间管理
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex-none">{CustomHeader && <CustomHeader />}</div>
