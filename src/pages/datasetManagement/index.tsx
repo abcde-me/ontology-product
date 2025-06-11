@@ -46,6 +46,8 @@ const DatasetManagement: React.FC = () => {
     {
       title: '描述',
       dataIndex: 'description',
+      ellipsis: true,
+      // render: (text) => <div style={{ whiteSpace: 'nowrap' }}>{text}</div>,
     },
     {
       title: '生成模型',
@@ -127,11 +129,130 @@ const DatasetManagement: React.FC = () => {
       updateTime: '2025年5月30日 11:33:47',
       isDefault: true,
     },
-    
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
   ];
 
   return (
-    <div style={{ padding: '24px', backgroundColor: '#F9FAFB' }}>
+    // <div style={{ padding: '24px', backgroundColor: '#F9FAFB' }}>
       <div style={{ background: '#fff', padding: '24px', borderRadius: '4px' }}>
         <Typography.Title heading={4} style={{ marginTop: 0 }}>
           数据集
@@ -161,11 +282,12 @@ const DatasetManagement: React.FC = () => {
           rowKey="key"
           columns={columns}
           data={data}
-          pagination={false}
+          pagination={false}//不显示分页
           border={false}
+          scroll={{ y: 400 }}//固定表格纵轴的高度
         />
       </div>
-    </div>
+    // </div>
   );
 };
 

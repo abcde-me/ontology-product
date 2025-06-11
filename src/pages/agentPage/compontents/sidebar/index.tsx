@@ -68,7 +68,7 @@ function AgentSidebar(props) {
           </div>
         </div>
         <div className="h-fit w-[364px]  gap-1" style={{ marginTop: '16px' }}>
-          <div className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal" style={{marginBottom:'3px'}}>
+          <div className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal" style={{ marginBottom: '3px' }}>
             开发者
           </div>
           <div>
@@ -78,7 +78,7 @@ function AgentSidebar(props) {
           </div>
         </div>
         <div className="h-fit w-[364px]  gap-1" style={{ marginTop: '18px' }}>
-          <div className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal" style={{marginBottom:'3px'}}>
+          <div className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal" style={{ marginBottom: '3px' }}>
             最近更新
           </div>
           <div>
@@ -94,14 +94,14 @@ function AgentSidebar(props) {
           <p className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal">
             模型
           </p>
-          <div className='flex items-center gap-2' style={{marginTop:'10px'}}>
+          <div className='flex items-center gap-2' style={{ marginTop: '10px' }}>
             <img src={deepseekImage} alt="123" />
             <p className="align-middle font-['PingFang_SC'] text-[14px] font-normal not-italic leading-[22px] tracking-normal">
               私有模型X5
             </p>
           </div>
 
-          <div className='flex items-center gap-2' style={{marginTop:'10px'}}>
+          <div className='flex items-center gap-2' style={{ marginTop: '10px' }}>
             <img src={deepseekImage} alt="123" />
             <p className="align-middle font-['PingFang_SC'] text-[14px] font-normal not-italic leading-[22px] tracking-normal">
               DeepSeek-R1
@@ -115,17 +115,17 @@ function AgentSidebar(props) {
           <p className="font-[PingFang-SC] text-[14px] font-medium leading-[22px] tracking-normal">
             工作流
           </p>
-          <div className='flex items-center gap-2' style={{marginTop:'10px'}}>
+          <div className='flex items-center gap-2' style={{ marginTop: '10px' }}>
             <img src={elses} alt="" />
             <p className="align-middle font-['PingFang_SC'] text-[14px] font-normal not-italic leading-[22px] tracking-normal">
               私有工作流
             </p>
           </div>
 
-          <div className='flex items-center gap-2' style={{marginTop:'10px'}}>
+          <div className='flex items-center gap-2' style={{ marginTop: '10px' }}>
             <img src={elses} alt="" />
             <p className="align-middle font-['PingFang_SC'] text-[14px] font-normal not-italic leading-[22px] tracking-normal">
-             read_sku_camera
+              read_sku_camera
             </p>
           </div>
         </div>
