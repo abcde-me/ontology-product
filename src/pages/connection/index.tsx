@@ -1,11 +1,16 @@
 import Button from '@/components/button';
-import { Input, Message, Pagination, Popconfirm, Table } from '@arco-design/web-react';
+import {
+  Input,
+  Message,
+  Pagination,
+  Popconfirm,
+  Table
+} from '@arco-design/web-react';
 import React, { useRef, useState } from 'react';
-import './index.css'
+import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './modal';
 const InputSearch = Input.Search;
-
 
 export default function Connection() {
   const formatDate = (timestamp) => {
@@ -34,61 +39,64 @@ export default function Connection() {
       title: '状态',
       dataIndex: 'status',
       width: 130,
-      render: ((_, item) => (
+      render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: '5px', height: '5px', backgroundColor: item.status ? 'green' : 'red', borderRadius: '50%', marginRight: '5px' }}></div>
+          <div
+            style={{
+              width: '5px',
+              height: '5px',
+              backgroundColor: item.status ? 'green' : 'red',
+              borderRadius: '50%',
+              marginRight: '5px'
+            }}
+          ></div>
           <div>{item.status ? '已连接' : '已断开'}</div>
         </div>
-      )),
+      ),
       filters: [
         {
           text: '已断开',
-          value: false,
+          value: false
         },
         {
           text: '已连接',
-          value: true,
-        },
+          value: true
+        }
       ],
-      onFilter: (value, row) => row.status == value,
-
+      onFilter: (value, row) => row.status == value
     },
     {
       title: '数据源类型',
       dataIndex: 'type',
       width: 150,
-      render: ((_, item) => (
-        <div>
-          {item.type == 'hdfs' ? 'HDFS' : '对象存储'}
-        </div>
-      )),
+      render: (_, item) => (
+        <div>{item.type == 'hdfs' ? 'HDFS' : '对象存储'}</div>
+      ),
       filters: [
         {
           text: '对象存储',
-          value: 's3',
+          value: 's3'
         },
         {
           text: 'HDFS',
-          value: 'hdfs',
-        },
+          value: 'hdfs'
+        }
       ],
-      onFilter: (value, row) => row.type == value,
+      onFilter: (value, row) => row.type == value
     },
     {
       title: '创建人',
       dataIndex: 'creator',
-      width: 120,
+      width: 120
     },
     {
       title: '创建时间',
       width: 200,
       dataIndex: 'created_at',
-      render: ((_, item) => (
-        <div className='fontMM'>
-          {formatDate(item.created_at)}
-        </div>
-      )),
-      sorter: (a, b) => a.created_at.length - b.created_at.length,
+      render: (_, item) => (
+        <div className="fontMM">{formatDate(item.created_at)}</div>
+      ),
+      sorter: (a, b) => a.created_at.length - b.created_at.length
     },
     {
       title: '更新时间',
@@ -106,43 +114,43 @@ export default function Connection() {
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span className='hover' onClick={viewDetailHan}>详情</span>
-          <span className='hover'>编辑</span>
+          <span className="hover" onClick={viewDetailHan}>
+            详情
+          </span>
+          <span className="hover">编辑</span>
           <Popconfirm
             focusLock
-            title='删除该连接器'
-            content='删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?'
+            title="删除该连接器"
+            content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
-              DeleteMethod(record.id)
+              DeleteMethod(record.id);
               Message.info({
-                content: '删除成功',
+                content: '删除成功'
               });
             }}
             onCancel={() => {
               Message.error({
-                content: '删除失败，请重试',
+                content: '删除失败，请重试'
               });
             }}
-
           >
-            <span className='hover'>删除</span>
+            <span className="hover">删除</span>
           </Popconfirm>
-
         </div>
-      ),
-    },
+      )
+    }
   ];
   // 点击删除按钮执行的方法
   const DeleteMethod = (id: any) => {
     const NewConnectionData = ConnectionData.filter((item: any) => {
-      return item.id !== id
-    })
-    setConnectionData(NewConnectionData)
-  }
+      return item.id !== id;
+    });
+    setConnectionData(NewConnectionData);
+  };
   // 点击查看执行的方法
   const viewDetailHan = () => {
     if (childRef.current) {
-      childRef.current.displayDetailHan()
+      childRef.current.displayDetailHan();
     }
   }
   const [ConnectionData, setConnectionData] = useState(
@@ -249,35 +257,25 @@ export default function Connection() {
     ]
   )
   // 分页的第几页
-  const [current, SetCurrent] = useState(1)
+  const [current, SetCurrent] = useState(1);
   // 每页展示数据的数据量
-  const [pageSize, SetPageSize] = useState(10)
+  const [pageSize, SetPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (current: number, pageSize: number) => {
     // SetCurrent(current);
     // SetPageSize(pageSize);
     console.log(current);
     console.log(pageSize);
-
   };
-  return <div style={{ padding: '20px', backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '30px', borderRadius: '10px' }}>
-    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
-    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
-      <InputSearch allowClear placeholder='输入关键词搜索' style={{ width: 230 }} />
-      <Button type='primary'>
-        <IconPlus />
-        创建连接器
-      </Button>
-    </div>
-    <Table border={false} columns={columns} data={ConnectionData} style={{ padding: '10px 20px' }} pagination={false} />
-
-    {/* 分页 */}
-    <Pagination
-      current={current}
-      pageSize={pageSize}
-      onPageSizeChange={(pageSize) => {
-        SetPageSize(pageSize);
-        SetCurrent(1);
+  return (
+    <div
+      style={{
+        padding: '20px',
+        backgroundColor: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '30px',
+        borderRadius: '10px'
       }}
       onChange={handlePageChange}
       sizeOptions={[10, 20, 50, 100]}
