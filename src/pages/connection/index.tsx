@@ -267,15 +267,24 @@ export default function Connection() {
     console.log(current);
     console.log(pageSize);
   };
-  return (
-    <div
-      style={{
-        padding: '20px',
-        backgroundColor: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        margin: '30px',
-        borderRadius: '10px'
+  return <div style={{ padding: '20px', backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '30px', borderRadius: '10px' }}>
+    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
+    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
+      <InputSearch allowClear placeholder='输入关键词搜索' style={{ width: 230 }} />
+      <Button type='primary'>
+        <IconPlus />
+        创建连接器
+      </Button>
+    </div>
+    <Table border={false} columns={columns} data={ConnectionData} style={{ padding: '10px 20px' }} pagination={false} />
+
+    {/* 分页 */}
+    <Pagination
+      current={current}
+      pageSize={pageSize}
+      onPageSizeChange={(pageSize) => {
+        SetPageSize(pageSize);
+        SetCurrent(1);
       }}
       onChange={handlePageChange}
       sizeOptions={[10, 20, 50, 100]}
