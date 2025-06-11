@@ -94,6 +94,11 @@ export default function Connection() {
       title: '更新时间',
       width: 200,
       dataIndex: 'updated_at',
+      render:((_,item)=>(
+        <div className='fontMM'>
+          {formatDate(item.updated_at)}
+        </div>
+      ))
     },
     {
       title: '操作',
@@ -139,7 +144,6 @@ export default function Connection() {
     if (childRef.current) {
       childRef.current.displayDetailHan()
     }
-
   }
   const [ConnectionData, setConnectionData] = useState(
     [

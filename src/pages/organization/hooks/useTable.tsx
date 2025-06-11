@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TableProps } from '@arco-design/web-react';
 import { useOrgEditor } from '@/pages/organization/components/OrgProvider/Context';
 import type { DataSet } from '@/pages/workflowConfig/models/datasets';
@@ -21,7 +21,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     defaultPageSize = 10,
     defaultCurrent = 1,
     name,
-    organization_id = 1,
+    organization_id = 1
   } = options;
 
   const org = useOrgEditor();
@@ -45,7 +45,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
       page,
       size: pageSize,
       name,
-      organization_id,
+      organization_id
     });
 
     setPagination((prev) => ({
@@ -53,23 +53,23 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
       total: result.total
     }));
   };
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const result = await orgStore.fetchData({
       page: pagination.current,
       size: pagination.pageSize,
       name,
-      organization_id,
+      organization_id
     });
 
     setPagination((prev) => ({
       ...prev,
       total: result.total
     }));
-  };
+  }, [name, orgStore, organization_id, pagination]);
 
   useEffect(() => {
     fetchData();
-  }, [name, organization_id, pagination.current, pagination.pageSize]);
+  }, [fetchData, name, organization_id, pagination.pageSize]);
 
   const tableProps: TableProps<DataSet> = {
     data: list,

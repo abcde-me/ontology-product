@@ -12,7 +12,7 @@ import {
   Form
 } from '@arco-design/web-react';
 import { format } from 'date-fns';
-import EllipsisPopover from '@/components/EllipsisPopoverCom';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import {
   IconCheck,
   IconCheckCircle,

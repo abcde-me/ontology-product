@@ -1,9 +1,8 @@
 .arco-table-tr>th {
-    background-color:rgb('#F5F9FF') !important;
+    background-color:rgb(245, 249, 255) !important;
 }
-
 .hover {
-    color: aqua;
+    color: rgb(0, 125, 250);
     cursor: pointer;
 }
 .hover:hover {
@@ -81,5 +80,5 @@ hr {
     cursor: pointer;
 }
 .fontMM{
-    font-size: 15px;
+    font-size: 14px;
 }
