@@ -16,7 +16,7 @@ UAPI_CONFIG.setDefaultConfig({
  */
 UAPI_CONFIG.addRequestInterceptor(
   (config) => {
-    const consolePluginToken = localStorage.getItem('console_token')
+    const consolePluginToken = localStorage.getItem('console_token');
     //配置自定义请求头
     if (!config.headers['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
@@ -135,7 +135,8 @@ UAPI_CONFIG.addResponseInterceptor(
         console.log('code 500: ', code);
         const errorMsg = error.response.data.message || error.message;
         errorMsg && Message.error(errorMsg) && console.error(errorMsg);
-        return Promise.reject(error);
+        return Promise.resolve(error);
+        // return Promise.reject(error);
       }
     } else if (!(code === 0 && error?.message === 'canceled')) {
       Message.error({
@@ -143,7 +144,8 @@ UAPI_CONFIG.addResponseInterceptor(
         duration: 5000
       });
     }
-    return Promise.reject(error);
+    return Promise.resolve(error);
+    // return Promise.reject(error);
   }
 );
 

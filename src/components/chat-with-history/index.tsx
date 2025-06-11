@@ -38,7 +38,7 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({ className, chatNode }) => {
   useEffect(() => {
     if (site) {
       if (customConfig) document.title = `${site.title}`;
-      else document.title = `ModaForge`;
+      else document.title = `AppForge`;
     }
   }, [site, customConfig]);
 
