@@ -114,7 +114,8 @@ export const ResourceEndpoints = {
   /**文生图 */
   imageGenerate: Prefix + '/console/api/apps/icon-gen',
   /**客户化信息 */
-  logoInfo: '/api/menu/v1/ex/logo/info'
+  logoInfo: '/api/menu/v1/ex/logo/info',
+  
 };
 // todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
 
@@ -153,6 +154,12 @@ export const ResourceEndpointsV2 = {
     `/datasets/{dataset_id}/documents/{document_id}/segments/{segment_id}`,
   HitRecordList: PrefixV2 + `/datasets/{dataset_id}/queries`,
   docContent: PrefixV2 + `/files/browser/{file_id}`,
+  
+  // 文件下载端点
+  fileDownloadApi: PrefixV2 + `/files/download/{file_id}`,
+  //删除文件的端点
+  fileDeleteApi:Prefix+`/files/delete/{file_id}`,
+
 
   apiKeyList: PrefixV2 + `/api-keys`,
 

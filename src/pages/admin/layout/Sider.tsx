@@ -103,6 +103,29 @@ const menus: MenuModel[] = [
         key: 'apiKey'
       }
     ]
+  },
+  {
+    type: 'itemGroup',
+    title:"数据管理",
+    key:"DataManagement",
+    children:[
+      {
+        title: '数据目录',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'dataCatalog',
+        path: '/tenant/compute/modaforge/dataCatalog'
+      },
+      {
+        title: '数据集管理',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'datasetManagement',
+        path: '/tenant/compute/modaforge/datasetManagement'
+      },
+    ]
   }
 ];
 
