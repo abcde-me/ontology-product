@@ -101,7 +101,12 @@ export default function Connection() {
     {
       title: '更新时间',
       width: 200,
-      dataIndex: 'updated_at'
+      dataIndex: 'updated_at',
+      render:((_,item)=>(
+        <div className='fontMM'>
+          {formatDate(item.updated_at)}
+        </div>
+      ))
     },
     {
       title: '操作',
@@ -147,108 +152,110 @@ export default function Connection() {
     if (childRef.current) {
       childRef.current.displayDetailHan();
     }
-  };
-  const [ConnectionData, setConnectionData] = useState([
-    {
-      id: '1',
-      name: '文案内容连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称',
-      status: false,
-      type: 's3',
-      creator: '张三',
-      created_at: '1749627860785',
-      updated_at: '17123456791'
-    },
-    {
-      id: '2',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456782',
-      updated_at: '17123456792'
-    },
-    {
-      id: '3',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456783',
-      updated_at: '17123456793'
-    },
-    {
-      id: '4',
-      name: '文案内容',
-      status: true,
-      type: 'hdfs',
-      creator: '张三',
-      created_at: '17123456784',
-      updated_at: '17123456794'
-    },
-    {
-      id: '5',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456785',
-      updated_at: '17123456795'
-    },
-    {
-      id: '6',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456786',
-      updated_at: '171234567976'
-    },
-    {
-      id: '7',
-      name: '文案内容',
-      status: true,
-      type: 'hdfs',
-      creator: '张三',
-      created_at: '17123456788',
-      updated_at: '17123456797'
-    },
-    {
-      id: '8',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456789',
-      updated_at: '17123456798'
-    },
-    {
-      id: '9',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '17123456780',
-      updated_at: '17123456799'
-    },
-    {
-      id: '10',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '171234567811',
-      updated_at: '17123456790'
-    },
-    {
-      id: '11',
-      name: '文案内容',
-      status: true,
-      type: 's3',
-      creator: '张三',
-      created_at: '171234567812',
-      updated_at: '171234567911'
-    }
-  ]);
+  }
+  const [ConnectionData, setConnectionData] = useState(
+    [
+      {
+        id: "1",
+        name: '文案内容连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称',
+        status: false,
+        type: 's3',
+        creator: '张三',
+        created_at: '1749627860785',
+        updated_at: '17123456791'
+      },
+      {
+        id: "2",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456782',
+        updated_at: '17123456792'
+      },
+      {
+        id: "3",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456783',
+        updated_at: '17123456793'
+      },
+      {
+        id: "4",
+        name: '文案内容',
+        status: true,
+        type: 'hdfs',
+        creator: '张三',
+        created_at: '17123456784',
+        updated_at: '17123456794'
+      },
+      {
+        id: "5",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456785',
+        updated_at: '17123456795'
+      },
+      {
+        id: "6",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456786',
+        updated_at: '171234567976'
+      },
+      {
+        id: "7",
+        name: '文案内容',
+        status: true,
+        type: 'hdfs',
+        creator: '张三',
+        created_at: '17123456788',
+        updated_at: '17123456797'
+      },
+      {
+        id: "8",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456789',
+        updated_at: '17123456798'
+      },
+      {
+        id: "9",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '17123456780',
+        updated_at: '17123456799'
+      },
+      {
+        id: "10",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '171234567811',
+        updated_at: '17123456790'
+      },
+      {
+        id: "11",
+        name: '文案内容',
+        status: true,
+        type: 's3',
+        creator: '张三',
+        created_at: '171234567812',
+        updated_at: '171234567911'
+      },
+    ]
+  )
   // 分页的第几页
   const [current, SetCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -270,60 +277,15 @@ export default function Connection() {
         margin: '30px',
         borderRadius: '10px'
       }}
-    >
-      <h1
-        style={{
-          fontSize: '20px',
-          fontWeight: 'bold',
-          margin: '20px 0px 15px 20px'
-        }}
-      >
-        连接器
-      </h1>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          padding: '0px 20px'
-        }}
-      >
-        <InputSearch
-          allowClear
-          placeholder="输入关键词搜索"
-          style={{ width: 230 }}
-        />
-        <Button type="primary">
-          <IconPlus />
-          创建连接器
-        </Button>
-      </div>
-      <Table
-        border={false}
-        columns={columns}
-        data={ConnectionData}
-        style={{ padding: '10px 20px' }}
-        pagination={false}
-      />
-
-      {/* 分页 */}
-      <Pagination
-        current={current}
-        pageSize={pageSize}
-        onPageSizeChange={(pageSize) => {
-          SetPageSize(pageSize);
-          SetCurrent(1);
-        }}
-        onChange={handlePageChange}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={ConnectionData.length}
-        showJumper
-        sizeCanChange
-        style={{ marginBottom: 20, justifyItems: 'end' }}
-      />
-      {/* 详情逻辑 */}
-      <ModalDetail ref={childRef} />
-    </div>
-  );
+      onChange={handlePageChange}
+      sizeOptions={[10, 20, 50, 100]}
+      showTotal
+      total={ConnectionData.length}
+      showJumper
+      sizeCanChange
+      style={{ marginBottom: 20, justifyItems: 'end' }}
+    />
+    {/* 详情逻辑 */}
+    <ModalDetail ref={childRef} />
+  </div>
 }
