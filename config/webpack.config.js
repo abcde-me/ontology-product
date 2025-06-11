@@ -443,7 +443,7 @@ module.exports = function (webpackEnv) {
             },
             {
               test: /\.svg$/, //处理scss文件中的svg图片路径问题
-              type: 'asset',
+              type: 'asset'
             },
             // Process application JS with Babel.
             // The preset includes JSX, Flow, TypeScript, and some ESnext features.
@@ -624,6 +624,8 @@ module.exports = function (webpackEnv) {
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
       new webpack.DefinePlugin(env.stringified),
+      // 热模块替换插件
+      isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
       // Experimental hot reloading for React .
       // https://github.com/facebook/react/tree/main/packages/react-refresh
       isEnvDevelopment &&
