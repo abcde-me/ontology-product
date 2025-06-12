@@ -1,17 +1,22 @@
 
 import { Message, Modal } from '@arco-design/web-react';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import './index.css'
 import { IconCopy } from '@arco-design/web-react/icon';
-
 
 const ModalDetail = forwardRef((props, ref) => {
     // 默认弹框隐藏
     const [visible2, setVisible2] = React.useState(false);
+    // 默认显示对象为空
+    const [DetailData,setDetailData]=useState({
+
+    }) as any
+
     // 将子组件方法暴露给父组件
     useImperativeHandle(ref, () => ({
-        displayDetailHan: () => {
+        displayDetailHan: (obj) => {
             setVisible2(true)
+            setDetailData(obj)
         },
     }));
     // 点击复制的逻辑
@@ -39,11 +44,11 @@ const ModalDetail = forwardRef((props, ref) => {
                             <h3>连接器信息</h3>
                             <div className="info-item">
                                 <span className="label">连接器名称:</span>
-                                <span className="value">data-source-s3</span>
+                                <span className="value">{DetailData.name}</span>
                             </div>
                             <div className="info-item">
                                 <span className="label">状态:</span>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center',marginLeft:'20px' }}>
                                     <div style={{ width: '5px', height: '5px', backgroundColor: 'red', borderRadius: '50%', marginRight: '5px' }}></div>
                                     <div>已连接</div>
                                 </div>
@@ -52,19 +57,19 @@ const ModalDetail = forwardRef((props, ref) => {
                             </div>
                             <div className="info-item">
                                 <span className="label">数据源类型:</span>
-                                <span className="value">对象存储</span>
+                                <span className="value">{DetailData.type}</span>
                             </div>
                             <div className="info-item">
                                 <span className="label">创建人:</span>
-                                <span className="value">admin</span>
+                                <span className="value">默认</span>
                             </div>
                             <div className="info-item">
                                 <span className="label">创建时间:</span>
-                                <span className="value">2025-05-05 05:05:05</span>
+                                <span className="value"></span>
                             </div>
                             <div className="info-item">
                                 <span className="label">更新时间:</span>
-                                <span className="value">2025-05-05 05:05:05</span>
+                                <span className="value">{DetailData.updated_at} </span>
                             </div>
                         </section>
                         <hr />
