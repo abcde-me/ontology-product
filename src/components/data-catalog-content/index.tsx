@@ -26,12 +26,13 @@ const CustomDbIcon: any = () => (
 
 
 
-import { downloadFile } from '@/utils/download';
-import {deleteFileById} from '@/api/dataCatalog'
+
 import { Tree, Typography, Button,Message } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
 import SmartTable from './components/SmartTable';
-import './index.css'
+import Pages from './components/pages'
+import './index.css';
+import {SourceData_Volume,SourceData_Database,TargetData_Volume,TargetData_Database} from './columns'
 const { Text } = Typography;//使用Text来控制文字的效果
 
 const treeData = [
@@ -154,49 +155,7 @@ const treeData = [
   },
 ];
 
-const columns = (Download,Delete) => [
-  {
-    title: 'ID',
-    dataIndex: 'id',
-    width: 60,
-  },
-  {
-    title: '数据内容',
-    dataIndex: 'content',
-    ellipsis: true,
-  },
-  {
-    title: '类型',
-    dataIndex: 'type',
-    width: 80,
-  },
-  {
-    title: '生成时间',
-    dataIndex: 'createdAt',
-    width: 180,
-  },
-  {
-    title: '更多信息',
-    dataIndex: 'meta',
-    render: (_, record) => (
-      <div>
-        <div>原文件: {record.file}</div>
-        <div>工作流ID: {record.workflowId}</div>
-      </div>
-    ),
-  },
-  {
-    title: '操作',
-    dataIndex: 'actions',
-    width: 100,
-    render: (_, record) => (
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Button type="primary" onClick={()=>Delete(record.id)}>删除</Button>
-        <Button type="primary" onClick={() => Download(record.id)}>下载</Button>
-      </div>
-    ),
-  },
-];
+
 
 
 const data = [
@@ -261,22 +220,15 @@ const data = [
 
 
 
-function DataPage() {
+function DataPage(props) {
+  let {searchValue,startTime,endTime} = props
+  //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
+  let [columns,setColumns] = React.useState(SourceData_Volume)
+
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
+
   const [tableData, setTableData] = React.useState([])
-  const Download = (id) => {
-    // console.log('下载', id)
-    downloadFile(id,'')//第一个参数是文件id，第二个参数是文件名
-  }
-  const Delete =(id)=>{
-    const token = localStorage.getItem('loginToken');
-  if (!token) {
-    Message.error('请先登录');
-    // 跳转到登录页
-    return;
-  }
-    deleteFileById(id)
-  }
+
   useEffect(() => {
     setTableData(data)
   }, [])
@@ -287,7 +239,7 @@ function DataPage() {
         <div style={{ padding: 20 }}>
           <Tree
             treeData={treeData}
-            defaultExpandAll
+            defaultExpandedKeys={[]}
             blockNode
           />
         </div>
@@ -295,7 +247,8 @@ function DataPage() {
 
       {/* 右侧主区域 */}
       <div style={{ flex: 1, width: '100%', height: '500px', backgroundColor: 'red' }}>
-        <SmartTable columns={columns(Download,Delete)} data={tableData} />
+        <SmartTable columns={columns} data={tableData} />
+        <Pages></Pages>
       </div>
     </div>
   );
