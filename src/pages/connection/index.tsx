@@ -1,10 +1,10 @@
-import Button from '@/components/button';
 import {
   Input,
   Message,
   Pagination,
   Popconfirm,
-  Table
+  Table,
+  Button
 } from '@arco-design/web-react';
 import React, { useRef, useState } from 'react';
 import './index.css';
@@ -26,7 +26,7 @@ export default function Connection() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
   // 子组件实例
-  const childRef = useRef();
+  const childRef = useRef(null);
   // 连接器配置项
   const columns: any = [
     {
@@ -102,7 +102,7 @@ export default function Connection() {
       title: '更新时间',
       width: 200,
       dataIndex: 'updated_at',
-      render:((_,item)=>(
+      render: ((_, item) => (
         <div className='fontMM'>
           {formatDate(item.updated_at)}
         </div>
@@ -244,35 +244,23 @@ export default function Connection() {
         creator: '张三',
         created_at: '171234567811',
         updated_at: '17123456790'
-      },
-      {
-        id: "11",
-        name: '文案内容',
-        status: true,
-        type: 's3',
-        creator: '张三',
-        created_at: '171234567812',
-        updated_at: '171234567911'
-      },
+      }
     ]
   )
-  // 分页的第几页
+  // 当前的第几页
   const [current, SetCurrent] = useState(1);
   // 每页展示数据的数据量
-  const [pageSize, SetPageSize] = useState(10);
+  const [pageSize, SetPageSize] = useState(2);
   // 改变数据的逻辑
-  const handlePageChange = (current: number, pageSize: number) => {
-    // SetCurrent(current);
-    // SetPageSize(pageSize);
-    console.log(current);
-    console.log(pageSize);
+  const handlePageChange = (page) => {
+   console.log('当前页'+page);
+    SetCurrent(page);
   };
-  return <div style={{ padding: '20px', backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '30px', borderRadius: '10px' }}>
+  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
       <InputSearch allowClear placeholder='输入关键词搜索' style={{ width: 230 }} />
-      <Button type='primary'>
-        <IconPlus />
+      <Button type='primary' icon={<IconPlus />}>
         创建连接器
       </Button>
     </div>
@@ -287,7 +275,7 @@ export default function Connection() {
         SetCurrent(1);
       }}
       onChange={handlePageChange}
-      sizeOptions={[10, 20, 50, 100]}
+      sizeOptions={[2, 5, 10, 20]}
       showTotal
       total={ConnectionData.length}
       showJumper

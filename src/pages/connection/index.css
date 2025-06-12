@@ -11,6 +11,7 @@
 .arco-pagination {
     display: flex;
     justify-content: end;
+    margin-right: 20px;
 }
 .margins-any{
     margin:'20px'
