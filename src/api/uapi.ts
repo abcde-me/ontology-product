@@ -7,7 +7,8 @@ import axios, {
 import {
   ActionEndpoints,
   ResourceEndpoints,
-  ResourceEndpointsV2
+  ResourceEndpointsV2,
+  ModaForgeResourceEndpoints
 } from './endpoints';
 import { getLocalStorage } from '@/utils/storage';
 
@@ -29,7 +30,8 @@ type SetModuleFunction = (
 // 使用 keyof 和 typeof 获取 端点 的键
 type RESEndpointKeys =
   | keyof typeof ResourceEndpoints
-  | keyof typeof ResourceEndpointsV2;
+  | keyof typeof ResourceEndpointsV2
+  | keyof typeof ModaForgeResourceEndpoints;
 type ACTEndpointKeys = keyof typeof ActionEndpoints;
 
 type RequestFulfilledFunction = (
@@ -112,6 +114,7 @@ let defaultConfig: Partial<AxiosRequestConfig> = {};
 // 目前是固定引入端点
 const resEndpoints = ResourceEndpoints;
 const resEndpointsV2 = ResourceEndpointsV2;
+const modaForgeResEndpoints = ModaForgeResourceEndpoints;
 const actEndpoints = ActionEndpoints;
 
 const replaceUriParams = (uri: string, params: Record<string, any>) => {
@@ -339,6 +342,36 @@ for (const key in resEndpointsV2) {
   };
   UAPI.RES[key] = resourceEndpointFunctionV2;
 }
+
+// 通过一种方法，ResourceEndpointsV2 里每一个 key，将成为 API.RES 内对象的的 key
+for (const key in modaForgeResEndpoints) {
+  const resourceEndpointFunction: RESEndpointsFunction = (
+    params: Record<string, string | number>
+  ) => {
+    const replacedUri = replaceUriParams(
+      modaForgeResEndpoints[key] as Endpoint,
+      params || {}
+    );
+    return {
+      get: (params?: any) => createUAPIChain('get', replacedUri, params, false),
+      post: (data?: any) => createUAPIChain('post', replacedUri, data, true),
+      put: (data?: any) => createUAPIChain('put', replacedUri, data, true),
+      patch: (data?: any) => createUAPIChain('patch', replacedUri, data, true),
+      head: (params?: any) =>
+        createUAPIChain('head', replacedUri, params, false),
+      delete: (data?: any) =>
+        createUAPIChain(
+          'delete',
+          replacedUri,
+          data,
+          data instanceof Array || data instanceof Object
+        )
+    } as {
+      [Method in HttpMethod]: () => UAPIChain;
+    };
+  };
+  UAPI.RES[key] = resourceEndpointFunction;
+}
 UAPI_CONFIG.addRequestInterceptor((config) => {
   // 严格校验逻辑
   const rawToken = getLocalStorage<string>('loginToken');
@@ -351,14 +384,17 @@ UAPI_CONFIG.addRequestInterceptor((config) => {
   const cleanToken = rawToken.replace(/['"]/g, '').trim();
 
   // 3. JWT 格式验证（严格正则）
-  const isValidJWT = /^([A-Za-z0-9-_]{4,})\.([A-Za-z0-9-_]{4,})\.([A-Za-z0-9-_]{4,})$/.test(cleanToken);
-  
+  const isValidJWT =
+    /^([A-Za-z0-9-_]{4,})\.([A-Za-z0-9-_]{4,})\.([A-Za-z0-9-_]{4,})$/.test(
+      cleanToken
+    );
+
   // 移除旧的授权头(如果存在)，确保不会有重复或冲突
   if (config.headers) {
     delete config.headers.authorization;
     delete config.headers.Authorization;
   }
-  
+
   if (isValidJWT) {
     // 强制覆盖而非追加
     config.headers = {

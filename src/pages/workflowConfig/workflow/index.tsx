@@ -1,5 +1,3 @@
-
-
 import type { FC } from 'react'
 import React, {
   memo,
@@ -101,7 +99,6 @@ import { useEventEmitterContextContext } from '@/pages/workflowConfig/context/ev
 import Confirm from '@/pages/workflowConfig/components/confirm'
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants'
 import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConfig.json'
-
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
@@ -297,7 +294,7 @@ const Workflow: FC<WorkflowProps> = memo(({
       <SyncingDataModal />
       <CandidateNode />
       <Header />
-      <SubHeader handleRedo={handleHistoryForward} handleUndo={handleHistoryBack}/>
+      <SubHeader handleRedo={handleHistoryForward} handleUndo={handleHistoryBack} />
       <Panel />
       {/* <Operator handleRedo={handleHistoryForward} handleUndo={handleHistoryBack} /> */}
       {
@@ -384,8 +381,8 @@ const Workflow: FC<WorkflowProps> = memo(({
           size={2}
           className="bg-workflow-canvas-workflow-bg react-flow-bg"
           color='var(--color-workflow-canvas-workflow-dot-color)'
-          // color='#c8ceda20'
-          // variant={BackgroundVariant.Lines}
+        // color='#c8ceda20'
+        // variant={BackgroundVariant.Lines}
         />
       </ReactFlow>
     </div>

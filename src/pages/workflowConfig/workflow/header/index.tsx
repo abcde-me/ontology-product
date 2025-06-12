@@ -130,7 +130,7 @@ const Header: FC = () => {
 
   // const resetWorkflowVersionHistory = useResetWorkflowVersionHistory(appDetail!.id)
   console.warn('API NOT IMPLEMENTED ', 'resetWorkflowVersionHistory')
-  const resetWorkflowVersionHistory = () => {} // 这里是重新查询version history，暂时无用
+  const resetWorkflowVersionHistory = () => { } // 这里是重新查询version history，暂时无用
 
   // const handleRestore = useCallback(() => {
   //   setShowWorkflowVersionHistoryPanel(false)
@@ -218,9 +218,9 @@ const Header: FC = () => {
     <div
       className='app-workflow-page-header absolute top-0 left-0 z-10 flex items-center justify-between w-full px-3 h-14 bg-mask-top2bottom-gray-50-to-transparent'
     >
-     <div className='left-part'>
+      <div className='left-part'>
         <div className='back-icon' onClick={() => history.push('/tenant/compute/appforge/workflowList')}>
-          <BackIcon className='size-[16px]'/>
+          <BackIcon className='size-[16px]' />
         </div>
         <div className="app-icon">
           {appDetail.icon ? <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} /> : <WorkflowIcon />}
@@ -229,7 +229,7 @@ const Header: FC = () => {
           <div className='app-name'>
             <span className='txt'>{appDetail.name}</span>
             <div className='op-icon' onClick={() => setShowEditModal(true)}>
-              <EditIcon className='size-[16px]'/>
+              <EditIcon className='size-[16px]' />
             </div>
           </div>
           {
@@ -253,7 +253,7 @@ const Header: FC = () => {
           }}
         />
       </div>
-      { showEditModal && <CreateAppModal visible={showEditModal} setVisible={setShowEditModal} />}
+      {showEditModal && <CreateAppModal visible={showEditModal} setVisible={setShowEditModal} />}
     </div>
   )
 }
