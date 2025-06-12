@@ -159,6 +159,8 @@ export const ResourceEndpointsV2 = {
   fileDownloadApi: PrefixV2 + `/files/download/{file_id}`,
   //删除文件的端点
   fileDeleteApi:Prefix+`/files/delete/{file_id}`,
+  dataCatalogListApi:Prefix+`load_tasks/files{file_id}`,
+  CatalogListApi:Prefix+`/catalogs`,
 
 
   apiKeyList: PrefixV2 + `/api-keys`,
