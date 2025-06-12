@@ -3,6 +3,8 @@ import { Message, Modal } from '@arco-design/web-react';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import './index.css'
 import { IconCopy } from '@arco-design/web-react/icon';
+
+
 const ModalDetail = forwardRef((props, ref) => {
     // 默认弹框隐藏
     const [visible2, setVisible2] = React.useState(false);
@@ -13,9 +15,9 @@ const ModalDetail = forwardRef((props, ref) => {
         },
     }));
     // 点击复制的逻辑
-    const cloneHan=()=>{
+    const cloneHan = () => {
         navigator.clipboard.writeText('oss-cn-hangzhou.aliyuncs.com ')
-         Message.success('复制成功')
+        Message.success('复制成功')
     }
     return <div>
         <Modal
@@ -77,7 +79,7 @@ const ModalDetail = forwardRef((props, ref) => {
                                 <span className="value">AKIAIOSFODNN7EXAMPLE <IconCopy className='set-mouse' onClick={cloneHan} /></span>
                             </div>
                             <div className="info-item">
-                                <span className="label">AccessKey Secret:</span> 
+                                <span className="label">AccessKey Secret:</span>
                                 <span className="value">wJalrX****************PLEKEY <IconCopy className='set-mouse' onClick={cloneHan} /></span>
                             </div>
                             <div className="info-item">
