@@ -6,6 +6,9 @@ import Table from '@/components/data-catalog-content/index'
 const { RangePicker } = DatePicker;
 
 const DataCatalog: React.FC = () => {
+  let [searchValue, setSearchValue] = React.useState('')
+  let [startTime, setStartTime] = React.useState('')
+  let [endTime, setEndTime] = React.useState('')
   return (
     <div className="p-6">
       <div style={{ padding: '24px', borderRadius: '4px' }}>
@@ -31,7 +34,7 @@ const DataCatalog: React.FC = () => {
           </div>
         </div>
         <div className='data-catalog-content'>
-          <Table></Table>
+          <Table searchValue={searchValue} startTime={startTime} endTime={endTime}></Table>
         </div>
       </div>
     </div>
