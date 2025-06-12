@@ -75,6 +75,52 @@ const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: "数据处理",
+    key: "DataDeal",
+    children: [
+      {
+        title: '工作流',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'workflowList',
+        path: '/tenant/compute/modaforge/workflowList'
+      },
+      {
+        title: '作业',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'workflowTask',
+        path: '/tenant/compute/modaforge/workflowTask'
+      },
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: "数据管理",
+    key: "DataManagement",
+    children: [
+      {
+        title: '数据目录',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'dataCatalog',
+        path: '/tenant/compute/modaforge/dataCatalog'
+      },
+      {
+        title: '数据集管理',
+        icon: (
+          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+        ),
+        key: 'datasetManagement',
+        path: '/tenant/compute/modaforge/datasetManagement'
+      },
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '平台管理',
     key: 'mgmtGroup',
     children: [
@@ -104,29 +150,6 @@ const menus: MenuModel[] = [
       }
     ]
   },
-  {
-    type: 'itemGroup',
-    title:"数据管理",
-    key:"DataManagement",
-    children:[
-      {
-        title: '数据目录',
-        icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        key: 'dataCatalog',
-        path: '/tenant/compute/modaforge/dataCatalog'
-      },
-      {
-        title: '数据集管理',
-        icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        key: 'datasetManagement',
-        path: '/tenant/compute/modaforge/datasetManagement'
-      },
-    ]
-  }
 ];
 
 const knowledgeDetailMenus: MenuModel[] = [
