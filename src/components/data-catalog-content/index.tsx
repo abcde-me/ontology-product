@@ -84,56 +84,114 @@ const rawCatalogData =
   }
 }
 //将后端返回的数据改成tree可以识别的数据
-function convertToArcoTreeData(data: any, handleTreeSelect: any): any[] {
-  const result: any[] = [];
-  //后续有过有其他的目录可以在这里增加
-  for (const directionKey of ['src', 'dst']) {
-    const directionNode = {
-      key: directionKey,
-      title: directionKey == 'src' ? '源数据' : '目标数据',
-      children: [] as any[]
-    };
-    //catalogs是源数据或者目标数据
-    const catalogs = data[directionKey];
-    for (const catalogName in catalogs) {//catalogName是目录名
-      const catalogNode = {
-        key: `${directionKey}-${catalogName}`,
-        title: catalogName,
-        children: [] as any[]
-      };
+{
+// function convertToArcoTreeData(data: any, handleTreeSelect: any): any[] {
+//   const result: any[] = [];
+//   //后续有过有其他的目录可以在这里增加
+//   for (const directionKey of ['src', 'dst']) {
+//     const directionNode = {
+//       key: directionKey,
+//       title: directionKey == 'src' ? '源数据' : '目标数据',
+//       children: [] as any[]
+//     };
+//     //catalogs是源数据或者目标数据
+//     const catalogs = data[directionKey];
+//     for (const catalogName in catalogs) {//catalogName是目录名
+//       const catalogNode = {
+//         key: `${directionKey}-${catalogName}`,
+//         title: catalogName,
+//         children: [] as any[]
+//       };
 
-      const types = catalogs[catalogName];//types是目录下的类型（volume或者db）
-      for (const typeName in types) {
-        const typeNode = {
-          key: `${directionKey}-${catalogName}-${typeName}`,
-          title: typeName === 'volume' ? '卷 Volume' : '库 DB',
-          children: [] as any[]
-        };
+//       const types = catalogs[catalogName];//types是目录下的类型（volume或者db）
+//       for (const typeName in types) {
+//         const typeNode = {
+//           key: `${directionKey}-${catalogName}-${typeName}`,
+//           title: typeName === 'volume' ? '卷 Volume' : '库 DB',
+//           children: [] as any[]
+//         };
 
-        const items = types[typeName];
-        for (const item of items) {
-          typeNode.children.push({
-            key: `${directionKey}-${catalogName}-${typeName}-${item}`,
-            title: (
-              <span onClick={() => handleTreeSelect(directionKey + '/' + catalogName + '/' + typeName + '/' + item,directionKey,typeName)}>
-                {typeName === 'db' ? <CustomDbIcon /> : <IconFolder style={{ marginRight: 6 }} />}
-                {item}
-              </span>
-            )
-          });
-        }
+//         const items = types[typeName];
+//         for (const item of items) {
+//           typeNode.children.push({
+//             key: `${directionKey}-${catalogName}-${typeName}-${item}`,
+//             title: (
+//               <span onClick={() => handleTreeSelect(directionKey + '/' + catalogName + '/' + typeName + '/' + item,directionKey,typeName)}>
+//                 {typeName === 'db' ? <CustomDbIcon /> : <IconFolder style={{ marginRight: 6 }} />}
+//                 {item}
+//               </span>
+//             )
+//           });
+//         }
 
-        catalogNode.children.push(typeNode);
-      }
+//         catalogNode.children.push(typeNode);
+//       }
 
-      directionNode.children.push(catalogNode);
-    }
+//       directionNode.children.push(catalogNode);
+//     }
 
-    result.push(directionNode);
-  }
+//     result.push(directionNode);
+//   }
 
-  return result;
+//   return result;
+// }
 }
+
+interface TreeNode {
+  key: string;
+  title: React.ReactNode;
+  children?: TreeNode[];
+}
+
+type DataType = {
+  [direction: string]: {
+    [catalog: string]: {
+      volume?: string[];
+      db?: string[];
+    };
+  };
+};
+
+function convertToArcoTreeData(data: DataType, handleTreeSelect: (fullPath: string, direction: string, type: string) => void): TreeNode[] {
+  const createItemNode = (direction: string, catalog: string, type: string, item: string): TreeNode => ({
+    key: `${direction}-${catalog}-${type}-${item}`,
+    title: (
+      <span onClick={() => handleTreeSelect(`${direction}/${catalog}/${type}/${item}`, direction, type)}>
+        {type === 'db' ? <CustomDbIcon /> : <IconFolder style={{ marginRight: 6 }} />}
+        {item}
+      </span>
+    )
+  });
+
+  const createTypeNode = (direction: string, catalog: string, type: string, items: string[]): TreeNode => ({
+    key: `${direction}-${catalog}-${type}`,
+    title: type === 'db' ? '库 DB' : '卷 Volume',
+    children: items.map(item => createItemNode(direction, catalog, type, item))
+  });
+
+  const createCatalogNode = (direction: string, catalog: string, types: any): TreeNode => ({
+    key: `${direction}-${catalog}`,
+    title: catalog,
+    children: Object.entries(types).map(([type, items]: [string, string[]]) =>
+      createTypeNode(direction, catalog, type, items)
+    )
+  });
+
+  return ['src', 'dst'].map(direction => ({
+    key: direction,
+    title: direction === 'src' ? '源数据' : '目标数据',
+    children: Object.entries(data[direction] || {}).map(([catalog, types]) =>
+      createCatalogNode(direction, catalog, types)
+    )
+  }));
+}
+
+
+
+
+
+
+
 
 
 

@@ -18,19 +18,19 @@ const LoginCard = () => {
       // 测试解析后端返回的实际 token
       const testToken = res.data.token;
       console.log('解析后端返回的实际 token:');
-      
+
       // // 导入解析工具
       // import('@/utils/authUtils').then(({ getTokenExpiration, isValidToken }) => {
       //   console.log('Token 有效性:', isValidToken(testToken));
       //   const expTime = getTokenExpiration(testToken);
       //   console.log('过期时间:', expTime ? new Date(expTime).toLocaleString() : '解析失败');
       // });
-      if(getLocalStorage('loginToken')){
-         removeLocalStorage('loginToken')
+      if (getLocalStorage('loginToken')) {
+        removeLocalStorage('loginToken')
       }
       setLocalStorage('loginToken', res.data.token);
       // TODO: 跳转到哪里
-      history.push('/tenant/compute/appforge/member');
+      history.push('/tenant/compute/modaforge/connection');
     }
   };
 

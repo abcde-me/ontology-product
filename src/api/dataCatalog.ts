@@ -39,12 +39,10 @@ export async function getCatalogList(param:any = {}) {
 }
 
 // 创建数据集
-export const createDataset = (data: {
-  name: string;
-  description: string;
-  tags: string[];
-  dataSource: 'catalog' | 'connector';
-  targetPath: string;
-}) => {
-  return Post('/api/datasets', data);
-};
+
+export async function createCatalog(data: any) {
+  return await UAPI.RES.CatalogCreateApi({})
+    .post(data)
+    .inRegion()
+    .do();
+    }

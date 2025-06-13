@@ -1,9 +1,11 @@
 import React from 'react';
-import { Typography, Input, Button, Table, Tag, Space, Modal } from '@arco-design/web-react';
+import { Typography, Input, Button, Table, Tag, Space, Modal, Message } from '@arco-design/web-react';
 import { IconPlus, IconEdit, IconUpload, IconDelete, } from '@arco-design/web-react/icon';
 import { getDatasetList } from '@/api/datasetManagement';
-import Form from '@/components/datasetform';
+import DatasetForm from '@/components/datasetform';
 
+
+// 数据集类型
 interface Dataset {
   key: string;
   name: string;
@@ -17,252 +19,218 @@ interface Dataset {
   isDefault: boolean;
 }
 
-const columns = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-  },
-  {
-    title: '标签',
-    dataIndex: 'tags',
-    render: (tags: string[]) => (
-      <>
-        {tags.map((tag) => (
-          <Tag key={tag} color="green">
-            {tag}
-          </Tag>
-        ))}
-      </>
-    ),
-  },
-  {
-    title: '版本',
-    dataIndex: 'version',
-  },
-  {
-    title: '描述',
-    dataIndex: 'description',
-    ellipsis: true,
-    // render: (text) => <div style={{ whiteSpace: 'nowrap' }}>{text}</div>,
-  },
-  {
-    title: '生成模型',
-    dataIndex: 'model',
-    render: (model: string) => <Tag color="purple">{model}</Tag>,
-  },
-  {
-    title: '创建人',
-    dataIndex: 'creator',
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createTime',
-  },
-  {
-    title: '最近更新',
-    dataIndex: 'updateTime',
-  },
-  {
-    title: '操作',
-    dataIndex: 'op',
-    render: (_: unknown, record: Dataset) => (
-      <Space>
-        <Button
-          type="text"
-          icon={<IconEdit />}
-          disabled={record.isDefault}
-        ></Button>
-        <Button
-          type="text"
-          icon={<IconUpload />}
-          disabled={record.isDefault}
-        ></Button>
-        <Button
-          type="text"
-          icon={<IconDelete />}
-          status={!record.isDefault ? 'danger' : undefined}
-          disabled={record.isDefault}
-        ></Button>
-      </Space>
-    ),
-  },
-];
-const data: Dataset[] = [
-  {
-    key: '1',
-    name: '数据集1',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个文本数据集',
-    model: 'GPT-4o',
-    creator: '行政',
-    createTime: '2025年5月15日 10:30:45',
-    updateTime: '2025年6月1日 08:15:22',
-    isDefault: false,
-  },
-  {
-    key: '2',
-    name: '数据集2',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个图片数据集',
-    model: '克劳德3号作品',
-    creator: '行政',
-    createTime: '2025年5月10日 14:22:33',
-    updateTime: '2025年5月28日 16:45:10',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-  {
-    key: '3',
-    name: '用户自定义数据集',
-    tags: ['标签1'],
-    version: 'v1.0.0',
-    description: '这是一个用户自定义的混合数据集',
-    model: '骆驼 3',
-    creator: '行政',
-    createTime: '2025年4月22日 09:12:18',
-    updateTime: '2025年5月30日 11:33:47',
-    isDefault: true,
-  },
-];
-
 const DatasetManagement: React.FC = () => {
-  const [datasetList, setDatasetList] = React.useState<Dataset[]>([]);
-  const [search, setSearch] = React.useState<string>('');
 
-  // 新建数据集弹框相关状态与方法
+  const [datasetList, setDatasetList] = React.useState<Dataset[]>([]);//数据集列表
+  const [search, setSearch] = React.useState<string>('');//搜索
+
+  // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+  const [isEdit, setIsEdit] = React.useState<boolean>(false);
+  const [currentDataset, setCurrentDataset] = React.useState<Dataset | undefined>(undefined);
 
-  const openModal = () => setModalVisible(true);
+  // 打开新建弹窗
+  const openCreateModal = () => {
+    setIsEdit(false);
+    setCurrentDataset(undefined);
+    setModalVisible(true);
+  };
 
-  const addDataset = ()=>{
+  // 打开编辑弹窗
+  const openEditModal = (record: Dataset) => {
+    setIsEdit(true);
+    setCurrentDataset(record);
+    setModalVisible(true);
+  };
+
+  // 关闭弹窗
+  const closeModal = () => {
     setModalVisible(false);
-    console.log('addDataset');
-  }
+    setIsEdit(false);
+    setCurrentDataset(undefined);
+  };
 
+  // 提交表单数据
+  const handleSubmit = (formData: Dataset) => {
+    if (isEdit) {
+      // 编辑模式
+      const updatedList = datasetList.map(item =>
+        item.key === currentDataset?.key
+          ? {
+            ...item,
+            ...formData,
+            updateTime: new Date().toLocaleString('zh-CN'),
+          }
+          : item
+      );
+      setDatasetList(updatedList);
+      Message.success('数据集修改成功！');
+    } else {
+      // 新建模式
+      const newDataset: Dataset = {
+        ...formData,
+        key: Date.now().toString(),
+        createTime: new Date().toLocaleString('zh-CN'),
+        updateTime: new Date().toLocaleString('zh-CN'),
+        isDefault: false,
+      };
+      setDatasetList([newDataset, ...datasetList]);
+      Message.success('数据集创建成功！');
+    }
+    closeModal();
+  };
+
+  // 删除数据集
+  const handleDelete = (record: Dataset) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除数据集"${record.name}"吗？此操作不可撤销。`,
+      okText: '确认删除',
+      cancelText: '取消',
+      okButtonProps: { status: 'danger' },
+      onOk: () => {
+        const updatedList = datasetList.filter(item => item.key !== record.key);
+        setDatasetList(updatedList);
+        Message.success('数据集删除成功！');
+      },
+    });
+  };
+
+  const columns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      render: (tags: string[]) => (
+        <>
+          {tags.map((tag) => (
+            <Tag key={tag} color="green">
+              {tag}
+            </Tag>
+          ))}
+        </>
+      ),
+    },
+    {
+      title: '版本',
+      dataIndex: 'version',
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+    },
+    {
+      title: '生成模型',
+      dataIndex: 'model',
+      render: (model: string) => <Tag color="purple">{model}</Tag>,
+    },
+    {
+      title: '创建人',
+      dataIndex: 'creator',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+    },
+    {
+      title: '最近更新',
+      dataIndex: 'updateTime',
+    },
+    {
+      title: '操作',
+      dataIndex: 'op',
+      render: (_: unknown, record: Dataset) => (
+        <Space>
+          <Button
+            type="text"
+            icon={<IconEdit />}
+            disabled={record.isDefault}
+            onClick={() => openEditModal(record)}
+          >
+            编辑
+          </Button>
+          <Button
+            type="text"
+            icon={<IconUpload />}
+            disabled={record.isDefault}
+          >
+            上传
+          </Button>
+          <Button
+            type="text"
+            icon={<IconDelete />}
+            status={!record.isDefault ? 'danger' : undefined}
+            disabled={record.isDefault}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const data: Dataset[] = [
+    {
+      key: '1',
+      name: '数据集1',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个文本数据集',
+      model: 'GPT-4o',
+      creator: '行政',
+      createTime: '2025年5月15日 10:30:45',
+      updateTime: '2025年6月1日 08:15:22',
+      isDefault: false,
+    },
+    {
+      key: '2',
+      name: '数据集2',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个图片数据集',
+      model: '克劳德3号作品',
+      creator: '行政',
+      createTime: '2025年5月10日 14:22:33',
+      updateTime: '2025年5月28日 16:45:10',
+      isDefault: true,
+    },
+    {
+      key: '3',
+      name: '用户自定义数据集',
+      tags: ['标签1'],
+      version: 'v1.0.0',
+      description: '这是一个用户自定义的混合数据集',
+      model: '骆驼 3',
+      creator: '行政',
+      createTime: '2025年4月22日 09:12:18',
+      updateTime: '2025年5月30日 11:33:47',
+      isDefault: true,
+    },
+  ];
+
+  // 过滤数据
+  const filteredData = React.useMemo(() => {
+    if (!search) return datasetList;
+    return datasetList.filter(item =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.description.toLowerCase().includes(search.toLowerCase()) ||
+      item.creator.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [datasetList, search]);
 
   React.useEffect(() => {
     // getDatasetList().then(res=>{
     //   console.log(res);
     // })
-    setDatasetList(data);//测试数据
-    // console.log(search);
-  }, [search])
-
-
-
-
+    setDatasetList(data); // 测试数据
+  }, []);
 
   return (
-    // <div style={{ padding: '24px', backgroundColor: '#F9FAFB' }}>
     <div style={{ background: '#fff', padding: '24px', borderRadius: '4px' }}>
       <Typography.Title heading={4} style={{ marginTop: 0 }}>
         数据集
@@ -286,31 +254,42 @@ const DatasetManagement: React.FC = () => {
           style={{ width: '320px' }}
           onChange={(value) => setSearch(value)}
         />
-        <Button type="primary" icon={<IconPlus />} onClick={openModal}>
+        <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
           新建数据集
         </Button>
       </div>
+
       <Table
         rowKey="key"
         columns={columns}
-        data={datasetList}
-        pagination={false}//不显示分页
+        data={filteredData}
+        pagination={{
+          pageSize: 10,
+          showTotal: (total) => `共 ${total} 条数据`,
+          sizeCanChange: true,
+          showJumper: true,
+        }}
         border={false}
-        scroll={{ y: 400 }}//固定表格纵轴的高度
+        scroll={{ y: 400 }}
       />
 
-      {/* 新建数据集弹框 */}
+      {/* 新建/编辑数据集弹框 */}
       <Modal
-        title={'新建数据集'}
+        title={isEdit ? '编辑数据集' : '新建数据集'}
         visible={modalVisible}
         footer={null}
-        style={{ width: 'auto' }}
+        style={{ width: '640px' }}
+        onCancel={closeModal}
+        maskClosable={false}
       >
-        <Form addDataset={addDataset}></Form>
-        
+        <DatasetForm
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          initialData={currentDataset}
+          isEdit={isEdit}
+        />
       </Modal>
     </div>
-    // </div>
   );
 };
 
