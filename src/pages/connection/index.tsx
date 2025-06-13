@@ -9,25 +9,13 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
-import ModalDetail from './modal';
-import AddModal from './addModal'
+import ModalDetail from './detailModal';
+import AddAndEditModal from './addAndEditModal'
+import TimeFormatting from '../../components/conversion-time/timeFormatting'
 const InputSearch = Input.Search;
 
 export default function Connection() {
-
-  // 封装方法(功能:将时间戳转换成特定的时间)
-  const formatDate = (timestamp) => {
-    const date = new Date(Number(timestamp));
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    // 返回格式化的字符串，例如：YYYY-MM-DD HH:MM:SS
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
+  
   // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
   // 添加编辑弹框的实例
@@ -38,7 +26,7 @@ export default function Connection() {
       title: '连接器名称',
       dataIndex: 'name',
       width: 230,
-      ellipsis: true
+      ellipsis: true,
     },
     {
       title: '状态',
@@ -99,7 +87,7 @@ export default function Connection() {
       width: 200,
       dataIndex: 'created_at',
       render: (_, item) => (
-        <div className="fontMM">{formatDate(item.created_at)}</div>
+        <div className="fontMM">{TimeFormatting(item.created_at)}</div>
       ),
       sorter: (a, b) => a.created_at.length - b.created_at.length
     },
@@ -109,7 +97,7 @@ export default function Connection() {
       dataIndex: 'updated_at',
       render: ((_, item) => (
         <div className='fontMM'>
-          {formatDate(item.updated_at)}
+          {TimeFormatting(item.updated_at)}
         </div>
       ))
     },
@@ -129,7 +117,7 @@ export default function Connection() {
             content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
               DeleteMethod(record.id);
-              Message.info({
+              Message.success({
                 content: '删除成功'
               });
             }}
@@ -329,7 +317,6 @@ export default function Connection() {
   const [pageSize, SetPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-    console.log('当前页' + page);
     SetCurrent(page);
   };
 
@@ -355,7 +342,7 @@ export default function Connection() {
 
 
 
-  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px' }}>
+  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px',height:'94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
       <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
@@ -367,8 +354,7 @@ export default function Connection() {
         创建连接器
       </Button>
     </div>
-    <Table border={false} columns={columns} data={currentPageData} style={{ padding: '10px 20px' }} pagination={false}  />
-
+    <Table border={false} columns={columns} data={currentPageData} style={{ padding: '10px 20px' }} pagination={false} rowKey="id"  />
     {/* 分页 */}
     <Pagination
       current={current}
@@ -383,11 +369,11 @@ export default function Connection() {
       total={filteredConnectors.length}
       showJumper
       sizeCanChange
-      simple
+      style={{marginBottom:'20px'}}
     />
 
     {/* 详情逻辑 */}
     <ModalDetail ref={childRef} />
-    <AddModal ref={addandsetchildRef} />
+    <AddAndEditModal ref={addandsetchildRef} />
   </div>
 }
