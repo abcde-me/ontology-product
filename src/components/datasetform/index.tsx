@@ -1,5 +1,5 @@
 import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface Dataset {
   key?: string;
@@ -22,6 +22,7 @@ const FormItem = Form.Item;
 
 const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel, initialData, isEdit = false }) => {
   const [form] = Form.useForm();
+  const formRef = useRef(null);
 
   // 模型选项
   const modelOptions = [
@@ -40,8 +41,12 @@ const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel, initialData, isEdit 
     { label: '音频', value: '音频' },
   ];
 
+  
+
+
   // 如果是编辑模式，回显数据
   useEffect(() => {
+
     if (isEdit && initialData) {
       form.setFieldsValue({
         name: initialData.name,

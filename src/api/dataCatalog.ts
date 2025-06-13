@@ -8,6 +8,8 @@ import { Get, Post } from '@/utils/request';
  * @param id 文件ID
  * @param params 额外参数
  */
+
+//这个下载接口可以使用，但是不是在这个模块中用的，以后可能会用到
 export async function downloadFileById(id: string, params: any = {}) {
   return await UAPI.RES.fileDownloadApi({ file_id: id })//暂定只传一个id，后面再添加其他参数
     .get(params)
@@ -45,4 +47,11 @@ export async function createCatalog(data: any) {
     .post(data)
     .inRegion()
     .do();
-    }
+}
+
+export async function exportFile(params:any = {}) {
+  return await UAPI.RES.fileExportApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
