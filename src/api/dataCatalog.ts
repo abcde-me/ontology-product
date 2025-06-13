@@ -1,4 +1,5 @@
 import UAPI from '@/api';
+import { Get, Post } from '@/utils/request';
 
 // 数据目录相关接口
 
@@ -21,3 +22,27 @@ export async function deleteFileById(id: string, params: any = {}) {
     .do();
 }
 
+//查询指定目录下，已加载成功的文件记录
+export async function getDataCatalogList(param:any = {}) {
+  return await UAPI.RES.dataCatalogListApi({})
+    .get(param)
+    .inRegion()
+    .do();
+}
+
+// 获取数据目录列表
+export async function getCatalogList(param:any = {}) {
+  return await UAPI.RES.CatalogListApi({})
+    .get(param)
+    .inRegion()
+    .do();
+}
+
+// 创建数据集
+
+export async function createCatalog(data: any) {
+  return await UAPI.RES.CatalogCreateApi({})
+    .post(data)
+    .inRegion()
+    .do();
+    }

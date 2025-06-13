@@ -1,14 +1,21 @@
 import React from 'react';
 import './index.css';
-import { Input, DatePicker, Space } from '@arco-design/web-react';
+import { Input, DatePicker, Space, Button } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import Table from '@/components/data-catalog-content/index'
 const { RangePicker } = DatePicker;
 
 const DataCatalog: React.FC = () => {
-  let [searchValue, setSearchValue] = React.useState('')
-  let [startTime, setStartTime] = React.useState('')
-  let [endTime, setEndTime] = React.useState('')
+  const [searchValue, setSearchValue] = React.useState('')
+  const [startTime, setStartTime] = React.useState('')
+  const [endTime, setEndTime] = React.useState('')
+
+  // 处理时间范围选择
+  const handleTimeRangeChange = (dateStrings: string[]) => {
+    setStartTime(dateStrings[0] || '')
+    setEndTime(dateStrings[1] || '')
+  }
+
   return (
     <div className="p-6">
       <div style={{ padding: '24px', borderRadius: '4px' }}>
@@ -22,6 +29,8 @@ const DataCatalog: React.FC = () => {
                 placeholder="搜索文件名"
                 prefix={<IconSearch />}
                 style={{ width: 200 }}
+                value={searchValue}
+                onPressEnter={()=>setSearchValue(searchValue)}
               />
 
               {/* 时间范围选择器 */}
@@ -29,6 +38,7 @@ const DataCatalog: React.FC = () => {
                 style={{ width: 300 }}
                 placeholder={['输入开始时间', '输入结束时间']}
                 showTime
+                onChange={handleTimeRangeChange}
               />
             </Space>
           </div>

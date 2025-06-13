@@ -5,7 +5,7 @@ import {deleteFileById} from '@/api/dataCatalog'
 import {Message } from '@arco-design/web-react';
 
 //数据源目录的卷中的数据格式
-export let SourceData_Volume=[
+export const SourceData_Volume=[
       {
     title: 'ID',
     dataIndex: 'id',
@@ -50,15 +50,15 @@ export let SourceData_Volume=[
 
 ]
 //数据源目录的数据库中的数据格式
-export let SourceData_Database=[
+export const SourceData_Database=[
 
 ]
 //目标数据目录中的卷中的数据格式
-export let TargetData_Volume=[
+export const TargetData_Volume=[
 
 ]
 //目标数据目录中的数据库中的数据格式
-export let TargetData_Database=[
+export const TargetData_Database=[
     
 ]
   const Download = (id) => {
