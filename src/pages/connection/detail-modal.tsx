@@ -3,7 +3,7 @@ import { Message, Modal } from '@arco-design/web-react';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import './index.css'
 import { IconCopy } from '@arco-design/web-react/icon';
-import TimeFormatting from '../../components/conversion-time/timeFormatting'
+import TimeFormatting from '../../utils/timeFormatting'
 const ModalDetail = forwardRef((props, ref) => {
     // 默认弹框隐藏
     const [visible2, setVisible2] = React.useState(false);

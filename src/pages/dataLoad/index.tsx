@@ -1,8 +1,9 @@
-import { Button, Input, Message, Pagination, Popconfirm, Table } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Pagination, Popconfirm, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import timeFormattig from '@/components/conversion-time/timeFormatting';
 import React, { useMemo, useState } from 'react';
 import Styles from './index.module.css'
+import LoadAddModal from './load-add-modal';
+import TimeFormattig from '../../utils/timeFormatting'
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const columns = [
@@ -101,7 +102,7 @@ export default function DataLoad() {
       dataIndex: 'created_at',
       width: 240,
       render: ((_, item) => (
-        <span>{timeFormattig(item.created_at)}</span>
+        <span>{TimeFormattig(item.created_at)}</span>
       ))
     },
     {
@@ -109,7 +110,7 @@ export default function DataLoad() {
       dataIndex: 'updated_at',
       width: 240,
       render: ((_, item) => (
-        <span>{timeFormattig(item.updated_at)}</span>
+        <span>{TimeFormattig(item.updated_at)}</span>
       ))
     },
     {
@@ -256,12 +257,12 @@ export default function DataLoad() {
     },
   ];
   // 当前的第几页
-  const [current, SetCurrent] = useState(1);
+  const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
-  const [pageSize, SetPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-    SetCurrent(page);
+    setCurrent(page);
   };
   const [searchValue, setSearchValue] = useState('')
   // 根据搜索条件过滤连接器
@@ -283,9 +284,15 @@ export default function DataLoad() {
 
   // 点击删除的逻辑
   const deleteHan = (id) => {
-    console.log('删除了'+id);
-    
+    console.log('删除了' + id);
+
   }
+
+  // 模态框默认状态
+  const [visible, setVisible] = React.useState(false);
+
+
+
   return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 10px 0px', borderRadius: '10px', height: '94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>数据载入</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
@@ -293,7 +300,7 @@ export default function DataLoad() {
         setSearchValue(value)
       }} />
       <Button type='primary' icon={<IconPlus />} onClick={() => {
-        // childAddAndSetModalHan(null)
+        setVisible(true)
       }} >
         创建数据载入任务
       </Button>
@@ -311,8 +318,8 @@ export default function DataLoad() {
         current={current}
         pageSize={pageSize}
         onPageSizeChange={(pageSize) => {
-          SetPageSize(pageSize);
-          SetCurrent(1);
+          setPageSize(pageSize);
+          setCurrent(1);
         }}
         onChange={handlePageChange}
         sizeOptions={[1, 2, 5, 10]}
@@ -323,6 +330,17 @@ export default function DataLoad() {
         style={{ marginBottom: '20px' }}
       />
     </div>
-
+    <Modal
+    style={{width:'600px'}}
+      title='创建数据载入任务'
+      visible={visible}
+      onOk={() => setVisible(false)}
+      onCancel={() => setVisible(false)}
+      autoFocus={false}
+      focusLock={true}
+      footer={null}
+    >
+      <LoadAddModal/>
+    </Modal>
   </div>;
 }

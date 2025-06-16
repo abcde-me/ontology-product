@@ -9,9 +9,10 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
-import ModalDetail from './detailModal';
-import AddAndEditModal from './addAndEditModal'
-import TimeFormatting from '../../components/conversion-time/timeFormatting'
+import ModalDetail from './detail-modal';
+import AddAndEditModal from './add-edit-modal'
+import TimeFormatting from '../../utils/timeFormatting'
+
 const InputSearch = Input.Search;
 
 export default function Connection() {
@@ -312,12 +313,12 @@ export default function Connection() {
     ]
   )
   // 当前的第几页
-  const [current, SetCurrent] = useState(1);
+  const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
-  const [pageSize, SetPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-    SetCurrent(page);
+    setCurrent(page);
   };
 
   // 根据搜索条件过滤连接器
@@ -333,11 +334,7 @@ export default function Connection() {
   }, [ConnectionData, searchValue]);
 
 
-  const currentPageData = useMemo(() => {
-    const startIndex = (current - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredConnectors.slice(startIndex, endIndex);
-  }, [current, pageSize, filteredConnectors]);
+
 
 
 
@@ -354,14 +351,14 @@ export default function Connection() {
         创建连接器
       </Button>
     </div>
-    <Table border={false} columns={columns} data={currentPageData} style={{ padding: '10px 20px' }} pagination={false} rowKey="id"  />
+    <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id"  />
     {/* 分页 */}
     <Pagination
       current={current}
       pageSize={pageSize}
       onPageSizeChange={(pageSize) => {
-        SetPageSize(pageSize);
-        SetCurrent(1);
+        setPageSize(pageSize);
+        setCurrent(1);
       }}
       onChange={handlePageChange}
       sizeOptions={[2, 5, 10, 20]}
