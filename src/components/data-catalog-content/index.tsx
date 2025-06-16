@@ -21,6 +21,11 @@ const CustomDbIcon: any = () => (
 import { Tree, Typography, Button, Message, Modal } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
 import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog'
+//getDataCatalogList是获取表格中的数据，getDataCatalog是获取左侧树状结构的数据，getCatalogList是获取目录列表
+
+
+
+
 import SmartTable from './components/SmartTable';
 import Pages from './components/pages'
 import './index.css';
@@ -321,11 +326,10 @@ function DataPage(props) {
   }
 
   useEffect(() => {
-    setTableData(data)//测试使用
     // getCatalogList().then(res => {
     //   console.log(res)
     // })
-    setTreeData(convertToArcoTreeData(rawCatalogData, handleTreeSelect))//测试
+    setTreeData(convertToArcoTreeData(rawCatalogData, handleTreeSelect))//测试使用，有数据以后可以将rawCatalogData改成后端返回的数据
   }, [])
 
   //监听搜索条件变化
@@ -340,6 +344,7 @@ function DataPage(props) {
     // }).then(res=>{
     //   console.log(res)
     // })
+    setTableData(data)//测试使用
   }, [searchValue, startTime, endTime,selectedFilePath,currentPage,pageSize])
   return (
     <div style={{ display: 'flex', padding: 16 }}>

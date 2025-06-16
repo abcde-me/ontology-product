@@ -4,6 +4,7 @@ import { IconPlus, IconEdit, IconUpload, IconDelete, } from '@arco-design/web-re
 import { getDatasetList } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
+import DatasetDetailModal from '@/components/datasetform/DatasetDetailModal';
 
 
 // 数据集类型
@@ -30,6 +31,10 @@ const DatasetManagement: React.FC = () => {
   const [isEdit, setIsEdit] = React.useState<boolean>(false);
   const [currentDataset, setCurrentDataset] = React.useState<Dataset | undefined>(undefined);
 
+  // 详情Modal状态
+  const [detailModalVisible, setDetailModalVisible] = React.useState<boolean>(false);
+  const [detailDataset, setDetailDataset] = React.useState<Dataset | null>(null);
+
   // 打开新建弹窗
   const openCreateModal = () => {
     setIsEdit(false);
@@ -50,6 +55,18 @@ const DatasetManagement: React.FC = () => {
     setModalVisible(false);
     setIsEdit(false);
     setCurrentDataset(undefined);
+  };
+
+  // 打开详情弹窗
+  const openDetailModal = (record: Dataset) => {
+    setDetailDataset(record);
+    setDetailModalVisible(true);
+  };
+
+  // 关闭详情弹窗
+  const closeDetailModal = () => {
+    setDetailModalVisible(false);
+    setDetailDataset(null);
   };
 
   // 提交表单数据
@@ -94,6 +111,20 @@ const DatasetManagement: React.FC = () => {
     {
       title: '名称',
       dataIndex: 'name',
+      render: (name: string, record: Dataset) => (
+        <Button
+          type="text"
+          style={{
+            padding: 0,
+            height: 'auto',
+            color: '#165dff',
+            fontWeight: 500,
+          }}
+          onClick={() => openDetailModal(record)}
+        >
+          {name}
+        </Button>
+      ),
     },
     {
       title: '标签',
@@ -248,12 +279,13 @@ const DatasetManagement: React.FC = () => {
         rowKey="key"
         columns={columns}
         data={datasetList}
-        pagination={{
-          pageSize: 10,
-          showTotal: (total) => `共 ${total} 条数据`,
-          sizeCanChange: true,
-          showJumper: true,
-        }}
+        pagination={false}
+        // pagination={{
+        //   pageSize: 10,
+        //   showTotal: (total) => `共 ${total} 条数据`,
+        //   sizeCanChange: true,
+        //   showJumper: true,
+        // }}
         border={false}
         scroll={{ y: 400 }}
       />
@@ -280,6 +312,13 @@ const DatasetManagement: React.FC = () => {
           />
         )}
       </Modal>
+
+      {/* 数据集详情弹框 */}
+      <DatasetDetailModal
+        visible={detailModalVisible}
+        dataset={detailDataset}
+        onClose={closeDetailModal}
+      />
     </div>
   );
 };
