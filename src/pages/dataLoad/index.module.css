@@ -1,0 +1,15 @@
+.arco-table-tr>th {
+    background-color:rgb(245, 249, 255) !important;
+}
+.arcoPagination {
+    display: flex;
+    justify-content: end;
+    margin-right: 20px;
+}
+.hoverStyle{
+    cursor: pointer;
+    color: rgb(0, 125, 250);
+}
+.hoverStyle:hover{
+    color: rgba(0, 125, 250,.5);
+}

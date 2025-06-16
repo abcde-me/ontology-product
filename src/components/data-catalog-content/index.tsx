@@ -1,5 +1,3 @@
-
-
 // components/CustomDbIcon.js
 import React, { useEffect } from 'react';
 //数据库图标（从里图标库拿，转换成组件的形式）
@@ -20,140 +18,182 @@ const CustomDbIcon: any = () => (
   </svg>
 );
 
-
-
-
-
-
-
-
-import { Tree, Typography, Button,Message } from '@arco-design/web-react';
+import { Tree, Typography, Button, Message, Modal } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
+import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog'
 import SmartTable from './components/SmartTable';
 import Pages from './components/pages'
 import './index.css';
-import {SourceData_Volume,SourceData_Database,TargetData_Volume,TargetData_Database} from './columns'
+import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './columns'
+import FormComponent from './components/Dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
-const treeData = [
-  {
-    title: '源数据目录',
-    key: 'source-root',
-    children: [
-      {
-        title: '目录1',
-        key: 'source-dir1',
-        children: [
-          {
-            title: '卷',
-            key: 'source-volume',
-            children: [
-              {
-                title: (
-                  <span>
-                    <IconFolder style={{ marginRight: 6 }} />
-                    <span>source-vol1</span>
-                  </span>
-                ),
-                key: 'source-vol1',
-              },
-            ],
-          },
-          {
-            title: '数据库',
-            key: 'source-dbs',
-            children: [
-              {
-                title: (
-                  <span>
-                    <CustomDbIcon>
-                      <Text
-                        ellipsis={{
-                          showTooltip: true,//是否显示tooltip
-                        }}
-                        style={{ maxWidth: 160 }}//设置最大宽度
-                      >
-                        source-db-11111111111111111111
-                      </Text>
-                    </CustomDbIcon>
-                  </span>
-                ),
-                key: 'source-db-1',
-              },
-              {
-                title: (
-                  <span>
-                    <Text
-                      ellipsis={{
-                        showTooltip: true,//是否显示tooltip
-                      }}
-                      style={{ maxWidth: 160 }}//设置最大宽度
-                    >
-                      source-db-11111111111111111111
-                    </Text>
-                    source-db-2
-                  </span>
-                ),
-                key: 'source-db-2',
-              },
-            ],
-          },
-        ],
-      },
-    ],
+
+const rawCatalogData =
+{
+  "src": {
+    "catalog1": {
+      "volume": [
+        "source-vol1",
+        "source-vol2",
+        "source-vol3"
+      ],
+      "db": [
+        "source-db1",
+        "source-db2",
+        "source-db3"
+      ]
+    },
+    "catalog2": {
+      "volume": [
+        "source-vol1",
+        "source-vol2",
+        "source-vol3"
+      ],
+      "db": [
+        "source-db1",
+        "source-db2",
+        "source-db3"
+      ]
+    }
   },
-  {
-    title: '目标数据目录',
-    key: 'target-root',
-    children: [
-      {
-        title: '目录1',
-        key: 'target-dir1',
-        children: [
-          {
-            title: '卷',
-            key: 'target-volume',
-            children: [
-              {
-                title: (
-                  <span>
-                    <IconFolder style={{ marginRight: 6 }} />
-                    <span>target-vol1</span>
-                  </span>
-                ),
-                key: 'target-vol1',
-              },
-            ],
-          },
-          {
-            title: '数据库',
-            key: 'target-dbs',
-            children: [
-              {
-                title: (
-                  <span>
-                    <CustomDbIcon></CustomDbIcon>
-                    destination-db-1
-                  </span>
-                ),
-                key: 'destination-db-1',
-              },
-              {
-                title: (
-                  <span>
-                    <CustomDbIcon></CustomDbIcon>
-                    destination-db-2
-                  </span>
-                ),
-                key: 'destination-db-2',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
+  "dst": {
+    "catalog1": {
+      "volume": [
+        "source-vol1",
+        "source-vol2",
+        "source-vol3"
+      ],
+      "db": [
+        "source-db1",
+        "source-db2",
+        "source-db3"
+      ]
+    },
+    "catalog2": {
+      "volume": [
+        "source-vol1",
+        "source-vol2",
+        "source-vol3"
+      ],
+      "db": [
+        "source-db1",
+        "source-db2",
+        "source-db3"
+      ]
+    }
+  }
+}
+//将后端返回的数据改成tree可以识别的数据
+{
+  // function convertToArcoTreeData(data: any, handleTreeSelect: any): any[] {
+  //   const result: any[] = [];
+  //   //后续有过有其他的目录可以在这里增加
+  //   for (const directionKey of ['src', 'dst']) {
+  //     const directionNode = {
+  //       key: directionKey,
+  //       title: directionKey == 'src' ? '源数据' : '目标数据',
+  //       children: [] as any[]
+  //     };
+  //     //catalogs是源数据或者目标数据
+  //     const catalogs = data[directionKey];
+  //     for (const catalogName in catalogs) {//catalogName是目录名
+  //       const catalogNode = {
+  //         key: `${directionKey}-${catalogName}`,
+  //         title: catalogName,
+  //         children: [] as any[]
+  //       };
+
+  //       const types = catalogs[catalogName];//types是目录下的类型（volume或者db）
+  //       for (const typeName in types) {
+  //         const typeNode = {
+  //           key: `${directionKey}-${catalogName}-${typeName}`,
+  //           title: typeName === 'volume' ? '卷 Volume' : '库 DB',
+  //           children: [] as any[]
+  //         };
+
+  //         const items = types[typeName];
+  //         for (const item of items) {
+  //           typeNode.children.push({
+  //             key: `${directionKey}-${catalogName}-${typeName}-${item}`,
+  //             title: (
+  //               <span onClick={() => handleTreeSelect(directionKey + '/' + catalogName + '/' + typeName + '/' + item,directionKey,typeName)}>
+  //                 {typeName === 'db' ? <CustomDbIcon /> : <IconFolder style={{ marginRight: 6 }} />}
+  //                 {item}
+  //               </span>
+  //             )
+  //           });
+  //         }
+
+  //         catalogNode.children.push(typeNode);
+  //       }
+
+  //       directionNode.children.push(catalogNode);
+  //     }
+
+  //     result.push(directionNode);
+  //   }
+
+  //   return result;
+  // }
+}
+
+interface TreeNode {
+  key: string;
+  title: React.ReactNode;
+  children?: TreeNode[];
+}
+
+type DataType = {
+  [direction: string]: {
+    [catalog: string]: {
+      volume?: string[];
+      db?: string[];
+    };
+  };
+};
+
+function convertToArcoTreeData(data: DataType, handleTreeSelect: (fullPath: string, direction: string, type: string) => void): TreeNode[] {
+  const createItemNode = (direction: string, catalog: string, type: string, item: string): TreeNode => ({
+    key: `${direction}-${catalog}-${type}-${item}`,
+    title: (
+      <span onClick={() => handleTreeSelect(`${direction}/${catalog}/${type}/${item}`, direction, type)}>
+        {type === 'db' ? <CustomDbIcon /> : <IconFolder style={{ marginRight: 6 }} />}
+        {item}
+      </span>
+    )
+  });
+
+  const createTypeNode = (direction: string, catalog: string, type: string, items: string[]): TreeNode => ({
+    key: `${direction}-${catalog}-${type}`,
+    title: type === 'db' ? '库 DB' : '卷 Volume',
+    children: items.map(item => createItemNode(direction, catalog, type, item))
+  });
+
+  const createCatalogNode = (direction: string, catalog: string, types: any): TreeNode => ({
+    key: `${direction}-${catalog}`,
+    title: catalog,
+    children: Object.entries(types).map(([type, items]: [string, string[]]) =>
+      createTypeNode(direction, catalog, type, items)
+    )
+  });
+
+  return ['src', 'dst'].map(direction => ({
+    key: direction,
+    title: direction === 'src' ? '源数据' : '目标数据',
+    children: Object.entries(data[direction] || {}).map(([catalog, types]) =>
+      createCatalogNode(direction, catalog, types)
+    )
+  }));
+}
+
+
+//将日期字符串转换为时间戳
+function toUnixTimestamp(dateString) {
+  const date = new Date(dateString.replace(' ', 'T'));
+  return Math.floor(date.getTime() / 1000);
+}
+
 
 
 
@@ -221,17 +261,86 @@ const data = [
 
 
 function DataPage(props) {
-  let {searchValue,startTime,endTime} = props
+  const [treeData, setTreeData] = React.useState([])
+  const { searchValue, startTime, endTime } = props
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
-  let [columns,setColumns] = React.useState(SourceData_Volume)
-
+  const [visible, setVisible] = React.useState(false);
+  //删除的弹框控制
+  const [columns, setColumns] = React.useState(() => sourceDataVolume(downloadShow))//默认是第一个
+  const [downloadData, setDownloadData] = React.useState([])//下载的数据
+  const [selectedFilePath, setSelectedFilePath] = React.useState('')//选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
-
   const [tableData, setTableData] = React.useState([])
 
+  // 分页状态
+  const [currentPage, setCurrentPage] = React.useState(1)
+  const [pageSize, setPageSize] = React.useState(10)//每页条数
+  const [total, setTotal] = React.useState(100)//总条数
+
+
+  const handleTreeSelect = (item: any, directionKey: string, type: string) => {
+    setSelectedFilePath(item)
+    console.log(item)
+    console.log(directionKey, type)
+    if (directionKey === 'src' && type === 'volume') {
+      setColumns(() => sourceDataVolume(downloadShow))
+    } else if (directionKey === 'src' && type === 'db') {
+      setColumns(() => sourceDataDatabase(downloadShow))
+    } else if (directionKey === 'dst' && type === 'volume') {
+      setColumns(() => targetDataVolume(downloadShow))
+    } else if (directionKey === 'dst' && type === 'db') {
+      setColumns(() => targetDataDatabase(downloadShow))
+    }
+  }
+
+  function downloadShow(visible, downloaddata) {//控制下载弹框的显示和隐藏
+    setVisible(visible)
+    console.log(downloaddata)
+    setDownloadData(downloaddata)
+  }
+
+
+
+
+
+
+  // 页码变化处理
+  const handlePageChange = (page: number, size: number) => {
+    console.log('页码变化:', page, '每页条数:', size)
+    setCurrentPage(page)
+    setPageSize(size)
+    // 这里可以添加获取数据的逻辑
+  }
+
+  // 每页条数变化处理
+  const handlePageSizeChange = (page: number, size: number) => {
+    console.log('每页条数变化:', page, '每页条数:', size)
+    setCurrentPage(page)
+    setPageSize(size)
+    // 这里可以添加获取数据的逻辑
+  }
+
   useEffect(() => {
-    setTableData(data)
+    setTableData(data)//测试使用
+    // getCatalogList().then(res => {
+    //   console.log(res)
+    // })
+    setTreeData(convertToArcoTreeData(rawCatalogData, handleTreeSelect))//测试
   }, [])
+
+  //监听搜索条件变化
+  useEffect(() => {
+    // getDataCatalogList({
+    //   start_time:toUnixTimestamp(startTime),
+    //   end_time:toUnixTimestamp(endTime),
+    //   file_name:searchValue,
+    //   file_path:selectedFilePath,
+    //   page:currentPage,
+    //   page_size:pageSize,
+    // }).then(res=>{
+    //   console.log(res)
+    // })
+  }, [searchValue, startTime, endTime,selectedFilePath,currentPage,pageSize])
   return (
     <div style={{ display: 'flex', padding: 16 }}>
       {/* 左侧树状导航 */}
@@ -239,7 +348,7 @@ function DataPage(props) {
         <div style={{ padding: 20 }}>
           <Tree
             treeData={treeData}
-            defaultExpandedKeys={[]}
+            defaultExpandedKeys={['src', 'dst']}
             blockNode
           />
         </div>
@@ -248,8 +357,27 @@ function DataPage(props) {
       {/* 右侧主区域 */}
       <div style={{ flex: 1, width: '100%', height: '500px', backgroundColor: 'red' }}>
         <SmartTable columns={columns} data={tableData} />
-        <Pages></Pages>
+        <Pages
+          current={currentPage}//当前页码
+          total={total}
+          pageSize={pageSize}//每页条数
+          onChange={handlePageChange}//页码变化处理
+          onPageSizeChange={handlePageSizeChange}//每页条数变化处理
+        />
       </div>
+
+      <Modal
+        title='文件下载'
+        visible={visible}
+        onOk={() => setVisible(false)}
+        onCancel={() => setVisible(false)}
+        autoFocus={false}
+        focusLock={true}
+        footer={null}
+      >
+        <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
+      </Modal>
+
     </div>
   );
 }
