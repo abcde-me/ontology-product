@@ -6,34 +6,28 @@ import {
   Table,
   Button
 } from '@arco-design/web-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
-import ModalDetail from './modal';
+import ModalDetail from './detail-modal';
+import AddAndEditModal from './add-edit-modal'
+import TimeFormatting from '../../utils/timeFormatting'
+
 const InputSearch = Input.Search;
 
 export default function Connection() {
-  const formatDate = (timestamp) => {
-    const date = new Date(Number(timestamp));
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    // 返回格式化的字符串，例如：YYYY-MM-DD HH:MM:SS
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
-  // 子组件实例
+  
+  // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
+  // 添加编辑弹框的实例
+  const addandsetchildRef = useRef(null)
   // 连接器配置项
   const columns: any = [
     {
       title: '连接器名称',
       dataIndex: 'name',
       width: 230,
-      ellipsis: true
+      ellipsis: true,
     },
     {
       title: '状态',
@@ -94,7 +88,7 @@ export default function Connection() {
       width: 200,
       dataIndex: 'created_at',
       render: (_, item) => (
-        <div className="fontMM">{formatDate(item.created_at)}</div>
+        <div className="fontMM">{TimeFormatting(item.created_at)}</div>
       ),
       sorter: (a, b) => a.created_at.length - b.created_at.length
     },
@@ -104,7 +98,7 @@ export default function Connection() {
       dataIndex: 'updated_at',
       render: ((_, item) => (
         <div className='fontMM'>
-          {formatDate(item.updated_at)}
+          {TimeFormatting(item.updated_at)}
         </div>
       ))
     },
@@ -114,17 +108,17 @@ export default function Connection() {
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span className="hover" onClick={viewDetailHan}>
+          <span className="hover" onClick={()=>{viewDetailHan(record)}}>
             详情
           </span>
-          <span className="hover">编辑</span>
+          <span className="hover" onClick={() => { childAddAndSetModalHan(record) }}>编辑</span>
           <Popconfirm
             focusLock
             title="删除该连接器"
             content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
               DeleteMethod(record.id);
-              Message.info({
+              Message.success({
                 content: '删除成功'
               });
             }}
@@ -148,141 +142,235 @@ export default function Connection() {
     setConnectionData(NewConnectionData);
   };
   // 点击查看执行的方法
-  const viewDetailHan = () => {
+  const viewDetailHan = (obj) => {
     if (childRef.current) {
-      childRef.current.displayDetailHan();
+      childRef.current.displayDetailHan(obj);
     }
   }
+  const childAddAndSetModalHan = (id) => {
+    if (addandsetchildRef.current) {
+      addandsetchildRef.current.displayModalView(id)
+    }
+  }
+  // 搜索框的默认值
+  const [searchValue, setSearchValue] = useState('')
   const [ConnectionData, setConnectionData] = useState(
     [
       {
         id: "1",
-        name: '文案内容连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称连接器名称',
+        name: '唐僧',
         status: false,
         type: 's3',
+        config: {
+          endpoint: "https://s3.amazonaws.com",
+          access_key: 'AKIAxxxxXXX',
+          secret_key: 'xxxxxxxx',
+          region: 'XXXXXX',
+          path: 'data-warehouse'
+        },
         creator: '张三',
         created_at: '1749627860785',
         updated_at: '17123456791'
       },
       {
         id: "2",
-        name: '文案内容',
+        name: '猪八戒',
         status: true,
-        type: 's3',
+        type: 'hdfs',
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
         creator: '张三',
         created_at: '17123456782',
         updated_at: '17123456792'
       },
       {
         id: "3",
-        name: '文案内容',
-        status: true,
+        name: '西游记',
+        status: false,
         type: 's3',
+        config: {
+          endpoint: "https://s3.amazonaws.com",
+          access_key: 'AKIAxxxxXXX',
+          secret_key: 'xxxxxxxx',
+          region: 'XXXXXX',
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456783',
-        updated_at: '17123456793'
+        created_at: '1749627860785',
+        updated_at: '17123456791'
       },
       {
         id: "4",
-        name: '文案内容',
+        name: '水浒传',
         status: true,
         type: 'hdfs',
-        creator: '张三',
-        created_at: '17123456784',
-        updated_at: '17123456794'
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
+        creator: '三国演义',
+        created_at: '17123456782',
+        updated_at: '17123456792'
       },
       {
         id: "5",
-        name: '文案内容',
-        status: true,
+        name: '红楼梦',
+        status: false,
         type: 's3',
+        config: {
+          endpoint: "https://s3.amazonaws.com",
+          access_key: 'AKIAxxxxXXX',
+          secret_key: 'xxxxxxxx',
+          region: 'XXXXXX',
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456785',
-        updated_at: '17123456795'
+        created_at: '1749627860785',
+        updated_at: '17123456791'
       },
       {
         id: "6",
-        name: '文案内容',
+        name: '孙悟空',
         status: true,
-        type: 's3',
+        type: 'hdfs',
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456786',
-        updated_at: '171234567976'
+        created_at: '17123456782',
+        updated_at: '17123456792'
       },
       {
         id: "7",
-        name: '文案内容',
-        status: true,
-        type: 'hdfs',
+        name: '沙僧',
+        status: false,
+        type: 's3',
+        config: {
+          endpoint: "https://s3.amazonaws.com",
+          access_key: 'AKIAxxxxXXX',
+          secret_key: 'xxxxxxxx',
+          region: 'XXXXXX',
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456788',
-        updated_at: '17123456797'
+        created_at: '1749627860785',
+        updated_at: '17123456791'
       },
       {
         id: "8",
-        name: '文案内容',
+        name: '猪八戒',
         status: true,
-        type: 's3',
+        type: 'hdfs',
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456789',
-        updated_at: '17123456798'
+        created_at: '17123456782',
+        updated_at: '17123456792'
       },
       {
         id: "9",
-        name: '文案内容',
+        name: '白龙马',
         status: true,
-        type: 's3',
+        type: 'hdfs',
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '17123456780',
-        updated_at: '17123456799'
+        created_at: '17123456782',
+        updated_at: '17123456792'
       },
       {
         id: "10",
-        name: '文案内容',
+        name: '白骨精',
         status: true,
-        type: 's3',
+        type: 'hdfs',
+        config: {
+          host: "XXXXX",
+          port: '22',
+          user: "xxxxxxxxxxx",
+          path: 'data-warehouse'
+        },
         creator: '张三',
-        created_at: '171234567811',
-        updated_at: '17123456790'
-      }
+        created_at: '17123456782',
+        updated_at: '17123456792'
+      },
     ]
   )
   // 当前的第几页
-  const [current, SetCurrent] = useState(1);
+  const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
-  const [pageSize, SetPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-   console.log('当前页'+page);
-    SetCurrent(page);
+    setCurrent(page);
   };
-  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px' }}>
+
+  // 根据搜索条件过滤连接器
+  const filteredConnectors = useMemo(() => {
+    return ConnectionData.filter(connector => {
+      const query = searchValue.toLowerCase();
+      return (
+        connector.name.toLowerCase().includes(query) ||
+        connector.type.toLowerCase().includes(query) ||
+        connector.creator.toLowerCase().includes(query)
+      );
+    });
+  }, [ConnectionData, searchValue]);
+
+
+
+
+
+
+
+  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px',height:'94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
-      <InputSearch allowClear placeholder='输入关键词搜索' style={{ width: 230 }} />
-      <Button type='primary' icon={<IconPlus />}>
+      <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
+        setSearchValue(value)
+      }} />
+      <Button type='primary' icon={<IconPlus />} onClick={() => {
+        childAddAndSetModalHan(null)
+      }} >
         创建连接器
       </Button>
     </div>
-    <Table border={false} columns={columns} data={ConnectionData} style={{ padding: '10px 20px' }} pagination={false} />
-
+    <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id"  />
     {/* 分页 */}
     <Pagination
       current={current}
       pageSize={pageSize}
       onPageSizeChange={(pageSize) => {
-        SetPageSize(pageSize);
-        SetCurrent(1);
+        setPageSize(pageSize);
+        setCurrent(1);
       }}
       onChange={handlePageChange}
       sizeOptions={[2, 5, 10, 20]}
       showTotal
-      total={ConnectionData.length}
+      total={filteredConnectors.length}
       showJumper
       sizeCanChange
-      style={{ marginBottom: 20, justifyItems: 'end' }}
+      style={{marginBottom:'20px'}}
     />
+
     {/* 详情逻辑 */}
     <ModalDetail ref={childRef} />
+    <AddAndEditModal ref={addandsetchildRef} />
   </div>
 }
