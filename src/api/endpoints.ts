@@ -162,7 +162,7 @@ export const ResourceEndpointsV2 = {
   CatalogListApi:Prefix+`/catalogs`,
   CatalogCreateApi:Prefix+`/catalogs`,
   fileExportApi:Prefix+`/files/export`,
-
+  connectorListAPI:Prefix+`/connectors`,
 
 
   apiKeyList: PrefixV2 + `/api-keys`,
