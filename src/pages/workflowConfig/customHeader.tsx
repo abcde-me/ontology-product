@@ -16,14 +16,14 @@ export default function Header() {
         {/* <Button
           className="!border-[rgb(var(--primary-4))] !text-white hover:!border-white"
           type="outline"
-          onClick={() => history.push('/tenant/compute/appforge/appCreate')}
+          onClick={() => history.push('/tenant/compute/modaforge/appCreate')}
         >
           创建我的应用
         </Button> */}
         <Button
           className="!border-[rgb(var(--primary-4))] !bg-transparent !text-white hover:!border-white"
           type="outline"
-          onClick={() => history.push('/tenant/compute/appforge/workflowList')}
+          onClick={() => history.push('/tenant/compute/modaforge/workflowList')}
         >
           探索更多工作流
         </Button>

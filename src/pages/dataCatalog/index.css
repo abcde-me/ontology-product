@@ -1,0 +1,13 @@
+.data-catalog-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.data-catalog-header h1{
+    font-size: 24px;
+    font-weight: 600;
+}
+.data-catalog-content{
+    background: '#fff',
+    
+}

@@ -21,56 +21,91 @@ export const routes: IRoute[] = [
   {
     name: 'home',
     key: '/tenant/compute/modaforge/home',
-    component: React.lazy(async () => import('../../home/index')),
+    component: React.lazy(async () => import('../../home')),
     children: []
   },
   // 连接器
   {
     name: 'connection',
     key: '/tenant/compute/modaforge/connection',
-    component: React.lazy(async () => import('../../connection/index')),
+    component: React.lazy(async () => import('../../connection')),
     children: []
   },
   // 数据载入
   {
     name: 'dataLoad',
     key: '/tenant/compute/modaforge/dataLoad',
-    component: React.lazy(async () => import('../../dataLoad/index')),
+    component: React.lazy(async () => import('../../dataLoad')),
+    children: []
+  },
+  // 工作流
+  {
+    name: 'workflowList',
+    key: '/tenant/compute/modaforge/workflowList',
+    component: React.lazy(async () => import('../../workflowList')),
+    children: []
+  },
+  // 创建工作流
+  {
+    name: 'workflowConfig',
+    key: '/tenant/compute/modaforge/workflowConfig',
+    component: React.lazy(async () => import('../../workflowConfig')),
+    children: []
+  },
+  // 作业
+  {
+    name: 'workflowTask',
+    key: '/tenant/compute/modaforge/workflowTask',
+    component: React.lazy(async () => import('../../workflowTask')),
     children: []
   },
   //APIKey
   {
     name: 'apiKey',
     key: '/tenant/compute/modaforge/apiKey',
-    component: React.lazy(async () => import('../../apiKey/index')),
+    component: React.lazy(async () => import('../../apiKey')),
     children: []
   },
   // 组织管理
   {
     name: 'organization',
     key: '/tenant/compute/modaforge/organization',
-    component: React.lazy(async () => import('../../organization/index')),
+    component: React.lazy(async () => import('../../organization')),
     children: []
   },
   // 成员管理
   {
     name: 'member',
     key: '/tenant/compute/modaforge/member',
-    component: React.lazy(async () => import('../../member/index')),
+    component: React.lazy(async () => import('../../member')),
     children: []
   },
   // 登陆页面
   {
     name: 'login',
     key: '/tenant/compute/modaforge/login',
-    component: React.lazy(async () => import('../../login/index')),
+    component: React.lazy(async () => import('../../login')),
     children: []
   },
   // 用户信息页面
   {
     name: 'userinfo',
     key: '/tenant/compute/modaforge/userinfo',
-    component: React.lazy(async () => import('../../userinfo/index')),
+    component: React.lazy(async () => import('../../userinfo')),
+    children: []
+  },
+  // 数据目录
+  {
+    name: 'dataCatalog',
+    key: '/tenant/compute/modaforge/dataCatalog',
+    component: React.lazy(async () => import('../../dataCatalog')),
+    children: []
+  },
+  // 数据集管理
+  {
+    name: 'datasetManagement',
+    key: '/tenant/compute/modaforge/datasetManagement',
+    component: React.lazy(async () => import('../../datasetManagement')),
     children: []
   }
 ];

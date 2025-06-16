@@ -12,7 +12,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
 
   const [showInput, setShowInput] = useState(true)
   const [showOutput, setShowOutput] = useState(true)
-    
+
   const toggleInputVars = () => {
     setShowInput(s => !s)
   }
@@ -36,7 +36,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       <div className={`output-section ${!showInput ? 'collapsed' : ''}`}>
         <div className='output-header' onClick={toggleInputVars}>
           <span className='txt'>输入</span>
-          <RiArrowDownSFill className='icon'/>
+          <RiArrowDownSFill className='icon' />
         </div>
         <div className='output-list'>
           {
@@ -48,15 +48,15 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
                   <span>
                     <span className='key-txt-origin mr-[8px]'>{variable || '未命名'}</span>
                     {node && <span className='extra-info'>
-                        {/* <span className='type-txt'>{node.data.}</span> */}
-                      </span>
+                      {/* <span className='type-txt'>{node.data.}</span> */}
+                    </span>
                     }
                   </span>
                   {node && <span className='key-txt'>
-                      <span className='node-type'>{node?.data.title}</span>
-                      <span className='node-name-separator'>/</span>
-                      <span className='var-name'>{value_selector[1]}</span>
-                    </span>
+                    <span className='node-type'>{node?.data.title}</span>
+                    <span className='node-name-separator'>/</span>
+                    <span className='var-name'>{value_selector[1]}</span>
+                  </span>
                   }
                 </div>
               )
@@ -68,7 +68,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       <div className={`input-section mt-[8px] ${!showOutput ? 'collapsed' : ''}`}>
         <div className='input-header' onClick={toggleOutputVars}>
           <span className='txt'>输出</span>
-          <RiArrowDownSFill className='icon'/>
+          <RiArrowDownSFill className='icon' />
         </div>
         <div className='input-list'>
           {

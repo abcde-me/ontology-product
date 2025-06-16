@@ -25,7 +25,7 @@ import SelectDataset from '@/pages/workflowConfig/app/select-dataset'
 import { useBoolean } from 'ahooks'
 import { DataSet } from '@/pages/workflowConfig/models/datasets'
 import KbConfigIcon from '@/pages/workflowConfig/styles/images/op-icons/kb-strategy.svg';
-import PolicyForm from '@/components/policyFrom/index';
+import PolicyForm from '@/components/policy-from/index';
 
 const i18nPrefix = 'workflow.nodes.knowledgeRetrieval'
 
@@ -113,7 +113,7 @@ const Panel: FC<NodePanelProps<KnowledgeRetrievalNodeType>> = ({
       score_threshold: fromdata.scoreValue // 匹配分
     })
   }
-  
+
 
   // const handleOpenFromPropsChange = useCallback((openFromProps: boolean) => {
   //   setRerankModelOpen(openFromProps)
@@ -125,10 +125,10 @@ const Panel: FC<NodePanelProps<KnowledgeRetrievalNodeType>> = ({
         <div className='title-txt'>知识库</div>
         <div className='flex items-center gap-x-[8px]'>
           <Tooltip content="知识库配置">
-            <KbConfigIcon className='size-[16px] cursor-pointer hover:text-[#007DFA]' onClick={() => seteditPolicy(true)}/>
+            <KbConfigIcon className='size-[16px] cursor-pointer hover:text-[#007DFA]' onClick={() => seteditPolicy(true)} />
           </Tooltip>
           <Tooltip content='添加知识库'>
-            {!readOnly && <RiAddLine className='w-4 h-4 text-text-tertiary cursor-pointer hover:text-[#007DFA]' onClick={showModal}/>}
+            {!readOnly && <RiAddLine className='w-4 h-4 text-text-tertiary cursor-pointer hover:text-[#007DFA]' onClick={showModal} />}
           </Tooltip>
         </div>
       </div>
