@@ -1,5 +1,5 @@
 import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 interface Dataset {
   key?: string;
@@ -14,13 +14,11 @@ interface Dataset {
 interface Props {
   onSubmit: (data: Dataset) => void;
   onCancel: () => void;
-  initialData?: Dataset;
-  isEdit?: boolean;
 }
 
 const FormItem = Form.Item;
 
-const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel, initialData, isEdit = false }) => {
+const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
   const [form] = Form.useForm();
 
   // 模型选项
@@ -40,25 +38,15 @@ const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel, initialData, isEdit 
     { label: '音频', value: '音频' },
   ];
 
-  // 如果是编辑模式，回显数据
-  useEffect(() => {
-    if (isEdit && initialData) {
-      form.setFieldsValue({
-        name: initialData.name,
-        tags: initialData.tags,
-        version: initialData.version,
-        description: initialData.description,
-        model: initialData.model,
-        creator: initialData.creator,
-      });
-    }
-  }, [form, isEdit, initialData]);
+
+
+
+
 
   const handleSubmit = () => {
     form.validate().then((values) => {
       const formData: Dataset = {
         ...values,
-        key: isEdit && initialData ? initialData.key : undefined,
       };
       onSubmit(formData);
     }).catch((error) => {
@@ -136,7 +124,7 @@ const DatasetForm: React.FC<Props> = ({ onSubmit, onCancel, initialData, isEdit 
       <FormItem wrapperCol={{ offset: 6, span: 18 }}>
         <Space>
           <Button type="primary" onClick={handleSubmit}>
-            {isEdit ? '保存修改' : '创建数据集'}
+            创建数据集
           </Button>
           <Button onClick={onCancel}>取消</Button>
         </Space>

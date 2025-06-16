@@ -2,7 +2,8 @@ import React from 'react';
 import { Typography, Input, Button, Table, Tag, Space, Modal, Message } from '@arco-design/web-react';
 import { IconPlus, IconEdit, IconUpload, IconDelete, } from '@arco-design/web-react/icon';
 import { getDatasetList } from '@/api/datasetManagement';
-import DatasetForm from '@/components/datasetform';
+import DatasetForm from '@/components/datasetform/AddDatasetForm';
+import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 
 
 // 数据集类型
@@ -38,6 +39,7 @@ const DatasetManagement: React.FC = () => {
 
   // 打开编辑弹窗
   const openEditModal = (record: Dataset) => {
+
     setIsEdit(true);
     setCurrentDataset(record);
     setModalVisible(true);
@@ -54,31 +56,19 @@ const DatasetManagement: React.FC = () => {
   const handleSubmit = (formData: Dataset) => {
     if (isEdit) {
       // 编辑模式
-      const updatedList = datasetList.map(item =>
-        item.key === currentDataset?.key
-          ? {
-            ...item,
-            ...formData,
-            updateTime: new Date().toLocaleString('zh-CN'),
-          }
-          : item
-      );
-      setDatasetList(updatedList);
+      console.log('编辑数据集:', formData);
+
       Message.success('数据集修改成功！');
     } else {
       // 新建模式
-      const newDataset: Dataset = {
-        ...formData,
-        key: Date.now().toString(),
-        createTime: new Date().toLocaleString('zh-CN'),
-        updateTime: new Date().toLocaleString('zh-CN'),
-        isDefault: false,
-      };
-      setDatasetList([newDataset, ...datasetList]);
+
+      console.log('新建数据集:', formData);
       Message.success('数据集创建成功！');
     }
     closeModal();
   };
+
+
 
   // 删除数据集
   const handleDelete = (record: Dataset) => {
@@ -89,12 +79,16 @@ const DatasetManagement: React.FC = () => {
       cancelText: '取消',
       okButtonProps: { status: 'danger' },
       onOk: () => {
-        const updatedList = datasetList.filter(item => item.key !== record.key);
-        setDatasetList(updatedList);
+        deleteDataset()
         Message.success('数据集删除成功！');
       },
     });
   };
+
+  // 删除数据集的方法
+  const deleteDataset = () => {
+
+  }
 
   const columns = [
     {
@@ -213,15 +207,6 @@ const DatasetManagement: React.FC = () => {
     },
   ];
 
-  // 过滤数据
-  const filteredData = React.useMemo(() => {
-    if (!search) return datasetList;
-    return datasetList.filter(item =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.description.toLowerCase().includes(search.toLowerCase()) ||
-      item.creator.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [datasetList, search]);
 
   React.useEffect(() => {
     // getDatasetList().then(res=>{
@@ -262,7 +247,7 @@ const DatasetManagement: React.FC = () => {
       <Table
         rowKey="key"
         columns={columns}
-        data={filteredData}
+        data={datasetList}
         pagination={{
           pageSize: 10,
           showTotal: (total) => `共 ${total} 条数据`,
@@ -282,12 +267,18 @@ const DatasetManagement: React.FC = () => {
         onCancel={closeModal}
         maskClosable={false}
       >
-        <DatasetForm
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
-          initialData={currentDataset}
-          isEdit={isEdit}
-        />
+        {isEdit ? (
+          <EditDatasetForm
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+            initialData={currentDataset!}
+          />
+        ) : (
+          <DatasetForm
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        )}
       </Modal>
     </div>
   );

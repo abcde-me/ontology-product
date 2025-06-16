@@ -161,7 +161,7 @@ export const ResourceEndpointsV2 = {
   dataCatalogListApi:Prefix+`load_tasks/files{file_id}`,
   CatalogListApi:Prefix+`/catalogs`,
   CatalogCreateApi:Prefix+`/catalogs`,
-
+  fileExportApi:Prefix+`/files/export`,
 
 
 
