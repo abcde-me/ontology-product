@@ -2,7 +2,8 @@ import React from 'react';
 import { Typography, Input, Button, Table, Tag, Space, Modal, Message } from '@arco-design/web-react';
 import { IconPlus, IconEdit, IconUpload, IconDelete, } from '@arco-design/web-react/icon';
 import { getDatasetList } from '@/api/datasetManagement';
-import DatasetForm from '@/components/datasetform';
+import DatasetForm from '@/components/datasetform/AddDatasetForm';
+import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 
 
 // 数据集类型
@@ -85,7 +86,7 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 删除数据集的方法
-  const deleteDataset=()=>{
+  const deleteDataset = () => {
 
   }
 
@@ -266,12 +267,18 @@ const DatasetManagement: React.FC = () => {
         onCancel={closeModal}
         maskClosable={false}
       >
-        <DatasetForm
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
-          initialData={currentDataset}
-          isEdit={isEdit}
-        />
+        {isEdit ? (
+          <EditDatasetForm
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+            initialData={currentDataset!}
+          />
+        ) : (
+          <DatasetForm
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        )}
       </Modal>
     </div>
   );

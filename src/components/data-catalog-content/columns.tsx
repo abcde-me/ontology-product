@@ -4,7 +4,7 @@ import { deleteFileById } from '@/api/dataCatalog'
 import { Message } from '@arco-design/web-react';
 
 //数据源目录的卷中的数据格式
-export const SourceData_Volume =(setVisible)=> [
+export const sourceDataVolume = (setVisible) => [
   {
     title: 'ID',
     dataIndex: 'id',
@@ -41,30 +41,30 @@ export const SourceData_Volume =(setVisible)=> [
     width: 100,
     render: (_, record) => (
       <div style={{ display: 'flex', gap: 8 }}>
-        <Button type="primary" onClick={() => Delete(record.id)}>删除</Button>
-        <Button type="primary" onClick={() => Download(record,setVisible)}>下载</Button>
+        <Button type="primary" onClick={() => handleDelete(record.id)}>删除</Button>
+        <Button type="primary" onClick={() => handleDownload(record, setVisible)}>下载</Button>
       </div>
     ),
   },
 
 ]
 //数据源目录的数据库中的数据格式
-export const SourceData_Database =(setVisible)=> [
+export const sourceDataDatabase = (setVisible) => [
 
 ]
 //目标数据目录中的卷中的数据格式
-export const TargetData_Volume =(setVisible)=> [
+export const targetDataVolume = (setVisible) => [
 
 ]
 //目标数据目录中的数据库中的数据格式
-export const TargetData_Database =(setVisible)=> [
+export const targetDataDatabase = (setVisible) => [
 
 ]
-const Download = (record,setVisible) => {
+const handleDownload = (record, setVisible) => {
   // console.log('下载', id)
-  setVisible(true,record)
+  setVisible(true, record)
 }
-const Delete = (id) => {
+const handleDelete = (id) => {
   console.log('删除', id)
   const token = localStorage.getItem('loginToken');
   if (!token) {

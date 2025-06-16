@@ -24,7 +24,7 @@ import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog'
 import SmartTable from './components/SmartTable';
 import Pages from './components/pages'
 import './index.css';
-import { SourceData_Volume, SourceData_Database, TargetData_Volume, TargetData_Database } from './columns'
+import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './columns'
 import FormComponent from './components/Dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
@@ -266,7 +266,7 @@ function DataPage(props) {
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
-  const [columns, setColumns] = React.useState(() => SourceData_Volume(downloadShow))//默认是第一个
+  const [columns, setColumns] = React.useState(() => sourceDataVolume(downloadShow))//默认是第一个
   const [downloadData, setDownloadData] = React.useState([])//下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState('')//选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
@@ -283,13 +283,13 @@ function DataPage(props) {
     console.log(item)
     console.log(directionKey, type)
     if (directionKey === 'src' && type === 'volume') {
-      setColumns(() => SourceData_Volume(downloadShow))
+      setColumns(() => sourceDataVolume(downloadShow))
     } else if (directionKey === 'src' && type === 'db') {
-      setColumns(() => SourceData_Database(downloadShow))
+      setColumns(() => sourceDataDatabase(downloadShow))
     } else if (directionKey === 'dst' && type === 'volume') {
-      setColumns(() => TargetData_Volume(downloadShow))
+      setColumns(() => targetDataVolume(downloadShow))
     } else if (directionKey === 'dst' && type === 'db') {
-      setColumns(() => TargetData_Database(downloadShow))
+      setColumns(() => targetDataDatabase(downloadShow))
     }
   }
 
