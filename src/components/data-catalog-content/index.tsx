@@ -25,7 +25,7 @@ import SmartTable from './components/SmartTable';
 import Pages from './components/pages'
 import './index.css';
 import { SourceData_Volume, SourceData_Database, TargetData_Volume, TargetData_Database } from './columns'
-import FormComponent from './components/Form'
+import FormComponent from './components/Dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
 
@@ -266,7 +266,7 @@ function DataPage(props) {
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
-  const [columns, setColumns] = React.useState(() => SourceData_Volume(DownloadShow))//默认是第一个
+  const [columns, setColumns] = React.useState(() => SourceData_Volume(downloadShow))//默认是第一个
   const [downloadData, setDownloadData] = React.useState([])//下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState('')//选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
@@ -283,17 +283,17 @@ function DataPage(props) {
     console.log(item)
     console.log(directionKey, type)
     if (directionKey === 'src' && type === 'volume') {
-      setColumns(() => SourceData_Volume(DownloadShow))
+      setColumns(() => SourceData_Volume(downloadShow))
     } else if (directionKey === 'src' && type === 'db') {
-      setColumns(() => SourceData_Database(DownloadShow))
+      setColumns(() => SourceData_Database(downloadShow))
     } else if (directionKey === 'dst' && type === 'volume') {
-      setColumns(() => TargetData_Volume(DownloadShow))
+      setColumns(() => TargetData_Volume(downloadShow))
     } else if (directionKey === 'dst' && type === 'db') {
-      setColumns(() => TargetData_Database(DownloadShow))
+      setColumns(() => TargetData_Database(downloadShow))
     }
   }
 
-  function DownloadShow(visible, downloaddata) {
+  function downloadShow(visible, downloaddata) {//控制下载弹框的显示和隐藏
     setVisible(visible)
     console.log(downloaddata)
     setDownloadData(downloaddata)
@@ -330,16 +330,16 @@ function DataPage(props) {
 
   //监听搜索条件变化
   useEffect(() => {
-    getDataCatalogList({
-      start_time:toUnixTimestamp(startTime),
-      end_time:toUnixTimestamp(endTime),
-      file_name:searchValue,
-      file_path:selectedFilePath,
-      page:currentPage,
-      page_size:pageSize,
-    }).then(res=>{
-      console.log(res)
-    })
+    // getDataCatalogList({
+    //   start_time:toUnixTimestamp(startTime),
+    //   end_time:toUnixTimestamp(endTime),
+    //   file_name:searchValue,
+    //   file_path:selectedFilePath,
+    //   page:currentPage,
+    //   page_size:pageSize,
+    // }).then(res=>{
+    //   console.log(res)
+    // })
   }, [searchValue, startTime, endTime,selectedFilePath,currentPage,pageSize])
   return (
     <div style={{ display: 'flex', padding: 16 }}>
