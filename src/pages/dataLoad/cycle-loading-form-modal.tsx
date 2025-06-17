@@ -2,17 +2,12 @@ import { Form, Input, TimePicker, Tag, Select } from '@arco-design/web-react';
 import Styles from './index.module.css';
 import React, { useState } from 'react'
 import './index.css'
+// 导入每周数据
+import {Weekly_Options} from './constants'
 // 选择器的实例
 const Option = Select.Option;
 
-const weeklyOptions = ['周一', '周二', '周三', '周四', '周五', '周六','周日'];
 
-// 周期设置的数据
-const cycleData = [
-    { key: '1', title: '每天' },
-    { key: '2', title: '每周' },
-    { key: '3', title: '每月' },
-];
 interface CycleLoadingFormProps {
     form: any; // 实际项目中应该使用更具体的类型
 }
@@ -66,7 +61,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                             >
                                 <Select
                                     mode='multiple'
-                                    options={weeklyOptions}
+                                    options={Weekly_Options}
                                     placeholder='请选择日期'
                                     style={{
                                         width: 300,
