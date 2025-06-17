@@ -2,6 +2,7 @@ import { Button, Form, Input, Message, Radio, Select, Tag, TimePicker, TreeSelec
 import React, { useState } from 'react'
 import Styles from './index.module.css'
 import CycleLoadingForm from './cycle-loading-form-modal';
+import conversionArco from '../../utils/conversionArco'
 // 单选框实例
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
@@ -50,7 +51,20 @@ const LoadAddModal = (props: any) => {
         form.validate().then(() => {
             // 点击确认隐藏弹框并且重置表单数据
             props.hideModalHan()
-            console.log(fo1);
+            if (fo1.load_type !== 'once') {
+                conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle)
+            }
+
+            const fo2 = {
+                name: fo1.name,
+                connector_id: fo1.connector_name,
+                source_type: fo1.source_type,
+                load_type: fo1.load_type,
+                cron_expr: fo1.load_type !== 'once' && conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle),
+                dest_path: fo1.dest_path,
+                creator: '张三'
+            }
+            console.log(fo2);
         }).catch((error) => {
             // 校验失败，错误信息会由 Form 自动处理
             console.error('表单校验失败：', error);
@@ -64,10 +78,15 @@ const LoadAddModal = (props: any) => {
     }
 
     // 载入类型的默认值
-    const [loadVal, setLoadVal] = useState('')
+    const [loadVal, setLoadVal] = useState('once')
     // 切换载入类型的函数
     const handoffLoadFormHan = (val) => {
-        console.log(val);
+
+        if (val === 'once') {
+            form.setFieldsValue({ time: undefined, day: undefined, weekly: undefined, cycle: undefined });
+        } else {
+            form.setFieldsValue({ cron_expr: undefined }); // 如果有需要，可以重置其他字段
+        }
         setLoadVal(val)
     }
     return (
@@ -89,20 +108,20 @@ const LoadAddModal = (props: any) => {
                     <Input placeholder='请输入任务名称' />
                 </FormItem>
                 <FormItem label='数据源类型：'
-                    field="zairutype"
+                    field="source_type"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'
                     rules={[{ required: true, message: '请选择数据源类型' }]}
                     initialValue='s3'
                 >
-                    <RadioGroup defaultValue='s3'>
+                    <RadioGroup>
                         <Radio value='s3'>对象存储</Radio>
                         <Radio value='hdfs'>HDFS</Radio>
                     </RadioGroup>
                 </FormItem>
                 <FormItem label='绑定连接器：'
-                    field="conname"
+                    field="connector_name"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'
@@ -117,21 +136,21 @@ const LoadAddModal = (props: any) => {
                     </Select>
                 </FormItem>
                 <FormItem label='载入形式：'
-                    initialValue='d'
-                    field="sourec_type"
+                    initialValue='once'
+                    field="load_type"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'
                     rules={[{ required: true, message: '请选择数据源类型' }]}
                 >
-                    <RadioGroup defaultValue='d' onChange={(val) => { handoffLoadFormHan(val) }}>
-                        <Radio value='d'>单次载入</Radio>
-                        <Radio value='z'>周期载入</Radio>
+                    <RadioGroup onChange={(val) => { handoffLoadFormHan(val) }}>
+                        <Radio value='once'>单次载入</Radio>
+                        <Radio value='cron'>周期载入</Radio>
                     </RadioGroup>
                 </FormItem>
-                {loadVal == 'z' && <CycleLoadingForm form={form} /> }
+                {loadVal == 'cron' ? <CycleLoadingForm form={form} /> : null}
                 <FormItem label='载入位置：'
-                    field="path"
+                    field="dest_path"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'

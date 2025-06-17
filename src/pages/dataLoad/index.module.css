@@ -34,11 +34,13 @@
     margin: 5px 3px;
     padding: 2px 13px;
     border: 0.7px solid #ccc;
-    border-radius: 3px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
 }
 .arco-timepicker-container{
     width: '100%';

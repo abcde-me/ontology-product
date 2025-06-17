@@ -15,21 +15,21 @@ export default function DataLoad() {
     },
     {
       title: '载入形式',
-      dataIndex: 'zairutype',
+      dataIndex: 'load_type',
       width: 150,
       filters: [
         {
           text: '单次载入',
-          value: 'd'
+          value: 'once'
         },
         {
           text: '周期载入',
-          value: 'z'
+          value: 'cron'
         }
       ],
       onFilter: (value, row) => row.zairutype == value,
       render: ((_, item) => (
-        <div>{item.zairutype == 'd' ? '单次载入' : '周期载入'}</div>
+        <div>{item.zairutype == 'once' ? '单次载入' : '周期载入'}</div>
       ))
     },
     {
@@ -40,7 +40,7 @@ export default function DataLoad() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{
             width: '5px', height: '5px',
-            background: item.state == '运行失败' ? 'red' : item.state == '运行成功' ? 'green' : item.state == '运行中' ? 'rgb(0, 125, 250)' : 'rgb(148, 163, 184)',
+            background: item.state == '运行失败' ? 'red' : item.state == 'running' ? 'green' : item.state == '运行中' ? 'rgb(0, 125, 250)' : 'rgb(148, 163, 184)',
             borderRadius: '50%'
           }}></div>
           <div style={{ marginLeft: '6px' }}>{item.state}</div>
@@ -49,7 +49,7 @@ export default function DataLoad() {
       filters: [
         {
           text: '运行成功',
-          value: '运行成功'
+          value: 'running'
         },
         {
           text: '运行失败',
@@ -88,12 +88,12 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
-      dataIndex: 'conname',
+      dataIndex: 'connector_name',
       width: 230
     },
     {
       title: '载入位置',
-      dataIndex: 'path',
+      dataIndex: 'dest_path',
       width: 200,
       ellipsis: true
     },
@@ -102,15 +102,15 @@ export default function DataLoad() {
       dataIndex: 'created_at',
       width: 240,
       render: ((_, item) => (
-        <span>{TimeFormattig(item.created_at)}</span>
+        <span>{item.created_at}</span>
       ))
     },
     {
       title: '更新时间',
-      dataIndex: 'updated_at',
+      dataIndex: 'last_run_time',
       width: 240,
       render: ((_, item) => (
-        <span>{TimeFormattig(item.updated_at)}</span>
+        <span>{item.last_run_time}</span>
       ))
     },
     {
@@ -148,112 +148,16 @@ export default function DataLoad() {
     {
       id: '1',
       name: '中科院大数据库任务1',
-      zairutype: 'd',
-      state: '运行失败',
+      load_type: 'once', //once单次载入 cron周期载入
+      status: 'running',
       source_type: 's3',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
+      connector_name: '连接器名称',
+      dest_path: '/232482347287/hshfusdhf/4234',
       created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '2',
-      name: '中科院大数据库任务2',
-      zairutype: 'z',
-      state: '运行成功',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '3',
-      name: '中科院大数据库任务3',
-      zairutype: 'z',
-      state: '运行中',
-      source_type: 's3',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '4',
-      name: '中科院大数据库任务4',
-      zairutype: 'd',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '5',
-      name: '中科院大数据库任务5',
-      zairutype: 'z',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '6',
-      name: '中科院大数据库任务6',
-      zairutype: 'd',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '7',
-      name: '中科院大数据库任务7',
-      zairutype: 'z',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '8',
-      name: '中科院大数据库任务8',
-      zairutype: 'd',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '9',
-      name: '中科院大数据库任务9',
-      zairutype: 'd',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
-    },
-    {
-      id: '10',
-      name: '中科院大数据库任务10',
-      zairutype: 'd',
-      state: '运行停止',
-      source_type: 'hdfs',
-      conname: '连接器名称',
-      path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      updated_at: '1749627860785'
+      last_run_time: '1749627860785',
+      creator:'张三',
+      enable:true,
+      connector_id:'456'
     },
   ];
   // 当前的第几页
