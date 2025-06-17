@@ -13,3 +13,33 @@
 .hoverStyle:hover{
     color: rgba(0, 125, 250,.5);
 }
+.footerBbtnBox{
+    margin: 14px 0px 20px 14px;
+    display: flex;
+    justify-content: flex-end;
+}
+.cycleLoadingBox{
+    width: '100%';
+    border: 0.8px solid #ccc;
+    border-radius: 6px;
+    margin: 15px 0px;
+    padding: 14px 10px 14px 0px;
+}
+.quickOptions{
+    width: '100%';
+    display: flex;
+    flex-wrap: wrap;
+}
+.quickOptionsChidren{
+    margin: 5px 3px;
+    padding: 2px 13px;
+    border: 0.7px solid #ccc;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.arco-timepicker-container{
+    width: '100%';
+}
