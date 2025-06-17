@@ -285,12 +285,15 @@ export default function DataLoad() {
   // 点击删除的逻辑
   const deleteHan = (id) => {
     console.log('删除了' + id);
-
   }
 
   // 模态框默认状态
   const [visible, setVisible] = React.useState(false);
 
+  // 点击按钮因残模态框(确认||取消同一个方法)
+  const hideModalHan = () => {
+    setVisible(false)
+  }
 
 
   return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 10px 0px', borderRadius: '10px', height: '94%' }}>
@@ -331,7 +334,7 @@ export default function DataLoad() {
       />
     </div>
     <Modal
-    style={{width:'600px'}}
+      style={{ width: '600px' }}
       title='创建数据载入任务'
       visible={visible}
       onOk={() => setVisible(false)}
@@ -339,8 +342,10 @@ export default function DataLoad() {
       autoFocus={false}
       focusLock={true}
       footer={null}
+      // maskClosable={false}
+      unmountOnExit={true}
     >
-      <LoadAddModal/>
+      <LoadAddModal hideModalHan={hideModalHan} />
     </Modal>
   </div>;
 }
