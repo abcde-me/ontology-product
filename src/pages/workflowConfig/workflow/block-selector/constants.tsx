@@ -5,12 +5,6 @@ import { BlockClassificationEnum } from './types'
 export const BLOCKS: Block[] = [
   {
     classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Start,
-    title: 'Start',
-    description: '',
-  },
-  {
-    classification: BlockClassificationEnum.Default,
     type: BlockEnum.LLM,
     title: 'LLM',
   },
@@ -18,11 +12,6 @@ export const BLOCKS: Block[] = [
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.KnowledgeRetrieval,
     title: 'Knowledge Retrieval',
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.End,
-    title: 'End',
   },
   {
     classification: BlockClassificationEnum.Default,
@@ -94,12 +83,55 @@ export const BLOCKS: Block[] = [
     type: BlockEnum.Agent,
     title: 'Agent',
   },
+  // TODO：上面无用代码删除
+
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Start,
+    title: 'Start',
+    description: '',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.TEXT,
+    title: '文本解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.PIC,
+    title: '图片解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.AUDIO,
+    title: '音频解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.VIDEO,
+    title: '视频解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.CLEANING,
+    title: '数据清洗节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.ENHANCEMENT,
+    title: '数据增强节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.End,
+    title: '结束节点',
+  },
 ]
 
 export const BLOCK_CLASSIFICATIONS: string[] = [
   BlockClassificationEnum.Default,
-  BlockClassificationEnum.Logic,
-  // BlockClassificationEnum.Transform,
-  BlockClassificationEnum.QuestionUnderstand,
-  BlockClassificationEnum.Utilities,
+  // BlockClassificationEnum.Logic,
+  // // BlockClassificationEnum.Transform,
+  // BlockClassificationEnum.QuestionUnderstand,
+  // BlockClassificationEnum.Utilities,
 ]

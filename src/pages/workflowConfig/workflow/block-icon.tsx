@@ -60,28 +60,16 @@ const getIcon = (type: BlockEnum, className: string) => {
   //   [BlockEnum.ListFilter]: <ListFilter className={className} />,
   //   [BlockEnum.Agent]: <Agent className={className} />,
   // }[type]
-  return <RiApps2Fill className={className}/>
+  return <RiApps2Fill className={className} />
 }
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
-  [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
-  [BlockEnum.Code]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
-  [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.Iteration]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.Loop]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.HttpRequest]: 'bg-util-colors-violet-violet-500',
-  [BlockEnum.Answer]: 'bg-util-colors-warning-warning-500',
-  [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
-  [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
-  [BlockEnum.TemplateTransform]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.VariableAssigner]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.VariableAggregator]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.Assigner]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.ParameterExtractor]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.DocExtractor]: 'bg-util-colors-green-green-500',
-  [BlockEnum.ListFilter]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.Agent]: 'bg-util-colors-indigo-indigo-500',
+  [BlockEnum.TEXT]: 'bg-util-colors-indigo-indigo-500',
+  [BlockEnum.PIC]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.AUDIO]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.VIDEO]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.CLEANING]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.ENHANCEMENT]: 'bg-util-colors-cyan-cyan-500',
 }
 const BlockIcon: FC<BlockIconProps> = ({
   type,
@@ -100,12 +88,7 @@ const BlockIcon: FC<BlockIconProps> = ({
     `}
     >
       {
-        type !== BlockEnum.Tool && (
-          getIcon(type, size === 'xs' ? 'w-3 h-3' : 'w-3.5 h-3.5')
-        )
-      }
-      {
-        type === BlockEnum.Tool && toolIcon && (
+        toolIcon && (
           <>
             {
               typeof toolIcon === 'string'
