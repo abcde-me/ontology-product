@@ -3,32 +3,21 @@ import { BlockEnum } from '../types'
 import { BlockClassificationEnum } from './types'
 
 export const BLOCKS: Block[] = [
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Start,
-    title: 'Start',
-    description: '',
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.LLM,
-    title: 'LLM',
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.KnowledgeRetrieval,
-    title: 'Knowledge Retrieval'
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.End,
-    title: 'End'
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Answer,
-    title: 'Direct Answer'
-  },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.LLM,
+  //   title: 'LLM',
+  // },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.KnowledgeRetrieval,
+  //   title: 'Knowledge Retrieval'
+  // },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.Answer,
+  //   title: 'Direct Answer'
+  // },
   {
     classification: BlockClassificationEnum.QuestionUnderstand,
     type: BlockEnum.QuestionClassifier,
@@ -89,22 +78,60 @@ export const BLOCKS: Block[] = [
     type: BlockEnum.ListFilter,
     title: 'List Filter'
   },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.Agent,
+  //   title: 'Agent'
+  // },
+  // TODO：上面无用代码删除
+
   {
     classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Agent,
-    title: 'Agent'
+    type: BlockEnum.Start,
+    title: 'Start',
+    description: '',
   },
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.Text,
-    title: 'Text'
+    title: '文本解析节点',
   },
-];
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Pic,
+    title: '图片解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Audio,
+    title: '音频解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Video,
+    title: '视频解析节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Cleaning,
+    title: '数据清洗节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Enhancement,
+    title: '数据增强节点',
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.End,
+    title: '结束节点',
+  },
+]
 
 export const BLOCK_CLASSIFICATIONS: string[] = [
   BlockClassificationEnum.Default,
-  BlockClassificationEnum.Logic,
-  // BlockClassificationEnum.Transform,
-  BlockClassificationEnum.QuestionUnderstand,
-  BlockClassificationEnum.Utilities,
+  // BlockClassificationEnum.Logic,
+  // // BlockClassificationEnum.Transform,
+  // BlockClassificationEnum.QuestionUnderstand,
+  // BlockClassificationEnum.Utilities,
 ]

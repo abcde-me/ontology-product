@@ -21,7 +21,8 @@ const translation = {
     conversationLog: 'Conversation Log',
     features: 'Features',
     featuresDescription: 'Enhance web app user experience',
-    ImageUploadLegacyTip: 'You can now create file type variables in the start form. We will no longer support the image upload feature in the future. ',
+    ImageUploadLegacyTip:
+      'You can now create file type variables in the start form. We will no longer support the image upload feature in the future. ',
     fileUploadTip: 'Image upload features have been upgraded to file upload. ',
     featuresDocLink: 'Learn more',
     debugAndPreview: 'Preview',
@@ -50,16 +51,18 @@ const translation = {
     needAnswerNode: 'The Answer block must be added',
     workflowProcess: 'Workflow Process',
     notRunning: 'Not running yet',
-    previewPlaceholder: 'Enter content in the box below to start debugging the Chatbot',
+    previewPlaceholder:
+      'Enter content in the box below to start debugging the Chatbot',
     effectVarConfirm: {
       title: 'Remove Variable',
-      content: 'The variable is used in other nodes. Do you still want to remove it?',
+      content:
+        'The variable is used in other nodes. Do you still want to remove it?'
     },
-    insertVarTip: 'Press the \'/\' key to insert quickly',
+    insertVarTip: "Press the '/' key to insert quickly",
     processData: 'Process Data',
     input: 'Input',
     output: 'Output',
-    jinjaEditorPlaceholder: 'Type \'/\' or \'{\' to insert variable',
+    jinjaEditorPlaceholder: "Type '/' or '{' to insert variable",
     viewOnly: 'View Only',
     showRunHistory: 'Show Run History',
     enableJinja: 'Enable Jinja template support',
@@ -75,11 +78,13 @@ const translation = {
     configureRequired: 'Configure Required',
     configure: 'Configure',
     manageInTools: 'Manage in Tools',
-    workflowAsToolTip: 'Tool reconfiguration is required after the workflow update.',
+    workflowAsToolTip:
+      'Tool reconfiguration is required after the workflow update.',
     viewDetailInTracingPanel: 'View details',
     syncingData: 'Syncing data, just a few seconds.',
     importDSL: 'Import DSL',
-    importDSLTip: 'Current draft will be overwritten.\nExport workflow as backup before importing.',
+    importDSLTip:
+      'Current draft will be overwritten.\nExport workflow as backup before importing.',
     backupCurrentDraft: 'Backup Current Draft',
     chooseDSL: 'Choose DSL file',
     overwriteAndImport: 'Overwrite and Import',
@@ -91,14 +96,14 @@ const translation = {
     parallelTip: {
       click: {
         title: 'Click',
-        desc: ' to add',
+        desc: ' to add'
       },
       drag: {
         title: 'Drag',
-        desc: ' to connect',
+        desc: ' to connect'
       },
       limit: 'Parallelism is limited to {{num}} branches.',
-      depthLimit: 'Parallel nesting layer limit of {{num}} layers',
+      depthLimit: 'Parallel nesting layer limit of {{num}} layers'
     },
     disconnect: 'Disconnect',
     jumpToNode: 'Jump to this node',
@@ -108,11 +113,12 @@ const translation = {
     onFailure: 'On Failure',
     addFailureBranch: 'Add Fail Branch',
     loadMore: 'Load More',
-    noHistory: 'No History',
+    noHistory: 'No History'
   },
   env: {
     envPanelTitle: 'Environment Variables',
-    envDescription: 'Environment variables can be used to store private information and credentials. They are read-only and can be separated from the DSL file during export.',
+    envDescription:
+      'Environment variables can be used to store private information and credentials. They are read-only and can be separated from the DSL file during export.',
     envPanelButton: 'Add Variable',
     modal: {
       title: 'Add Environment Variable',
@@ -122,18 +128,20 @@ const translation = {
       namePlaceholder: 'env name',
       value: 'Value',
       valuePlaceholder: 'env value',
-      secretTip: 'Used to define sensitive information or data, with DSL settings configured for leak prevention.',
+      secretTip:
+        'Used to define sensitive information or data, with DSL settings configured for leak prevention.'
     },
     export: {
       title: 'Export Secret environment variables?',
       checkbox: 'Export secret values',
       ignore: 'Export DSL',
-      export: 'Export DSL with secret values ',
-    },
+      export: 'Export DSL with secret values '
+    }
   },
   chatVariable: {
     panelTitle: 'Conversation Variables',
-    panelDescription: 'Conversation Variables are used to store interactive information that LLM needs to remember, including conversation history, uploaded files, user preferences. They are read-write. ',
+    panelDescription:
+      'Conversation Variables are used to store interactive information that LLM needs to remember, including conversation history, uploaded files, user preferences. They are read-write. ',
     docLink: 'Visit our docs to learn more.',
     button: 'Add Variable',
     modal: {
@@ -153,17 +161,18 @@ const translation = {
       addArrayValue: 'Add Value',
       objectKey: 'Key',
       objectType: 'Type',
-      objectValue: 'Default Value',
+      objectValue: 'Default Value'
     },
     storedContent: 'Stored content',
-    updatedAt: 'Updated at ',
+    updatedAt: 'Updated at '
   },
   changeHistory: {
     title: 'Change History',
-    placeholder: 'You haven\'t changed anything yet',
+    placeholder: "You haven't changed anything yet",
     clearHistory: 'Clear History',
     hint: 'Hint',
-    hintText: 'Your editing actions are tracked in a change history, which is stored on your device for the duration of this session. This history will be cleared when you leave the editor.',
+    hintText:
+      'Your editing actions are tracked in a change history, which is stored on your device for the duration of this session. This history will be cleared when you leave the editor.',
     stepBackward_one: '{{count}} step backward',
     stepBackward_other: '{{count}} steps backward',
     stepForward_one: '{{count}} step forward',
@@ -182,7 +191,7 @@ const translation = {
     noteAdd: 'Note added',
     noteChange: 'Note changed',
     noteDelete: 'Note deleted',
-    edgeDelete: 'Block disconnected',
+    edgeDelete: 'Block disconnected'
   },
   errorMsg: {
     fieldRequired: '{{field}} is required',
@@ -195,11 +204,11 @@ const translation = {
       code: 'Code',
       model: 'Model',
       rerankModel: 'A configured Rerank Model',
-      visionVariable: 'Vision Variable',
+      visionVariable: 'Vision Variable'
     },
     invalidVariable: 'Invalid variable',
     noValidTool: '{{field}} no valid tool selected',
-    toolParameterRequired: '{{field}}: parameter [{{param}}] is required',
+    toolParameterRequired: '{{field}}: parameter [{{param}}] is required'
   },
   singleRun: {
     testRun: 'Test Run ',
@@ -208,83 +217,102 @@ const translation = {
     testRunIteration: 'Test Run Iteration',
     back: 'Back',
     iteration: 'Iteration',
-    loop: 'Loop',
+    loop: 'Loop'
   },
   tabs: {
-    'searchBlock': 'Search block',
-    'blocks': 'Blocks',
-    'searchTool': 'Search tool',
-    'tools': 'Tools',
-    'allTool': 'All',
-    'plugin': 'Plugin',
-    'customTool': 'Custom',
-    'workflowTool': 'Workflow',
+    searchBlock: 'Search block',
+    blocks: 'Blocks',
+    searchTool: 'Search tool',
+    tools: 'Tools',
+    allTool: 'All',
+    plugin: 'Plugin',
+    customTool: 'Custom',
+    workflowTool: 'Workflow',
     'question-understand': 'Question Understand',
-    'logic': 'Logic',
-    'transform': 'Transform',
-    'utilities': 'Utilities',
-    'noResult': 'No match found',
-    'agent': 'Agent Strategy',
+    logic: 'Logic',
+    transform: 'Transform',
+    utilities: 'Utilities',
+    noResult: 'No match found',
+    agent: 'Agent Strategy'
   },
   blocks: {
-    'start': 'Start',
-    'end': 'End',
-    'answer': 'Answer',
-    'llm': 'LLM',
+    answer: 'Answer',
+    llm: 'LLM',
     'knowledge-retrieval': 'Knowledge Retrieval',
     'question-classifier': 'Question Classifier',
     'if-else': 'IF/ELSE',
-    'code': 'Code',
+    code: 'Code',
     'template-transform': 'Template',
     'http-request': 'HTTP Request',
     'variable-assigner': 'Variable Aggregator',
     'variable-aggregator': 'Variable Aggregator',
-    'assigner': 'Variable Assigner',
+    assigner: 'Variable Assigner',
     'iteration-start': 'Iteration Start',
-    'iteration': 'Iteration',
+    iteration: 'Iteration',
     'parameter-extractor': 'Parameter Extractor',
     'document-extractor': 'Doc Extractor',
     'list-operator': 'List Operator',
-    'agent': 'Agent',
+    agent: 'Agent',
     'loop-start': 'Loop Start',
-    'loop': 'Loop',
-    'text': 'Text',
+    loop: 'Loop',
+    // 以上删除
+
+    start: 'Start',
+    end: 'End',
+    text: 'Text',
+    pic: 'Pic',
+    video: 'Video',
+    audio: 'Audio',
+    enhancement: 'Enhancement',
+    cleaning: 'Cleaning'
   },
   blocksAbout: {
-    'start': 'Define the initial parameters for launching a workflow',
-    'end': 'Define the end and result type of a workflow',
-    'answer': 'Define the reply content of a chat conversation',
-    'llm': 'Invoking large language models to answer questions or process natural language',
-    'knowledge-retrieval': 'Allows you to query text content related to user questions from the Knowledge',
-    'question-classifier': 'Define the classification conditions of user questions, LLM can define how the conversation progresses based on the classification description',
-    'if-else': 'Allows you to split the workflow into two branches based on if/else conditions',
-    'code': 'Execute a piece of Python or NodeJS code to implement custom logic',
+    start: 'Define the initial parameters for launching a workflow',
+    end: 'Define the end and result type of a workflow',
+    answer: 'Define the reply content of a chat conversation',
+    llm: 'Invoking large language models to answer questions or process natural language',
+    'knowledge-retrieval':
+      'Allows you to query text content related to user questions from the Knowledge',
+    'question-classifier':
+      'Define the classification conditions of user questions, LLM can define how the conversation progresses based on the classification description',
+    'if-else':
+      'Allows you to split the workflow into two branches based on if/else conditions',
+    code: 'Execute a piece of Python or NodeJS code to implement custom logic',
     'template-transform': 'Convert data to string using Jinja template syntax',
     'http-request': 'Allow server requests to be sent over the HTTP protocol',
-    'variable-assigner': 'Aggregate multi-branch variables into a single variable for unified configuration of downstream nodes.',
-    'assigner': 'The variable assignment node is used for assigning values to writable variables(like conversation variables).',
-    'variable-aggregator': 'Aggregate multi-branch variables into a single variable for unified configuration of downstream nodes.',
-    'iteration': 'Perform multiple steps on a list object until all results are outputted.',
-    'loop': 'Execute a loop of logic until the termination condition is met or the maximum loop count is reached.',
-    'parameter-extractor': 'Use LLM to extract structured parameters from natural language for tool invocations or HTTP requests.',
-    'document-extractor': 'Used to parse uploaded documents into text content that is easily understandable by LLM.',
+    'variable-assigner':
+      'Aggregate multi-branch variables into a single variable for unified configuration of downstream nodes.',
+    assigner:
+      'The variable assignment node is used for assigning values to writable variables(like conversation variables).',
+    'variable-aggregator':
+      'Aggregate multi-branch variables into a single variable for unified configuration of downstream nodes.',
+    iteration:
+      'Perform multiple steps on a list object until all results are outputted.',
+    loop: 'Execute a loop of logic until the termination condition is met or the maximum loop count is reached.',
+    'parameter-extractor':
+      'Use LLM to extract structured parameters from natural language for tool invocations or HTTP requests.',
+    'document-extractor':
+      'Used to parse uploaded documents into text content that is easily understandable by LLM.',
     'list-operator': 'Used to filter or sort array content.',
-    'agent': 'Invoking large language models to answer questions or process natural language',
-    'text': 'text',
+    agent:
+      'Invoking large language models to answer questions or process natural language',
+    text: 'text'
   },
   operator: {
     zoomIn: 'Zoom In',
     zoomOut: 'Zoom Out',
     zoomTo50: 'Zoom to 50%',
     zoomTo100: 'Zoom to 100%',
-    zoomToFit: 'Zoom to Fit',
+    zoomToFit: 'Zoom to Fit'
   },
   variableReference: {
     noAvailableVars: 'No available variables',
-    noVarsForOperation: 'There are no variables available for assignment with the selected operation.',
+    noVarsForOperation:
+      'There are no variables available for assignment with the selected operation.',
     noAssignedVars: 'No available assigned variables',
-    assignedVarsDescription: 'Assigned variables must be writable variables, such as ',
-    conversationVars: 'conversation variables',
+    assignedVarsDescription:
+      'Assigned variables must be writable variables, such as ',
+    conversationVars: 'conversation variables'
   },
   panel: {
     userInputField: 'User Input Field',
@@ -301,7 +329,7 @@ const translation = {
     checklistResolved: 'All issues are resolved',
     organizeBlocks: 'Organize blocks',
     change: 'Change',
-    optional: '(optional)',
+    optional: '(optional)'
   },
   nodes: {
     common: {
@@ -313,37 +341,39 @@ const translation = {
         windowSize: 'Window Size',
         conversationRoleName: 'Conversation Role Name',
         user: 'User prefix',
-        assistant: 'Assistant prefix',
+        assistant: 'Assistant prefix'
       },
       memories: {
         title: 'Memories',
         tip: 'Chat memory',
-        builtIn: 'Built-in',
+        builtIn: 'Built-in'
       },
       errorHandle: {
         title: 'Error Handling',
         tip: 'Exception handling strategy, triggered when a node encounters an exception.',
         none: {
           title: 'None',
-          desc: 'The node will stop running if an exception occurs and is not handled',
+          desc: 'The node will stop running if an exception occurs and is not handled'
         },
         defaultValue: {
           title: 'Default Value',
           desc: 'When an error occurs, specify a static output content.',
           tip: 'On error, will return below value.',
           inLog: 'Node exception, outputting according to default values.',
-          output: 'Output Default Value',
+          output: 'Output Default Value'
         },
         failBranch: {
           title: 'Fail Branch',
           desc: 'When an error occurs, it will execute the exception branch',
           customize: 'Go to the canvas to customize the fail branch logic.',
-          customizeTip: 'When the fail branch is activated, exceptions thrown by nodes will not terminate the process. Instead, it will automatically execute the predefined fail branch, allowing you to flexibly provide error messages, reports, fixes, or skip actions.',
-          inLog: 'Node exception, will automatically execute the fail branch. The node output will return an error type and error message and pass them to downstream.',
+          customizeTip:
+            'When the fail branch is activated, exceptions thrown by nodes will not terminate the process. Instead, it will automatically execute the predefined fail branch, allowing you to flexibly provide error messages, reports, fixes, or skip actions.',
+          inLog:
+            'Node exception, will automatically execute the fail branch. The node output will return an error type and error message and pass them to downstream.'
         },
         partialSucceeded: {
-          tip: 'There are {{num}} nodes in the process running abnormally, please go to tracing to check the logs.',
-        },
+          tip: 'There are {{num}} nodes in the process running abnormally, please go to tracing to check the logs.'
+        }
       },
       retry: {
         retry: 'Retry',
@@ -357,8 +387,8 @@ const translation = {
         retryFailedTimes: '{{times}} retries failed',
         times: 'times',
         ms: 'ms',
-        retries: '{{num}} Retries',
-      },
+        retries: '{{num}} Retries'
+      }
     },
     start: {
       required: 'required',
@@ -369,39 +399,40 @@ const translation = {
         memories: {
           des: 'Conversation history',
           type: 'message type',
-          content: 'message content',
+          content: 'message content'
         },
-        files: 'File list',
+        files: 'File list'
       },
-      noVarTip: 'Set inputs that can be used in the Workflow',
+      noVarTip: 'Set inputs that can be used in the Workflow'
     },
     end: {
       outputs: 'Outputs',
       output: {
         type: 'output type',
-        variable: 'output variable',
+        variable: 'output variable'
       },
       type: {
-        'none': 'None',
+        none: 'None',
         'plain-text': 'Plain Text',
-        'structured': 'Structured',
-      },
+        structured: 'Structured'
+      }
     },
     answer: {
       answer: 'Answer',
-      outputVars: 'Output Variables',
+      outputVars: 'Output Variables'
     },
     llm: {
       model: 'model',
       variables: 'variables',
       context: 'context',
       contextTooltip: 'You can import Knowledge as context',
-      notSetContextInPromptTip: 'To enable the context feature, please fill in the context variable in PROMPT.',
+      notSetContextInPromptTip:
+        'To enable the context feature, please fill in the context variable in PROMPT.',
       prompt: 'prompt',
       roleDescription: {
         system: 'Give high level instructions for the conversation',
         user: 'Provide instructions, queries, or any text-based input to the model',
-        assistant: 'The model’s responses  based on the user messages',
+        assistant: 'The model’s responses  based on the user messages'
       },
       addMessage: 'Add Message',
       vision: 'vision',
@@ -409,16 +440,16 @@ const translation = {
       resolution: {
         name: 'Resolution',
         high: 'High',
-        low: 'Low',
+        low: 'Low'
       },
       outputVars: {
         output: 'Generate content',
-        usage: 'Model Usage Information',
+        usage: 'Model Usage Information'
       },
       singleRun: {
-        variable: 'Variable',
+        variable: 'Variable'
       },
-      sysQueryInUser: 'sys.query in user message is required',
+      sysQueryInUser: 'sys.query in user message is required'
     },
     knowledgeRetrieval: {
       queryVariable: 'Query Variable',
@@ -429,8 +460,8 @@ const translation = {
         title: 'Segmented title',
         icon: 'Segmented icon',
         url: 'Segmented URL',
-        metadata: 'Other metadata',
-      },
+        metadata: 'Other metadata'
+      }
     },
     http: {
       inputVars: 'Input Variables',
@@ -451,21 +482,21 @@ const translation = {
         body: 'Response Content',
         statusCode: 'Response Status Code',
         headers: 'Response Header List JSON',
-        files: 'Files List',
+        files: 'Files List'
       },
       authorization: {
-        'authorization': 'Authorization',
-        'authorizationType': 'Authorization Type',
+        authorization: 'Authorization',
+        authorizationType: 'Authorization Type',
         'no-auth': 'None',
         'api-key': 'API-Key',
         'auth-type': 'Auth Type',
-        'basic': 'Basic',
-        'bearer': 'Bearer',
-        'custom': 'Custom',
+        basic: 'Basic',
+        bearer: 'Bearer',
+        custom: 'Custom',
         'api-key-title': 'API Key',
-        'header': 'Header',
+        header: 'Header'
       },
-      insertVarPlaceholder: 'type \'/\' to insert variable',
+      insertVarPlaceholder: "type '/' to insert variable",
       timeout: {
         title: 'Timeout',
         connectLabel: 'Connection Timeout',
@@ -473,52 +504,54 @@ const translation = {
         readLabel: 'Read Timeout',
         readPlaceholder: 'Enter read timeout in seconds',
         writeLabel: 'Write Timeout',
-        writePlaceholder: 'Enter write timeout in seconds',
+        writePlaceholder: 'Enter write timeout in seconds'
       },
       curl: {
         title: 'Import from cURL',
-        placeholder: 'Paste cURL string here',
-      },
+        placeholder: 'Paste cURL string here'
+      }
     },
     code: {
       inputVars: 'Input Variables',
       outputVars: 'Output Variables',
       advancedDependencies: 'Advanced Dependencies',
-      advancedDependenciesTip: 'Add some preloaded dependencies that take more time to consume or are not default built-in here',
-      searchDependencies: 'Search Dependencies',
+      advancedDependenciesTip:
+        'Add some preloaded dependencies that take more time to consume or are not default built-in here',
+      searchDependencies: 'Search Dependencies'
     },
     templateTransform: {
       inputVars: 'Input Variables',
       code: 'Code',
       codeSupportTip: 'Only supports Jinja2',
       outputVars: {
-        output: 'Transformed content',
-      },
+        output: 'Transformed content'
+      }
     },
     ifElse: {
       if: 'If',
       else: 'Else',
-      elseDescription: 'Used to define the logic that should be executed when the if condition is not met.',
+      elseDescription:
+        'Used to define the logic that should be executed when the if condition is not met.',
       and: 'and',
       or: 'or',
       operator: 'Operator',
       notSetVariable: 'Please set variable first',
       comparisonOperator: {
-        'contains': 'contains',
+        contains: 'contains',
         'not contains': 'not contains',
         'start with': 'start with',
         'end with': 'end with',
-        'is': 'is',
+        is: 'is',
         'is not': 'is not',
-        'empty': 'is empty',
+        empty: 'is empty',
         'not empty': 'is not empty',
-        'null': 'is null',
+        null: 'is null',
         'not null': 'is not null',
-        'in': 'in',
+        in: 'in',
         'not in': 'not in',
         'all of': 'all of',
-        'exists': 'exists',
-        'not exists': 'not exists',
+        exists: 'exists',
+        'not exists': 'not exists'
       },
       optionName: {
         image: 'Image',
@@ -526,14 +559,14 @@ const translation = {
         audio: 'Audio',
         video: 'Video',
         localUpload: 'Local Upload',
-        url: 'URL',
+        url: 'URL'
       },
       enterValue: 'Enter value',
       addCondition: 'Add Condition',
       conditionNotSetup: 'Condition NOT setup',
       selectVariable: 'Select variable...',
       addSubVariable: 'Sub Variable',
-      select: 'Select',
+      select: 'Select'
     },
     variableAssigner: {
       title: 'Assign variables',
@@ -544,46 +577,48 @@ const translation = {
         string: 'String',
         number: 'Number',
         object: 'Object',
-        array: 'Array',
+        array: 'Array'
       },
       aggregationGroup: 'Aggregation Group',
-      aggregationGroupTip: 'Enabling this feature allows the variable aggregator to aggregate multiple sets of variables.',
+      aggregationGroupTip:
+        'Enabling this feature allows the variable aggregator to aggregate multiple sets of variables.',
       addGroup: 'Add Group',
       outputVars: {
-        varDescribe: '{{groupName}} output',
+        varDescribe: '{{groupName}} output'
       },
-      setAssignVariable: 'Set assign variable',
+      setAssignVariable: 'Set assign variable'
     },
     assigner: {
-      'assignedVariable': 'Assigned Variable',
-      'varNotSet': 'Variable NOT Set',
-      'variables': 'Variables',
-      'noVarTip': 'Click the "+" button to add variables',
-      'writeMode': 'Write Mode',
-      'writeModeTip': 'Append mode: Available for array variables only.',
+      assignedVariable: 'Assigned Variable',
+      varNotSet: 'Variable NOT Set',
+      variables: 'Variables',
+      noVarTip: 'Click the "+" button to add variables',
+      writeMode: 'Write Mode',
+      writeModeTip: 'Append mode: Available for array variables only.',
       'over-write': 'Overwrite',
-      'append': 'Append',
-      'plus': 'Plus',
-      'clear': 'Clear',
-      'setVariable': 'Set Variable',
-      'selectAssignedVariable': 'Select assigned variable...',
-      'setParameter': 'Set parameter...',
-      'operations': {
-        'title': 'Operation',
+      append: 'Append',
+      plus: 'Plus',
+      clear: 'Clear',
+      setVariable: 'Set Variable',
+      selectAssignedVariable: 'Select assigned variable...',
+      setParameter: 'Set parameter...',
+      operations: {
+        title: 'Operation',
         'over-write': 'Overwrite',
-        'overwrite': 'Overwrite',
-        'set': 'Set',
-        'clear': 'Clear',
-        'extend': 'Extend',
-        'append': 'Append',
+        overwrite: 'Overwrite',
+        set: 'Set',
+        clear: 'Clear',
+        extend: 'Extend',
+        append: 'Append',
         '+=': '+=',
         '-=': '-=',
         '*=': '*=',
-        '/=': '/=',
+        '/=': '/='
       },
-      'variable': 'Variable',
-      'noAssignedVars': 'No available assigned variables',
-      'assignedVarsDescription': 'Assigned variables must be writable variables, such as conversation variables.',
+      variable: 'Variable',
+      noAssignedVars: 'No available assigned variables',
+      assignedVarsDescription:
+        'Assigned variables must be writable variables, such as conversation variables.'
     },
     tool: {
       toAuthorize: 'To authorize',
@@ -595,16 +630,16 @@ const translation = {
           type: 'Support type. Now only support image',
           transfer_method: 'Transfer method.Value is  remote_url or local_file',
           url: 'Image url',
-          upload_file_id: 'Upload file id',
+          upload_file_id: 'Upload file id'
         },
-        json: 'tool generated json',
-      },
+        json: 'tool generated json'
+      }
     },
     questionClassifiers: {
       model: 'model',
       inputVars: 'Input Variables',
       outputVars: {
-        className: 'Class Name',
+        className: 'Class Name'
       },
       class: 'Class',
       classNamePlaceholder: 'Write your class name',
@@ -613,8 +648,9 @@ const translation = {
       topicPlaceholder: 'Write your topic name',
       addClass: 'Add Class',
       instruction: 'Instruction',
-      instructionTip: 'Input additional instructions to help the question classifier better understand how to categorize questions.',
-      instructionPlaceholder: 'Write your instruction',
+      instructionTip:
+        'Input additional instructions to help the question classifier better understand how to categorize questions.',
+      instructionPlaceholder: 'Write your instruction'
     },
     parameterExtractor: {
       inputVar: 'Input Variable',
@@ -629,16 +665,20 @@ const translation = {
         description: 'Description',
         descriptionPlaceholder: 'Extract Parameter Description',
         required: 'Required',
-        requiredContent: 'Required is only used as a reference for model inference, and not for mandatory validation of parameter output.',
+        requiredContent:
+          'Required is only used as a reference for model inference, and not for mandatory validation of parameter output.'
       },
       extractParametersNotSet: 'Extract Parameters not setup',
       instruction: 'Instruction',
-      instructionTip: 'Input additional instructions to help the parameter extractor understand how to extract parameters.',
+      instructionTip:
+        'Input additional instructions to help the parameter extractor understand how to extract parameters.',
       advancedSetting: 'Advanced Setting',
       reasoningMode: 'Reasoning Mode',
-      reasoningModeTip: 'You can choose the appropriate reasoning mode based on the model\'s ability to respond to instructions for function calling or prompts.',
-      isSuccess: 'Is Success.On success the value is 1, on failure the value is 0.',
-      errorReason: 'Error Reason',
+      reasoningModeTip:
+        "You can choose the appropriate reasoning mode based on the model's ability to respond to instructions for function calling or prompts.",
+      isSuccess:
+        'Is Success.On success the value is 1, on failure the value is 0.',
+      errorReason: 'Error Reason'
     },
     iteration: {
       deleteTitle: 'Delete Iteration Node?',
@@ -654,17 +694,21 @@ const translation = {
       parallelMode: 'Parallel Mode',
       parallelModeUpper: 'PARALLEL MODE',
       parallelModeEnableTitle: 'Parallel Mode Enabled',
-      parallelModeEnableDesc: 'In parallel mode, tasks within iterations support parallel execution. You can configure this in the properties panel on the right.',
-      parallelPanelDesc: 'In parallel mode, tasks in the iteration support parallel execution.',
+      parallelModeEnableDesc:
+        'In parallel mode, tasks within iterations support parallel execution. You can configure this in the properties panel on the right.',
+      parallelPanelDesc:
+        'In parallel mode, tasks in the iteration support parallel execution.',
       MaxParallelismTitle: 'Maximum parallelism',
-      MaxParallelismDesc: 'The maximum parallelism is used to control the number of tasks executed simultaneously in a single iteration.',
+      MaxParallelismDesc:
+        'The maximum parallelism is used to control the number of tasks executed simultaneously in a single iteration.',
       errorResponseMethod: 'Error response method',
       ErrorMethod: {
         operationTerminated: 'Terminated',
         continueOnError: 'Continue on Error',
-        removeAbnormalOutput: 'Remove Abnormal Output',
+        removeAbnormalOutput: 'Remove Abnormal Output'
       },
-      answerNodeWarningDesc: 'Parallel mode warning: Answer nodes, conversation variable assignments, and persistent read/write operations within iterations may cause exceptions.',
+      answerNodeWarningDesc:
+        'Parallel mode warning: Answer nodes, conversation variable assignments, and persistent read/write operations within iterations may cause exceptions.'
     },
     loop: {
       deleteTitle: 'Delete Loop Node?',
@@ -676,13 +720,14 @@ const translation = {
       currentLoop: 'Current Loop',
       breakCondition: 'Loop Termination Condition',
       loopMaxCount: 'Maximum Loop Count',
-      loopMaxCountError: 'Please enter a valid maximum loop count, ranging from 1 to {{maxCount}}',
+      loopMaxCountError:
+        'Please enter a valid maximum loop count, ranging from 1 to {{maxCount}}',
       errorResponseMethod: 'Error Response Method',
       ErrorMethod: {
         operationTerminated: 'Terminated',
         continueOnError: 'Continue on Error',
-        removeAbnormalOutput: 'Remove Abnormal Output',
-      },
+        removeAbnormalOutput: 'Remove Abnormal Output'
+      }
     },
     note: {
       addNote: 'Add Note',
@@ -700,16 +745,16 @@ const translation = {
         enterUrl: 'Enter URL...',
         invalidUrl: 'Invalid URL',
         bulletList: 'Bullet List',
-        showAuthor: 'Show Author',
-      },
+        showAuthor: 'Show Author'
+      }
     },
     docExtractor: {
       inputVar: 'Input Variable',
       outputVars: {
-        text: 'Extracted text',
+        text: 'Extracted text'
       },
       supportFileTypes: 'Support file types: {{types}}.',
-      learnMore: 'Learn more',
+      learnMore: 'Learn more'
     },
     listFilter: {
       inputVar: 'Input Variable',
@@ -726,36 +771,40 @@ const translation = {
       outputVars: {
         result: 'Filter result',
         first_record: 'First record',
-        last_record: 'Last record',
-      },
+        last_record: 'Last record'
+      }
     },
     agent: {
       strategy: {
         label: 'Agentic Strategy',
-        tooltip: 'Different Agentic strategies determine how the system plans and executes multi-step tool calls',
+        tooltip:
+          'Different Agentic strategies determine how the system plans and executes multi-step tool calls',
         shortLabel: 'Strategy',
         configureTip: 'Please configure agentic strategy.',
-        configureTipDesc: 'After configuring the agentic strategy, this node will automatically load the remaining configurations. The strategy will affect the mechanism of multi-step tool reasoning. ',
+        configureTipDesc:
+          'After configuring the agentic strategy, this node will automatically load the remaining configurations. The strategy will affect the mechanism of multi-step tool reasoning. ',
         selectTip: 'Select agentic strategy',
-        searchPlaceholder: 'Search agentic strategy',
+        searchPlaceholder: 'Search agentic strategy'
       },
       learnMore: 'Learn more',
       pluginNotInstalled: 'This plugin is not installed',
-      pluginNotInstalledDesc: 'This plugin is installed from GitHub. Please go to Plugins to reinstall',
+      pluginNotInstalledDesc:
+        'This plugin is installed from GitHub. Please go to Plugins to reinstall',
       linkToPlugin: 'Link to Plugins',
       pluginInstaller: {
         install: 'Install',
-        installing: 'Installing',
+        installing: 'Installing'
       },
       modelNotInMarketplace: {
         title: 'Model not installed',
         desc: 'This model is installed from Local or GitHub repository. Please use after installation.',
-        manageInPlugins: 'Manage in Plugins',
+        manageInPlugins: 'Manage in Plugins'
       },
       modelNotSupport: {
         title: 'Unsupported Model',
         desc: 'The installed plugin version does not provide this model.',
-        descForVersionSwitch: 'The installed plugin version does not provide this model. Click to switch version.',
+        descForVersionSwitch:
+          'The installed plugin version does not provide this model. Click to switch version.'
       },
       configureModel: 'Configure Model',
       notAuthorized: 'Not Authorized',
@@ -770,11 +819,14 @@ const translation = {
       toolNotAuthorizedTooltip: '{{tool}} Not Authorized',
       strategyNotInstallTooltip: '{{strategy}} is not installed',
       unsupportedStrategy: 'Unsupported strategy',
-      pluginNotFoundDesc: 'This plugin is installed from GitHub. Please go to Plugins to reinstall',
-      strategyNotFoundDesc: 'The installed plugin version does not provide this strategy.',
-      strategyNotFoundDescAndSwitchVersion: 'The installed plugin version does not provide this strategy. Click to switch version.',
+      pluginNotFoundDesc:
+        'This plugin is installed from GitHub. Please go to Plugins to reinstall',
+      strategyNotFoundDesc:
+        'The installed plugin version does not provide this strategy.',
+      strategyNotFoundDescAndSwitchVersion:
+        'The installed plugin version does not provide this strategy. Click to switch version.',
       modelSelectorTooltips: {
-        deprecated: 'This model is deprecated',
+        deprecated: 'This model is deprecated'
       },
       outputVars: {
         text: 'agent generated content',
@@ -783,24 +835,24 @@ const translation = {
           type: 'Support type. Now only support image',
           transfer_method: 'Transfer method.Value is  remote_url or local_file',
           url: 'Image url',
-          upload_file_id: 'Upload file id',
+          upload_file_id: 'Upload file id'
         },
-        json: 'agent generated json',
+        json: 'agent generated json'
       },
       checkList: {
-        strategyNotSelected: 'Strategy not selected',
+        strategyNotSelected: 'Strategy not selected'
       },
       installPlugin: {
         title: 'Install Plugin',
         desc: 'About to install the following plugin',
         changelog: 'Change log',
         install: 'Install',
-        cancel: 'Cancel',
-      },
-    },
+        cancel: 'Cancel'
+      }
+    }
   },
   tracing: {
-    stopBy: 'Stop by {{user}}',
+    stopBy: 'Stop by {{user}}'
   },
   versionHistory: {
     title: 'Versions',
@@ -811,7 +863,7 @@ const translation = {
       onlyYours: 'Only yours',
       onlyShowNamedVersions: 'Only show named versions',
       reset: 'Reset Filter',
-      empty: 'No matching version history found',
+      empty: 'No matching version history found'
     },
     defaultName: 'Untitled Version',
     nameThisVersion: 'Name this version',
@@ -819,11 +871,12 @@ const translation = {
     editField: {
       title: 'Title',
       releaseNotes: 'Release Notes',
-      titleLengthLimit: 'Title can\'t exceed {{limit}} characters',
-      releaseNotesLengthLimit: 'Release notes can\'t exceed {{limit}} characters',
+      titleLengthLimit: "Title can't exceed {{limit}} characters",
+      releaseNotesLengthLimit: "Release notes can't exceed {{limit}} characters"
     },
     releaseNotesPlaceholder: 'Describe what changed',
-    restorationTip: 'After version restoration, the current draft will be overwritten.',
+    restorationTip:
+      'After version restoration, the current draft will be overwritten.',
     deletionTip: 'Deletion is irreversible, please confirm.',
     action: {
       restoreSuccess: 'Version restored',
@@ -831,9 +884,9 @@ const translation = {
       deleteSuccess: 'Version deleted',
       deleteFailure: 'Failed to delete version',
       updateSuccess: 'Version updated',
-      updateFailure: 'Failed to update version',
-    },
-  },
-}
+      updateFailure: 'Failed to update version'
+    }
+  }
+};
 
-export default translation
+export default translation;
