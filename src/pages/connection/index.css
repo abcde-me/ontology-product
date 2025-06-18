@@ -1,6 +1,7 @@
 .arco-table-tr>th {
     background-color:rgb(245, 249, 255) !important;
 }
+
 .hover {
     color: rgb(0, 125, 250);
     cursor: pointer;

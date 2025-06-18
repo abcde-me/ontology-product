@@ -37,6 +37,8 @@ import ListFilterPanel from './list-operator/panel'
 // import AgentNode from './agent/node'
 // import AgentPanel from './agent/panel'
 import { TransferMethod } from '@/pages/workflowConfig/types/app'
+import TextNode from './text/node'
+import TextPanel from './text/panel'
 
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
@@ -57,6 +59,7 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Loop]: LoopNode,
   [BlockEnum.DocExtractor]: DocExtractorNode,
   [BlockEnum.ListFilter]: ListFilterNode,
+  [BlockEnum.Text]: TextNode,
   // [BlockEnum.Agent]: AgentNode,
 }
 
@@ -79,6 +82,7 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Loop]: LoopPanel,
   [BlockEnum.DocExtractor]: DocExtractorPanel,
   [BlockEnum.ListFilter]: ListFilterPanel,
+  [BlockEnum.Text]: TextPanel,
   // [BlockEnum.Agent]: AgentPanel,
 }
 

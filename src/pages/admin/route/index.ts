@@ -34,9 +34,15 @@ export const routes: IRoute[] = [
   // 数据载入
   {
     name: 'dataLoad',
-    key: '/tenant/compute/modaforge/dataLoad',
-    component: React.lazy(async () => import('../../dataLoad')),
-    children: []
+    key: '/tenant/compute/modaforge/dataLoad',   //临时修改../../dataLoad/index
+    component: React.lazy(async () => import('../../dataLoad/detail/dataLoad-detail')),
+    children: [
+      {
+        name:'dataLoadDetail',
+        key: '/tenant/compute/modaforge/dataLoad/detail',
+        component: React.lazy(async () => import('../../dataLoad/detail/dataLoad-detail')),
+      }
+    ]
   },
   // 工作流
   {

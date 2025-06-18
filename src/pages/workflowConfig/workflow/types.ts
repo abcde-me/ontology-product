@@ -37,6 +37,7 @@ export enum BlockEnum {
   Agent = 'agent',
   Loop = 'loop',
   LoopStart = 'loop-start',
+  Text = 'text',
 }
 
 export enum ControlMode {

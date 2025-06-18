@@ -82,7 +82,8 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.DocExtractor]: 'bg-util-colors-green-green-500',
   [BlockEnum.ListFilter]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Agent]: 'bg-util-colors-indigo-indigo-500',
-}
+  [BlockEnum.Text]: 'bg-util-colors-warning-warning-500'
+};
 const BlockIcon: FC<BlockIconProps> = ({
   type,
   size = 'sm',
