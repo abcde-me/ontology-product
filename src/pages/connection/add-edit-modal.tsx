@@ -33,7 +33,7 @@ const addModal = forwardRef((props, ref) => {
             } else {
                 // 添加模式 - 重置表单
                 form.resetFields();
-                form.setFieldsValue({ type: 's3' });
+                form.setFieldsValue({ type: 's3',name:'' });
                 setStorageType('s3');
             }
         }
@@ -77,6 +77,7 @@ const addModal = forwardRef((props, ref) => {
             visible={visible}
             autoFocus={false}
             focusLock={false}
+            unmountOnExit={true}
             onCancel={() => {
                 // 点击关闭隐藏弹框
                 if (isFlag == null) {
