@@ -21,6 +21,7 @@ import ListFilterDefault from './nodes/list-operator/default'
 import IterationStartDefault from './nodes/iteration-start/default'
 // import AgentDefault from './nodes/agent/default'
 import LoopStartDefault from './nodes/loop-start/default'
+import TextDefault from './nodes/text/default'
 
 type NodesExtraData = {
   author: string
@@ -230,6 +231,15 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
   //   getAvailableNextNodes: ListFilterDefault.getAvailableNextNodes,
   //   checkValid: AgentDefault.checkValid,
   // },
+  [BlockEnum.Text]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid,
+  },
 }
 
 export const NODES_INITIAL_DATA = {
@@ -383,6 +393,12 @@ export const NODES_INITIAL_DATA = {
   //   desc: '',
   //   ...AgentDefault.defaultValue,
   // },
+  [BlockEnum.Text]: {
+    type: BlockEnum.Text,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue,
+  },
 }
 export const MAX_ITERATION_PARALLEL_NUM = 10
 export const MIN_ITERATION_PARALLEL_NUM = 1
@@ -444,7 +460,7 @@ export const SUPPORT_OUTPUT_VARS_NODE = [
   BlockEnum.HttpRequest, BlockEnum.Tool, BlockEnum.VariableAssigner, BlockEnum.VariableAggregator, BlockEnum.QuestionClassifier,
   BlockEnum.ParameterExtractor, BlockEnum.Iteration, BlockEnum.Loop,
   BlockEnum.DocExtractor, BlockEnum.ListFilter,
-  BlockEnum.Agent,
+  BlockEnum.Agent,BlockEnum.Text,
 ]
 
 export const LLM_OUTPUT_STRUCT: Var[] = [

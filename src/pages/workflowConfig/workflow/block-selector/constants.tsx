@@ -17,84 +17,89 @@ export const BLOCKS: Block[] = [
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.KnowledgeRetrieval,
-    title: 'Knowledge Retrieval',
+    title: 'Knowledge Retrieval'
   },
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.End,
-    title: 'End',
+    title: 'End'
   },
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.Answer,
-    title: 'Direct Answer',
+    title: 'Direct Answer'
   },
   {
     classification: BlockClassificationEnum.QuestionUnderstand,
     type: BlockEnum.QuestionClassifier,
-    title: 'Question Classifier',
+    title: 'Question Classifier'
   },
   {
     classification: BlockClassificationEnum.Logic,
     type: BlockEnum.IfElse,
-    title: 'IF/ELSE',
+    title: 'IF/ELSE'
   },
   {
     classification: BlockClassificationEnum.Logic,
     type: BlockEnum.Iteration,
-    title: 'Iteration',
+    title: 'Iteration'
   },
   {
     classification: BlockClassificationEnum.Logic,
     type: BlockEnum.Loop,
-    title: 'Loop',
+    title: 'Loop'
   },
   {
     classification: BlockClassificationEnum.Transform,
     type: BlockEnum.TemplateTransform,
-    title: 'Templating Transform',
+    title: 'Templating Transform'
   },
   {
     classification: BlockClassificationEnum.Transform,
     type: BlockEnum.VariableAggregator,
-    title: 'Variable Aggregator',
+    title: 'Variable Aggregator'
   },
   {
     classification: BlockClassificationEnum.Transform,
     type: BlockEnum.DocExtractor,
-    title: 'Doc Extractor',
+    title: 'Doc Extractor'
   },
   {
     classification: BlockClassificationEnum.Transform,
     type: BlockEnum.Assigner,
-    title: 'Variable Assigner',
+    title: 'Variable Assigner'
   },
   {
     classification: BlockClassificationEnum.Transform,
     type: BlockEnum.ParameterExtractor,
-    title: 'Parameter Extractor',
+    title: 'Parameter Extractor'
   },
   {
     classification: BlockClassificationEnum.Utilities,
     type: BlockEnum.Code,
-    title: 'Code',
+    title: 'Code'
   },
   {
     classification: BlockClassificationEnum.Utilities,
     type: BlockEnum.HttpRequest,
-    title: 'HTTP Request',
+    title: 'HTTP Request'
   },
   {
     classification: BlockClassificationEnum.Utilities,
     type: BlockEnum.ListFilter,
-    title: 'List Filter',
+    title: 'List Filter'
   },
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.Agent,
-    title: 'Agent',
+    title: 'Agent'
   },
-]
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Text,
+    title: 'Text'
+  },
+];
 
 export const BLOCK_CLASSIFICATIONS: string[] = [
   BlockClassificationEnum.Default,
