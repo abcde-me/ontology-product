@@ -6,16 +6,16 @@ const { Title, Text } = Typography;
 
 // 数据集类型
 interface Dataset {
-    key: string;
+    id: number;
     name: string;
-    tags: string[];
-    version: string;
     description: string;
-    model: string;
-    creator: string;
-    createTime: string;
-    updateTime: string;
-    isDefault: boolean;
+    latest_version: string;
+    src: number;
+    creator_id: string;
+    creator_name: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: null;
 }
 
 interface DatasetDetailModalProps {
@@ -62,9 +62,9 @@ const DatasetDetailModal: React.FC<DatasetDetailModalProps> = ({ visible, datase
                                 value: (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <Text style={{ fontWeight: 500 }}>{dataset.name}</Text>
-                                        {dataset.isDefault && (
+                                        {dataset.src === 0 && (
                                             <Tag color="blue" size="small">
-                                                默认数据集
+                                                系统数据集
                                             </Tag>
                                         )}
                                     </div>
@@ -72,40 +72,43 @@ const DatasetDetailModal: React.FC<DatasetDetailModalProps> = ({ visible, datase
                             },
                             {
                                 label: '版本',
-                                value: <Tag color="green">{dataset.version}</Tag>,
+                                value: <Tag color="green">{dataset.latest_version}</Tag>,
                             },
                             {
                                 label: '创建人',
-                                value: dataset.creator,
+                                value: dataset.creator_name,
                             },
                             {
-                                label: '生成模型',
-                                value: <Tag color="purple">{dataset.model}</Tag>,
+                                label: '数据来源',
+                                value: <Tag color="purple">{dataset.src === 0 ? '系统' : '用户'}</Tag>,
                             },
                             {
                                 label: '创建时间',
-                                value: dataset.createTime,
+                                value: dataset.created_at,
                             },
                             {
                                 label: '最近更新',
-                                value: dataset.updateTime,
+                                value: dataset.updated_at,
                             },
                         ]}
                     />
                 </div>
 
-                {/* 标签 */}
+                {/* 数据集ID */}
                 <div style={{ marginBottom: '24px' }}>
                     <Title heading={6} style={{ marginBottom: '12px', color: '#1d2129' }}>
-                        标签
+                        数据集ID
                     </Title>
-                    <Space wrap>
-                        {dataset.tags.map((tag) => (
-                            <Tag key={tag} color="green" style={{ fontSize: '14px', padding: '4px 12px' }}>
-                                {tag}
-                            </Tag>
-                        ))}
-                    </Space>
+                    <div
+                        style={{
+                            background: '#f7f8fa',
+                            border: '1px solid #e5e6eb',
+                            borderRadius: '6px',
+                            padding: '12px 16px',
+                        }}
+                    >
+                        <Text code>{dataset.id}</Text>
+                    </div>
                 </div>
 
                 {/* 描述 */}

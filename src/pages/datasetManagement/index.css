@@ -1,0 +1,174 @@
+.dataset-management {
+  background: #fff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dataset-header {
+  margin-bottom: 16px;
+}
+
+.dataset-title {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  color: #1d2129;
+  font-weight: 600;
+}
+
+.dataset-description {
+  color: #86909c;
+  margin-bottom: 0;
+}
+
+.search-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-field-select {
+  width: 120px;
+}
+
+.search-input {
+  width: 260px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.batch-delete-btn {
+  color: #f53f3f !important;
+  border-color: #f53f3f !important;
+}
+
+.batch-delete-btn:hover {
+  background-color: #f53f3f !important;
+  color: #fff !important;
+}
+
+.batch-export-btn {
+  color: #165dff !important;
+  border-color: #165dff !important;
+}
+
+.batch-export-btn:hover {
+  background-color: #165dff !important;
+  color: #fff !important;
+}
+
+
+
+.dataset-table {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dataset-table .arco-table-th {
+  background-color: #f7f8fa;
+  color: #4e5969;
+  font-weight: 500;
+  border-bottom: 1px solid #e5e6eb;
+}
+
+.dataset-table .arco-table-td {
+  border-bottom: 1px solid #f2f3f5;
+}
+
+.dataset-table .arco-table-row:hover .arco-table-td {
+  background-color: #f7f8fa;
+}
+
+.dataset-name-link {
+  color: #165dff !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  height: auto !important;
+  text-decoration: none;
+}
+
+.dataset-name-link:hover {
+  color: #0e42d2 !important;
+  text-decoration: underline;
+}
+
+.action-button {
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  height: auto !important;
+  border-radius: 4px !important;
+}
+
+
+
+.action-button.export {
+  color: #00b42a !important;
+}
+
+.action-button.export:hover {
+  background-color: #e8f7ed !important;
+}
+
+.action-button.delete {
+  color: #f53f3f !important;
+}
+
+.action-button.delete:hover {
+  background-color: #fff1f0 !important;
+}
+
+.tag-green {
+  background-color: #e8f7ed !important;
+  color: #00b42a !important;
+  border: 1px solid #c9e6d0 !important;
+}
+
+.tag-purple {
+  background-color: #f5f0ff !important;
+  color: #722ed1 !important;
+  border: 1px solid #d9c7f7 !important;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+@media (max-width: 768px) {
+  .search-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .search-group {
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 200px;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -6,11 +6,11 @@ const conversionArco = (time, day, week, cycle) => {
   const [hour, minute] = time.split(':').map(Number);
     
   // 初始化 Cron 字段（秒 分 时 日 月 星期 年）
-  let cronSec = 0; // 秒（默认 0）
-  let cronMin = minute; // 分
-  let cronHour = hour; // 时
-  let cronDay = '*'; // 日（默认 *）
-  let cronMonth = '*'; // 月（默认 *）
+  const cronSec = 0; // 秒（默认 0）
+  const cronMin = minute; // 分
+  const cronHour = hour; // 时
+  const cronDay = '*'; // 日（默认 *）
+  const cronMonth = '*'; // 月（默认 *）
   let cronWeek = '?'; // 星期（默认 ?）
 
 //     const resultday = day.map(item => {
