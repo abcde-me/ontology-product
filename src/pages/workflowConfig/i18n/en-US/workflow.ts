@@ -248,6 +248,7 @@ const translation = {
     'agent': 'Agent',
     'loop-start': 'Loop Start',
     'loop': 'Loop',
+    'text': 'Text',
   },
   blocksAbout: {
     'start': 'Define the initial parameters for launching a workflow',
@@ -269,6 +270,7 @@ const translation = {
     'document-extractor': 'Used to parse uploaded documents into text content that is easily understandable by LLM.',
     'list-operator': 'Used to filter or sort array content.',
     'agent': 'Invoking large language models to answer questions or process natural language',
+    'text': 'text',
   },
   operator: {
     zoomIn: 'Zoom In',
