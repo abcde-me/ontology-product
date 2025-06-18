@@ -3,21 +3,21 @@ import { BlockEnum } from '../types'
 import { BlockClassificationEnum } from './types'
 
 export const BLOCKS: Block[] = [
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.LLM,
-    title: 'LLM',
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.KnowledgeRetrieval,
-    title: 'Knowledge Retrieval'
-  },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Answer,
-    title: 'Direct Answer'
-  },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.LLM,
+  //   title: 'LLM',
+  // },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.KnowledgeRetrieval,
+  //   title: 'Knowledge Retrieval'
+  // },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.Answer,
+  //   title: 'Direct Answer'
+  // },
   {
     classification: BlockClassificationEnum.QuestionUnderstand,
     type: BlockEnum.QuestionClassifier,
@@ -78,11 +78,11 @@ export const BLOCKS: Block[] = [
     type: BlockEnum.ListFilter,
     title: 'List Filter'
   },
-  {
-    classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Agent,
-    title: 'Agent'
-  },
+  // {
+  //   classification: BlockClassificationEnum.Default,
+  //   type: BlockEnum.Agent,
+  //   title: 'Agent'
+  // },
   // TODO：上面无用代码删除
 
   {

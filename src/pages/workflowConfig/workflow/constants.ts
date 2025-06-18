@@ -33,24 +33,6 @@ type NodesExtraData = {
   checkValid: any;
 };
 export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
-  [BlockEnum.Start]: {
-    author: 'AppForge',
-    about: '',
-    availablePrevNodes: [],
-    availableNextNodes: [],
-    getAvailablePrevNodes: StartNodeDefault.getAvailablePrevNodes,
-    getAvailableNextNodes: StartNodeDefault.getAvailableNextNodes,
-    checkValid: StartNodeDefault.checkValid
-  },
-  [BlockEnum.End]: {
-    author: 'AppForge',
-    about: '',
-    availablePrevNodes: [],
-    availableNextNodes: [],
-    getAvailablePrevNodes: EndNodeDefault.getAvailablePrevNodes,
-    getAvailableNextNodes: EndNodeDefault.getAvailableNextNodes,
-    checkValid: EndNodeDefault.checkValid
-  },
   [BlockEnum.Answer]: {
     author: 'AppForge',
     about: '',
@@ -222,16 +204,72 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailableNextNodes: ListFilterDefault.getAvailableNextNodes,
     checkValid: ListFilterDefault.checkValid
   },
-  // [BlockEnum.Agent]: {
-  //   author: 'AppForge',
-  //   about: '',
-  //   availablePrevNodes: [],
-  //   availableNextNodes: [],
-  //   getAvailablePrevNodes: ListFilterDefault.getAvailablePrevNodes,
-  //   getAvailableNextNodes: ListFilterDefault.getAvailableNextNodes,
-  //   checkValid: AgentDefault.checkValid,
-  // },
+  // TODO: 以上删除
+
+  [BlockEnum.Start]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: StartNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: StartNodeDefault.getAvailableNextNodes,
+    checkValid: StartNodeDefault.checkValid
+  },
+  [BlockEnum.End]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: EndNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: EndNodeDefault.getAvailableNextNodes,
+    checkValid: EndNodeDefault.checkValid
+  },
   [BlockEnum.Text]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  },
+  [BlockEnum.Pic]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  },
+  [BlockEnum.Audio]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  },
+  [BlockEnum.Video]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  },
+  [BlockEnum.Cleaning]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  },
+  [BlockEnum.Enhancement]: {
     author: 'AppForge',
     about: '',
     availablePrevNodes: [],
@@ -243,18 +281,6 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
 };
 
 export const NODES_INITIAL_DATA = {
-  [BlockEnum.Start]: {
-    type: BlockEnum.Start,
-    title: '',
-    desc: '',
-    ...StartNodeDefault.defaultValue
-  },
-  [BlockEnum.End]: {
-    type: BlockEnum.End,
-    title: '',
-    desc: '',
-    ...EndNodeDefault.defaultValue
-  },
   [BlockEnum.Answer]: {
     type: BlockEnum.Answer,
     title: '',
@@ -387,14 +413,52 @@ export const NODES_INITIAL_DATA = {
     desc: '',
     ...ListFilterDefault.defaultValue
   },
-  // [BlockEnum.Agent]: {
-  //   type: BlockEnum.Agent,
-  //   title: '',
-  //   desc: '',
-  //   ...AgentDefault.defaultValue,
-  // },
+  // TODO: 以上删除
+
+  [BlockEnum.Start]: {
+    type: BlockEnum.Start,
+    title: '',
+    desc: '',
+    ...StartNodeDefault.defaultValue
+  },
+  [BlockEnum.End]: {
+    type: BlockEnum.End,
+    title: '',
+    desc: '',
+    ...EndNodeDefault.defaultValue
+  },
   [BlockEnum.Text]: {
     type: BlockEnum.Text,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  },
+  [BlockEnum.Pic]: {
+    type: BlockEnum.Pic,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  },
+  [BlockEnum.Audio]: {
+    type: BlockEnum.Audio,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  },
+  [BlockEnum.Video]: {
+    type: BlockEnum.Video,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  },
+  [BlockEnum.Cleaning]: {
+    type: BlockEnum.Cleaning,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  },
+  [BlockEnum.Enhancement]: {
+    type: BlockEnum.Enhancement,
     title: '',
     desc: '',
     ...TextDefault.defaultValue

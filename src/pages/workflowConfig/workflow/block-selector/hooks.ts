@@ -1,43 +1,40 @@
-import { useTranslation } from 'react-i18next'
-import { BLOCKS } from './constants'
-import {
-  TabsEnum,
-  ToolTypeEnum,
-} from './types'
+import { useTranslation } from 'react-i18next';
+import { BLOCKS } from './constants';
+import { TabsEnum, ToolTypeEnum } from './types';
 
 export const useBlocks = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   return BLOCKS.map((block) => {
     return {
-      ...block,
-      title: t(`workflow.blocks.${block.type}`),
-    }
-  })
-}
+      ...block
+      // title: t(`workflow.blocks.${block.type}`)
+    };
+  });
+};
 
 export const useTabs = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   return [
     {
       key: TabsEnum.Blocks,
-      name: t('workflow.tabs.blocks'),
+      name: t('workflow.tabs.blocks')
     },
     {
       key: TabsEnum.Tools,
-      name: t('workflow.tabs.tools'),
-    },
-  ]
-}
+      name: t('workflow.tabs.tools')
+    }
+  ];
+};
 
 export const useToolTabs = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   return [
     {
       key: ToolTypeEnum.All,
-      name: t('workflow.tabs.allTool'),
+      name: t('workflow.tabs.allTool')
     },
     // {
     //   key: ToolTypeEnum.BuiltIn,
@@ -45,11 +42,11 @@ export const useToolTabs = () => {
     // },
     {
       key: ToolTypeEnum.Custom,
-      name: t('workflow.tabs.customTool'),
+      name: t('workflow.tabs.customTool')
     },
     {
       key: ToolTypeEnum.Workflow,
-      name: t('workflow.tabs.workflowTool'),
-    },
-  ]
-}
+      name: t('workflow.tabs.workflowTool')
+    }
+  ];
+};

@@ -47,14 +47,7 @@ const Blocks = ({
 
   // 过滤暂时无用节点
   const renderGroup = useCallback((classification: string) => {
-    const list = groups[classification].filter(b =>
-      b.type !== BlockEnum.Start &&
-      b.type !== BlockEnum.Text &&
-      b.type !== BlockEnum.Pic &&
-      b.type !== BlockEnum.Audio &&
-      b.type !== BlockEnum.Cleaning &&
-      b.type !== BlockEnum.Enhancement
-    )
+    const list = groups[classification];
 
     return (
       <div
@@ -84,7 +77,7 @@ const Blocks = ({
                     />
                     <div className='system-md-medium text-text-primary text-[16px]/[24px] '>{block.title}</div>
                   </div>
-                  <div className='text-text-tertiary system-xs-regular text-[12px]/[20px] text-[#6E7B8D]'>{nodesExtraData[block.type].about}</div>
+                  <div className='text-text-tertiary system-xs-regular text-[12px]/[20px] text-[#6E7B8D]'>{nodesExtraData[block.type]?.about}</div>
                 </div>
               )}
             >
