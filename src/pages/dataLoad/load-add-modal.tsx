@@ -104,6 +104,7 @@ const LoadAddModal = (props: any) => {
                             <div>名称建议:北京市各区GDP数据_2024</div>
                         </div>
                     }
+                    initialValue='s3'
                 >
                     <Input placeholder='请输入任务名称' />
                 </FormItem>
@@ -173,8 +174,7 @@ const LoadAddModal = (props: any) => {
             <div className={Styles.footerBbtnBox}>
                 <Button onClick={cancelHan} style={{ marginRight: '20px' }}>取消</Button>
                 <Button onClick={handleSubmit}>确认</Button>
-            </div>
-
+            </div>  
         </div>
     )
 }
