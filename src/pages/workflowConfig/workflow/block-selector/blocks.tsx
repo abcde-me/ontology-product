@@ -49,11 +49,11 @@ const Blocks = ({
   const renderGroup = useCallback((classification: string) => {
     const list = groups[classification].filter(b =>
       b.type !== BlockEnum.Start &&
-      b.type !== BlockEnum.TEXT &&
-      b.type !== BlockEnum.PIC &&
-      b.type !== BlockEnum.AUDIO &&
-      b.type !== BlockEnum.CLEANING &&
-      b.type !== BlockEnum.ENHANCEMENT
+      b.type !== BlockEnum.Text &&
+      b.type !== BlockEnum.Pic &&
+      b.type !== BlockEnum.Audio &&
+      b.type !== BlockEnum.Cleaning &&
+      b.type !== BlockEnum.Enhancement
     )
 
     return (

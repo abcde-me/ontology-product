@@ -21,6 +21,7 @@ import ListFilterDefault from './nodes/list-operator/default';
 import IterationStartDefault from './nodes/iteration-start/default';
 // import AgentDefault from './nodes/agent/default'
 import LoopStartDefault from './nodes/loop-start/default';
+import TextDefault from './nodes/text/default';
 
 type NodesExtraData = {
   author: string;
@@ -220,7 +221,7 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailablePrevNodes: ListFilterDefault.getAvailablePrevNodes,
     getAvailableNextNodes: ListFilterDefault.getAvailableNextNodes,
     checkValid: ListFilterDefault.checkValid
-  }
+  },
   // [BlockEnum.Agent]: {
   //   author: 'AppForge',
   //   about: '',
@@ -230,6 +231,15 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
   //   getAvailableNextNodes: ListFilterDefault.getAvailableNextNodes,
   //   checkValid: AgentDefault.checkValid,
   // },
+  [BlockEnum.Text]: {
+    author: 'AppForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: TextDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: TextDefault.getAvailableNextNodes,
+    checkValid: TextDefault.checkValid
+  }
 };
 
 export const NODES_INITIAL_DATA = {
@@ -376,13 +386,19 @@ export const NODES_INITIAL_DATA = {
     title: '',
     desc: '',
     ...ListFilterDefault.defaultValue
-  }
+  },
   // [BlockEnum.Agent]: {
   //   type: BlockEnum.Agent,
   //   title: '',
   //   desc: '',
   //   ...AgentDefault.defaultValue,
   // },
+  [BlockEnum.Text]: {
+    type: BlockEnum.Text,
+    title: '',
+    desc: '',
+    ...TextDefault.defaultValue
+  }
 };
 export const MAX_ITERATION_PARALLEL_NUM = 10;
 export const MIN_ITERATION_PARALLEL_NUM = 1;

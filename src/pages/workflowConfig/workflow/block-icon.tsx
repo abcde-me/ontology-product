@@ -64,13 +64,33 @@ const getIcon = (type: BlockEnum, className: string) => {
 }
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
-  [BlockEnum.TEXT]: 'bg-util-colors-indigo-indigo-500',
-  [BlockEnum.PIC]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.AUDIO]: 'bg-util-colors-warning-warning-500',
-  [BlockEnum.VIDEO]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.CLEANING]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.ENHANCEMENT]: 'bg-util-colors-cyan-cyan-500',
-}
+  [BlockEnum.Text]: 'bg-util-colors-indigo-indigo-500',
+  [BlockEnum.Pic]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.Audio]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
+
+  // TODO：待删除
+  [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
+  [BlockEnum.Code]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Iteration]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Loop]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.HttpRequest]: 'bg-util-colors-violet-violet-500',
+  [BlockEnum.Answer]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
+  [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
+  [BlockEnum.TemplateTransform]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.VariableAssigner]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.VariableAggregator]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.Assigner]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.ParameterExtractor]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.DocExtractor]: 'bg-util-colors-green-green-500',
+  [BlockEnum.ListFilter]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Agent]: 'bg-util-colors-indigo-indigo-500',
+};
 const BlockIcon: FC<BlockIconProps> = ({
   type,
   size = 'sm',
