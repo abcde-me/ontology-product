@@ -18,6 +18,8 @@ const CustomDbIcon: any = () => (
   </svg>
 );
 
+
+
 import { Tree, Typography, Button, Message, Modal } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
 import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog'
@@ -267,7 +269,9 @@ const data = [
 
 function DataPage(props) {
   const [treeData, setTreeData] = React.useState([])
-  const { searchValue, startTime, endTime } = props
+  const [searchValue, setSearchValue] = React.useState('')
+  const [startTime, setStartTime] = React.useState('')
+  const [endTime, setEndTime] = React.useState('')
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
@@ -327,7 +331,7 @@ function DataPage(props) {
 
   useEffect(() => {
     // getCatalogList().then(res => {
-    //   console.log(res)
+    //   setTreeData(convertToArcoTreeData(res.data, handleTreeSelect))
     // })
     setTreeData(convertToArcoTreeData(rawCatalogData, handleTreeSelect))//测试使用，有数据以后可以将rawCatalogData改成后端返回的数据
   }, [])
@@ -345,7 +349,7 @@ function DataPage(props) {
     //   console.log(res)
     // })
     setTableData(data)//测试使用
-  }, [searchValue, startTime, endTime,selectedFilePath,currentPage,pageSize])
+  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
   return (
     <div style={{ display: 'flex', padding: 16 }}>
       {/* 左侧树状导航 */}
