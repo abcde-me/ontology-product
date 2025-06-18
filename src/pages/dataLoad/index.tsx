@@ -3,7 +3,9 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useMemo, useState } from 'react';
 import Styles from './index.module.css'
 import LoadAddModal from './load-add-modal';
-import TimeFormattig from '../../utils/timeFormatting'
+import { Route } from 'react-router';
+import { Link } from 'react-router-dom';
+import Tables from './tables';
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const columns = [
@@ -34,37 +36,42 @@ export default function DataLoad() {
     },
     {
       title: '最近运行状态',
-      dataIndex: 'state',
+      dataIndex: 'status',
       width: 170,
       render: ((_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{
             width: '5px', height: '5px',
-            background: item.state == '运行失败' ? 'red' : item.state == 'running' ? 'green' : item.state == '运行中' ? 'rgb(0, 125, 250)' : 'rgb(148, 163, 184)',
+            background: item.status == 'failed' ? 'red' : item.status == 'succeed' ? 'green' : item.status == 'running' ? 'rgb(0, 125, 250)' : 'rgb(148, 163, 184)',
             borderRadius: '50%'
           }}></div>
-          <div style={{ marginLeft: '6px' }}>{item.state}</div>
+          <div style={{ marginLeft: '6px' }}>
+            {item.status == 'succeed' && '运行成功'}
+            {item.status == 'failed' && '运行失败'}
+            {item.status == 'running' && '运行中'}
+            {item.status == 'stopped' && '运行停止'}
+          </div>
         </div>
       )),
       filters: [
         {
           text: '运行成功',
-          value: 'running'
+          value: 'succeed'
         },
         {
           text: '运行失败',
-          value: '运行失败'
+          value: 'failed'
         },
         {
           text: '运行中',
-          value: '运行中'
+          value: 'running'
         },
         {
           text: '运行停止',
-          value: '运行停止'
+          value: 'stopped'
         }
       ],
-      onFilter: (value, row) => row.state == value,
+      onFilter: (value, row) => row.status == value,
 
     },
     {
@@ -119,7 +126,9 @@ export default function DataLoad() {
       width: 130,
       render: ((_, item) => (
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
-          <span className={Styles.hoverStyle}>详情</span>
+          <span className={Styles.hoverStyle} >
+            <Link to='/tenant/compute/modaforge/dataLoad/detail'>详情</Link>
+          </span>
           <Popconfirm
             focusLock
             title="删除该连接器"
@@ -155,9 +164,51 @@ export default function DataLoad() {
       dest_path: '/232482347287/hshfusdhf/4234',
       created_at: '1749627860785',
       last_run_time: '1749627860785',
-      creator:'张三',
-      enable:true,
-      connector_id:'456'
+      creator: '张三',
+      enable: true,
+      connector_id: '456'
+    },
+    {
+      id: '1',
+      name: '中科院大数据库任务1',
+      load_type: 'once', //once单次载入 cron周期载入
+      status: 'succeed',
+      source_type: 's3',
+      connector_name: '连接器名称',
+      dest_path: '/232482347287/hshfusdhf/4234',
+      created_at: '1749627860785',
+      last_run_time: '1749627860785',
+      creator: '张三',
+      enable: true,
+      connector_id: '456'
+    },
+    {
+      id: '1',
+      name: '中科院大数据库任务1',
+      load_type: 'once', //once单次载入 cron周期载入
+      status: 'failed',
+      source_type: 's3',
+      connector_name: '连接器名称',
+      dest_path: '/232482347287/hshfusdhf/4234',
+      created_at: '1749627860785',
+      last_run_time: '1749627860785',
+      creator: '张三',
+      enable: true,
+      connector_id: '456'
+    },
+    {
+      id: '1',
+      name: '中科院大数据库任务1',
+      load_type: 'once', //once单次载入 cron周期载入
+      status: 'stopped',
+      source_type: 's3',
+      connector_name: '连接器名称',
+      dest_path: '/232482347287/hshfusdhf/4234',
+      created_at: '1749627860785',
+      last_run_time: '1749627860785',
+      creator: '张三',
+      enable: true,
+      connector_id: '456'
     },
   ];
   // 当前的第几页
@@ -199,7 +250,17 @@ export default function DataLoad() {
     setVisible(false)
   }
 
+  // 点击详情跳转详情页
+  const gotodetail = () => {
 
+  }
+  const myDivBox = (
+    <div>
+      <span>编辑</span>
+      <span>详情</span>
+      <span>删除</span>
+    </div>
+  )
   return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 10px 0px', borderRadius: '10px', height: '94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>数据载入</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
@@ -251,5 +312,11 @@ export default function DataLoad() {
     >
       <LoadAddModal hideModalHan={hideModalHan} />
     </Modal>
+    <Route
+      key='/tenant/compute/modaforge/dataLoad/detail'
+      path='/tenant/compute/modaforge/dataLoad/detail'
+      component={React.lazy(async () => import('./detail/dataLoad-detail'))}
+    />
+    {/* <Tables myDiv={myDivBox} data={data} /> */}
   </div>;
 }
