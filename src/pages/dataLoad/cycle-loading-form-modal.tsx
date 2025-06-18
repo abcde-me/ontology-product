@@ -30,10 +30,9 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
     const [promptState, setPromptState] = useState(-1)
     // 周期设置为月时 后面选择框改变的方法
     const monthlyHan = (val) => {
-        const monthIndex = val.findIndex(item => item == '31号')
+        const monthIndex = val.findIndex(item => item == '31')
         setPromptState(monthIndex)
     }
-
     // 点击快捷选项的回调
     const shortcutHan = (value) => {
         if (value == '每天凌晨0点') {

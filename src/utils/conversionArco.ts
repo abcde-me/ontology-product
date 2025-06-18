@@ -6,18 +6,18 @@ const conversionArco = (time, day, week, cycle) => {
   const [hour, minute] = time.split(':').map(Number);
     
   // 初始化 Cron 字段（秒 分 时 日 月 星期 年）
-  let cronSec = 0; // 秒（默认 0）
-  let cronMin = minute; // 分
-  let cronHour = hour; // 时
+  const cronSec = 0; // 秒（默认 0）
+  const cronMin = minute; // 分
+  const cronHour = hour; // 时
   let cronDay = '*'; // 日（默认 *）
-  let cronMonth = '*'; // 月（默认 *）
+  const cronMonth = '*'; // 月（默认 *）
   let cronWeek = '?'; // 星期（默认 ?）
 
-//     const resultday = day.map(item => {
-//   // 使用正则表达式提取数字部分
-//   const match = item.match(/\d+/);
-//   return match ? parseInt(match[0], 10) : null; // 转换为整数
-// }).filter(num => num !== null).join(', '); // 过滤掉可能的 null 值并连接
+    const resultday = day&&day.map(item => {
+  // 使用正则表达式提取数字部分
+  const match = item.match(/\d+/);
+  return match ? parseInt(match[0], 10) : null; // 转换为整数
+}).filter(num => num !== null).join(', '); // 过滤掉可能的 null 值并连接
 
   const weekMap = {
     "周一": 1,
@@ -36,7 +36,7 @@ const conversionArco = (time, day, week, cycle) => {
     cronDay = '?'; // 每周时日不指定
     cronWeek = week.map(week => weekMap[week]) ?? '?'; // 使用传入的 week 参数（如 "周一"）
   } else if (cycle === '每月') {
-    cronDay = day || '*'; // 使用传入的 day 参数（如 1）
+    cronDay = resultday || '*'; // 使用传入的 day 参数（如 1）
     cronWeek = '?'; // 月和日时星期不指定
   }
 
