@@ -64,14 +64,18 @@ export default function WorkflowTask() {
     // 每页展示数据的数据量
     const [pageSize, setPageSize] = useState(10);
 
+    const handleToTaskDeatil = (id: any) => {
+        history.push(`/tenant/compute/modaforge/workflowTaskDetail?id=${id}`);
+    }
+
     // table columns
     const columns: ColumnProps<any>[] = [
         {
             title: '作业ID',
             dataIndex: 'id',
             width: 120,
-            render: (_, item) => (
-                <span className="operate-text">{item.id}</span>
+            render: (_, record) => (
+                <span className="operate-text">{record.id}</span>
             )
         }, {
             title: '运行时长',
@@ -82,39 +86,39 @@ export default function WorkflowTask() {
             dataIndex: 'name',
             width: 130,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text" title={item.name}>{item.name}</span>
+            render: (_, record) => (
+                <span className="operate-text" onClick={() => handleToTaskDeatil(record.id)} title={record.name}>{record.name}</span>
             )
         }, {
             title: '源数据目录',
             dataIndex: 'source',
             width: 230,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text" title={item.source}>{item.source}</span>
+            render: (_, record) => (
+                <span className="operate-text" title={record.source}>{record.source}</span>
             )
         }, {
             title: '目标数据目录',
             dataIndex: 'target',
             width: 230,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text" title={item.target}>{item.target}</span>
+            render: (_, record) => (
+                <span className="operate-text" title={record.target}>{record.target}</span>
             )
         }, {
             title: '开始时间',
             dataIndex: 'start_time',
             width: 150,
-            render: (_, item) => (
-                <span>{TimeFormatting(item.start_time)}</span>
+            render: (_, record) => (
+                <span>{TimeFormatting(record.start_time)}</span>
             ),
             sorter: (a, b) => a.start_time.length - b.start_time.length
         }, {
             title: '结束时间',
             dataIndex: 'end_time',
             width: 150,
-            render: (_, item) => (
-                <span>{TimeFormatting(item.end_time)}</span>
+            render: (_, record) => (
+                <span>{TimeFormatting(record.end_time)}</span>
             ),
             sorter: (a, b) => a.end_time.length - b.end_time.length
         }

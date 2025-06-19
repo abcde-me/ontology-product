@@ -67,7 +67,15 @@ export const routes: IRoute[] = [
     name: 'workflowTask',
     key: '/tenant/compute/modaforge/workflowTask',
     component: React.lazy(async () => import('../../workflowTask')),
-    children: []
+    children: [
+      {
+        name: 'taskDetail',
+        key: '/tenant/compute/modaforge/workflowTaskDetail',
+        component: React.lazy(
+          async () => import('../../workflowTask/detail')
+        )
+      }
+    ]
   },
   //APIKey
   {
