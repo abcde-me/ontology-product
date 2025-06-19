@@ -1,25 +1,30 @@
 .workflow {
   background-color: white;
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   margin: 10px;
-  padding: 20px; 
-  border-radius: 10px; 
+  padding: 20px;
+  border-radius: 10px;
   min-height: 94%
 }
+
 .workflow .arco-table-tr>th {
-    background-color:rgb(245, 249, 255) !important;
+  background-color: rgb(245, 249, 255) !important;
 }
+
 .workflow .arco-table-content-scroll .arco-table-content-inner {
   min-height: 335px;
 }
+
 .workflow .arco-pagination-total-text {
   line-height: 32px;
 }
+
 .workflow .operate-text {
-    color: rgb(0, 125, 250);
-    cursor: pointer;
+  color: rgb(0, 125, 250);
+  cursor: pointer;
 }
+
 .workflow .operate-text:hover {
-    color: black;
+  color: black;
 }
