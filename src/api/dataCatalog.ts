@@ -17,9 +17,17 @@ export async function downloadFileById(id: string, params: any = {}) {
     .do();
 }
 
+//获取目录列表
 export async function getCatalogList(param:any = {}) {
   return await UAPI.RES.catalogListApi({})
     .get(param)
+    .inRegion()
+    .do();
+}
+
+export async function getCatalogPreview(param:any = {}) {
+  return await UAPI.RES.catalogPreviewApi({path:param.path})
+    .get()
     .inRegion()
     .do();
 }
@@ -29,7 +37,7 @@ export async function getCatalogList(param:any = {}) {
 
 
 
-
+//删除目录文件接口
 export async function deleteFileById(id: string, params: any = {}) {
   return await UAPI.RES.fileDeleteApi({ file_id: id })//暂定只传一个id，后面再添加其他参数
     .delete(params)
