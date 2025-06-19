@@ -1,6 +1,7 @@
 import * as React from 'react';
 import auth, { AuthParams } from '@/utils/authentication';
 import { useEffect, useMemo, useState } from 'react';
+import { Redirect } from 'react-router';
 
 export type IRoute = AuthParams & {
   name: string;
@@ -35,8 +36,13 @@ export const routes: IRoute[] = [
   {
     name: 'dataLoad',
     key: '/tenant/compute/modaforge/dataLoad',   //临时修改../../dataLoad/index
-    component: React.lazy(async () => import('../../dataLoad/detail/dataLoad-detail')),
+    component: React.lazy(async () => import('../../dataLoad')),
     children: [
+      {
+        name:'dataLoadList',
+        key: '/tenant/compute/modaforge/dataLoad/list',
+        component: React.lazy(async () => import('../../dataLoad/list/list')),
+      },
       {
         name:'dataLoadDetail',
         key: '/tenant/compute/modaforge/dataLoad/detail',

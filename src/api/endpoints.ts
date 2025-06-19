@@ -217,6 +217,7 @@ export const ModaForgeResourceEndpoints = {
   createWorkflow: PrefixV2 + '/apps',
   // 工作流详情
   workflowDetail: PrefixV2 + '/apps/{appId}'
+  
 };
 
 /**
