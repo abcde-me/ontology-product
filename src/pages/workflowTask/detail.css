@@ -1,0 +1,8 @@
+.workflow-task-detail {
+  padding: 10px;
+}
+
+.workflow-task-detail .arco-breadcrumb-item>.arco-icon {
+  color: #000000;
+  cursor: pointer;
+}
