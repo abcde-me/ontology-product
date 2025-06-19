@@ -219,11 +219,18 @@ export const ModaForgeResourceEndpoints = {
   // 工作流详情
   workflowDetail: PrefixV2 + '/apps/{appId}',
 
+
+
 //数据目录
   //获取数据目录
   catalogListApi: PrefixAimdo + '/directory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdo + '/path/files',
+  //查询目标数据文件列表
+  catalogPreviewApi:PrefixAimdo + '/path/directory/{path}',//数据集管理在用
+
+
+
 
 
   //数据集

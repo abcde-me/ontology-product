@@ -194,10 +194,11 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 提交表单数据,新建数据集
-  const handleSubmit = (formData: any) => {    console.log('新建数据集:', formData);
-    createDataset(formData).then(res => {
-      console.log(res);
-    })
+  const handleSubmit = (formData: any) => {
+    console.log('新建数据集:', formData);
+    // createDataset(formData).then(res => {
+    //   console.log(res);
+    // })
     Message.success('数据集创建成功！');
     closeModal();
   };
