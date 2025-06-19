@@ -179,8 +179,8 @@ export default function WorkflowList() {
                     <span className="operate-text" onClick={() => { handleCloneWorkflow(record) }}>复制</span>
                     <Popconfirm
                         focusLock
-                        title="删除该连接器"
-                        content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
+                        title="确定删除工作流吗？"
+                        content="删除该工作流后，工作流中的内容将全部清除。"
                         onOk={() => {
                             handleDeleteWorkflow(record.id);
                             Message.success({
@@ -189,7 +189,7 @@ export default function WorkflowList() {
                         }}
                         onCancel={() => {
                             Message.error({
-                                content: '删除失败，请重试'
+                                content: '删除失败，请稍后重试'
                             });
                         }}
                     >
