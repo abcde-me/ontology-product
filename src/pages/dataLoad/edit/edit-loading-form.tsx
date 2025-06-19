@@ -1,11 +1,11 @@
 import { Form, Input, TimePicker, Tag, Select, Alert } from '@arco-design/web-react';
 import Styles from './index.module.css';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './index.css'
 // 导入每周数据
-import { Weekly_Options } from './constants'
+import { Weekly_Options } from '../data/constants'
 // 导入每月的数据
-import { Monthly_Options } from './constants'
+import { Monthly_Options } from '../data/constants'
 // 选择器的实例
 const Option = Select.Option;
 
@@ -22,7 +22,7 @@ const quickOptionsData = [
     '每周一上午9点'
 ]
 
-const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
+const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
     // 频率选择器选择的数据
     const [frequencyData, setFrequencyData] = useState('')
 
@@ -113,8 +113,8 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                                     style={{
                                         width: 300,
                                     }}
-                                    
-                                    onChange={(val) => { monthlyHan(val.map(item=>item.slice(0,-1))) }}
+
+                                    onChange={(val) => { monthlyHan(val.map(item => item.slice(0, -1))) }}
                                 />
                             </Form.Item>
                         }
@@ -154,4 +154,4 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
     );
 };
 
-export default CycleLoadingForm;
+export default EditLoadingForm;
