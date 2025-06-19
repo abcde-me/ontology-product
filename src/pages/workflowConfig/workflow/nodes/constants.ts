@@ -39,7 +39,8 @@ import ListFilterPanel from './list-operator/panel';
 import { TransferMethod } from '@/pages/workflowConfig/types/app';
 import TextNode from './text/node';
 import TextPanel from './text/panel';
-
+import PicNode from './pic/node';
+import PicPanel from './pic/panel';
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Answer]: AnswerNode,
   [BlockEnum.LLM]: LLMNode,
@@ -62,7 +63,7 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
   [BlockEnum.End]: EndNode,
   [BlockEnum.Text]: TextNode,
-  [BlockEnum.Pic]: TextNode,
+  [BlockEnum.Pic]: PicNode,
   [BlockEnum.Video]: TextNode,
   [BlockEnum.Audio]: TextNode,
   [BlockEnum.Enhancement]: TextNode,
@@ -91,7 +92,7 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartPanel,
   [BlockEnum.End]: EndPanel,
   [BlockEnum.Text]: TextPanel,
-  [BlockEnum.Pic]: TextPanel,
+  [BlockEnum.Pic]: PicPanel,
   [BlockEnum.Video]: TextPanel,
   [BlockEnum.Audio]: TextPanel,
   [BlockEnum.Cleaning]: TextPanel,

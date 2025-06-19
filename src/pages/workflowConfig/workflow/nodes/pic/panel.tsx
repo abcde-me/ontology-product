@@ -119,10 +119,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     return {
       key: index,
       name: 'Jane Doe ' + index,
-      fileType: fileType[index],
       size: Math.floor(Math.random() * 100),
-      gender: index % 2 > 0 ? 'male' : 'female',
-      date: formattedDateOverall
     };
   });
 
@@ -163,65 +160,19 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         }}
         layout="inline"
         onChange={onValuesChange}
-        // onValuesChange={onValuesChange}
-        // onValuesChange={(_, v) => {
-        //   console.log('ccccccccc', _, v);
-        //   const allValues = form.getFieldsValue();
-        //   console.log('所有字段的值:', allValues);
-        //   if (v.vars.some((v) => !v || !v.type || !v.id)) {
-        //     form.setFieldValue(
-        //       'vars',
-        //       v.vars.map(
-        //         (v) =>
-        //           v ?? {
-        //             variable: '',
-        //             label: '',
-        //             required: false,
-        //             type: 'string',
-        //             id: uuid4()
-        //           }
-        //       )
-        //     );
-        //   }
-        // }}
       >
-        <FormItem
-          layout="inline"
-          label="选择文件："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <div>已选择{fileNum}个文件</div>
-        </FormItem>
-        <div>
           <Table
+            style={{
+              width: '100%'
+            }}
             columns={[
               {
                 title: '文件名',
                 dataIndex: 'name'
               },
               {
-                title: '类型',
-                dataIndex: 'fileType',
-                filters: [
-                  {
-                    text: 'London',
-                    value: 'London'
-                  },
-                  {
-                    text: 'Paris',
-                    value: 'Paris'
-                  }
-                ]
-              },
-              {
                 title: '文件大小',
-                dataIndex: 'size'
-              },
-              {
-                title: '载入开始时间',
-                dataIndex: 'date',
+                dataIndex: 'size',
                 sorter: (a, b) => a.name.length - b.name.length
               }
             ]}
@@ -239,11 +190,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             }}
             data={defaultData}
           />
-        </div>
         <FormItem
           layout="vertical"
-          label="分段方式："
-          field="segmentation"
+          label="图片描述模型:"
+          field="imgDescModel"
           labelAlign="left"
           required
         >
@@ -267,53 +217,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           layout="vertical"
-          label="分段最大长度："
-          field="maxSegment"
-          labelAlign="left"
-          required
-        >
-          <InputNumber
-            placeholder="Please enter"
-            min={0}
-            max={1200}
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              setMaxSegmentLength(value);
-            }}
-          />
-          <div className="wk-node-panel-content-tip">800-1200</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本处理规则："
-          field="textProcessingRules"
-          labelAlign="left"
-          required
-        >
-          <Checkbox
-            checked={textProcessingRules.replaceExpressionsAndSymbols}
-            onChange={(checked) =>
-              handleCheckboxChange('replaceExpressionsAndSymbols', checked)
-            }
-          >
-            替换表达和特殊符号
-          </Checkbox>
-          <Checkbox
-            checked={textProcessingRules.removeValidUrlsAndEmails}
-            onChange={(checked) =>
-              handleCheckboxChange('removeValidUrlsAndEmails', checked)
-            }
-          >
-            删除有效URL和电子邮箱地址
-          </Checkbox>
-          <div className="wk-node-panel-content-tip">
-            选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="OCR模型："
-          field="ocrModel"
+          label="图片嵌入模型:"
+          field="imgEmbedModel"
           labelAlign="left"
           required
         >
@@ -323,7 +228,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             onChange={(value) => {
               console.log(value);
             }}
-            defaultValue={0}
+            defaultValue={1}
           >
             {segmentationOptions.map((option) => (
               <Option key={option.value} value={option.value}>
@@ -332,57 +237,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             ))}
           </Select>
           <div className="wk-node-panel-content-tip">
-            当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="图片描述模型："
-          field="imageCaptionModel"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div className="wk-node-panel-content-tip">
-            用于指定对文本文件中的图片进行caption 时使用的模型。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本嵌入模型："
-          field="textEmbeddingModel"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div className="wk-node-panel-content-tip">
-            指定对文本内容进行embedding 的模型。
+            选择切分文本的方式，目前支持按照字符、句子和段落。
           </div>
         </FormItem>
       </Form>
