@@ -26,7 +26,6 @@ function WorkflowConfig() {
         setLoading(false)
       } else {
         const app = await createWorkflow({ name: '新建工作流', mode: "workflow" })
-        console.log('appappapp', app);
         history.push('/tenant/compute/modaforge/workflowConfig?id=' + app.data.id)
       }
     }

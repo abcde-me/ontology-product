@@ -3,6 +3,7 @@ import { string } from 'mobx-state-tree/dist/internal';
 
 /**获取知识库列表 */
 export async function getDatasetsList(params) {
+  // @ts-expect-error
   const result = await UAPI.RES.datasets({}).get(params).inRegion().do();
   // 适配dify字段
   result.data.data?.forEach((d) => {
@@ -75,8 +76,15 @@ export async function getdocSegmentation(
     .do();
 }
 //文档操作接口,如：启用，禁用
-export async function putdocSwitch(dataset_id: string, document_id: string, action: string) {
-  return UAPI.RES.docSwitch({ dataset_id, document_id, action }).put().inRegion().do();
+export async function putdocSwitch(
+  dataset_id: string,
+  document_id: string,
+  action: string
+) {
+  return UAPI.RES.docSwitch({ dataset_id, document_id, action })
+    .put()
+    .inRegion()
+    .do();
 }
 //文档操作接口,如：启用，禁用  分段
 export async function putdocSwitchSegmentation(
@@ -85,7 +93,12 @@ export async function putdocSwitchSegmentation(
   action: string,
   segment_id: string
 ) {
-  return UAPI.RES.docSwitchSegmentation({ dataset_id, document_id, action, segment_id })
+  return UAPI.RES.docSwitchSegmentation({
+    dataset_id,
+    document_id,
+    action,
+    segment_id
+  })
     .put()
     .inRegion()
     .do();
@@ -95,13 +108,21 @@ export async function postdocEditList(dataset_id: string, action: any) {
   return UAPI.RES.docEditList({ dataset_id }).post(action).inRegion().do();
 }
 //文档删除接口
-export async function deletedocEditList(dataset_id: string, document_id: string) {
-
-  return UAPI.RES.docdeleteList({ dataset_id, document_id }).delete().inRegion().do();
+export async function deletedocEditList(
+  dataset_id: string,
+  document_id: string
+) {
+  return UAPI.RES.docdeleteList({ dataset_id, document_id })
+    .delete()
+    .inRegion()
+    .do();
 }
 //文档详情接口
 export async function getdocDetail(dataset_id: string, document_id: string) {
-  return UAPI.RES.doxdetailData({ dataset_id, document_id }).get().inRegion().do();
+  return UAPI.RES.doxdetailData({ dataset_id, document_id })
+    .get()
+    .inRegion()
+    .do();
 }
 //文档索引状态接口
 export async function getdocIndex(dataset_id: string, document_id: string) {
@@ -109,23 +130,41 @@ export async function getdocIndex(dataset_id: string, document_id: string) {
 }
 //知识库命中测试接口
 export async function postHitTest(dataset_id: string, params: any) {
-
   return UAPI.RES.hitTestapi({ dataset_id }).post(params).inRegion().do();
 }
 //	文档分段删除接口
-export async function deletedocsublevel(dataset_id: string, document_id: string, segment_id?: string) {
-
-  return UAPI.RES.docDeleteSublevel({ dataset_id, document_id, segment_id }).delete().inRegion().do();
+export async function deletedocsublevel(
+  dataset_id: string,
+  document_id: string,
+  segment_id?: string
+) {
+  return UAPI.RES.docDeleteSublevel({ dataset_id, document_id, segment_id })
+    .delete()
+    .inRegion()
+    .do();
 }
 //添加文档分段接口
-export async function AddDocsublevel(dataset_id: string, document_id: string, params: any) {
-
-  return UAPI.RES.docAddSublevel({ dataset_id, document_id }).post(params).inRegion().do();
+export async function AddDocsublevel(
+  dataset_id: string,
+  document_id: string,
+  params: any
+) {
+  return UAPI.RES.docAddSublevel({ dataset_id, document_id })
+    .post(params)
+    .inRegion()
+    .do();
 }
 //编辑文档分段接口
-export async function editDocsublevel(dataset_id: string, document_id: string, segment_id: string, params: any) {
-
-  return UAPI.RES.docEditSublevel({ dataset_id, document_id, segment_id }).post(params).inRegion().do();
+export async function editDocsublevel(
+  dataset_id: string,
+  document_id: string,
+  segment_id: string,
+  params: any
+) {
+  return UAPI.RES.docEditSublevel({ dataset_id, document_id, segment_id })
+    .post(params)
+    .inRegion()
+    .do();
 }
 //	知识库命中测试记录列表接口
 export async function getHitRecord(dataset_id: string, params: any) {
@@ -133,10 +172,7 @@ export async function getHitRecord(dataset_id: string, params: any) {
 }
 //知识库文档内容获取
 export async function getDocContent(file_id: string) {
-  const response = await UAPI.RES.docContent({ file_id })
-    .get()
-    .inRegion()
-    .do();
+  const response = await UAPI.RES.docContent({ file_id }).get().inRegion().do();
 
   return response;
 }

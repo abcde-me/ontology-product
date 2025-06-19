@@ -18,7 +18,7 @@ export type IRoute = AuthParams & {
 
 // om 运维、tenant 运营、portal 租户
 export const routes: IRoute[] = [
-  //主页
+  // 主页
   {
     name: 'home',
     key: '/tenant/compute/modaforge/home',
@@ -46,7 +46,9 @@ export const routes: IRoute[] = [
       {
         name:'dataLoadDetail',
         key: '/tenant/compute/modaforge/dataLoad/detail',
-        component: React.lazy(async () => import('../../dataLoad/detail/dataLoad-detail')),
+        component: React.lazy(
+          async () => import('../../dataLoad/detail/dataLoad-detail')
+        )
       }
     ]
   },

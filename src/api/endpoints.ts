@@ -121,9 +121,9 @@ export const ResourceEndpoints = {
 // 研发环境部署
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
-
+export const PrefixV1 = '/api/v1';
+export const PrefixAimdo = '/api/aimdo/v1';
 export const ResourceEndpointsV2 = {
-  datasets: PrefixV2 + '/datasets',
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
   knowledgeBaseList: PrefixV2 + '/datasets',
@@ -159,7 +159,8 @@ export const ResourceEndpointsV2 = {
   //删除文件的端点
   fileDeleteApi:Prefix+`/files/delete/{file_id}`,
   dataCatalogListApi:Prefix+`load_tasks/files{file_id}`,
-  CatalogListApi:Prefix+`/catalogs`,
+
+  
   CatalogCreateApi:Prefix+`/catalogs`,
   fileExportApi:Prefix+`/files/export`,
   connectorListAPI:Prefix+`/connectors`,
@@ -216,8 +217,30 @@ export const ModaForgeResourceEndpoints = {
   // 新建工作流
   createWorkflow: PrefixV2 + '/apps',
   // 工作流详情
-  workflowDetail: PrefixV2 + '/apps/{appId}'
-  
+  workflowDetail: PrefixV2 + '/apps/{appId}',
+
+//数据目录
+  //获取数据目录
+  catalogListApi: PrefixAimdo + '/directory',
+  //查询指定目录下加载成功的文件信息
+  fileListApi: PrefixAimdo + '/path/files',
+
+
+  //数据集
+  //获取数据集列表
+  datasetsApi: PrefixV1 + '/dataset',
+  //获取数据集详情
+  datasetDetailApi: PrefixV1 + '/dataset/{id}',
+  //创建数据集
+  createDatasetApi: PrefixV1 + '/dataset',
+  //获取标签列表
+  tagListApi: PrefixV1 + '/tag',
+  //删除数据集
+  deleteDataset: PrefixV1 + '/dataset/{id}',
+  //查询连接器信息列表
+  connectorListApi: PrefixAimdo + '/connector',
+  //查询指定连接器加载成功的文件信息
+  connectorFileListApi: PrefixAimdo + '/connectors/{connector_id}/files'
 };
 
 /**

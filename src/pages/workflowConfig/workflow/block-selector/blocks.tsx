@@ -34,9 +34,6 @@ const Blocks = ({
   const groups = useMemo(() => {
     return BLOCK_CLASSIFICATIONS.reduce((acc, classification) => {
       const list = groupBy(blocks, 'classification')[classification].filter((block) => {
-        if (block.type === BlockEnum.Answer && !isChatMode)
-          return false
-
         return block.title.toLowerCase().includes(searchText.toLowerCase()) && availableBlocksTypes.includes(block.type)
       })
 
@@ -45,20 +42,12 @@ const Blocks = ({
         [classification]: list,
       }
     }, {} as Record<string, typeof blocks>)
-  }, [blocks, isChatMode, searchText, availableBlocksTypes])
+  }, [blocks, searchText, availableBlocksTypes])
   const isEmpty = Object.values(groups).every(list => !list.length)
 
   // 过滤暂时无用节点
   const renderGroup = useCallback((classification: string) => {
-    const list = groups[classification].filter(b =>
-      b.type !== BlockEnum.Agent &&
-      b.type !== BlockEnum.TemplateTransform &&
-      b.type !== BlockEnum.Iteration &&
-      b.type !== BlockEnum.Loop &&
-      b.type !== BlockEnum.QuestionClassifier &&
-      b.type !== BlockEnum.ListFilter &&
-      b.type !== BlockEnum.Assigner
-    )
+    const list = groups[classification];
 
     return (
       <div
@@ -88,7 +77,7 @@ const Blocks = ({
                     />
                     <div className='system-md-medium text-text-primary text-[16px]/[24px] '>{block.title}</div>
                   </div>
-                  <div className='text-text-tertiary system-xs-regular text-[12px]/[20px] text-[#6E7B8D]'>{nodesExtraData[block.type].about}</div>
+                  <div className='text-text-tertiary system-xs-regular text-[12px]/[20px] text-[#6E7B8D]'>{nodesExtraData[block.type]?.about}</div>
                 </div>
               )}
             >

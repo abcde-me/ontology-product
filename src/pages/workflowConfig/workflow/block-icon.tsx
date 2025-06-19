@@ -60,13 +60,21 @@ const getIcon = (type: BlockEnum, className: string) => {
   //   [BlockEnum.ListFilter]: <ListFilter className={className} />,
   //   [BlockEnum.Agent]: <Agent className={className} />,
   // }[type]
-  return <RiApps2Fill className={className}/>
+  return <RiApps2Fill className={className} />
 }
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
+  [BlockEnum.Text]: 'bg-util-colors-indigo-indigo-500',
+  [BlockEnum.Pic]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.Audio]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
+
+  // TODO：待删除
   [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
   [BlockEnum.Code]: 'bg-util-colors-blue-blue-500',
-  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
   [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Iteration]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Loop]: 'bg-util-colors-cyan-cyan-500',
@@ -82,7 +90,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.DocExtractor]: 'bg-util-colors-green-green-500',
   [BlockEnum.ListFilter]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Agent]: 'bg-util-colors-indigo-indigo-500',
-}
+};
 const BlockIcon: FC<BlockIconProps> = ({
   type,
   size = 'sm',
@@ -100,12 +108,7 @@ const BlockIcon: FC<BlockIconProps> = ({
     `}
     >
       {
-        type !== BlockEnum.Tool && (
-          getIcon(type, size === 'xs' ? 'w-3 h-3' : 'w-3.5 h-3.5')
-        )
-      }
-      {
-        type === BlockEnum.Tool && toolIcon && (
+        toolIcon && (
           <>
             {
               typeof toolIcon === 'string'

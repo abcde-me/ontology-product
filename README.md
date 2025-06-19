@@ -6,7 +6,7 @@ ModaForge 多模态数据治理平台前端框架
 
 ## 开发规范
 
-[开发SOP](./docs/DEV.md)
+[开发规范](./docs/DEV.md)
 
 ## 运行方式
 

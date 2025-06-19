@@ -1,7 +1,7 @@
 import { Form, Input, Button, Select, Space, Radio, Table, Checkbox } from '@arco-design/web-react';
-import React, { useState,useEffect } from 'react';
-import {getCatalogList} from '@/api/dataCatalog'
-import {getconnectorList,getconnectorFileInformation} from '@/api/datasetManagement'
+import React, { useState, useEffect } from 'react';
+import { getCatalogList } from '@/api/dataCatalog'
+import { getConnectorList, getConnectorFileList, getTagList } from '@/api/datasetManagement'
 interface Dataset {
   key?: string;
   name: string;
@@ -30,7 +30,7 @@ const cstargetDataSourceOptions = [
   { label: '连接器1', value: 'connector1' },
   { label: '连接器2', value: 'connector2' },
 ];
-const csconnectorList=[
+const csconnectorList = [
   {
     "id": 101,
     "name": "s3-production-updated",
@@ -47,53 +47,125 @@ const csconnectorList=[
     "status": "connected"
   }
 ]
+//连接器列表转换为select选项
+function convertToSelectOptions(connectorList) {
+  return connectorList.map(connector => ({
+    label: connector.name,
+    value: connector.id,
+  }));
+}
 
-function DatasetForm({ onSubmit, onCancel }){
+//测试数据
+const tagOptions = [
+  {
+    "id": 1,
+    "name": "nlp"
+  },
+  {
+    "id": 2,
+    "name": "gan"
+  }
+];
+//标签列表转换为select选项
+function convertTotagSelectOptions(data = []) {
+  return data.map(item => ({
+    label: item.name,
+    value: item.name
+  }));
+}
+
+
+
+
+const mockFiles: DataFile[] = [
+  { key: '1', filename: 'data1.jsonl', size: '2.3 MB', modifyTime: '2025-05-30' },
+  { key: '2', filename: 'conversations.jsonl', size: '5.1 MB', modifyTime: '2025-05-28' },
+  { key: '3', filename: 'training_set.jsonl', size: '8.7 MB', modifyTime: '2025-05-25' },
+];
+
+function DatasetForm({ onSubmit, onCancel }) {
   const [form] = Form.useForm();
-  const [dataSource, setDataSource] = useState<'volume' | 'connector'>('volume');
+  const [dataSource, setDataSource] = useState<'volume' | 'connector'>('volume');//数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [showFileSelection, setShowFileSelection] = useState(false);
+  const [showDataPreview, setShowDataPreview] = useState(false);//数据预览
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]);//目标数据源选项
   const [connectorList, setConnectorList] = useState([]);//连接器列表
   const [connectorFileInformation, setConnectorFileInformation] = useState([]);//连接器文件信息
+  const [previewData, setPreviewData] = useState([]);//预览数据
+  //标签列表
+  const [tagList, setTagList] = useState([]);//标签列表
   // 标签选项
-  const tagOptions = [
-    { label: '标签1', value: '标签1' },
-    { label: '标签2', value: '标签2' },
-    { label: '标签3', value: '标签3' },
-    { label: '文本', value: '文本' },
-    { label: '图片', value: '图片' },
-    { label: '音频', value: '音频' },
-  ];
+
 
 
 
   // 模拟文件数据
-  const mockFiles: DataFile[] = [
-    { key: '1', filename: 'data1.jsonl', size: '2.3 MB', modifyTime: '2025-05-30' },
-    { key: '2', filename: 'conversations.jsonl', size: '5.1 MB', modifyTime: '2025-05-28' },
-    { key: '3', filename: 'training_set.jsonl', size: '8.7 MB', modifyTime: '2025-05-25' },
+
+
+  // 模拟预览数据
+  const mockPreviewData = [
+    {
+      id: 100,
+      instruction: "请解释下面的历史事件",
+      content: "马克思主义基本原理概论，它的意义和影响。当天终于能够自己做主，能够从世界社会主义运动的目标和理想出发，去考察社会主义革命发展规律。当确认了该主要政治目标，我们具有了真正认识资本主义的基础，为充分认识生产关系的规律奠定了基础。",
+      response: "马克思主义的了新的立体形意识形态的演进。希望您能像您心中到意像，既可能让你的心了有农艺手续要在这理论的基础上，有力证明传统该不能作出充分的理论论证。正所谓资本主义的形成，总是每次了充实的仪式，选择性的发展演进和完善的了固面貌的塑造。对于事业的不懈追求并不是了爱伤像的"
+    },
+    {
+      id: 200,
+      instruction: "请分析以下金融案例的会计处理",
+      content: "某公司于现金购置了一套新的生产设备，价值500万元。该设备的使用年限为10年，残值为50万元。假设使用直线法进行折旧计算，请你算计算年度折旧费用。另外如果某设备在8年后出售，售价为100万元，请计算处置损益。",
+      response: "根据题目信息计算折旧和处置损益：1、年度折旧计算：（设备原值-残值）/使用年限=（500-50）/10=45万元/年  2、8年后的累计折旧：45×8=360万元  3、设备账面净值：500-360=140万元  4、处置损益：售价-账面净值=100-140=-40万元（处置损失）  因此，该设备年度折旧费用为45万元，8年后出售产生40万元的处置损失。"
+    },
+    {
+      id: 300,
+      instruction: "请详细分析这段文本的文学特征和写作风格",
+      content: "夜，像是一副巨大的黑色丝绸，轻柔地铺展在大地之上。月亮像一枚银色的钮扣，缀在这片暗夜的幕布上。远山如墨，近树成影，偶尔传来几声鸟叫，打破了这份宁静。一阵微风吹过，树叶沙沙作响，仿佛在诉说着什么秘密。",
+      response: "这段文本具有以下文学特征：1、修辞手法：运用了比喻（夜如丝绸、月如钮扣）、拟人（树叶诉说秘密）等手法，形象生动  2、感官描写：通过视觉（黑色、银色）、听觉（鸟叫、沙沙声）营造氛围  3、静中有动：以静态描写为主，点缀动态元素（微风、鸟叫）形成对比  4、诗意语言：语言优美、节奏感强，具有较强的画面感和音乐性  5、意境营造：通过自然景物的描绘，营造出宁静优美的夜晚意境，给读者以美的享受。"
+    }
   ];
 
-  const getConnectorFileInformationfun = (id:string,type:'jsonl') => {
-    getconnectorFileInformation({connector_id:id,type:type}).then(res => {
-      console.log(res)
+  const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
+    getConnectorFileList({ connector_id: id, type: type }).then(res => {
+      setConnectorFileInformation(res.data)
     })
-  }//获取连接器文件信息
+  }//查询指定连接器加载成功的文件信息
 
- useEffect(() => {
-  //数据目录卷
-  // getCatalogList().then(res => {
-  //   console.log(res)
-  // })//获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
-  setTargetDataSourceOptions(cstargetDataSourceOptions);//测试数据
+  // 获取数据目录卷预览数据的方法
+  const getVolumePreviewData = (volumeId: string) => {
+    // 这里应该调用真实的API
+    // getCatalogPreview(volumeId).then(res => {
+    //   setPreviewData(res.data)
+    // })
 
-  //连接器
-  // getconnectorList({scope:1}).then(res => {
-  //   console.log(res)
-  // })//获取连接器列表,获取的数据需要处理，不处理没办法直接使用
-  setConnectorList(csconnectorList);//测试数据
- }, []);
+    // 暂时使用模拟数据
+    setPreviewData(mockPreviewData);
+  };
+
+
+
+
+  useEffect(() => {
+    //数据目录卷
+    // getCatalogList({integer:2}).then(res => {
+    //   console.log(res)
+    // })//获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
+    setTargetDataSourceOptions(cstargetDataSourceOptions);//测试数据
+
+    //连接器
+    // getConnectorList({scope:1}).then(res => {
+    //   console.log(res)
+    //   setConnectorList(convertToSelectOptions(res.data))
+    // })//获取连接器列表,获取的数据需要处理，不处理没办法直接使用
+    setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
+
+    //标签
+    // getTagList().then(res => {
+    //   setTagList(res.data)
+    //   console.log(res.data)
+    // })
+    setTagList(convertTotagSelectOptions(tagOptions))//测试数据
+  }, []);
 
 
 
@@ -103,17 +175,27 @@ function DatasetForm({ onSubmit, onCancel }){
     setDataSource(value);
     form.setFieldValue('dataSource', value);
     setShowFileSelection(false);
+    setShowDataPreview(false);
     setSelectedFiles([]);
+    setPreviewData([]);
   };
 
   // 处理目标数据源选择
   const handleTargetDataSourceChange = (value: string) => {
-    if (dataSource === 'connector') {
-      setShowFileSelection(true);
+    if (dataSource === 'connector') {//连接器
+      setShowFileSelection(true);//显示文件选择
+      setShowDataPreview(false);//不显示数据预览
+      // 加载连接器文件信息
+      getConnectorFileInformationfun(value, 'jsonl');
+    } else if (dataSource === 'volume') {//数据目录卷
+      setShowDataPreview(true);//显示数据预览
+      setShowFileSelection(false);//不显示文件选择
+      // 加载数据目录卷预览数据
+      getVolumePreviewData(value);
     }
   };
 
-  // 文件选择表格列定义
+  // 文件选择表格列定义,后期会变
   const fileColumns = [
     {
       title: '',
@@ -146,6 +228,65 @@ function DatasetForm({ onSubmit, onCancel }){
     },
   ];
 
+  // 数据预览表格列定义
+  const previewColumns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      width: 80,
+    },
+    {
+      title: 'INSTRUCTION',
+      dataIndex: 'instruction',
+      width: 250,
+      ellipsis: true,
+      render: (text: string) => (
+        <div style={{
+          maxHeight: '60px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-all'
+        }}>
+          {text}
+        </div>
+      ),
+    },
+    {
+      title: 'CONTENT',
+      dataIndex: 'content',
+      width: 300,
+      ellipsis: true,
+      render: (text: string) => (
+        <div style={{
+          maxHeight: '60px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-all'
+        }}>
+          {text}
+        </div>
+      ),
+    },
+    {
+      title: 'RESPONSE',
+      dataIndex: 'response',
+      width: 300,
+      ellipsis: true,
+      render: (text: string) => (
+        <div style={{
+          maxHeight: '60px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-all'
+        }}>
+          {text}
+        </div>
+      ),
+    },
+  ];
+
+
+  //提交数据
   const handleSubmit = () => {
     form.validate().then((values) => {
       console.log(values);
@@ -165,92 +306,80 @@ function DatasetForm({ onSubmit, onCancel }){
     <div>
       <Form
         form={form}
-        style={{ width: '100%' }}
         autoComplete="off"
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 18 }}
+        labelCol={{ span: 3 }}
+        wrapperCol={{ span: 21 }}
         layout="horizontal"
+        labelAlign='right'
       >
-        <FormItem
-          label="名称"
+        <Form.Item
+          label="数据集名称:"
           field="name"
           rules={[{ required: true, message: '请输入数据集名称' }]}
+          style={{ marginBottom: 16 }}
         >
-          <Input placeholder="输入数据集名称..." />
-        </FormItem>
-
-        <FormItem
-          label="描述说明"
-          field="description"
-          rules={[{ required: true, message: '请输入描述信息' }]}
-        >
-          <Input.TextArea
-            placeholder="这里输入对数据集的描述和说明信息..."
-            rows={4}
-            maxLength={500}
+          <Input
+            maxLength={128}
             showWordLimit
+            style={{ width: '100%', marginLeft: 10 }}
+            placeholder="输入数据集名称..."
           />
-        </FormItem>
+        </Form.Item>
 
         <FormItem
-          label="标签"
+          label="标签:"
           field="tags"
           rules={[{ required: true, message: '请选择至少一个标签' }]}
         >
           <Select
             placeholder="请输入或选择标签（用逗号分隔）..."
             mode="multiple"
-            options={tagOptions}
+            options={tagList}
             allowCreate
+            style={{ marginLeft: 10 }}
           />
         </FormItem>
 
         <FormItem
-          label="数据来源"
+          label="描述说明:"
+          field="description"
+          rules={[{ required: true, message: '请输入描述信息' }]}
+        >
+          <Input.TextArea
+            placeholder="这里输入对数据集的描述和说明信息..."
+            rows={1}
+            maxLength={500}
+            showWordLimit
+            style={{ marginLeft: 10 }}
+          />
+        </FormItem>
+
+        <FormItem
+          label="数据来源:"
           field="dataSource"
           rules={[{ required: true, message: '请选择数据来源' }]}
         >
-          <Radio.Group value={dataSource} onChange={handleDataSourceChange}>
+          <Radio.Group
+            value={dataSource}
+            onChange={handleDataSourceChange}
+            style={{ marginLeft: 10 }}
+          >
             <Radio value="volume">数据目录卷</Radio>
             <Radio value="connector">连接器</Radio>
           </Radio.Group>
         </FormItem>
 
-        <FormItem
-          label="请选择目标数据源/卷"
-          field="targetDataSource"
-          rules={[{ required: true, message: '请选择目标数据源' }]}
-        >
-          {dataSource === 'volume' ? (
-            <Select
-              placeholder="请选择目标数据源..."
-              options={[]}
-              onChange={handleTargetDataSourceChange}
-            />
-          ) : <Select
-              placeholder="请选择目标数据源/卷"
-              options={[]}
-          />}
-        </FormItem>
+        {
+          dataSource==='volume'?<div>
+              
+          </div>:
+          <div>
 
-        {showFileSelection && (
-          <FormItem label="选择数据文件" wrapperCol={{ span: 18, offset: 6 }}>
-            <div style={{ marginBottom: 16 }}>
-              <span style={{ fontSize: 12, color: '#999' }}>
-                注意：目前允许同时使用的JSON数据格式，请确保您的文件格式正确，请尽最大努力只上传JSON数据文件
-              </span>
-            </div>
-            <Table
-              columns={fileColumns}
-              data={mockFiles}
-              pagination={false}
-              size="small"
-              style={{ border: '1px solid #e5e5e5' }}
-            />
-          </FormItem>
-        )}
+          </div>
+        }
 
-        <FormItem wrapperCol={{ offset: 6, span: 18 }}>
+        
+        <FormItem wrapperCol={{ offset: 3, span: 21 }}>
           <Space>
             <Button onClick={onCancel}>取消</Button>
             <Button type="primary" onClick={handleSubmit}>
