@@ -23,9 +23,27 @@ export default function WorkflowTaskDetail() {
     fail_content: '这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容。'
   });
   // 初始化解析节点数据
-  const [parseNodeData, setParseNodeData] = useState({
-
-  })
+  const [parseNodeData, setParseNodeData] = useState([
+    {
+      file_name: '文件1',
+      status: true,
+      file_type: 'pdf',
+      start_time: '1749627834576',
+      end_time: '1749627834576',
+    }, {
+      file_name: '文件2',
+      status: false,
+      file_type: 'txt',
+      start_time: '1749627834576',
+      end_time: '1749627834576',
+    }, {
+      file_name: '文件3',
+      status: false,
+      file_type: 'epub',
+      start_time: '1749627834576',
+      end_time: '1749627834576',
+    }
+  ])
 
   // 运行失败状态下重试操作
   const handleRetryWorkflow = (id) => {
