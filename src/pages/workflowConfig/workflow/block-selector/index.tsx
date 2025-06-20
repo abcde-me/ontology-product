@@ -67,6 +67,7 @@ const NodeSelector: FC<NodeSelectorProps> = ({
   const [tags, setTags] = useState<string[]>([])
   const [localOpen, setLocalOpen] = useState(false)
   const open = openFromProps === undefined ? localOpen : openFromProps
+
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setLocalOpen(newOpen)
 
