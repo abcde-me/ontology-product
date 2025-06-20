@@ -28,3 +28,8 @@
 .workflow-task .operate-text:hover {
   color: black;
 }
+
+.workflow-task .arco-table-tr:hover .hover-change {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
+}
