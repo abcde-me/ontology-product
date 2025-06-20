@@ -122,7 +122,7 @@ export const ResourceEndpoints = {
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdo = '/api/aimdo/v1';
+export const PrefixAimdo = '/api/aimdp/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -245,7 +245,7 @@ export const ModaForgeResourceEndpoints = {
   //删除数据集
   deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
-  connectorListApi: PrefixAimdo + '/connector',
+  connectorListApi: PrefixAimdo + '/connectors',
   //查询指定连接器加载成功的文件信息
   connectorFileListApi: PrefixAimdo + '/connectors/{connector_id}/files'
 };

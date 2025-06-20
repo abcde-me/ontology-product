@@ -232,7 +232,7 @@ const cspreviewColumns = [
 function DatasetForm({ onSubmit, onCancel }) {
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>('volume');//数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);//选择文件
   const [showFileSelection, setShowFileSelection] = useState(false);
   const [showDataPreview, setShowDataPreview] = useState(false);//数据预览
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]);//目标数据源选项
@@ -256,11 +256,11 @@ function DatasetForm({ onSubmit, onCancel }) {
     setTargetDataSourceOptions(cstargetDataSourceOptions);//测试数据
 
     //连接器
-    // getConnectorList({scope:1}).then(res => {
-    //   console.log(res)
-    //   setConnectorList(convertToSelectOptions(res.data))
-    // })//获取连接器列表,获取的数据需要处理，不处理没办法直接使用
-    setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
+    getConnectorList({scope:1}).then(res => {
+      console.log(res)
+      // setConnectorList(convertToSelectOptions(res.data))
+    })//获取连接器列表,获取的数据需要处理，不处理没办法直接使用
+    // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
     //标签
     // getTagList().then(res => {
@@ -286,20 +286,19 @@ function DatasetForm({ onSubmit, onCancel }) {
 
   // 处理目标数据源选择
   const handleTargetDataSourceChange = (value: string | (string | string[])[]) => {
-    let path: string;
     if (dataSource === 'volume') {
-      path = 'dst' + '/' + value[0] + '/' + value[1]
+      const path = 'dst' + '/' + value[0] + '/' + value[1]
       getVolumePreviewData(path)
 
     } else if (dataSource === 'connector') {
-      console.log(value)
-      getConnectorFileInformationfun(path, 'jsonl')
+      console.log('选择的连接器ID:', value)
+      getConnectorFileInformationfun(value as string, 'jsonl')
     }
   };
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
-
+    //
     // getConnectorFileList({ connector_id: id, type: type }).then(res => {
     //   setConnectorFileInformation(res.data.files)
     // })
@@ -329,13 +328,13 @@ function DatasetForm({ onSubmit, onCancel }) {
   //提交数据
   const handleSubmit = () => {
     form.validate().then((values) => {
-      console.log(values);
       const formData: Dataset = {
         ...values,
         dataSource,
-        selectedFiles: dataSource === 'connector' ? selectedFiles : undefined,
+        selectedFiles: dataSource === 'connector' ? selectedFiles : undefined,//如果数据源是连接器，则设置选择文件
+        targetDataSource: dataSource === 'volume' ? values.targetDataSource : values.connector,//数据目录卷用targetDataSource，连接器用connector
       };
-      // console.log(formData);
+      console.log('表单数据:', formData);
       onSubmit(formData);
     }).catch((error) => {
       console.log('表单验证失败:', error);
@@ -481,12 +480,12 @@ function DatasetForm({ onSubmit, onCancel }) {
                         style={{ marginLeft: 10 }}
                         onChange={setSelectedFiles}
                         value={selectedFiles}
-                        // renderOption={(option) => (
-                        //   <div>
-                        //     <div>{option.data.name}</div>
-                        //     <small>{option.data.last_modified}</small>
-                        //   </div>
-                        // )}
+                      // renderOption={(option) => (
+                      //   <div>
+                      //     <div>{option.data.name}</div>
+                      //     <small>{option.data.last_modified}</small>
+                      //   </div>
+                      // )}
                       />
                     </FormItem>
                   )}
