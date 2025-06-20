@@ -25,3 +25,7 @@
   text-align: center;
   color: #1E293B;
 }
+
+.parse-node .arco-table-tr>th {
+  background-color: rgb(245, 249, 255) !important;
+}

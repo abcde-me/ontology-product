@@ -84,6 +84,7 @@
   padding: 24px;
   gap: 20px;
   background-color: #FFFFFF;
+  margin: 10px 0;
 }
 
 .workflow-task-detail .work-region .arco-tabs-vertical {
