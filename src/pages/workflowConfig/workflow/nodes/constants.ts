@@ -4,99 +4,108 @@ import StartNode from './start/node';
 import StartPanel from './start/panel';
 import EndNode from './end/node';
 import EndPanel from './end/panel';
-import AnswerNode from './answer/node';
-import AnswerPanel from './answer/panel';
-import LLMNode from './llm/node';
-import LLMPanel from './llm/panel';
-import KnowledgeRetrievalNode from './knowledge-retrieval/node';
-import KnowledgeRetrievalPanel from './knowledge-retrieval/panel';
-import QuestionClassifierNode from './question-classifier/node';
-import QuestionClassifierPanel from './question-classifier/panel';
-import IfElseNode from './if-else/node';
-import IfElsePanel from './if-else/panel';
-import CodeNode from './code/node';
-import CodePanel from './code/panel';
-import HttpNode from './http/node';
-import HttpPanel from './http/panel';
-import ToolNode from './tool/node';
-import ToolPanel from './tool/panel';
-import VariableAssignerNode from './variable-assigner/node';
-import VariableAssignerPanel from './variable-assigner/panel';
-import AssignerNode from './assigner/node';
-import AssignerPanel from './assigner/panel';
-import ParameterExtractorNode from './parameter-extractor/node';
-import ParameterExtractorPanel from './parameter-extractor/panel';
-import IterationNode from './iteration/node';
-import IterationPanel from './iteration/panel';
-import LoopNode from './loop/node';
-import LoopPanel from './loop/panel';
-import DocExtractorNode from './document-extractor/node';
-import DocExtractorPanel from './document-extractor/panel';
-import ListFilterNode from './list-operator/node';
-import ListFilterPanel from './list-operator/panel';
+// import AnswerNode from './answer/node';
+// import AnswerPanel from './answer/panel';
+// import LLMNode from './llm/node';
+// import LLMPanel from './llm/panel';
+// import KnowledgeRetrievalNode from './knowledge-retrieval/node';
+// import KnowledgeRetrievalPanel from './knowledge-retrieval/panel';
+// import QuestionClassifierNode from './question-classifier/node';
+// import QuestionClassifierPanel from './question-classifier/panel';
+// import IfElseNode from './if-else/node';
+// import IfElsePanel from './if-else/panel';
+// import CodeNode from './code/node';
+// import CodePanel from './code/panel';
+// import HttpNode from './http/node';
+// import HttpPanel from './http/panel';
+// import ToolNode from './tool/node';
+// import ToolPanel from './tool/panel';
+// import VariableAssignerNode from './variable-assigner/node';
+// import VariableAssignerPanel from './variable-assigner/panel';
+// import AssignerNode from './assigner/node';
+// import AssignerPanel from './assigner/panel';
+// import ParameterExtractorNode from './parameter-extractor/node';
+// import ParameterExtractorPanel from './parameter-extractor/panel';
+// import IterationNode from './iteration/node';
+// import IterationPanel from './iteration/panel';
+// import LoopNode from './loop/node';
+// import LoopPanel from './loop/panel';
+// import DocExtractorNode from './document-extractor/node';
+// import DocExtractorPanel from './document-extractor/panel';
+// import ListFilterNode from './list-operator/node';
+// import ListFilterPanel from './list-operator/panel';
 // import AgentNode from './agent/node'
 // import AgentPanel from './agent/panel'
 import { TransferMethod } from '@/pages/workflowConfig/types/app';
-import TextNode from './text/node';
-import TextPanel from './text/panel';
-import PicNode from './pic/node';
-import PicPanel from './pic/panel';
+import TextNode from './data-text-parser/node';
+import TextPanel from './data-text-parser/panel';
+import ImageNode from './data-image-parser/node';
+import ImagePanel from './data-image-parser/panel';
+import AudioNode from './data-audio-parser/node';
+import AudioPanel from './data-audio-parser/panel';
+import VideoNode from './data-video-parser/node';
+import VideoPanel from './data-video-parser/panel';
+import CleaningNode from './data-cleaning/node';
+import CleaningPanel from './data-cleaning/panel';
+import EnhancementNode from './data-enhancement/node';
+import EnhancementPanel from './data-enhancement/panel';
+
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
-  [BlockEnum.Answer]: AnswerNode,
-  [BlockEnum.LLM]: LLMNode,
-  [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalNode,
-  [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
-  [BlockEnum.IfElse]: IfElseNode,
-  [BlockEnum.Code]: CodeNode,
-  [BlockEnum.HttpRequest]: HttpNode,
-  [BlockEnum.Tool]: ToolNode,
-  [BlockEnum.VariableAssigner]: VariableAssignerNode,
-  [BlockEnum.Assigner]: AssignerNode,
-  [BlockEnum.VariableAggregator]: VariableAssignerNode,
-  [BlockEnum.ParameterExtractor]: ParameterExtractorNode,
-  [BlockEnum.Iteration]: IterationNode,
-  [BlockEnum.Loop]: LoopNode,
-  [BlockEnum.DocExtractor]: DocExtractorNode,
-  [BlockEnum.ListFilter]: ListFilterNode,
+  // [BlockEnum.Answer]: AnswerNode,
+  // [BlockEnum.LLM]: LLMNode,
+  // [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalNode,
+  // [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
+  // [BlockEnum.IfElse]: IfElseNode,
+  // [BlockEnum.Code]: CodeNode,
+  // [BlockEnum.HttpRequest]: HttpNode,
+  // [BlockEnum.Tool]: ToolNode,
+  // [BlockEnum.VariableAssigner]: VariableAssignerNode,
+  // [BlockEnum.Assigner]: AssignerNode,
+  // [BlockEnum.VariableAggregator]: VariableAssignerNode,
+  // [BlockEnum.ParameterExtractor]: ParameterExtractorNode,
+  // [BlockEnum.Iteration]: IterationNode,
+  // [BlockEnum.Loop]: LoopNode,
+  // [BlockEnum.DocExtractor]: DocExtractorNode,
+  // [BlockEnum.ListFilter]: ListFilterNode,
   // TODO: 以上删除
 
   [BlockEnum.Start]: StartNode,
   [BlockEnum.End]: EndNode,
   [BlockEnum.Text]: TextNode,
-  [BlockEnum.Pic]: PicNode,
-  [BlockEnum.Video]: TextNode,
-  [BlockEnum.Audio]: TextNode,
-  [BlockEnum.Enhancement]: TextNode,
-  [BlockEnum.Cleaning]: TextNode
+  [BlockEnum.Pic]: ImageNode,
+  [BlockEnum.Video]: VideoNode,
+  [BlockEnum.Audio]: AudioNode,
+  [BlockEnum.Enhancement]: EnhancementNode,
+  [BlockEnum.Cleaning]: CleaningNode
 };
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
-  [BlockEnum.Answer]: AnswerPanel,
-  [BlockEnum.LLM]: LLMPanel,
-  [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalPanel,
-  [BlockEnum.QuestionClassifier]: QuestionClassifierPanel,
-  [BlockEnum.IfElse]: IfElsePanel,
-  [BlockEnum.Code]: CodePanel,
-  [BlockEnum.HttpRequest]: HttpPanel,
-  [BlockEnum.Tool]: ToolPanel,
-  [BlockEnum.VariableAssigner]: VariableAssignerPanel,
-  [BlockEnum.VariableAggregator]: VariableAssignerPanel,
-  [BlockEnum.Assigner]: AssignerPanel,
-  [BlockEnum.ParameterExtractor]: ParameterExtractorPanel,
-  [BlockEnum.Iteration]: IterationPanel,
-  [BlockEnum.Loop]: LoopPanel,
-  [BlockEnum.DocExtractor]: DocExtractorPanel,
-  [BlockEnum.ListFilter]: ListFilterPanel,
+  // [BlockEnum.Answer]: AnswerPanel,
+  // [BlockEnum.LLM]: LLMPanel,
+  // [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalPanel,
+  // [BlockEnum.QuestionClassifier]: QuestionClassifierPanel,
+  // [BlockEnum.IfElse]: IfElsePanel,
+  // [BlockEnum.Code]: CodePanel,
+  // [BlockEnum.HttpRequest]: HttpPanel,
+  // [BlockEnum.Tool]: ToolPanel,
+  // [BlockEnum.VariableAssigner]: VariableAssignerPanel,
+  // [BlockEnum.VariableAggregator]: VariableAssignerPanel,
+  // [BlockEnum.Assigner]: AssignerPanel,
+  // [BlockEnum.ParameterExtractor]: ParameterExtractorPanel,
+  // [BlockEnum.Iteration]: IterationPanel,
+  // [BlockEnum.Loop]: LoopPanel,
+  // [BlockEnum.DocExtractor]: DocExtractorPanel,
+  // [BlockEnum.ListFilter]: ListFilterPanel,
   // 以上删除
 
   [BlockEnum.Start]: StartPanel,
   [BlockEnum.End]: EndPanel,
   [BlockEnum.Text]: TextPanel,
-  [BlockEnum.Pic]: PicPanel,
-  [BlockEnum.Video]: TextPanel,
-  [BlockEnum.Audio]: TextPanel,
-  [BlockEnum.Cleaning]: TextPanel,
-  [BlockEnum.Enhancement]: TextPanel
+  [BlockEnum.Pic]: ImagePanel,
+  [BlockEnum.Video]: VideoPanel,
+  [BlockEnum.Audio]: AudioPanel,
+  [BlockEnum.Cleaning]: CleaningPanel,
+  [BlockEnum.Enhancement]: EnhancementPanel
 };
 
 export const CUSTOM_NODE_TYPE = 'custom';
