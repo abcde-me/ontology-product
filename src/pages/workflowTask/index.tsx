@@ -15,46 +15,46 @@ export default function WorkflowTask() {
     const [workflowTaskData, setWorkflowTaskData] = useState([
         {
             id: '1',
-            name: 'Jane Doe',
-            running_time: '50分20秒',
-            source: 'jane.doe@example.com',
-            target: 'jane.doe@example.com',
+            job_name: 'Jane Doe',
+            time_size: '50分20秒',
+            source_path: 'jane.doe@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627834576',
             end_time: '1749627834576',
         },
         {
             id: '2',
-            name: 'Alisa Ross',
-            running_time: '50分20秒',
-            source: 'alisa.ross@example.com',
-            target: 'jane.doe@example.com',
+            job_name: 'Alisa Ross',
+            time_size: '50分20秒',
+            source_path: 'alisa.ross@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627876834',
             end_time: '1749627834576',
         },
         {
             id: '3',
-            name: 'Kevin Sandra',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            job_name: 'Kevin Sandra',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627812365',
             end_time: '1749627834576',
         },
         {
             id: '4',
-            name: '张三',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            job_name: '张三',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '174962787645',
             end_time: '1749627834576',
         },
         {
             id: '5',
-            name: '李四',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            job_name: '李四',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627860783',
             end_time: '1749627834576',
         },
@@ -79,31 +79,31 @@ export default function WorkflowTask() {
             )
         }, {
             title: '运行时长',
-            dataIndex: 'running_time',
+            dataIndex: 'time_size',
             width: 130,
         }, {
             title: '工作流名称',
-            dataIndex: 'name',
+            dataIndex: 'job_name',
             width: 130,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" onClick={() => handleToTaskDeatil(record.id)} title={record.name}>{record.name}</span>
+                <span className="operate-text" onClick={() => handleToTaskDeatil(record.id)} title={record.job_name}>{record.job_name}</span>
             )
         }, {
             title: '源数据目录',
-            dataIndex: 'source',
+            dataIndex: 'source_path',
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.source}>{record.source}</span>
+                <span className="operate-text" title={record.source_path}>{record.source_path}</span>
             )
         }, {
             title: '目标数据目录',
-            dataIndex: 'target',
+            dataIndex: 'target_path',
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.target}>{record.target}</span>
+                <span className="operate-text" title={record.target_path}>{record.target_path}</span>
             )
         }, {
             title: '开始时间',
