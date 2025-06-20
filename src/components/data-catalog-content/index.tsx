@@ -351,20 +351,45 @@ function DataPage(props) {
     setTableData(data)//测试使用
   }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
   return (
-    <div style={{ display: 'flex', padding: 16 }}>
-      {/* 左侧树状导航 */}
-      <div style={{ width: 220, marginRight: 16, backgroundColor: '#fff' }}>
-        <div style={{ padding: 20 }}>
-          <Tree
-            treeData={treeData}
-            defaultExpandedKeys={['src', 'dst']}
-            blockNode
-          />
-        </div>
-      </div>
+    // <div style={{ display: 'flex', padding: 16 }}>
+    //   {/* 左侧树状导航 */}
+    //   <div style={{ width: 220, marginRight: 16, backgroundColor: '#fff' }}>
+    //     <div style={{ padding: 20 }}>
+    //       <Tree
+    //         treeData={treeData}
+    //         defaultExpandedKeys={['src', 'dst']}
+    //         blockNode
+    //       />
+    //     </div>
+    //   </div>
 
-      {/* 右侧主区域 */}
-      <div style={{ flex: 1, width: '100%', height: '500px', backgroundColor: 'red' }}>
+    //   {/* 右侧主区域 */}
+    //   <div style={{ flex: 1, width: '100%', height: '500px', backgroundColor: 'red' }}>
+    //     <SmartTable columns={columns} data={tableData} />
+    //     <Pages
+    //       current={currentPage}//当前页码
+    //       total={total}
+    //       pageSize={pageSize}//每页条数
+    //       onChange={handlePageChange}//页码变化处理
+    //       onPageSizeChange={handlePageSizeChange}//每页条数变化处理
+    //     />
+    //   </div>
+
+    //   <Modal
+    //     title='文件下载'
+    //     visible={visible}
+    //     onOk={() => setVisible(false)}
+    //     onCancel={() => setVisible(false)}
+    //     autoFocus={false}
+    //     focusLock={true}
+    //     footer={null}
+    //   >
+    //     <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
+    //   </Modal>
+
+    // </div>
+    <>
+      <div style={{ flex: 1, width: '100%', height: '500px' }}>
         <SmartTable columns={columns} data={tableData} />
         <Pages
           current={currentPage}//当前页码
@@ -386,8 +411,7 @@ function DataPage(props) {
       >
         <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
       </Modal>
-
-    </div>
+    </>
   );
 }
 

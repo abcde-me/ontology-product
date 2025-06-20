@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 
@@ -17,9 +17,17 @@ function SmartTable<RecordType extends object>({
   rowKey = 'key',
   ...restProps
 }: SmartTableProps<RecordType>) {
+  const [checkStrictly, setCheckStrictly] = useState(true);
   return (
     <Table<RecordType>
       columns={columns}
+      rowSelection={{
+        type: 'checkbox',
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(selectedRowKeys, selectedRows);
+        },
+        checkStrictly,
+      }}
       data={data}
       rowKey={rowKey}
       pagination={false}
