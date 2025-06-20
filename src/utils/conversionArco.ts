@@ -9,7 +9,7 @@ const conversionArco = (time, day, week, cycle) => {
   const cronSec = 0; // 秒（默认 0）
   const cronMin = minute; // 分
   const cronHour = hour; // 时
-  const cronDay = '*'; // 日（默认 *）
+  let cronDay = '*'; // 日（默认 *）
   const cronMonth = '*'; // 月（默认 *）
   let cronWeek = '?'; // 星期（默认 ?）
 

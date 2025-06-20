@@ -123,6 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdo = '/api/aimdo/v1';
+export const PrefixAimdp='/api/aimdp/v1'
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -230,9 +231,6 @@ export const ModaForgeResourceEndpoints = {
   catalogPreviewApi:PrefixAimdo + '/path/directory/{path}',//数据集管理在用
 
 
-
-
-
   //数据集
   //获取数据集列表
   datasetsApi: PrefixV1 + '/dataset',
@@ -247,7 +245,14 @@ export const ModaForgeResourceEndpoints = {
   //查询连接器信息列表
   connectorListApi: PrefixAimdo + '/connector',
   //查询指定连接器加载成功的文件信息
-  connectorFileListApi: PrefixAimdo + '/connectors/{connector_id}/files'
+  connectorFileListApi: PrefixAimdo + '/connectors/{connector_id}/files',
+
+
+    // 连接器接口
+  
+  // 获取连接器数据列表
+  getConnection: PrefixAimdp+'/connectors',
+
 };
 
 /**
