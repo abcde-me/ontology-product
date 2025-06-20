@@ -4,7 +4,7 @@
   }
   .app-workflow-page-header {
     height: 56px;
-    background: #F0F6FE;
+    background: #FFF;
     box-shadow: inset 0 -1px 0 0 #E8E9EB;
     box-sizing: border-box;
     // border-bottom: 1px solid #E2E8F0;
@@ -104,13 +104,15 @@
       margin-right: 12px;
     }
     .add-node-btn {
+      width: 72px;
+      height: 32px;
       cursor: pointer;
       display: flex;
       column-gap: 4px;
       align-items: center;
       border: 1px solid #007DFA;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 6px 10px;
       font-family: PingFangSC-Semibold;
       font-size: 14px;
       color: #007DFA;
@@ -147,6 +149,11 @@
       .play-icon {
         width: 16px;
         height: 16px;
+      }
+      &.is-running {
+        pointer-events: none;
+        opacity: .5;
+        cursor: not-allowed;
       }
     }
   }
@@ -410,51 +417,69 @@
   &.end {
     background-image: url('./images/node-icons/EndIcon.svg');
   }
-  &.llm {
-    background-image: url('./images/node-icons/LLMIcon.svg');
+  &.text {
+    background-image: url('./images/node-icons/TextIcon.svg');
   }
-  &.knowledge-retrieval {
-    background-image: url('./images/node-icons/KBIcon.svg');
+  &.pic {
+    background-image: url('./images/node-icons/ImageIcon.svg');
   }
-  &.agent {
-    background-image: url('./images/workflow/AgentIcon.svg');
+  &.audio {
+    background-image: url('./images/node-icons/AudioIcon.svg');
   }
-  &.question-classifier {
-    background-image: url('./images/workflow/QuestionIcon.svg');
+  &.video {
+    background-image: url('./images/node-icons/VideoIcon.svg');
   }
-  &.if-else {
-    background-image: url('./images/node-icons/IfElseIcon.svg');
+  &.cleaning {
+    background-image: url('./images/node-icons/CleaningIcon.svg');
   }
-  &.iteration {
-    background-image: url('./images/workflow/IterationIcon.svg');
+  &.enhancement {
+    background-image: url('./images/node-icons/EnhancementIcon.svg');
   }
-  &.loop {
-    background-image: url('./images/workflow/LoopIcon.svg');
-  }
-  &.code {
-    background-image: url('./images/node-icons/CodeIcon.svg');
-  }
-  &.template-transform {
-    background-image: url('./images/workflow/TemplateIcon.svg');
-  }
-  &.variable-aggregator {
-    background-image: url('./images/workflow/VarAggIcon.svg');
-  }
-  &.document-extractor {
-    background-image: url('./images/workflow/DocIcon.svg');
-  }
-  &.variable-assigner, &.assigner {
-    background-image: url('./images/workflow/VarAssIcon.svg');
-  }
-  &.parameter-extractor {
-    background-image: url('./images/workflow/ParamExtIcon.svg');
-  }
-  &.http-request {
-    background-image: url('./images/node-icons/HttpIcon.svg');
-  }
-  &.list-operator {
-    background-image: url('./images/workflow/ListIcon.svg');
-  }
+  // &.llm {
+  //   background-image: url('./images/node-icons/LLMIcon.svg');
+  // }
+  // &.knowledge-retrieval {
+  //   background-image: url('./images/node-icons/KBIcon.svg');
+  // }
+  // &.agent {
+  //   background-image: url('./images/workflow/AgentIcon.svg');
+  // }
+  // &.question-classifier {
+  //   background-image: url('./images/workflow/QuestionIcon.svg');
+  // }
+  // &.if-else {
+  //   background-image: url('./images/node-icons/IfElseIcon.svg');
+  // }
+  // &.iteration {
+  //   background-image: url('./images/workflow/IterationIcon.svg');
+  // }
+  // &.loop {
+  //   background-image: url('./images/workflow/LoopIcon.svg');
+  // }
+  // &.code {
+  //   background-image: url('./images/node-icons/CodeIcon.svg');
+  // }
+  // &.template-transform {
+  //   background-image: url('./images/workflow/TemplateIcon.svg');
+  // }
+  // &.variable-aggregator {
+  //   background-image: url('./images/workflow/VarAggIcon.svg');
+  // }
+  // &.document-extractor {
+  //   background-image: url('./images/workflow/DocIcon.svg');
+  // }
+  // &.variable-assigner, &.assigner {
+  //   background-image: url('./images/workflow/VarAssIcon.svg');
+  // }
+  // &.parameter-extractor {
+  //   background-image: url('./images/workflow/ParamExtIcon.svg');
+  // }
+  // &.http-request {
+  //   background-image: url('./images/node-icons/HttpIcon.svg');
+  // }
+  // &.list-operator {
+  //   background-image: url('./images/workflow/ListIcon.svg');
+  // }
 }
 
 .wk-node-wrapper {
@@ -477,7 +502,7 @@
           .input-header,
           .output-header {
             .icon {
-              transform: rotate(180deg);
+              transform: rotate(-90deg);
             }
           }
           .input-list,
@@ -650,55 +675,17 @@
       }
     }
   }
-  // .item-bg {
-  //   background: #FFFFFF;
-  //   box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.1);
-  //   border-radius: 4px;
-  //   padding: 2px 2px 2px 8px;
-  //   .name {
-  //     font-size: 10px;
-  //     font-weight: normal;
-  //     line-height: 18px;
-  //     color: #1E293B;
-  //   }
-  // }
+
   &.show-selected-border {
     border: 2px solid #007DFA;
-    // .wk-node {
-    //   .wk-node-header {
-    //     background: #D9EAFF;
-    //   }
-    // }
   }
   &.status-running {
     border-width: 1px;
     border-color: #007DFA;
-    // .wk-node {
-    //   .wk-node-header {
-    //     background: #FEFBEB;
-    //   }
-    //   &:has(.wk-node-desc),
-    //   &:has(.wk-node-content) {
-    //     .wk-node-header {
-    //       border-color: #FBBF24;
-    //     }
-    //   }
-    // }
   }
   &.status-succeeded {
     border-width: 1px;
     border-color: #10B981;
-    // .wk-node {
-    //   .wk-node-header {
-    //     background: #ECFDF5;
-    //   }
-    //   &:has(.wk-node-desc),
-    //   &:has(.wk-node-content) {
-    //     .wk-node-header {
-    //       border-color: #10B981;
-    //     }
-    //   }
-    // }
   }
   &.status-failed, &.status-exception  {
     border-width: 1px;
@@ -788,15 +775,6 @@
     border-radius: 4px;
     background: #969BB4;
   }
-  // .title-wrapper {
-  //   background: #007DFA;
-  //   // border: 1px solid #E2E8F0;
-  //   .title-input {
-  //     background: #007DFA;
-  //     color: white !important;
-  //     border-radius: 0;
-  //   }
-  // }
   .title-txt {
     font-family: PingFangSC-Medium;
     font-size: 14px;
@@ -845,56 +823,8 @@
       cursor: pointer;
     }
     &.start-panel-content {
-      .var-item-wrapper {
-        border: 1px solid #CBD5E1;
-        border-radius: 8px;
-        padding: 12px;
-        .line1 {
-          display: flex;
-          column-gap: 8px;
-          .var-name, .var-type, .var-required {
-            display: flex;
-            flex-direction: column;
-            row-gap: 8px;
-          }
-          .var-name {
-            flex: 5;
-          }
-          .var-type {
-            flex: 3;
-          }
-          .var-required {
-            flex: 2;
-          }
-        }
-        .line-other {
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          row-gap: 8px;
-        }
-        .field-txt {
-          font-family: PingFangSC-Medium;
-          font-size: 12px;
-          color: #151B26;
-          line-height: 16px;
-          font-weight: 500;
-        }
-      }
-      .empty-vars {
-        border: 1px solid #CBD5E1;
-        border-radius: 8px;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: PingFangSC-Medium;
-        font-size: 12px;
-        color: #7F8C9F;
-        line-height: 20px;
-        font-weight: 500;
-        width: 100%;
-        margin-bottom: 16px;
+      .arco-checkbox-group .arco-checkbox {
+        margin-right: 16px;
       }
     }
     &.if-else-panel-content {

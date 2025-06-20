@@ -1,7 +1,12 @@
-import { Table } from '@arco-design/web-react'
-import React, { useEffect, useState } from 'react'
-
-const Tables = (props) => {
+import { Button, Input, Message, Modal, Pagination, Popconfirm, Table } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import React, { useMemo, useState } from 'react';
+import Styles from './index.module.css'
+import LoadAddModal from './load-add-modal';
+import { Route } from 'react-router';
+import { Link } from 'react-router-dom';
+const InputSearch = Input.Search;
+export default function DataLoad() {
     const columns = [
         {
             title: '载入任务名称',
@@ -29,7 +34,6 @@ const Tables = (props) => {
             ))
         },
         {
-
             title: '最近运行状态',
             dataIndex: 'status',
             width: 170,
@@ -121,14 +125,34 @@ const Tables = (props) => {
             width: 130,
             render: ((_, item) => (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
-                    {/* 需要什么操作按钮父级传什么操作按钮 */}
-                    {props.myDiv}
+                    <span className={Styles.hoverStyle} >
+                        <Link to='/tenant/compute/modaforge/dataLoad/detail'>详情</Link>
+                    </span>
+                    <Popconfirm
+                        focusLock
+                        title="删除该连接器"
+                        content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
+                        onOk={() => {
+                            deleteHan(item.id);
+                            Message.success({
+                                content: '删除成功'
+                            });
+                        }}
+                        onCancel={() => {
+                            Message.error({
+                                content: '删除失败，请重试'
+                            });
+                        }}
+                    >
+                        <span className={Styles.hoverStyle}>删除</span>
+                    </Popconfirm>
+
                 </div>
             )
             )
         },
     ] as any;
-    const [data, setData] = useState([
+    const data = [
         {
             id: '1',
             name: '中科院大数据库任务1',
@@ -144,7 +168,7 @@ const Tables = (props) => {
             connector_id: '456'
         },
         {
-            id: '1',
+            id: '2',
             name: '中科院大数据库任务1',
             load_type: 'once', //once单次载入 cron周期载入
             status: 'succeed',
@@ -158,7 +182,7 @@ const Tables = (props) => {
             connector_id: '456'
         },
         {
-            id: '1',
+            id: '3',
             name: '中科院大数据库任务1',
             load_type: 'once', //once单次载入 cron周期载入
             status: 'failed',
@@ -172,7 +196,7 @@ const Tables = (props) => {
             connector_id: '456'
         },
         {
-            id: '1',
+            id: '4',
             name: '中科院大数据库任务1',
             load_type: 'once', //once单次载入 cron周期载入
             status: 'stopped',
@@ -185,18 +209,113 @@ const Tables = (props) => {
             enable: true,
             connector_id: '456'
         },
-    ])
-    useEffect(() => {
-        // 传递过来的数据
-        setData(props.data)
-    }, [])
-    return <Table
-        columns={columns}
-        data={data}
-        style={{ padding: '10px 20px' }}
-        rowKey="id" border={false}
-        scroll={{
-            x: 1500,
-        }} />
+    ];
+    // 当前的第几页
+    const [current, setCurrent] = useState(1);
+    // 每页展示数据的数据量
+    const [pageSize, setPageSize] = useState(10);
+    // 改变数据的逻辑
+    const handlePageChange = (page) => {
+        setCurrent(page);
+    };
+    const [searchValue, setSearchValue] = useState('')
+    // 根据搜索条件过滤连接器
+    const filteredConnectors = useMemo(() => {
+        return data.filter(connector => {
+            const query = searchValue.toLowerCase();
+            return (
+                connector.name.toLowerCase().includes(query)
+            );
+        });
+    }, [data, searchValue]);
+
+
+    const currentPageData = useMemo(() => {
+        const startIndex = (current - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        return filteredConnectors.slice(startIndex, endIndex);
+    }, [current, pageSize, filteredConnectors]);
+
+    // 点击删除的逻辑
+    const deleteHan = (id) => {
+        console.log('删除了' + id);
+    }
+
+    // 模态框默认状态
+    const [visible, setVisible] = React.useState(false);
+
+    // 点击按钮因残模态框(确认||取消同一个方法)
+    const hideEditModal = () => {
+        setVisible(false)
+    }
+
+    // 点击详情跳转详情页
+    const gotodetail = () => {
+
+    }
+    const myDivBox = (
+        <div>
+            <span>编辑</span>
+            <span>详情</span>
+            <span>删除</span>
+        </div>
+    )
+    return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 10px 0px', borderRadius: '10px', height: '94%' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>数据载入</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
+            <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} onChange={(value) => {
+                setSearchValue(value)
+            }} />
+            <Button type='primary' icon={<IconPlus />} onClick={() => {
+                setVisible(true)
+            }} >
+                创建数据载入任务
+            </Button>
+        </div>
+        <Table columns={columns} data={currentPageData} style={{ padding: '10px 20px' }}
+            pagination={false}
+            rowKey="id"
+            border={false}
+            scroll={{
+                x: 1500,
+            }}
+        />
+        <div className={Styles.arcoPagination}>
+            <Pagination
+                current={current}
+                pageSize={pageSize}
+                onPageSizeChange={(pageSize) => {
+                    setPageSize(pageSize);
+                    setCurrent(1);
+                }}
+                onChange={handlePageChange}
+                sizeOptions={[1, 2, 5, 10]}
+                showTotal
+                total={filteredConnectors.length}
+                showJumper
+                sizeCanChange
+                style={{ marginBottom: '20px' }}
+            />
+        </div>
+        <Modal
+            style={{ width: '600px' }}
+            title='创建数据载入任务'
+            visible={visible}
+            onOk={() => setVisible(false)}
+            onCancel={() => setVisible(false)}
+            autoFocus={false}
+            focusLock={true}
+            footer={null}
+            // maskClosable={false}
+            unmountOnExit={true}
+        >
+            <LoadAddModal hideModalHan={hideEditModal} />
+        </Modal>
+        <Route
+            key='/tenant/compute/modaforge/dataLoad/detail'
+            path='/tenant/compute/modaforge/dataLoad/detail'
+            component={React.lazy(async () => import('../detail/dataLoad-detail'))}
+        />
+        {/* <Tables myDiv={myDivBox} data={data} /> */}
+    </div>;
 }
-export default Tables

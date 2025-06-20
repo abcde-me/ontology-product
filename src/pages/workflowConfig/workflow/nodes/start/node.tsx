@@ -12,53 +12,40 @@ const Node: FC<NodeProps<StartNodeType>> = ({
   data,
 }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge')
-  const { variables } = data
-  
-  const [show, setShow] = useState(true)
-  
-  const toggleVars = () => {
-    setShow(s => !s)
-  }
+  const { doc, image, audio, video, srcDir } = data
 
-  // if (!variables.length)
-  //   return null
-  // console.log('variables', variables)
+  const hasFileTypes = doc?.enabled || image?.enabled || audio?.enabled || video?.enabled
+
+  console.log('variables', doc, image, audio, video, srcDir)
   return (
-    // <div className='mb-1 px-3 py-1 wk-node-content'>
-    //   <div className='space-y-[6px]'>
-    //     {variables.map(variable => (
-    //       <div key={variable.variable} className='flex items-center h-6 justify-between bg-gray-100 rounded-md  px-1 space-x-1 text-xs font-normal text-gray-700 item-bg'>
-    //         <div className='w-0 grow flex items-center space-x-1'>
-    //           <span className='w-0 grow truncate text-xs font-normal text-gray-700 name'>{variable.variable}</span>
-    //         </div>
-
-    //         <div className='ml-1 flex items-center space-x-1'>
-    //           {variable.required && <span className='text-xs font-normal text-gray-500 uppercase'>{t(`${i18nPrefix}.required`)}</span>}
-    //           <InputVarTypeIcon type={variable.type} className='w-3 h-3 text-gray-500' isTag/>
-    //         </div>
-    //       </div>
-    //     ))}
-    //   </div>
-    // </div>
     <div className={`wk-node-content`}>
-      <div className={`input-section ${!show ? 'collapsed' : ''}`}>
-        <div className='input-header' onClick={toggleVars}>
-          <span className='txt'>输入</span>
-          <RiArrowDownSFill className='icon'/>
+      <div className={`input-section`}>
+        <div className='input-header'>
+          <span className='txt'>数据源目录</span>
         </div>
         <div className='input-list'>
-          {variables.map(variable => (
-            <div className='input-var-item' key={variable.id || variable.variable}>
-              <div className='left-part'>
-                <span className='key-txt'>{variable.variable || '未命名'}</span>
-                <span className='extra-info'>
-                  {variable.required && <span className='required-txt'>{t(`${i18nPrefix}.required`)}</span>}
-                  <span className='type-txt'>{variable.type}</span>
-                </span>
-              </div>
+          {!!srcDir &&
+            <div className='input-var-item'>
+              <span className='key-txt'>{srcDir}</span>
             </div>
-          ))}
-          {!variables.length && <div className='input-var-item'><span className='extra-info'>未配置变量</span></div>}
+          }
+          {!srcDir && <div className='input-var-item'><span className='extra-info'>未配置</span></div>}
+        </div>
+      </div>
+      <div className={`input-section`}>
+        <div className='input-header'>
+          <span className='txt'>文件类型</span>
+        </div>
+        <div className='input-list'>
+          {!!hasFileTypes &&
+            <div className='input-var-item flex gap-x-[4px] !justify-normal *:rounded-[4px] *:px-[4px] *:bg-[#E2E8F0] *:text-[12px]/[18px] *:text-[#0F172A]'>
+              {doc?.enabled && doc?.types.length > 0 && <div>文档</div>}
+              {image?.enabled && image?.types.length > 0 && <div>图片</div>}
+              {audio?.enabled && audio?.types.length > 0 && <div>音频</div>}
+              {video?.enabled && video?.types.length > 0 && <div>视频</div>}
+            </div>
+          }
+          {!hasFileTypes && <div className='input-var-item'><span className='extra-info'>未配置</span></div>}
         </div>
       </div>
     </div>

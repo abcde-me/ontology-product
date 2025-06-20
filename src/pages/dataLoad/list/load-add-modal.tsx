@@ -1,10 +1,11 @@
 import { Button, Form, Input, Message, Radio, Select, Tag, TimePicker, TreeSelect } from '@arco-design/web-react'
 import React, { useState } from 'react'
 import Styles from './index.module.css'
-import CycleLoadingForm from './cycle-loading-form-modal';
-import conversionArco from '../../utils/conversionArco'
+import CycleLoadingForm from '../list/cycle-loading-form-modal';
+import conversionArco from '../../../utils/conversionArco'
 // 单选框实例
 const RadioGroup = Radio.Group;
+// 表单实例
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
@@ -54,7 +55,6 @@ const LoadAddModal = (props: any) => {
             if (fo1.load_type !== 'once') {
                 conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle)
             }
-
             const fo2 = {
                 name: fo1.name,
                 connector_id: fo1.connector_name,
@@ -65,6 +65,7 @@ const LoadAddModal = (props: any) => {
                 creator: '张三'
             }
             console.log(fo2);
+            console.log(fo1);
         }).catch((error) => {
             // 校验失败，错误信息会由 Form 自动处理
             console.error('表单校验失败：', error);
@@ -81,7 +82,6 @@ const LoadAddModal = (props: any) => {
     const [loadVal, setLoadVal] = useState('once')
     // 切换载入类型的函数
     const handoffLoadFormHan = (val) => {
-
         if (val === 'once') {
             form.setFieldsValue({ time: undefined, day: undefined, weekly: undefined, cycle: undefined });
         } else {
@@ -174,7 +174,7 @@ const LoadAddModal = (props: any) => {
             <div className={Styles.footerBbtnBox}>
                 <Button onClick={cancelHan} style={{ marginRight: '20px' }}>取消</Button>
                 <Button onClick={handleSubmit}>确认</Button>
-            </div>  
+            </div>
         </div>
     )
 }
