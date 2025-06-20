@@ -4,11 +4,13 @@ import { Typography, Button, Space } from '@arco-design/web-react';
 import { IconLeft } from '@arco-design/web-react/icon';
 import { Breadcrumb } from "@arco-design/web-react";
 import BreadcrumbCom from '@/components/breadcrumb-com';
+import { getDatasetDetail } from '@/api/datasetManagement';
 import './style.css';
 
 const { Title } = Typography;
 
 const DatasetDetail: React.FC = () => {
+    const [datasetDetail, setDatasetDetail] = React.useState<any>(null);
     const { id } = useParams<{ id: string }>();
     const history = useHistory();
 
@@ -22,6 +24,13 @@ const DatasetDetail: React.FC = () => {
     const handleGoToDatasetList = () => {
         history.push('/tenant/compute/modaforge/datasetManagement');
     };
+
+    React.useEffect(() => {
+        // getDatasetDetail(id).then(res => {
+        //     console.log(res)
+        //     setDatasetDetail(res.data)
+        // })
+    }, [])
 
     return (
         <div className="dataset-detail">

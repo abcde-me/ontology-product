@@ -100,8 +100,8 @@ export default function WorkflowList() {
             dataIndex: 'name',
             width: 120,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text">{item.name}</span>
+            render: (_, record) => (
+                <span className="operate-text">{record.name}</span>
             )
         }, {
             title: '运行方式',
@@ -122,8 +122,8 @@ export default function WorkflowList() {
             title: '状态',
             dataIndex: 'status',
             width: 100,
-            render: (_, item) => (
-                item.status ?
+            render: (_, record) => (
+                record.status ?
                     <Tag color="green" icon={<IconCheckCircleFill />}>已上线</Tag> :
                     <Tag color="gray" icon={<IconClockCircle />}>未上线</Tag>
             ),
@@ -143,16 +143,16 @@ export default function WorkflowList() {
             dataIndex: 'source',
             width: 230,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text" title={item.source}>{item.source}</span>
+            render: (_, record) => (
+                <span className="operate-text" title={record.source}>{record.source}</span>
             )
         }, {
             title: '目标数据目录',
             dataIndex: 'target',
             width: 230,
             ellipsis: true,
-            render: (_, item) => (
-                <span className="operate-text" title={item.target}>{item.target}</span>
+            render: (_, record) => (
+                <span className="operate-text" title={record.target}>{record.target}</span>
             )
         }, {
             title: '创建人',
@@ -163,8 +163,8 @@ export default function WorkflowList() {
             title: '创建时间',
             dataIndex: 'created_time',
             width: 150,
-            render: (_, item) => (
-                <span>{TimeFormatting(item.created_time)}</span>
+            render: (_, record) => (
+                <span>{TimeFormatting(record.created_time)}</span>
             ),
             sorter: (a, b) => a.created_time.length - b.created_time.length
         }, {
@@ -205,8 +205,7 @@ export default function WorkflowList() {
         return workflowData.filter(item => {
             const query = searchValue.toLowerCase();
             return (
-                item.name.toLowerCase().includes(query) ||
-                item.operation.toLowerCase().includes(query)
+                item.name.toLowerCase().includes(query)
             );
         });
     }, [workflowData, searchValue]);
@@ -215,7 +214,7 @@ export default function WorkflowList() {
         <div className="workflow">
             <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>工作流</h1>
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', margin: '15px 0' }}>
-                <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
+                <InputSearch placeholder='输入工作流名称搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
                     setSearchValue(value)
                 }} />
                 <Button shape='round' type='primary' onClick={handleCreateWorkflow}>创建工作流</Button>

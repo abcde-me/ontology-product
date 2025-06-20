@@ -1,10 +1,11 @@
 import { Button, Form, Input, Message, Radio, Select, Tag, TimePicker, TreeSelect } from '@arco-design/web-react'
 import React, { useState } from 'react'
 import Styles from './index.module.css'
-import CycleLoadingForm from './cycle-loading-form-modal';
-import conversionArco from '../../utils/conversionArco'
+import CycleLoadingForm from '../list/cycle-loading-form-modal';
+import conversionArco from '../../../utils/conversionArco'
 // 单选框实例
 const RadioGroup = Radio.Group;
+// 表单实例
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
@@ -47,21 +48,22 @@ const LoadAddModal = (props: any) => {
     // 提交表单时的校验逻辑
     const handleSubmit = () => {
         const fo1 = form.getFieldsValue()
+        const [hour, minute] = fo1.time.split(':')
         // 校验成功的逻辑
         form.validate().then(() => {
             // 点击确认隐藏弹框并且重置表单数据
             props.hideModalHan()
-            if (fo1.load_type !== 'once') {
-                conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle)
-            }
-
             const fo2 = {
                 name: fo1.name,
-                connector_id: fo1.connector_name,
-                source_type: fo1.source_type,
+                connector_id: fo1.connector_id,
+                source_type: fo1.cycle,
                 load_type: fo1.load_type,
-                cron_expr: fo1.load_type !== 'once' && conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle),
                 dest_path: fo1.dest_path,
+                minute: minute,
+                hour: hour,
+                data: fo1.cycle == '每日' ? '*' : fo1.cycle == '每月' ? fo1.week : '*',
+                month: fo1.cycle == '每月' ? '*' : '',
+                week: fo1.cycle == '每周' ? fo1.week : '',
                 creator: '张三'
             }
             console.log(fo2);
@@ -81,7 +83,6 @@ const LoadAddModal = (props: any) => {
     const [loadVal, setLoadVal] = useState('once')
     // 切换载入类型的函数
     const handoffLoadFormHan = (val) => {
-
         if (val === 'once') {
             form.setFieldsValue({ time: undefined, day: undefined, weekly: undefined, cycle: undefined });
         } else {
@@ -122,7 +123,7 @@ const LoadAddModal = (props: any) => {
                     </RadioGroup>
                 </FormItem>
                 <FormItem label='绑定连接器：'
-                    field="connector_name"
+                    field="connector_id"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'
@@ -174,7 +175,7 @@ const LoadAddModal = (props: any) => {
             <div className={Styles.footerBbtnBox}>
                 <Button onClick={cancelHan} style={{ marginRight: '20px' }}>取消</Button>
                 <Button onClick={handleSubmit}>确认</Button>
-            </div>  
+            </div>
         </div>
     )
 }

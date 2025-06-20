@@ -255,11 +255,14 @@ function DatasetForm({ onSubmit, onCancel }) {
     // })//获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     setTargetDataSourceOptions(cstargetDataSourceOptions);//测试数据
 
+
     //连接器
-    getConnectorList({scope:1}).then(res => {
+    getConnectorList({ scope: 2 }).then(res => {
       console.log(res)
-      // setConnectorList(convertToSelectOptions(res.data))
-    })//获取连接器列表,获取的数据需要处理，不处理没办法直接使用
+      setConnectorList(convertToSelectOptions(res.data))
+    })
+
+    // setConnectorList(convertToSelectOptions(res.data))
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
     //标签

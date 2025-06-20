@@ -33,12 +33,7 @@ export async function getTagList(){
 //查询连接器信息列表
 export async function getConnectorList(params:any){
   return UAPI.RES.connectorListApi({})
-    .get(params)
-    // .withConfig({
-    //   baseURL: 'http://localhost:3000/'
-    // })
-    .inRegion()
-    .do();
+    .get(params).inRegion().do({ preCheck: false});
 }
 
 
