@@ -61,7 +61,7 @@ const BasePanel: FC<BasePanelProps> = ({
     showMessageLogModal: state.showMessageLogModal,
   })))
   const showSingleRunPanel = useStore(s => s.showSingleRunPanel)
-  const panelWidth = localStorage.getItem('workflow-node-panel-width') ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!) : 400
+  const panelWidth = localStorage.getItem('workflow-node-panel-width') ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!) : 600
   const {
     setPanelWidth,
   } = useWorkflow()
