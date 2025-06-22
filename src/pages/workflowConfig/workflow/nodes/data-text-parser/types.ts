@@ -14,6 +14,7 @@ export type OutputVar = Record<string, {
 
 export type TextParserNodeType = CommonNodeType & {
   files: string[]
+  selected_files_num: number
   text_slice_rule: number
   slice_max_size: number
   text_proc_rules: number[]
