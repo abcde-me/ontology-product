@@ -8,6 +8,7 @@ const i18nPrefix = 'workflow.errorMsg'
 const nodeDefault: NodeDefault<TextParserNodeType> = {
   defaultValue: {
     files: [],
+    selected_files_num: -1,
     text_slice_rule: 1,
     slice_max_size: 800,
     text_proc_rules: [0],
