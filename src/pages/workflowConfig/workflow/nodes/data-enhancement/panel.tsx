@@ -31,7 +31,7 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import './text.scss';
+import './data-enhancement.scss';
 const i18nPrefix = 'workflow.nodes.code';
 
 const codeLanguages = [
@@ -46,14 +46,15 @@ const codeLanguages = [
 ];
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按句子'  },
-  { value: 3, label: '按段落'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按句子' },
+  { value: 3, label: '按段落' }
 ];
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
+  const TextArea = Input.TextArea;
 
   const [fileNum, setFileNum] = useState(0);
   const [type, setType] = useState('checkbox');
@@ -62,6 +63,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   // 定义分段最大长度状态变量
   const [maxSegmentLength, setMaxSegmentLength] = useState<number | null>(null);
   const { t } = useTranslation('plugin__console-plugin-appforge');
+
 
   const {
     readOnly,
@@ -91,58 +93,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     setInputVarValues
   } = useConfig(id, data);
 
-  const handleGeneratedCode = (value: string) => {
-    const params = extractFunctionParams(value, inputs.code_language);
-    const codeNewInput = params.map((p) => {
-      return {
-        variable: p,
-        value_selector: []
-      };
-    });
-    const returnTypes = extractReturnType(value, inputs.code_language);
-    handleCodeAndVarsChange(value, codeNewInput, returnTypes);
-  };
-  //
-  // 生成 1970 年 1 月 1 日到当前时间之间的随机日期
-  function getRandomDateOverall(): Date {
-    // 生成 1970 年 1 月 1 日到当前时间之间的随机时间戳
-    const randomTime = Math.random() * Date.now();
-    return new Date(randomTime);
-  }
+  const [customPromptChecked, setCustomPromptChecked] = useState(false);
 
-  const randomDateOverall = getRandomDateOverall();
-  // 格式化日期为 YYYY-MM-DD 格式
-  const formattedDateOverall = `${randomDateOverall.getFullYear()}-${String(randomDateOverall.getMonth() + 1).padStart(2, '0')}-${String(randomDateOverall.getDate()).padStart(2, '0')} ${String(randomDateOverall.getHours()).padStart(2, '0')}:${String(randomDateOverall.getMinutes()).padStart(2, '0')}:${String(randomDateOverall.getSeconds()).padStart(2, '0')}`;
-  console.log(formattedDateOverall);
-  const fileType = ['pdf', 'excel', 'word', 'txt', 'markdown'];
-  const defaultData = [...new Array(5)].map((_, index) => {
-    return {
-      key: index,
-      name: 'Jane Doe ' + index,
-      fileType: fileType[index],
-      size: Math.floor(Math.random() * 100),
-      gender: index % 2 > 0 ? 'male' : 'female',
-      date: formattedDateOverall
-    };
-  });
-
-  // 初始化文本处理规则状态
-  const [textProcessingRules, setTextProcessingRules] =
-    useState<TextProcessingRules>({
-      replaceExpressionsAndSymbols: false,
-      removeValidUrlsAndEmails: false
-    });
-
-  // 处理复选框变化的函数
-  const handleCheckboxChange = (
-    field: keyof TextProcessingRules,
-    checked: boolean
-  ) => {
-    setTextProcessingRules((prev) => ({
-      ...prev,
-      [field]: checked
-    }));
-  };
   useEffect(() => {
     const allValues = form.getFieldsValue();
     console.log('所有字段的值:', allValues);
@@ -152,7 +104,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     console.log('1111111111:', values, changeValue);
   };
   return (
-    <div className="wk-node-panel-content code-panel-content mt-[16px]">
+    <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
         form={form}
         autoComplete="off"
@@ -163,227 +115,91 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         }}
         layout="inline"
         onChange={onValuesChange}
-        // onValuesChange={onValuesChange}
-        // onValuesChange={(_, v) => {
-        //   console.log('ccccccccc', _, v);
-        //   const allValues = form.getFieldsValue();
-        //   console.log('所有字段的值:', allValues);
-        //   if (v.vars.some((v) => !v || !v.type || !v.id)) {
-        //     form.setFieldValue(
-        //       'vars',
-        //       v.vars.map(
-        //         (v) =>
-        //           v ?? {
-        //             variable: '',
-        //             label: '',
-        //             required: false,
-        //             type: 'string',
-        //             id: uuid4()
-        //           }
-        //       )
-        //     );
-        //   }
-        // }}
       >
         <FormItem
-          layout="inline"
-          label="选择文件："
-          field="fileList"
+          layout="vertical"
+          label="场景选择:"
+          field="sceneSelection"
           labelAlign="left"
           required
         >
-          <div>已选择{fileNum}个文件</div>
-        </FormItem>
-        <div>
-          <Table
-            columns={[
-              {
-                title: '文件名',
-                dataIndex: 'name'
-              },
-              {
-                title: '类型',
-                dataIndex: 'fileType',
-                filters: [
-                  {
-                    text: 'London',
-                    value: 'London'
-                  },
-                  {
-                    text: 'Paris',
-                    value: 'Paris'
-                  }
-                ]
-              },
-              {
-                title: '文件大小',
-                dataIndex: 'size'
-              },
-              {
-                title: '载入开始时间',
-                dataIndex: 'date',
-                sorter: (a, b) => a.name.length - b.name.length
-              }
-            ]}
-            pagination={false}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log('onChange:', selectedRowKeys, selectedRows);
-                setSelectedRowKeys(selectedRowKeys);
-                setFileNum(selectedRowKeys.length);
-              },
-              onSelect: (selected, record, selectedRows) => {
-                console.log('onSelect:', selected, record, selectedRows);
-              }
+          <Select
+            placeholder="请选择场景"
+            style={{ width: '100%' }}
+            onChange={(value) => {
+              console.log(value);
             }}
-            data={defaultData}
-          />
+          >
+            <Option key={1} value={1}>
+              {1}
+            </Option>
+          </Select>
+        </FormItem>
+        <div className="wk-node-panel-content-tip">
+          常见的针对SFT的模型微调场景生成数据集。
+        </div>
+        <div className="content-box">
+          <FormItem label="指令生成依赖样本数:" field="">
+            <Input placeholder="请输入指令" />
+          </FormItem>
+          <div className="content-tips-text">
+            该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+            部分，增加到prompt 中去。
+          </div>
+          <FormItem label="过滤相似度阈值:" field="">
+            <Input placeholder="请输入阈值" />
+          </FormItem>
+          <div className="content-tips-text">
+            这里通过Rouge-L
+            分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。
+          </div>
+          <FormItem label="生成样本数:" field="">
+            <Input placeholder="请输入样本数" />
+          </FormItem>
+          <div className="content-tips-text">指定生成的数据集的条数。</div>
         </div>
         <FormItem
           layout="vertical"
-          label="分段方式："
-          field="segmentation"
-          labelAlign="left"
-          required
+          field="enhancementTextArea"
+          label="数据示例（JSON格式）"
         >
-          <Select
-            placeholder="Select city"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={1}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div className="wk-node-panel-content-tip">
-            选择切分文本的方式，目前支持按照字符、句子和段落。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="分段最大长度："
-          field="maxSegment"
-          labelAlign="left"
-          required
-        >
-          <InputNumber
-            placeholder="Please enter"
-            min={0}
-            max={1200}
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              setMaxSegmentLength(value);
-            }}
+          <TextArea
+            placeholder="请在这里输入期望的数据集的示例数据（JSON格式）"
+            style={{ minHeight: 64, minWidth: 350 }}
           />
-          <div className="wk-node-panel-content-tip">800-1200</div>
         </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本处理规则："
-          field="textProcessingRules"
-          labelAlign="left"
-          required
-        >
+        <FormItem field="enhancementTextArea" label={null}>
           <Checkbox
-            checked={textProcessingRules.replaceExpressionsAndSymbols}
-            onChange={(checked) =>
-              handleCheckboxChange('replaceExpressionsAndSymbols', checked)
-            }
+            checked={customPromptChecked} // 绑定选中状态
+            onChange={(checked) => setCustomPromptChecked(checked)} // 处理选中状态变化
           >
-            替换表达和特殊符号
+            自定义提示词
           </Checkbox>
-          <Checkbox
-            checked={textProcessingRules.removeValidUrlsAndEmails}
-            onChange={(checked) =>
-              handleCheckboxChange('removeValidUrlsAndEmails', checked)
-            }
-          >
-            删除有效URL和电子邮箱地址
-          </Checkbox>
-          <div className="wk-node-panel-content-tip">
-            选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。
-          </div>
         </FormItem>
         <FormItem
           layout="vertical"
-          label="OCR模型："
-          field="ocrModel"
+          label="模型选择:"
+          field="modelSelection"
           labelAlign="left"
           required
         >
           <Select
-            placeholder="Select city"
+            placeholder="请选择模型"
             style={{ width: '100%' }}
             onChange={(value) => {
               console.log(value);
             }}
-            defaultValue={0}
           >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
+            <Option key={1} value={1}>
+              {1}
+            </Option>
           </Select>
-          <div className="wk-node-panel-content-tip">
-            当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。
-          </div>
         </FormItem>
-        <FormItem
-          layout="vertical"
-          label="图片描述模型："
-          field="imageCaptionModel"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div className="wk-node-panel-content-tip">
-            用于指定对文本文件中的图片进行caption 时使用的模型。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本嵌入模型："
-          field="textEmbeddingModel"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div className="wk-node-panel-content-tip">
-            指定对文本内容进行embedding 的模型。
-          </div>
+        <FormItem layout="vertical" field="nodeDescription" label="说明">
+          <TextArea
+            placeholder="请输入对该节点的描述"
+            style={{ minHeight: 64, minWidth: 350 }}
+          />
         </FormItem>
       </Form>
     </div>

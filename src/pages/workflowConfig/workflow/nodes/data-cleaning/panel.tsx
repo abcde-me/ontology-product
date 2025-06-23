@@ -8,15 +8,6 @@ import type {
   SegmentationOption,
   TextProcessingRules
 } from './types';
-import { CodeLanguage } from './types';
-import { extractFunctionParams, extractReturnType } from './text-parser';
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
-import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
-import AddButton from '@/pages/workflowConfig/components/button/add-button';
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field';
-import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
-import CodeEditor from '@/pages/workflowConfig/workflow/nodes/_base/components/editor/code-editor';
-import TypeSelector from '@/pages/workflowConfig/workflow/nodes/_base/components/selector';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
 import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
@@ -25,113 +16,79 @@ import {
   Form,
   Input,
   Select,
-  InputNumber,
-  Checkbox
+  Space,
+  Checkbox,
+  Switch,
+  Slider,
+  Button
 } from '@arco-design/web-react';
+import { IconUp, IconDown, IconDelete } from '@arco-design/web-react/icon';
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import './text.scss';
-const i18nPrefix = 'workflow.nodes.code';
+import {
+  dataStandardizationBefore,
+  dataStandardizationAfter,
+  dateScreeningAfter,
+  dataScreeningBefore,
+  dataSpecialBefore,
+  dataSpecialAfter,
+  dataSpecialCharactersAfter,
+  dataSpecialCharactersBefore,
+  dataDeduplicateBefore,
+  dataDeduplicateAfter,
+  dataFuzzyDeduplicateBefore,
+  dataFuzzyDeduplicateAfter,
+  dataDetoxificationAfter,
+  dataDetoxificationBefore,
+  dataImputationBefore,
+  dataImputationAfter,
+  dataOutlierHandlingBefore,
+  dataOutlierHandlingAfter
+} from './date-text';
+import './date-cleaning.scss';
 
-const codeLanguages = [
-  {
-    label: 'Python3',
-    value: CodeLanguage.python3
-  },
-  {
-    label: 'JavaScript',
-    value: CodeLanguage.javascript
-  }
-];
-// 分段方式选项
-const segmentationOptions: any = [
-  { value: 0, label: '按字符'  },
-  { value: 1, label: '按句子'  },
-  { value: 2, label: '按段落'}
-];
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const [form] = Form.useForm();
-  const FormItem = Form.Item;
-  const Option = Select.Option;
-
-  const [fileNum, setFileNum] = useState(0);
-  const [type, setType] = useState('checkbox');
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  // 定义分段最大长度状态变量
-  const [maxSegmentLength, setMaxSegmentLength] = useState<number | null>(null);
-  const { t } = useTranslation('plugin__console-plugin-appforge');
-
   const {
     readOnly,
     inputs,
-    outputKeyOrders,
-    handleCodeAndVarsChange,
-    handleVarListChange,
-    handleAddVariable,
-    handleRemoveVariable,
-    handleCodeChange,
-    handleCodeLanguageChange,
-    handleVarsChange,
-    handleAddOutputVariable,
-    filterVar,
-    isShowRemoveVarConfirm,
-    hideRemoveVarConfirm,
-    onRemoveVarConfirm,
-    // single run
-    isShowSingleRun,
-    hideSingleRun,
-    runningStatus,
-    handleRun,
-    handleStop,
     runResult,
     varInputs,
     inputVarValues,
     setInputVarValues
   } = useConfig(id, data);
 
-  const handleGeneratedCode = (value: string) => {
-    const params = extractFunctionParams(value, inputs.code_language);
-    const codeNewInput = params.map((p) => {
-      return {
-        variable: p,
-        value_selector: []
-      };
-    });
-    const returnTypes = extractReturnType(value, inputs.code_language);
-    handleCodeAndVarsChange(value, codeNewInput, returnTypes);
+
+  const [form] = Form.useForm();
+  const FormItem = Form.Item;
+  const Option = Select.Option;
+  const CheckboxGroup = Checkbox.Group;
+
+  const [switchChecked, setSwitchChecked] = useState(false);
+  const [filterChecked, setFilterChecked] = useState(false);
+  const [sliderValue, setSliderValue] = useState<any>(0);
+  const [dataStandardization, setDataStandardization] = useState(false);
+  const [specialCharFilter, setSpecialCharFilter] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
+  const [upperLowerStatus, setUpperLowerStatus] = useState(true);
+ 
+  const [SensitiveSwitch, setSensitiveSwitch] = useState(false);
+  const [deduplicateSwitch, setDeduplicateSwitch] = useState(false);
+  const [fuzzyDeduplicateSwitch, setFuzzyDeduplicateSwitch] = useState(false);
+  const [detoxificationSwitch, setDetoxificationSwitch] = useState(false);
+  const [imputationSwitch, setImputationSwitch] = useState(false);
+  const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
+  
+  const sliderOnChange = (value: any) => {
+    setSliderValue(value);
   };
 
-  const defaultData = [...new Array(5)].map((_, index) => {
-    return {
-      key: index,
-      name: 'Jane Doe ' + index,
-      salary: 23000,
-      email: 'jane.doe@example.com',
-      gender: index % 2 > 0 ? 'male' : 'female',
-      age: 20 + index
-    };
-  });
-
-  // 初始化文本处理规则状态
-  const [textProcessingRules, setTextProcessingRules] =
-    useState<TextProcessingRules>({
-      replaceExpressionsAndSymbols: false,
-      removeValidUrlsAndEmails: false
-    });
-
-  // 处理复选框变化的函数
-  const handleCheckboxChange = (
-    field: keyof TextProcessingRules,
-    checked: boolean
-  ) => {
-    setTextProcessingRules((prev) => ({
-      ...prev,
-      [field]: checked
-    }));
+  // 获取from内容
+  const onValuesChange = (changeValue, values) => {
+    console.log(changeValue, values);
   };
   return (
-    <div className="wk-node-panel-content code-panel-content mt-[16px]">
+    <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
         form={form}
         disabled={readOnly}
@@ -139,231 +96,487 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
+          caseType: 0,
           vars: cloneDeep(inputs.variables || [])
         }}
         layout="inline"
-        onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
-          if (v.vars.some((v) => !v || !v.type || !v.id)) {
-            form.setFieldValue(
-              'vars',
-              v.vars.map(
-                (v) =>
-                  v ?? {
-                    variable: '',
-                    label: '',
-                    required: false,
-                    type: 'string',
-                    id: uuid4()
-                  }
-              )
-            );
-          }
-          // window.setTimeout(async() => {
-          //   try {
-          //     await form.validate()
-          //   } catch{}
-          // })
-        }}
+        onValuesChange={onValuesChange}
       >
         <FormItem
           layout="inline"
-          label="选择文件："
-          field="fileList"
+          label="处理类型："
           labelAlign="left"
           required
-        >
-          <div>已选择{fileNum}个文件</div>
-        </FormItem>
-        <div>
-          <Table
-            columns={[
-              {
-                title: '文件名',
-                dataIndex: 'name'
-              },
-              {
-                title: '类型',
-                dataIndex: 'salary',
-                filters: [
-                  {
-                    text: 'London',
-                    value: 'London'
-                  },
-                  {
-                    text: 'Paris',
-                    value: 'Paris'
-                  }
-                ]
-              },
-              {
-                title: '文件大小',
-                dataIndex: 'gender'
-              },
-              {
-                title: 'Age',
-                dataIndex: 'age'
-              },
-              {
-                title: '载入开始时间',
-                dataIndex: 'email',
-                sorter: (a, b) => a.name.length - b.name.length
-              }
-            ]}
-            pagePosition={null}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log('onChange:', selectedRowKeys, selectedRows);
-                setSelectedRowKeys(selectedRowKeys);
-                setFileNum(selectedRowKeys.length);
-              },
-              onSelect: (selected, record, selectedRows) => {
-                console.log('onSelect:', selected, record, selectedRows);
-              }
-            }}
-            data={defaultData}
-          />
+        />
+        <div className="file-box">
+          {/* switch 开关 */}
+          <div className="date-switch">
+            <FormItem field="dataStandardization">
+              <Switch
+                disabled={true}
+                style={{ margin: 0, width: 'auto' }}
+                checked={switchChecked}
+                onChange={(checked) => {
+                  setSwitchChecked(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">数据标准化</span>
+          </div>
+          <div className="date-desc">
+            将数据转换为标准格式或单位，例如日期、时间、货币等。
+          </div>
+          {switchChecked && (
+            <>
+              <div className="date-option">
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="textStandardization"
+                  labelAlign="left"
+                >
+                  <Checkbox disabled={switchChecked}>文本标准化</Checkbox>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="controlledCheckboxes"
+                  labelAlign="left"
+                >
+                  <Checkbox>繁体转简体</Checkbox>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="upperLower"
+                  labelAlign="left"
+                >
+                  <Checkbox
+                    onChange={(checked: boolean) => {
+                      setUpperLowerStatus(!checked);
+                    }}
+                  >
+                    大小写统一
+                  </Checkbox>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="upperDown"
+                  labelAlign="left"
+                >
+                  <Select
+                    placeholder="请选择"
+                    style={{ width: 120, height: 18, marginLeft: '8px' }}
+                    onChange={(value) => {
+                      console.log(value);
+                    }}
+                    disabled={upperLowerStatus}
+                  >
+                    <Option key={0} value={0}>
+                      小写
+                    </Option>
+                    <Option key={1} value={1}>
+                      大写
+                    </Option>
+                  </Select>
+                </FormItem>
+              </div>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataStandardizationBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataStandardizationAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-        <FormItem
-          layout="vertical"
-          label="分段方式："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>选择切分文本的方式，目前支持按照字符、句子和段落。</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="分段最大长度："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <InputNumber
-            placeholder="Please enter"
-            min={0}
-            max={1200}
-            style={{ width: 160, margin: '10px 24px 10px 0' }}
-            onChange={(value) => {
-              setMaxSegmentLength(value);
-            }}
-          />
-          <div>800-1200</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本处理规则："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Checkbox
-            checked={textProcessingRules.replaceExpressionsAndSymbols}
-            onChange={(checked) =>
-              handleCheckboxChange('replaceExpressionsAndSymbols', checked)
-            }
-          >
-            替换表达和特殊符号
-          </Checkbox>
-          <Checkbox
-            checked={textProcessingRules.removeValidUrlsAndEmails}
-            onChange={(checked) =>
-              handleCheckboxChange('removeValidUrlsAndEmails', checked)
-            }
-          >
-            删除有效URL和电子邮箱地址
-          </Checkbox>
-          <div>
-            选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。
+        <div className="file-box">
+          <div className="date-switch">
+            {/* 数据过滤开关 */}
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={filterChecked}
+                onChange={(checked) => setFilterChecked(checked)}
+              />
+            </FormItem>
+            <span className="date-switch-text">数据过滤</span>
           </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="OCR模型："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>
-            当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。
+          <div className="data-dec-text">
+            根据规则过滤数据，去除无效、错误或低质量数据
           </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="图片描述模型："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>用于指定对文本文件中的图片进行caption 时使用的模型。</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本嵌入模型："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>指定对文本内容进行embedding 的模型。</div>
-        </FormItem>
+          {filterChecked && (
+            <>
+              <FormItem field="" layout="inline" label="字符串长度阈值">
+                <Input placeholder="请输入发阈值" />
+              </FormItem>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataScreeningBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dateScreeningAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          {/* switch 开关 */}
+          {/* 开关关闭复选框禁用，开关打开复选框正常使用 */}
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={dataStandardization}
+                onChange={(checked) => setDataStandardization(checked)}
+              />
+            </FormItem>
+            <span className="date-switch-text">特殊字符删除</span>
+          </div>
+          <div className="date-desc">将数据转换为标准格式或单位</div>
+          {dataStandardization && (
+            <>
+              <div className="date-option">
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field=""
+                  labelAlign="left"
+                >
+                  <Checkbox>去除URL链接</Checkbox>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="upperLower"
+                  labelAlign="left"
+                >
+                  <Checkbox>去除不可见字符</Checkbox>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="upperLower"
+                  labelAlign="left"
+                >
+                  <Checkbox>去除html格式字符</Checkbox>
+                </FormItem>
+              </div>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataSpecialBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">{dataSpecialAfter}</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          {/* switch 开关 */}
+          {/* 开关关闭复选框禁用，开关打开复选框正常使用 */}
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={specialCharFilter}
+                onChange={(checked) => {
+                  setSpecialCharFilter(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">特殊字符过滤</span>
+          </div>
+          <div className="date-desc">将数据转换为标准格式或单位</div>
+          {specialCharFilter && (
+            <>
+              <div className="date-option">
+                <span className="date-option-desc">特殊字符占比</span>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="specialCharRatio"
+                  labelAlign="left"
+                >
+                  <Slider
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    value={sliderValue}
+                    onChange={sliderOnChange}
+                    style={{ width: 120 }}
+                    disabled={true}
+                  />
+                </FormItem>
+              </div>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataSpecialCharactersBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataSpecialCharactersAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={SensitiveSwitch}
+                onChange={(checked) => {
+                  setSensitiveSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">去除敏感词</span>
+          </div>
+          <div className="date-desc">---</div>
+          {SensitiveSwitch && (
+            <>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataSpecialCharactersBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataSpecialCharactersAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={deduplicateSwitch}
+                onChange={(checked) => {
+                  setDeduplicateSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">数据去重</span>
+          </div>
+          <div className="date-desc">---</div>
+          {deduplicateSwitch && (
+            <>
+              <FormItem
+                layout="vertical"
+                label={null}
+                field="duplicationCheckbox"
+                labelAlign="left"
+              >
+                <Checkbox>重复比率过滤</Checkbox>
+              </FormItem>
+              <FormItem
+                layout="vertical"
+                label={null}
+                field="duplicationInput"
+                labelAlign="left"
+              >
+                <Input placeholder="请输入" />
+              </FormItem>
+              <FormItem
+                layout="vertical"
+                label={null}
+                field="MD5"
+                labelAlign="left"
+              >
+                <Checkbox>基于MD5去重</Checkbox>
+              </FormItem>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataDeduplicateBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataDeduplicateAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={fuzzyDeduplicateSwitch}
+                onChange={(checked) => {
+                  setFuzzyDeduplicateSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">相似度去重</span>
+          </div>
+          <div className="date-desc">---</div>
+          {fuzzyDeduplicateSwitch && (
+            <>
+              <FormItem
+                layout="vertical"
+                label="数据相似度阈值"
+                field="duplicationCheckbox"
+                labelAlign="left"
+              >
+                <Input placeholder="请输入" />
+              </FormItem>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataFuzzyDeduplicateBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataFuzzyDeduplicateAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={detoxificationSwitch}
+                onChange={(checked) => {
+                  setDetoxificationSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">数据去毒化</span>
+          </div>
+          <div className="date-desc">---</div>
+          {detoxificationSwitch && (
+            <>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataDetoxificationBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataDetoxificationAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={imputationSwitch}
+                onChange={(checked) => {
+                  setImputationSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">数据填补</span>
+          </div>
+          <div className="date-desc">---</div>
+          {imputationSwitch && (
+            <>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataImputationBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataImputationAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem>
+              <Switch
+                style={{ margin: 0, width: 'auto' }}
+                checked={outlierHandlingSwitch}
+                onChange={(checked) => {
+                  setOutlierHandlingSwitch(checked);
+                }}
+              />
+            </FormItem>
+            <span className="date-switch-text">异常值处理</span>
+          </div>
+          <div className="date-desc">---</div>
+          {outlierHandlingSwitch && (
+            <>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataOutlierHandlingBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-content">
+                    {dataOutlierHandlingAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </Form>
     </div>
   );
