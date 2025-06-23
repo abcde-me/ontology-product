@@ -64,34 +64,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [maxSegmentLength, setMaxSegmentLength] = useState<number | null>(null);
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-
-  const {
-    readOnly,
-    inputs,
-    outputKeyOrders,
-    handleCodeAndVarsChange,
-    handleVarListChange,
-    handleAddVariable,
-    handleRemoveVariable,
-    handleCodeChange,
-    handleCodeLanguageChange,
-    handleVarsChange,
-    handleAddOutputVariable,
-    filterVar,
-    isShowRemoveVarConfirm,
-    hideRemoveVarConfirm,
-    onRemoveVarConfirm,
-    // single run
-    isShowSingleRun,
-    hideSingleRun,
-    runningStatus,
-    handleRun,
-    handleStop,
-    runResult,
-    varInputs,
-    inputVarValues,
-    setInputVarValues
-  } = useConfig(id, data);
+  const { readOnly, inputs, updateInputs } = useConfig(id, data);
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
 
@@ -102,6 +75,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
 
   const onValuesChange = (changeValue: any, values: any) => {
     console.log('1111111111:', values, changeValue);
+    updateInputs(values);
   };
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
@@ -113,47 +87,73 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         initialValues={{
           vars: cloneDeep(inputs.variables || [])
         }}
-        layout="inline"
         onChange={onValuesChange}
       >
         <FormItem
-          layout="vertical"
+          layout="inline"
           label="场景选择:"
-          field="sceneSelection"
           labelAlign="left"
           required
-        >
-          <Select
-            placeholder="请选择场景"
-            style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        />
+        <div>
+          <FormItem
+            layout="horizontal"
+            label={null}
+            field="app_scenarios"
+            labelAlign="left"
+            required
           >
-            <Option key={1} value={1}>
-              {1}
-            </Option>
-          </Select>
-        </FormItem>
-        <div className="wk-node-panel-content-tip">
-          常见的针对SFT的模型微调场景生成数据集。
+            <Select
+              placeholder="请选择场景"
+              style={{ width: '100%', margin: 0 }}
+              onChange={(value) => {
+                console.log(value);
+              }}
+            >
+              {/* 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4） */}
+              <Option key={1} value={1}>
+                按通用
+              </Option>
+              <Option key={2} value={2}>
+                文本分类
+              </Option>
+              <Option key={3} value={3}>
+                文本提取
+              </Option>
+              <Option key={4} value={4}>
+                文本生成
+              </Option>
+              <Option key={5} value={5}>
+                多轮回答
+              </Option>
+            </Select>
+          </FormItem>
+          <div className="content-tips-text">
+            常见的针对SFT的模型微调场景生成数据集。
+          </div>
         </div>
         <div className="content-box">
-          <FormItem label="指令生成依赖样本数:" field="">
+          <FormItem label="指令生成依赖样本数:" field="" layout="vertical">
             <Input placeholder="请输入指令" />
           </FormItem>
           <div className="content-tips-text">
             该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
             部分，增加到prompt 中去。
           </div>
-          <FormItem label="过滤相似度阈值:" field="">
+        </div>
+        <div className="content-box">
+          <FormItem label="过滤相似度阈值:" field="" layout="vertical">
             <Input placeholder="请输入阈值" />
           </FormItem>
           <div className="content-tips-text">
             这里通过Rouge-L
             分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。
           </div>
-          <FormItem label="生成样本数:" field="">
+          <FormItem label="生成样本数:" field="" layout="vertical">
             <Input placeholder="请输入样本数" />
           </FormItem>
           <div className="content-tips-text">指定生成的数据集的条数。</div>
@@ -194,12 +194,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               {1}
             </Option>
           </Select>
-        </FormItem>
-        <FormItem layout="vertical" field="nodeDescription" label="说明">
-          <TextArea
-            placeholder="请输入对该节点的描述"
-            style={{ minHeight: 64, minWidth: 350 }}
-          />
         </FormItem>
       </Form>
     </div>

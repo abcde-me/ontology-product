@@ -1,4 +1,3 @@
-import { data } from '@emoji-mart/data';
 // 清洗前后的文案内容
 // 数据标准化
 export const dataStandardizationBefore =

@@ -1,19 +1,33 @@
-.data-enhancement-panel {
+.data-enhancement-content {
+    margin: 0 12px 12px 12px;
+    background: #F9F9FB;
+    // background-color: red;
+    border-radius: 12px;
+    padding: 8px;
+    .enhancement-content{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .enhancement-item{
+        background-color: #E2E8F0;
+        padding: 0 4px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        border-radius: 5px;
+    }
+    .content-tips-text{
+        color: #6E7B8D;
+        font-size: 12px;
+        line-height: 18px;
+        margin-top: 4px;
+    }
+    .arco-form-inline .arco-form-item {
+        width: auto;
+        margin: 0;
+    }
+
     .arco-form-label-item>label {
-    display: flex;
+        display: flex !important;
+    }
 }
-.arco-form-inline .arco-form-item{
-    width: 100%;
-}
-.wk-node-panel-content-tip {
-    width: 100%;
-    color: #6E7B8D;
-    font-size: 12px;
-    line-height: 18px;
-    margin-top: 8px;
-}
-.content-box{
-    border: 1px solid #E2E8F0;
-    border-radius: 5px;
-    padding: 16px;
-}}
+
