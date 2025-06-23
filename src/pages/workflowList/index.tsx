@@ -101,7 +101,7 @@ export default function WorkflowList() {
             width: 120,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text">{record.name}</span>
+                <span className="hover-change">{record.name}</span>
             )
         }, {
             title: '运行方式',
@@ -144,7 +144,7 @@ export default function WorkflowList() {
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.source}>{record.source}</span>
+                <span className="hover-change" title={record.source}>{record.source}</span>
             )
         }, {
             title: '目标数据目录',
@@ -152,7 +152,7 @@ export default function WorkflowList() {
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.target}>{record.target}</span>
+                <span className="hover-change" title={record.target}>{record.target}</span>
             )
         }, {
             title: '创建人',

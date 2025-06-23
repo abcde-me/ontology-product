@@ -1,35 +1,20 @@
 import type { CommonNodeType, VarType, Variable } from '@/pages/workflowConfig/workflow/types'
+import { string } from 'mobx-state-tree/dist/internal'
 
-export enum CodeLanguage {
-  python3 = 'python3',
-  javascript = 'javascript',
-  json = 'json',
-}
 
 export type OutputVar = Record<string, {
   type: VarType
   children: null // support nest in the future,
 }>
 
-export type CodeNodeType = CommonNodeType & {
-  variables: Variable[]
-  code_language: CodeLanguage
-  code: string
-  outputs: OutputVar
+export type AudioParserNodeType = CommonNodeType & {
+  files: string[]
+  selected_files_num: number
+  vad_enabled: number
+  audio_pret: number[]
+  activity_mode: string
+  is_open_multi_conv: number
+  vad_options: string[]
+  audio_model: string
+  after_proc: number[]
 }
-
-export type CodeDependency = any
-
-// 分段方式 按字符 0 按段落 1 按句子 2
-// 定义分段选项的类型
-export type SegmentationOption = {
-  value: string;
-  label: string;
-  key: number;
-  map: any;
-};
-
-export type TextProcessingRules = {
-  replaceExpressionsAndSymbols: boolean;
-  removeValidUrlsAndEmails: boolean;
-};
