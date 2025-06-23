@@ -14,6 +14,7 @@ const Pages: React.FC<PagesProps> = ({current = 1,total = 200,pageSize = 10,onCh
 
   return (
     <Pagination
+      // style={{ marginRight: '-1.5px' }}
       current={current}
       total={total}
       pageSize={pageSize}
