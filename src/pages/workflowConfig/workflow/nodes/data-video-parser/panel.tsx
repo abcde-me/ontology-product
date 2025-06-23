@@ -36,12 +36,15 @@ import './text.scss';
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
+const test = '1';
+
+test = '2';
 
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按句子'  },
-  { value: 3, label: '按段落'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按句子' },
+  { value: 3, label: '按段落' }
 ];
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
@@ -52,12 +55,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const {
-    readOnly,
-    inputs,
-    handleFilesChange,
-    handleFiledsChange
-  } = useConfig(id, data);
+  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+    id,
+    data
+  );
 
   const columns = [
     {
@@ -87,7 +88,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       dataIndex: 'created_at',
       sorter: (a, b) => a.name.length - b.name.length
     }
-  ]
+  ];
 
   const defaultData = [...new Array(5)].map((_, index) => {
     return {
@@ -138,7 +139,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             data={defaultData}
           />
         </FormItem>
-        <Split className='my-[16px]'/>
+        <Split className="my-[16px]" />
         <FormItem
           label="分段方式："
           field="text_slice_rule"
@@ -170,7 +171,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           extra="选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。"
         >
           <Checkbox.Group
-            options={[{ label: '替换表达和特殊符号', value: 0 }, { label: '删除有效URL和电子邮箱地址', value: 1 }]}
+            options={[
+              { label: '替换表达和特殊符号', value: 0 },
+              { label: '删除有效URL和电子邮箱地址', value: 1 }
+            ]}
           />
         </FormItem>
         <FormItem
