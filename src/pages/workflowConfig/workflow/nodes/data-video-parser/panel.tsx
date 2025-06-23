@@ -38,7 +38,7 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 const test = '1';
 
-test = '4';
+test = '5';
 
 // 分段方式选项
 const segmentationOptions: any = [
