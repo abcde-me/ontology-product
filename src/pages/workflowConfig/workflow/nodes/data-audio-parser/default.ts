@@ -1,20 +1,21 @@
 import { BlockEnum } from '../../types'
 import type { NodeDefault } from '../../types'
-import { type TextParserNodeType } from './types'
+import { type AudioParserNodeType } from './types'
 import { ALL_CHAT_AVAILABLE_BLOCKS, ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks'
 
 const i18nPrefix = 'workflow.errorMsg'
 
-const nodeDefault: NodeDefault<TextParserNodeType> = {
+const nodeDefault: NodeDefault<AudioParserNodeType> = {
   defaultValue: {
     files: [],
     selected_files_num: -1,
-    text_slice_rule: 1,
-    slice_max_size: 800,
-    text_proc_rules: [0],
-    multi_model: '',
-    pic_model: '',
-    text_emb_model: '',
+    audio_pret: [1],
+    vad_enabled: 1,
+    activity_mode: '自动',
+    is_open_multi_conv: 1,
+    vad_options: ['vad', 'conv'],
+    audio_model: '',
+    after_proc: [0],
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -26,7 +27,7 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     const nodes = isChatMode ? ALL_CHAT_AVAILABLE_BLOCKS : ALL_COMPLETION_AVAILABLE_BLOCKS
     return nodes
   },
-  checkValid(payload: TextParserNodeType, t: any) {
+  checkValid(payload: AudioParserNodeType, t: any) {
     const errorMessages = ''
     // const { code, variables = [] } = payload
     // if (!errorMessages && variables.filter(v => !v.variable).length > 0)
