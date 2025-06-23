@@ -8,7 +8,7 @@
     "start": "yarn clean && node --max-old-space-size=4096 ./scripts/start",
     "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
     "build": "yarn clean && cross-env NODE_ENV=production GENERATE_SOURCEMAP=false node ./scripts/build",
-    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
+    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --cache",
     "eslint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache --fix",
     "stylelint": "stylelint \"src/**/*.less\" \"src/**/*.scss\" \"src/**/*.css\" --fix --cache",
     "test": "LANG=en_US.UTF-8 jest",
@@ -326,8 +326,8 @@
     "mockjs/commander": "~9.4.1"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "eslint --cache --fix",
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --cache",
       "prettier --write"
     ],
     "src/**/*.{json,md,html,css,scss}": [
