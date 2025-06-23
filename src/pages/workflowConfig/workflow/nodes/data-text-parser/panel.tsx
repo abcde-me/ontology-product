@@ -4,12 +4,8 @@ import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
 import type {
-  CodeNodeType,
-  SegmentationOption,
-  TextProcessingRules
+  TextParserNodeType,
 } from './types';
-import { CodeLanguage } from './types';
-import { extractFunctionParams, extractReturnType } from './text-parser';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -31,7 +27,6 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import './text.scss';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -40,11 +35,11 @@ const Option = Select.Option;
 // 分段方式选项
 const segmentationOptions: any = [
   { value: 1, label: '按字符'  },
-  { value: 2, label: '按句子'  },
-  { value: 3, label: '按段落'}
+  { value: 2, label: '按段落'  },
+  { value: 3, label: '按句子'}
 ];
 
-const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
+const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const [fileNum, setFileNum] = useState(0);
@@ -170,12 +165,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           extra="选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。"
         >
           <Checkbox.Group
-            options={[{ label: '替换表达和特殊符号', value: 0 }, { label: '删除有效URL和电子邮箱地址', value: 1 }]}
+            options={[{ label: '替换表达和特殊符号', value: 1 }, { label: '删除有效URL和电子邮箱地址', value: 2 }]}
           />
         </FormItem>
         <FormItem
           label="多模态模型："
-          field="multi_model"
+          field="text_multi_model_id"
           labelAlign="left"
           extra="当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。"
         >
@@ -189,7 +184,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           label="图片描述模型："
-          field="pic_model"
+          field="text_pic_model_id"
           labelAlign="left"
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
@@ -203,7 +198,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           label="文本嵌入模型："
-          field="text_emb_model"
+          field="text_emb_model_id"
           labelAlign="left"
           extra="指定对文本内容进行embedding 的模型。"
         >
