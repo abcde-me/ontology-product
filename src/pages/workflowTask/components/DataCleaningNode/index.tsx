@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import './index.css';
-import { Pagination, Table } from "@arco-design/web-react";
+import { Table } from "@arco-design/web-react";
 import { ColumnProps } from "@arco-design/web-react/es/Table";
 import noDataElement from "@/components/no-data"
 
@@ -46,7 +46,7 @@ export default function DataCleaningNode(props: { dataSource }) {
           <span className="item-content">{dataSource.missing_value_num}</span>
         </div>
       </div>
-      <Table border={false} columns={columns} data={dataSource.log} pagination={false} noDataElement={noDataElement({ description: '暂无数据', btnText: '创建工作流' })} rowKey="id" style={{ margin: '10px 0' }} />
+      <Table border={false} columns={columns} data={dataSource.log} pagination={false} noDataElement={noDataElement({ description: '暂无数据' })} rowKey="id" style={{ margin: '10px 0' }} />
     </div>
   )
 }

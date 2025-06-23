@@ -6,6 +6,7 @@ import { useHistory } from "react-router";
 import TimeFormatting from '@/utils/timeFormatting'
 import ParseNode from "./components/ParseNode";
 import DataCleaningNode from "./components/DataCleaningNode";
+import DataAugmentationNode from "./components/DataAugmentationNode";
 import './detail.css'
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -18,7 +19,10 @@ export default function WorkflowTaskDetail() {
   const [runningTime, setRunningTime] = useState('fail');
   // 初始化作业详情数据
   const [taskDetailData, setTaskDetailData] = useState({
-    time: '10小时20分30秒',
+    job_name: '',
+    run_status: 1,
+    cre_time: '',
+    time_size: '10小时20分30秒',
     start_time: '1749627834576',
     end_time: '2749627999999',
     fail_content: '这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容。'
@@ -150,7 +154,7 @@ export default function WorkflowTaskDetail() {
           <div className="running-item">
             <span className="item-title">总用时</span>
             <div className="item-content-box">
-              <span className="item-content">{taskDetailData.time}</span>
+              <span className="item-content">{taskDetailData.time_size}</span>
             </div>
           </div>
           <div className="running-item">
@@ -184,7 +188,7 @@ export default function WorkflowTaskDetail() {
               文本解析
             </span>
           }>
-            <Typography.Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
+            <Typography.Paragraph style={{ marginTop: 20 }}>
               <ParseNode dataSource={parseNodeData} />
             </Typography.Paragraph>
           </TabPane>
@@ -194,13 +198,18 @@ export default function WorkflowTaskDetail() {
               数据清洗
             </span>
           }>
-            <Typography.Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
+            <Typography.Paragraph style={{ marginTop: 20 }}>
               <DataCleaningNode dataSource={dataCleaningNodeData} />
             </Typography.Paragraph>
           </TabPane>
-          <TabPane key='3' title='Tab 3'>
-            <Typography.Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
-              Content of Tab Panel 3
+          <TabPane key='3' title={
+            <span>
+              <IconCheckCircle style={{ marginRight: 6 }} />
+              数据增强
+            </span>
+          }>
+            <Typography.Paragraph style={{ marginTop: 20 }}>
+              <DataAugmentationNode dataSource={dataCleaningNodeData} />
             </Typography.Paragraph>
           </TabPane>
         </Tabs>
