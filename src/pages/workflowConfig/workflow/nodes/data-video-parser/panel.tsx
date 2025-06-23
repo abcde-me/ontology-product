@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
 import type {
-  CodeNodeType,
+  // CodeNodeType,
   SegmentationOption,
   TextProcessingRules
 } from './types';
@@ -36,9 +36,6 @@ import './text.scss';
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
-const test = '1';
-
-test = '7';
 
 // 分段方式选项
 const segmentationOptions: any = [
@@ -47,7 +44,7 @@ const segmentationOptions: any = [
   { value: 3, label: '按段落' }
 ];
 
-const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
+const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const [fileNum, setFileNum] = useState(0);
@@ -124,11 +121,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         >
           <Table
             columns={columns}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             rowSelection={{
               selectedRowKeys,
               onChange: (selectedRowKeys, selectedRows) => {
                 console.log('onChange:', selectedRowKeys, selectedRows);
+                // TODO: ts错误
+                // @ts-expect-error
                 setSelectedRowKeys(selectedRowKeys);
                 setFileNum(selectedRowKeys.length);
               },

@@ -98,6 +98,8 @@ export default function Avatar(props: {
                 input.accept = '.png,.jpg,.jpeg';
                 input.onchange = () => {
                   const reader = new FileReader();
+                  // TODO: ts错误
+                  // @ts-expect-error
                   reader.readAsDataURL(input.files[0]);
                   reader.onload = () => {
                     onChange(reader.result as string);

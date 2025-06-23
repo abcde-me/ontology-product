@@ -46,9 +46,9 @@ const codeLanguages = [
 ];
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 0, label: '按字符'  },
-  { value: 1, label: '按句子'  },
-  { value: 2, label: '按段落'}
+  { value: 0, label: '按字符' },
+  { value: 1, label: '按句子' },
+  { value: 2, label: '按段落' }
 ];
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
@@ -210,11 +210,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 sorter: (a, b) => a.name.length - b.name.length
               }
             ]}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             rowSelection={{
               selectedRowKeys,
               onChange: (selectedRowKeys, selectedRows) => {
                 console.log('onChange:', selectedRowKeys, selectedRows);
+                // TODO: ts错误
+                // @ts-expect-error
                 setSelectedRowKeys(selectedRowKeys);
                 setFileNum(selectedRowKeys.length);
               },

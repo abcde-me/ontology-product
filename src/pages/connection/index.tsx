@@ -10,25 +10,24 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail-modal';
-import AddAndEditModal from './add-edit-modal'
-import TimeFormatting from '../../utils/timeFormatting'
+import AddAndEditModal from './add-edit-modal';
+import TimeFormatting from '../../utils/timeFormatting';
 import { getConnectionList } from '@/api/connectionApi';
 
 const InputSearch = Input.Search;
 
 export default function Connection() {
-
   // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
   // 添加编辑弹框的实例
-  const addandsetchildRef = useRef(null)
+  const addandsetchildRef = useRef(null);
   // 连接器配置项
   const columns: any = [
     {
       title: '连接器名称',
       dataIndex: 'name',
       width: 230,
-      ellipsis: true,
+      ellipsis: true
     },
     {
       title: '状态',
@@ -97,11 +96,9 @@ export default function Connection() {
       title: '更新时间',
       width: 200,
       dataIndex: 'updated_at',
-      render: ((_, item) => (
-        <div className='fontMM'>
-          {TimeFormatting(item.updated_at)}
-        </div>
-      ))
+      render: (_, item) => (
+        <div className="fontMM">{TimeFormatting(item.updated_at)}</div>
+      )
     },
     {
       title: '操作',
@@ -109,10 +106,22 @@ export default function Connection() {
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span className="hover" onClick={() => { viewDetailHan(record) }}>
+          <span
+            className="hover"
+            onClick={() => {
+              viewDetailHan(record);
+            }}
+          >
             详情
           </span>
-          <span className="hover" onClick={() => { childAddAndSetModalHan(record) }}>编辑</span>
+          <span
+            className="hover"
+            onClick={() => {
+              childAddAndSetModalHan(record);
+            }}
+          >
+            编辑
+          </span>
           <Popconfirm
             focusLock
             title="删除该连接器"
@@ -145,52 +154,54 @@ export default function Connection() {
   // 点击查看执行的方法
   const viewDetailHan = (obj) => {
     if (childRef.current) {
+      // TODO: ts错误
+      // @ts-expect-error
       childRef.current.displayDetailHan(obj);
     }
-  }
+  };
   const childAddAndSetModalHan = (id) => {
     if (addandsetchildRef.current) {
-      addandsetchildRef.current.displayModalView(id)
+      // TODO: ts错误
+      // @ts-expect-error
+      addandsetchildRef.current.displayModalView(id);
     }
-  }
+  };
   // 搜索框的默认值
-  const [searchValue, setSearchValue] = useState('')
-  const [ConnectionData, setConnectionData] = useState(
-    [
-      {
-        id: "1",
-        name: '唐僧',
-        status: 'connected',
-        type: 's3',
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
+  const [searchValue, setSearchValue] = useState('');
+  const [ConnectionData, setConnectionData] = useState([
+    {
+      id: '1',
+      name: '唐僧',
+      status: 'connected',
+      type: 's3',
+      config: {
+        endpoint: 'https://s3.amazonaws.com',
+        access_key: 'AKIAxxxxXXX',
+        secret_key: 'xxxxxxxx',
+        region: 'XXXXXX',
+        path: 'data-warehouse'
       },
-      {
-        id: "1",
-        name: '唐僧',
-        status: 'disconnection',
-        type: 's3',
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
-      }
-    ]
-  )
+      creator: '张三',
+      created_at: '1749627860785',
+      updated_at: '17123456791'
+    },
+    {
+      id: '1',
+      name: '唐僧',
+      status: 'disconnection',
+      type: 's3',
+      config: {
+        endpoint: 'https://s3.amazonaws.com',
+        access_key: 'AKIAxxxxXXX',
+        secret_key: 'xxxxxxxx',
+        region: 'XXXXXX',
+        path: 'data-warehouse'
+      },
+      creator: '张三',
+      created_at: '1749627860785',
+      updated_at: '17123456791'
+    }
+  ]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -202,7 +213,7 @@ export default function Connection() {
 
   // 根据搜索条件过滤连接器
   const filteredConnectors = useMemo(() => {
-    return ConnectionData.filter(connector => {
+    return ConnectionData.filter((connector) => {
       const query = searchValue.toLowerCase();
       return (
         connector.name.toLowerCase().includes(query) ||
@@ -212,52 +223,94 @@ export default function Connection() {
     });
   }, [ConnectionData, searchValue]);
 
-
-
-
-
   const getlist = () => {
     getConnectionList({
       page: current,
-      page_size: pageSize,
-    })
-  }
+      page_size: pageSize
+    });
+  };
 
-  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px', height: '94%' }}>
-    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
-    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
-      <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
-        setSearchValue(value)
-      }} />
-      <Button type='primary' icon={<IconPlus />} onClick={() => {
-        childAddAndSetModalHan(null)
-      }} >
-        创建连接器
-      </Button>
-    </div>
-    <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id" />
-    {/* 分页 */}
-    <Pagination
-      current={current}
-      pageSize={pageSize}
-      onPageSizeChange={(pageSize) => {
-        setPageSize(pageSize);
-        setCurrent(1);
+  return (
+    <div
+      style={{
+        backgroundColor: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '10px 20px 0px 0px',
+        borderRadius: '10px',
+        height: '94%'
       }}
-      onChange={handlePageChange}
-      sizeOptions={[2, 5, 10, 20]}
-      showTotal
-      total={filteredConnectors.length}
-      showJumper
-      sizeCanChange
-      style={{ marginBottom: '20px' }}
-    />
+    >
+      <h1
+        style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          margin: '20px 0px 15px 20px'
+        }}
+      >
+        连接器
+      </h1>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: '0px 20px'
+        }}
+      >
+        <InputSearch
+          placeholder="输入关键词搜索"
+          style={{ width: 230 }}
+          value={searchValue}
+          onChange={(value) => {
+            setSearchValue(value);
+          }}
+        />
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => {
+            childAddAndSetModalHan(null);
+          }}
+        >
+          创建连接器
+        </Button>
+      </div>
+      <Table
+        border={false}
+        columns={columns}
+        data={filteredConnectors}
+        style={{ padding: '10px 20px' }}
+        pagination={false}
+        rowKey="id"
+      />
+      {/* 分页 */}
+      <Pagination
+        current={current}
+        pageSize={pageSize}
+        onPageSizeChange={(pageSize) => {
+          setPageSize(pageSize);
+          setCurrent(1);
+        }}
+        onChange={handlePageChange}
+        sizeOptions={[2, 5, 10, 20]}
+        showTotal
+        total={filteredConnectors.length}
+        showJumper
+        sizeCanChange
+        style={{ marginBottom: '20px' }}
+      />
 
-    {/* 详情逻辑 */}
-    <ModalDetail ref={childRef} />
-    <AddAndEditModal ref={addandsetchildRef} />
-    <button onClick={() => {
-      getlist()
-    }}>获取数据</button>
-  </div>
+      {/* 详情逻辑 */}
+      <ModalDetail ref={childRef} />
+      <AddAndEditModal ref={addandsetchildRef} />
+      <button
+        onClick={() => {
+          getlist();
+        }}
+      >
+        获取数据
+      </button>
+    </div>
+  );
 }

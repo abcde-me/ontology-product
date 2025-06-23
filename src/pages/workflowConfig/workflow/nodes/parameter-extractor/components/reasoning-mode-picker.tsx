@@ -1,49 +1,47 @@
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ReasoningModeType } from '../types';
+import Field from '../../_base/components/field';
+import OptionCard from '../../_base/components/option-card';
 
-import type { FC } from 'react'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ReasoningModeType } from '../types'
-import Field from '../../_base/components/field'
-import OptionCard from '../../_base/components/option-card'
-
-const i18nPrefix = 'workflow.nodes.parameterExtractor'
+const i18nPrefix = 'workflow.nodes.parameterExtractor';
 
 interface Props {
-  type: ReasoningModeType
-  onChange: (type: ReasoningModeType) => void
+  type: ReasoningModeType;
+  onChange: (type: ReasoningModeType) => void;
 }
 
-const ReasoningModePicker: FC<Props> = ({
-  type,
-  onChange,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+const ReasoningModePicker: FC<Props> = ({ type, onChange }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const handleChange = useCallback((type: ReasoningModeType) => {
-    return () => {
-      onChange(type)
-    }
-  }, [onChange])
+  const handleChange = useCallback(
+    (type: ReasoningModeType) => {
+      return () => {
+        onChange(type);
+      };
+    },
+    [onChange]
+  );
 
   return (
     <Field
       title={t(`${i18nPrefix}.reasoningMode`)}
-      tooltip={t(`${i18nPrefix}.reasoningModeTip`)!}
+      tooltip={t(`${i18nPrefix}.reasoningModeTip`)}
     >
-      <div className='grid grid-cols-2 gap-x-1'>
+      <div className="grid grid-cols-2 gap-x-1">
         <OptionCard
-          title='Function/Tool Calling'
+          title="Function/Tool Calling"
           onSelect={handleChange(ReasoningModeType.functionCall)}
           selected={type === ReasoningModeType.functionCall}
         />
         <OptionCard
-          title='Prompt'
+          title="Prompt"
           selected={type === ReasoningModeType.prompt}
           onSelect={handleChange(ReasoningModeType.prompt)}
         />
       </div>
     </Field>
-
-  )
-}
-export default React.memo(ReasoningModePicker)
+  );
+};
+export default React.memo(ReasoningModePicker);

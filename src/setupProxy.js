@@ -1,7 +1,7 @@
-const { createProxyMiddleware } = require('http-proxy-middleware');
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
-module.exports = function (app) {
+export default function (app) {
   if (process.env.SINGLE_APP === 'true') {
     console.log('==================>enable proxy', process.env.SINGLE_APP);
     app.use(
@@ -46,5 +46,5 @@ module.exports = function (app) {
       })
     );
   }
-};
+}
 //    "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",

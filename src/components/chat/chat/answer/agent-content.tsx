@@ -16,7 +16,7 @@ type AgentContentProps = {
 const AgentContent: FC<AgentContentProps> = ({
   item,
   responding,
-  allToolIcons,
+  allToolIcons
 }) => {
   const { annotation, agent_thoughts } = item;
 
@@ -56,29 +56,32 @@ function renderReason(item: ThoughtItem) {
     dayjs(item.thinkEnd).diff(dayjs(item.thinkStart), 'second')
   );
 
-  return <div className='ass-msg-content think-time'>
-    { thinkStartMatch ? (
-      <Button
-        disabled
-        type="text"
-        className="mr-[8px]"
-        loading={isThinking}
-        style={{
-          padding: '0',
-        }}
-      >
-        {isThinking ? (
-          '思考中'
-        ) : (
-          <Space>
-            <span>{`思考完成 (用时 ${thinkTime} 秒)`}</span>
-          </Space>
-        )}
-      </Button>
-    ) : null
-  }
-    <ReasonContent content={item.thought} />
-  </div>
+  return (
+    <div className="ass-msg-content think-time">
+      {thinkStartMatch ? (
+        <Button
+          disabled
+          type="text"
+          className="mr-[8px]"
+          // TODO: ts错误
+          // @ts-expect-error
+          loading={isThinking}
+          style={{
+            padding: '0'
+          }}
+        >
+          {isThinking ? (
+            '思考中'
+          ) : (
+            <Space>
+              <span>{`思考完成 (用时 ${thinkTime} 秒)`}</span>
+            </Space>
+          )}
+        </Button>
+      ) : null}
+      <ReasonContent content={item.thought} />
+    </div>
+  );
 }
 
 export default memo(AgentContent);

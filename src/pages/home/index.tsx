@@ -6,6 +6,7 @@ import Chat from './chat';
 import png1 from '@/assets/home_1.png';
 import png2 from '@/assets/home_2.png';
 import png3 from '@/assets/home_3.png';
+import { InstalledApp } from '@/utils/type';
 
 export default function AppChat() {
   const appid = '1';
@@ -46,7 +47,7 @@ export default function AppChat() {
         </div>
       </div>
       <div className="flex flex-auto items-stretch overflow-auto rounded-[0_0_8px_8px]">
-        <Chat installedApp={installedApp} />
+        <Chat installedApp={installedApp as InstalledApp} />
       </div>
     </div>
   );

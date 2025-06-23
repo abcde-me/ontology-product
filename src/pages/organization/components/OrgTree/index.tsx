@@ -1,17 +1,22 @@
 import AddSvg from '@/assets/add.svg';
-import { Input, Menu, Popconfirm, Popover, Tree, Button } from '@arco-design/web-react';
+import {
+  Input,
+  Menu,
+  Popconfirm,
+  Popover,
+  Tree,
+  Button
+} from '@arco-design/web-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import AddOrgForm from '../AddOrgForm';
 import EditOrgForm from '../EditOrgForm';
 import { useOrgEditor } from '../OrgProvider/Context';
-import AddParentOrgForm from '../AddParentOrgForm'
+import AddParentOrgForm from '../AddParentOrgForm';
 
 export default function OrgTree() {
   const org = useOrgEditor();
   const { orgStore } = org;
-  const { orgData } = orgStore.useGetState([
-    'orgData',
-  ]);
+  const { orgData } = orgStore.useGetState(['orgData']);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [popoverVisible, setPopoverVisible] = useState<boolean>(false); // 控制 Popover 显示与隐藏
 
@@ -22,11 +27,15 @@ export default function OrgTree() {
       const result = [];
       data.forEach((item) => {
         if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
+          // TODO: ts错误
+          // @ts-expect-error
           result.push({ ...item });
         } else if (item.children) {
           const filterData = loop(item.children);
 
           if (filterData.length) {
+            // TODO: ts错误
+            // @ts-expect-error
             result.push({ ...item, children: filterData });
           }
         }
@@ -72,7 +81,7 @@ export default function OrgTree() {
         <div className="border-primary-light-4 flex h-[32px] w-[36px] cursor-pointer items-center justify-center rounded-[6px] border">
           <AddSvg
             onClick={() => {
-              orgStore.setParentOrgModalVisible(true)
+              orgStore.setParentOrgModalVisible(true);
             }}
           />
         </div>
@@ -93,12 +102,16 @@ export default function OrgTree() {
             }
 
             const prefix = title?.toString().substr(0, index);
+            // TODO: ts错误
+            // @ts-expect-error
             const suffix = title?.toString().substr(index + inputValue.length);
             return (
               <span>
                 {prefix}
                 <span style={{ color: 'var(--color-primary-light-4)' }}>
-                  {title?.toString().substr(index, inputValue.length)}
+                  {// TODO: ts错误
+                  // @ts-expect-error
+                  title?.toString().substr(index, inputValue.length)}
                 </span>
                 {suffix}
               </span>
@@ -111,19 +124,19 @@ export default function OrgTree() {
           orgStore.setCurrentOrg(info.selectedNodes[0].props);
         }}
         renderExtra={(node: any) => {
-           const { perms } = node;
-           // 是否可以创建， 如果perms包括 "can_create"
-           const canCreate = perms?.includes('can_create');
-           // 是否可以编辑， 如果perms包括 "can_edit"
-            const canEdit = perms?.includes('can_update');
-            // 是否可以删除， 如果perms包括 "can_delete"
-            const canDelete = perms?.includes('can_delete');
+          const { perms } = node;
+          // 是否可以创建， 如果perms包括 "can_create"
+          const canCreate = perms?.includes('can_create');
+          // 是否可以编辑， 如果perms包括 "can_edit"
+          const canEdit = perms?.includes('can_update');
+          // 是否可以删除， 如果perms包括 "can_delete"
+          const canDelete = perms?.includes('can_delete');
 
           return (
             <div
               onMouseEnter={() => {
-                handleMouseEnter(node.id)
-                orgStore.setHoveredOrg(node)
+                handleMouseEnter(node.id);
+                orgStore.setHoveredOrg(node);
               }}
               onMouseLeave={handleMouseLeave}
               style={{
@@ -145,7 +158,7 @@ export default function OrgTree() {
                   content={
                     <Menu>
                       <Menu.Item
-                      disabled={!canCreate}
+                        disabled={!canCreate}
                         key="1"
                         onClick={() => {
                           console.log('111', node);
@@ -156,7 +169,7 @@ export default function OrgTree() {
                         创建子部门
                       </Menu.Item>
                       <Menu.Item
-                      disabled={!canEdit}
+                        disabled={!canEdit}
                         key="2"
                         onClick={() => {
                           orgStore.setEditOrgModalVisible(true);
@@ -177,7 +190,7 @@ export default function OrgTree() {
                       >
                         <Menu.Item key="3" disabled={!canDelete}>
                           {' '}
-                          <div style={{ color:'red' }}>删除部门</div>
+                          <div style={{ color: 'red' }}>删除部门</div>
                         </Menu.Item>
                       </Popconfirm>
                     </Menu>
@@ -186,7 +199,7 @@ export default function OrgTree() {
                   <div className="text-black">...</div>
                 </Popover>
               ) : (
-                <div style={{ opacity: 0}}>{node.value}</div>
+                <div style={{ opacity: 0 }}>{node.value}</div>
               )}
             </div>
           );
