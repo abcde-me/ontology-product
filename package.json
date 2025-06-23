@@ -327,7 +327,7 @@
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [
-      "eslint --cache",
+      "eslint --cache --max-warnings=0 --ext .ts,.tsx,.js,.jsx",
       "prettier --write"
     ],
     "src/**/*.{json,md,html,css,scss}": [
