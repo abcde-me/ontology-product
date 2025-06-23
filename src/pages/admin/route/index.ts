@@ -129,7 +129,7 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/datasetManagement/detail/:id',
     component: React.lazy(async () => {
       console.log('加载数据集详情页组件');
-      return import('../../datasetManagement/detail/index');
+      return import('../../../components/detail/index');
     }),
     children: []
   },

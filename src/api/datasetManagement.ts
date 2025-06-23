@@ -43,6 +43,14 @@ export async function getConnectorFileList(params:any){
 }
 
 
+//修改数据集
+export async function updateDataset(params:any){
+  return UAPI.RES.updateDatasetApi({id:params.id}).put(params).inRegion().do();
+}
+
+
+
+
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){
 //   return UAPI.RES.connectorListAPI({}).get(params).inRegion().do();
