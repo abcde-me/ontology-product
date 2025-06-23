@@ -92,5 +92,6 @@
 }
 
 .workflow-task-detail .work-region .arco-tabs-left .arco-tabs-content-vertical {
-  padding-top: 0;
+  padding: 0;
+  margin-left: 16px;
 }
