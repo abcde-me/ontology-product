@@ -4,6 +4,7 @@ import { useHistory } from "react-router";
 import { ColumnProps } from "@arco-design/web-react/es/Table";
 import TimeFormatting from '@/utils/timeFormatting'
 import './index.css'
+import noDataElement from "@/components/no-data";
 
 const InputSearch = Input.Search;
 
@@ -200,7 +201,7 @@ export default function WorkflowTask() {
                     setSearchValue(value)
                 }} />
             </div>
-            <Table border={false} columns={columns} data={filterWorkflowTaskData} pagination={false} rowKey="id" />
+            <Table border={false} columns={columns} data={filterWorkflowTaskData} pagination={false} noDataElement={noDataElement({ description: '暂无作业' })} rowKey="id" />
             {/* 分页 */}
             <Pagination
                 current={current}

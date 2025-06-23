@@ -5,6 +5,7 @@ import { useParams } from '@/utils/url'
 import { useHistory } from "react-router";
 import TimeFormatting from '@/utils/timeFormatting'
 import ParseNode from "./components/ParseNode";
+import DataCleaningNode from "./components/DataCleaningNode";
 import './detail.css'
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -23,27 +24,41 @@ export default function WorkflowTaskDetail() {
     fail_content: '这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容。'
   });
   // 初始化解析节点数据
-  const [parseNodeData, setParseNodeData] = useState([
-    {
-      file_name: '文件1',
-      status: true,
-      file_type: 'pdf',
-      start_time: '1749627834576',
-      end_time: '1749627834576',
-    }, {
-      file_name: '文件2',
-      status: false,
-      file_type: 'txt',
-      start_time: '1749627834576',
-      end_time: '1749627834576',
-    }, {
-      file_name: '文件3',
-      status: false,
-      file_type: 'epub',
-      start_time: '1749627834576',
-      end_time: '1749627834576',
-    }
-  ])
+  const [parseNodeData, setParseNodeData] = useState({
+    file: [
+      {
+        file_name: '文件1',
+        status: true,
+        file_type: 'pdf',
+        start_time: '1749627834576',
+        end_time: '1749627834576',
+      }, {
+        file_name: '文件2',
+        status: false,
+        file_type: 'txt',
+        start_time: '1749627834576',
+        end_time: '1749627834576',
+      }, {
+        file_name: '文件3',
+        status: false,
+        file_type: 'epub',
+        start_time: '1749627834576',
+        end_time: '1749627834576',
+      }
+    ], // 成功文件列表
+    total: 100, //总数
+    success_total: 99,
+    fail_total: 1
+  })
+  // 初始化数据清洗节点数据
+  const [dataCleaningNodeData, setDataCleaningNodeData] = useState({
+    raw_data_num: 1250, // 原始数据量
+    cleansed_data_num: 1120, // 清洗后数据量/ 增强后数据量
+    remove_duplicates_num: 87, // 删除重复数据量
+    missing_value_num: 32, // 缺失值处理
+    abnormal_value_num: 11, // 异常值处理
+    log: [],
+  })
 
   // 运行失败状态下重试操作
   const handleRetryWorkflow = (id) => {
@@ -176,11 +191,11 @@ export default function WorkflowTaskDetail() {
           <TabPane key='2' title={
             <span>
               <IconCheckCircle style={{ marginRight: 6 }} />
-              文本解析
+              数据清洗
             </span>
           }>
             <Typography.Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
-              Content of Tab Panel 2
+              <DataCleaningNode dataSource={dataCleaningNodeData} />
             </Typography.Paragraph>
           </TabPane>
           <TabPane key='3' title='Tab 3'>
