@@ -14,9 +14,10 @@ export type VideoParserNodeType = CommonNodeType & {
   is_denoise: number
   audio_options: string[]
   vad_enabled: number
-  activity_mode: string
+  activity_mode: number
+  activity_mode_num: number
   is_open_multi_conv: number
   vad_options: string[]
-  audio_model: string
+  audio_model_id: string
   after_proc: number[]
 }

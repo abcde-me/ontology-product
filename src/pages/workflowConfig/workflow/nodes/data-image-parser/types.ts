@@ -8,8 +8,8 @@ export type OutputVar = Record<string, {
 
 export type ImageParserNodeType = CommonNodeType & {
   files: string[]
-  pic_caption_model: string
-  pic_emb_model: string
+  pic_model_id: string
+  pic_embc_model_id: string
   selected_files_num: number
 }
 

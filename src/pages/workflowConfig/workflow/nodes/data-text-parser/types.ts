@@ -12,7 +12,7 @@ export type TextParserNodeType = CommonNodeType & {
   text_slice_rule: number
   slice_max_size: number
   text_proc_rules: number[]
-  text_multi_model_id: string
+  text_orc_model_id: string
   text_pic_model_id: string
   text_emb_model_id: string
 }
