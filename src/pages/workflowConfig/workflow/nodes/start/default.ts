@@ -5,6 +5,33 @@ import { ALL_CHAT_AVAILABLE_BLOCKS, ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pa
 const nodeDefault: NodeDefault<StartNodeType> = {
   defaultValue: {
     variables: [],
+    source_path: 'string',
+    data_category: [
+      {
+        "id": 1,
+        "category": "文档",
+        "enabled": true,
+        "format": ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
+      },
+      {
+        "id": 2,
+        "category": "图片",
+        "enabled": true,
+        "format": ['JPEG', 'PNG', 'JPG']
+      },
+      {
+        "id": 3,
+        "category": "音频",
+        "enabled": true,
+        "format": ['WAV', 'MP#', 'AAC', 'FLAC']
+      },
+      {
+        "id": 4,
+        "category": "视频",
+        "enabled": true,
+        "format": ['MP4', 'MOV', 'MKV']
+      },
+    ]
   },
   getAvailablePrevNodes() {
     return []

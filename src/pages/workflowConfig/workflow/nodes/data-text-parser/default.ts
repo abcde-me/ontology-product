@@ -11,10 +11,10 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     selected_files_num: -1,
     text_slice_rule: 1,
     slice_max_size: 800,
-    text_proc_rules: [0],
-    multi_model: '',
-    pic_model: '',
-    text_emb_model: '',
+    text_proc_rules: [1],
+    text_multi_model_id: '',
+    text_pic_model_id: '',
+    text_emb_model_id: '',
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
