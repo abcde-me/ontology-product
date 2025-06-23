@@ -556,21 +556,21 @@ export const useWorkflowInit = () => {
   }, [])
 
   const handleFetchPreloadData = useCallback(async () => {
-    try {
-      const { data: nodesDefaultConfigsData } = await getWorkflowBlockConfig(appDetail?.id)
-      const { data: publishedWorkflow } = await getWorkflowPublish(appDetail?.id)
-      workflowStore.setState({
-        nodesDefaultConfigs: nodesDefaultConfigsData.reduce((acc, block) => {
-          if (!acc[block.type])
-            acc[block.type] = { ...block.config }
-          return acc
-        }, {} as Record<string, any>),
-      })
-      workflowStore.getState().setPublishedAt(publishedWorkflow?.created_at)
-    }
-    catch (e) {
-      console.error(e)
-    }
+    // try {
+    //   const { data: nodesDefaultConfigsData } = await getWorkflowBlockConfig(appDetail?.id)
+    //   const { data: publishedWorkflow } = await getWorkflowPublish(appDetail?.id)
+    //   workflowStore.setState({
+    //     nodesDefaultConfigs: nodesDefaultConfigsData.reduce((acc, block) => {
+    //       if (!acc[block.type])
+    //         acc[block.type] = { ...block.config }
+    //       return acc
+    //     }, {} as Record<string, any>),
+    //   })
+    //   workflowStore.getState().setPublishedAt(publishedWorkflow?.created_at)
+    // }
+    // catch (e) {
+    //   console.error(e)
+    // }
   }, [workflowStore, appDetail])
 
   useEffect(() => {
