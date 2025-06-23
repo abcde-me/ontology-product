@@ -328,7 +328,7 @@
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [
-      "tsc-files --noEmit",
+      "tsc-files --pretty --noEmit --file",
       "eslint --cache --max-warnings=0 --ext .ts,.tsx,.js,.jsx",
       "prettier --write"
     ],

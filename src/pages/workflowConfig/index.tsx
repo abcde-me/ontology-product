@@ -1,44 +1,53 @@
-import React, { useEffect, useState } from 'react'
-import { useShallow } from 'zustand/react/shallow'
-import { Initor } from '@/pages/workflowConfig/initor'
-import Workflow from '@/pages/workflowConfig/workflow'
-import { useStore } from '@/pages/workflowConfig/app/store'
-import { createWorkflow, getWorkflowDetail } from '@/api/workflow'
-import { useParams } from '@/utils/url'
-import { useHistory } from 'react-router-dom'
-import './styles/index.css'
-import './styles/markdown.scss'
-import './styles/custom.scss'
+import React, { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { Initor } from '@/pages/workflowConfig/initor';
+import Workflow from '@/pages/workflowConfig/workflow';
+import { useStore } from '@/pages/workflowConfig/app/store';
+import { createWorkflow, getWorkflowDetail } from '@/api/workflow';
+import { useParams } from '@/utils/url';
+import { useHistory } from 'react-router-dom';
+import './styles/index.css';
+import './styles/markdown.scss';
+import './styles/custom.scss';
+
+console.log('测试测试测试', test);
 
 function WorkflowConfig() {
-  const { setWorkflowDetail } = useStore(useShallow(state => ({
-    setWorkflowDetail: state.setAppDetail,
-  })))
-  const [loading, setLoading] = useState(true)
-  const appId = useParams('id')
-  const history = useHistory()
+  const { setWorkflowDetail } = useStore(
+    useShallow((state) => ({
+      setWorkflowDetail: state.setAppDetail
+    }))
+  );
+  const [loading, setLoading] = useState(true);
+  const appId = useParams('id');
+  const history = useHistory();
 
   useEffect(() => {
     const init = async () => {
       if (appId) {
-        const app = await getWorkflowDetail(appId)
-        setWorkflowDetail(app.data)
-        setLoading(false)
+        const app = await getWorkflowDetail(appId);
+        setWorkflowDetail(app.data);
+        setLoading(false);
       } else {
-        const app = await createWorkflow({ name: '新建工作流', mode: "workflow" })
-        history.push('/tenant/compute/modaforge/workflowConfig?id=' + app.data.id)
+        const app = await createWorkflow({
+          name: '新建工作流',
+          mode: 'workflow'
+        });
+        history.push(
+          '/tenant/compute/modaforge/workflowConfig?id=' + app.data.id
+        );
       }
-    }
-    init()
-  }, [appId, history, setWorkflowDetail])
+    };
+    init();
+  }, [appId, history, setWorkflowDetail]);
 
   return (
     <Initor>
-      <div className='w-full h-full overflow-x-auto app-workflow-page'>
+      <div className="app-workflow-page h-full w-full overflow-x-auto">
         {!loading && <Workflow />}
       </div>
     </Initor>
-  )
+  );
 }
 
-export default WorkflowConfig
+export default WorkflowConfig;
