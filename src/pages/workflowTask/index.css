@@ -5,26 +5,31 @@
   margin: 10px;
   padding: 20px;
   border-radius: 10px;
-  min-height: 94%
-}
+  min-height: 94%;
 
-.workflow-task .arco-table-tr>th {
-  background-color: rgb(245, 249, 255) !important;
-}
+  .arco-table-tr>th {
+    background-color: rgb(245, 249, 255) !important;
+  }
 
-.workflow-task .arco-table-content-scroll .arco-table-content-inner {
-  min-height: 335px;
-}
+  .arco-table-content-scroll .arco-table-content-inner {
+    min-height: 335px;
+  }
 
-.workflow-task .arco-pagination-total-text {
-  line-height: 32px;
-}
+  .arco-pagination-total-text {
+    line-height: 32px;
+  }
 
-.workflow-task .operate-text {
-  color: rgb(0, 125, 250);
-  cursor: pointer;
-}
+  .operate-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
 
-.workflow-task .operate-text:hover {
-  color: black;
+  .operate-text:hover {
+    color: black;
+  }
+
+  .arco-table-tr:hover .hover-change {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
 }

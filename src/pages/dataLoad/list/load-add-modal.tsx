@@ -48,24 +48,25 @@ const LoadAddModal = (props: any) => {
     // 提交表单时的校验逻辑
     const handleSubmit = () => {
         const fo1 = form.getFieldsValue()
+        const [hour, minute] = fo1.time.split(':')
         // 校验成功的逻辑
         form.validate().then(() => {
             // 点击确认隐藏弹框并且重置表单数据
             props.hideModalHan()
-            if (fo1.load_type !== 'once') {
-                conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle)
-            }
             const fo2 = {
                 name: fo1.name,
-                connector_id: fo1.connector_name,
-                source_type: fo1.source_type,
+                connector_id: fo1.connector_id,
+                source_type: fo1.cycle,
                 load_type: fo1.load_type,
-                cron_expr: fo1.load_type !== 'once' && conversionArco(fo1.time, fo1.day, fo1.weekly, fo1.cycle),
                 dest_path: fo1.dest_path,
+                minute: minute,
+                hour: hour,
+                data: fo1.cycle == '每日' ? '*' : fo1.cycle == '每月' ? fo1.week : '*',
+                month: fo1.cycle == '每月' ? '*' : '',
+                week: fo1.cycle == '每周' ? fo1.week : '',
                 creator: '张三'
             }
             console.log(fo2);
-            console.log(fo1);
         }).catch((error) => {
             // 校验失败，错误信息会由 Form 自动处理
             console.error('表单校验失败：', error);
@@ -122,7 +123,7 @@ const LoadAddModal = (props: any) => {
                     </RadioGroup>
                 </FormItem>
                 <FormItem label='绑定连接器：'
-                    field="connector_name"
+                    field="connector_id"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign='right'

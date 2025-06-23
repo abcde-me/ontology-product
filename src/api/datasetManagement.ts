@@ -10,9 +10,9 @@ export async function getDatasetList(params:any) {
   return UAPI.RES.datasetsApi({}).get(params).inRegion().do();
 }
 
-//获取数据详情列表
-export async function getDatasetDetail(id:any){
-  return UAPI.RES.datasetDetailApi({id}).get().inRegion().do();
+//获取数据集详情
+export async function getDatasetDetail(id: any) {
+  return UAPI.RES.datasetDetailApi({ id }).get().inRegion().do();
 }
 
 
@@ -32,7 +32,8 @@ export async function getTagList(){
 
 //查询连接器信息列表
 export async function getConnectorList(params:any){
-  return UAPI.RES.connectorListApi({}).get(params).inRegion().do();
+  return UAPI.RES.connectorListApi({})
+    .get(params).inRegion().do({ preCheck: false});
 }
 
 

@@ -12,11 +12,12 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail-modal';
 import AddAndEditModal from './add-edit-modal'
 import TimeFormatting from '../../utils/timeFormatting'
+import { getConnectionList } from '@/api/connectionApi';
 
 const InputSearch = Input.Search;
 
 export default function Connection() {
-  
+
   // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
   // 添加编辑弹框的实例
@@ -39,22 +40,22 @@ export default function Connection() {
             style={{
               width: '5px',
               height: '5px',
-              backgroundColor: item.status ? 'green' : 'red',
+              backgroundColor: item.status !== 'connected' ? 'red' : 'green',
               borderRadius: '50%',
               marginRight: '5px'
             }}
           ></div>
-          <div>{item.status ? '已连接' : '已断开'}</div>
+          <div>{item.status !== 'connected' ? '已断开' : '已连接'}</div>
         </div>
       ),
       filters: [
         {
           text: '已断开',
-          value: false
+          value: 'disconnection'
         },
         {
           text: '已连接',
-          value: true
+          value: 'connected'
         }
       ],
       onFilter: (value, row) => row.status == value
@@ -108,7 +109,7 @@ export default function Connection() {
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span className="hover" onClick={()=>{viewDetailHan(record)}}>
+          <span className="hover" onClick={() => { viewDetailHan(record) }}>
             详情
           </span>
           <span className="hover" onClick={() => { childAddAndSetModalHan(record) }}>编辑</span>
@@ -159,7 +160,7 @@ export default function Connection() {
       {
         id: "1",
         name: '唐僧',
-        status: false,
+        status: 'connected',
         type: 's3',
         config: {
           endpoint: "https://s3.amazonaws.com",
@@ -173,24 +174,9 @@ export default function Connection() {
         updated_at: '17123456791'
       },
       {
-        id: "2",
-        name: '猪八戒',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
-      {
-        id: "3",
-        name: '西游记',
-        status: false,
+        id: "1",
+        name: '唐僧',
+        status: 'disconnection',
         type: 's3',
         config: {
           endpoint: "https://s3.amazonaws.com",
@@ -202,114 +188,7 @@ export default function Connection() {
         creator: '张三',
         created_at: '1749627860785',
         updated_at: '17123456791'
-      },
-      {
-        id: "4",
-        name: '水浒传',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '三国演义',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
-      {
-        id: "5",
-        name: '红楼梦',
-        status: false,
-        type: 's3',
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
-      },
-      {
-        id: "6",
-        name: '孙悟空',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
-      {
-        id: "7",
-        name: '沙僧',
-        status: false,
-        type: 's3',
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
-      },
-      {
-        id: "8",
-        name: '猪八戒',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
-      {
-        id: "9",
-        name: '白龙马',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
-      {
-        id: "10",
-        name: '白骨精',
-        status: true,
-        type: 'hdfs',
-        config: {
-          host: "XXXXX",
-          port: '22',
-          user: "xxxxxxxxxxx",
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '17123456782',
-        updated_at: '17123456792'
-      },
+      }
     ]
   )
   // 当前的第几页
@@ -337,9 +216,14 @@ export default function Connection() {
 
 
 
+  const getlist = () => {
+    getConnectionList({
+      page: current,
+      page_size: pageSize,
+    })
+  }
 
-
-  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px',height:'94%' }}>
+  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px', height: '94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
       <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
@@ -351,7 +235,7 @@ export default function Connection() {
         创建连接器
       </Button>
     </div>
-    <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id"  />
+    <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id" />
     {/* 分页 */}
     <Pagination
       current={current}
@@ -366,11 +250,14 @@ export default function Connection() {
       total={filteredConnectors.length}
       showJumper
       sizeCanChange
-      style={{marginBottom:'20px'}}
+      style={{ marginBottom: '20px' }}
     />
 
     {/* 详情逻辑 */}
     <ModalDetail ref={childRef} />
     <AddAndEditModal ref={addandsetchildRef} />
+    <button onClick={() => {
+      getlist()
+    }}>获取数据</button>
   </div>
 }
