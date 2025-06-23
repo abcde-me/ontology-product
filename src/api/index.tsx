@@ -17,6 +17,7 @@ UAPI_CONFIG.setDefaultConfig({
 UAPI_CONFIG.addRequestInterceptor(
   (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
+    // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (!config.headers['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);

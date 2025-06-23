@@ -76,7 +76,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                         {frequencyData == '每天' && null}
                         {frequencyData == '每周' &&
                             <Form.Item
-                                field="weekly"
+                                field="week"
                                 style={{
                                     flex: '0 0 120px',
                                     margin: '0 8px',
