@@ -1,19 +1,23 @@
 /* eslint-disable no-eval */
-import { readdir, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { transpile } from 'typescript';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('node:fs');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('node:path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const transpile = require('typescript').transpile;
 
 const targetLanguage = 'en-US';
-import { languages as _languages } from './languages.json';
-const languages = _languages
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const data = require('./languages.json');
+const languages = data.languages
   .filter((language) => language.supported)
   .map((language) => language.value);
 
 async function getKeysFromLanuage(language) {
   return new Promise((resolve, reject) => {
-    const folderPath = join(__dirname, language);
+    const folderPath = path.join(__dirname, language);
     let allKeys = [];
-    readdir(folderPath, (err, files) => {
+    fs.readdir(folderPath, (err, files) => {
       if (err) {
         console.error('Error reading folder:', err);
         reject(err);
@@ -21,13 +25,13 @@ async function getKeysFromLanuage(language) {
       }
 
       files.forEach((file) => {
-        const filePath = join(folderPath, file);
+        const filePath = path.join(folderPath, file);
         const fileName = file.replace(/\.[^/.]+$/, ''); // Remove file extension
         const camelCaseFileName = fileName.replace(/[-_](.)/g, (_, c) =>
           c.toUpperCase()
         ); // Convert to camel case
         // console.log(camelCaseFileName)
-        const content = readFileSync(filePath, 'utf8');
+        const content = fs.readFileSync(filePath, 'utf8');
         const translation = eval(transpile(content));
         // console.log(translation)
         const keys = Object.keys(translation);

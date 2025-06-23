@@ -242,6 +242,8 @@ const Header: FC = () => {
             // TODO: ts错误
             // @ts-expect-error
             appDetail.icon ? (
+              // TODO: ts错误
+              // @ts-expect-error
               <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
             ) : (
               <WorkflowIcon />

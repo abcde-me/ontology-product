@@ -1,4 +1,5 @@
-import { createProxyMiddleware } from 'http-proxy-middleware';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 export default function (app) {

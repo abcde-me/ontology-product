@@ -1,16 +1,22 @@
 /* eslint-disable no-eval */
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { transpile } from 'typescript';
-import magicast from 'magicast';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('node:fs');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('node:path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const transpile = require('typescript').transpile;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const magicast = require('magicast');
 const { parseModule, generateCode, loadFile } = magicast;
-import bingTranslate from 'bing-translate-api';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bingTranslate = require('bing-translate-api');
 const { translate } = bingTranslate;
-import { languages } from './languages.json';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const data = require('./languages.json');
 
 const targetLanguage = 'en-US';
 // https://github.com/plainheart/bing-translate-api/blob/master/src/met/lang.json
-const languageKeyMap = languages.reduce((map, language) => {
+const languageKeyMap = data.languages.reduce((map, language) => {
   if (language.supported) {
     if (language.value === 'zh-Hans' || language.value === 'zh-Hant')
       map[language.value] = language.value;
@@ -66,13 +72,19 @@ async function translateMissingKeyDeeply(sourceObj, targetObject, toLanguage) {
 }
 
 async function autoGenTrans(fileName, toGenLanguage) {
-  const fullKeyFilePath = join(__dirname, targetLanguage, `${fileName}.ts`);
-  const toGenLanguageFilePath = join(
+  const fullKeyFilePath = path.join(
+    __dirname,
+    targetLanguage,
+    `${fileName}.ts`
+  );
+  const toGenLanguageFilePath = path.join(
     __dirname,
     toGenLanguage,
     `${fileName}.ts`
   );
-  const fullKeyContent = eval(transpile(readFileSync(fullKeyFilePath, 'utf8')));
+  const fullKeyContent = eval(
+    transpile(fs.readFileSync(fullKeyFilePath, 'utf8'))
+  );
   // To keep object format and format it for magicast to work: const translation = { ... } => export default {...}
   const readContent = await loadFile(toGenLanguageFilePath);
   const { code: toGenContent } = generateCode(readContent);
@@ -90,7 +102,7 @@ export default translation
     .replace(/,\n\n/g, ',\n')
     .replace('};', '}');
 
-  writeFileSync(toGenLanguageFilePath, res);
+  fs.writeFileSync(toGenLanguageFilePath, res);
 }
 
 async function main() {
@@ -99,7 +111,8 @@ async function main() {
   //   await autoGenTrans(fileName, toLanguage)
   // }))
 
-  const files = readdirSync(join(__dirname, targetLanguage))
+  const files = fs
+    .readdirSync(path.join(__dirname, targetLanguage))
     .map((file) => file.replace(/\.ts/, ''))
     .filter((f) => f !== 'app-debug'); // ast parse error in app-debug
 

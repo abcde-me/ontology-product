@@ -206,9 +206,9 @@ const VersionHistoryPanel = () => {
       } finally {
         setDeleteConfirmOpen(false);
       }
-      // TODO: ts错误
-      // @ts-expect-error
     },
+    // TODO: ts错误
+    // @ts-expect-error
     [appDetail.id, t, resetWorkflowVersionHistory]
   );
 
@@ -251,10 +251,9 @@ const VersionHistoryPanel = () => {
       } finally {
         setEditModalOpen(false);
       }
-
-      // TODO: ts错误
-      // @ts-expect-error
     },
+    // TODO: ts错误
+    // @ts-expect-error
     [appDetail.id, t]
   );
 
@@ -293,10 +292,10 @@ const VersionHistoryPanel = () => {
               // TODO: ts错误
               // @ts-expect-error
               page.items?.map((item, idx) => {
-                // TODO: ts错误
-                // @ts-expect-error
                 const isLast =
                   pageNumber === versionHistory.pages.length - 1 &&
+                  // TODO: ts错误
+                  // @ts-expect-error
                   idx === page.items.length - 1;
                 return (
                   <VersionHistoryItem
@@ -332,15 +331,13 @@ const VersionHistoryPanel = () => {
                 </div>
               </div>
             )}
-            {
-              // TODO: ts错误
-              // @ts-expect-error
-              !isFetching &&
-                (!versionHistory?.pages?.length ||
-                  !versionHistory.pages[0].items.length) && (
-                  <Empty onResetFilter={handleResetFilter} />
-                )
-            }
+            {!isFetching &&
+              (!versionHistory?.pages?.length ||
+                // TODO: ts错误
+                // @ts-expect-error
+                !versionHistory.pages[0].items.length) && (
+                <Empty onResetFilter={handleResetFilter} />
+              )}
           </>
         )}
       </div>
