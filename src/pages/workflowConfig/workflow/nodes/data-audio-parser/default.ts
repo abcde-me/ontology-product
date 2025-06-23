@@ -9,13 +9,13 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
   defaultValue: {
     files: [],
     selected_files_num: -1,
-    audio_pret: [1],
+    audio_pret: [],
     vad_enabled: 1,
-    activity_mode: '自动',
+    activity_mode: 1,
     is_open_multi_conv: 1,
     vad_options: ['vad', 'conv'],
-    audio_model: '',
-    after_proc: [0],
+    audio_model_id: '',
+    after_proc: [],
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -28,15 +28,12 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
     return nodes
   },
   checkValid(payload: AudioParserNodeType, t: any) {
-    const errorMessages = ''
-    // const { code, variables = [] } = payload
-    // if (!errorMessages && variables.filter(v => !v.variable).length > 0)
-    //   errorMessages = t(`${i18nPrefix}.fieldRequired`, { field: t(`${i18nPrefix}.fields.variable`) })
-    // if (!errorMessages && variables.filter(v => !v.value_selector.length).length > 0)
-    //   errorMessages = t(`${i18nPrefix}.fieldRequired`, { field: t(`${i18nPrefix}.fields.variableValue`) })
-    // if (!errorMessages && !code)
-    //   errorMessages = t(`${i18nPrefix}.fieldRequired`, { field: t(`${i18nPrefix}.fields.code`) })
+    let errorMessages = ''
+    const { selected_files_num } = payload
 
+    if (selected_files_num <= 0) {
+      errorMessages = '需要选择至少一个音频文件'
+    }
     return {
       isValid: !errorMessages,
       errorMessage: errorMessages,
