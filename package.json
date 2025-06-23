@@ -326,11 +326,11 @@
     "mockjs/commander": "~9.4.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --cache --fix",
       "prettier --write"
     ],
-    "*.{json,md,html,css,scss}": [
+    "src/**/*.{json,md,html,css,scss}": [
       "prettier --write"
     ]
   }
