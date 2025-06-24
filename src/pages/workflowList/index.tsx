@@ -19,11 +19,13 @@ import {
 import noDataElement from '@/components/no-data';
 import { getWorkflowList } from '@/api/workflowList';
 import { getLocalStorage } from '@/utils/storage';
+import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
 
 export default function WorkflowList() {
   const history = useHistory();
+  const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
@@ -86,12 +88,12 @@ export default function WorkflowList() {
 
   // 组件初始化
   useEffect(() => {
-    getList();
-  }, []);
+    if (userInfo) getList();
+  }, [userInfo]);
 
   const getList = async () => {
     const params = {
-      uid: '0d1615af-4738-11f0-8454-26c15098facd',
+      uid: userInfo?.id,
       token: getLocalStorage('loginToken'),
       search_content: searchValue,
       page: current, //第几页
