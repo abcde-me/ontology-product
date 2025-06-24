@@ -357,6 +357,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
       try {
         setConversationDeleting(true);
+        // TODO: ts错误
+        // @ts-expect-error
         await deleteConvension({ appId, conversationId });
         Message.success('删除成功');
         onSuccess();

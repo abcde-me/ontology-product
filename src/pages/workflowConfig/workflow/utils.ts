@@ -291,8 +291,6 @@ export const preprocessNodesAndEdges = (nodes: Node[], edges: Edge[]) => {
     const newNode = (
       isIteration ? newIterationStartNodesMap : newLoopStartNodesMap
     )[nodeItem.id];
-    // TODO: ts错误
-    // @ts-expect-error
     const startNode = nodesMap[nodeItem.data.start_node_id];
     const source = newNode.id;
     const sourceHandle = 'source';
