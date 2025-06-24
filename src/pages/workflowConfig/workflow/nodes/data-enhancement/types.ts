@@ -24,7 +24,12 @@ export type CodeNodeType = CommonNodeType & {
   code: string;
   outputs: OutputVar;
   app_scenarios: number;
-  enha_modle: number;
+  enha_modle_id: number;
+  generate_sample_num: number; // 生成样本数
+  similarity_threshold: number; // 相似度阈值
+  sample_num: number; // 指令生成依赖样本数
+  prompt: string;
+  prompt_checkbox: boolean;
 };
 
 export type CodeDependency = any;
@@ -51,5 +56,9 @@ export type EnhancementNodeType = {
   app_scenarios: number; // '应用场景'; // 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4）
   sample_data: string; // 示例数据;
   prompt: string; // '提示词';
-  enha_modle: number; //'数据增强模型名称';
+  enha_modle_id: number; //'数据增强模型名称';
+  generate_sample_num: number; // 生成样本数
+  similarity_threshold: number; // 相似度阈值
+  sample_num: number; // 指令生成依赖样本数
+  prompt_checkbox: boolean; // 提示词 开关
 };

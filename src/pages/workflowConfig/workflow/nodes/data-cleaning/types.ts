@@ -24,12 +24,21 @@ export type CodeNodeType = CommonNodeType & {
   code_language: CodeLanguage;
   code: string;
   outputs: OutputVar;
-  data_standardization: Array<{
-    id: number;
-    category: string;
-    enabled: boolean;
-    format: string[];
-  }>;
+  data_standardization: boolean;
+  threshold: number;
+  threshold_switch: boolean;
+  unicode: boolean;
+  traditional_to_simplified: boolean;
+  case_uniformity: boolean;
+  case_transform: number; // 1 大写。2 小写
+  oh_is: boolean;
+  df_is: boolean;
+  qd_is: boolean;
+  mg_is: boolean;
+  ts_remove: boolean;
+  remove_url: boolean;
+  remove_invisible: boolean;
+  remove_html: boolean;
 };
 
 export type CodeDependency = any;
@@ -46,8 +55,4 @@ export type SegmentationOption = {
 export type TextProcessingRules = {
   replaceExpressionsAndSymbols: boolean;
   removeValidUrlsAndEmails: boolean;
-};
-
-export type CleaningNodeType = {
-  data_standardization: any;
 };

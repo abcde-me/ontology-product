@@ -22,7 +22,12 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     (payload: EnhancementNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.app_scenarios = payload.app_scenarios;
-        draft.enha_modle = payload.enha_modle;
+        draft.enha_modle_id = payload.enha_modle_id;
+        draft.generate_sample_num = payload?.generate_sample_num;
+        draft.similarity_threshold = payload?.similarity_threshold;
+        draft.sample_num = payload?.sample_num;
+        draft.prompt = payload.prompt;
+        draft.prompt_checkbox = payload.prompt_checkbox;
       });
       setInputs(newInputs);
     },
