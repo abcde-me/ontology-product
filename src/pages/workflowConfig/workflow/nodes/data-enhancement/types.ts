@@ -24,6 +24,7 @@ export type CodeNodeType = CommonNodeType & {
   code: string;
   outputs: OutputVar;
   app_scenarios: number;
+  enha_modle: number;
 };
 
 export type CodeDependency = any;
@@ -51,5 +52,5 @@ export type enhancementNodeType = {
   app_scenarios: number; // '应用场景'; // 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4）
   sample_data: string; // 示例数据;
   prompt: string; // '提示词';
-  enha_modle: string; //'数据增强模型名称';
+  enha_modle: number; //'数据增强模型名称';
 };

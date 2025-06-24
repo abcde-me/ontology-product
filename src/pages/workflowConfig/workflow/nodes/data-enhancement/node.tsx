@@ -7,7 +7,7 @@ import { useStoreApi } from 'reactflow'
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
-  const { app_scenarios } = props.data;
+  const { app_scenarios, enha_modle } = props.data;
   console.log(props.data, '=========enh');
   const store = useStoreApi()
   const appScenarios: { [key: number]: string } = {
@@ -17,17 +17,25 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     4: '文本生成',
     5: '多轮回答',
   };
+  const enhaModle: { [key: number]: string } = {
+    1: '模型1',
+    2: '模型2',
+    3: '模型3',
+    4: '模型4',
+    5: '模型5'
+  };
   return (
-    <div className={`wk-node-content data-enhancement-content`}>
+    <div className={`wk-node-content data-enhancement-node`}>
       <div className="input-header">
         <span className="txt">增强类型</span>
       </div>
       <div className="enhancement-content">
-        <div className="enhancement-item">
-          {app_scenarios && appScenarios[app_scenarios]}
-        </div>
-        <div className="enhancement-item">过滤相似度阈值</div>
-        <div className="enhancement-item">过滤相似度阈值</div>
+        {app_scenarios && (
+          <div className="enhancement-item">{appScenarios[app_scenarios]}</div>
+        )}
+        {enha_modle && (
+          <div className="enhancement-item">{enhaModle[enha_modle]}</div>
+        )}
       </div>
     </div>
   );

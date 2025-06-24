@@ -85,6 +85,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
+          app_scenarios: 1,
+          enha_modle: 1,
           vars: cloneDeep(inputs.variables || [])
         }}
         onChange={onValuesChange}
@@ -106,13 +108,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             field="app_scenarios"
             labelAlign="left"
             required
+            style={{ margin: 0 }}
           >
             <Select
               placeholder="请选择场景"
               style={{ width: '100%', margin: 0 }}
-              onChange={(value) => {
-                console.log(value);
-              }}
             >
               {/* 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4） */}
               <Option key={1} value={1}>
@@ -144,8 +144,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
             部分，增加到prompt 中去。
           </div>
-        </div>
-        <div className="content-box">
           <FormItem label="过滤相似度阈值:" field="" layout="vertical">
             <Input placeholder="请输入阈值" />
           </FormItem>
@@ -160,7 +158,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </div>
         <FormItem
           layout="vertical"
-          field="enhancementTextArea"
+          field="sample_data"
           label="数据示例（JSON格式）"
         >
           <TextArea
@@ -168,7 +166,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             style={{ minHeight: 64, minWidth: 350 }}
           />
         </FormItem>
-        <FormItem field="enhancementTextArea" label={null}>
+        <FormItem field="prompt" label={null}>
           <Checkbox
             checked={customPromptChecked} // 绑定选中状态
             onChange={(checked) => setCustomPromptChecked(checked)} // 处理选中状态变化
@@ -179,19 +177,28 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <FormItem
           layout="vertical"
           label="模型选择:"
-          field="modelSelection"
+          field="enha_modle"
           labelAlign="left"
           required
         >
           <Select
             placeholder="请选择模型"
             style={{ width: '100%' }}
-            onChange={(value) => {
-              console.log(value);
-            }}
           >
             <Option key={1} value={1}>
-              {1}
+              模型1
+            </Option>
+            <Option key={2} value={2}>
+              模型1
+            </Option>
+            <Option key={3} value={3}>
+              模型3
+            </Option>
+            <Option key={4} value={4}>
+              模型4
+            </Option>
+            <Option key={5} value={5}>
+              模型5
             </Option>
           </Select>
         </FormItem>

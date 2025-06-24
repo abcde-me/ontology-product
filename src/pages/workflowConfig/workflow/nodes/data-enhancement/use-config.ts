@@ -23,6 +23,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     (payload: enhancementNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.app_scenarios = payload.app_scenarios;
+        draft.enha_modle = payload.enha_modle;
       });
       setInputs(newInputs);
     },

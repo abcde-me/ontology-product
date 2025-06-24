@@ -1,4 +1,4 @@
-.data-enhancement-content {
+.data-enhancement-node {
     margin: 0 12px 12px 12px;
     background: #F9F9FB;
     // background-color: red;
@@ -19,7 +19,7 @@
         color: #6E7B8D;
         font-size: 12px;
         line-height: 18px;
-        margin-top: 4px;
+        margin-top: 8px;
     }
     .arco-form-inline .arco-form-item {
         width: auto;
@@ -28,6 +28,27 @@
 
     .arco-form-label-item>label {
         display: flex !important;
+    }
+   
+}
+.data-enhancement-panel{
+    .content-tips-text {
+        color: #6E7B8D;
+        font-size: 12px;
+        line-height: 18px;
+        margin-top: 8px;
+    }
+    .content-box {
+        border: 1px solid #E2E8F0;
+        border-radius: 5px;
+        padding: 16px;
+        margin-top: 24px;
+        .arco-form-label-item{
+            height: 26px;
+        }
+    }
+    .arco-form-label-item>label{
+        display: flex;
     }
 }
 
