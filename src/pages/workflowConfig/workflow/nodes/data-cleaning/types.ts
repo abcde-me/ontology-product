@@ -41,6 +41,6 @@ export type TextProcessingRules = {
   removeValidUrlsAndEmails: boolean;
 };
 
-export type cleaningNodeType = {
+export type CleaningNodeType = {
   data_standardization: any
 };
