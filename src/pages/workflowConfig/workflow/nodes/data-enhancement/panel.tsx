@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
@@ -31,7 +31,7 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import './text.scss';
+import './data-enhancement.scss';
 const i18nPrefix = 'workflow.nodes.code';
 
 const codeLanguages = [
@@ -46,323 +46,161 @@ const codeLanguages = [
 ];
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 0, label: '按字符'  },
-  { value: 1, label: '按句子'  },
-  { value: 2, label: '按段落'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按句子' },
+  { value: 3, label: '按段落' }
 ];
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
+  const TextArea = Input.TextArea;
 
   const [fileNum, setFileNum] = useState(0);
   const [type, setType] = useState('checkbox');
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [newTableData, setNewTableData] = useState([]);
   // 定义分段最大长度状态变量
   const [maxSegmentLength, setMaxSegmentLength] = useState<number | null>(null);
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const {
-    readOnly,
-    inputs,
-    outputKeyOrders,
-    handleCodeAndVarsChange,
-    handleVarListChange,
-    handleAddVariable,
-    handleRemoveVariable,
-    handleCodeChange,
-    handleCodeLanguageChange,
-    handleVarsChange,
-    handleAddOutputVariable,
-    filterVar,
-    isShowRemoveVarConfirm,
-    hideRemoveVarConfirm,
-    onRemoveVarConfirm,
-    // single run
-    isShowSingleRun,
-    hideSingleRun,
-    runningStatus,
-    handleRun,
-    handleStop,
-    runResult,
-    varInputs,
-    inputVarValues,
-    setInputVarValues
-  } = useConfig(id, data);
+  const { readOnly, inputs, updateInputs } = useConfig(id, data);
 
-  const handleGeneratedCode = (value: string) => {
-    const params = extractFunctionParams(value, inputs.code_language);
-    const codeNewInput = params.map((p) => {
-      return {
-        variable: p,
-        value_selector: []
-      };
-    });
-    const returnTypes = extractReturnType(value, inputs.code_language);
-    handleCodeAndVarsChange(value, codeNewInput, returnTypes);
-  };
+  const [customPromptChecked, setCustomPromptChecked] = useState(false);
 
-  const defaultData = [...new Array(5)].map((_, index) => {
-    return {
-      key: index,
-      name: 'Jane Doe ' + index,
-      salary: 23000,
-      email: 'jane.doe@example.com',
-      gender: index % 2 > 0 ? 'male' : 'female',
-      age: 20 + index
-    };
-  });
+  useEffect(() => {
+    const allValues = form.getFieldsValue();
+    console.log('所有字段的值:', allValues);
+  }, [form]);
 
-  // 初始化文本处理规则状态
-  const [textProcessingRules, setTextProcessingRules] =
-    useState<TextProcessingRules>({
-      replaceExpressionsAndSymbols: false,
-      removeValidUrlsAndEmails: false
-    });
-
-  // 处理复选框变化的函数
-  const handleCheckboxChange = (
-    field: keyof TextProcessingRules,
-    checked: boolean
-  ) => {
-    setTextProcessingRules((prev) => ({
-      ...prev,
-      [field]: checked
-    }));
+  const onValuesChange = (changeValue: any, values: any) => {
+    console.log('1111111111:', values, changeValue);
+    updateInputs(values);
   };
   return (
-    <div className="wk-node-panel-content code-panel-content mt-[16px]">
+    <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
         form={form}
-        disabled={readOnly}
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
+          app_scenarios: 1,
+          enha_modle: 1,
           vars: cloneDeep(inputs.variables || [])
         }}
-        layout="inline"
-        onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
-          if (v.vars.some((v) => !v || !v.type || !v.id)) {
-            form.setFieldValue(
-              'vars',
-              v.vars.map(
-                (v) =>
-                  v ?? {
-                    variable: '',
-                    label: '',
-                    required: false,
-                    type: 'string',
-                    id: uuid4()
-                  }
-              )
-            );
-          }
-          // window.setTimeout(async() => {
-          //   try {
-          //     await form.validate()
-          //   } catch{}
-          // })
-        }}
+        onChange={onValuesChange}
       >
         <FormItem
           layout="inline"
-          label="选择文件："
-          field="fileList"
+          label="场景选择:"
           labelAlign="left"
           required
-        >
-          <div>已选择{fileNum}个文件</div>
-        </FormItem>
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        />
         <div>
-          <Table
-            columns={[
-              {
-                title: '文件名',
-                dataIndex: 'name'
-              },
-              {
-                title: '类型',
-                dataIndex: 'salary',
-                filters: [
-                  {
-                    text: 'London',
-                    value: 'London'
-                  },
-                  {
-                    text: 'Paris',
-                    value: 'Paris'
-                  }
-                ]
-              },
-              {
-                title: '文件大小',
-                dataIndex: 'gender'
-              },
-              {
-                title: 'Age',
-                dataIndex: 'age'
-              },
-              {
-                title: '载入开始时间',
-                dataIndex: 'email',
-                sorter: (a, b) => a.name.length - b.name.length
-              }
-            ]}
-            pagePosition={null}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log('onChange:', selectedRowKeys, selectedRows);
-                setSelectedRowKeys(selectedRowKeys);
-                setFileNum(selectedRowKeys.length);
-              },
-              onSelect: (selected, record, selectedRows) => {
-                console.log('onSelect:', selected, record, selectedRows);
-              }
-            }}
-            data={defaultData}
-          />
+          <FormItem
+            layout="horizontal"
+            label={null}
+            field="app_scenarios"
+            labelAlign="left"
+            required
+            style={{ margin: 0 }}
+          >
+            <Select
+              placeholder="请选择场景"
+              style={{ width: '100%', margin: 0 }}
+            >
+              {/* 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4） */}
+              <Option key={1} value={1}>
+                按通用
+              </Option>
+              <Option key={2} value={2}>
+                文本分类
+              </Option>
+              <Option key={3} value={3}>
+                文本提取
+              </Option>
+              <Option key={4} value={4}>
+                文本生成
+              </Option>
+              <Option key={5} value={5}>
+                多轮回答
+              </Option>
+            </Select>
+          </FormItem>
+          <div className="content-tips-text">
+            常见的针对SFT的模型微调场景生成数据集。
+          </div>
+        </div>
+        <div className="content-box">
+          <FormItem label="指令生成依赖样本数:" field="" layout="vertical">
+            <Input placeholder="请输入指令" />
+          </FormItem>
+          <div className="content-tips-text">
+            该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+            部分，增加到prompt 中去。
+          </div>
+          <FormItem label="过滤相似度阈值:" field="" layout="vertical">
+            <Input placeholder="请输入阈值" />
+          </FormItem>
+          <div className="content-tips-text">
+            这里通过Rouge-L
+            分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。
+          </div>
+          <FormItem label="生成样本数:" field="" layout="vertical">
+            <Input placeholder="请输入样本数" />
+          </FormItem>
+          <div className="content-tips-text">指定生成的数据集的条数。</div>
         </div>
         <FormItem
           layout="vertical"
-          label="分段方式："
-          field="fileList"
-          labelAlign="left"
-          required
+          field="sample_data"
+          label="数据示例（JSON格式）"
         >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>选择切分文本的方式，目前支持按照字符、句子和段落。</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="分段最大长度："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <InputNumber
-            placeholder="Please enter"
-            min={0}
-            max={1200}
-            style={{ width: 160, margin: '10px 24px 10px 0' }}
-            onChange={(value) => {
-              setMaxSegmentLength(value);
-            }}
+          <TextArea
+            placeholder="请在这里输入期望的数据集的示例数据（JSON格式）"
+            style={{ minHeight: 64, minWidth: 350 }}
           />
-          <div>800-1200</div>
         </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本处理规则："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
+        <FormItem field="prompt" label={null}>
           <Checkbox
-            checked={textProcessingRules.replaceExpressionsAndSymbols}
-            onChange={(checked) =>
-              handleCheckboxChange('replaceExpressionsAndSymbols', checked)
-            }
+            checked={customPromptChecked} // 绑定选中状态
+            onChange={(checked) => setCustomPromptChecked(checked)} // 处理选中状态变化
           >
-            替换表达和特殊符号
+            自定义提示词
           </Checkbox>
-          <Checkbox
-            checked={textProcessingRules.removeValidUrlsAndEmails}
-            onChange={(checked) =>
-              handleCheckboxChange('removeValidUrlsAndEmails', checked)
-            }
-          >
-            删除有效URL和电子邮箱地址
-          </Checkbox>
-          <div>
-            选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。
-          </div>
         </FormItem>
         <FormItem
           layout="vertical"
-          label="OCR模型："
-          field="fileList"
+          label="模型选择:"
+          field="enha_modle"
           labelAlign="left"
           required
         >
           <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
+            placeholder="请选择模型"
+            style={{ width: '100%' }}
           >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
+            <Option key={1} value={1}>
+              模型1
+            </Option>
+            <Option key={2} value={2}>
+              模型1
+            </Option>
+            <Option key={3} value={3}>
+              模型3
+            </Option>
+            <Option key={4} value={4}>
+              模型4
+            </Option>
+            <Option key={5} value={5}>
+              模型5
+            </Option>
           </Select>
-          <div>
-            当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。
-          </div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="图片描述模型："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>用于指定对文本文件中的图片进行caption 时使用的模型。</div>
-        </FormItem>
-        <FormItem
-          layout="vertical"
-          label="文本嵌入模型："
-          field="fileList"
-          labelAlign="left"
-          required
-        >
-          <Select
-            placeholder="Select city"
-            style={{ width: 154 }}
-            onChange={(value) => {
-              console.log(value);
-            }}
-            defaultValue={0}
-          >
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <div>指定对文本内容进行embedding 的模型。</div>
         </FormItem>
       </Form>
     </div>

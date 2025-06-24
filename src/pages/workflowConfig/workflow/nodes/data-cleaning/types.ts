@@ -1,4 +1,5 @@
 import type { CommonNodeType, VarType, Variable } from '@/pages/workflowConfig/workflow/types'
+import exp from 'constants'
 
 export enum CodeLanguage {
   python3 = 'python3',
@@ -12,11 +13,17 @@ export type OutputVar = Record<string, {
 }>
 
 export type CodeNodeType = CommonNodeType & {
-  variables: Variable[]
-  code_language: CodeLanguage
-  code: string
-  outputs: OutputVar
-}
+  variables: Variable[];
+  code_language: CodeLanguage;
+  code: string;
+  outputs: OutputVar;
+  data_standardization: Array<{
+    id: number;
+    category: string;
+    enabled: boolean;
+    format: string[];
+  }>;
+};
 
 export type CodeDependency = any
 
@@ -32,4 +39,8 @@ export type SegmentationOption = {
 export type TextProcessingRules = {
   replaceExpressionsAndSymbols: boolean;
   removeValidUrlsAndEmails: boolean;
+};
+
+export type CleaningNodeType = {
+  data_standardization: any
 };
