@@ -28,10 +28,11 @@ import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog'
 
 
 
-import SmartTable from './components/SmartTable';
+import TargetTable from './components/target-table';
 import Pages from './components/pages'
 import './index.css';
-import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './target-columns'
+import { targetDatacolumns, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './target-columns'
+import { sourceDataVolume } from './source-columns'
 import FormComponent from './components/Dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
@@ -268,7 +269,8 @@ const data = [
 
 
 function DataPage(props) {
-  const { selectedNode } = props;
+  const { selectedNode, onSelectionChange } = props;
+  // const { selectedNode } = props;
   const [treeData, setTreeData] = React.useState([])
   const [searchValue, setSearchValue] = React.useState('')
   const [startTime, setStartTime] = React.useState('')
@@ -276,7 +278,7 @@ function DataPage(props) {
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
-  const [columns, setColumns] = React.useState(() => sourceDataVolume(downloadShow))//默认是第一个
+  const [columnType, setColumnType] = React.useState('targetDatacolumns')//列类型标识
   const [downloadData, setDownloadData] = React.useState([])//下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState('')//选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
@@ -291,18 +293,37 @@ function DataPage(props) {
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([])
   const [selectedRows, setSelectedRows] = React.useState<any[]>([])
 
+  // 行悬浮状态
+  const [hoveredRowId, setHoveredRowId] = React.useState<any>(null)
+
+  // 动态计算列配置
+  const columns = React.useMemo(() => {
+    switch (columnType) {
+      case 'sourceDataVolume':
+        return sourceDataVolume(downloadShow, hoveredRowId);
+      case 'sourceDataDatabase':
+        return sourceDataDatabase(downloadShow, hoveredRowId);
+      case 'targetDataVolume':
+        return targetDataVolume(downloadShow, hoveredRowId);
+      case 'targetDataDatabase':
+        return targetDataDatabase(downloadShow, hoveredRowId);
+      default:
+        return targetDatacolumns(downloadShow, hoveredRowId);
+    }
+  }, [columnType, hoveredRowId]);
+
   const handleTreeSelect = (item: any, directionKey: string, type: string) => {
     setSelectedFilePath(item)
     console.log(item)
     console.log(directionKey, type)
     if (directionKey === 'src' && type === 'volume') {
-      setColumns(() => sourceDataVolume(downloadShow))
+      setColumnType('sourceDataVolume')
     } else if (directionKey === 'src' && type === 'db') {
-      setColumns(() => sourceDataDatabase(downloadShow))
+      setColumnType('sourceDataDatabase')
     } else if (directionKey === 'dst' && type === 'volume') {
-      setColumns(() => targetDataVolume(downloadShow))
+      setColumnType('targetDataVolume')
     } else if (directionKey === 'dst' && type === 'db') {
-      setColumns(() => targetDataDatabase(downloadShow))
+      setColumnType('targetDataDatabase')
     }
   }
 
@@ -317,6 +338,12 @@ function DataPage(props) {
     setSelectedRowKeys(selectedRowKeys)
     setSelectedRows(selectedRows)
     console.log('表格选择变化:', selectedRowKeys, selectedRows)
+     // 调用外部传入的回调函数
+     console.log('DataPage - 准备调用外部回调函数, onSelectionChange存在:', !!onSelectionChange);
+     if (onSelectionChange) {
+       console.log('DataPage - 调用外部回调函数, 参数:', selectedRowKeys, selectedRows);
+       onSelectionChange(selectedRowKeys, selectedRows);
+     }
   }
 
   // 处理从外部传入的selectedNode
@@ -386,12 +413,15 @@ function DataPage(props) {
 
       </div> */}
       <div >
-        <SmartTable
+        <TargetTable
           columns={columns}
           data={tableData}
           onSelectionChange={handleSelectionChange}
+          // onSelectionChange={handleSelectionChange}
+          hoveredRowId={hoveredRowId}
+          onRowHover={setHoveredRowId}
         />
-         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
           <span></span>
           <Pages
             current={currentPage}//当前页码
@@ -405,7 +435,7 @@ function DataPage(props) {
       </div>
 
       <Modal
-        title='文件下载'
+        title='导出设置'
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}

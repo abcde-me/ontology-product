@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css';
 import { DatePicker } from '@arco-design/web-react';
-import Table from '@/components/data-catalog-content/index'
+
 import SourceDate from './components/source-data';
 import Eltable from './components/el-table';
 

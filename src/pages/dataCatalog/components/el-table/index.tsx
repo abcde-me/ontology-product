@@ -4,7 +4,7 @@ import { Tabs, Typography, Select, DatePicker, Button } from '@arco-design/web-r
 import { Input, Space } from '@arco-design/web-react';
 import { IconPlus, IconDown, IconDragArrow, IconCaretDown, IconCaretRight, IconDelete, IconDownload } from '@arco-design/web-react/icon';
 import { Tree } from '@arco-design/web-react';
-import Table from '@/components/data-catalog-content/index'
+
 import SourceTable from '../source-table';
 import TargetTable from '../target-table';
 const Option = Select.Option;

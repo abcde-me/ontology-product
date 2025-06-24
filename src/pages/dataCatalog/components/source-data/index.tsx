@@ -17,7 +17,7 @@ export default function SourceDate(props) {
     }
 
     return (
-        <div style={{ width: '220px', border: '1px solid #E2E8F0', borderRadius: '4px', marginRight: '8px',  }}>
+        <div style={{ width: '220px', border: '1px solid #E2E8F0', borderRadius: '4px', marginRight: '8px',overflow:'auto'  }}>
             <div style={{ width: '100%', height: '40px' }}>
                 <Tabs activeTab={activeTab} onChange={(e) => handleTabChange(e)} className="tabs-center" >
                     <TabPane key='source' title='源数据' >

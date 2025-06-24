@@ -1,15 +1,57 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from 'react';
-import { Tabs, Typography, Select, DatePicker, Button } from '@arco-design/web-react';
+import { Tabs, Typography, Select, DatePicker, Button, Popover, Modal, Message } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
 import { IconPlus, IconDown, IconDragArrow, IconCaretDown, IconCaretRight, IconDelete, IconDownload } from '@arco-design/web-react/icon';
 import { Tree } from '@arco-design/web-react';
-import Table from '@/components/data-catalog-content/index'
-import Tables from '../table';
+import Table from '@/components/data-catalog-content/source-table'
+
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 export default function SourceTable(props) {
     const { selectedNode } = props;
+    const [selectedRows, setSelectedRows] = useState([]); // 用于存储选中的行数据
+    const handleSelectionChange = (selectedRowKeys, selectedRowsData) => {
+        console.log('选中的行Keys:', selectedRowKeys);
+        console.log('选中的行数据:', selectedRowsData);
+
+        setSelectedRows(selectedRowsData || []);
+    };
+
+    // 判断是否有选中的行
+    const hasSelectedRows = selectedRows.length > 0;
+    const [searchValue, setSearchValue] = useState(''); // 实际用于搜索的值
+    const [inputValue, setInputValue] = useState(''); // 输入框的值
+
+    // 搜索处理函数
+    const handleSearch = (value) => {
+        setSearchValue(value || inputValue);
+        console.log('执行搜索:', value || inputValue);
+    };
+
+    // 清空搜索时也要清空输入框
+    const handleClear = () => {
+        setInputValue('');
+        setSearchValue('');
+    };
+
+    // 调试信息
+    console.log('SourceTable - 当前选中的行数:', selectedRows.length);
+    console.log('SourceTable - 按钮是否可用:', hasSelectedRows);
+    //批量删除
+    const handleDeleteMany = () => {
+        try {
+            Modal.confirm({
+                title: '确认删除文件吗?',
+                content: '删除后，文件不可恢复',
+                async onOk() {
+                    // await deleteinterTuningUpdata(appid, e.id, {});
+                    Message.success('删除成功');
+                    // creatsuccess();
+                }
+            });
+        } catch { Message.error('删除失败，请重试') }
+    }
     return (
         <div>
             <div>
@@ -26,6 +68,11 @@ export default function SourceTable(props) {
                             <Input.Search
                                 allowClear
                                 placeholder="输入关键词搜索"
+                                value={inputValue}
+                                onChange={(value) => setInputValue(value)}
+                                onSearch={handleSearch}
+                                onPressEnter={() => handleSearch(inputValue)}
+                                onClear={handleClear}
                                 style={{ width: 260, height: 32, border: 'none', borderRadius: 0, background: 'transparent' }}
                             />
                         </div>
@@ -35,12 +82,90 @@ export default function SourceTable(props) {
                         />
                     </Space>
                     <Space>
-                        <Button icon={<IconDelete />} type="outline" style={{ color: '#94A3B8' }}>批量删除</Button>
-                        <Button icon={<IconDownload />} type="outline" style={{ color: '#94A3B8' }}>批量导出</Button>
+                        {!hasSelectedRows ? <Popover
+
+                            content={
+                                <span>
+                                    请先选择文件
+                                </span>
+                            }
+                        >
+                            <Button
+                                icon={<IconDelete />}
+                                type="outline"
+                                style={{
+                                    color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                                    cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                                    borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                                }}
+                                disabled={!hasSelectedRows}
+                                onClick={() => {
+                                    handleDeleteMany()
+                                }}
+                            >
+                                批量删除
+                            </Button>
+                        </Popover> :
+                            <Button
+                                icon={<IconDelete />}
+                                type="outline"
+                                style={{
+                                    color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                                    cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                                    borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                                }}
+                                disabled={!hasSelectedRows}
+                                onClick={() => {
+                                    handleDeleteMany()
+                                }}
+                            >
+                                批量删除
+                            </Button>}
+                        {!hasSelectedRows ? <Popover
+                            content={
+                                <span>
+                                    请先选择文件
+                                </span>
+                            }
+                        >
+                            <Button
+                                icon={<IconDownload />}
+                                type="outline"
+                                style={{
+                                    color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                                    cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                                    borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                                }}
+                                disabled={!hasSelectedRows}
+                                onClick={() => {
+
+                                }}
+                            >
+                                批量导出
+                            </Button>
+                        </Popover> : <Button
+                            icon={<IconDownload />}
+                            type="outline"
+                            style={{
+                                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                            }}
+                            disabled={!hasSelectedRows}
+                            onClick={() => {
+
+                            }}
+                        >
+                            批量导出
+                        </Button>}
                     </Space>
                 </div>
                 <div className="data-catalog-content" >
-                    <Table selectedNode={selectedNode} />
+                    <Table
+                        selectedNode={selectedNode}
+                        onSelectionChange={handleSelectionChange}
+                        searchValue={searchValue}
+                    />
                     {/* <Tables /> */}
                 </div>
             </div>

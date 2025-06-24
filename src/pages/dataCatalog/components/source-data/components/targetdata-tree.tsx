@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { Children, useEffect, useState } from 'react';
 import { Typography, Input, Tree, Tooltip, Popover, Modal, Message } from '@arco-design/web-react';
 import { IconPlus, IconCaretDown, IconCaretRight, IconDelete, IconFile, IconFolder, IconStorage, IconSearch, IconCloseCircle } from '@arco-design/web-react/icon';
 import { icon } from 'mermaid/dist/rendering-util/rendering-elements/shapes/icon';
+// 引入树节点相关API（使用时取消注释）
+// import { fetchTreeDataAPI, deleteTreeNodeAPI, createTreeNodeAPI, updateTreeNodeAPI } from '@/api/treeApi';
 
 // 树数据结构
 const TreeData = [
@@ -144,21 +146,78 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
         setExpandedKeys(['0-0', '0-0-1', '0-0-2']);
         // 确保默认选中卷下的第一个文件
         setSelectedKey('0-0-1-1');
+
+        // 如果使用真实API，在这里初始化加载树数据
+        // loadTreeData();
     }, []);
 
+    // 加载树数据的函数（使用真实API时启用）
+    // const loadTreeData = async () => {
+    //     try {
+    //         const data = await fetchTreeDataAPI();
+    //         setTreeData(data);
+    //     } catch (error) {
+    //         Message.error('加载数据失败');
+    //     }
+    // };
+
+    // 递归删除树节点的函数
+    const deleteNodeFromTree = (nodes, targetKey) => {
+        return nodes.filter(node => {
+            if (node.key === targetKey) {
+                return false; // 删除匹配的节点
+            }
+            if (node.children) {
+                node.children = deleteNodeFromTree(node.children, targetKey);
+            }
+            return true;
+        });
+    };
+
     // 删除树节点
-    const handDelete = () => {
+    const handDelete = (nodeKey, nodeData) => {
         try {
             Modal.confirm({
                 title: '确认删除文件?',
                 content: '删除后，该目录下所有内容将被删除，不可恢复',
                 async onOk() {
-                    // await deleteknowledgeBaseRootTree(node.id, {});
-                    // treeredirect();
-                    Message.success('删除成功!');
+                    try {
+                        // 方法2：删除后重新获取整个树数据（推荐）
+                        // const response = await deleteTreeNodeAPI(nodeData.id || nodeKey);
+                        // if (response.success) {
+                        //     // 重新获取树数据
+                        //     const newTreeData = await fetchTreeDataAPI();
+                        //     setTreeData(newTreeData);
+                        // }
+
+                        // 临时保留前端模拟逻辑，替换为真实API调用
+                        console.log('准备删除节点:', { nodeKey, nodeData });
+
+                        // 模拟API调用延迟
+                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                        // 从树数据中删除节点（前端更新）
+                        const newTreeData = deleteNodeFromTree(treeData, nodeKey);
+                        setTreeData(newTreeData);
+
+                        // 如果删除的是当前选中的节点，清除选中状态
+                        if (selectedKey === nodeKey) {
+                            setSelectedKey('');
+                        }
+
+                        // 从展开的节点中移除被删除的节点
+                        const newExpandedKeys = expandedKeys.filter(key => key !== nodeKey);
+                        setExpandedKeys(newExpandedKeys);
+
+                        Message.success('删除成功!');
+                    } catch (apiError) {
+                        console.error('删除节点失败:', apiError);
+                        Message.error('删除失败: ' + (apiError.message || '请稍后重试'));
+                    }
                 }
             });
         } catch (error) {
+            console.error('删除操作错误:', error);
             Message.error('删除失败，请稍后重试');
         }
     }
@@ -219,23 +278,55 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                 style={{ width: '100%', height: '24px', marginRight: '17px' }}
                 value={newNodeValue}
                 onChange={v => setNewNodeValue(v)}
-                onPressEnter={() => {
-                    if (newNodeValue.trim()) {
-                        const newNode = { title: newNodeValue, key: Date.now().toString(), isLeaf: true };
+                onPressEnter={async () => {
+                    // 如果输入为空，使用默认名称
+                    const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
+
+                    try {
+                        // 方法1：调用真实API创建子节点
+                        // const newNode = await createTreeNodeAPI({
+                        //     title: finalName,
+                        //     type: 'file', // 子节点通常是文件类型
+                        //     parentId: parentKey // 父节点ID
+                        // });
+                        // // 重新加载树数据
+                        // await loadTreeData();
+
+                        // 方法2：前端模拟创建（当前使用）
+                        const newNode = { title: finalName, key: Date.now().toString(), isLeaf: true };
                         setTreeData(addNodeToParent(treeData, parentKey, newNode));
-                    } else {
+                    } catch (error) {
+                        Message.error('创建子节点失败');
+                        console.error('创建子节点失败:', error);
                         setTreeData(removeInputFromParent(treeData, parentKey));
                     }
+
                     setAddingToParentInfo(null);
                     setNewNodeValue('');
                 }}
-                onBlur={() => {
-                    if (newNodeValue.trim()) {
-                        const newNode = { title: newNodeValue, key: Date.now().toString(), isLeaf: true };
+                onBlur={async () => {
+                    // 如果输入为空，使用默认名称
+                    const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
+
+                    try {
+                        // 方法1：调用真实API创建子节点
+                        // const newNode = await createTreeNodeAPI({
+                        //     title: finalName,
+                        //     type: 'file',
+                        //     parentId: parentKey
+                        // });
+                        // // 重新加载树数据
+                        // await loadTreeData();
+
+                        // 方法2：前端模拟创建（当前使用）
+                        const newNode = { title: finalName, key: Date.now().toString(), isLeaf: true };
                         setTreeData(addNodeToParent(treeData, parentKey, newNode));
-                    } else {
+                    } catch (error) {
+                        Message.error('创建子节点失败');
+                        console.error('创建子节点失败:', error);
                         setTreeData(removeInputFromParent(treeData, parentKey));
                     }
+
                     setAddingToParentInfo(null);
                     setNewNodeValue('');
                 }}
@@ -324,7 +415,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                             fontSize: 12,
                                                             top: 10,
                                                         }}
-                                                        onClick={() => handDelete()}
+                                                        onClick={() => handDelete(node._key, node)}
                                                         onMouseEnter={() => setHoverDeleteKey(node._key)}
                                                         onMouseLeave={() => setHoverDeleteKey(null)}
                                                     />
@@ -353,7 +444,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                         fontSize: 12,
                                                         top: 10,
                                                     }}
-                                                    onClick={() => handDelete()}
+                                                    onClick={() => handDelete(node._key, node)}
                                                     onMouseEnter={() => setHoverDeleteKey(node._key)}
                                                     onMouseLeave={() => setHoverDeleteKey(null)}
                                                 />
@@ -365,8 +456,8 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         );
                     }}
                     renderTitle={(props) => {
-                        const hasChildren = props.childrenData && props.childrenData.length > 0;
-                        // 动态图标：有子节点用文件夹图标，否则用文件图标
+                        const hasChildren = props.dataRef && props.dataRef.children !== undefined;
+                        // 动态图标：有子节点用文件夹图标，否则用文件图标  
                         const icon = hasChildren ? '' : <IconStorage />;
                         if (props._key === '__input__') {
                             return (
@@ -376,10 +467,22 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                     style={{ width: '100%', height: '24px', marginRight: '17px' }}
                                     value={newNodeValue}
                                     onChange={v => setNewNodeValue(v)}
-                                    onPressEnter={() => {
-                                        if (newNodeValue.trim()) {
+                                    onPressEnter={async () => {
+                                        // 如果输入为空，使用默认名称
+                                        const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
+
+                                        try {
+                                            // 方法1：调用真实API创建节点
+                                            // const newNode = await createTreeNodeAPI({
+                                            //     title: finalName,
+                                            //     type: 'directory'
+                                            // });
+                                            // // 重新加载树数据
+                                            // await loadTreeData();
+
+                                            // 方法2：前端模拟创建（当前使用）
                                             const newNode = {
-                                                title: newNodeValue,
+                                                title: finalName,
                                                 key: Date.now().toString(),
                                                 children: []
                                             };
@@ -388,14 +491,31 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                 newNode,
                                                 ...treeData,
                                             ]);
+                                        } catch (error) {
+                                            Message.error('创建目录失败');
+                                            console.error('创建节点失败:', error);
                                         }
+
                                         setIsAdding(false);
                                         setNewNodeValue('');
                                     }}
-                                    onBlur={() => {
-                                        if (newNodeValue.trim()) {
+                                    onBlur={async () => {
+                                        // 如果输入为空，使用默认名称
+                                        const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
+
+                                        try {
+                                            // 方法1：调用真实API创建根目录
+                                            // const newNode = await createTreeNodeAPI({
+                                            //     title: finalName,
+                                            //     type: 'directory',
+                                            //     parentId: null // 根目录没有父节点
+                                            // });
+                                            // // 重新加载树数据
+                                            // await loadTreeData();
+
+                                            // 方法2：前端模拟创建（当前使用）
                                             const newNode = {
-                                                title: newNodeValue,
+                                                title: finalName,
                                                 key: Date.now().toString(),
                                                 children: []
                                             };
@@ -404,7 +524,11 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                 newNode,
                                                 ...treeData,
                                             ]);
+                                        } catch (error) {
+                                            Message.error('创建目录失败');
+                                            console.error('创建节点失败:', error);
                                         }
+
                                         setIsAdding(false);
                                         setNewNodeValue('');
                                     }}

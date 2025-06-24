@@ -4,7 +4,7 @@ import { deleteFileById } from '@/api/dataCatalog'
 import { Message } from '@arco-design/web-react';
 
 //数据源目录的卷中的数据格式
-export const sourceDataVolume = (setVisible) => [
+export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
     {
         title: 'ID',
         dataIndex: 'id',
@@ -17,9 +17,23 @@ export const sourceDataVolume = (setVisible) => [
         width: 300,
     },
     {
-        title: '文件类型',
+        title: '类型',
         dataIndex: 'type',
-        width: 80,
+        width: 100,
+        filters: [
+            {
+                text: 'pdf',
+                value: 'pdf',
+            },
+            {
+                text: 'gif',
+                value: 'gif',
+            },
+            {
+                text: 'doc',
+                value: 'doc',
+            },
+        ],
     },
     {
         title: '文件大小',
@@ -38,12 +52,13 @@ export const sourceDataVolume = (setVisible) => [
     },
     {
         title: '载入开始时间',
-        dataIndex: 'createdAt',
+        // dataIndex: 'createdAt',
         width: 180,
+        // sorter: (a, b) => a.salary - b.salary,
     },
     {
         title: '连接器名称',
-        dataIndex: 'createdAt',
+        // dataIndex: 'createdAt',
         width: 180,
     },
     {
@@ -53,23 +68,23 @@ export const sourceDataVolume = (setVisible) => [
         width: 112,
         render: (_, record) => (
             <div style={{ display: 'flex', gap: 8 }}>
-                <span style={{color:'#165DFF',display:'inline-block',width:'100%',textAlign:'center'}} onClick={() => handleDownload(record, setVisible)}>导出</span>
-                <span style={{color:'#165DFF',display:'inline-block',width:'100%',textAlign:'center'}} onClick={() => handleDelete(record.id)}>操作</span>
+                <span style={{ color: '#165DFF', display: 'inline-block', width: '100%', textAlign: 'center' }} onClick={() => handleDownload(record, setVisible)}>导出</span>
+                <span style={{ color: '#165DFF', display: 'inline-block', width: '100%', textAlign: 'center' }} onClick={() => handleDelete(record.id)}>删除</span>
             </div>
         ),
     },
 
 ]
 //数据源目录的数据库中的数据格式
-export const sourceDataDatabase = (setVisible) => [
+export const sourceDataDatabase = (setVisible, hoveredRowId = null) => [
 
 ]
 //目标数据目录中的卷中的数据格式
-export const targetDataVolume = (setVisible) => [
+export const targetDataVolume = (setVisible, hoveredRowId = null) => [
 
 ]
 //目标数据目录中的数据库中的数据格式
-export const targetDataDatabase = (setVisible) => [
+export const targetDataDatabase = (setVisible, hoveredRowId = null) => [
 
 ]
 const handleDownload = (record, setVisible) => {
@@ -77,6 +92,7 @@ const handleDownload = (record, setVisible) => {
     setVisible(true, record)
 }
 const handleDelete = (id) => {
+
     console.log('删除', id)
     const token = localStorage.getItem('loginToken');
     if (!token) {
@@ -84,5 +100,5 @@ const handleDelete = (id) => {
         // 跳转到登录页
         return;
     }
-    deleteFileById(id)
+    // deleteFileById(id)
 }
