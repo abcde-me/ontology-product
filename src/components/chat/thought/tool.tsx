@@ -87,11 +87,7 @@ const Tool: FC<Props> = ({ payload, allToolIcons = {} }) => {
           <div className="space-y-2 border-t border-black/5 p-2 ">
             <Panel isRequest={true} toolName={toolName} content={input} />
             {output && (
-              <Panel
-                isRequest={false}
-                toolName={toolName}
-                content={output as string}
-              />
+              <Panel isRequest={false} toolName={toolName} content={output} />
             )}
           </div>
         )}

@@ -1,109 +1,111 @@
-
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import s from './style.module.css'
-import Tooltip from '@/pages/workflowConfig/components/tooltip'
-import Loading from '@/pages/workflowConfig/components/loading'
-import { AudioPlayerManager } from '@/pages/workflowConfig/components/audio-btn/audio.player.manager'
+import s from './style.module.css';
+import Tooltip from '@/pages/workflowConfig/components/tooltip';
+import Loading from '@/pages/workflowConfig/components/loading';
+import { AudioPlayerManager } from '@/pages/workflowConfig/components/audio-btn/audio.player.manager';
 
 interface AudioBtnProps {
-  id?: string
-  voice?: string
-  value?: string
-  className?: string
-  isAudition?: boolean
-  noCache?: boolean
+  id?: string;
+  voice?: string;
+  value?: string;
+  className?: string;
+  isAudition?: boolean;
+  noCache?: boolean;
 }
 
-type AudioState = 'initial' | 'loading' | 'playing' | 'paused' | 'ended'
+type AudioState = 'initial' | 'loading' | 'playing' | 'paused' | 'ended';
 
 const AudioBtn = ({
   id,
   voice,
   value,
   className,
-  isAudition,
+  isAudition
 }: AudioBtnProps) => {
-  const [audioState, setAudioState] = useState<AudioState>('initial')
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const params = {} as any
-  const pathname = {} as any
+  const [audioState, setAudioState] = useState<AudioState>('initial');
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const params = {} as any;
+  const pathname = {} as any;
   const audio_finished_call = (event: string): any => {
     switch (event) {
       case 'ended':
-        setAudioState('ended')
-        break
+        setAudioState('ended');
+        break;
       case 'paused':
-        setAudioState('ended')
-        break
+        setAudioState('ended');
+        break;
       case 'loaded':
-        setAudioState('loading')
-        break
+        setAudioState('loading');
+        break;
       case 'play':
-        setAudioState('playing')
-        break
+        setAudioState('playing');
+        break;
       case 'error':
-        setAudioState('ended')
-        break
+        setAudioState('ended');
+        break;
     }
-  }
-  let url = ''
-  let isPublic = false
+  };
+  let url = '';
+  let isPublic = false;
 
   if (params.token) {
-    url = '/text-to-audio'
-    isPublic = true
-  }
-  else if (params.appId) {
+    url = '/text-to-audio';
+    isPublic = true;
+  } else if (params.appId) {
     if (pathname.search('explore/installed') > -1)
-      url = `/installed-apps/${params.appId}/text-to-audio`
-    else
-      url = `/apps/${params.appId}/text-to-audio`
+      url = `/installed-apps/${params.appId}/text-to-audio`;
+    else url = `/apps/${params.appId}/text-to-audio`;
   }
-  const handleToggle = async () => {
+  const handleToggle = () => {
     if (audioState === 'playing' || audioState === 'loading') {
-      setTimeout(() => setAudioState('paused'), 1)
-      AudioPlayerManager.getInstance().getAudioPlayer(url, isPublic, id, value, voice, audio_finished_call).pauseAudio()
+      setTimeout(() => setAudioState('paused'), 1);
+      AudioPlayerManager.getInstance()
+        .getAudioPlayer(url, isPublic, id, value, voice, audio_finished_call)
+        .pauseAudio();
+    } else {
+      setTimeout(() => setAudioState('loading'), 1);
+      AudioPlayerManager.getInstance()
+        .getAudioPlayer(url, isPublic, id, value, voice, audio_finished_call)
+        .playAudio();
     }
-    else {
-      setTimeout(() => setAudioState('loading'), 1)
-      AudioPlayerManager.getInstance().getAudioPlayer(url, isPublic, id, value, voice, audio_finished_call).playAudio()
-    }
-  }
+  };
 
   const tooltipContent = {
     initial: t('appApi.play'),
     ended: t('appApi.play'),
     paused: t('appApi.pause'),
     playing: t('appApi.playing'),
-    loading: t('appApi.loading'),
-  }[audioState]
+    loading: t('appApi.loading')
+  }[audioState];
 
   return (
-    <div className={`inline-flex items-center justify-center ${(audioState === 'loading' || audioState === 'playing') ? 'mr-1' : className}`}>
-      <Tooltip
-        popupContent={tooltipContent}
-      >
+    <div
+      className={`inline-flex items-center justify-center ${audioState === 'loading' || audioState === 'playing' ? 'mr-1' : className}`}
+    >
+      <Tooltip popupContent={tooltipContent}>
         <button
           disabled={audioState === 'loading'}
-          className={`box-border w-6 h-6 flex items-center justify-center cursor-pointer ${isAudition ? 'p-0.5' : 'p-0 rounded-md bg-white'}`}
+          className={`box-border flex h-6 w-6 cursor-pointer items-center justify-center ${isAudition ? 'p-0.5' : 'rounded-md bg-white p-0'}`}
           onClick={handleToggle}
         >
-          {audioState === 'loading'
-            ? (
-              <div className='w-full h-full rounded-md flex items-center justify-center'>
-                <Loading />
-              </div>
-            )
-            : (
-              <div className={`w-full h-full rounded-md flex items-center justify-center ${!isAudition ? 'hover:bg-gray-50' : 'hover:bg-gray-50'}`}>
-                <div className={`w-4 h-4 ${(audioState === 'playing') ? s.pauseIcon : s.playIcon}`}></div>
-              </div>
-            )}
+          {audioState === 'loading' ? (
+            <div className="flex h-full w-full items-center justify-center rounded-md">
+              <Loading />
+            </div>
+          ) : (
+            <div
+              className={`flex h-full w-full items-center justify-center rounded-md ${!isAudition ? 'hover:bg-gray-50' : 'hover:bg-gray-50'}`}
+            >
+              <div
+                className={`h-4 w-4 ${audioState === 'playing' ? s.pauseIcon : s.playIcon}`}
+              ></div>
+            </div>
+          )}
         </button>
       </Tooltip>
     </div>
-  )
-}
+  );
+};
 
-export default AudioBtn
+export default AudioBtn;

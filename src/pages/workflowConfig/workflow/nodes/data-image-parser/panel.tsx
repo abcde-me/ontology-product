@@ -3,9 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  ImageParserNodeType,
-} from './types';
+import type { ImageParserNodeType } from './types';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -34,9 +32,9 @@ const Option = Select.Option;
 
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按句子'  },
-  { value: 3, label: '按段落'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按句子' },
+  { value: 3, label: '按段落' }
 ];
 
 const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
@@ -47,12 +45,10 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const {
-    readOnly,
-    inputs,
-    handleFilesChange,
-    handleFiledsChange
-  } = useConfig(id, data);
+  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+    id,
+    data
+  );
 
   const columns = [
     {
@@ -82,7 +78,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
       dataIndex: 'created_at',
       sorter: (a, b) => a.name.length - b.name.length
     }
-  ]
+  ];
 
   const defaultData = [...new Array(5)].map((_, index) => {
     return {
@@ -118,11 +114,15 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         >
           <Table
             columns={columns}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             rowSelection={{
               selectedRowKeys,
               onChange: (selectedRowKeys, selectedRows) => {
                 console.log('onChange:', selectedRowKeys, selectedRows);
+                // TODO: ts错误
+                // @ts-expect-error
                 setSelectedRowKeys(selectedRowKeys);
                 setFileNum(selectedRowKeys.length);
               },
@@ -133,7 +133,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
             data={defaultData}
           />
         </FormItem>
-        <Split className='my-[16px]'/>
+        <Split className="my-[16px]" />
         <FormItem
           label="图片描述模型："
           field="pic_model_id"

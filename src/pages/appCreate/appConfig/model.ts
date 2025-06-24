@@ -172,6 +172,8 @@ const AppConfig = types
       self.tools = (self.app.model_config?.agent_mode?.tools || []) as any;
     };
     const initDatasets = () => {
+      // TODO: ts错误
+      // @ts-expect-error
       self.knowledges =
         self.app.model_config.dataset_configs?.datasets?.datasets?.map(
           (item) => item.dataset
@@ -191,7 +193,7 @@ const AppConfig = types
           initModelParams();
           initTools();
           initDatasets();
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
           Message.error(err?.message);
         } finally {
@@ -205,6 +207,8 @@ const AppConfig = types
           self.creating = true;
           try {
             const data = yield createApp();
+            // TODO: ts错误
+            // @ts-expect-error
             history.replace('/tenant/compute/appforge/appConfig?id=' + data.id);
             // const newApp = yield getAppDetail({ id: data.id });
             // self.app = newApp;
@@ -212,7 +216,7 @@ const AppConfig = types
             // initModelParams();
             // initTools();
             // initDatasets();
-          } catch (err) {
+          } catch (err: any) {
             Message.error(err?.message);
           } finally {
             self.creating = false;
@@ -234,7 +238,7 @@ const AppConfig = types
           });
           Message.success('保存成功');
           return res;
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
           Message.error(err?.message);
         } finally {
@@ -362,6 +366,8 @@ const AppConfig = types
   });
 
 export const appConfigStore = AppConfig.create({
+  // TODO: ts错误
+  // @ts-expect-error
   app: null,
   loading: false,
   userinput: {
@@ -375,6 +381,8 @@ export const appConfigStore = AppConfig.create({
   },
   parameterRules: [],
   parameterRulesLoading: false,
+  // TODO: ts错误
+  // @ts-expect-error
   formData: null,
   tools: [],
   knowledges: [],

@@ -11,64 +11,49 @@ import { Get, Post } from '@/utils/request';
 
 //这个下载接口可以使用，但是不是在这个模块中用的，以后可能会用到
 export async function downloadFileById(id: string, params: any = {}) {
-  return await UAPI.RES.fileDownloadApi({ file_id: id })//暂定只传一个id，后面再添加其他参数
+  return await UAPI.RES.fileDownloadApi({ file_id: id }) //暂定只传一个id，后面再添加其他参数
     .get(params)
     .inRegion()
     .do();
 }
 
 //获取目录列表
-export async function getCatalogList(param:any = {}) {
+export async function getCatalogList(param: any = {}) {
   return await UAPI.RES.catalogListApi({})
     .get(param)
     // .withConfig({baseURL: 'http://172.27.195.188:8080'})
     .inRegion()
-    .do({ preCheck: false});
+    .do({ preCheck: false });
 }
 
-export async function getCatalogPreview(param:any = {}) {
-  return await UAPI.RES.catalogPreviewApi({path:param.path})
+export async function getCatalogPreview(param: any = {}) {
+  return await UAPI.RES.catalogPreviewApi({ path: param.path })
     .get()
     .inRegion()
     .do();
 }
 
-
-
-
-
-
 //删除目录文件接口
 export async function deleteFileById(id: string, params: any = {}) {
-  return await UAPI.RES.fileDeleteApi({ file_id: id })//暂定只传一个id，后面再添加其他参数
+  return await UAPI.RES.fileDeleteApi({ file_id: id }) //暂定只传一个id，后面再添加其他参数
     .delete(params)
     .inRegion()
     .do();
 }
 
 //查询指定目录下，已加载成功的文件记录
-export async function getDataCatalogList(param:any = {}) {
-  return await UAPI.RES.dataCatalogListApi({})
-    .get(param)
-    .inRegion()
-    .do();
+export async function getDataCatalogList(param: any = {}) {
+  return await UAPI.RES.dataCatalogListApi({}).get(param).inRegion().do();
 }
 
 // 获取数据目录列表
 
-
 // 创建数据集
 
 export async function createCatalog(data: any) {
-  return await UAPI.RES.CatalogCreateApi({})
-    .post(data)
-    .inRegion()
-    .do();
+  return await UAPI.RES.CatalogCreateApi({}).post(data).inRegion().do();
 }
 
-export async function exportFile(params:any = {}) {
-  return await UAPI.RES.fileExportApi({})
-    .post(params)
-    .inRegion()
-    .do();
+export async function exportFile(params: any = {}) {
+  return await UAPI.RES.fileExportApi({}).post(params).inRegion().do();
 }

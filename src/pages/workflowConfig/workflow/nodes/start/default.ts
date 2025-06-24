@@ -1,6 +1,9 @@
-import type { NodeDefault } from '../../types'
-import type { StartNodeType } from './types'
-import { ALL_CHAT_AVAILABLE_BLOCKS, ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks'
+import type { NodeDefault } from '../../types';
+import type { StartNodeType } from './types';
+import {
+  ALL_CHAT_AVAILABLE_BLOCKS,
+  ALL_COMPLETION_AVAILABLE_BLOCKS
+} from '@/pages/workflowConfig/workflow/blocks';
 
 const nodeDefault: NodeDefault<StartNodeType> = {
   defaultValue: {
@@ -8,60 +11,73 @@ const nodeDefault: NodeDefault<StartNodeType> = {
     source_path: 'string',
     data_category: [
       {
-        "id": 1,
-        "category": "文档",
-        "enabled": true,
-        "format": ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
+        id: 1,
+        category: '文档',
+        enabled: true,
+        format: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD']
       },
       {
-        "id": 2,
-        "category": "图片",
-        "enabled": true,
-        "format": ['JPEG', 'PNG', 'JPG']
+        id: 2,
+        category: '图片',
+        enabled: true,
+        format: ['JPEG', 'PNG', 'JPG']
       },
       {
-        "id": 3,
-        "category": "音频",
-        "enabled": true,
-        "format": ['WAV', 'MP#', 'AAC', 'FLAC']
+        id: 3,
+        category: '音频',
+        enabled: true,
+        format: ['WAV', 'MP#', 'AAC', 'FLAC']
       },
       {
-        "id": 4,
-        "category": "视频",
-        "enabled": true,
-        "format": ['MP4', 'MOV', 'MKV']
-      },
+        id: 4,
+        category: '视频',
+        enabled: true,
+        format: ['MP4', 'MOV', 'MKV']
+      }
     ]
   },
   getAvailablePrevNodes() {
-    return []
+    return [];
   },
   getAvailableNextNodes(isChatMode: boolean) {
-    const nodes = isChatMode ? ALL_CHAT_AVAILABLE_BLOCKS : ALL_COMPLETION_AVAILABLE_BLOCKS
-    return nodes
+    const nodes = isChatMode
+      ? ALL_CHAT_AVAILABLE_BLOCKS
+      : ALL_COMPLETION_AVAILABLE_BLOCKS;
+    return nodes;
   },
   checkValid(data: StartNodeType) {
+    // TODO: ts错误
+    // @ts-expect-error
     if (!data.srcDir) {
       return {
         isValid: false,
-        errorMessage: '请选择源数据目录',
-      }
+        errorMessage: '请选择源数据目录'
+      };
     }
-    if (data.doc.enabled && data.doc.types.length ||
-      data.image.enabled && data.image.types.length ||
-      data.audio.enabled && data.audio.types.length ||
-      data.video.enabled && data.video.types.length
+    if (
+      // TODO: ts错误
+      // @ts-expect-error
+      (data.doc.enabled && data.doc.types.length) ||
+      // TODO: ts错误
+      // @ts-expect-error
+      (data.image.enabled && data.image.types.length) ||
+      // TODO: ts错误
+      // @ts-expect-error
+      (data.audio.enabled && data.audio.types.length) ||
+      // TODO: ts错误
+      // @ts-expect-error
+      (data.video.enabled && data.video.types.length)
     ) {
       return {
-        isValid: true,
-      }
+        isValid: true
+      };
     } else {
       return {
         isValid: false,
-        errorMessage: '请至少选择一种文件类型',
-      }
+        errorMessage: '请至少选择一种文件类型'
+      };
     }
-  },
-}
+  }
+};
 
-export default nodeDefault
+export default nodeDefault;

@@ -33,6 +33,8 @@ function useStorage(
     }
   }, [key]);
 
+  // TODO: ts错误
+  // @ts-expect-error
   return [storedValue, setStorageValue, removeStorage];
 }
 

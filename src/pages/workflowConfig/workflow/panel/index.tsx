@@ -1,74 +1,74 @@
-import type { FC } from 'react'
-import React, { memo } from 'react'
-import { useNodes } from 'reactflow'
-import { useShallow } from 'zustand/react/shallow'
-import type { CommonNodeType } from '../types'
-import { Panel as NodePanel } from '../nodes'
-import { useStore } from '../store'
-import {
-  useIsChatMode,
-} from '../hooks'
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { useNodes } from 'reactflow';
+import { useShallow } from 'zustand/react/shallow';
+import type { CommonNodeType } from '../types';
+import { Panel as NodePanel } from '../nodes';
+import { useStore } from '../store';
+import { useIsChatMode } from '../hooks';
 // import DebugAndPreview from './debug-and-preview'
-import Record from './record'
-import WorkflowPreview from './workflow-preview'
+import Record from './record';
+import WorkflowPreview from './workflow-preview';
 // import ChatRecord from './chat-record'
 // import ChatVariablePanel from './chat-variable-panel'
 // import EnvPanel from './env-panel'
-import GlobalVariablePanel from './global-variable-panel'
-import VersionHistoryPanel from './version-history-panel'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store'
-import MessageLogModal from '@/pages/workflowConfig/components/message-log-modal'
+import GlobalVariablePanel from './global-variable-panel';
+import VersionHistoryPanel from './version-history-panel';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import MessageLogModal from '@/pages/workflowConfig/components/message-log-modal';
 
 const Panel: FC = () => {
-  const nodes = useNodes<CommonNodeType>()
-  const isChatMode = useIsChatMode()
-  const selectedNode = nodes.find(node => node.data.selected)
-  const historyWorkflowData = useStore(s => s.historyWorkflowData)
-  const showDebugAndPreviewPanel = useStore(s => s.showDebugAndPreviewPanel)
-  const showEnvPanel = useStore(s => s.showEnvPanel)
-  const showChatVariablePanel = useStore(s => s.showChatVariablePanel)
-  const showGlobalVariablePanel = useStore(s => s.showGlobalVariablePanel)
-  const showWorkflowVersionHistoryPanel = useStore(s => s.showWorkflowVersionHistoryPanel)
-  const isRestoring = useStore(s => s.isRestoring)
-  const { currentLogItem, setCurrentLogItem, showMessageLogModal, setShowMessageLogModal, currentLogModalActiveTab } = useAppStore(useShallow(state => ({
-    currentLogItem: state.currentLogItem,
-    setCurrentLogItem: state.setCurrentLogItem,
-    showMessageLogModal: state.showMessageLogModal,
-    setShowMessageLogModal: state.setShowMessageLogModal,
-    currentLogModalActiveTab: state.currentLogModalActiveTab,
-  })))
+  const nodes = useNodes<CommonNodeType>();
+  const isChatMode = useIsChatMode();
+  const selectedNode = nodes.find((node) => node.data.selected);
+  const historyWorkflowData = useStore((s) => s.historyWorkflowData);
+  const showDebugAndPreviewPanel = useStore((s) => s.showDebugAndPreviewPanel);
+  const showEnvPanel = useStore((s) => s.showEnvPanel);
+  const showChatVariablePanel = useStore((s) => s.showChatVariablePanel);
+  const showGlobalVariablePanel = useStore((s) => s.showGlobalVariablePanel);
+  const showWorkflowVersionHistoryPanel = useStore(
+    (s) => s.showWorkflowVersionHistoryPanel
+  );
+  const isRestoring = useStore((s) => s.isRestoring);
+  const {
+    currentLogItem,
+    setCurrentLogItem,
+    showMessageLogModal,
+    setShowMessageLogModal,
+    currentLogModalActiveTab
+  } = useAppStore(
+    useShallow((state) => ({
+      currentLogItem: state.currentLogItem,
+      setCurrentLogItem: state.setCurrentLogItem,
+      showMessageLogModal: state.showMessageLogModal,
+      setShowMessageLogModal: state.setShowMessageLogModal,
+      currentLogModalActiveTab: state.currentLogModalActiveTab
+    }))
+  );
 
   return (
     <div
       tabIndex={-1}
-      className={cn('app-workflow-page-panels absolute top-14 right-0 bottom-2 flex z-10 outline-none')}
+      className={cn(
+        'app-workflow-page-panels absolute bottom-2 right-0 top-14 z-10 flex outline-none'
+      )}
       key={`${isRestoring}`}
     >
-      {
-        showMessageLogModal && (
-          <MessageLogModal
-            fixedWidth
-            width={400}
-            currentLogItem={currentLogItem}
-            onCancel={() => {
-              setCurrentLogItem()
-              setShowMessageLogModal(false)
-            }}
-            defaultTab={currentLogModalActiveTab}
-          />
-        )
-      }
-      {
-        !!selectedNode && (
-          <NodePanel {...selectedNode!} />
-        )
-      }
-      {
-        historyWorkflowData && !isChatMode && (
-          <Record />
-        )
-      }
+      {showMessageLogModal && (
+        <MessageLogModal
+          fixedWidth
+          width={400}
+          currentLogItem={currentLogItem}
+          onCancel={() => {
+            setCurrentLogItem();
+            setShowMessageLogModal(false);
+          }}
+          defaultTab={currentLogModalActiveTab}
+        />
+      )}
+      {!!selectedNode && <NodePanel {...selectedNode} />}
+      {historyWorkflowData && !isChatMode && <Record />}
       {/* {
         historyWorkflowData && isChatMode && (
           <ChatRecord />
@@ -79,11 +79,7 @@ const Panel: FC = () => {
           <DebugAndPreview />
         )
       } */}
-      {
-        showDebugAndPreviewPanel && !isChatMode && (
-          <WorkflowPreview />
-        )
-      }
+      {showDebugAndPreviewPanel && !isChatMode && <WorkflowPreview />}
       {/* {
         showEnvPanel && (
           <EnvPanel />
@@ -94,18 +90,10 @@ const Panel: FC = () => {
           <ChatVariablePanel />
         )
       } */}
-      {
-        showGlobalVariablePanel && (
-          <GlobalVariablePanel />
-        )
-      }
-      {
-        showWorkflowVersionHistoryPanel && (
-          <VersionHistoryPanel/>
-        )
-      }
+      {showGlobalVariablePanel && <GlobalVariablePanel />}
+      {showWorkflowVersionHistoryPanel && <VersionHistoryPanel />}
     </div>
-  )
-}
+  );
+};
 
-export default memo(Panel)
+export default memo(Panel);

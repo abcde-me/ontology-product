@@ -1,81 +1,122 @@
-import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import produce from 'immer'
-import type { AppPublisherProps } from '@/pages/workflowConfig/app/app-publisher'
-import Confirm from '@/pages/workflowConfig/components/confirm'
-import AppPublisher from '@/pages/workflowConfig/app/app-publisher'
+import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import produce from 'immer';
+import type { AppPublisherProps } from '@/pages/workflowConfig/app/app-publisher';
+import Confirm from '@/pages/workflowConfig/components/confirm';
+import AppPublisher from '@/pages/workflowConfig/app/app-publisher';
 // import { useFeatures, useFeaturesStore } from '@/app/components/base/features/hooks'
 // import type { ModelAndParameter } from '@/app/components/app/configuration/debug/types'
 // import type { FileUpload } from '@/app/components/base/features/types'
-import { Resolution } from '@/pages/workflowConfig/types/app'
-import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants'
-import { SupportUploadFileTypes } from '@/pages/workflowConfig/workflow/types'
+import { Resolution } from '@/pages/workflowConfig/types/app';
+import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
+import { SupportUploadFileTypes } from '@/pages/workflowConfig/workflow/types';
 
-type FileUpload = any
-type ModelAndParameter = any
+type FileUpload = any;
+type ModelAndParameter = any;
 
 type Props = Omit<AppPublisherProps, 'onPublish'> & {
-  onPublish?: (modelAndParameter?: ModelAndParameter, features?: any) => Promise<any> | any
-  publishedConfig?: any
-  resetAppConfig?: () => void
-}
+  onPublish?: (
+    modelAndParameter?: ModelAndParameter,
+    features?: any
+  ) => Promise<any> | any;
+  publishedConfig?: any;
+  resetAppConfig?: () => void;
+};
 
 const FeaturesWrappedAppPublisher = (props: Props) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
   // const features = useFeatures(s => s.features)
   // const featuresStore = useFeaturesStore()
-  const features = {} as any
-  const featuresStore = {getState: () => { return { features: {}, setFeatures: (args: any) => {}} as any} }
+  const features = {} as any;
+  const featuresStore = {
+    getState: () => {
+      return { features: {}, setFeatures: (args: any) => {} } as any;
+    }
+  };
 
-  const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false)
+  const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
   const handleConfirm = useCallback(() => {
-    props.resetAppConfig?.()
-    const {
-      features,
-      setFeatures,
-    } = featuresStore!.getState()
+    props.resetAppConfig?.();
+    const { features, setFeatures } = featuresStore.getState();
     const newFeatures = produce(features, (draft) => {
-      draft.moreLikeThis = props.publishedConfig.modelConfig.more_like_this || { enabled: false }
+      draft.moreLikeThis = props.publishedConfig.modelConfig.more_like_this || {
+        enabled: false
+      };
       draft.opening = {
         enabled: !!props.publishedConfig.modelConfig.opening_statement,
-        opening_statement: props.publishedConfig.modelConfig.opening_statement || '',
-        suggested_questions: props.publishedConfig.modelConfig.suggested_questions || [],
-      }
-      draft.moderation = props.publishedConfig.modelConfig.sensitive_word_avoidance || { enabled: false }
-      draft.speech2text = props.publishedConfig.modelConfig.speech_to_text || { enabled: false }
-      draft.text2speech = props.publishedConfig.modelConfig.text_to_speech || { enabled: false }
-      draft.suggested = props.publishedConfig.modelConfig.suggested_questions_after_answer || { enabled: false }
-      draft.citation = props.publishedConfig.modelConfig.retriever_resource || { enabled: false }
-      draft.annotationReply = props.publishedConfig.modelConfig.annotation_reply || { enabled: false }
+        opening_statement:
+          props.publishedConfig.modelConfig.opening_statement || '',
+        suggested_questions:
+          props.publishedConfig.modelConfig.suggested_questions || []
+      };
+      draft.moderation = props.publishedConfig.modelConfig
+        .sensitive_word_avoidance || { enabled: false };
+      draft.speech2text = props.publishedConfig.modelConfig.speech_to_text || {
+        enabled: false
+      };
+      draft.text2speech = props.publishedConfig.modelConfig.text_to_speech || {
+        enabled: false
+      };
+      draft.suggested = props.publishedConfig.modelConfig
+        .suggested_questions_after_answer || { enabled: false };
+      draft.citation = props.publishedConfig.modelConfig.retriever_resource || {
+        enabled: false
+      };
+      draft.annotationReply = props.publishedConfig.modelConfig
+        .annotation_reply || { enabled: false };
       draft.file = {
         image: {
-          detail: props.publishedConfig.modelConfig.file_upload?.image?.detail || Resolution.high,
-          enabled: !!props.publishedConfig.modelConfig.file_upload?.image?.enabled,
-          number_limits: props.publishedConfig.modelConfig.file_upload?.image?.number_limits || 3,
-          transfer_methods: props.publishedConfig.modelConfig.file_upload?.image?.transfer_methods || ['local_file', 'remote_url'],
+          detail:
+            props.publishedConfig.modelConfig.file_upload?.image?.detail ||
+            Resolution.high,
+          enabled:
+            !!props.publishedConfig.modelConfig.file_upload?.image?.enabled,
+          number_limits:
+            props.publishedConfig.modelConfig.file_upload?.image
+              ?.number_limits || 3,
+          transfer_methods: props.publishedConfig.modelConfig.file_upload?.image
+            ?.transfer_methods || ['local_file', 'remote_url']
         },
-        enabled: !!(props.publishedConfig.modelConfig.file_upload?.enabled || props.publishedConfig.modelConfig.file_upload?.image?.enabled),
-        allowed_file_types: props.publishedConfig.modelConfig.file_upload?.allowed_file_types || [SupportUploadFileTypes.image],
-        allowed_file_extensions: props.publishedConfig.modelConfig.file_upload?.allowed_file_extensions || FILE_EXTS[SupportUploadFileTypes.image].map(ext => `.${ext}`),
-        allowed_file_upload_methods: props.publishedConfig.modelConfig.file_upload?.allowed_file_upload_methods || props.publishedConfig.modelConfig.file_upload?.image?.transfer_methods || ['local_file', 'remote_url'],
-        number_limits: props.publishedConfig.modelConfig.file_upload?.number_limits || props.publishedConfig.modelConfig.file_upload?.image?.number_limits || 3,
-      } as FileUpload
-    })
-    setFeatures?.(newFeatures)
-    setRestoreConfirmOpen(false)
-  }, [featuresStore, props])
+        enabled: !!(
+          props.publishedConfig.modelConfig.file_upload?.enabled ||
+          props.publishedConfig.modelConfig.file_upload?.image?.enabled
+        ),
+        allowed_file_types: props.publishedConfig.modelConfig.file_upload
+          ?.allowed_file_types || [SupportUploadFileTypes.image],
+        allowed_file_extensions:
+          props.publishedConfig.modelConfig.file_upload
+            ?.allowed_file_extensions ||
+          FILE_EXTS[SupportUploadFileTypes.image].map((ext) => `.${ext}`),
+        allowed_file_upload_methods: props.publishedConfig.modelConfig
+          .file_upload?.allowed_file_upload_methods ||
+          props.publishedConfig.modelConfig.file_upload?.image
+            ?.transfer_methods || ['local_file', 'remote_url'],
+        number_limits:
+          props.publishedConfig.modelConfig.file_upload?.number_limits ||
+          props.publishedConfig.modelConfig.file_upload?.image?.number_limits ||
+          3
+      } as FileUpload;
+    });
+    setFeatures?.(newFeatures);
+    setRestoreConfirmOpen(false);
+  }, [featuresStore, props]);
 
-  const handlePublish = useCallback((modelAndParameter?: ModelAndParameter) => {
-    return props.onPublish?.(modelAndParameter, features)
-  }, [features, props])
+  const handlePublish = useCallback(
+    (modelAndParameter?: ModelAndParameter) => {
+      return props.onPublish?.(modelAndParameter, features);
+    },
+    [features, props]
+  );
 
   return (
     <>
-      <AppPublisher {...{
-        ...props,
-        onPublish: handlePublish,
-        onRestore: () => setRestoreConfirmOpen(true),
-      }}/>
+      <AppPublisher
+        {...{
+          ...props,
+          onPublish: handlePublish,
+          onRestore: () => setRestoreConfirmOpen(true)
+        }}
+      />
       {restoreConfirmOpen && (
         <Confirm
           title={t('appDebug.resetConfig.title')}
@@ -86,7 +127,7 @@ const FeaturesWrappedAppPublisher = (props: Props) => {
         />
       )}
     </>
-  )
-}
+  );
+};
 
-export default FeaturesWrappedAppPublisher
+export default FeaturesWrappedAppPublisher;

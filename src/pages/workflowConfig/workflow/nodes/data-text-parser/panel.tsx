@@ -3,9 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  TextParserNodeType,
-} from './types';
+import type { TextParserNodeType } from './types';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -13,7 +11,10 @@ import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field'
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
 import CodeEditor from '@/pages/workflowConfig/workflow/nodes/_base/components/editor/code-editor';
 import TypeSelector from '@/pages/workflowConfig/workflow/nodes/_base/components/selector';
-import { BlockEnum, type NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import {
+  BlockEnum,
+  type NodePanelProps
+} from '@/pages/workflowConfig/workflow/types';
 import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
 import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
 import {
@@ -28,7 +29,7 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep, difference, reduce, dropWhile } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import { useNodes } from 'reactflow'
+import { useNodes } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
@@ -40,9 +41,9 @@ const Option = Select.Option;
 
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按段落'  },
-  { value: 3, label: '按句子'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按段落' },
+  { value: 3, label: '按句子' }
 ];
 
 const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
@@ -222,7 +223,11 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           {/* <Table
             className="files-table"
             loading={loading}
+            // TODO：ts错误
+            // @ts-expect-error
             columns={columns}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             pagination={{
               showTotal: true,
@@ -289,7 +294,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
             handleFilesChange={handleFilesChange}
           />
         </FormItem>
-        <Split className='my-[16px]'/>
+        <Split className="my-[16px]" />
         <FormItem
           label="分段方式："
           field="text_slice_rule"
@@ -321,7 +326,10 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           extra="选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。"
         >
           <Checkbox.Group
-            options={[{ label: '替换表达和特殊符号', value: 1 }, { label: '删除有效URL和电子邮箱地址', value: 2 }]}
+            options={[
+              { label: '替换表达和特殊符号', value: 1 },
+              { label: '删除有效URL和电子邮箱地址', value: 2 }
+            ]}
           />
         </FormItem>
         <FormItem

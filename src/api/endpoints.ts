@@ -246,7 +246,15 @@ export const ModaForgeResourceEndpoints = {
   // 连接器接口
 
   // 获取连接器数据列表
-  getConnection: PrefixAimdp + '/connectors'
+  getConnection: PrefixAimdp + '/connectors',
+  // 新建连接器数据
+  addconnection: PrefixAimdp + '/connectors',
+  // 删除连接器数据
+  delconnection: PrefixAimdp + '/connectors/{connector_id}',
+  // 修改连接器数据
+  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  // 查看连接器详情数据
+  getconnection: PrefixAimdp + '/connectors/{connector_id}'
 };
 
 /**
