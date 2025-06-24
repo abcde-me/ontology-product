@@ -16,7 +16,7 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
 
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
-    if (isReady) {
+    if (isReady && inputs.selected_files_num === undefined) {
       setInputs({
         ...inputs,
         ...defaultConfig
@@ -26,24 +26,26 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
   }, [defaultConfig]);
 
   const handleFilesChange = useCallback(
-    (files: string[]) => {
+    (files: string[], count: number) => {
       const newInputs = produce(inputs, (draft) => {
         draft.files = files;
+        draft.selected_files_num = count;
       });
+      console.log('handleFilesChange', files, inputs, newInputs);
       setInputs(newInputs);
     },
     [inputs, setInputs]
   );
 
-  const handleFilesCountChange = useCallback(
-    (count: number) => {
-      const newInputs = produce(inputs, (draft) => {
-        draft.selected_files_num = count;
-      });
-      setInputs(newInputs);
-    },
-    [inputs, setInputs]
-  );
+  // const handleFilesCountChange = useCallback(
+  //   (count: number) => {
+  //     const newInputs = produce(inputs, (draft) => {
+  //       draft.selected_files_num = count;
+  //     });
+  //     setInputs(newInputs);
+  //   },
+  //   [inputs, setInputs]
+  // );
 
   const handleFiledsChange = useCallback(
     (fields: ImageParserNodeType) => {
@@ -60,8 +62,7 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFiledsChange,
-    handleFilesCountChange
+    handleFiledsChange
   };
 };
 

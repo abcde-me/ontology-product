@@ -959,6 +959,10 @@
     //     background-color: white;
     //   }
     // }
+    .arco-form-label-item label {
+      display: flex;
+      align-items: center;
+    }
     .files-table {
       .arco-table-container {
         border-radius: 12px 12px 12px 12px;
