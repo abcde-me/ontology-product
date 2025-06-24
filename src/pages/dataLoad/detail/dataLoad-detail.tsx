@@ -11,25 +11,32 @@ import { Router } from 'react-router';
 import TableDetail from './table-detail';
 import './index.css';
 import Edit from '../edit';
+import {
+  ApiResponse,
+  ExecutionStatus,
+  LoadType,
+  SourceType,
+  TaskStatus
+} from '../type';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
 const DataLoadDetail = () => {
   // 默认详情的数据
-  const [listDetail, setListDetail] = useState({
+  const [listDetail, setListDetail] = useState<ApiResponse | null>({
     task_info: {
       id: 123,
       name: 'daily-image-import',
-      source_type: 'HDFS',
+      source_type: SourceType.HDFS,
       connector: {
         id: 456,
         name: 'hdfs-prod-01',
-        type: 'HDFS'
+        type: SourceType.HDFS
       },
-      load_type: 'cron',
+      load_type: LoadType.Cron,
       cron_expression: '0 0 3 * * ?',
       dest_path: 'minio/vision-data',
-      status: 'running',
+      status: TaskStatus.Running,
       created_at: '2025-06-16 18:40:36',
       last_run_time: '2025-06-16 18:40:36',
       creator: 'user123'
@@ -38,7 +45,7 @@ const DataLoadDetail = () => {
       {
         execution_id: 7891,
         execution_name: 'RUN-20250306-001',
-        status: 'running',
+        status: ExecutionStatus.Running,
         start_time: '2025-06-16 18:40:36',
         end_time: '2025-06-16 18:40:36',
         details: {
@@ -50,7 +57,7 @@ const DataLoadDetail = () => {
       {
         execution_id: 7890,
         execution_name: 'RUN-20250306-002',
-        status: 'failed',
+        status: ExecutionStatus.Failed,
         start_time: '2025-06-16 18:40:36',
         end_time: '2025-06-16 18:40:36',
         details: {
@@ -66,8 +73,10 @@ const DataLoadDetail = () => {
 
   // 判断任务中是否存在运行的任务
   const judgmentTask = () => {
+    // TODO: ts错误
+    // @ts-expect-error
     const runningIndex = listDetail.execution_history.findIndex((item) => {
-      return item.status == 'running';
+      return item.status === 'running';
     });
     console.log(runningIndex);
 
@@ -146,7 +155,13 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 载入位置：
               </Col>
-              <Col span={21}>{listDetail.task_info.dest_path}</Col>
+              <Col span={21}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.dest_path
+                }
+              </Col>
             </Row>
             <Row
               style={{
@@ -158,7 +173,13 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建人：
               </Col>
-              <Col span={21}>{listDetail.task_info.creator}</Col>
+              <Col span={21}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.creator
+                }
+              </Col>
             </Row>
             <Row
               style={{
@@ -170,7 +191,13 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建时间：
               </Col>
-              <Col span={21}>{listDetail.task_info.created_at}</Col>
+              <Col span={21}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.created_at
+                }
+              </Col>
             </Row>
             <Row
               style={{
@@ -182,7 +209,13 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 更新时间：
               </Col>
-              <Col span={21}>{listDetail.task_info.last_run_time}</Col>
+              <Col span={21}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.last_run_time
+                }
+              </Col>
             </Row>
           </div>
           <div className="info-column">
@@ -196,7 +229,13 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 数据源类型：
               </Col>
-              <Col span={20}>{listDetail.task_info.source_type}</Col>
+              <Col span={20}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.source_type
+                }
+              </Col>
             </Row>
             <Row
               style={{
@@ -208,7 +247,13 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 连接器名称：
               </Col>
-              <Col span={20}>{listDetail.task_info.connector.name}</Col>
+              <Col span={20}>
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.connector.name
+                }
+              </Col>
             </Row>
             <Row
               style={{
@@ -221,37 +266,62 @@ const DataLoadDetail = () => {
                 载入形式：
               </Col>
               <Col span={20}>
-                {listDetail.task_info.load_type == 'once'
-                  ? '单次载入'
-                  : '周期载入'}
-                {listDetail.task_info.load_type == 'cron' && (
-                  <Switch
-                    checkedText="启用"
-                    uncheckedText="停止"
-                    style={{ marginLeft: '10px' }}
-                    onChange={(val) => console.log(!val)}
-                  />
-                )}
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.load_type == 'once'
+                    ? '单次载入'
+                    : '周期载入'
+                }
+                {
+                  // TODO: ts错误
+                  // @ts-expect-error
+                  listDetail.task_info.load_type == 'cron' && (
+                    <Switch
+                      checkedText="启用"
+                      uncheckedText="停止"
+                      style={{ marginLeft: '10px' }}
+                      onChange={(val) => console.log(!val)}
+                    />
+                  )
+                }
               </Col>
             </Row>
-            {listDetail.task_info.load_type == 'cron' && (
-              <Row
-                style={{
-                  marginBottom: 16,
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
-                  周期设置：
-                </Col>
-                <Col span={20}>{listDetail.task_info.cron_expression}</Col>
-              </Row>
-            )}
+            {
+              // TODO: ts错误
+              // @ts-expect-error
+              listDetail.task_info.load_type == 'cron' && (
+                <Row
+                  style={{
+                    marginBottom: 16,
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Col
+                    span={4}
+                    style={{ fontWeight: 'bold', fontSize: '15px' }}
+                  >
+                    周期设置：
+                  </Col>
+                  <Col span={20}>
+                    {
+                      // TODO: ts错误
+                      // @ts-expect-error
+                      listDetail.task_info.cron_expression
+                    }
+                  </Col>
+                </Row>
+              )
+            }
           </div>
         </div>
         <TableDetail
-          data={listDetail.execution_history}
+          data={
+            // TODO: ts错误
+            // @ts-expect-error
+            listDetail.execution_history
+          }
           runningStatus={runningFlag}
           judgmentTaskHan={judgmentTask}
         />

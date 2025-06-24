@@ -4,17 +4,47 @@ import {
   Pagination,
   Popconfirm,
   Table,
-  Button
+  Button,
+  Modal
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail-modal';
 import AddAndEditModal from './add-edit-modal';
-import TimeFormatting from '../../utils/timeFormatting';
-import { getConnectionList } from '@/api/connectionApi';
+import { delconnectionList, getConnectionList } from '@/api/connectionApi';
 
 const InputSearch = Input.Search;
+
+// 连接器状态枚举
+enum ConnectionStatus {
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected'
+}
+
+// 连接器类型枚举
+enum ConnectorType {
+  S3 = 's3',
+  HDFS = 'hdfs'
+}
+
+// 状态显示配置
+const STATUS_CONFIG = {
+  [ConnectionStatus.CONNECTED]: {
+    text: '已连接',
+    color: 'green'
+  },
+  [ConnectionStatus.DISCONNECTED]: {
+    text: '已断开',
+    color: 'red'
+  }
+};
+
+// 类型显示配置
+const TYPE_CONFIG = {
+  [ConnectorType.S3]: '对象存储',
+  [ConnectorType.HDFS]: 'HDFS'
+};
 
 export default function Connection() {
   // 显示详情页面的实例子组件实例
@@ -31,52 +61,53 @@ export default function Connection() {
     },
     {
       title: '状态',
-      dataIndex: 'status',
       width: 130,
-      render: (_, item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '5px',
-              height: '5px',
-              backgroundColor: item.status !== 'connected' ? 'red' : 'green',
-              borderRadius: '50%',
-              marginRight: '5px'
-            }}
-          ></div>
-          <div>{item.status !== 'connected' ? '已断开' : '已连接'}</div>
-        </div>
-      ),
+      render: (_, item) => {
+        const statusConfig =
+          STATUS_CONFIG[item.status] ||
+          STATUS_CONFIG[ConnectionStatus.DISCONNECTED];
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div
+              style={{
+                width: '5px',
+                height: '5px',
+                backgroundColor: statusConfig.color,
+                borderRadius: '50%',
+                marginRight: '5px'
+              }}
+            ></div>
+            <div>{statusConfig.text}</div>
+          </div>
+        );
+      },
       filters: [
         {
-          text: '已断开',
-          value: 'disconnection'
+          text: STATUS_CONFIG[ConnectionStatus.DISCONNECTED].text,
+          value: ConnectionStatus.DISCONNECTED
         },
         {
-          text: '已连接',
-          value: 'connected'
+          text: STATUS_CONFIG[ConnectionStatus.CONNECTED].text,
+          value: ConnectionStatus.CONNECTED
         }
       ],
-      onFilter: (value, row) => row.status == value
+      onFilter: (value, row) => row.status === value
     },
     {
       title: '数据源类型',
-      dataIndex: 'type',
       width: 150,
-      render: (_, item) => (
-        <div>{item.type == 'hdfs' ? 'HDFS' : '对象存储'}</div>
-      ),
+      render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
         {
-          text: '对象存储',
-          value: 's3'
+          text: TYPE_CONFIG[ConnectorType.S3],
+          value: ConnectorType.S3
         },
         {
-          text: 'HDFS',
-          value: 'hdfs'
+          text: TYPE_CONFIG[ConnectorType.HDFS],
+          value: ConnectorType.HDFS
         }
       ],
-      onFilter: (value, row) => row.type == value
+      onFilter: (value, row) => row.type === value
     },
     {
       title: '创建人',
@@ -86,30 +117,23 @@ export default function Connection() {
     {
       title: '创建时间',
       width: 200,
-      dataIndex: 'created_at',
-      render: (_, item) => (
-        <div className="fontMM">{TimeFormatting(item.created_at)}</div>
-      ),
-      sorter: (a, b) => a.created_at.length - b.created_at.length
+      render: (_, item) => <div className="fontMM">{item.created_at}</div>,
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
       width: 200,
-      dataIndex: 'updated_at',
-      render: (_, item) => (
-        <div className="fontMM">{TimeFormatting(item.updated_at)}</div>
-      )
+      render: (_, item) => <div className="fontMM">{item.updated_at}</div>
     },
     {
       title: '操作',
-      dataIndex: 'created_at',
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
             className="hover"
             onClick={() => {
-              viewDetailHan(record);
+              viewDetailHan(record.id);
             }}
           >
             详情
@@ -144,21 +168,22 @@ export default function Connection() {
       )
     }
   ];
+  // 默认弹框隐藏
+  const [visible2, setVisible2] = React.useState(false);
+  // 详情页面的默认id
+  const [cId, setCId] = useState('0');
   // 点击删除按钮执行的方法
-  const DeleteMethod = (id: any) => {
-    const NewConnectionData = ConnectionData.filter((item: any) => {
-      return item.id !== id;
-    });
-    setConnectionData(NewConnectionData);
+  const DeleteMethod = async (id: string) => {
+    await delconnectionList(id);
+    getlist();
+    console.log(id);
   };
   // 点击查看执行的方法
-  const viewDetailHan = (obj) => {
-    if (childRef.current) {
-      // TODO: ts错误
-      // @ts-expect-error
-      childRef.current.displayDetailHan(obj);
-    }
+  const viewDetailHan = (id) => {
+    setCId(id);
+    setVisible2(true);
   };
+
   const childAddAndSetModalHan = (id) => {
     if (addandsetchildRef.current) {
       // TODO: ts错误
@@ -168,47 +193,23 @@ export default function Connection() {
   };
   // 搜索框的默认值
   const [searchValue, setSearchValue] = useState('');
-  const [ConnectionData, setConnectionData] = useState([
-    {
-      id: '1',
-      name: '唐僧',
-      status: 'connected',
-      type: 's3',
-      config: {
-        endpoint: 'https://s3.amazonaws.com',
-        access_key: 'AKIAxxxxXXX',
-        secret_key: 'xxxxxxxx',
-        region: 'XXXXXX',
-        path: 'data-warehouse'
-      },
-      creator: '张三',
-      created_at: '1749627860785',
-      updated_at: '17123456791'
-    },
-    {
-      id: '1',
-      name: '唐僧',
-      status: 'disconnection',
-      type: 's3',
-      config: {
-        endpoint: 'https://s3.amazonaws.com',
-        access_key: 'AKIAxxxxXXX',
-        secret_key: 'xxxxxxxx',
-        region: 'XXXXXX',
-        path: 'data-warehouse'
-      },
-      creator: '张三',
-      created_at: '1749627860785',
-      updated_at: '17123456791'
-    }
-  ]);
+  const [ConnectionData, setConnectionData] = useState([]) as any;
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-    setCurrent(page);
+    setPagination((prev) => ({
+      ...prev,
+      current: page
+    }));
   };
 
   // 根据搜索条件过滤连接器
@@ -223,13 +224,31 @@ export default function Connection() {
     });
   }, [ConnectionData, searchValue]);
 
-  const getlist = () => {
-    getConnectionList({
-      page: current,
-      page_size: pageSize
+  const [searchParams, setSearchParams] = useState({
+    keyword: ''
+  });
+
+  // 数据总量
+  const [total, setTotal] = useState(null);
+
+  const getlist = async () => {
+    const res = await getConnectionList({
+      page: pagination.current,
+      page_size: pagination.pageSize,
+      scope: '0'
     });
+    setTotal(res.data.total);
+
+    setConnectionData(res.data.items);
+    setPagination((prev) => ({
+      ...prev,
+      total: res.data.total
+    }));
   };
 
+  useEffect(() => {
+    getlist();
+  }, [pagination.current, pagination.pageSize, searchParams.keyword]);
   return (
     <div
       style={{
@@ -238,7 +257,7 @@ export default function Connection() {
         flexDirection: 'column',
         margin: '10px 20px 0px 0px',
         borderRadius: '10px',
-        height: '94%'
+        maxHeight: '94%'
       }}
     >
       <h1
@@ -286,31 +305,41 @@ export default function Connection() {
       />
       {/* 分页 */}
       <Pagination
-        current={current}
-        pageSize={pageSize}
+        current={pagination.current}
+        pageSize={pagination.pageSize}
         onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
+          setPagination((prev) => ({
+            ...prev,
+            pageSize,
+            current: 1
+          }));
         }}
         onChange={handlePageChange}
         sizeOptions={[2, 5, 10, 20]}
         showTotal
-        total={filteredConnectors.length}
+        total={pagination.total}
         showJumper
         sizeCanChange
         style={{ marginBottom: '20px' }}
       />
 
       {/* 详情逻辑 */}
-      <ModalDetail ref={childRef} />
-      <AddAndEditModal ref={addandsetchildRef} />
-      <button
-        onClick={() => {
-          getlist();
+
+      <Modal
+        style={{ width: '700px', height: '500px' }}
+        visible={visible2}
+        footer={null}
+        onCancel={() => {
+          // 点击关闭隐藏弹框
+          setVisible2(false);
         }}
       >
-        获取数据
-      </button>
+        <ModalDetail ref={childRef} detailId={cId} />
+      </Modal>
+      <AddAndEditModal ref={addandsetchildRef} getListHan={getlist} />
     </div>
   );
 }
+
+// 导出枚举供其他组件使用
+export { ConnectionStatus, ConnectorType, STATUS_CONFIG, TYPE_CONFIG };

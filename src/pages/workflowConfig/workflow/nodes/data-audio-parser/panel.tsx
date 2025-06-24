@@ -3,13 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  // CodeNodeType,
-  SegmentationOption,
-  TextProcessingRules
-} from './types';
-import { CodeLanguage } from './types';
-import { extractFunctionParams, extractReturnType } from './text-parser';
+import type { AudioParserNodeType } from './types';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -31,7 +25,6 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import './text.scss';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -44,8 +37,9 @@ const segmentationOptions: any = [
   { value: 3, label: '按段落' }
 ];
 
-const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
+const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
+  const activityMode = Form.useWatch('activity_mode', form);
 
   const [fileNum, setFileNum] = useState(0);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -98,7 +92,7 @@ const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
   });
 
   return (
-    <div className="wk-node-panel-content text-parser-panel-content mt-[16px]">
+    <div className="wk-node-panel-content audio-parser-panel-content mt-[16px]">
       <Form
         form={form}
         disabled={readOnly}
@@ -110,7 +104,7 @@ const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
         }}
         layout="vertical"
         onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
+          console.log('valuechange', _, v);
         }}
       >
         <FormItem
@@ -142,75 +136,47 @@ const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
         </FormItem>
         <Split className="my-[16px]" />
         <FormItem
-          label="分段方式："
-          field="text_slice_rule"
-          labelAlign="left"
-          required
-          extra="选择切分文本的方式，目前支持按照字符、句子和段落。"
-        >
-          <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
-        <FormItem
-          label="分段最大长度："
-          field="slice_max_size"
-          labelAlign="left"
-          required
-          extra="取值范围：800-1200"
-        >
-          <InputNumber min={800} max={1200} />
-        </FormItem>
-        <FormItem
-          label="文本处理规则："
-          field="text_proc_rules"
-          labelAlign="left"
-          extra="选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。"
-        >
-          <Checkbox.Group
-            options={[
-              { label: '替换表达和特殊符号', value: 0 },
-              { label: '删除有效URL和电子邮箱地址', value: 1 }
-            ]}
-          />
-        </FormItem>
-        <FormItem
-          label="多模态模型："
-          field="multi_model"
-          labelAlign="left"
-          extra="当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。"
-        >
-          <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
-        <FormItem
-          label="图片描述模型："
-          field="pic_model"
+          label="音频预处理："
+          field="audio_pret"
           labelAlign="left"
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
+          <Checkbox.Group
+            options={[
+              { label: '降噪', value: 1 },
+              { label: '语音增强', value: 2 }
+            ]}
+          />
+        </FormItem>
+        <FormItem label="语音活动检测（VAD）与切片设置：" field="vad_options">
+          <Checkbox.Group
+            options={[
+              { label: '启用语音活体检测', value: 'vad' },
+              { label: '启用多说话人识别', value: 'conv' }
+            ]}
+          />
+        </FormItem>
+        <FormItem label="切片模式：" field="activity_mode" labelAlign="left">
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
+            <Option value={1}>自动</Option>
+            <Option value={2}>定时长</Option>
           </Select>
         </FormItem>
+        {activityMode === 2 && (
+          <FormItem
+            label="时长："
+            field="activity_mode_num"
+            labelAlign="left"
+            required
+          >
+            <InputNumber min={0} />
+          </FormItem>
+        )}
         <FormItem
-          label="文本嵌入模型："
-          field="text_emb_model"
+          label="解析模型："
+          field="audio_model_id"
           labelAlign="left"
-          extra="指定对文本内容进行embedding 的模型。"
+          extra="指定对图片caption进行embedding 的模型。"
         >
           <Select>
             {segmentationOptions.map((option) => (
@@ -219,6 +185,14 @@ const Panel: FC<NodePanelProps<any>> = ({ id, data }) => {
               </Option>
             ))}
           </Select>
+        </FormItem>
+        <FormItem label="后处理与校验：" field="after_proc" labelAlign="left">
+          <Checkbox.Group
+            options={[
+              { label: '使用大模型进行错别字校验', value: 1 },
+              { label: '文字标准化', value: 2 }
+            ]}
+          />
         </FormItem>
       </Form>
     </div>

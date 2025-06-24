@@ -13,10 +13,11 @@ import React, {
   useState
 } from 'react';
 import './index.css';
+import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-const addModal = forwardRef((props, ref) => {
+const addModal = forwardRef((props: any, ref) => {
   // 创建的表单实例
   const [form] = Form.useForm();
 
@@ -32,6 +33,7 @@ const addModal = forwardRef((props, ref) => {
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     displayModalView: (id) => {
+      console.log(id);
       setIsFlag(id);
       setVisible(true);
       if (id) {
@@ -55,20 +57,28 @@ const addModal = forwardRef((props, ref) => {
     form
       .validate()
       .then((values) => {
+        const { type, name, ...newValues } = values;
+        const newfrom = {
+          name: values.name,
+          type: values.type,
+          config: {
+            ...newValues
+          },
+          creator: 'test1'
+        };
         if (isFlag == null) {
           // 添加逻辑
-          const newfrom = {
-            name: values.name,
-            type: values.type,
-            config: {
-              ...values
-            },
-            creator: '梁世昌'
-          };
-          console.log(newfrom);
+          addconnectionList(newfrom);
+          props.getListHan();
         } else {
           // 编辑逻辑
-          console.log(values.id);
+          updataConnectionList({
+            // TODO: ts错误
+            // @ts-expect-error
+            connector_id: isFlag.id,
+            newfrom
+          });
+          props.getListHan();
         }
         setVisible(false);
         resetHan();
@@ -202,6 +212,16 @@ const addModal = forwardRef((props, ref) => {
                     rules={[
                       { required: true, message: '请输入AccessKey Secret' }
                     ]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="区域："
+                    field="region"
+                    rules={[{ required: true, message: '请输入区域' }]}
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     labelAlign="right"
@@ -355,6 +375,16 @@ const addModal = forwardRef((props, ref) => {
                       rules={[
                         { required: true, message: '请输入AccessKey Secret' }
                       ]}
+                      labelCol={{ span: 5 }}
+                      wrapperCol={{ span: 19 }}
+                      labelAlign="right"
+                    >
+                      <Input placeholder="请输入" />
+                    </FormItem>
+                    <FormItem
+                      label="区域："
+                      field="region"
+                      rules={[{ required: true, message: '请输入区域' }]}
                       labelCol={{ span: 5 }}
                       wrapperCol={{ span: 19 }}
                       labelAlign="right"

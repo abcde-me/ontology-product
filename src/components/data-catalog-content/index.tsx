@@ -37,7 +37,7 @@ import {
   sourceDataDatabase,
   targetDataVolume,
   targetDataDatabase
-} from './columns';
+} from './target-columns';
 import FormComponent from './components/Dataset-form';
 const { Text } = Typography; //使用Text来控制文字的效果
 
@@ -259,6 +259,7 @@ const data = [
 ];
 
 function DataPage(props) {
+  const { selectedNode } = props;
   const [treeData, setTreeData] = React.useState([]);
   const [searchValue, setSearchValue] = React.useState('');
   const [startTime, setStartTime] = React.useState('');
@@ -278,6 +279,10 @@ function DataPage(props) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(100); //总条数
+
+  // 表格选择状态
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
 
   const handleTreeSelect = (item: any, directionKey: string, type: string) => {
     setSelectedFilePath(item);
@@ -300,6 +305,25 @@ function DataPage(props) {
     console.log(downloaddata);
     setDownloadData(downloaddata);
   }
+
+  // 处理表格选择变化
+  const handleSelectionChange = (
+    selectedRowKeys: React.Key[],
+    selectedRows: any[]
+  ) => {
+    setSelectedRowKeys(selectedRowKeys);
+    setSelectedRows(selectedRows);
+    console.log('表格选择变化:', selectedRowKeys, selectedRows);
+  };
+
+  // 处理从外部传入的selectedNode
+  React.useEffect(() => {
+    if (selectedNode) {
+      // 这里可以根据selectedNode来更新表格数据
+      // 暂时保持原有的逻辑，后续可以根据需要扩展
+      console.log('Selected node changed:', selectedNode);
+    }
+  }, [selectedNode]);
 
   // 页码变化处理
   const handlePageChange = (page: number, size: number) => {
@@ -350,35 +374,48 @@ function DataPage(props) {
     pageSize
   ]);
   return (
-    <div style={{ display: 'flex', padding: 16 }}>
-      {/* 左侧树状导航 */}
-      <div style={{ width: 220, marginRight: 16, backgroundColor: '#fff' }}>
-        <div style={{ padding: 20 }}>
-          <Tree
-            treeData={treeData}
-            defaultExpandedKeys={['src', 'dst']}
-            blockNode
+    <>
+      {/* <div style={{ flex: 1, width: '100%', height: '100%' }}>
+        <SmartTable
+          columns={columns}
+          data={tableData}
+          onSelectionChange={handleSelectionChange}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+          <span></span>
+          <Pages
+            current={currentPage}//当前页码
+            total={total}
+            pageSize={pageSize}//每页条数
+            onChange={handlePageChange}//页码变化处理
+            onPageSizeChange={handlePageSizeChange}//每页条数变化处理
           />
         </div>
-      </div>
 
-      {/* 右侧主区域 */}
-      <div
-        style={{
-          flex: 1,
-          width: '100%',
-          height: '500px',
-          backgroundColor: 'red'
-        }}
-      >
-        <SmartTable columns={columns} data={tableData} />
-        <Pages
-          current={currentPage} //当前页码
-          total={total}
-          pageSize={pageSize} //每页条数
-          onChange={handlePageChange} //页码变化处理
-          onPageSizeChange={handlePageSizeChange} //每页条数变化处理
+      </div> */}
+      <div>
+        <SmartTable
+          columns={columns}
+          data={tableData}
+          onSelectionChange={handleSelectionChange}
         />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: '12px'
+          }}
+        >
+          <span></span>
+          <Pages
+            current={currentPage} //当前页码
+            total={total}
+            pageSize={pageSize} //每页条数
+            onChange={handlePageChange} //页码变化处理
+            onPageSizeChange={handlePageSizeChange} //每页条数变化处理
+          />
+        </div>
       </div>
 
       <Modal
@@ -395,7 +432,7 @@ function DataPage(props) {
           onCancel={() => setVisible(false)}
         />
       </Modal>
-    </div>
+    </>
   );
 }
 

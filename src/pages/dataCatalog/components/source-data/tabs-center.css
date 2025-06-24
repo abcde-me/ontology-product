@@ -1,0 +1,9 @@
+.tabs-center .arco-tabs-header-nav {
+  justify-content: center !important;
+  display: flex !important;
+}
+
+/* Custom tree node hover style */
+/* .arco-tree-node-title:hover {
+  width: auto !important;
+} */

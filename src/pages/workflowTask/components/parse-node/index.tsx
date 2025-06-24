@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import './index.css';
-import { Pagination, Table } from "@arco-design/web-react";
-import { ColumnProps } from "@arco-design/web-react/es/Table";
+import { Pagination, Table } from '@arco-design/web-react';
+import { ColumnProps } from '@arco-design/web-react/es/Table';
 import PdfIcon from '@/assets/pdf-icon.svg';
 import TxtIcon from '@/assets/txt-icon.svg';
 import EpubIcon from '@/assets/epub-icon.svg';
-import TimeFormatting from '@/utils/timeFormatting'
+import TimeFormatting from '@/utils/timeFormatting';
+import noDataElement from '@/components/no-data';
 
 export default function ParseNode(props: { dataSource }) {
   const { dataSource } = props;
@@ -19,8 +20,9 @@ export default function ParseNode(props: { dataSource }) {
       title: '文件名称',
       dataIndex: 'file_name',
       width: 120,
-      ellipsis: true,
-    }, {
+      ellipsis: true
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       width: 80,
@@ -49,19 +51,20 @@ export default function ParseNode(props: { dataSource }) {
         }
       ],
       onFilter: (value, row) => row.status == value
-    }, {
+    },
+    {
       title: '文件类型',
       dataIndex: 'file_type',
       width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {
-            record.file_type === 'pdf' ?
-              <PdfIcon /> :
-              record.file_type === 'txt' ?
-                <TxtIcon /> :
-                <EpubIcon />
-          }
+          {record.file_type === 'pdf' ? (
+            <PdfIcon />
+          ) : record.file_type === 'txt' ? (
+            <TxtIcon />
+          ) : (
+            <EpubIcon />
+          )}
           <div style={{ margin: '0 0 0 5px' }}>{record.file_type}</div>
         </div>
       ),
@@ -76,41 +79,53 @@ export default function ParseNode(props: { dataSource }) {
         }
       ],
       onFilter: (value, row) => row.status == value
-    }, {
+    },
+    {
       title: '开始时间',
       dataIndex: 'start_time',
       width: 150,
-      render: (_, record) => (
-        <span>{TimeFormatting(record.start_time)}</span>
-      ),
+      render: (_, record) => <span>{TimeFormatting(record.start_time)}</span>,
       sorter: (a, b) => a.start_time.length - b.start_time.length
-    }, {
+    },
+    {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 150,
-      render: (_, record) => (
-        <span>{TimeFormatting(record.end_time)}</span>
-      ),
+      render: (_, record) => <span>{TimeFormatting(record.end_time)}</span>,
       sorter: (a, b) => a.end_time.length - b.end_time.length
     }
-  ]
+  ];
   return (
     <div className="parse-node">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}
+      >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.total}</span>
         </div>
         <div className="item-box">
           <span className="item-title">成功</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.success_total}</span>
         </div>
         <div className="item-box">
           <span className="item-title">失败</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.fail_total}</span>
         </div>
       </div>
-      <Table border={false} columns={columns} data={dataSource} pagination={false} rowKey="id" style={{ margin: '10px 0' }} />
+      <Table
+        border={false}
+        columns={columns}
+        data={dataSource.file}
+        pagination={false}
+        noDataElement={noDataElement({ description: '暂无数据' })}
+        rowKey="file_name"
+        style={{ margin: '10px 0' }}
+      />
       {/* 分页 */}
       <Pagination
         current={current}
@@ -130,5 +145,5 @@ export default function ParseNode(props: { dataSource }) {
         style={{ justifyContent: 'flex-end', marginTop: '10px' }}
       />
     </div>
-  )
+  );
 }
