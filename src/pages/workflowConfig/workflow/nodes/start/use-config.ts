@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import produce from 'immer'
 import { useBoolean } from 'ahooks'
 import type { StartNodeType } from './types'
@@ -10,45 +10,34 @@ import {
   useNodesReadOnly,
   useWorkflow,
 } from '@/pages/workflowConfig/workflow/hooks'
+import StartNodeDefault from './default'
 
 const useConfig = (id: string, payload: StartNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly()
 
+  const defaultConfig = StartNodeDefault.defaultValue
   const { inputs, setInputs } = useNodeCrud<StartNodeType>(id, payload)
+
+  useEffect(() => {
+    const isReady = defaultConfig && Object.keys(defaultConfig).length > 0
+    if (isReady) {
+      setInputs({
+        ...defaultConfig,
+        ...inputs,
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultConfig])
 
   const updateInputs = useCallback((payload: StartNodeType) => {
     const newInputs = produce(inputs, (draft: any) => {
-      draft.srcDir = payload.srcDir
-      draft.doc = payload.doc
-      draft.image = payload.image
-      draft.audio = payload.audio
-      draft.video = payload.video
+      draft.source_path = payload.source_path
+      draft.data_category = payload.data_category
     })
     setInputs(newInputs)
   }, [inputs, setInputs])
 
-  const initInputs = {
-    srcDir: 'string',
-    doc: {
-      enabled: true,
-      types: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
-    },
-    image: {
-      enabled: true,
-      types: ['JPEG', 'PNG', 'JPG'],
-    },
-    audio: {
-      enabled: true,
-      types: ['WAV', 'MP#', 'AAC', 'FLAC'],
-    },
-    video: {
-      enabled: true,
-      types: ['MP4', 'MOV', 'MKV'],
-    },
-  }
-
   return {
-    initInputs,
     readOnly,
     updateInputs,
     inputs,

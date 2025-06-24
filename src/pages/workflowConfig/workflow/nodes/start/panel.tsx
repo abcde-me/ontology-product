@@ -18,10 +18,16 @@ import PdfIcon from '@/assets/file/pdf-icon.svg'
 import ImageIcon from '@/assets/file/image-icon.svg'
 import AudioIcon from '@/assets/file/audio-icon.svg'
 import VideoIcon from '@/assets/file/video-icon.svg'
+import StartNodeDefault from './default'
 
 const FormItem = Form.Item;
 const i18nPrefix = 'workflow.nodes.start'
-
+const FileOptions = {
+  doc: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
+  image: ['JPEG', 'PNG', 'JPG'],
+  audio: ['WAV', 'MP#', 'AAC', 'FLAC'],
+  video: ['MP4', 'MOV', 'MKV'],
+}
 const Panel: FC<NodePanelProps<StartNodeType>> = ({
   id,
   data,
@@ -29,16 +35,15 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({
   const { t } = useTranslation('plugin__console-plugin-appforge')
   const [form] = Form.useForm();
 
-  const docParams = Form.useWatch('doc', form);
-  const imageParams = Form.useWatch('image', form);
-  const audioParams = Form.useWatch('audio', form);
-  const videoParams = Form.useWatch('video', form);
+  const docParams = Form.useWatch('data_category[0]', form);
+  const imageParams = Form.useWatch('data_category[1]', form);
+  const audioParams = Form.useWatch('data_category[2]', form);
+  const videoParams = Form.useWatch('data_category[3]', form);
 
   const {
     readOnly,
     inputs,
     updateInputs,
-    initInputs
   } = useConfig(id, data)
 
   const handleChanged = (values: any) => {
@@ -53,7 +58,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({
         autoComplete='off'
         labelCol={{span: 0}}
         wrapperCol={{span: 24}}
-        initialValues={cloneDeep(initInputs)}
+        initialValues={cloneDeep(inputs)}
         layout="vertical"
         onChange={async(_, v) => {
           // form.validate().catch(() => {})
@@ -63,7 +68,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({
       >
         <FormItem
           label='源数据目录'
-          field='srcDir'
+          field='source_path'
           rules={[{ required: true, message: '源数据目录必须选择' }]}
           extra='选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。'
         >
@@ -90,50 +95,50 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({
         ]}>
           <div className='border-[1px] border-[#CBD5E1] rounded-[12px] p-[16px] flex flex-col gap-y-[12px]'>
             <div className='flex items-center gap-x-[8px] h-[22px]'>
-              <FormItem field='doc.enabled' noStyle triggerPropName='checked'>
+              <FormItem field='data_category[0].enabled' noStyle triggerPropName='checked'>
                 <Switch />
               </FormItem>
               <PdfIcon className='size-[16px]'/>
               <span className='text-[14px]/[22px] font-semibold'>文档</span>
             </div>
-            <FormItem field='doc.types' noStyle disabled={!docParams?.enabled}>
-              <Checkbox.Group options={initInputs.doc.types}/>
+            <FormItem field='data_category[0].format' noStyle disabled={!docParams?.enabled}>
+              <Checkbox.Group options={FileOptions.doc}/>
             </FormItem>
           </div>
           <div className='mt-[12px] border-[1px] border-[#CBD5E1] rounded-[12px] p-[16px] flex flex-col gap-y-[12px]'>
             <div className='flex items-center gap-x-[8px] h-[22px]'>
-              <FormItem field='image.enabled' noStyle triggerPropName='checked'>
+              <FormItem field='data_category[1].enabled' noStyle triggerPropName='checked'>
                 <Switch />
               </FormItem>
               <ImageIcon className='size-[16px]'/>
               <span className='text-[14px]/[22px] font-semibold'>图片</span>
             </div>
-            <FormItem field='image.types' noStyle disabled={!imageParams?.enabled}>
-              <Checkbox.Group options={initInputs.image.types}/>
+            <FormItem field='data_category[1].format' noStyle disabled={!imageParams?.enabled}>
+              <Checkbox.Group options={FileOptions.image}/>
             </FormItem>
           </div>
           <div className='mt-[12px] border-[1px] border-[#CBD5E1] rounded-[12px] p-[16px] flex flex-col gap-y-[12px]'>
             <div className='flex items-center gap-x-[8px] h-[22px]'>
-              <FormItem field='audio.enabled' noStyle triggerPropName='checked'>
+              <FormItem field='data_category[2].enabled' noStyle triggerPropName='checked'>
                 <Switch />
               </FormItem>
               <AudioIcon className='size-[16px]'/>
               <span className='text-[14px]/[22px] font-semibold'>音频</span>
             </div>
-            <FormItem field='audio.types' noStyle disabled={!audioParams?.enabled}>
-              <Checkbox.Group options={initInputs.audio.types}/>
+            <FormItem field='data_category[2].format' noStyle disabled={!audioParams?.enabled}>
+              <Checkbox.Group options={FileOptions.audio}/>
             </FormItem>
           </div>
           <div className='mt-[12px] border-[1px] border-[#CBD5E1] rounded-[12px] p-[16px] flex flex-col gap-y-[12px]'>
             <div className='flex items-center gap-x-[8px] h-[22px]'>
-              <FormItem field='video.enabled' noStyle triggerPropName='checked'>
+              <FormItem field='data_category[3].enabled' noStyle triggerPropName='checked'>
                 <Switch />
               </FormItem>
               <VideoIcon className='size-[16px]'/>
               <span className='text-[14px]/[22px] font-semibold'>视频</span>
             </div>
-            <FormItem field='video.types' noStyle disabled={!videoParams?.enabled}>
-              <Checkbox.Group options={initInputs.video.types}/>
+            <FormItem field='data_category[3].format' noStyle disabled={!videoParams?.enabled}>
+              <Checkbox.Group options={FileOptions.video}/>
             </FormItem>
           </div>
         </FormItem>

@@ -21,8 +21,9 @@ export async function downloadFileById(id: string, params: any = {}) {
 export async function getCatalogList(param:any = {}) {
   return await UAPI.RES.catalogListApi({})
     .get(param)
+    // .withConfig({baseURL: 'http://172.27.195.188:8080'})
     .inRegion()
-    .do();
+    .do({ preCheck: false});
 }
 
 export async function getCatalogPreview(param:any = {}) {

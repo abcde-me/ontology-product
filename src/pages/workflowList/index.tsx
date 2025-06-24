@@ -5,6 +5,7 @@ import { ColumnProps } from "@arco-design/web-react/es/Table";
 import TimeFormatting from '@/utils/timeFormatting'
 import './index.css'
 import { IconCheckCircleFill, IconClockCircle } from "@arco-design/web-react/icon";
+import noDataElement from "@/components/no-data";
 
 const InputSearch = Input.Search;
 
@@ -101,7 +102,7 @@ export default function WorkflowList() {
             width: 120,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text">{record.name}</span>
+                <span className="hover-change">{record.name}</span>
             )
         }, {
             title: '运行方式',
@@ -144,7 +145,7 @@ export default function WorkflowList() {
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.source}>{record.source}</span>
+                <span className="hover-change" title={record.source}>{record.source}</span>
             )
         }, {
             title: '目标数据目录',
@@ -152,7 +153,7 @@ export default function WorkflowList() {
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.target}>{record.target}</span>
+                <span className="hover-change" title={record.target}>{record.target}</span>
             )
         }, {
             title: '创建人',
@@ -219,7 +220,7 @@ export default function WorkflowList() {
                 }} />
                 <Button shape='round' type='primary' onClick={handleCreateWorkflow}>创建工作流</Button>
             </div>
-            <Table border={false} columns={columns} data={filterWorkflowData} pagination={false} rowKey="id" />
+            <Table border={false} columns={columns} data={filterWorkflowData} pagination={false} noDataElement={noDataElement({ description: '暂无工作流', btnText: '创建工作流', handleBtn: () => handleCreateWorkflow() })} rowKey="id" />
             {/* 分页 */}
             <Pagination
                 current={current}

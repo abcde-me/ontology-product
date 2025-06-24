@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import produce from 'immer'
-import type { TextParserNodeType, OutputVar } from './types'
+import type { VideoParserNodeType, OutputVar } from './types'
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud'
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store'
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks'
 import TextNodeDefault from './default'
 
-const useConfig = (id: string, payload: TextParserNodeType) => {
+const useConfig = (id: string, payload: VideoParserNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly()
 
   const appId = useAppStore.getState().appDetail?.id
 
   const defaultConfig = TextNodeDefault.defaultValue
-  const { inputs, setInputs } = useNodeCrud<TextParserNodeType>(id, payload)
+  const { inputs, setInputs } = useNodeCrud<VideoParserNodeType>(id, payload)
  
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0
@@ -31,15 +31,23 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
     })
     setInputs(newInputs)
   }, [inputs, setInputs])
-
-  const handleFiledsChange = useCallback((fields: TextParserNodeType) => {
+  const handleFilesCountChange = useCallback((count: number) => {
     const newInputs = produce(inputs, (draft) => {
-      draft.text_slice_rule = inputs.text_slice_rule
-      draft.slice_max_size = inputs.slice_max_size
-      draft.text_proc_rules = inputs.text_proc_rules
-      draft.multi_model = inputs.multi_model
-      draft.pic_model = inputs.pic_model
-      draft.text_emb_model = inputs.text_emb_model
+      draft.selected_files_num = count
+    })
+    setInputs(newInputs)
+  }, [inputs, setInputs])
+  const handleFiledsChange = useCallback((fields: VideoParserNodeType) => {
+    const newInputs = produce(inputs, (draft) => {
+      draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1
+      draft.activity_mode = fields.activity_mode,
+      draft.is_open_multi_conv = fields.vad_options.includes('conv') ? 2 : 1,
+      draft.vad_options = fields.vad_options
+      draft.audio_model_id = fields.audio_model_id
+      draft.after_proc = fields.after_proc
+      draft.is_poly_orbit = fields.audio_options.includes('orbit') ? 2 : 1,
+      draft.is_denoise = fields.audio_options.includes('denoise') ? 2 : 1,
+      draft.audio_options = fields.audio_options
     })
     setInputs(newInputs)
   }, [inputs, setInputs])
@@ -49,6 +57,7 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
     inputs,
     handleFilesChange,
     handleFiledsChange,
+    handleFilesCountChange,
   }
 }
 

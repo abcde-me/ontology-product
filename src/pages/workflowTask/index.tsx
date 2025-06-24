@@ -4,6 +4,7 @@ import { useHistory } from "react-router";
 import { ColumnProps } from "@arco-design/web-react/es/Table";
 import TimeFormatting from '@/utils/timeFormatting'
 import './index.css'
+import noDataElement from "@/components/no-data";
 
 const InputSearch = Input.Search;
 
@@ -15,46 +16,51 @@ export default function WorkflowTask() {
     const [workflowTaskData, setWorkflowTaskData] = useState([
         {
             id: '1',
-            name: 'Jane Doe',
-            running_time: '50分20秒',
-            source: 'jane.doe@example.com',
-            target: 'jane.doe@example.com',
+            status: 0,
+            job_name: 'Jane Doe',
+            time_size: '50分20秒',
+            source_path: 'jane.doe@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627834576',
             end_time: '1749627834576',
         },
         {
             id: '2',
-            name: 'Alisa Ross',
-            running_time: '50分20秒',
-            source: 'alisa.ross@example.com',
-            target: 'jane.doe@example.com',
+            status: 1,
+            job_name: 'Alisa Ross',
+            time_size: '50分20秒',
+            source_path: 'alisa.ross@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627876834',
             end_time: '1749627834576',
         },
         {
             id: '3',
-            name: 'Kevin Sandra',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            status: 2,
+            job_name: 'Kevin Sandra',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627812365',
             end_time: '1749627834576',
         },
         {
             id: '4',
-            name: '张三',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            status: 3,
+            job_name: '张三',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '174962787645',
             end_time: '1749627834576',
         },
         {
             id: '5',
-            name: '李四',
-            running_time: '50分20秒',
-            source: 'kevin.sandra@example.com',
-            target: 'jane.doe@example.com',
+            status: 0,
+            job_name: '李四',
+            time_size: '50分20秒',
+            source_path: 'kevin.sandra@example.com',
+            target_path: 'jane.doe@example.com',
             start_time: '1749627860783',
             end_time: '1749627834576',
         },
@@ -74,36 +80,82 @@ export default function WorkflowTask() {
             title: '作业ID',
             dataIndex: 'id',
             width: 120,
+            ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text">{record.id}</span>
+                <span className="hover-change">{record.id}</span>
             )
         }, {
+            title: '状态',
+            dataIndex: 'status',
+            width: 130,
+            render: (_, record) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div
+                        style={{
+                            width: '5px',
+                            height: '5px',
+                            backgroundColor: record.status === 0 ? '#10B981' :
+                                record.status === 1 ? '#EF4444' :
+                                    record.status === 2 ? '#007DFA' : '#CBD5E1',
+                            borderRadius: '50%',
+                            marginRight: '5px'
+                        }}
+                    ></div>
+                    <div>
+                        {
+                            record.status === 0 ? '运行完成' :
+                                record.status === 1 ? '运行失败' :
+                                    record.status === 2 ? '进行中' : '已停止'
+                        }
+                    </div>
+                </div>
+            ),
+            filters: [
+                {
+                    text: '运行完成',
+                    value: 0
+                },
+                {
+                    text: '运行失败',
+                    value: 1
+                },
+                {
+                    text: '进行中',
+                    value: 2
+                },
+                {
+                    text: '已停止',
+                    value: 3
+                }
+            ],
+            onFilter: (value, row) => row.status == value
+        }, {
             title: '运行时长',
-            dataIndex: 'running_time',
+            dataIndex: 'time_size',
             width: 130,
         }, {
             title: '工作流名称',
-            dataIndex: 'name',
+            dataIndex: 'job_name',
             width: 130,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" onClick={() => handleToTaskDeatil(record.id)} title={record.name}>{record.name}</span>
+                <span className="hover-change" onClick={() => handleToTaskDeatil(record.id)} title={record.job_name}>{record.job_name}</span>
             )
         }, {
             title: '源数据目录',
-            dataIndex: 'source',
+            dataIndex: 'source_path',
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.source}>{record.source}</span>
+                <span className="hover-change" title={record.source_path}>{record.source_path}</span>
             )
         }, {
             title: '目标数据目录',
-            dataIndex: 'target',
+            dataIndex: 'target_path',
             width: 230,
             ellipsis: true,
             render: (_, record) => (
-                <span className="operate-text" title={record.target}>{record.target}</span>
+                <span className="hover-change" title={record.target_path}>{record.target_path}</span>
             )
         }, {
             title: '开始时间',
@@ -121,6 +173,13 @@ export default function WorkflowTask() {
                 <span>{TimeFormatting(record.end_time)}</span>
             ),
             sorter: (a, b) => a.end_time.length - b.end_time.length
+        }, {
+            title: '操作',
+            dataIndex: 'operate',
+            width: 80,
+            render: (_, record) => (
+                <span className="operate-text" onClick={() => handleToTaskDeatil(record.id)}>详情</span>
+            ),
         }
     ]
 
@@ -142,7 +201,7 @@ export default function WorkflowTask() {
                     setSearchValue(value)
                 }} />
             </div>
-            <Table border={false} columns={columns} data={filterWorkflowTaskData} pagination={false} rowKey="id" />
+            <Table border={false} columns={columns} data={filterWorkflowTaskData} pagination={false} noDataElement={noDataElement({ description: '暂无作业' })} rowKey="id" />
             {/* 分页 */}
             <Pagination
                 current={current}

@@ -122,7 +122,6 @@ export const ResourceEndpoints = {
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdo = '/api/aimdo/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
@@ -220,11 +219,11 @@ export const ModaForgeResourceEndpoints = {
 
   //数据目录
   //获取数据目录
-  catalogListApi: PrefixAimdo + '/directory',
+  catalogListApi: PrefixAimdp + '/directory',
   //查询指定目录下加载成功的文件信息
-  fileListApi: PrefixAimdo + '/path/files',
+  fileListApi: PrefixAimdp + '/path/files',
   //查询目标数据文件列表
-  catalogPreviewApi: PrefixAimdo + '/path/directory/{path}', //数据集管理在用
+  catalogPreviewApi: PrefixAimdp + '/path/directory/{path}', //数据集管理在用
 
   //数据集
   //获取数据集列表
@@ -238,9 +237,11 @@ export const ModaForgeResourceEndpoints = {
   //删除数据集
   deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
-  connectorListApi: PrefixAimdo + '/connector',
+  connectorListApi: PrefixAimdp + '/connectors',
   //查询指定连接器加载成功的文件信息
-  connectorFileListApi: PrefixAimdo + '/connectors/{connector_id}/files',
+  connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
+  //修改数据集
+  updateDatasetApi: PrefixAimdp + '/dataset/{id}',
 
   // 连接器接口
 

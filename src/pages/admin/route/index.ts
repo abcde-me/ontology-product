@@ -130,6 +130,16 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../dataCatalog')),
     children: []
   },
+  // 数据集详情 (需要在数据集管理之前匹配)
+  {
+    name: 'datasetDetail',
+    key: '/tenant/compute/modaforge/datasetManagement/detail/:id',
+    component: React.lazy(async () => {
+      console.log('加载数据集详情页组件');
+      return import('../../../components/detail/index');
+    }),
+    children: []
+  },
   // 数据集管理
   {
     name: 'datasetManagement',
