@@ -5,7 +5,7 @@ import useOutputVarList from '../_base/hooks/use-output-var-list';
 import { BlockEnum, VarType } from '../../types';
 import type { Var, Variable } from '../../types';
 import { useStore } from '../../store';
-import type { CodeNodeType, OutputVar, CleaningNodeType } from './types';
+import type { CodeNodeType, OutputVar } from './types';
 import { CodeLanguage } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
 import useOneStepRun from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-one-step-run';
@@ -173,9 +173,18 @@ const useConfig = (id: string, payload: CodeNodeType) => {
   );
 
   const updateInputs = useCallback(
-    (payload: CleaningNodeType) => {
+    (payload: CodeNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.data_standardization = payload.data_standardization;
+        draft.threshold = payload.threshold;
+        draft.oh_is = payload.oh_is;
+        draft.df_is = payload.df_is;
+        draft.qd_is = payload.qd_is;
+        draft.mg_is = payload.mg_is;
+        draft.ts_remove = payload.ts_remove;
+        draft.remove_url = payload.remove_url;
+        draft.remove_invisible = payload.remove_invisible;
+        draft.remove_html = payload.remove_html;
       });
       setInputs(newInputs);
     },

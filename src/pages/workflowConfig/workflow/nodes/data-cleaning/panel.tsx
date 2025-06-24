@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
@@ -49,10 +49,12 @@ import {
 import './date-cleaning.scss';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const { readOnly, inputs, updateInputs, setInputVarValues } = useConfig(
-    id,
-    data
-  );
+  const {
+    readOnly,
+    inputs,
+    updateInputs,
+    setInputVarValues
+  } = useConfig(id, data);
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -61,32 +63,31 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
 
   const [switchChecked, setSwitchChecked] = useState(false);
   const [filterChecked, setFilterChecked] = useState(false);
-  const [sliderValue, setSliderValue] = useState<any>(0);
-  const [specialCharFilter, setSpecialCharFilter] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [upperLowerStatus, setUpperLowerStatus] = useState(true);
 
   const [dataStandardizationSwitch, setDataStandardizationSwitch] =
     useState(false);
   const [SensitiveSwitch, setSensitiveSwitch] = useState(false);
-  const [deduplicateSwitch, setDeduplicateSwitch] = useState(false);
-  const [fuzzyDeduplicateSwitch, setFuzzyDeduplicateSwitch] = useState(false);
   const [detoxificationSwitch, setDetoxificationSwitch] = useState(false);
   const [imputationSwitch, setImputationSwitch] = useState(false);
   const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
-  const dateCleaning = {
-    standard: ['']
-  };
-
-  const sliderOnChange = (value: any) => {
-    setSliderValue(value);
-  };
-
+  console.log(data, inputs, '==============1111111');
   // 获取from内容
   const onValuesChange = (changeValue, values) => {
-    // console.log(changeValue, values);
     updateInputs(values);
+    if (changeValue.case_transform) {
+      setUpperLowerStatus(false)
+    } else {
+      setUpperLowerStatus(true)
+    }
   };
+  useEffect(() => {
+    setImputationSwitch(inputs?.df_is);
+    setOutlierHandlingSwitch(inputs?.oh_is);
+    setDetoxificationSwitch(inputs.qd_is);
+    setSensitiveSwitch(inputs?.mg_is);
+    setDataStandardizationSwitch(inputs?.ts_remove);
+  }, [inputs])
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
@@ -96,8 +97,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          'data_standardization[0].enabled': false,
-          caseType: 0,
+          threshold: 80,
+          data_standardization: inputs?.data_standardization,
+          remove_url: inputs?.remove_url,
+          remove_invisible: inputs?.remove_invisible,
+          remove_html: inputs?.remove_html,
+          threshold: inputs?.threshold,
           vars: cloneDeep(inputs.variables || [])
         }}
         layout="inline"
@@ -112,7 +117,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           {/* switch 开关 */}
           <div className="date-switch">
-            <FormItem field="data_standardization[0].enabled">
+            <FormItem field="data_standardization">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={switchChecked}
@@ -132,15 +137,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="data_standardization[0].format"
+                  field="unicode"
                   labelAlign="left"
                 >
-                  <Checkbox>文本</Checkbox>
+                  <Checkbox>文本标准化</Checkbox>
                 </FormItem>
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="data_standardization[1].format"
+                  field="traditional_to_simplified"
                   labelAlign="left"
                 >
                   <Checkbox>繁体转简体</Checkbox>
@@ -148,35 +153,26 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="data_standardization[2].format"
+                  field="case_uniformity"
                   labelAlign="left"
                 >
-                  <Checkbox
-                  // onChange={(checked: boolean) => {
-                  // setUpperLowerStatus(!checked);
-                  // }}
-                  >
-                    大小写统一
-                  </Checkbox>
+                  <Checkbox>大小写统一</Checkbox>
                 </FormItem>
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="upperDown"
+                  field="case_transform"
                   labelAlign="left"
                 >
                   <Select
                     placeholder="请选择"
                     style={{ width: 120, height: 18, marginLeft: '8px' }}
-                    onChange={(value) => {
-                      console.log(value);
-                    }}
                     disabled={upperLowerStatus}
                   >
-                    <Option key={0} value={0}>
+                    <Option key={1} value={1}>
                       小写
                     </Option>
-                    <Option key={1} value={1}>
+                    <Option key={2} value={2}>
                       大写
                     </Option>
                   </Select>
@@ -202,7 +198,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             {/* 数据过滤开关 */}
-            <FormItem field="data_standardization[1].enabled">
+            <FormItem field="threshold_switch">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={filterChecked}
@@ -216,8 +212,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </div>
           {filterChecked && (
             <>
-              <FormItem field="" layout="inline" label="字符串长度阈值">
-                <Input placeholder="请输入发阈值" />
+              <FormItem
+                field="threshold"
+                layout="inline"
+                label="字符串长度阈值"
+              >
+                <Input placeholder="请输入发阈值" min={0} maxLength={1024} />
               </FormItem>
               <div className="date-cleaning-info">
                 <div className="info-before">
@@ -238,7 +238,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </div>
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[2].enabled">
+            <FormItem field="ts_remove">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={dataStandardizationSwitch}
@@ -254,7 +254,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field=""
+                  field="remove_url"
                   labelAlign="left"
                 >
                   <Checkbox>去除URL链接</Checkbox>
@@ -262,7 +262,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="upperLower"
+                  field="remove_invisible"
                   labelAlign="left"
                 >
                   <Checkbox>去除不可见字符</Checkbox>
@@ -270,7 +270,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <FormItem
                   layout="vertical"
                   label={null}
-                  field="upperLower"
+                  field="remove_html"
                   labelAlign="left"
                 >
                   <Checkbox>去除html格式字符</Checkbox>
@@ -291,7 +291,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </>
           )}
         </div>
-        <div className="file-box">
+        {/* 这期不做 */}
+        {/* <div className="file-box">
           <div className="date-switch">
             <FormItem field="data_standardization[3].enabled">
               <Switch
@@ -342,10 +343,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </div>
             </>
           )}
-        </div>
+        </div> */}
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[4].enabled">
+            <FormItem field="mg_is">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={SensitiveSwitch}
@@ -356,7 +357,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">去除敏感词</span>
           </div>
-          <div className="date-desc">---</div>
+          {/* <div className="date-desc">---</div> */}
           {SensitiveSwitch && (
             <>
               <div className="date-cleaning-info">
@@ -376,7 +377,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </>
           )}
         </div>
-        <div className="file-box">
+        {/* 这期不做 */}
+        {/* <div className="file-box">
           <div className="date-switch">
             <FormItem field="data_standardization[5].enabled">
               <Switch
@@ -473,10 +475,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </div>
             </>
           )}
-        </div>
+        </div> */}
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[7].enabled">
+            <FormItem field="qd_is">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={detoxificationSwitch}
@@ -487,7 +489,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">数据去毒化</span>
           </div>
-          <div className="date-desc">---</div>
+          {/* <div className="date-desc">---</div> */}
           {detoxificationSwitch && (
             <>
               <div className="date-cleaning-info">
@@ -509,7 +511,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </div>
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[8].enabled">
+            <FormItem field="df_is">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={imputationSwitch}
@@ -520,7 +522,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">数据填补</span>
           </div>
-          <div className="date-desc">---</div>
+          {/* <div className="date-desc">---</div> */}
           {imputationSwitch && (
             <>
               <div className="date-cleaning-info">
@@ -542,7 +544,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </div>
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[9].enabled">
+            <FormItem field="oh_is">
               <Switch
                 style={{ margin: 0, width: 'auto' }}
                 checked={outlierHandlingSwitch}
@@ -553,7 +555,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">异常值处理</span>
           </div>
-          <div className="date-desc">---</div>
+          {/* <div className="date-desc">---</div> */}
           {outlierHandlingSwitch && (
             <>
               <div className="date-cleaning-info">
