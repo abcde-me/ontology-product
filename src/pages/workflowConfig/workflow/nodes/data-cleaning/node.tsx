@@ -1,15 +1,15 @@
-import type { FC } from 'react'
-import React, { useState } from 'react'
-import type { CodeNodeType } from './types'
-import type { NodeProps } from '@/pages/workflowConfig/workflow/types'
-import { RiArrowDownSFill } from '@remixicon/react'
-import { useStoreApi } from 'reactflow'
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import type { CodeNodeType } from './types';
+import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
+import { RiArrowDownSFill } from '@remixicon/react';
+import { useStoreApi } from 'reactflow';
 import { Tooltip } from '@arco-design/web-react';
 import './date-cleaning.scss';
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const { data_standardization } = props.data;
 
-  const store = useStoreApi()
+  const store = useStoreApi();
   console.log(data_standardization, 'data_standardization');
   const items = [
     '数据标准化',
@@ -24,8 +24,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     '异常值处理'
   ];
   const MAX_VISIBLE_ITEMS = 2;
-  const extraCount =
-    data_standardization?.length - MAX_VISIBLE_ITEMS;
+  const extraCount = data_standardization?.length - MAX_VISIBLE_ITEMS;
   const allItemsText = items.join('、');
 
   return (
@@ -77,6 +76,6 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       </div>
     </div>
   );
-}
+};
 
-export default React.memo(Node)
+export default React.memo(Node);

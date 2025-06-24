@@ -181,10 +181,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           labelAlign="left"
           required
         >
-          <Select
-            placeholder="请选择模型"
-            style={{ width: '100%' }}
-          >
+          <Select placeholder="请选择模型" style={{ width: '100%' }}>
             <Option key={1} value={1}>
               模型1
             </Option>

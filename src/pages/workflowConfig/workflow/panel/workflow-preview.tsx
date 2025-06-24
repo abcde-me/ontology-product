@@ -1,46 +1,36 @@
-import React, {
-  memo,
-  useEffect,
-  useState,
-} from 'react'
-import {
-  RiClipboardLine,
-  RiCloseLine,
-} from '@remixicon/react'
-import { useTranslation } from 'react-i18next'
-import copy from 'copy-to-clipboard'
-import ResultText from '../run/result-text'
-import ResultPanel from '../run/result-panel'
-import TracingPanel from '../run/tracing-panel'
-import {
-  useWorkflowInteractions,
-} from '../hooks'
-import { useStore } from '../store'
-import {
-  WorkflowRunningStatus,
-} from '../types'
-import Toast from '@/pages/workflowConfig/components/toast'
-import InputsPanel from './inputs-panel'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import Loading from '@/pages/workflowConfig/components/loading'
-import Button from '@/pages/workflowConfig/components/button'
+import React, { memo, useEffect, useState } from 'react';
+import { RiClipboardLine, RiCloseLine } from '@remixicon/react';
+import { useTranslation } from 'react-i18next';
+import copy from 'copy-to-clipboard';
+import ResultText from '../run/result-text';
+import ResultPanel from '../run/result-panel';
+import TracingPanel from '../run/tracing-panel';
+import { useWorkflowInteractions } from '../hooks';
+import { useStore } from '../store';
+import { WorkflowRunningStatus } from '../types';
+import Toast from '@/pages/workflowConfig/components/toast';
+import InputsPanel from './inputs-panel';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import Loading from '@/pages/workflowConfig/components/loading';
+import Button from '@/pages/workflowConfig/components/button';
 
 const WorkflowPreview = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const { handleCancelDebugAndPreviewPanel } = useWorkflowInteractions()
-  const workflowRunningData = useStore(s => s.workflowRunningData)
-  const showInputsPanel = useStore(s => s.showInputsPanel)
-  const showDebugAndPreviewPanel = useStore(s => s.showDebugAndPreviewPanel)
-  const [currentTab, setCurrentTab] = useState<string>(showInputsPanel ? 'INPUT' : 'TRACING')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { handleCancelDebugAndPreviewPanel } = useWorkflowInteractions();
+  const workflowRunningData = useStore((s) => s.workflowRunningData);
+  const showInputsPanel = useStore((s) => s.showInputsPanel);
+  const showDebugAndPreviewPanel = useStore((s) => s.showDebugAndPreviewPanel);
+  const [currentTab, setCurrentTab] = useState<string>(
+    showInputsPanel ? 'INPUT' : 'TRACING'
+  );
 
-  const switchTab = async (tab: string) => {
-    setCurrentTab(tab)
-  }
+  const switchTab = (tab: string) => {
+    setCurrentTab(tab);
+  };
 
   useEffect(() => {
-    if (showDebugAndPreviewPanel && showInputsPanel)
-      setCurrentTab('INPUT')
-  }, [showDebugAndPreviewPanel, showInputsPanel])
+    if (showDebugAndPreviewPanel && showInputsPanel) setCurrentTab('INPUT');
+  }, [showDebugAndPreviewPanel, showInputsPanel]);
 
   // useEffect(() => {
   //   if ((workflowRunningData?.result.status === WorkflowRunningStatus.Succeeded || workflowRunningData?.result.status === WorkflowRunningStatus.Failed) && !workflowRunningData.resultText && !workflowRunningData.result.files?.length)
@@ -48,23 +38,30 @@ const WorkflowPreview = () => {
   // }, [workflowRunningData])
 
   return (
-    <div className={`flex flex-col w-[400px] h-full bg-white rounded-[12px] workflow-preview-panel`}>
-      <div className='flex items-center justify-between px-[16px] py-[20px] text-[16px]/[24px] font-semibold text-[#1E293B]'>
+    <div
+      className={`workflow-preview-panel flex h-full w-[400px] flex-col rounded-[12px] bg-white`}
+    >
+      <div className="flex items-center justify-between px-[16px] py-[20px] text-[16px]/[24px] font-semibold text-[#1E293B]">
         {`运行测试${!workflowRunningData?.result.sequence_number ? '' : `_${workflowRunningData?.result.sequence_number}`}`}
-        <div className='p-1 cursor-pointer' onClick={() => handleCancelDebugAndPreviewPanel()}>
-          <RiCloseLine className='w-4 h-4 text-gray-500' />
+        <div
+          className="cursor-pointer p-1"
+          onClick={() => handleCancelDebugAndPreviewPanel()}
+        >
+          <RiCloseLine className="h-4 w-4 text-gray-500" />
         </div>
       </div>
-      <div className='grow relative flex flex-col'>
-        <div className='shrink-0 flex items-center mx-[16px] mb-[16px] border-b-[1px] border-[#E8E9EB]'>
+      <div className="relative flex grow flex-col">
+        <div className="mx-[16px] mb-[16px] flex shrink-0 items-center border-b-[1px] border-[#E8E9EB]">
           {showInputsPanel && (
             <div
               className={cn(
-                'mr-[24px] pb-[3px] border-b-2 border-transparent text-[14px] font-semibold leading-[24px] text-[#1E293B] cursor-pointer',
-                currentTab === 'INPUT' && '!border-[#007DFA]',
+                'mr-[24px] cursor-pointer border-b-2 border-transparent pb-[3px] text-[14px] font-semibold leading-[24px] text-[#1E293B]',
+                currentTab === 'INPUT' && '!border-[#007DFA]'
               )}
               onClick={() => switchTab('INPUT')}
-            >输入/输出</div>
+            >
+              输入/输出
+            </div>
           )}
           {/* <div
             className={cn(
@@ -92,21 +89,25 @@ const WorkflowPreview = () => {
           >{t('runLog.detail')}</div> */}
           <div
             className={cn(
-              'pb-[3px] border-b-2 border-transparent text-[14px] font-semibold leading-[24px] text-[#1E293B] cursor-pointer',
+              'cursor-pointer border-b-2 border-transparent pb-[3px] text-[14px] font-semibold leading-[24px] text-[#1E293B]',
               currentTab === 'TRACING' && '!border-[#007DFA]',
-              !workflowRunningData && 'opacity-30 !cursor-not-allowed',
+              !workflowRunningData && '!cursor-not-allowed opacity-30'
             )}
             onClick={() => {
-              if (!workflowRunningData)
-                return
-              switchTab('TRACING')
+              if (!workflowRunningData) return;
+              switchTab('TRACING');
             }}
-          >运行详情</div>
+          >
+            运行详情
+          </div>
         </div>
-        <div className={cn(
-          'grow bg-components-panel-bg h-0 overflow-y-auto rounded-b-[12px]',
-          (currentTab === 'RESULT' || currentTab === 'TRACING') && '!bg-[white]',
-        )}>
+        <div
+          className={cn(
+            'h-0 grow overflow-y-auto rounded-b-[12px] bg-components-panel-bg',
+            (currentTab === 'RESULT' || currentTab === 'TRACING') &&
+              '!bg-[white]'
+          )}
+        >
           {currentTab === 'INPUT' && showInputsPanel && (
             <InputsPanel onRun={() => switchTab('RESULT')} />
           )}
@@ -157,19 +158,20 @@ const WorkflowPreview = () => {
           )} */}
           {currentTab === 'TRACING' && (
             <TracingPanel
-              className='bg-[white]'
+              className="bg-[white]"
               list={workflowRunningData?.tracing || []}
             />
           )}
-          {currentTab === 'TRACING' && !workflowRunningData?.tracing?.length && (
-            <div className='flex h-full items-center justify-center !bg-background-section-burn'>
-              <Loading />
-            </div>
-          )}
+          {currentTab === 'TRACING' &&
+            !workflowRunningData?.tracing?.length && (
+              <div className="flex h-full items-center justify-center !bg-background-section-burn">
+                <Loading />
+              </div>
+            )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default memo(WorkflowPreview)
+export default memo(WorkflowPreview);

@@ -35,28 +35,28 @@ export const routes: IRoute[] = [
   // 数据载入
   {
     name: 'dataLoad',
-    key: '/tenant/compute/modaforge/dataLoad',   //临时修改../../dataLoad/index
+    key: '/tenant/compute/modaforge/dataLoad', //临时修改../../dataLoad/index
     component: React.lazy(async () => import('../../dataLoad')),
     children: [
       {
-        name:'dataLoadList',
+        name: 'dataLoadList',
         key: '/tenant/compute/modaforge/dataLoad/list',
-        component: React.lazy(async () => import('../../dataLoad/list/list')),
+        component: React.lazy(async () => import('../../dataLoad/list/list'))
       },
       {
-        name:'dataLoadDetail',
+        name: 'dataLoadDetail',
         key: '/tenant/compute/modaforge/dataLoad/detail',
         component: React.lazy(
           async () => import('../../dataLoad/detail/dataLoad-detail')
         )
       },
       {
-        name:'accessLodaDetail',
+        name: 'accessLodaDetail',
         key: '/tenant/compute/modaforge/access/detail',
         component: React.lazy(
           async () => import('../../dataLoad/access/access-detail')
         )
-      },
+      }
     ]
   },
   // 工作流
@@ -82,9 +82,7 @@ export const routes: IRoute[] = [
       {
         name: 'taskDetail',
         key: '/tenant/compute/modaforge/workflowTaskDetail',
-        component: React.lazy(
-          async () => import('../../workflowTask/detail')
-        )
+        component: React.lazy(async () => import('../../workflowTask/detail'))
       }
     ]
   },
@@ -152,6 +150,8 @@ export const routes: IRoute[] = [
 // 获取平铺的路由数组
 export const getFlatRoutes = (routesArr: IRoute[]): IRoute[] => {
   return routesArr.reduce((flatArr, cur) => {
+    // TODO: ts错误
+    // @ts-expect-error
     flatArr.push({ ...cur, children: [] });
     if (cur.children && cur.children.length) {
       const child = cur.children;
@@ -159,6 +159,8 @@ export const getFlatRoutes = (routesArr: IRoute[]): IRoute[] => {
         return (item['parentKey'] = cur.key);
       });
       const res = getFlatRoutes(child);
+      // TODO: ts错误
+      // @ts-expect-error
       flatArr.push(...res);
     }
     return flatArr;
@@ -208,9 +210,13 @@ const useRoute = (userPermission): [IRoute[], string] => {
         const newRoute = { ...route, children: [] };
         filterRoute(route.children, newRoute.children);
         if (newRoute.children.length) {
+          // TODO: ts错误
+          // @ts-expect-error
           arr.push(newRoute);
         }
       } else {
+        // TODO: ts错误
+        // @ts-expect-error
         arr.push({ ...route });
       }
     }

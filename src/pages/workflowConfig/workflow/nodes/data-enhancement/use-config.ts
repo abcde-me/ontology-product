@@ -7,7 +7,6 @@ import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-n
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
-
 const useConfig = (id: string, payload: CodeNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
 

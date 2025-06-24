@@ -1,21 +1,21 @@
-import type { FC } from 'react'
-import React, { useState } from 'react'
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import type { CodeNodeType } from './types';
-import type { NodeProps } from '@/pages/workflowConfig/workflow/types'
-import { RiArrowDownSFill } from '@remixicon/react'
-import { useStoreApi } from 'reactflow'
+import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
+import { RiArrowDownSFill } from '@remixicon/react';
+import { useStoreApi } from 'reactflow';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const { app_scenarios, enha_modle } = props.data;
   console.log(props.data, '=========enh');
-  const store = useStoreApi()
+  const store = useStoreApi();
   const appScenarios: { [key: number]: string } = {
     1: '按通用',
     2: '文本分类',
     3: '文本提取',
     4: '文本生成',
-    5: '多轮回答',
+    5: '多轮回答'
   };
   const enhaModle: { [key: number]: string } = {
     1: '模型1',
@@ -39,6 +39,6 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       </div>
     </div>
   );
-}
+};
 
-export default React.memo(Node)
+export default React.memo(Node);

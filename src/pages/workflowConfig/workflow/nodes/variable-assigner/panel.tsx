@@ -1,24 +1,23 @@
-import type { FC } from 'react'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import Field from '../_base/components/field'
-import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm'
-import useConfig from './use-config'
-import type { VariableAssignerNodeType } from './types'
-import VarGroupItem from './components/var-group-item'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types'
-import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split'
-import OutputVars, { VarItem } from '@/pages/workflowConfig/workflow/nodes/_base/components/output-vars'
-import Switch from '@/pages/workflowConfig/components/switch'
-import AddButton from '@/pages/workflowConfig/workflow/nodes/_base/components/add-button'
+import type { FC } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import Field from '../_base/components/field';
+import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
+import useConfig from './use-config';
+import type { VariableAssignerNodeType } from './types';
+import VarGroupItem from './components/var-group-item';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
+import OutputVars, {
+  VarItem
+} from '@/pages/workflowConfig/workflow/nodes/_base/components/output-vars';
+import Switch from '@/pages/workflowConfig/components/switch';
+import AddButton from '@/pages/workflowConfig/workflow/nodes/_base/components/add-button';
 
-const i18nPrefix = 'workflow.nodes.variableAssigner'
-const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
-  id,
-  data,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+const i18nPrefix = 'workflow.nodes.variableAssigner';
+const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({ id, data }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   const {
     readOnly,
@@ -34,28 +33,32 @@ const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
     hideRemoveVarConfirm,
     onRemoveVarConfirm,
     getAvailableVars,
-    filterVar,
-  } = useConfig(id, data)
+    filterVar
+  } = useConfig(id, data);
 
   return (
-    <div className='mt-2'>
-      <div className='px-4 pb-4 space-y-4'>
-        {!isEnableGroup
-          ? (
-            <VarGroupItem
-              readOnly={readOnly}
-              nodeId={id}
-              payload={{
-                output_type: inputs.output_type,
-                variables: inputs.variables,
-              }}
-              onChange={handleListOrTypeChange}
-              groupEnabled={false}
-              availableVars={getAvailableVars(id, 'target', filterVar(inputs.output_type), true)}
-            />
-          )
-          : (<div>
-            <div className='space-y-2'>
+    <div className="mt-2">
+      <div className="space-y-4 px-4 pb-4">
+        {!isEnableGroup ? (
+          <VarGroupItem
+            readOnly={readOnly}
+            nodeId={id}
+            payload={{
+              output_type: inputs.output_type,
+              variables: inputs.variables
+            }}
+            onChange={handleListOrTypeChange}
+            groupEnabled={false}
+            availableVars={getAvailableVars(
+              id,
+              'target',
+              filterVar(inputs.output_type),
+              true
+            )}
+          />
+        ) : (
+          <div>
+            <div className="space-y-2">
               {inputs.advanced_settings?.groups.map((item, index) => (
                 <div key={item.groupId}>
                   <VarGroupItem
@@ -64,33 +67,42 @@ const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
                     payload={item}
                     onChange={handleListOrTypeChangeInGroup(item.groupId)}
                     groupEnabled
-                    canRemove={!readOnly && inputs.advanced_settings?.groups.length > 1}
+                    canRemove={
+                      !readOnly && inputs.advanced_settings?.groups.length > 1
+                    }
                     onRemove={handleGroupRemoved(item.groupId)}
                     onGroupNameChange={handleVarGroupNameChange(item.groupId)}
-                    availableVars={getAvailableVars(id, item.groupId, filterVar(item.output_type), true)}
+                    availableVars={getAvailableVars(
+                      id,
+                      item.groupId,
+                      filterVar(item.output_type),
+                      true
+                    )}
                   />
-                  {index !== inputs.advanced_settings?.groups.length - 1 && <Split className='my-4' />}
+                  {index !== inputs.advanced_settings?.groups.length - 1 && (
+                    <Split className="my-4" />
+                  )}
                 </div>
-
               ))}
             </div>
             <AddButton
-              className='mt-2'
+              className="mt-2"
               text={t(`${i18nPrefix}.addGroup`)}
               onClick={handleAddGroup}
             />
-          </div>)}
+          </div>
+        )}
       </div>
       <Split />
       <div className={cn('px-4 pt-4', isEnableGroup ? 'pb-4' : 'pb-2')}>
         <Field
           title={t(`${i18nPrefix}.aggregationGroup`)}
-          tooltip={t(`${i18nPrefix}.aggregationGroupTip`)!}
+          tooltip={t(`${i18nPrefix}.aggregationGroupTip`)}
           operations={
             <Switch
               defaultValue={isEnableGroup}
               onChange={handleGroupEnabledChange}
-              size='md'
+              size="md"
               disabled={readOnly}
             />
           }
@@ -99,7 +111,7 @@ const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
       {isEnableGroup && (
         <>
           <Split />
-          <div className='px-4 pt-4 pb-2'>
+          <div className="px-4 pb-2 pt-4">
             <OutputVars>
               <>
                 {inputs.advanced_settings?.groups.map((item, index) => (
@@ -108,7 +120,7 @@ const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
                     name={`${item.group_name}.output`}
                     type={item.output_type}
                     description={t(`${i18nPrefix}.outputVars.varDescribe`, {
-                      groupName: item.group_name,
+                      groupName: item.group_name
                     })}
                   />
                 ))}
@@ -123,7 +135,7 @@ const Panel: FC<NodePanelProps<VariableAssignerNodeType>> = ({
         onConfirm={onRemoveVarConfirm}
       />
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(Panel)
+export default React.memo(Panel);

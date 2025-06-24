@@ -1,95 +1,101 @@
-import { useCallback, useEffect, useState } from 'react'
-import produce from 'immer'
-import useVarList from '../_base/hooks/use-var-list'
-import useOutputVarList from '../_base/hooks/use-output-var-list'
-import { BlockEnum, VarType } from '../../types'
-import type { Var, Variable } from '../../types'
-import { useStore } from '../../store'
+import { useCallback, useEffect, useState } from 'react';
+import produce from 'immer';
+import useVarList from '../_base/hooks/use-var-list';
+import useOutputVarList from '../_base/hooks/use-output-var-list';
+import { BlockEnum, VarType } from '../../types';
+import type { Var, Variable } from '../../types';
+import { useStore } from '../../store';
 import type { CodeNodeType, OutputVar, CleaningNodeType } from './types';
-import { CodeLanguage } from './types'
-import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud'
-import useOneStepRun from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-one-step-run'
+import { CodeLanguage } from './types';
+import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
+import useOneStepRun from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-one-step-run';
 // import { fetchNodeDefault } from '@/service/workflow'
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store'
-import {
-  useNodesReadOnly,
-} from '@/pages/workflowConfig/workflow/hooks'
+import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
-import jsConfigJson from '@/pages/workflowConfig/mockData/jsDefaultConfig.json'
-import pythonConfigJson from '@/pages/workflowConfig/mockData/pythonDefaultConfig.json'
+import jsConfigJson from '@/pages/workflowConfig/mockData/jsDefaultConfig.json';
+import pythonConfigJson from '@/pages/workflowConfig/mockData/pythonDefaultConfig.json';
 
 const useConfig = (id: string, payload: CodeNodeType) => {
-  const { nodesReadOnly: readOnly } = useNodesReadOnly()
+  const { nodesReadOnly: readOnly } = useNodesReadOnly();
 
-  const appId = useAppStore.getState().appDetail?.id
+  const appId = useAppStore.getState().appDetail?.id;
 
-  const [allLanguageDefault, setAllLanguageDefault] = useState<Record<CodeLanguage, CodeNodeType> | null>(null)
+  const [allLanguageDefault, setAllLanguageDefault] = useState<Record<
+    CodeLanguage,
+    CodeNodeType
+  > | null>(null);
   useEffect(() => {
     if (appId) {
-      (async () => {
-        console.warn('API NOT IMPLEMENTED', 'fetchNodeDefault')
-        const javaScriptConfig = jsConfigJson.config as any
-        const pythonConfig = pythonConfigJson.config as any
+      (() => {
+        console.warn('API NOT IMPLEMENTED', 'fetchNodeDefault');
+        const javaScriptConfig = jsConfigJson.config as any;
+        const pythonConfig = pythonConfigJson.config as any;
         // const { config: javaScriptConfig } = await fetchNodeDefault(appId, BlockEnum.Code, { code_language: CodeLanguage.javascript }) as any
         // const { config: pythonConfig } = await fetchNodeDefault(appId, BlockEnum.Code, { code_language: CodeLanguage.python3 }) as any
         setAllLanguageDefault({
           [CodeLanguage.javascript]: javaScriptConfig as CodeNodeType,
-          [CodeLanguage.python3]: pythonConfig as CodeNodeType,
-        } as any)
-      })()
+          [CodeLanguage.python3]: pythonConfig as CodeNodeType
+        } as any);
+      })();
     }
-  }, [appId])
+  }, [appId]);
 
-  const defaultConfig = useStore(s => s.nodesDefaultConfigs)[payload.type]
-  const { inputs, setInputs } = useNodeCrud<CodeNodeType>(id, payload)
+  const defaultConfig = useStore((s) => s.nodesDefaultConfigs)[payload.type];
+  const { inputs, setInputs } = useNodeCrud<CodeNodeType>(id, payload);
   const { handleVarListChange, handleAddVariable } = useVarList<CodeNodeType>({
     inputs,
-    setInputs,
-  })
+    setInputs
+  });
 
-  const [outputKeyOrders, setOutputKeyOrders] = useState<string[]>([])
+  const [outputKeyOrders, setOutputKeyOrders] = useState<string[]>([]);
   const syncOutputKeyOrders = useCallback((outputs: OutputVar) => {
-    setOutputKeyOrders(Object.keys(outputs))
-  }, [])
+    setOutputKeyOrders(Object.keys(outputs));
+  }, []);
   useEffect(() => {
     if (inputs.code) {
       if (inputs.outputs && Object.keys(inputs.outputs).length > 0)
-        syncOutputKeyOrders(inputs.outputs)
+        syncOutputKeyOrders(inputs.outputs);
 
-      return
+      return;
     }
 
-    const isReady = defaultConfig && Object.keys(defaultConfig).length > 0
+    const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
     if (isReady) {
       setInputs({
         ...inputs,
-        ...defaultConfig,
-      })
-      syncOutputKeyOrders(defaultConfig.outputs)
+        ...defaultConfig
+      });
+      syncOutputKeyOrders(defaultConfig.outputs);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultConfig])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultConfig]);
 
-  const handleCodeChange = useCallback((code: string) => {
-    const newInputs = produce(inputs, (draft) => {
-      draft.code = code
-    })
-    setInputs(newInputs)
-  }, [inputs, setInputs])
+  const handleCodeChange = useCallback(
+    (code: string) => {
+      const newInputs = produce(inputs, (draft) => {
+        draft.code = code;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
 
-  const handleCodeLanguageChange = useCallback((codeLanguage: CodeLanguage) => {
-    const currDefaultConfig = allLanguageDefault?.[codeLanguage]
+  const handleCodeLanguageChange = useCallback(
+    (codeLanguage: CodeLanguage) => {
+      const currDefaultConfig = allLanguageDefault?.[codeLanguage];
 
-    const newInputs = produce(inputs, (draft) => {
-      draft.code_language = codeLanguage
-      if (!currDefaultConfig)
-        return
-      draft.code = currDefaultConfig.code
-      draft.variables = currDefaultConfig.variables
-      draft.outputs = currDefaultConfig.outputs
-    })
-    setInputs(newInputs)
-  }, [allLanguageDefault, inputs, setInputs])
+      const newInputs = produce(inputs, (draft) => {
+        draft.code_language = codeLanguage;
+        if (!currDefaultConfig) return;
+        draft.code = currDefaultConfig.code;
+        draft.variables = currDefaultConfig.variables;
+        draft.outputs = currDefaultConfig.outputs;
+      });
+      setInputs(newInputs);
+    },
+    [allLanguageDefault, inputs, setInputs]
+  );
 
   const {
     handleVarsChange,
@@ -97,18 +103,27 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     handleRemoveVariable,
     isShowRemoveVarConfirm,
     hideRemoveVarConfirm,
-    onRemoveVarConfirm,
+    onRemoveVarConfirm
   } = useOutputVarList<CodeNodeType>({
     id,
     inputs,
     setInputs,
     outputKeyOrders,
-    onOutputKeyOrdersChange: setOutputKeyOrders,
-  })
+    onOutputKeyOrdersChange: setOutputKeyOrders
+  });
 
   const filterVar = useCallback((varPayload: Var) => {
-    return [VarType.string, VarType.number, VarType.secret, VarType.object, VarType.array, VarType.arrayNumber, VarType.arrayString, VarType.arrayObject].includes(varPayload.type)
-  }, [])
+    return [
+      VarType.string,
+      VarType.number,
+      VarType.secret,
+      VarType.object,
+      VarType.array,
+      VarType.arrayNumber,
+      VarType.arrayString,
+      VarType.arrayObject
+    ].includes(varPayload.type);
+  }, []);
 
   // single run
   const {
@@ -121,47 +136,51 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     handleStop,
     runInputData,
     setRunInputData,
-    runResult,
+    runResult
   } = useOneStepRun<CodeNodeType>({
     id,
     data: inputs,
-    defaultRunInputData: {},
-  })
+    defaultRunInputData: {}
+  });
 
-  const varInputs = toVarInputs(inputs.variables)
+  const varInputs = toVarInputs(inputs.variables);
 
   const inputVarValues = (() => {
-    const vars: Record<string, any> = {}
-    Object.keys(runInputData)
-      .forEach((key) => {
-        vars[key] = runInputData[key]
-      })
-    return vars
-  })()
+    const vars: Record<string, any> = {};
+    Object.keys(runInputData).forEach((key) => {
+      vars[key] = runInputData[key];
+    });
+    return vars;
+  })();
 
-  const setInputVarValues = useCallback((newPayload: Record<string, any>) => {
-    setRunInputData(newPayload)
-  }, [setRunInputData])
-  const handleCodeAndVarsChange = useCallback((code: string, inputVariables: Variable[], outputVariables: OutputVar) => {
-    const newInputs = produce(inputs, (draft) => {
-      draft.code = code
-      draft.variables = inputVariables
-      draft.outputs = outputVariables
-    })
-    setInputs(newInputs)
-    syncOutputKeyOrders(outputVariables)
-  }, [inputs, setInputs, syncOutputKeyOrders])
+  const setInputVarValues = useCallback(
+    (newPayload: Record<string, any>) => {
+      setRunInputData(newPayload);
+    },
+    [setRunInputData]
+  );
+  const handleCodeAndVarsChange = useCallback(
+    (code: string, inputVariables: Variable[], outputVariables: OutputVar) => {
+      const newInputs = produce(inputs, (draft) => {
+        draft.code = code;
+        draft.variables = inputVariables;
+        draft.outputs = outputVariables;
+      });
+      setInputs(newInputs);
+      syncOutputKeyOrders(outputVariables);
+    },
+    [inputs, setInputs, syncOutputKeyOrders]
+  );
 
-
-    const updateInputs = useCallback(
-      (payload: CleaningNodeType) => {
-        const newInputs = produce(inputs, (draft: any) => {
-          draft.data_standardization = payload.data_standardization;
-        });
-        setInputs(newInputs);
-      },
-      [inputs, setInputs]
-    );
+  const updateInputs = useCallback(
+    (payload: CleaningNodeType) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.data_standardization = payload.data_standardization;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
 
   return {
     readOnly,
@@ -190,8 +209,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     setInputVarValues,
     runResult,
     handleCodeAndVarsChange,
-    updateInputs,
+    updateInputs
   };
-}
+};
 
-export default useConfig
+export default useConfig;

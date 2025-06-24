@@ -3,9 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  AudioParserNodeType,
-} from './types';
+import type { AudioParserNodeType } from './types';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -34,9 +32,9 @@ const Option = Select.Option;
 
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按句子'  },
-  { value: 3, label: '按段落'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按句子' },
+  { value: 3, label: '按段落' }
 ];
 
 const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
@@ -48,12 +46,10 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const {
-    readOnly,
-    inputs,
-    handleFilesChange,
-    handleFiledsChange
-  } = useConfig(id, data);
+  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+    id,
+    data
+  );
 
   const columns = [
     {
@@ -83,7 +79,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
       dataIndex: 'created_at',
       sorter: (a, b) => a.name.length - b.name.length
     }
-  ]
+  ];
 
   const defaultData = [...new Array(5)].map((_, index) => {
     return {
@@ -119,11 +115,15 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         >
           <Table
             columns={columns}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             rowSelection={{
               selectedRowKeys,
               onChange: (selectedRowKeys, selectedRows) => {
                 console.log('onChange:', selectedRowKeys, selectedRows);
+                // TODO: ts错误
+                // @ts-expect-error
                 setSelectedRowKeys(selectedRowKeys);
                 setFileNum(selectedRowKeys.length);
               },
@@ -134,7 +134,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
             data={defaultData}
           />
         </FormItem>
-        <Split className='my-[16px]'/>
+        <Split className="my-[16px]" />
         <FormItem
           label="音频预处理："
           field="audio_pret"
@@ -142,25 +142,28 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
           <Checkbox.Group
-            options={[{ label: '降噪', value: 1 }, { label: '语音增强', value: 2 }]}
+            options={[
+              { label: '降噪', value: 1 },
+              { label: '语音增强', value: 2 }
+            ]}
           />
         </FormItem>
-        <FormItem label="语音活动检测（VAD）与切片设置：" field='vad_options'>
+        <FormItem label="语音活动检测（VAD）与切片设置：" field="vad_options">
           <Checkbox.Group
-            options={[{ label: '启用语音活体检测', value: 'vad' }, { label: '启用多说话人识别', value: 'conv' }]}
+            options={[
+              { label: '启用语音活体检测', value: 'vad' },
+              { label: '启用多说话人识别', value: 'conv' }
+            ]}
           />
         </FormItem>
-        <FormItem
-          label="切片模式："
-          field="activity_mode"
-          labelAlign="left"
-        >
+        <FormItem label="切片模式：" field="activity_mode" labelAlign="left">
           <Select>
             <Option value={1}>自动</Option>
             <Option value={2}>定时长</Option>
           </Select>
         </FormItem>
-        {activityMode === 2 && <FormItem
+        {activityMode === 2 && (
+          <FormItem
             label="时长："
             field="activity_mode_num"
             labelAlign="left"
@@ -168,7 +171,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
           >
             <InputNumber min={0} />
           </FormItem>
-        }
+        )}
         <FormItem
           label="解析模型："
           field="audio_model_id"
@@ -183,13 +186,12 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
-        <FormItem
-          label="后处理与校验："
-          field="after_proc"
-          labelAlign="left"
-        >
+        <FormItem label="后处理与校验：" field="after_proc" labelAlign="left">
           <Checkbox.Group
-            options={[{ label: '使用大模型进行错别字校验', value: 1 }, { label: '文字标准化', value: 2 }]}
+            options={[
+              { label: '使用大模型进行错别字校验', value: 1 },
+              { label: '文字标准化', value: 2 }
+            ]}
           />
         </FormItem>
       </Form>

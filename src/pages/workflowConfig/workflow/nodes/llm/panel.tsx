@@ -1,34 +1,36 @@
-import { FC, useCallback } from 'react'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import MemoryConfig from '../_base/components/memory-config'
-import VarReferencePicker from '../_base/components/variable/var-reference-picker'
-import ConfigVision from '../_base/components/config-vision'
-import useConfig from './use-config'
-import { findVariableWhenOnLLMVision } from '../utils'
-import type { LLMNodeType } from './types'
-import ConfigPrompt from './components/config-prompt'
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list'
-import AddButton2 from '@/pages/workflowConfig/components/button/add-button'
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field'
-import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split'
-import ModelParameterModal from '@/pages/workflowConfig/app/model-parameter-modal'
-import OutputVars, { VarItem } from '@/pages/workflowConfig/workflow/nodes/_base/components/output-vars'
-import { InputVarType, type NodePanelProps } from '@/pages/workflowConfig/workflow/types'
-import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form'
-import type { Props as FormProps } from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form/form'
-import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel'
-import Tooltip from '@/pages/workflowConfig/components/tooltip'
-import Editor from '@/pages/workflowConfig/workflow/nodes/_base/components/prompt/editor'
-import { aiGenerate } from '@/api/appsV2'
+import { FC, useCallback } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import MemoryConfig from '../_base/components/memory-config';
+import VarReferencePicker from '../_base/components/variable/var-reference-picker';
+import ConfigVision from '../_base/components/config-vision';
+import useConfig from './use-config';
+import { findVariableWhenOnLLMVision } from '../utils';
+import type { LLMNodeType } from './types';
+import ConfigPrompt from './components/config-prompt';
+import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
+import AddButton2 from '@/pages/workflowConfig/components/button/add-button';
+import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field';
+import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
+import ModelParameterModal from '@/pages/workflowConfig/app/model-parameter-modal';
+import OutputVars, {
+  VarItem
+} from '@/pages/workflowConfig/workflow/nodes/_base/components/output-vars';
+import {
+  InputVarType,
+  type NodePanelProps
+} from '@/pages/workflowConfig/workflow/types';
+import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
+import type { Props as FormProps } from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form/form';
+import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
+import Tooltip from '@/pages/workflowConfig/components/tooltip';
+import Editor from '@/pages/workflowConfig/workflow/nodes/_base/components/prompt/editor';
+import { aiGenerate } from '@/api/appsV2';
 
-const i18nPrefix = 'workflow.nodes.llm'
+const i18nPrefix = 'workflow.nodes.llm';
 
-const Panel: FC<NodePanelProps<LLMNodeType>> = ({
-  id,
-  data,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   const {
     readOnly,
@@ -69,61 +71,69 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
     handleStop,
     varInputs,
     runResult,
-    filterJinjia2InputVar,
-  } = useConfig(id, data)
+    filterJinjia2InputVar
+  } = useConfig(id, data);
 
-  const model = inputs.model
+  const model = inputs.model;
 
   const singleRunForms = (() => {
-    const forms: FormProps[] = []
+    const forms: FormProps[] = [];
 
     if (varInputs.length > 0) {
-      forms.push(
-        {
-          label: t(`${i18nPrefix}.singleRun.variable`)!,
-          inputs: varInputs,
-          values: inputVarValues,
-          onChange: setInputVarValues,
-        },
-      )
+      forms.push({
+        label: t(`${i18nPrefix}.singleRun.variable`)!,
+        inputs: varInputs,
+        values: inputVarValues,
+        onChange: setInputVarValues
+      });
     }
 
-    if (inputs.context?.variable_selector && inputs.context?.variable_selector.length > 0) {
-      forms.push(
-        {
-          label: t(`${i18nPrefix}.context`)!,
-          inputs: [{
+    if (
+      inputs.context?.variable_selector &&
+      inputs.context?.variable_selector.length > 0
+    ) {
+      forms.push({
+        label: t(`${i18nPrefix}.context`)!,
+        inputs: [
+          {
             label: '',
             variable: '#context#',
             type: InputVarType.contexts,
-            required: false,
-          }],
-          values: { '#context#': contexts },
-          onChange: keyValue => setContexts((keyValue as any)['#context#']),
-        },
-      )
+            required: false
+          }
+        ],
+        values: { '#context#': contexts },
+        onChange: (keyValue) => setContexts((keyValue as any)['#context#'])
+      });
     }
 
-    if (isVisionModel && data.vision.enabled && data.vision.configs?.variable_selector) {
-      const currentVariable = findVariableWhenOnLLMVision(data.vision.configs.variable_selector, availableVars)
+    if (
+      isVisionModel &&
+      data.vision.enabled &&
+      data.vision.configs?.variable_selector
+    ) {
+      const currentVariable = findVariableWhenOnLLMVision(
+        data.vision.configs.variable_selector,
+        availableVars
+      );
 
-      forms.push(
-        {
-          label: t(`${i18nPrefix}.vision`)!,
-          inputs: [{
+      forms.push({
+        label: t(`${i18nPrefix}.vision`)!,
+        inputs: [
+          {
             label: currentVariable?.variable as any,
             variable: '#files#',
             type: currentVariable?.formType as any,
-            required: false,
-          }],
-          values: { '#files#': visionFiles },
-          onChange: keyValue => setVisionFiles((keyValue as any)['#files#']),
-        },
-      )
+            required: false
+          }
+        ],
+        values: { '#files#': visionFiles },
+        onChange: (keyValue) => setVisionFiles((keyValue as any)['#files#'])
+      });
     }
 
-    return forms
-  })()
+    return forms;
+  })();
 
   const generatePrompt = useCallback(async () => {
     const result = await aiGenerate({
@@ -132,9 +142,9 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
       type: 'pre_prompt',
       pre_prompt: data.prompt_template[0].text,
       stream: false
-    })
-    return result.data
-  }, [data.title, data.desc, data.prompt_template[0].text])
+    });
+    return result.data;
+  }, [data.title, data.desc, data.prompt_template[0].text]);
 
   return (
     // <div className='mt-2'>
@@ -312,10 +322,10 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
     //     />
     //   )}
     // </div>
-    <div className='mt-[16px] wk-node-panel-content llm-panel-content'>
-      <div className='mb-[8px] title-txt'>模型</div>
+    <div className="wk-node-panel-content llm-panel-content mt-[16px]">
+      <div className="title-txt mb-[8px]">模型</div>
       <ModelParameterModal
-        popupClassName='!w-full'
+        popupClassName="!w-full"
         isInWorkflow
         isAdvancedMode={false}
         mode={model?.mode}
@@ -330,13 +340,13 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
         showMode={false}
         showFeatures={false}
       />
-      <Split className='my-[16px]' />
-      <div className='mb-[16px] title-txt flex items-center'>
+      <Split className="my-[16px]" />
+      <div className="title-txt mb-[16px] flex items-center">
         <span>{t(`${i18nPrefix}.context`)}</span>
         <Tooltip
-          popupContent={t(`${i18nPrefix}.contextTooltip`)!}
-          popupClassName='ml-1'
-          triggerClassName='w-4 h-4 ml-1'
+          popupContent={t(`${i18nPrefix}.contextTooltip`)}
+          popupClassName="ml-1"
+          triggerClassName="w-4 h-4 ml-1"
         />
       </div>
       <div>
@@ -349,10 +359,12 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
           filterVar={filterVar}
         />
         {shouldShowContextTip && (
-          <div className='leading-[18px] text-xs font-normal text-[#DC6803]'>{t(`${i18nPrefix}.notSetContextInPromptTip`)}</div>
+          <div className="text-xs font-normal leading-[18px] text-[#DC6803]">
+            {t(`${i18nPrefix}.notSetContextInPromptTip`)}
+          </div>
         )}
       </div>
-      <Split className='my-[16px]' />
+      <Split className="my-[16px]" />
       {/* <div className='mb-[8px] title-txt'>提示词</div> */}
       <ConfigPrompt
         readOnly={readOnly}
@@ -369,15 +381,15 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({
         modelConfig={model}
         promptGenerator={generatePrompt}
       />
-      <Split className='my-[16px]' />
-      <div className='mb-[8px] title-txt'>输出</div>
+      <Split className="my-[16px]" />
+      <div className="title-txt mb-[8px]">输出</div>
       <VarItem
-        name='text'
-        type='string'
+        name="text"
+        type="string"
         description={t(`${i18nPrefix}.outputVars.output`)}
       />
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(Panel)
+export default React.memo(Panel);

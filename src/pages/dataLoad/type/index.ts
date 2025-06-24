@@ -1,41 +1,40 @@
-
-interface cycle_text{
-    minute:string
-    hour:string
-    data:string|string[]
-    month:string
-    week:string |string[]
+interface cycle_text {
+  minute: string;
+  hour: string;
+  data: string | string[];
+  month: string;
+  week: string | string[];
 }
-interface run_cycle{
-    type:string
-    cycle_text:cycle_text
+interface run_cycle {
+  type: string;
+  cycle_text: cycle_text;
 }
-export interface dataLodaAddForm{
-    job_name:string
-    connector_id:string
-    source_type:'hdfs'|'s3'
-    run_cycle:run_cycle
-    dest_path:string    
-    creator:string
+export interface dataLodaAddForm {
+  job_name: string;
+  connector_id: string;
+  source_type: 'hdfs' | 's3';
+  run_cycle: run_cycle;
+  dest_path: string;
+  creator: string;
 }
 export enum TaskStatus {
-  Running = "running",
-  Stopped = "stopped"
+  Running = 'running',
+  Stopped = 'stopped'
 }
- 
+
 export enum ExecutionStatus {
-  Running = "running",
-  Failed = "failed"
+  Running = 'running',
+  Failed = 'failed'
 }
- 
+
 export enum SourceType {
-  HDFS = "HDFS",
-  S3 = "S3"
+  HDFS = 'HDFS',
+  S3 = 'S3'
 }
- 
+
 export enum LoadType {
-  Cron = "cron",
-  Once = "once"
+  Cron = 'cron',
+  Once = 'once'
 }
 // 连接器类型
 interface Connector {
@@ -43,7 +42,7 @@ interface Connector {
   name: string;
   type: SourceType; // 使用枚举类型
 }
- 
+
 // 任务信息类型
 interface TaskInfo {
   id: number;
@@ -58,14 +57,14 @@ interface TaskInfo {
   last_run_time: string;
   creator: string;
 }
- 
+
 // 执行详情类型
 interface ExecutionDetails {
   success_files: number;
   failed_files: number;
   error_message: string | null;
 }
- 
+
 // 执行历史记录类型
 interface ExecutionHistory {
   execution_id: number;
@@ -75,7 +74,7 @@ interface ExecutionHistory {
   end_time: string;
   details: ExecutionDetails;
 }
- 
+
 // 数据类型
 export interface ApiResponse {
   task_info: TaskInfo;

@@ -1,89 +1,89 @@
 .date-cleaning-panel {
-    .arco-checkbox-text{
-        white-space: nowrap;
-    }
-    .arco-checkbox-group{
-        display: flex;
-    }
-    .arco-form-inline .arco-form-item{
-        width: auto;
-        margin: 0;
-    }
-    .arco-form-label-item>label {
-        display: flex;
-    }
-    .arco-checkbox-group .arco-checkbox {
-        display: flex;
-        align-items: center;
-    }
-    .file-box {
-        border: 1px solid #CBD5E1;
-        padding: 16px;
-        border-radius: 5px;
-        margin-bottom: 12px;
-        width: 100%;
-    }
+  .arco-checkbox-text {
+    white-space: nowrap;
+  }
+  .arco-checkbox-group {
+    display: flex;
+  }
+  .arco-form-inline .arco-form-item {
+    width: auto;
+    margin: 0;
+  }
+  .arco-form-label-item > label {
+    display: flex;
+  }
+  .arco-checkbox-group .arco-checkbox {
+    display: flex;
+    align-items: center;
+  }
+  .file-box {
+    border: 1px solid #cbd5e1;
+    padding: 16px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
 
-    .date-desc {
-        color: #6E7B8D;
-        font-size: 14px;
-        line-height: 22px;
-        margin: 12px 0;
-    }
+  .date-desc {
+    color: #6e7b8d;
+    font-size: 14px;
+    line-height: 22px;
+    margin: 12px 0;
+  }
 
-    .date-switch {
-        display: flex;
-        align-items: center;
+  .date-switch {
+    display: flex;
+    align-items: center;
 
-        .date-switch-text {
-            font-size: 14px;
-            line-height: 22px;
-            margin-left: 8px;
-            color: #0F172A;
-            display: block;
-        }
+    .date-switch-text {
+      font-size: 14px;
+      line-height: 22px;
+      margin-left: 8px;
+      color: #0f172a;
+      display: block;
     }
+  }
 
-    .date-option {
-        display: flex;
-        align-items: center;
-    }
-    .date-option-desc{
-        display: inline-block;
-        margin-right: 16px;
-        color: #0F172A;
-        line-height: 22px;
-    }
-    .data-dec-text{
-        color: #6E7B8D;
-        font-size: 14px;
-        line-height: 22px;
-    }
-    .info-before{
-        margin: 12px 0;
-    }
+  .date-option {
+    display: flex;
+    align-items: center;
+  }
+  .date-option-desc {
+    display: inline-block;
+    margin-right: 16px;
+    color: #0f172a;
+    line-height: 22px;
+  }
+  .data-dec-text {
+    color: #6e7b8d;
+    font-size: 14px;
+    line-height: 22px;
+  }
+  .info-before {
+    margin: 12px 0;
+  }
 }
-.data-cleaning-node{
-    background-color: #F9F9FB;
-    border-radius: 10px;
-    margin: 12px 16px;
-    .node-title{
-        margin: 8px 8px 4px 8px;
-        display: inline-block;
-    }
-    .node-item-content{
-        margin-left: 8px;
-        display: flex;
-        flex-wrap: wrap;
-        margin-bottom: 8px;
-    }
-    .node-item{
-        background-color: #E2E8F0;
-        border-radius: 3px;
-        margin-right: 4px;
-        margin-bottom: 4px;
-        padding: 0 4px;
-        display: inline-block;
-        white-space: nowrap;
-    }
+.data-cleaning-node {
+  background-color: #f9f9fb;
+  border-radius: 10px;
+  margin: 12px 16px;
+  .node-title {
+    margin: 8px 8px 4px 8px;
+    display: inline-block;
+  }
+  .node-item-content {
+    margin-left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .node-item {
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    padding: 0 4px;
+    display: inline-block;
+    white-space: nowrap;
+  }
 }

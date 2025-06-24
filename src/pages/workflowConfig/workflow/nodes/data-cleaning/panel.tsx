@@ -49,13 +49,10 @@ import {
 import './date-cleaning.scss';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const {
-    readOnly,
-    inputs,
-    updateInputs,
-    setInputVarValues
-  } = useConfig(id, data);
-
+  const { readOnly, inputs, updateInputs, setInputVarValues } = useConfig(
+    id,
+    data
+  );
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -68,7 +65,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [specialCharFilter, setSpecialCharFilter] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [upperLowerStatus, setUpperLowerStatus] = useState(true);
-  
+
   const [dataStandardizationSwitch, setDataStandardizationSwitch] =
     useState(false);
   const [SensitiveSwitch, setSensitiveSwitch] = useState(false);
@@ -78,7 +75,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [imputationSwitch, setImputationSwitch] = useState(false);
   const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
   const dateCleaning = {
-    standard: [''],
+    standard: ['']
   };
 
   const sliderOnChange = (value: any) => {

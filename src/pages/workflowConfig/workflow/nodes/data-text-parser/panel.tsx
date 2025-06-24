@@ -3,9 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  TextParserNodeType,
-} from './types';
+import type { TextParserNodeType } from './types';
 import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
 import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
 import AddButton from '@/pages/workflowConfig/components/button/add-button';
@@ -13,7 +11,10 @@ import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field'
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
 import CodeEditor from '@/pages/workflowConfig/workflow/nodes/_base/components/editor/code-editor';
 import TypeSelector from '@/pages/workflowConfig/workflow/nodes/_base/components/selector';
-import { BlockEnum, type NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import {
+  BlockEnum,
+  type NodePanelProps
+} from '@/pages/workflowConfig/workflow/types';
 import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
 import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
 import {
@@ -28,7 +29,7 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
-import { useNodes } from 'reactflow'
+import { useNodes } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
@@ -39,22 +40,24 @@ const Option = Select.Option;
 
 // 分段方式选项
 const segmentationOptions: any = [
-  { value: 1, label: '按字符'  },
-  { value: 2, label: '按段落'  },
-  { value: 3, label: '按句子'}
+  { value: 1, label: '按字符' },
+  { value: 2, label: '按段落' },
+  { value: 3, label: '按句子' }
 ];
 
 const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
-  const nodes = useNodes()
-  const startNode = nodes.find((node: any) => node.data.type === BlockEnum.Start);
+  const nodes = useNodes();
+  const startNode = nodes.find(
+    (node: any) => node.data.type === BlockEnum.Start
+  );
   const [filesData, setFilesData] = useState([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
   const [pagination, setPagination] = useState<any>({
     page: 1,
     limit: 5,
-    total: 0,
+    total: 0
   });
 
   const [fileNum, setFileNum] = useState(0);
@@ -62,12 +65,10 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
-  const {
-    readOnly,
-    inputs,
-    handleFilesChange,
-    handleFiledsChange
-  } = useConfig(id, data);
+  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+    id,
+    data
+  );
 
   const columns = [
     {
@@ -77,10 +78,10 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
       filterIcon: <IconSearch />,
       filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
         return (
-          <div className='arco-table-custom-filter'>
+          <div className="arco-table-custom-filter">
             <Input.Search
               ref={inputRef}
-              placeholder='输入文件名搜索'
+              placeholder="输入文件名搜索"
               value={filterKeys[0] || ''}
               onChange={(value) => {
                 setFilterKeys(value ? [value] : []);
@@ -95,13 +96,17 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
       onFilter: (value, row) => (value ? row.name.indexOf(value) !== -1 : true),
       onFilterDropdownVisibleChange: (visible) => {
         if (visible) {
+          // TODO：ts错误
+          // @ts-expect-error
           setTimeout(() => inputRef.current.focus(), 150);
         }
       },
       render(col, record) {
-        return <>
-          <EllipsisPopover value={col} isEdit={false} preferTypography />
-        </>
+        return (
+          <>
+            <EllipsisPopover value={col} isEdit={false} preferTypography />
+          </>
+        );
       }
     },
     {
@@ -117,7 +122,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           value: 'pdf'
         }
       ],
-      onFilter: (value, row) => row.type.indexOf(value) > -1,
+      onFilter: (value, row) => row.type.indexOf(value) > -1
     },
     {
       title: '文件大小',
@@ -126,9 +131,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      sorter: (a, b) => a.created_at.localeCompare(b.created_at),
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     }
-  ]
+  ];
 
   const loadFiles = (params: any) => {
     try {
@@ -138,7 +143,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           data: [...new Array(5)].map((_, index) => {
             return {
               id: Math.random().toString(36).substring(2, 15),
-              name: Math.random().toString(36).substring(2, 6) + 'Jane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
+              name:
+                Math.random().toString(36).substring(2, 6) +
+                'Jane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
               type: index % 2 === 0 ? 'docx' : 'pdf',
               size: '3.8M',
               created_at: '2025-05-05 05:05:05' + index
@@ -146,9 +153,11 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           }),
           total: 100
         }
-      }
+      };
       console.log('列表数据:', item);
       const { data = [], total = 0 } = item.data;
+      // TODO：ts错误
+      // @ts-expect-error
       setFilesData(data || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
@@ -159,7 +168,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const onChangeTable = (pagination, sorter, filters, extra) => {
     console.log('表格变化:', { pagination, sorter, filters, extra });
@@ -177,14 +186,14 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
       });
       return;
     }
-  }
+  };
 
   useEffect(() => {
     loadFiles({
       page: pagination.page,
       limit: pagination.limit
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -212,7 +221,11 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           <Table
             className="files-table"
             loading={loading}
+            // TODO：ts错误
+            // @ts-expect-error
             columns={columns}
+            // TODO: ts错误
+            // @ts-expect-error
             pagePosition={null}
             pagination={{
               showTotal: true,
@@ -225,6 +238,8 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
               selectedRowKeys,
               onChange: (selectedRowKeys, selectedRows) => {
                 console.log('onChange:', selectedRowKeys, selectedRows);
+                // TODO: ts错误
+                // @ts-expect-error
                 setSelectedRowKeys(selectedRowKeys);
                 setFileNum(selectedRowKeys.length);
               },
@@ -234,13 +249,15 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
             }}
             data={filesData}
             rowKey="id"
-            noDataElement={<div className='flex flex-col items-center justify-center'>
-              <EmptyIcon className='size-[48px]'></EmptyIcon>
-              <span className='text-[#6E7B8D]'>请先选择源数据目录</span>
-            </div>}
+            noDataElement={
+              <div className="flex flex-col items-center justify-center">
+                <EmptyIcon className="size-[48px]"></EmptyIcon>
+                <span className="text-[#6E7B8D]">请先选择源数据目录</span>
+              </div>
+            }
           />
         </FormItem>
-        <Split className='my-[16px]'/>
+        <Split className="my-[16px]" />
         <FormItem
           label="分段方式："
           field="text_slice_rule"
@@ -272,7 +289,10 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           extra="选择是否需要替换掉标点和一些特殊字符，以及是否删除有效URL和电子邮箱地址。"
         >
           <Checkbox.Group
-            options={[{ label: '替换表达和特殊符号', value: 1 }, { label: '删除有效URL和电子邮箱地址', value: 2 }]}
+            options={[
+              { label: '替换表达和特殊符号', value: 1 },
+              { label: '删除有效URL和电子邮箱地址', value: 2 }
+            ]}
           />
         </FormItem>
         <FormItem

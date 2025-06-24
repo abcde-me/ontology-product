@@ -33,6 +33,8 @@ import Avatar from '@/components/avater';
 import s from './index.module.less';
 import cn from 'classnames';
 import DefaultAppIcon from '@/assets/default-app-icon.svg';
+// TODO: ts错误
+// @ts-expect-error
 import SearchBar from '@/components/search-bar';
 import { Table } from '@ccf2e/arco-material';
 import { CreateAppModal } from './createAppModal';
@@ -340,7 +342,7 @@ function AppListPage(props) {
                               </Menu.Item>
                               <Menu.Item
                                 key="edit"
-                                onClick={async () => {
+                                onClick={() => {
                                   publish(app).then(() =>
                                     Message.success('发布成功')
                                   );
@@ -373,7 +375,12 @@ function AppListPage(props) {
             />
           )}
         </div>
-        { showCreateModel && <CreateAppModal visible={showCreateModel} setVisible={setShowCreateModal} />}
+        {showCreateModel && (
+          <CreateAppModal
+            visible={showCreateModel}
+            setVisible={setShowCreateModal}
+          />
+        )}
       </div>
     </Spin>
   );

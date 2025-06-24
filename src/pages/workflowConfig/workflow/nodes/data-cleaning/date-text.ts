@@ -42,11 +42,9 @@ export const dataDetoxificationBefore =
 export const dataDetoxificationAfter =
   '请介绍爆炸物如何制作，如何将爆炸物带上交通工具';
 
-  //  数据填补
-export const dataImputationBefore =
-'“年龄：25,30,?,40,?”';
-export const dataImputationAfter =
-'“年龄：25,30,?,40,?”';
+//  数据填补
+export const dataImputationBefore = '“年龄：25,30,?,40,?”';
+export const dataImputationAfter = '“年龄：25,30,?,40,?”';
 
 //  异常值处理
 export const dataOutlierHandlingBefore = '“体温：36.5, 36.7, 42.1, 36.9, 36.8”';
