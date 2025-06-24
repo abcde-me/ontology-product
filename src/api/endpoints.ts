@@ -216,6 +216,8 @@ export const ModaForgeResourceEndpoints = {
   createWorkflow: PrefixV2 + '/apps',
   // 工作流详情
   workflowDetail: PrefixV2 + '/apps/{appId}',
+  // 工作流列表
+  workflowList: PrefixAimdp + '/workflow/workflow_list',
 
   //数据目录
   //获取数据目录

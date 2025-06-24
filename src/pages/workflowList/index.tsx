@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Input,
@@ -17,6 +17,8 @@ import {
   IconClockCircle
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
+import { getWorkflowList } from '@/api/workflowList';
+import { getLocalStorage } from '@/utils/storage';
 
 const InputSearch = Input.Search;
 
@@ -81,6 +83,24 @@ export default function WorkflowList() {
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
+
+  // 组件初始化
+  useEffect(() => {
+    getList();
+  }, []);
+
+  const getList = async () => {
+    const params = {
+      uid: 'eeee-aaaa',
+      token: getLocalStorage('loginToken'),
+      search_content: searchValue,
+      page: current, //第几页
+      page_size: pageSize //每页个数
+    };
+    await getWorkflowList(params).then((res) => {
+      console.log(res, 'res');
+    });
+  };
 
   // 创建工作流
   const handleCreateWorkflow = () => {
