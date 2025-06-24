@@ -1,38 +1,12 @@
 import type { FC } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
 import type { TextParserNodeType } from './types';
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
-import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
-import AddButton from '@/pages/workflowConfig/components/button/add-button';
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field';
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
-import CodeEditor from '@/pages/workflowConfig/workflow/nodes/_base/components/editor/code-editor';
-import TypeSelector from '@/pages/workflowConfig/workflow/nodes/_base/components/selector';
-import {
-  BlockEnum,
-  type NodePanelProps
-} from '@/pages/workflowConfig/workflow/types';
-import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
-import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
-import {
-  Table,
-  Form,
-  Input,
-  Select,
-  InputNumber,
-  Checkbox,
-  Typography
-} from '@arco-design/web-react';
-import { RiAddLine } from '@remixicon/react';
-import { cloneDeep } from 'lodash-es';
-import { v4 as uuid4 } from 'uuid';
-import { useNodes } from 'reactflow';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import EmptyIcon from '@/assets/empty.svg';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { type NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import { Form, Select, InputNumber, Checkbox } from '@arco-design/web-react';
+import FileList from './file-list';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -47,21 +21,6 @@ const segmentationOptions: any = [
 
 const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
-  const nodes = useNodes();
-  const startNode = nodes.find(
-    (node: any) => node.data.type === BlockEnum.Start
-  );
-  const [filesData, setFilesData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const inputRef = useRef(null);
-  const [pagination, setPagination] = useState<any>({
-    page: 1,
-    limit: 5,
-    total: 0
-  });
-
-  const [fileNum, setFileNum] = useState(0);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
@@ -69,132 +28,6 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
     id,
     data
   );
-
-  const columns = [
-    {
-      title: '文件名',
-      dataIndex: 'name',
-      width: 170,
-      filterIcon: <IconSearch />,
-      filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
-        return (
-          <div className="arco-table-custom-filter">
-            <Input.Search
-              ref={inputRef}
-              placeholder="输入文件名搜索"
-              value={filterKeys[0] || ''}
-              onChange={(value) => {
-                setFilterKeys(value ? [value] : []);
-              }}
-              onSearch={() => {
-                confirm();
-              }}
-            />
-          </div>
-        );
-      },
-      onFilter: (value, row) => (value ? row.name.indexOf(value) !== -1 : true),
-      onFilterDropdownVisibleChange: (visible) => {
-        if (visible) {
-          // TODO：ts错误
-          // @ts-expect-error
-          setTimeout(() => inputRef.current.focus(), 150);
-        }
-      },
-      render(col, record) {
-        return (
-          <>
-            <EllipsisPopover value={col} isEdit={false} preferTypography />
-          </>
-        );
-      }
-    },
-    {
-      title: '类型',
-      dataIndex: 'type',
-      filters: [
-        {
-          text: 'docx',
-          value: 'docx'
-        },
-        {
-          text: 'pdf',
-          value: 'pdf'
-        }
-      ],
-      onFilter: (value, row) => row.type.indexOf(value) > -1
-    },
-    {
-      title: '文件大小',
-      dataIndex: 'size'
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
-    }
-  ];
-
-  const loadFiles = (params: any) => {
-    try {
-      setLoading(true);
-      const item = {
-        data: {
-          data: [...new Array(5)].map((_, index) => {
-            return {
-              id: Math.random().toString(36).substring(2, 15),
-              name:
-                Math.random().toString(36).substring(2, 6) +
-                'Jane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
-              type: index % 2 === 0 ? 'docx' : 'pdf',
-              size: '3.8M',
-              created_at: '2025-05-05 05:05:05' + index
-            };
-          }),
-          total: 100
-        }
-      };
-      console.log('列表数据:', item);
-      const { data = [], total = 0 } = item.data;
-      // TODO：ts错误
-      // @ts-expect-error
-      setFilesData(data || []);
-      setPagination((prevPagination) => ({
-        ...prevPagination,
-        total: total
-      }));
-    } catch (error) {
-      setFilesData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onChangeTable = (pagination, sorter, filters, extra) => {
-    console.log('表格变化:', { pagination, sorter, filters, extra });
-
-    if (extra.action === 'paginate') {
-      setPagination((prev) => ({
-        ...prev,
-        page: pagination.current,
-        limit: pagination.pageSize
-      }));
-      loadFiles({
-        ...pagination,
-        page: pagination.current,
-        limit: pagination.pageSize
-      });
-      return;
-    }
-  };
-
-  useEffect(() => {
-    loadFiles({
-      page: pagination.page,
-      limit: pagination.limit
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="wk-node-panel-content text-parser-panel-content mt-[16px]">
@@ -213,48 +46,16 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         }}
       >
         <FormItem
-          label={`选择文件：已选择${fileNum}个文件`}
+          label={`选择文件：已选择${inputs.selected_files_num}个文件`}
           field="files"
           labelAlign="left"
           required
         >
-          <Table
-            className="files-table"
-            loading={loading}
-            // TODO：ts错误
-            // @ts-expect-error
-            columns={columns}
-            // TODO: ts错误
-            // @ts-expect-error
-            pagePosition={null}
-            pagination={{
-              showTotal: true,
-              current: pagination.page,
-              pageSize: pagination.limit,
-              total: pagination.total
-            }}
-            onChange={onChangeTable}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log('onChange:', selectedRowKeys, selectedRows);
-                // TODO: ts错误
-                // @ts-expect-error
-                setSelectedRowKeys(selectedRowKeys);
-                setFileNum(selectedRowKeys.length);
-              },
-              onSelect: (selected, record, selectedRows) => {
-                console.log('onSelect:', selected, record, selectedRows);
-              }
-            }}
-            data={filesData}
-            rowKey="id"
-            noDataElement={
-              <div className="flex flex-col items-center justify-center">
-                <EmptyIcon className="size-[48px]"></EmptyIcon>
-                <span className="text-[#6E7B8D]">请先选择源数据目录</span>
-              </div>
-            }
+          <FileList
+            catetoryId={1}
+            files={inputs.files}
+            selectedFilesNum={inputs.selected_files_num}
+            handleFilesChange={handleFilesChange}
           />
         </FormItem>
         <Split className="my-[16px]" />

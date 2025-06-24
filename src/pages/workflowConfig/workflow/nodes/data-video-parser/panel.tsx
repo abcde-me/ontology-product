@@ -25,6 +25,7 @@ import {
 import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
+import FileList from '../data-text-parser/file-list';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -41,55 +42,12 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const activityMode = Form.useWatch('activity_mode', form);
 
-  const [fileNum, setFileNum] = useState(0);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const { t } = useTranslation('plugin__console-plugin-appforge');
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
     data
   );
-
-  const columns = [
-    {
-      title: '文件名',
-      dataIndex: 'name'
-    },
-    {
-      title: '类型',
-      dataIndex: 'type',
-      filters: [
-        {
-          text: 'London',
-          value: 'London'
-        },
-        {
-          text: 'Paris',
-          value: 'Paris'
-        }
-      ]
-    },
-    {
-      title: '文件大小',
-      dataIndex: 'size'
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      sorter: (a, b) => a.name.length - b.name.length
-    }
-  ];
-
-  const defaultData = [...new Array(5)].map((_, index) => {
-    return {
-      key: index,
-      name: 'Jane Doe ' + index,
-      type: 'docx',
-      size: '3.8M',
-      created_at: '2025-05-05 05:05:05'
-    };
-  });
 
   return (
     <div className="wk-node-panel-content video-parser-panel-content mt-[16px]">
@@ -108,30 +66,16 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         }}
       >
         <FormItem
-          label={`选择文件：已选择${fileNum}个文件`}
+          label={`选择文件：已选择${inputs.selected_files_num}个文件`}
           field="files"
           labelAlign="left"
           required
         >
-          <Table
-            columns={columns}
-            // TODO: ts错误
-            // @ts-expect-error
-            pagePosition={null}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log('onChange:', selectedRowKeys, selectedRows);
-                // TODO: ts错误
-                // @ts-expect-error
-                setSelectedRowKeys(selectedRowKeys);
-                setFileNum(selectedRowKeys.length);
-              },
-              onSelect: (selected, record, selectedRows) => {
-                console.log('onSelect:', selected, record, selectedRows);
-              }
-            }}
-            data={defaultData}
+          <FileList
+            catetoryId={1}
+            files={inputs.files}
+            selectedFilesNum={inputs.selected_files_num}
+            handleFilesChange={handleFilesChange}
           />
         </FormItem>
         <Split className="my-[16px]" />
