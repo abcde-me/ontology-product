@@ -50,6 +50,16 @@ export async function updateDataset(params:any){
 
 
 
+//获取数据集详情页
+
+
+
+//获取数据集详情页的数据内容
+export async function getDatasetContents(params:any){
+  return UAPI.RES.datasetContentsApi({}).get(params).inRegion().do();
+}
+
+
 
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){

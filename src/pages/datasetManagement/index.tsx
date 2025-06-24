@@ -410,7 +410,6 @@ const DatasetManagement: React.FC = () => {
           }}
           border={false}
           scroll={{ x: 1200 }}
-          stripe
         />
 
         {/* 新建数据集弹框 */}
