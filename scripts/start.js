@@ -121,10 +121,11 @@ checkBrowsers(paths.appPath, isInteractive)
       liveReload: true, // 启用实时重新加载
       client: {
         logging: 'info',
-        overlay: {
-          errors: true,
-          warnings: false
-        },
+        overlay: false,
+        // overlay: {
+        //   errors: true,
+        //   warnings: false
+        // },
         progress: true,
         reconnect: true,
         webSocketTransport: 'ws'
