@@ -10,6 +10,7 @@ const translation = {
     update: 'Update',
     publishUpdate: 'Publish Update',
     run: 'Run',
+    runScheduled: 'RunScheduled',
     running: 'Running',
     inRunMode: 'In Run Mode',
     inPreview: 'In Preview',

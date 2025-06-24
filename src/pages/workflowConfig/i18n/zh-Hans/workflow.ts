@@ -10,6 +10,7 @@ const translation = {
     update: '更新',
     publishUpdate: '发布更新',
     run: '运行',
+    runScheduled: '定时运行',
     running: '运行中',
     inRunMode: '在运行模式中',
     inPreview: '预览中',
