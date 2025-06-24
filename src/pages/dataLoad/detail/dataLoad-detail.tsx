@@ -5,26 +5,27 @@ import { Router } from 'react-router';
 import TableDetail from './table-detail'
 import './index.css'
 import Edit from '../edit';
+import { ApiResponse, ExecutionStatus, LoadType, SourceType, TaskStatus } from '../type';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
 const DataLoadDetail = () => {
     // 默认详情的数据
-    const [listDetail, setListDetail] = useState(
+    const [listDetail, setListDetail] = useState<ApiResponse | null>(
         {
             "task_info": {
                 "id": 123,
                 "name": "daily-image-import",
-                "source_type": "HDFS",
+                "source_type": SourceType.HDFS,
                 "connector": {
                     "id": 456,
                     "name": "hdfs-prod-01",
-                    "type": "HDFS"
+                    "type": SourceType.HDFS
                 },
-                "load_type": "cron",
+                "load_type": LoadType.Cron,
                 "cron_expression": "0 0 3 * * ?",
                 "dest_path": "minio/vision-data",
-                "status": "running",
+                "status": TaskStatus.Running,
                 "created_at": "2025-06-16 18:40:36",
                 "last_run_time": "2025-06-16 18:40:36",
                 "creator": "user123"
@@ -33,7 +34,7 @@ const DataLoadDetail = () => {
                 {
                     "execution_id": 7891,
                     "execution_name": "RUN-20250306-001",
-                    "status": "running",
+                    "status": ExecutionStatus.Running,
                     "start_time": "2025-06-16 18:40:36",
                     "end_time": "2025-06-16 18:40:36",
                     "details": {
@@ -45,7 +46,7 @@ const DataLoadDetail = () => {
                 {
                     "execution_id": 7890,
                     "execution_name": "RUN-20250306-002",
-                    "status": "failed",
+                    "status": ExecutionStatus.Failed,
                     "start_time": "2025-06-16 18:40:36",
                     "end_time": "2025-06-16 18:40:36",
                     "details": {
@@ -63,7 +64,7 @@ const DataLoadDetail = () => {
     // 判断任务中是否存在运行的任务
     const judgmentTask = () => {
         const runningIndex = listDetail.execution_history.findIndex((item) => {
-            return item.status == 'running'
+            return item.status === 'running'
         })
         console.log(runningIndex);
 
@@ -165,7 +166,7 @@ const DataLoadDetail = () => {
 
                 </div>
             </div>
-            <TableDetail data={listDetail.execution_history} runningStatus={runningFlag} judgmentTaskHan={judgmentTask}  />
+            <TableDetail data={listDetail.execution_history} runningStatus={runningFlag} judgmentTaskHan={judgmentTask} />
             <Modal
                 style={{ width: '600px' }}
                 title='编辑数据载入任务'

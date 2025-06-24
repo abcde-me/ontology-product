@@ -4,15 +4,15 @@ import {
   Pagination,
   Popconfirm,
   Table,
-  Button
+  Button,
+  Modal
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail-modal';
 import AddAndEditModal from './add-edit-modal'
-import TimeFormatting from '../../utils/timeFormatting'
-import { getConnectionList } from '@/api/connectionApi';
+import { delconnectionList, getConnectionList } from '@/api/connectionApi';
 
 const InputSearch = Input.Search;
 
@@ -62,7 +62,6 @@ export default function Connection() {
     },
     {
       title: '状态',
-      dataIndex: 'status',
       width: 130,
       render: (_, item) => {
         const statusConfig = STATUS_CONFIG[item.status] || STATUS_CONFIG[ConnectionStatus.DISCONNECTED];
@@ -95,7 +94,6 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      dataIndex: 'type',
       width: 150,
       render: (_, item) => (
         <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>
@@ -120,29 +118,26 @@ export default function Connection() {
     {
       title: '创建时间',
       width: 200,
-      dataIndex: 'created_at',
       render: (_, item) => (
-        <div className="fontMM">{TimeFormatting(item.created_at)}</div>
+        <div className="fontMM">{item.created_at}</div>
       ),
-      sorter: (a, b) => a.created_at.length - b.created_at.length
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
       width: 200,
-      dataIndex: 'updated_at',
       render: ((_, item) => (
         <div className='fontMM'>
-          {TimeFormatting(item.updated_at)}
+          {item.updated_at}
         </div>
       ))
     },
     {
       title: '操作',
-      dataIndex: 'created_at',
       width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span className="hover" onClick={() => { viewDetailHan(record) }}>
+          <span className="hover" onClick={() => { viewDetailHan(record.id) }}>
             详情
           </span>
           <span className="hover" onClick={() => { childAddAndSetModalHan(record) }}>编辑</span>
@@ -168,19 +163,22 @@ export default function Connection() {
       )
     }
   ];
+  // 默认弹框隐藏
+  const [visible2, setVisible2] = React.useState(false);
+  // 详情页面的默认id
+  const [cId, setCId] = useState('0')
   // 点击删除按钮执行的方法
-  const DeleteMethod = (id: any) => {
-    const NewConnectionData = ConnectionData.filter((item: any) => {
-      return item.id !== id;
-    });
-    setConnectionData(NewConnectionData);
+  const DeleteMethod = async (id: string) => {
+    await delconnectionList(id)
+    getlist()
+    console.log(id);
   };
   // 点击查看执行的方法
-  const viewDetailHan = (obj) => {
-    if (childRef.current) {
-      childRef.current.displayDetailHan(obj);
-    }
+  const viewDetailHan = (id) => {
+    setCId(id)
+    setVisible2(true)
   }
+
   const childAddAndSetModalHan = (id) => {
     if (addandsetchildRef.current) {
       addandsetchildRef.current.displayModalView(id)
@@ -189,48 +187,24 @@ export default function Connection() {
   // 搜索框的默认值
   const [searchValue, setSearchValue] = useState('')
   const [ConnectionData, setConnectionData] = useState(
-    [
-      {
-        id: "1",
-        name: '唐僧',
-        status: ConnectionStatus.CONNECTED,
-        type: ConnectorType.S3,
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '张三',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
-      },
-      {
-        id: "2",
-        name: '孙悟空',
-        status: ConnectionStatus.DISCONNECTED,
-        type: ConnectorType.HDFS,
-        config: {
-          endpoint: "https://s3.amazonaws.com",
-          access_key: 'AKIAxxxxXXX',
-          secret_key: 'xxxxxxxx',
-          region: 'XXXXXX',
-          path: 'data-warehouse'
-        },
-        creator: '李四',
-        created_at: '1749627860785',
-        updated_at: '17123456791'
-      }
-    ]
-  )
+    []
+  ) as any
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+   
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
-    setCurrent(page);
+    setPagination(prev => ({
+      ...prev,
+      current: page
+    }));
   };
 
   // 根据搜索条件过滤连接器
@@ -245,14 +219,33 @@ export default function Connection() {
     });
   }, [ConnectionData, searchValue]);
 
-  const getlist = () => {
-    getConnectionList({
-      page: current,
-      page_size: pageSize,
-    })
+
+  const [searchParams, setSearchParams] = useState({
+    keyword: ''
+  });
+
+  // 数据总量
+  const [total, setTotal] = useState(null)
+
+  const getlist = async () => {
+    const res = await getConnectionList({
+      page: pagination.current,
+      page_size: pagination.pageSize,
+      scope: "0"
+    });
+    setTotal(res.data.total)
+
+    setConnectionData(res.data.items);
+    setPagination(prev => ({
+      ...prev,
+      total: res.data.total
+    }))
   }
 
-  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px', height: '94%' }}>
+  useEffect(() => {
+    getlist()
+  }, [pagination.current, pagination.pageSize, searchParams.keyword])
+  return <div style={{ backgroundColor: 'white', display: 'flex', flexDirection: 'column', margin: '10px 20px 0px 0px', borderRadius: '10px', maxHeight: '94%' }}>
     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '20px 0px 15px 20px' }}>连接器</h1>
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0px 20px' }}>
       <InputSearch placeholder='输入关键词搜索' style={{ width: 230 }} value={searchValue} onChange={(value) => {
@@ -267,27 +260,38 @@ export default function Connection() {
     <Table border={false} columns={columns} data={filteredConnectors} style={{ padding: '10px 20px' }} pagination={false} rowKey="id" />
     {/* 分页 */}
     <Pagination
-      current={current}
-      pageSize={pageSize}
+      current={pagination.current}
+      pageSize={pagination.pageSize}
       onPageSizeChange={(pageSize) => {
-        setPageSize(pageSize);
-        setCurrent(1);
+        setPagination(prev => ({
+          ...prev,
+          pageSize,
+          current: 1
+        }));
       }}
       onChange={handlePageChange}
       sizeOptions={[2, 5, 10, 20]}
       showTotal
-      total={filteredConnectors.length}
+      total={pagination.total}
       showJumper
       sizeCanChange
       style={{ marginBottom: '20px' }}
     />
 
     {/* 详情逻辑 */}
-    <ModalDetail ref={childRef} />
-    <AddAndEditModal ref={addandsetchildRef} />
-    <button onClick={() => {
-      getlist()
-    }}>获取数据</button>
+
+    <Modal
+      style={{ width: '700px', height: '500px' }}
+      visible={visible2}
+      footer={null}
+      onCancel={() => {
+        // 点击关闭隐藏弹框
+        setVisible2(false);
+      }}
+    >
+      <ModalDetail ref={childRef} detailId={cId} />
+    </Modal>
+    <AddAndEditModal ref={addandsetchildRef} getListHan={getlist} />
   </div>
 }
 

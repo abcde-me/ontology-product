@@ -2,6 +2,7 @@ import { Button, Input, Message, Modal, Pagination, Table } from '@arco-design/w
 import { IconPlus } from '@arco-design/web-react/icon'
 import React, { useEffect, useState } from 'react'
 import './index.css'
+import { Link } from 'react-router-dom';
 const InputSearch = Input.Search;
 
 
@@ -68,13 +69,15 @@ const TableDetail = (props) => {
         {
             title: '操作',
             render: ((_, tiem) => (
-                <span style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}>详情</span>
+                <span style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}>
+                    <Link to='/tenant/compute/modaforge/access/detail'>详情</Link>
+                </span>
             ))
         },
     ];
     const [data, setData] = useState([
         {
-            id: '7891',
+            execution_id: '7891',
             execution_name: 'RUN-20250306-001',
             status: 'succeed',
             start_time: '2025-06-16 18:40:36',

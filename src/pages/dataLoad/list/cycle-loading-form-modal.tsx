@@ -1,4 +1,4 @@
-import { Form, Input, TimePicker, Tag, Select, Alert } from '@arco-design/web-react';
+import { Form, Input, TimePicker, Tag, Select, Alert, Divider } from '@arco-design/web-react';
 import Styles from './index.module.css';
 import React, { useState } from 'react'
 import './index.css'
@@ -49,6 +49,14 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
             form.setFieldsValue({ cycle: '每周', weekly: ['周一'], time: '09:00' })
         }
     }
+
+    const [time, setTime] = useState([
+        '具体日期',
+        '相对时间'
+    ])
+    const [rtime, setRTime] = useState(['每月最后一天'])
+    const [timeFlag, setTimeFlag] = useState('具体日期')
+
     return (
         <div className={Styles.cycleLoadingBox}>
             <div style={{ display: 'flex' }}>
@@ -108,6 +116,61 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                             >
                                 <Select
                                     mode='multiple'
+                                    style={{ width: 300 }}
+                                    placeholder='请选择日期'
+                                    dropdownRender={(menu) => (
+                                        <div>
+                                            <Divider style={{ margin: 0 }} />
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    padding: '3px',
+                                                    background: 'rgb(224, 229, 238)',
+                                                    margin: "5px 0px",
+                                                    height: '35px'
+                                                }}
+                                            >
+                                                {time.map((item) => {
+                                                    return <div key={item} style={{
+                                                        width: '50%',
+                                                        height: '100%',
+                                                        background: item == timeFlag ? 'white' : null,
+                                                        color: item == timeFlag ? 'rgb(0, 125, 250)' : null,
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        borderRadius: '3px'
+                                                    }}
+                                                        onClick={() => {
+                                                            setTimeFlag(item)
+                                                            console.log(item);
+                                                        }}
+                                                    >{item}</div>
+                                                })}
+
+                                            </div>
+                                            {menu}
+                                        </div>
+                                    )}
+                                    dropdownMenuStyle={{ maxHeight: 200 }}
+                                >
+                                    {timeFlag == '具体日期' &&
+                                        Monthly_Options.map((option) => (
+                                            <Option key={option} value={option}>
+                                                {option}
+                                            </Option>
+                                        ))}
+                                    {timeFlag == '相对时间' &&
+                                        rtime.map((option) => (
+                                            <Option key={option} value={option}>
+                                                {option}
+                                            </Option>
+                                        ))}
+                                </Select>
+                                {/* <Select
+                                    mode='multiple'
                                     options={Monthly_Options}
                                     placeholder='请选择日期'
                                     style={{
@@ -115,7 +178,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                                     }}
 
                                     onChange={(val) => { monthlyHan(val.map(item => item.slice(0, -1))) }}
-                                />
+                                /> */}
                             </Form.Item>
                         }
                     </div>
