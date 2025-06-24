@@ -88,17 +88,17 @@ export default function WorkflowList() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (obj: any) => {
+  const viewDetailWorkflow = (obj: object) => {
     console.log(obj);
   };
 
   // 复制工作流
-  const handleCloneWorkflow = (obj: any) => {
+  const handleCloneWorkflow = (obj: object) => {
     console.log(obj);
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = (id: any) => {
+  const handleDeleteWorkflow = (id: string) => {
     const newWorkflowData = workflowData.filter((item) => {
       return item.id !== id;
     });
@@ -106,7 +106,7 @@ export default function WorkflowList() {
   };
 
   // table columns
-  const columns: ColumnProps<any>[] = [
+  const columns: ColumnProps[] = [
     {
       title: '工作流名称',
       dataIndex: 'name',
