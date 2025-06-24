@@ -4,9 +4,9 @@ import { IconArrowLeft, IconCheckCircle, IconCheckCircleFill, IconClockCircle, I
 import { useParams } from '@/utils/url'
 import { useHistory } from "react-router";
 import TimeFormatting from '@/utils/timeFormatting'
-import ParseNode from "./components/ParseNode";
-import DataCleaningNode from "./components/DataCleaningNode";
-import DataAugmentationNode from "./components/DataAugmentationNode";
+import ParseNode from "./components/parse-node";
+import DataCleaningNode from "./components/data-cleaning-node";
+import DataAugmentationNode from "./components/data-augmentation-node";
 import './detail.css'
 
 const BreadcrumbItem = Breadcrumb.Item;
