@@ -16,7 +16,7 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
 
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
-    if (isReady) {
+    if (isReady && inputs.selected_files_num === undefined) {
       setInputs({
         ...inputs,
         ...defaultConfig
@@ -26,32 +26,30 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
   }, [defaultConfig]);
 
   const handleFilesChange = useCallback(
-    (files: string[]) => {
+    (files: string[], count: number) => {
       const newInputs = produce(inputs, (draft) => {
         draft.files = files;
-      });
-      setInputs(newInputs);
-    },
-    [inputs, setInputs]
-  );
-  const handleFilesCountChange = useCallback(
-    (count: number) => {
-      const newInputs = produce(inputs, (draft) => {
         draft.selected_files_num = count;
       });
+      console.log('handleFilesChange', files, inputs, newInputs);
       setInputs(newInputs);
     },
     [inputs, setInputs]
   );
+  // const handleFilesCountChange = useCallback((count: number) => {
+  //   const newInputs = produce(inputs, (draft) => {
+  //     draft.selected_files_num = count
+  //   })
+  //   console.log('handleFilesCountChange', count, inputs, newInputs)
+  //   setInputs(newInputs)
+  // }, [inputs, setInputs])
   const handleFiledsChange = useCallback(
     (fields: TextParserNodeType) => {
       const newInputs = produce(inputs, (draft) => {
         draft.text_slice_rule = fields.text_slice_rule;
         draft.slice_max_size = fields.slice_max_size;
         draft.text_proc_rules = fields.text_proc_rules;
-        // TODO: ts错误
-        // @ts-expect-error
-        draft.text_multi_model_id = fields.text_multi_model_id;
+        draft.text_orc_model_id = fields.text_orc_model_id;
         draft.text_pic_model_id = fields.text_pic_model_id;
         draft.text_emb_model_id = fields.text_emb_model_id;
       });
@@ -64,7 +62,7 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFilesCountChange,
+    // handleFilesCountChange,
     handleFiledsChange
   };
 };
