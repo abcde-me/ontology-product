@@ -136,7 +136,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         <Split className='my-[16px]'/>
         <FormItem
           label="图片描述模型："
-          field="pic_caption_model"
+          field="pic_model_id"
           labelAlign="left"
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
@@ -150,7 +150,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           label="图片嵌入模型："
-          field="pic_emb_model"
+          field="pic_embc_model_id"
           labelAlign="left"
           extra="指定对图片caption进行embedding 的模型。"
         >

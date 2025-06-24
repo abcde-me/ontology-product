@@ -170,7 +170,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           label="多模态模型："
-          field="text_multi_model_id"
+          field="text_orc_model_id"
           labelAlign="left"
           extra="当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。"
         >

@@ -41,8 +41,8 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
 
   const handleFiledsChange = useCallback((fields: ImageParserNodeType) => {
     const newInputs = produce(inputs, (draft) => {
-      draft.pic_caption_model = fields.pic_caption_model
-      draft.pic_emb_model = fields.pic_emb_model
+      draft.pic_model_id = fields.pic_model_id
+      draft.pic_embc_model_id = fields.pic_embc_model_id
     })
     setInputs(newInputs)
   }, [inputs, setInputs])

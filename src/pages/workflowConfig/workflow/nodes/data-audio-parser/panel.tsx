@@ -156,11 +156,11 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
           labelAlign="left"
         >
           <Select>
-            <Option value="自动">自动</Option>
-            <Option value="定时长">定时长</Option>
+            <Option value={1}>自动</Option>
+            <Option value={2}>定时长</Option>
           </Select>
         </FormItem>
-        {activityMode === '定时长' && <FormItem
+        {activityMode === 2 && <FormItem
             label="时长："
             field="activity_mode_num"
             labelAlign="left"
@@ -171,7 +171,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         }
         <FormItem
           label="解析模型："
-          field="audio_model"
+          field="audio_model_id"
           labelAlign="left"
           extra="指定对图片caption进行embedding 的模型。"
         >
@@ -189,7 +189,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
           labelAlign="left"
         >
           <Checkbox.Group
-            options={[{ label: '使用大模型进行错别字校验', value: 0 }, { label: '文字标准化', value: 1 }]}
+            options={[{ label: '使用大模型进行错别字校验', value: 1 }, { label: '文字标准化', value: 2 }]}
           />
         </FormItem>
       </Form>
