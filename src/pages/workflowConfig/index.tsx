@@ -10,6 +10,9 @@ import './styles/index.css';
 import './styles/markdown.scss';
 import './styles/custom.scss';
 
+let test = '1';
+test = 2;
+
 function WorkflowConfig() {
   const { setWorkflowDetail } = useStore(
     useShallow((state) => ({
