@@ -5,7 +5,7 @@ import { Router } from 'react-router';
 import TableDetail from './table-detail'
 import './index.css'
 import Edit from '../edit';
-import { ApiResponse } from '../type';
+import { ApiResponse, ExecutionStatus, LoadType, SourceType, TaskStatus } from '../type';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -16,16 +16,16 @@ const DataLoadDetail = () => {
             "task_info": {
                 "id": 123,
                 "name": "daily-image-import",
-                "source_type": "HDFS",
+                "source_type": SourceType.HDFS,
                 "connector": {
                     "id": 456,
                     "name": "hdfs-prod-01",
-                    "type": "HDFS"
+                    "type": SourceType.HDFS
                 },
-                "load_type": "cron",
+                "load_type": LoadType.Cron,
                 "cron_expression": "0 0 3 * * ?",
                 "dest_path": "minio/vision-data",
-                "status": "running",
+                "status": TaskStatus.Running,
                 "created_at": "2025-06-16 18:40:36",
                 "last_run_time": "2025-06-16 18:40:36",
                 "creator": "user123"
@@ -34,7 +34,7 @@ const DataLoadDetail = () => {
                 {
                     "execution_id": 7891,
                     "execution_name": "RUN-20250306-001",
-                    "status": "failed",
+                    "status": ExecutionStatus.Running,
                     "start_time": "2025-06-16 18:40:36",
                     "end_time": "2025-06-16 18:40:36",
                     "details": {
@@ -46,7 +46,7 @@ const DataLoadDetail = () => {
                 {
                     "execution_id": 7890,
                     "execution_name": "RUN-20250306-002",
-                    "status": "failed",
+                    "status": ExecutionStatus.Failed,
                     "start_time": "2025-06-16 18:40:36",
                     "end_time": "2025-06-16 18:40:36",
                     "details": {

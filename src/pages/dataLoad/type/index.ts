@@ -18,11 +18,25 @@ export interface dataLodaAddForm{
     dest_path:string    
     creator:string
 }
-// 使用联合类型代替枚举
-type TaskStatus = "running" | "stopped" | "paused";
-type ExecutionStatus = "running" | "failed";
-type SourceType = "HDFS" | "S3" ;
-type LoadType = "cron" | "once" ;
+export enum TaskStatus {
+  Running = "running",
+  Stopped = "stopped"
+}
+ 
+export enum ExecutionStatus {
+  Running = "running",
+  Failed = "failed"
+}
+ 
+export enum SourceType {
+  HDFS = "HDFS",
+  S3 = "S3"
+}
+ 
+export enum LoadType {
+  Cron = "cron",
+  Once = "once"
+}
 // 连接器类型
 interface Connector {
   id: number;
