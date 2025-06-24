@@ -1,0 +1,16 @@
+.arco-empty .arco-empty-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    height: 128px;
+  }
+
+  .description-text {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: 0%;
+  }
+}

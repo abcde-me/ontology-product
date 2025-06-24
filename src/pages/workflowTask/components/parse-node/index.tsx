@@ -6,6 +6,7 @@ import PdfIcon from '@/assets/pdf-icon.svg';
 import TxtIcon from '@/assets/txt-icon.svg';
 import EpubIcon from '@/assets/epub-icon.svg';
 import TimeFormatting from '@/utils/timeFormatting'
+import noDataElement from "@/components/no-data";
 
 export default function ParseNode(props: { dataSource }) {
   const { dataSource } = props;
@@ -99,18 +100,18 @@ export default function ParseNode(props: { dataSource }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.total}</span>
         </div>
         <div className="item-box">
           <span className="item-title">成功</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.success_total}</span>
         </div>
         <div className="item-box">
           <span className="item-title">失败</span>
-          <span className="item-content">10000</span>
+          <span className="item-content">{dataSource.fail_total}</span>
         </div>
       </div>
-      <Table border={false} columns={columns} data={dataSource} pagination={false} rowKey="id" style={{ margin: '10px 0' }} />
+      <Table border={false} columns={columns} data={dataSource.file} pagination={false} noDataElement={noDataElement({ description: '暂无数据' })} rowKey="file_name" style={{ margin: '10px 0' }} />
       {/* 分页 */}
       <Pagination
         current={current}
