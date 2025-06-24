@@ -1,22 +1,20 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { ImageParserNodeType } from './types';
-import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
-import { useStoreApi } from 'reactflow';
+import {
+  BlockEnum,
+  type NodeProps
+} from '@/pages/workflowConfig/workflow/types';
+import { useNodes, useStoreApi } from 'reactflow';
 
 const Node: FC<NodeProps<ImageParserNodeType>> = (props) => {
   const { selected_files_num } = props.data;
 
-  const store = useStoreApi();
-  const [totalFiles, setTotalFiles] = useState(10000);
-
-  const findNode = (nodeId: string) => {
-    const { getNodes, setNodes } = store.getState();
-
-    const nodes = getNodes();
-    const currentNode = nodes.find((n) => n.id === nodeId)!;
-    return currentNode;
-  };
+  const nodes = useNodes();
+  const startNode = nodes.find(
+    (node: any) => node.data.type === BlockEnum.Start
+  );
+  const [totalFiles, setTotalFiles] = useState(100);
 
   return (
     <div className={`wk-node-content`}>
