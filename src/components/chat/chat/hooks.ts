@@ -243,7 +243,7 @@ export const useChat = (
   );
 
   const handleSend = useCallback(
-    async (
+    (
       url: string,
       data: any,
       {

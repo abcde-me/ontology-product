@@ -1,31 +1,28 @@
-import { useCallback } from 'react'
-import {
-  useReactFlow,
-  useStoreApi,
-} from 'reactflow'
-import produce from 'immer'
-import { v4 as uuidV4 } from 'uuid'
-import { useWorkflowStore } from '../store'
-import { useNodesSyncDraft } from '../hooks'
-import { WorkflowRunningStatus } from '../types'
-import { useWorkflowUpdate } from './use-workflow-interactions'
-import { useWorkflowRunEvent } from './use-workflow-run-event/use-workflow-run-event'
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store'
-import { ssePost } from '@/pages/workflowConfig/service/base'
+import { useCallback } from 'react';
+import { useReactFlow, useStoreApi } from 'reactflow';
+import produce from 'immer';
+import { v4 as uuidV4 } from 'uuid';
+import { useWorkflowStore } from '../store';
+import { useNodesSyncDraft } from '../hooks';
+import { WorkflowRunningStatus } from '../types';
+import { useWorkflowUpdate } from './use-workflow-interactions';
+import { useWorkflowRunEvent } from './use-workflow-run-event/use-workflow-run-event';
+import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { ssePost } from '@/pages/workflowConfig/service/base';
 // import { stopWorkflowRun } from '@/pages/workflowConfig/service/workflow'
-import { AudioPlayerManager } from '@/pages/workflowConfig/components/audio-btn/audio.player.manager'
-import type { VersionHistory } from '@/pages/workflowConfig/types/workflow'
+import { AudioPlayerManager } from '@/pages/workflowConfig/components/audio-btn/audio.player.manager';
+import type { VersionHistory } from '@/pages/workflowConfig/types/workflow';
 
 type IOtherOptions = any;
 
 export const useWorkflowRun = () => {
-  const store = useStoreApi()
-  const workflowStore = useWorkflowStore()
-  const reactflow = useReactFlow()
+  const store = useStoreApi();
+  const workflowStore = useWorkflowStore();
+  const reactflow = useReactFlow();
 
-  const { doSyncWorkflowDraft } = useNodesSyncDraft()
-  const { handleUpdateWorkflowCanvas } = useWorkflowUpdate()
-  const pathname = {} as any
+  const { doSyncWorkflowDraft } = useNodesSyncDraft();
+  const { handleUpdateWorkflowCanvas } = useWorkflowUpdate();
+  const pathname = {} as any;
   const {
     handleWorkflowStarted,
     handleWorkflowFinished,
@@ -41,21 +38,15 @@ export const useWorkflowRun = () => {
     handleWorkflowNodeRetry,
     handleWorkflowAgentLog,
     handleWorkflowTextChunk,
-    handleWorkflowTextReplace,
-  } = useWorkflowRunEvent()
+    handleWorkflowTextReplace
+  } = useWorkflowRunEvent();
 
   const handleBackupDraft = useCallback(() => {
-    const {
-      getNodes,
-      edges,
-    } = store.getState()
-    const { getViewport } = reactflow
-    const {
-      backupDraft,
-      setBackupDraft,
-      environmentVariables,
-    } = workflowStore.getState()
-    const features = {} as any
+    const { getNodes, edges } = store.getState();
+    const { getViewport } = reactflow;
+    const { backupDraft, setBackupDraft, environmentVariables } =
+      workflowStore.getState();
+    const features = {} as any;
 
     if (!backupDraft) {
       setBackupDraft({
@@ -63,295 +54,272 @@ export const useWorkflowRun = () => {
         edges,
         viewport: getViewport(),
         features,
-        environmentVariables,
-      })
-      doSyncWorkflowDraft()
+        environmentVariables
+      });
+      doSyncWorkflowDraft();
     }
-  }, [reactflow, workflowStore, store, doSyncWorkflowDraft])
+  }, [reactflow, workflowStore, store, doSyncWorkflowDraft]);
 
   const handleLoadBackupDraft = useCallback(() => {
-    const {
-      backupDraft,
-      setBackupDraft,
-      setEnvironmentVariables,
-    } = workflowStore.getState()
+    const { backupDraft, setBackupDraft, setEnvironmentVariables } =
+      workflowStore.getState();
 
     if (backupDraft) {
-      const {
-        nodes,
-        edges,
-        viewport,
-        features,
-        environmentVariables,
-      } = backupDraft
+      const { nodes, edges, viewport, features, environmentVariables } =
+        backupDraft;
       handleUpdateWorkflowCanvas({
         nodes,
         edges,
-        viewport,
-      })
-      setEnvironmentVariables(environmentVariables)
+        viewport
+      });
+      setEnvironmentVariables(environmentVariables);
       // featuresStore!.setState({ features })
-      setBackupDraft(undefined)
+      setBackupDraft(undefined);
     }
-  }, [handleUpdateWorkflowCanvas, workflowStore])
+  }, [handleUpdateWorkflowCanvas, workflowStore]);
 
-  const handleRun = useCallback(async (
-    params: any,
-    callback?: IOtherOptions,
-  ) => {
-    const {
-      getNodes,
-      setNodes,
-    } = store.getState()
-    const newNodes = produce(getNodes(), (draft) => {
-      draft.forEach((node) => {
-        node.data.selected = false
-        node.data._runningStatus = undefined
-      })
-    })
-    setNodes(newNodes)
-    await doSyncWorkflowDraft()
+  const handleRun = useCallback(
+    async (params: any, callback?: IOtherOptions) => {
+      const { getNodes, setNodes } = store.getState();
+      const newNodes = produce(getNodes(), (draft) => {
+        draft.forEach((node) => {
+          node.data.selected = false;
+          node.data._runningStatus = undefined;
+        });
+      });
+      setNodes(newNodes);
+      await doSyncWorkflowDraft();
 
-    const {
-      onWorkflowStarted,
-      onWorkflowFinished,
-      onNodeStarted,
-      onNodeFinished,
-      onIterationStart,
-      onIterationNext,
-      onIterationFinish,
-      onLoopStart,
-      onLoopNext,
-      onLoopFinish,
-      onNodeRetry,
-      onAgentLog,
-      onError,
-      ...restCallback
-    } = callback || {}
-    workflowStore.setState({ historyWorkflowData: undefined })
-    const appDetail = useAppStore.getState().appDetail
-    const workflowContainer = document.getElementById('workflow-container')
+      const {
+        onWorkflowStarted,
+        onWorkflowFinished,
+        onNodeStarted,
+        onNodeFinished,
+        onIterationStart,
+        onIterationNext,
+        onIterationFinish,
+        onLoopStart,
+        onLoopNext,
+        onLoopFinish,
+        onNodeRetry,
+        onAgentLog,
+        onError,
+        ...restCallback
+      } = callback || {};
+      workflowStore.setState({ historyWorkflowData: undefined });
+      const appDetail = useAppStore.getState().appDetail;
+      const workflowContainer = document.getElementById('workflow-container');
 
-    const {
-      clientWidth,
-      clientHeight,
-    } = workflowContainer!
+      const { clientWidth, clientHeight } = workflowContainer!;
 
-    let url = ''
-    if (appDetail?.mode === 'advanced-chat')
-      url = `/apps/${appDetail.id}/advanced-chat/workflows/draft/run`
+      let url = '';
+      if (appDetail?.mode === 'advanced-chat')
+        url = `/apps/${appDetail.id}/advanced-chat/workflows/draft/run`;
 
-    if (appDetail?.mode === 'workflow')
-      url = `/apps/${appDetail.id}/workflows/draft/run`
+      if (appDetail?.mode === 'workflow')
+        url = `/apps/${appDetail.id}/workflows/draft/run`;
 
-    const {
-      setWorkflowRunningData,
-    } = workflowStore.getState()
-    setWorkflowRunningData({
-      result: {
-        status: WorkflowRunningStatus.Running,
-      },
-      tracing: [],
-      resultText: '',
-    })
-
-    let ttsUrl = ''
-    let ttsIsPublic = false
-    if (params.token) {
-      ttsUrl = '/text-to-audio'
-      ttsIsPublic = true
-    }
-    else if (params.appId) {
-      if (pathname.search?.('explore/installed') > -1)
-        ttsUrl = `/installed-apps/${params.appId}/text-to-audio`
-      else
-        ttsUrl = `/apps/${params.appId}/text-to-audio`
-    }
-    const player = AudioPlayerManager.getInstance().getAudioPlayer(ttsUrl, ttsIsPublic, uuidV4(), 'none', 'none', (_: any): any => { })
-    
-    url = `/apps/${appDetail.id}/workflows/draft/run`
-    ssePost(
-      url,
-      {
-        body: params,
-      },
-      {
-        onWorkflowStarted: (params) => {
-          handleWorkflowStarted(params)
-
-          if (onWorkflowStarted)
-            onWorkflowStarted(params)
+      const { setWorkflowRunningData } = workflowStore.getState();
+      setWorkflowRunningData({
+        result: {
+          status: WorkflowRunningStatus.Running
         },
-        onWorkflowFinished: (params) => {
-          handleWorkflowFinished(params)
+        tracing: [],
+        resultText: ''
+      });
 
-          if (onWorkflowFinished)
-            onWorkflowFinished(params)
-        },
-        onError: (params) => {
-          handleWorkflowFailed()
+      let ttsUrl = '';
+      let ttsIsPublic = false;
+      if (params.token) {
+        ttsUrl = '/text-to-audio';
+        ttsIsPublic = true;
+      } else if (params.appId) {
+        if (pathname.search?.('explore/installed') > -1)
+          ttsUrl = `/installed-apps/${params.appId}/text-to-audio`;
+        else ttsUrl = `/apps/${params.appId}/text-to-audio`;
+      }
+      const player = AudioPlayerManager.getInstance().getAudioPlayer(
+        ttsUrl,
+        ttsIsPublic,
+        uuidV4(),
+        'none',
+        'none',
+        (_: any): any => {}
+      );
 
-          if (onError)
-            onError(params)
+      url = `/apps/${appDetail?.id}/workflows/draft/run`;
+      ssePost(
+        url,
+        {
+          body: params
         },
-        onNodeStarted: (params) => {
-          handleWorkflowNodeStarted(
-            params,
-            {
+        {
+          onWorkflowStarted: (params) => {
+            handleWorkflowStarted(params);
+
+            if (onWorkflowStarted) onWorkflowStarted(params);
+          },
+          onWorkflowFinished: (params) => {
+            handleWorkflowFinished(params);
+
+            if (onWorkflowFinished) onWorkflowFinished(params);
+          },
+          onError: (params) => {
+            handleWorkflowFailed();
+
+            if (onError) onError(params);
+          },
+          onNodeStarted: (params) => {
+            handleWorkflowNodeStarted(params, {
               clientWidth,
-              clientHeight,
-            },
-          )
+              clientHeight
+            });
 
-          if (onNodeStarted)
-            onNodeStarted(params)
-        },
-        onNodeFinished: (params) => {
-          handleWorkflowNodeFinished(params)
+            if (onNodeStarted) onNodeStarted(params);
+          },
+          onNodeFinished: (params) => {
+            handleWorkflowNodeFinished(params);
 
-          if (onNodeFinished)
-            onNodeFinished(params)
-        },
-        onIterationStart: (params) => {
-          handleWorkflowNodeIterationStarted(
-            params,
-            {
+            if (onNodeFinished) onNodeFinished(params);
+          },
+          onIterationStart: (params) => {
+            handleWorkflowNodeIterationStarted(params, {
               clientWidth,
-              clientHeight,
-            },
-          )
+              clientHeight
+            });
 
-          if (onIterationStart)
-            onIterationStart(params)
-        },
-        onIterationNext: (params) => {
-          handleWorkflowNodeIterationNext(params)
+            if (onIterationStart) onIterationStart(params);
+          },
+          onIterationNext: (params) => {
+            handleWorkflowNodeIterationNext(params);
 
-          if (onIterationNext)
-            onIterationNext(params)
-        },
-        onIterationFinish: (params) => {
-          handleWorkflowNodeIterationFinished(params)
+            if (onIterationNext) onIterationNext(params);
+          },
+          onIterationFinish: (params) => {
+            handleWorkflowNodeIterationFinished(params);
 
-          if (onIterationFinish)
-            onIterationFinish(params)
-        },
-        onLoopStart: (params) => {
-          handleWorkflowNodeLoopStarted(
-            params,
-            {
+            if (onIterationFinish) onIterationFinish(params);
+          },
+          onLoopStart: (params) => {
+            handleWorkflowNodeLoopStarted(params, {
               clientWidth,
-              clientHeight,
-            },
-          )
+              clientHeight
+            });
 
-          if (onLoopStart)
-            onLoopStart(params)
-        },
-        onLoopNext: (params) => {
-          handleWorkflowNodeLoopNext(params)
+            if (onLoopStart) onLoopStart(params);
+          },
+          onLoopNext: (params) => {
+            handleWorkflowNodeLoopNext(params);
 
-          if (onLoopNext)
-            onLoopNext(params)
-        },
-        onLoopFinish: (params) => {
-          handleWorkflowNodeLoopFinished(params)
+            if (onLoopNext) onLoopNext(params);
+          },
+          onLoopFinish: (params) => {
+            handleWorkflowNodeLoopFinished(params);
 
-          if (onLoopFinish)
-            onLoopFinish(params)
-        },
-        onNodeRetry: (params) => {
-          handleWorkflowNodeRetry(params)
+            if (onLoopFinish) onLoopFinish(params);
+          },
+          onNodeRetry: (params) => {
+            handleWorkflowNodeRetry(params);
 
-          if (onNodeRetry)
-            onNodeRetry(params)
-        },
-        onAgentLog: (params) => {
-          handleWorkflowAgentLog(params)
+            if (onNodeRetry) onNodeRetry(params);
+          },
+          onAgentLog: (params) => {
+            handleWorkflowAgentLog(params);
 
-          if (onAgentLog)
-            onAgentLog(params)
-        },
-        onTextChunk: (params) => {
-          handleWorkflowTextChunk(params)
-        },
-        onTextReplace: (params) => {
-          handleWorkflowTextReplace(params)
-        },
-        onTTSChunk: (messageId: string, audio: string) => {
-          if (!audio || audio === '')
-            return
-          player.playAudioWithAudio(audio, true)
-          AudioPlayerManager.getInstance().resetMsgId(messageId)
-        },
-        onTTSEnd: (messageId: string, audio: string) => {
-          player.playAudioWithAudio(audio, false)
-        },
-        ...restCallback,
-      },
-    )
-  }, [
-    store,
-    workflowStore,
-    doSyncWorkflowDraft,
-    handleWorkflowStarted,
-    handleWorkflowFinished,
-    handleWorkflowFailed,
-    handleWorkflowNodeStarted,
-    handleWorkflowNodeFinished,
-    handleWorkflowNodeIterationStarted,
-    handleWorkflowNodeIterationNext,
-    handleWorkflowNodeIterationFinished,
-    handleWorkflowNodeLoopStarted,
-    handleWorkflowNodeLoopNext,
-    handleWorkflowNodeLoopFinished,
-    handleWorkflowNodeRetry,
-    handleWorkflowTextChunk,
-    handleWorkflowTextReplace,
-    handleWorkflowAgentLog,
-    pathname],
-  )
+            if (onAgentLog) onAgentLog(params);
+          },
+          onTextChunk: (params) => {
+            handleWorkflowTextChunk(params);
+          },
+          onTextReplace: (params) => {
+            handleWorkflowTextReplace(params);
+          },
+          onTTSChunk: (messageId: string, audio: string) => {
+            if (!audio || audio === '') return;
+            player.playAudioWithAudio(audio, true);
+            AudioPlayerManager.getInstance().resetMsgId(messageId);
+          },
+          onTTSEnd: (messageId: string, audio: string) => {
+            player.playAudioWithAudio(audio, false);
+          },
+          ...restCallback
+        }
+      );
+    },
+    [
+      store,
+      workflowStore,
+      doSyncWorkflowDraft,
+      handleWorkflowStarted,
+      handleWorkflowFinished,
+      handleWorkflowFailed,
+      handleWorkflowNodeStarted,
+      handleWorkflowNodeFinished,
+      handleWorkflowNodeIterationStarted,
+      handleWorkflowNodeIterationNext,
+      handleWorkflowNodeIterationFinished,
+      handleWorkflowNodeLoopStarted,
+      handleWorkflowNodeLoopNext,
+      handleWorkflowNodeLoopFinished,
+      handleWorkflowNodeRetry,
+      handleWorkflowTextChunk,
+      handleWorkflowTextReplace,
+      handleWorkflowAgentLog,
+      pathname
+    ]
+  );
 
   const handleStopRun = useCallback((taskId: string) => {
-    const appId = useAppStore.getState().appDetail?.id
+    const appId = useAppStore.getState().appDetail?.id;
 
     // stopWorkflowRun(`/apps/${appId}/workflow-runs/tasks/${taskId}/stop`)
-    console.warn('API NOT IMPLEMENTED', 'stopWorkflowRun')
-  }, [])
+    console.warn('API NOT IMPLEMENTED', 'stopWorkflowRun');
+  }, []);
 
-  const handleRestoreFromPublishedWorkflow = useCallback((publishedWorkflow: VersionHistory) => {
-    const nodes = publishedWorkflow.graph.nodes.map(node => ({ ...node, selected: false, data: { ...node.data, selected: false } }))
-    const edges = publishedWorkflow.graph.edges
-    const viewport = publishedWorkflow.graph.viewport!
-    handleUpdateWorkflowCanvas({
-      nodes,
-      edges,
-      viewport,
-    })
-    const mappedFeatures = {
-      opening: {
-        enabled: !!publishedWorkflow.features.opening_statement || !!publishedWorkflow.features.suggested_questions.length,
-        opening_statement: publishedWorkflow.features.opening_statement,
-        suggested_questions: publishedWorkflow.features.suggested_questions,
-      },
-      suggested: publishedWorkflow.features.suggested_questions_after_answer,
-      text2speech: publishedWorkflow.features.text_to_speech,
-      speech2text: publishedWorkflow.features.speech_to_text,
-      citation: publishedWorkflow.features.retriever_resource,
-      moderation: publishedWorkflow.features.sensitive_word_avoidance,
-      file: publishedWorkflow.features.file_upload,
-    }
+  const handleRestoreFromPublishedWorkflow = useCallback(
+    (publishedWorkflow: VersionHistory) => {
+      const nodes = publishedWorkflow.graph.nodes.map((node) => ({
+        ...node,
+        selected: false,
+        data: { ...node.data, selected: false }
+      }));
+      const edges = publishedWorkflow.graph.edges;
+      const viewport = publishedWorkflow.graph.viewport!;
+      handleUpdateWorkflowCanvas({
+        nodes,
+        edges,
+        viewport
+      });
+      const mappedFeatures = {
+        opening: {
+          enabled:
+            !!publishedWorkflow.features.opening_statement ||
+            !!publishedWorkflow.features.suggested_questions.length,
+          opening_statement: publishedWorkflow.features.opening_statement,
+          suggested_questions: publishedWorkflow.features.suggested_questions
+        },
+        suggested: publishedWorkflow.features.suggested_questions_after_answer,
+        text2speech: publishedWorkflow.features.text_to_speech,
+        speech2text: publishedWorkflow.features.speech_to_text,
+        citation: publishedWorkflow.features.retriever_resource,
+        moderation: publishedWorkflow.features.sensitive_word_avoidance,
+        file: publishedWorkflow.features.file_upload
+      };
 
-    // featuresStore?.setState({ features: mappedFeatures })
-    workflowStore.getState().setPublishedAt(publishedWorkflow.created_at)
-    workflowStore.getState().setEnvironmentVariables(publishedWorkflow.environment_variables || [])
-  }, [handleUpdateWorkflowCanvas, workflowStore])
+      // featuresStore?.setState({ features: mappedFeatures })
+      workflowStore.getState().setPublishedAt(publishedWorkflow.created_at);
+      workflowStore
+        .getState()
+        .setEnvironmentVariables(publishedWorkflow.environment_variables || []);
+    },
+    [handleUpdateWorkflowCanvas, workflowStore]
+  );
 
   return {
     handleBackupDraft,
     handleLoadBackupDraft,
     handleRun,
     handleStopRun,
-    handleRestoreFromPublishedWorkflow,
-  }
-}
+    handleRestoreFromPublishedWorkflow
+  };
+};

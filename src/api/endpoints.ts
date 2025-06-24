@@ -243,15 +243,22 @@ export const ModaForgeResourceEndpoints = {
   //修改数据集
   updateDatasetApi: PrefixAimdp + '/dataset/{id}',
   //获取数据集详细信息
-  
+
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
-
 
   // 连接器接口
 
   // 获取连接器数据列表
-  getConnection: PrefixAimdp + '/connectors'
+  getConnection: PrefixAimdp + '/connectors',
+  // 新建连接器数据
+  addconnection: PrefixAimdp + '/connectors',
+  // 删除连接器数据
+  delconnection: PrefixAimdp + '/connectors/{connector_id}',
+  // 修改连接器数据
+  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  // 查看连接器详情数据
+  getconnection: PrefixAimdp + '/connectors/{connector_id}'
 };
 
 /**

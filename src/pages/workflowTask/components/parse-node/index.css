@@ -4,7 +4,7 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-  background-color: #F8FAFD;
+  background-color: #f8fafd;
 
   .item-title {
     font-weight: 500;
@@ -12,7 +12,7 @@
     line-height: 22px;
     letter-spacing: 0%;
     text-align: center;
-    color: #1E293B;
+    color: #1e293b;
   }
 
   .item-content {
@@ -22,10 +22,10 @@
     line-height: 54px;
     letter-spacing: 0%;
     text-align: center;
-    color: #1E293B;
+    color: #1e293b;
   }
 }
 
-.parse-node .arco-table-tr>th {
+.parse-node .arco-table-tr > th {
   background-color: rgb(245, 249, 255) !important;
 }

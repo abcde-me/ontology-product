@@ -140,7 +140,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  background-color: #F8FAFD;
+  background-color: #f8fafd;
   border-radius: 4px;
   padding: 20px;
   height: 164px;
@@ -288,15 +288,15 @@
 }
 
 .dataset-content p {
-    margin-bottom: 12px;
-    color: #4e5969;
-    font-size: 14px;
+  margin-bottom: 12px;
+  color: #4e5969;
+  font-size: 14px;
 }
 
 /* 面包屑可点击项悬停效果 */
 .dataset-detail .arco-breadcrumb-item span:hover {
-    color: #0e42d2 !important;
-    text-decoration: underline;
+  color: #0e42d2 !important;
+  text-decoration: underline;
 }
 
 /* 响应式布局 */
@@ -304,36 +304,36 @@
   .dataset-detail {
     padding: 12px;
   }
-  
+
   .dataset-detail-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .basic-info-content {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .search-section {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .search-section .arco-input {
     width: 100%;
   }
-  
+
   .header-right {
     align-self: stretch;
   }
-  
+
   .basic-info-card .arco-card-body {
     padding: 16px;
   }
-  
+
   .basic-info-card .arco-tabs-content {
     padding: 12px;
   }
@@ -359,4 +359,4 @@
   color: #86909c;
   font-size: 14px;
   margin-left: auto;
-} 
+}

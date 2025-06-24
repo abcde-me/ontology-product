@@ -1,34 +1,38 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import {
-    Typography,
-    Button,
-    Space,
-    Card,
-    Descriptions,
-    Tag,
-    Modal,
-    Message,
-    Tabs,
-    Table,
-    Input,
-    Select,
-    Pagination,
-    Tooltip,
+  Typography,
+  Button,
+  Space,
+  Card,
+  Descriptions,
+  Tag,
+  Modal,
+  Message,
+  Tabs,
+  Table,
+  Input,
+  Select,
+  Pagination,
+  Tooltip
 } from '@arco-design/web-react';
 import {
-    IconArrowLeft,
-    IconEdit,
-    IconDelete,
-    IconSearch,
-    IconPlayArrow,
-    IconHistory,
-    IconRefresh,
-    IconCheck,
-    IconClose
+  IconArrowLeft,
+  IconEdit,
+  IconDelete,
+  IconSearch,
+  IconPlayArrow,
+  IconHistory,
+  IconRefresh,
+  IconCheck,
+  IconClose
 } from '@arco-design/web-react/icon';
-import { Breadcrumb } from "@arco-design/web-react";
-import { getDatasetDetail, updateDataset, getDatasetContents } from '@/api/datasetManagement';
+import { Breadcrumb } from '@arco-design/web-react';
+import {
+  getDatasetDetail,
+  updateDataset,
+  getDatasetContents
+} from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { render } from '@headlessui/react/dist/utils/render';
@@ -38,503 +42,564 @@ const { TabPane } = Tabs;
 
 // 测试数据
 const csdatasetDetail = {
-    "id": 0,
-    "name": "西游三打白骨精",
-    "description": "liuxiaoyu-test",
-    "latest_version": "v1.10",
-    "src": 0,
-    "creator_id": "user_001",
-    "creator_name": "张三",
-    "created_at": "2025-05-05 05:05:05",
-    "updated_at": "2025-05-05 05:05:05",
-    "deleted_at": null,
-    "tags": ["小说情节"],
-    "model": "GPT-4o"
-}
+  id: 0,
+  name: '西游三打白骨精',
+  description: 'liuxiaoyu-test',
+  latest_version: 'v1.10',
+  src: 0,
+  creator_id: 'user_001',
+  creator_name: '张三',
+  created_at: '2025-05-05 05:05:05',
+  updated_at: '2025-05-05 05:05:05',
+  deleted_at: null,
+  tags: ['小说情节'],
+  model: 'GPT-4o'
+};
 
 // 内容数据测试数据
 const cscontentData = [
-    { "line": 0, "data": { "姓名": "张三", "年龄": 28, "性别": "男" } },
-    { "line": 1, "data": { "姓名": "李四", "年龄": 34, "性别": "女" } },
-    { "line": 2, "data": { "姓名": "王五", "年龄": 22, "性别": "男" } }
-]
+  { line: 0, data: { 姓名: '张三', 年龄: 28, 性别: '男' } },
+  { line: 1, data: { 姓名: '李四', 年龄: 34, 性别: '女' } },
+  { line: 2, data: { 姓名: '王五', 年龄: 22, 性别: '男' } }
+];
 
 // 内容数据表格列定义
-const cscontentColumns = ['姓名', '年龄', '性别']
-
+const cscontentColumns = ['姓名', '年龄', '性别'];
 
 //headers:表头
 //handleEditContent:编辑内容
 //handleContinue:删除
 //editingRowKey:当前编辑行
 //editingData:当前编辑数据
-//onDataChange:处理编辑数据变化 
+//onDataChange:处理编辑数据变化
 
-const generateArcoColumns = (headers, handleEditContent, handleContinue, editingRowKey, editingData, onDataChange, handleInlineEditSubmit, handleInlineEditCancel) => {
-    const cols = headers.map((header) => ({
-        title: header,
-        dataIndex: header,
-        key: header,
-        render: (value: any, record: any) => {
-            if (editingRowKey == record.line) {
-                return (
-                    <Input.TextArea
-                        value={editingData[header] !== undefined ? editingData[header] : record.data[header]}
-                        onChange={(value) => onDataChange(header, value)}
-                        style={{ margin: '-5px 0' }}
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                        placeholder="请输入内容"
-                    />
-                );
+const generateArcoColumns = (
+  headers,
+  handleEditContent,
+  handleContinue,
+  editingRowKey,
+  editingData,
+  onDataChange,
+  handleInlineEditSubmit,
+  handleInlineEditCancel
+) => {
+  const cols = headers.map((header) => ({
+    title: header,
+    dataIndex: header,
+    key: header,
+    render: (value: any, record: any) => {
+      if (editingRowKey == record.line) {
+        return (
+          <Input.TextArea
+            value={
+              editingData[header] !== undefined
+                ? editingData[header]
+                : record.data[header]
             }
-            return <div>{record.data[header]}</div>;
-        }
-        // width: 150,
-        // align: 'center',
-        // ellipsis: true,
-    }));
+            onChange={(value) => onDataChange(header, value)}
+            style={{ margin: '-5px 0' }}
+            autoSize={{ minRows: 2, maxRows: 6 }}
+            placeholder="请输入内容"
+          />
+        );
+      }
+      return <div>{record.data[header]}</div>;
+    }
+    // width: 150,
+    // align: 'center',
+    // ellipsis: true,
+  }));
 
-    // 在最后追加一列 "操作"
-    cols.push({
-        title: '操作',
-        key: 'action',
-        width: 140,
-        fixed: 'right',
-        render: (_, record) => {
-            if (editingRowKey == record.line) {
-                // 编辑模式：显示确认和取消按钮
-                return (
-                    <Space>
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<IconCheck style={{ color: '#00b42a' }} />}
-                            onClick={() => handleInlineEditSubmit(record)}
-                            style={{ color: '#00b42a' }}
-                            title="确认"
-                        />
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<IconClose style={{ color: '#f53f3f' }} />}
-                            onClick={handleInlineEditCancel}
-                            style={{ color: '#f53f3f' }}
-                            title="取消"
-                        />
-                    </Space>
-                );
-            }
+  // 在最后追加一列 "操作"
+  cols.push({
+    title: '操作',
+    key: 'action',
+    width: 140,
+    fixed: 'right',
+    render: (_, record) => {
+      if (editingRowKey == record.line) {
+        // 编辑模式：显示确认和取消按钮
+        return (
+          <Space>
+            <Button
+              type="text"
+              size="small"
+              icon={<IconCheck style={{ color: '#00b42a' }} />}
+              onClick={() => handleInlineEditSubmit(record)}
+              style={{ color: '#00b42a' }}
+              title="确认"
+            />
+            <Button
+              type="text"
+              size="small"
+              icon={<IconClose style={{ color: '#f53f3f' }} />}
+              onClick={handleInlineEditCancel}
+              style={{ color: '#f53f3f' }}
+              title="取消"
+            />
+          </Space>
+        );
+      }
 
-            // 正常模式：显示编辑和删除按钮
-            return (
-                <Space>
-                    <Button type="text" size="small" onClick={() => handleEditContent(record.line)}>
-                        编辑
-                    </Button>
-                    <Button
-                        type="text"
-                        status="danger"
-                        size="small"
-                        onClick={() => handleContinue(record.line)}
-                    >
-                        删除
-                    </Button>
-                </Space>
-            );
-        },
-    });
+      // 正常模式：显示编辑和删除按钮
+      return (
+        <Space>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => handleEditContent(record.line)}
+          >
+            编辑
+          </Button>
+          <Button
+            type="text"
+            status="danger"
+            size="small"
+            onClick={() => handleContinue(record.line)}
+          >
+            删除
+          </Button>
+        </Space>
+      );
+    }
+  });
 
-    return cols;
-}
-
-
-
-
+  return cols;
+};
 
 // 版本历史测试数据
 const versionHistory = [
-    { version: 'v1.10', date: '2025-06-23', description: '当前版本', status: 'current', changes: 15 },
-    { version: 'v1.09', date: '2025-06-20', description: '重新版本', status: 'archived', changes: 8 },
-    { version: 'v1.08', date: '2025-06-18', description: '优化内容', status: 'archived', changes: 12 },
-    { version: 'v1.07', date: '2025-06-15', description: '修复问题', status: 'archived', changes: 5 },
+  {
+    version: 'v1.10',
+    date: '2025-06-23',
+    description: '当前版本',
+    status: 'current',
+    changes: 15
+  },
+  {
+    version: 'v1.09',
+    date: '2025-06-20',
+    description: '重新版本',
+    status: 'archived',
+    changes: 8
+  },
+  {
+    version: 'v1.08',
+    date: '2025-06-18',
+    description: '优化内容',
+    status: 'archived',
+    changes: 12
+  },
+  {
+    version: 'v1.07',
+    date: '2025-06-15',
+    description: '修复问题',
+    status: 'archived',
+    changes: 5
+  }
 ];
-
-
-
-
 
 // 版本历史表格列定义
 const versionColumns = [
-    {
-        title: '版本号',
-        dataIndex: 'version',
+  {
+    title: '版本号',
+    dataIndex: 'version',
 
-        render: (version: string, record: any) => (
-            <Space>
-                <Text style={{ fontWeight: record.status === 'current' ? 'bold' : 'normal' }}>
-                    {version}
-                </Text>
-                {record.status === 'current' && (
-                    <span className="version-current-tag">当前版本</span>
-                )}
-            </Space>
-        ),
-    },
-    {
-        title: '日期',
-        dataIndex: 'date',
-    },
-    {
-        title: '描述',
-        dataIndex: 'description',
-    },
-    {
-        title: '更改数量',
-        dataIndex: 'changes',
-        render: (changes: number) => `${changes} 项更改`,
-    }
+    render: (version: string, record: any) => (
+      <Space>
+        <Text
+          style={{
+            fontWeight: record.status === 'current' ? 'bold' : 'normal'
+          }}
+        >
+          {version}
+        </Text>
+        {record.status === 'current' && (
+          <span className="version-current-tag">当前版本</span>
+        )}
+      </Space>
+    )
+  },
+  {
+    title: '日期',
+    dataIndex: 'date'
+  },
+  {
+    title: '描述',
+    dataIndex: 'description'
+  },
+  {
+    title: '更改数量',
+    dataIndex: 'changes',
+    render: (changes: number) => `${changes} 项更改`
+  }
 ];
 
-
-
 const DatasetDetail: React.FC = () => {
-    const [datasetDetail, setDatasetDetail] = React.useState<any>(null);
-    const [editModalVisible, setEditModalVisible] = React.useState(false);
-    const [activeTab, setActiveTab] = React.useState('content');
-    const [contentData, setContentData] = React.useState([]);//内容数据
-    const [searchValue, setSearchValue] = React.useState('');
-    const [currentPage, setCurrentPage] = React.useState(1);//当前页码
-    const [pageSize] = React.useState(10);//每页条数
-    const [total, setTotal] = React.useState(0);//总条数
-    const [contentColumns, setContentColumns] = React.useState([]);//列信息
-    const { id } = useParams<{ id: string }>();//数据集id
-    const history = useHistory();
+  const [datasetDetail, setDatasetDetail] = React.useState<any>(null);
+  const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('content');
+  const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
+  const [searchValue, setSearchValue] = React.useState('');
+  const [currentPage, setCurrentPage] = React.useState(1); //当前页码
+  const [pageSize] = React.useState(10); //每页条数
+  const [total, setTotal] = React.useState(0); //总条数
+  const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
+  const { id } = useParams<{ id: string }>(); //数据集id
+  const history = useHistory();
 
-    // 编辑数据
-    const [editingRowKey, setEditingRowKey] = React.useState<string | null>(null);//当前编辑行
-    const [editingData, setEditingData] = React.useState<any>({});//当前编辑数据
-    const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的行
-    const [confirmModalVisible, setConfirmModalVisible] = React.useState(false);//确认弹窗
+  // 编辑数据
+  const [editingRowKey, setEditingRowKey] = React.useState<string | null>(null); //当前编辑行
+  const [editingData, setEditingData] = React.useState<any>({}); //当前编辑数据
+  const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的行
+  const [confirmModalVisible, setConfirmModalVisible] = React.useState(false); //确认弹窗
 
+  // 返回按钮
+  const handleBack = () => {
+    window.history.back();
+  };
 
+  // 跳转到数据集管理页面
+  const handleGoToDatasetList = () => {
+    history.push('/tenant/compute/modaforge/datasetManagement');
+  };
 
-    // 返回按钮
-    const handleBack = () => {
-        window.history.back();
-    };
+  // 打开编辑弹窗
+  const handleEdit = () => {
+    setEditModalVisible(true);
+  };
 
-    // 跳转到数据集管理页面
-    const handleGoToDatasetList = () => {
-        history.push('/tenant/compute/modaforge/datasetManagement');
-    };
+  // 关闭编辑弹窗
+  const handleCloseEditModal = () => {
+    setEditModalVisible(false);
+  };
 
-    // 打开编辑弹窗
-    const handleEdit = () => {
-        setEditModalVisible(true);
-    };
+  // 处理编辑提交
+  const handleEditSubmit = (formData: any) => {
+    console.log('编辑数据集:', formData);
 
-    // 关闭编辑弹窗
-    const handleCloseEditModal = () => {
+    updateDataset(formData)
+      .then((res) => {
+        console.log(res);
+        Message.success('数据集更新成功');
         setEditModalVisible(false);
-    };
+      })
+      .catch((err) => {
+        Message.error('数据集更新失败');
+      });
+  };
 
-    // 处理编辑提交
-    const handleEditSubmit = (formData: any) => {
-        console.log('编辑数据集:', formData);
+  // 编辑内容
+  const handleEditContent = (record: any) => {
+    console.log('编辑内容:', record);
+    setEditingRowKey(record);
 
-        updateDataset(formData).then(res => {
-            console.log(res)
-            Message.success('数据集更新成功');
-            setEditModalVisible(false);
-        }).catch(err => {
-            Message.error('数据集更新失败');
-        })
-    };
+    // 初始化编辑数据
+    const currentRow = contentData.find((item: any) => item.line === record);
+    if (currentRow) {
+      setEditingData({ ...currentRow.data });
+    }
 
+    Message.info(`编辑第${record}条内容`);
+  };
 
+  // 操作
+  const handleContinue = (record: any) => {
+    Message.info(`为第${record}条内容生成后续文本`);
+  };
 
+  // 处理编辑数据变化
+  const handleEditDataChange = (field: string, value: any) => {
+    setEditingData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-    // 编辑内容
-    const handleEditContent = (record: any) => {
-        console.log('编辑内容:', record);
-        setEditingRowKey(record);
+  // 确认保存内联编辑
+  const handleInlineEditSubmit = (record: any) => {
+    // 更新数据
+    const newData = contentData.map((item: any) => {
+      if (item.line === editingRowKey) {
+        return {
+          ...item,
+          data: { ...editingData }
+        };
+      }
+      return item;
+    });
+    setContentData(newData);
 
-        // 初始化编辑数据
-        const currentRow = contentData.find((item: any) => item.line === record);
-        if (currentRow) {
-            setEditingData({ ...currentRow.data });
-        }
+    // 记录修改的行
+    if (!changedRows.includes(editingRowKey!.toString())) {
+      setChangedRows([...changedRows, editingRowKey!.toString()]);
+    }
 
-        Message.info(`编辑第${record}条内容`);
-    };
+    // 重置编辑状态
+    setEditingRowKey(null);
+    setEditingData({});
 
-    // 操作
-    const handleContinue = (record: any) => {
-        Message.info(`为第${record}条内容生成后续文本`);
-    };
+    Message.success('数据修改成功');
+    console.log('已修改的行:', [...changedRows, editingRowKey]);
+  };
 
-    // 处理编辑数据变化
-    const handleEditDataChange = (field: string, value: any) => {
-        setEditingData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
+  // 取消内联编辑
+  const handleInlineEditCancel = () => {
+    setEditingRowKey(null);
+    setEditingData({});
+    Message.info('已取消编辑');
+  };
 
-    // 确认保存内联编辑
-    const handleInlineEditSubmit = (record: any) => {
-        // 更新数据
-        const newData = contentData.map((item: any) => {
-            if (item.line === editingRowKey) {
-                return {
-                    ...item,
-                    data: { ...editingData }
-                };
-            }
-            return item;
-        });
-        setContentData(newData);
+  // 格式化日期
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-        // 记录修改的行
-        if (!changedRows.includes(editingRowKey!.toString())) {
-            setChangedRows([...changedRows, editingRowKey!.toString()]);
-        }
+  React.useEffect(() => {
+    // 测试数据
+    setDatasetDetail(csdatasetDetail);
+  }, []);
 
-        // 重置编辑状态
-        setEditingRowKey(null);
-        setEditingData({});
+  React.useEffect(() => {
+    // 查询数据集数据内容
+    // if(datasetDetail){
+    //     getDatasetContents({id,datasetDetail:datasetDetail.latest_version,searchValue,currentPage,pageSize}).then(res=>{
+    //         setContentData(res.data.list)
+    //         setContentColumns(generateArcoColumns( res.data.field_names,handleEditContent,handleContinue))
+    //         setTotal(res.data.total)
+    //     })
+    // }
 
-        Message.success('数据修改成功');
-        console.log('已修改的行:', [...changedRows, editingRowKey]);
-    };
+    //测试数据
+    setContentData(cscontentData);
+    setContentColumns(
+      generateArcoColumns(
+        cscontentColumns,
+        handleEditContent,
+        handleContinue,
+        editingRowKey,
+        editingData,
+        handleEditDataChange,
+        handleInlineEditSubmit,
+        handleInlineEditCancel
+      )
+    );
+  }, [
+    searchValue,
+    currentPage,
+    pageSize,
+    datasetDetail,
+    editingRowKey,
+    editingData
+  ]);
 
-    // 取消内联编辑
-    const handleInlineEditCancel = () => {
-        setEditingRowKey(null);
-        setEditingData({});
-        Message.info('已取消编辑');
-    };
+  return (
+    <div className="dataset-detail">
+      {/* 面包屑导航区域 */}
+      <div className="breadcrumb-wrapper">
+        <Button
+          type="text"
+          icon={<IconArrowLeft style={{ color: '#000' }} />}
+          onClick={handleBack}
+        />
+        <Breadcrumb style={{ fontSize: 18 }}>
+          <Breadcrumb.Item>
+            <span
+              // style={{ cursor: 'pointer', color: '#165dff' }}
+              onClick={handleGoToDatasetList}
+            >
+              数据集管理
+            </span>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
+        </Breadcrumb>
+      </div>
 
-    // 格式化日期
-    const formatDate = (dateString: string) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-
-
-    React.useEffect(() => {
-        // 测试数据
-        setDatasetDetail(csdatasetDetail)
-    }, [])
-
-    React.useEffect(() => {
-        // 查询数据集数据内容
-        // if(datasetDetail){
-        //     getDatasetContents({id,datasetDetail:datasetDetail.latest_version,searchValue,currentPage,pageSize}).then(res=>{
-        //         setContentData(res.data.list)
-        //         setContentColumns(generateArcoColumns( res.data.field_names,handleEditContent,handleContinue))
-        //         setTotal(res.data.total)
-        //     })
-        // }
-
-        //测试数据
-        setContentData(cscontentData)
-        setContentColumns(generateArcoColumns(cscontentColumns, handleEditContent, handleContinue, editingRowKey, editingData, handleEditDataChange, handleInlineEditSubmit, handleInlineEditCancel))
-    }, [searchValue, currentPage, pageSize, datasetDetail, editingRowKey, editingData])
-
-
-    return (
-        <div className="dataset-detail">
-            {/* 面包屑导航区域 */}
-            <div className="breadcrumb-wrapper">
-                <Button
-                    type="text"
-                    icon={<IconArrowLeft style={{ color: '#000' }} />}
-                    onClick={handleBack}
-                />
-                <Breadcrumb style={{ fontSize: 18 }}>
-                    <Breadcrumb.Item>
-                        <span
-                            // style={{ cursor: 'pointer', color: '#165dff' }}
-                            onClick={handleGoToDatasetList}
-                        >
-                            数据集管理
-                        </span>
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
-                </Breadcrumb>
+      {/* 数据集详情面板 */}
+      <Card className="basic-info-card" bordered={false}>
+        {/* 基本信息区域 */}
+        {datasetDetail && (
+          <>
+            {/* 标题区域 */}
+            <div className="basic-info-header">
+              <Title heading={4}>基本信息</Title>
+              <Button
+                type="text"
+                icon={<IconEdit />}
+                onClick={handleEdit}
+                className="edit-btn"
+              >
+                编辑
+              </Button>
             </div>
 
-            {/* 数据集详情面板 */}
-            <Card
-                className="basic-info-card"
-                bordered={false}
-            >
-                {/* 基本信息区域 */}
-                {datasetDetail && (
-                    <>
-                        {/* 标题区域 */}
-                        <div className="basic-info-header">
-                            <Title heading={4}>
-                                基本信息
-                            </Title>
-                            <Button
-                                type="text"
-                                icon={<IconEdit />}
-                                onClick={handleEdit}
-                                className="edit-btn"
-                            >
-                                编辑
-                            </Button>
-                        </div>
+            {/* 内容区域 */}
+            <div className="basic-info-content" style={{ marginBottom: 24 }}>
+              <div>
+                <Descriptions
+                  data={[
+                    { label: '名称', value: datasetDetail.name },
+                    {
+                      label: '标签',
+                      value: datasetDetail.tags?.join('、') || '-'
+                    },
+                    { label: '创建人', value: datasetDetail.creator_name },
+                    { label: '生成模型', value: datasetDetail.model }
+                  ]}
+                  column={1}
+                  labelStyle={{
+                    width: 80,
+                    fontWeight: 'normal',
+                    color: '#666666'
+                  }}
+                  valueStyle={{
+                    color: '#333333',
+                    fontWeight: 'normal'
+                  }}
+                />
+              </div>
 
-                        {/* 内容区域 */}
-                        <div className="basic-info-content" style={{ marginBottom: 24 }}>
-                            <div>
-                                <Descriptions
-                                    data={[
-                                        { label: '名称', value: datasetDetail.name },
-                                        { label: '标签', value: datasetDetail.tags?.join('、') || '-' },
-                                        { label: '创建人', value: datasetDetail.creator_name },
-                                        { label: '生成模型', value: datasetDetail.model },
-                                    ]}
-                                    column={1}
-                                    labelStyle={{
-                                        width: 80,
-                                        fontWeight: 'normal',
-                                        color: '#666666'
-                                    }}
-                                    valueStyle={{
-                                        color: '#333333',
-                                        fontWeight: 'normal'
-                                    }}
-                                />
-                            </div>
+              <div>
+                <Descriptions
+                  data={[
+                    {
+                      label: '当前版本',
+                      value: (
+                        <span
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <span>{datasetDetail.latest_version}</span>
+                          <span className="version-tag">最新版本</span>
+                        </span>
+                      )
+                    },
+                    {
+                      label: '创建时间',
+                      value: formatDate(datasetDetail.created_at)
+                    },
+                    {
+                      label: '更新时间',
+                      value: formatDate(datasetDetail.updated_at)
+                    },
+                    {
+                      label: '描述说明',
+                      value: datasetDetail.description || '-'
+                    }
+                  ]}
+                  column={1}
+                  labelStyle={{
+                    width: 80,
+                    fontWeight: 'normal',
+                    color: '#666666'
+                  }}
+                  valueStyle={{
+                    color: '#333333',
+                    fontWeight: 'normal'
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
-                            <div>
-                                <Descriptions
-                                    data={[
-                                        {
-                                            label: '当前版本',
-                                            value: (
-                                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <span>{datasetDetail.latest_version}</span>
-                                                    <span className="version-tag">
-                                                        最新版本
-                                                    </span>
-                                                </span>
-                                            )
-                                        },
-                                        { label: '创建时间', value: formatDate(datasetDetail.created_at) },
-                                        { label: '更新时间', value: formatDate(datasetDetail.updated_at) },
-                                        { label: '描述说明', value: datasetDetail.description || '-' },
-                                    ]}
-                                    column={1}
-                                    labelStyle={{
-                                        width: 80,
-                                        fontWeight: 'normal',
-                                        color: '#666666'
-                                    }}
-                                    valueStyle={{
-                                        color: '#333333',
-                                        fontWeight: 'normal'
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </>
-                )}
+        {/* 数据管理标签页 */}
+        <Tabs activeTab={activeTab} onChange={setActiveTab}>
+          <TabPane key="content" title="内容数据">
+            {/* 搜索系统 */}
 
-                {/* 数据管理标签页 */}
-                <Tabs activeTab={activeTab} onChange={setActiveTab}>
-                    <TabPane key="content" title="内容数据">
-                        {/* 搜索系统 */}
+            <div className="search-section">
+              <Input
+                placeholder="输入ID、关键字搜索"
+                value={searchValue}
+                onChange={setSearchValue}
+                style={{ width: 300 }}
+                allowClear
+                suffix={<IconSearch style={{ color: '#999' }} />}
+              />
+            </div>
 
-                        <div className="search-section">
-                            <Input
-                                placeholder="输入ID、关键字搜索"
-                                value={searchValue}
-                                onChange={setSearchValue}
-                                style={{ width: 300 }}
-                                allowClear
-                                suffix={<IconSearch style={{ color: '#999' }} />}
-                            />
-                        </div>
+            {/* 内容数据表格 */}
+            {activeTab === 'content' ? (
+              <Table
+                columns={contentColumns}
+                data={contentData}
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                border
+              />
+            ) : null}
 
-                        {/* 内容数据表格 */}
-                        {activeTab === 'content' ?
-                            <Table
-                                columns={contentColumns}
-                                data={contentData}
-                                pagination={false}
-                                scroll={{ x: 'max-content' }}
-                                border
-                            /> : null}
+            {/* 分页控件 */}
+            <div className="pagination-wrapper">
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={total}
+                onChange={setCurrentPage}
+                showTotal={(total, range) =>
+                  `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                }
+                showJumper
+                sizeCanChange={false}
+              />
+            </div>
+          </TabPane>
 
-                        {/* 分页控件 */}
-                        <div className="pagination-wrapper">
-                            <Pagination
-                                current={currentPage}
-                                pageSize={pageSize}
-                                total={total}
-                                onChange={setCurrentPage}
-                                showTotal={(total, range) =>
-                                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                                }
-                                showJumper
-                                sizeCanChange={false}
-                            />
-                        </div>
-                    </TabPane>
+          <TabPane key="version" title="版本历史">
+            {activeTab === 'version' ? (
+              <Table
+                columns={versionColumns}
+                data={versionHistory}
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                border
+              />
+            ) : (
+              ''
+            )}
+          </TabPane>
+        </Tabs>
+      </Card>
 
-                    <TabPane key="version" title="版本历史">
-                        {activeTab === 'version' ?
-                            <Table
-                                columns={versionColumns}
-                                data={versionHistory}
-                                pagination={false}
-                                scroll={{ x: 'max-content' }}
-                                border
-                            /> : ''}
-                    </TabPane>
-                </Tabs>
-            </Card>
-
-            {/* 编辑弹窗 */}
-            <Modal
-                title="编辑基本信息"
-                visible={editModalVisible}
-                onCancel={handleCloseEditModal}
-                footer={null}
-                style={{ width: 640, height: 354 }}
-                autoFocus={false}
-                focusLock={true}
-            >
-                {datasetDetail && (
-                    <EditDatasetForm
-                        initialData={{
-                            key: datasetDetail.id.toString(),
-                            name: datasetDetail.name,
-                            description: datasetDetail.description || '',
-                            version: datasetDetail.latest_version || 'v1.0.0',
-                            tags: datasetDetail.tags || [],
-                            model: datasetDetail.model || 'GPT-4o',
-                            creator: datasetDetail.creator_name || '',
-                        }}
-                        onSubmit={handleEditSubmit}
-                        onCancel={handleCloseEditModal}
-                    />
-                )}
-            </Modal>
-        </div>
-    );
+      {/* 编辑弹窗 */}
+      <Modal
+        title="编辑基本信息"
+        visible={editModalVisible}
+        onCancel={handleCloseEditModal}
+        footer={null}
+        style={{ width: 640, height: 354 }}
+        autoFocus={false}
+        focusLock={true}
+      >
+        {datasetDetail && (
+          <EditDatasetForm
+            initialData={{
+              key: datasetDetail.id.toString(),
+              name: datasetDetail.name,
+              description: datasetDetail.description || '',
+              version: datasetDetail.latest_version || 'v1.0.0',
+              tags: datasetDetail.tags || [],
+              model: datasetDetail.model || 'GPT-4o',
+              creator: datasetDetail.creator_name || ''
+            }}
+            onSubmit={handleEditSubmit}
+            onCancel={handleCloseEditModal}
+          />
+        )}
+      </Modal>
+    </div>
+  );
 };
 
-export default DatasetDetail; 
+export default DatasetDetail;

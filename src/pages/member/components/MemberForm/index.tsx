@@ -16,23 +16,23 @@ export default function MemberForm() {
   // 是添加成员还是修改成员
   const isEdit = !!currentMember;
 
-  console.log('currentMember', currentMember)
+  console.log('currentMember', currentMember);
   useEffect(() => {
     if (!isEdit) {
       // 如果是添加成员，清空表单
-         form.setFieldsValue({
-          account: '',
-          username: '',
-          password: '',
-          confirmPassword: '',
-          organization_id: '',
-          phone: '',
-          role_id: '',
-          position: '',
-          mark: ''
-         })
-    } else{
-      form.setFieldsValue(currentMember)
+      form.setFieldsValue({
+        account: '',
+        username: '',
+        password: '',
+        confirmPassword: '',
+        organization_id: '',
+        phone: '',
+        role_id: '',
+        position: '',
+        mark: ''
+      });
+    } else {
+      form.setFieldsValue(currentMember);
     }
   }, [currentMember]);
   return (
@@ -59,14 +59,16 @@ export default function MemberForm() {
         memberStore.setVisible(false);
       }}
     >
-      <Form form={form} initialValues={{
-        ...currentMember
-      }}>
+      <Form
+        form={form}
+        initialValues={{
+          ...currentMember
+        }}
+      >
         <FormItem
           label="姓名"
           field="username"
           required
-        
           rules={[
             { required: true, message: '请输入姓名' },
             {
@@ -81,7 +83,7 @@ export default function MemberForm() {
         <FormItem
           label="用户名"
           field="account"
-            disabled={isEdit}
+          disabled={isEdit}
           required
           rules={[
             { required: true, message: '请输入用户名' },
@@ -94,49 +96,46 @@ export default function MemberForm() {
           <Input placeholder="请输入用户名" />
         </FormItem>
 
-        {
-          isEdit ? null : ( 
-            <FormItem
-          label="密码"
-          field="password"
-          required
-          rules={[
-            { required: true, message: '请输入密码' },
-            {
-              match:
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,24}$/,
-              message:
-                '密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息'
-            }
-          ]}
-        >
-          <Input.Password placeholder="请输入密码" />
-        </FormItem>
-          )
-        }
-
-        {
-          isEdit ? null : (
-            <FormItem
-          label="确认密码"
-          field="confirmPassword"
-          required
-          rules={[
-            { required: true, message: '请确认密码' },
-            {
-              validator: (value, cb) => {
-                const password = form.getFieldValue('password');
-                if (value !== password) {
-                  return cb('两次输入的密码不一致');
-                }
-                cb();
+        {isEdit ? null : (
+          <FormItem
+            label="密码"
+            field="password"
+            required
+            rules={[
+              { required: true, message: '请输入密码' },
+              {
+                match:
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,24}$/,
+                message:
+                  '密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息'
               }
-            }
-          ]}
-        >
-          <Input.Password placeholder="请确认密码" />
-        </FormItem>)
-        }
+            ]}
+          >
+            <Input.Password placeholder="请输入密码" />
+          </FormItem>
+        )}
+
+        {isEdit ? null : (
+          <FormItem
+            label="确认密码"
+            field="confirmPassword"
+            required
+            rules={[
+              { required: true, message: '请确认密码' },
+              {
+                validator: (value, cb) => {
+                  const password = form.getFieldValue('password');
+                  if (value !== password) {
+                    return cb('两次输入的密码不一致');
+                  }
+                  cb();
+                }
+              }
+            ]}
+          >
+            <Input.Password placeholder="请确认密码" />
+          </FormItem>
+        )}
 
         <FormItem
           label="手机号"
@@ -166,7 +165,7 @@ export default function MemberForm() {
             renderFormat={(nodeProps, value) => {
               const pathTitles = getNodePathTitles(
                 orgData,
-                nodeProps._key as string
+                nodeProps?._key as string
               );
               return <span> {pathTitles.join(' / ')}</span>;
             }}
@@ -189,12 +188,9 @@ export default function MemberForm() {
             })}
           </Select>
         </FormItem>
-                  <FormItem
-                      label="职位"
-                      field="position"
-                    >
-                      <Input placeholder="请输入职位" />
-                    </FormItem>
+        <FormItem label="职位" field="position">
+          <Input placeholder="请输入职位" />
+        </FormItem>
         <FormItem label="备注" field="mark">
           <Input.TextArea placeholder="请输入备注" />
         </FormItem>

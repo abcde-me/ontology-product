@@ -28,7 +28,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const userInfo = useSelector(
     (state: GlobalState) => state?.plugins?.consolePluginAibuilder?.userInfo
   );
-  console.log('userInfo', userInfo)
+  console.log('userInfo', userInfo);
   const isInstalledApp = useMemo(() => !!installedAppInfo, [installedAppInfo]);
   const {
     data: appInfo,
@@ -357,6 +357,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
       try {
         setConversationDeleting(true);
+        // TODO: ts错误
+        // @ts-expect-error
         await deleteConvension({ appId, conversationId });
         Message.success('删除成功');
         onSuccess();
@@ -394,6 +396,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
       setConversationRenaming(true);
       try {
         await renameConvension({
+          // TODO: ts错误
+          // @ts-expect-error
           appId,
           conversationId,
           name: newName

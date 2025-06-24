@@ -1,50 +1,41 @@
 import { useLogoInfo } from '@/utils/swr';
-import { Button, Dropdown, Menu, Space, Tooltip } from '@arco-design/web-react';
-import React, {
-  type PropsWithChildren,
-  type CSSProperties,
-  useCallback,
-  useState,
-  useEffect
-} from 'react';
-import { useHistory } from 'react-router-dom';
+import { Dropdown, Menu, Tooltip, Link } from '@arco-design/web-react';
+import React, { type CSSProperties, useCallback } from 'react';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
 import { usePathChange } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
-import { getMe } from '@/api/user';
+import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
+import { PrefixV2 } from '@/api/endpoints';
+import axios from 'axios';
+import { getToken } from '@/utils/request';
 
 export default function Header({
   className,
-  style,
-  children
-}: PropsWithChildren<{ className?: string; style?: CSSProperties }>) {
-  const history = useHistory();
+  style
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   const { data } = useLogoInfo();
   const { pushPath } = usePathChange();
-  const [userInfo, setUserInfo] = useState({
-    account: '',
-    username: '',
-    phone: '',
-    created_at: '',
-    organization: '',
-    role: ''
-  });
-  function getMeInfo() {
-    getMe().then((res) => {
-      if (res.success) {
-        setUserInfo(res.data);
-      }
-    });
-  }
-  useEffect(() => {
-    getMeInfo();
-  }, []);
+
+  // 从全局 store 获取用户信息
+  const userInfo = useUserInfo();
+  console.log('userInfo', userInfo);
+  const { clearUserInfo } = useUserInfoStore();
 
   const logout = useCallback(() => {
+    // 清除本地存储的 token
     localStorage.removeItem('loginToken');
-    pushPath('/login');
-  }, [pushPath]);
+    localStorage.removeItem('console_token');
+
+    // 清除全局用户信息
+    clearUserInfo();
+
+    // 跳转到登录页面
+    pushPath('/tenant/compute/appforge/login');
+  }, [pushPath, clearUserInfo]);
 
   const onClickUserDropdown = useCallback(
     (action) => {
@@ -62,6 +53,26 @@ export default function Header({
     [logout, pushPath]
   );
 
+  const goHelp = () => {
+    const url = `${PrefixV2}/files/browser/api-demo`;
+    axios
+      .get(url, {
+        responseType: 'arraybuffer',
+        // @ts-ignore
+        headers: { ...getToken() }
+      })
+      .then((res) => {
+        // 转换pdf
+        try {
+          const blob = new Blob([res.data], { type: 'application/pdf' });
+          const docURL = URL.createObjectURL(blob);
+          window.open(docURL, '_blank');
+        } catch {
+          // Message.error('无法加载PDF文件，请检查文件结构或文件完整性');
+        }
+      });
+  };
+
   return (
     <div
       className={cls(
@@ -70,7 +81,7 @@ export default function Header({
       )}
       style={style}
     >
-      <a href="/" className="flex">
+      <a href="/" className="flex items-center">
         <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
         <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
         <div className="text-[16px] leading-[22px] text-white">
@@ -79,7 +90,13 @@ export default function Header({
       </a>
       <div className="flex items-center gap-x-[16px]">
         <Tooltip content="下载帮助文档">
-          <IconQuestionCircle className="size-[20px] cursor-pointer text-[white]" />
+          <Link
+            href="#"
+            icon={
+              <IconQuestionCircle className="size-[20px] pt-[2px] text-[white]" />
+            }
+            onClick={goHelp}
+          ></Link>
         </Tooltip>
         <Dropdown
           droplist={
@@ -100,12 +117,15 @@ export default function Header({
                   {userInfo?.role}
                 </div>
               </Menu.Item>
-              <Menu.Item
-                key="org"
-                className="flex h-[24px] items-center bg-[#E7ECF0] px-[12px] text-[14px]/[20px] text-[#151B26] hover:bg-[#E7ECF0]"
-              >
-                组织：{userInfo?.organization}
-              </Menu.Item>
+              {!userInfo?.is_super_admin && (
+                <Menu.Item
+                  key="org"
+                  className="flex h-[24px] items-center bg-[#E7ECF0] px-[12px] text-[14px]/[20px] text-[#151B26] hover:bg-[#E7ECF0]"
+                >
+                  组织：{userInfo?.organization}
+                </Menu.Item>
+              )}
+
               <Menu.Item key="account">我的账号</Menu.Item>
               <Menu.Item key="logout">退出登录</Menu.Item>
             </Menu>

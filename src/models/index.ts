@@ -383,7 +383,7 @@ export function useModel<
       model.isUnMount = true;
     };
   }, [model]);
-  return model as Model<TState, TEffects, UserData>;
+  return model;
 }
 
 interface ICreateAsyncEffectOptions {
@@ -405,7 +405,7 @@ export function createAsyncEffect<
     const options = args[0];
     const loadingKey = config?.loadingKey || 'loading';
     const showLoading = options?.showLoading;
-    const model: Model & Record<string, any> = this as any as Model;
+    const model: Model & Record<string, any> = this as Model;
     if (showLoading !== false) {
       model.setState({
         [loadingKey]: true

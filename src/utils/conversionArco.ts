@@ -1,54 +1,29 @@
-import { number } from 'echarts';
+const weekDayMap = {
+  周一: '1',
+  周二: '2',
+  周三: '3',
+  周四: '4',
+  周五: '5',
+  周六: '6',
+  周日: '7'
+} as const;
 
-// 传过来的数据转换哼后端需要的arco格式
-const conversionArco = (time, day, week, cycle) => {
-  // 解析时间（如 "09:10" -> 小时 9，分钟 10）
-  const [hour, minute] = time.split(':').map(Number);
+export type WeekDay = keyof typeof weekDayMap;
 
-  // 初始化 Cron 字段（秒 分 时 日 月 星期 年）
-  const cronSec = 0; // 秒（默认 0）
-  const cronMin = minute; // 分
-  const cronHour = hour; // 时
-  let cronDay = '*'; // 日（默认 *）
-  const cronMonth = '*'; // 月（默认 *）
-  let cronWeek = '?'; // 星期（默认 ?）
+/**
+ * 将星期数组转换为数字字符串（如 ['周一','周三'] → '1,3'）
+ */
+export function convertWeekDaysToString(days: WeekDay[] | undefined): string {
+  if (!days || days.length === 0) return '';
 
-  const resultday =
-    day &&
-    day
-      .map((item) => {
-        // 使用正则表达式提取数字部分
-        const match = item.match(/\d+/);
-        return match ? parseInt(match[0], 10) : null; // 转换为整数
-      })
-      .filter((num) => num !== null)
-      .join(', '); // 过滤掉可能的 null 值并连接
+  // 过滤掉不在映射中的值（防御性编程）
+  const validDays = days.filter((day) => day in weekDayMap);
 
-  const weekMap = {
-    周一: 1,
-    周二: 2,
-    周三: 3,
-    周四: 4,
-    周五: 5,
-    周六: 6,
-    周日: 0
-  };
-  // 根据 cycle 调整日和星期
-  if (cycle === '每日') {
-    cronDay = '*';
-    cronWeek = '?'; // 日和星期互斥，每日时星期不指定
-  } else if (cycle === '每周') {
-    cronDay = '?'; // 每周时日不指定
-    cronWeek = week.map((week) => weekMap[week]) ?? '?'; // 使用传入的 week 参数（如 "周一"）
-  } else if (cycle === '每月') {
-    cronDay = resultday || '*'; // 使用传入的 day 参数（如 1）
-    cronWeek = '?'; // 月和日时星期不指定
-  }
+  // 映射为数字并去重
+  const numbers = Array.from(new Set(validDays.map((day) => weekDayMap[day])));
 
-  // 拼接 Cron 表达式（秒 分 时 日 月 星期）
-  const cronExpression = `${cronSec} ${cronMin} ${cronHour} ${cronDay} ${cronMonth} ${cronWeek}`;
+  // 排序（可选，如果需要固定顺序）
+  numbers.sort((a, b) => parseInt(a) - parseInt(b));
 
-  return cronExpression; // 返回 Cron 表达式，而不是直接打印
-};
-
-export default conversionArco;
+  return numbers.join(',');
+}
