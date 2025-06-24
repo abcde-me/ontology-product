@@ -44,7 +44,7 @@ export type TextProcessingRules = {
 };
 
 
-export type enhancementNodeType = {
+export type EnhancementNodeType = {
   source_path: []; // '源文件路径'; // 待定是否多个目录 【】
   target_path: string; ///'目标文件路径';
   type: 'enhancement'; // start、text、pic、audio、video、cleaning、enhancement、end
