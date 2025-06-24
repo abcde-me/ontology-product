@@ -22,8 +22,8 @@ const useConfig = (id: string, payload: StartNodeType) => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0
     if (isReady) {
       setInputs({
-        ...inputs,
         ...defaultConfig,
+        ...inputs,
       })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
