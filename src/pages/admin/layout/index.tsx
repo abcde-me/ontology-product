@@ -13,6 +13,7 @@ import { SWRConfig } from 'swr';
 import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
 import { withSider } from './Sider';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 type LayoutPageProps = {
   history: any;
@@ -28,6 +29,9 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   useCheckHideRegion();
   const dispatch = useDispatch();
 
+  // 用户信息 store
+  const { fetchUserInfo, isInitialized } = useUserInfoStore();
+
   // 路由数组
   const flattenRoutes = getFlatRoutes(routes);
 
@@ -39,6 +43,14 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
     renewBeforeExpire: 1, // 在过期前30秒续约
     renewEndpoint: '/api/auth/v1/renew'
   });
+
+  // 获取用户信息 - 在 layout 初始化时调用
+  React.useEffect(() => {
+    // 只在未初始化时获取用户信息，避免重复请求
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
 
   // 入口文件的useEffect方法
   React.useEffect(() => {
