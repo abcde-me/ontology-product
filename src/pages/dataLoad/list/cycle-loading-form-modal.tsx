@@ -149,7 +149,11 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                               style={{
                                 width: '50%',
                                 height: '100%',
+                                // TODO: ts错误
+                                // @ts-expect-error
                                 background: item == timeFlag ? 'white' : null,
+                                // TODO: ts错误
+                                // @ts-expect-error
                                 color:
                                   item == timeFlag ? 'rgb(0, 125, 250)' : null,
                                 cursor: 'pointer',

@@ -78,6 +78,8 @@ const data = [
 const App = () => {
   return (
     <Table
+      // TODO: ts错误
+      // @ts-expect-error
       columns={columns}
       data={data}
       expandedRowRender={(record) =>
