@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@arco-design/web-react';
+import { Button,Popover } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog'
 import { Message } from '@arco-design/web-react';
 
@@ -15,6 +15,13 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
         dataIndex: 'content',
         ellipsis: true,
         width: 300,
+        render: (_, record) => (
+            <div>
+                <Popover content={record.content}>
+                    <span>{record.content}</span>
+                </Popover>
+            </div>
+        )
     },
     {
         title: '类型',
@@ -26,14 +33,15 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
                 value: 'pdf',
             },
             {
-                text: 'gif',
-                value: 'gif',
+                text: 'txt',
+                value: 'txt',
             },
             {
                 text: 'doc',
                 value: 'doc',
             },
         ],
+        onFilter: (value, row) => row.type == value,
     },
     {
         title: '文件大小',
@@ -55,6 +63,9 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
         // dataIndex: 'createdAt',
         width: 180,
         // sorter: (a, b) => a.salary - b.salary,
+        onFilter: (value, row) => row.salary > value,
+        // sortDirections: ['ascend'],
+        // defaultSortOrder: 'ascend',
     },
     {
         title: '连接器名称',

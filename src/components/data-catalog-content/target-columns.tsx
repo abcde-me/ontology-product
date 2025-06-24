@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog'
-import { Message } from '@arco-design/web-react';
+import { Message,Popover } from '@arco-design/web-react';
 import { sort } from 'semver';
 import axios from 'axios';
 import { rename } from 'fs';
@@ -66,6 +66,13 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
     dataIndex: 'content',
     ellipsis: true,
     width: 300,
+    render: (_, record) => (
+      <div>
+          <Popover content={record.content}>
+              <span>{record.content}</span>
+          </Popover>
+      </div>
+  )
   },
   {
     title: '生成时间',
@@ -81,22 +88,26 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
   },
   {
     title: '原文件类型',
-    dataIndex: 'file',
+    dataIndex: 'type',
     filters: [
       {
         text: 'pdf',
         value: 'pdf',
       },
       {
-        text: 'gif',
-        value: 'gif',
+        text: 'txt',
+        value: 'txt',
       },
       {
         text: 'doc',
         value: 'doc',
       },
     ],
+    onFilter: (value, row) => row.type == value,
     width: 134,
+    render: (_, record) => (
+      <div>{record.type}</div>
+    )
   },
   {
     title: '操作',

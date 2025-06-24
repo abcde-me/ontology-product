@@ -210,7 +210,7 @@ const data = [
   {
     id: 4,
     content: '插图展示唐僧与孙悟空在火焰山对战红孩儿的场景...',
-    type: '文本',
+    type: 'txt',
     createdAt: '2025-02-25 09:18:45',
     file: '西游插图.jpg',
     workflowId: 'WF-20250225-001',
@@ -218,7 +218,7 @@ const data = [
   {
     id: 5,
     content: '音频片段包含经典西游记电视剧主题曲《敢不敢》的部分片段...',
-    type: '文本',
+    type: 'txt',
     createdAt: '2025-02-25 10:40:18',
     file: '西游配乐.mp3',
     workflowId: 'WF-20250225-002',
@@ -226,7 +226,7 @@ const data = [
   {
     id: 6,
     content: '视频片段展示1986年版西游记电视剧中孙悟空大闹天宫的经典场景...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-25 15:05:32',
     file: '西游片段.mp4',
     workflowId: 'WF-20250225-003',
@@ -234,7 +234,7 @@ const data = [
   {
     id: 0,
     content: '第一回 灵根子守山神，孙悟空开石洞。一日，花果山顶突然石破天惊...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-24 17:40:22',
     file: '西游.pdf',
     workflowId: 'WF-20250224-001',
@@ -242,7 +242,7 @@ const data = [
   {
     id: 1,
     content: '唐僧取经路上遭遇了九九八十一难，其中最著名的是白骨精三打...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-24 17:42:15',
     file: '西游.pdf',
     workflowId: 'WF-20250224-001',
@@ -250,7 +250,7 @@ const data = [
   {
     id: 2,
     content: '网络安全防护包括防火墙配置、入侵检测系统、加密措施等核心内容...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-26 10:30:45',
     file: '信息安全必知.pdf',
     workflowId: 'WF-20250226-002',
@@ -258,7 +258,7 @@ const data = [
   {
     id: 3,
     content: '2025年第一季度销售数据显示，电子产品类别同比增长12.7%...',
-    type: '文本',
+    type: 'pdf',
     createdAt: '2025-03-10 12:20:18',
     file: '数据报告.pdf',
     workflowId: 'WF-20250310-003',
@@ -269,7 +269,7 @@ const data = [
 
 
 function DataPage(props) {
-  const { selectedNode, onSelectionChange } = props;
+  const { selectedNode, onSelectionChange,searchCondition } = props;
   // const { selectedNode } = props;
   const [treeData, setTreeData] = React.useState([])
   const [searchValue, setSearchValue] = React.useState('')
@@ -390,8 +390,18 @@ function DataPage(props) {
     // }).then(res=>{
     //   console.log(res)
     // })
-    setTableData(data)//测试使用
-  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
+    console.log(searchCondition,'打印searchCondition');
+    if(searchCondition.type === '数据内容'){
+      setTableData(data.filter(item => item.content.includes(searchCondition.keyword)))
+    }else if(searchCondition.type === 'ID'){
+      setTableData(data.filter(item => item.id.toString().includes(searchCondition.keyword)))
+    }
+    // setTableData(data)//测试使用
+  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize,searchCondition])
+  // useEffect(() => {
+  //   console.log(searchCondition,'打印searchCondition');
+    
+  // }, [searchCondition])
   return (
     <>
       {/* <div style={{ flex: 1, width: '100%', height: '100%' }}>
