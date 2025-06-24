@@ -111,7 +111,7 @@ export default function ParseNode(props: { dataSource }) {
           <span className="item-content">{dataSource.fail_total}</span>
         </div>
       </div>
-      <Table border={false} columns={columns} data={dataSource.file} pagination={false} noDataElement={noDataElement({ description: '暂无数据' })} rowKey="file_name" style={{ margin: '10px 0' }} />
+      <Table border={false} columns={columns} data={dataSource.file} pagination={false} noDataElement={noDataElement({ description: '暂无数据' })} rowKey="id" style={{ margin: '10px 0' }} />
       {/* 分页 */}
       <Pagination
         current={current}
