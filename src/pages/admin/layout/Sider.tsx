@@ -75,8 +75,8 @@ const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
-    title: "数据处理",
-    key: "DataDeal",
+    title: '数据处理',
+    key: 'DataDeal',
     children: [
       {
         title: '工作流',
@@ -93,13 +93,13 @@ const menus: MenuModel[] = [
         ),
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask'
-      },
+      }
     ]
   },
   {
     type: 'itemGroup',
-    title: "数据管理",
-    key: "DataManagement",
+    title: '数据管理',
+    key: 'DataManagement',
     children: [
       {
         title: '数据目录',
@@ -116,7 +116,7 @@ const menus: MenuModel[] = [
         ),
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement'
-      },
+      }
     ]
   },
   {
@@ -149,7 +149,7 @@ const menus: MenuModel[] = [
         key: 'apiKey'
       }
     ]
-  },
+  }
 ];
 
 const knowledgeDetailMenus: MenuModel[] = [
@@ -239,7 +239,7 @@ function LayoutWithSider(props: { children }) {
         return (
           <MenuItem
             key={item.key}
-            onClick={() => clickMenu(item.path)}
+            onClick={() => clickMenu(item?.path ?? '')}
             className="flex items-center"
           >
             {item.icon}
@@ -296,15 +296,15 @@ function LayoutWithSider(props: { children }) {
   }, [knowledgeDetailSidebar]);
 
   const actives = useMemo(() => {
-    const findMatch = (menus: MenuModel[]): string[] => {
+    const findMatch = (menus: MenuModel[]): string[] | null => {
       for (const menu of menus) {
-        if (menu.children?.length > 0) {
+        if (menu.children?.length && menu.children?.length > 0) {
           const key = findMatch(menu.children);
           if (key) return [...key, menu.key];
         } else {
           const activePaths = menu.activePaths || [menu.path];
           const path = activePaths.find((path) =>
-            location.pathname.startsWith(path)
+            location.pathname.startsWith(path ?? '')
           );
           if (path) return [menu.key];
         }

@@ -9,12 +9,13 @@ export default function MemberForm() {
   const [form] = Form.useForm();
   const org = useOrgEditor();
   const { orgStore } = org;
-  const { currentOrg, editOrgModalVisible, orgData, hoveredOrg } = orgStore.useGetState([
-    'currentOrg',
-    'orgData',
-    'editOrgModalVisible',
-    'hoveredOrg'
-  ]);
+  const { currentOrg, editOrgModalVisible, orgData, hoveredOrg } =
+    orgStore.useGetState([
+      'currentOrg',
+      'orgData',
+      'editOrgModalVisible',
+      'hoveredOrg'
+    ]);
   return (
     <Modal
       title="编辑部门"
@@ -23,7 +24,7 @@ export default function MemberForm() {
         form
           .validate()
           .then((values) => {
-            console.log('values', values)
+            console.log('values', values);
             // 在values添加id字段，从hoveredOrg中获取
             values.id = Number(hoveredOrg._key) || Number(currentOrg._key);
             orgStore.updateOrg(values);
@@ -52,10 +53,7 @@ export default function MemberForm() {
           <Input placeholder="请输入组织名称" />
         </FormItem>
 
-        <FormItem
-          label="上级部门"
-          field="parent_org_id"
-        >
+        <FormItem label="上级部门" field="parent_org_id">
           <TreeSelect
             showSearch
             placeholder="请选择上级部门"
@@ -63,11 +61,8 @@ export default function MemberForm() {
             treeData={orgData}
             treeCheckedStrategy={TreeSelect.SHOW_ALL}
             renderFormat={(nodeProps, value) => {
-              const targetKey = (hoveredOrg._key || nodeProps._key) as string;
-              const pathTitles = getParentNodePathTitles(
-                orgData,
-                targetKey
-              );
+              const targetKey = (hoveredOrg._key || nodeProps?._key) as string;
+              const pathTitles = getParentNodePathTitles(orgData, targetKey);
               return <span> {pathTitles.join(' / ')}</span>;
             }}
           />

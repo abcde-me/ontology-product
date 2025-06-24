@@ -50,7 +50,7 @@ const Sidebar = () => {
               return handleDeleteConversation(item.id, {
                 onSuccess() {}
               });
-            } catch (err) {
+            } catch (err: any) {
               console.error(err?.message);
               Message.error(err?.message);
             }
@@ -101,7 +101,7 @@ const Sidebar = () => {
         <div className="mb-4">
           <List
             isPin
-            title={'已置顶' || ''}
+            title={'已置顶'}
             list={pinnedConversationList}
             onChangeConversation={handleChangeConversation}
             onOperate={handleOperate}

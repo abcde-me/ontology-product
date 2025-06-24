@@ -19,11 +19,11 @@ UAPI_CONFIG.addRequestInterceptor(
     const consolePluginToken = localStorage.getItem('console_token');
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
-    if (!config.headers['x-auth-validate'])
+    if (config.headers && !config.headers?.['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
-    if (consolePluginToken)
+    if (consolePluginToken && config.headers)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
-    config.headers['Content-Type'] = 'application/json';
+    config.headers && (config.headers['Content-Type'] = 'application/json');
     return config;
   },
   (error) => {

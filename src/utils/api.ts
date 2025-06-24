@@ -68,7 +68,7 @@ export const fetchAppParams = async (
   const url = getUrl('parameters', isInstalledApp, installedAppId);
   return Get(url);
 };
-export const fetchChatList = async (
+export const fetchChatList = (
   conversationId: string,
   isInstalledApp: boolean,
   installedAppId = ''

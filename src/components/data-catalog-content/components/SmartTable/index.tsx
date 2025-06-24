@@ -6,7 +6,10 @@ type SmartTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
   data: RecordType[];
   rowKey?: string | ((record: RecordType) => string);
-  onSelectionChange?: (selectedRowKeys: React.Key[], selectedRows: RecordType[]) => void;
+  onSelectionChange?: (
+    selectedRowKeys: React.Key[],
+    selectedRows: RecordType[]
+  ) => void;
 } & Omit<TableProps<RecordType>, 'columns' | 'data' | 'rowKey'>;
 
 /**
@@ -28,7 +31,11 @@ function SmartTable<RecordType extends object>({
     onChange: (selectedRowKeys: React.Key[], selectedRows: RecordType[]) => {
       setSelectedRowKeys(selectedRowKeys);
       setSelectedRows(selectedRows);
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows: ',
+        selectedRows
+      );
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },
     onSelectAll: (selected: boolean, selectedRows: any) => {
@@ -36,11 +43,14 @@ function SmartTable<RecordType extends object>({
     },
     onSelect: (selected: boolean, record: RecordType, selectedRows: any) => {
       console.log('onSelect:', selected, record, selectedRows);
-    },
+    }
   };
 
   // 计算表格总宽度，确保有足够的宽度来触发横向滚动
-  const totalWidth = columns.reduce((sum, col) => sum + (Number(col.width) || 150), 0);
+  const totalWidth = columns.reduce(
+    (sum, col) => sum + (Number(col.width) || 150),
+    0
+  );
 
   return (
     <Table<RecordType>

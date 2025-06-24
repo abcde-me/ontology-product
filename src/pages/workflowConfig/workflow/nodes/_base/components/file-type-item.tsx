@@ -1,77 +1,90 @@
-
-import type { FC } from 'react'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { SupportUploadFileTypes } from '../../../types'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants'
-import TagInput from '@/pages/workflowConfig/components/tag-input'
-import Checkbox from '@/pages/workflowConfig/components/checkbox'
-import { FileTypeIcon } from '@/pages/workflowConfig/components/file-uploader'
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SupportUploadFileTypes } from '../../../types';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
+import TagInput from '@/pages/workflowConfig/components/tag-input';
+import Checkbox from '@/pages/workflowConfig/components/checkbox';
+import { FileTypeIcon } from '@/pages/workflowConfig/components/file-uploader';
 
 type Props = {
-  type: SupportUploadFileTypes.image | SupportUploadFileTypes.document | SupportUploadFileTypes.audio | SupportUploadFileTypes.video | SupportUploadFileTypes.custom
-  selected: boolean
-  onToggle: (type: SupportUploadFileTypes) => void
-  onCustomFileTypesChange?: (customFileTypes: string[]) => void
-  customFileTypes?: string[]
-}
+  type:
+    | SupportUploadFileTypes.image
+    | SupportUploadFileTypes.document
+    | SupportUploadFileTypes.audio
+    | SupportUploadFileTypes.video
+    | SupportUploadFileTypes.custom;
+  selected: boolean;
+  onToggle: (type: SupportUploadFileTypes) => void;
+  onCustomFileTypesChange?: (customFileTypes: string[]) => void;
+  customFileTypes?: string[];
+};
 
 const FileTypeItem: FC<Props> = ({
   type,
   selected,
   onToggle,
   customFileTypes = [],
-  onCustomFileTypesChange = () => { },
+  onCustomFileTypesChange = () => {}
 }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
 
   const handleOnSelect = useCallback(() => {
-    onToggle(type)
-  }, [onToggle, type])
+    onToggle(type);
+  }, [onToggle, type]);
 
-  const isCustomSelected = type === SupportUploadFileTypes.custom && selected
+  const isCustomSelected = type === SupportUploadFileTypes.custom && selected;
 
   return (
     <div
       className={cn(
-        'rounded-[4px] bg-components-option-card-option-bg border border-components-option-card-option-border cursor-pointer select-none',
-        !isCustomSelected && 'py-2 px-3',
-        selected && 'border-[1.5px] bg-components-option-card-option-selected-bg border-components-option-card-option-selected-border',
-        !selected && 'hover:bg-components-option-card-option-bg-hover hover:border-components-option-card-option-border-hover',
+        'cursor-pointer select-none rounded-[4px] border border-components-option-card-option-border bg-components-option-card-option-bg',
+        !isCustomSelected && 'px-3 py-2',
+        selected &&
+          'border-[1.5px] border-components-option-card-option-selected-border bg-components-option-card-option-selected-bg',
+        !selected &&
+          'hover:border-components-option-card-option-border-hover hover:bg-components-option-card-option-bg-hover'
       )}
       onClick={handleOnSelect}
     >
-      {isCustomSelected
-        ? (
-          <div>
-            <div className='flex items-center p-3 pb-2 border-b border-divider-subtle'>
-              <FileTypeIcon className='shrink-0' type={type} size='md' />
-              <div className='mx-2 grow text-text-primary system-sm-medium'>{t(`appDebug.variableConfig.file.${type}.name`)}</div>
-              <Checkbox className='shrink-0' checked={selected} />
+      {isCustomSelected ? (
+        <div>
+          <div className="flex items-center border-b border-divider-subtle p-3 pb-2">
+            <FileTypeIcon className="shrink-0" type={type} size="md" />
+            <div className="system-sm-medium mx-2 grow text-text-primary">
+              {t(`appDebug.variableConfig.file.${type}.name`)}
             </div>
-            <div className='p-3' onClick={e => e.stopPropagation()}>
-              <TagInput
-                items={customFileTypes}
-                onChange={onCustomFileTypesChange}
-                placeholder={t('appDebug.variableConfig.file.custom.createPlaceholder')!}
-              />
+            <Checkbox className="shrink-0" checked={selected} />
+          </div>
+          <div className="p-3" onClick={(e) => e.stopPropagation()}>
+            <TagInput
+              items={customFileTypes}
+              onChange={onCustomFileTypesChange}
+              placeholder={t(
+                'appDebug.variableConfig.file.custom.createPlaceholder'
+              )}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center">
+          <FileTypeIcon className="shrink-0" type={type} size="md" />
+          <div className="mx-2 grow">
+            <div className="system-sm-medium text-text-primary">
+              {t(`appDebug.variableConfig.file.${type}.name`)}
+            </div>
+            <div className="system-2xs-regular-uppercase mt-1 text-text-tertiary">
+              {type !== SupportUploadFileTypes.custom
+                ? FILE_EXTS[type].join(', ')
+                : t('appDebug.variableConfig.file.custom.description')}
             </div>
           </div>
-        )
-        : (
-          <div className='flex items-center'>
-            <FileTypeIcon className='shrink-0' type={type} size='md' />
-            <div className='mx-2 grow'>
-              <div className='text-text-primary system-sm-medium'>{t(`appDebug.variableConfig.file.${type}.name`)}</div>
-              <div className='mt-1 text-text-tertiary system-2xs-regular-uppercase'>{type !== SupportUploadFileTypes.custom ? FILE_EXTS[type].join(', ') : t('appDebug.variableConfig.file.custom.description')}</div>
-            </div>
-            <Checkbox className='shrink-0' checked={selected} />
-          </div>
-        )}
-
+          <Checkbox className="shrink-0" checked={selected} />
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(FileTypeItem)
+export default React.memo(FileTypeItem);

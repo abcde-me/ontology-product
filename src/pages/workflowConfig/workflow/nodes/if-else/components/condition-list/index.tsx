@@ -1,5 +1,5 @@
-import { RiLoopLeftLine, RiArrowLeftRightLine } from '@remixicon/react'
-import React, { useCallback, useMemo } from 'react'
+import { RiLoopLeftLine, RiArrowLeftRightLine } from '@remixicon/react';
+import React, { useCallback, useMemo } from 'react';
 import {
   type CaseItem,
   type HandleAddSubVariableCondition,
@@ -9,36 +9,36 @@ import {
   type HandleUpdateCondition,
   type HandleUpdateSubVariableCondition,
   LogicalOperator,
-  type handleRemoveSubVariableCondition,
-} from '../../types'
-import ConditionItem from './condition-item'
+  type handleRemoveSubVariableCondition
+} from '../../types';
+import ConditionItem from './condition-item';
 import type {
   Node,
   NodeOutPutVar,
-  Var,
-} from '@/pages/workflowConfig/workflow/types'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import { IconSwap } from '@arco-design/web-react/icon'
+  Var
+} from '@/pages/workflowConfig/workflow/types';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import { IconSwap } from '@arco-design/web-react/icon';
 
 interface ConditionListProps {
-  isSubVariable?: boolean
-  disabled?: boolean
-  caseId: string
-  conditionId?: string
-  caseItem: CaseItem
-  onRemoveCondition?: HandleRemoveCondition
-  onUpdateCondition?: HandleUpdateCondition
-  onToggleConditionLogicalOperator?: HandleToggleConditionLogicalOperator
-  nodeId: string
-  nodesOutputVars: NodeOutPutVar[]
-  availableNodes: Node[]
-  numberVariables: NodeOutPutVar[]
-  filterVar: (varPayload: Var) => boolean
-  varsIsVarFileAttribute: Record<string, boolean>
-  onAddSubVariableCondition?: HandleAddSubVariableCondition
-  onRemoveSubVariableCondition?: handleRemoveSubVariableCondition
-  onUpdateSubVariableCondition?: HandleUpdateSubVariableCondition
-  onToggleSubVariableConditionLogicalOperator?: HandleToggleSubVariableConditionLogicalOperator
+  isSubVariable?: boolean;
+  disabled?: boolean;
+  caseId: string;
+  conditionId?: string;
+  caseItem: CaseItem;
+  onRemoveCondition?: HandleRemoveCondition;
+  onUpdateCondition?: HandleUpdateCondition;
+  onToggleConditionLogicalOperator?: HandleToggleConditionLogicalOperator;
+  nodeId: string;
+  nodesOutputVars: NodeOutPutVar[];
+  availableNodes: Node[];
+  numberVariables: NodeOutPutVar[];
+  filterVar: (varPayload: Var) => boolean;
+  varsIsVarFileAttribute: Record<string, boolean>;
+  onAddSubVariableCondition?: HandleAddSubVariableCondition;
+  onRemoveSubVariableCondition?: handleRemoveSubVariableCondition;
+  onUpdateSubVariableCondition?: HandleUpdateSubVariableCondition;
+  onToggleSubVariableConditionLogicalOperator?: HandleToggleSubVariableConditionLogicalOperator;
 }
 const ConditionList = ({
   isSubVariable,
@@ -58,82 +58,96 @@ const ConditionList = ({
   availableNodes,
   numberVariables,
   varsIsVarFileAttribute,
-  filterVar,
+  filterVar
 }: ConditionListProps) => {
-  const { conditions, logical_operator } = caseItem
+  const { conditions, logical_operator } = caseItem;
 
   const doToggleConditionLogicalOperator = useCallback(() => {
     if (isSubVariable)
-      onToggleSubVariableConditionLogicalOperator?.(caseId!, conditionId!)
-    else
-      onToggleConditionLogicalOperator?.(caseId)
-  }, [caseId, conditionId, isSubVariable, onToggleConditionLogicalOperator, onToggleSubVariableConditionLogicalOperator])
+      onToggleSubVariableConditionLogicalOperator?.(caseId, conditionId!);
+    else onToggleConditionLogicalOperator?.(caseId);
+  }, [
+    caseId,
+    conditionId,
+    isSubVariable,
+    onToggleConditionLogicalOperator,
+    onToggleSubVariableConditionLogicalOperator
+  ]);
 
   const isValueFieldShort = useMemo(() => {
-    if (isSubVariable && conditions.length > 1)
-      return true
+    if (isSubVariable && conditions.length > 1) return true;
 
-    return false
-  }, [conditions.length, isSubVariable])
+    return false;
+  }, [conditions.length, isSubVariable]);
   const conditionItemClassName = useMemo(() => {
-    if (!isSubVariable)
-      return ''
-    if (conditions.length < 2)
-      return ''
-    return logical_operator === LogicalOperator.and ? 'pl-[51px]' : 'pl-[42px]'
-  }, [conditions.length, isSubVariable, logical_operator])
+    if (!isSubVariable) return '';
+    if (conditions.length < 2) return '';
+    return logical_operator === LogicalOperator.and ? 'pl-[51px]' : 'pl-[42px]';
+  }, [conditions.length, isSubVariable, logical_operator]);
 
   return (
-    <div className={cn('relative condition-list', !isSubVariable && 'pl-[40px]')}>
-      {
-        conditions.length > 1 && (
-          <div className={cn(
-            'absolute top-0 bottom-0 left-0 w-[40px] logical-operator-label',
-            isSubVariable && logical_operator === LogicalOperator.and && 'left-[-10px]',
-            isSubVariable && logical_operator === LogicalOperator.or && 'left-[-18px]',
-          )}>
-            <div className='absolute top-4 bottom-4 left-[20px] w-[20px] border border-[#E8E9EB] rounded-l-none border-r-0'></div>
-            <div className='absolute top-1/2 -translate-y-1/2 right-0 w-4 h-[29px] bg-components-panel-bg'></div>
-            <div
-              className='absolute top-1/2 right-1 -translate-y-1/2 flex items-center px-1 h-[20px] rounded-none bg-[white] text-text-accent-secondary text-[10px] font-semibold cursor-pointer select-none'
-              onClick={doToggleConditionLogicalOperator}
-            >
-              {/* {logical_operator.toUpperCase()}
+    <div
+      className={cn('condition-list relative', !isSubVariable && 'pl-[40px]')}
+    >
+      {conditions.length > 1 && (
+        <div
+          className={cn(
+            'logical-operator-label absolute bottom-0 left-0 top-0 w-[40px]',
+            isSubVariable &&
+              logical_operator === LogicalOperator.and &&
+              'left-[-10px]',
+            isSubVariable &&
+              logical_operator === LogicalOperator.or &&
+              'left-[-18px]'
+          )}
+        >
+          <div className="absolute bottom-4 left-[20px] top-4 w-[20px] rounded-l-none border border-r-0 border-[#E8E9EB]"></div>
+          <div className="absolute right-0 top-1/2 h-[29px] w-4 -translate-y-1/2 bg-components-panel-bg"></div>
+          <div
+            className="absolute right-1 top-1/2 flex h-[20px] -translate-y-1/2 cursor-pointer select-none items-center rounded-none bg-[white] px-1 text-[10px] font-semibold text-text-accent-secondary"
+            onClick={doToggleConditionLogicalOperator}
+          >
+            {/* {logical_operator.toUpperCase()}
               <RiArrowLeftRightLine className='ml-0.5 w-3 h-3' /> */}
-              <span className='text-[#151B26] text-[12px]/[20px]'>{logical_operator === LogicalOperator.and ? '且' : '或'}</span>
-              <IconSwap className='ml-[2px] w-[12px] h-[12px] text-[#151B26]'/>
-            </div>
+            <span className="text-[12px]/[20px] text-[#151B26]">
+              {logical_operator === LogicalOperator.and ? '且' : '或'}
+            </span>
+            <IconSwap className="ml-[2px] h-[12px] w-[12px] text-[#151B26]" />
           </div>
-        )
-      }
-      {
-        caseItem.conditions.map(condition => (
-          <ConditionItem
-            key={condition.id}
-            className={conditionItemClassName}
-            disabled={disabled}
-            caseId={caseId}
-            conditionId={isSubVariable ? conditionId! : condition.id}
-            condition={condition}
-            isValueFieldShort={isValueFieldShort}
-            onUpdateCondition={onUpdateCondition}
-            onRemoveCondition={onRemoveCondition}
-            onAddSubVariableCondition={onAddSubVariableCondition}
-            onRemoveSubVariableCondition={onRemoveSubVariableCondition}
-            onUpdateSubVariableCondition={onUpdateSubVariableCondition}
-            onToggleSubVariableConditionLogicalOperator={onToggleSubVariableConditionLogicalOperator}
-            nodeId={nodeId}
-            nodesOutputVars={nodesOutputVars}
-            availableNodes={availableNodes}
-            filterVar={filterVar}
-            numberVariables={numberVariables}
-            file={varsIsVarFileAttribute[condition.id] ? { key: (condition.variable_selector || []).slice(-1)[0] } : undefined}
-            isSubVariableKey={isSubVariable}
-          />
-        ))
-      }
+        </div>
+      )}
+      {caseItem.conditions.map((condition) => (
+        <ConditionItem
+          key={condition.id}
+          className={conditionItemClassName}
+          disabled={disabled}
+          caseId={caseId}
+          conditionId={isSubVariable ? conditionId! : condition.id}
+          condition={condition}
+          isValueFieldShort={isValueFieldShort}
+          onUpdateCondition={onUpdateCondition}
+          onRemoveCondition={onRemoveCondition}
+          onAddSubVariableCondition={onAddSubVariableCondition}
+          onRemoveSubVariableCondition={onRemoveSubVariableCondition}
+          onUpdateSubVariableCondition={onUpdateSubVariableCondition}
+          onToggleSubVariableConditionLogicalOperator={
+            onToggleSubVariableConditionLogicalOperator
+          }
+          nodeId={nodeId}
+          nodesOutputVars={nodesOutputVars}
+          availableNodes={availableNodes}
+          filterVar={filterVar}
+          numberVariables={numberVariables}
+          file={
+            varsIsVarFileAttribute[condition.id]
+              ? { key: (condition.variable_selector || []).slice(-1)[0] }
+              : undefined
+          }
+          isSubVariableKey={isSubVariable}
+        />
+      ))}
     </div>
-  )
-}
+  );
+};
 
-export default ConditionList
+export default ConditionList;

@@ -21,7 +21,7 @@ export default function MemberForm() {
         form
           .validate()
           .then((values) => {
-            values.parent_org_id =   Number(values.parent_org_id)
+            values.parent_org_id = Number(values.parent_org_id);
             orgStore.createOrg(values);
           })
           .catch((err) => {
@@ -29,12 +29,16 @@ export default function MemberForm() {
           });
       }}
       onCancel={() => {
-        orgStore.setParentOrgModalVisible(false)
+        orgStore.setParentOrgModalVisible(false);
       }}
     >
-      <Form form={form} initialValues={{
-        parent_org_id: orgData && orgData.length > 0 ? orgData[0].key : undefined,
-      }}>
+      <Form
+        form={form}
+        initialValues={{
+          parent_org_id:
+            orgData && orgData.length > 0 ? orgData[0].key : undefined
+        }}
+      >
         <FormItem
           label="组织名称"
           field="name"
@@ -50,10 +54,7 @@ export default function MemberForm() {
           <Input placeholder="请输入组织名称" />
         </FormItem>
 
-        <FormItem
-          label="上级部门"
-          field="parent_org_id"
-        >
+        <FormItem label="上级部门" field="parent_org_id">
           <TreeSelect
             showSearch
             placeholder="请选择上级部门"
@@ -63,7 +64,7 @@ export default function MemberForm() {
             renderFormat={(nodeProps, value) => {
               const pathTitles = getNodePathTitles(
                 orgData,
-                (nodeProps._key) as string
+                nodeProps?._key as string
               );
               return <span> {pathTitles.join(' / ')}</span>;
             }}

@@ -16,11 +16,7 @@ interface UseTableReturn {
 }
 
 export function useTable(options: UseTableOptions = {}): UseTableReturn {
-  const {
-    defaultPageSize = 10,
-    defaultCurrent = 1,
-    name,
-  } = options;
+  const { defaultPageSize = 10, defaultCurrent = 1, name } = options;
 
   const member = useMemberEditor();
   const { memberStore } = member;
@@ -42,9 +38,11 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     const result = await memberStore.fetchData({
       page,
       size: pageSize,
-      name,
+      name
     });
 
+    // TODO: ts错误
+    // @ts-expect-error
     setPagination((prev) => ({
       ...prev,
       total: result.total
@@ -55,10 +53,12 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     const result = await memberStore.fetchData({
       page: pagination.current,
       size: pagination.pageSize,
-      name,
+      name
     });
     console.log('fetchData result', result);
 
+    // TODO: ts错误
+    // @ts-expect-error
     setPagination((prev) => ({
       ...prev,
       total: result.total
@@ -67,7 +67,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
 
   useEffect(() => {
     fetchData();
-  }, [ name, pagination.current, pagination.pageSize]);
+  }, [name, pagination.current, pagination.pageSize]);
 
   const tableProps: TableProps<DataSet> = {
     data: list,

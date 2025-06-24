@@ -9,21 +9,23 @@ export default function MemberForm() {
   const [form] = Form.useForm();
   const org = useOrgEditor();
   const { orgStore } = org;
-  const { visible, currentMember, orgData, roleData } = orgStore.useGetState(
-    ['visible', 'currentMember', 'orgData', 'roleData']
-  );
+  const { visible, currentMember, orgData, roleData } = orgStore.useGetState([
+    'visible',
+    'currentMember',
+    'orgData',
+    'roleData'
+  ]);
 
-  
   return (
     <Modal
-      title='添加成员'
+      title="添加成员"
       visible={visible}
       onOk={() => {
         form
           .validate()
           .then((values) => {
-            values.organization_id= Number(values.organization_id);
-             orgStore.addMember(values);
+            values.organization_id = Number(values.organization_id);
+            orgStore.addMember(values);
           })
           .catch((err) => {
             console.log(err);
@@ -129,7 +131,7 @@ export default function MemberForm() {
             renderFormat={(nodeProps, value) => {
               const pathTitles = getNodePathTitles(
                 orgData,
-                nodeProps._key as string
+                nodeProps?._key as string
               );
               return <span> {pathTitles.join(' / ')}</span>;
             }}
@@ -152,12 +154,9 @@ export default function MemberForm() {
             })}
           </Select>
         </FormItem>
-                  <FormItem
-                      label="职位"
-                      field="position"
-                    >
-                      <Input placeholder="请输入职位" />
-                    </FormItem>
+        <FormItem label="职位" field="position">
+          <Input placeholder="请输入职位" />
+        </FormItem>
         <FormItem label="备注" field="mark">
           <Input.TextArea placeholder="请输入备注" />
         </FormItem>
