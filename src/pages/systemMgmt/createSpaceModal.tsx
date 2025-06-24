@@ -1,11 +1,18 @@
 import * as React from 'react';
-import { Alert, Form, Input, Message, Modal, Trigger } from '@arco-design/web-react';
+import {
+  Alert,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Trigger
+} from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { createKnowledge } from '@/api/knowledgeBase';
 import { useHistory } from 'react-router-dom';
 import SpaceDefaultIcon from '@/assets/space-default-icon.svg';
 import AIIcon from '@/assets/ai.svg';
-import './createSpaceModel.less'
+import './createSpaceModel.less';
 
 type CommonModalProps = {
   visible: boolean;
@@ -18,7 +25,7 @@ export const CreateSpaceModal: React.FC<CommonModalProps> = (props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
 
-  const confirmAction = async () => {
+  const confirmAction = () => {
     form
       .validate()
       .then(async () => {
@@ -44,7 +51,7 @@ export const CreateSpaceModal: React.FC<CommonModalProps> = (props) => {
     <Modal
       title="创建空间"
       visible={visible}
-      style={{width: '720px'}}
+      style={{ width: '720px' }}
       className="bold-form-label"
       okButtonProps={{
         loading: loading
@@ -79,35 +86,34 @@ export const CreateSpaceModal: React.FC<CommonModalProps> = (props) => {
         >
           <Input placeholder="请输入空间名称" maxLength={50} showWordLimit />
         </Form.Item>
-        <Form.Item
-          field="desc"
-          label="空间描述"
-        >
-          <Input.TextArea placeholder="请输入空间描述" style={{ minHeight: 60 }} maxLength={255} showWordLimit />
+        <Form.Item field="desc" label="空间描述">
+          <Input.TextArea
+            placeholder="请输入空间描述"
+            style={{ minHeight: 60 }}
+            maxLength={255}
+            showWordLimit
+          />
         </Form.Item>
-        <Form.Item
-          field="icon"
-          label="图标"
-        >
+        <Form.Item field="icon" label="图标">
           <Trigger
-            position='right'
-            style={{ marginLeft: '14px'}}
-            trigger='hover'
+            position="right"
+            style={{ marginLeft: '14px' }}
+            trigger="hover"
             popup={() => (
               <div className="create-space-icon-menu">
                 <div className="icon-menu-item">
-                  <AIIcon className='size=[16px] text-[#334155]'/>
-                  <span className='txt'>智能生成图标</span>
+                  <AIIcon className="size=[16px] text-[#334155]" />
+                  <span className="txt">智能生成图标</span>
                 </div>
                 <div className="icon-menu-separator" />
                 <div className="icon-menu-item">
-                  <IconUpload className='size=[16px] text-[#334155]'/>
+                  <IconUpload className="size=[16px] text-[#334155]" />
                   <span
-                    className='txt'
+                    className="txt"
                     onClick={() => {
                       const input = document.createElement('input');
                       input.type = 'file';
-                      input.accept=".svg,.png,.jpg,.jpeg"
+                      input.accept = '.svg,.png,.jpg,.jpeg';
                       input.click();
                       input.onchange = () => {
                         // const modal = Modal.info({
@@ -131,12 +137,14 @@ export const CreateSpaceModal: React.FC<CommonModalProps> = (props) => {
                         //   });
                       };
                     }}
-                  >上传图标</span>
+                  >
+                    上传图标
+                  </span>
                 </div>
               </div>
             )}
           >
-            <SpaceDefaultIcon className='size=[96px] cursor-pointer' />
+            <SpaceDefaultIcon className="size=[96px] cursor-pointer" />
           </Trigger>
         </Form.Item>
       </Form>

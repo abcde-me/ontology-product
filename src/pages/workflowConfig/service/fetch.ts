@@ -1,12 +1,21 @@
-import type { AfterResponseHook, BeforeErrorHook, BeforeRequestHook, Hooks } from 'ky'
-import ky from 'ky'
-import type { IOtherOptions } from './base'
-import Toast from '@/pages/workflowConfig/components/toast'
-import { API_PREFIX, MARKETPLACE_API_PREFIX, PUBLIC_API_PREFIX } from '@/pages/workflowConfig/config/'
-import { getToken } from '@/utils/request'
-import { queryCurrentRegionInfo } from '@/hooks/use-region-info'
+import type {
+  AfterResponseHook,
+  BeforeErrorHook,
+  BeforeRequestHook,
+  Hooks
+} from 'ky';
+import ky from 'ky';
+import type { IOtherOptions } from './base';
+import Toast from '@/pages/workflowConfig/components/toast';
+import {
+  API_PREFIX,
+  MARKETPLACE_API_PREFIX,
+  PUBLIC_API_PREFIX
+} from '@/pages/workflowConfig/config/';
+import { getToken } from '@/utils/request';
+import { queryCurrentRegionInfo } from '@/hooks/use-region-info';
 
-const TIME_OUT = 100000
+const TIME_OUT = 100000;
 
 export const ContentType = {
   json: 'application/json',
@@ -15,200 +24,209 @@ export const ContentType = {
   form: 'application/x-www-form-urlencoded; charset=UTF-8',
   download: 'application/octet-stream', // for download
   downloadZip: 'application/zip', // for download
-  upload: 'multipart/form-data', // for upload
-}
+  upload: 'multipart/form-data' // for upload
+};
 
 export type FetchOptionType = Omit<RequestInit, 'body'> & {
-  params?: Record<string, any>
-  body?: BodyInit | Record<string, any> | null
-}
+  params?: Record<string, any>;
+  body?: BodyInit | Record<string, any> | null;
+};
 
-const afterResponse204: AfterResponseHook = async (_request, _options, response) => {
+const afterResponse204: AfterResponseHook = (_request, _options, response) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  if (response.status === 204) return Response.json({ result: 'success' })
-}
+  if (response.status === 204) return Response.json({ result: 'success' });
+};
 
 export type ResponseError = {
-  code: string
-  message: string
-  status: number
-}
+  code: string;
+  message: string;
+  status: number;
+};
 
-const afterResponseErrorCode = (otherOptions: IOtherOptions): AfterResponseHook => {
+const afterResponseErrorCode = (
+  otherOptions: IOtherOptions
+): AfterResponseHook => {
   return async (_request, _options, response) => {
-    const clonedResponse = response.clone()
+    const clonedResponse = response.clone();
     if (!/^(2|3)\d{2}$/.test(String(clonedResponse.status))) {
-      const bodyJson = clonedResponse.json() as Promise<ResponseError>
+      const bodyJson = clonedResponse.json() as Promise<ResponseError>;
       switch (clonedResponse.status) {
         case 403:
           bodyJson.then((data: ResponseError) => {
             if (!otherOptions.silent)
-              Toast.notify({ type: 'error', message: data.message })
+              Toast.notify({ type: 'error', message: data.message });
             if (data.code === 'already_setup')
-              globalThis.location.href = `${globalThis.location.origin}/signin`
-          })
-          break
+              globalThis.location.href = `${globalThis.location.origin}/signin`;
+          });
+          break;
         case 401:
-          return Promise.reject(response)
+          return Promise.reject(response);
         // fall through
         default:
           bodyJson.then((data: ResponseError) => {
             if (!otherOptions.silent)
-              Toast.notify({ type: 'error', message: data.message })
-          })
-          return Promise.reject(response)
+              Toast.notify({ type: 'error', message: data.message });
+          });
+          return Promise.reject(response);
       }
     }
-  }
-}
+  };
+};
 
 const beforeErrorToast = (otherOptions: IOtherOptions): BeforeErrorHook => {
   return (error) => {
     if (!otherOptions.silent)
-      Toast.notify({ type: 'error', message: error.message })
-    return error
-  }
-}
+      Toast.notify({ type: 'error', message: error.message });
+    return error;
+  };
+};
 
 export const getPublicToken = () => {
-  let token = ''
-  const sharedToken = globalThis.location.pathname.split('/').slice(-1)[0]
-  const accessToken = localStorage.getItem('token') || JSON.stringify({ [sharedToken]: '' })
-  let accessTokenJson = { [sharedToken]: '' }
+  let token = '';
+  const sharedToken = globalThis.location.pathname.split('/').slice(-1)[0];
+  const accessToken =
+    localStorage.getItem('token') || JSON.stringify({ [sharedToken]: '' });
+  let accessTokenJson = { [sharedToken]: '' };
   try {
-    accessTokenJson = JSON.parse(accessToken)
+    accessTokenJson = JSON.parse(accessToken);
+  } catch {
+    console.log('');
   }
-  catch { console.log('') }
-  token = accessTokenJson[sharedToken]
-  return token || ''
-}
+  token = accessTokenJson[sharedToken];
+  return token || '';
+};
 
 export function getAccessToken(isPublicAPI?: boolean) {
   if (isPublicAPI) {
-    const sharedToken = globalThis.location.pathname.split('/').slice(-1)[0]
-    const accessToken = localStorage.getItem('token') || JSON.stringify({ [sharedToken]: '' })
-    let accessTokenJson = { [sharedToken]: '' }
+    const sharedToken = globalThis.location.pathname.split('/').slice(-1)[0];
+    const accessToken =
+      localStorage.getItem('token') || JSON.stringify({ [sharedToken]: '' });
+    let accessTokenJson = { [sharedToken]: '' };
     try {
-      accessTokenJson = JSON.parse(accessToken)
+      accessTokenJson = JSON.parse(accessToken);
+    } catch (e) {
+      console.error(e);
     }
-    catch (e) {
-      console.error(e)
-    }
-    return accessTokenJson[sharedToken]
-  }
-  else {
-    return localStorage.getItem('console_token') || ''
+    return accessTokenJson[sharedToken];
+  } else {
+    return localStorage.getItem('console_token') || '';
   }
 }
 
 const beforeRequestPublicAuthorization: BeforeRequestHook = (request) => {
-  const token = getToken()
-  const region = queryCurrentRegionInfo()
-  token.authorization && request.headers.set('Authorization', token.authorization)
-  region.regionId && request.headers.set('x-regionid', region.regionId)
-  
-}
+  const token = getToken();
+  const region = queryCurrentRegionInfo();
+  token.authorization &&
+    request.headers.set('Authorization', token.authorization);
+  region.regionId && request.headers.set('x-regionid', region.regionId);
+};
 
 const beforeRequestAuthorization: BeforeRequestHook = (request) => {
-  const token = getToken()
-  const region = queryCurrentRegionInfo()
-  token.authorization && request.headers.set('Authorization', token.authorization)
-  region.regionId && request.headers.set('x-regionid', region.regionId)
-}
+  const token = getToken();
+  const region = queryCurrentRegionInfo();
+  token.authorization &&
+    request.headers.set('Authorization', token.authorization);
+  region.regionId && request.headers.set('x-regionid', region.regionId);
+};
 
 const baseHooks: Hooks = {
-  afterResponse: [
-    afterResponse204,
-  ],
-}
+  afterResponse: [afterResponse204]
+};
 
 const baseClient = ky.create({
   hooks: baseHooks,
-  timeout: TIME_OUT,
-})
+  timeout: TIME_OUT
+});
 
 export const baseOptions: RequestInit = {
   method: 'GET',
   mode: 'cors',
   credentials: 'include', // always send cookies、HTTP Basic authentication.
   headers: new Headers({
-    'Content-Type': ContentType.json,
+    'Content-Type': ContentType.json
   }),
-  redirect: 'follow',
-}
+  redirect: 'follow'
+};
 
-async function base<T>(url: string, options: FetchOptionType = {}, otherOptions: IOtherOptions = {}): Promise<T> {
-  const { params, body, headers, ...init } = Object.assign({}, baseOptions, options)
+async function base<T>(
+  url: string,
+  options: FetchOptionType = {},
+  otherOptions: IOtherOptions = {}
+): Promise<T> {
+  const { params, body, headers, ...init } = Object.assign(
+    {},
+    baseOptions,
+    options
+  );
   const {
     isPublicAPI = false,
     isMarketplaceAPI = false,
     bodyStringify = true,
     needAllResponseContent,
     deleteContentType,
-    getAbortController,
-  } = otherOptions
+    getAbortController
+  } = otherOptions;
 
-  const base
-    = isMarketplaceAPI
-      ? MARKETPLACE_API_PREFIX
-      : isPublicAPI
-        ? PUBLIC_API_PREFIX
-        : API_PREFIX
+  const base = isMarketplaceAPI
+    ? MARKETPLACE_API_PREFIX
+    : isPublicAPI
+      ? PUBLIC_API_PREFIX
+      : API_PREFIX;
 
   if (getAbortController) {
-    const abortController = new AbortController()
-    getAbortController(abortController)
-    options.signal = abortController.signal
+    const abortController = new AbortController();
+    getAbortController(abortController);
+    options.signal = abortController.signal;
   }
 
-  const fetchPathname = `${base}${url.startsWith('/') ? url : `/${url}`}`
+  const fetchPathname = `${base}${url.startsWith('/') ? url : `/${url}`}`;
 
-  if (deleteContentType)
-    (headers as any).delete('Content-Type')
+  if (deleteContentType) (headers as any).delete('Content-Type');
 
   const client = baseClient.extend({
     hooks: {
       ...baseHooks,
       beforeError: [
-        ...baseHooks.beforeError || [],
-        beforeErrorToast(otherOptions),
+        ...(baseHooks.beforeError || []),
+        beforeErrorToast(otherOptions)
       ],
+      // TODO: ts错误
+      // @ts-expect-error
       beforeRequest: [
-        ...baseHooks.beforeRequest || [],
+        ...(baseHooks.beforeRequest || []),
         isPublicAPI && beforeRequestPublicAuthorization,
-        !isPublicAPI && !isMarketplaceAPI && beforeRequestAuthorization,
+        !isPublicAPI && !isMarketplaceAPI && beforeRequestAuthorization
       ].filter(Boolean),
       afterResponse: [
-        ...baseHooks.afterResponse || [],
-        afterResponseErrorCode(otherOptions),
-      ],
-    },
-  })
+        ...(baseHooks.afterResponse || []),
+        afterResponseErrorCode(otherOptions)
+      ]
+    }
+  });
 
   const res = await client(fetchPathname, {
     ...init,
     headers,
-    credentials: isMarketplaceAPI
-      ? 'omit'
-      : (options.credentials || 'include'),
+    credentials: isMarketplaceAPI ? 'omit' : options.credentials || 'include',
     retry: {
-      methods: [],
+      methods: []
     },
     ...(bodyStringify ? { json: body } : { body: body as BodyInit }),
-    searchParams: params,
-  })
+    searchParams: params
+  });
 
-  if (needAllResponseContent)
-    return res as T
-  const contentType = res.headers.get('content-type')
+  if (needAllResponseContent) return res as T;
+  const contentType = res.headers.get('content-type');
   if (
-    contentType
-    && [ContentType.download, ContentType.audio, ContentType.downloadZip].includes(contentType)
+    contentType &&
+    [ContentType.download, ContentType.audio, ContentType.downloadZip].includes(
+      contentType
+    )
   )
-    return await res.blob() as T
+    return (await res.blob()) as T;
 
-  return await res.json() as T
+  return (await res.json()) as T;
 }
 
-export { base }
+export { base };

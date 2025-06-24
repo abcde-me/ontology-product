@@ -169,8 +169,9 @@ const UAPI_CONFIG: UAPIConfigType = {
       );
       const currentRegionId = parts?.[2] ?? 'region1';
 
-      currentRegionId &&
-        (axiosConfig.headers = Object.assign(axiosConfig.headers ?? {}, {
+      axiosConfig &&
+        currentRegionId &&
+        (axiosConfig.headers = Object.assign(axiosConfig?.headers ?? {}, {
           'x-regionid': currentRegionId
         }));
 
@@ -180,23 +181,29 @@ const UAPI_CONFIG: UAPIConfigType = {
     // 指定策略，用regionInfo的
     const { id } = regionInfo;
 
-    axiosConfig.headers = Object.assign(axiosConfig.headers ?? {}, {
-      'x-regionid': id
-    });
+    if (axiosConfig) {
+      axiosConfig.headers = Object.assign(axiosConfig?.headers ?? {}, {
+        'x-regionid': id
+      });
+    }
 
     regionInfo.host &&
+      axiosConfig &&
       (axiosConfig.baseURL =
         '//' +
-        `${regionInfo.host}/${axiosConfig.baseURL}`.replace(/\/{2,}/, '/'));
+        `${regionInfo.host}/${axiosConfig?.baseURL}`.replace(/\/{2,}/, '/'));
 
     return axiosConfig || {};
   },
+  // TODO: ts错误
+  // @ts-expect-error
   setModuleFunction: (
     moduleId: Parameters<SetModuleFunction>[0],
     axiosConfig?: AxiosRequestConfig
   ) => {
     moduleId &&
-      (axiosConfig.headers = Object.assign(axiosConfig.headers ?? {}, {
+      axiosConfig &&
+      (axiosConfig.headers = Object.assign(axiosConfig?.headers ?? {}, {
         'x-request-from': `webapi/${moduleId}`
       }));
 
@@ -375,7 +382,7 @@ for (const key in modaForgeResEndpoints) {
 UAPI_CONFIG.addRequestInterceptor((config) => {
   // 严格校验逻辑
   const rawToken = getLocalStorage<string>('loginToken');
-  console.log('cleanToken', rawToken);
+  // console.log('cleanToken', rawToken);
 
   // 1. 类型检查
   if (typeof rawToken !== 'string') return config;

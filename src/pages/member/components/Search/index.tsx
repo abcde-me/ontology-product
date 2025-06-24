@@ -26,7 +26,6 @@ export default function Search() {
     memberStore.fetchOrgData();
   }, []);
 
-
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex items-center space-x-3">
@@ -55,6 +54,8 @@ export default function Search() {
         type="primary"
         className="flex items-center gap-1 px-3"
         onClick={() => {
+          // TODO: ts错误
+          // @ts-expect-error
           memberStore.setCurrentMember(null);
           memberStore.setVisible(true);
         }}

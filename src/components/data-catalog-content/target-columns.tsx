@@ -59,7 +59,7 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
   {
     title: 'ID',
     dataIndex: 'id',
-    width: 50,
+    width: 50
   },
   {
     title: '数据内容',
@@ -143,7 +143,6 @@ const handleDownload = (record, setVisible) => {
   // console.log('下载', id)
   setVisible(true, record);
 };
-
 const handleDelete = (id) => {
   console.log('删除', id);
   const token = localStorage.getItem('loginToken');

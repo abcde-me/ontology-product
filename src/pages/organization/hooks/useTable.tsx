@@ -48,6 +48,8 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
       organization_id
     });
 
+    // TODO: ts错误
+    // @ts-expect-error
     setPagination((prev) => ({
       ...prev,
       total: result.total
@@ -61,6 +63,8 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
       organization_id
     });
 
+    // TODO: ts错误
+    // @ts-expect-error
     setPagination((prev) => ({
       ...prev,
       total: result.total

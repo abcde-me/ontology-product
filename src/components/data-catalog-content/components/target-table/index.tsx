@@ -36,7 +36,11 @@ function TargetTable<RecordType extends object>({
     onChange: (selectedRowKeys: React.Key[], selectedRows: RecordType[]) => {
       setSelectedRowKeys(selectedRowKeys);
       setSelectedRows(selectedRows);
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows: ',
+        selectedRows
+      );
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },
     onSelectAll: (selected: boolean, selectedRows: any) => {
@@ -44,7 +48,7 @@ function TargetTable<RecordType extends object>({
     },
     onSelect: (selected: boolean, record: RecordType, selectedRows: any) => {
       console.log('onSelect:', selected, record, selectedRows);
-    },
+    }
   };
 
   // 处理行悬浮事件
@@ -57,7 +61,10 @@ function TargetTable<RecordType extends object>({
   };
 
   // 计算表格总宽度，确保有足够的宽度来触发横向滚动
-  const totalWidth = columns.reduce((sum, col) => sum + (Number(col.width) || 150), 0);
+  const totalWidth = columns.reduce(
+    (sum, col) => sum + (Number(col.width) || 150),
+    0
+  );
 
   return (
     <Table<RecordType>

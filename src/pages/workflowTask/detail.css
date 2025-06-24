@@ -1,7 +1,7 @@
 .workflow-task-detail {
   padding: 10px;
 
-  .arco-breadcrumb-item>.arco-icon {
+  .arco-breadcrumb-item > .arco-icon {
     color: #000000;
     cursor: pointer;
   }
@@ -29,7 +29,7 @@
         font-weight: 600;
         font-size: 14px;
         line-height: 22px;
-        color: #1E293B;
+        color: #1e293b;
       }
 
       .item-content-box {
@@ -42,14 +42,14 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 18px;
-        color: #0F172A;
+        color: #0f172a;
       }
 
       .operate-text {
         font-weight: 400;
         font-size: 14px;
         line-height: 18px;
-        color: #007DFA;
+        color: #007dfa;
         margin: 0 0 0 5px;
         cursor: pointer;
       }
@@ -59,7 +59,7 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 18px;
-      color: #6E7B8D;
+      color: #6e7b8d;
       margin: 8px 0 0 0;
     }
   }
@@ -71,7 +71,7 @@
     border-radius: 8px;
     padding: 20px;
     gap: 20px;
-    background-color: #F8FAFD;
+    background-color: #f8fafd;
   }
 
   /* 作业区域 */
@@ -82,14 +82,14 @@
     border-radius: 12px;
     padding: 24px;
     gap: 20px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     margin: 10px 0;
 
     .arco-tabs-vertical {
       width: 100%;
     }
 
-    .workflow-task-detail .work-region .arco-tabs-left .arco-tabs-content-vertical {
+    .arco-tabs-left .arco-tabs-content-vertical {
       padding: 0;
       margin-left: 16px;
     }

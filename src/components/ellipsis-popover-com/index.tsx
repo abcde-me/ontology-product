@@ -36,10 +36,14 @@ function EllipsisPopover(props: any, ref: any) {
 
   useImperativeHandle(ref, () => ({}));
   const onMouseOver = () => {
+    // TODO: ts错误
+    // @ts-expect-error
     clearTimeout(columnTimerRef.current);
     const columnTimer = setTimeout(() => {
       setColumnTextVisible(true);
     }, 200);
+    // TODO: ts错误
+    // @ts-expect-error
     columnTimerRef.current = columnTimer;
   };
   React.useEffect(() => {
@@ -48,6 +52,8 @@ function EllipsisPopover(props: any, ref: any) {
       const tag1 = columnTextRef.current;
       if (tag && tag1) {
         let parentWidth = Number(
+          // TODO: ts错误
+          // @ts-expect-error
           window.getComputedStyle(tag.parentNode).width.replace('px', '')
         ); // 获取元素父级宽度精确到小数
         const contentWidth = Number(
@@ -65,6 +71,8 @@ function EllipsisPopover(props: any, ref: any) {
   const onMouseOut = () => {
     setIsShowTooltip(false);
     setColumnTextVisible(false);
+    // TODO: ts错误
+    // @ts-expect-error
     clearTimeout(columnTimerRef.current);
   };
   const onMouseOverIconCopy = () => {
@@ -76,6 +84,8 @@ function EllipsisPopover(props: any, ref: any) {
   const handleCopy = () => {
     const oInput = columnInputRef.current;
     // 选择对象
+    // TODO: ts错误
+    // @ts-expect-error
     oInput.select();
     // 执行浏览器复制命令
     try {

@@ -2,7 +2,15 @@ import React from 'react';
 import { useState } from 'react';
 import { Tabs, Typography, Select, DatePicker, Button, Modal, Message, Popover } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import { IconPlus, IconDown, IconDragArrow, IconCaretDown, IconCaretRight, IconDelete, IconDownload } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconDown,
+  IconDragArrow,
+  IconCaretDown,
+  IconCaretRight,
+  IconDelete,
+  IconDownload
+} from '@arco-design/web-react/icon';
 import { Tree } from '@arco-design/web-react';
 
 import Tables from '@/components/data-catalog-content/target-table';

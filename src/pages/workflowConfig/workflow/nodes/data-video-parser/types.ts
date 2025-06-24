@@ -1,22 +1,29 @@
-import type { CommonNodeType, VarType, Variable } from '@/pages/workflowConfig/workflow/types'
-import { string } from 'mobx-state-tree/dist/internal'
+import type {
+  CommonNodeType,
+  VarType,
+  Variable
+} from '@/pages/workflowConfig/workflow/types';
+import { string } from 'mobx-state-tree/dist/internal';
 
-
-export type OutputVar = Record<string, {
-  type: VarType
-  children: null // support nest in the future,
-}>
+export type OutputVar = Record<
+  string,
+  {
+    type: VarType;
+    children: null; // support nest in the future,
+  }
+>;
 
 export type VideoParserNodeType = CommonNodeType & {
-  files: string[]
-  selected_files_num: number
-  is_poly_orbit: number
-  is_denoise: number
-  audio_options: string[]
-  vad_enabled: number
-  activity_mode: string
-  is_open_multi_conv: number
-  vad_options: string[]
-  audio_model: string
-  after_proc: number[]
-}
+  files: string[];
+  selected_files_num: number;
+  is_poly_orbit: number;
+  is_denoise: number;
+  audio_options: string[];
+  vad_enabled: number;
+  activity_mode: number;
+  activity_mode_num: number;
+  is_open_multi_conv: number;
+  vad_options: string[];
+  audio_model_id: string;
+  after_proc: number[];
+};

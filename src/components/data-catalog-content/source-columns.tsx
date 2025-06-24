@@ -99,9 +99,9 @@ export const targetDataDatabase = (setVisible, hoveredRowId = null) => [
 
 ]
 const handleDownload = (record, setVisible) => {
-    // console.log('下载', id)
-    setVisible(true, record)
-}
+  // console.log('下载', id)
+  setVisible(true, record);
+};
 const handleDelete = (id) => {
 
     console.log('删除', id)

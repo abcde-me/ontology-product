@@ -85,7 +85,7 @@ export const useWorkflowOrganize = () => {
   const { saveStateToHistory } = useWorkflowHistory();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
 
-  const handleLayout = useCallback(async () => {
+  const handleLayout = useCallback(() => {
     if (getNodesReadOnly()) return;
     workflowStore.setState({ nodeAnimation: true });
     const { getNodes, edges, setNodes } = store.getState();

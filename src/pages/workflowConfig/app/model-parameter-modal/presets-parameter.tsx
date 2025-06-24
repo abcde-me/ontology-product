@@ -1,34 +1,35 @@
-import type { FC } from 'react'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { RiArrowDownSLine } from '@remixicon/react'
-import Button from '@/pages/workflowConfig/components/button'
-import Dropdown from '@/pages/workflowConfig/components/dropdown'
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiArrowDownSLine } from '@remixicon/react';
+import Button from '@/pages/workflowConfig/components/button';
+import Dropdown from '@/pages/workflowConfig/components/dropdown';
 // import { Brush01 } from '@/app/components/base/icons/src/vender/solid/editor'
 // import { Scales02 } from '@/app/components/base/icons/src/vender/solid/FinanceAndECommerce'
 // import { Target04 } from '@/app/components/base/icons/src/vender/solid/general'
-import { TONE_LIST } from '@/pages/workflowConfig/config/'
-import cn from '@/pages/workflowConfig/utils/classnames'
+import { TONE_LIST } from '@/pages/workflowConfig/config/';
+import cn from '@/pages/workflowConfig/utils/classnames';
 
 type PresetsParameterProps = {
-  onSelect: (toneId: number) => void
-}
-const PresetsParameter: FC<PresetsParameterProps> = ({
-  onSelect,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const renderTrigger = useCallback((open: boolean) => {
-    return (
-      <Button
-        size={'small'}
-        variant={'secondary'}
-        className={cn(open && 'bg-state-base-hover')}
-      >
-        {t('common.modelProvider.loadPresets')}
-        <RiArrowDownSLine className='ml-0.5 w-3.5 h-3.5' />
-      </Button>
-    )
-  }, [t])
+  onSelect: (toneId: number) => void;
+};
+const PresetsParameter: FC<PresetsParameterProps> = ({ onSelect }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const renderTrigger = useCallback(
+    (open: boolean) => {
+      return (
+        <Button
+          size={'small'}
+          variant={'secondary'}
+          className={cn(open && 'bg-state-base-hover')}
+        >
+          {t('common.modelProvider.loadPresets')}
+          <RiArrowDownSLine className="ml-0.5 h-3.5 w-3.5" />
+        </Button>
+      );
+    },
+    [t]
+  );
   // const getToneIcon = (toneId: number) => {
   //   const className = 'mr-2 w-[14px] h-[14px]'
   //   const res = ({
@@ -42,22 +43,22 @@ const PresetsParameter: FC<PresetsParameterProps> = ({
     return {
       value: tone.id,
       text: (
-        <div className='flex items-center h-full'>
+        <div className="flex h-full items-center">
           {/* {getToneIcon(tone.id)} */}
-          {t(`common.model.tone.${tone.name}`) as string}
+          {t(`common.model.tone.${tone.name}`)}
         </div>
-      ),
-    }
-  })
+      )
+    };
+  });
 
   return (
     <Dropdown
       renderTrigger={renderTrigger}
       items={options}
-      onSelect={item => onSelect(item.value as number)}
-      popupClassName='z-[1003]'
+      onSelect={(item) => onSelect(item.value as number)}
+      popupClassName="z-[1003]"
     />
-  )
-}
+  );
+};
 
-export default PresetsParameter
+export default PresetsParameter;

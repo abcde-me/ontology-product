@@ -1,11 +1,28 @@
 import React from 'react';
-import { Typography, Input, Button, Table, Tag, Space, Modal, Message, Select, Checkbox } from '@arco-design/web-react';
-import { IconPlus, IconEdit, IconUpload, IconDelete, IconDownload, IconFilter } from '@arco-design/web-react/icon';
+import {
+  Typography,
+  Input,
+  Button,
+  Table,
+  Tag,
+  Space,
+  Modal,
+  Message,
+  Select,
+  Checkbox
+} from '@arco-design/web-react';
+import {
+  IconPlus,
+  IconEdit,
+  IconUpload,
+  IconDelete,
+  IconDownload,
+  IconFilter
+} from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import { getDatasetList, createDataset } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import './index.css';
-
 
 // 数据集类型
 interface Dataset {
@@ -23,7 +40,6 @@ interface Dataset {
   src_model: string;
 }
 
-
 const columns = (handleGoToDetail, handleDelete) => [
   {
     title: '名称',
@@ -36,14 +52,14 @@ const columns = (handleGoToDetail, handleDelete) => [
       >
         {name}
       </Button>
-    ),
+    )
   },
   {
     title: '标签',
     dataIndex: 'tags',
     filterable: {
       icon: <IconFilter />,
-      defaultFilters: [],
+      defaultFilters: []
     },
     render: (tags: string[]) => (
       <Space>
@@ -53,57 +69,55 @@ const columns = (handleGoToDetail, handleDelete) => [
           </Tag>
         ))}
       </Space>
-    ),
+    )
   },
   {
     title: '版本',
-    dataIndex: 'latest_version',
+    dataIndex: 'latest_version'
   },
   {
     title: '描述说明',
     dataIndex: 'description',
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '生成模型',
     dataIndex: 'src_model',
     filterable: {
       icon: <IconFilter />,
-      defaultFilters: [],
+      defaultFilters: []
     },
-    render: (src_model: string) => (
-      <Tag className="tag-purple">
-        {src_model}
-      </Tag>
-    ),
+    render: (src_model: string) => <Tag className="tag-purple">{src_model}</Tag>
   },
   {
     title: '创建人',
     dataIndex: 'creator_name',
     sortable: {
-      sortDirections: ['ascend', 'descend'],
-    },
+      sortDirections: ['ascend', 'descend']
+    }
   },
   {
     title: '创建时间',
     dataIndex: 'created_at',
     sortable: {
-      sortDirections: ['ascend', 'descend'],
-    },
+      sortDirections: ['ascend', 'descend']
+    }
   },
   {
     title: '最近更新',
-    dataIndex: 'updated_at',
+    dataIndex: 'updated_at'
   },
   {
     title: '操作',
     dataIndex: 'op',
+    width: 148,
+    fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
-      <Space>
-        <Button
-          type="text"
-          className="action-button export"
-        >
+      <Space size={8}>
+        <Button type="text" className="action-button export">
+          编辑
+        </Button>
+        <Button type="text" className="action-button export">
           导出
         </Button>
         <Button
@@ -114,27 +128,25 @@ const columns = (handleGoToDetail, handleDelete) => [
           删除
         </Button>
       </Space>
-    ),
-  },
+    )
+  }
 ];
-
-
 
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
 
-  const [datasetList, setDatasetList] = React.useState<Dataset[]>([]);//数据集列表
-  const [search, setSearch] = React.useState<string>('');//搜索
-  const [searchField, setSearchField] = React.useState<string>('name');//搜索字段
+  const [datasetList, setDatasetList] = React.useState<Dataset[]>([]); //数据集列表
+  const [search, setSearch] = React.useState<string>(''); //搜索
+  const [searchField, setSearchField] = React.useState<string>('name'); //搜索字段
 
   // 分页相关状态
-  const [currentPage, setCurrentPage] = React.useState<number>(1);//当前页码
-  const [pageSize, setPageSize] = React.useState<number>(10);//每页条数
-  const [total, setTotal] = React.useState<number>(0);//总条数
+  const [currentPage, setCurrentPage] = React.useState<number>(1); //当前页码
+  const [pageSize, setPageSize] = React.useState<number>(10); //每页条数
+  const [total, setTotal] = React.useState<number>(0); //总条数
 
   // 选择相关状态
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);//选择行
-  const [selectedRows, setSelectedRows] = React.useState<Dataset[]>([]);//选择行数据
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]); //选择行
+  const [selectedRows, setSelectedRows] = React.useState<Dataset[]>([]); //选择行数据
 
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -145,7 +157,7 @@ const DatasetManagement: React.FC = () => {
     { label: '标签', value: 'tags' },
     { label: '描述说明', value: 'description' },
     { label: '生成模型', value: 'src_model' },
-    { label: '创建人', value: 'creator_name' },
+    { label: '创建人', value: 'creator_name' }
   ];
 
   // 行选择配置
@@ -157,7 +169,7 @@ const DatasetManagement: React.FC = () => {
     },
     onSelectAll: (selected: boolean, selectedRows: any) => {
       console.log('onSelectAll:', selected, selectedRows);
-    },
+    }
   };
 
   // 打开新建弹窗
@@ -172,10 +184,10 @@ const DatasetManagement: React.FC = () => {
 
   // 跳转到详情页
   const handleGoToDetail = (datasetId: number) => {
-    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`);
+    history.push(
+      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
+    );
   };
-
-
 
   // 提交表单数据,新建数据集
   const handleSubmit = (formData: any) => {
@@ -185,26 +197,32 @@ const DatasetManagement: React.FC = () => {
       description: formData.description,
       tag_names: formData.tags || [],
       src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
-      src_extra: formData.dataSource === 'volume'
-        ? {
-          path: 'dst' + '/' + formData.targetDataSource[0] + '/' + formData.targetDataSource[1]
-        }
-        : {
-          connector_id: parseInt(formData.targetDataSource) || 0,
-          connector_files: formData.selectedFiles || []
-        }
+      src_extra:
+        formData.dataSource === 'volume'
+          ? {
+              path:
+                'dst' +
+                '/' +
+                formData.targetDataSource[0] +
+                '/' +
+                formData.targetDataSource[1]
+            }
+          : {
+              connector_id: parseInt(formData.targetDataSource) || 0,
+              connector_files: formData.selectedFiles || []
+            }
     };
 
     console.log('提交数据:', submitData);
-    createDataset(submitData).then(res => {
-      Message.success(res.msg);
-    }).catch(err => {
-      Message.error('数据集创建失败！');
-    })
+    createDataset(submitData)
+      .then((res) => {
+        Message.success(res.msg);
+      })
+      .catch((err) => {
+        Message.error('数据集创建失败！');
+      });
     closeModal();
   };
-
-
 
   // 删除数据集
   const handleDelete = (record: Dataset) => {
@@ -215,17 +233,16 @@ const DatasetManagement: React.FC = () => {
       cancelText: '取消',
       okButtonProps: { status: 'danger' },
       onOk: () => {
-        deleteDataset(record)
+        deleteDataset(record);
         Message.success('数据集删除成功！');
-      },
+      }
     });
   };
 
   // 删除数据集的方法
   const deleteDataset = (record: Dataset) => {
     console.log(record);
-  }
-
+  };
 
   const data: Dataset[] = [
     {
@@ -240,7 +257,7 @@ const DatasetManagement: React.FC = () => {
       updated_at: '2025年6月1日 08:15:22',
       deleted_at: null,
       tags: ['文本', '训练'],
-      src_model: 'gpt-3.5-turbo',
+      src_model: 'gpt-3.5-turbo'
     },
     {
       id: 2,
@@ -254,7 +271,7 @@ const DatasetManagement: React.FC = () => {
       updated_at: '2025年5月28日 16:45:10',
       deleted_at: null,
       tags: ['图片', '分类'],
-      src_model: 'vision-model',
+      src_model: 'vision-model'
     },
     {
       id: 3,
@@ -268,10 +285,9 @@ const DatasetManagement: React.FC = () => {
       updated_at: '2025年5月30日 11:33:47',
       deleted_at: null,
       tags: ['混合', '自定义', '测试'],
-      src_model: 'claude-3-sonnet',
-    },
+      src_model: 'claude-3-sonnet'
+    }
   ];
-
 
   // 分页处理函数
   const handlePageChange = (page: number) => {
@@ -314,7 +330,7 @@ const DatasetManagement: React.FC = () => {
         Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
         setSelectedRowKeys([]);
         setSelectedRows([]);
-      },
+      }
     });
   };
 
@@ -331,96 +347,94 @@ const DatasetManagement: React.FC = () => {
 
   return (
     <div className="dataset-management">
-      <div className="dataset-header">
-        <Typography.Title heading={4} className="dataset-title">
-          数据集管理
-        </Typography.Title>
-        <Typography.Text type="secondary" className="dataset-description">
-          管理用于模型精调和训练的数据集
-        </Typography.Text>
-      </div>
-
-      <div className="search-toolbar">
-        <div className="search-group">
-          <Select
-            className="search-field-select"
-            value={searchField}
-            onChange={(value) => setSearchField(value)}
-            options={searchOptions}
-          />
-          <Input.Search
-            allowClear
-            placeholder="输入关键字搜索"
-            className="search-input"
-            value={search}
-            onChange={(value) => setSearch(value)}
-          />
+      <div className="dataset-content-card">
+        <div className="dataset-header">
+          <div className="dataset-title">数据集管理</div>
+          <div className="dataset-description">
+            管理用于模型精调和训练的数据集
+          </div>
         </div>
-        <div className="action-buttons">
-          <Button
-            icon={<IconDelete />}
-            className="batch-delete-btn"
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchDelete}
-          >
-            批量删除
-          </Button>
-          <Button
-            icon={<IconDownload />}
-            className="batch-export-btn"
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchExport}
-          >
-            批量导出
-          </Button>
-          <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
-            新建数据集
-          </Button>
+
+        <div className="search-toolbar">
+          <div className="search-group">
+            <Select
+              className="search-field-select"
+              value={searchField}
+              onChange={(value) => setSearchField(value)}
+              options={searchOptions}
+            />
+            <Input.Search
+              allowClear
+              placeholder="输入关键字搜索"
+              className="search-input"
+              value={search}
+              onChange={(value) => setSearch(value)}
+            />
+          </div>
+          <div className="action-buttons">
+            <Button
+              icon={<IconDelete />}
+              className="batch-delete-btn"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchDelete}
+            >
+              批量删除
+            </Button>
+            <Button
+              icon={<IconDownload />}
+              className="batch-export-btn"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchExport}
+            >
+              批量导出
+            </Button>
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              onClick={openCreateModal}
+            >
+              新建数据集
+            </Button>
+          </div>
         </div>
-      </div>
 
-
-
-      <Table
-        rowKey="id"
-        className="dataset-table"
-        columns={columns(handleGoToDetail, handleDelete)}
-        data={datasetList}
-        rowSelection={rowSelection}
-        pagination={{
-          current: currentPage,
-          total: total,
-          pageSize: pageSize,
-          showTotal: (total, range) => `共${total}条，`,
-          sizeCanChange: true,
-          showJumper: true,
-          pageSizeChangeResetCurrent: true,
-          onChange: handlePageChange,
-          onPageSizeChange: handlePageSizeChange,
-          sizeOptions: [10, 20, 50, 100],
-        }}
-        border={false}
-        scroll={{ y: 400 }}
-      />
-
-      {/* 新建数据集弹框 */}
-      <Modal
-        title="新建数据集"
-        visible={modalVisible}
-        footer={null}
-        style={{ width: '960px', minHeight: '436px' }}
-        onCancel={closeModal}
-        maskClosable={false}
-      >
-        <DatasetForm
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
+        <Table
+          rowKey="id"
+          className="dataset-table"
+          columns={columns(handleGoToDetail, handleDelete)}
+          data={datasetList}
+          rowSelection={rowSelection}
+          pagination={{
+            current: currentPage,
+            total: total,
+            pageSize: pageSize,
+            showTotal: (total, range) => `共${total}条`,
+            sizeCanChange: true,
+            showJumper: true,
+            pageSizeChangeResetCurrent: true,
+            onChange: handlePageChange,
+            onPageSizeChange: handlePageSizeChange,
+            sizeOptions: [10, 20, 50, 100]
+          }}
+          border={false}
+          scroll={{ x: 1200 }}
+          stripe
         />
-      </Modal>
 
-
+        {/* 新建数据集弹框 */}
+        <Modal
+          title="新建数据集"
+          visible={modalVisible}
+          footer={null}
+          style={{ width: '960px', minHeight: '436px' }}
+          onCancel={closeModal}
+          maskClosable={false}
+        >
+          <DatasetForm onSubmit={handleSubmit} onCancel={closeModal} />
+        </Modal>
+      </div>
     </div>
   );
 };
 
-export default DatasetManagement; 
+export default DatasetManagement;

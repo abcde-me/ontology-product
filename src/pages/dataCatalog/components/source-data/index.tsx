@@ -7,14 +7,14 @@ import TargetDataTree from './components/targetdata-tree';
 const TabPane = Tabs.TabPane;
 
 export default function SourceDate(props) {
-    const { onTabChange, onNodeSelect, activeTab } = props
+  const { onTabChange, onNodeSelect, activeTab } = props;
 
-    const handleTabChange = (value) => {
-        console.log('Tab changed to:', value);
-        if (onTabChange) {
-            onTabChange(value);
-        }
+  const handleTabChange = (value) => {
+    console.log('Tab changed to:', value);
+    if (onTabChange) {
+      onTabChange(value);
     }
+  };
 
     return (
         <div style={{ width: '220px', border: '1px solid #E2E8F0', borderRadius: '4px', marginRight: '8px',overflow:'auto'  }}>

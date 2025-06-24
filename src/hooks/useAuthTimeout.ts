@@ -26,35 +26,35 @@ const useAuthTimeout = (options: {
     
     timerRef.current = setTimeout(
       () => {
-        console.log('【验证】自动登出计时器触发');
+        // console.log('【验证】自动登出计时器触发');
         handleLogout();
       },
       options.logoutTimeout * 60 * 1000
     );
-    console.log(`【验证】登出计时器已设置，将在${options.logoutTimeout}分钟后触发`);
+    // console.log(`【验证】登出计时器已设置，将在${options.logoutTimeout}分钟后触发`);
   };
 
   const handleRenewToken = async () => {
     // 防止重复续约
     if (isRenewingRef.current) {
-      console.log('【验证】已有续约请求正在进行，跳过');
+      // console.log('【验证】已有续约请求正在进行，跳过');
       return;
     }
 
     const rawToken = localStorage.getItem('loginToken');
     if (!rawToken) {
-      console.log('【验证】Token 不存在，跳过续约检查');
+      // console.log('【验证】Token 不存在，跳过续约检查');
       return;
     }
     
     if (!isValidToken(rawToken)) {
-      console.log('【验证】Token 格式无效，跳过续约');
+      // console.log('【验证】Token 格式无效，跳过续约');
       return;
     }
     
     const expTime = getTokenExpiration(rawToken);
     if (!expTime) {
-      console.log('【验证】无法获取 Token 过期时间，跳过续约');
+      // console.log('【验证】无法获取 Token 过期时间，跳过续约');
       return;
     }
 
@@ -63,15 +63,15 @@ const useAuthTimeout = (options: {
     const remainingMinutes = Math.floor(remaining / (60 * 1000));
     const remainingSeconds = Math.floor((remaining % (60 * 1000)) / 1000);
     
-    console.log(
-      `【验证】Token 检查: 剩余时间 ${remainingMinutes}分${remainingSeconds}秒, ` +
-      `续约阈值: ${options.renewBeforeExpire}分钟`
-    );
+    // console.log(
+    //   `【验证】Token 检查: 剩余时间 ${remainingMinutes}分${remainingSeconds}秒, ` +
+    //   `续约阈值: ${options.renewBeforeExpire}分钟`
+    // );
     
     const shouldRenew = remaining < options.renewBeforeExpire * 60 * 1000;
 
     if (shouldRenew) {
-      console.log('【验证】Token 即将过期，开始续约...');
+      // console.log('【验证】Token 即将过期，开始续约...');
       try {
         isRenewingRef.current = true;
         const response = await renew();
@@ -82,14 +82,14 @@ const useAuthTimeout = (options: {
         const newToken = response.data.renewToken;
         
         // 打印旧token和新token的前10个字符进行对比
-        console.log(`【验证】Token续约: 旧=${rawToken.substring(0, 10)}... 新=${newToken.substring(0, 10)}...`);
+        // console.log(`【验证】Token续约: 旧=${rawToken.substring(0, 10)}... 新=${newToken.substring(0, 10)}...`);
         
         localStorage.setItem('loginToken', newToken);
         
         // 获取新 token 的过期时间
         const newExpTime = getTokenExpiration(newToken);
         const newExpDate = newExpTime ? new Date(newExpTime).toLocaleString() : '未知';
-        console.log(`【验证】Token 续约成功! 新的过期时间: ${newExpDate}`);
+        // console.log(`【验证】Token 续约成功! 新的过期时间: ${newExpDate}`);
         
         // 续约成功后重置登出计时器
         startLogoutTimer();
@@ -100,7 +100,7 @@ const useAuthTimeout = (options: {
         isRenewingRef.current = false;
       }
     } else {
-      console.log('【验证】Token 还未达到续约时间，无需续约');
+      // console.log('【验证】Token 还未达到续约时间，无需续约');
     }
   };
 
@@ -110,25 +110,25 @@ const useAuthTimeout = (options: {
     
     try {
       isLoggingOutRef.current = true;
-      console.log('【验证】执行自动登出操作');
+      // console.log('【验证】执行自动登出操作');
       cleanup();
       localStorage.removeItem('loginToken');
       // 使用replace而不是href，避免浏览器历史记录问题
       window.location.replace('/tenant/compute/appforge/login');
     } catch (error) {
-      console.error('【验证】登出操作失败:', error);
+      // console.error('【验证】登出操作失败:', error);
       isLoggingOutRef.current = false;
     }
   };
 
   const handleUserActivity = () => {
-    console.log('【验证】检测到用户活动，重置登出计时器');
+    // console.log('【验证】检测到用户活动，重置登出计时器');
     startLogoutTimer();
   };
 
   useEffect(() => {
-    console.log('【验证】初始化 AuthTimeout 钩子');
-    console.log(`【验证】配置: 登出超时=${options.logoutTimeout}分钟, 续约阈值=${options.renewBeforeExpire}分钟`);
+    // console.log('【验证】初始化 AuthTimeout 钩子');
+    // console.log(`【验证】配置: 登出超时=${options.logoutTimeout}分钟, 续约阈值=${options.renewBeforeExpire}分钟`);
     
     // 检查当前token的过期时间
     const rawToken = localStorage.getItem('loginToken');
@@ -139,7 +139,7 @@ const useAuthTimeout = (options: {
         const remaining = expTime - Date.now();
         const remainingMinutes = Math.floor(remaining / (60 * 1000));
         const remainingSeconds = Math.floor((remaining % (60 * 1000)) / 1000);
-        console.log(`【验证】当前Token过期时间: ${expDate}, 剩余: ${remainingMinutes}分${remainingSeconds}秒`);
+        // console.log(`【验证】当前Token过期时间: ${expDate}, 剩余: ${remainingMinutes}分${remainingSeconds}秒`);
       }
     }
     
@@ -175,7 +175,7 @@ const useAuthTimeout = (options: {
     );
 
     return () => {
-      console.log('【验证】清理 AuthTimeout 钩子');
+      // console.log('【验证】清理 AuthTimeout 钩子');
       cleanup();
       events.forEach((event) =>
         window.removeEventListener(event, throttledUserActivity)
