@@ -58,7 +58,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({
         autoComplete='off'
         labelCol={{span: 0}}
         wrapperCol={{span: 24}}
-        initialValues={cloneDeep(StartNodeDefault.defaultValue)}
+        initialValues={cloneDeep(inputs)}
         layout="vertical"
         onChange={async(_, v) => {
           // form.validate().catch(() => {})
