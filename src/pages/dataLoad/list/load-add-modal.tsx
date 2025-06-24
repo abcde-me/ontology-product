@@ -2,7 +2,9 @@ import { Button, Form, Input, Message, Radio, Select, Tag, TimePicker, TreeSelec
 import React, { useState } from 'react'
 import Styles from './index.module.css'
 import CycleLoadingForm from '../list/cycle-loading-form-modal';
-import conversionArco from '../../../utils/conversionArco'
+import { convertWeekDaysToString } from '../../../utils/conversionArco'
+import { WeekDay } from '../../../utils/conversionArco';
+import { dataLodaAddForm } from '../type';
 // 单选框实例
 const RadioGroup = Radio.Group;
 // 表单实例
@@ -46,31 +48,56 @@ const LoadAddModal = (props: any) => {
 
 
     // 提交表单时的校验逻辑
-    const handleSubmit = () => {
-        const fo1 = form.getFieldsValue()
-        const [hour, minute] = fo1.time.split(':')
-        // 校验成功的逻辑
-        form.validate().then(() => {
-            // 点击确认隐藏弹框并且重置表单数据
-            props.hideModalHan()
-            const fo2 = {
-                name: fo1.name,
-                connector_id: fo1.connector_id,
-                source_type: fo1.cycle,
-                load_type: fo1.load_type,
-                dest_path: fo1.dest_path,
-                minute: minute,
-                hour: hour,
-                data: fo1.cycle == '每日' ? '*' : fo1.cycle == '每月' ? fo1.week : '*',
-                month: fo1.cycle == '每月' ? '*' : '',
-                week: fo1.cycle == '每周' ? fo1.week : '',
-                creator: '张三'
+    const handleSubmit = async () => {
+        try {
+            const formValues = form.getFieldsValue();
+            const { time, day, cycle, ...rest } = formValues;
+
+            const [hour, minute] = time.split(':');
+            await form.validate();
+            props.hideModalHan();
+
+            const isLastDayOfMonth = day?.findIndex(item => item === '每月最后一天') !== -1;
+
+            // 转换星期为数字字符串
+            let dataValue: string;
+            switch (cycle) {
+                case '每日':
+                    dataValue = '*';
+                    break;
+                case '每周':
+                    dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
+                    break;
+                case '每月':
+                    dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
+                    break;
+                default:
+                    dataValue = '*';
             }
-            console.log(fo2);
-        }).catch((error) => {
-            // 校验失败，错误信息会由 Form 自动处理
-            console.error('表单校验失败：', error);
-        });
+
+            const formData = {
+                job_name: rest.name,
+                connector_id: rest.connector_id,
+                source_type: rest.source_type,
+                run_cycle: {
+                    type: isLastDayOfMonth ? '0' : '1',
+                    cycle_text: {
+                        minute,
+                        hour,
+                        data: dataValue,
+                        month: '*',
+                        week: cycle === '每周' ? rest.week?.join(',') || '' : '*'// 如果week也需要转换
+                    }
+                },
+                dest_path: rest.dest_path,
+                creator: '张三'
+            };
+
+            console.log('提交的数据:', formData);
+
+        } catch (error) {
+            console.error('表单处理失败:', error);
+        }
     };
 
     // 点击取消按钮的逻辑

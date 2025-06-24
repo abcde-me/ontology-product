@@ -77,7 +77,7 @@ const TableDetail = (props) => {
     ];
     const [data, setData] = useState([
         {
-            id: '7891',
+            execution_id: '7891',
             execution_name: 'RUN-20250306-001',
             status: 'succeed',
             start_time: '2025-06-16 18:40:36',

@@ -5,12 +5,13 @@ import { Router } from 'react-router';
 import TableDetail from './table-detail'
 import './index.css'
 import Edit from '../edit';
+import { ApiResponse } from '../type';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
 const DataLoadDetail = () => {
     // 默认详情的数据
-    const [listDetail, setListDetail] = useState(
+    const [listDetail, setListDetail] = useState<ApiResponse | null>(
         {
             "task_info": {
                 "id": 123,
@@ -63,7 +64,7 @@ const DataLoadDetail = () => {
     // 判断任务中是否存在运行的任务
     const judgmentTask = () => {
         const runningIndex = listDetail.execution_history.findIndex((item) => {
-            return item.status == 'running'
+            return item.status === 'running'
         })
         console.log(runningIndex);
 
@@ -165,7 +166,7 @@ const DataLoadDetail = () => {
 
                 </div>
             </div>
-            <TableDetail data={listDetail.execution_history} runningStatus={runningFlag} judgmentTaskHan={judgmentTask}  />
+            <TableDetail data={listDetail.execution_history} runningStatus={runningFlag} judgmentTaskHan={judgmentTask} />
             <Modal
                 style={{ width: '600px' }}
                 title='编辑数据载入任务'
