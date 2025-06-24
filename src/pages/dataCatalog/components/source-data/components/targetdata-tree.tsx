@@ -337,9 +337,9 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
             // 设置默认选中的节点
             selectedKeys={[selectedKey]}
             icons={(node) => ({
-              // TODO: ts错误
-              // @ts-expect-error
               switcherIcon:
+                // TODO: ts错误
+                // @ts-expect-error
                 node._key === '__input__' || node.childrenData.length > 0 ? (
                   <IconCaretDown />
                 ) : null,
@@ -361,9 +361,9 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
             renderExtra={(node) => {
               return (
                 <div
-                  // TODO: ts错误
-                  // @ts-expect-error
                   onMouseEnter={() => {
+                    // TODO: ts错误
+                    // @ts-expect-error
                     setHoveredKey(node._key);
                   }} //移入时修改key值
                   onMouseLeave={() => setHoveredKey(null)} //移除时将key改为空
@@ -497,6 +497,8 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                 );
               }
 
+              // TODO: ts错误
+              // @ts-expect-error
               if (props._key.startsWith('__input_child__')) {
                 return renderChildInput(props);
               }
@@ -521,7 +523,11 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                       alignItems: 'center',
                       justifyContent: 'space-between'
                     }}
-                    onMouseEnter={() => setHoveredKey(key)} //移入时修改key值
+                    onMouseEnter={() =>
+                      // TODO: ts错误
+                      // @ts-expect-error
+                      setHoveredKey(key)
+                    } //移入时修改key值
                     onMouseLeave={() => setHoveredKey(null)} //移除时将key改为空
                   >
                     <span
@@ -553,7 +559,11 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                     alignItems: 'center',
                     justifyContent: 'flex-start'
                   }}
-                  onMouseEnter={() => setHoveredKey(key)}
+                  onMouseEnter={() =>
+                    // TODO: ts错误
+                    // @ts-expect-error
+                    setHoveredKey(key)
+                  }
                   onMouseLeave={() => setHoveredKey(null)}
                 >
                   <span style={{ marginRight: '6px' }}>{icon}</span>
