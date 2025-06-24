@@ -177,6 +177,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.data_standardization = payload.data_standardization;
         draft.threshold = payload.threshold;
+        draft.threshold_switch = payload.threshold_switch;
         draft.oh_is = payload.oh_is;
         draft.df_is = payload.df_is;
         draft.qd_is = payload.qd_is;
@@ -184,7 +185,10 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.ts_remove = payload.ts_remove;
         draft.remove_url = payload.remove_url;
         draft.remove_invisible = payload.remove_invisible;
-        draft.remove_html = payload.remove_html;
+        draft.unicode = payload.unicode;
+        draft.traditional_to_simplified = payload.traditional_to_simplified;
+        draft.case_transform = payload.case_transform;
+        draft.case_uniformity = payload.case_uniformity;
       });
       setInputs(newInputs);
     },

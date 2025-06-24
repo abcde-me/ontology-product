@@ -7,7 +7,7 @@ import { useStoreApi } from 'reactflow';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
-  const { app_scenarios, enha_modle } = props.data;
+  const { app_scenarios, enha_modle_id, sample_num, similarity_threshold, generate_sample_num, prompt } = props.data;
   console.log(props.data, '=========enh');
   const store = useStoreApi();
   const appScenarios: { [key: number]: string } = {
@@ -33,8 +33,20 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {app_scenarios && (
           <div className="enhancement-item">{appScenarios[app_scenarios]}</div>
         )}
-        {enha_modle && (
-          <div className="enhancement-item">{enhaModle[enha_modle]}</div>
+        {enha_modle_id && (
+          <div className="enhancement-item">{enhaModle[enha_modle_id]}</div>
+        )}
+        {(app_scenarios === 1 || app_scenarios === 5) && sample_num > 0 && (
+          <div className="enhancement-item">{`生成依赖样本数目: ${sample_num}`}</div>
+        )}
+        {similarity_threshold && (
+          <div className="enhancement-item">{`过滤相似度阈值: ${similarity_threshold}`}</div>
+        )}
+        {generate_sample_num && (
+          <div className="enhancement-item">{`生成样本数: ${generate_sample_num}`}</div>
+        )}
+        {prompt && (
+          <div className="enhancement-item">{`提示词: ${prompt}`}</div>
         )}
       </div>
     </div>

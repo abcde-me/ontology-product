@@ -71,11 +71,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [detoxificationSwitch, setDetoxificationSwitch] = useState(false);
   const [imputationSwitch, setImputationSwitch] = useState(false);
   const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
-  console.log(data, inputs, '==============1111111');
   // 获取from内容
   const onValuesChange = (changeValue, values) => {
     updateInputs(values);
-    if (changeValue.case_transform) {
+    if (changeValue.case_uniformity) {
       setUpperLowerStatus(false)
     } else {
       setUpperLowerStatus(true)
@@ -87,6 +86,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     setDetoxificationSwitch(inputs.qd_is);
     setSensitiveSwitch(inputs?.mg_is);
     setDataStandardizationSwitch(inputs?.ts_remove);
+    setSwitchChecked(inputs?.data_standardization);
+    setFilterChecked(inputs?.threshold_switch)
   }, [inputs])
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
@@ -97,12 +98,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          threshold: 80,
-          data_standardization: inputs?.data_standardization,
           remove_url: inputs?.remove_url,
           remove_invisible: inputs?.remove_invisible,
           remove_html: inputs?.remove_html,
-          threshold: inputs?.threshold,
+          threshold: inputs?.threshold || 800,
+          unicode: inputs?.unicode,
+          traditional_to_simplified: inputs?.traditional_to_simplified,
+          case_transform: inputs?.case_transform,
+          case_uniformity: inputs?.case_uniformity,
           vars: cloneDeep(inputs.variables || [])
         }}
         layout="inline"
