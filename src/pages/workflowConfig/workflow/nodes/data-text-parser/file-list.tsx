@@ -1,36 +1,40 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
-import {
-  Table,
-  Input,
-} from '@arco-design/web-react';
-import { useNodes } from 'reactflow'
+import { Table, Input } from '@arco-design/web-react';
+import { useNodes } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 
 type FileListProps = {
-  catetoryId: number
-  files: string[]
-  selectedFilesNum: number
-  handleFilesChange: (files: string[], selectedCount: number) => void
-}
+  catetoryId: number;
+  files: string[];
+  selectedFilesNum: number;
+  handleFilesChange: (files: string[], selectedCount: number) => void;
+};
 
-function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: FileListProps) {
+function FileList({
+  catetoryId,
+  files,
+  selectedFilesNum,
+  handleFilesChange
+}: FileListProps) {
   // console.log('fileList......', files, selectedFilesNum)
-  const nodes = useNodes()
-  const startNode = nodes.find((node: any) => node.data.type === BlockEnum.Start);
-  const [filesData, setFilesData] = useState([]);
+  const nodes = useNodes();
+  const startNode = nodes.find(
+    (node: any) => node.data.type === BlockEnum.Start
+  );
+  const [filesData, setFilesData] = useState<Record<string, any>[]>([]);
   const [loading, setLoading] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<any>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 5,
-    total: 0,
+    total: 0
   });
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const columns = [
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const columns: any[] = [
     {
       title: '文件名',
       dataIndex: 'name',
@@ -38,10 +42,10 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
       filterIcon: <IconSearch />,
       filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
         return (
-          <div className='arco-table-custom-filter'>
+          <div className="arco-table-custom-filter">
             <Input.Search
               ref={inputRef}
-              placeholder='输入文件名搜索'
+              placeholder="输入文件名搜索"
               value={filterKeys[0] || ''}
               onChange={(value) => {
                 setFilterKeys(value ? [value] : []);
@@ -56,13 +60,15 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
       onFilter: (value, row) => (value ? row.name.indexOf(value) !== -1 : true),
       onFilterDropdownVisibleChange: (visible) => {
         if (visible) {
-          setTimeout(() => inputRef.current.focus(), 150);
+          setTimeout(() => inputRef.current?.focus(), 150);
         }
       },
       render(col, record) {
-        return <>
-          <EllipsisPopover value={col} isEdit={false} preferTypography />
-        </>
+        return (
+          <>
+            <EllipsisPopover value={col} isEdit={false} preferTypography />
+          </>
+        );
       }
     },
     {
@@ -78,7 +84,7 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
           value: 'pdf'
         }
       ],
-      onFilter: (value, row) => row.type.indexOf(value) > -1,
+      onFilter: (value, row) => row.type.indexOf(value) > -1
     },
     {
       title: '文件大小',
@@ -87,9 +93,9 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      sorter: (a, b) => a.created_at.localeCompare(b.created_at),
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     }
-  ]
+  ];
 
   const loadFiles = (params: any) => {
     try {
@@ -99,7 +105,9 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
           data: [...new Array(5)].map((_, index) => {
             return {
               id: String(1000 * params.page + index),
-              name: String(1000 * params.page + index) + 'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
+              name:
+                String(1000 * params.page + index) +
+                'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
               type: index % 2 === 0 ? 'docx' : 'pdf',
               size: '3.8M',
               created_at: '2025-05-05 05:05:05' + index
@@ -107,7 +115,7 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
           }),
           total: 100
         }
-      }
+      };
       // console.log('列表数据:', item);
       const { data = [], total = 0 } = item.data;
       setFilesData(data || []);
@@ -117,18 +125,20 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
       }));
 
       const keysSet = new Set([...selectedRowKeys]);
-      data.filter(d => !files?.includes(d.id)).forEach(d => {
-        keysSet.add(d.id);
-      });
+      data
+        .filter((d) => !files?.includes(d.id))
+        .forEach((d) => {
+          keysSet.add(d.id);
+        });
       setSelectedRowKeys(Array.from(keysSet));
-      console.log('loadFiles', total, files)
-      handleFilesChange(files, total - files.length)
+      console.log('loadFiles', total, files);
+      handleFilesChange(files, total - files.length);
     } catch (error) {
       setFilesData([]);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const onChangeTable = (pagination, sorter, filters, extra) => {
     // console.log('表格变化:', { pagination, sorter, filters, extra });
@@ -146,81 +156,98 @@ function FileList({catetoryId, files, selectedFilesNum, handleFilesChange}: File
       });
       return;
     }
-  }
+  };
 
   useEffect(() => {
     loadFiles({
       page: pagination.page,
       limit: pagination.limit
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <Table
-    className="files-table"
-    loading={loading}
-    columns={columns}
-    pagePosition={null}
-    pagination={{
-      showTotal: true,
-      current: pagination.page,
-      pageSize: pagination.limit,
-      total: pagination.total
-    }}
-    onChange={onChangeTable}
-    rowSelection={{
-      selectedRowKeys,
-      onSelect: (selected, record, selectedRows) => {
-        console.log('onSelect:', selected, record, selectedRows);
-        if (selected) {
-          if (!selectedRowKeys.includes(record.id)) {
-            setSelectedRowKeys([...selectedRowKeys, record.id]);
+  return (
+    <Table
+      className="files-table"
+      loading={loading}
+      columns={columns}
+      pagePosition="br"
+      pagination={{
+        showTotal: true,
+        current: pagination.page,
+        pageSize: pagination.limit,
+        total: pagination.total
+      }}
+      onChange={onChangeTable}
+      rowSelection={{
+        selectedRowKeys,
+        onSelect: (selected, record, selectedRows) => {
+          console.log('onSelect:', selected, record, selectedRows);
+          if (selected) {
+            if (!selectedRowKeys.includes(record.id)) {
+              setSelectedRowKeys([...selectedRowKeys, record.id]);
+            }
+            if (files.includes(record.id)) {
+              handleFilesChange(
+                files.filter((f) => f !== record.id),
+                selectedFilesNum + 1
+              );
+            }
+          } else {
+            if (selectedRowKeys.includes(record.id)) {
+              setSelectedRowKeys((old) =>
+                old.filter((key) => key !== record.id)
+              );
+            }
+            if (!files.includes(record.id)) {
+              handleFilesChange([...files, record.id], selectedFilesNum - 1);
+            }
           }
-          if (files.includes(record.id)) {
-            handleFilesChange(files.filter(f => f !== record.id), selectedFilesNum + 1);
-          }
-        } else {
-          if (selectedRowKeys.includes(record.id)) {
-            setSelectedRowKeys(old => old.filter(key => key !== record.id));
-          }
-          if (!files.includes(record.id)) {
-            handleFilesChange([...files, record.id], selectedFilesNum - 1);
+        },
+        onSelectAll: (selected) => {
+          console.log('onSelectAll:', selected);
+          const currentPageFileIds = filesData.map((f) => f.id);
+          if (selected) {
+            setSelectedRowKeys(
+              Array.from(new Set([...selectedRowKeys, ...currentPageFileIds]))
+            );
+            let counter = 0;
+            currentPageFileIds.forEach((id) => {
+              if (files.includes(id)) {
+                counter++;
+              }
+            });
+            handleFilesChange(
+              files.filter((f) => !currentPageFileIds.includes(f)),
+              selectedFilesNum + counter
+            );
+          } else {
+            setSelectedRowKeys((oldKeys) =>
+              oldKeys.filter((key) => !currentPageFileIds.includes(key))
+            );
+            let counter = 0;
+            currentPageFileIds.forEach((id) => {
+              if (!files.includes(id)) {
+                counter++;
+              }
+            });
+            handleFilesChange(
+              Array.from(new Set([...files, ...currentPageFileIds])),
+              selectedFilesNum - counter
+            );
           }
         }
-      },
-      onSelectAll: (selected) => {
-        console.log('onSelectAll:', selected);
-        const currentPageFileIds = filesData.map(f => f.id);
-        if (selected) {
-          setSelectedRowKeys(Array.from(new Set([...selectedRowKeys, ...currentPageFileIds])));
-          let counter = 0
-          currentPageFileIds.forEach((id) => {
-            if (files.includes(id)) {
-              counter++
-            }
-          })
-          handleFilesChange(files.filter(f => !currentPageFileIds.includes(f)), selectedFilesNum + counter);
-        } else {
-          setSelectedRowKeys(oldKeys => oldKeys.filter((key) => !currentPageFileIds.includes(key)));
-          let counter = 0
-          currentPageFileIds.forEach((id) => {
-            if (!files.includes(id)) {
-              counter++
-            }
-          })
-          handleFilesChange(Array.from(new Set([...files, ...currentPageFileIds])), selectedFilesNum - counter);
-        }
+      }}
+      data={filesData}
+      rowKey="id"
+      noDataElement={
+        <div className="flex flex-col items-center justify-center">
+          <EmptyIcon className="size-[48px]"></EmptyIcon>
+          <span className="text-[#6E7B8D]">请先选择源数据目录</span>
+        </div>
       }
-    }}
-    data={filesData}
-    rowKey="id"
-    noDataElement={
-      <div className='flex flex-col items-center justify-center'>
-        <EmptyIcon className='size-[48px]'></EmptyIcon>
-        <span className='text-[#6E7B8D]'>请先选择源数据目录</span>
-      </div>
-    }
-  />
+    />
+  );
 }
 
 export default FileList;
