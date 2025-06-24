@@ -250,16 +250,15 @@ function DatasetForm({ onSubmit, onCancel }) {
 
   useEffect(() => {
     //数据目录卷
-    // getCatalogList({integer:2}).then(res => {
-    //   console.log(res)
-    // })//获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
+    getCatalogList({integer:2}).then(res => {
+      console.log(res)
+    })//获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     setTargetDataSourceOptions(cstargetDataSourceOptions);//测试数据
 
 
     //连接器
     getConnectorList({ scope: 2 }).then(res => {
-      console.log(res)
-      setConnectorList(convertToSelectOptions(res.data))
+      setConnectorList(convertToSelectOptions(res.data.items))
     })
 
     // setConnectorList(convertToSelectOptions(res.data))

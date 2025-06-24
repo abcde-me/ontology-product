@@ -40,11 +40,11 @@ const useConfig = (id: string, payload: AudioParserNodeType) => {
   const handleFiledsChange = useCallback((fields: AudioParserNodeType) => {
     const newInputs = produce(inputs, (draft) => {
       draft.audio_pret = fields.audio_pret
-      draft.vad_enabled = fields.vad_options.includes('vad') ? 1 : 0
+      draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1
       draft.activity_mode = fields.activity_mode,
-      draft.is_open_multi_conv = fields.vad_options.includes('conv') ? 1 : 0,
+      draft.is_open_multi_conv = fields.vad_options.includes('conv') ? 2 : 1,
       draft.vad_options = fields.vad_options
-      draft.audio_model = fields.audio_model
+      draft.audio_model_id = fields.audio_model_id
       draft.after_proc = fields.after_proc
     })
     setInputs(newInputs)

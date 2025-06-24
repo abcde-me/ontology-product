@@ -98,8 +98,16 @@ const columns = (handleGoToDetail, handleDelete) => [
   {
     title: '操作',
     dataIndex: 'op',
+    width: 148,
+    fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
-      <Space>
+      <Space size={8}>
+        <Button
+          type="text"
+          className="action-button export"
+        >
+          编辑
+        </Button>
         <Button
           type="text"
           className="action-button export"
@@ -331,94 +339,96 @@ const DatasetManagement: React.FC = () => {
 
   return (
     <div className="dataset-management">
-      <div className="dataset-header">
-        <Typography.Title heading={4} className="dataset-title">
-          数据集管理
-        </Typography.Title>
-        <Typography.Text type="secondary" className="dataset-description">
-          管理用于模型精调和训练的数据集
-        </Typography.Text>
-      </div>
-
-      <div className="search-toolbar">
-        <div className="search-group">
-          <Select
-            className="search-field-select"
-            value={searchField}
-            onChange={(value) => setSearchField(value)}
-            options={searchOptions}
-          />
-          <Input.Search
-            allowClear
-            placeholder="输入关键字搜索"
-            className="search-input"
-            value={search}
-            onChange={(value) => setSearch(value)}
-          />
+      <div className="dataset-content-card">
+        <div className="dataset-header">
+          <div className="dataset-title">
+            数据集管理
+          </div>
+          <div className="dataset-description">
+            管理用于模型精调和训练的数据集
+          </div>
         </div>
-        <div className="action-buttons">
-          <Button
-            icon={<IconDelete />}
-            className="batch-delete-btn"
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchDelete}
-          >
-            批量删除
-          </Button>
-          <Button
-            icon={<IconDownload />}
-            className="batch-export-btn"
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchExport}
-          >
-            批量导出
-          </Button>
-          <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
-            新建数据集
-          </Button>
+
+        <div className="search-toolbar">
+          <div className="search-group">
+            <Select
+              className="search-field-select"
+              value={searchField}
+              onChange={(value) => setSearchField(value)}
+              options={searchOptions}
+            />
+            <Input.Search
+              allowClear
+              placeholder="输入关键字搜索"
+              className="search-input"
+              value={search}
+              onChange={(value) => setSearch(value)}
+            />
+          </div>
+          <div className="action-buttons">
+            <Button
+              icon={<IconDelete />}
+              className="batch-delete-btn"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchDelete}
+            >
+              批量删除
+            </Button>
+            <Button
+              icon={<IconDownload />}
+              className="batch-export-btn"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchExport}
+            >
+              批量导出
+            </Button>
+            <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
+              新建数据集
+            </Button>
+          </div>
         </div>
-      </div>
 
 
 
-      <Table
-        rowKey="id"
-        className="dataset-table"
-        columns={columns(handleGoToDetail, handleDelete)}
-        data={datasetList}
-        rowSelection={rowSelection}
-        pagination={{
-          current: currentPage,
-          total: total,
-          pageSize: pageSize,
-          showTotal: (total, range) => `共${total}条，`,
-          sizeCanChange: true,
-          showJumper: true,
-          pageSizeChangeResetCurrent: true,
-          onChange: handlePageChange,
-          onPageSizeChange: handlePageSizeChange,
-          sizeOptions: [10, 20, 50, 100],
-        }}
-        border={false}
-        scroll={{ y: 400 }}
-      />
-
-      {/* 新建数据集弹框 */}
-      <Modal
-        title="新建数据集"
-        visible={modalVisible}
-        footer={null}
-        style={{ width: '960px', minHeight: '436px' }}
-        onCancel={closeModal}
-        maskClosable={false}
-      >
-        <DatasetForm
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
+        <Table
+          rowKey="id"
+          className="dataset-table"
+          columns={columns(handleGoToDetail, handleDelete)}
+          data={datasetList}
+          rowSelection={rowSelection}
+          pagination={{
+            current: currentPage,
+            total: total,
+            pageSize: pageSize,
+            showTotal: (total, range) => `共${total}条`,
+            sizeCanChange: true,
+            showJumper: true,
+            pageSizeChangeResetCurrent: true,
+            onChange: handlePageChange,
+            onPageSizeChange: handlePageSizeChange,
+            sizeOptions: [10, 20, 50, 100],
+          }}
+          border={false}
+          scroll={{ x: 1200 }}
+          stripe
         />
-      </Modal>
 
+        {/* 新建数据集弹框 */}
+        <Modal
+          title="新建数据集"
+          visible={modalVisible}
+          footer={null}
+          style={{ width: '960px', minHeight: '436px' }}
+          onCancel={closeModal}
+          maskClosable={false}
+        >
+          <DatasetForm
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        </Modal>
 
+      </div>
     </div>
   );
 };

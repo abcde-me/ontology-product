@@ -8,17 +8,13 @@ export const sourceDataVolume = (setVisible) => [
   {
     title: 'ID',
     dataIndex: 'id',
-    width: 60,
+    width: 50,
   },
   {
     title: '数据内容',
     dataIndex: 'content',
     ellipsis: true,
-  },
-  {
-    title: '类型',
-    dataIndex: 'type',
-    width: 80,
+    width: 300,
   },
   {
     title: '生成时间',
@@ -26,23 +22,27 @@ export const sourceDataVolume = (setVisible) => [
     width: 180,
   },
   {
-    title: '更多信息',
-    dataIndex: 'meta',
-    render: (_, record) => (
-      <div>
-        <div>原文件: {record.file}</div>
-        <div>工作流ID: {record.workflowId}</div>
-      </div>
-    ),
+    title: '其他信息',
+    dataIndex: 'workflowId',
+    width: 240,
+    render: (text) => `工作流ID: ${text}`,
+  },
+  {
+    title: '原文件',
+    dataIndex: 'file',
+    width: 134,
   },
   {
     title: '操作',
     dataIndex: 'actions',
-    width: 100,
+    fixed: 'right' as const,
+    width: 112,
     render: (_, record) => (
       <div style={{ display: 'flex', gap: 8 }}>
-        <Button type="primary" onClick={() => handleDelete(record.id)}>删除</Button>
-        <Button type="primary" onClick={() => handleDownload(record, setVisible)}>下载</Button>
+        {/* <Button type="primary" onClick={() => handleDownload(record, setVisible)}>导出</Button>
+        <Button type="primary" onClick={() => handleDelete(record.id)}>操作</Button> */}
+        <span style={{color:'#165DFF',display:'inline-block',width:'100%',textAlign:'center'}} onClick={() => handleDownload(record, setVisible)}>导出</span>
+        <span style={{color:'#165DFF',display:'inline-block',width:'100%',textAlign:'center'}} onClick={() => handleDelete(record.id)}>操作</span>
       </div>
     ),
   },

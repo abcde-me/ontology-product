@@ -16,6 +16,36 @@ import { getConnectionList } from '@/api/connectionApi';
 
 const InputSearch = Input.Search;
 
+// 连接器状态枚举
+enum ConnectionStatus {
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected'
+}
+
+// 连接器类型枚举
+enum ConnectorType {
+  S3 = 's3',
+  HDFS = 'hdfs'
+}
+
+// 状态显示配置
+const STATUS_CONFIG = {
+  [ConnectionStatus.CONNECTED]: {
+    text: '已连接',
+    color: 'green'
+  },
+  [ConnectionStatus.DISCONNECTED]: {
+    text: '已断开',
+    color: 'red'
+  }
+};
+
+// 类型显示配置
+const TYPE_CONFIG = {
+  [ConnectorType.S3]: '对象存储',
+  [ConnectorType.HDFS]: 'HDFS'
+};
+
 export default function Connection() {
 
   // 显示详情页面的实例子组件实例
@@ -34,50 +64,53 @@ export default function Connection() {
       title: '状态',
       dataIndex: 'status',
       width: 130,
-      render: (_, item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '5px',
-              height: '5px',
-              backgroundColor: item.status !== 'connected' ? 'red' : 'green',
-              borderRadius: '50%',
-              marginRight: '5px'
-            }}
-          ></div>
-          <div>{item.status !== 'connected' ? '已断开' : '已连接'}</div>
-        </div>
-      ),
+      render: (_, item) => {
+        const statusConfig = STATUS_CONFIG[item.status] || STATUS_CONFIG[ConnectionStatus.DISCONNECTED];
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div
+              style={{
+                width: '5px',
+                height: '5px',
+                backgroundColor: statusConfig.color,
+                borderRadius: '50%',
+                marginRight: '5px'
+              }}
+            ></div>
+            <div>{statusConfig.text}</div>
+          </div>
+        );
+      },
       filters: [
         {
-          text: '已断开',
-          value: 'disconnection'
+          text: STATUS_CONFIG[ConnectionStatus.DISCONNECTED].text,
+          value: ConnectionStatus.DISCONNECTED
         },
         {
-          text: '已连接',
-          value: 'connected'
+          text: STATUS_CONFIG[ConnectionStatus.CONNECTED].text,
+          value: ConnectionStatus.CONNECTED
         }
       ],
-      onFilter: (value, row) => row.status == value
+      onFilter: (value, row) => row.status === value
     },
     {
       title: '数据源类型',
       dataIndex: 'type',
       width: 150,
       render: (_, item) => (
-        <div>{item.type == 'hdfs' ? 'HDFS' : '对象存储'}</div>
+        <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>
       ),
       filters: [
         {
-          text: '对象存储',
-          value: 's3'
+          text: TYPE_CONFIG[ConnectorType.S3],
+          value: ConnectorType.S3
         },
         {
-          text: 'HDFS',
-          value: 'hdfs'
+          text: TYPE_CONFIG[ConnectorType.HDFS],
+          value: ConnectorType.HDFS
         }
       ],
-      onFilter: (value, row) => row.type == value
+      onFilter: (value, row) => row.type === value
     },
     {
       title: '创建人',
@@ -160,8 +193,8 @@ export default function Connection() {
       {
         id: "1",
         name: '唐僧',
-        status: 'connected',
-        type: 's3',
+        status: ConnectionStatus.CONNECTED,
+        type: ConnectorType.S3,
         config: {
           endpoint: "https://s3.amazonaws.com",
           access_key: 'AKIAxxxxXXX',
@@ -174,10 +207,10 @@ export default function Connection() {
         updated_at: '17123456791'
       },
       {
-        id: "1",
-        name: '唐僧',
-        status: 'disconnection',
-        type: 's3',
+        id: "2",
+        name: '孙悟空',
+        status: ConnectionStatus.DISCONNECTED,
+        type: ConnectorType.HDFS,
         config: {
           endpoint: "https://s3.amazonaws.com",
           access_key: 'AKIAxxxxXXX',
@@ -185,7 +218,7 @@ export default function Connection() {
           region: 'XXXXXX',
           path: 'data-warehouse'
         },
-        creator: '张三',
+        creator: '李四',
         created_at: '1749627860785',
         updated_at: '17123456791'
       }
@@ -211,10 +244,6 @@ export default function Connection() {
       );
     });
   }, [ConnectionData, searchValue]);
-
-
-
-
 
   const getlist = () => {
     getConnectionList({
@@ -261,3 +290,6 @@ export default function Connection() {
     }}>获取数据</button>
   </div>
 }
+
+// 导出枚举供其他组件使用
+export { ConnectionStatus, ConnectorType, STATUS_CONFIG, TYPE_CONFIG };
