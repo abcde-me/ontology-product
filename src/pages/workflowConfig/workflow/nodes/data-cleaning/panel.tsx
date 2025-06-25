@@ -1,31 +1,22 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
+import React, { useEffect, useMemo, useState } from 'react';
 import useConfig from './use-config';
 import type {
   CodeNodeType,
-  SegmentationOption,
-  TextProcessingRules
 } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
-import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
 import {
-  Table,
   Form,
   Input,
   Select,
-  Space,
   Checkbox,
   Switch,
-  Slider,
-  Button
+  // Table,
+  // Space,
+  // Slider,
+  // Button
 } from '@arco-design/web-react';
-import { IconUp, IconDown, IconDelete } from '@arco-design/web-react/icon';
-import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
-import { v4 as uuid4 } from 'uuid';
 import {
   dataStandardizationBefore,
   dataStandardizationAfter,
@@ -35,10 +26,10 @@ import {
   dataSpecialAfter,
   dataSpecialCharactersAfter,
   dataSpecialCharactersBefore,
-  dataDeduplicateBefore,
-  dataDeduplicateAfter,
-  dataFuzzyDeduplicateBefore,
-  dataFuzzyDeduplicateAfter,
+  // dataDeduplicateBefore,
+  // dataDeduplicateAfter,
+  // dataFuzzyDeduplicateBefore,
+  // dataFuzzyDeduplicateAfter,
   dataDetoxificationAfter,
   dataDetoxificationBefore,
   dataImputationBefore,
@@ -53,13 +44,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     readOnly,
     inputs,
     updateInputs,
-    setInputVarValues
   } = useConfig(id, data);
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
-  const CheckboxGroup = Checkbox.Group;
 
   const [switchChecked, setSwitchChecked] = useState(false);
   const [filterChecked, setFilterChecked] = useState(false);
@@ -72,14 +61,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [imputationSwitch, setImputationSwitch] = useState(false);
   const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
   // 获取from内容
-  const onValuesChange = (changeValue, values) => {
+  const onValuesChange = useMemo(() => (changeValue, values) => {
     updateInputs(values);
-    if (changeValue.case_uniformity) {
-      setUpperLowerStatus(false)
-    } else {
-      setUpperLowerStatus(true)
-    }
-  };
+  }, [upperLowerStatus]);
   useEffect(() => {
     setImputationSwitch(inputs?.df_is);
     setOutlierHandlingSwitch(inputs?.oh_is);
@@ -93,7 +77,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
         form={form}
-        disabled={readOnly}
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
@@ -159,7 +142,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   field="case_uniformity"
                   labelAlign="left"
                 >
-                  <Checkbox>大小写统一</Checkbox>
+                  <Checkbox onChange={(checked) => { setUpperLowerStatus(!checked) }}>大小写统一</Checkbox>
                 </FormItem>
                 <FormItem
                   layout="vertical"
@@ -492,6 +475,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">数据去毒化</span>
           </div>
+          {/* 提示文案位置 */}
           {/* <div className="date-desc">---</div> */}
           {detoxificationSwitch && (
             <>
@@ -525,6 +509,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">数据填补</span>
           </div>
+          {/* 提示文案位置 */}
           {/* <div className="date-desc">---</div> */}
           {imputationSwitch && (
             <>
