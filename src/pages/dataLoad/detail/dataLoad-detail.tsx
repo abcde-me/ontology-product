@@ -45,7 +45,7 @@ const DataLoadDetail = () => {
       {
         execution_id: 7891,
         execution_name: 'RUN-20250306-001',
-        status: ExecutionStatus.Running,
+        status: ExecutionStatus.Failed,
         start_time: '2025-06-16 18:40:36',
         end_time: '2025-06-16 18:40:36',
         details: {
