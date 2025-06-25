@@ -1,5 +1,9 @@
-import type { CommonNodeType, Variable } from '@/pages/workflowConfig/workflow/types'
+import type {
+  CommonNodeType,
+  Variable
+} from '@/pages/workflowConfig/workflow/types';
 
 export type EndNodeType = CommonNodeType & {
-  outputs: Variable[]
-}
+  outputs: Variable[];
+  target_path: string;
+};
