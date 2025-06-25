@@ -10,19 +10,15 @@ export default function DataLoad() {
           from="/tenant/compute/modaforge/dataLoad"
           to="/tenant/compute/modaforge/dataLoad/list"
         />
-        {
-          // TODO: ts错误
-          // @ts-expect-error
-          routes[2].children.map((route) => {
-            return (
-              <Route
-                key={route.key}
-                path={route.key}
-                component={route.component}
-              />
-            );
-          })
-        }
+        {routes[2].children.map((route) => {
+          return (
+            <Route
+              key={route.key}
+              path={route.key}
+              component={route.component}
+            />
+          );
+        })}
       </Switch>
     </div>
   );
