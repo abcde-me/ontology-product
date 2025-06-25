@@ -35,7 +35,7 @@ module.exports = function (app) {
     app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({
-        target: 'http://10.56.62.23:8089/api/aimdp/v1',
+        target: 'http://10.252.26.5:30183/api/aimdp/v1',
         changeOrigin: true,
         secure: false,
         logger: console,

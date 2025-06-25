@@ -72,7 +72,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
           required
         >
           <FileList
-            catetoryId={1}
+            catetoryId={4}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}
             handleFilesChange={handleFilesChange}
