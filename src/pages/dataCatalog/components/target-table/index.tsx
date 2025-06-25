@@ -120,7 +120,7 @@ export default function TargetTable(props) {
             Modal.confirm({
                 title: '确认删除文件吗?',
                 content: '删除后，文件不可恢复',
-                async onOk() {
+                onOk() {
                     console.log(selectedRows, '打印selectedRows');
                     
                     // await deleteinterTuningUpdata(appid, e.id, {});
