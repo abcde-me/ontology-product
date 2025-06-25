@@ -10,3 +10,8 @@
 .arco-select-size-default.arco-select-multiple .arco-select-view {
   margin-left: 7px;
 }
+.arco-form-label-item {
+  > label {
+    display: flex;
+  }
+}

@@ -36,7 +36,7 @@ const AppPublisher = ({
       params?: ModelAndParameter | PublishWorkflowParams
     ) => {
       if (op === WORKFLOW_OPERATION.CRON_RUNNING) {
-        setSchedulerDialogVisible(!schedulerDialogVisible);
+        setSchedulerDialogVisible(false);
         return;
       }
 
@@ -69,21 +69,17 @@ const AppPublisher = ({
     <>
       <Space>
         <Button
-          className="!border-[rgb(var(--primary-4))]"
           type="outline"
           onClick={() => handleOperate(WORKFLOW_OPERATION.ONLINE)}
         >
           上线
         </Button>
-        <Button
-          className="!border-[rgb(var(--primary-4))]"
-          type="outline"
-          onClick={() => setSchedulerDialogVisible(true)}
-        >
+        <Button type="outline" onClick={() => setSchedulerDialogVisible(true)}>
           定时运行
         </Button>
         <Modal
-          title="Add User"
+          title="定时任务设置"
+          style={{ width: '640px' }}
           visible={schedulerDialogVisible}
           onOk={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
           onCancel={() => setSchedulerDialogVisible(false)}
@@ -91,7 +87,6 @@ const AppPublisher = ({
           <SchedulerRun></SchedulerRun>
         </Modal>
         <Button
-          className="!border-[rgb(var(--primary-4))]"
           type="outline"
           onClick={() => handleOperate(WORKFLOW_OPERATION.RUNNING)}
         >
