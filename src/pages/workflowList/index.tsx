@@ -101,6 +101,7 @@ export default function WorkflowList() {
       Message.success({
         content: '删除成功'
       });
+      getList();
     } else {
       Message.error({
         content: '删除失败，请稍后重试'
