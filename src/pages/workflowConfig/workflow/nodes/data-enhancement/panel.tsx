@@ -36,6 +36,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   }, [inputs]);
 
   const onValuesChange = (changeValue: any, values: any) => {
+    if (values?.app_scenarios !== 1 && values?.app_scenarios !== 5) {
+      form.setFieldValue('sample_num', '');
+    }
     updateInputs(values);
   };
   return (
@@ -47,8 +50,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           prompt: inputs?.prompt,
-          app_scenarios: 1 || inputs?.app_scenarios,
-          enha_modle_id: 1 || inputs?.enha_modle_id,
+          app_scenarios: inputs?.app_scenarios,
+          enha_modle_id: inputs?.enha_modle_id,
           vars: cloneDeep(inputs.variables || [])
         }}
         onChange={onValuesChange}
@@ -60,7 +63,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           required
           style={{
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            margin: 0,
           }}
         />
         <div>
@@ -145,6 +149,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           field="enha_modle_id"
           labelAlign="left"
           required
+          style={{ margin: 0 }}
         >
           <Select placeholder="请选择模型" style={{ width: '100%' }}>
             <Option key={1} value={1}>
@@ -164,7 +169,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </Option>
           </Select>
         </FormItem>
-        <div className='content-tips-text'>常见的针对SFT的模型微调场景生成数据集。</div>
+        <div className='content-tips-text' style={{ marginTop: '8px' }}>常见的针对SFT的模型微调场景生成数据集。</div>
       </Form>
     </div>
   );

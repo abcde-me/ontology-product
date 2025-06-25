@@ -16,5 +16,9 @@
 
     .val {
         margin-top: 4px;
+        width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }

@@ -16,6 +16,10 @@
     margin-right: 4px;
     margin-bottom: 4px;
     border-radius: 5px;
+    width: 95px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .arco-form-inline .arco-form-item {
@@ -50,5 +54,5 @@
   color: #6e7b8d;
   font-size: 12px;
   line-height: 18px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
