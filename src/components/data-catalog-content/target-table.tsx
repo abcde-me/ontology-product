@@ -181,8 +181,8 @@ function convertToArcoTreeData(data: DataType, handleTreeSelect: (fullPath: stri
   const createCatalogNode = (direction: string, catalog: string, types: any): TreeNode => ({
     key: `${direction}-${catalog}`,
     title: catalog,
-    children: Object.entries(types).map(([type, items]: [string, string[]]) =>
-      createTypeNode(direction, catalog, type, items)
+    children: Object.entries(types).map(([type, items]) =>
+      createTypeNode(direction, catalog, type, items as string[])
     )
   });
 
@@ -268,10 +268,19 @@ const data = [
 
 
 
+interface TableDataItem {
+  id: number;
+  content: string;
+  type: string;
+  createdAt: string;
+  file: string;
+  workflowId: string;
+}
+
 function DataPage(props) {
-  const { selectedNode, onSelectionChange,searchCondition } = props;
+  const { selectedNode, onSelectionChange, searchCondition } = props;
   // const { selectedNode } = props;
-  const [treeData, setTreeData] = React.useState([])
+  const [treeData, setTreeData] = React.useState<TreeNode[]>([])
   const [searchValue, setSearchValue] = React.useState('')
   const [startTime, setStartTime] = React.useState('')
   const [endTime, setEndTime] = React.useState('')
@@ -282,7 +291,7 @@ function DataPage(props) {
   const [downloadData, setDownloadData] = React.useState([])//下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState('')//选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
-  const [tableData, setTableData] = React.useState([])
+  const [tableData, setTableData] = React.useState<TableDataItem[]>([])
 
   // 分页状态
   const [currentPage, setCurrentPage] = React.useState(1)
@@ -338,12 +347,12 @@ function DataPage(props) {
     setSelectedRowKeys(selectedRowKeys)
     setSelectedRows(selectedRows)
     console.log('表格选择变化:', selectedRowKeys, selectedRows)
-     // 调用外部传入的回调函数
-     console.log('DataPage - 准备调用外部回调函数, onSelectionChange存在:', !!onSelectionChange);
-     if (onSelectionChange) {
-       console.log('DataPage - 调用外部回调函数, 参数:', selectedRowKeys, selectedRows);
-       onSelectionChange(selectedRowKeys, selectedRows);
-     }
+    // 调用外部传入的回调函数
+    console.log('DataPage - 准备调用外部回调函数, onSelectionChange存在:', !!onSelectionChange);
+    if (onSelectionChange) {
+      console.log('DataPage - 调用外部回调函数, 参数:', selectedRowKeys, selectedRows);
+      onSelectionChange(selectedRowKeys, selectedRows);
+    }
   }
 
   // 处理从外部传入的selectedNode
@@ -390,17 +399,17 @@ function DataPage(props) {
     // }).then(res=>{
     //   console.log(res)
     // })
-    console.log(searchCondition,'打印searchCondition');
-    if(searchCondition.type === '数据内容'){
+    console.log(searchCondition, '打印searchCondition');
+    if (searchCondition.type === '数据内容') {
       setTableData(data.filter(item => item.content.includes(searchCondition.keyword)))
-    }else if(searchCondition.type === 'ID'){
+    } else if (searchCondition.type === 'ID') {
       setTableData(data.filter(item => item.id.toString().includes(searchCondition.keyword)))
     }
     // setTableData(data)//测试使用
-  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize,searchCondition])
+  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize, searchCondition])
   // useEffect(() => {
   //   console.log(searchCondition,'打印searchCondition');
-    
+
   // }, [searchCondition])
   return (
     <>
@@ -452,6 +461,7 @@ function DataPage(props) {
         autoFocus={false}
         focusLock={true}
         footer={null}
+        style={{width:640}}
       >
         <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
       </Modal>

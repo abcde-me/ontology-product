@@ -5,8 +5,16 @@ import { icon } from 'mermaid/dist/rendering-util/rendering-elements/shapes/icon
 // 引入树节点相关API（使用时取消注释）
 // import { fetchTreeDataAPI, deleteTreeNodeAPI, createTreeNodeAPI, updateTreeNodeAPI } from '@/api/treeApi';
 
+// 树节点类型定义
+interface TreeNodeType {
+    title: string;
+    key: string;
+    children?: TreeNodeType[];
+    isLeaf?: boolean;
+}
+
 // 树数据结构
-const TreeData = [
+const TreeData: TreeNodeType[] = [
     {
         title: '目录1录1录1录1录1录6666',
         key: '0-0',
@@ -74,9 +82,9 @@ const TreeData = [
     },
 ];
 
-function searchData(inputValue) {
-    const loop = (data) => {
-        const result = [];
+function searchData(inputValue: string): TreeNodeType[] {
+    const loop = (data: TreeNodeType[]): TreeNodeType[] => {
+        const result: TreeNodeType[] = [];
         data.forEach((item) => {
             if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
                 result.push({ ...item });
@@ -110,12 +118,12 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
     // 搜索树相关状态
     const [inputValue, setInputValue] = useState('');
     const [isInputHovered, setIsInputHovered] = useState(false);
-    const [hoveredKey, setHoveredKey] = useState(null);
-    const [hoverDeleteKey, setHoverDeleteKey] = useState(null);
+    const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+    const [hoverDeleteKey, setHoverDeleteKey] = useState<string | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [newNodeValue, setNewNodeValue] = useState('');
     const [treeData, setTreeData] = useState(TreeData);
-    const [addingToParentInfo, setAddingToParentInfo] = useState(null);
+    const [addingToParentInfo, setAddingToParentInfo] = useState<string | null>(null);
 
     // 处理树节点展开/收起事件
     const handleExpand = (expandedKeys) => {
@@ -210,7 +218,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         setExpandedKeys(newExpandedKeys);
 
                         Message.success('删除成功!');
-                    } catch (apiError) {
+                    } catch (apiError: any) {
                         console.error('删除节点失败:', apiError);
                         Message.error('删除失败: ' + (apiError.message || '请稍后重试'));
                     }
@@ -380,7 +388,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                     // 设置默认选中的节点
                     selectedKeys={[selectedKey]}
                     icons={(node) => ({
-                        switcherIcon: (node._key === '__input__' || node.childrenData.length > 0) ? <IconCaretDown /> : null,
+                        switcherIcon: (node._key === '__input__' || (node.childrenData && node.childrenData.length > 0)) ? <IconCaretDown /> : null,
                         dragIcon: <IconCaretRight />,
                     })}
                     treeData={(() => {
@@ -397,7 +405,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                     renderExtra={(node) => {
                         return (
                             <div
-                                onMouseEnter={() => { setHoveredKey(node._key) }
+                                onMouseEnter={() => { setHoveredKey(node._key || null) }
                                 } //移入时修改key值
                                 onMouseLeave={() => setHoveredKey(null)} //移除时将key改为空
                             >
@@ -416,7 +424,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                             top: 10,
                                                         }}
                                                         onClick={() => handDelete(node._key, node)}
-                                                        onMouseEnter={() => setHoverDeleteKey(node._key)}
+                                                        onMouseEnter={() => setHoverDeleteKey(node._key || null)}
                                                         onMouseLeave={() => setHoverDeleteKey(null)}
                                                     />
                                                 </Tooltip>
@@ -428,8 +436,8 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                     fontSize: 12,
                                                     top: 10,
                                                 }} onClick={() => {
-                                                    setAddingToParentInfo(node._key);
-                                                    if (!expandedKeys.includes(node._key)) {
+                                                    setAddingToParentInfo(node._key || null);
+                                                    if (node._key && !expandedKeys.includes(node._key)) {
                                                         setExpandedKeys([...expandedKeys, node._key]);
                                                     }
                                                 }} />
@@ -445,7 +453,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                                         top: 10,
                                                     }}
                                                     onClick={() => handDelete(node._key, node)}
-                                                    onMouseEnter={() => setHoverDeleteKey(node._key)}
+                                                    onMouseEnter={() => setHoverDeleteKey(node._key || null)}
                                                     onMouseLeave={() => setHoverDeleteKey(null)}
                                                 />
                                             </Tooltip>
@@ -537,7 +545,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                             );
                         }
 
-                        if (props._key.startsWith('__input_child__')) {
+                        if (props._key?.startsWith('__input_child__')) {
                             return renderChildInput(props);
                         }
 
@@ -554,7 +562,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                             return (
                                 <div
                                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                                    onMouseEnter={() => setHoveredKey(key)} //移入时修改key值
+                                    onMouseEnter={() => setHoveredKey(key || null)} //移入时修改key值
                                     onMouseLeave={() => setHoveredKey(null)} //移除时将key改为空
                                 >
                                     <span
@@ -584,7 +592,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         return (
                             <div
                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}
-                                onMouseEnter={() => setHoveredKey(key)}
+                                onMouseEnter={() => setHoveredKey(key || null)}
                                 onMouseLeave={() => setHoveredKey(null)}
                             >
                                 <span style={{ marginRight: '6px' }}>

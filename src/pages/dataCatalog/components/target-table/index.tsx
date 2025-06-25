@@ -124,6 +124,16 @@ export default function TargetTable(props) {
             });
         } catch { Message.error('删除失败，请重试') }
     }
+    //请除搜索
+    const handleClear = () => {
+        setSearchKeyword('');
+        setSearchType('数据内容');
+        setSearchCondition({
+            type: '数据内容',
+            keyword: '',
+            isActive: false
+        });
+    }
     return (
         <div>
             <div style={{
@@ -150,6 +160,7 @@ export default function TargetTable(props) {
                                 value={searchKeyword}
                                 onChange={(value) => setSearchKeyword(value)}
                                 onSearch={handleSearch}
+                                onClear={handleClear}
                                 allowClear
                             />
                         </Input.Group>

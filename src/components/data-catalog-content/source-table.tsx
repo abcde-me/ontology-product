@@ -254,7 +254,7 @@ const data = [
 ];
 
 function DataPage(props) {
-  const { selectedNode, onSelectionChange,searchValue} = props;
+  const { selectedNode, onSelectionChange, searchValue } = props;
   const [treeData, setTreeData] = React.useState([])
   // const [searchValue, setSearchValue] = React.useState('')
   const [startTime, setStartTime] = React.useState('')
@@ -268,7 +268,15 @@ function DataPage(props) {
   const [downloadData, setDownloadData] = React.useState([]); //下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState(''); //选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
-  const [tableData, setTableData] = React.useState([]);
+  interface TableDataItem {
+    id: number;
+    content: string;
+    type: string;
+    createdAt: string;
+    file: string;
+    workflowId: string;
+  }
+  const [tableData, setTableData] = React.useState<TableDataItem[]>([]);
 
   // 分页状态
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -361,9 +369,9 @@ function DataPage(props) {
     // }).then(res=>{
     //   console.log(res)
     // })
-    if(searchValue){
+    if (searchValue) {
       setTableData(data.filter(item => item.content.includes(searchValue)))
-    }else{
+    } else {
       setTableData(data)
     }
     // setTableData(data)//测试使用
@@ -397,6 +405,7 @@ function DataPage(props) {
         autoFocus={false}
         focusLock={true}
         footer={null}
+        style={{width:640}}
       >
         <FormComponent
           downloadData={downloadData}

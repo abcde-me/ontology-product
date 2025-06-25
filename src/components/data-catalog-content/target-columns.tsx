@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog'
-import { Message,Popover } from '@arco-design/web-react';
+import { Message, Popover } from '@arco-design/web-react';
 import { sort } from 'semver';
 import axios from 'axios';
 import { rename } from 'fs';
@@ -43,12 +43,12 @@ const WorkflowIdCell = ({ record, showIcon }) => {
         >
           {record.workflowId}
           {showIcon && (
-          <>
-            &nbsp;<IconLaunch />
-          </>
-        )}
+            <>
+              &nbsp;<IconLaunch />
+            </>
+          )}
         </a>
-        
+
       </div>
     </div>
   );
@@ -68,11 +68,19 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
     width: 300,
     render: (_, record) => (
       <div>
-          <Popover content={record.content}>
-              <span>{record.content}</span>
-          </Popover>
+        <Popover content={record.content}>
+          <span style={{
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '100%'
+          }}>
+            {record.content}
+          </span>
+        </Popover>
       </div>
-  )
+    )
   },
   {
     title: '生成时间',

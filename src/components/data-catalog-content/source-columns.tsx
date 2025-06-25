@@ -18,7 +18,15 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
         render: (_, record) => (
             <div>
                 <Popover content={record.content}>
-                    <span>{record.content}</span>
+                    <span
+                    style={{
+                        display: 'block',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        maxWidth: '100%'
+                    }}
+                    >{record.content}</span>
                 </Popover>
             </div>
         )
@@ -70,6 +78,7 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
     {
         title: '连接器名称',
         // dataIndex: 'createdAt',
+        ellipsis: true,
         width: 180,
     },
     {
