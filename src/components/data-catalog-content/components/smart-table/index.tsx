@@ -5,6 +5,7 @@ import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 type SmartTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
   data: RecordType[];
+  selectedArray: [];
   rowKey?: string | ((record: RecordType) => string);
   onSelectionChange?: (
     selectedRowKeys: React.Key[],
@@ -20,11 +21,13 @@ function SmartTable<RecordType extends object>({
   data,
   rowKey = 'id',
   onSelectionChange,
+  selectedArray,
   ...restProps
 }: SmartTableProps<RecordType>) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<RecordType[]>([]);
-
+  //定义选中的列表数组
+  // const [selectedArray, setSelectedArray] = useState<React.Key[]>([]);
   const rowSelection = {
     type: 'checkbox' as const,
     selectedRowKeys,
@@ -38,10 +41,14 @@ function SmartTable<RecordType extends object>({
       );
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },
-    onSelectAll: (selected: boolean, selectedRows: any) => {
+    onSelectAll: (selected: boolean, selectedRows: RecordType[]) => {
       console.log('onSelectAll:', selected, selectedRows);
     },
-    onSelect: (selected: boolean, record: RecordType, selectedRows: any) => {
+    onSelect: (
+      selected: boolean,
+      record: RecordType,
+      selectedRows: RecordType[]
+    ) => {
       console.log('onSelect:', selected, record, selectedRows);
     }
   };
@@ -65,6 +72,7 @@ function SmartTable<RecordType extends object>({
       rowKey={rowKey}
       pagination={false}
       border={true}
+      // selectedArray={selectedArray as []}
       {...restProps}
     />
   );
