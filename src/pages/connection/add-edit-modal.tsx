@@ -6,12 +6,7 @@ import {
   Modal,
   Radio
 } from '@arco-design/web-react';
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useMemo,
-  useState
-} from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import './index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 
@@ -32,18 +27,17 @@ const addModal = forwardRef((props: any, ref) => {
 
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
-    displayModalView: (id) => {
-      console.log(id);
-      setIsFlag(id);
+    displayModalView: (newobj) => {
+      setIsFlag(newobj);
       setVisible(true);
-      if (id) {
+      if (newobj) {
         // 编辑模式 - 设置表单值
         form.setFieldsValue({
-          ...id,
-          ...id.config,
-          type: id.type || 's3'
+          ...newobj,
+          ...newobj.config,
+          type: newobj.type || 's3'
         });
-        setStorageType(id.type || 's3');
+        setStorageType(newobj.type || 's3');
       } else {
         // 添加模式 - 重置表单
         form.resetFields();
@@ -53,39 +47,36 @@ const addModal = forwardRef((props: any, ref) => {
     }
   }));
   // 点击创建的按钮
-  const createConnectionHan = () => {
-    form
-      .validate()
-      .then((values) => {
-        const { type, name, ...newValues } = values;
-        const newfrom = {
-          name: values.name,
-          type: values.type,
-          config: {
-            ...newValues
-          },
-          creator: 'test1'
-        };
-        if (isFlag == null) {
-          // 添加逻辑
-          addconnectionList(newfrom);
-          props.getListHan();
-        } else {
-          // 编辑逻辑
-          updataConnectionList({
-            // TODO: ts错误
-            // @ts-expect-error
-            connector_id: isFlag.id,
-            newfrom
-          });
-          props.getListHan();
-        }
-        setVisible(false);
-        resetHan();
-      })
-      .catch((error) => {
-        console.log('验证失败', error);
-      });
+  const createConnectionHan = async () => {
+    try {
+      const values = await form.validate();
+      const { type, name, ...newValues } = values;
+      const newfrom = {
+        name,
+        type,
+        config: { ...newValues },
+        creator: 'test1'
+      };
+
+      if (isFlag == null) {
+        // 添加逻辑
+        await addconnectionList(newfrom);
+        Message.success('测试通过，连接器创建成功');
+      } else {
+        // 编辑逻辑
+        await updataConnectionList({
+          // connector_id: isFlag.id,
+          newfrom
+        });
+      }
+
+      // 确保数据更新完成后再调用 getListHan
+      props.getListHan();
+      setVisible(false);
+      resetHan();
+    } catch (error) {
+      console.log('验证失败', error);
+    }
   };
   const resetHan = () => {
     form.resetFields();

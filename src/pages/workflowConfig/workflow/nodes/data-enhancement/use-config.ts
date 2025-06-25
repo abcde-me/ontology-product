@@ -18,6 +18,18 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     setInputs
   });
 
+  const newDataEnhancement = {
+    type: 'enhancement',
+    title: '数据增强节点',
+    desc: '',
+    app_scenarios: inputs?.app_scenarios, // 应用场景
+    sample_num: inputs?.sample_num, // 指令生成依赖样本数
+    similarity_threshold: inputs?.similarity_threshold, // 过滤相似度阈值,0~1
+    generate_sample_num: inputs?.generate_sample_num, //生成样本数
+    prompt: inputs?.prompt, // 提示词
+    enha_modle_id: inputs?.enha_modle_id, // 和音频解析模型冲突？？？另外格式不正确吧
+  };
+
   const updateInputs = useCallback(
     (payload: EnhancementNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
@@ -28,6 +40,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.sample_num = payload?.sample_num;
         draft.prompt = payload.prompt;
         draft.prompt_checkbox = payload.prompt_checkbox;
+        draft.newDataEnhancement = newDataEnhancement;
       });
       setInputs(newInputs);
     },

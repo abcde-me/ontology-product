@@ -152,9 +152,6 @@ export default function Connection() {
             content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
               DeleteMethod(record.id);
-              Message.success({
-                content: '删除成功'
-              });
             }}
             onCancel={() => {
               Message.error({
@@ -174,7 +171,13 @@ export default function Connection() {
   const [cId, setCId] = useState('0');
   // 点击删除按钮执行的方法
   const DeleteMethod = async (id: string) => {
-    await delconnectionList(id);
+    const res = await delconnectionList(id);
+    console.log(res);
+    if (res.message) {
+      Message.success({
+        content: '删除成功'
+      });
+    }
     getlist();
     console.log(id);
   };
@@ -228,16 +231,11 @@ export default function Connection() {
     keyword: ''
   });
 
-  // 数据总量
-  const [total, setTotal] = useState(null);
-
   const getlist = async () => {
     const res = await getConnectionList({
       page: pagination.current,
-      page_size: pagination.pageSize,
-      scope: '0'
+      page_size: pagination.pageSize
     });
-    setTotal(res.data.total);
 
     setConnectionData(res.data.items);
     setPagination((prev) => ({
@@ -255,9 +253,8 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 0px 0px',
-        borderRadius: '10px',
-        maxHeight: '94%'
+        margin: '10px 20px 10px 0px',
+        borderRadius: '10px'
       }}
     >
       <h1
