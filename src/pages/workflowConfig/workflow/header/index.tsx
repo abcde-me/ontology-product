@@ -1,13 +1,5 @@
 import { FC, useState } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  RiApps2AddLine,
-  RiArrowLeftLine,
-  RiComputerLine,
-  RiFileTextLine,
-  RiHistoryLine,
-  RiSettings3Line
-} from '@remixicon/react';
 import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -26,21 +18,9 @@ import {
 } from '../hooks';
 import AppPublisher from '@/pages/workflowConfig/app/app-publisher';
 import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
-// import Divider from '@/componnets/workflow/divider'
-// import RunAndHistory from './run-and-history'
 import EditingTitle from './editing-title';
-// import RunningTitle from './running-title'
-// import RestoringTitle from './restoring-title'
-// import ViewHistory from './view-history'
-// import ChatVariableButton from './chat-variable-button'
-// import EnvButton from './env-button'
-import VersionHistoryButton from './version-history-button';
 import { CreateAppModal } from './create-app-modal';
-// import Button from '@/pages/workflowConfig/components/button'
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
-// import { ArrowNarrowLeft } from '@/app/components/base/icons/src/vender/line/arrows'
-// import { useFeatures } from '@/app/components/base/features/hooks'
-// import { usePublishWorkflow, useResetWorkflowVersionHistory } from '@/service/use-workflow'
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
@@ -81,7 +61,6 @@ const Header: FC = () => {
   const startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
   const selectedNode = nodes.find((node) => node.data.selected);
   const startVariables = startNode?.data.variables;
-  // const fileSettings = useFeatures(s => s.features.file)
   const fileSettings = {} as any;
   const variables = useMemo(() => {
     const data = startVariables || [];
@@ -177,11 +156,6 @@ const Header: FC = () => {
     },
     [handleSyncWorkflowDraft]
   );
-
-  // const handleGoBackToEdit = useCallback(() => {
-  //   handleLoadBackupDraft()
-  //   workflowStore.setState({ historyWorkflowData: undefined })
-  // }, [workflowStore, handleLoadBackupDraft])
 
   const handleToolConfigureUpdate = useCallback(() => {
     workflowStore.setState({ toolPublished: true });
