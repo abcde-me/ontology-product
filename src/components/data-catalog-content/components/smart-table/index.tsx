@@ -5,7 +5,7 @@ import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 type SmartTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
   data: RecordType[];
-  selectedArray: []
+  selectedArray: [];
   rowKey?: string | ((record: RecordType) => string);
   onSelectionChange?: (
     selectedRowKeys: React.Key[],
@@ -44,7 +44,11 @@ function SmartTable<RecordType extends object>({
     onSelectAll: (selected: boolean, selectedRows: RecordType[]) => {
       console.log('onSelectAll:', selected, selectedRows);
     },
-    onSelect: (selected: boolean, record: RecordType, selectedRows: RecordType[]) => {
+    onSelect: (
+      selected: boolean,
+      record: RecordType,
+      selectedRows: RecordType[]
+    ) => {
       console.log('onSelect:', selected, record, selectedRows);
     }
   };
