@@ -18,7 +18,6 @@ import {
   IconDownload
 } from '@arco-design/web-react/icon';
 import { Tree } from '@arco-design/web-react';
-import Table from '@/components/data-catalog-content/index';
 import SourceTable from '../source-table';
 import TargetTable from '../target-table';
 const Option = Select.Option;

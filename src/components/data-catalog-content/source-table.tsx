@@ -1,5 +1,5 @@
 // components/CustomDbIcon.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 //数据库图标（从里图标库拿，转换成组件的形式）
 const CustomDbIcon: any = () => (
   <svg
@@ -29,17 +29,12 @@ import { IconFolder } from '@arco-design/web-react/icon';
 import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog';
 //getDataCatalogList是获取表格中的数据，getDataCatalog是获取左侧树状结构的数据，getCatalogList是获取目录列表
 
-import SmartTable from './components/SmartTable';
+import SmartTable from './components/smartTable';
 import Pages from './components/pages';
 import './index.css';
-import {
-  sourceDataVolume,
-  sourceDataDatabase,
-  targetDataVolume,
-  targetDataDatabase
-} from './target-columns';
-import FormComponent from './components/Dataset-form';
-const { Text } = Typography; //使用Text来控制文字的效果
+import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './source-columns'
+import FormComponent from './components/dataset-form'
+const { Text } = Typography;//使用Text来控制文字的效果
 
 const rawCatalogData = {
   src: {
@@ -203,7 +198,7 @@ const data = [
   {
     id: 4,
     content: '插图展示唐僧与孙悟空在火焰山对战红孩儿的场景...',
-    type: '文本',
+    type: 'pdf',
     createdAt: '2025-02-25 09:18:45',
     file: '西游插图.jpg',
     workflowId: 'WF-20250225-001'
@@ -211,7 +206,7 @@ const data = [
   {
     id: 5,
     content: '音频片段包含经典西游记电视剧主题曲《敢不敢》的部分片段...',
-    type: '文本',
+    type: 'txt',
     createdAt: '2025-02-25 10:40:18',
     file: '西游配乐.mp3',
     workflowId: 'WF-20250225-002'
@@ -219,7 +214,7 @@ const data = [
   {
     id: 6,
     content: '视频片段展示1986年版西游记电视剧中孙悟空大闹天宫的经典场景...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-25 15:05:32',
     file: '西游片段.mp4',
     workflowId: 'WF-20250225-003'
@@ -227,7 +222,7 @@ const data = [
   {
     id: 0,
     content: '第一回 灵根子守山神，孙悟空开石洞。一日，花果山顶突然石破天惊...',
-    type: '文本',
+    type: 'pdf',
     createdAt: '2025-02-24 17:40:22',
     file: '西游.pdf',
     workflowId: 'WF-20250224-001'
@@ -235,7 +230,7 @@ const data = [
   {
     id: 1,
     content: '唐僧取经路上遭遇了九九八十一难，其中最著名的是白骨精三打...',
-    type: '文本',
+    type: 'doc',
     createdAt: '2025-02-24 17:42:15',
     file: '西游.pdf',
     workflowId: 'WF-20250224-001'
@@ -243,7 +238,7 @@ const data = [
   {
     id: 2,
     content: '网络安全防护包括防火墙配置、入侵检测系统、加密措施等核心内容...',
-    type: '文本',
+    type: 'txt',
     createdAt: '2025-02-26 10:30:45',
     file: '信息安全必知.pdf',
     workflowId: 'WF-20250226-002'
@@ -251,7 +246,7 @@ const data = [
   {
     id: 3,
     content: '2025年第一季度销售数据显示，电子产品类别同比增长12.7%...',
-    type: '文本',
+    type: 'pdf',
     createdAt: '2025-03-10 12:20:18',
     file: '数据报告.pdf',
     workflowId: 'WF-20250310-003'
@@ -259,11 +254,20 @@ const data = [
 ];
 
 function DataPage(props) {
-  const { selectedNode } = props;
-  const [treeData, setTreeData] = React.useState([]);
-  const [searchValue, setSearchValue] = React.useState('');
-  const [startTime, setStartTime] = React.useState('');
-  const [endTime, setEndTime] = React.useState('');
+  const { selectedNode, onSelectionChange, searchValue, startTime, endTime } = props;
+
+  // 添加调试信息
+  console.log('DataPage 接收到的 props:', {
+    searchValue,
+    startTime,
+    endTime,
+    selectedNode: selectedNode ? 'has value' : 'null'
+  });
+
+  const [treeData, setTreeData] = React.useState([])
+  // const [searchValue, setSearchValue] = React.useState('')
+  // const [startTime, setStartTime] = React.useState('')
+  // const [endTime, setEndTime] = React.useState('')
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
@@ -273,7 +277,15 @@ function DataPage(props) {
   const [downloadData, setDownloadData] = React.useState([]); //下载的数据
   const [selectedFilePath, setSelectedFilePath] = React.useState(''); //选中的文件路径
   //设一个值表示他渲染的是那种类型的数据，默认是源数据
-  const [tableData, setTableData] = React.useState([]);
+  interface TableDataItem {
+    id: number;
+    content: string;
+    type: string;
+    createdAt: string;
+    file: string;
+    workflowId: string;
+  }
+  const [tableData, setTableData] = React.useState<TableDataItem[]>([]);
 
   // 分页状态
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -307,14 +319,18 @@ function DataPage(props) {
   }
 
   // 处理表格选择变化
-  const handleSelectionChange = (
-    selectedRowKeys: React.Key[],
-    selectedRows: any[]
-  ) => {
-    setSelectedRowKeys(selectedRowKeys);
-    setSelectedRows(selectedRows);
-    console.log('表格选择变化:', selectedRowKeys, selectedRows);
-  };
+  const handleSelectionChange = (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+    setSelectedRowKeys(selectedRowKeys)
+    setSelectedRows(selectedRows)
+    console.log('表格选择变化:', selectedRowKeys, '长度吗', selectedRows)
+
+    // 调用外部传入的回调函数
+    console.log('DataPage - 准备调用外部回调函数, onSelectionChange存在:', !!onSelectionChange);
+    if (onSelectionChange) {
+      console.log('DataPage - 调用外部回调函数, 参数:', selectedRowKeys, selectedRows);
+      onSelectionChange(selectedRowKeys, selectedRows);
+    }
+  }
 
   // 处理从外部传入的selectedNode
   React.useEffect(() => {
@@ -352,80 +368,83 @@ function DataPage(props) {
 
   //监听搜索条件变化
   useEffect(() => {
+    // 如果有真实的API，调用这个
     // getDataCatalogList({
-    //   start_time:toUnixTimestamp(startTime),
-    //   end_time:toUnixTimestamp(endTime),
-    //   file_name:searchValue,
-    //   file_path:selectedFilePath,
-    //   page:currentPage,
-    //   page_size:pageSize,
-    // }).then(res=>{
-    //   console.log(res)
+    //   start_time: startTime ? toUnixTimestamp(startTime) : undefined,
+    //   end_time: endTime ? toUnixTimestamp(endTime) : undefined,
+    //   file_name: searchValue,
+    //   file_path: selectedFilePath,
+    //   page: currentPage,
+    //   page_size: pageSize,
+    // }).then(res => {
+    //   console.log('API返回数据:', res);
+    //   setTableData(res.data.list || []);
+    //   setTotal(res.data.total || 0);
     // })
-    // TODO: ts错误
-    // @ts-expect-error
-    setTableData(data); //测试使用
-  }, [
-    searchValue,
-    startTime,
-    endTime,
-    selectedFilePath,
-    currentPage,
-    pageSize
-  ]);
+
+    // 测试用的本地数据过滤逻辑
+    let filteredData = [...data];
+
+    // 1. 根据搜索关键词过滤
+    if (searchValue) {
+      filteredData = filteredData.filter(item =>
+        item.content.includes(searchValue) ||
+        item.file.includes(searchValue) ||
+        item.workflowId.includes(searchValue)
+      );
+    }
+
+    // 2. 根据日期范围过滤
+    if (startTime && endTime) {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.createdAt);
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        // 确保时间比较的准确性
+        return itemDate >= start && itemDate <= end;
+      });
+    }
+
+    // 3. 根据文件路径过滤（如果需要）
+    if (selectedFilePath) {
+      // 这里可以根据selectedFilePath进行额外的过滤
+      console.log('根据文件路径过滤:', selectedFilePath);
+    }
+
+    console.log('过滤后的数据:', filteredData);
+    setTableData(filteredData);
+  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
   return (
     <>
-      {/* <div style={{ flex: 1, width: '100%', height: '100%' }}>
+      <div>
         <SmartTable
           columns={columns}
           data={tableData}
+          selectedArray={selectedRowKeys as []}
           onSelectionChange={handleSelectionChange}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
           <span></span>
           <Pages
             current={currentPage}//当前页码
-            total={total}
+            total={data.length}
             pageSize={pageSize}//每页条数
             onChange={handlePageChange}//页码变化处理
             onPageSizeChange={handlePageSizeChange}//每页条数变化处理
           />
         </div>
-
-      </div> */}
-      <div>
-        <SmartTable
-          columns={columns}
-          data={tableData}
-          onSelectionChange={handleSelectionChange}
-        />
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: '12px'
-          }}
-        >
-          <span></span>
-          <Pages
-            current={currentPage} //当前页码
-            total={total}
-            pageSize={pageSize} //每页条数
-            onChange={handlePageChange} //页码变化处理
-            onPageSizeChange={handlePageSizeChange} //每页条数变化处理
-          />
-        </div>
       </div>
 
       <Modal
-        title="文件下载"
+        title='导出设置'
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
         autoFocus={false}
         focusLock={true}
         footer={null}
+        style={{ width: 640 }}
       >
         <FormComponent
           downloadData={downloadData}
