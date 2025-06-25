@@ -244,6 +244,10 @@ export const ModaForgeResourceEndpoints = {
   connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
   //修改数据集
   updateDatasetApi: PrefixAimdp + '/dataset/{id}',
+  //获取数据集详细信息
+
+  //查询数据集详细信息的数据内容和
+  datasetContentsApi: PrefixAimdp + '/datasets/version/data',
 
   // 连接器接口
 
