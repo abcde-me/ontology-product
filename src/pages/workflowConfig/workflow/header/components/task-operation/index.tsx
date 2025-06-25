@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useKeyPress } from 'ahooks';
 import { getKeyboardKeyCodeBySystem } from '@/pages/workflowConfig/workflow/utils';
-import { Button } from '@arco-design/web-react';
+import { Button, Modal } from '@arco-design/web-react';
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
@@ -26,6 +26,7 @@ const AppPublisher = ({
   onToggle
 }: AppPublisherProps) => {
   const [published, setPublished] = useState(false);
+  const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const appDetail = useAppStore((state) => state.appDetail);
   appDetail?.site ?? {};
 
@@ -34,6 +35,11 @@ const AppPublisher = ({
       op: WORKFLOW_OPERATION,
       params?: ModelAndParameter | PublishWorkflowParams
     ) => {
+      if (op === WORKFLOW_OPERATION.CRON_RUNNING) {
+        setSchedulerDialogVisible(!schedulerDialogVisible);
+        return;
+      }
+
       console.log('点击操作按钮params:', params);
       try {
         await onPublish?.(op, params);
@@ -72,11 +78,18 @@ const AppPublisher = ({
         <Button
           className="!border-[rgb(var(--primary-4))]"
           type="outline"
-          onClick={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
+          onClick={() => setSchedulerDialogVisible(true)}
         >
           定时运行
         </Button>
-        {/* <SchedulerRun></SchedulerRun> */}
+        <Modal
+          title="Add User"
+          visible={schedulerDialogVisible}
+          onOk={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
+          onCancel={() => setSchedulerDialogVisible(false)}
+        >
+          <SchedulerRun></SchedulerRun>
+        </Modal>
         <Button
           className="!border-[rgb(var(--primary-4))]"
           type="outline"
