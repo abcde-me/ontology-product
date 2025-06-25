@@ -240,7 +240,9 @@ const DatasetDetail: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('content');
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
-  const [searchValue, setSearchValue] = React.useState('');
+  const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
+  const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
+  const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
   const [pageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
@@ -252,7 +254,9 @@ const DatasetDetail: React.FC = () => {
   const [editingRowKey, setEditingRowKey] = React.useState<string | null>(null); //当前编辑行
   const [editingData, setEditingData] = React.useState<any>({}); //当前编辑数据
   const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的行
+  const [deletedRows, setDeletedRows] = React.useState<number[]>([]); // 记录删除的行号
   const [confirmModalVisible, setConfirmModalVisible] = React.useState(false); //确认弹窗
+  const [pendingEditRow, setPendingEditRow] = React.useState<any>(null); // 待编辑的行（用于确认切换）
 
   // 返回按钮
   const handleBack = () => {
@@ -292,8 +296,23 @@ const DatasetDetail: React.FC = () => {
   // 编辑内容
   const handleEditContent = (record: any) => {
     console.log('编辑内容:', record);
-    setEditingRowKey(record);
 
+    // 如果当前已经在编辑状态，且点击的不是同一行
+    if (editingRowKey !== null && editingRowKey !== record) {
+      // 显示确认弹框
+      setPendingEditRow(record); //待编辑的行
+      setConfirmModalVisible(true); //确认弹框
+      return;
+    }
+
+    // 直接进入编辑模式
+    startEditRow(record);
+  };
+
+  // 开始编辑指定行
+  const startEditRow = (record: any) => {
+    setEditingRowKey(record);
+    console.log(contentData);
     // 初始化编辑数据
     const currentRow = contentData.find((item: any) => item.line === record);
     if (currentRow) {
@@ -303,9 +322,48 @@ const DatasetDetail: React.FC = () => {
     Message.info(`编辑第${record}条内容`);
   };
 
-  // 操作
-  const handleContinue = (record: any) => {
-    Message.info(`为第${record}条内容生成后续文本`);
+  // 确认放弃当前编辑并切换到新行
+  const handleConfirmSwitchEdit = () => {
+    if (pendingEditRow !== null) {
+      // 重置当前编辑状态
+      setEditingRowKey(null);
+      setEditingData({});
+
+      // 开始编辑新行
+      startEditRow(pendingEditRow);
+    }
+
+    // 关闭弹框
+    setConfirmModalVisible(false);
+    setPendingEditRow(null);
+  };
+
+  // 取消切换编辑
+  const handleCancelSwitchEdit = () => {
+    setConfirmModalVisible(false);
+    setPendingEditRow(null);
+  };
+
+  // 删除
+  const handleContinue = (lineNumber: number) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除第 ${lineNumber} 行数据吗？`,
+      okText: '确认删除',
+      cancelText: '取消',
+      onOk: () => {
+        const newContentData = contentData.filter(
+          (item) => item.line !== lineNumber
+        );
+        setContentData(newContentData);
+
+        // 将删除的行号添加到数组中
+        setDeletedRows((prev) => [...prev, lineNumber]);
+
+        Message.success(`第 ${lineNumber} 行已删除`);
+        console.log('已删除的行:', [...deletedRows, lineNumber]);
+      }
+    });
   };
 
   // 处理编辑数据变化
@@ -318,12 +376,16 @@ const DatasetDetail: React.FC = () => {
 
   // 确认保存内联编辑
   const handleInlineEditSubmit = (record: any) => {
+    // console.log(contentData)
     // 更新数据
     const newData = contentData.map((item: any) => {
       if (item.line === editingRowKey) {
         return {
           ...item,
-          data: { ...editingData }
+          data: {
+            ...item.data, // 保留原有的所有字段
+            ...editingData // 用编辑的数据覆盖修改的字段
+          }
         };
       }
       return item;
@@ -365,21 +427,67 @@ const DatasetDetail: React.FC = () => {
   React.useEffect(() => {
     // 测试数据
     setDatasetDetail(csdatasetDetail);
+    // 初始化总数
+    setTotal(cscontentData.length);
   }, []);
+
+  // 处理搜索
+  const handleSearch = () => {
+    setActualSearchValue(searchValue);
+    // 搜索时重置到第一页
+    setCurrentPage(1);
+  };
+
+  // 处理清空搜索，李帆标记，暂时不用后面要用
+  const handleClearSearch = () => {
+    setSearchValue('');
+    setActualSearchValue('');
+    setCurrentPage(1);
+  };
 
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
     // 查询数据集数据内容
-    // if(datasetDetail){
-    //     getDatasetContents({id,datasetDetail:datasetDetail.latest_version,searchValue,currentPage,pageSize}).then(res=>{
-    //         setContentData(res.data.list)
-    //         setTotal(res.data.total)
-    //     })
-    // }
+    if (datasetDetail && id) {
+      const params = {
+        dataset_id: id,
+        page: currentPage,
+        page_size: pageSize,
+        search: actualSearchValue || undefined
+      };
 
-    // 测试数据 - 只在需要重新加载数据时设置
-    setContentData(cscontentData);
-  }, [searchValue, currentPage, pageSize, datasetDetail]);
+      getDatasetContents(params)
+        .then((res) => {
+          // 根据接口文档处理返回数据
+          if (res.data && res.data.length > 0) {
+            const responseData = res.data[0]; // API返回的data是数组，取第一个元素
+            setContentData(responseData.list || []);
+            setTotal(responseData.total || 0);
+            setContentDatabackup(responseData.list || []);
+            // 动态生成列配置（如果有field_names）
+            if (
+              responseData.field_names &&
+              responseData.field_names.length > 0
+            ) {
+              // 这里可以根据实际字段名动态生成列
+              // setContentColumns(generateArcoColumns(...))
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+          // 如果请求失败，使用测试数据
+          setContentData(cscontentData);
+          setContentDatabackup(cscontentData);
+          setTotal(cscontentData.length);
+        });
+    } else {
+      // 测试数据 - 只在需要重新加载数据时设置
+      setContentData(cscontentData);
+      setTotal(cscontentData.length);
+    }
+  }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
 
   // 更新表格列配置 - 只在编辑状态变化时执行
   React.useEffect(() => {
@@ -395,7 +503,7 @@ const DatasetDetail: React.FC = () => {
         handleInlineEditCancel
       )
     );
-  }, [editingRowKey, editingData]);
+  }, [editingRowKey, editingData, contentData]);
 
   return (
     <div className="dataset-detail">
@@ -514,15 +622,56 @@ const DatasetDetail: React.FC = () => {
         <Tabs activeTab={activeTab} onChange={setActiveTab}>
           <TabPane key="content" title="内容数据">
             {/* 搜索系统 */}
-            <div className="search-section">
+            <div
+              className="search-section"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <Input
                 placeholder="输入ID、关键字搜索"
                 value={searchValue}
                 onChange={setSearchValue}
+                onPressEnter={handleSearch}
                 style={{ width: 300 }}
                 allowClear
                 suffix={<IconSearch style={{ color: '#999' }} />}
               />
+              {/* 只有在有修改内容或正在编辑时才显示按钮 */}
+              {(changedRows.length > 0 ||
+                editingRowKey !== null ||
+                deletedRows.length > 0) && (
+                <Space>
+                  <Button
+                    onClick={() => {
+                      Modal.confirm({
+                        title: '确认取消',
+                        content:
+                          '确定要取消所有修改吗？此操作将清空所有修改和删除的内容，无法撤销。',
+                        okText: '确认取消',
+                        cancelText: '继续编辑',
+                        onOk: () => {
+                          // 清空所有修改和删除记录
+                          setDeletedRows([]);
+                          setChangedRows([]);
+                          setEditingRowKey(null);
+                          setEditingData({});
+
+                          // 恢复原始数据
+                          setContentData(contentDatabackup);
+
+                          Message.success('已取消所有修改并恢复数据');
+                        }
+                      });
+                    }}
+                  >
+                    取消
+                  </Button>
+                  <Button type="primary">确定</Button>
+                </Space>
+              )}
             </div>
 
             {/* 内容数据表格 */}
@@ -542,7 +691,10 @@ const DatasetDetail: React.FC = () => {
                 current={currentPage}
                 pageSize={pageSize}
                 total={total}
-                onChange={setCurrentPage}
+                onChange={(page) => {
+                  console.log('页码变更:', page);
+                  setCurrentPage(page);
+                }}
                 showTotal={(total, range) =>
                   `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
                 }
@@ -593,6 +745,25 @@ const DatasetDetail: React.FC = () => {
             onCancel={handleCloseEditModal}
           />
         )}
+      </Modal>
+
+      {/* 切换编辑确认弹窗 */}
+      <Modal
+        title="切换编辑"
+        visible={confirmModalVisible}
+        onOk={handleConfirmSwitchEdit}
+        onCancel={handleCancelSwitchEdit}
+        okText="确认切换"
+        cancelText="继续当前编辑"
+        okButtonProps={{ status: 'warning' }}
+      >
+        <div
+          style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}
+        >
+          <IconEdit style={{ color: '#ff7d00', marginRight: 8 }} />
+          {/* <span>您当前正在编辑第 {editingRowKey} 行数据</span> */}
+        </div>
+        <p>切换到新的编辑行将放弃当前的修改内容，确定要继续吗？</p>
       </Modal>
     </div>
   );
