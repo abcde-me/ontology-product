@@ -5,28 +5,16 @@ import { useKeyPress } from 'ahooks';
 import { getKeyboardKeyCodeBySystem } from '@/pages/workflowConfig/workflow/utils';
 import { Button } from '@arco-design/web-react';
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
-import type { InputVar } from '@/pages/workflowConfig/workflow/types';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
+import {
+  AppPublisherProps,
+  ModelAndParameter,
+  WORKFLOW_OPERATION
+} from '../../types';
+import SchedulerRun from '@/components/scheduler-run';
+
 dayjs.extend(relativeTime);
-
-type ModelAndParameter = any;
-
-export type AppPublisherProps = {
-  disabled?: boolean;
-  publishDisabled?: boolean;
-  publishedAt?: number;
-  draftUpdatedAt?: number;
-  debugWithMultipleModel?: boolean;
-  multipleModelConfigs?: ModelAndParameter[];
-  onPublish?: (params?: any) => Promise<any> | any;
-  onRestore?: () => Promise<any> | any;
-  onToggle?: (state: boolean) => void;
-  crossAxisOffset?: number;
-  toolPublished?: boolean;
-  inputs?: InputVar[];
-  onRefreshData?: () => void;
-};
 
 const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
 
@@ -42,10 +30,13 @@ const AppPublisher = ({
   appDetail?.site ?? {};
 
   const handleOperate = useCallback(
-    async (params?: ModelAndParameter | PublishWorkflowParams) => {
-      console.log('点击操作按钮', params);
+    async (
+      op: WORKFLOW_OPERATION,
+      params?: ModelAndParameter | PublishWorkflowParams
+    ) => {
+      console.log('点击操作按钮params:', params);
       try {
-        await onPublish?.(params);
+        await onPublish?.(op, params);
         setPublished(true);
         // 发布操作在弹框里面时，需要去掉下面这个计时器
         window.setTimeout(() => {
@@ -58,15 +49,15 @@ const AppPublisher = ({
     [onPublish]
   );
 
-  useKeyPress(
-    `${getKeyboardKeyCodeBySystem('ctrl')}.shift.p`,
-    (e) => {
-      e.preventDefault();
-      if (publishDisabled || published) return;
-      handleOperate();
-    },
-    { exactMatch: true, useCapture: true }
-  );
+  // useKeyPress(
+  //     `${getKeyboardKeyCodeBySystem('ctrl')}.shift.p`,
+  //     (e) => {
+  //         e.preventDefault();
+  //         if (publishDisabled || published) return;
+  //         handleOperate();
+  //     },
+  //     { exactMatch: true, useCapture: true }
+  // );
 
   return (
     <>
@@ -74,21 +65,22 @@ const AppPublisher = ({
         <Button
           className="!border-[rgb(var(--primary-4))]"
           type="outline"
-          onClick={() => handleOperate()}
+          onClick={() => handleOperate(WORKFLOW_OPERATION.ONLINE)}
         >
           上线
         </Button>
         <Button
           className="!border-[rgb(var(--primary-4))]"
           type="outline"
-          onClick={() => handleOperate()}
+          onClick={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
         >
           定时运行
         </Button>
+        {/* <SchedulerRun></SchedulerRun> */}
         <Button
           className="!border-[rgb(var(--primary-4))]"
           type="outline"
-          onClick={() => handleOperate()}
+          onClick={() => handleOperate(WORKFLOW_OPERATION.RUNNING)}
         >
           运行
         </Button>

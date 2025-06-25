@@ -16,7 +16,7 @@ import {
   useWorkflowMode,
   useWorkflowRun
 } from '../hooks';
-import AppPublisher from '@/pages/workflowConfig/app/app-publisher';
+import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { CreateAppModal } from './create-app-modal';
@@ -29,6 +29,7 @@ import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import EditIcon from '@/pages/workflowConfig/styles/images/op-icons/edit.svg';
 import WorkflowIcon from '@/pages/workflowConfig/styles/images/op-icons/workflow.svg';
 import { PrefixV2 } from '@/api/endpoints';
+import { WORKFLOW_OPERATION } from './types';
 
 const Header: FC = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -99,7 +100,7 @@ const Header: FC = () => {
   }, [appID, setAppDetail]);
 
   const onPublish = useCallback(
-    async (params?: PublishWorkflowParams) => {
+    async (op: WORKFLOW_OPERATION, params?: PublishWorkflowParams) => {
       if (handleCheckBeforePublish()) {
         // TODO: ts错误
         // @ts-expect-error
@@ -200,7 +201,7 @@ const Header: FC = () => {
         </div>
       </div>
       <div className="right-part">
-        <AppPublisher
+        <TaskOperation
           {...{
             publishedAt,
             draftUpdatedAt,
