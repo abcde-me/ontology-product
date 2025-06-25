@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Input,
@@ -17,11 +17,15 @@ import {
   IconClockCircle
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
+import { getWorkflowList } from '@/api/workflowList';
+import { getLocalStorage } from '@/utils/storage';
+import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
 
 export default function WorkflowList() {
   const history = useHistory();
+  const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
@@ -81,6 +85,25 @@ export default function WorkflowList() {
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
+  // 总数据量
+  const [total, setTotal] = useState(100);
+
+  // 组件初始化
+  useEffect(() => {
+    if (userInfo) getList();
+  }, [userInfo]);
+
+  const getList = async () => {
+    const params = {
+      uid: userInfo?.id,
+      token: getLocalStorage('loginToken'),
+      search_content: searchValue,
+      page: current, //第几页
+      page_size: pageSize //每页个数
+    };
+    const res = await getWorkflowList(params);
+    console.log(res, 'res');
+  };
 
   // 创建工作流
   const handleCreateWorkflow = () => {
@@ -88,17 +111,17 @@ export default function WorkflowList() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (obj: any) => {
-    console.log(obj);
+  const viewDetailWorkflow = (id: number | string) => {
+    console.log(id);
   };
 
   // 复制工作流
-  const handleCloneWorkflow = (obj: any) => {
-    console.log(obj);
+  const handleCloneWorkflow = (id: number | string) => {
+    console.log(id);
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = (id: any) => {
+  const handleDeleteWorkflow = (id: number | string) => {
     const newWorkflowData = workflowData.filter((item) => {
       return item.id !== id;
     });
@@ -106,7 +129,7 @@ export default function WorkflowList() {
   };
 
   // table columns
-  const columns: ColumnProps<any>[] = [
+  const columns: ColumnProps[] = [
     {
       title: '工作流名称',
       dataIndex: 'name',
@@ -200,7 +223,7 @@ export default function WorkflowList() {
           <span
             className="operate-text"
             onClick={() => {
-              viewDetailWorkflow(record);
+              viewDetailWorkflow(record.id);
             }}
           >
             详情
@@ -208,7 +231,7 @@ export default function WorkflowList() {
           <span
             className="operate-text"
             onClick={() => {
-              handleCloneWorkflow(record);
+              handleCloneWorkflow(record.id);
             }}
           >
             复制
@@ -236,14 +259,6 @@ export default function WorkflowList() {
     }
   ];
 
-  // 根据搜索条件过滤工作流
-  const filterWorkflowData = useMemo(() => {
-    return workflowData.filter((item) => {
-      const query = searchValue.toLowerCase();
-      return item.name.toLowerCase().includes(query);
-    });
-  }, [workflowData, searchValue]);
-
   return (
     <div className="workflow">
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>工作流</h1>
@@ -270,7 +285,7 @@ export default function WorkflowList() {
       <Table
         border={false}
         columns={columns}
-        data={filterWorkflowData}
+        data={workflowData}
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无工作流',
@@ -292,7 +307,7 @@ export default function WorkflowList() {
         }}
         sizeOptions={[2, 5, 10, 20]}
         showTotal
-        total={filterWorkflowData.length}
+        total={total}
         showJumper
         sizeCanChange
         style={{ justifyContent: 'flex-end', marginTop: '10px' }}

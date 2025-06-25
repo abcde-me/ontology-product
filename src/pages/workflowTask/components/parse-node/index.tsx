@@ -8,6 +8,13 @@ import EpubIcon from '@/assets/epub-icon.svg';
 import TimeFormatting from '@/utils/timeFormatting';
 import noDataElement from '@/components/no-data';
 
+// 枚举文件类型
+enum FileType {
+  pdf = 'pdf',
+  txt = 'txt',
+  epub = 'epub'
+}
+
 export default function ParseNode(props: { dataSource }) {
   const { dataSource } = props;
   // 当前的第几页
@@ -15,7 +22,7 @@ export default function ParseNode(props: { dataSource }) {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
 
-  const columns: ColumnProps<any>[] = [
+  const columns: ColumnProps[] = [
     {
       title: '文件名称',
       dataIndex: 'file_name',
@@ -58,9 +65,9 @@ export default function ParseNode(props: { dataSource }) {
       width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {record.file_type === 'pdf' ? (
+          {record.file_type === FileType.pdf ? (
             <PdfIcon />
-          ) : record.file_type === 'txt' ? (
+          ) : record.file_type === FileType.txt ? (
             <TxtIcon />
           ) : (
             <EpubIcon />
@@ -123,7 +130,7 @@ export default function ParseNode(props: { dataSource }) {
         data={dataSource.file}
         pagination={false}
         noDataElement={noDataElement({ description: '暂无数据' })}
-        rowKey="file_name"
+        rowKey="id"
         style={{ margin: '10px 0' }}
       />
       {/* 分页 */}

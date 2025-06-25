@@ -7,7 +7,7 @@ import noDataElement from '@/components/no-data';
 export default function DataCleaningNode(props: { dataSource }) {
   const { dataSource } = props;
 
-  const columns: ColumnProps<any>[] = [
+  const columns: ColumnProps[] = [
     {
       title: '规则名称',
       dataIndex: 'file_name',

@@ -8,6 +8,14 @@ import noDataElement from '@/components/no-data';
 
 const InputSearch = Input.Search;
 
+// 枚举作业运行状态
+enum TaskRunStatus {
+  success = 1,
+  fail = 2,
+  running = 3,
+  stop = 4
+}
+
 export default function WorkflowTask() {
   const history = useHistory();
   // 初始化搜索框value
@@ -16,7 +24,7 @@ export default function WorkflowTask() {
   const [workflowTaskData, setWorkflowTaskData] = useState([
     {
       id: '1',
-      status: 0,
+      status: 1,
       job_name: 'Jane Doe',
       time_size: '50分20秒',
       source_path: 'jane.doe@example.com',
@@ -56,7 +64,7 @@ export default function WorkflowTask() {
     },
     {
       id: '5',
-      status: 0,
+      status: 4,
       job_name: '李四',
       time_size: '50分20秒',
       source_path: 'kevin.sandra@example.com',
@@ -70,12 +78,12 @@ export default function WorkflowTask() {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
 
-  const handleToTaskDeatil = (id: any) => {
+  const handleToTaskDeatil = (id: number) => {
     history.push(`/tenant/compute/modaforge/workflowTaskDetail?id=${id}`);
   };
 
   // table columns
-  const columns: ColumnProps<any>[] = [
+  const columns: ColumnProps[] = [
     {
       title: '作业ID',
       dataIndex: 'id',
@@ -94,11 +102,11 @@ export default function WorkflowTask() {
               width: '5px',
               height: '5px',
               backgroundColor:
-                record.status === 0
+                record.status === TaskRunStatus.success
                   ? '#10B981'
-                  : record.status === 1
+                  : record.status === TaskRunStatus.fail
                     ? '#EF4444'
-                    : record.status === 2
+                    : record.status === TaskRunStatus.running
                       ? '#007DFA'
                       : '#CBD5E1',
               borderRadius: '50%',
@@ -106,11 +114,11 @@ export default function WorkflowTask() {
             }}
           ></div>
           <div>
-            {record.status === 0
+            {record.status === TaskRunStatus.success
               ? '运行完成'
-              : record.status === 1
+              : record.status === TaskRunStatus.fail
                 ? '运行失败'
-                : record.status === 2
+                : record.status === TaskRunStatus.running
                   ? '进行中'
                   : '已停止'}
           </div>
