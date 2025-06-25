@@ -20,6 +20,8 @@ import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
 import './data-enhancement.scss';
 
+// default 示例数据
+const defaultPrompt = '{ "instruction": "公司最近的战略计划是什么？", "context": "公司计划在未来两年内扩大海外市场，重点关注东南亚和欧洲地区。公司已在这些地区设立了办事处，并计划在当地招聘销售和市场团队。", "response": "公司计划在未来两年重点拓展东南亚和欧洲市场，并已设立办事处和开始本地化招聘。"}';
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -36,6 +38,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   }, [inputs]);
 
   const onValuesChange = (changeValue: any, values: any) => {
+    if (values?.app_scenarios !== 1 && values?.app_scenarios !== 5) {
+      form.setFieldValue('sample_num', '');
+    }
     updateInputs(values);
   };
   return (
@@ -47,9 +52,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           prompt: inputs?.prompt,
-          app_scenarios: 1 || inputs?.app_scenarios,
-          enha_modle_id: 1 || inputs?.enha_modle_id,
-          vars: cloneDeep(inputs.variables || [])
+          app_scenarios: inputs?.app_scenarios,
+          enha_modle_id: inputs?.enha_modle_id,
+          sample_data: defaultPrompt,
+          vars: cloneDeep(inputs.variables || []),
         }}
         onChange={onValuesChange}
       >
@@ -60,7 +66,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           required
           style={{
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            margin: 0,
           }}
         />
         <div>
@@ -145,6 +152,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           field="enha_modle_id"
           labelAlign="left"
           required
+          style={{ margin: 0 }}
         >
           <Select placeholder="请选择模型" style={{ width: '100%' }}>
             <Option key={1} value={1}>
@@ -164,7 +172,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </Option>
           </Select>
         </FormItem>
-        <div className='content-tips-text'>常见的针对SFT的模型微调场景生成数据集。</div>
+        <div className='content-tips-text' style={{ marginTop: '8px' }}>常见的针对SFT的模型微调场景生成数据集。</div>
       </Form>
     </div>
   );
