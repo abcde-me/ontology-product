@@ -37,6 +37,7 @@ const useConfig = (id: string, payload: StartNodeType) => {
     (payload: StartNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.source_path = payload.source_path;
+        draft.source_path_name = payload.source_path_name;
         draft.data_category = payload.data_category;
       });
       setInputs(newInputs);
