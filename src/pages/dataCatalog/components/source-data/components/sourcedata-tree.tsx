@@ -37,10 +37,10 @@ interface TreeNodeType {
 
 // 数据转换函数：将原始数据转换为Tree组件需要的格式
 function transformRawDataToTreeData(rawData: RawDataNode[]): TreeNodeType[] {
-    const transformNode = (node: RawDataNode, keyPrefix: string = ''): TreeNodeType => {
+    const transformNode = (node: RawDataNode, keyPrefix = ''): TreeNodeType => {
         const key = `${keyPrefix}${node.id}`;
 
-        let children: TreeNodeType[] = [];
+        const children: TreeNodeType[] = [];
 
         if (node.children && node.children.length > 0) {
             // 处理 children 中的 volume 和 db
@@ -453,7 +453,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                 style={{ width: '100%', height: '24px', marginRight: '17px' }}
                 value={newNodeValue}
                 onChange={v => setNewNodeValue(v)}
-                onPressEnter={async () => {
+                onPressEnter={() => {
                     // 如果输入为空，使用默认名称
                     const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
 
@@ -488,7 +488,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                     setAddingToParentInfo(null);
                     setNewNodeValue('');
                 }}
-                onBlur={async () => {
+                onBlur={() => {
                     // 如果输入为空，使用默认名称
                     const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
 
@@ -649,7 +649,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         );
                     }}
                     renderTitle={(props) => {
-                        console.log(props.dataRef);
+                        // console.log(props.dataRef);
 
                         const hasChildren = props.dataRef && props.dataRef.children !== undefined;
                         // 动态图标：有子节点用文件夹图标，否则用文件图标  
@@ -662,7 +662,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                     style={{ width: '100%', height: '24px', marginRight: '17px' }}
                                     value={newNodeValue}
                                     onChange={v => setNewNodeValue(v)}
-                                    onPressEnter={async () => {
+                                    onPressEnter={() => {
                                         // 如果输入为空，使用默认名称
                                         const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
 
@@ -699,7 +699,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                         setIsAdding(false);
                                         setNewNodeValue('');
                                     }}
-                                    onBlur={async () => {
+                                    onBlur={() => {
                                         // 如果输入为空，使用默认名称
                                         const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
 
