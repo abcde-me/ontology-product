@@ -20,6 +20,8 @@ import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
 import './data-enhancement.scss';
 
+// default 示例数据
+const defaultPrompt = '{ "instruction": "公司最近的战略计划是什么？", "context": "公司计划在未来两年内扩大海外市场，重点关注东南亚和欧洲地区。公司已在这些地区设立了办事处，并计划在当地招聘销售和市场团队。", "response": "公司计划在未来两年重点拓展东南亚和欧洲市场，并已设立办事处和开始本地化招聘。"}';
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -52,7 +54,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           prompt: inputs?.prompt,
           app_scenarios: inputs?.app_scenarios,
           enha_modle_id: inputs?.enha_modle_id,
-          vars: cloneDeep(inputs.variables || [])
+          sample_data: defaultPrompt,
+          vars: cloneDeep(inputs.variables || []),
         }}
         onChange={onValuesChange}
       >
