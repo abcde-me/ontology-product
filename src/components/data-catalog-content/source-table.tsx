@@ -29,12 +29,17 @@ import { IconFolder } from '@arco-design/web-react/icon';
 import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog';
 //getDataCatalogList是获取表格中的数据，getDataCatalog是获取左侧树状结构的数据，getCatalogList是获取目录列表
 
-import SmartTable from './components/smartTable';
+import SmartTable from './components/smart-table';
 import Pages from './components/pages';
 import './index.css';
-import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './source-columns'
-import FormComponent from './components/dataset-form'
-const { Text } = Typography;//使用Text来控制文字的效果
+import {
+  sourceDataVolume,
+  sourceDataDatabase,
+  targetDataVolume,
+  targetDataDatabase
+} from './source-columns';
+import FormComponent from './components/dataset-form';
+const { Text } = Typography; //使用Text来控制文字的效果
 
 const rawCatalogData = {
   src: {
@@ -254,7 +259,8 @@ const data = [
 ];
 
 function DataPage(props) {
-  const { selectedNode, onSelectionChange, searchValue, startTime, endTime } = props;
+  const { selectedNode, onSelectionChange, searchValue, startTime, endTime } =
+    props;
 
   // 添加调试信息
   console.log('DataPage 接收到的 props:', {
@@ -264,7 +270,7 @@ function DataPage(props) {
     selectedNode: selectedNode ? 'has value' : 'null'
   });
 
-  const [treeData, setTreeData] = React.useState([])
+  const [treeData, setTreeData] = React.useState([]);
   // const [searchValue, setSearchValue] = React.useState('')
   // const [startTime, setStartTime] = React.useState('')
   // const [endTime, setEndTime] = React.useState('')
@@ -319,18 +325,28 @@ function DataPage(props) {
   }
 
   // 处理表格选择变化
-  const handleSelectionChange = (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-    setSelectedRowKeys(selectedRowKeys)
-    setSelectedRows(selectedRows)
-    console.log('表格选择变化:', selectedRowKeys, '长度吗', selectedRows)
+  const handleSelectionChange = (
+    selectedRowKeys: React.Key[],
+    selectedRows: any[]
+  ) => {
+    setSelectedRowKeys(selectedRowKeys);
+    setSelectedRows(selectedRows);
+    console.log('表格选择变化:', selectedRowKeys, '长度吗', selectedRows);
 
     // 调用外部传入的回调函数
-    console.log('DataPage - 准备调用外部回调函数, onSelectionChange存在:', !!onSelectionChange);
+    console.log(
+      'DataPage - 准备调用外部回调函数, onSelectionChange存在:',
+      !!onSelectionChange
+    );
     if (onSelectionChange) {
-      console.log('DataPage - 调用外部回调函数, 参数:', selectedRowKeys, selectedRows);
+      console.log(
+        'DataPage - 调用外部回调函数, 参数:',
+        selectedRowKeys,
+        selectedRows
+      );
       onSelectionChange(selectedRowKeys, selectedRows);
     }
-  }
+  };
 
   // 处理从外部传入的selectedNode
   React.useEffect(() => {
@@ -387,16 +403,17 @@ function DataPage(props) {
 
     // 1. 根据搜索关键词过滤
     if (searchValue) {
-      filteredData = filteredData.filter(item =>
-        item.content.includes(searchValue) ||
-        item.file.includes(searchValue) ||
-        item.workflowId.includes(searchValue)
+      filteredData = filteredData.filter(
+        (item) =>
+          item.content.includes(searchValue) ||
+          item.file.includes(searchValue) ||
+          item.workflowId.includes(searchValue)
       );
     }
 
     // 2. 根据日期范围过滤
     if (startTime && endTime) {
-      filteredData = filteredData.filter(item => {
+      filteredData = filteredData.filter((item) => {
         const itemDate = new Date(item.createdAt);
         const start = new Date(startTime);
         const end = new Date(endTime);
@@ -414,7 +431,14 @@ function DataPage(props) {
 
     console.log('过滤后的数据:', filteredData);
     setTableData(filteredData);
-  }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
+  }, [
+    searchValue,
+    startTime,
+    endTime,
+    selectedFilePath,
+    currentPage,
+    pageSize
+  ]);
   return (
     <>
       <div>
@@ -424,20 +448,27 @@ function DataPage(props) {
           selectedArray={selectedRowKeys as []}
           onSelectionChange={handleSelectionChange}
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: '12px'
+          }}
+        >
           <span></span>
           <Pages
-            current={currentPage}//当前页码
+            current={currentPage} //当前页码
             total={data.length}
-            pageSize={pageSize}//每页条数
-            onChange={handlePageChange}//页码变化处理
-            onPageSizeChange={handlePageSizeChange}//每页条数变化处理
+            pageSize={pageSize} //每页条数
+            onChange={handlePageChange} //页码变化处理
+            onPageSizeChange={handlePageSizeChange} //每页条数变化处理
           />
         </div>
       </div>
 
       <Modal
-        title='导出设置'
+        title="导出设置"
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
