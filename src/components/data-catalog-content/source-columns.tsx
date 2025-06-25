@@ -1,7 +1,32 @@
-import React from 'react';
-import { Button,Popover } from '@arco-design/web-react';
+import React, { useState } from 'react';
+import { Button, Popover, DatePicker } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog'
 import { Message } from '@arco-design/web-react';
+import DocIcon from './icon/DOC.svg'; // 直接导入为组件
+import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
+import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
+// SVG图标组件 - 使用原始设计
+
+const { RangePicker } = DatePicker;
+
+// 根据文件类型获取对应图标组件的函数
+const DOCIcon = ({ size = 16 }) => (
+    <DocIcon width={size} height={size} />
+);
+const PDFIcon = ({ size = 16 }) => (
+    <PdfIcon width={size} height={size} />
+);
+const TXTIcon = ({ size = 16 }) => (
+    <TxtIcon width={size} height={size} />
+);
+const getFileIcon = (type, size = 16) => {
+    const iconMap = {
+        'pdf': <PDFIcon size={size} />,
+        'txt': <TXTIcon size={size} />,
+        'doc': <DOCIcon size={size} />,
+    };
+    return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
+};
 
 //数据源目录的卷中的数据格式
 export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
@@ -19,14 +44,16 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
             <div>
                 <Popover content={record.content}>
                     <span
-                    style={{
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        maxWidth: '100%'
-                    }}
-                    >{record.content}</span>
+                        style={{
+                            display: 'block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '100%'
+                        }}
+                    >
+                        {record.content}
+                    </span>
                 </Popover>
             </div>
         )
@@ -50,10 +77,22 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
             },
         ],
         onFilter: (value, row) => row.type == value,
+        render: (_, record) => (
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                }}
+            >
+                {getFileIcon(record.type, 16)}
+                <span>{record.type}</span>
+            </div>
+        )
     },
     {
         title: '文件大小',
-        dataIndex: 'createdAt',
+        // dataIndex: 'createdAt',
         width: 180,
     },
     {
@@ -68,16 +107,23 @@ export const sourceDataVolume = (setVisible, hoveredRowId = null) => [
     },
     {
         title: '载入开始时间',
-        // dataIndex: 'createdAt',
+        dataIndex: 'createdAt',
         width: 180,
-        // sorter: (a, b) => a.salary - b.salary,
-        onFilter: (value, row) => row.salary > value,
-        // sortDirections: ['ascend'],
-        // defaultSortOrder: 'ascend',
+        sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        onFilter: (value, record) => {
+            if (!value || value.length !== 2) return true;
+            if (!record.createdAt) return false;
+
+            const recordDate = new Date(record.createdAt);
+            const startDate = new Date(value[0]);
+            const endDate = new Date(value[1]);
+
+            return recordDate >= startDate && recordDate <= endDate;
+        },
     },
     {
         title: '连接器名称',
-        // dataIndex: 'createdAt',
+        dataIndex: 'connectorName',
         ellipsis: true,
         width: 180,
     },
@@ -108,8 +154,8 @@ export const targetDataDatabase = (setVisible, hoveredRowId = null) => [
 
 ]
 const handleDownload = (record, setVisible) => {
-  // console.log('下载', id)
-  setVisible(true, record);
+    // console.log('下载', id)
+    setVisible(true, record);
 };
 const handleDelete = (id) => {
 

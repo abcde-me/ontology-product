@@ -29,11 +29,11 @@ import { IconFolder } from '@arco-design/web-react/icon';
 import { getDataCatalogList, getCatalogList } from '@/api/dataCatalog';
 //getDataCatalogList是获取表格中的数据，getDataCatalog是获取左侧树状结构的数据，getCatalogList是获取目录列表
 
-import SmartTable from './components/SmartTable';
+import SmartTable from './components/smartTable';
 import Pages from './components/pages';
 import './index.css';
 import { sourceDataVolume, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './source-columns'
-import FormComponent from './components/Dataset-form'
+import FormComponent from './components/dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
 const rawCatalogData = {
@@ -254,11 +254,20 @@ const data = [
 ];
 
 function DataPage(props) {
-  const { selectedNode, onSelectionChange, searchValue } = props;
+  const { selectedNode, onSelectionChange, searchValue, startTime, endTime } = props;
+
+  // 添加调试信息
+  console.log('DataPage 接收到的 props:', {
+    searchValue,
+    startTime,
+    endTime,
+    selectedNode: selectedNode ? 'has value' : 'null'
+  });
+
   const [treeData, setTreeData] = React.useState([])
   // const [searchValue, setSearchValue] = React.useState('')
-  const [startTime, setStartTime] = React.useState('')
-  const [endTime, setEndTime] = React.useState('')
+  // const [startTime, setStartTime] = React.useState('')
+  // const [endTime, setEndTime] = React.useState('')
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
@@ -359,22 +368,52 @@ function DataPage(props) {
 
   //监听搜索条件变化
   useEffect(() => {
+    // 如果有真实的API，调用这个
     // getDataCatalogList({
-    //   start_time:toUnixTimestamp(startTime),
-    //   end_time:toUnixTimestamp(endTime),
-    //   file_name:searchValue,
-    //   file_path:selectedFilePath,
-    //   page:currentPage,
-    //   page_size:pageSize,
-    // }).then(res=>{
-    //   console.log(res)
+    //   start_time: startTime ? toUnixTimestamp(startTime) : undefined,
+    //   end_time: endTime ? toUnixTimestamp(endTime) : undefined,
+    //   file_name: searchValue,
+    //   file_path: selectedFilePath,
+    //   page: currentPage,
+    //   page_size: pageSize,
+    // }).then(res => {
+    //   console.log('API返回数据:', res);
+    //   setTableData(res.data.list || []);
+    //   setTotal(res.data.total || 0);
     // })
+
+    // 测试用的本地数据过滤逻辑
+    let filteredData = [...data];
+
+    // 1. 根据搜索关键词过滤
     if (searchValue) {
-      setTableData(data.filter(item => item.content.includes(searchValue)))
-    } else {
-      setTableData(data)
+      filteredData = filteredData.filter(item =>
+        item.content.includes(searchValue) ||
+        item.file.includes(searchValue) ||
+        item.workflowId.includes(searchValue)
+      );
     }
-    // setTableData(data)//测试使用
+
+    // 2. 根据日期范围过滤
+    if (startTime && endTime) {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.createdAt);
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        // 确保时间比较的准确性
+        return itemDate >= start && itemDate <= end;
+      });
+    }
+
+    // 3. 根据文件路径过滤（如果需要）
+    if (selectedFilePath) {
+      // 这里可以根据selectedFilePath进行额外的过滤
+      console.log('根据文件路径过滤:', selectedFilePath);
+    }
+
+    console.log('过滤后的数据:', filteredData);
+    setTableData(filteredData);
   }, [searchValue, startTime, endTime, selectedFilePath, currentPage, pageSize])
   return (
     <>
@@ -405,7 +444,7 @@ function DataPage(props) {
         autoFocus={false}
         focusLock={true}
         footer={null}
-        style={{width:640}}
+        style={{ width: 640 }}
       >
         <FormComponent
           downloadData={downloadData}

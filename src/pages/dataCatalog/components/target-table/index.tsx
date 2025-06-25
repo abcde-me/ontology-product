@@ -29,6 +29,10 @@ export default function TargetTable(props) {
         keyword: '',
         isActive: false
     }); // 搜索条件状态，传递给子组件
+    const [startTime, setStartTime] = React.useState('')
+    const [endTime, setEndTime] = React.useState('')
+    // 新增日期范围状态
+    const [dateRange, setDateRange] = React.useState([]);
 
     const handleSelectionChange = (selectedRowKeys, selectedRowsData) => {
         console.log('选中的行Keys:', selectedRowKeys);
@@ -117,6 +121,8 @@ export default function TargetTable(props) {
                 title: '确认删除文件吗?',
                 content: '删除后，文件不可恢复',
                 async onOk() {
+                    console.log(selectedRows, '打印selectedRows');
+                    
                     // await deleteinterTuningUpdata(appid, e.id, {});
                     Message.success('删除成功');
                     // creatsuccess();
@@ -134,6 +140,28 @@ export default function TargetTable(props) {
             isActive: false
         });
     }
+    //时间选择器】
+    function onSelect(dateString, date) {
+        console.log('onSelect', dateString, date);
+      }
+      
+      function onChange(dateString, date) {
+        console.log('onChange: ', dateString, date);
+        // 更新日期范围状态
+        if (dateString && dateString.length === 2) {
+            setStartTime(dateString[0]);
+            setEndTime(dateString[1]);
+            setDateRange(dateString);
+        } else {
+            setStartTime('');
+            setEndTime('');
+            setDateRange([]);
+        }
+    }
+      
+      function onOk(dateString, date) {
+        console.log('onOk: ', dateString, date);
+      }
     return (
         <div>
             <div style={{
@@ -167,7 +195,14 @@ export default function TargetTable(props) {
                     </div>
                     <RangePicker
                         style={{ width: 260 }}
-                        placeholder={['开始日期', '结束日期']}
+                        showTime={{
+                        defaultValue: ['00:00', '04:05'],
+                        format: 'HH:mm',
+                        }}
+                        format='YYYY-MM-DD HH:mm'
+                        onChange={onChange}
+                        onSelect={onSelect}
+                        onOk={onOk}
                     />
                 </Space>
                 <Space>
@@ -250,7 +285,12 @@ export default function TargetTable(props) {
             </div>
             <div>
                 {/* <Table selectedNode={selectedNode} /> */}
-                <Tables selectedNode={selectedNode} onSelectionChange={handleSelectionChange} searchCondition={searchCondition} />
+                <Tables selectedNode={selectedNode} 
+                onSelectionChange={handleSelectionChange} 
+                searchCondition={searchCondition} 
+                startTime={startTime}
+                endTime={endTime}
+                />
             </div>
         </div>
     )

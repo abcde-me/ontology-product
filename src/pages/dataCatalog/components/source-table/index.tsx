@@ -22,6 +22,10 @@ export default function SourceTable(props) {
     const hasSelectedRows = selectedRows.length > 0;
     const [searchValue, setSearchValue] = useState(''); // 实际用于搜索的值
     const [inputValue, setInputValue] = useState(''); // 输入框的值
+    const [startTime, setStartTime] = React.useState('')
+    const [endTime, setEndTime] = React.useState('')
+    // 新增日期范围状态
+    const [dateRange, setDateRange] = React.useState([]);
 
     // 搜索处理函数
     const handleSearch = (value) => {
@@ -52,6 +56,28 @@ export default function SourceTable(props) {
             });
         } catch { Message.error('删除失败，请重试') }
     }
+    //时间选择器】
+    function onSelect(dateString, date) {
+        console.log('onSelect', dateString, date);
+    }
+
+    function onChange(dateString, date) {
+        console.log('onChange: ', dateString, date);
+        // 更新日期范围状态
+        if (dateString && dateString.length === 2) {
+            setStartTime(dateString[0]);
+            setEndTime(dateString[1]);
+            setDateRange(dateString);
+        } else {
+            setStartTime('');
+            setEndTime('');
+            setDateRange([]);
+        }
+    }
+
+    function onOk(dateString, date) {
+        console.log('onOk: ', dateString, date);
+    }
     return (
         <div>
             <div>
@@ -77,8 +103,15 @@ export default function SourceTable(props) {
                             />
                         </div>
                         <RangePicker
-                            style={{ width: 260 }}
-                            placeholder={['开始日期', '结束日期']}
+                            style={{ maxWidth: 260 }}
+                            showTime={{
+                                defaultValue: ['00:00', '04:05'],
+                                format: 'HH:mm',
+                            }}
+                            format='YYYY-MM-DD HH:mm'
+                            onChange={onChange}
+                            onSelect={onSelect}
+                            onOk={onOk}
                         />
                     </Space>
                     <Space>
@@ -165,6 +198,8 @@ export default function SourceTable(props) {
                         selectedNode={selectedNode}
                         onSelectionChange={handleSelectionChange}
                         searchValue={searchValue}
+                        startTime={startTime}
+                        endTime={endTime}
                     />
                     {/* <Tables /> */}
                 </div>

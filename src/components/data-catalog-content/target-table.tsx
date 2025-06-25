@@ -33,7 +33,7 @@ import Pages from './components/pages'
 import './index.css';
 import { targetDatacolumns, sourceDataDatabase, targetDataVolume, targetDataDatabase } from './target-columns'
 import { sourceDataVolume } from './source-columns'
-import FormComponent from './components/Dataset-form'
+import FormComponent from './components/dataset-form'
 const { Text } = Typography;//使用Text来控制文字的效果
 
 
@@ -278,12 +278,12 @@ interface TableDataItem {
 }
 
 function DataPage(props) {
-  const { selectedNode, onSelectionChange, searchCondition } = props;
+  const { selectedNode, onSelectionChange, searchCondition, startTime, endTime } = props;
   // const { selectedNode } = props;
   const [treeData, setTreeData] = React.useState<TreeNode[]>([])
   const [searchValue, setSearchValue] = React.useState('')
-  const [startTime, setStartTime] = React.useState('')
-  const [endTime, setEndTime] = React.useState('')
+  // const [startTime, setStartTime] = React.useState('')
+  // const [endTime, setEndTime] = React.useState('')
   //searchValue 为搜索框的值,startTime为开始时间,endTime为结束时间
   const [visible, setVisible] = React.useState(false);
   //删除的弹框控制
@@ -400,6 +400,8 @@ function DataPage(props) {
     //   console.log(res)
     // })
     console.log(searchCondition, '打印searchCondition');
+    console.log(startTime, endTime, '打印startTime和endTime');
+    // let filteredData = [...data];
     if (searchCondition.type === '数据内容') {
       setTableData(data.filter(item => item.content.includes(searchCondition.keyword)))
     } else if (searchCondition.type === 'ID') {
@@ -461,7 +463,7 @@ function DataPage(props) {
         autoFocus={false}
         focusLock={true}
         footer={null}
-        style={{width:640}}
+        style={{ width: 640 }}
       >
         <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
       </Modal>

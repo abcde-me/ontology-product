@@ -41,10 +41,10 @@ function SmartTable<RecordType extends object>({
       );
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },
-    onSelectAll: (selected: boolean, selectedRows: any) => {
+    onSelectAll: (selected: boolean, selectedRows: RecordType[]) => {
       console.log('onSelectAll:', selected, selectedRows);
     },
-    onSelect: (selected: boolean, record: RecordType, selectedRows: any) => {
+    onSelect: (selected: boolean, record: RecordType, selectedRows: RecordType[]) => {
       console.log('onSelect:', selected, record, selectedRows);
     }
   };

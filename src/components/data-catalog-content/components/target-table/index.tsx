@@ -7,14 +7,14 @@ type SmartTableProps<RecordType> = {
   data: RecordType[];
   rowKey?: string | ((record: RecordType) => string);
   onSelectionChange?: (selectedRowKeys: React.Key[], selectedRows: RecordType[]) => void;
-  hoveredRowId?: any;
-  onRowHover?: (rowId: any) => void;
+  hoveredRowId?: string;
+  onRowHover?: (rowId: string) => void;
 } & Omit<TableProps<RecordType>, 'columns' | 'data' | 'rowKey'>;
 
 /**
  * 通用表格组件（支持任意列和数据结构）
  */
-function TargetTable<RecordType extends object>({
+function TargetTable<RecordType extends Record<string, unknown>>({
   columns,
   data,
   rowKey = 'id',
@@ -25,7 +25,7 @@ function TargetTable<RecordType extends object>({
 }: SmartTableProps<RecordType>) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<RecordType[]>([]);
-  const [internalHoveredRowId, setInternalHoveredRowId] = useState<any>(null);
+  const [internalHoveredRowId, setInternalHoveredRowId] = useState<string | null>(null);
 
   // 使用外部传入的 hoveredRowId 或内部状态
   const currentHoveredRowId = hoveredRowId !== undefined ? hoveredRowId : internalHoveredRowId;
@@ -43,16 +43,16 @@ function TargetTable<RecordType extends object>({
       );
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },
-    onSelectAll: (selected: boolean, selectedRows: any) => {
+    onSelectAll: (selected: boolean, selectedRows: RecordType[]) => {
       console.log('onSelectAll:', selected, selectedRows);
     },
-    onSelect: (selected: boolean, record: RecordType, selectedRows: any) => {
+    onSelect: (selected: boolean, record: RecordType, selectedRows: RecordType[]) => {
       console.log('onSelect:', selected, record, selectedRows);
     }
   };
 
   // 处理行悬浮事件
-  const handleRowHover = (rowId: any) => {
+  const handleRowHover = (rowId: string) => {
     if (onRowHover) {
       onRowHover(rowId);
     } else {
@@ -80,10 +80,10 @@ function TargetTable<RecordType extends object>({
       onRow={(record) => ({
         onMouseEnter: () => {
           const id = typeof rowKey === 'function' ? rowKey(record) : record[rowKey as keyof RecordType];
-          handleRowHover(id);
+          handleRowHover(id as string);
         },
         onMouseLeave: () => {
-          handleRowHover(null);
+          handleRowHover('');
         },
       })}
       {...restProps}

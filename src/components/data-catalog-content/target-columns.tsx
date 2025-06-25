@@ -6,8 +6,30 @@ import { sort } from 'semver';
 import axios from 'axios';
 import { rename } from 'fs';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
-
+import DocIcon from './icon/DOC.svg'; // 直接导入为组件
+import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
+import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
 // 工作流ID显示组件，用于管理悬浮状态
+
+const DOCIcon = ({ size = 16 }) => (
+    <DocIcon width={size} height={size} />
+);
+const PDFIcon = ({ size = 16 }) => (
+    <PdfIcon width={size} height={size} />
+);
+const TXTIcon = ({ size = 16 }) => (
+    <TxtIcon width={size} height={size} />
+);
+
+// 根据文件类型获取对应图标组件的函数
+const getFileIcon = (type, size = 16) => {
+  const iconMap = {
+      'pdf': <PDFIcon size={size} />,
+      'txt': <TXTIcon size={size} />,
+      'doc': <DOCIcon size={size} />,
+  };
+  return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
+};
 const WorkflowIdCell = ({ record, showIcon }) => {
   const handleWorkflowClick = () => {
     // 这里添加跳转逻辑，例如跳转到工作流详情页
@@ -85,7 +107,17 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
   {
     title: '生成时间',
     dataIndex: 'createdAt',
-    sorter: (a, b) => a.creaetAt - b.creaetAt,
+    sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        onFilter: (value, record) => {
+            if (!value || value.length !== 2) return true;
+            if (!record.createdAt) return false;
+
+            const recordDate = new Date(record.createdAt);
+            const startDate = new Date(value[0]);
+            const endDate = new Date(value[1]);
+
+            return recordDate >= startDate && recordDate <= endDate;
+        },
     width: 180,
   },
   {
@@ -114,7 +146,16 @@ export const targetDatacolumns = (setVisible, hoveredRowId = null) => [
     onFilter: (value, row) => row.type == value,
     width: 134,
     render: (_, record) => (
-      <div>{record.type}</div>
+              <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                }}
+            >
+                {getFileIcon(record.type, 16)}
+                <span>{record.type}</span>
+            </div>
     )
   },
   {
