@@ -43,8 +43,7 @@ export default function WorkflowList() {
 
   const getList = async () => {
     const params = {
-      // uid: userInfo?.id,
-      uid: 'whx',
+      uid: userInfo?.id,
       token: getLocalStorage('loginToken'),
       search_content: searchValue,
       page: current, //第几页
@@ -90,8 +89,7 @@ export default function WorkflowList() {
   // 删除工作流
   const handleDeleteWorkflow = async (id: number | string, version: string) => {
     const params = {
-      // uid: userInfo?.id,
-      uid: 'whx',
+      uid: userInfo?.id,
       token: getLocalStorage('loginToken'),
       ds_workflow_id: 0,
       workflow_uuid: id,
@@ -99,7 +97,15 @@ export default function WorkflowList() {
       op: 'DELETE'
     };
     const res = await workflowOperation(params);
-    console.log(res, 'rrr');
+    if (res.status === 200 && res.data.is_success) {
+      Message.success({
+        content: '删除成功'
+      });
+    } else {
+      Message.error({
+        content: '删除失败，请稍后重试'
+      });
+    }
   };
 
   // table columns
@@ -110,7 +116,14 @@ export default function WorkflowList() {
       width: 100,
       ellipsis: true,
       render: (_, record) => (
-        <span className="hover-change">{record.workflow_name}</span>
+        <span
+          className="hover-change"
+          onClick={() => {
+            viewDetailWorkflow(record.workflow_uuid);
+          }}
+        >
+          {record.workflow_name}
+        </span>
       )
     },
     {
@@ -231,9 +244,6 @@ export default function WorkflowList() {
                 record.workflow_uuid,
                 record.workflow_version
               );
-              Message.success({
-                content: '删除成功'
-              });
             }}
             onCancel={() => {
               Message.error({
