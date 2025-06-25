@@ -1,5 +1,6 @@
 import {
   Button,
+  Cascader,
   Form,
   Input,
   Message,
@@ -206,15 +207,13 @@ const LoadAddModal = (props: any) => {
           labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
         >
-          <TreeSelect
+          <Cascader
+            placeholder="请输入载入位置"
             style={{ width: '100%' }}
-            treeData={treeData}
-            placeholder="请选择载入位置"
-            allowClear
-            onChange={(val) => console.log(val)}
+            options={treeData}
             fieldNames={{
-              title: 'title', // 显示文本使用 title
-              key: 'value', // 实际值使用 value
+              label: 'title', // 显示文本使用 title
+              value: 'value', // 实际值使用 value
               children: 'children'
             }}
           />

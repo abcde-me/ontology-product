@@ -1,0 +1,105 @@
+/******** fontSize *******/
+@font-size-body-3: 14px;
+
+/******** fontWeight ********/
+@font-weight-400: 400;
+@font-weight-600: 600;
+
+/*********** border ***********/
+@border-radius-medium: 4px;
+
+/*********** size ***********/
+@size-4: 16px;
+
+/*********** spacing ***********/
+
+@spacing-none: 0;
+@spacing-1: 2px;
+@spacing-2: 4px;
+@spacing-3: 6px;
+@spacing-4: 8px;
+@spacing-5: 10px;
+@spacing-6: 12px;
+@spacing-7: 16px;
+@spacing-8: 20px;
+@spacing-9: 24px;
+
+// TODO: 应该再抽离中间层，用于场景定义，需要与视觉设计师一起共创
+// @font-weight-normal: @font-weight-400;
+// @font-weight-block: @font-weight-600;
+
+/******** btn ********/
+.arco-btn-size-default {
+  font-size: @font-size-body-3;
+}
+.arco-btn-text {
+  font-weight: @font-weight-400;
+}
+
+/******** table ********/
+.arco-table thead .arco-table-tr {
+  height: 40px;
+}
+.arco-table-th {
+  font-weight: @font-weight-600;
+}
+.arco-table .arco-table-th-item {
+  font-size: @font-size-body-3;
+}
+.arco-table-td {
+  font-size: @font-size-body-3;
+  padding: 12px;
+}
+
+/******** pagination ********/
+.arco-pagination-item {
+  font-size: @font-size-body-3;
+  color: var(--color-text-2);
+  font-weight: @font-weight-600;
+}
+.arco-pagination-item-active {
+  color: rgb(var(--primary-6));
+  background-color: rgb(var(--primary-1));
+}
+.arco-pagination-total-text {
+  color: var(--color-text-1);
+}
+
+/******** tree ********/
+
+.arco-tree-node:hover {
+  background-color: var(--color-bg-3);
+}
+.arco-tree-node-title {
+  font-size: @font-size-body-3;
+}
+.arco-tree-node-title:hover {
+  background-color: var(--color-bg-3);
+}
+.arco-tree-node.arco-tree-node-selected {
+  background-color: var(--color-bg-3);
+}
+.arco-tree-node-selected .arco-tree-node-title,
+.arco-tree-node-selected .arco-tree-node-title:hover {
+  font-size: @font-size-body-3;
+  font-weight: @font-weight-600;
+}
+
+/******** form ********/
+.arco-form .arco-form-item > .arco-form-label-item {
+  padding-right: @size-4;
+}
+
+.arco-input-word-limit {
+  color: var(--color-text-5);
+}
+
+.arco-link {
+  font-size: @font-size-body-3;
+  font-weight: @font-weight-400;
+}
+
+.arco-menu-vertical .arco-menu-group-title {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
