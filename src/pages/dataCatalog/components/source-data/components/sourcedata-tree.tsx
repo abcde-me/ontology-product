@@ -1,88 +1,256 @@
 import React, { Children, useEffect, useState } from 'react';
 import { Typography, Input, Tree, Tooltip, Popover, Modal, Message } from '@arco-design/web-react';
-import { IconPlus, IconCaretDown, IconCaretRight, IconDelete, IconFile, IconFolder, IconStorage, IconSearch, IconCloseCircle } from '@arco-design/web-react/icon';
+import { IconPlus, IconCaretDown, IconCaretRight, IconDelete, IconFile, IconFolder, IconStorage, IconSearch, IconCloseCircle, IconArchive } from '@arco-design/web-react/icon';
 import { icon } from 'mermaid/dist/rendering-util/rendering-elements/shapes/icon';
+import { getCatalogList } from '@/api/dataCatalog';
 // 引入树节点相关API（使用时取消注释）
 // import { fetchTreeDataAPI, deleteTreeNodeAPI, createTreeNodeAPI, updateTreeNodeAPI } from '@/api/treeApi';
 
-// 树节点类型定义
+// 原始数据结构接口
+interface RawDataNode {
+    id: string | number;
+    name: string;
+    type: string;
+    parent_id?: string | number;
+    children?: Array<{
+        volume?: Array<{
+            id: number;
+            name: string;
+            parent_id: number;
+        }>;
+        db?: Array<{
+            id: number;
+            name: string;
+            parent_id: number;
+        }>;
+    }>;
+}
+
+// 树节点类型定义（用于Tree组件）
 interface TreeNodeType {
     title: string;
     key: string;
     children?: TreeNodeType[];
     isLeaf?: boolean;
+    rawData?: any; // 保存原始数据引用
+}
+
+// 数据转换函数：将原始数据转换为Tree组件需要的格式
+function transformRawDataToTreeData(rawData: RawDataNode[]): TreeNodeType[] {
+    const transformNode = (node: RawDataNode, keyPrefix: string = ''): TreeNodeType => {
+        const key = `${keyPrefix}${node.id}`;
+
+        let children: TreeNodeType[] = [];
+
+        if (node.children && node.children.length > 0) {
+            // 处理 children 中的 volume 和 db
+            node.children.forEach((childGroup, groupIndex) => {
+                // 处理数据卷
+                if (childGroup.volume && childGroup.volume.length > 0) {
+                    const volumeParent: TreeNodeType = {
+                        title: '数据卷',
+                        key: `${key}-volume`,
+                        rawData: { type: 'volume_parent', id: `${node.id}-volume`, name: '数据卷' },
+                        children: childGroup.volume.map((vol, volIndex) => ({
+                            title: vol.name,
+                            key: `${key}-volume-${vol.id}`,
+                            isLeaf: true,
+                            rawData: { ...vol, type: 'volume' }
+                        }))
+                    };
+                    children.push(volumeParent);
+                }
+
+                // 处理数据库
+                if (childGroup.db && childGroup.db.length > 0) {
+                    const dbParent: TreeNodeType = {
+                        title: '数据库',
+                        key: `${key}-db`,
+                        rawData: { type: 'db_parent', id: `${node.id}-db`, name: '数据库' },
+                        children: childGroup.db.map((database, dbIndex) => ({
+                            title: database.name,
+                            key: `${key}-db-${database.id}`,
+                            isLeaf: true,
+                            rawData: { ...database, type: 'database' }
+                        }))
+                    };
+                    children.push(dbParent);
+                }
+            });
+        }
+
+        return {
+            title: node.name,
+            key,
+            children: children.length > 0 ? children : undefined,
+            isLeaf: children.length === 0,
+            rawData: node
+        };
+    };
+
+    return rawData.map((node, index) => transformNode(node, `${index}-`));
 }
 
 // 树数据结构
-const TreeData: TreeNodeType[] = [
-    {
-        title: '目录1录1录1录1录1录6666',
-        key: '0-0',
-        children: [
-            {
-                title: '数据卷',
-                key: '0-0-1',
-                children: [
-                    {
-                        // icon: <IconFile />,
-                        title: '文件16666666666666666666.txt',
-                        key: '0-0-1-1',
-                    },
-                    {
-                        title: 'source-vol3source-vol3',
-                        key: '0-0-1-2',
-                    },
-                    {
-                        title: '文件3.docx',
-                        key: '0-0-1-3',
-                    },
-                ],
-            },
-            {
-                title: '数据库',
-                key: '0-0-2',
-                children: [
-                    {
-                        title: '数据库1',
-                        key: '0-0-2-1',
-                    },
-                    {
-                        title: '数据库2',
-                        key: '0-0-2-2',
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        title: '目录2',
-        key: '0-1',
-        children: [
-            {
-                title: '文件夹1',
-                key: '0-1-1',
-                children: [
-                    {
-                        title: '文档1',
-                        key: '0-1-1-0',
-                    },
-                ],
-            },
-            {
-                title: '文件夹2',
-                key: '0-1-2',
-                children: [
-                    {
-                        title: '文档2',
-                        key: '0-1-2-0',
-                    },
-                ],
-            },
-        ],
-    },
-];
+// const TreeData: TreeNodeType[] = [
+//     {
+//         title: '目录1录1录1录1录1录6666',
+//         key: '0-0',
+//         children: [
+//             {
+//                 title: '数据卷',
+//                 key: '0-0-1',
+//                 children: [
+//                     {
+//                         // icon: <IconFile />,
+//                         title: '文件16666666666666666666.txt',
+//                         key: '0-0-1-1',
+//                     },
+//                     {
+//                         title: 'source-vol3source-vol3',
+//                         key: '0-0-1-2',
+//                     },
+//                     {
+//                         title: '文件3.docx',
+//                         key: '0-0-1-3',
+//                     },
+//                 ],
+//             },
+//             {
+//                 title: '数据库',
+//                 key: '0-0-2',
+//                 children: [
+//                     {
+//                         title: '数据库1',
+//                         key: '0-0-2-1',
+//                     },
+//                     {
+//                         title: '数据库2',
+//                         key: '0-0-2-2',
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+//     {
+//         title: '目录2',
+//         key: '0-1',
+//         children: [
+//             {
+//                 title: '文件夹1',
+//                 key: '0-1-1',
+//                 children: [
+//                     {
+//                         title: '文档1',
+//                         key: '0-1-1-0',
+//                     },
+//                 ],
+//             },
+//             {
+//                 title: '文件夹2',
+//                 key: '0-1-2',
+//                 children: [
+//                     {
+//                         title: '文档2',
+//                         key: '0-1-2-0',
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+// ];
+
+//获取树数据
+//模拟获取树数据
+const FlaseTreeData = {
+    "src": [
+        {
+            "type": "catalog",
+            "id": "1",
+            "name": "catalog1",
+            "children": [
+                {
+                    "volume": [
+                        {
+                            "id": 10,
+                            "name": "source-vol1",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 11,
+                            "name": "source-vol2",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 12,
+                            "name": "source-vol3",
+                            "parent_id": 1,
+                        }
+                    ],
+                    "db": [
+                        {
+                            "id": 20,
+                            "name": "source-db1",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 21,
+                            "name": "source-db2",
+                            "parent_id": 1,
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "dst": [
+        {
+            "type": "catalog",
+            "id": "1",
+            "name": "catalog1",
+            "children": [
+                {
+                    "volume": [
+                        {
+                            "id": 10,
+                            "name": "source-vol1",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 11,
+                            "name": "source-vol2",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 12,
+                            "name": "source-vol3",
+                            "parent_id": 1,
+                        }
+                    ],
+                    "db": [
+                        {
+                            "id": 20,
+                            "name": "source-db1",
+                            "parent_id": 1,
+                        },
+                        {
+                            "id": 21,
+                            "name": "source-db2",
+                            "parent_id": 1,
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+// 转换原始数据为Tree组件格式
+const rawTreeData = FlaseTreeData.src;
+const TreeData = transformRawDataToTreeData(rawTreeData);
+
 //树组件自带的
-function searchData(inputValue: string): TreeNodeType[] {
+function searchData(inputValue: string, treeData: TreeNodeType[]): TreeNodeType[] {
     const loop = (data: TreeNodeType[]): TreeNodeType[] => {
         const result: TreeNodeType[] = [];
         data.forEach((item) => {
@@ -99,7 +267,7 @@ function searchData(inputValue: string): TreeNodeType[] {
         return result;
     };
 
-    return loop(TreeData);
+    return loop(treeData);
 }
 
 interface SourceDataTreeProps {
@@ -108,12 +276,11 @@ interface SourceDataTreeProps {
 
 export default function SourceDataTree(props: SourceDataTreeProps) {
     const { onChanges } = props;
-
-    // 设置默认展开的节点key（目录1、卷、数据库）
-    const [expandedKeys, setExpandedKeys] = useState(['0-0', '0-0-1', '0-0-2']);
+    // 设置默认展开的节点key（根据新的数据结构生成的key）
+    const [expandedKeys, setExpandedKeys] = useState(['0-1', '0-1-volume', '0-1-db']);
 
     // 设置默认选中的节点key（卷下的第一个文件）
-    const [selectedKey, setSelectedKey] = useState('0-0-1-1');
+    const [selectedKey, setSelectedKey] = useState('0-1-volume-10');
 
     // 搜索树相关状态
     const [inputValue, setInputValue] = useState('');
@@ -143,7 +310,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
         if (!inputValue) {
             setTreeData(TreeData);
         } else {
-            const result = searchData(inputValue);
+            const result = searchData(inputValue, TreeData);
             setTreeData(result);
         }
     }, [inputValue]);
@@ -151,9 +318,9 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
     // 组件初始化时设置默认展开和选中状态
     useEffect(() => {
         // 确保默认展开目录1、卷、数据库
-        setExpandedKeys(['0-0', '0-0-1', '0-0-2']);
+        setExpandedKeys(['0-1', '0-1-volume', '0-1-db']);
         // 确保默认选中卷下的第一个文件
-        setSelectedKey('0-0-1-1');
+        setSelectedKey('0-1-volume-10');
 
         // 如果使用真实API，在这里初始化加载树数据
         // loadTreeData();
@@ -301,7 +468,16 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         // await loadTreeData();
 
                         // 方法2：前端模拟创建（当前使用）
-                        const newNode = { title: finalName, key: Date.now().toString(), isLeaf: true };
+                        const newNode: TreeNodeType = {
+                            title: finalName,
+                            key: Date.now().toString(),
+                            isLeaf: true,
+                            rawData: {
+                                id: Date.now().toString(),
+                                name: finalName,
+                                type: 'file'
+                            }
+                        };
                         setTreeData(addNodeToParent(treeData, parentKey, newNode));
                     } catch (error) {
                         Message.error('创建子节点失败');
@@ -327,7 +503,16 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         // await loadTreeData();
 
                         // 方法2：前端模拟创建（当前使用）
-                        const newNode = { title: finalName, key: Date.now().toString(), isLeaf: true };
+                        const newNode: TreeNodeType = {
+                            title: finalName,
+                            key: Date.now().toString(),
+                            isLeaf: true,
+                            rawData: {
+                                id: Date.now().toString(),
+                                name: finalName,
+                                type: 'file'
+                            }
+                        };
                         setTreeData(addNodeToParent(treeData, parentKey, newNode));
                     } catch (error) {
                         Message.error('创建子节点失败');
@@ -464,9 +649,11 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                         );
                     }}
                     renderTitle={(props) => {
+                        console.log(props.dataRef);
+
                         const hasChildren = props.dataRef && props.dataRef.children !== undefined;
                         // 动态图标：有子节点用文件夹图标，否则用文件图标  
-                        const icon = hasChildren ? '' : <IconStorage />;
+                        const icon = hasChildren ? '' : (props.dataRef?.rawData?.type == 'volume' ? <IconStorage /> : <IconArchive />);
                         if (props._key === '__input__') {
                             return (
                                 <Input
@@ -489,10 +676,15 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                             // await loadTreeData();
 
                                             // 方法2：前端模拟创建（当前使用）
-                                            const newNode = {
+                                            const newNode: TreeNodeType = {
                                                 title: finalName,
                                                 key: Date.now().toString(),
-                                                children: []
+                                                children: [],
+                                                rawData: {
+                                                    id: Date.now().toString(),
+                                                    name: finalName,
+                                                    type: 'catalog'
+                                                }
                                             };
                                             console.log('Adding new directory:', newNode);
                                             setTreeData([
@@ -522,10 +714,15 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                             // await loadTreeData();
 
                                             // 方法2：前端模拟创建（当前使用）
-                                            const newNode = {
+                                            const newNode: TreeNodeType = {
                                                 title: finalName,
                                                 key: Date.now().toString(),
-                                                children: []
+                                                children: [],
+                                                rawData: {
+                                                    id: Date.now().toString(),
+                                                    name: finalName,
+                                                    type: 'catalog'
+                                                }
                                             };
                                             console.log('Adding new directory:', newNode);
                                             setTreeData([
@@ -560,14 +757,17 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                             const suffix = title.slice(index + inputValue.length);
                             return (
                                 <div
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}
                                     onMouseEnter={() => setHoveredKey(key || null)} //移入时修改key值
                                     onMouseLeave={() => setHoveredKey(null)} //移除时将key改为空
                                 >
+                                    <span style={{ marginRight: '6px' }}>
+                                        {icon}
+                                    </span>
                                     <span
                                         style={{
                                             flex: 1,
-                                            maxWidth: '100px',
+                                            maxWidth: '80px',
                                             minWidth: '80px',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
@@ -582,9 +782,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                             </span>
                                             {suffix}
                                         </Popover>
-
                                     </span>
-
                                 </div>
                             );
                         }
