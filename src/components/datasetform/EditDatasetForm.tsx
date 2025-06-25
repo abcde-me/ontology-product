@@ -81,14 +81,20 @@ const EditDatasetForm: React.FC<Props> = ({
         form={form}
         style={{ width: '100%' }}
         autoComplete="off"
-        layout="vertical"
+        layout="horizontal"
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
+        colon={true}
       >
         <FormItem
           label="数据集名称"
           field="name"
           rules={[{ required: true, message: '请输入数据集名称' }]}
         >
-          <Input placeholder="请输入数据集名称..." />
+          <Input
+            placeholder="请输入数据集名称..."
+            style={{ marginLeft: '8px' }}
+          />
         </FormItem>
 
         <FormItem
@@ -100,6 +106,7 @@ const EditDatasetForm: React.FC<Props> = ({
             placeholder="请选择生成模型..."
             options={modelOptions}
             disabled={true}
+            style={{ marginLeft: '8px' }}
           />
         </FormItem>
 
@@ -111,6 +118,7 @@ const EditDatasetForm: React.FC<Props> = ({
             allowCreate
             value={selectedTags}
             onChange={setSelectedTags}
+            style={{ marginLeft: '8px' }}
           />
         </FormItem>
 
@@ -120,6 +128,7 @@ const EditDatasetForm: React.FC<Props> = ({
             rows={4}
             maxLength={500}
             showWordLimit
+            style={{ marginLeft: '8px' }}
           />
         </FormItem>
       </Form>
