@@ -255,17 +255,17 @@ export default function WorkflowTaskDetail() {
   // 获取节点name
   const getNodeName = (type: number) => {
     switch (type) {
-      case 1:
+      case NodeType.text:
         return NodeTypeName.text;
-      case 2:
+      case NodeType.img:
         return NodeTypeName.img;
-      case 3:
+      case NodeType.music:
         return NodeTypeName.music;
-      case 4:
+      case NodeType.video:
         return NodeTypeName.video;
-      case 5:
+      case NodeType.dataClean:
         return NodeTypeName.dataClean;
-      case 6:
+      case NodeType.dataAugment:
         return NodeTypeName.dataAugment;
     }
   };
