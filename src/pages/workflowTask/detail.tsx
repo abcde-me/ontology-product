@@ -26,6 +26,41 @@ import './detail.css';
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
 
+// 枚举作业运行状态
+enum TaskRunStatus {
+  success = 1,
+  fail = 2,
+  running = 3,
+  stop = 4
+}
+
+// 枚举节点运行状态
+enum NodeRunStatus {
+  running = 1,
+  success = 2,
+  fail = 3
+}
+
+// 枚举节点类型
+enum NodeType {
+  text = 1,
+  img = 2,
+  music = 3,
+  video = 4,
+  dataClean = 5,
+  dataAugment = 6
+}
+
+// 枚举节点类型中文名称
+enum NodeTypeName {
+  text = '文本解析',
+  img = '图片解析',
+  music = '音频解析',
+  video = '视频解析',
+  dataClean = '数据清洗',
+  dataAugment = '数据增强'
+}
+
 export default function WorkflowTaskDetail() {
   const taskId = useParams('id');
   const history = useHistory();
@@ -107,11 +142,11 @@ export default function WorkflowTaskDetail() {
       <div
         className="running-box"
         style={
-          taskDetailData.run_status === 1
+          taskDetailData.run_status === TaskRunStatus.success
             ? { backgroundColor: '#ECFDF5', border: '1px solid #10B981' }
-            : taskDetailData.run_status === 2
+            : taskDetailData.run_status === TaskRunStatus.fail
               ? { backgroundColor: '#FEF2F2', border: '1px solid #EF4444' }
-              : taskDetailData.run_status === 3
+              : taskDetailData.run_status === TaskRunStatus.running
                 ? { backgroundColor: '#EEF6FF', border: '1px solid #007DFA' }
                 : { backgroundColor: '#CBD5E1', border: '1px solid #CBD5E1' }
         }
@@ -119,14 +154,14 @@ export default function WorkflowTaskDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div className="running-item">
             <span className="item-title">状态</span>
-            {taskDetailData.run_status === 1 ? (
+            {taskDetailData.run_status === TaskRunStatus.success ? (
               <div className="item-content-box">
                 <IconCheckCircleFill
                   style={{ color: '#10B981', margin: '0 5px 0 0' }}
                 />
                 <span className="item-content">运行成功</span>
               </div>
-            ) : taskDetailData.run_status === 2 ? (
+            ) : taskDetailData.run_status === TaskRunStatus.fail ? (
               <div className="item-content-box">
                 <IconCloseCircleFill
                   style={{ color: '#EF4444', margin: '0 5px 0 0' }}
@@ -151,7 +186,7 @@ export default function WorkflowTaskDetail() {
                   <span className="operate-text">重试</span>
                 </Popconfirm>
               </div>
-            ) : taskDetailData.run_status === 3 ? (
+            ) : taskDetailData.run_status === TaskRunStatus.running ? (
               <div className="item-content-box">
                 <IconLoading
                   style={{ color: '#007DFA', margin: '0 5px 0 0' }}
@@ -208,7 +243,7 @@ export default function WorkflowTaskDetail() {
             </div>
           </div>
         </div>
-        {taskDetailData.run_status === 2 ? (
+        {taskDetailData.run_status === TaskRunStatus.fail ? (
           <span className="fail-tip">{taskDetailData.error_msg}</span>
         ) : (
           <></>
@@ -221,17 +256,17 @@ export default function WorkflowTaskDetail() {
   const getNodeName = (type: number) => {
     switch (type) {
       case 1:
-        return '文本解析';
+        return NodeTypeName.text;
       case 2:
-        return '图片解析';
+        return NodeTypeName.img;
       case 3:
-        return '音频解析';
+        return NodeTypeName.music;
       case 4:
-        return '视频解析';
+        return NodeTypeName.video;
       case 5:
-        return '数据清洗';
+        return NodeTypeName.dataClean;
       case 6:
-        return '数据增强';
+        return NodeTypeName.dataAugment;
     }
   };
 
@@ -253,12 +288,12 @@ export default function WorkflowTaskDetail() {
             return (
               <TabPane
                 key={item.task_type}
-                disabled={item.status === 3}
+                disabled={item.status === NodeRunStatus.fail}
                 title={
                   <span>
-                    {item.status === 1 ? (
+                    {item.status === NodeRunStatus.running ? (
                       <IconLoading style={{ marginRight: 6 }} />
-                    ) : item.status === 2 ? (
+                    ) : item.status === NodeRunStatus.success ? (
                       <IconCheckCircle style={{ marginRight: 6 }} />
                     ) : (
                       <IconClockCircle style={{ marginRight: 6 }} />
@@ -268,9 +303,9 @@ export default function WorkflowTaskDetail() {
                 }
               >
                 <Typography.Paragraph style={{ marginTop: 20 }}>
-                  {item.task_type < 4 ? (
+                  {item.task_type < NodeType.video ? (
                     <ParseNode dataSource={parseNodeData} />
-                  ) : item.task_type === 5 ? (
+                  ) : item.task_type === NodeType.dataClean ? (
                     <DataCleaningNode dataSource={cleaningAugmentNodeData} />
                   ) : (
                     <DataAugmentationNode
