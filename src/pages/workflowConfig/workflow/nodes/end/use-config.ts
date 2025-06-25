@@ -1,27 +1,37 @@
-import useVarList from '../_base/hooks/use-var-list'
-import type { EndNodeType } from './types'
-import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud'
-import {
-  useNodesReadOnly,
-} from '@/pages/workflowConfig/workflow/hooks'
+import { useCallback } from 'react';
+import produce from 'immer';
+import useVarList from '../_base/hooks/use-var-list';
+import type { EndNodeType } from './types';
+import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
+import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 const useConfig = (id: string, payload: EndNodeType) => {
-  const { nodesReadOnly: readOnly } = useNodesReadOnly()
-  const { inputs, setInputs } = useNodeCrud<EndNodeType>(id, payload)
+  const { nodesReadOnly: readOnly } = useNodesReadOnly();
+  const { inputs, setInputs } = useNodeCrud<EndNodeType>(id, payload);
 
   const { handleVarListChange, handleAddVariable } = useVarList<EndNodeType>({
     inputs,
     setInputs: (newInputs) => {
-      setInputs(newInputs)
+      setInputs(newInputs);
     },
-    varKey: 'outputs',
-  })
+    varKey: 'outputs'
+  });
 
+  const updateInputs = useCallback(
+    (payload: EndNodeType) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.target_path = payload.target_path;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
   return {
+    updateInputs,
     readOnly,
     inputs,
     handleVarListChange,
-    handleAddVariable,
-  }
-}
+    handleAddVariable
+  };
+};
 
-export default useConfig
+export default useConfig;
