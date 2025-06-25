@@ -106,49 +106,8 @@ const Header: FC = () => {
   const { notify } = useContext(ToastContext);
   const { normal, restoring, viewHistory } = useWorkflowMode();
 
-  // const handleShowFeatures = useCallback(() => {
-  //   const {
-  //     showFeaturesPanel,
-  //     isRestoring,
-  //     setShowFeaturesPanel,
-  //   } = workflowStore.getState()
-  //   if (getNodesReadOnly() && !isRestoring)
-  //     return
-  //   setShowFeaturesPanel(!showFeaturesPanel)
-  // }, [workflowStore, getNodesReadOnly])
-
-  // const handleCancelRestore = useCallback(() => {
-  //   handleLoadBackupDraft()
-  //   workflowStore.setState({ isRestoring: false })
-  //   setShowWorkflowVersionHistoryPanel(false)
-  // }, [workflowStore, handleLoadBackupDraft, setShowWorkflowVersionHistoryPanel])
-
-  // const resetWorkflowVersionHistory = useResetWorkflowVersionHistory(appDetail!.id)
   console.warn('API NOT IMPLEMENTED ', 'resetWorkflowVersionHistory');
   const resetWorkflowVersionHistory = () => {}; // 这里是重新查询version history，暂时无用
-
-  // const handleRestore = useCallback(() => {
-  //   setShowWorkflowVersionHistoryPanel(false)
-  //   workflowStore.setState({ isRestoring: false })
-  //   workflowStore.setState({ backupDraft: undefined })
-  //   handleSyncWorkflowDraft(true, false, {
-  //     onSuccess: () => {
-  //       Toast.notify({
-  //         type: 'success',
-  //         message: t('workflow.versionHistory.action.restoreSuccess'),
-  //       })
-  //     },
-  //     onError: () => {
-  //       Toast.notify({
-  //         type: 'error',
-  //         message: t('workflow.versionHistory.action.restoreFailure'),
-  //       })
-  //     },
-  //     onSettled: () => {
-  //       resetWorkflowVersionHistory()
-  //     },
-  //   })
-  // }, [handleSyncWorkflowDraft, workflowStore, setShowWorkflowVersionHistoryPanel, resetWorkflowVersionHistory, t])
 
   const updateAppDetail = useCallback(async () => {
     try {
@@ -267,10 +226,6 @@ const Header: FC = () => {
         </div>
       </div>
       <div className="right-part">
-        <VersionHistoryButton
-          className="history-btn"
-          onClick={onStartRestoring}
-        />
         <AppPublisher
           {...{
             publishedAt,

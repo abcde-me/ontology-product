@@ -4,10 +4,12 @@
   // background-color: red;
   border-radius: 12px;
   padding: 8px;
+
   .enhancement-content {
     display: flex;
     flex-wrap: wrap;
   }
+
   .enhancement-item {
     background-color: #e2e8f0;
     padding: 0 4px;
@@ -15,38 +17,38 @@
     margin-bottom: 4px;
     border-radius: 5px;
   }
-  .content-tips-text {
-    color: #6e7b8d;
-    font-size: 12px;
-    line-height: 18px;
-    margin-top: 8px;
-  }
+
   .arco-form-inline .arco-form-item {
     width: auto;
     margin: 0;
   }
 
-  .arco-form-label-item > label {
+  .arco-form-label-item>label {
     display: flex !important;
   }
 }
+
 .data-enhancement-panel {
-  .content-tips-text {
-    color: #6e7b8d;
-    font-size: 12px;
-    line-height: 18px;
-    margin-top: 8px;
-  }
   .content-box {
     border: 1px solid #e2e8f0;
     border-radius: 5px;
     padding: 16px;
     margin-top: 24px;
+
     .arco-form-label-item {
       height: 26px;
     }
   }
-  .arco-form-label-item > label {
+
+  .arco-form-label-item>label {
     display: flex;
   }
+
+}
+
+.content-tips-text {
+  color: #6e7b8d;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 8px;
 }
