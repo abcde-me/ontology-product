@@ -39,7 +39,7 @@ export default function WorkflowList() {
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, searchValue, pageSize]);
+  }, [userInfo, current, pageSize]);
 
   const getList = async () => {
     const params = {
@@ -276,6 +276,9 @@ export default function WorkflowList() {
           value={searchValue}
           onChange={(value) => {
             setSearchValue(value);
+          }}
+          onPressEnter={() => {
+            getList();
           }}
         />
         <Button shape="round" type="primary" onClick={handleCreateWorkflow}>
