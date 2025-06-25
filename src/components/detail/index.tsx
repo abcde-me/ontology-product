@@ -367,18 +367,22 @@ const DatasetDetail: React.FC = () => {
     setDatasetDetail(csdatasetDetail);
   }, []);
 
+  // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
     // 查询数据集数据内容
     // if(datasetDetail){
     //     getDatasetContents({id,datasetDetail:datasetDetail.latest_version,searchValue,currentPage,pageSize}).then(res=>{
     //         setContentData(res.data.list)
-    //         setContentColumns(generateArcoColumns( res.data.field_names,handleEditContent,handleContinue))
     //         setTotal(res.data.total)
     //     })
     // }
 
-    //测试数据
+    // 测试数据 - 只在需要重新加载数据时设置
     setContentData(cscontentData);
+  }, [searchValue, currentPage, pageSize, datasetDetail]);
+
+  // 更新表格列配置 - 只在编辑状态变化时执行
+  React.useEffect(() => {
     setContentColumns(
       generateArcoColumns(
         cscontentColumns,
@@ -391,14 +395,7 @@ const DatasetDetail: React.FC = () => {
         handleInlineEditCancel
       )
     );
-  }, [
-    searchValue,
-    currentPage,
-    pageSize,
-    datasetDetail,
-    editingRowKey,
-    editingData
-  ]);
+  }, [editingRowKey, editingData]);
 
   return (
     <div className="dataset-detail">
@@ -517,7 +514,6 @@ const DatasetDetail: React.FC = () => {
         <Tabs activeTab={activeTab} onChange={setActiveTab}>
           <TabPane key="content" title="内容数据">
             {/* 搜索系统 */}
-
             <div className="search-section">
               <Input
                 placeholder="输入ID、关键字搜索"
