@@ -286,7 +286,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                 style={{ width: '100%', height: '24px', marginRight: '17px' }}
                 value={newNodeValue}
                 onChange={v => setNewNodeValue(v)}
-                onPressEnter={async () => {
+                onPressEnter={() => {
                     // 如果输入为空，使用默认名称
                     const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
 
@@ -312,7 +312,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                     setAddingToParentInfo(null);
                     setNewNodeValue('');
                 }}
-                onBlur={async () => {
+                onBlur={() => {
                     // 如果输入为空，使用默认名称
                     const finalName = newNodeValue.trim() || `新建文件${Date.now()}`;
 
@@ -475,7 +475,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                     style={{ width: '100%', height: '24px', marginRight: '17px' }}
                                     value={newNodeValue}
                                     onChange={v => setNewNodeValue(v)}
-                                    onPressEnter={async () => {
+                                    onPressEnter={() => {
                                         // 如果输入为空，使用默认名称
                                         const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
 
@@ -507,7 +507,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                                         setIsAdding(false);
                                         setNewNodeValue('');
                                     }}
-                                    onBlur={async () => {
+                                    onBlur={() => {
                                         // 如果输入为空，使用默认名称
                                         const finalName = newNodeValue.trim() || `新建目录${Date.now()}`;
 

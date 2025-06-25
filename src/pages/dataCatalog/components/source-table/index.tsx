@@ -48,7 +48,7 @@ export default function SourceTable(props) {
             Modal.confirm({
                 title: '确认删除文件吗?',
                 content: '删除后，文件不可恢复',
-                async onOk() {
+                 onOk() {
                     // await deleteinterTuningUpdata(appid, e.id, {});
                     Message.success('删除成功');
                     // creatsuccess();
