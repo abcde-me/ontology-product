@@ -3,11 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useConfig from './use-config'
 import type { EndNodeType } from './types'
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list'
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field'
-import AddButton from '@/pages/workflowConfig/components/button/add-button'
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types'
-import { IconPlus } from '@arco-design/web-react/icon'
 import { Form, AutoComplete } from '@arco-design/web-react'
 import './end.scss';
 
@@ -15,12 +11,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({
   id,
   data,
 }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
   const [form] = Form.useForm();
   const FormItem = Form.Item;
-  const [dataSource, setDataSource] = useState([]);
+  // 测试数据
+  const [dataSource, setDataSource]: Array<any> = useState([]);
 
-  const handleSearch = (inputValue: any) => {
+  const handleSearch = (inputValue: string) => {
     setDataSource(inputValue ? new Array(5).fill(null).map((_, index) => `${inputValue}_${index}`) : []);
   };
   const {

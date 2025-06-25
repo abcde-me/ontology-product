@@ -4,9 +4,9 @@ import emptyList from '@/assets/empty-list.png';
 import './index.css';
 
 export default function noDataElement(props: {
-  description: any;
-  btnText?: any;
-  handleBtn?;
+  description: string;
+  btnText?: string;
+  handleBtn?: ((e: Event) => void) | undefined;
 }) {
   const { description, btnText, handleBtn } = props;
   return (
