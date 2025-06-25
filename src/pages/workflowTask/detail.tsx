@@ -26,11 +26,44 @@ import './detail.css';
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
 
+// 枚举作业运行状态
+enum TaskRunStatus {
+  success = 1,
+  fail = 2,
+  running = 3,
+  stop = 4
+}
+
+// 枚举节点运行状态
+enum NodeRunStatus {
+  running = 1,
+  success = 2,
+  fail = 3
+}
+
+// 枚举节点类型
+enum NodeType {
+  text = 1,
+  img = 2,
+  music = 3,
+  video = 4,
+  dataClean = 5,
+  dataAugment = 6
+}
+
+// 枚举节点类型中文名称
+enum NodeTypeName {
+  text = '文本解析',
+  img = '图片解析',
+  music = '音频解析',
+  video = '视频解析',
+  dataClean = '数据清洗',
+  dataAugment = '数据增强'
+}
+
 export default function WorkflowTaskDetail() {
   const taskId = useParams('id');
   const history = useHistory();
-  // 初始化运行状态
-  const [runningTime, setRunningTime] = useState('fail');
   // 初始化作业详情数据
   const [taskDetailData, setTaskDetailData] = useState({
     job_name: '',
@@ -39,13 +72,33 @@ export default function WorkflowTaskDetail() {
     time_size: '10小时20分30秒',
     start_time: '1749627834576',
     end_time: '2749627999999',
-    fail_content:
+    error_msg:
       '这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容。'
   });
+  // 初始化节点数据
+  const [nodeData, setNodeData] = useState([
+    {
+      task_type: 1, // 1-文本、2-图片、3-视频、4-音频
+      status: 1 //1-运行中、2-完成、3-失败
+    },
+    {
+      task_type: 2,
+      status: 2
+    },
+    {
+      task_type: 6,
+      status: 3
+    },
+    {
+      task_type: 5,
+      status: 2
+    }
+  ]);
   // 初始化解析节点数据
   const [parseNodeData, setParseNodeData] = useState({
     file: [
       {
+        id: '123',
         file_name: '文件1',
         status: true,
         file_type: 'pdf',
@@ -53,6 +106,7 @@ export default function WorkflowTaskDetail() {
         end_time: '1749627834576'
       },
       {
+        id: '234',
         file_name: '文件2',
         status: false,
         file_type: 'txt',
@@ -60,6 +114,7 @@ export default function WorkflowTaskDetail() {
         end_time: '1749627834576'
       },
       {
+        id: '456',
         file_name: '文件3',
         status: false,
         file_type: 'epub',
@@ -71,8 +126,8 @@ export default function WorkflowTaskDetail() {
     success_total: 99,
     fail_total: 1
   });
-  // 初始化数据清洗节点数据
-  const [dataCleaningNodeData, setDataCleaningNodeData] = useState({
+  // 初始化数据清洗节点及数据增强节点数据
+  const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({
     raw_data_num: 1250, // 原始数据量
     cleansed_data_num: 1120, // 清洗后数据量/ 增强后数据量
     remove_duplicates_num: 87, // 删除重复数据量
@@ -81,37 +136,17 @@ export default function WorkflowTaskDetail() {
     log: []
   });
 
-  // 运行失败状态下重试操作
-  const handleRetryWorkflow = (id) => {
-    console.log('重试', id);
-  };
-
-  // 进行中状态下停止操作
-  const handleStopWorkflow = (id) => {
-    console.log('停止', id);
-  };
-
-  return (
-    <div className="workflow-task-detail">
-      <div className="head-breadcrumb-box">
-        <IconArrowLeft
-          style={{ cursor: 'pointer' }}
-          onClick={() => history.goBack()}
-        />
-        <Breadcrumb style={{ fontSize: 12, marginLeft: '10px' }}>
-          <BreadcrumbItem>作业详情</BreadcrumbItem>
-          <BreadcrumbItem>{taskId}</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
-      {/* 详情顶部状态区域 */}
+  // 获取顶部区域dom
+  const getTaskDetailTopDom = () => {
+    return (
       <div
         className="running-box"
         style={
-          runningTime === 'success'
+          taskDetailData.run_status === TaskRunStatus.success
             ? { backgroundColor: '#ECFDF5', border: '1px solid #10B981' }
-            : runningTime === 'fail'
+            : taskDetailData.run_status === TaskRunStatus.fail
               ? { backgroundColor: '#FEF2F2', border: '1px solid #EF4444' }
-              : runningTime === 'running'
+              : taskDetailData.run_status === TaskRunStatus.running
                 ? { backgroundColor: '#EEF6FF', border: '1px solid #007DFA' }
                 : { backgroundColor: '#CBD5E1', border: '1px solid #CBD5E1' }
         }
@@ -119,14 +154,14 @@ export default function WorkflowTaskDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div className="running-item">
             <span className="item-title">状态</span>
-            {runningTime === 'success' ? (
+            {taskDetailData.run_status === TaskRunStatus.success ? (
               <div className="item-content-box">
                 <IconCheckCircleFill
                   style={{ color: '#10B981', margin: '0 5px 0 0' }}
                 />
                 <span className="item-content">运行成功</span>
               </div>
-            ) : runningTime === 'fail' ? (
+            ) : taskDetailData.run_status === TaskRunStatus.fail ? (
               <div className="item-content-box">
                 <IconCloseCircleFill
                   style={{ color: '#EF4444', margin: '0 5px 0 0' }}
@@ -151,7 +186,7 @@ export default function WorkflowTaskDetail() {
                   <span className="operate-text">重试</span>
                 </Popconfirm>
               </div>
-            ) : runningTime === 'running' ? (
+            ) : taskDetailData.run_status === TaskRunStatus.running ? (
               <div className="item-content-box">
                 <IconLoading
                   style={{ color: '#007DFA', margin: '0 5px 0 0' }}
@@ -208,60 +243,114 @@ export default function WorkflowTaskDetail() {
             </div>
           </div>
         </div>
-        {runningTime === 'fail' ? (
-          <span className="fail-tip">{taskDetailData.fail_content}</span>
+        {taskDetailData.run_status === TaskRunStatus.fail ? (
+          <span className="fail-tip">{taskDetailData.error_msg}</span>
         ) : (
           <></>
         )}
       </div>
+    );
+  };
+
+  // 获取节点name
+  const getNodeName = (type: number) => {
+    switch (type) {
+      case NodeType.text:
+        return NodeTypeName.text;
+      case NodeType.img:
+        return NodeTypeName.img;
+      case NodeType.music:
+        return NodeTypeName.music;
+      case NodeType.video:
+        return NodeTypeName.video;
+      case NodeType.dataClean:
+        return NodeTypeName.dataClean;
+      case NodeType.dataAugment:
+        return NodeTypeName.dataAugment;
+    }
+  };
+
+  // 切换节点tab
+  const handleChangeTab = (val: string) => {
+    console.log(val, 'task_type');
+  };
+
+  // 获取作业内容区域dom
+  const getTaskContentDom = () => {
+    return (
+      <div className="work-region">
+        <Tabs
+          key="card"
+          tabPosition={'left'}
+          onChange={(task_type) => handleChangeTab(task_type)}
+        >
+          {nodeData.map((item) => {
+            return (
+              <TabPane
+                key={item.task_type}
+                disabled={item.status === NodeRunStatus.fail}
+                title={
+                  <span>
+                    {item.status === NodeRunStatus.running ? (
+                      <IconLoading style={{ marginRight: 6 }} />
+                    ) : item.status === NodeRunStatus.success ? (
+                      <IconCheckCircle style={{ marginRight: 6 }} />
+                    ) : (
+                      <IconClockCircle style={{ marginRight: 6 }} />
+                    )}
+                    {getNodeName(item.task_type)}
+                  </span>
+                }
+              >
+                <Typography.Paragraph style={{ marginTop: 20 }}>
+                  {item.task_type < NodeType.video ? (
+                    <ParseNode dataSource={parseNodeData} />
+                  ) : item.task_type === NodeType.dataClean ? (
+                    <DataCleaningNode dataSource={cleaningAugmentNodeData} />
+                  ) : (
+                    <DataAugmentationNode
+                      dataSource={cleaningAugmentNodeData}
+                    />
+                  )}
+                </Typography.Paragraph>
+              </TabPane>
+            );
+          })}
+        </Tabs>
+      </div>
+    );
+  };
+
+  // 运行失败状态下重试操作
+  const handleRetryWorkflow = (id: string | null) => {
+    console.log('重试', id);
+  };
+
+  // 进行中状态下停止操作
+  const handleStopWorkflow = (id: string | null) => {
+    console.log('停止', id);
+  };
+
+  return (
+    <div className="workflow-task-detail">
+      <div className="head-breadcrumb-box">
+        <IconArrowLeft
+          style={{ cursor: 'pointer' }}
+          onClick={() => history.goBack()}
+        />
+        <Breadcrumb style={{ fontSize: 12, marginLeft: '10px' }}>
+          <BreadcrumbItem>作业详情</BreadcrumbItem>
+          <BreadcrumbItem>{taskId}</BreadcrumbItem>
+        </Breadcrumb>
+      </div>
+      {/* 详情顶部状态区域 */}
+      {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
         <span>工作流拓扑图</span>
       </div>
       {/* 作业内容区域 */}
-      <div className="work-region">
-        <Tabs key="card" tabPosition={'left'}>
-          <TabPane
-            key="1"
-            title={
-              <span>
-                <IconCheckCircle style={{ marginRight: 6 }} />
-                文本解析
-              </span>
-            }
-          >
-            <Typography.Paragraph style={{ marginTop: 20 }}>
-              <ParseNode dataSource={parseNodeData} />
-            </Typography.Paragraph>
-          </TabPane>
-          <TabPane
-            key="2"
-            title={
-              <span>
-                <IconCheckCircle style={{ marginRight: 6 }} />
-                数据清洗
-              </span>
-            }
-          >
-            <Typography.Paragraph style={{ marginTop: 20 }}>
-              <DataCleaningNode dataSource={dataCleaningNodeData} />
-            </Typography.Paragraph>
-          </TabPane>
-          <TabPane
-            key="3"
-            title={
-              <span>
-                <IconCheckCircle style={{ marginRight: 6 }} />
-                数据增强
-              </span>
-            }
-          >
-            <Typography.Paragraph style={{ marginTop: 20 }}>
-              <DataAugmentationNode dataSource={dataCleaningNodeData} />
-            </Typography.Paragraph>
-          </TabPane>
-        </Tabs>
-      </div>
+      {getTaskContentDom()}
     </div>
   );
 }
