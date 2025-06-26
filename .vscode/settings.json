@@ -31,6 +31,5 @@
   "typescript.preferences.importModuleSpecifier": "shortest",
   "[svg]": {
     "editor.defaultFormatter": "jock.svg"
-  },
-  "typescript.tsserver.experimental.enableProjectDiagnostics": true 
+  }
 }
