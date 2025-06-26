@@ -1,5 +1,6 @@
 // components/CustomDbIcon.js
 import React, { useEffect, useState } from 'react';
+import useStore from '@/pages/dataCatalog/store';
 //数据库图标（从里图标库拿，转换成组件的形式）
 const CustomDbIcon: any = () => (
   <svg
@@ -39,6 +40,7 @@ import {
   targetDataDatabase
 } from './source-columns';
 import FormComponent from './components/dataset-form';
+import { use } from 'echarts';
 const { Text } = Typography; //使用Text来控制文字的效果
 
 const rawCatalogData = {
@@ -269,6 +271,15 @@ function DataPage(props) {
     endTime,
     selectedNode: selectedNode ? 'has value' : 'null'
   });
+ 
+  //使用zustand获取路径!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const selectedPath = useStore((state: any) => state.selectedPath);  //获取到路径，然后传递给后端
+  useEffect(()=>{
+    console.log('能进来');
+    console.log('selectedPath',selectedPath);
+    //获取到路径后直接传递给后端，然后前端根据路径获取数据
+  },[selectedPath])
+
 
   const [treeData, setTreeData] = React.useState([]);
   // const [searchValue, setSearchValue] = React.useState('')
@@ -372,7 +383,7 @@ function DataPage(props) {
     setPageSize(size);
     // 这里可以添加获取数据的逻辑
   };
-
+  
   useEffect(() => {
     // getCatalogList().then(res => {
     //   setTreeData(convertToArcoTreeData(res.data, handleTreeSelect))
@@ -467,21 +478,11 @@ function DataPage(props) {
         </div>
       </div>
 
-      <Modal
-        title="导出设置"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        footer={null}
-        style={{ width: 640 }}
-      >
-        <FormComponent
-          downloadData={downloadData}
-          onCancel={() => setVisible(false)}
-        />
-      </Modal>
+      <FormComponent
+        downloadData={downloadData} // 传递需要导出的数据
+        onCancel={() => setVisible(false)} // 传递关闭弹框的回调函数
+        visible={visible} // 传递弹框显示状态，控制Modal是否显示
+      />
     </>
   );
 }

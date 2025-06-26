@@ -1,6 +1,7 @@
 // components/CustomDbIcon.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 //数据库图标（从里图标库拿，转换成组件的形式）
+import useStore from '@/pages/dataCatalog/store';
 const CustomDbIcon: any = () => (
   <svg
     className="icon"
@@ -304,6 +305,7 @@ function DataPage(props) {
 
   // 行悬浮状态
   const [hoveredRowId, setHoveredRowId] = React.useState<any>(null)
+  const childRef: any = useRef(null)
 
   // 动态计算列配置
   const columns = React.useMemo(() => {
@@ -380,6 +382,12 @@ function DataPage(props) {
     // 这里可以添加获取数据的逻辑
   }
 
+  const selectedPath = useStore((state: any) => state.selectedPath);  //获取到路径，然后传递给后端
+  useEffect(() => {
+    console.log('能进来');
+    console.log('selectedPath', selectedPath);
+    //获取到路径后直接传递给后端，然后前端根据路径获取数据
+  }, [selectedPath])
   useEffect(() => {
     // getCatalogList().then(res => {
     //   setTreeData(convertToArcoTreeData(res.data, handleTreeSelect))
@@ -455,7 +463,7 @@ function DataPage(props) {
 
       </div>
 
-      <Modal
+      {/* <Modal
         title='导出设置'
         visible={visible}
         onOk={() => setVisible(false)}
@@ -466,7 +474,13 @@ function DataPage(props) {
         style={{ width: 640 }}
       >
         <FormComponent downloadData={downloadData} onCancel={() => setVisible(false)} />
-      </Modal>
+      </Modal> */}
+      {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
+      <FormComponent
+        downloadData={downloadData} // 传递需要导出的数据
+        onCancel={() => setVisible(false)} // 传递关闭弹框的回调函数
+        visible={visible} // 传递弹框显示状态，控制Modal是否显示
+      />
     </>
   );
 }

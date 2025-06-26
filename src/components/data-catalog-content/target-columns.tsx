@@ -9,6 +9,7 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg'; // 直接导入为组件
 import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
 import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
+
 // 工作流ID显示组件，用于管理悬浮状态
 
 const DOCIcon = ({ size = 16 }) => (
