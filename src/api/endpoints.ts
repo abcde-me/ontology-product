@@ -217,9 +217,10 @@ export const ModaForgeResourceEndpoints = {
   // 工作流详情
   workflowDetail: PrefixV2 + '/apps/{appId}',
   // 工作流列表
-  workflowList: PrefixAimdp + '/workflow/workflow_list',
+  workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
-  workflowOperation: PrefixAimdp + '/workflow/workflow_operation',
+  workflowOperation:
+    PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
 
   //数据目录
   //获取数据目录

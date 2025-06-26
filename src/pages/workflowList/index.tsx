@@ -17,7 +17,7 @@ import {
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
 import { getWorkflowList, workflowOperation } from '@/api/workflowList';
-import { getLocalStorage } from '@/utils/storage';
+import IsoTimeFormatting from '@/utils/isoTimeFormatting';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
@@ -44,7 +44,6 @@ export default function WorkflowList() {
   const getList = async () => {
     const params = {
       uid: userInfo?.id,
-      token: getLocalStorage('loginToken'),
       search_content: searchValue,
       page: current, //第几页
       page_size: pageSize //每页个数
@@ -88,16 +87,8 @@ export default function WorkflowList() {
 
   // 删除工作流
   const handleDeleteWorkflow = async (id: number | string, version: string) => {
-    const params = {
-      uid: userInfo?.id,
-      token: getLocalStorage('loginToken'),
-      ds_workflow_id: 0,
-      workflow_uuid: id,
-      workflow_version: version,
-      op: 'DELETE'
-    };
-    const res = await workflowOperation(params);
-    if (res.status === 200 && res.data.is_success) {
+    const res = await workflowOperation(id, version);
+    if (res.status === 200 && res.code === '') {
       Message.success({
         content: '删除成功'
       });
@@ -132,7 +123,7 @@ export default function WorkflowList() {
       dataIndex: 'run_cycle',
       width: 100,
       render: (_, record) =>
-        record.run_cycle ? <span>单次运行</span> : <span>周期运行</span>,
+        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>,
       filters: [
         {
           text: '单次运行',
@@ -211,8 +202,14 @@ export default function WorkflowList() {
       title: '创建时间',
       dataIndex: 'create_time',
       width: 180,
-      render: (_, record) => <span>{record.create_time}</span>,
-      sorter: (a, b) => a.create_time.length - b.create_time.length
+      render: (_, record) => (
+        <span>{IsoTimeFormatting(record.create_time)}</span>
+      ),
+      sorter: (a, b) => {
+        return (
+          new Date(a.create_time).getTime() - new Date(b.create_time).getTime()
+        );
+      }
     },
     {
       title: '操作',
