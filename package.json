@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist build",
     "start": "yarn clean && node --max-old-space-size=4096 ./scripts/start",
-    "dev": "concurrently \"cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start\" \"yarn type-check\"",
+    "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
     "build": "yarn clean && cross-env NODE_ENV=production GENERATE_SOURCEMAP=false node ./scripts/build",
     "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --cache",
     "eslint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache --fix",
@@ -22,8 +22,7 @@
     "test-cypress-modaforge-front-headless": "cd integration-tests-cypress && cypress run --env ccos=true --browser ${BRIDGE_E2E_BROWSER_NAME:=chrome} --headless",
     "cypress-merge": "mochawesome-merge ./gui_test_screenshots/cypress_report*.json > ./gui_test_screenshots/cypress.json",
     "cypress-generate": "marge -o ./gui_test_screenshots/ -f cypress-report -t 'Ccos Console Cypress Test Results' -p 'Ccos Cypress Test Results' --showPassed false --assetsDir ./gui_test_screenshots/cypress/assets ./gui_test_screenshots/cypress.json",
-    "cypress-postreport": "yarn cypress-merge && yarn cypress-generate",
-    "type-check": "tsc --noEmit --watch --preserveWatchOutput"
+    "cypress-postreport": "yarn cypress-merge && yarn cypress-generate"
   },
   "dependencies": {
     "@antv/data-set": "^0.11.8",
