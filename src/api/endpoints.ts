@@ -222,6 +222,9 @@ export const ModaForgeResourceEndpoints = {
   workflowOperation:
     PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
 
+  // 作业列表
+  taskList: PrefixAimdp + '/workflow_instance/list',
+
   //数据目录
   //获取数据目录
   catalogListApi: PrefixAimdp + '/directory',
