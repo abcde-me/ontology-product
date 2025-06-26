@@ -8,7 +8,8 @@ import {
 const nodeDefault: NodeDefault<StartNodeType> = {
   defaultValue: {
     variables: [],
-    source_path: 'string',
+    source_path: '',
+    source_path_name: '',
     data_category: [
       {
         id: 1,
@@ -26,7 +27,7 @@ const nodeDefault: NodeDefault<StartNodeType> = {
         id: 3,
         category: '音频',
         enabled: true,
-        format: ['WAV', 'MP#', 'AAC', 'FLAC']
+        format: ['WAV', 'MP3', 'AAC', 'FLAC']
       },
       {
         id: 4,

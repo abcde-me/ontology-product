@@ -5,7 +5,7 @@ import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
 import '@ccf2e/arco-material';
 import './index.css';
-
+// import './style/theme.less'
 import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -50,7 +50,7 @@ initI18n();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
-console.log('李帆测试，111',flattenRoutes)
+console.log('李帆测试，111', flattenRoutes);
 const hiddenTopBarRoutes = [
   '/login',
   '/tenant/compute/modaforge/login',

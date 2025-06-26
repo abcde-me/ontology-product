@@ -37,12 +37,41 @@ const AccessDetail = () => {
             Router;
           }}
         />
-        <Breadcrumb style={{ marginLeft: '15px', fontSize: '17px' }}>
-          <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
-            数据载入
-          </BreadcrumbItem>
-          <BreadcrumbItem>新建成功的载入名称</BreadcrumbItem>
-        </Breadcrumb>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <Breadcrumb style={{ marginLeft: '15px', fontSize: '17px' }}>
+            <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
+              数据载入
+            </BreadcrumbItem>
+            <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad/detail">
+              新建成功的载入名称
+            </BreadcrumbItem>
+            <BreadcrumbItem>载入名称记录</BreadcrumbItem>
+          </Breadcrumb>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginLeft: '15px'
+            }}
+          >
+            <div
+              style={{
+                width: '7px',
+                height: '7px',
+                background: 'red',
+                borderRadius: '50%'
+              }}
+            ></div>
+            <div style={{ marginLeft: '5px', fontSize: '14px' }}>失败</div>
+          </div>
+        </div>
       </div>
       <div
         style={{

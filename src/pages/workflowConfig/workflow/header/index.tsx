@@ -1,13 +1,5 @@
 import { FC, useState } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  RiApps2AddLine,
-  RiArrowLeftLine,
-  RiComputerLine,
-  RiFileTextLine,
-  RiHistoryLine,
-  RiSettings3Line
-} from '@remixicon/react';
 import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -24,23 +16,11 @@ import {
   useWorkflowMode,
   useWorkflowRun
 } from '../hooks';
-import AppPublisher from '@/pages/workflowConfig/app/app-publisher';
+import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
-// import Divider from '@/componnets/workflow/divider'
-// import RunAndHistory from './run-and-history'
 import EditingTitle from './editing-title';
-// import RunningTitle from './running-title'
-// import RestoringTitle from './restoring-title'
-// import ViewHistory from './view-history'
-// import ChatVariableButton from './chat-variable-button'
-// import EnvButton from './env-button'
-import VersionHistoryButton from './version-history-button';
 import { CreateAppModal } from './create-app-modal';
-// import Button from '@/pages/workflowConfig/components/button'
 import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
-// import { ArrowNarrowLeft } from '@/app/components/base/icons/src/vender/line/arrows'
-// import { useFeatures } from '@/app/components/base/features/hooks'
-// import { usePublishWorkflow, useResetWorkflowVersionHistory } from '@/service/use-workflow'
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
@@ -49,6 +29,7 @@ import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import EditIcon from '@/pages/workflowConfig/styles/images/op-icons/edit.svg';
 import WorkflowIcon from '@/pages/workflowConfig/styles/images/op-icons/workflow.svg';
 import { PrefixV2 } from '@/api/endpoints';
+import { WORKFLOW_OPERATION } from './types';
 
 const Header: FC = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -81,7 +62,6 @@ const Header: FC = () => {
   const startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
   const selectedNode = nodes.find((node) => node.data.selected);
   const startVariables = startNode?.data.variables;
-  // const fileSettings = useFeatures(s => s.features.file)
   const fileSettings = {} as any;
   const variables = useMemo(() => {
     const data = startVariables || [];
@@ -120,7 +100,7 @@ const Header: FC = () => {
   }, [appID, setAppDetail]);
 
   const onPublish = useCallback(
-    async (params?: PublishWorkflowParams) => {
+    async (op: WORKFLOW_OPERATION, params?: PublishWorkflowParams) => {
       if (handleCheckBeforePublish()) {
         // TODO: ts错误
         // @ts-expect-error
@@ -178,11 +158,6 @@ const Header: FC = () => {
     [handleSyncWorkflowDraft]
   );
 
-  // const handleGoBackToEdit = useCallback(() => {
-  //   handleLoadBackupDraft()
-  //   workflowStore.setState({ historyWorkflowData: undefined })
-  // }, [workflowStore, handleLoadBackupDraft])
-
   const handleToolConfigureUpdate = useCallback(() => {
     workflowStore.setState({ toolPublished: true });
   }, [workflowStore]);
@@ -226,7 +201,7 @@ const Header: FC = () => {
         </div>
       </div>
       <div className="right-part">
-        <AppPublisher
+        <TaskOperation
           {...{
             publishedAt,
             draftUpdatedAt,
