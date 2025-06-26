@@ -29,16 +29,28 @@ const quickOptionsData = [
   '每月一日凌晨0点',
   '每周一上午9点'
 ];
+export enum timeType {
+  SEPCIFICTIME = 'Specific',
+  RELATICELYTIME = 'relatively'
+}
+export const TIMEARR = {
+  [timeType.SEPCIFICTIME]: {
+    text: '具体日期'
+  },
+  [timeType.RELATICELYTIME]: {
+    text: '相对时间'
+  }
+};
 
 const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
   // 频率选择器选择的数据
   const [frequencyData, setFrequencyData] = useState('');
 
   // 提示信息的状态
-  const [promptState, setPromptState] = useState(-1);
+  const [promptState, setPromptState] = useState(false);
   // 周期设置为月时 后面选择框改变的方法
   const monthlyHan = (val) => {
-    const monthIndex = val.findIndex((item) => item == '31');
+    const monthIndex = val.some((item) => item == '每月最后一天');
     setPromptState(monthIndex);
   };
   // 点击快捷选项的回调
@@ -54,14 +66,13 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
       form.setFieldsValue({ cycle: '每月', day: ['1号'], time: '00:00' });
     } else if (value == '每周一上午9点') {
       setFrequencyData('每周');
-      form.setFieldsValue({ cycle: '每周', weekly: ['周一'], time: '09:00' });
+      form.setFieldsValue({ cycle: '每周', week: ['周一'], time: '09:00' });
     }
   };
 
   const [time, setTime] = useState(['具体日期', '相对时间']);
   const [rtime, setRTime] = useState(['每月最后一天']);
   const [timeFlag, setTimeFlag] = useState('具体日期');
-
   return (
     <div className={Styles.cycleLoadingBox}>
       <div style={{ display: 'flex' }}>
@@ -129,6 +140,9 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                   mode="multiple"
                   style={{ width: 300 }}
                   placeholder="请选择日期"
+                  onChange={(val) => {
+                    monthlyHan(val);
+                  }}
                   dropdownRender={(menu) => (
                     <div>
                       <Divider style={{ margin: 0 }} />
@@ -149,13 +163,12 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                               style={{
                                 width: '50%',
                                 height: '100%',
-                                // TODO: ts错误
-                                // @ts-expect-error
-                                background: item == timeFlag ? 'white' : null,
-                                // TODO: ts错误
-                                // @ts-expect-error
+                                background:
+                                  item == timeFlag ? 'white' : undefined,
                                 color:
-                                  item == timeFlag ? 'rgb(0, 125, 250)' : null,
+                                  item == timeFlag
+                                    ? 'rgb(0, 125, 250)'
+                                    : undefined,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -177,35 +190,25 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                   )}
                   dropdownMenuStyle={{ maxHeight: 200 }}
                 >
-                  {timeFlag == '具体日期' &&
+                  {timeFlag == TIMEARR[timeType.SEPCIFICTIME].text &&
                     Monthly_Options.map((option) => (
                       <Option key={option} value={option}>
                         {option}
                       </Option>
                     ))}
-                  {timeFlag == '相对时间' &&
+                  {timeFlag == TIMEARR[timeType.RELATICELYTIME].text &&
                     rtime.map((option) => (
                       <Option key={option} value={option}>
                         {option}
                       </Option>
                     ))}
                 </Select>
-                {/* <Select
-                                    mode='multiple'
-                                    options={Monthly_Options}
-                                    placeholder='请选择日期'
-                                    style={{
-                                        width: 300,
-                                    }}
-
-                                    onChange={(val) => { monthlyHan(val.map(item => item.slice(0, -1))) }}
-                                /> */}
               </Form.Item>
             )}
           </div>
         </Form.Item>
       </div>
-      {promptState == -1 ? null : (
+      {!promptState ? null : (
         <Alert
           style={{
             margin: '0px 0px 10px 30px',

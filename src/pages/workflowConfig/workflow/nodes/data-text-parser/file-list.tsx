@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import { Table, Input } from '@arco-design/web-react';
-import { useNodes } from 'reactflow';
+import { useNodes, type Node } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
+import { StartNodeType } from '../start/types';
 
 type FileListProps = {
   catetoryId: number;
@@ -23,7 +24,7 @@ function FileList({
   const nodes = useNodes();
   const startNode = nodes.find(
     (node: any) => node.data.type === BlockEnum.Start
-  );
+  ) as unknown as Node<StartNodeType>;
   const [filesData, setFilesData] = useState<Record<string, any>[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<any>(null);
@@ -98,24 +99,43 @@ function FileList({
   ];
 
   const loadFiles = (params: any) => {
+    const fileConfig = startNode?.data.data_category.find(
+      (c) => c.id === catetoryId
+    );
+
     try {
       setLoading(true);
-      const item = {
-        data: {
-          data: [...new Array(5)].map((_, index) => {
-            return {
-              id: String(1000 * params.page + index),
-              name:
-                String(1000 * params.page + index) +
-                'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
-              type: index % 2 === 0 ? 'docx' : 'pdf',
-              size: '3.8M',
-              created_at: '2025-05-05 05:05:05' + index
-            };
-          }),
-          total: 100
-        }
-      };
+      let item;
+      if (fileConfig?.enabled && fileConfig.format.length) {
+        const formats = fileConfig.format
+          .join('/')
+          .split('/')
+          .map((f) => f.toLowerCase());
+        const sourcePath = startNode?.data.source_path;
+        item = {
+          data: {
+            data: [...new Array(5)].map((_, index) => {
+              return {
+                id: String(1000 * params.page + index),
+                name:
+                  String(1000 * params.page + index) +
+                  'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
+                type: index % 2 === 0 ? 'docx' : 'pdf',
+                size: '3.8M',
+                created_at: '2025-05-05 05:05:05' + index
+              };
+            }),
+            total: 100
+          }
+        };
+      } else {
+        item = {
+          data: {
+            data: [],
+            total: 0
+          }
+        };
+      }
       // console.log('列表数据:', item);
       const { data = [], total = 0 } = item.data;
       setFilesData(data || []);

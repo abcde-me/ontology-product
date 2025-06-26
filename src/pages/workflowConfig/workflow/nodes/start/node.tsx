@@ -10,15 +10,14 @@ const i18nPrefix = 'workflow.nodes.start';
 
 const Node: FC<NodeProps<StartNodeType>> = ({ data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const { source_path, data_category } = data;
+  const { source_path_name, data_category } = data;
 
   const hasFileTypes =
-    data_category?.[0]?.enabled ||
-    data_category?.[1]?.enabled ||
-    data_category?.[2]?.enabled ||
-    data_category?.[3]?.enabled;
+    (data_category?.[0]?.enabled && data_category?.[0]?.format.length > 0) ||
+    (data_category?.[1]?.enabled && data_category?.[1]?.format.length > 0) ||
+    (data_category?.[2]?.enabled && data_category?.[2]?.format.length > 0) ||
+    (data_category?.[3]?.enabled && data_category?.[3]?.format.length > 0);
 
-  console.log('variables', data_category);
   return (
     <div className={`wk-node-content`}>
       <div className={`input-section`}>
@@ -26,12 +25,12 @@ const Node: FC<NodeProps<StartNodeType>> = ({ data }) => {
           <span className="txt">数据源目录</span>
         </div>
         <div className="input-list">
-          {!!source_path && (
+          {!!source_path_name && (
             <div className="input-var-item">
-              <span className="key-txt">{source_path}</span>
+              <span className="key-txt">{source_path_name}</span>
             </div>
           )}
-          {!source_path && (
+          {!source_path_name && (
             <div className="input-var-item">
               <span className="extra-info">未配置</span>
             </div>

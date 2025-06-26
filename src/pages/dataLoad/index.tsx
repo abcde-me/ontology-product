@@ -1,6 +1,7 @@
 import React from 'react';
-import { routes } from '../admin/route';
 import { Redirect, Route, Switch } from 'react-router';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const routes = require('../admin/route').routes || [];
 export default function DataLoad() {
   return (
     <div>
@@ -10,6 +11,7 @@ export default function DataLoad() {
           from="/tenant/compute/modaforge/dataLoad"
           to="/tenant/compute/modaforge/dataLoad/list"
         />
+
         {routes[2].children.map((route) => {
           return (
             <Route

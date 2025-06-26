@@ -274,6 +274,8 @@ function DatasetForm({ onSubmit, onCancel }) {
     setTargetDataSourceOptions(cstargetDataSourceOptions); //测试数据
 
     //连接器
+    // TODO: ts错误
+    // @ts-expect-error
     getConnectorList({ scope: 2 }).then((res) => {
       setConnectorList(convertToSelectOptions(res.data.items));
     });

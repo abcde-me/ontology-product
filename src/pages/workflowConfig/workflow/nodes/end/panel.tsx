@@ -41,7 +41,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({
           target_path: inputs?.target_path,
         }}
       >
-        <FormItem label="目标数据目录" field="target_path" rules={[{ required: true, message: '目标数据目录不可为空' }]}>
+        <FormItem label="目标数据目录" field="target_path" rules={[{ required: true, message: '目标数据目录不可为空' }]} style={{ margin: 0 }}>
           <AutoComplete
             placeholder='请输入或选择目标数据目录'
             onSearch={handleSearch}
@@ -49,6 +49,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({
             style={{ width: '100%' }}
           />
         </FormItem>
+        <div className='content-tips-text'>选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。</div>
       </Form>
     </div>
   )

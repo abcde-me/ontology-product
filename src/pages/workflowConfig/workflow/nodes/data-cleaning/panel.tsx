@@ -151,8 +151,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   labelAlign="left"
                 >
                   <Select
+                    size='mini'
                     placeholder="请选择"
-                    style={{ width: 120, height: 18, marginLeft: '8px' }}
+                    style={{ width: '120px', height: '22px', marginLeft: '8px' }}
                     disabled={upperLowerStatus}
                   >
                     <Option key={1} value={1}>
@@ -193,7 +194,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </FormItem>
             <span className="date-switch-text">数据过滤</span>
           </div>
-          <div className="data-dec-text">
+          <div className="data-dec">
             根据规则过滤数据，去除无效、错误或低质量数据
           </div>
           {filterChecked && (
@@ -202,8 +203,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 field="threshold"
                 layout="inline"
                 label="字符串长度阈值"
+
               >
-                <Input placeholder="请输入发阈值" min={0} maxLength={1024} />
+                <Input size='mini' style={{ marginLeft: '16px' }} placeholder="请输入发阈值" min={0} />
               </FormItem>
               <div className="date-cleaning-info">
                 <div className="info-before">

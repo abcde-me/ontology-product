@@ -6,6 +6,7 @@ import {
   Pagination,
   Table
 } from '@arco-design/web-react';
+import { RunState, RunStateType } from '../list/list';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
@@ -40,10 +41,14 @@ const TableDetail = (props) => {
             }}
           ></div>
           <div style={{ marginLeft: '7px' }}>
-            {item.status == 'succeed' && '运行成功'}
-            {item.status == 'failed' && '运行失败'}
-            {item.status == 'running' && '运行中'}
-            {item.status == 'stopped' && '运行停止'}
+            {item.status == RunStateType[RunState.SUCCEED].value &&
+              RunStateType[RunState.SUCCEED].text}
+            {item.status == RunStateType[RunState.FAILED].value &&
+              RunStateType[RunState.FAILED].text}
+            {item.status == RunStateType[RunState.RUNNING].value &&
+              RunStateType[RunState.RUNNING].text}
+            {item.status == RunStateType[RunState.STOPPED].value &&
+              RunStateType[RunState.STOPPED].text}
           </div>
           {item.status == 'running' && (
             <span
@@ -64,15 +69,15 @@ const TableDetail = (props) => {
       filters: [
         {
           text: '成功',
-          value: 'succeed'
+          value: RunState.SUCCEED
         },
         {
           text: '失败',
-          value: 'failed'
+          value: RunState.FAILED
         },
         {
           text: '运行中',
-          value: 'running'
+          value: RunState.RUNNING
         }
       ],
       onFilter: (value, row) => row.status == value
@@ -92,17 +97,19 @@ const TableDetail = (props) => {
     },
     {
       title: '开始时间',
-      dataIndex: 'start_time'
+      dataIndex: 'start_time',
+      sorter: (a, b) => a.start_time - b.start_time
     },
     {
       title: '结束时间',
-      dataIndex: 'end_time'
+      dataIndex: 'end_time',
+      sorter: (a, b) => a.end_time - b.end_time
     },
     {
       title: '操作',
       render: (_, tiem) => (
         <span style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}>
-          <Link to="/tenant/compute/modaforge/access/detail">详情</Link>
+          <Link to="/tenant/compute/modaforge/dataLoad/access">详情</Link>
         </span>
       )
     }

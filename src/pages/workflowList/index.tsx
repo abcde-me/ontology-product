@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Input,
@@ -10,14 +10,13 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import TimeFormatting from '@/utils/timeFormatting';
 import './index.css';
 import {
   IconCheckCircleFill,
   IconClockCircle
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
-import { getWorkflowList } from '@/api/workflowList';
+import { getWorkflowList, workflowOperation } from '@/api/workflowList';
 import { getLocalStorage } from '@/utils/storage';
 import { useUserInfo } from '@/store/userInfoStore';
 
@@ -29,69 +28,18 @@ export default function WorkflowList() {
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([
-    {
-      id: '1',
-      name: 'Jane Doe',
-      operation: '单次运行',
-      status: false,
-      source: 'jane.doe@example.com',
-      target: 'jane.doe@example.com',
-      creater: 'Jane Doe',
-      created_time: '1749627834576'
-    },
-    {
-      id: '2',
-      name: 'Alisa Ross',
-      operation: '单次运行',
-      status: true,
-      source: 'alisa.ross@example.com',
-      target: 'jane.doe@example.com',
-      creater: 'Alisa Ross',
-      created_time: '1749627876834'
-    },
-    {
-      id: '3',
-      name: 'Kevin Sandra',
-      operation: '单次运行',
-      status: false,
-      source: 'kevin.sandra@example.com',
-      target: 'jane.doe@example.com',
-      creater: 'Kevin Sandra',
-      created_time: '1749627812365'
-    },
-    {
-      id: '4',
-      name: '张三',
-      operation: '单次运行',
-      status: false,
-      source: 'kevin.sandra@example.com',
-      target: 'jane.doe@example.com',
-      creater: '张三',
-      created_time: '174962787645'
-    },
-    {
-      id: '5',
-      name: '李四',
-      operation: '单次运行',
-      status: false,
-      source: 'kevin.sandra@example.com',
-      target: 'jane.doe@example.com',
-      creater: '李四',
-      created_time: '1749627860783'
-    }
-  ]);
+  const [workflowData, setWorkflowData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
-  const [total, setTotal] = useState(100);
+  const [total, setTotal] = useState(10);
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo]);
+  }, [userInfo, current, pageSize]);
 
   const getList = async () => {
     const params = {
@@ -102,17 +50,35 @@ export default function WorkflowList() {
       page_size: pageSize //每页个数
     };
     const res = await getWorkflowList(params);
-    console.log(res, 'res');
+    if (res.status === 200 && res.data) {
+      setWorkflowData(res.data.list);
+      setCurrent(res.data.page_info?.page);
+      setPageSize(res.data.page_info?.page_size);
+      setTotal(res.data.page_info?.total);
+    }
   };
 
   // 创建工作流
   const handleCreateWorkflow = () => {
-    history.push(`/tenant/compute/modaforge/workflowConfig`);
+    window.open(
+      '/tenant/compute/modaforge/workflowConfig',
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+  // 跳转目录
+  const handleToDirectoryPath = (path: string) => {
+    history.push(path);
   };
 
   // 查看详情
   const viewDetailWorkflow = (id: number | string) => {
-    console.log(id);
+    window.open(
+      '/tenant/compute/modaforge/workflowConfig?id=' + id,
+      '_blank',
+      'noopener,noreferrer'
+    );
   };
 
   // 复制工作流
@@ -121,44 +87,70 @@ export default function WorkflowList() {
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = (id: number | string) => {
-    const newWorkflowData = workflowData.filter((item) => {
-      return item.id !== id;
-    });
-    setWorkflowData(newWorkflowData);
+  const handleDeleteWorkflow = async (id: number | string, version: string) => {
+    const params = {
+      uid: userInfo?.id,
+      token: getLocalStorage('loginToken'),
+      ds_workflow_id: 0,
+      workflow_uuid: id,
+      workflow_version: version,
+      op: 'DELETE'
+    };
+    const res = await workflowOperation(params);
+    if (res.status === 200 && res.data.is_success) {
+      Message.success({
+        content: '删除成功'
+      });
+      getList();
+    } else {
+      Message.error({
+        content: '删除失败，请稍后重试'
+      });
+    }
   };
 
   // table columns
   const columns: ColumnProps[] = [
     {
       title: '工作流名称',
-      dataIndex: 'name',
-      width: 120,
+      dataIndex: 'workflow_name',
+      width: 100,
       ellipsis: true,
-      render: (_, record) => <span className="hover-change">{record.name}</span>
+      render: (_, record) => (
+        <span
+          className="hover-change"
+          onClick={() => {
+            viewDetailWorkflow(record.workflow_uuid);
+          }}
+        >
+          {record.workflow_name}
+        </span>
+      )
     },
     {
       title: '运行方式',
-      dataIndex: 'operation',
-      width: 130,
+      dataIndex: 'run_cycle',
+      width: 100,
+      render: (_, record) =>
+        record.run_cycle ? <span>单次运行</span> : <span>周期运行</span>,
       filters: [
         {
           text: '单次运行',
-          value: '单次运行'
+          value: 0
         },
         {
-          text: '多次运行',
-          value: '多次运行'
+          text: '周期运行',
+          value: 1
         }
       ],
-      onFilter: (value, row) => row.operation == value
+      onFilter: (value, row) => row.run_cycle == value
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      width: 100,
+      dataIndex: 'is_online',
+      width: 80,
       render: (_, record) =>
-        record.status ? (
+        record.is_online ? (
           <Tag color="green" icon={<IconCheckCircleFill />}>
             已上线
           </Tag>
@@ -170,60 +162,68 @@ export default function WorkflowList() {
       filters: [
         {
           text: '未上线',
-          value: false
+          value: 0
         },
         {
           text: '已上线',
-          value: true
+          value: 1
         }
       ],
-      onFilter: (value, row) => row.status == value
+      onFilter: (value, row) => row.is_online == value
     },
     {
       title: '源数据目录',
-      dataIndex: 'source',
-      width: 230,
+      dataIndex: 'source_path',
+      width: 150,
       ellipsis: true,
       render: (_, record) => (
-        <span className="hover-change" title={record.source}>
-          {record.source}
+        <span
+          className="hover-change"
+          title={record.source_path}
+          onClick={() => handleToDirectoryPath(record.source_path)}
+        >
+          {record.source_path}
         </span>
       )
     },
     {
       title: '目标数据目录',
-      dataIndex: 'target',
-      width: 230,
+      dataIndex: 'target_path',
+      width: 150,
       ellipsis: true,
       render: (_, record) => (
-        <span className="hover-change" title={record.target}>
-          {record.target}
+        <span
+          className="hover-change"
+          title={record.target_path}
+          onClick={() => handleToDirectoryPath(record.target_path)}
+        >
+          {record.target_path}
         </span>
       )
     },
     {
       title: '创建人',
-      dataIndex: 'creater',
-      width: 100,
+      dataIndex: 'user_name',
+      width: 80,
       ellipsis: true
     },
     {
       title: '创建时间',
-      dataIndex: 'created_time',
-      width: 150,
-      render: (_, record) => <span>{TimeFormatting(record.created_time)}</span>,
-      sorter: (a, b) => a.created_time.length - b.created_time.length
+      dataIndex: 'create_time',
+      width: 180,
+      render: (_, record) => <span>{record.create_time}</span>,
+      sorter: (a, b) => a.create_time.length - b.create_time.length
     },
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
             className="operate-text"
             onClick={() => {
-              viewDetailWorkflow(record.id);
+              viewDetailWorkflow(record.workflow_uuid);
             }}
           >
             详情
@@ -231,7 +231,7 @@ export default function WorkflowList() {
           <span
             className="operate-text"
             onClick={() => {
-              handleCloneWorkflow(record.id);
+              handleCloneWorkflow(record.workflow_uuid);
             }}
           >
             复制
@@ -241,10 +241,10 @@ export default function WorkflowList() {
             title="确定删除工作流吗？"
             content="删除该工作流后，工作流中的内容将全部清除。"
             onOk={() => {
-              handleDeleteWorkflow(record.id);
-              Message.success({
-                content: '删除成功'
-              });
+              handleDeleteWorkflow(
+                record.workflow_uuid,
+                record.workflow_version
+              );
             }}
             onCancel={() => {
               Message.error({
@@ -276,6 +276,9 @@ export default function WorkflowList() {
           value={searchValue}
           onChange={(value) => {
             setSearchValue(value);
+          }}
+          onPressEnter={() => {
+            getList();
           }}
         />
         <Button shape="round" type="primary" onClick={handleCreateWorkflow}>
