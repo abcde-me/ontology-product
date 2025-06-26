@@ -9,6 +9,7 @@ import {
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import './index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
+import { Connection } from './type';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -17,7 +18,7 @@ const addModal = forwardRef((props: any, ref) => {
   const [form] = Form.useForm();
 
   // 判断是修改还是添加
-  const [isFlag, setIsFlag] = useState(null);
+  const [isFlag, setIsFlag] = useState<Connection | null>(null);
 
   // 弹框的状态
   const [visible, setVisible] = React.useState(false);
@@ -25,6 +26,8 @@ const addModal = forwardRef((props: any, ref) => {
   // 判断是以什么方式存储(s3:对象存储;hdfs:HDFS存储)
   const [storageType, setStorageType] = useState('s3');
 
+  // 确定按钮的状态
+  const [loading, setLoading] = useState<boolean>(false);
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     displayModalView: (newobj) => {
@@ -57,23 +60,30 @@ const addModal = forwardRef((props: any, ref) => {
         config: { ...newValues },
         creator: 'test1'
       };
-
+      setLoading(true);
       if (isFlag == null) {
         // 添加逻辑
-        await addconnectionList(newfrom);
-        Message.success('测试通过，连接器创建成功');
+        const res = await addconnectionList(newfrom);
+        if (res.code) {
+          setLoading(false);
+        }
       } else {
         // 编辑逻辑
-        await updataConnectionList({
-          // connector_id: isFlag.id,
+        const res = await updataConnectionList({
+          connector_id: isFlag.id,
           newfrom
         });
+        if (res.code) {
+          setLoading(false);
+        }
       }
-
       // 确保数据更新完成后再调用 getListHan
       props.getListHan();
       setVisible(false);
       resetHan();
+      Message.success(
+        isFlag == null ? '测试通过，连接器创建成功' : '编辑连接器成功'
+      );
     } catch (error) {
       console.log('验证失败', error);
     }
@@ -82,7 +92,7 @@ const addModal = forwardRef((props: any, ref) => {
     form.resetFields();
     form.setFieldsValue({ type: 's3' });
     setStorageType('s3');
-    setIsFlag(null);
+    setIsFlag({});
   };
   return (
     <div>
@@ -120,6 +130,7 @@ const addModal = forwardRef((props: any, ref) => {
               取消
             </Button>
             <Button
+              loading={loading}
               type="primary"
               onClick={createConnectionHan}
               style={{
@@ -135,7 +146,7 @@ const addModal = forwardRef((props: any, ref) => {
       >
         <div className="modal-overlay">
           {isFlag == null ? (
-            <Form style={{ width: 600 }} autoComplete="off" form={form}>
+            <Form style={{ width: 650 }} autoComplete="off" form={form}>
               <FormItem
                 label="连接器名称："
                 required
@@ -277,17 +288,13 @@ const addModal = forwardRef((props: any, ref) => {
             </Form>
           ) : (
             <Form
-              style={{ width: 600 }}
+              style={{ width: 620 }}
               autoComplete="off"
               form={form} // 统一使用一个表单实例
               initialValues={
                 isFlag
                   ? {
-                      // TODO: ts错误
-                      // @ts-expect-error
                       ...isFlag,
-                      // TODO: ts错误
-                      // @ts-expect-error
                       type: isFlag.type || 's3'
                     }
                   : { type: 's3' }
@@ -313,13 +320,7 @@ const addModal = forwardRef((props: any, ref) => {
                 labelAlign="right"
                 disabled={true}
               >
-                <RadioGroup
-                  defaultValue={
-                    // TODO: ts错误
-                    // @ts-expect-error
-                    isFlag.type
-                  }
-                >
+                <RadioGroup defaultValue={isFlag.type}>
                   <Radio value="s3">对象存储</Radio>
                   <Radio value="hdfs">HDFS</Radio>
                 </RadioGroup>
@@ -333,111 +334,105 @@ const addModal = forwardRef((props: any, ref) => {
               >
                 连接信息
               </span>
-              {
-                // TODO: ts错误
-                // @ts-expect-error
-                isFlag.type == 's3' ? (
-                  <div>
-                    <FormItem
-                      label="Endpoint："
-                      field="endpoint"
-                      rules={[{ required: true, message: '请输入Endpoint' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="AccessKey lD :"
-                      field="access_key"
-                      rules={[
-                        { required: true, message: '请输入AccessKey lD' }
-                      ]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="AccessKey Secret :"
-                      field="secret_key"
-                      rules={[
-                        { required: true, message: '请输入AccessKey Secret' }
-                      ]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="区域："
-                      field="region"
-                      rules={[{ required: true, message: '请输入区域' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="文件路径："
-                      field="path"
-                      rules={[{ required: true, message: '请输入文件路径' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                  </div>
-                ) : (
-                  <div>
-                    <FormItem
-                      label="Host："
-                      rules={[{ required: true, message: '请输入Host' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                      field="host"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="Port："
-                      rules={[{ required: true, message: '请输入Port' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                      field="port"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="用户名："
-                      rules={[{ required: true, message: '请输入用户名' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                      field="user"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                    <FormItem
-                      label="目录路径："
-                      field="path"
-                      rules={[{ required: true, message: '请输入目录路径' }]}
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 19 }}
-                      labelAlign="right"
-                    >
-                      <Input placeholder="请输入" />
-                    </FormItem>
-                  </div>
-                )
-              }
+              {isFlag.type == 's3' ? (
+                <div>
+                  <FormItem
+                    label="Endpoint："
+                    field="endpoint"
+                    rules={[{ required: true, message: '请输入Endpoint' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="AccessKey lD :"
+                    field="access_key"
+                    rules={[{ required: true, message: '请输入AccessKey lD' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="AccessKey Secret :"
+                    field="secret_key"
+                    rules={[
+                      { required: true, message: '请输入AccessKey Secret' }
+                    ]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="区域："
+                    field="region"
+                    rules={[{ required: true, message: '请输入区域' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="文件路径："
+                    field="path"
+                    rules={[{ required: true, message: '请输入文件路径' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                </div>
+              ) : (
+                <div>
+                  <FormItem
+                    label="Host："
+                    rules={[{ required: true, message: '请输入Host' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                    field="host"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="Port："
+                    rules={[{ required: true, message: '请输入Port' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                    field="port"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="用户名："
+                    rules={[{ required: true, message: '请输入用户名' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                    field="user"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="目录路径："
+                    field="path"
+                    rules={[{ required: true, message: '请输入目录路径' }]}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
+                    labelAlign="right"
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                </div>
+              )}
             </Form>
           )}
         </div>
