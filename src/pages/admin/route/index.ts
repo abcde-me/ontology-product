@@ -45,14 +45,14 @@ export const routes: IRoute[] = [
       },
       {
         name: 'dataLoadDetail',
-        key: '/tenant/compute/modaforge/dataLoad/detail',
+        key: '/tenant/compute/modaforge/dataLoad/detail/:id',
         component: React.lazy(
           async () => import('../../dataLoad/detail/dataLoad-detail')
         )
       },
       {
         name: 'accessLodaDetail',
-        key: '/tenant/compute/modaforge/dataLoad/access',
+        key: '/tenant/compute/modaforge/dataLoad/access/:id',
         component: React.lazy(
           async () => import('../../dataLoad/access/access-detail')
         )

@@ -8,7 +8,8 @@ import {
   Table,
   Checkbox,
   Cascader,
-  Typography
+  Typography,
+  Modal
 } from '@arco-design/web-react';
 import React, { useState, useEffect } from 'react';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
@@ -35,6 +36,12 @@ interface DataFile {
   filename: string;
   size: string;
   modifyTime: string;
+}
+
+interface DatasetFormProps {
+  visible: boolean;
+  onSubmit: (formData: any) => void;
+  onCancel: () => void;
 }
 
 const FormItem = Form.Item;
@@ -185,69 +192,17 @@ const csmockPreviewData = [
 ];
 
 // 数据预览表格列定义
-const cspreviewColumns = [
-  {
-    title: 'ID',
-    dataIndex: 'id',
-    width: 80
-  },
-  {
-    title: 'INSTRUCTION',
-    dataIndex: 'instruction',
-    width: 250,
-    ellipsis: true,
-    render: (text: string) => (
-      <div
-        style={{
-          maxHeight: '60px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          wordBreak: 'break-all'
-        }}
-      >
-        {text}
-      </div>
-    )
-  },
-  {
-    title: 'CONTENT',
-    dataIndex: 'content',
-    width: 300,
-    ellipsis: true,
-    render: (text: string) => (
-      <div
-        style={{
-          maxHeight: '60px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          wordBreak: 'break-all'
-        }}
-      >
-        {text}
-      </div>
-    )
-  },
-  {
-    title: 'RESPONSE',
-    dataIndex: 'response',
-    width: 300,
-    ellipsis: true,
-    render: (text: string) => (
-      <div
-        style={{
-          maxHeight: '60px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          wordBreak: 'break-all'
-        }}
-      >
-        {text}
-      </div>
-    )
-  }
-];
+const cspreviewColumns = ['id', 'instruction', 'content', 'response'];
 
-function DatasetForm({ onSubmit, onCancel }) {
+function formatTableData(columns) {
+  return columns.map((col) => ({
+    title: col.charAt(0).toUpperCase() + col.slice(1), // 格式化列标题
+    dataIndex: col, // 对应 data 中的键
+    key: col // 唯一标识符
+  }));
+}
+
+function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -333,17 +288,13 @@ function DatasetForm({ onSubmit, onCancel }) {
   const getVolumePreviewData = (volumeId: string) => {
     // 这里应该调用真实的API
     // getCatalogPreview({ path: volumeId }).then(res => {
-    //   setPreviewData(res.data)//这里的数据不能直接赋值，需要处理一下
-    //   setPreviewColumns(res.columns)//设置表格列（从后端返回的列配置）
+    //   setPreviewData(res.data.list)//这里的数据不能直接赋值，需要处理一下
+    //   setPreviewColumns(formatTableData(res.filed_names))//设置表格列（从后端返回的列配置）
     // })
-
-    // 暂时使用模拟数据（开发阶段）
     // TODO: ts错误
     // @ts-expect-error
     setPreviewData(csmockPreviewData);
-    // TODO: ts错误
-    // @ts-expect-error
-    setPreviewColumns(cspreviewColumns); //模拟从后端获取的columns配置
+    setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
   //提交数据
@@ -367,7 +318,14 @@ function DatasetForm({ onSubmit, onCancel }) {
   };
 
   return (
-    <div>
+    <Modal
+      title="新建数据集"
+      visible={visible}
+      footer={null}
+      style={{ width: '960px', minHeight: '436px' }}
+      onCancel={onCancel}
+      maskClosable={false}
+    >
       <Form
         form={form}
         autoComplete="off"
@@ -535,7 +493,7 @@ function DatasetForm({ onSubmit, onCancel }) {
           </Space>
         </FormItem>
       </Form>
-    </div>
+    </Modal>
   );
 }
 

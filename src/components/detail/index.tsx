@@ -31,7 +31,11 @@ import { Breadcrumb } from '@arco-design/web-react';
 import {
   getDatasetDetail,
   updateDataset,
-  getDatasetContents
+  getDatasetContents,
+  getDatasetDetailPage,
+  editDatasetVersion,
+  type DataChangeItem,
+  getDatasetVersionList
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
@@ -40,21 +44,34 @@ import { render } from '@headlessui/react/dist/utils/render';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
-// 测试数据
+// 测试数据 - 按照API接口字段顺序排列
 const csdatasetDetail = {
   id: 0,
   name: '西游三打白骨精',
+  tag_names: ['小说情节'],
   description: 'liuxiaoyu-test',
   latest_version: 'v1.10',
   src: 0,
+  src_model: 'GPT-4o',
   creator_id: 'user_001',
   creator_name: '张三',
   created_at: '2025-05-05 05:05:05',
-  updated_at: '2025-05-05 05:05:05',
-  deleted_at: null,
-  tags: ['小说情节'],
-  model: 'GPT-4o'
+  updated_at: '2025-05-05 05:05:05'
 };
+interface DatasetDetail {
+  id: number;
+  name: string;
+  tag_names: string[];
+  description: string;
+  latest_version: string;
+  src: number;
+  src_model: string;
+  creator_id: string;
+  creator_name: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null; // 可选字段，因为API响应中可能没有这个字段
+}
 
 // 内容数据测试数据
 const cscontentData = [
@@ -168,7 +185,7 @@ const generateArcoColumns = (
 };
 
 // 版本历史测试数据
-const versionHistory = [
+const csversionHistory = [
   {
     version: 'v1.10',
     date: '2025-06-23',
@@ -236,7 +253,8 @@ const versionColumns = [
 ];
 
 const DatasetDetail: React.FC = () => {
-  const [datasetDetail, setDatasetDetail] = React.useState<any>(null);
+  const [datasetDetail, setDatasetDetail] =
+    React.useState<DatasetDetail | null>(null);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('content');
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
@@ -257,6 +275,9 @@ const DatasetDetail: React.FC = () => {
   const [deletedRows, setDeletedRows] = React.useState<number[]>([]); // 记录删除的行号
   const [confirmModalVisible, setConfirmModalVisible] = React.useState(false); //确认弹窗
   const [pendingEditRow, setPendingEditRow] = React.useState<any>(null); // 待编辑的行（用于确认切换）
+
+  //历史数据
+  const [versionHistory, setVersionHistory] = React.useState<any[]>([]);
 
   // 返回按钮
   const handleBack = () => {
@@ -412,6 +433,77 @@ const DatasetDetail: React.FC = () => {
     Message.info('已取消编辑');
   };
 
+  // 提交数据修改
+  const handleSubmitChanges = () => {
+    if (!datasetDetail) return;
+
+    // 构造提交数据
+    const submitData: DataChangeItem[] = [];
+
+    // 处理修改的行
+    changedRows.forEach((lineStr) => {
+      const line = parseInt(lineStr);
+      const modifiedRow = contentData.find((item) => item.line === line);
+      if (modifiedRow) {
+        submitData.push({
+          line: line,
+          change_type: 1, // 修改
+          new_data: modifiedRow.data
+        });
+      }
+    });
+
+    // 处理删除的行
+    deletedRows.forEach((line) => {
+      submitData.push({
+        line: line,
+        change_type: 2, // 删除
+        new_data: {}
+      });
+    });
+
+    const params = {
+      id: datasetDetail.id.toString(),
+      version_id: datasetDetail.latest_version,
+      datas: submitData
+    };
+
+    console.log('提交数据修改:', params);
+
+    editDatasetVersion(params)
+      .then((res) => {
+        Message.success('数据修改成功');
+        // 清空修改记录
+        setChangedRows([]);
+        setDeletedRows([]);
+        setEditingRowKey(null);
+        setEditingData({});
+        // 重新加载数据 - 刷新内容数据
+        const refreshParams = {
+          dataset_id: id,
+          page: currentPage,
+          page_size: pageSize,
+          search: actualSearchValue || undefined
+        };
+        getDatasetContents(refreshParams)
+          .then((res) => {
+            if (res.data && res.data.length > 0) {
+              const responseData = res.data[0];
+              setContentData(responseData.list || []);
+              setContentDatabackup(responseData.list || []);
+              setTotal(responseData.total || 0);
+            }
+          })
+          .catch((err) => {
+            console.error('刷新数据失败:', err);
+          });
+      })
+      .catch((err) => {
+        console.error('数据修改失败:', err);
+        Message.error('数据修改失败');
+      });
+  };
+
   // 格式化日期
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
@@ -425,11 +517,28 @@ const DatasetDetail: React.FC = () => {
   };
 
   React.useEffect(() => {
-    // 测试数据
-    setDatasetDetail(csdatasetDetail);
-    // 初始化总数
-    setTotal(cscontentData.length);
-  }, []);
+    if (id) {
+      getDatasetDetailPage({ id: id })
+        .then((res) => {
+          console.log(res);
+          setDatasetDetail(res.data);
+        })
+        .catch((err) => {
+          console.error('获取数据集详情失败:', err);
+          Message.error('加载数据集详情失败');
+          // 如果请求失败，使用测试数据
+          setDatasetDetail(csdatasetDetail);
+          setTotal(cscontentData.length);
+        });
+
+      // getDatasetVersionList({ integer : id }).then((res)=>{
+      //   console.log('历史数据',res);
+      //   setVersionHistory(res.data);
+      // })
+      // 测试数据
+      setVersionHistory(csversionHistory);
+    }
+  }, [id]);
 
   // 处理搜索
   const handleSearch = () => {
@@ -479,12 +588,14 @@ const DatasetDetail: React.FC = () => {
           Message.error('加载数据失败');
           // 如果请求失败，使用测试数据
           setContentData(cscontentData);
+          console.log(cscontentData);
           setContentDatabackup(cscontentData);
           setTotal(cscontentData.length);
         });
     } else {
       // 测试数据 - 只在需要重新加载数据时设置
       setContentData(cscontentData);
+      setContentDatabackup(cscontentData); // 备份测试数据
       setTotal(cscontentData.length);
     }
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
@@ -553,10 +664,10 @@ const DatasetDetail: React.FC = () => {
                     { label: '名称', value: datasetDetail.name },
                     {
                       label: '标签',
-                      value: datasetDetail.tags?.join('、') || '-'
+                      value: datasetDetail.tag_names?.join('、') || '-'
                     },
                     { label: '创建人', value: datasetDetail.creator_name },
-                    { label: '生成模型', value: datasetDetail.model }
+                    { label: '生成模型', value: datasetDetail.src_model }
                   ]}
                   column={1}
                   labelStyle={{
@@ -660,6 +771,7 @@ const DatasetDetail: React.FC = () => {
                           setEditingData({});
 
                           // 恢复原始数据
+                          console.log(contentDatabackup);
                           setContentData(contentDatabackup);
 
                           Message.success('已取消所有修改并恢复数据');
@@ -669,7 +781,15 @@ const DatasetDetail: React.FC = () => {
                   >
                     取消
                   </Button>
-                  <Button type="primary">确定</Button>
+                  <Button
+                    type="primary"
+                    onClick={handleSubmitChanges}
+                    disabled={
+                      changedRows.length === 0 && deletedRows.length === 0
+                    }
+                  >
+                    确定
+                  </Button>
                 </Space>
               )}
             </div>
@@ -737,8 +857,8 @@ const DatasetDetail: React.FC = () => {
               name: datasetDetail.name,
               description: datasetDetail.description || '',
               version: datasetDetail.latest_version || 'v1.0.0',
-              tags: datasetDetail.tags || [],
-              model: datasetDetail.model || 'GPT-4o',
+              tags: datasetDetail.tag_names || [],
+              model: datasetDetail.src_model || 'GPT-4o',
               creator: datasetDetail.creator_name || ''
             }}
             onSubmit={handleEditSubmit}

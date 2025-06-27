@@ -1,0 +1,20 @@
+/** TODO: 按钮样式全局替换 */
+.arco-btn-outline:not(.arco-btn-disabled):not(.arco-btn-loading):active,
+.arco-btn-outline:not(.arco-btn-disabled):not(.arco-btn-loading):hover,
+.arco-btn-outline:not(.arco-btn-disabled) {
+  color: #007dfa;
+  border: 1px solid #007dfa;
+  background-color: transparent;
+}
+
+.arco-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.arco-modal-footer {
+  display: flex;
+  justify-content: end;
+}

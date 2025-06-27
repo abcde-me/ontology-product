@@ -10,19 +10,21 @@ import { RunState, RunStateType } from '../list/list';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 const InputSearch = Input.Search;
 
 const TableDetail = (props) => {
+  const history = useHistory();
   const columns = [
     {
       title: '运行ID',
       dataIndex: 'execution_name',
-      width: 300
+      width: 240,
+      ellipsis: true
     },
     {
       title: '状态',
-      width: 150,
+      width: 250,
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -84,6 +86,7 @@ const TableDetail = (props) => {
     },
     {
       title: '载入结果',
+      width: 300,
       render: (_, item) => (
         <div style={{ display: 'flex' }}>
           <div
@@ -107,9 +110,17 @@ const TableDetail = (props) => {
     },
     {
       title: '操作',
-      render: (_, tiem) => (
-        <span style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}>
-          <Link to="/tenant/compute/modaforge/dataLoad/access">详情</Link>
+      width: 100,
+      render: (_, item) => (
+        <span
+          style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
+          onClick={() => {
+            history.push(
+              `/tenant/compute/modaforge/dataLoad/access/${item.execution_id}`
+            );
+          }}
+        >
+          详情
         </span>
       )
     }
@@ -152,7 +163,7 @@ const TableDetail = (props) => {
   // 模态框点击确认的按钮
   const modalOk = () => {
     // 请求接口
-    // props.tHan()
+    props.tHan();
     props.judgmentTaskHan();
     Message.success('操作成功,停止运行');
     setVisible(false);

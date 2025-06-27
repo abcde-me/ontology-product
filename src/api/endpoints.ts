@@ -217,17 +217,21 @@ export const ModaForgeResourceEndpoints = {
   // 工作流详情
   workflowDetail: PrefixV2 + '/apps/{appId}',
   // 工作流列表
-  workflowList: PrefixAimdp + '/workflow/workflow_list',
+  workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
-  workflowOperation: PrefixAimdp + '/workflow/workflow_operation',
+  workflowOperation:
+    PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
+
+  // 作业列表
+  taskList: PrefixAimdp + '/workflow_instance/list',
 
   //数据目录
   //获取数据目录
   catalogListApi: PrefixAimdp + '/directory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
-  //查询目标数据文件列表
-  catalogPreviewApi: PrefixAimdp + '/path/directory/{path}', //数据集管理在用
+  //预览/搜索数据集
+  catalogPreviewApi: PrefixAimdp + '/datasets/preview', //数据集管理在用
 
   //数据集
   //获取数据集列表
@@ -247,9 +251,13 @@ export const ModaForgeResourceEndpoints = {
   //修改数据集
   updateDatasetApi: PrefixAimdp + '/dataset/{id}',
   //获取数据集详细信息
-
+  datasetDetailPageApi: PrefixAimdp + '/datasets/{id}',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
+  //编辑数据集版本数据
+  editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
+  //获取数据集版本列表
+  datasetVersionListApi: PrefixAimdp + '/datasets/version',
 
   // 连接器接口
 

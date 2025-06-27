@@ -25,12 +25,9 @@ export async function getCatalogList(param: any = {}) {
     .inRegion()
     .do({ preCheck: false });
 }
-
+//预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
-  return await UAPI.RES.catalogPreviewApi({ path: param.path })
-    .get()
-    .inRegion()
-    .do();
+  return await UAPI.RES.catalogPreviewApi({}).get(param).inRegion().do();
 }
 
 //删除目录文件接口

@@ -12,13 +12,14 @@ import React, { useMemo, useState } from 'react';
 import Styles from './index.module.css';
 import LoadAddModal from './load-add-modal';
 import { Route } from 'react-router';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
   RUNNING = 'running',
   STOPPED = 'stopped'
 }
+
 export const RunStateType = {
   [RunState.SUCCEED]: {
     text: '运行成功',
@@ -71,6 +72,7 @@ const TYPE_CONFIG = {
 };
 const InputSearch = Input.Search;
 export default function DataLoad() {
+  const history = useHistory();
   const columns = [
     {
       title: '载入任务名称',
@@ -192,13 +194,15 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      render: (_, item) => <span>{item.created_at}</span>
+      render: (_, item) => <span>{item.created_at}</span>,
+      sorter: (a, b) => a.created_at - b.created_at // 排序
     },
     {
       title: '更新时间',
       dataIndex: 'last_run_time',
       width: 240,
-      render: (_, item) => <span>{item.last_run_time}</span>
+      render: (_, item) => <span>{item.last_run_time}</span>,
+      sorter: (a, b) => a.last_run_time - b.last_run_time // 排序
     },
     {
       title: '操作',
@@ -212,8 +216,13 @@ export default function DataLoad() {
             justifyContent: 'space-around'
           }}
         >
-          <span className={Styles.hoverStyle}>
-            <Link to="/tenant/compute/modaforge/dataLoad/detail">详情</Link>
+          <span
+            className={Styles.hoverStyle}
+            onClick={() => {
+              gotoDetail(item.id);
+            }}
+          >
+            详情
           </span>
           <Popconfirm
             focusLock
@@ -330,6 +339,10 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
+  // 跳转到详情页面
+  const gotoDetail = (id: number) => {
+    history.push(`/tenant/compute/modaforge/dataLoad/detail/${id}`);
+  };
   return (
     <div
       style={{
@@ -344,7 +357,7 @@ export default function DataLoad() {
       <h1
         style={{
           fontSize: '20px',
-          fontWeight: 'bold',
+          fontWeight: '600',
           margin: '20px 0px 15px 20px'
         }}
       >

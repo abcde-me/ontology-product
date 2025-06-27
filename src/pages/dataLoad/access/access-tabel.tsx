@@ -1,13 +1,27 @@
-import item from '@/components/chat-with-history/sidebar/item';
 import { Pagination, Table, Tooltip } from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React from 'react';
+enum StatusType {
+  SYCCESS = '成功',
+  FAIL = '失败'
+}
+const STATUSTYPEARR = {
+  [StatusType.SYCCESS]: {
+    txt: '成功',
+    color: 'green'
+  },
+  [StatusType.FAIL]: {
+    txt: '失败',
+    color: 'red'
+  }
+};
 const AccessTable = (props) => {
   const columns = [
     {
       title: '文件名',
       dataIndex: 'filed',
-      width: 500
+      width: 500,
+      ellipsis: true
     },
     {
       title: '状态',
@@ -18,11 +32,14 @@ const AccessTable = (props) => {
               width: '5px',
               height: '5px',
               borderRadius: '50%',
-              background: item.status == '失败' ? 'red' : 'green'
+              background:
+                item.status == StatusType.FAIL
+                  ? STATUSTYPEARR[StatusType.FAIL].color
+                  : STATUSTYPEARR[StatusType.SYCCESS].color
             }}
           ></div>
           <div style={{ margin: '0px 3px 0px 5px' }}>{item.status}</div>
-          {item.status == '失败' && (
+          {item.status == StatusType.FAIL && (
             <Tooltip mini content="失败原因">
               <IconExclamationCircle
                 style={{ color: 'orange', fontSize: '17px' }}

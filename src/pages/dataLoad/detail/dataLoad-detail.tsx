@@ -45,7 +45,7 @@ const DataLoadDetail = () => {
       {
         execution_id: 7891,
         execution_name: 'RUN-20250306-001',
-        status: ExecutionStatus.Failed,
+        status: ExecutionStatus.Running,
         start_time: '2025-06-16 18:40:36',
         end_time: '2025-06-16 18:40:36',
         details: {
@@ -69,26 +69,37 @@ const DataLoadDetail = () => {
     ]
   });
   // 存在运行中的状态
-  const [runningFlag, setRunningFlag] = useState(null);
+  const [runningFlag, setRunningFlag] = useState<number | null>(null);
 
   // 判断任务中是否存在运行的任务
   const judgmentTask = () => {
-    // TODO: ts错误
-    // @ts-expect-error
+    if (listDetail == null) {
+      // 处理 listDetail 为空的情况，例如返回默认值或抛出错误
+      return -1; // 这里假设返回 -1 表示没有运行中的任务，根据实际情况调整
+    }
+
     const runningIndex = listDetail.execution_history.findIndex((item) => {
       return item.status === 'running';
     });
-    console.log(runningIndex);
-
-    // TODO: ts错误
-    // @ts-expect-error
     setRunningFlag(runningIndex);
+  };
+  // 点击停止运行
+  const stopehan = () => {
+    listDetail?.execution_history.forEach((item: any) => {
+      if (item.execution_id == 7891) {
+        item.status = 'failed';
+      }
+    });
   };
   // 编辑弹框的状态
   const [editVisible, setEditVisible] = useState(false);
   // 点击编辑显示弹框
   const hideEditModal = () => {
     setEditVisible(false);
+  };
+  // 返回上一层的函数
+  const OneLevelUpHan = () => {
+    history.back();
   };
   useEffect(() => {
     judgmentTask();
@@ -105,8 +116,9 @@ const DataLoadDetail = () => {
         }}
       >
         <IconArrowLeft
+          style={{ cursor: 'pointer' }}
           onClick={() => {
-            Router;
+            OneLevelUpHan();
           }}
         />
         <Breadcrumb style={{ marginLeft: '15px', fontSize: '17px' }}>
@@ -130,16 +142,13 @@ const DataLoadDetail = () => {
           <div
             style={{
               color: runningFlag !== -1 ? '#ccc' : 'rgb(0, 125, 250)',
-              // TODO: ts错误
-              // @ts-expect-error
-              pointerEvents: runningFlag !== -1 ? 'none' : null,
+              pointerEvents: runningFlag !== -1 ? 'none' : undefined,
               cursor: 'pointer'
             }}
             onClick={() => {
               setEditVisible(true);
             }}
           >
-            {' '}
             <IconEdit /> 编辑
           </div>
         </div>
@@ -156,11 +165,7 @@ const DataLoadDetail = () => {
                 载入位置：
               </Col>
               <Col span={21}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.dest_path
-                }
+                {listDetail && listDetail.task_info.dest_path}
               </Col>
             </Row>
             <Row
@@ -173,13 +178,7 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建人：
               </Col>
-              <Col span={21}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.creator
-                }
-              </Col>
+              <Col span={21}>{listDetail && listDetail.task_info.creator}</Col>
             </Row>
             <Row
               style={{
@@ -192,11 +191,7 @@ const DataLoadDetail = () => {
                 创建时间：
               </Col>
               <Col span={21}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.created_at
-                }
+                {listDetail && listDetail.task_info.created_at}
               </Col>
             </Row>
             <Row
@@ -210,11 +205,7 @@ const DataLoadDetail = () => {
                 更新时间：
               </Col>
               <Col span={21}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.last_run_time
-                }
+                {listDetail && listDetail.task_info.last_run_time}
               </Col>
             </Row>
           </div>
@@ -230,11 +221,7 @@ const DataLoadDetail = () => {
                 数据源类型：
               </Col>
               <Col span={20}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.source_type
-                }
+                {listDetail && listDetail.task_info.source_type}
               </Col>
             </Row>
             <Row
@@ -248,11 +235,7 @@ const DataLoadDetail = () => {
                 连接器名称：
               </Col>
               <Col span={20}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.connector.name
-                }
+                {listDetail && listDetail.task_info.connector.name}
               </Col>
             </Row>
             <Row
@@ -266,64 +249,40 @@ const DataLoadDetail = () => {
                 载入形式：
               </Col>
               <Col span={20}>
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.load_type == 'once'
-                    ? '单次载入'
-                    : '周期载入'
-                }
-                {
-                  // TODO: ts错误
-                  // @ts-expect-error
-                  listDetail.task_info.load_type == 'cron' && (
-                    <Switch
-                      checkedText="启用"
-                      uncheckedText="停止"
-                      style={{ marginLeft: '10px' }}
-                      onChange={(val) => console.log(!val)}
-                    />
-                  )
-                }
+                {listDetail && listDetail.task_info.load_type == 'once'
+                  ? '单次载入'
+                  : '周期载入'}
+                {listDetail && listDetail.task_info.load_type == 'cron' && (
+                  <Switch
+                    checkedText="启用"
+                    uncheckedText="停止"
+                    style={{ marginLeft: '10px' }}
+                    onChange={(val) => console.log(!val)}
+                  />
+                )}
               </Col>
             </Row>
-            {
-              // TODO: ts错误
-              // @ts-expect-error
-              listDetail.task_info.load_type == 'cron' && (
-                <Row
-                  style={{
-                    marginBottom: 16,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Col
-                    span={4}
-                    style={{ fontWeight: 'bold', fontSize: '15px' }}
-                  >
-                    周期设置：
-                  </Col>
-                  <Col span={20}>
-                    {
-                      // TODO: ts错误
-                      // @ts-expect-error
-                      listDetail.task_info.cron_expression
-                    }
-                  </Col>
-                </Row>
-              )
-            }
+            {listDetail && listDetail.task_info.load_type == 'cron' && (
+              <Row
+                style={{
+                  marginBottom: 16,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+                  周期设置：
+                </Col>
+                <Col span={20}>{listDetail.task_info.cron_expression}</Col>
+              </Row>
+            )}
           </div>
         </div>
         <TableDetail
-          data={
-            // TODO: ts错误
-            // @ts-expect-error
-            listDetail.execution_history
-          }
+          data={listDetail && listDetail.execution_history}
           runningStatus={runningFlag}
           judgmentTaskHan={judgmentTask}
+          tHan={stopehan}
         />
         <Modal
           style={{ width: '600px' }}
