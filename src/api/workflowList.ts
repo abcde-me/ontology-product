@@ -1,9 +1,12 @@
 import UAPI from '@/api';
 
 // 工作流列表
-export async function getWorkflowList(
-  params: any[] | Record<string | number, any> | undefined
-) {
+export async function getWorkflowList(params: {
+  uid: string | number;
+  search_content: string;
+  page: number;
+  page_size: number;
+}) {
   return await UAPI.RES.workflowList({}).get(params).inRegion().do();
 }
 

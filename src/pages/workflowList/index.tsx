@@ -17,7 +17,6 @@ import {
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
 import { getWorkflowList, workflowOperation } from '@/api/workflowList';
-import IsoTimeFormatting from '@/utils/isoTimeFormatting';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
@@ -203,7 +202,7 @@ export default function WorkflowList() {
       dataIndex: 'create_time',
       width: 180,
       render: (_, record) => (
-        <span>{IsoTimeFormatting(record.create_time)}</span>
+        <span>{new Date(record.create_time).toLocaleString()}</span>
       ),
       sorter: (a, b) => {
         return (
