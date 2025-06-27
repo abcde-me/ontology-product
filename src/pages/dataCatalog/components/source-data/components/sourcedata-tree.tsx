@@ -275,10 +275,11 @@ function searchData(inputValue: string, treeData: TreeNodeType[]): TreeNodeType[
 
 interface SourceDataTreeProps {
     onChanges?: (value: string) => void;
+    activeTab?: string;
 }
 
 export default function SourceDataTree(props: SourceDataTreeProps) {
-    const { onChanges } = props;
+    const { onChanges, activeTab } = props;
     // 设置默认展开的节点key（根据新的数据结构生成的key）
     const [expandedKeys, setExpandedKeys] = useState(['0-1', '0-1-volume', '0-1-db']);
 
@@ -328,37 +329,6 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
         }
         return null;
     };
-
-    // 根据nodeKey获取当前选中节点信息的函数
-    // const getCurrentSelectedNodeInfo = (nodeKey: string = selectedKey) => {
-    //     if (!nodeKey || !treeData) return null;
-
-    //     // 递归查找节点
-    //     const findNodeByKey = (nodes: TreeNodeType[], targetKey: string): TreeNodeType | null => {
-    //         for (const node of nodes) {
-    //             if (node.key === targetKey) {
-    //                 return node;
-    //             }
-    //             if (node.children) {
-    //                 const found = findNodeByKey(node.children, targetKey);
-    //                 if (found) return found;
-    //             }
-    //         }
-    //         return null;
-    //     };
-
-    //     const foundNode = findNodeByKey(treeData, nodeKey);
-    //     if (foundNode && foundNode.rawData) {
-    //         return {
-    //             nodeKey: foundNode.key,
-    //             nodeId: foundNode.rawData.id,
-    //             nodeName: foundNode.rawData.name,
-    //             nodeType: foundNode.rawData.type,
-    //             parentId: foundNode.rawData.parent_id,
-    //         };
-    //     }
-    //     return null;
-    // };
 
     // 处理树节点选择事件
     const handleSelect = (selectedKeys, nodeData) => {
@@ -434,6 +404,36 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
         // 如果使用真实API，在这里初始化加载树数据
         // loadTreeData();
     }, []);
+
+    // 监听activeTab变化，当切换到source时重新设置默认选中状态
+    useEffect(() => {
+        if (activeTab === 'source') {
+            console.log('切换到源数据，重新设置默认选中状态');
+            // 重新设置默认展开和选中状态
+            setExpandedKeys(['0-1', '0-1-volume', '0-1-db']);
+            setSelectedKey('0-1-volume-10');
+
+            // 获取并处理默认选中节点的信息
+            const defaultNodeInfo = getDefaultSelectedNodeInfo();
+            if (defaultNodeInfo) {
+                console.log('源数据 - 默认选中节点信息:', defaultNodeInfo);
+
+                // 模拟handleSelect的调用，直接处理默认节点信息
+                const simulatedNodeData = {
+                    node: {
+                        rawData: {
+                            id: defaultNodeInfo.nodeId,
+                            name: defaultNodeInfo.nodeName,
+                            type: defaultNodeInfo.nodeType,
+                            parent_id: defaultNodeInfo.parentId
+                        }
+                    }
+                };
+
+                handleSelect(['0-1-volume-10'], simulatedNodeData);
+            }
+        }
+    }, [activeTab]);
 
     // 加载树数据的函数（使用真实API时启用）
     // const loadTreeData = async () => {
