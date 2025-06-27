@@ -224,6 +224,8 @@ export const ModaForgeResourceEndpoints = {
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
+  // 作业详情
+  taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
 
   //数据目录
   //获取数据目录
