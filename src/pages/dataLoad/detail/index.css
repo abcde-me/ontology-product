@@ -1,12 +1,12 @@
-.box{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0px 20px;
-    margin: 15px 0px;
+.box {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 20px;
+  margin: 15px 0px;
 }
-.arco-table-tr>th {
-    background-color:rgb(245, 249, 255) !important;
+.arco-table-tr > th {
+  background-color: rgb(245, 249, 255) !important;
 }
 .info-container {
   width: 98%;
@@ -16,27 +16,23 @@
   border-radius: 10px;
   margin: 0 auto;
 }
- 
+
 .info-column {
   display: flex;
   flex-direction: column;
   width: 50%;
 }
- 
+
 .info-item {
   margin-bottom: 13px;
   align-items: center;
 }
- 
+
 .label {
   font-weight: bold;
   margin-right: 5px;
 }
- 
-.value {
-  /* 可以根据需要调整样式 */
-}
- 
+
 .toggle-enabled {
   color: #1890ff; /* 启用状态的颜色 */
   background-color: #e6f7ff; /* 背景颜色 */

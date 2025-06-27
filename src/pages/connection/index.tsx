@@ -13,7 +13,10 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail-modal';
 import AddAndEditModal from './add-edit-modal';
 import { delconnectionList, getConnectionList } from '@/api/connectionApi';
-
+interface ChildComponentMethods {
+  displayModalView: (id: number | string) => void; // 根据实际情况调整参数类型
+  // 可以添加其他子组件暴露的方法...
+}
 const InputSearch = Input.Search;
 
 // 连接器状态枚举
@@ -50,7 +53,7 @@ export default function Connection() {
   // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
   // 添加编辑弹框的实例
-  const addandsetchildRef = useRef(null);
+  const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
   // 连接器配置项
   const columns: any = [
     {
@@ -127,7 +130,7 @@ export default function Connection() {
     },
     {
       title: '操作',
-      width: 110,
+      width: 130,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
@@ -187,26 +190,22 @@ export default function Connection() {
     setVisible2(true);
   };
 
-  const childAddAndSetModalHan = (id) => {
+  const childAddAndSetModalHan = (obj) => {
     if (addandsetchildRef.current) {
-      // TODO: ts错误
-      // @ts-expect-error
-      addandsetchildRef.current.displayModalView(id);
+      addandsetchildRef.current.displayModalView(obj);
     }
   };
   // 搜索框的默认值
   const [searchValue, setSearchValue] = useState('');
   const [ConnectionData, setConnectionData] = useState([]) as any;
   const [pagination, setPagination] = useState({
+    // 当前第1页
     current: 1,
+    // 每页默认显示10条
     pageSize: 10,
     total: 0
   });
 
-  // 当前的第几页
-  const [current, setCurrent] = useState(1);
-  // 每页展示数据的数据量
-  const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
   const handlePageChange = (page) => {
     setPagination((prev) => ({
@@ -283,7 +282,7 @@ export default function Connection() {
           }}
         />
         <Button
-          type="primary"
+          // type="primary"
           icon={<IconPlus />}
           onClick={() => {
             childAddAndSetModalHan(null);
@@ -299,6 +298,7 @@ export default function Connection() {
         style={{ padding: '10px 20px' }}
         pagination={false}
         rowKey="id"
+        loading={false}
       />
       {/* 分页 */}
       <Pagination

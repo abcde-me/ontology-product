@@ -94,8 +94,8 @@ const LoadAddModal = (props: any) => {
             minute,
             hour,
             data: dataValue,
-            month: '*',
-            week: cycle === '每周' ? rest.week?.join(',') || '' : '*' // 如果week也需要转换
+            month: cycle == '每月' ? '*' : '',
+            week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
           }
         },
         dest_path: rest.dest_path,
