@@ -24,6 +24,23 @@ import { getDatasetList, createDataset } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import './index.css';
 
+// 时间格式化函数
+const formatDateTime = (dateTimeString: string): string => {
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    return dateTimeString; // 如果格式化失败，返回原字符串
+  }
+};
+
 // 数据集类型
 interface Dataset {
   id: number;
@@ -40,10 +57,11 @@ interface Dataset {
   src_model: string;
 }
 
-const columns = (handleGoToDetail, handleDelete) => [
+const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
   {
     title: '名称',
     dataIndex: 'name',
+    width: 180,
     render: (name: string, record: Dataset) => (
       <Button
         type="text"
@@ -57,55 +75,108 @@ const columns = (handleGoToDetail, handleDelete) => [
   {
     title: '标签',
     dataIndex: 'tags',
-    filterable: {
-      icon: <IconFilter />,
-      defaultFilters: []
+    width: 160,
+    filterIcon: <IconFilter />,
+    filters: (() => {
+      const tagSet = new Set<string>();
+      datasetList.forEach((dataset) => {
+        dataset.tags.forEach((tag) => tagSet.add(tag));
+      });
+      return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
+    })(),
+    onFilter: (value: string, record: Dataset) => {
+      return record.tags.includes(value);
     },
     render: (tags: string[]) => (
-      <Space>
-        {tags.map((tag, index) => (
-          <Tag key={index} className="tag-green">
-            {tag}
+      <Space size="mini">
+        {tags.length > 0 && (
+          <Tag className="tag-green">
+            {tags[0].length > 8 ? `${tags[0].substring(0, 8)}...` : tags[0]}
           </Tag>
-        ))}
+        )}
+        {tags.length > 1 && <Tag className="tag-green">+{tags.length - 1}</Tag>}
       </Space>
     )
   },
   {
     title: '版本',
-    dataIndex: 'latest_version'
+    dataIndex: 'latest_version',
+    width: 100
   },
   {
     title: '描述说明',
     dataIndex: 'description',
+    width: 200,
     ellipsis: true
   },
   {
     title: '生成模型',
     dataIndex: 'src_model',
-    filterable: {
-      icon: <IconFilter />,
-      defaultFilters: []
+    filterIcon: <IconFilter />,
+    width: 150,
+    filters: (() => {
+      const modelSet = new Set<string>();
+      datasetList.forEach((dataset) => {
+        if (dataset.src_model) {
+          modelSet.add(dataset.src_model);
+        }
+      });
+      return Array.from(modelSet).map((model) => ({
+        text: model,
+        value: model
+      }));
+    })(),
+    onFilter: (value: string, record: Dataset) => {
+      return record.src_model === value;
     },
     render: (src_model: string) => <Tag className="tag-purple">{src_model}</Tag>
   },
   {
     title: '创建人',
     dataIndex: 'creator_name',
-    sortable: {
-      sortDirections: ['ascend', 'descend']
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: (() => {
+      const creatorSet = new Set<string>();
+      datasetList.forEach((dataset) => {
+        if (dataset.creator_name) {
+          creatorSet.add(dataset.creator_name);
+        }
+      });
+      return Array.from(creatorSet).map((creator) => ({
+        text: creator,
+        value: creator
+      }));
+    })(),
+    onFilter: (value: string, record: Dataset) => {
+      return record.creator_name === value;
     }
   },
   {
     title: '创建时间',
     dataIndex: 'created_at',
-    sortable: {
-      sortDirections: ['ascend', 'descend']
-    }
+    width: 220,
+    sorter: (a: Dataset, b: Dataset) => {
+      // 直接比较 ISO 8601 格式的时间字符串
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateA - dateB;
+    },
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (created_at: string) => formatDateTime(created_at)
   },
   {
     title: '最近更新',
-    dataIndex: 'updated_at'
+    dataIndex: 'updated_at',
+    width: 220,
+    sorter: (a: Dataset, b: Dataset) => {
+      // 直接比较 ISO 8601 格式的时间字符串
+      const dateA = new Date(a.updated_at).getTime();
+      const dateB = new Date(b.updated_at).getTime();
+      return dateA - dateB;
+    },
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (updated_at: string) => formatDateTime(updated_at)
   },
   {
     title: '操作',
@@ -129,6 +200,51 @@ const columns = (handleGoToDetail, handleDelete) => [
         </Button>
       </Space>
     )
+  }
+];
+
+const data: Dataset[] = [
+  {
+    id: 1,
+    name: '数据集1',
+    description: '这是一个文本数据集',
+    latest_version: 'v1.0.0',
+    src: 1,
+    creator_id: 'admin001',
+    creator_name: '行政',
+    created_at: '2025-05-15T10:30:45+08:00',
+    updated_at: '2025-06-01T08:15:22+08:00',
+    deleted_at: null,
+    tags: ['文本11111111111111111', '训练'],
+    src_model: 'gpt-3.5-turbo'
+  },
+  {
+    id: 2,
+    name: '数据集2',
+    description: '这是一个图片数据集',
+    latest_version: 'v1.0.0',
+    src: 0,
+    creator_id: 'system',
+    creator_name: '行政',
+    created_at: '2025-05-10T14:22:33+08:00',
+    updated_at: '2025-05-28T16:45:10+08:00',
+    deleted_at: null,
+    tags: ['图片', '分类'],
+    src_model: 'vision-model'
+  },
+  {
+    id: 3,
+    name: '用户自定义数据集',
+    description: '这是一个用户自定义的混合数据集',
+    latest_version: 'v1.0.0',
+    src: 1,
+    creator_id: 'admin001',
+    creator_name: '行政',
+    created_at: '2025-04-22T09:12:18+08:00',
+    updated_at: '2025-05-30T11:33:47+08:00',
+    deleted_at: null,
+    tags: ['混合', '自定义', '测试'],
+    src_model: 'claude-3-sonnet'
   }
 ];
 
@@ -244,51 +360,6 @@ const DatasetManagement: React.FC = () => {
     console.log(record);
   };
 
-  const data: Dataset[] = [
-    {
-      id: 1,
-      name: '数据集1',
-      description: '这是一个文本数据集',
-      latest_version: 'v1.0.0',
-      src: 1,
-      creator_id: 'admin001',
-      creator_name: '行政',
-      created_at: '2025年5月15日 10:30:45',
-      updated_at: '2025年6月1日 08:15:22',
-      deleted_at: null,
-      tags: ['文本', '训练'],
-      src_model: 'gpt-3.5-turbo'
-    },
-    {
-      id: 2,
-      name: '数据集2',
-      description: '这是一个图片数据集',
-      latest_version: 'v1.0.0',
-      src: 0,
-      creator_id: 'system',
-      creator_name: '行政',
-      created_at: '2025年5月10日 14:22:33',
-      updated_at: '2025年5月28日 16:45:10',
-      deleted_at: null,
-      tags: ['图片', '分类'],
-      src_model: 'vision-model'
-    },
-    {
-      id: 3,
-      name: '用户自定义数据集',
-      description: '这是一个用户自定义的混合数据集',
-      latest_version: 'v1.0.0',
-      src: 1,
-      creator_id: 'admin001',
-      creator_name: '行政',
-      created_at: '2025年4月22日 09:12:18',
-      updated_at: '2025年5月30日 11:33:47',
-      deleted_at: null,
-      tags: ['混合', '自定义', '测试'],
-      src_model: 'claude-3-sonnet'
-    }
-  ];
-
   // 分页处理函数
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -401,7 +472,7 @@ const DatasetManagement: React.FC = () => {
         <Table
           rowKey="id"
           className="dataset-table"
-          columns={columns(handleGoToDetail, handleDelete)}
+          columns={columns(handleGoToDetail, handleDelete, datasetList)}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
@@ -421,16 +492,11 @@ const DatasetManagement: React.FC = () => {
         />
 
         {/* 新建数据集弹框 */}
-        <Modal
-          title="新建数据集"
+        <DatasetForm
           visible={modalVisible}
-          footer={null}
-          style={{ width: '960px', minHeight: '436px' }}
+          onSubmit={handleSubmit}
           onCancel={closeModal}
-          maskClosable={false}
-        >
-          <DatasetForm onSubmit={handleSubmit} onCancel={closeModal} />
-        </Modal>
+        />
       </div>
     </div>
   );
