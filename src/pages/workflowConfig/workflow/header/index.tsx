@@ -99,27 +99,26 @@ const Header: FC = () => {
     }
   }, [appID, setAppDetail]);
 
-  const onPublish = useCallback(
+  const onOperate = useCallback(
     async (op: WORKFLOW_OPERATION, params?: PublishWorkflowParams) => {
-      if (handleCheckBeforePublish()) {
-        // TODO: ts错误
-        // @ts-expect-error
-        const { data: res } = await publishWorkflow(appID, {
-          title: params?.title || '',
-          releaseNotes: params?.releaseNotes || '',
-          marked_name: params?.title || '',
-          marked_comment: params?.releaseNotes || ''
-        });
-
-        if (res) {
-          notify({ type: 'success', message: t('common.api.actionSuccess') });
-          updateAppDetail();
-          console.log('res.created_at', res.created_at);
-          workflowStore.getState().setPublishedAt(res.created_at);
-          resetWorkflowVersionHistory();
-        }
-      } else {
+      if (!handleCheckBeforePublish()) {
         throw new Error('Checklist failed');
+      }
+
+      // @ts-expect-error
+      const { data: res } = await publishWorkflow(appID, {
+        title: params?.title || '',
+        releaseNotes: params?.releaseNotes || '',
+        marked_name: params?.title || '',
+        marked_comment: params?.releaseNotes || ''
+      });
+
+      if (res) {
+        notify({ type: 'success', message: t('common.api.actionSuccess') });
+        updateAppDetail();
+        console.log('res.created_at', res.created_at);
+        workflowStore.getState().setPublishedAt(res.created_at);
+        resetWorkflowVersionHistory();
       }
     },
     [
@@ -209,7 +208,7 @@ const Header: FC = () => {
             toolPublished,
             inputs: variables,
             onRefreshData: handleToolConfigureUpdate,
-            onPublish,
+            onOperate,
             onToggle: onPublisherToggle,
             crossAxisOffset: 4
           }}
