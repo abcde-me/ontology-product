@@ -49,6 +49,31 @@ interface DatasetContentsParams {
   search?: string;
 }
 
+interface DatasetDetailPageParams {
+  id: string;
+}
+
+// 数据变更类型枚举
+export enum DataChangeType {
+  MODIFY = 1, // 修改
+  DELETE = 2, // 删除
+  ADD = 3 // 新增，目前不用后期开发可能会用
+}
+
+// 数据变更项接口
+export interface DataChangeItem {
+  line: number; // 行号
+  change_type: DataChangeType; // 变更类型
+  new_data: Record<string, any>; // 新数据，key-value格式
+}
+
+// 编辑数据集版本参数接口
+export interface EditDatasetVersionParams {
+  id: string;
+  version_id: string;
+  datas: DataChangeItem[]; // 数据变更列表
+}
+
 /**
  * 获取数据集列表
  */
@@ -98,10 +123,23 @@ export async function updateDataset(params: UpdateDatasetParams) {
 }
 
 //获取数据集详情页
+export async function getDatasetDetailPage(params: DatasetDetailPageParams) {
+  return UAPI.RES.datasetDetailPageApi({ id: params.id }).get().inRegion().do();
+}
 
 //获取数据集详情页的数据内容
 export async function getDatasetContents(params: DatasetContentsParams) {
   return UAPI.RES.datasetContentsApi({}).get(params).inRegion().do();
+}
+
+//编辑数据集版本数据
+export async function editDatasetVersion(params: EditDatasetVersionParams) {
+  return UAPI.RES.editDatasetVersionApi({}).put(params).inRegion().do();
+}
+
+//获取数据集版本列表
+export async function getDatasetVersionList(params: any) {
+  return UAPI.RES.datasetVersionListApi({}).get(params).inRegion().do();
 }
 
 //获取连接器列表

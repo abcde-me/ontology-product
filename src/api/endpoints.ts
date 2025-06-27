@@ -226,8 +226,8 @@ export const ModaForgeResourceEndpoints = {
   catalogListApi: PrefixAimdp + '/directory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
-  //查询目标数据文件列表
-  catalogPreviewApi: PrefixAimdp + '/path/directory/{path}', //数据集管理在用
+  //预览/搜索数据集
+  catalogPreviewApi: PrefixAimdp + '/datasets/preview', //数据集管理在用
 
   //数据集
   //获取数据集列表
@@ -247,9 +247,13 @@ export const ModaForgeResourceEndpoints = {
   //修改数据集
   updateDatasetApi: PrefixAimdp + '/dataset/{id}',
   //获取数据集详细信息
-
+  datasetDetailPageApi: PrefixAimdp + '/datasets/{id}',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
+  //编辑数据集版本数据
+  editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
+  //获取数据集版本列表
+  datasetVersionListApi: PrefixAimdp + '/datasets/version',
 
   // 连接器接口
 
