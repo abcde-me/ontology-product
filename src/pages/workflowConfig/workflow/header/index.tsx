@@ -20,7 +20,7 @@ import TaskOperation from '@/pages/workflowConfig/workflow/header/components/tas
 import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { CreateAppModal } from './create-app-modal';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
@@ -37,13 +37,13 @@ const Header: FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const workflowStore = useWorkflowStore();
-  const appDetail = useAppStore((s) => s.appDetail);
-  const setAppDetail = useAppStore((s) => s.setAppDetail);
+  const appDetail = useTaskStore((s) => s.workflowDetail);
+  const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
   const systemFeatures = useContextSelector(
     AppContext,
     (state) => state.systemFeatures
   );
-  const appID = appDetail?.id;
+  const appID = appDetail?.workflow_uuid;
   const isChatMode = useIsChatMode();
   const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
   const { handleNodeSelect } = useNodesInteractions();
@@ -91,7 +91,7 @@ const Header: FC = () => {
 
   const updateAppDetail = useCallback(async () => {
     try {
-      const result = await getAppDetail(appID!);
+      const result = await getAppDetail(appID ?? '');
       const res = result.data;
       setAppDetail({ ...res });
     } catch (error) {
@@ -185,13 +185,7 @@ const Header: FC = () => {
         </div>
         <div className="app-info">
           <div className="app-name">
-            <span className="txt">
-              {
-                // TODO: ts错误
-                // @ts-expect-error
-                appDetail.name
-              }
-            </span>
+            <span className="txt">{appDetail?.workflow_name}</span>
             <div className="op-icon" onClick={() => setShowEditModal(true)}>
               <EditIcon className="size-[16px]" />
             </div>

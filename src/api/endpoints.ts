@@ -213,9 +213,9 @@ export const ResourceEndpointsV2 = {
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
   // 新建工作流
-  createWorkflow: PrefixV2 + '/apps',
+  createWorkflow: PrefixAimdp + '/workflow/info',
   // 工作流详情
-  workflowDetail: PrefixV2 + '/apps/{appId}',
+  workflowDetail: PrefixAimdp + '/workflow/info/{workflow_uuid}',
   // 工作流列表
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作

@@ -2,14 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import type { VideoParserNodeType, OutputVar } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 import TextNodeDefault from './default';
 
 const useConfig = (id: string, payload: VideoParserNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
 
-  const appId = useAppStore.getState().appDetail?.id;
+  const appId = useTaskStore.getState().workflowDetail?.workflow_uuid;
 
   const defaultConfig = TextNodeDefault.defaultValue;
   const { inputs, setInputs } = useNodeCrud<VideoParserNodeType>(id, payload);

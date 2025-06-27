@@ -7,7 +7,7 @@ import { useNodesSyncDraft } from '../hooks';
 import { WorkflowRunningStatus } from '../types';
 import { useWorkflowUpdate } from './use-workflow-interactions';
 import { useWorkflowRunEvent } from './use-workflow-run-event/use-workflow-run-event';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { ssePost } from '@/pages/workflowConfig/service/base';
 // import { stopWorkflowRun } from '@/pages/workflowConfig/service/workflow'
 import { AudioPlayerManager } from '@/pages/workflowConfig/components/audio-btn/audio.player.manager';
@@ -107,17 +107,19 @@ export const useWorkflowRun = () => {
         ...restCallback
       } = callback || {};
       workflowStore.setState({ historyWorkflowData: undefined });
-      const appDetail = useAppStore.getState().appDetail;
+      const appDetail = useTaskStore.getState().workflowDetail;
       const workflowContainer = document.getElementById('workflow-container');
 
       const { clientWidth, clientHeight } = workflowContainer!;
 
       let url = '';
+      // @ts-expect-error
       if (appDetail?.mode === 'advanced-chat')
-        url = `/apps/${appDetail.id}/advanced-chat/workflows/draft/run`;
+        url = `/apps/${appDetail.workflow_uuid}/advanced-chat/workflows/draft/run`;
 
+      // @ts-expect-error
       if (appDetail?.mode === 'workflow')
-        url = `/apps/${appDetail.id}/workflows/draft/run`;
+        url = `/apps/${appDetail.workflow_uuid}/workflows/draft/run`;
 
       const { setWorkflowRunningData } = workflowStore.getState();
       setWorkflowRunningData({
@@ -147,7 +149,7 @@ export const useWorkflowRun = () => {
         (_: any): any => {}
       );
 
-      url = `/apps/${appDetail?.id}/workflows/draft/run`;
+      url = `/apps/${appDetail?.workflow_uuid}/workflows/draft/run`;
       ssePost(
         url,
         {
@@ -270,7 +272,7 @@ export const useWorkflowRun = () => {
   );
 
   const handleStopRun = useCallback((taskId: string) => {
-    const appId = useAppStore.getState().appDetail?.id;
+    const appId = useTaskStore.getState().workflowDetail?.workflow_uuid;
 
     // stopWorkflowRun(`/apps/${appId}/workflow-runs/tasks/${taskId}/stop`)
     console.warn('API NOT IMPLEMENTED', 'stopWorkflowRun');
