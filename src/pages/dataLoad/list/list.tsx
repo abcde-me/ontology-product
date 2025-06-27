@@ -207,7 +207,7 @@ export default function DataLoad() {
     {
       title: '操作',
       fixed: 'right',
-      width: 130,
+      width: 105,
       render: (_, item) => (
         <div
           style={{
@@ -246,7 +246,7 @@ export default function DataLoad() {
       )
     }
   ] as any;
-  const data = [
+  const [data, setData] = useState([
     {
       id: '1',
       name: '中科院大数据库任务1',
@@ -303,7 +303,7 @@ export default function DataLoad() {
       enable: true,
       connector_id: '456'
     }
-  ];
+  ]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -342,6 +342,13 @@ export default function DataLoad() {
   // 跳转到详情页面
   const gotoDetail = (id: number) => {
     history.push(`/tenant/compute/modaforge/dataLoad/detail/${id}`);
+  };
+  // 查询载入任务列表
+  const getdataLoadList = async () => {
+    // const res = await dataLoadList();
+    // if (res.code === 200) {
+    //   setData(res.data);
+    // }
   };
   return (
     <div

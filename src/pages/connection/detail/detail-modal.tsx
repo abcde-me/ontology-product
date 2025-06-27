@@ -1,13 +1,8 @@
 import { Message, Modal } from '@arco-design/web-react';
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState
-} from 'react';
-import './index.css';
+import React, { useEffect, useState } from 'react';
+import '../index.css';
 import { IconCopy } from '@arco-design/web-react/icon';
-import TimeFormatting from '../../utils/timeFormatting';
+import TimeFormatting from '../../../utils/timeFormatting';
 import { getdetailList } from '@/api/connectionApi';
 const ModalDetail = (props) => {
   // 默认显示对象为空
@@ -34,9 +29,11 @@ const ModalDetail = (props) => {
           <div className="modal-header">
             <h2>连接器详情</h2>
           </div>
-          <div className="modal-content">
+          <div className="modal-content" style={{ fontSize: '14px' }}>
             <section className="section">
-              <h3>连接器信息</h3>
+              <h3 style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+                连接器信息
+              </h3>
               <div className="info-item">
                 <span className="label">连接器名称:</span>
                 <span className="value">{DetailData.name}</span>
@@ -82,7 +79,9 @@ const ModalDetail = (props) => {
             </section>
             <hr />
             <section className="section">
-              <h3>连接信息</h3>
+              <h3 style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+                连接信息
+              </h3>
               {DetailData.type == 's3' ? (
                 <div>
                   <div className="info-item">

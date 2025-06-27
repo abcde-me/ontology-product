@@ -1,0 +1,261 @@
+import {
+  Button,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Radio
+} from '@arco-design/web-react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import '../index.css';
+import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
+import { Connection } from '../type';
+const FormItem = Form.Item;
+const RadioGroup = Radio.Group;
+const add = forwardRef((props: any, ref) => {
+  // 创建的表单实例
+  const [form] = Form.useForm();
+  // 添加弹框的状态
+  const [visible, setVisible] = React.useState(false);
+
+  // 判断是以什么方式存储(s3:对象存储;hdfs:HDFS存储)
+  const [storageType, setStorageType] = useState('s3');
+
+  // 确定按钮的状态
+  const [loading, setLoading] = useState<boolean>(false);
+  // 将方法暴露给父组件
+  useImperativeHandle(ref, () => ({
+    displayModalView: () => {
+      setVisible(true);
+      // 添加模式 - 重置表单
+      form.resetFields();
+      form.setFieldsValue({ type: 's3', name: '' });
+      setStorageType('s3');
+    }
+  }));
+  // 点击创建的按钮
+  const createConnectionHan = async () => {
+    try {
+      const values = await form.validate();
+      const { type, name, ...newValues } = values;
+      const newfrom = {
+        name,
+        type,
+        config: { ...newValues },
+        creator: 'test1'
+      };
+      setLoading(true);
+      const res = await addconnectionList(newfrom);
+      console.log(res);
+      if (res.message == '') {
+        Message.success('测试通过，连接器创建成功');
+        setVisible(false);
+        // 确保数据更新完成后再调用 getListHan
+        props.getListHan();
+        resetHan();
+      } else {
+        Message.error(res.message);
+      }
+    } catch (error) {
+      console.log('验证失败', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const resetHan = () => {
+    form.resetFields();
+    form.setFieldsValue({ type: 's3' });
+    setStorageType('s3');
+  };
+  return (
+    <div>
+      <Modal
+        style={{ width: '700px' }}
+        title={'创建连接器'}
+        visible={visible}
+        autoFocus={false}
+        focusLock={false}
+        unmountOnExit={true}
+        onCancel={() => {
+          // 点击关闭隐藏弹框
+          setVisible(false);
+          resetHan();
+        }}
+        footer={
+          <div style={{ marginBottom: '20px' }}>
+            <Button
+              onClick={() => {
+                setVisible(false);
+                resetHan();
+              }}
+              style={{ fontSize: '14px', fontWeight: '400' }}
+            >
+              取消
+            </Button>
+            <Button
+              loading={loading}
+              type="primary"
+              onClick={createConnectionHan}
+              style={{
+                marginLeft: '10px',
+                fontSize: '14px',
+                fontWeight: '400'
+              }}
+            >
+              {'测试并创建'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="modal-overlay">
+          <Form
+            style={{ width: 650 }}
+            autoComplete="off"
+            form={form}
+            disabled={loading}
+          >
+            <FormItem
+              label="连接器名称："
+              required
+              field="name"
+              rules={[{ required: true, message: '请输入连接器名称' }]}
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+              labelAlign="right"
+            >
+              <Input placeholder="请输入" />
+            </FormItem>
+            <FormItem
+              label="连接器类型："
+              field="type"
+              rules={[{ required: true, message: '请选择类型' }]}
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+              labelAlign="right"
+              initialValue="s3"
+            >
+              <RadioGroup
+                defaultValue="s3"
+                onChange={(value) => {
+                  setStorageType(value);
+                }}
+              >
+                <Radio value="s3">对象存储</Radio>
+                <Radio value="hdfs">HDFS</Radio>
+              </RadioGroup>
+            </FormItem>
+            <span
+              style={{
+                margin: '13px 0px 13px 0px',
+                fontSize: '17px',
+                fontWeight: '500'
+              }}
+            >
+              连接信息
+            </span>
+            {storageType == 's3' ? (
+              <div>
+                <FormItem
+                  label="Endpoint："
+                  field="endpoint"
+                  rules={[{ required: true, message: '请输入Endpoint' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="AccessKey lD :"
+                  field="access_key"
+                  rules={[{ required: true, message: '请输入AccessKey lD' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="AccessKey Secret :"
+                  field="secret_key"
+                  rules={[
+                    { required: true, message: '请输入AccessKey Secret' }
+                  ]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="区域："
+                  field="region"
+                  rules={[{ required: true, message: '请输入区域' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="文件路径："
+                  field="path"
+                  rules={[{ required: true, message: '请输入文件路径' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+              </div>
+            ) : (
+              <div>
+                <FormItem
+                  label="Host："
+                  rules={[{ required: true, message: '请输入Host' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  field="host"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="Port："
+                  rules={[{ required: true, message: '请输入Port' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  field="port"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="用户名："
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  field="user"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="目录路径："
+                  rules={[{ required: true, message: '请输入目录路径' }]}
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  field="path"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+              </div>
+            )}
+          </Form>
+        </div>
+      </Modal>
+    </div>
+  );
+});
+export default add;
