@@ -298,6 +298,7 @@ export default function Connection() {
         style={{ padding: '10px 20px' }}
         pagination={false}
         rowKey="id"
+        loading={false}
       />
       {/* 分页 */}
       <Pagination
