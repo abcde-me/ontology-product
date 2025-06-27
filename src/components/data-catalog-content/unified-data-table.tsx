@@ -6,7 +6,7 @@ import { IconFolder } from '@arco-design/web-react/icon';
 // 导入统一的组件
 import UnifiedTable from './unified-table';
 import Pages from './components/pages';
-import FormComponent from './components/dataset-form';
+import FormComponent from './components/popups-form';
 import { getUnifiedColumns } from './unified-columns';
 import './index.css';
 
