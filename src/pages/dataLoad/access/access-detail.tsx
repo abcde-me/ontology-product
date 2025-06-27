@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { Router } from 'react-router';
 import './index.css';
 import AccessTable from './access-tabel';
+
 const InputSearch = Input.Search;
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -21,6 +22,10 @@ const AccessDetail = () => {
     fild: 125123,
     succeed: 124223,
     error: 7
+  };
+  // 返回上一层的函数
+  const OneLevelUpHan = () => {
+    history.back();
   };
   return (
     <div>
@@ -33,8 +38,9 @@ const AccessDetail = () => {
         }}
       >
         <IconArrowLeft
+          style={{ cursor: 'pointer' }}
           onClick={() => {
-            Router;
+            OneLevelUpHan();
           }}
         />
         <div

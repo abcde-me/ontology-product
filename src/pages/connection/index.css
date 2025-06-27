@@ -1,23 +1,22 @@
-.arco-table-tr>th {
-    background-color:rgb(245, 249, 255) !important;
+.arco-table-tr > th {
+  background-color: rgb(245, 249, 255) !important;
 }
 
 .hover {
-    color: rgb(0, 125, 250);
-    cursor: pointer;
+  color: rgb(0, 125, 250);
+  cursor: pointer;
 }
 .hover:hover {
-    color: black;
+  color: black;
 }
 .arco-pagination {
-    display: flex;
-    justify-content: end;
-    margin-right: 20px;
+  display: flex;
+  justify-content: end;
+  margin-right: 20px;
 }
-.margins-any{
-    margin:'20px'
+.margins-any {
+  margin: '20px';
 }
- 
 
 .modal {
   background-color: white;
@@ -78,9 +77,9 @@ hr {
   border-top: 1px solid #e0e0e0;
   margin: 16px 0;
 }
-.set-mouse{
-    cursor: pointer;
+.set-mouse {
+  cursor: pointer;
 }
-.fontMM{
-    font-size: 14px;
+.fontMM {
+  font-size: 14px;
 }
