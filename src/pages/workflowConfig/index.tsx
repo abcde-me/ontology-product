@@ -27,13 +27,16 @@ function WorkflowConfig() {
         setWorkflowDetail(app.data);
         setLoading(false);
       } else {
-        const app = await createWorkflow({
-          name: '新建工作流',
-          mode: 'workflow'
+        const workflowInfo = await createWorkflow({
+          workflow_name: '新建工作流'
         });
-        history.push(
-          '/tenant/compute/modaforge/workflowConfig?id=' + app.data.id
-        );
+
+        if (workflowInfo?.data?.workflow_uuid) {
+          history.push(
+            '/tenant/compute/modaforge/workflowConfig?id=' +
+              workflowInfo.data.workflow_uuid
+          );
+        }
       }
     };
     init();

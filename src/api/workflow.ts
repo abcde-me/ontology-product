@@ -1,8 +1,20 @@
 import UAPI from '@/api';
 
-// TODO: 待补充类型
-export async function createWorkflow(params: Record<string, any>) {
-  return await UAPI.RES.createWorkflow({}).post(params).inRegion().do();
+export async function createWorkflow(
+  params: CreateWorkflowParams
+): Promise<ApiRes<CreateWorkflowRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.createWorkflow({}).post(params).inRegion().do();
+  return Promise.resolve({
+    code: '',
+    message: 'ok',
+    data: {
+      ds_workflow_id: '3242242',
+      workflow_uuid: 'app-903a7d22-dd9d-4ab9-8748-2659c2dbf1ce'
+    },
+    requestId: '',
+    status: 200
+  });
 }
 
 // TODO: 待补充类型
