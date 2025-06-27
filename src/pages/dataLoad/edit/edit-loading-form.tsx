@@ -31,6 +31,31 @@ const quickOptionsData = [
   '每月一日凌晨0点',
   '每周一上午9点'
 ];
+enum PromptType {
+  EVERYDAYZERO = '每天凌晨0点',
+  EVERYDAYTWELVE = '每天凌晨12点',
+  EVERYMONTHONEZERO = '每月一日凌晨0点',
+  EVERWEEKNINE = '每周一上午9点'
+}
+const PromptTypeStatus = {
+  [PromptType.EVERYDAYZERO]: {
+    txt: '每天凌晨0点'
+  },
+  [PromptType.EVERYDAYTWELVE]: {
+    txt: '每天凌晨12点'
+  },
+  [PromptType.EVERYMONTHONEZERO]: {
+    txt: '每月一日凌晨0点'
+  },
+  [PromptType.EVERWEEKNINE]: {
+    txt: '每周一上午9点'
+  }
+};
+enum FrequencyType {
+  EVERYDAY = '每日',
+  EVERYWEEK = '每周',
+  EVERYMONTH = '每月'
+}
 const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
   // 频率选择器选择的数据
   const [frequencyData, setFrequencyData] = useState('');
@@ -44,18 +69,26 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
   };
   // 点击快捷选项的回调
   const shortcutHan = (value) => {
-    if (value == '每天凌晨0点') {
-      setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '00:00' });
-    } else if (value == '每天中午12点') {
-      setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '12:00' });
-    } else if (value == '每月一日凌晨0点') {
-      setFrequencyData('每月');
-      form.setFieldsValue({ cycle: '每月', day: ['1号'], time: '00:00' });
-    } else if (value == '每周一上午9点') {
-      setFrequencyData('每周');
-      form.setFieldsValue({ cycle: '每周', week: ['周一'], time: '09:00' });
+    if (value == PromptTypeStatus[PromptType.EVERYDAYZERO].txt) {
+      setFrequencyData(FrequencyType.EVERYDAY);
+      form.setFieldsValue({ cycle: FrequencyType.EVERYDAY, time: '00:00' });
+    } else if (value == PromptTypeStatus[PromptType.EVERYDAYTWELVE].txt) {
+      setFrequencyData(FrequencyType.EVERYDAY);
+      form.setFieldsValue({ cycle: FrequencyType.EVERYDAY, time: '12:00' });
+    } else if (value == PromptTypeStatus[PromptType.EVERYMONTHONEZERO].txt) {
+      setFrequencyData(FrequencyType.EVERYMONTH);
+      form.setFieldsValue({
+        cycle: FrequencyType.EVERYMONTH,
+        day: ['1号'],
+        time: '00:00'
+      });
+    } else if (value == PromptTypeStatus[PromptType.EVERWEEKNINE].txt) {
+      setFrequencyData(FrequencyType.EVERYWEEK);
+      form.setFieldsValue({
+        cycle: FrequencyType.EVERYWEEK,
+        week: ['周一'],
+        time: '09:00'
+      });
     }
   };
   return (
@@ -83,13 +116,13 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                 style={{ width: 100 }}
                 onChange={(val) => setFrequencyData(val)}
               >
-                <Option value="每日">每日</Option>
-                <Option value="每周">每周</Option>
-                <Option value="每月">每月</Option>
+                <Option value="每日">{FrequencyType.EVERYDAY}</Option>
+                <Option value="每周">{FrequencyType.EVERYWEEK}</Option>
+                <Option value="每月">{FrequencyType.EVERYMONTH}</Option>
               </Select>
             </Form.Item>
-            {frequencyData == '每天' && null}
-            {frequencyData == '每周' && (
+            {frequencyData == FrequencyType.EVERYDAY && null}
+            {frequencyData == FrequencyType.EVERYWEEK && (
               <Form.Item
                 field="week"
                 style={{
@@ -110,7 +143,7 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                 />
               </Form.Item>
             )}
-            {frequencyData == '每月' && (
+            {frequencyData == FrequencyType.EVERYMONTH && (
               <Form.Item
                 field="day"
                 style={{
@@ -148,13 +181,12 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                               style={{
                                 width: '50%',
                                 height: '100%',
-                                // TODO: ts错误
-                                // @ts-expect-error
-                                background: item == timeFlag ? 'white' : null,
-                                // TODO: ts错误
-                                // @ts-expect-error
+                                background:
+                                  item == timeFlag ? 'white' : undefined,
                                 color:
-                                  item == timeFlag ? 'rgb(0, 125, 250)' : null,
+                                  item == timeFlag
+                                    ? 'rgb(0, 125, 250)'
+                                    : undefined,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
