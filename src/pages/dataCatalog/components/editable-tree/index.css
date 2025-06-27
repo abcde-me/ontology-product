@@ -1,0 +1,29 @@
+.tree-container {
+  &.arco-tree {
+    .arco-tree-node {
+      .extra-container {
+        opacity: 0;
+      }
+
+      .last-leaf-title {
+        .last-leaf-text {
+          width: 100px;
+        }
+      }
+
+      &:hover {
+        .extra-container {
+          opacity: 1;
+        }
+
+        &:not(:has(.no-operation)) {
+          .last-leaf-title {
+            .last-leaf-text {
+              width: 80px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

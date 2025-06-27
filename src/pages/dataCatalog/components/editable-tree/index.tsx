@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Tooltip, Tree } from '@arco-design/web-react';
 import {
   IconCaretDown,
-  IconCaretRight,
   IconPlus,
-  IconDelete
+  IconDelete,
+  IconEdit,
+  IconStorage,
+  IconArchive
 } from '@arco-design/web-react/icon';
 import SearchInput from '../search-input';
 import {
@@ -12,8 +14,7 @@ import {
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
 import classNames from 'classnames';
-
-const TreeNode = Tree.Node; // 从treedata 生成 treenode
+import './index.css';
 
 interface ITreeData {
   id: string | number;
@@ -48,7 +49,7 @@ const fakeData: ITreeData[] = [
         },
         {
           id: 11,
-          name: 'source-vol-2',
+          name: 'source-vol-22222',
           parent_id: 1
         }
       ],
@@ -101,10 +102,29 @@ function convertRawDataToTreeData(fakeData: ITreeData[]) {
           type: type,
           children:
             arr?.map((item) => {
+              const itemTitle = (
+                <div className="last-leaf-title flex items-center overflow-hidden">
+                  {type === 'volume' ? (
+                    <IconStorage className="mr-2" />
+                  ) : (
+                    <IconArchive className="mr-2" />
+                  )}
+                  <div
+                    className={classNames(
+                      'last-leaf-text overflow-hidden text-ellipsis whitespace-nowrap',
+                      type === 'db' ? 'no-operation' : ''
+                    )}
+                  >
+                    {item.name}
+                  </div>
+                </div>
+              );
+
               return {
-                title: item.name,
+                title: itemTitle,
                 key: `${type}-${item.id}`,
-                isLeaf: true
+                isLeaf: true,
+                type: type
               };
             }) || []
         };
@@ -162,52 +182,65 @@ export default function EditableTree(props: Props) {
     }
   };
 
+  // 重命名目录
+  const handleEdit = (node) => {};
+
+  // 删除目录 or 卷
+  const handDelete = (node) => {};
+
+  const addVolume = (node) => {
+    if (node.dataRef) {
+      const dataChildren = node.dataRef.children || [];
+      dataChildren.push({
+        title: 'new tree node',
+        key: node._key + '-' + (dataChildren.length + 1)
+      });
+      node.dataRef.children = dataChildren;
+      setTreeData([...treeData]);
+    }
+  };
+
   const renderExtra = (node) => {
     const { type, isLeaf } = node;
 
     return (
-      <div className={classNames('mr-1 flex h-9 items-center justify-between')}>
-        <Tooltip color="white" content="删除">
-          <IconDelete
-          // 删除目录 or 卷 or 数据库
-          // onClick={() => handDelete(node._key, node)}
-          />
-        </Tooltip>
-        {type && subLeafKeys[type] && (
-          <IconPlus
-            className="ml-2"
-            style={{
-              fontSize: 12
-            }}
-            onClick={() => {
-              // 新增卷 or 数据库
-              if (node.dataRef) {
-                const dataChildren = node.dataRef.children || [];
-                dataChildren.push({
-                  title: 'new tree node',
-                  key: node._key + '-' + (dataChildren.length + 1)
-                });
-                node.dataRef.children = dataChildren;
-                setTreeData([...treeData]);
-              }
-            }}
-          />
+      <div
+        className={classNames(
+          'mr-1 flex h-9 items-center justify-between opacity-0',
+          'extra-container'
+        )}
+      >
+        {type === 'catalog' && (
+          <Tooltip color="white" content="重命名">
+            <IconEdit
+              className={'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'}
+              onClick={() => handleEdit(node)}
+            />
+          </Tooltip>
+        )}
+        {type !== 'db' && (
+          <Tooltip color="white" content="删除">
+            <IconDelete
+              onClick={() => handDelete(node)}
+              className="hover:text-[rgb(var(--primary-6))]"
+            />
+          </Tooltip>
+        )}
+        {!isLeaf && type === 'volume' && (
+          <Tooltip color="white" content="新建">
+            <IconPlus
+              className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+              onClick={() => addVolume(node)}
+            />
+          </Tooltip>
         )}
       </div>
     );
   };
 
   return (
-    <div className="pl-3 pr-3 pt-2">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          marginTop: '-8px',
-          marginBottom: 8
-        }}
-      >
+    <div className={classNames('pl-3 pr-3 pt-2')}>
+      <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <SearchInput
           value={searchValue}
           onChange={setSearchValue}
@@ -233,12 +266,12 @@ export default function EditableTree(props: Props) {
             node._key === '__input__' ||
             (node.childrenData && node.childrenData.length > 0) ? (
               <IconCaretDown />
-            ) : null,
-          dragIcon: <IconCaretRight />
+            ) : null
         })}
         onExpand={handleExpand}
         onSelect={handleSelect}
         renderExtra={renderExtra}
+        className="tree-container"
       >
         {generatorTreeNodes(treeData)}
       </Tree>
