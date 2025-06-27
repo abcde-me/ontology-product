@@ -13,6 +13,11 @@ import {
   WORKFLOW_OPERATION
 } from '../../types';
 import SchedulerRun from '@/components/scheduler-run';
+import CircleIcon from '@/assets/workflow-header-circle.svg';
+import CircleIconDisabled from '@/assets/workflow-header-circle-disabled.svg';
+import PlayIcon from '@/assets/workflow-header-play.svg';
+import PlayIconDisabled from '@/assets/workflow-header-play-disabled.svg';
+import './index.css';
 
 dayjs.extend(relativeTime);
 
@@ -21,7 +26,7 @@ const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
 const AppPublisher = ({
   disabled = false,
   publishDisabled = false,
-  onPublish,
+  onOperate,
   onRestore,
   onToggle
 }: AppPublisherProps) => {
@@ -42,7 +47,7 @@ const AppPublisher = ({
 
       console.log('点击操作按钮params:', params);
       try {
-        await onPublish?.(op, params);
+        await onOperate?.(op, params);
         setPublished(true);
         // 发布操作在弹框里面时，需要去掉下面这个计时器
         window.setTimeout(() => {
@@ -52,7 +57,7 @@ const AppPublisher = ({
         setPublished(false);
       }
     },
-    [onPublish]
+    [onOperate]
   );
 
   // useKeyPress(
@@ -70,25 +75,35 @@ const AppPublisher = ({
       <Space>
         <Button
           type="outline"
+          className="toggle-btn"
           onClick={() => handleOperate(WORKFLOW_OPERATION.ONLINE)}
         >
           上线
         </Button>
-        <Button type="outline" onClick={() => setSchedulerDialogVisible(true)}>
-          定时运行
-        </Button>
-        <Modal
-          title="定时任务设置"
-          style={{ width: '640px' }}
-          visible={schedulerDialogVisible}
-          onOk={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
-          onCancel={() => setSchedulerDialogVisible(false)}
-        >
-          <SchedulerRun></SchedulerRun>
-        </Modal>
+        <div>
+          <Button
+            className="scheduler-btn"
+            type="outline"
+            onClick={() => setSchedulerDialogVisible(true)}
+            icon={<CircleIcon />}
+          >
+            定时运行
+          </Button>
+          <Modal
+            title="定时任务设置"
+            style={{ width: '640px' }}
+            visible={schedulerDialogVisible}
+            onOk={() => handleOperate(WORKFLOW_OPERATION.CRON_RUNNING)}
+            onCancel={() => setSchedulerDialogVisible(false)}
+          >
+            <SchedulerRun></SchedulerRun>
+          </Modal>
+        </div>
         <Button
-          type="outline"
+          className="run-btn"
+          type="primary"
           onClick={() => handleOperate(WORKFLOW_OPERATION.RUNNING)}
+          icon={<PlayIcon />}
         >
           运行
         </Button>
