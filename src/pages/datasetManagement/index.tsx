@@ -24,6 +24,23 @@ import { getDatasetList, createDataset } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import './index.css';
 
+// 时间格式化函数
+const formatDateTime = (dateTimeString: string): string => {
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    return dateTimeString; // 如果格式化失败，返回原字符串
+  }
+};
+
 // 数据集类型
 interface Dataset {
   id: number;
@@ -140,32 +157,26 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     dataIndex: 'created_at',
     width: 220,
     sorter: (a: Dataset, b: Dataset) => {
-      // 将中文日期格式转换为可比较的时间戳
-      const dateA = new Date(
-        a.created_at.replace(/年|月/g, '-').replace(/日/g, '')
-      ).getTime();
-      const dateB = new Date(
-        b.created_at.replace(/年|月/g, '-').replace(/日/g, '')
-      ).getTime();
+      // 直接比较 ISO 8601 格式的时间字符串
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
       return dateA - dateB;
     },
-    sortDirections: ['ascend' as const, 'descend' as const]
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (created_at: string) => formatDateTime(created_at)
   },
   {
     title: '最近更新',
     dataIndex: 'updated_at',
     width: 220,
     sorter: (a: Dataset, b: Dataset) => {
-      // 将中文日期格式转换为可比较的时间戳
-      const dateA = new Date(
-        a.updated_at.replace(/年|月/g, '-').replace(/日/g, '')
-      ).getTime();
-      const dateB = new Date(
-        b.updated_at.replace(/年|月/g, '-').replace(/日/g, '')
-      ).getTime();
+      // 直接比较 ISO 8601 格式的时间字符串
+      const dateA = new Date(a.updated_at).getTime();
+      const dateB = new Date(b.updated_at).getTime();
       return dateA - dateB;
     },
-    sortDirections: ['ascend' as const, 'descend' as const]
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (updated_at: string) => formatDateTime(updated_at)
   },
   {
     title: '操作',
@@ -201,8 +212,8 @@ const data: Dataset[] = [
     src: 1,
     creator_id: 'admin001',
     creator_name: '行政',
-    created_at: '2025年5月15日 10:30:45',
-    updated_at: '2025年6月1日 08:15:22',
+    created_at: '2025-05-15T10:30:45+08:00',
+    updated_at: '2025-06-01T08:15:22+08:00',
     deleted_at: null,
     tags: ['文本11111111111111111', '训练'],
     src_model: 'gpt-3.5-turbo'
@@ -215,8 +226,8 @@ const data: Dataset[] = [
     src: 0,
     creator_id: 'system',
     creator_name: '行政',
-    created_at: '2025年5月10日 14:22:33',
-    updated_at: '2025年5月28日 16:45:10',
+    created_at: '2025-05-10T14:22:33+08:00',
+    updated_at: '2025-05-28T16:45:10+08:00',
     deleted_at: null,
     tags: ['图片', '分类'],
     src_model: 'vision-model'
@@ -229,8 +240,8 @@ const data: Dataset[] = [
     src: 1,
     creator_id: 'admin001',
     creator_name: '行政',
-    created_at: '2025年4月22日 09:12:18',
-    updated_at: '2025年5月30日 11:33:47',
+    created_at: '2025-04-22T09:12:18+08:00',
+    updated_at: '2025-05-30T11:33:47+08:00',
     deleted_at: null,
     tags: ['混合', '自定义', '测试'],
     src_model: 'claude-3-sonnet'

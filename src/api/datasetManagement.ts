@@ -53,10 +53,17 @@ interface DatasetDetailPageParams {
   id: string;
 }
 
+// 数据变更类型枚举
+export enum DataChangeType {
+  MODIFY = 1, // 修改
+  DELETE = 2, // 删除
+  ADD = 3 // 新增，目前不用后期开发可能会用
+}
+
 // 数据变更项接口
 export interface DataChangeItem {
   line: number; // 行号
-  change_type: number; // 变更类型：0=修改, 1=删除, 2=新增 等
+  change_type: DataChangeType; // 变更类型
   new_data: Record<string, any>; // 新数据，key-value格式
 }
 
