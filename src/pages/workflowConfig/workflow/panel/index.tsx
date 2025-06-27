@@ -15,7 +15,7 @@ import WorkflowPreview from './workflow-preview';
 import GlobalVariablePanel from './global-variable-panel';
 import VersionHistoryPanel from './version-history-panel';
 import cn from '@/pages/workflowConfig/utils/classnames';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import MessageLogModal from '@/pages/workflowConfig/components/message-log-modal';
 
 const Panel: FC = () => {
@@ -37,7 +37,7 @@ const Panel: FC = () => {
     showMessageLogModal,
     setShowMessageLogModal,
     currentLogModalActiveTab
-  } = useAppStore(
+  } = useTaskStore(
     useShallow((state) => ({
       currentLogItem: state.currentLogItem,
       setCurrentLogItem: state.setCurrentLogItem,

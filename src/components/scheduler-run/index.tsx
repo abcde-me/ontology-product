@@ -14,11 +14,6 @@ import { WEEKLY_OPTIONS, MONTHLY_OPTIONS } from './constants';
 // 选择器的实例
 const Option = Select.Option;
 
-// form表单类型
-interface CycleLoadingFormProps {
-  form: any; // 实际项目中应该使用更具体的类型
-}
-
 // 快捷键的数据
 const quickOptionsData = [
   '每天凌晨0点',
@@ -39,9 +34,10 @@ export const TIMEARR = {
   }
 };
 
-const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
+const CycleLoadingForm: React.FC = () => {
   // 频率选择器选择的数据
   const [frequencyData, setFrequencyData] = useState('');
+  const [form] = Form.useForm();
 
   // 提示信息的状态
   const [promptState, setPromptState] = useState(false);

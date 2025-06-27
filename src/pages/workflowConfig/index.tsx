@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Initor } from '@/pages/workflowConfig/initor';
 import Workflow from '@/pages/workflowConfig/workflow';
-import { useStore } from '@/pages/workflowConfig/app/store';
+import { useStore } from '@/pages/workflowConfig/task/store';
 import { createWorkflow, getWorkflowDetail } from '@/api/workflow';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router-dom';
@@ -13,18 +13,22 @@ import './styles/custom.scss';
 function WorkflowConfig() {
   const { setWorkflowDetail } = useStore(
     useShallow((state) => ({
-      setWorkflowDetail: state.setAppDetail
+      setWorkflowDetail: state.setWorkflowDetail
     }))
   );
   const [loading, setLoading] = useState(true);
-  const appId = useParams('id');
+  const appId = useParams('workflow_uuid');
   const history = useHistory();
 
   useEffect(() => {
     const init = async () => {
       if (appId) {
-        const app = await getWorkflowDetail(appId);
-        setWorkflowDetail(app.data);
+        const workflowDetailRes = await getWorkflowDetail(appId);
+
+        if (workflowDetailRes?.data) {
+          setWorkflowDetail(workflowDetailRes.data);
+        }
+
         setLoading(false);
       } else {
         const workflowInfo = await createWorkflow({
@@ -32,9 +36,9 @@ function WorkflowConfig() {
         });
 
         if (workflowInfo?.data?.workflow_uuid) {
+          const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
           history.push(
-            '/tenant/compute/modaforge/workflowConfig?id=' +
-              workflowInfo.data.workflow_uuid
+            `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );
         }
       }

@@ -27,7 +27,7 @@ import { useEventEmitterContextContext } from '@/pages/workflowConfig/context/ev
 import { getWorkflowDraft } from '@/api/workflowV2';
 // import { exportAppConfig } from '@/service/apps'
 import { useToastContext } from '@/pages/workflowConfig/components/toast';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 // import workflowDraftJson from '@/pages/workflowConfig/mockData/workflowDraft.json'
 
 export const useWorkflowInteractions = () => {
@@ -266,7 +266,7 @@ export const useDSL = () => {
   const [exporting, setExporting] = useState(false);
   const { doSyncWorkflowDraft } = useNodesSyncDraft();
 
-  const appDetail = useAppStore((s) => s.appDetail);
+  const appDetail = useTaskStore((s) => s.workflowDetail);
 
   const handleExportDSL = useCallback(
     async (include = false) => {
@@ -299,7 +299,9 @@ export const useDSL = () => {
   const exportCheck = useCallback(async () => {
     if (!appDetail) return;
     try {
-      const { data: workflowDraft } = await getWorkflowDraft(appDetail?.id);
+      const { data: workflowDraft } = await getWorkflowDraft(
+        appDetail?.workflow_uuid
+      );
       const list = (workflowDraft.environment_variables || []).filter(
         (env) => env.value_type === 'secret'
       );
