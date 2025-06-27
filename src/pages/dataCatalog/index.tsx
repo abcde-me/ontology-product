@@ -1,7 +1,6 @@
 import React from 'react';
 import './index.css';
-import { DatePicker } from '@arco-design/web-react';
-import SourceDate from './components/source-data';
+import SourceData from './components/source-data';
 import Eltable from './components/el-table';
 
 const DataCatalog: React.FC = () => {
@@ -55,7 +54,7 @@ const DataCatalog: React.FC = () => {
             height: 'calc(100% - 43px)'
           }}
         >
-          <SourceDate
+          <SourceData
             onTabChange={handleTabChange}
             onNodeSelect={handleNodeSelect}
             activeTab={active}

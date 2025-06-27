@@ -3,10 +3,16 @@ import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import SourceDataTree from './components/sourcedata-tree';
 import TargetDataTree from './components/targetdata-tree';
+import EditableTree from '../EditableTree';
 
 const TabPane = Tabs.TabPane;
 
-export default function SourceDate(props) {
+const tabKeys = [
+  { key: 'source', title: '源数据' },
+  { key: 'target', title: '目标数据' }
+];
+
+export default function SourceData(props) {
   const { onTabChange, onNodeSelect, activeTab } = props;
 
   const handleTabChange = (value) => {
@@ -16,18 +22,27 @@ export default function SourceDate(props) {
     }
   };
 
-    return (
-        <div style={{ width: '220px', border: '1px solid #E2E8F0', borderRadius: '4px', marginRight: '8px',overflow:'auto'  }}>
-            <div style={{ width: '100%', height: '40px' }}>
-                <Tabs activeTab={activeTab} onChange={(e) => handleTabChange(e)} className="tabs-center" >
-                    <TabPane key='source' title='源数据' >
-                        <SourceDataTree onChanges={onNodeSelect} />
-                    </TabPane>
-                    <TabPane key='target' title='目标数据' >
-                        <TargetDataTree onChanges={onNodeSelect} />
-                    </TabPane>
-                </Tabs>
-            </div>
-        </div>
-    )
+  return (
+    <div className="mr-[8px] w-[220px] overflow-auto rounded border border-solid border-[#E2E8F0]">
+      <div className="h-[40px] w-full">
+        <Tabs
+          activeTab={activeTab}
+          onChange={(e) => handleTabChange(e)}
+          className="tabs-center"
+        >
+          {tabKeys.map((tab) => (
+            <TabPane key={tab.key} title={tab.title}>
+              <EditableTree onChanges={onNodeSelect} />
+            </TabPane>
+          ))}
+          {/* <TabPane key="source" title="源数据">
+            <SourceDataTree onChanges={onNodeSelect} />
+          </TabPane>
+          <TabPane key="target" title="目标数据">
+            <TargetDataTree onChanges={onNodeSelect} />
+          </TabPane> */}
+        </Tabs>
+      </div>
+    </div>
+  );
 }
