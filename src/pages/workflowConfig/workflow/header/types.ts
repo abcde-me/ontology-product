@@ -28,7 +28,7 @@ export type AppPublisherProps = {
   draftUpdatedAt?: number;
   debugWithMultipleModel?: boolean;
   multipleModelConfigs?: ModelAndParameter[];
-  onPublish?: (op: WORKFLOW_OPERATION, params?: any) => Promise<any> | any;
+  onOperate?: (op: WORKFLOW_OPERATION, params?: any) => Promise<any> | any;
   onRestore?: () => Promise<any> | any;
   onToggle?: (state: boolean) => void;
   crossAxisOffset?: number;
