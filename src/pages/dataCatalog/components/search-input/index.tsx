@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Input } from '@arco-design/web-react';
+import { Input, InputProps } from '@arco-design/web-react';
 import { IconCloseCircle, IconSearch } from '@arco-design/web-react/icon';
 
 type Props = {
   value?: string;
   onChange?: (value: string) => void;
-};
+} & Omit<InputProps, 'value' | 'onChange'>;
 
 export default function SearchInput(props: Props) {
   const [value, setValue] = useState(props.value || '');
@@ -19,15 +19,17 @@ export default function SearchInput(props: Props) {
     setIsHover(false);
   };
 
+  const onChange = (value: string) => {
+    setValue(value);
+    props?.onChange?.(value);
+  };
+
   return (
-    <div>
+    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <Input
+        {...props}
         value={value}
-        className={'h-8 w-[130px]'}
-        onChange={(value) => {
-          setValue(value);
-        }}
-        placeholder="输入搜索目录"
+        onChange={onChange}
         suffix={
           value && isHover ? (
             <IconCloseCircle
@@ -38,8 +40,6 @@ export default function SearchInput(props: Props) {
             <IconSearch />
           )
         }
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
       />
     </div>
   );

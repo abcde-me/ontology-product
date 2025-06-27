@@ -3,7 +3,7 @@ import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import SourceDataTree from './components/sourcedata-tree';
 import TargetDataTree from './components/targetdata-tree';
-import EditableTree from '../EditableTree';
+import EditableTree from '../editable-tree';
 
 const TabPane = Tabs.TabPane;
 

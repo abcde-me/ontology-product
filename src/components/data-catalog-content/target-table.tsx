@@ -39,7 +39,7 @@ import {
   targetDataDatabase
 } from './target-columns';
 import { sourceDataVolume } from './source-columns';
-import FormComponent from './components/Dataset-form';
+import FormComponent from './components/dataset-form';
 const { Text } = Typography; //使用Text来控制文字的效果
 
 const rawCatalogData = {

@@ -5,7 +5,7 @@ import {
   IconCaretRight,
   IconPlus
 } from '@arco-design/web-react/icon';
-import ClearableInput from '../SearchInput';
+import SearchInput from '../search-input';
 
 const TreeNode = Tree.Node; // 从treedata 生成 treenode
 
@@ -108,7 +108,12 @@ export default function EditableTree(props: Props) {
           marginBottom: 8
         }}
       >
-        <ClearableInput value={inputValue} onChange={setInputValue} />
+        <SearchInput
+          value={inputValue}
+          onChange={setInputValue}
+          placeholder="输入搜索目录"
+          className="h-8 w-[130px]"
+        />
         <div
           className="cursor-pointer text-xs text-[#2563EB]"
           // onClick={() => setIsAdding(true)}

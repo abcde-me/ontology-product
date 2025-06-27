@@ -49,7 +49,7 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
         draft.text_slice_rule = fields.text_slice_rule;
         draft.slice_max_size = fields.slice_max_size;
         draft.text_proc_rules = fields.text_proc_rules;
-        draft.text_orc_model_id = fields.text_orc_model_id;
+        draft.text_ocr_model_id = fields.text_ocr_model_id;
         draft.text_pic_model_id = fields.text_pic_model_id;
         draft.text_emb_model_id = fields.text_emb_model_id;
       });
