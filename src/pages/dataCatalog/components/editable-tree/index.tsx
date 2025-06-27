@@ -1,13 +1,72 @@
 import React, { useState } from 'react';
-import { Tree } from '@arco-design/web-react';
+import { Tooltip, Tree } from '@arco-design/web-react';
 import {
   IconCaretDown,
   IconCaretRight,
-  IconPlus
+  IconPlus,
+  IconDelete
 } from '@arco-design/web-react/icon';
 import SearchInput from '../search-input';
+import {
+  NodeInstance,
+  TreeDataType
+} from '@arco-design/web-react/es/Tree/interface';
+import classNames from 'classnames';
 
 const TreeNode = Tree.Node; // 从treedata 生成 treenode
+
+interface ITreeData {
+  id: string | number;
+  name: string;
+  type: string;
+  parent_id?: string | number;
+  children?: {
+    volume?: Array<{
+      id: number;
+      name: string;
+      parent_id: number;
+    }>;
+    db?: Array<{
+      id: number;
+      name: string;
+      parent_id: number;
+    }>;
+  };
+}
+
+const fakeData: ITreeData[] = [
+  {
+    type: 'catalog',
+    id: 1,
+    name: '目录1',
+    children: {
+      volume: [
+        {
+          id: 10,
+          name: 'source-vol',
+          parent_id: 1
+        },
+        {
+          id: 11,
+          name: 'source-vol-2',
+          parent_id: 1
+        }
+      ],
+      db: [
+        {
+          id: 20,
+          name: 'source-db-1',
+          parent_id: 1
+        },
+        {
+          id: 21,
+          name: 'source-db-2',
+          parent_id: 1
+        }
+      ]
+    }
+  }
+];
 
 const generatorTreeNodes = (treeData) => {
   return treeData.map((item) => {
@@ -20,81 +79,122 @@ const generatorTreeNodes = (treeData) => {
   });
 };
 
-const TreeData = [
-  {
-    title: 'Trunk',
-    key: '0-0',
-    children: [
-      {
-        title: 'Leaf',
-        key: '0-0-1'
-      },
-      {
-        title: 'Branch',
-        key: '0-0-2',
-        children: [
-          {
-            title: 'Leaf',
-            key: '0-0-2-1'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    title: 'Trunk',
-    key: '0-1',
-    children: [
-      {
-        title: 'Branch',
-        key: '0-1-1',
-        children: [
-          {
-            title: 'Leaf',
-            key: '0-1-1-1'
-          },
-          {
-            title: 'Leaf',
-            key: '0-1-1-2'
-          }
-        ]
-      },
-      {
-        title: 'Leaf',
-        key: '0-1-2'
-      }
-    ]
-  }
-];
-
 type Props = {
   onChanges?: (data: any) => void;
 };
 
+const subLeafKeys = {
+  volume: '数据卷',
+  db: '数据库'
+};
+
+function convertRawDataToTreeData(fakeData: ITreeData[]) {
+  if (!Array.isArray(fakeData)) return [];
+
+  const cache = fakeData.map((catalog) => {
+    const childrenArr: TreeDataType[] = [];
+    if (catalog.children) {
+      Object.entries(catalog.children).forEach(([type, arr]) => {
+        const subChildren = {
+          title: subLeafKeys[type],
+          key: type,
+          type: type,
+          children:
+            arr?.map((item) => {
+              return {
+                title: item.name,
+                key: `${type}-${item.id}`,
+                isLeaf: true
+              };
+            }) || []
+        };
+        childrenArr.push(subChildren);
+      });
+    }
+    return {
+      title: catalog.name,
+      key: `catalog-${catalog.id}`,
+      type: catalog.type,
+      children: childrenArr
+    };
+  });
+
+  return cache;
+}
+
+const tmpData = convertRawDataToTreeData(fakeData);
+
 export default function EditableTree(props: Props) {
   const { onChanges } = props;
 
-  const [treeData, setTreeData] = useState(TreeData);
+  const [treeData, setTreeData] = useState(tmpData);
   const [expandedKeys, setExpandedKeys] = useState([
-    '0-1',
-    '0-1-volume',
-    '0-1-db'
+    tmpData?.[0]?.key || '',
+    tmpData?.[0]?.children?.[0]?.key || '',
+    tmpData?.[0]?.children?.[1]?.key || ''
   ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isInputHovered, setIsInputHovered] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
-  // 设置默认选中的节点key（卷下的第一个文件）
-  const [selectedKey, setSelectedKey] = useState('0-1-volume-10');
+  // 默认选中第一个目录的数据卷卷下的第一个文件
+  const [selectedKey, setSelectedKey] = useState(
+    tmpData?.[0]?.children?.[0]?.children?.[0]?.key || ''
+  );
 
   const handleExpand = (expandedKeys) => {
     setExpandedKeys(expandedKeys);
   };
 
-  const handleSelect = (selectedKeys) => {
-    setSelectedKey(selectedKeys[0]);
-    if (onChanges) {
-      onChanges(selectedKeys[0]);
+  const handleSelect = (
+    selectedKeys: string[],
+    extra: {
+      selected: boolean;
+      selectedNodes: NodeInstance[];
+      node: NodeInstance;
+      e: Event;
     }
+  ) => {
+    const { props } = extra.node;
+    if (props.isLeaf) {
+      setSelectedKey(selectedKeys[0]);
+      if (onChanges) {
+        onChanges(selectedKeys[0]);
+      }
+    }
+  };
+
+  const renderExtra = (node) => {
+    const { type, isLeaf } = node;
+
+    return (
+      <div className={classNames('mr-1 flex h-9 items-center justify-between')}>
+        <Tooltip color="white" content="删除">
+          <IconDelete
+          // 删除目录 or 卷 or 数据库
+          // onClick={() => handDelete(node._key, node)}
+          />
+        </Tooltip>
+        {type && subLeafKeys[type] && (
+          <IconPlus
+            className="ml-2"
+            style={{
+              fontSize: 12
+            }}
+            onClick={() => {
+              // 新增卷 or 数据库
+              if (node.dataRef) {
+                const dataChildren = node.dataRef.children || [];
+                dataChildren.push({
+                  title: 'new tree node',
+                  key: node._key + '-' + (dataChildren.length + 1)
+                });
+                node.dataRef.children = dataChildren;
+                setTreeData([...treeData]);
+              }
+            }}
+          />
+        )}
+      </div>
+    );
   };
 
   return (
@@ -109,8 +209,8 @@ export default function EditableTree(props: Props) {
         }}
       >
         <SearchInput
-          value={inputValue}
-          onChange={setInputValue}
+          value={searchValue}
+          onChange={setSearchValue}
           placeholder="输入搜索目录"
           className="h-8 w-[130px]"
         />
@@ -138,30 +238,7 @@ export default function EditableTree(props: Props) {
         })}
         onExpand={handleExpand}
         onSelect={handleSelect}
-        renderExtra={(node) => {
-          return (
-            <IconPlus
-              style={{
-                position: 'absolute',
-                right: 8,
-                fontSize: 12,
-                top: 10,
-                color: '#3370ff'
-              }}
-              onClick={() => {
-                if (node.dataRef) {
-                  const dataChildren = node.dataRef.children || [];
-                  dataChildren.push({
-                    title: 'new tree node',
-                    key: node._key + '-' + (dataChildren.length + 1)
-                  });
-                  node.dataRef.children = dataChildren;
-                  setTreeData([...treeData]);
-                }
-              }}
-            />
-          );
-        }}
+        renderExtra={renderExtra}
       >
         {generatorTreeNodes(treeData)}
       </Tree>
