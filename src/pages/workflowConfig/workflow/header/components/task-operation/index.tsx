@@ -4,7 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { useKeyPress } from 'ahooks';
 import { getKeyboardKeyCodeBySystem } from '@/pages/workflowConfig/workflow/utils';
 import { Button, Modal } from '@arco-design/web-react';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
 import {
@@ -32,8 +32,6 @@ const AppPublisher = ({
 }: AppPublisherProps) => {
   const [published, setPublished] = useState(false);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
-  const appDetail = useAppStore((state) => state.appDetail);
-  appDetail?.site ?? {};
 
   const handleOperate = useCallback(
     async (

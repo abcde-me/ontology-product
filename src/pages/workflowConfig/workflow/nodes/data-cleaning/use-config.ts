@@ -3,13 +3,13 @@ import produce from 'immer';
 import useVarList from '../_base/hooks/use-var-list';
 import type { CodeNodeType } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
 const useConfig = (id: string, payload: CodeNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
 
-  const appId = useAppStore.getState().appDetail?.id;
+  const appId = useTaskStore.getState().workflowDetail?.workflow_uuid;
 
   const { inputs, setInputs } = useNodeCrud<CodeNodeType>(id, payload);
   const { handleVarListChange, handleAddVariable } = useVarList<CodeNodeType>({

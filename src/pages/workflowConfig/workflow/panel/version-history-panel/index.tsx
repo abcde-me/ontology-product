@@ -14,7 +14,7 @@ import {
 import VersionHistoryItem from './version-history-item';
 // import Filter from './filter'
 import type { VersionHistory } from '@/pages/workflowConfig/types/workflow';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 // import Divider from '@/pages/workflowConfig/components/divider'
 import Loading from './loading';
 import Empty from './empty';
@@ -42,7 +42,7 @@ const VersionHistoryPanel = () => {
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
   const { handleRestoreFromPublishedWorkflow, handleLoadBackupDraft } =
     useWorkflowRun();
-  const appDetail = useAppStore.getState().appDetail;
+  const appDetail = useTaskStore.getState().workflowDetail;
   const setShowWorkflowVersionHistoryPanel = useStore(
     (s) => s.setShowWorkflowVersionHistoryPanel
   );
@@ -59,21 +59,20 @@ const VersionHistoryPanel = () => {
 
   const fetchNextPage = useCallback(async () => {
     setIsFetching(true);
-    // TODO: ts错误
-    // @ts-expect-error
-    const { data: res } = await getWorkflowPublishHistory(appDetail.id, {
-      page: page.current,
-      limit: 10
-    });
+    const { data: res } = await getWorkflowPublishHistory(
+      appDetail?.workflow_uuid ?? '',
+      {
+        page: page.current,
+        limit: 10
+      }
+    );
     page.current++;
     // TODO: ts错误
     // @ts-expect-error
     setVersionHistory((v) => ({ pages: [...v.pages, { items: res.data }] }));
     setHasNextPage(res.page * res.limit < res.total);
     setIsFetching(false);
-    // TODO: ts错误
-    // @ts-expect-error
-  }, [appDetail.id]);
+  }, [appDetail?.workflow_uuid]);
 
   const handleVersionClick = useCallback(
     (item: VersionHistory) => {
@@ -302,9 +301,8 @@ const VersionHistoryPanel = () => {
                     key={item.id}
                     item={item}
                     currentVersion={currentVersion}
-                    // TODO: ts错误
                     // @ts-expect-error
-                    latestVersionId={appDetail?.workflow?.id}
+                    latestVersionId={appDetail?.workflow?.workflow_uuid}
                     onClick={handleVersionClick}
                     handleClickMenuItem={handleClickMenuItem.bind(null, item)}
                     isLast={isLast}
