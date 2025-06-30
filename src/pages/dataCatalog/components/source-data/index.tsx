@@ -1,33 +1,47 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
+import EditableTree from '../editable-tree';
+import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SourceDataTree from './components/sourcedata-tree';
-import TargetDataTree from './components/targetdata-tree';
 
 const TabPane = Tabs.TabPane;
 
-export default function SourceDate(props) {
-  const { onTabChange, onNodeSelect, activeTab } = props;
+const tabKeys = [
+  { key: 'source', title: '源数据' },
+  { key: 'target', title: '目标数据' }
+];
 
-  const handleTabChange = (value) => {
+export default function SourceData() {
+  const dataCatalog = useDataCatalog();
+  const { catalogTreeStore } = dataCatalog;
+  const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
+
+  const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
-    if (onTabChange) {
-      onTabChange(value);
-    }
+    catalogTreeStore.setState({
+      activeTab: value
+    });
   };
 
-    return (
-        <div style={{ width: '220px', border: '1px solid #E2E8F0', borderRadius: '4px', marginRight: '8px',overflow:'auto'  }}>
-            <div style={{ width: '100%', height: '40px' }}>
-                <Tabs activeTab={activeTab} onChange={(e) => handleTabChange(e)} className="tabs-center" >
-                    <TabPane key='source' title='源数据' >
-                        <SourceDataTree onChanges={onNodeSelect} activeTab={activeTab} />
-                    </TabPane>
-                    <TabPane key='target' title='目标数据' >
-                        <TargetDataTree onChanges={onNodeSelect} activeTab={activeTab} />
-                    </TabPane>
-                </Tabs>
-            </div>
-        </div>
-    )
+  return (
+    <div className="mr-[8px] w-[220px] overflow-auto rounded border border-solid border-[#E2E8F0]">
+      <div className="h-[40px] w-full">
+        <Tabs
+          activeTab={activeTab}
+          onChange={(e) => handleTabChange(e)}
+          className="tabs-center"
+        >
+          {tabKeys.map((tab) => (
+            <TabPane key={tab.key} title={tab.title}>
+              <EditableTree />
+            </TabPane>
+          ))}
+          {/* <TabPane key={'source'} title={'数据集'}>
+            <SourceDataTree />
+          </TabPane> */}
+        </Tabs>
+      </div>
+    </div>
+  );
 }
