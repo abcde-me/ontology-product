@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
@@ -27,12 +27,17 @@ import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
 import { operateWorkflow } from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
-import EditIcon from '@/pages/workflowConfig/styles/images/op-icons/edit.svg';
-import WorkflowIcon from '@/pages/workflowConfig/styles/images/op-icons/workflow.svg';
-import { PrefixV2 } from '@/api/endpoints';
 import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
-import { Button, Modal, Space, Typography } from '@arco-design/web-react';
+import {
+  Button,
+  Input,
+  Modal,
+  Popover,
+  Space,
+  Typography
+} from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
+import './index.scss';
 
 const SuccessModal = ({ visible, onClose }) => {
   return (
@@ -79,6 +84,8 @@ const Header: FC = () => {
   const history = useHistory();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRuningModal, setShowRuningModal] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef(null);
 
   const workflowStore = useWorkflowStore();
   const userInfo = useUserInfo();
@@ -234,6 +241,31 @@ const Header: FC = () => {
     workflowStore.setState({ toolPublished: true });
   }, [workflowStore]);
 
+  const handleWorkflowNameChange = (workflow_name: string) => {
+    appDetail &&
+      setAppDetail({
+        ...appDetail,
+        workflow_name
+      });
+  };
+
+  const handleEdit = () => {
+    setEditing(true);
+    // @ts-expect-error
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleSave = () => {
+    setEditing(false);
+    // 这里可以添加保存逻辑
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    }
+  };
+
   return (
     <div className="app-workflow-page-header absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3">
       <div className="left-part">
@@ -243,24 +275,25 @@ const Header: FC = () => {
         >
           <BackIcon className="size-[16px]" />
         </div>
-        <div className="app-icon">
-          {
-            //@ts-expect-error
-            appDetail.icon ? (
-              //@ts-expect-error
-              <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
-            ) : (
-              <WorkflowIcon />
-            )
-          }
-        </div>
         <div className="app-info">
-          <div className="app-name">
-            <span className="txt">{appDetail?.workflow_name}</span>
-            <div className="op-icon" onClick={() => setShowEditModal(true)}>
-              <EditIcon className="size-[16px]" />
+          {editing ? (
+            <Input
+              className="app-name--editing"
+              ref={inputRef}
+              value={appDetail?.workflow_name}
+              onChange={handleWorkflowNameChange}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              style={{ width: 200 }}
+            />
+          ) : (
+            <div className="app-name">
+              <span className="txt">{appDetail?.workflow_name}</span>
+              <Popover trigger="hover" title="编辑">
+                <div className="eidt-icon" onClick={handleEdit}></div>
+              </Popover>
             </div>
-          </div>
+          )}
           {normal && <EditingTitle />}
         </div>
       </div>
