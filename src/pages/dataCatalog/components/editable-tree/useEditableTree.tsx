@@ -13,11 +13,7 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-
-const subLeafKeys: { [prop: string]: string } = {
-  volume: '数据卷',
-  db: '数据库'
-};
+import { subLeafKeys } from './consts';
 
 export function useEditableTree({ catalogTreeStore }) {
   const { inputRef, inputValue, treeData } = catalogTreeStore.useGetState([
@@ -59,7 +55,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const { props } = extra.node;
     if (props.dataRef?.isLastLeaf) {
       catalogTreeStore.setState({
-        selectedKeys: selectedKeys
+        selectedKey: selectedKeys[0]
       });
     }
   };
@@ -78,43 +74,26 @@ export function useEditableTree({ catalogTreeStore }) {
         })
       });
       catalogTreeStore.focusAndSelectInput();
+      // TODO
+      // Message.success('修改成功!'); // 成功提示
     }
-
-    Message.success('修改成功!'); // 成功提示
   };
 
-  // 递归删除树节点的工具函数
-  const deleteNodeFromTree = (
-    nodes: TreeDataType[],
-    targetKey: string,
-    pathKeys?: string[]
-  ): TreeDataType[] => {
-    return nodes
-      .filter((node) => node.key !== targetKey) // 直接过滤掉目标节点
-      .map((node) => {
-        if (!node.children?.length) return node;
-
-        // 如果有路径键，按路径查找并删除
-        if (pathKeys?.length) {
-          const [currentPathKey, ...remainingPath] = pathKeys;
-          if (node.key === currentPathKey) {
-            return {
-              ...node,
-              children: deleteNodeFromTree(
-                node.children,
-                targetKey,
-                remainingPath
-              )
-            };
+  // 操作子资源
+  const handleTarget = (
+    pathParentKeys,
+    targetFn: (target: TreeDataType[] | undefined) => void
+  ) => {
+    return treeData.map((item: TreeDataType) => {
+      if (item.key === pathParentKeys[0]) {
+        item.children?.forEach((subItem: TreeDataType) => {
+          if (subItem.key === pathParentKeys[1]) {
+            targetFn(subItem.children);
           }
-        }
-
-        // 递归处理子节点
-        return {
-          ...node,
-          children: deleteNodeFromTree(node.children, targetKey)
-        };
-      });
+        });
+      }
+      return item;
+    });
   };
 
   // 删除目录 or 卷
@@ -131,7 +110,6 @@ export function useEditableTree({ catalogTreeStore }) {
     try {
       switch (dataRef.type) {
         case 'catalog':
-          // 删除目录：直接从根级别过滤
           newTreeData = treeData.filter(
             (item: TreeDataType) => item.key !== _key
           );
@@ -153,11 +131,13 @@ export function useEditableTree({ catalogTreeStore }) {
           break;
 
         case 'volume-child':
-          // 删除子资源：使用路径键递归删除
-          if (!pathParentKeys?.length) {
+          if (pathParentKeys) {
+            newTreeData = handleTarget(pathParentKeys, (target) => {
+              target = target?.filter((child) => child.key !== _key);
+            });
+          } else {
             throw new Error('缺少父节点路径信息');
           }
-          newTreeData = deleteNodeFromTree(treeData, _key, pathParentKeys);
           break;
 
         default:
@@ -225,46 +205,49 @@ export function useEditableTree({ catalogTreeStore }) {
 
     let newTreeData: TreeDataType[] = [];
 
-    if (dataRef?.type === 'catalog') {
-      const newNode = {
-        ...dataRef,
-        title: fileName,
-        showInput: false,
-        children: dataRef?.children?.length
-          ? dataRef?.children
-          : [
-              {
-                title: '数据卷',
-                key: `catalog-${fileName}-volume`,
-                type: 'volume',
-                children: []
-              }
-            ]
-      };
-      newTreeData = [newNode, ...treeData.slice(1)];
-    } else if (dataRef?.type === 'volume-child') {
-      const { pathParentKeys } = props;
+    switch (dataRef?.type) {
+      case 'catalog':
+        newTreeData = [
+          {
+            ...dataRef,
+            title: fileName,
+            showInput: false,
+            children: dataRef?.children?.length
+              ? dataRef?.children
+              : [
+                  {
+                    title: '数据卷',
+                    key: `catalog-${fileName}-volume`,
+                    type: 'volume',
+                    children: []
+                  }
+                ]
+          },
+          ...treeData.slice(1)
+        ];
+        break;
 
-      if (pathParentKeys) {
-        const newNode = {
-          ...dataRef,
-          title: fileName,
-          showInput: false
-        };
-        newTreeData = treeData.map((item: TreeDataType) => {
-          if (item.key === pathParentKeys[0]) {
-            item.children?.forEach((subItem: TreeDataType) => {
-              if (subItem.key === pathParentKeys[1]) {
-                subItem.children?.splice(0, 1, newNode);
-              }
+      case 'volume-child':
+        const { pathParentKeys } = props;
+        if (pathParentKeys) {
+          newTreeData = handleTarget(pathParentKeys, (target) => {
+            target?.splice(0, 1, {
+              ...dataRef,
+              title: fileName,
+              showInput: false
             });
-          }
-          return item;
-        });
-      }
+          });
+        }
+        break;
+
+      default:
+        break;
     }
 
-    catalogTreeStore.setState({ treeData: newTreeData, inputValue: '' });
+    catalogTreeStore.setState({
+      treeData: newTreeData,
+      inputValue: ''
+    });
   };
 
   const renderExtra = (node: NodeProps) => {

@@ -57,23 +57,27 @@ export default function EditableTree() {
           新建
         </div>
       </div>
-      <Tree
-        showLine
-        blockNode
-        selectable
-        expandedKeys={expandedKeys}
-        selectedKeys={[selectedKey]}
-        icons={(node) => ({
-          switcherIcon: !node.dataRef?.isLastLeaf ? <IconCaretDown /> : null
-        })}
-        onExpand={handleExpand}
-        onSelect={handleSelect}
-        renderExtra={renderExtra}
-        renderTitle={renderTitle}
-        className="tree-container"
-      >
-        {generatorTreeNodes(treeData)}
-      </Tree>
+      {treeData && treeData.length ? (
+        <Tree
+          showLine
+          blockNode
+          selectable
+          expandedKeys={expandedKeys}
+          selectedKeys={[selectedKey]}
+          icons={(node) => ({
+            switcherIcon: !node.dataRef?.isLastLeaf ? <IconCaretDown /> : null
+          })}
+          onExpand={handleExpand}
+          onSelect={handleSelect}
+          renderExtra={renderExtra}
+          renderTitle={renderTitle}
+          className="tree-container"
+        >
+          {generatorTreeNodes(treeData)}
+        </Tree>
+      ) : (
+        <p className="mt-4 text-center">暂无数据</p>
+      )}
     </div>
   );
 }
