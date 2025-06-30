@@ -199,6 +199,11 @@ export const ResourceEndpointsV2 = {
   password: PrefixAuth + '/user/passwd',
   // 获取用户信息
   selfUser: PrefixAuth + '/user/self',
+  // 删除组织/用户前判断
+  preDelOrg: PrefixAuth + '/organization/authorize_delete/{orgId}',
+  preDelUser: PrefixAuth + '/user/authorize_delete/{userId}',
+  // 用户管理搜索
+  memberSearch: PrefixAuth + '/user/organization/search',
 
   workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
   workflowPublish: PrefixV2 + '/apps/{appId}/workflows/publish',
