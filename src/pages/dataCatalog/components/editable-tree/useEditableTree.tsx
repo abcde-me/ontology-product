@@ -5,7 +5,7 @@ import {
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
 import classNames from 'classnames';
-import React, { useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect } from 'react';
 import {
   IconPlus,
   IconDelete,
@@ -16,11 +16,13 @@ import {
 import { subLeafKeys } from './consts';
 
 export function useEditableTree({ catalogTreeStore }) {
-  const { inputRef, inputValue, treeData } = catalogTreeStore.useGetState([
-    'inputRef',
-    'inputValue',
-    'treeData'
-  ]);
+  const { searchValue, inputRef, inputValue, treeData } =
+    catalogTreeStore.useGetState([
+      'searchValue',
+      'inputRef',
+      'inputValue',
+      'treeData'
+    ]);
 
   useEffect(() => {
     catalogTreeStore.getEffect('fetchData')();
@@ -83,15 +85,24 @@ export function useEditableTree({ catalogTreeStore }) {
   const handleTarget = useCallback(
     (
       pathParentKeys,
-      targetFn: (target: TreeDataType[] | undefined) => void
+      targetFn: (
+        target: TreeDataType[] | undefined
+      ) => TreeDataType[] | undefined
     ) => {
       return treeData.map((item: TreeDataType) => {
         if (item.key === pathParentKeys[0]) {
-          item.children?.forEach((subItem: TreeDataType) => {
-            if (subItem.key === pathParentKeys[1]) {
-              targetFn(subItem.children);
-            }
-          });
+          return {
+            ...item,
+            children: item.children?.map((subItem: TreeDataType) => {
+              if (subItem.key === pathParentKeys[1]) {
+                return {
+                  ...subItem,
+                  children: targetFn(subItem.children)
+                };
+              }
+              return subItem;
+            })
+          };
         }
         return item;
       });
@@ -118,7 +129,6 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
 
       case 'volume':
-        // 删除卷：清空该卷的子节点
         newTreeData = treeData.map((item: TreeDataType) => {
           if (item.key === pathParentKeys?.[0]) {
             return {
@@ -135,7 +145,7 @@ export function useEditableTree({ catalogTreeStore }) {
       case 'volume-child':
         if (pathParentKeys) {
           newTreeData = handleTarget(pathParentKeys, (target) => {
-            target = target?.filter((child) => child.key !== _key);
+            return target?.filter((child) => child.key !== _key);
           });
         }
         break;
@@ -237,11 +247,15 @@ export function useEditableTree({ catalogTreeStore }) {
         const { pathParentKeys } = props;
         if (pathParentKeys) {
           newTreeData = handleTarget(pathParentKeys, (target) => {
-            target?.splice(0, 1, {
-              ...dataRef,
-              title: fileName,
-              showInput: false
-            });
+            if (target) {
+              const newTarget = [...target];
+              newTarget.splice(0, 1, {
+                ...dataRef,
+                title: fileName,
+                showInput: false
+              });
+              return newTarget;
+            }
           });
         }
         break;
@@ -261,12 +275,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
     return (
       !dataRef?.showInput && (
-        <div
-          className={classNames(
-            'flex items-center justify-between',
-            'extra-container'
-          )}
-        >
+        <div className={'extra-container flex items-center justify-between'}>
           {dataRef?.type === 'catalog' && (
             <Tooltip color="white" content="重命名">
               <IconEdit
@@ -286,7 +295,6 @@ export function useEditableTree({ catalogTreeStore }) {
                       try {
                         await handleDelete(node);
                       } catch (apiError: any) {
-                        console.error('删除节点失败:', apiError);
                         Message.error(
                           '删除失败: ' + (apiError.message || '请稍后重试')
                         );
@@ -322,6 +330,22 @@ export function useEditableTree({ catalogTreeStore }) {
       )
     ) : null;
 
+    let TitleText: ReactNode = title;
+    if (searchValue.length && typeof title === 'string') {
+      const index = title.toLowerCase().indexOf(searchValue.toLowerCase());
+      if (index !== -1) {
+        const prefix = title.slice(0, index);
+        const suffix = title.slice(index + searchValue.length);
+        TitleText = (
+          <>
+            {prefix}
+            <span className="text-[rgb(var(--primary-6))]">{searchValue}</span>
+            {suffix}
+          </>
+        );
+      }
+    }
+
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
         {IconComponent}
@@ -338,6 +362,7 @@ export function useEditableTree({ catalogTreeStore }) {
             onPressEnter={() => {
               onEditFinish(props);
             }}
+            maxLength={256}
             className="h-8 focus:border-[rgb(var(--primary-6))]"
           />
         ) : (
@@ -353,7 +378,7 @@ export function useEditableTree({ catalogTreeStore }) {
                 dataRef?.type === 'catalog' ? 'catalog-title-text' : ''
               )}
             >
-              {title}
+              {TitleText}
             </div>
           </Tooltip>
         )}

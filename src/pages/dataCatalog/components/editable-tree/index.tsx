@@ -32,9 +32,12 @@ export default function EditableTree() {
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <SearchInput
           value={searchValue}
-          onChange={catalogTreeStore.setSearchValue}
+          onChange={(value) => {
+            catalogTreeStore.setSearchValue(value);
+          }}
           placeholder="输入搜索目录"
           style={{ height: '32px', width: '130px' }}
+          maxLength={256}
         />
         <div
           className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
