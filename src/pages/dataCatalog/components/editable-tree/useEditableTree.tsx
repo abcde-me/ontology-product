@@ -326,6 +326,7 @@ export function useEditableTree({ catalogTreeStore }) {
             onPressEnter={() => {
               onEditFinish(props);
             }}
+            className="h-8 focus:border-[rgb(var(--primary-6))]"
           />
         ) : (
           <Tooltip
