@@ -1,6 +1,7 @@
 /******** fontSize *******/
 @font-size-body-3: 14px;
-
+/******** background ********/
+@color-bg-hover: rgb(67, 141, 251);
 /******** fontWeight ********/
 @font-weight-400: 400;
 @font-weight-600: 600;
@@ -35,7 +36,14 @@
 .arco-btn-text {
   font-weight: @font-weight-400;
 }
-
+// .arco-btn-secondary:not(.arco-btn-disabled) {
+//   background-color: rgb(var(--primary-6));
+//   color: var(--color-white);
+// }
+// .arco-btn-secondary:not(.arco-btn-disabled):hover {
+//   background-color: @color-bg-hover !important;
+//   color: var(--color-white) !important;
+// }
 /******** table ********/
 .arco-table thead .arco-table-tr {
   height: 40px;
@@ -44,6 +52,11 @@
   font-weight: @font-weight-600;
 }
 .arco-table .arco-table-th-item {
+  font-size: @font-size-body-3;
+}
+.arco-table
+  .arco-table-th-item.arco-table-col-has-sorter
+  .arco-table-cell-with-sorter {
   font-size: @font-size-body-3;
 }
 .arco-table-td {
@@ -103,3 +116,4 @@
   margin-top: 12px;
   margin-bottom: 6px;
 }
+/******** button ********/

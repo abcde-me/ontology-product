@@ -5,16 +5,23 @@ import {
   Popconfirm,
   Table,
   Button,
-  Modal
+  Modal,
+  Form
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
 import { IconPlus } from '@arco-design/web-react/icon';
-import ModalDetail from './detail-modal';
-import AddAndEditModal from './add-edit-modal';
-import { delconnectionList, getConnectionList } from '@/api/connectionApi';
+import ModalDetail from './detail/detail-modal';
+import Add from './add';
+import {
+  delconnectionList,
+  getConnectionList,
+  updataConnectionList
+} from '@/api/connectionApi';
+import Edit from './edit';
+import { ConnectionType } from './type';
 interface ChildComponentMethods {
-  displayModalView: (id: number | string) => void; // 根据实际情况调整参数类型
+  displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
 }
 const InputSearch = Input.Search;
@@ -50,10 +57,63 @@ const TYPE_CONFIG = {
 };
 
 export default function Connection() {
+  // 默认编辑弹框状态
+  const [editVisible, setEditVisible] = React.useState(false);
+  const [editObject, setEditObject] = React.useState<ConnectionType>({});
+  // 编辑表单实例
+  const [EditForm] = Form.useForm();
   // 显示详情页面的实例子组件实例
   const childRef = useRef(null);
   // 添加编辑弹框的实例
   const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
+  // 编辑按钮的状态
+  const [editLoadingState, setEditLoadingState] = React.useState(false);
+  // 表格默认的状态(Lodaing)
+  const [tableLoding, setTableLoding] = React.useState(false);
+  // 默认弹框隐藏
+  const [visible2, setVisible2] = React.useState(false);
+  // 详情页面的默认id
+  const [cId, setCId] = useState('0');
+  // 搜索框的默认值
+  const [searchValue, setSearchValue] = useState('');
+  const [ConnectionData, setConnectionData] = useState([]) as any;
+  const [pagination, setPagination] = useState({
+    // 当前第1页
+    current: 1,
+    // 每页默认显示10条
+    pageSize: 10,
+    total: 0
+  });
+  // 点击确认按钮编辑连接器
+  const editConnectorBtnHandel = async () => {
+    try {
+      const values = await EditForm.validate();
+      const { type, name, ...newValues } = values;
+      const newfrom = {
+        name,
+        type,
+        config: { ...newValues },
+        creator: 'test1'
+      };
+      setEditLoadingState(true);
+      const res = await updataConnectionList({
+        connector_id: editObject.id,
+        newfrom
+      });
+      if (res.message == '') {
+        setEditLoadingState(false);
+        // 确保数据更新完成后再调用 getListHan
+        setEditVisible(false);
+        Message.success('测试通过，连接器创建成功');
+      } else {
+        Message.error(res.message);
+      }
+    } catch (error) {
+      console.log('验证失败', error);
+    } finally {
+      setEditLoadingState(false);
+    }
+  };
   // 连接器配置项
   const columns: any = [
     {
@@ -131,6 +191,7 @@ export default function Connection() {
     {
       title: '操作',
       width: 130,
+      fixed: 'right',
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
@@ -144,7 +205,7 @@ export default function Connection() {
           <span
             className="hover"
             onClick={() => {
-              childAddAndSetModalHan(record);
+              editFormHandle(record);
             }}
           >
             编辑
@@ -154,7 +215,7 @@ export default function Connection() {
             title="删除该连接器"
             content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
-              DeleteMethod(record.id);
+              DeleteMethod(record);
             }}
             onCancel={() => {
               Message.error({
@@ -168,10 +229,13 @@ export default function Connection() {
       )
     }
   ];
-  // 默认弹框隐藏
-  const [visible2, setVisible2] = React.useState(false);
-  // 详情页面的默认id
-  const [cId, setCId] = useState('0');
+  // 点击详情的回调
+  const editFormHandle = (obj) => {
+    console.log(obj);
+    setEditObject(obj);
+    setEditVisible(true);
+  };
+
   // 点击删除按钮执行的方法
   const DeleteMethod = async (id: string) => {
     const res = await delconnectionList(id);
@@ -190,21 +254,11 @@ export default function Connection() {
     setVisible2(true);
   };
 
-  const childAddAndSetModalHan = (obj) => {
+  const childAddAndSetModalHan = () => {
     if (addandsetchildRef.current) {
-      addandsetchildRef.current.displayModalView(obj);
+      addandsetchildRef.current.displayModalView();
     }
   };
-  // 搜索框的默认值
-  const [searchValue, setSearchValue] = useState('');
-  const [ConnectionData, setConnectionData] = useState([]) as any;
-  const [pagination, setPagination] = useState({
-    // 当前第1页
-    current: 1,
-    // 每页默认显示10条
-    pageSize: 10,
-    total: 0
-  });
 
   // 改变数据的逻辑
   const handlePageChange = (page) => {
@@ -225,27 +279,29 @@ export default function Connection() {
       );
     });
   }, [ConnectionData, searchValue]);
-
-  const [searchParams, setSearchParams] = useState({
-    keyword: ''
-  });
-
+  // 获取连接器列表
   const getlist = async () => {
-    const res = await getConnectionList({
-      page: pagination.current,
-      page_size: pagination.pageSize
-    });
-
-    setConnectionData(res.data.items);
-    setPagination((prev) => ({
-      ...prev,
-      total: res.data.total
-    }));
+    try {
+      setTableLoding(true); // 请求开始时设置为 true
+      const res = await getConnectionList({
+        page: pagination.current,
+        page_size: pagination.pageSize
+      });
+      setConnectionData(res.data.items);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.total
+      }));
+    } catch (error) {
+      console.error('获取连接器列表失败:', error);
+    } finally {
+      setTableLoding(false); // 无论请求成功与否，最后都设置为 false
+    }
   };
-
+  // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
-  }, [pagination.current, pagination.pageSize, searchParams.keyword]);
+  }, [pagination.current, pagination.pageSize]);
   return (
     <div
       style={{
@@ -285,7 +341,7 @@ export default function Connection() {
           // type="primary"
           icon={<IconPlus />}
           onClick={() => {
-            childAddAndSetModalHan(null);
+            childAddAndSetModalHan();
           }}
         >
           创建连接器
@@ -298,7 +354,7 @@ export default function Connection() {
         style={{ padding: '10px 20px' }}
         pagination={false}
         rowKey="id"
-        loading={false}
+        loading={tableLoding}
       />
       {/* 分页 */}
       <Pagination
@@ -312,7 +368,7 @@ export default function Connection() {
           }));
         }}
         onChange={handlePageChange}
-        sizeOptions={[2, 5, 10, 20]}
+        sizeOptions={[1, 5, 10, 20]}
         showTotal
         total={pagination.total}
         showJumper
@@ -331,9 +387,53 @@ export default function Connection() {
           setVisible2(false);
         }}
       >
-        <ModalDetail ref={childRef} detailId={cId} />
+        <ModalDetail detailId={cId} />
       </Modal>
-      <AddAndEditModal ref={addandsetchildRef} getListHan={getlist} />
+      <Add ref={addandsetchildRef} getListHan={getlist} />
+      <Modal
+        style={{ width: '700px' }}
+        title={'编辑连接器'}
+        visible={editVisible}
+        autoFocus={false}
+        focusLock={false}
+        unmountOnExit={true}
+        onCancel={() => {
+          // 点击关闭隐藏弹框
+          setEditVisible(false);
+        }}
+        footer={
+          <div style={{ marginBottom: '20px' }}>
+            <Button
+              style={{ fontSize: '14px', fontWeight: '400' }}
+              onClick={() => {
+                setEditVisible(false);
+
+                console.log(editObject);
+              }}
+            >
+              取消{' '}
+            </Button>
+            <Button
+              type="primary"
+              onClick={editConnectorBtnHandel}
+              loading={editLoadingState}
+              style={{
+                marginLeft: '10px',
+                fontSize: '14px',
+                fontWeight: '400'
+              }}
+            >
+              编辑连接器
+            </Button>
+          </div>
+        }
+      >
+        <Edit
+          inEditForm={EditForm}
+          editObj={editObject}
+          editDisabled={editLoadingState}
+        />
+      </Modal>
     </div>
   );
 }

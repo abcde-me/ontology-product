@@ -120,7 +120,7 @@ export default function WorkflowList() {
     {
       title: '运行方式',
       dataIndex: 'run_cycle',
-      width: 100,
+      width: 120,
       render: (_, record) =>
         record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>,
       filters: [
@@ -138,7 +138,7 @@ export default function WorkflowList() {
     {
       title: '状态',
       dataIndex: 'is_online',
-      width: 80,
+      width: 100,
       render: (_, record) =>
         record.is_online ? (
           <Tag color="green" icon={<IconCheckCircleFill />}>
@@ -164,7 +164,7 @@ export default function WorkflowList() {
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 150,
+      width: 130,
       ellipsis: true,
       render: (_, record) => (
         <span
@@ -179,7 +179,7 @@ export default function WorkflowList() {
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 150,
+      width: 130,
       ellipsis: true,
       render: (_, record) => (
         <span

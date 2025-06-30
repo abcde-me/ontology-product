@@ -24,80 +24,43 @@ export default function WorkflowTask() {
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化作业列表数据
-  const [workflowTaskData, setWorkflowTaskData] = useState([
-    {
-      id: '1',
-      status: 1,
-      job_name: 'Jane Doe',
-      time_size: '50分20秒',
-      source_path: 'jane.doe@example.com',
-      target_path: 'jane.doe@example.com',
-      start_time: '1749627834576',
-      end_time: '1749627834576'
-    },
-    {
-      id: '2',
-      status: 1,
-      job_name: 'Alisa Ross',
-      time_size: '50分20秒',
-      source_path: 'alisa.ross@example.com',
-      target_path: 'jane.doe@example.com',
-      start_time: '1749627876834',
-      end_time: '1749627834576'
-    },
-    {
-      id: '3',
-      status: 2,
-      job_name: 'Kevin Sandra',
-      time_size: '50分20秒',
-      source_path: 'kevin.sandra@example.com',
-      target_path: 'jane.doe@example.com',
-      start_time: '1749627812365',
-      end_time: '1749627834576'
-    },
-    {
-      id: '4',
-      status: 3,
-      job_name: '张三',
-      time_size: '50分20秒',
-      source_path: 'kevin.sandra@example.com',
-      target_path: 'jane.doe@example.com',
-      start_time: '174962787645',
-      end_time: '1749627834576'
-    },
-    {
-      id: '5',
-      status: 4,
-      job_name: '李四',
-      time_size: '50分20秒',
-      source_path: 'kevin.sandra@example.com',
-      target_path: 'jane.doe@example.com',
-      start_time: '1749627860783',
-      end_time: '1749627834576'
-    }
-  ]);
+  const [workflowTaskData, setWorkflowTaskData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
+  // 数据总数
+  const [total, setTotal] = useState(10);
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo]);
+  }, [userInfo, current, pageSize]);
 
   const getList = async () => {
     const params = {
       uid: userInfo?.id,
-      job_id: '',
-      page: 1,
-      page_size: 10
+      search_value: searchValue,
+      page: current,
+      page_size: pageSize
     };
     const res = await getTaskList(params);
+    if (res.status === 200 && res.data) {
+      setWorkflowTaskData(res.data.list);
+      setCurrent(res.data.page_info.page);
+      setPageSize(res.data.page_info.page_size);
+      setTotal(res.data.page_info.total);
+    }
   };
 
+  // 跳转详情
   const handleToTaskDeatil = (id: number) => {
     history.push(`/tenant/compute/modaforge/workflowTaskDetail?id=${id}`);
+  };
+
+  // 跳转目录
+  const handleToDirectoryPath = (path: string) => {
+    history.push(path);
   };
 
   // table columns
@@ -105,14 +68,21 @@ export default function WorkflowTask() {
     {
       title: '作业ID',
       dataIndex: 'id',
-      width: 120,
+      width: 80,
       ellipsis: true,
-      render: (_, record) => <span className="hover-change">{record.id}</span>
+      render: (_, record) => (
+        <span
+          className="hover-change"
+          onClick={() => handleToTaskDeatil(record.id)}
+        >
+          {record.id}
+        </span>
+      )
     },
     {
       title: '状态',
       dataIndex: 'status',
-      width: 130,
+      width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -165,30 +135,35 @@ export default function WorkflowTask() {
     {
       title: '运行时长',
       dataIndex: 'time_size',
-      width: 130
+      width: 170,
+      ellipsis: true
     },
     {
       title: '工作流名称',
-      dataIndex: 'job_name',
+      dataIndex: 'workflow_name',
       width: 130,
       ellipsis: true,
       render: (_, record) => (
         <span
           className="hover-change"
           onClick={() => handleToTaskDeatil(record.id)}
-          title={record.job_name}
+          title={record.workflow_name}
         >
-          {record.job_name}
+          {record.workflow_name}
         </span>
       )
     },
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 230,
+      width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span className="hover-change" title={record.source_path}>
+        <span
+          className="hover-change"
+          title={record.source_path}
+          onClick={() => handleToDirectoryPath(record.source_path)}
+        >
           {record.source_path}
         </span>
       )
@@ -196,10 +171,14 @@ export default function WorkflowTask() {
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 230,
+      width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span className="hover-change" title={record.target_path}>
+        <span
+          className="hover-change"
+          title={record.target_path}
+          onClick={() => handleToDirectoryPath(record.target_path)}
+        >
           {record.target_path}
         </span>
       )
@@ -207,15 +186,15 @@ export default function WorkflowTask() {
     {
       title: '开始时间',
       dataIndex: 'start_time',
-      width: 150,
-      render: (_, record) => <span>{TimeFormatting(record.start_time)}</span>,
+      width: 170,
+      render: (_, record) => <span>{record.start_time}</span>,
       sorter: (a, b) => a.start_time.length - b.start_time.length
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
-      width: 150,
-      render: (_, record) => <span>{TimeFormatting(record.end_time)}</span>,
+      width: 170,
+      render: (_, record) => <span>{record.end_time}</span>,
       sorter: (a, b) => a.end_time.length - b.end_time.length
     },
     {
@@ -232,14 +211,6 @@ export default function WorkflowTask() {
       )
     }
   ];
-
-  // 根据搜索条件过滤作业
-  const filterWorkflowTaskData = useMemo(() => {
-    return workflowTaskData.filter((item) => {
-      const query = searchValue.toLowerCase();
-      return item.id.toLowerCase().includes(query);
-    });
-  }, [workflowTaskData, searchValue]);
 
   return (
     <div className="workflow-task">
@@ -259,12 +230,13 @@ export default function WorkflowTask() {
           onChange={(value) => {
             setSearchValue(value);
           }}
+          onPressEnter={() => getList()}
         />
       </div>
       <Table
         border={false}
         columns={columns}
-        data={filterWorkflowTaskData}
+        data={workflowTaskData}
         pagination={false}
         noDataElement={noDataElement({ description: '暂无作业' })}
         rowKey="id"
@@ -282,7 +254,7 @@ export default function WorkflowTask() {
         }}
         sizeOptions={[2, 5, 10, 20]}
         showTotal
-        total={filterWorkflowTaskData.length}
+        total={total}
         showJumper
         sizeCanChange
         style={{ justifyContent: 'flex-end', marginTop: '10px' }}

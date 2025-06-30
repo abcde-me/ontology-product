@@ -4,13 +4,13 @@ import useVarList from '../_base/hooks/use-var-list';
 import { useStore } from '../../store';
 import type { CodeNodeType, OutputVar, EnhancementNodeType } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
 const useConfig = (id: string, payload: CodeNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
 
-  const appId = useAppStore.getState().appDetail?.id;
+  const appId = useTaskStore.getState().workflowDetail?.workflow_uuid;
 
   const { inputs, setInputs } = useNodeCrud<CodeNodeType>(id, payload);
   const { handleVarListChange, handleAddVariable } = useVarList<CodeNodeType>({
@@ -27,7 +27,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     similarity_threshold: inputs?.similarity_threshold, // 过滤相似度阈值,0~1
     generate_sample_num: inputs?.generate_sample_num, //生成样本数
     prompt: inputs?.prompt, // 提示词
-    enha_modle_id: inputs?.enha_modle_id, // 和音频解析模型冲突？？？另外格式不正确吧
+    enha_modle_id: inputs?.enha_modle_id // 和音频解析模型冲突？？？另外格式不正确吧
   };
 
   const updateInputs = useCallback(

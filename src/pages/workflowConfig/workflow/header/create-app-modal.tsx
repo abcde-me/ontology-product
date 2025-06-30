@@ -1,13 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Form, Input, Message, Modal, Trigger } from '@arco-design/web-react';
 import { IconUpload } from '@arco-design/web-react/icon';
-import { createKnowledge } from '@/api/knowledgeBase';
 import { useHistory } from 'react-router-dom';
 import './create-app-modal.less';
-import AgentIcon from '@/assets/agent-icon.svg';
 import WorkflowIcon from '@/pages/workflowConfig/styles/images/op-icons/workflow.svg';
-import AIIcon from '@/assets/ai.svg';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { upload } from '@/pages/workflowConfig/service/base';
 import { PrefixV2 } from '@/api/endpoints';
 import { updateApp } from '@/api/appsV2';
@@ -24,8 +21,8 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
   const icon = Form.useWatch('icon', form);
   const [loading, setLoading] = useState(false);
   const [appType, setAppType] = useState('workflow');
-  const appDetail = useAppStore((s) => s.appDetail);
-  const setAppDetail = useAppStore((s) => s.setAppDetail);
+  const appDetail = useTaskStore((s) => s.workflowDetail);
+  const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
 
   const appNameLabel = useMemo(() => {
     return appType === 'agent' ? '智能体名称' : '工作流名称';
@@ -43,13 +40,11 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
           const formValue = form.getFields();
           await updateApp({
             ...formValue,
-            id: appDetail?.id,
+            id: appDetail?.workflow_uuid,
             mode: 'workflow',
             icon_type: formValue.icon ? 'image' : ''
           });
-          // TODO: ts错误
-          // @ts-expect-error
-          setAppDetail({ ...appDetail, ...formValue });
+          appDetail && setAppDetail({ ...appDetail, ...formValue });
           Message.success('修改成功');
           setLoading(false);
           setVisible(false);
@@ -85,9 +80,9 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
         labelCol={{ span: 4 }}
         wrapperCol={{ span: 20 }}
         initialValues={{
-          name: appDetail?.name,
-          description: appDetail?.description,
-          icon: appDetail?.icon
+          name: appDetail?.workflow_name,
+          description: '',
+          icon: ''
         }}
       >
         <Form.Item
@@ -125,11 +120,6 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
             trigger="hover"
             popup={() => (
               <div className="create-space-icon-menu">
-                {/* <div className="icon-menu-item">
-                  <AIIcon className='size-[40px] text-[#334155]'/>
-                  <span className='txt'>智能生成图标</span>
-                </div>
-                <div className="icon-menu-separator" /> */}
                 <div className="icon-menu-item">
                   <IconUpload className="size=[16px] text-[#334155]" />
                   <span

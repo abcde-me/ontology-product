@@ -17,7 +17,7 @@ import Loading from '@/pages/workflowConfig/components/loading';
 // import { fetchRunDetail, fetchTracingList } from '@/service/log'
 import type { NodeTracing } from '@/pages/workflowConfig/types/workflow';
 import type { WorkflowRunDetailResponse } from '@/pages/workflowConfig/models/log';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 export type RunProps = {
   hideResult?: boolean;
   activeTab?: 'RESULT' | 'DETAIL' | 'TRACING';
@@ -34,7 +34,7 @@ const RunPanel: FC<RunProps> = ({
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const { notify } = useContext(ToastContext);
   const [currentTab, setCurrentTab] = useState<string>(activeTab);
-  const appDetail = useAppStore((state) => state.appDetail);
+  const appDetail = useTaskStore((state) => state.workflowDetail);
   const [loading, setLoading] = useState<boolean>(true);
   const [runDetail, setRunDetail] = useState<WorkflowRunDetailResponse>();
   const [list, setList] = useState<NodeTracing[]>([]);
@@ -48,7 +48,7 @@ const RunPanel: FC<RunProps> = ({
   }, [runDetail]);
 
   const getResult = useCallback(
-    (appID: string, runID: string) => {
+    (appID: string | number, runID: string) => {
       try {
         console.warn('API NOT IMPLEMENTED', 'fetchRunDetail');
         // const res = await fetchRunDetail({
@@ -69,7 +69,7 @@ const RunPanel: FC<RunProps> = ({
   );
 
   const getTracingList = useCallback(
-    (appID: string, runID: string) => {
+    (appID: string | number, runID: string) => {
       try {
         console.warn('API NOT IMPLEMENTED', 'fetchTracingList');
         // const { data: nodeList } = await fetchTracingList({
@@ -87,7 +87,7 @@ const RunPanel: FC<RunProps> = ({
     [notify]
   );
 
-  const getData = (appID: string, runID: string) => {
+  const getData = (appID: string | number, runID: string) => {
     setLoading(true);
     getResult(appID, runID);
     getTracingList(appID, runID);
@@ -96,13 +96,14 @@ const RunPanel: FC<RunProps> = ({
 
   const switchTab = (tab: string) => {
     setCurrentTab(tab);
-    if (tab === 'RESULT') appDetail?.id && getResult(appDetail.id, runID);
-    appDetail?.id && getTracingList(appDetail.id, runID);
+    if (tab === 'RESULT')
+      appDetail?.workflow_uuid && getResult(appDetail.workflow_uuid, runID);
+    appDetail?.workflow_uuid && getTracingList(appDetail.workflow_uuid, runID);
   };
 
   useEffect(() => {
     // fetch data
-    if (appDetail && runID) getData(appDetail.id, runID);
+    if (appDetail && runID) getData(appDetail.workflow_uuid, runID);
   }, [appDetail, runID]);
 
   const [height, setHeight] = useState(0);
