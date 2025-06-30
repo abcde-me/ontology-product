@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Input, Pagination, Table } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import TimeFormatting from '@/utils/timeFormatting';
 import './index.css';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -31,6 +30,8 @@ export default function WorkflowTask() {
   const [pageSize, setPageSize] = useState(10);
   // 数据总数
   const [total, setTotal] = useState(10);
+  // 添加loading状态控制
+  const [loading, setLoading] = useState(true);
 
   // 组件初始化
   useEffect(() => {
@@ -38,18 +39,23 @@ export default function WorkflowTask() {
   }, [userInfo, current, pageSize]);
 
   const getList = async () => {
-    const params = {
-      uid: userInfo?.id,
-      search_value: searchValue,
-      page: current,
-      page_size: pageSize
-    };
-    const res = await getTaskList(params);
-    if (res.status === 200 && res.data) {
-      setWorkflowTaskData(res.data.list);
-      setCurrent(res.data.page_info.page);
-      setPageSize(res.data.page_info.page_size);
-      setTotal(res.data.page_info.total);
+    setLoading(true);
+    try {
+      const params = {
+        uid: userInfo?.id,
+        search_value: searchValue,
+        page: current,
+        page_size: pageSize
+      };
+      const res = await getTaskList(params);
+      if (res.status === 200 && res.data) {
+        setWorkflowTaskData(res.data.list);
+        setCurrent(res.data.page_info.page);
+        setPageSize(res.data.page_info.page_size);
+        setTotal(res.data.page_info.total);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -240,6 +246,7 @@ export default function WorkflowTask() {
         pagination={false}
         noDataElement={noDataElement({ description: '暂无作业' })}
         rowKey="id"
+        loading={loading}
       />
       {/* 分页 */}
       <Pagination

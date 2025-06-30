@@ -16,6 +16,7 @@ import CycleLoadingForm from '../list/cycle-loading-form-modal';
 import { convertWeekDaysToString } from '../../../utils/conversionArco';
 import { WeekDay } from '../../../utils/conversionArco';
 import { dataLodaAddForm } from '../type';
+import { addLoad } from '@/api/loadApi';
 // 单选框实例
 const RadioGroup = Radio.Group;
 // 表单实例
@@ -58,51 +59,59 @@ const LoadAddModal = (props: any) => {
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
     try {
-      const formValues = form.getFieldsValue();
+      const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
+      if (loadVal !== 'once') {
+        const [hour, minute] = time.split(':');
+        await form.validate();
+        props.hideModalHan();
 
-      const [hour, minute] = time.split(':');
-      await form.validate();
-      props.hideModalHan();
+        const isLastDayOfMonth =
+          day?.findIndex((item) => item === '每月最后一天') !== -1;
 
-      const isLastDayOfMonth =
-        day?.findIndex((item) => item === '每月最后一天') !== -1;
+        // 转换星期为数字字符串
+        let dataValue: string;
+        switch (cycle) {
+          case '每日':
+            dataValue = '*';
+            break;
+          case '每周':
+            dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
+            break;
+          case '每月':
+            dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
+            break;
+          default:
+            dataValue = '*';
+        }
 
-      // 转换星期为数字字符串
-      let dataValue: string;
-      switch (cycle) {
-        case '每日':
-          dataValue = '*';
-          break;
-        case '每周':
-          dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
-          break;
-        case '每月':
-          dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
-          break;
-        default:
-          dataValue = '*';
+        const formData = {
+          task_name: rest.name,
+          connector_id: rest.connector_id,
+          source_type: rest.source_type,
+          run_cycle: {
+            type: isLastDayOfMonth ? '0' : '1',
+            cycle_text: {
+              minute,
+              hour,
+              data: dataValue,
+              month: cycle == '每月' ? '*' : '',
+              week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
+            }
+          },
+          dest_path: rest.dest_path,
+          creator: 'userlsc'
+        };
+        await addLoad(formData);
+      } else {
+        // const formData = {
+        //   task_name: rest.name
+        // }
+        console.log('单次载入');
+        cancelHan();
       }
-
-      const formData = {
-        job_name: rest.name,
-        connector_id: rest.connector_id,
-        source_type: rest.source_type,
-        run_cycle: {
-          type: isLastDayOfMonth ? '0' : '1',
-          cycle_text: {
-            minute,
-            hour,
-            data: dataValue,
-            month: cycle == '每月' ? '*' : '',
-            week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
-          }
-        },
-        dest_path: rest.dest_path,
-        creator: '张三'
-      };
-
-      console.log('提交的数据:', formData);
+      // cancelHan()
+      props.getList();
     } catch (error) {
       console.error('表单处理失败:', error);
     }
@@ -220,10 +229,12 @@ const LoadAddModal = (props: any) => {
         </FormItem>
       </Form>
       <div className={Styles.footerBbtnBox}>
-        <Button onClick={cancelHan} style={{ marginRight: '20px' }}>
+        <Button onClick={cancelHan} style={{ marginRight: '12px' }}>
           取消
         </Button>
-        <Button onClick={handleSubmit}>确认</Button>
+        <Button onClick={handleSubmit} type="primary">
+          确认
+        </Button>
       </div>
     </div>
   );
