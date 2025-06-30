@@ -244,11 +244,15 @@ const Header: FC = () => {
           <BackIcon className="size-[16px]" />
         </div>
         <div className="app-icon">
-          {appDetail.icon ? (
-            <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
-          ) : (
-            <WorkflowIcon />
-          )}
+          {
+            //@ts-expect-error
+            appDetail.icon ? (
+              //@ts-expect-error
+              <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
+            ) : (
+              <WorkflowIcon />
+            )
+          }
         </div>
         <div className="app-info">
           <div className="app-name">

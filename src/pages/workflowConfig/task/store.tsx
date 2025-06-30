@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { App, AppSSO } from '@/pages/workflowConfig/types/app';
 import type { IChatItem } from '@/pages/workflowConfig/chat/chat/type';
 // import appDetailJson from '@/pages/workflowConfig/mockData/appDetail.json'
+import { WorkflowDetailRes } from '@/types/workflowApi';
 
 interface State {
   workflowDetail?: WorkflowDetailRes & Partial<AppSSO>;
