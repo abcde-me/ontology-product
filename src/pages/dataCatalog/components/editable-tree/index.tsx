@@ -194,11 +194,16 @@ export default function EditableTree(props: Props) {
       });
       focusAndSelectInput();
     }
+
+    Message.success('修改成功!'); // 成功提示
   };
 
   // 删除目录 or 卷
-  const handleDelete = (node: NodeProps) => {
+  const handleDelete = async (node: NodeProps) => {
     const { _key, dataRef } = node;
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     if (dataRef?.type === 'catalog') {
       setTreeData((prev) => {
         return prev.filter((item) => item.key !== _key);
@@ -232,6 +237,7 @@ export default function EditableTree(props: Props) {
         });
       });
     }
+    Message.success('删除成功!');
   };
 
   const addCatalog = () => {
@@ -296,11 +302,9 @@ export default function EditableTree(props: Props) {
                   Modal.confirm({
                     title: '确认删除文件?',
                     content: '删除后，该目录下所有内容将被删除，不可恢复',
-                    onOk() {
+                    async onOk() {
                       try {
-                        handleDelete(node);
-
-                        Message.success('删除成功!');
+                        await handleDelete(node);
                       } catch (apiError: any) {
                         console.error('删除节点失败:', apiError);
                         Message.error(
