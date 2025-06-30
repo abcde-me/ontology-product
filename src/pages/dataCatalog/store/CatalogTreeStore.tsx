@@ -4,6 +4,7 @@ import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
 import { subLeafKeys } from '../components/editable-tree/consts';
+import { NodeProps } from '@arco-design/web-react/es/Cascader';
 
 interface ITreeData {
   id: string | number;
@@ -117,14 +118,6 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     this.setState({
       searchValue: value
     });
-  }
-
-  focusAndSelectInput() {
-    const { inputRef } = this.getState();
-    setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.dom.select();
-    }, 0);
   }
 
   convertRawDataToTreeData(fakeData: ITreeData[]) {

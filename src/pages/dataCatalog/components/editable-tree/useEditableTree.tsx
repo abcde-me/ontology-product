@@ -151,6 +151,13 @@ export function useEditableTree({ catalogTreeStore }) {
     Message.success('删除成功!');
   };
 
+  const focusAndSelectInput = () => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.dom.select();
+    }, 0);
+  };
+
   const addCatalog = () => {
     const name = `目录${Date.now()}`;
     catalogTreeStore.setState({
@@ -166,7 +173,7 @@ export function useEditableTree({ catalogTreeStore }) {
         ...treeData
       ]
     });
-    catalogTreeStore.focusAndSelectInput();
+    focusAndSelectInput();
   };
 
   const addSubVolume = (node: NodeProps) => {
@@ -186,7 +193,7 @@ export function useEditableTree({ catalogTreeStore }) {
       });
 
       catalogTreeStore.setState({ inputValue: name, treeData: cachTreeData });
-      catalogTreeStore.focusAndSelectInput();
+      focusAndSelectInput();
     }
   };
 
