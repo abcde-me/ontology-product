@@ -302,9 +302,10 @@ export const ModaForgeResourceEndpoints = {
   // 查询单个载入任务的执行记录
   getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
   // 查询单个载入任务已加载文件信息
-  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}'
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
+  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page'
 };
 
 /**
