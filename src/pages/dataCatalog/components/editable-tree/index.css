@@ -1,14 +1,25 @@
 .tree-container {
   &.arco-tree {
     .arco-tree-node {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 36px;
+
       .extra-container {
+        position: absolute;
+        height: 36px;
+        right: 0;
+        top: 0;
         opacity: 0;
       }
 
-      .last-leaf-title {
-        .last-leaf-text {
-          width: 100px;
-        }
+      .catalog-title-text {
+        width: 180px;
+      }
+
+      .last-leaf-text {
+        width: 100px;
       }
 
       &:hover {
@@ -16,11 +27,13 @@
           opacity: 1;
         }
 
+        .catalog-title-text {
+          width: 130px;
+        }
+
         &:not(:has(.no-operation)) {
-          .last-leaf-title {
-            .last-leaf-text {
-              width: 80px;
-            }
+          .last-leaf-text {
+            width: 80px;
           }
         }
       }

@@ -32,7 +32,7 @@ export default function SourceData(props) {
         >
           {tabKeys.map((tab) => (
             <TabPane key={tab.key} title={tab.title}>
-              <EditableTree onChanges={onNodeSelect} />
+              <EditableTree onChange={onNodeSelect} />
             </TabPane>
           ))}
           {/* <TabPane key="source" title="源数据">
