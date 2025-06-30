@@ -199,6 +199,11 @@ export const ResourceEndpointsV2 = {
   password: PrefixAuth + '/user/passwd',
   // 获取用户信息
   selfUser: PrefixAuth + '/user/self',
+  // 删除组织/用户前判断
+  preDelOrg: PrefixAuth + '/organization/authorize_delete/{orgId}',
+  preDelUser: PrefixAuth + '/user/authorize_delete/{userId}',
+  // 用户管理搜索
+  memberSearch: PrefixAuth + '/user/organization/search',
 
   workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
   workflowPublish: PrefixV2 + '/apps/{appId}/workflows/publish',
@@ -220,11 +225,14 @@ export const ModaForgeResourceEndpoints = {
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  // workflowDraft: PrefixAimdp + '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
   // 作业详情
   taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+
+  modelGet: PrefixAimdp + '/model/get',
 
   //数据目录
   //获取数据目录
@@ -294,9 +302,10 @@ export const ModaForgeResourceEndpoints = {
   // 查询单个载入任务的执行记录
   getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
   // 查询单个载入任务已加载文件信息
-  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}'
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
+  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page'
 };
 
 /**

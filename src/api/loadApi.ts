@@ -41,3 +41,7 @@ export async function runLoad(params) {
 export async function getLoadRecord(task_id) {
   return await UAPI.RES.getLoadRecordApi({ task_id }).get().inRegion().do();
 }
+
+export async function getLoadTaskFiles(params: any = {}) {
+  return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
+}
