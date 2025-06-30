@@ -1,8 +1,11 @@
-import UAPI from '@/api';
-
+import UAPI from '.';
 // 获取载入任务列表
 export async function getLoadList(params: any) {
-  return await UAPI.RES.getLoadListApi({}).post().inRegion().do();
+  return await UAPI.RES.getLoadListApi({})
+    .post(params)
+    // .withConfig({ baseURL: 'http://10.252.26.5:30183' })
+    .inRegion()
+    .do();
 }
 // 创建载入任务
 export async function addLoad(params: any) {

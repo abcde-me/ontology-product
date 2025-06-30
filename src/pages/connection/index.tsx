@@ -20,6 +20,7 @@ import {
 } from '@/api/connectionApi';
 import Edit from './edit';
 import { ConnectionType } from './type';
+import { filterValues } from '@/api/filterValues';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -89,10 +90,11 @@ export default function Connection() {
     try {
       const values = await EditForm.validate();
       const { type, name, ...newValues } = values;
+      const filteredValues = filterValues(values);
       const newfrom = {
         name,
         type,
-        config: { ...newValues },
+        config: { ...filteredValues },
         creator: 'test1'
       };
       setEditLoadingState(true);
@@ -100,7 +102,7 @@ export default function Connection() {
         connector_id: editObject.id,
         newfrom
       });
-      if (res.message == '') {
+      if (res.message == 'ok') {
         setEditLoadingState(false);
         // 确保数据更新完成后再调用 getListHan
         setEditVisible(false);
@@ -338,7 +340,7 @@ export default function Connection() {
           }}
         />
         <Button
-          // type="primary"
+          type="primary"
           icon={<IconPlus />}
           onClick={() => {
             childAddAndSetModalHan();
