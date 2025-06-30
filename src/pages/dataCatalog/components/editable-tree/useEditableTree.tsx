@@ -211,25 +211,26 @@ export function useEditableTree({ catalogTreeStore }) {
 
     switch (dataRef?.type) {
       case 'catalog':
-        debugger;
-        newTreeData = [
-          {
-            ...dataRef,
-            title: fileName,
-            showInput: false,
-            children: dataRef?.children?.length
-              ? dataRef?.children
-              : [
-                  {
-                    title: '数据卷',
-                    key: `catalog-${fileName}-volume`,
-                    type: 'volume',
-                    children: []
-                  }
-                ]
-          },
-          ...treeData.slice(1)
-        ];
+        newTreeData = treeData.map((item: TreeDataType) => {
+          if (item.key === dataRef.key) {
+            return {
+              ...dataRef,
+              title: fileName,
+              showInput: false,
+              children: dataRef?.children?.length
+                ? dataRef?.children
+                : [
+                    {
+                      title: '数据卷',
+                      key: `catalog-${fileName}-volume`,
+                      type: 'volume',
+                      children: []
+                    }
+                  ]
+            };
+          }
+          return item;
+        });
         break;
 
       case 'volume-child':
