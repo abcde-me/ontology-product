@@ -3,7 +3,7 @@ import UAPI from '@/api';
 // 作业列表
 export async function getTaskList(params: {
   uid: string | number;
-  job_id: string;
+  search_value: string;
   page: number;
   page_size: number;
 }) {
