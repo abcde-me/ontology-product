@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
-import SourceDataTree from './components/sourcedata-tree';
-import TargetDataTree from './components/targetdata-tree';
 import EditableTree from '../editable-tree';
+import { useDataCatalog } from '../DataCatalogProvider/Context';
 
 const TabPane = Tabs.TabPane;
 
@@ -13,13 +12,17 @@ const tabKeys = [
 ];
 
 export default function SourceData(props) {
-  const { onTabChange, onNodeSelect, activeTab } = props;
+  const { onTabChange, onNodeSelect } = props;
+
+  const dataCatalog = useDataCatalog();
+  const { catalogTreeStore } = dataCatalog;
+  const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
 
   const handleTabChange = (value) => {
     console.log('Tab changed to:', value);
-    if (onTabChange) {
-      onTabChange(value);
-    }
+    catalogTreeStore.setState({
+      activeTab: value
+    });
   };
 
   return (
@@ -35,12 +38,6 @@ export default function SourceData(props) {
               <EditableTree onChange={onNodeSelect} />
             </TabPane>
           ))}
-          {/* <TabPane key="source" title="源数据">
-            <SourceDataTree onChanges={onNodeSelect} />
-          </TabPane>
-          <TabPane key="target" title="目标数据">
-            <TargetDataTree onChanges={onNodeSelect} />
-          </TabPane> */}
         </Tabs>
       </div>
     </div>

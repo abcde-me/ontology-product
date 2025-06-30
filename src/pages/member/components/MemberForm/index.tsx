@@ -2,7 +2,6 @@ import { Form, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 import { useMemberEditor } from '../../components/MemberProvider/Context';
 import { getNodePathTitles } from '../../utils';
-import { use } from 'echarts';
 
 const FormItem = Form.Item;
 
