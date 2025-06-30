@@ -32,15 +32,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const [isShow, setIsShow] = useState(false);
+  const [isShowWB, setIsShowWB] = useState(false);
   useEffect(() => {
-    setIsShow(inputs?.app_scenarios === 1 || inputs?.app_scenarios === 5);
+    setIsShow(inputs?.app_scenarios === 'tongyong' || inputs?.app_scenarios === 'duolong');
+    setIsShowWB(inputs?.app_scenarios === 'fenlei' || inputs?.app_scenarios === 'shengcheng');
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
 
   const onValuesChange = (changeValue: any, values: any) => {
-    if (values?.app_scenarios !== 1 && values?.app_scenarios !== 5) {
-      form.setFieldValue('sample_num', '');
-    }
     updateInputs(values);
   };
   return (
@@ -83,20 +82,19 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               placeholder="请选择场景"
               style={{ width: '100%', margin: 0 }}
             >
-              {/* 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4） */}
-              <Option key={1} value={1}>
-                按通用
+              <Option key='tongyong' value='tongyong'>
+                通用
               </Option>
-              <Option key={2} value={2}>
+              <Option key='fenlei' value='fenlei'>
                 文本分类
               </Option>
-              <Option key={3} value={3}>
+              <Option key='tiqu' value='tiqu'>
                 文本提取
               </Option>
-              <Option key={4} value={4}>
+              <Option key='shengcheng' value='shengcheng'>
                 文本生成
               </Option>
-              <Option key={5} value={5}>
+              <Option key='duolong' value='duolong'>
                 多轮回答
               </Option>
             </Select>
@@ -112,6 +110,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             <div className="content-tips-text">
               该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
               部分，增加到prompt 中去。
+            </div></>}
+          {isShowWB && <><FormItem label="任务描述增强占比:" field="enhanced_proportion" layout="vertical">
+            <InputNumber min={0} max={1} step={0.1} placeholder="请输入指令" />
+          </FormItem>
+            <div className="content-tips-text">
+              节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0 ~ 1
             </div></>}
           <FormItem label="过滤相似度阈值:" field="similarity_threshold" layout="vertical">
             <InputNumber min={0} max={1} step={0.1} placeholder="请输入阈值" />
