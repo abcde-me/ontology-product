@@ -73,7 +73,7 @@ export function useEditableTree({ catalogTreeStore }) {
           return item;
         })
       });
-      catalogTreeStore.focusAndSelectInput();
+      focusAndSelectInput();
       // TODO
       // Message.success('修改成功!'); // 成功提示
     }
@@ -192,7 +192,10 @@ export function useEditableTree({ catalogTreeStore }) {
         return item;
       });
 
-      catalogTreeStore.setState({ inputValue: name, treeData: cachTreeData });
+      catalogTreeStore.setState({
+        inputValue: name,
+        treeData: cachTreeData
+      });
       focusAndSelectInput();
     }
   };
@@ -208,6 +211,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
     switch (dataRef?.type) {
       case 'catalog':
+        debugger;
         newTreeData = [
           {
             ...dataRef,

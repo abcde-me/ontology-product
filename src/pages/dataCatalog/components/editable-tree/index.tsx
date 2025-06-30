@@ -1,24 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Input, Message, Modal, Tooltip, Tree } from '@arco-design/web-react';
-import {
-  IconCaretDown,
-  IconPlus,
-  IconDelete,
-  IconEdit,
-  IconStorage,
-  IconArchive
-} from '@arco-design/web-react/icon';
-import {
-  NodeInstance,
-  NodeProps,
-  TreeDataType
-} from '@arco-design/web-react/es/Tree/interface';
+import React from 'react';
+import { Tree } from '@arco-design/web-react';
+import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
-import './index.css';
-import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import SearchInput from '../search-input';
 import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
+import './index.css';
 
 export default function EditableTree() {
   const dataCatalog = useDataCatalog();
