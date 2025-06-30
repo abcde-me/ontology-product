@@ -271,7 +271,32 @@ export const ModaForgeResourceEndpoints = {
   // 修改连接器数据
   editconnection: PrefixAimdp + '/connectors/{connector_id}',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}'
+  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+
+  // 数据载入接口
+
+  // 获取数据载入列表
+  getLoadListApi: PrefixAimdp + '/load_tasks_page',
+  // 创建单个载入任务
+  addLoadApi: PrefixAimdp + '/load_tasks',
+  // 删除指定载入任务
+  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 修改单个载入任务
+  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 查看单个载入任务详情
+  getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 启停单个载入任务
+  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/{task_id}/{action}',
+  // 立即运行指定载入任务
+  runLoadApi: PrefixAimdp + '/load_tasks/{task_id}/exec',
+  // 删除指定文件
+  delFileApi: PrefixAimdp + '/load_tasks/files',
+  // 查询单个载入任务的执行记录
+  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
+  // 查询单个载入任务已加载文件信息
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}'
+  // 查询目录卷路径关联的载入任务
+  // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
 };
 
 /**
