@@ -7,6 +7,7 @@ import { useContext, useContextSelector } from 'use-context-selector';
 import { useStore, useWorkflowStore } from '../store';
 import { BlockEnum, InputVarType, WorkflowVersion } from '../types';
 import type { StartNodeType } from '../nodes/start/types';
+import { useUserInfo } from '@/store/userInfoStore';
 import {
   useChecklistBeforePublish,
   useIsChatMode,
@@ -20,30 +21,76 @@ import TaskOperation from '@/pages/workflowConfig/workflow/header/components/tas
 import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { CreateAppModal } from './create-app-modal';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
-import { publishWorkflow } from '@/api/workflowV2';
+import { operateWorkflow } from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import EditIcon from '@/pages/workflowConfig/styles/images/op-icons/edit.svg';
 import WorkflowIcon from '@/pages/workflowConfig/styles/images/op-icons/workflow.svg';
 import { PrefixV2 } from '@/api/endpoints';
-import { WORKFLOW_OPERATION } from './types';
+import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
+import { Button, Modal, Space, Typography } from '@arco-design/web-react';
+import { RiCheckboxCircleFill } from '@remixicon/react';
+
+const SuccessModal = ({ visible, onClose }) => {
+  return (
+    <Modal
+      title={null}
+      visible={visible}
+      footer={null}
+      closable={false}
+      style={{ textAlign: 'start' }}
+    >
+      <Space style={{ display: 'flex', alignItems: 'center', marginTop: 20 }}>
+        <RiCheckboxCircleFill
+          className="h-5 w-5 text-text-success"
+          aria-hidden="true"
+        />
+
+        <Typography.Title heading={6} style={{ marginTop: 0, marginBottom: 0 }}>
+          已成功提交运行
+        </Typography.Title>
+      </Space>
+
+      <Typography.Text
+        type="secondary"
+        style={{ margin: '4px 0 16px', lineHeight: '22px', display: 'block' }}
+      >
+        运行详情请到作业（job_123）中查看。
+      </Typography.Text>
+
+      <Space
+        size="medium"
+        style={{ marginBottom: 20, justifyContent: 'end', width: '100%' }}
+      >
+        <Button onClick={onClose}>关闭</Button>
+        <Button type="primary" onClick={onClose}>
+          去查看
+        </Button>
+      </Space>
+    </Modal>
+  );
+};
 
 const Header: FC = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const history = useHistory();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRuningModal, setShowRuningModal] = useState(false);
 
   const workflowStore = useWorkflowStore();
-  const appDetail = useAppStore((s) => s.appDetail);
-  const setAppDetail = useAppStore((s) => s.setAppDetail);
+  const userInfo = useUserInfo();
+  const appDetail = useTaskStore((s) => s.workflowDetail);
+  const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
   const systemFeatures = useContextSelector(
     AppContext,
     (state) => state.systemFeatures
   );
-  const appID = appDetail?.id;
+  const workflowUuid = appDetail?.workflow_uuid ?? '';
+  const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
+  const workflowStatus = appDetail?.is_online ?? IsOnline.online;
   const isChatMode = useIsChatMode();
   const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
   const { handleNodeSelect } = useNodesInteractions();
@@ -91,38 +138,64 @@ const Header: FC = () => {
 
   const updateAppDetail = useCallback(async () => {
     try {
-      const result = await getAppDetail(appID!);
+      const result = await getAppDetail(workflowUuid);
       const res = result.data;
       setAppDetail({ ...res });
     } catch (error) {
       console.error(error);
     }
-  }, [appID, setAppDetail]);
+  }, [workflowUuid, setAppDetail]);
 
   const onOperate = useCallback(
-    async (op: WORKFLOW_OPERATION, params?: PublishWorkflowParams) => {
-      if (!handleCheckBeforePublish()) {
-        throw new Error('Checklist failed');
-      }
+    async (op: WorkflowOperation, params?: PublishWorkflowParams) => {
+      // if (!handleCheckBeforePublish()) {
+      //   throw new Error('Checklist failed');
+      // }
 
-      // @ts-expect-error
-      const { data: res } = await publishWorkflow(appID, {
-        title: params?.title || '',
-        releaseNotes: params?.releaseNotes || '',
-        marked_name: params?.title || '',
-        marked_comment: params?.releaseNotes || ''
+      const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+        uid: userInfo?.account ?? '',
+        ds_workflow_id: dsWorkflowId ?? 0,
+        op
       });
 
-      if (res) {
-        notify({ type: 'success', message: t('common.api.actionSuccess') });
-        updateAppDetail();
-        console.log('res.created_at', res.created_at);
-        workflowStore.getState().setPublishedAt(res.created_at);
-        resetWorkflowVersionHistory();
+      if (op === WorkflowOperation.ONLINE) {
+        if (workflowRes?.data) {
+          notify({ type: 'success', message: '上线成功' });
+        } else {
+          notify({ type: 'error', message: '上线失败' });
+        }
+      } else if (op === WorkflowOperation.OFFLINE) {
+        if (workflowRes?.data) {
+          notify({ type: 'success', message: '下线成功', duration: 100000 });
+        } else {
+          notify({ type: 'error', message: '下线失败' });
+        }
+      } else if (op === WorkflowOperation.RUNNING) {
+        if (workflowRes?.data) {
+          setShowRuningModal(true);
+        } else {
+          notify({ type: 'error', message: '下线失败' });
+        }
+      }
+
+      if (workflowRes?.data) {
+        // Notification.success({
+        //     title: 'Success',
+        //     content: 'This is a success Notification!',
+        //   })
+        // if (op === WorkflowOperation.ONLINE) {
+        //   notify({ type: 'success', message: '上线成功' });
+        // } else if (op === WorkflowOperation.OFFLINE) {
+        //   notify({ type: 'success', message: '下线成功' });
+        // }
+        // updateAppDetail();
+        // console.log('res.created_at', workflowRes?.data.created_at);
+        // workflowStore.getState().setPublishedAt(workflowRes?.data.created_at);
+        // resetWorkflowVersionHistory();
       }
     },
     [
-      appID,
+      workflowUuid,
       handleCheckBeforePublish,
       notify,
       t,
@@ -171,27 +244,15 @@ const Header: FC = () => {
           <BackIcon className="size-[16px]" />
         </div>
         <div className="app-icon">
-          {
-            // TODO: ts错误
-            // @ts-expect-error
-            appDetail.icon ? (
-              // TODO: ts错误
-              // @ts-expect-error
-              <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
-            ) : (
-              <WorkflowIcon />
-            )
-          }
+          {appDetail.icon ? (
+            <img src={`${PrefixV2}/files/browser/${appDetail.icon}`} />
+          ) : (
+            <WorkflowIcon />
+          )}
         </div>
         <div className="app-info">
           <div className="app-name">
-            <span className="txt">
-              {
-                // TODO: ts错误
-                // @ts-expect-error
-                appDetail.name
-              }
-            </span>
+            <span className="txt">{appDetail?.workflow_name}</span>
             <div className="op-icon" onClick={() => setShowEditModal(true)}>
               <EditIcon className="size-[16px]" />
             </div>
@@ -202,6 +263,7 @@ const Header: FC = () => {
       <div className="right-part">
         <TaskOperation
           {...{
+            workflowStatus,
             publishedAt,
             draftUpdatedAt,
             disabled: nodesReadOnly,
@@ -214,9 +276,11 @@ const Header: FC = () => {
           }}
         />
       </div>
-      {showEditModal && (
-        <CreateAppModal visible={showEditModal} setVisible={setShowEditModal} />
-      )}
+      <CreateAppModal visible={showEditModal} setVisible={setShowEditModal} />
+      <SuccessModal
+        visible={showRuningModal}
+        onClose={() => setShowRuningModal(false)}
+      />
     </div>
   );
 };

@@ -1,15 +1,13 @@
-import { useContext } from 'react'
-import {
-  useStore as useZustandStore,
-} from 'zustand'
-import { createStore } from 'zustand/vanilla'
-import { debounce } from 'lodash-es'
-import type { Viewport } from 'reactflow'
+import { useContext } from 'react';
+import { useStore as useZustandStore } from 'zustand';
+import { createStore } from 'zustand/vanilla';
+import { debounce } from 'lodash-es';
+import type { Viewport } from 'reactflow';
 import type {
   HelpLineHorizontalPosition,
-  HelpLineVerticalPosition,
-} from './help-line/types'
-import type { VariableAssignerNodeType } from './nodes/variable-assigner/types'
+  HelpLineVerticalPosition
+} from './help-line/types';
+import type { VariableAssignerNodeType } from './nodes/variable-assigner/types';
 import type {
   ConversationVariable,
   Edge,
@@ -18,10 +16,13 @@ import type {
   Node,
   RunFile,
   ToolWithProvider,
-  WorkflowRunningData,
-} from './types'
-import { WorkflowContext } from './context'
-import type { NodeTracing, VersionHistory } from '@/pages/workflowConfig/types/workflow'
+  WorkflowRunningData
+} from './types';
+import { WorkflowContext } from './context';
+import type {
+  NodeTracing,
+  VersionHistory
+} from '@/pages/workflowConfig/types/workflow';
 
 // #TODO chatVar#
 // const MOCK_DATA = [
@@ -42,282 +43,343 @@ import type { NodeTracing, VersionHistory } from '@/pages/workflowConfig/types/w
 // ]
 
 type PreviewRunningData = WorkflowRunningData & {
-  resultTabActive?: boolean
-  resultText?: string
-}
+  resultTabActive?: boolean;
+  resultText?: string;
+};
 
 type Shape = {
-  appId: string
-  panelWidth: number
-  showSingleRunPanel: boolean
-  setShowSingleRunPanel: (showSingleRunPanel: boolean) => void
-  workflowRunningData?: PreviewRunningData
-  setWorkflowRunningData: (workflowData: PreviewRunningData) => void
-  historyWorkflowData?: HistoryWorkflowData
-  setHistoryWorkflowData: (historyWorkflowData?: HistoryWorkflowData) => void
-  showRunHistory: boolean
-  setShowRunHistory: (showRunHistory: boolean) => void
-  showFeaturesPanel: boolean
-  setShowFeaturesPanel: (showFeaturesPanel: boolean) => void
-  helpLineHorizontal?: HelpLineHorizontalPosition
-  setHelpLineHorizontal: (helpLineHorizontal?: HelpLineHorizontalPosition) => void
-  helpLineVertical?: HelpLineVerticalPosition
-  setHelpLineVertical: (helpLineVertical?: HelpLineVerticalPosition) => void
-  draftUpdatedAt: number
-  setDraftUpdatedAt: (draftUpdatedAt: number) => void
-  publishedAt: number
-  setPublishedAt: (publishedAt: number) => void
-  currentVersion: VersionHistory | null
-  setCurrentVersion: (currentVersion: VersionHistory) => void
-  showWorkflowVersionHistoryPanel: boolean
-  setShowWorkflowVersionHistoryPanel: (showWorkflowVersionHistoryPanel: boolean) => void
-  showInputsPanel: boolean
-  setShowInputsPanel: (showInputsPanel: boolean) => void
-  inputs: Record<string, string>
-  setInputs: (inputs: Record<string, string>) => void
-  toolPublished: boolean
-  setToolPublished: (toolPublished: boolean) => void
-  files: RunFile[]
-  setFiles: (files: RunFile[]) => void
+  appId: string | number;
+  panelWidth: number;
+  showSingleRunPanel: boolean;
+  setShowSingleRunPanel: (showSingleRunPanel: boolean) => void;
+  workflowRunningData?: PreviewRunningData;
+  setWorkflowRunningData: (workflowData: PreviewRunningData) => void;
+  historyWorkflowData?: HistoryWorkflowData;
+  setHistoryWorkflowData: (historyWorkflowData?: HistoryWorkflowData) => void;
+  showRunHistory: boolean;
+  setShowRunHistory: (showRunHistory: boolean) => void;
+  showFeaturesPanel: boolean;
+  setShowFeaturesPanel: (showFeaturesPanel: boolean) => void;
+  helpLineHorizontal?: HelpLineHorizontalPosition;
+  setHelpLineHorizontal: (
+    helpLineHorizontal?: HelpLineHorizontalPosition
+  ) => void;
+  helpLineVertical?: HelpLineVerticalPosition;
+  setHelpLineVertical: (helpLineVertical?: HelpLineVerticalPosition) => void;
+  draftUpdatedAt: number;
+  setDraftUpdatedAt: (draftUpdatedAt: number) => void;
+  publishedAt: number;
+  setPublishedAt: (publishedAt: number) => void;
+  currentVersion: VersionHistory | null;
+  setCurrentVersion: (currentVersion: VersionHistory) => void;
+  showWorkflowVersionHistoryPanel: boolean;
+  setShowWorkflowVersionHistoryPanel: (
+    showWorkflowVersionHistoryPanel: boolean
+  ) => void;
+  showInputsPanel: boolean;
+  setShowInputsPanel: (showInputsPanel: boolean) => void;
+  inputs: Record<string, string>;
+  setInputs: (inputs: Record<string, string>) => void;
+  toolPublished: boolean;
+  setToolPublished: (toolPublished: boolean) => void;
+  files: RunFile[];
+  setFiles: (files: RunFile[]) => void;
   backupDraft?: {
-    nodes: Node[]
-    edges: Edge[]
-    viewport: Viewport
-    features: Record<string, any>
+    nodes: Node[];
+    edges: Edge[];
+    viewport: Viewport;
+    features: Record<string, any>;
+    environmentVariables: EnvironmentVariable[];
+  };
+  setBackupDraft: (backupDraft?: Shape['backupDraft']) => void;
+  notInitialWorkflow: boolean;
+  setNotInitialWorkflow: (notInitialWorkflow: boolean) => void;
+  nodesDefaultConfigs: Record<string, any>;
+  setNodesDefaultConfigs: (nodesDefaultConfigs: Record<string, any>) => void;
+  nodeAnimation: boolean;
+  setNodeAnimation: (nodeAnimation: boolean) => void;
+  isRestoring: boolean;
+  setIsRestoring: (isRestoring: boolean) => void;
+  debouncedSyncWorkflowDraft: (fn: () => void) => void;
+  buildInTools: ToolWithProvider[];
+  setBuildInTools: (tools: ToolWithProvider[]) => void;
+  customTools: ToolWithProvider[];
+  setCustomTools: (tools: ToolWithProvider[]) => void;
+  workflowTools: ToolWithProvider[];
+  setWorkflowTools: (tools: ToolWithProvider[]) => void;
+  clipboardElements: Node[];
+  setClipboardElements: (clipboardElements: Node[]) => void;
+  showDebugAndPreviewPanel: boolean;
+  setShowDebugAndPreviewPanel: (showDebugAndPreviewPanel: boolean) => void;
+  showEnvPanel: boolean;
+  setShowEnvPanel: (showEnvPanel: boolean) => void;
+  environmentVariables: EnvironmentVariable[];
+  setEnvironmentVariables: (
     environmentVariables: EnvironmentVariable[]
-  }
-  setBackupDraft: (backupDraft?: Shape['backupDraft']) => void
-  notInitialWorkflow: boolean
-  setNotInitialWorkflow: (notInitialWorkflow: boolean) => void
-  nodesDefaultConfigs: Record<string, any>
-  setNodesDefaultConfigs: (nodesDefaultConfigs: Record<string, any>) => void
-  nodeAnimation: boolean
-  setNodeAnimation: (nodeAnimation: boolean) => void
-  isRestoring: boolean
-  setIsRestoring: (isRestoring: boolean) => void
-  debouncedSyncWorkflowDraft: (fn: () => void) => void
-  buildInTools: ToolWithProvider[]
-  setBuildInTools: (tools: ToolWithProvider[]) => void
-  customTools: ToolWithProvider[]
-  setCustomTools: (tools: ToolWithProvider[]) => void
-  workflowTools: ToolWithProvider[]
-  setWorkflowTools: (tools: ToolWithProvider[]) => void
-  clipboardElements: Node[]
-  setClipboardElements: (clipboardElements: Node[]) => void
-  showDebugAndPreviewPanel: boolean
-  setShowDebugAndPreviewPanel: (showDebugAndPreviewPanel: boolean) => void
-  showEnvPanel: boolean
-  setShowEnvPanel: (showEnvPanel: boolean) => void
-  environmentVariables: EnvironmentVariable[]
-  setEnvironmentVariables: (environmentVariables: EnvironmentVariable[]) => void
-  envSecrets: Record<string, string>
-  setEnvSecrets: (envSecrets: Record<string, string>) => void
-  showChatVariablePanel: boolean
-  setShowChatVariablePanel: (showChatVariablePanel: boolean) => void
-  showGlobalVariablePanel: boolean
-  setShowGlobalVariablePanel: (showGlobalVariablePanel: boolean) => void
-  conversationVariables: ConversationVariable[]
-  setConversationVariables: (conversationVariables: ConversationVariable[]) => void
-  selection: null | { x1: number; y1: number; x2: number; y2: number }
-  setSelection: (selection: Shape['selection']) => void
-  bundleNodeSize: { width: number; height: number } | null
-  setBundleNodeSize: (bundleNodeSize: Shape['bundleNodeSize']) => void
-  controlMode: 'pointer' | 'hand'
-  setControlMode: (controlMode: Shape['controlMode']) => void
-  candidateNode?: Node
-  setCandidateNode: (candidateNode?: Node) => void
+  ) => void;
+  envSecrets: Record<string, string>;
+  setEnvSecrets: (envSecrets: Record<string, string>) => void;
+  showChatVariablePanel: boolean;
+  setShowChatVariablePanel: (showChatVariablePanel: boolean) => void;
+  showGlobalVariablePanel: boolean;
+  setShowGlobalVariablePanel: (showGlobalVariablePanel: boolean) => void;
+  conversationVariables: ConversationVariable[];
+  setConversationVariables: (
+    conversationVariables: ConversationVariable[]
+  ) => void;
+  selection: null | { x1: number; y1: number; x2: number; y2: number };
+  setSelection: (selection: Shape['selection']) => void;
+  bundleNodeSize: { width: number; height: number } | null;
+  setBundleNodeSize: (bundleNodeSize: Shape['bundleNodeSize']) => void;
+  controlMode: 'pointer' | 'hand';
+  setControlMode: (controlMode: Shape['controlMode']) => void;
+  candidateNode?: Node;
+  setCandidateNode: (candidateNode?: Node) => void;
   panelMenu?: {
-    top: number
-    left: number
-  }
-  setPanelMenu: (panelMenu: Shape['panelMenu']) => void
+    top: number;
+    left: number;
+  };
+  setPanelMenu: (panelMenu: Shape['panelMenu']) => void;
   nodeMenu?: {
-    top: number
-    left: number
-    nodeId: string
-  }
-  setNodeMenu: (nodeMenu: Shape['nodeMenu']) => void
-  mousePosition: { pageX: number; pageY: number; elementX: number; elementY: number }
-  setMousePosition: (mousePosition: Shape['mousePosition']) => void
-  syncWorkflowDraftHash: string
-  setSyncWorkflowDraftHash: (hash: string) => void
-  showConfirm?: { title: string; desc?: string; onConfirm: () => void }
-  setShowConfirm: (showConfirm: Shape['showConfirm']) => void
+    top: number;
+    left: number;
+    nodeId: string;
+  };
+  setNodeMenu: (nodeMenu: Shape['nodeMenu']) => void;
+  mousePosition: {
+    pageX: number;
+    pageY: number;
+    elementX: number;
+    elementY: number;
+  };
+  setMousePosition: (mousePosition: Shape['mousePosition']) => void;
+  syncWorkflowDraftHash: string;
+  setSyncWorkflowDraftHash: (hash: string) => void;
+  showConfirm?: { title: string; desc?: string; onConfirm: () => void };
+  setShowConfirm: (showConfirm: Shape['showConfirm']) => void;
   showAssignVariablePopup?: {
-    nodeId: string
-    nodeData: Node['data']
-    variableAssignerNodeId: string
-    variableAssignerNodeData: VariableAssignerNodeType
-    variableAssignerNodeHandleId: string
-    parentNode?: Node
-    x: number
-    y: number
-  }
-  setShowAssignVariablePopup: (showAssignVariablePopup: Shape['showAssignVariablePopup']) => void
-  hoveringAssignVariableGroupId?: string
-  setHoveringAssignVariableGroupId: (hoveringAssignVariableGroupId?: string) => void
-  connectingNodePayload?: { nodeId: string; nodeType: string; handleType: string; handleId: string | null }
-  setConnectingNodePayload: (startConnectingPayload?: Shape['connectingNodePayload']) => void
+    nodeId: string;
+    nodeData: Node['data'];
+    variableAssignerNodeId: string;
+    variableAssignerNodeData: VariableAssignerNodeType;
+    variableAssignerNodeHandleId: string;
+    parentNode?: Node;
+    x: number;
+    y: number;
+  };
+  setShowAssignVariablePopup: (
+    showAssignVariablePopup: Shape['showAssignVariablePopup']
+  ) => void;
+  hoveringAssignVariableGroupId?: string;
+  setHoveringAssignVariableGroupId: (
+    hoveringAssignVariableGroupId?: string
+  ) => void;
+  connectingNodePayload?: {
+    nodeId: string;
+    nodeType: string;
+    handleType: string;
+    handleId: string | null;
+  };
+  setConnectingNodePayload: (
+    startConnectingPayload?: Shape['connectingNodePayload']
+  ) => void;
   enteringNodePayload?: {
-    nodeId: string
-    nodeData: VariableAssignerNodeType
-  }
-  setEnteringNodePayload: (enteringNodePayload?: Shape['enteringNodePayload']) => void
-  isSyncingWorkflowDraft: boolean
-  setIsSyncingWorkflowDraft: (isSyncingWorkflowDraft: boolean) => void
-  controlPromptEditorRerenderKey: number
-  setControlPromptEditorRerenderKey: (controlPromptEditorRerenderKey: number) => void
-  showImportDSLModal: boolean
-  setShowImportDSLModal: (showImportDSLModal: boolean) => void
-  showTips: string
-  setShowTips: (showTips: string) => void
-  iterTimes: number
-  setIterTimes: (iterTimes: number) => void
-  loopTimes: number
-  setLoopTimes: (loopTimes: number) => void
-  iterParallelLogMap: Map<string, Map<string, NodeTracing[]>>
-  setIterParallelLogMap: (iterParallelLogMap: Map<string, Map<string, NodeTracing[]>>) => void
-  versionHistory: VersionHistory[]
-  setVersionHistory: (versionHistory: VersionHistory[]) => void
-}
+    nodeId: string;
+    nodeData: VariableAssignerNodeType;
+  };
+  setEnteringNodePayload: (
+    enteringNodePayload?: Shape['enteringNodePayload']
+  ) => void;
+  isSyncingWorkflowDraft: boolean;
+  setIsSyncingWorkflowDraft: (isSyncingWorkflowDraft: boolean) => void;
+  controlPromptEditorRerenderKey: number;
+  setControlPromptEditorRerenderKey: (
+    controlPromptEditorRerenderKey: number
+  ) => void;
+  showImportDSLModal: boolean;
+  setShowImportDSLModal: (showImportDSLModal: boolean) => void;
+  showTips: string;
+  setShowTips: (showTips: string) => void;
+  iterTimes: number;
+  setIterTimes: (iterTimes: number) => void;
+  loopTimes: number;
+  setLoopTimes: (loopTimes: number) => void;
+  iterParallelLogMap: Map<string, Map<string, NodeTracing[]>>;
+  setIterParallelLogMap: (
+    iterParallelLogMap: Map<string, Map<string, NodeTracing[]>>
+  ) => void;
+  versionHistory: VersionHistory[];
+  setVersionHistory: (versionHistory: VersionHistory[]) => void;
+};
 
 export const createWorkflowStore = () => {
   const hideAllPanel = {
     showDebugAndPreviewPanel: false,
     showEnvPanel: false,
     showChatVariablePanel: false,
-    showGlobalVariablePanel: false,
-  }
-  return createStore<Shape>(set => ({
+    showGlobalVariablePanel: false
+  };
+  return createStore<Shape>((set) => ({
     appId: '',
-    panelWidth: localStorage.getItem('workflow-node-panel-width') ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!) : 420,
+    panelWidth: localStorage.getItem('workflow-node-panel-width')
+      ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!)
+      : 420,
     showSingleRunPanel: false,
-    setShowSingleRunPanel: showSingleRunPanel => set(() => ({ showSingleRunPanel })),
+    setShowSingleRunPanel: (showSingleRunPanel) =>
+      set(() => ({ showSingleRunPanel })),
     workflowRunningData: undefined,
-    setWorkflowRunningData: workflowRunningData => set(() => ({ workflowRunningData })),
+    setWorkflowRunningData: (workflowRunningData) =>
+      set(() => ({ workflowRunningData })),
     historyWorkflowData: undefined,
-    setHistoryWorkflowData: historyWorkflowData => set(() => ({ historyWorkflowData })),
+    setHistoryWorkflowData: (historyWorkflowData) =>
+      set(() => ({ historyWorkflowData })),
     showRunHistory: false,
-    setShowRunHistory: showRunHistory => set(() => ({ showRunHistory })),
+    setShowRunHistory: (showRunHistory) => set(() => ({ showRunHistory })),
     showFeaturesPanel: false,
-    setShowFeaturesPanel: showFeaturesPanel => set(() => ({ showFeaturesPanel })),
+    setShowFeaturesPanel: (showFeaturesPanel) =>
+      set(() => ({ showFeaturesPanel })),
     helpLineHorizontal: undefined,
-    setHelpLineHorizontal: helpLineHorizontal => set(() => ({ helpLineHorizontal })),
+    setHelpLineHorizontal: (helpLineHorizontal) =>
+      set(() => ({ helpLineHorizontal })),
     helpLineVertical: undefined,
-    setHelpLineVertical: helpLineVertical => set(() => ({ helpLineVertical })),
+    setHelpLineVertical: (helpLineVertical) =>
+      set(() => ({ helpLineVertical })),
     draftUpdatedAt: 0,
-    setDraftUpdatedAt: draftUpdatedAt => set(() => ({ draftUpdatedAt: draftUpdatedAt ? draftUpdatedAt * 1000 : 0 })),
+    setDraftUpdatedAt: (draftUpdatedAt) =>
+      set(() => ({
+        draftUpdatedAt: draftUpdatedAt ? draftUpdatedAt * 1000 : 0
+      })),
     publishedAt: 0,
-    setPublishedAt: publishedAt => set(() => ({ publishedAt: publishedAt ? publishedAt * 1000 : 0 })),
+    setPublishedAt: (publishedAt) =>
+      set(() => ({ publishedAt: publishedAt ? publishedAt * 1000 : 0 })),
     currentVersion: null,
-    setCurrentVersion: currentVersion => set(() => ({ currentVersion })),
+    setCurrentVersion: (currentVersion) => set(() => ({ currentVersion })),
     showWorkflowVersionHistoryPanel: false,
-    setShowWorkflowVersionHistoryPanel: showWorkflowVersionHistoryPanel => set(() => ({ showWorkflowVersionHistoryPanel })),
+    setShowWorkflowVersionHistoryPanel: (showWorkflowVersionHistoryPanel) =>
+      set(() => ({ showWorkflowVersionHistoryPanel })),
     showInputsPanel: false,
-    setShowInputsPanel: showInputsPanel => set(() => ({ showInputsPanel })),
+    setShowInputsPanel: (showInputsPanel) => set(() => ({ showInputsPanel })),
     inputs: {},
-    setInputs: inputs => set(() => ({ inputs })),
+    setInputs: (inputs) => set(() => ({ inputs })),
     toolPublished: false,
-    setToolPublished: toolPublished => set(() => ({ toolPublished })),
+    setToolPublished: (toolPublished) => set(() => ({ toolPublished })),
     files: [],
-    setFiles: files => set(() => ({ files })),
+    setFiles: (files) => set(() => ({ files })),
     backupDraft: undefined,
-    setBackupDraft: backupDraft => set(() => ({ backupDraft })),
+    setBackupDraft: (backupDraft) => set(() => ({ backupDraft })),
     notInitialWorkflow: false,
-    setNotInitialWorkflow: notInitialWorkflow => set(() => ({ notInitialWorkflow })),
+    setNotInitialWorkflow: (notInitialWorkflow) =>
+      set(() => ({ notInitialWorkflow })),
     nodesDefaultConfigs: {},
-    setNodesDefaultConfigs: nodesDefaultConfigs => set(() => ({ nodesDefaultConfigs })),
+    setNodesDefaultConfigs: (nodesDefaultConfigs) =>
+      set(() => ({ nodesDefaultConfigs })),
     nodeAnimation: false,
-    setNodeAnimation: nodeAnimation => set(() => ({ nodeAnimation })),
+    setNodeAnimation: (nodeAnimation) => set(() => ({ nodeAnimation })),
     isRestoring: false,
-    setIsRestoring: isRestoring => set(() => ({ isRestoring })),
+    setIsRestoring: (isRestoring) => set(() => ({ isRestoring })),
     debouncedSyncWorkflowDraft: debounce((syncWorkflowDraft) => {
-      syncWorkflowDraft()
+      syncWorkflowDraft();
     }, 5000),
     buildInTools: [],
-    setBuildInTools: buildInTools => set(() => ({ buildInTools })),
+    setBuildInTools: (buildInTools) => set(() => ({ buildInTools })),
     customTools: [],
-    setCustomTools: customTools => set(() => ({ customTools })),
+    setCustomTools: (customTools) => set(() => ({ customTools })),
     workflowTools: [],
-    setWorkflowTools: workflowTools => set(() => ({ workflowTools })),
+    setWorkflowTools: (workflowTools) => set(() => ({ workflowTools })),
     clipboardElements: [],
-    setClipboardElements: clipboardElements => set(() => ({ clipboardElements })),
+    setClipboardElements: (clipboardElements) =>
+      set(() => ({ clipboardElements })),
     showDebugAndPreviewPanel: false,
-    setShowDebugAndPreviewPanel: showDebugAndPreviewPanel => set(() => ({ showDebugAndPreviewPanel })),
+    setShowDebugAndPreviewPanel: (showDebugAndPreviewPanel) =>
+      set(() => ({ showDebugAndPreviewPanel })),
     showEnvPanel: false,
-    setShowEnvPanel: showEnvPanel => set(() => ({ showEnvPanel })),
+    setShowEnvPanel: (showEnvPanel) => set(() => ({ showEnvPanel })),
     environmentVariables: [],
-    setEnvironmentVariables: environmentVariables => set(() => ({ environmentVariables })),
+    setEnvironmentVariables: (environmentVariables) =>
+      set(() => ({ environmentVariables })),
     envSecrets: {},
-    setEnvSecrets: envSecrets => set(() => ({ envSecrets })),
+    setEnvSecrets: (envSecrets) => set(() => ({ envSecrets })),
     showChatVariablePanel: false,
-    setShowChatVariablePanel: showChatVariablePanel => set(() => ({ showChatVariablePanel })),
+    setShowChatVariablePanel: (showChatVariablePanel) =>
+      set(() => ({ showChatVariablePanel })),
     showGlobalVariablePanel: false,
-    setShowGlobalVariablePanel: showGlobalVariablePanel => set(() => {
-      if (showGlobalVariablePanel)
-        return { ...hideAllPanel, showGlobalVariablePanel: true }
-      else
-        return { showGlobalVariablePanel: false }
-    }),
+    setShowGlobalVariablePanel: (showGlobalVariablePanel) =>
+      set(() => {
+        if (showGlobalVariablePanel)
+          return { ...hideAllPanel, showGlobalVariablePanel: true };
+        else return { showGlobalVariablePanel: false };
+      }),
     conversationVariables: [],
-    setConversationVariables: conversationVariables => set(() => ({ conversationVariables })),
+    setConversationVariables: (conversationVariables) =>
+      set(() => ({ conversationVariables })),
     selection: null,
-    setSelection: selection => set(() => ({ selection })),
+    setSelection: (selection) => set(() => ({ selection })),
     bundleNodeSize: null,
-    setBundleNodeSize: bundleNodeSize => set(() => ({ bundleNodeSize })),
-    controlMode: localStorage.getItem('workflow-operation-mode') === 'pointer' ? 'pointer' : 'hand',
+    setBundleNodeSize: (bundleNodeSize) => set(() => ({ bundleNodeSize })),
+    controlMode:
+      localStorage.getItem('workflow-operation-mode') === 'pointer'
+        ? 'pointer'
+        : 'hand',
     setControlMode: (controlMode) => {
-      set(() => ({ controlMode }))
-      localStorage.setItem('workflow-operation-mode', controlMode)
+      set(() => ({ controlMode }));
+      localStorage.setItem('workflow-operation-mode', controlMode);
     },
     candidateNode: undefined,
-    setCandidateNode: candidateNode => set(() => ({ candidateNode })),
+    setCandidateNode: (candidateNode) => set(() => ({ candidateNode })),
     panelMenu: undefined,
-    setPanelMenu: panelMenu => set(() => ({ panelMenu })),
+    setPanelMenu: (panelMenu) => set(() => ({ panelMenu })),
     nodeMenu: undefined,
-    setNodeMenu: nodeMenu => set(() => ({ nodeMenu })),
+    setNodeMenu: (nodeMenu) => set(() => ({ nodeMenu })),
     mousePosition: { pageX: 0, pageY: 0, elementX: 0, elementY: 0 },
-    setMousePosition: mousePosition => set(() => ({ mousePosition })),
+    setMousePosition: (mousePosition) => set(() => ({ mousePosition })),
     syncWorkflowDraftHash: '',
-    setSyncWorkflowDraftHash: syncWorkflowDraftHash => set(() => ({ syncWorkflowDraftHash })),
+    setSyncWorkflowDraftHash: (syncWorkflowDraftHash) =>
+      set(() => ({ syncWorkflowDraftHash })),
     showConfirm: undefined,
-    setShowConfirm: showConfirm => set(() => ({ showConfirm })),
+    setShowConfirm: (showConfirm) => set(() => ({ showConfirm })),
     showAssignVariablePopup: undefined,
-    setShowAssignVariablePopup: showAssignVariablePopup => set(() => ({ showAssignVariablePopup })),
+    setShowAssignVariablePopup: (showAssignVariablePopup) =>
+      set(() => ({ showAssignVariablePopup })),
     hoveringAssignVariableGroupId: undefined,
-    setHoveringAssignVariableGroupId: hoveringAssignVariableGroupId => set(() => ({ hoveringAssignVariableGroupId })),
+    setHoveringAssignVariableGroupId: (hoveringAssignVariableGroupId) =>
+      set(() => ({ hoveringAssignVariableGroupId })),
     connectingNodePayload: undefined,
-    setConnectingNodePayload: connectingNodePayload => set(() => ({ connectingNodePayload })),
+    setConnectingNodePayload: (connectingNodePayload) =>
+      set(() => ({ connectingNodePayload })),
     enteringNodePayload: undefined,
-    setEnteringNodePayload: enteringNodePayload => set(() => ({ enteringNodePayload })),
+    setEnteringNodePayload: (enteringNodePayload) =>
+      set(() => ({ enteringNodePayload })),
     isSyncingWorkflowDraft: false,
-    setIsSyncingWorkflowDraft: isSyncingWorkflowDraft => set(() => ({ isSyncingWorkflowDraft })),
+    setIsSyncingWorkflowDraft: (isSyncingWorkflowDraft) =>
+      set(() => ({ isSyncingWorkflowDraft })),
     controlPromptEditorRerenderKey: 0,
-    setControlPromptEditorRerenderKey: controlPromptEditorRerenderKey => set(() => ({ controlPromptEditorRerenderKey })),
+    setControlPromptEditorRerenderKey: (controlPromptEditorRerenderKey) =>
+      set(() => ({ controlPromptEditorRerenderKey })),
     showImportDSLModal: false,
-    setShowImportDSLModal: showImportDSLModal => set(() => ({ showImportDSLModal })),
+    setShowImportDSLModal: (showImportDSLModal) =>
+      set(() => ({ showImportDSLModal })),
     showTips: '',
-    setShowTips: showTips => set(() => ({ showTips })),
+    setShowTips: (showTips) => set(() => ({ showTips })),
     iterTimes: 1,
-    setIterTimes: iterTimes => set(() => ({ iterTimes })),
+    setIterTimes: (iterTimes) => set(() => ({ iterTimes })),
     loopTimes: 1,
-    setLoopTimes: loopTimes => set(() => ({ loopTimes })),
+    setLoopTimes: (loopTimes) => set(() => ({ loopTimes })),
     iterParallelLogMap: new Map<string, Map<string, NodeTracing[]>>(),
-    setIterParallelLogMap: iterParallelLogMap => set(() => ({ iterParallelLogMap })),
+    setIterParallelLogMap: (iterParallelLogMap) =>
+      set(() => ({ iterParallelLogMap })),
 
     versionHistory: [],
-    setVersionHistory: versionHistory => set(() => ({ versionHistory })),
-  }))
-}
+    setVersionHistory: (versionHistory) => set(() => ({ versionHistory }))
+  }));
+};
 
 export function useStore<T>(selector: (state: Shape) => T): T {
-  const store = useContext(WorkflowContext)
-  if (!store)
-    throw new Error('Missing WorkflowContext.Provider in the tree')
+  const store = useContext(WorkflowContext);
+  if (!store) throw new Error('Missing WorkflowContext.Provider in the tree');
 
-  return useZustandStore(store, selector)
+  return useZustandStore(store, selector);
 }
 
 export const useWorkflowStore = () => {
-  return useContext(WorkflowContext)!
-}
+  return useContext(WorkflowContext)!;
+};

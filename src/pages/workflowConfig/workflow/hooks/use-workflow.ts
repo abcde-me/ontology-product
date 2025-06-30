@@ -22,7 +22,7 @@ import {
 } from '../nodes/_base/components/variable/utils';
 import { useNodesExtraData } from './use-nodes-data';
 import { useWorkflowTemplate } from './use-workflow-template';
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import {
   getWorkflowDraft,
   createWorkflowDraft,
@@ -47,8 +47,10 @@ import workflowsDraftConfig from '@/pages/workflowConfig/mockData/workflowsDraft
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
 
 export const useIsChatMode = () => {
-  const appDetail = useAppStore((s) => s.appDetail);
+  const appDetail = useTaskStore((s) => s.workflowDetail);
 
+  // TODO: 删除无用代码
+  // @ts-expect-error
   return appDetail?.mode === 'advanced-chat';
 };
 
@@ -526,20 +528,20 @@ export const useWorkflowInit = () => {
   // @ts-expect-error
   const { nodes: nodesTemplate, edges: edgesTemplate } = useWorkflowTemplate();
   const { handleFetchAllTools } = useFetchToolsData();
-  const appDetail = useAppStore((state) => state.appDetail)!;
+  const appDetail = useTaskStore((state) => state.workflowDetail);
   const setSyncWorkflowDraftHash = useStore((s) => s.setSyncWorkflowDraftHash);
   const [data, setData] = useState<FetchWorkflowDraftResponse>();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    workflowStore.setState({ appId: appDetail.id });
-  }, [appDetail.id, workflowStore]);
+    workflowStore.setState({ appId: appDetail?.workflow_uuid });
+  }, [appDetail?.workflow_uuid, workflowStore]);
 
   const handleGetInitialWorkflowData = useCallback(async () => {
     try {
-      const result = await getWorkflowDraft(appDetail.id);
+      const result = await getWorkflowDraft(appDetail?.workflow_uuid ?? '');
       if (result.code.indexOf('DraftWorkflowNotFound') > -1) {
         workflowStore.setState({ notInitialWorkflow: true });
-        createWorkflowDraft(appDetail.id, {
+        createWorkflowDraft(appDetail?.workflow_uuid ?? '', {
           graph: {
             nodes: nodesTemplate,
             edges: edgesTemplate
@@ -582,7 +584,7 @@ export const useWorkflowInit = () => {
         error.json().then((err: any) => {
           if (err.code === 'draft_workflow_not_exist') {
             workflowStore.setState({ notInitialWorkflow: true });
-            createWorkflowDraft(appDetail.id, {
+            createWorkflowDraft(appDetail.workflow_uuid, {
               graph: {
                 nodes: nodesTemplate,
                 edges: edgesTemplate

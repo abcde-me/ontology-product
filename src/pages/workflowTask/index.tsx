@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Input, Pagination, Table } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import TimeFormatting from '@/utils/timeFormatting';
 import './index.css';
 import noDataElement from '@/components/no-data';
+import { useUserInfo } from '@/store/userInfoStore';
+import { getTaskList } from '@/api/taskList';
 
 const InputSearch = Input.Search;
 
@@ -18,6 +20,7 @@ enum TaskRunStatus {
 
 export default function WorkflowTask() {
   const history = useHistory();
+  const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化作业列表数据
@@ -77,6 +80,21 @@ export default function WorkflowTask() {
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
+
+  // 组件初始化
+  useEffect(() => {
+    if (userInfo) getList();
+  }, [userInfo]);
+
+  const getList = async () => {
+    const params = {
+      uid: userInfo?.id,
+      job_id: '',
+      page: 1,
+      page_size: 10
+    };
+    const res = await getTaskList(params);
+  };
 
   const handleToTaskDeatil = (id: number) => {
     history.push(`/tenant/compute/modaforge/workflowTaskDetail?id=${id}`);
