@@ -284,7 +284,12 @@ export default function WorkflowList() {
             getList();
           }}
         />
-        <Button shape="round" type="primary" onClick={handleCreateWorkflow}>
+        <Button
+          shape="round"
+          type="primary"
+          onClick={handleCreateWorkflow}
+          loading={loading}
+        >
           创建工作流
         </Button>
       </div>
