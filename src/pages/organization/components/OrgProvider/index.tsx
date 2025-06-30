@@ -18,7 +18,7 @@ const MemberProvider = ({ children, orgStore }: MemberProviderProps) => {
   useEffect(() => {
     org.orgStore.fetchOrgData();
     org.orgStore.fetchRoleData();
-  }, []);
+  }, [org]);
 
   return (
     <EditorContext.Provider value={org}>{children}</EditorContext.Provider>

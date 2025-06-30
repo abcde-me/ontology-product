@@ -6,7 +6,6 @@ import type { DataSet } from '@/pages/workflowConfig/models/datasets';
 interface UseTableOptions {
   defaultPageSize?: number;
   defaultCurrent?: number;
-  name?: string;
 }
 
 interface UseTableReturn {
@@ -16,58 +15,56 @@ interface UseTableReturn {
 }
 
 export function useTable(options: UseTableOptions = {}): UseTableReturn {
-  const { defaultPageSize = 10, defaultCurrent = 1, name } = options;
+  const { defaultPageSize = 10, defaultCurrent = 1 } = options;
 
   const member = useMemberEditor();
   const { memberStore } = member;
-  const { loading, list } = memberStore.useGetState();
+  const { loading, list, total, searchParams } = memberStore.useGetState([
+    'loading',
+    'list',
+    'total',
+    'searchParams'
+  ]);
 
   const [pagination, setPagination] = useState({
     current: defaultCurrent,
-    pageSize: defaultPageSize,
-    total: 0
+    pageSize: defaultPageSize
   });
 
   const handlePaginationChange = async (page: number, pageSize: number) => {
-    setPagination((prev) => ({
-      ...prev,
+    setPagination({
       current: page,
       pageSize
-    }));
-
-    const result = await memberStore.fetchData({
-      page,
-      size: pageSize,
-      name
     });
 
-    // TODO: ts错误
-    // @ts-expect-error
-    setPagination((prev) => ({
-      ...prev,
-      total: result.total
-    }));
+    await memberStore.fetchData({
+      page,
+      size: pageSize
+    });
   };
 
   const fetchData = async () => {
     const result = await memberStore.fetchData({
       page: pagination.current,
-      size: pagination.pageSize,
-      name
+      size: pagination.pageSize
     });
     console.log('fetchData result', result);
-
-    // TODO: ts错误
-    // @ts-expect-error
-    setPagination((prev) => ({
-      ...prev,
-      total: result.total
-    }));
   };
 
   useEffect(() => {
     fetchData();
-  }, [name, pagination.current, pagination.pageSize]);
+  }, [pagination.current, pagination.pageSize, searchParams.organization_id]);
+
+  // 当组织ID变化时，重置分页到第1页
+  useEffect(() => {
+    if (searchParams.organization_id) {
+      console.log('Organization changed, resetting pagination to page 1');
+      setPagination((prev) => ({
+        ...prev,
+        current: 1
+      }));
+    }
+  }, [searchParams.organization_id]);
 
   const tableProps: TableProps<DataSet> = {
     data: list,
@@ -75,7 +72,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     pagination: {
       current: pagination.current,
       pageSize: pagination.pageSize,
-      total: pagination.total,
+      total: total,
       onChange: handlePaginationChange,
       showTotal: true,
       showJumper: true,

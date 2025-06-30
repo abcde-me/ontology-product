@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { TableProps } from '@arco-design/web-react';
 import { useOrgEditor } from '@/pages/organization/components/OrgProvider/Context';
 import type { DataSet } from '@/pages/workflowConfig/models/datasets';
@@ -6,7 +6,6 @@ import type { DataSet } from '@/pages/workflowConfig/models/datasets';
 interface UseTableOptions {
   defaultPageSize?: number;
   defaultCurrent?: number;
-  name?: string;
   organization_id?: string | number;
 }
 
@@ -17,22 +16,32 @@ interface UseTableReturn {
 }
 
 export function useTable(options: UseTableOptions = {}): UseTableReturn {
-  const {
-    defaultPageSize = 10,
-    defaultCurrent = 1,
-    name,
-    organization_id = 1
-  } = options;
+  const { defaultPageSize = 10, defaultCurrent = 1, organization_id } = options;
 
   const org = useOrgEditor();
   const { orgStore } = org;
-  const { loading, list } = orgStore.useGetState();
+  const { list, searchParams, total } = orgStore.useGetState([
+    'list',
+    'searchParams',
+    'total'
+  ]);
 
+  // 使用本地 loading 状态，避免依赖 orgStore 的 loading
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: defaultCurrent,
     pageSize: defaultPageSize,
     total: 0
   });
+
+  console.log(
+    'useTable - loading:',
+    loading,
+    'list length:',
+    list?.length,
+    'organization_id:',
+    organization_id
+  );
 
   const handlePaginationChange = async (page: number, pageSize: number) => {
     setPagination((prev) => ({
@@ -41,39 +50,63 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
       pageSize
     }));
 
-    const result = await orgStore.fetchData({
-      page,
-      size: pageSize,
-      name,
-      organization_id
-    });
-
-    // TODO: ts错误
-    // @ts-expect-error
-    setPagination((prev) => ({
-      ...prev,
-      total: result.total
-    }));
+    setLoading(true);
+    try {
+      await orgStore.fetchData({
+        page,
+        size: pageSize
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-  const fetchData = useCallback(async () => {
-    const result = await orgStore.fetchData({
-      page: pagination.current,
-      size: pagination.pageSize,
-      name,
-      organization_id
-    });
 
-    // TODO: ts错误
-    // @ts-expect-error
-    setPagination((prev) => ({
-      ...prev,
-      total: result.total
-    }));
-  }, [name, orgStore, organization_id, pagination]);
+  const fetchData = async () => {
+    console.log('useTable fetchData called with searchParams:', searchParams);
+    setLoading(true);
+    try {
+      await orgStore.fetchData({
+        page: pagination.current,
+        size: pagination.pageSize
+      });
+    } catch (error) {
+      console.error('useTable fetchData error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData, name, organization_id, pagination.pageSize]);
+    // 只有当有 organization_id 时才调用接口
+    console.log(
+      'useTable useEffect triggered, organization_id from searchParams:',
+      searchParams.organization_id,
+      'from props:',
+      organization_id
+    );
+    if (searchParams.organization_id || organization_id) {
+      console.log('useTable calling fetchData');
+      fetchData();
+    } else {
+      console.log('useTable skipping fetchData because no organization_id');
+    }
+  }, [
+    pagination.current,
+    pagination.pageSize,
+    searchParams.organization_id,
+    organization_id
+  ]);
+
+  // 当 organization_id 变化时，重置分页到第1页
+  useEffect(() => {
+    if (searchParams.organization_id || organization_id) {
+      console.log('Organization changed, resetting pagination to page 1');
+      setPagination((prev) => ({
+        ...prev,
+        current: 1
+      }));
+    }
+  }, [searchParams.organization_id, organization_id]);
 
   const tableProps: TableProps<DataSet> = {
     data: list,
@@ -81,7 +114,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     pagination: {
       current: pagination.current,
       pageSize: pagination.pageSize,
-      total: pagination.total,
+      total: total, // 使用 store 中的 total
       onChange: handlePaginationChange,
       showTotal: true,
       showJumper: true,

@@ -1,31 +1,202 @@
-import { Form, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import {
+  Form,
+  Input,
+  Modal,
+  Select,
+  TreeSelect,
+  Button,
+  Message
+} from '@arco-design/web-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMemberEditor } from '../../components/MemberProvider/Context';
 import { getNodePathTitles } from '../../utils';
-import { use } from 'echarts';
+import { getOrganizationTree } from '@/api/user';
 
 const FormItem = Form.Item;
 
 export default function MemberForm() {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const member = useMemberEditor();
   const { memberStore } = member;
-  const { visible, currentMember, orgData, roleData } = memberStore.useGetState(
-    ['visible', 'currentMember', 'orgData', 'roleData']
-  );
+  const { visible, currentMember, roleData, searchParams } =
+    memberStore.useGetState([
+      'visible',
+      'currentMember',
+      'roleData',
+      'searchParams'
+    ]);
   // 是添加成员还是修改成员
   const isEdit = !!currentMember;
 
+  // 为组织数据添加权限控制的函数
+  const addPermissionControl = (nodes: any[]): any[] => {
+    return nodes.map((node) => {
+      // 检查当前节点是否有 can_get 权限
+      const hasGetPermission = node.perms && node.perms.includes('can_get');
+
+      // 创建新节点（保留原有属性）
+      const newNode = {
+        ...node,
+        disabled: !hasGetPermission, // 没有 can_get 权限则禁用
+        key: node.key || node.id, // 确保有 key 字段
+        // 为禁用的节点添加样式提示
+        className: !hasGetPermission ? 'text-gray-400' : undefined
+      };
+
+      // 递归处理子节点
+      if (node.children && node.children.length > 0) {
+        newNode.children = addPermissionControl(node.children);
+      }
+
+      return newNode;
+    });
+  };
+
+  const [orgData, setOrgData] = useState<any[]>([]);
+  const getOrgData = async () => {
+    const response = await getOrganizationTree();
+    if (response?.data) {
+      setOrgData(response?.data || []);
+    }
+  };
+  useEffect(() => {
+    getOrgData();
+  }, []);
+  // 处理后的组织数据（添加权限控制）
+  const processedOrgData = orgData ? addPermissionControl(orgData) : [];
+
+  // 修复后的搜索函数：按照 Arco Design 官方 API
+  const filterTreeNode = (inputText: string, node: any) => {
+    if (!inputText) return true;
+
+    const searchValue = inputText.toLowerCase();
+
+    // 1. 搜索节点标题（按照官方 API，使用 node.props.title）
+    const nodeTitle = node.props?.title || node.title || '';
+    if (nodeTitle.toLowerCase().includes(searchValue)) {
+      return true;
+    }
+
+    // 2. 搜索完整路径（例如：搜索"技术部/前端组"）
+    try {
+      const nodeKey =
+        node.props?.key || node.key || node.props?.value || node.value;
+      if (nodeKey) {
+        const pathTitles = getNodePathTitles(processedOrgData, nodeKey);
+        const fullPath = pathTitles.join('/').toLowerCase();
+        if (fullPath.includes(searchValue)) {
+          return true;
+        }
+
+        // 3. 搜索路径中的任意部分
+        const pathString = pathTitles.join(' ').toLowerCase();
+        if (pathString.includes(searchValue)) {
+          return true;
+        }
+      }
+    } catch (error) {
+      // 如果路径搜索出错，只进行标题搜索
+      console.warn('Path search error:', error);
+    }
+
+    return false;
+  };
+
+  // 调试日志：显示权限控制的结果
+  React.useEffect(() => {
+    if (processedOrgData.length > 0) {
+      console.log('MemberForm TreeSelect 权限控制结果:', processedOrgData);
+
+      // 统计禁用的节点数量
+      const countDisabledNodes = (nodes: any[]): number => {
+        let count = 0;
+        nodes.forEach((node) => {
+          if (node.disabled) count++;
+          if (node.children) count += countDisabledNodes(node.children);
+        });
+        return count;
+      };
+
+      const disabledCount = countDisabledNodes(processedOrgData);
+      console.log(
+        `MemberForm TreeSelect 中共有 ${disabledCount} 个节点因缺少 'can_get' 权限被禁用`
+      );
+    }
+  }, [processedOrgData]);
+
+  // 用于记录上一次的组织ID
+  const prevOrgIdRef = useRef<string | null>(null);
+
+  // 处理确定按钮点击
+  const handleOk = async () => {
+    try {
+      setLoading(true);
+      const values = await form.validate();
+      console.log('values', values);
+      const orgID = form.getFieldValue('organization_id');
+      values.organization_id = orgID;
+      values.id = isEdit ? currentMember.id : undefined; // 如果是编辑，添加id字段
+
+      if (isEdit) {
+        const res = await memberStore.updateMember(values);
+        if (res.success) {
+          Message.success('修改成功');
+        }
+      } else {
+        const res = await memberStore.addMember(values);
+        if (res.success) {
+          Message.success('添加成功');
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理取消按钮点击
+  const handleCancel = () => {
+    memberStore.setVisible(false);
+  };
+
   console.log('currentMember', currentMember);
+  console.log('orgData', orgData);
+
+  // 监听组织变化，当组织切换时清空表单
+  useEffect(() => {
+    const currentOrgId = searchParams.organization_id;
+
+    // 如果组织发生了变化（且不是初始化）
+    if (
+      prevOrgIdRef.current !== null &&
+      prevOrgIdRef.current !== currentOrgId
+    ) {
+      console.log('Organization changed, clearing member form');
+      // 清空表单
+      form.resetFields();
+      // 设置默认的组织ID
+      if (currentOrgId) {
+        form.setFieldsValue({
+          organization_id: currentOrgId
+        });
+      }
+    }
+
+    // 更新记录的组织ID
+    prevOrgIdRef.current = currentOrgId;
+  }, [searchParams.organization_id, form]);
+
   useEffect(() => {
     if (!isEdit) {
-      // 如果是添加成员，清空表单
+      // 如果是添加成员，清空表单并设置默认组织
       form.setFieldsValue({
         account: '',
         username: '',
         password: '',
         confirmPassword: '',
-        organization_id: '',
+        organization_id: searchParams.organization_id || '',
         phone: '',
         role_id: '',
         position: '',
@@ -34,32 +205,28 @@ export default function MemberForm() {
     } else {
       form.setFieldsValue(currentMember);
     }
-  }, [currentMember]);
+  }, [currentMember, isEdit, searchParams.organization_id, form]);
   return (
     <Modal
       title={isEdit ? '修改成员' : '添加成员'}
       visible={visible}
-      onOk={() => {
-        form
-          .validate()
-          .then((values) => {
-            values.organization_id = Number(values.organization_id);
-            values.id = isEdit ? currentMember.id : undefined; // 如果是编辑，添加id字段
-            if (isEdit) {
-              memberStore.updateMember(values);
-            } else {
-              memberStore.addMember(values);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }}
-      onCancel={() => {
-        memberStore.setVisible(false);
-      }}
+      footer={
+        <div>
+          <Button onClick={handleCancel}>取消</Button>
+          <Button
+            type="primary"
+            loading={loading}
+            onClick={handleOk}
+            className="ml-1"
+          >
+            确定
+          </Button>
+        </div>
+      }
+      onCancel={handleCancel}
     >
       <Form
+        autoComplete="off"
         form={form}
         initialValues={{
           ...currentMember
@@ -71,13 +238,14 @@ export default function MemberForm() {
           required
           rules={[
             { required: true, message: '请输入姓名' },
+            // 最多30个字符
             {
-              match: /^[\u4e00-\u9fa5]+$/,
-              message: '姓名只能输入中文'
+              maxLength: 30,
+              message: '姓名最多30个字符'
             }
           ]}
         >
-          <Input placeholder="请输入姓名" />
+          <Input placeholder="请输入姓名" maxLength={30} />
         </FormItem>
 
         <FormItem
@@ -90,10 +258,18 @@ export default function MemberForm() {
             {
               match: /^[a-zA-Z][a-zA-Z0-9_]*$/,
               message: '用户名只能包含英文、数字和下划线，且必须以英文开头'
+            },
+            {
+              minLength: 2,
+              message: '用户名最少2个字符'
+            },
+            {
+              maxLength: 30,
+              message: '用户名最多30个字符'
             }
           ]}
         >
-          <Input placeholder="请输入用户名" />
+          <Input placeholder="请输入姓名" maxLength={30} />
         </FormItem>
 
         {isEdit ? null : (
@@ -157,14 +333,19 @@ export default function MemberForm() {
           rules={[{ required: true, message: '请选择所属组织' }]}
         >
           <TreeSelect
+            disabled={!!isEdit}
             showSearch
             placeholder="请选择所属组织"
             allowClear
-            treeData={orgData}
+            treeData={processedOrgData}
             treeCheckedStrategy={TreeSelect.SHOW_ALL}
-            renderFormat={(nodeProps, value) => {
+            filterTreeNode={filterTreeNode}
+            className="member-form-tree-select"
+            style={{ width: '100%', maxWidth: '367px' }}
+            dropdownMenuStyle={{ maxWidth: '367px' }}
+            renderFormat={(nodeProps, _value) => {
               const pathTitles = getNodePathTitles(
-                orgData,
+                processedOrgData,
                 nodeProps?._key as string
               );
               return <span> {pathTitles.join(' / ')}</span>;
@@ -188,10 +369,28 @@ export default function MemberForm() {
             })}
           </Select>
         </FormItem>
-        <FormItem label="职位" field="position">
+        <FormItem
+          label="职位"
+          field="position"
+          rules={[
+            {
+              maxLength: 20,
+              message: '职位最多20个字符'
+            }
+          ]}
+        >
           <Input placeholder="请输入职位" />
         </FormItem>
-        <FormItem label="备注" field="mark">
+        <FormItem
+          label="备注"
+          field="mark"
+          rules={[
+            {
+              maxLength: 300,
+              message: '备注最多300个字符'
+            }
+          ]}
+        >
           <Input.TextArea placeholder="请输入备注" />
         </FormItem>
       </Form>
