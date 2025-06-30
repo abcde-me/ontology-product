@@ -7,7 +7,7 @@
   border-radius: 10px;
   min-height: 94%;
 
-  .arco-table-tr>th {
+  .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;
   }
 
@@ -25,11 +25,15 @@
   }
 
   .operate-text:hover {
-    color: black;
+    color: rgba(0, 125, 250, 0.5);
   }
 
   .arco-table-tr:hover .hover-change {
     color: rgb(0, 125, 250);
     cursor: pointer;
+  }
+
+  .arco-table-tr:hover .hover-change:hover {
+    color: rgba(0, 125, 250, 0.5);
   }
 }

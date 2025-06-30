@@ -43,22 +43,22 @@ enum NodeRunStatus {
 
 // 枚举节点类型
 enum NodeType {
-  text = 1,
-  img = 2,
-  music = 3,
-  video = 4,
-  dataClean = 5,
-  dataAugment = 6
+  text = 'text',
+  pic = 'pic',
+  audio = 'audio',
+  video = 'video',
+  cleaning = 'cleaning',
+  enhancement = 'enhancement'
 }
 
 // 枚举节点类型中文名称
 enum NodeTypeName {
   text = '文本解析',
-  img = '图片解析',
-  music = '音频解析',
+  pic = '图片解析',
+  audio = '音频解析',
   video = '视频解析',
-  dataClean = '数据清洗',
-  dataAugment = '数据增强'
+  cleaning = '数据清洗',
+  enhancement = '数据增强'
 }
 
 // 定义taskDetailData值的类型
@@ -72,71 +72,29 @@ interface TaskDetailObject {
   error_msg?: string;
 }
 
+// 定义nodeData值的类型
+interface nodeDataObject {
+  task_type: string;
+  status: number | string;
+}
+
 export default function WorkflowTaskDetail() {
   const taskId = useParams('id');
   const history = useHistory();
   // 初始化作业详情数据
   const [taskDetailData, setTaskDetailData] = useState<TaskDetailObject>({});
   // 初始化节点数据
-  const [nodeData, setNodeData] = useState([
-    {
-      task_type: 1, // 1-文本、2-图片、3-视频、4-音频
-      status: 1 //1-运行中、2-完成、3-失败
-    },
-    {
-      task_type: 2,
-      status: 2
-    },
-    {
-      task_type: 6,
-      status: 3
-    },
-    {
-      task_type: 5,
-      status: 2
-    }
-  ]);
+  const [nodeData, setNodeData] = useState<nodeDataObject[]>([]);
   // 初始化解析节点数据
-  const [parseNodeData, setParseNodeData] = useState({
-    file: [
-      {
-        id: '123',
-        file_name: '文件1',
-        status: true,
-        file_type: 'pdf',
-        start_time: '1749627834576',
-        end_time: '1749627834576'
-      },
-      {
-        id: '234',
-        file_name: '文件2',
-        status: false,
-        file_type: 'txt',
-        start_time: '1749627834576',
-        end_time: '1749627834576'
-      },
-      {
-        id: '456',
-        file_name: '文件3',
-        status: false,
-        file_type: 'epub',
-        start_time: '1749627834576',
-        end_time: '1749627834576'
-      }
-    ], // 成功文件列表
-    total: 100, //总数
-    success_total: 99,
-    fail_total: 1
-  });
+  const [parseNodeData, setParseNodeData] = useState({});
+  // 初始化当前选中的节点
+  const [activeNode, setActiveNode] = useState('');
+  // 初始化当前节点是否是解析节点
+  const [isParseNode, setIsParseNode] = useState(true);
   // 初始化数据清洗节点及数据增强节点数据
-  const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({
-    raw_data_num: 1250, // 原始数据量
-    cleansed_data_num: 1120, // 清洗后数据量/ 增强后数据量
-    remove_duplicates_num: 87, // 删除重复数据量
-    missing_value_num: 32, // 缺失值处理
-    abnormal_value_num: 11, // 异常值处理
-    log: []
-  });
+  const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({});
+  // 添加loading状态控制
+  const [loading, setLoading] = useState(true);
 
   // 初始化详情基本数据
   useEffect(() => {
@@ -144,9 +102,28 @@ export default function WorkflowTaskDetail() {
   }, [taskId]);
 
   const getDetailData = async () => {
-    const res = await getTaskDetail(taskId!);
-    if (res.status === 200 && res.data) {
-      setTaskDetailData(res.data.base_info);
+    setLoading(true);
+    try {
+      const res = await getTaskDetail(taskId!);
+      if (res.status === 200 && res.data) {
+        setTaskDetailData(res.data.base_info);
+        setActiveNode(res.data.result_info.task_type);
+        // 判断第一个节点是否是解析数据节点
+        const isParse =
+          res.data.result_info.task_type === NodeType.text ||
+          res.data.result_info.task_type === NodeType.pic ||
+          res.data.result_info.task_type === NodeType.video ||
+          res.data.result_info.task_type === NodeType.audio;
+        setIsParseNode(isParse);
+        setNodeData(res.data.result_info.task_type_list);
+        if (isParse) {
+          setParseNodeData(res.data.result_info.data_parse);
+        } else {
+          setCleaningAugmentNodeData(res.data.result_info.data_dispose);
+        }
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -263,26 +240,32 @@ export default function WorkflowTaskDetail() {
   };
 
   // 获取节点name
-  const getNodeName = (type: number) => {
+  const getNodeName = (type: string) => {
     switch (type) {
       case NodeType.text:
         return NodeTypeName.text;
-      case NodeType.img:
-        return NodeTypeName.img;
-      case NodeType.music:
-        return NodeTypeName.music;
+      case NodeType.pic:
+        return NodeTypeName.pic;
+      case NodeType.audio:
+        return NodeTypeName.audio;
       case NodeType.video:
         return NodeTypeName.video;
-      case NodeType.dataClean:
-        return NodeTypeName.dataClean;
-      case NodeType.dataAugment:
-        return NodeTypeName.dataAugment;
+      case NodeType.cleaning:
+        return NodeTypeName.cleaning;
+      case NodeType.enhancement:
+        return NodeTypeName.enhancement;
     }
   };
 
   // 切换节点tab
   const handleChangeTab = (val: string) => {
-    console.log(val, 'task_type');
+    const isParse =
+      val === NodeType.text ||
+      val === NodeType.pic ||
+      val === NodeType.video ||
+      val === NodeType.audio;
+    setIsParseNode(isParse);
+    setActiveNode(val);
   };
 
   // 获取作业内容区域dom
@@ -293,6 +276,8 @@ export default function WorkflowTaskDetail() {
           key="card"
           tabPosition={'left'}
           onChange={(task_type) => handleChangeTab(task_type)}
+          defaultActiveTab={activeNode || nodeData[0]?.task_type}
+          activeTab={activeNode}
         >
           {nodeData.map((item) => {
             return (
@@ -313,13 +298,17 @@ export default function WorkflowTaskDetail() {
                 }
               >
                 <Typography.Paragraph style={{ marginTop: 20 }}>
-                  {item.task_type < NodeType.video ? (
-                    <ParseNode dataSource={parseNodeData} />
-                  ) : item.task_type === NodeType.dataClean ? (
-                    <DataCleaningNode dataSource={cleaningAugmentNodeData} />
+                  {isParseNode ? (
+                    <ParseNode dataSource={parseNodeData} loading={loading} />
+                  ) : item.task_type === NodeType.cleaning ? (
+                    <DataCleaningNode
+                      dataSource={cleaningAugmentNodeData}
+                      loading={loading}
+                    />
                   ) : (
                     <DataAugmentationNode
                       dataSource={cleaningAugmentNodeData}
+                      loading={loading}
                     />
                   )}
                 </Typography.Paragraph>

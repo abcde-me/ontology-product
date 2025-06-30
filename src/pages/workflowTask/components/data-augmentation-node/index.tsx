@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css';
 
-export default function DataAugmentationNode(props: { dataSource }) {
+export default function DataAugmentationNode(props: { dataSource; loading }) {
   const { dataSource } = props;
 
   return (

@@ -15,7 +15,7 @@ enum FileType {
   epub = 'epub'
 }
 
-export default function ParseNode(props: { dataSource }) {
+export default function ParseNode(props: { dataSource; loading }) {
   const { dataSource } = props;
   // 当前的第几页
   const [current, setCurrent] = useState(1);
