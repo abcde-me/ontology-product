@@ -309,6 +309,8 @@ export default function MemberForm() {
             renderFormat={(nodeProps, _value) => {
               const pathTitles = getNodePathTitles(
                 processedOrgData,
+                // TODO: ts错误
+                // @ts-expect-error
                 nodeProps._key as string
               );
               return <span> {pathTitles.join(' / ')}</span>;

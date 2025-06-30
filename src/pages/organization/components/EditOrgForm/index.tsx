@@ -111,6 +111,8 @@ export default function MemberForm() {
             treeCheckedStrategy={TreeSelect.SHOW_ALL}
             renderFormat={(nodeProps, value) => {
               // 确定要显示路径的目标节点
+              // TODO: ts错误
+              // @ts-expect-error
               const targetKey = (value || nodeProps._key) as string;
 
               if (targetKey) {
