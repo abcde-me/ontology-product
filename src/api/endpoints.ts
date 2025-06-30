@@ -199,6 +199,11 @@ export const ResourceEndpointsV2 = {
   password: PrefixAuth + '/user/passwd',
   // 获取用户信息
   selfUser: PrefixAuth + '/user/self',
+  // 删除组织/用户前判断
+  preDelOrg: PrefixAuth + '/organization/authorize_delete/{orgId}',
+  preDelUser: PrefixAuth + '/user/authorize_delete/{userId}',
+  // 用户管理搜索
+  memberSearch: PrefixAuth + '/user/organization/search',
 
   workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
   workflowPublish: PrefixV2 + '/apps/{appId}/workflows/publish',
@@ -219,11 +224,15 @@ export const ModaForgeResourceEndpoints = {
   // 工作流列表
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
-  workflowOperation:
-    PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
+  workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  // workflowDraft: PrefixAimdp + '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
+  // 作业详情
+  taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+
+  modelGet: PrefixAimdp + '/model/get',
 
   //数据目录
   //获取数据目录
@@ -270,7 +279,32 @@ export const ModaForgeResourceEndpoints = {
   // 修改连接器数据
   editconnection: PrefixAimdp + '/connectors/{connector_id}',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}'
+  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+
+  // 数据载入接口
+
+  // 获取数据载入列表
+  getLoadListApi: PrefixAimdp + '/load_tasks_page',
+  // 创建单个载入任务
+  addLoadApi: PrefixAimdp + '/load_tasks',
+  // 删除指定载入任务
+  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 修改单个载入任务
+  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 查看单个载入任务详情
+  getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  // 启停单个载入任务
+  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/{task_id}/{action}',
+  // 立即运行指定载入任务
+  runLoadApi: PrefixAimdp + '/load_tasks/{task_id}/exec',
+  // 删除指定文件
+  delFileApi: PrefixAimdp + '/load_tasks/files',
+  // 查询单个载入任务的执行记录
+  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
+  // 查询单个载入任务已加载文件信息
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}'
+  // 查询目录卷路径关联的载入任务
+  // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
 };
 
 /**

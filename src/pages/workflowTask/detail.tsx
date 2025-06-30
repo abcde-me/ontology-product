@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Breadcrumb,
   Message,
@@ -17,11 +17,11 @@ import {
 } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
-import TimeFormatting from '@/utils/timeFormatting';
 import ParseNode from './components/parse-node';
 import DataCleaningNode from './components/data-cleaning-node';
 import DataAugmentationNode from './components/data-augmentation-node';
 import './detail.css';
+import { getTaskDetail } from '@/api/taskDetail';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -61,20 +61,22 @@ enum NodeTypeName {
   dataAugment = '数据增强'
 }
 
+// 定义taskDetailData值的类型
+interface TaskDetailObject {
+  job_name?: string;
+  run_status?: number;
+  cre_time?: string;
+  time_size?: string;
+  start_time?: string;
+  end_time?: string;
+  error_msg?: string;
+}
+
 export default function WorkflowTaskDetail() {
   const taskId = useParams('id');
   const history = useHistory();
   // 初始化作业详情数据
-  const [taskDetailData, setTaskDetailData] = useState({
-    job_name: '',
-    run_status: 1,
-    cre_time: '',
-    time_size: '10小时20分30秒',
-    start_time: '1749627834576',
-    end_time: '2749627999999',
-    error_msg:
-      '这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容，这是一条错误提示内容。'
-  });
+  const [taskDetailData, setTaskDetailData] = useState<TaskDetailObject>({});
   // 初始化节点数据
   const [nodeData, setNodeData] = useState([
     {
@@ -135,6 +137,18 @@ export default function WorkflowTaskDetail() {
     abnormal_value_num: 11, // 异常值处理
     log: []
   });
+
+  // 初始化详情基本数据
+  useEffect(() => {
+    if (taskId) getDetailData();
+  }, [taskId]);
+
+  const getDetailData = async () => {
+    const res = await getTaskDetail(taskId!);
+    if (res.status === 200 && res.data) {
+      setTaskDetailData(res.data.base_info);
+    }
+  };
 
   // 获取顶部区域dom
   const getTaskDetailTopDom = () => {
@@ -229,17 +243,13 @@ export default function WorkflowTaskDetail() {
           <div className="running-item">
             <span className="item-title">开始时间</span>
             <div className="item-content-box">
-              <span className="item-content">
-                {TimeFormatting(taskDetailData.start_time)}
-              </span>
+              <span className="item-content">{taskDetailData.start_time}</span>
             </div>
           </div>
           <div className="running-item">
             <span className="item-title">结束时间</span>
             <div className="item-content-box">
-              <span className="item-content">
-                {TimeFormatting(taskDetailData.end_time)}
-              </span>
+              <span className="item-content">{taskDetailData.end_time}</span>
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function Header({
     clearUserInfo();
 
     // 跳转到登录页面
-    pushPath('/tenant/compute/appforge/login');
+    pushPath('/tenant/compute/modaforge/login');
   }, [pushPath, clearUserInfo]);
 
   const onClickUserDropdown = useCallback(
@@ -44,7 +44,7 @@ export default function Header({
           logout();
           break;
         case 'account':
-          pushPath('/tenant/compute/appforge/userinfo');
+          pushPath('/tenant/compute/modaforge/userinfo');
           break;
         default:
           break;

@@ -5,12 +5,8 @@ import UAPI from '@/api';
 interface DatasetListParams {
   page?: number;
   page_size?: number;
-  name?: string;
-  tag_id?: string;
-  sort?: string;
   search?: string;
   search_field?: string;
-  order?: 'asc' | 'desc';
 }
 
 interface CreateDatasetParams {
@@ -83,7 +79,15 @@ export interface EditDatasetVersionParams {
 
 //获取数据集列表
 export async function getDatasetList(params: DatasetListParams = {}) {
-  return UAPI.RES.datasetsApi({}).get(params).inRegion().do();
+  const { page, page_size, search_field, search } = params;
+  const queryParams: Record<string, any> = {
+    page,
+    page_size
+  };
+  if (search_field && search) {
+    queryParams[search_field] = search;
+  }
+  return UAPI.RES.datasetsApi({}).get(queryParams).inRegion().do();
 }
 
 //获取数据集详情

@@ -248,12 +248,22 @@ const data: Dataset[] = [
   }
 ];
 
+enum searchFieldType {
+  name = 'name',
+  // tags = 'tags',
+  description = 'description'
+  // src_model = 'src_model',
+  // creator_name = 'creator_name'
+}
+
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
 
   const [datasetList, setDatasetList] = React.useState<Dataset[]>([]); //数据集列表
   const [search, setSearch] = React.useState<string>(''); //搜索
-  const [searchField, setSearchField] = React.useState<string>('name'); //搜索字段
+  const [searchField, setSearchField] = React.useState<searchFieldType>(
+    searchFieldType.name
+  ); //搜索字段
 
   // 分页相关状态
   const [currentPage, setCurrentPage] = React.useState<number>(1); //当前页码
@@ -270,10 +280,10 @@ const DatasetManagement: React.FC = () => {
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
-    { label: '标签', value: 'tags' },
-    { label: '描述说明', value: 'description' },
-    { label: '生成模型', value: 'src_model' },
-    { label: '创建人', value: 'creator_name' }
+    // { label: '标签', value: 'tags' },
+    { label: '描述说明', value: 'description' }
+    // { label: '生成模型', value: 'src_model' },
+    // { label: '创建人', value: 'creator_name' }
   ];
 
   // 行选择配置
@@ -322,7 +332,8 @@ const DatasetManagement: React.FC = () => {
                 '/' +
                 formData.targetDataSource[0][1] +
                 '/' +
-                formData.targetDataSource[1]
+                formData.targetDataSource[1][0],
+              path_id: formData.targetDataSource[1][1]
             }
           : {
               connector_id: parseInt(formData.targetDataSource) || 0,
@@ -373,13 +384,35 @@ const DatasetManagement: React.FC = () => {
     console.log('每页显示', size, '条数据');
   };
 
+  // 执行搜索函数
+  const handleSearch = () => {
+    setCurrentPage(1); // 重置到第一页
+    getDatasetList({
+      page: 1,
+      page_size: pageSize,
+      search: search,
+      search_field: searchField
+    }).then((res) => {
+      setDatasetList(res.data.list);
+      setTotal(res.data.total);
+      console.log(res);
+    });
+    // setDatasetList(data); // 测试数据
+    // setTotal(1000); // 设置总条数
+  };
+
   // 获取数据集列表,当页码或者每页条数变化时，重新获取数据
   React.useEffect(() => {
-    // getDatasetList({page:currentPage,page_size:pageSize,search:search,search_field:searchField}).then(res => {
-    //   setDatasetList(res.data.list);
-    //   setTotal(res.data.total);
-    //   console.log(res);
-    // })
+    getDatasetList({
+      page: currentPage,
+      page_size: pageSize,
+      search: search,
+      search_field: searchField
+    }).then((res) => {
+      setDatasetList(res.data.list);
+      setTotal(res.data.total);
+      console.log(res);
+    });
     setDatasetList(data); // 测试数据
     setTotal(1000); // 设置总条数
   }, [currentPage, pageSize]);
@@ -441,6 +474,8 @@ const DatasetManagement: React.FC = () => {
               className="search-input"
               value={search}
               onChange={(value) => setSearch(value)}
+              onPressEnter={handleSearch}
+              onSearch={handleSearch}
             />
           </div>
           <div className="action-buttons">

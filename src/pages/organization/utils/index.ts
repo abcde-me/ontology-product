@@ -4,8 +4,6 @@ export function getNodePathTitles(treeData, targetKey) {
 
   function traverse(nodes) {
     for (const node of nodes) {
-      // TODO: ts错误
-      // @ts-expect-error
       path.push(node.title); // 将当前节点加入路径
       if (node.key === targetKey) {
         return true; // 找到目标，停止搜索
@@ -61,7 +59,8 @@ export function addDisabledField(nodes) {
     // 创建新节点（保留原有属性）
     const newNode = {
       ...node,
-      disabled: !hasValidPerm // 包含任意权限则启用，否则禁用
+      disabled: !hasValidPerm, // 包含任意权限则启用，否则禁用
+      key: node.key || node.id // 确保有 key 字段，优先使用 key，否则使用 id
     };
 
     // 递归处理子节点

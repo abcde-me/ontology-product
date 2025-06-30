@@ -119,7 +119,7 @@ function convertToCascaderOptions(dataSourceData) {
     value: [catalog.base_dir, catalog.name],
     children: (catalog.children.volume || []).map((volume) => ({
       label: volume.name,
-      value: volume.name,
+      value: [volume.name, volume.id],
       type: 'volume',
       originalData: volume
     }))
@@ -349,7 +349,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       // value 是一个数组，格式为 [catalog_id, "volume_id" 或 "db_id"]
       const catalogpath = value[0][0];
       const catalogId = value[0][1];
-      const selectedItem = value[1] as string;
+      const selectedItem = value[1][0];
 
       // 构建路径：catalog_id/type_itemId
       const path = `${catalogpath}/dst/${catalogId}/${selectedItem}`;
@@ -363,13 +363,13 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
-    //
-    // getConnectorFileList({ connector_id: id, type: type }).then(res => {
-    //   setConnectorFileInformation(res.data.files)
-    // })
-    setConnectorFileInformation(
-      transformToSelectOptions(csconnectorFileInformation)
-    );
+    getConnectorFileList({ connector_id: id, type: type }).then((res) => {
+      console.log(res.data);
+      setConnectorFileInformation(transformToSelectOptions(res.data.files));
+    });
+    // setConnectorFileInformation(
+    //   transformToSelectOptions(csconnectorFileInformation)
+    // );
   }; //查询指定连接器加载成功的文件信息
 
   // 获取数据目录卷预览数据的方法
@@ -439,7 +439,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         <FormItem
           label="标签:"
           field="tags"
-          rules={[{ required: true, message: '请选择至少一个标签' }]}
+          rules={[{ required: false, message: '请选择至少一个标签' }]}
         >
           <Select
             placeholder="请输入或选择标签（用逗号分隔）..."
@@ -453,7 +453,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         <FormItem
           label="描述说明:"
           field="description"
-          rules={[{ required: true, message: '请输入描述信息' }]}
+          rules={[{ required: false, message: '请输入描述信息' }]}
         >
           <Input.TextArea
             placeholder="这里输入对数据集的描述和说明信息..."

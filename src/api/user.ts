@@ -22,8 +22,8 @@ export async function createUser(params: Record<string, any>) {
  * @param params - Key-value pairs of user attributes to update.
  * @returns Promise containing the updated user data.
  */
-export async function updateUser( params: Record<string, any>) {
-  return await UAPI.RES.user({  }).put(params).inRegion().do();
+export async function updateUser(params: Record<string, any>) {
+  return await UAPI.RES.user({}).put(params).inRegion().do();
 }
 // 删除成员
 export async function deleteUser(id: string) {
@@ -71,11 +71,26 @@ export async function updatePassword(params: Record<string, any>) {
   return await UAPI.RES.password({}).put(params).inRegion().do();
 }
 
-// 获取自己信息 
+// 获取自己信息
 /**
  * Fetches the current authenticated user's data.
  * @returns Promise containing the self user information.
  */
 export async function getMe() {
   return await UAPI.RES.selfUser({}).get().inRegion().do();
+}
+
+// 删除组织前判断
+export async function preDelOrg({ orgId }) {
+  return await UAPI.RES.preDelOrg({ orgId }).get().inRegion().do();
+}
+
+// 删除用户前判断
+export async function preDelUser({ userId }) {
+  return await UAPI.RES.preDelUser({ userId }).get().inRegion().do();
+}
+
+// 用户管理搜索
+export async function searchMemberUsers(params: Record<string, any>) {
+  return await UAPI.RES.memberSearch({}).get(params).inRegion().do();
 }
