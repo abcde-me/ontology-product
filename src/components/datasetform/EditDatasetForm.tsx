@@ -1,5 +1,6 @@
 import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import styles from './EditDatasetForm.module.css';
 
 interface Dataset {
   key?: string;
@@ -25,7 +26,12 @@ const EditDatasetForm: React.FC<Props> = ({
   initialData
 }) => {
   const [form] = Form.useForm();
-  const [selectedTags, setSelectedTags] = useState<string[]>(['小说情节']);
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    initialData?.tags || []
+  );
+  const [description, setDescription] = useState<string>(
+    initialData?.description || ''
+  );
 
   // 模型选项
   const modelOptions = [
@@ -44,30 +50,39 @@ const EditDatasetForm: React.FC<Props> = ({
     { label: '描述', value: '描述' }
   ];
 
-  // 回显编辑数据 - 使用指定的数据值
+  // 回显编辑数据 - 使用传入的真实数据
   useEffect(() => {
-    // 设置指定的数据回显值
-    const defaultData = {
-      name: '三打白骨精',
-      model: 'GPT-4o',
-      tags: ['小说情节'],
-      description: 'liuxiaoyu-test'
-    };
-
-    form.setFieldsValue(defaultData);
-    setSelectedTags(defaultData.tags);
-  }, [form]);
+    console.log(
+      'EditDatasetForm 接收到的 initialData:',
+      initialData.description
+    );
+    if (initialData) {
+      form.setFieldsValue({
+        name: initialData.name,
+        model: initialData.model,
+        tags: initialData.tags,
+        description: initialData.description
+      });
+      setSelectedTags(initialData.tags);
+      setDescription(initialData.description || '');
+    }
+  }, [initialData, form]);
 
   const handleSubmit = () => {
     form
       .validate()
       .then((values) => {
+        console.log('表单收集到的values:', values);
+        // 确保description字段被包含
         const formData: Dataset = {
           ...values,
+          description: description, // 使用state中的description值
+          tags: selectedTags, // 使用state中的tags值
           key: initialData?.key || '',
           version: initialData?.version || 'v1.0.0',
           creator: initialData?.creator || ''
         };
+        console.log('最终提交的formData:', formData);
         onSubmit(formData);
       })
       .catch((error) => {
@@ -75,10 +90,16 @@ const EditDatasetForm: React.FC<Props> = ({
       });
   };
 
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    form.setFieldValue('description', value);
+  };
+
   return (
-    <div>
+    <div className={styles.editFormContainer}>
       <Form
         form={form}
+        className={styles.editForm}
         style={{ width: '100%' }}
         autoComplete="off"
         layout="horizontal"
@@ -125,23 +146,33 @@ const EditDatasetForm: React.FC<Props> = ({
         <FormItem label="描述说明" field="description">
           <Input.TextArea
             placeholder="请输入导出文件的路径说明..."
-            rows={4}
+            rows={2}
             maxLength={500}
             showWordLimit
+            value={description}
             style={{ marginLeft: '8px' }}
+            onChange={(value) => {
+              handleDescriptionChange(value);
+              console.log('description changed:', value);
+            }}
           />
+          <span style={{ color: '#999', fontSize: 12, marginLeft: 8 }}>
+            指定导出文件的保存路径目录
+          </span>
         </FormItem>
       </Form>
 
       {/* 底部按钮 */}
       <div
+        className={styles.buttonContainer}
         style={{
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 12,
-          marginTop: 24,
-          paddingTop: 16,
-          borderTop: '1px solid #e5e6eb'
+          // marginTop: 8,
+          paddingTop: 8,
+          marginBottom: 16,
+          paddingLeft: 'calc(16.666% + 8px)' // 对齐表单字段
         }}
       >
         <Button onClick={onCancel}>取消</Button>

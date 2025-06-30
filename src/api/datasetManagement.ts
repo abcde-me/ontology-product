@@ -8,6 +8,8 @@ interface DatasetListParams {
   name?: string;
   tag_id?: string;
   sort?: string;
+  search?: string;
+  search_field?: string;
   order?: 'asc' | 'desc';
 }
 
@@ -31,6 +33,7 @@ interface ConnectorFileListParams {
   connector_id: string;
   path?: string;
   page?: number;
+  type?: string;
   page_size?: number;
 }
 
@@ -109,7 +112,7 @@ export async function getConnectorList(params: ConnectorListParams = {}) {
 //查询指定连接器加载成功的文件信息
 export async function getConnectorFileList(params: ConnectorFileListParams) {
   return UAPI.RES.connectorFileListApi({ connector_id: params.connector_id })
-    .get(params)
+    .get({ type: params.type })
     .inRegion()
     .do();
 }

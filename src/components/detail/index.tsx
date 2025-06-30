@@ -75,7 +75,14 @@ interface DatasetDetail {
 
 // 内容数据测试数据
 const cscontentData = [
-  { line: 0, data: { 姓名: '张三', 年龄: 28, 性别: '男' } },
+  {
+    line: 0,
+    data: {
+      姓名: '张11111111111111111111三张11111111111111111111三张11111111111111111111三张11111111111111111111三',
+      年龄: 28,
+      性别: '男'
+    }
+  },
   { line: 1, data: { 姓名: '李四', 年龄: 34, 性别: '女' } },
   { line: 2, data: { 姓名: '王五', 年龄: 22, 性别: '男' } }
 ];
@@ -104,6 +111,10 @@ const generateArcoColumns = (
     title: header,
     dataIndex: header,
     key: header,
+    minWidth: 150,
+    maxWidth: 300,
+    // align: 'center',
+    // ellipsis: true,
     render: (value: any, record: any) => {
       if (editingRowKey == record.line) {
         return (
@@ -122,9 +133,6 @@ const generateArcoColumns = (
       }
       return <div>{record.data[header]}</div>;
     }
-    // width: 150,
-    // align: 'center',
-    // ellipsis: true,
   }));
 
   // 在最后追加一列 "操作"
@@ -303,7 +311,17 @@ const DatasetDetail: React.FC = () => {
   const handleEditSubmit = (formData: any) => {
     console.log('编辑数据集:', formData);
 
-    updateDataset(formData)
+    if (!datasetDetail) return;
+
+    // 只传递需要的字段
+    const updateData = {
+      id: datasetDetail.id.toString(),
+      name: formData.name,
+      description: formData.description,
+      tag_names: formData.tags
+    };
+
+    updateDataset(updateData)
       .then((res) => {
         console.log(res);
         Message.success('数据集更新成功');
@@ -661,13 +679,13 @@ const DatasetDetail: React.FC = () => {
               <div>
                 <Descriptions
                   data={[
-                    { label: '名称', value: datasetDetail.name },
+                    { label: '名称:', value: datasetDetail.name },
                     {
-                      label: '标签',
+                      label: '标签:',
                       value: datasetDetail.tag_names?.join('、') || '-'
                     },
-                    { label: '创建人', value: datasetDetail.creator_name },
-                    { label: '生成模型', value: datasetDetail.src_model }
+                    { label: '创建人:', value: datasetDetail.creator_name },
+                    { label: '生成模型:', value: datasetDetail.src_model }
                   ]}
                   column={1}
                   labelStyle={{
@@ -686,7 +704,7 @@ const DatasetDetail: React.FC = () => {
                 <Descriptions
                   data={[
                     {
-                      label: '当前版本',
+                      label: '当前版本:',
                       value: (
                         <span
                           style={{
@@ -701,15 +719,15 @@ const DatasetDetail: React.FC = () => {
                       )
                     },
                     {
-                      label: '创建时间',
+                      label: '创建时间:',
                       value: formatDate(datasetDetail.created_at)
                     },
                     {
-                      label: '更新时间',
+                      label: '更新时间:',
                       value: formatDate(datasetDetail.updated_at)
                     },
                     {
-                      label: '描述说明',
+                      label: '描述说明:',
                       value: datasetDetail.description || '-'
                     }
                   ]}
@@ -844,9 +862,9 @@ const DatasetDetail: React.FC = () => {
       <Modal
         title="编辑基本信息"
         visible={editModalVisible}
-        onCancel={handleCloseEditModal}
+        // onCancel={handleCloseEditModal}
         footer={null}
-        style={{ width: 640, height: 354 }}
+        style={{ width: 640 }}
         autoFocus={false}
         focusLock={true}
       >

@@ -317,9 +317,10 @@ const DatasetManagement: React.FC = () => {
         formData.dataSource === 'volume'
           ? {
               path:
-                'dst' +
+                formData.targetDataSource[0][0] +
+                '/dst' +
                 '/' +
-                formData.targetDataSource[0] +
+                formData.targetDataSource[0][1] +
                 '/' +
                 formData.targetDataSource[1]
             }
