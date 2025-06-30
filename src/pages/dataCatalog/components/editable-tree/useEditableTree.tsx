@@ -1,5 +1,4 @@
 import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
-import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { Input, Message, Modal, Tooltip, Tree } from '@arco-design/web-react';
 import {
   NodeProps,
@@ -71,7 +70,7 @@ export function useEditableTree({ catalogTreeStore }) {
     if (dataRef?.type === 'catalog') {
       catalogTreeStore.setState({
         inputValue: dataRef?.title,
-        treeData: treeData.map((item) => {
+        treeData: treeData.map((item: TreeDataType) => {
           if (item.key === _key) {
             item.showInput = true;
           }
@@ -84,47 +83,98 @@ export function useEditableTree({ catalogTreeStore }) {
     Message.success('修改成功!'); // 成功提示
   };
 
+  // 递归删除树节点的工具函数
+  const deleteNodeFromTree = (
+    nodes: TreeDataType[],
+    targetKey: string,
+    pathKeys?: string[]
+  ): TreeDataType[] => {
+    return nodes
+      .filter((node) => node.key !== targetKey) // 直接过滤掉目标节点
+      .map((node) => {
+        if (!node.children?.length) return node;
+
+        // 如果有路径键，按路径查找并删除
+        if (pathKeys?.length) {
+          const [currentPathKey, ...remainingPath] = pathKeys;
+          if (node.key === currentPathKey) {
+            return {
+              ...node,
+              children: deleteNodeFromTree(
+                node.children,
+                targetKey,
+                remainingPath
+              )
+            };
+          }
+        }
+
+        // 递归处理子节点
+        return {
+          ...node,
+          children: deleteNodeFromTree(node.children, targetKey)
+        };
+      });
+  };
+
   // 删除目录 or 卷
   const handleDelete = async (node: NodeProps) => {
-    const { _key, dataRef } = node;
+    const { _key, dataRef, pathParentKeys } = node;
 
-    let newTreeData: TreeDataType[] = [];
-    if (dataRef?.type === 'catalog') {
-      // 删除目录
-      newTreeData = treeData.filter((item) => item.key !== _key);
-    } else if (dataRef?.type === 'volume') {
-      // 删除卷
-      newTreeData = treeData.map((item) => {
-        if (item.key === node.pathParentKeys?.[0]) {
-          item.children?.forEach((child) => {
-            if (child.key === _key) {
-              child.children = [];
-            }
-          });
-        }
-        return item;
-      });
-    } else if (dataRef?.type === 'volume-child') {
-      // 删除子资源
-      newTreeData = treeData.map((item) => {
-        if (item.key === node.pathParentKeys?.[0]) {
-          item.children?.forEach((child) => {
-            if (child.key === node.pathParentKeys?.[1]) {
-              child.children = child.children?.filter(
-                (subChild) => subChild.key !== _key
-              );
-            }
-          });
-        }
-        return item;
-      });
+    if (!_key || !dataRef?.type) {
+      Message.error('删除失败：节点信息不完整');
+      return;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    catalogTreeStore.setState({
-      treeData: newTreeData
-    });
-    Message.success('删除成功!');
+    let newTreeData: TreeDataType[];
+
+    try {
+      switch (dataRef.type) {
+        case 'catalog':
+          // 删除目录：直接从根级别过滤
+          newTreeData = treeData.filter(
+            (item: TreeDataType) => item.key !== _key
+          );
+          break;
+
+        case 'volume':
+          // 删除卷：清空该卷的子节点
+          newTreeData = treeData.map((item: TreeDataType) => {
+            if (item.key === pathParentKeys?.[0]) {
+              return {
+                ...item,
+                children: item.children?.map((child: TreeDataType) =>
+                  child.key === _key ? { ...child, children: [] } : child
+                )
+              };
+            }
+            return item;
+          });
+          break;
+
+        case 'volume-child':
+          // 删除子资源：使用路径键递归删除
+          if (!pathParentKeys?.length) {
+            throw new Error('缺少父节点路径信息');
+          }
+          newTreeData = deleteNodeFromTree(treeData, _key, pathParentKeys);
+          break;
+
+        default:
+          throw new Error(`不支持的节点类型: ${dataRef.type}`);
+      }
+
+      // 模拟异步操作
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      catalogTreeStore.setState({ treeData: newTreeData });
+      Message.success('删除成功!');
+    } catch (error) {
+      console.error('删除节点失败:', error);
+      Message.error(
+        `删除失败: ${error instanceof Error ? error.message : '未知错误'}`
+      );
+    }
   };
 
   const addCatalog = () => {
@@ -145,22 +195,17 @@ export function useEditableTree({ catalogTreeStore }) {
     catalogTreeStore.focusAndSelectInput();
   };
 
-  const addSubVolumeOrDb = (node: NodeProps) => {
+  const addSubVolume = (node: NodeProps) => {
     if (node.dataRef) {
       const name = `source-vol${Date.now()}`;
-
-      const cachTreeData = treeData.map((item) => {
+      const cachTreeData = treeData.map((item: TreeDataType) => {
         if (item.key === node.pathParentKeys?.[0]) {
-          item.children?.forEach((child) => {
-            if (child.key === node.pathParentKeys?.[1]) {
-              child.children?.unshift({
-                title: name,
-                key: `volume-${Date.now()}`,
-                type: `volume-child`,
-                isLastLeaf: true,
-                showInput: true
-              });
-            }
+          item.children?.[0]?.children?.unshift({
+            title: name,
+            key: `volume-${Date.now()}`,
+            type: `volume-child`,
+            isLastLeaf: true,
+            showInput: true
           });
         }
         return item;
@@ -206,9 +251,9 @@ export function useEditableTree({ catalogTreeStore }) {
           title: fileName,
           showInput: false
         };
-        newTreeData = treeData.map((item) => {
+        newTreeData = treeData.map((item: TreeDataType) => {
           if (item.key === pathParentKeys[0]) {
-            item.children?.forEach((subItem) => {
+            item.children?.forEach((subItem: TreeDataType) => {
               if (subItem.key === pathParentKeys[1]) {
                 subItem.children?.splice(0, 1, newNode);
               }
@@ -268,7 +313,7 @@ export function useEditableTree({ catalogTreeStore }) {
             <Tooltip color="white" content="新建">
               <IconPlus
                 className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                onClick={() => addSubVolumeOrDb(node)}
+                onClick={() => addSubVolume(node)}
               />
             </Tooltip>
           )}
