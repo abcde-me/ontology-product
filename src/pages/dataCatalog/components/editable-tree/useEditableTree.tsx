@@ -5,7 +5,7 @@ import {
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   IconPlus,
   IconDelete,
@@ -80,21 +80,24 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   // 操作子资源
-  const handleTarget = (
-    pathParentKeys,
-    targetFn: (target: TreeDataType[] | undefined) => void
-  ) => {
-    return treeData.map((item: TreeDataType) => {
-      if (item.key === pathParentKeys[0]) {
-        item.children?.forEach((subItem: TreeDataType) => {
-          if (subItem.key === pathParentKeys[1]) {
-            targetFn(subItem.children);
-          }
-        });
-      }
-      return item;
-    });
-  };
+  const handleTarget = useCallback(
+    (
+      pathParentKeys,
+      targetFn: (target: TreeDataType[] | undefined) => void
+    ) => {
+      return treeData.map((item: TreeDataType) => {
+        if (item.key === pathParentKeys[0]) {
+          item.children?.forEach((subItem: TreeDataType) => {
+            if (subItem.key === pathParentKeys[1]) {
+              targetFn(subItem.children);
+            }
+          });
+        }
+        return item;
+      });
+    },
+    [treeData]
+  );
 
   // 删除目录 or 卷
   const handleDelete = async (node: NodeProps) => {
@@ -105,56 +108,47 @@ export function useEditableTree({ catalogTreeStore }) {
       return;
     }
 
-    let newTreeData: TreeDataType[];
+    let newTreeData: TreeDataType[] = [];
 
-    try {
-      switch (dataRef.type) {
-        case 'catalog':
-          newTreeData = treeData.filter(
-            (item: TreeDataType) => item.key !== _key
-          );
-          break;
+    switch (dataRef.type) {
+      case 'catalog':
+        newTreeData = treeData.filter(
+          (item: TreeDataType) => item.key !== _key
+        );
+        break;
 
-        case 'volume':
-          // 删除卷：清空该卷的子节点
-          newTreeData = treeData.map((item: TreeDataType) => {
-            if (item.key === pathParentKeys?.[0]) {
-              return {
-                ...item,
-                children: item.children?.map((child: TreeDataType) =>
-                  child.key === _key ? { ...child, children: [] } : child
-                )
-              };
-            }
-            return item;
-          });
-          break;
-
-        case 'volume-child':
-          if (pathParentKeys) {
-            newTreeData = handleTarget(pathParentKeys, (target) => {
-              target = target?.filter((child) => child.key !== _key);
-            });
-          } else {
-            throw new Error('缺少父节点路径信息');
+      case 'volume':
+        // 删除卷：清空该卷的子节点
+        newTreeData = treeData.map((item: TreeDataType) => {
+          if (item.key === pathParentKeys?.[0]) {
+            return {
+              ...item,
+              children: item.children?.map((child: TreeDataType) =>
+                child.key === _key ? { ...child, children: [] } : child
+              )
+            };
           }
-          break;
+          return item;
+        });
+        break;
 
-        default:
-          throw new Error(`不支持的节点类型: ${dataRef.type}`);
-      }
+      case 'volume-child':
+        if (pathParentKeys) {
+          newTreeData = handleTarget(pathParentKeys, (target) => {
+            target = target?.filter((child) => child.key !== _key);
+          });
+        }
+        break;
 
-      // 模拟异步操作
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      catalogTreeStore.setState({ treeData: newTreeData });
-      Message.success('删除成功!');
-    } catch (error) {
-      console.error('删除节点失败:', error);
-      Message.error(
-        `删除失败: ${error instanceof Error ? error.message : '未知错误'}`
-      );
+      default:
+        throw new Error(`不支持的节点类型: ${dataRef.type}`);
     }
+
+    // 模拟异步操作
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    catalogTreeStore.setState({ treeData: newTreeData });
+    Message.success('删除成功!');
   };
 
   const addCatalog = () => {
