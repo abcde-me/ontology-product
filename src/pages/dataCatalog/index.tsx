@@ -1,23 +1,10 @@
 import React from 'react';
-import './index.css';
 import SourceData from './components/source-data';
 import Eltable from './components/el-table';
 import DataCatalogProvider from './components/DataCatalogProvider';
+import './index.css';
 
 const DataCatalog: React.FC = () => {
-  const [active, setActive] = React.useState('source');
-  const [selectedNode, setSelectedNode] = React.useState('');
-
-  // 处理标签页切换
-  const handleTabChange = (tabValue: string) => {
-    setActive(tabValue);
-  };
-
-  // 处理树节点选择
-  const handleNodeSelect = (nodeKey: string) => {
-    setSelectedNode(nodeKey);
-  };
-
   return (
     <DataCatalogProvider>
       <div className="h-full w-full py-5 pr-5">
@@ -26,12 +13,8 @@ const DataCatalog: React.FC = () => {
             <p className="text-xl font-medium">数据集目录</p>
           </div>
           <div className="flex w-full" style={{ height: 'calc(100% - 43px)' }}>
-            <SourceData
-              onTabChange={handleTabChange}
-              onNodeSelect={handleNodeSelect}
-              // activeTab={active}
-            />
-            <Eltable active={active} selectedNode={selectedNode} />
+            <SourceData />
+            <Eltable />
           </div>
         </div>
       </div>

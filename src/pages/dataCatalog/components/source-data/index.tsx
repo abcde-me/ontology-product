@@ -11,13 +11,7 @@ const tabKeys = [
   { key: 'target', title: '目标数据' }
 ];
 
-interface SourceDataProps {
-  onTabChange?: (tabValue: string) => void;
-  onNodeSelect?: (nodeKey: string) => void;
-}
-
-export default function SourceData(props: SourceDataProps) {
-  const { onNodeSelect } = props;
+export default function SourceData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
   const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
@@ -39,7 +33,7 @@ export default function SourceData(props: SourceDataProps) {
         >
           {tabKeys.map((tab) => (
             <TabPane key={tab.key} title={tab.title}>
-              <EditableTree onChange={onNodeSelect} />
+              <EditableTree />
             </TabPane>
           ))}
         </Tabs>

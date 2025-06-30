@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import {
-  Tabs,
-  Typography,
   Select,
   DatePicker,
   Button,
@@ -11,25 +9,22 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconDown,
-  IconDragArrow,
-  IconCaretDown,
-  IconCaretRight,
-  IconDelete,
-  IconDownload
-} from '@arco-design/web-react/icon';
-import { Tree } from '@arco-design/web-react';
+import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
+import { useDataCatalog } from '../DataCatalogProvider/Context';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 const InputSearch = Input.Search;
 
-export default function Eltable(props) {
-  const { active, selectedNode } = props;
+export default function Eltable() {
+  const dataCatalog = useDataCatalog();
+  const { catalogTreeStore } = dataCatalog;
+  const { activeTab, selectedKey } = catalogTreeStore.useGetState([
+    'activeTab',
+    'selectedKey'
+  ]);
 
   // 通用状态管理
   const [selectedRows, setSelectedRows] = useState([]); // 用于存储选中的行数据
@@ -190,12 +185,12 @@ export default function Eltable(props) {
   }
 
   // 调试信息
-  console.log(`${active}Table - 当前选中的行数:`, selectedRows.length);
-  console.log(`${active}Table - 按钮是否可用:`, hasSelectedRows);
+  console.log(`${activeTab}Table - 当前选中的行数:`, selectedRows.length);
+  console.log(`${activeTab}Table - 按钮是否可用:`, hasSelectedRows);
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
-    if (active === 'source') {
+    if (activeTab === 'source') {
       // Source表格的简单搜索区域
       return (
         <div
@@ -376,17 +371,19 @@ export default function Eltable(props) {
         {/* 使用统一的数据表格组件，根据active类型动态切换 */}
         <div className="data-catalog-content">
           <UnifiedDataTable
-            selectedNode={selectedNode}
+            selectedNode={selectedKey}
             onSelectionChange={handleSelectionChange}
             // Source表格专用属性
-            searchValue={active === 'source' ? searchValue : undefined}
+            searchValue={activeTab === 'source' ? searchValue : undefined}
             // Target表格专用属性
-            searchCondition={active === 'target' ? searchCondition : undefined}
+            searchCondition={
+              activeTab === 'target' ? searchCondition : undefined
+            }
             // 通用属性
             startTime={startTime}
             endTime={endTime}
             // 表格类型标识，根据active值决定
-            tableType={active as 'source' | 'target'}
+            tableType={activeTab as 'source' | 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
           />
