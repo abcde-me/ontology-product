@@ -1,12 +1,12 @@
-/* 数据集管理页面样式 - 百分百还原设计稿 */
-.dataset-management {
+/* 数据集管理页面样式 - 使用 CSS Modules 进行样式隔离 */
+.datasetManagement {
   background: #f5f5f5;
   padding: 24px;
   min-height: 100vh;
 }
 
 /* 主内容卡片 */
-.dataset-content-card {
+.datasetContentCard {
   background: #fff;
   padding: 24px;
   border-radius: 8px;
@@ -14,28 +14,28 @@
 }
 
 /* 标题区域样式 */
-.dataset-header {
+.datasetHeader {
   display: flex;
   align-items: baseline;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.dataset-title {
+.datasetTitle {
   color: #1d2129;
   font-weight: 600;
   font-size: 20px;
   margin: 0;
 }
 
-.dataset-description {
+.datasetDescription {
   color: #86909c;
   font-size: 14px;
   margin: 0;
 }
 
 /* 搜索工具栏样式 */
-.search-toolbar {
+.searchToolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,43 +43,43 @@
   padding: 0;
 }
 
-.search-group {
+.searchGroup {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.search-field-select {
+.searchFieldSelect {
   width: 120px;
 }
 
-.search-field-select .arco-select-view-single {
+.searchFieldSelect :global(.arco-select-view-single) {
   border-radius: 6px;
   border: 1px solid #e5e6eb;
 }
 
-.search-input {
+.searchInput {
   width: 280px;
 }
 
-.search-input .arco-input-wrapper {
+.searchInput :global(.arco-input-wrapper) {
   border-radius: 6px;
   border: 1px solid #e5e6eb;
 }
 
-.search-input .arco-input {
+.searchInput :global(.arco-input) {
   font-size: 14px;
 }
 
 /* 操作按钮区域 */
-.action-buttons {
+.actionButtons {
   display: flex;
   gap: 8px;
   align-items: center;
 }
 
 /* 批量删除按钮 */
-.batch-delete-btn {
+.batchDeleteBtn {
   color: #f53f3f !important;
   border: 1px solid #f53f3f !important;
   background: #fff !important;
@@ -89,19 +89,19 @@
   padding: 0 12px;
 }
 
-.batch-delete-btn:hover {
+.batchDeleteBtn:hover {
   background-color: #f53f3f !important;
   color: #fff !important;
 }
 
-.batch-delete-btn:disabled {
+.batchDeleteBtn:disabled {
   color: #c9cdd4 !important;
   border-color: #e5e6eb !important;
   background: #f7f8fa !important;
 }
 
 /* 批量导出按钮 */
-.batch-export-btn {
+.batchExportBtn {
   color: #165dff !important;
   border: 1px solid #165dff !important;
   background: #fff !important;
@@ -111,19 +111,19 @@
   padding: 0 12px;
 }
 
-.batch-export-btn:hover {
+.batchExportBtn:hover {
   background-color: #165dff !important;
   color: #fff !important;
 }
 
-.batch-export-btn:disabled {
+.batchExportBtn:disabled {
   color: #c9cdd4 !important;
   border-color: #e5e6eb !important;
   background: #f7f8fa !important;
 }
 
 /* 新建数据集按钮 */
-.dataset-management .arco-btn-primary {
+.datasetManagement :global(.arco-btn-primary) {
   background: #165dff;
   border-color: #165dff;
   border-radius: 6px;
@@ -133,20 +133,20 @@
   font-weight: 500;
 }
 
-.dataset-management .arco-btn-primary:hover {
+.datasetManagement :global(.arco-btn-primary):hover {
   background: #0e42d2;
   border-color: #0e42d2;
 }
 
 /* 表格样式 */
-.dataset-table {
+.datasetTable {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #f0f0f0;
   height: 742px;
 }
 
-.dataset-table .arco-table-thead th {
+.datasetTable :global(.arco-table-thead th) {
   background-color: #fafafa;
   color: #000000d9;
   font-weight: 500;
@@ -155,18 +155,18 @@
   padding: 16px 12px;
 }
 
-.dataset-table .arco-table-tbody td {
+.datasetTable :global(.arco-table-tbody td) {
   border-bottom: 1px solid #f0f0f0;
   padding: 14px 12px;
   font-size: 14px;
 }
 
-.dataset-table .arco-table-tbody .arco-table-tr:hover td {
+.datasetTable :global(.arco-table-tbody .arco-table-tr):hover :global(td) {
   background-color: #f5f5f5;
 }
 
 /* 表格内链接样式 */
-.dataset-name-link {
+.datasetNameLink {
   color: #165dff !important;
   font-weight: 500 !important;
   padding: 0 !important;
@@ -175,13 +175,13 @@
   font-size: 14px;
 }
 
-.dataset-name-link:hover {
+.datasetNameLink:hover {
   color: #0e42d2 !important;
   text-decoration: underline;
 }
 
 /* 操作列样式优化 */
-.dataset-table .arco-table-tbody td:last-child {
+.datasetTable :global(.arco-table-tbody td):last-child {
   width: 148px !important;
   height: 47px !important;
   padding: 12px !important;
@@ -189,7 +189,7 @@
 }
 
 /* 表格内操作按钮 */
-.action-button {
+.actionButton {
   font-size: 14px !important;
   width: 24px !important;
   height: 22px !important;
@@ -204,31 +204,31 @@
   min-width: auto !important;
 }
 
-.action-button.export {
+.actionButtonExport {
   color: #165dff !important;
 }
 
-.action-button.export:hover {
+.actionButtonExport:hover {
   background-color: rgba(22, 93, 255, 0.1) !important;
 }
 
-.action-button.delete {
+.actionButtonDelete {
   color: #f53f3f !important;
 }
 
-.action-button.delete:hover {
+.actionButtonDelete:hover {
   background-color: rgba(245, 63, 63, 0.1) !important;
 }
 
 /* 操作按钮容器 */
-.dataset-table .arco-space {
+.datasetTable :global(.arco-space) {
   gap: 8px !important;
   align-items: center;
   justify-content: center;
 }
 
 /* 标签样式 */
-.tag-green {
+.tagGreen {
   background-color: #f6ffed !important;
   color: #52c41a !important;
   border: 1px solid #b7eb8f !important;
@@ -237,7 +237,7 @@
   padding: 2px 6px;
 }
 
-.tag-purple {
+.tagPurple {
   background-color: #f9f0ff !important;
   color: #722ed1 !important;
   border: 1px solid #d3adf7 !important;
@@ -247,138 +247,141 @@
 }
 
 /* 复选框样式 */
-.dataset-table .arco-checkbox {
+.datasetTable :global(.arco-checkbox) {
   margin-right: 0;
 }
 
-.dataset-table .arco-checkbox-checked .arco-checkbox-icon {
+.datasetTable :global(.arco-checkbox-checked .arco-checkbox-icon) {
   background-color: #165dff;
   border-color: #165dff;
 }
 
-/* 分页样式 */
-.dataset-table .arco-pagination {
+/* 分页样式 - 关键的样式隔离 */
+.datasetTable :global(.arco-pagination) {
   margin-top: 16px;
   justify-content: flex-end;
 }
 
-.dataset-table .arco-pagination-item {
+.datasetTable :global(.arco-pagination-item) {
   border-radius: 4px;
   font-size: 14px;
 }
 
-/* .dataset-table .arco-pagination-item-active {
-  background-color: #165dff;
-  border-color: #165dff;
-} */
+.datasetTable :global(.arco-pagination-item-active) {
+  background-color: #165dff !important;
+  border-color: #165dff !important;
+}
 
-.dataset-table .arco-pagination-item:hover:not(.arco-pagination-item-active) {
-  background-color: rgba(22, 93, 255, 0.1);
-  border-color: #165dff;
+.datasetTable
+  :global(.arco-pagination-item):hover:not(
+    :global(.arco-pagination-item-active)
+  ) {
+  background-color: rgba(22, 93, 255, 0.1) !important;
+  border-color: #165dff !important;
 }
 
 /* 筛选图标样式 */
-.dataset-table .arco-table-filters-trigger {
+.datasetTable :global(.arco-table-filters-trigger) {
   color: #86909c;
 }
 
-.dataset-table .arco-table-filters-trigger:hover {
+.datasetTable :global(.arco-table-filters-trigger):hover {
   color: #165dff;
 }
 
 /* 排序图标样式 */
-.dataset-table .arco-table-sorter {
+.datasetTable :global(.arco-table-sorter) {
   color: #86909c;
 }
 
-.dataset-table .arco-table-sorter:hover {
+.datasetTable :global(.arco-table-sorter):hover {
   color: #165dff;
 }
 
 /* 表格空状态 */
-.dataset-table .arco-empty {
+.datasetTable :global(.arco-empty) {
   padding: 40px 0;
 }
 
-.dataset-table .arco-empty-description {
+.datasetTable :global(.arco-empty-description) {
   color: #86909c;
   font-size: 14px;
 }
 
 /* 模态框样式 */
-.dataset-management .arco-modal {
+.datasetManagement :global(.arco-modal) {
   border-radius: 8px;
 }
 
-.dataset-management .arco-modal-header {
+.datasetManagement :global(.arco-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
 }
 
-.dataset-management .arco-modal-title {
+.datasetManagement :global(.arco-modal-title) {
   font-size: 16px;
   font-weight: 600;
   color: #1d2129;
 }
 
-.dataset-management .arco-modal-body {
+.datasetManagement :global(.arco-modal-body) {
   padding: 24px;
 }
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
-  .search-input {
+  .searchInput {
     width: 240px;
   }
 }
 
 @media (max-width: 768px) {
-  .dataset-management {
+  .datasetManagement {
     padding: 16px;
   }
 
-  .dataset-content-card {
+  .datasetContentCard {
     padding: 16px;
   }
 
-  .search-toolbar {
+  .searchToolbar {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
 
-  .search-group {
+  .searchGroup {
     width: 100%;
     justify-content: flex-start;
   }
 
-  .search-input {
+  .searchInput {
     width: 200px;
   }
 
-  .action-buttons {
+  .actionButtons {
     width: 100%;
     justify-content: flex-end;
   }
 
-  .dataset-table .arco-table-container {
+  .datasetTable :global(.arco-table-container) {
     overflow-x: auto;
   }
 }
 
 @media (max-width: 480px) {
-  .action-buttons {
+  .actionButtons {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .search-group {
+  .searchGroup {
     flex-direction: column;
     gap: 8px;
   }
 
-  .search-field-select,
-  .search-input {
+  .searchFieldSelect,
+  .searchInput {
     width: 100%;
   }
 }
