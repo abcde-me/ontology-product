@@ -139,6 +139,10 @@ const replaceUriParams = (uri: string, params: Record<string, any>) => {
     result += params['id'];
   }
 
+  if (result.endsWith('/')) {
+    result = result.slice(0, -1);
+  }
+
   return result;
 };
 
