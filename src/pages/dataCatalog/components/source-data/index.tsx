@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import EditableTree from '../editable-tree';
@@ -11,14 +11,18 @@ const tabKeys = [
   { key: 'target', title: '目标数据' }
 ];
 
-export default function SourceData(props) {
-  const { onTabChange, onNodeSelect } = props;
+interface SourceDataProps {
+  onTabChange?: (tabValue: string) => void;
+  onNodeSelect?: (nodeKey: string) => void;
+}
 
+export default function SourceData(props: SourceDataProps) {
+  const { onNodeSelect } = props;
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
   const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
 
-  const handleTabChange = (value) => {
+  const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
     catalogTreeStore.setState({
       activeTab: value

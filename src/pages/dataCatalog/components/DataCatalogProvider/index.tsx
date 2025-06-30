@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { DataCatalog } from './DataCatalog';
 import { DataCatalogContext } from './Context';
 
-interface DataMenuProviderProps {
+interface DataCatalogProviderProps {
   children: React.ReactNode | React.ReactNode[];
   dataCatalogStore?: DataCatalog;
 }
@@ -11,7 +11,7 @@ interface DataMenuProviderProps {
 const DataCatalogProvider = ({
   children,
   dataCatalogStore
-}: DataMenuProviderProps) => {
+}: DataCatalogProviderProps) => {
   const dataCatalog = useCreation(() => {
     if (dataCatalogStore) {
       return dataCatalogStore;

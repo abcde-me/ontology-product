@@ -4,5 +4,5 @@ import { DataCatalog } from './DataCatalog';
 export const DataCatalogContext = createContext<DataCatalog | null>(null);
 
 export function useDataCatalog() {
-  return useContext(DataCatalogContext);
+  return useContext(DataCatalogContext)!;
 }

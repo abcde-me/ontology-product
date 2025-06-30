@@ -23,13 +23,13 @@ const DataCatalog: React.FC = () => {
       <div className="h-full w-full py-5 pr-5">
         <div className="box-border h-full w-full rounded-2xl bg-white pb-[27px] pl-4 pr-6 pt-6">
           <div className="mb-4 h-[30px] w-full leading-[30px]">
-            <p style={{ fontSize: '20px', fontWeight: 500 }}>数据集目录</p>
+            <p className="text-xl font-medium">数据集目录</p>
           </div>
           <div className="flex w-full" style={{ height: 'calc(100% - 43px)' }}>
             <SourceData
-            // onTabChange={handleTabChange}
-            // onNodeSelect={handleNodeSelect}
-            // activeTab={active}
+              onTabChange={handleTabChange}
+              onNodeSelect={handleNodeSelect}
+              // activeTab={active}
             />
             <Eltable active={active} selectedNode={selectedNode} />
           </div>
