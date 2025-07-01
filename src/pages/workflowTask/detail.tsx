@@ -94,7 +94,7 @@ export default function WorkflowTaskDetail() {
   // 初始化数据清洗节点及数据增强节点数据
   const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({});
   // 添加loading状态控制
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // 初始化详情基本数据
   useEffect(() => {
