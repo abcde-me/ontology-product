@@ -21,7 +21,12 @@ import ParseNode from './components/parse-node';
 import DataCleaningNode from './components/data-cleaning-node';
 import DataAugmentationNode from './components/data-augmentation-node';
 import './detail.css';
-import { getTaskDetail, getTaskDetailNode, taskRerun } from '@/api/taskDetail';
+import {
+  getTaskDetail,
+  getTaskDetailNode,
+  taskRerun,
+  taskStop
+} from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -29,9 +34,9 @@ const TabPane = Tabs.TabPane;
 
 // 枚举作业运行状态
 enum TaskRunStatus {
-  success = 1,
-  fail = 2,
-  running = 3,
+  running = 1,
+  success = 2,
+  fail = 3,
   stop = 4
 }
 
@@ -198,10 +203,7 @@ export default function WorkflowTaskDetail() {
                   title="确定停止吗？"
                   content="未处理完的数据将停止处理"
                   onOk={() => {
-                    handleStopWorkflow(taskId);
-                    Message.success({
-                      content: '停止成功'
-                    });
+                    handleStopWorkflow(taskId!);
                   }}
                   onCancel={() => {
                     Message.error({
@@ -387,8 +389,22 @@ export default function WorkflowTaskDetail() {
   };
 
   // 进行中状态下停止操作
-  const handleStopWorkflow = (id: string | null) => {
-    console.log('停止', id);
+  const handleStopWorkflow = async (id: string) => {
+    const params = {
+      id: id,
+      uid: userInfo?.id
+    };
+    const res = await taskStop(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '停止成功'
+      });
+      getDetailData();
+    } else {
+      Message.error({
+        content: '停止失败，请稍后重试'
+      });
+    }
   };
 
   return (

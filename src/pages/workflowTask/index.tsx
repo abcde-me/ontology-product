@@ -11,9 +11,9 @@ const InputSearch = Input.Search;
 
 // 枚举作业运行状态
 enum TaskRunStatus {
-  success = 1,
-  fail = 2,
-  running = 3,
+  running = 1,
+  success = 2,
+  fail = 3,
   stop = 4
 }
 

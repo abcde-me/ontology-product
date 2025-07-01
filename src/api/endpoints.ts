@@ -244,6 +244,8 @@ export const ModaForgeResourceEndpoints = {
   taskDetailNode: PrefixAimdp + '/workflow_instance/task_detail',
   // 作业重跑
   taskRerun: PrefixAimdp + '/workflow_instance/task_rerun',
+  // 作业停用
+  taskStop: PrefixAimdp + '/workflow_instance/task_stop',
 
   modelGet: PrefixAimdp + '/model/get',
 
