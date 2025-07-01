@@ -1,4 +1,9 @@
 /* 数据集表单样式 */
+
+/* Modal内容区域样式调整 */
+:global(.arco-modal-content) {
+  padding-left: 1px !important;
+}
 .previewContainer {
   margin-top: 16px;
   border-radius: 8px;
