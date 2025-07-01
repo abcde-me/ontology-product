@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import useStore from '@/pages/dataCatalog/store';
 import {
   Tree,
@@ -127,7 +127,7 @@ interface UnifiedDataTableProps {
 /**
  * 统一的数据表格组件
  */
-function UnifiedDataTable(props: UnifiedDataTableProps) {
+const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const {
     selectedNode,
     onSelectionChange,
@@ -171,21 +171,63 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
   const childRef = useRef(null);
-
   // 监听选中路径变化
-  useEffect(() => {
-    if (selectedPath) {
-      console.log(
-        `UnifiedDataTable (${tableType}) - selectedPath:`,
-        selectedPath
-      );
-      // 获取到路径后直接传递给后端，然后前端根据路径获取数据
-    }
-  }, [selectedPath, tableType]);
+  // useEffect(() => {
+  //   if (selectedPath) {
+  //     console.log(
+  //       `UnifiedDataTable (${tableType}) - selectedPath:`,
+  //       selectedPath
+  //     );
+  //     // 获取到路径后直接传递给后端，然后前端根据路径获取数据
+  //   }
+  // }, [selectedPath, tableType]);
+  // 将getTableList方法暴露给父组件
+  useImperativeHandle(ref, () => ({
+    getTableList
+  }));
 
   const getTableList = async () => {
-    const res = await getTargetDataFileList('/src/test1/volume/test11');
-    console.log(res);
+    try {
+      // 如果是target表格，调用特定API获取数据
+      if (tableType === 'target') {
+        const res = await getTargetDataFileList({ file_id: selectedNode });
+        if (res && res.data) {
+          setTableData(res.data.list || []);
+          setTotal(res.data.total || 0);
+          console.log('获取最新表格数据成功:', res.data);
+        }
+      } else {
+        // 如果是source表格，调用对应的API
+        // 此处使用模拟数据，实际项目中应替换为真实API
+        let filteredData = [...mockData];
+
+        // 根据搜索条件过滤数据
+        if (searchValue) {
+          filteredData = filteredData.filter(
+            (item) =>
+              item.content.includes(searchValue) ||
+              item.file.includes(searchValue) ||
+              item.workflowId.includes(searchValue)
+          );
+        }
+
+        // 根据日期范围过滤
+        if (startTime && endTime) {
+          filteredData = filteredData.filter((item) => {
+            const itemDate = new Date(item.createdAt);
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            return itemDate >= start && itemDate <= end;
+          });
+        }
+
+        setTableData(filteredData);
+        setTotal(filteredData.length);
+        console.log('获取最新表格数据成功 (模拟):', filteredData);
+      }
+    } catch (error) {
+      console.error('获取表格数据失败:', error);
+    }
   };
   useEffect(() => {
     getTableList();
@@ -207,14 +249,14 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
-    return getUnifiedColumns(tableType, dataType, downloadShow, null);
+    return getUnifiedColumns(tableType, dataType, downloadShow, null, getTableList);
   }, [tableType, dataType, downloadShow]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
     if (tableType === 'target' && dataType === 'volume') {
       // 只有Target表格才需要动态更新hoveredRowId
-      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId);
+      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId, getTableList);
     }
     return baseColumns;
   }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId]);
@@ -407,12 +449,12 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
       <FormComponent
         downloadData={downloadData}
-        
+
         onCancel={() => setVisible(false)}
         visible={visible}
       />
     </>
   );
-}
+});
 
 export default UnifiedDataTable;

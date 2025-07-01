@@ -47,12 +47,12 @@ export async function renameCatalog(id:string,params: any) {
   return await UAPI.RES.catalogRenameApi({catalogId: id}).put(params).inRegion().do();
 }
 //查询目标数据文件列表
-export async function getTargetDataFileList(path: string) {
-  return await UAPI.RES.targetDataFileListApi({path}).get().inRegion().do();
+export async function getTargetDataFileList(params: any) {
+  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 //删除目标文件
 export async function deleteTargetFile( param: any = {}) {
-  return await UAPI.RES.targetDataFileListApi({}).delete(param).inRegion().do();
+  return await UAPI.RES.targetDataFileDeleteApi({}).delete(param).inRegion().do();
 }
 
 //预览/搜索数据集

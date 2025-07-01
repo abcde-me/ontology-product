@@ -17,25 +17,37 @@ interface FormProps {
   downloadData?: any;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
+  exportdatas?: any;
 }
 
 const FormComponent: React.FC<FormProps> = ({
   downloadData,
   onCancel,
   visible = false,
-  names
+  names,
+  exportdatas
 }) => {
+  // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
+    const exportNames:Array<string> = []
+    if(exportdatas){
+      exportNames.push(exportdatas.map(item=>item.file_name))
+      
+    }else{
+      exportNames.push(form.getFieldValue('name'))
+    }
     const res = await exportFile({
-      file_names: form.getFieldValue('name'),
+      file_names: exportNames,
       output_path: form.getFieldValue('path'),
       file_path: form.getFieldValue('path'),
       connector_id: Number(form.getFieldValue('province'))
     });
     console.log(res);
     try {
+      console.log('导出文件名',exportNames);
       await form.validate();
+      onCancel && onCancel();
       Message.success('导出成功');
     } catch (e) {
       Message.error('导出失败，请重试');
