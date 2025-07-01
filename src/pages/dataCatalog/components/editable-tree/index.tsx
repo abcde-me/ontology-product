@@ -1,24 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Input, Message, Modal, Tooltip, Tree } from '@arco-design/web-react';
-import {
-  IconCaretDown,
-  IconPlus,
-  IconDelete,
-  IconEdit,
-  IconStorage,
-  IconArchive
-} from '@arco-design/web-react/icon';
-import {
-  NodeInstance,
-  NodeProps,
-  TreeDataType
-} from '@arco-design/web-react/es/Tree/interface';
+import React from 'react';
+import { Tree } from '@arco-design/web-react';
+import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
-import './index.css';
-import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import SearchInput from '../search-input';
 import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
+import './index.css';
 
 export default function EditableTree() {
   const dataCatalog = useDataCatalog();
@@ -33,9 +20,10 @@ export default function EditableTree() {
 
   const {
     generatorTreeNodes,
+    onSearchChange,
     handleExpand,
     handleSelect,
-    addCatalog,
+    onCatalogAdd,
     renderExtra,
     renderTitle
   } = useEditableTree({ catalogTreeStore });
@@ -45,13 +33,14 @@ export default function EditableTree() {
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <SearchInput
           value={searchValue}
-          onChange={catalogTreeStore.setSearchValue}
+          onChange={onSearchChange}
           placeholder="输入搜索目录"
           style={{ height: '32px', width: '130px' }}
+          maxLength={256}
         />
         <div
           className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-          onClick={addCatalog}
+          onClick={onCatalogAdd}
         >
           <IconPlus className="mr-2" />
           新建
