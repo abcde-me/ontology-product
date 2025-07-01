@@ -94,9 +94,11 @@ export function useEditableTree({ catalogTreeStore }) {
     }
   ) => {
     const { props } = extra.node;
-    if (props.dataRef?.isLastLeaf) {
+    const { dataRef } = props;
+    if (dataRef?.isLastLeaf) {
       catalogTreeStore.setState({
-        selectedKey: selectedKeys[0]
+        selectedKey: selectedKeys[0],
+        selectedFullPath: dataRef?.fullPath
       });
     }
   };

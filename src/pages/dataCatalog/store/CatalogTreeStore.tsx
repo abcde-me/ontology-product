@@ -14,6 +14,7 @@ interface BaseTreeData {
   name: string;
   base_dir: string;
   isLastLeaf?: boolean;
+  fullPath?: string;
 }
 
 interface ITreeData extends BaseTreeData {
@@ -33,6 +34,7 @@ interface CatalogTreeState {
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
   isEditing: boolean;
+  selectedFullPath: string;
   loading?: boolean;
 }
 
@@ -53,7 +55,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         expandedKeys: [],
         selectedKey: '',
         isEditing: false,
-        inputRef: React.createRef<RefInputType>()
+        inputRef: React.createRef<RefInputType>(),
+        selectedFullPath: ''
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -135,8 +138,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                   title: item.name,
                   key: String(item.id), // 转换为字符串
                   parent_id: volumeKey,
-                  // isLeaf: true,
-                  isLastLeaf: true
+                  isLastLeaf: true,
+                  fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };
