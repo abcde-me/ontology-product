@@ -101,7 +101,7 @@ export function useEditableTree({ catalogTreeStore }) {
   // 重命名目录
   const handleEdit = (node: any) => {
     const { _key, dataRef } = node;
-    if (dataRef?.type === 'catalog') {
+    if (dataRef?.type === CatalogTypeEnum.catalog) {
       catalogTreeStore.setState({
         inputValue: dataRef?.title,
         treeData: treeData.map((item: TreeDataType) => {
@@ -158,7 +158,7 @@ export function useEditableTree({ catalogTreeStore }) {
     let newTreeData: TreeDataType[] = [];
 
     switch (dataRef.type) {
-      case 'catalog':
+      case CatalogTypeEnum.catalog:
         newTreeData = treeData.filter(
           (item: TreeDataType) => item.key !== _key
         );
@@ -178,7 +178,7 @@ export function useEditableTree({ catalogTreeStore }) {
         });
         break;
 
-      case 'volume-child':
+      case CatalogTypeEnum.volume:
         if (pathParentKeys) {
           newTreeData = handleTarget(pathParentKeys, (target) => {
             return target?.filter((child) => child.key !== _key);
@@ -213,7 +213,7 @@ export function useEditableTree({ catalogTreeStore }) {
           title: name,
           key: `catalog-${Date.now()}`,
           children: [],
-          type: 'catalog',
+          type: 1,
           showInput: true
         },
         ...treeData
@@ -231,7 +231,7 @@ export function useEditableTree({ catalogTreeStore }) {
           item.children?.[0]?.children?.unshift({
             title: name,
             key: `volume-${Date.now()}`,
-            type: `volume-child`,
+            type: 2,
             isLastLeaf: true,
             showInput: true
           });
@@ -242,7 +242,7 @@ export function useEditableTree({ catalogTreeStore }) {
       catalogTreeStore.setState({
         inputValue: name,
         treeData: cachTreeData,
-        expandedKeys: [...new Set([...expandedKeys, dataRef._key])]
+        expandedKeys: [...new Set([...expandedKeys, dataRef.key])]
       });
       focusAndSelectInput();
     }
@@ -251,14 +251,16 @@ export function useEditableTree({ catalogTreeStore }) {
   const onEditFinish = (props: NodeProps) => {
     const { dataRef } = props;
 
-    const fileName =
-      inputValue.trim() ||
-      `${dataRef?.type === 'catalog' ? '目录' : 'source-vol'}${Date.now()}`;
+    const fileName = inputValue.trim();
+    if (!fileName.length) {
+      Message.warning('名称不能为空');
+      return;
+    }
 
     let newTreeData: TreeDataType[] = [];
 
     switch (dataRef?.type) {
-      case 'catalog':
+      case CatalogTypeEnum.catalog:
         newTreeData = treeData.map((item: TreeDataType) => {
           if (item.key === dataRef.key) {
             return {
@@ -281,7 +283,7 @@ export function useEditableTree({ catalogTreeStore }) {
         });
         break;
 
-      case 'volume-child':
+      case CatalogTypeEnum.volume:
         const { pathParentKeys } = props;
         if (pathParentKeys) {
           newTreeData = handleTarget(pathParentKeys, (target) => {
@@ -360,7 +362,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef, title } = props;
 
     const IconComponent = dataRef?.isLastLeaf ? (
-      dataRef?.type === 'volume-child' ? (
+      [CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(dataRef?.type) ? (
         <IconStorage className="mr-2 text-base" />
       ) : (
         <IconArchive className="mr-2 text-base" />
@@ -411,8 +413,10 @@ export function useEditableTree({ catalogTreeStore }) {
               className={classNames(
                 'overflow-hidden text-ellipsis whitespace-nowrap',
                 dataRef?.isLastLeaf ? 'last-leaf-text' : '',
-                dataRef?.type === 'db' ? 'no-operation' : '',
-                dataRef?.type === 'catalog' ? 'catalog-title-text' : ''
+                dataRef?.type === CatalogTypeEnum.db ? 'no-operation' : '',
+                dataRef?.type === CatalogTypeEnum.volume
+                  ? 'catalog-title-text'
+                  : ''
               )}
             >
               {TitleText}
