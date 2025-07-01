@@ -35,7 +35,7 @@ export default function WorkflowList() {
   // 总数据量
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // 组件初始化
   useEffect(() => {
@@ -284,12 +284,7 @@ export default function WorkflowList() {
             getList();
           }}
         />
-        <Button
-          shape="round"
-          type="primary"
-          onClick={handleCreateWorkflow}
-          loading={loading}
-        >
+        <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>
           创建工作流
         </Button>
       </div>

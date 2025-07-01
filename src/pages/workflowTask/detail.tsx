@@ -21,7 +21,7 @@ import ParseNode from './components/parse-node';
 import DataCleaningNode from './components/data-cleaning-node';
 import DataAugmentationNode from './components/data-augmentation-node';
 import './detail.css';
-import { getTaskDetail } from '@/api/taskDetail';
+import { getTaskDetail, getTaskDetailNode } from '@/api/taskDetail';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -94,7 +94,11 @@ export default function WorkflowTaskDetail() {
   // 初始化数据清洗节点及数据增强节点数据
   const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({});
   // 添加loading状态控制
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  // 当前的第几页
+  const [current, setCurrent] = useState(1);
+  // 每页展示数据的数据量
+  const [pageSize, setPageSize] = useState(10);
 
   // 初始化详情基本数据
   useEffect(() => {
@@ -257,6 +261,14 @@ export default function WorkflowTaskDetail() {
     }
   };
 
+  // 获取子组件的分页数据
+  const handleChildData = (data: { page: number; page_size: number }) => {
+    setCurrent(data.page);
+    setPageSize(data.page_size);
+    getNodeDetail();
+    console.log(data, 'ddddd');
+  };
+
   // 切换节点tab
   const handleChangeTab = (val: string) => {
     const isParse =
@@ -266,6 +278,24 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
+    setCurrent(1);
+    setPageSize(10);
+    getNodeDetail();
+  };
+
+  // 获取节点详情
+  const getNodeDetail = async () => {
+    if (!taskId) return;
+    const params = {
+      id: taskId,
+      task_type: activeNode,
+      search_key: '',
+      page: current,
+      page_size: pageSize
+    };
+    const res = await getTaskDetailNode(params);
+    if (isParseNode) setParseNodeData(res.data.data_parse);
+    else setCleaningAugmentNodeData(res.data.data_dispose);
   };
 
   // 获取作业内容区域dom
@@ -299,7 +329,11 @@ export default function WorkflowTaskDetail() {
               >
                 <Typography.Paragraph style={{ marginTop: 20 }}>
                   {isParseNode ? (
-                    <ParseNode dataSource={parseNodeData} loading={loading} />
+                    <ParseNode
+                      dataSource={parseNodeData}
+                      loading={loading}
+                      onSendData={handleChildData}
+                    />
                   ) : item.task_type === NodeType.cleaning ? (
                     <DataCleaningNode
                       dataSource={cleaningAugmentNodeData}
