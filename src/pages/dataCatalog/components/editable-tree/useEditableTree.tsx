@@ -16,12 +16,13 @@ import {
 import { subLeafKeys } from './consts';
 
 export function useEditableTree({ catalogTreeStore }) {
-  const { searchValue, inputRef, inputValue, treeData } =
+  const { searchValue, inputRef, inputValue, treeData, expandedKeys } =
     catalogTreeStore.useGetState([
       'searchValue',
       'inputRef',
       'inputValue',
-      'treeData'
+      'treeData',
+      'expandedKeys'
     ]);
 
   useEffect(() => {
@@ -36,6 +37,32 @@ export function useEditableTree({ catalogTreeStore }) {
           {children ? generatorTreeNodes(children) : null}
         </Tree.Node>
       );
+    });
+  };
+
+  const onSearchChange = (value) => {
+    // 遍历treeData，找出所有节点 title 中包含 searchValue 的节点 key，存储到一个 keys 数组中
+    const keys: string[] = [];
+    const loop = (data: TreeDataType[]) => {
+      data.forEach((item) => {
+        if (
+          typeof item.title === 'string' &&
+          item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
+        ) {
+          if (item.parentKey) {
+            keys.push(item.parentKey);
+          }
+        } else if (item.children) {
+          loop(item.children);
+        }
+      });
+    };
+    loop(treeData);
+
+    const newKeys = new Set([...expandedKeys, ...keys]);
+    catalogTreeStore.setState({
+      searchValue: value,
+      expandedKeys: [...newKeys]
     });
   };
 
@@ -84,7 +111,7 @@ export function useEditableTree({ catalogTreeStore }) {
   // 操作子资源
   const handleTarget = useCallback(
     (
-      pathParentKeys,
+      pathParentKeys: string[],
       targetFn: (
         target: TreeDataType[] | undefined
       ) => TreeDataType[] | undefined
@@ -187,7 +214,8 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const addSubVolume = (node: NodeProps) => {
-    if (node.dataRef) {
+    const { dataRef } = node;
+    if (dataRef) {
       const name = `source-vol${Date.now()}`;
       const cachTreeData = treeData.map((item: TreeDataType) => {
         if (item.key === node.pathParentKeys?.[0]) {
@@ -204,7 +232,8 @@ export function useEditableTree({ catalogTreeStore }) {
 
       catalogTreeStore.setState({
         inputValue: name,
-        treeData: cachTreeData
+        treeData: cachTreeData,
+        expandedKeys: [...new Set([...expandedKeys, dataRef._key])]
       });
       focusAndSelectInput();
     }
@@ -388,6 +417,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   return {
     generatorTreeNodes,
+    onSearchChange,
     handleExpand,
     handleSelect,
     addCatalog,

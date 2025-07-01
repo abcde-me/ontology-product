@@ -4,7 +4,6 @@ import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
 import { subLeafKeys } from '../components/editable-tree/consts';
-import { NodeProps } from '@arco-design/web-react/es/Cascader';
 
 interface ITreeData {
   id: string | number;
@@ -125,22 +124,25 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
     const cache = fakeData.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
+      const catalogKey = `catalog-${catalog.id}`;
+
       if (catalog.children) {
         Object.entries(catalog.children).forEach(([type, arr]) => {
+          const volumeKey = `${catalog.id}-${type}`;
           const subChildren = {
             title: subLeafKeys[type],
-            key: `${catalog.id}-${type}`,
+            key: volumeKey,
             type: type,
+            parentKey: catalogKey,
             children:
-              arr?.map((item) => {
-                return {
-                  title: item.name,
-                  key: `${type}-${item.id}`,
-                  isLeaf: true,
-                  isLastLeaf: true,
-                  type: `${type}-child`
-                };
-              }) || []
+              arr?.map((item) => ({
+                title: item.name,
+                key: `${type}-${item.id}`,
+                isLeaf: true,
+                isLastLeaf: true,
+                type: `${type}-child`,
+                parentKey: volumeKey
+              })) || []
           };
           childrenArr.push(subChildren);
         });
@@ -148,7 +150,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
       return {
         title: catalog.name,
-        key: `catalog-${catalog.id}`,
+        key: catalogKey,
         type: catalog.type,
         children: childrenArr
       };

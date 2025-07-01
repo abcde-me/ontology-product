@@ -20,6 +20,7 @@ export default function EditableTree() {
 
   const {
     generatorTreeNodes,
+    onSearchChange,
     handleExpand,
     handleSelect,
     addCatalog,
@@ -32,9 +33,7 @@ export default function EditableTree() {
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <SearchInput
           value={searchValue}
-          onChange={(value) => {
-            catalogTreeStore.setSearchValue(value);
-          }}
+          onChange={onSearchChange}
           placeholder="输入搜索目录"
           style={{ height: '32px', width: '130px' }}
           maxLength={256}
