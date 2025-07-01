@@ -13,22 +13,30 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-import { subLeafKeys } from '../../consts';
+import { CatalogTypeEnum, subLeafKeys } from '../../consts';
 
 export function useEditableTree({ catalogTreeStore }) {
-  const { searchValue, inputRef, inputValue, treeData, expandedKeys, loading } =
-    catalogTreeStore.useGetState([
-      'searchValue',
-      'inputRef',
-      'inputValue',
-      'treeData',
-      'expandedKeys',
-      'loading'
-    ]);
+  const {
+    activeTab,
+    searchValue,
+    inputRef,
+    inputValue,
+    treeData,
+    expandedKeys,
+    loading
+  } = catalogTreeStore.useGetState([
+    'activeTab',
+    'searchValue',
+    'inputRef',
+    'inputValue',
+    'treeData',
+    'expandedKeys',
+    'loading'
+  ]);
 
   useEffect(() => {
     catalogTreeStore.getEffect('fetchData')();
-  }, []);
+  }, [activeTab]);
 
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
     return treeData.map((item) => {
@@ -41,7 +49,7 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const onSearchChange = (value) => {
+  const onSearchChange = (value: string) => {
     // 遍历treeData，找出所有节点 title 中包含 searchValue 的节点 key，存储到一个 keys 数组中
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
@@ -302,11 +310,10 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
-
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {dataRef?.type === 'catalog' && (
+          {dataRef?.type === CatalogTypeEnum.catalog && (
             <Tooltip color="white" content="重命名">
               <IconEdit
                 className={'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'}
@@ -314,7 +321,7 @@ export function useEditableTree({ catalogTreeStore }) {
               />
             </Tooltip>
           )}
-          {!dataRef?.type.includes('db') && (
+          {dataRef?.type !== CatalogTypeEnum.db && (
             <Tooltip color="white" content="删除">
               <IconDelete
                 onClick={() => {
@@ -336,7 +343,7 @@ export function useEditableTree({ catalogTreeStore }) {
               />
             </Tooltip>
           )}
-          {!dataRef?.isLastLeaf && dataRef?.type === 'volume' && (
+          {dataRef?.type === 'volume' && (
             <Tooltip color="white" content="新建">
               <IconPlus
                 className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"

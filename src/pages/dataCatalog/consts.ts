@@ -4,6 +4,12 @@ export const subLeafKeys: { [prop: string]: string } = {
 };
 
 export const tabKeys = [
-  { key: 'source', title: '源数据' },
-  { key: 'target', title: '目标数据' }
+  { key: 'src', title: '源数据' },
+  { key: 'dst', title: '目标数据' }
 ];
+
+export enum CatalogTypeEnum {
+  catalog = 1,
+  volume = 2,
+  db = 3
+}

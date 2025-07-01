@@ -6,56 +6,76 @@ import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
 import { subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
 
-interface ITreeData {
-  id: string | number;
+interface BaseTreeData {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name?: string;
   name: string;
-  type: string;
-  parent_id?: string | number;
+  base_dir: string;
+  isLastLeaf?: boolean;
+}
+
+interface ITreeData extends BaseTreeData {
   children?: {
-    volume?: Array<{
-      id: number;
-      name: string;
-      parent_id: number;
-    }>;
-    db?: Array<{
-      id: number;
-      name: string;
-      parent_id: number;
-    }>;
+    volume?: BaseTreeData[];
+    // TODO 下一期做
+    db?: BaseTreeData[];
   };
 }
 
 const fakeData: ITreeData[] = [
   {
-    type: 'catalog',
     id: 1,
-    name: '目录1',
+    parent_id: 0,
+    type: 1,
+    type_name: 'catalog',
+    name: 'test1',
+    base_dir: '/user/xxd',
     children: {
       volume: [
         {
-          id: 10,
-          name: 'source-vol',
-          parent_id: 1
+          id: 2,
+          parent_id: 1,
+          type: 2,
+          type_name: 'volume',
+          name: 'test11',
+          base_dir: '/user/xxd'
         },
         {
-          id: 11,
-          name: 'source-vol-22222',
-          parent_id: 1
-        }
-      ],
-      db: [
-        {
-          id: 20,
-          name: 'source-db-1',
-          parent_id: 1
-        },
-        {
-          id: 21,
-          name: 'source-db-2',
-          parent_id: 1
+          id: 4,
+          parent_id: 1,
+          type: 2,
+          type_name: 'volume',
+          name: 'test12',
+          base_dir: '/user/xxd'
         }
       ]
     }
+  },
+  {
+    id: 5,
+    parent_id: 0,
+    type: 1,
+    type_name: 'catalog',
+    name: '新建的',
+    base_dir: '/user/xxd'
+  },
+  {
+    id: 6,
+    parent_id: 0,
+    type: 1,
+    type_name: 'catalog',
+    name: '9999',
+    base_dir: '/user/xxd'
+  },
+  {
+    id: 7,
+    parent_id: 0,
+    type: 1,
+    type_name: 'catalog',
+    name: '8888',
+    base_dir: '/user/xxd'
   }
 ];
 
@@ -67,7 +87,7 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
-  loading: boolean;
+  loading?: boolean;
 }
 
 interface Effects {
@@ -80,39 +100,46 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   constructor(public member: DataCatalog) {
     super({
       state: {
-        activeTab: 'source',
+        activeTab: 'src',
         searchValue: '',
         inputValue: '',
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
-        inputRef: React.createRef<RefInputType>(),
-        loading: false
+        inputRef: React.createRef<RefInputType>()
       },
       effects: {
         fetchData: createAsyncEffect(
           async (options?: {
             showLoading?: boolean;
           }): Promise<Partial<CatalogTreeState>> => {
-            // 模拟异步操作
-            // await new Promise((resolve) => setTimeout(resolve, 500));
             const { activeTab } = this.getState();
-            const res = await getCatalogList({
-              root_type: activeTab === 'source' ? 1 : 2
-            });
+            try {
+              const res = await getCatalogList({
+                root_type: activeTab === 'src' ? 1 : 2
+              });
 
-            const tmpData = this.convertRawDataToTreeData(fakeData);
+              const cacheTreeData = this.convertRawDataToTreeData(
+                res.data?.[activeTab] || []
+              );
+              // debugger
+              return {
+                treeData: cacheTreeData,
+                expandedKeys: [
+                  cacheTreeData?.[0]?.key || '',
+                  cacheTreeData?.[0]?.children?.[0]?.key || '',
+                  cacheTreeData?.[0]?.children?.[1]?.key || ''
+                ],
+                searchValue: '',
+                selectedKey: String(
+                  cacheTreeData?.[0]?.children?.[0]?.children?.[0]?.key || ''
+                )
+              };
+            } catch (err) {
+              console.log(err);
+            }
 
-            return {
-              treeData: tmpData,
-              expandedKeys: [
-                tmpData?.[0]?.key || '',
-                tmpData?.[0]?.children?.[0]?.key || '',
-                tmpData?.[0]?.children?.[1]?.key || ''
-              ],
-              searchValue: '',
-              selectedKey: tmpData?.[0]?.children?.[0]?.children?.[0]?.key || ''
-            };
+            return {};
           },
           { loadingKey: 'loading' }
         )
@@ -138,12 +165,11 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
-  convertRawDataToTreeData(fakeData: ITreeData[]) {
-    if (!Array.isArray(fakeData)) return [];
+  convertRawDataToTreeData(data: ITreeData[]) {
+    if (!Array.isArray(data)) return [];
 
-    const cache = fakeData.map((catalog) => {
+    const cache = data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
-      const catalogKey = `catalog-${catalog.id}`;
 
       if (catalog.children) {
         Object.entries(catalog.children).forEach(([type, arr]) => {
@@ -152,25 +178,26 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
             title: subLeafKeys[type],
             key: volumeKey,
             type: type,
-            parentKey: catalogKey,
             children:
-              arr?.map((item) => ({
-                title: item.name,
-                key: `${type}-${item.id}`,
-                isLeaf: true,
-                isLastLeaf: true,
-                type: `${type}-child`,
-                parentKey: volumeKey
-              })) || []
+              arr?.map((item) => {
+                return {
+                  ...item,
+                  title: item.name,
+                  key: String(item.id), // 转换为字符串
+                  parent_id: volumeKey,
+                  // isLeaf: true,
+                  isLastLeaf: true
+                };
+              }) || []
           };
           childrenArr.push(subChildren);
         });
       }
 
       return {
+        ...catalog,
         title: catalog.name,
-        key: catalogKey,
-        type: catalog.type,
+        key: String(catalog.id), // 转换为字符串
         children: childrenArr
       };
     });
