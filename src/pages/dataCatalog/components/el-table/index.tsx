@@ -38,10 +38,12 @@ interface TableRefType {
 export default function Eltable() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { activeTab, selectedKey } = catalogTreeStore.useGetState([
-    'activeTab',
-    'selectedKey'
-  ]);
+  const { activeTab, selectedKey, selectedFullPath } =
+    catalogTreeStore.useGetState([
+      'activeTab',
+      'selectedKey',
+      'selectedFullPath'
+    ]);
 
   // 通用状态管理
   const [selectedRows, setSelectedRows] = useState<TableRow[]>([]); // 用于存储选中的行数据
