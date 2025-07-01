@@ -10,8 +10,14 @@ import {
 import Styles from './index.module.css';
 import React, { useEffect, useState } from 'react';
 import './index.css';
-import { WEEKLY_OPTIONS, MONTHLY_OPTIONS, CYCLE_OPTIONS } from './constants';
-import { CycleValues, TimeType } from './types';
+import {
+  WEEKLY_OPTIONS,
+  MONTHLY_OPTIONS,
+  CYCLE_OPTIONS,
+  RELATIVE_TIME_OPTIONS,
+  TIME_TAB
+} from './constants';
+import { CycleText, CycleValues, TimeType } from './types';
 // 选择器的实例
 const Option = Select.Option;
 
@@ -32,14 +38,6 @@ export const TIMEARR = {
   }
 };
 
-interface CycleText {
-  minute: string; // 10代表第10分钟
-  hour: string; // 10代表10点
-  date: string; // *代表每日，"1,3"代表1号和3号执行，"L"代表最后一天，默认空字符，代表未选择
-  month: string; // *代表每月，默认空字符，代表未选择
-  week: string; // *代表每周，默认空字符，代表未选择
-}
-
 interface CycleLoadingFormProps {
   options: CycleText;
   onOptionsChange: (options: CycleText) => void;
@@ -59,7 +57,7 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       cycle: frequencyData,
-      day: options.date.split(','),
+      date: options.date.split(','),
       time: `${options.hour}:${options.minute}`
     };
   } else if (frequencyData === CycleValues.PER_WEEK) {
@@ -76,6 +74,35 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
   }
 };
 
+const formatOptions = (frequencyData: CycleValues, formVals) => {
+  const [hour, minute] = formVals.time.split(':');
+  if (frequencyData === CycleValues.PER_MONTH) {
+    return {
+      minute,
+      hour,
+      date: formVals.date.join(','),
+      month: '*',
+      week: ''
+    };
+  } else if (frequencyData === CycleValues.PER_WEEK) {
+    return {
+      minute,
+      hour,
+      date: formVals.date.join(','),
+      month: '',
+      week: '*'
+    };
+  } else {
+    return {
+      minute,
+      hour,
+      date: '*',
+      month: '',
+      week: ''
+    };
+  }
+};
+
 const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
   options,
   onOptionsChange
@@ -86,16 +113,6 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
     initFrequencyData(options)
   );
   const initialValues = getInitialValues(frequencyData, options);
-
-  // useEffect(() => {
-  //   if (frequencyData === CycleValues.PER_MONTH) {
-  //     form.setFieldsValue({ cycle: frequencyData, day: options.date.split(','), time: `${options.hour}:${options.minute}` });
-  //   } else if (frequencyData === CycleValues.PER_WEEK) {
-  //     form.setFieldsValue({ cycle: frequencyData, week: options.week.split(','), time: `${options.hour}:${options.minute}` });
-  //   } else {
-  //     form.setFieldsValue({ cycle: frequencyData, time: `${options.hour}:${options.minute}` });
-  //   }
-  // }, [options, frequencyData]);
 
   // 提示信息的状态
   // const [promptState, setPromptState] = useState(false);
@@ -116,24 +133,31 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
       setFrequencyData(CycleValues.PER_MONTH);
       form.setFieldsValue({
         cycle: CycleValues.PER_MONTH,
-        day: ['1号'],
+        date: ['1'],
         time: '00:00'
       });
     } else if (value == '每周一上午9点') {
       setFrequencyData(CycleValues.PER_WEEK);
       form.setFieldsValue({
         cycle: CycleValues.PER_WEEK,
-        week: ['周一'],
+        week: ['1'],
         time: '09:00'
       });
     }
   };
-
-  const [time, setTime] = useState(['具体日期', '相对时间']);
-  const [rtime, setRTime] = useState(['每月最后一天']);
   const [timeFlag, setTimeFlag] = useState('具体日期');
+  const handleValuesChange = (changedValues, allValues) => {
+    const optionsFormat = formatOptions(frequencyData, allValues);
+    console.log('变化的字段:', changedValues);
+    console.log('当前所有字段值:', allValues);
+    console.log('格式后的字段值:', optionsFormat);
+    onOptionsChange(optionsFormat);
+  };
+
   return (
-    <Form initialValues={initialValues}>
+    // TODO: ts错误
+    // @ts-expect-error
+    <Form initialValues={initialValues} onValuesChange={handleValuesChange}>
       <div className={Styles.cycleLoadingBox}>
         <div style={{ display: 'flex' }}>
           <Form.Item
@@ -195,7 +219,8 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
               )}
               {frequencyData == CycleValues.PER_MONTH && (
                 <Form.Item
-                  field="day"
+                  field="date"
+                  key={frequencyData}
                   style={{
                     flex: '0 0 120px',
                     margin: '0 8px',
@@ -224,7 +249,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                             height: '35px'
                           }}
                         >
-                          {time.map((item) => {
+                          {TIME_TAB.map((item) => {
                             return (
                               <div
                                 key={item}
@@ -259,15 +284,15 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                     dropdownMenuStyle={{ maxHeight: 200 }}
                   >
                     {timeFlag == TIMEARR[TimeType.SEPCIFICTIME].text &&
-                      MONTHLY_OPTIONS.map((option, index) => (
-                        <Option key={option} value={index + 1}>
-                          {option}
+                      MONTHLY_OPTIONS.map((option) => (
+                        <Option key={option.lable} value={option.value}>
+                          {option.lable}
                         </Option>
                       ))}
                     {timeFlag == TIMEARR[TimeType.RELATICELYTIME].text &&
-                      rtime.map((option) => (
-                        <Option key={option} value={option}>
-                          {option}
+                      RELATIVE_TIME_OPTIONS.map((option) => (
+                        <Option key={option.lable} value={option.value}>
+                          {option.lable}
                         </Option>
                       ))}
                   </Select>
@@ -278,6 +303,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
         </div>
         <Form.Item
           label="时间设置："
+          key={frequencyData}
           field="time"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}

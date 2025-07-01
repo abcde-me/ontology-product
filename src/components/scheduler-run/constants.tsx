@@ -31,11 +31,20 @@ export const WEEKLY_OPTIONS = [
     value: WeekValues.SUNDAY
   }
 ];
+export const TIME_TAB = ['具体日期', '相对时间'];
 // 每月的数据
-export const MONTHLY_OPTIONS = Array.from(
-  { length: 31 },
-  (_, i) => `${i + 1}号`
-);
+export const MONTHLY_OPTIONS = Array.from({ length: 31 }, (_, i) => {
+  return {
+    lable: `${i + 1}号`,
+    value: `${i + 1}`
+  };
+});
+export const RELATIVE_TIME_OPTIONS = [
+  {
+    lable: '每月最后一天',
+    value: 'L'
+  }
+];
 // 快捷键的数据
 export const QUICK_OPTIONS_DATA = [
   '每天凌晨0点',
