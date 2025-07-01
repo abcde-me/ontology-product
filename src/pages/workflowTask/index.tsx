@@ -194,14 +194,20 @@ export default function WorkflowTask() {
       dataIndex: 'start_time',
       width: 170,
       render: (_, record) => <span>{record.start_time}</span>,
-      sorter: (a, b) => a.start_time.length - b.start_time.length
+      sorter: (a, b) => {
+        return (
+          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+        );
+      }
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 170,
       render: (_, record) => <span>{record.end_time}</span>,
-      sorter: (a, b) => a.end_time.length - b.end_time.length
+      sorter: (a, b) => {
+        return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
+      }
     },
     {
       title: '操作',
