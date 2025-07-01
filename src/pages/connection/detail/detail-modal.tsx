@@ -57,7 +57,9 @@ const ModalDetail = (props) => {
                       marginRight: '5px'
                     }}
                   ></div>
-                  <div>已连接</div>
+                  <div>
+                    {DetailData.status == 'connected' ? '已连接' : '已断开'}
+                  </div>
                 </div>
               </div>
               <div className="info-item">

@@ -12,6 +12,7 @@ import {
   Modal
 } from '@arco-design/web-react';
 import React, { useState, useEffect } from 'react';
+import styles from './AddDatasetForm.module.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import {
   getConnectorList,
@@ -46,25 +47,84 @@ interface DatasetFormProps {
 
 const FormItem = Form.Item;
 
-//模拟数据目录卷数据
-const cstargetDataSourceOptions = [
+//模拟数据目录卷数据 - 新格式
+const cstargetDataSourceData = [
   {
-    label: '数据目录卷',
-    value: 'volumes',
-    children: [
-      { label: '目标数据源volume1', value: 'volume1' },
-      { label: '目标数据源volume2', value: 'volume2' }
-    ]
+    type: 'catalog',
+    id: 1,
+    name: 'Volume',
+    type_name: 'catalog',
+    base_dir: '/user/xxd',
+    children: {
+      volume: [
+        {
+          id: 10,
+          name: '目标数据源volume1',
+          parent_id: 1
+        },
+        {
+          id: 11,
+          name: '目标数据源volume2',
+          parent_id: 1
+        }
+      ],
+      db: [
+        {
+          id: 20,
+          name: '数据库连接1',
+          parent_id: 1
+        },
+        {
+          id: 21,
+          name: '数据库连接2',
+          parent_id: 1
+        }
+      ]
+    }
   },
   {
-    label: '其他数据源',
-    value: 'others',
-    children: [
-      { label: '连接器1', value: 'connector1' },
-      { label: '连接器2', value: 'connector2' }
-    ]
+    type: 'catalog',
+    id: 2,
+    name: 'Volume',
+    type_name: 'catalog',
+    base_dir: '/user/xxd',
+    children: {
+      volume: [
+        {
+          id: 30,
+          name: '目标数据源volume3',
+          parent_id: 2
+        },
+        {
+          id: 31,
+          name: '目标数据源volume4',
+          parent_id: 2
+        }
+      ],
+      db: [
+        {
+          id: 40,
+          name: '数据库连接3',
+          parent_id: 2
+        }
+      ]
+    }
   }
 ];
+
+// 转换函数：将新数据格式转换为 Cascader 组件需要的格式
+function convertToCascaderOptions(dataSourceData) {
+  return dataSourceData.map((catalog) => ({
+    label: catalog.name,
+    value: [catalog.base_dir, catalog.name],
+    children: (catalog.children.volume || []).map((volume) => ({
+      label: volume.name,
+      value: [volume.name, volume.id],
+      type: 'volume',
+      originalData: volume
+    }))
+  }));
+}
 
 //模拟连接器列表数据
 const csconnectorList = [
@@ -198,7 +258,30 @@ function formatTableData(columns) {
   return columns.map((col) => ({
     title: col.charAt(0).toUpperCase() + col.slice(1), // 格式化列标题
     dataIndex: col, // 对应 data 中的键
-    key: col // 唯一标识符
+    key: col, // 唯一标识符
+    ellipsis: true, // 启用省略号
+    width: 200, // 设置默认宽度
+    render: (text: any) => {
+      // 处理长文本显示
+      const textStr = String(text || '');
+      const isLongText = textStr.length > 50;
+
+      return (
+        <div
+          title={textStr}
+          style={{
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            lineHeight: '1.5',
+            cursor: isLongText ? 'help' : 'default'
+          }}
+        >
+          {isLongText ? `${textStr.substring(0, 50)}...` : textStr}
+        </div>
+      );
+    }
   }));
 }
 
@@ -208,7 +291,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]); //选择文件
-  const [showFileSelection, setShowFileSelection] = useState(false);
+  const [showFileSelection, setShowFileSelection] = useState(false); //文件选择
   const [showDataPreview, setShowDataPreview] = useState(false); //数据预览
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]); //目标数据源选项
   const [connectorList, setConnectorList] = useState([]); //连接器列表
@@ -221,12 +304,13 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
   useEffect(() => {
     //数据目录卷
-    getCatalogList({ integer: 2 }).then((res) => {
-      console.log(res);
-    }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
-    // TODO: ts错误
-    // @ts-expect-error
-    setTargetDataSourceOptions(cstargetDataSourceOptions); //测试数据
+    // getCatalogList({ type: 2 }).then((res) => {
+    //   console.log(res);
+    //   setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
+    // }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
+    setTargetDataSourceOptions(
+      convertToCascaderOptions(cstargetDataSourceData)
+    ); //测试数据
 
     //连接器
     // TODO: ts错误
@@ -234,8 +318,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     getConnectorList({ scope: 2 }).then((res) => {
       setConnectorList(convertToSelectOptions(res.data.items));
     });
-
-    // setConnectorList(convertToSelectOptions(res.data))
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
     //标签
@@ -264,7 +346,14 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     value: string | (string | string[])[]
   ) => {
     if (dataSource === 'volume') {
-      const path = 'dst' + '/' + value[0] + '/' + value[1];
+      // value 是一个数组，格式为 [catalog_id, "volume_id" 或 "db_id"]
+      const catalogpath = value[0][0];
+      const catalogId = value[0][1];
+      const selectedItem = value[1][0];
+
+      // 构建路径：catalog_id/type_itemId
+      const path = `${catalogpath}/dst/${catalogId}/${selectedItem}`;
+      console.log('选择的数据目录卷路径:', path);
       getVolumePreviewData(path);
     } else if (dataSource === 'connector') {
       console.log('选择的连接器ID:', value);
@@ -274,14 +363,13 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
-    //
-    // getConnectorFileList({ connector_id: id, type: type }).then(res => {
-    //   setConnectorFileInformation(res.data.files)
-    // })
-    // console.log(11111111111, transformToSelectOptions(csconnectorFileInformation))
-    setConnectorFileInformation(
-      transformToSelectOptions(csconnectorFileInformation)
-    );
+    getConnectorFileList({ connector_id: id, type: type }).then((res) => {
+      console.log(res.data);
+      setConnectorFileInformation(transformToSelectOptions(res.data.files));
+    });
+    // setConnectorFileInformation(
+    //   transformToSelectOptions(csconnectorFileInformation)
+    // );
   }; //查询指定连接器加载成功的文件信息
 
   // 获取数据目录卷预览数据的方法
@@ -289,7 +377,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     // 这里应该调用真实的API
     // getCatalogPreview({ path: volumeId }).then(res => {
     //   setPreviewData(res.data.list)//这里的数据不能直接赋值，需要处理一下
-    //   setPreviewColumns(formatTableData(res.filed_names))//设置表格列（从后端返回的列配置）
+    //   setPreviewColumns(formatTableData(res.data.filed_names))//设置表格列（从后端返回的列配置）
     // })
     // TODO: ts错误
     // @ts-expect-error
@@ -351,7 +439,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         <FormItem
           label="标签:"
           field="tags"
-          rules={[{ required: true, message: '请选择至少一个标签' }]}
+          rules={[{ required: false, message: '请选择至少一个标签' }]}
         >
           <Select
             placeholder="请输入或选择标签（用逗号分隔）..."
@@ -365,7 +453,14 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         <FormItem
           label="描述说明:"
           field="description"
-          rules={[{ required: true, message: '请输入描述信息' }]}
+          rules={[{ required: false, message: '请输入描述信息' }]}
+          extra={
+            <span
+              style={{ fontSize: '12px', color: '#86909c', marginLeft: 10 }}
+            >
+              指定导出文件的保存路径目录
+            </span>
+          }
         >
           <Input.TextArea
             placeholder="这里输入对数据集的描述和说明信息..."
@@ -375,7 +470,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
             style={{ marginLeft: 10 }}
           />
         </FormItem>
-
         <FormItem
           label="数据来源:"
           field="dataSource"
@@ -395,9 +489,10 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         {
           <div
             style={{
-              border: '1px solid black',
+              border: '1px solid rgba(0, 0, 0, 0.2)',
               borderRadius: '10px',
-              padding: '0 40px 0px 0px'
+              padding: '10px 30px 10px 0px',
+              marginLeft: 20
             }}
           >
             {dataSource === 'volume' ? (
@@ -412,28 +507,50 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                   <Cascader
                     placeholder="请选择"
                     options={targetDataSourceOptions}
-                    style={{ marginLeft: 10 }}
+                    style={{ marginLeft: 10, marginRight: 20 }}
                     onChange={handleTargetDataSourceChange}
                     expandTrigger="hover"
                     showSearch
                   />
                 </FormItem>
+                <div
+                  style={{
+                    marginLeft: 20,
+                    marginTop: 8,
+                    fontSize: '12px',
+                    color: '#86909c'
+                  }}
+                >
+                  {previewData ? (
+                    <span>
+                      <span style={{ fontWeight: '500', color: '#000' }}>
+                        预览
+                      </span>{' '}
+                      目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                    </span>
+                  ) : (
+                    <span>
+                      <span style={{ fontWeight: '500', color: '#000' }}>
+                        预览：
+                      </span>
+                      请先选择目标数据目录卷/卷
+                    </span>
+                  )}
+                </div>
                 {previewData ? (
-                  <div style={{ marginTop: 16 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
-                      数据预览:
-                    </div>
+                  <div className={styles.previewContainer}>
                     <Table
+                      className={styles.previewTable}
                       columns={previewColumns}
                       data={previewData}
-                      pagination={{
-                        pageSize: 5,
-                        showTotal: true,
-                        showJumper: true
+                      pagination={false}
+                      scroll={{
+                        x: Math.max(800, previewColumns.length * 200),
+                        y: 300
                       }}
-                      scroll={{ x: 1000 }}
-                      stripe
-                      border
+                      size="small"
+                      loading={false}
+                      placeholder="暂无数据"
                     />
                   </div>
                 ) : null}
@@ -444,8 +561,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                   label="选择连接器:"
                   field="connector"
                   rules={[{ required: true, message: '请选择连接器' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
+                  labelCol={{ span: 4 }}
+                  wrapperCol={{ span: 20 }}
                 >
                   <Select
                     placeholder="请选择"
@@ -457,11 +574,22 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
                 {connectorFileInformation.length > 0 && (
                   <FormItem
-                    label="选择文件:"
+                    label="选择数据文件:"
                     field="selectedFiles"
                     rules={[{ required: true, message: '请选择至少一个文件' }]}
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 19 }}
+                    labelCol={{ span: 4 }}
+                    wrapperCol={{ span: 20 }}
+                    extra={
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          color: '#86909c',
+                          marginLeft: 10
+                        }}
+                      >
+                        目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                      </span>
+                    }
                   >
                     <Select
                       placeholder="请选择要使用的文件..."
@@ -484,13 +612,23 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           </div>
         }
 
-        <FormItem wrapperCol={{ offset: 3, span: 21 }}>
-          <Space>
+        <FormItem wrapperCol={{ span: 24 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '12px',
+              marginTop: '24px',
+              paddingTop: '20px',
+              borderTop: '1px solid #f0f0f0'
+            }}
+          >
             <Button onClick={onCancel}>取消</Button>
             <Button type="primary" onClick={handleSubmit}>
-              完成
+              确定
             </Button>
-          </Space>
+          </div>
         </FormItem>
       </Form>
     </Modal>

@@ -7,7 +7,7 @@
   cursor: pointer;
 }
 .hover:hover {
-  color: black;
+  color: rgb(0, 125, 250, 0.5);
 }
 .arco-pagination {
   display: flex;

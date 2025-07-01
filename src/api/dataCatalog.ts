@@ -18,13 +18,43 @@ export async function downloadFileById(id: string, params: any = {}) {
 }
 
 //获取目录列表
+// export async function getCatalogList(param: any = {}) {
+//   return await UAPI.RES.catalogListApi({})
+//     .get(param)
+//     // .withConfig({baseURL: 'http://172.27.195.188:8080'})
+//     .inRegion()
+//     .do({ preCheck: false });
+// }
+
+// 获取数据目录列表
 export async function getCatalogList(param: any = {}) {
-  return await UAPI.RES.catalogListApi({})
-    .get(param)
-    // .withConfig({baseURL: 'http://172.27.195.188:8080'})
-    .inRegion()
-    .do({ preCheck: false });
+  return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
 }
+//添加目录
+export async function addCatalog(data: any) {
+  return await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
+}
+//新建卷
+export async function addVolume(data: any) {
+  return await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
+}
+//删除数据卷
+export async function deleteVolume(id: string) {
+  return await UAPI.RES.volumeDeleteApi({ id }).delete().inRegion().do();
+}
+//重命名目录
+export async function renameCatalog(id:string,params: any) {
+  return await UAPI.RES.catalogRenameApi({catalogId: id}).put(params).inRegion().do();
+}
+//查询目标数据文件列表
+export async function getTargetDataFileList(param: any = {}) {
+  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
+}
+//删除目标文件
+export async function deleteTargetFile(param: any) {
+  return await UAPI.RES.targetDataFileListApi({}).delete(param).inRegion().do();
+}
+
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
   return await UAPI.RES.catalogPreviewApi({}).get(param).inRegion().do();

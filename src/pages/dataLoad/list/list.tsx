@@ -8,11 +8,13 @@ import {
   Table
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Styles from './index.module.css';
 import LoadAddModal from './load-add-modal';
 import { Route } from 'react-router';
 import { useHistory } from 'react-router-dom';
+import { delLoad, getLoadList } from '@/api/loadApi';
+import { OperationColumn } from '@ccf2e/arco-material';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -186,7 +188,7 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
-      dataIndex: 'dest_path',
+      dataIndex: 'data_path_name',
       width: 200,
       ellipsis: true
     },
@@ -208,100 +210,66 @@ export default function DataLoad() {
       title: '操作',
       fixed: 'right',
       width: 105,
-      render: (_, item) => (
-        <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-around'
-          }}
-        >
-          <span
-            className={Styles.hoverStyle}
-            onClick={() => {
-              gotoDetail(item.id);
+      render: (_, item) => {
+        return (
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-around'
             }}
           >
-            详情
-          </span>
-          <Popconfirm
-            focusLock
-            title="删除该连接器"
-            content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
-            onOk={() => {
-              deleteHan(item.id);
-              Message.success({
-                content: '删除成功'
-              });
-            }}
-            onCancel={() => {
-              Message.error({
-                content: '删除失败，请重试'
-              });
-            }}
-          >
-            <span className={Styles.hoverStyle}>删除</span>
-          </Popconfirm>
-        </div>
-      )
+            <span
+              className={Styles.hoverStyle}
+              onClick={() => {
+                gotoDetail(item.id);
+              }}
+            >
+              详情
+            </span>
+            <Popconfirm
+              focusLock
+              title="删除该连接器"
+              content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
+              onOk={() => {
+                deleteHan(item.id);
+                Message.success({
+                  content: '删除成功'
+                });
+              }}
+              onCancel={() => {
+                Message.error({
+                  content: '删除失败，请重试'
+                });
+              }}
+            >
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  deleteLoadHan(item.connector_id);
+                }}
+              >
+                删除
+              </span>
+            </Popconfirm>
+          </div>
+        );
+      }
     }
   ] as any;
   const [data, setData] = useState([
     {
-      id: '1',
-      name: '中科院大数据库任务1',
-      load_type: 'once', //once单次载入 cron周期载入
-      status: 'running',
-      source_type: 's3',
-      connector_name: '连接器名称',
-      dest_path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      last_run_time: '1749627860785',
-      creator: '张三',
-      enable: true,
-      connector_id: '456'
-    },
-    {
-      id: '2',
-      name: '中科院大数据库任务1',
-      load_type: 'once', //once单次载入 cron周期载入
+      connector_id: '1',
+      connector_name: '中科院大数据库任务1',
+      name: '1234',
+      source_type: 'hdfs',
+      load_type: 'once',
       status: 'succeed',
-      source_type: 's3',
-      connector_name: '连接器名称',
-      dest_path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      last_run_time: '1749627860785',
-      creator: '张三',
-      enable: true,
-      connector_id: '456'
-    },
-    {
-      id: '3',
-      name: '中科院大数据库任务1',
-      load_type: 'once', //once单次载入 cron周期载入
-      status: 'failed',
-      source_type: 's3',
-      connector_name: '连接器名称',
-      dest_path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      last_run_time: '1749627860785',
-      creator: '张三',
-      enable: true,
-      connector_id: '456'
-    },
-    {
-      id: '4',
-      name: '中科院大数据库任务1',
-      load_type: 'once', //once单次载入 cron周期载入
-      status: 'stopped',
-      source_type: 's3',
-      connector_name: '连接器名称',
-      dest_path: '/232482347287/hshfusdhf/4234',
-      created_at: '1749627860785',
-      last_run_time: '1749627860785',
-      creator: '张三',
-      enable: true,
-      connector_id: '456'
+      data_path_id: '2',
+      data_path_name: '1234',
+      creator: '111',
+      created_at: '1234',
+      last_run_time: '1234'
     }
   ]);
   // 当前的第几页
@@ -312,6 +280,7 @@ export default function DataLoad() {
   const handlePageChange = (page) => {
     setCurrent(page);
   };
+  const [loadloading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   // 根据搜索条件过滤连接器
   const filteredConnectors = useMemo(() => {
@@ -334,7 +303,8 @@ export default function DataLoad() {
 
   // 模态框默认状态
   const [visible, setVisible] = React.useState(false);
-
+  // 整体数据
+  const [loadTotal, setLoadTotal] = useState(0);
   // 点击按钮因残模态框(确认||取消同一个方法)
   const hideEditModal = () => {
     setVisible(false);
@@ -345,11 +315,39 @@ export default function DataLoad() {
   };
   // 查询载入任务列表
   const getdataLoadList = async () => {
-    // const res = await dataLoadList();
-    // if (res.code === 200) {
-    //   setData(res.data);
-    // }
+    try {
+      setLoading(true);
+      const res = await getLoadList({
+        page: current,
+        page_size: pageSize,
+        name: '',
+        status: ['running'],
+        load_type: 'once',
+        source_type: 'hdfs'
+      });
+      if (res.message == 'ok') {
+        setData(res.data.items);
+        setLoadTotal(res.data.total);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
+  // 删除列表的方法
+  const deleteLoadHan = async (id) => {
+    const res = await delLoad(id);
+    if (res.message == 'ok') {
+      Message.success('删除成功');
+      getdataLoadList();
+    } else {
+      Message.error(res.message);
+    }
+  };
+  useEffect(() => {
+    getdataLoadList();
+  }, [current, pageSize]);
   return (
     <div
       style={{
@@ -396,11 +394,12 @@ export default function DataLoad() {
         </Button>
       </div>
       <Table
+        loading={loadloading}
         columns={columns}
         data={currentPageData}
         style={{ padding: '10px 20px' }}
         pagination={false}
-        rowKey="id"
+        rowKey="connector_id"
         border={false}
         scroll={{
           x: true
@@ -412,12 +411,14 @@ export default function DataLoad() {
           pageSize={pageSize}
           onPageSizeChange={(pageSize) => {
             setPageSize(pageSize);
+            console.log(pageSize);
+
             setCurrent(1);
           }}
           onChange={handlePageChange}
           sizeOptions={[1, 2, 5, 10]}
           showTotal
-          total={filteredConnectors.length}
+          total={loadTotal}
           showJumper
           sizeCanChange
           style={{ marginBottom: '20px' }}
@@ -435,9 +436,8 @@ export default function DataLoad() {
         // maskClosable={false}
         unmountOnExit={true}
       >
-        <LoadAddModal hideModalHan={hideEditModal} />
+        <LoadAddModal hideModalHan={hideEditModal} getList={getLoadList} />
       </Modal>
-      {console.log(RunStateType[RunState.FAILED].text)}
       <Route
         key="/tenant/compute/modaforge/dataLoad/detail"
         path="/tenant/compute/modaforge/dataLoad/detail"

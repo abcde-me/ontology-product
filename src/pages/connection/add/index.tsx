@@ -10,6 +10,7 @@ import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import '../index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 import { Connection } from '../type';
+import { filterValues } from '@/api/filterValues';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const add = forwardRef((props: any, ref) => {
@@ -37,17 +38,19 @@ const add = forwardRef((props: any, ref) => {
   const createConnectionHan = async () => {
     try {
       const values = await form.validate();
-      const { type, name, ...newValues } = values;
+      const { type, name } = values;
+      // 如果选中有字段，不选的话没有字段的一个函数
+      const filteredValues = filterValues(values);
       const newfrom = {
         name,
         type,
-        config: { ...newValues },
-        creator: 'test1'
+        config: { ...filteredValues },
+        creator: 'testlsc'
       };
       setLoading(true);
       const res = await addconnectionList(newfrom);
       console.log(res);
-      if (res.message == '') {
+      if (res.message == 'ok') {
         Message.success('测试通过，连接器创建成功');
         setVisible(false);
         // 确保数据更新完成后再调用 getListHan
@@ -190,7 +193,6 @@ const add = forwardRef((props: any, ref) => {
                 <FormItem
                   label="区域："
                   field="region"
-                  rules={[{ required: true, message: '请输入区域' }]}
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
