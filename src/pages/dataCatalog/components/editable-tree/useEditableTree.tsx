@@ -13,16 +13,17 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-import { subLeafKeys } from './consts';
+import { subLeafKeys } from '../../consts';
 
 export function useEditableTree({ catalogTreeStore }) {
-  const { searchValue, inputRef, inputValue, treeData, expandedKeys } =
+  const { searchValue, inputRef, inputValue, treeData, expandedKeys, loading } =
     catalogTreeStore.useGetState([
       'searchValue',
       'inputRef',
       'inputValue',
       'treeData',
-      'expandedKeys'
+      'expandedKeys',
+      'loading'
     ]);
 
   useEffect(() => {
@@ -422,6 +423,7 @@ export function useEditableTree({ catalogTreeStore }) {
     handleSelect,
     addCatalog,
     renderExtra,
-    renderTitle
+    renderTitle,
+    loading
   };
 }

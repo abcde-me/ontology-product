@@ -1,9 +1,9 @@
-import { Model } from '@/models';
+import { Model, createAsyncEffect } from '@/models';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { subLeafKeys } from '../components/editable-tree/consts';
+import { subLeafKeys } from '../consts';
 
 interface ITreeData {
   id: string | number;
@@ -66,15 +66,16 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
+  loading: boolean;
 }
 
 interface Effects {
-  fetchData: () => Promise<void>;
+  fetchData: (options?: {
+    showLoading?: boolean;
+  }) => Promise<Partial<CatalogTreeState>>;
 }
 
 export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
-  // public inputRef = React.createRef<RefInputType>();
-
   constructor(public member: DataCatalog) {
     super({
       state: {
@@ -84,26 +85,39 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
-        inputRef: React.createRef<RefInputType>()
+        inputRef: React.createRef<RefInputType>(),
+        loading: false
       },
       effects: {
-        fetchData: () => {
-          const tmpData = this.convertRawDataToTreeData(fakeData);
-          this.setState({
-            treeData: tmpData,
-            expandedKeys: [
-              tmpData?.[0]?.key || '',
-              tmpData?.[0]?.children?.[0]?.key || '',
-              tmpData?.[0]?.children?.[1]?.key || ''
-            ],
-            searchValue: '',
-            selectedKey: tmpData?.[0]?.children?.[0]?.children?.[0]?.key || ''
-          });
-          return new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-        }
+        fetchData: createAsyncEffect(
+          async (options?: {
+            showLoading?: boolean;
+          }): Promise<Partial<CatalogTreeState>> => {
+            // 模拟异步操作
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            const tmpData = this.convertRawDataToTreeData(fakeData);
+
+            return {
+              treeData: tmpData,
+              expandedKeys: [
+                tmpData?.[0]?.key || '',
+                tmpData?.[0]?.children?.[0]?.key || '',
+                tmpData?.[0]?.children?.[1]?.key || ''
+              ],
+              searchValue: '',
+              selectedKey: tmpData?.[0]?.children?.[0]?.children?.[0]?.key || ''
+            };
+          },
+          { loadingKey: 'loading' }
+        )
       }
+    });
+  }
+
+  setActiveTab(value: string) {
+    this.setState({
+      activeTab: value
     });
   }
 
