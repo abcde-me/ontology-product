@@ -1,3 +1,5 @@
+import { CycleValues } from './types';
+
 // 每周的数据
 export const WEEKLY_OPTIONS = [
   '周一',
@@ -19,4 +21,18 @@ export const QUICK_OPTIONS_DATA = [
   '每天中午12点',
   '每月一日凌晨0点',
   '每周一上午9点'
+];
+export const CYCLE_OPTIONS = [
+  {
+    lable: '每日',
+    value: CycleValues.PER_DAY
+  },
+  {
+    lable: '每周',
+    value: CycleValues.PER_WEEK
+  },
+  {
+    lable: '每月',
+    value: CycleValues.PER_MONTH
+  }
 ];

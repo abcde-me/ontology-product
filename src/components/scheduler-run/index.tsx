@@ -10,7 +10,8 @@ import {
 import Styles from './index.module.css';
 import React, { useState } from 'react';
 import './index.css';
-import { WEEKLY_OPTIONS, MONTHLY_OPTIONS } from './constants';
+import { WEEKLY_OPTIONS, MONTHLY_OPTIONS, CYCLE_OPTIONS } from './constants';
+import { CycleValues } from './types';
 // 选择器的实例
 const Option = Select.Option;
 
@@ -47,12 +48,24 @@ interface CycleLoadingFormProps {
   onOptionsChange: (options: CycleText) => void;
 }
 
+const initFrequencyData = (options: CycleText) => {
+  if (options.month === '*') {
+    return CycleValues.PER_MONTH;
+  } else if (options.week === '*') {
+    return CycleValues.PER_WEEK;
+  } else {
+    return CycleValues.PER_DAY;
+  }
+};
+
 const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
   options,
   onOptionsChange
 }) => {
   // 频率选择器选择的数据
-  const [frequencyData, setFrequencyData] = useState('');
+  const [frequencyData, setFrequencyData] = useState(
+    initFrequencyData(options)
+  );
   const [form] = Form.useForm();
 
   // 提示信息的状态
@@ -65,16 +78,16 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
   // 点击快捷选项的回调
   const shortcutHan = (value) => {
     if (value == '每天凌晨0点') {
-      setFrequencyData('每天');
+      setFrequencyData(CycleValues.PER_DAY);
       form.setFieldsValue({ cycle: '每日', time: '00:00' });
     } else if (value == '每天中午12点') {
-      setFrequencyData('每天');
+      setFrequencyData(CycleValues.PER_DAY);
       form.setFieldsValue({ cycle: '每日', time: '12:00' });
     } else if (value == '每月一日凌晨0点') {
-      setFrequencyData('每月');
+      setFrequencyData(CycleValues.PER_MONTH);
       form.setFieldsValue({ cycle: '每月', day: ['1号'], time: '00:00' });
     } else if (value == '每周一上午9点') {
-      setFrequencyData('每周');
+      setFrequencyData(CycleValues.PER_WEEK);
       form.setFieldsValue({ cycle: '每周', week: ['周一'], time: '09:00' });
     }
   };
@@ -108,9 +121,11 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                   style={{ width: 100 }}
                   onChange={(val) => setFrequencyData(val)}
                 >
-                  <Option value="每日">每日</Option>
-                  <Option value="每周">每周</Option>
-                  <Option value="每月">每月</Option>
+                  {CYCLE_OPTIONS.map((item) => {
+                    <Option value={item.value} key={item.value}>
+                      {item.lable}
+                    </Option>;
+                  })}
                 </Select>
               </Form.Item>
               {frequencyData == '每天' && null}
