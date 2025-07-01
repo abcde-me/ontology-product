@@ -1,0 +1,23 @@
+.app-workflow-page-header {
+  .app-name--editing {
+    border: none;
+    padding: 0;
+    color: var(--text-color-text-1, #0f172a);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .eidt-icon {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    background-image: url(~@/pages/workflowConfig/styles/images/workflow/edit.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    &:hover {
+      background-image: url(~@/pages/workflowConfig/styles/images/workflow/edit-hover.svg);
+    }
+  }
+}

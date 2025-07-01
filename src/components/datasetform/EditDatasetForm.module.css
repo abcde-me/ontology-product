@@ -1,0 +1,35 @@
+.editFormContainer {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+.editFormContainer * {
+  box-sizing: border-box;
+}
+
+.editForm {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.editForm .arco-form-item {
+  border: none !important;
+  outline: none !important;
+  margin-bottom: 16px !important;
+  height: calc(100% - 20px) !important;
+  min-height: calc(32px - 20px) !important;
+}
+
+.editForm .arco-form-item-wrapper {
+  border: none !important;
+  outline: none !important;
+}
+
+.buttonContainer {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

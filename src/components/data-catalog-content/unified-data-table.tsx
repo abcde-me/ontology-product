@@ -377,14 +377,13 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
         {/* 使用统一的表格组件 */}
         <UnifiedTable
           columns={columns}
-          data={tableData}
+          data={tableData as any}
           onSelectionChange={handleSelectionChange}
           tableType={tableType}
           // Target表格特有的悬浮功能
           hoveredRowId={tableType === 'target' ? hoveredRowId : undefined}
           onRowHover={tableType === 'target' ? setHoveredRowId : undefined}
         />
-
         {/* 分页组件 */}
         <div
           style={{

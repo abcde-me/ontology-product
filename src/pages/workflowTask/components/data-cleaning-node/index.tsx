@@ -4,7 +4,7 @@ import { Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import noDataElement from '@/components/no-data';
 
-export default function DataCleaningNode(props: { dataSource }) {
+export default function DataCleaningNode(props: { dataSource; loading }) {
   const { dataSource } = props;
 
   const columns: ColumnProps[] = [

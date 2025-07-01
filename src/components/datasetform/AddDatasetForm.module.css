@@ -1,0 +1,199 @@
+/* 数据集表单样式 */
+
+/* Modal内容区域样式调整 */
+:global(.arco-modal-content) {
+  padding-left: 1px !important;
+}
+.previewContainer {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.previewTitle {
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1d2129;
+  padding: 0 4px;
+}
+
+.previewTable {
+  border-radius: 6px;
+  overflow: hidden;
+  max-height: 400px;
+  min-height: 200px;
+  background: #fff;
+}
+
+/* 表格头部样式 */
+.previewTable :global(.arco-table-thead) {
+  background: #f7f8fa;
+}
+
+.previewTable :global(.arco-table-thead th) {
+  background-color: #f7f8fa !important;
+  color: #4e5969 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  border-bottom: none !important;
+  padding: 12px 16px !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 200px;
+  min-width: 100px;
+}
+
+/* 表格主体样式 */
+.previewTable :global(.arco-table-tbody) {
+  font-size: 13px;
+}
+
+.previewTable :global(.arco-table-tbody td) {
+  padding: 12px 16px !important;
+  border-bottom: none !important;
+  color: #1d2129 !important;
+  word-wrap: break-word;
+  word-break: break-all;
+  max-width: 200px;
+  min-width: 100px;
+  position: relative;
+}
+
+/* 悬停效果 */
+.previewTable :global(.arco-table-tbody tr):hover :global(td) {
+  background-color: #f7f8fa !important;
+}
+
+/* 奇偶行条纹效果已取消 */
+/* .previewTable :global(.arco-table-tbody tr):nth-child(even) :global(td) {
+  background-color: #fafafa;
+} */
+
+/* 单元格内容截断显示 */
+.cellContent {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.cellContent:hover {
+  white-space: normal;
+  word-wrap: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* 长文本展开提示 */
+.cellContent.longText::after {
+  content: '...';
+  color: #86909c;
+}
+
+/* 滚动条样式 */
+.previewTable :global(.arco-table-body) {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c9cdd4 #f7f8fa;
+}
+
+.previewTable :global(.arco-table-body)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.previewTable :global(.arco-table-body)::-webkit-scrollbar-track {
+  background: #f7f8fa;
+  border-radius: 3px;
+}
+
+.previewTable :global(.arco-table-body)::-webkit-scrollbar-thumb {
+  background: #c9cdd4;
+  border-radius: 3px;
+}
+
+.previewTable :global(.arco-table-body)::-webkit-scrollbar-thumb:hover {
+  background: #86909c;
+}
+
+/* 无分页样式 - 已移除分页功能 */
+
+/* 加载状态 */
+.previewTable :global(.arco-table-loading) {
+  min-height: 200px;
+}
+
+/* 空状态样式 */
+.previewTable :global(.arco-empty) {
+  padding: 40px 20px;
+}
+
+.previewTable :global(.arco-empty-description) {
+  color: #86909c;
+  font-size: 13px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .previewTable {
+    max-height: 300px;
+    min-height: 150px;
+  }
+
+  .previewTable :global(.arco-table-thead th),
+  .previewTable :global(.arco-table-tbody td) {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    max-width: 150px;
+    min-width: 80px;
+  }
+
+  .previewTable :global(.arco-table-body) {
+    max-height: 200px;
+  }
+}
+
+/* 表格边框美化 - 已禁用 */
+/* .previewTable :global(.arco-table-border) {
+  border: 1px solid #e5e6eb;
+}
+
+.previewTable :global(.arco-table-border .arco-table-cell) {
+  border-right: 1px solid #f2f3f5;
+}
+
+.previewTable :global(.arco-table-border .arco-table-cell:last-child) {
+  border-right: none;
+} */
+
+/* 数据类型指示器（可选功能） */
+.dataTypeIndicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.dataTypeIndicator.string {
+  background-color: #52c41a;
+}
+
+.dataTypeIndicator.number {
+  background-color: #1890ff;
+}
+
+.dataTypeIndicator.boolean {
+  background-color: #fa8c16;
+}
+
+.dataTypeIndicator.object {
+  background-color: #722ed1;
+}

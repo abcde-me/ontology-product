@@ -5,10 +5,8 @@ import UAPI from '@/api';
 interface DatasetListParams {
   page?: number;
   page_size?: number;
-  name?: string;
-  tag_id?: string;
-  sort?: string;
-  order?: 'asc' | 'desc';
+  search?: string;
+  search_field?: string;
 }
 
 interface CreateDatasetParams {
@@ -31,6 +29,7 @@ interface ConnectorFileListParams {
   connector_id: string;
   path?: string;
   page?: number;
+  type?: string;
   page_size?: number;
 }
 
@@ -80,7 +79,15 @@ export interface EditDatasetVersionParams {
 
 //获取数据集列表
 export async function getDatasetList(params: DatasetListParams = {}) {
-  return UAPI.RES.datasetsApi({}).get(params).inRegion().do();
+  const { page, page_size, search_field, search } = params;
+  const queryParams: Record<string, any> = {
+    page,
+    page_size
+  };
+  if (search_field && search) {
+    queryParams[search_field] = search;
+  }
+  return UAPI.RES.datasetsApi({}).get(queryParams).inRegion().do();
 }
 
 //获取数据集详情
@@ -109,7 +116,7 @@ export async function getConnectorList(params: ConnectorListParams = {}) {
 //查询指定连接器加载成功的文件信息
 export async function getConnectorFileList(params: ConnectorFileListParams) {
   return UAPI.RES.connectorFileListApi({ connector_id: params.connector_id })
-    .get(params)
+    .get({ type: params.type })
     .inRegion()
     .do();
 }

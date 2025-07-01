@@ -34,6 +34,8 @@ export default function WorkflowList() {
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
   const [total, setTotal] = useState(10);
+  // 添加loading状态控制
+  const [loading, setLoading] = useState(false);
 
   // 组件初始化
   useEffect(() => {
@@ -41,18 +43,23 @@ export default function WorkflowList() {
   }, [userInfo, current, pageSize]);
 
   const getList = async () => {
-    const params = {
-      uid: userInfo?.id,
-      search_content: searchValue,
-      page: current, //第几页
-      page_size: pageSize //每页个数
-    };
-    const res = await getWorkflowList(params);
-    if (res.status === 200 && res.data) {
-      setWorkflowData(res.data.list);
-      setCurrent(res.data.page_info?.page);
-      setPageSize(res.data.page_info?.page_size);
-      setTotal(res.data.page_info?.total);
+    setLoading(true);
+    try {
+      const params = {
+        uid: userInfo?.id,
+        search_content: searchValue,
+        page: current, //第几页
+        page_size: pageSize //每页个数
+      };
+      const res = await getWorkflowList(params);
+      if (res.status === 200 && res.data) {
+        setWorkflowData(res.data.list);
+        setCurrent(res.data.page_info?.page);
+        setPageSize(res.data.page_info?.page_size);
+        setTotal(res.data.page_info?.total);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -277,7 +284,7 @@ export default function WorkflowList() {
             getList();
           }}
         />
-        <Button shape="round" type="primary" onClick={handleCreateWorkflow}>
+        <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>
           创建工作流
         </Button>
       </div>
@@ -292,6 +299,7 @@ export default function WorkflowList() {
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"
+        loading={loading}
       />
       {/* 分页 */}
       <Pagination

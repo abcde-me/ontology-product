@@ -135,12 +135,20 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
               >
                 <Select
                   mode="multiple"
-                  options={Weekly_Options}
+                  // options={Weekly_Options}
                   placeholder="请选择日期"
                   style={{
                     width: 300
                   }}
-                />
+                >
+                  {Weekly_Options.map((item) => {
+                    return (
+                      <Option value={item.key} key={item.key}>
+                        {item.label}
+                      </Option>
+                    );
+                  })}
+                </Select>
               </Form.Item>
             )}
             {frequencyData == FrequencyType.EVERYMONTH && (
@@ -210,8 +218,8 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
                 >
                   {timeFlag == TIMEARR[timeType.SEPCIFICTIME].text &&
                     Monthly_Options.map((option) => (
-                      <Option key={option} value={option}>
-                        {option}
+                      <Option key={option.key} value={option.key}>
+                        {option.label}
                       </Option>
                     ))}
                   {timeFlag == TIMEARR[timeType.RELATICELYTIME].text &&
