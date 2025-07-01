@@ -4,6 +4,7 @@ import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
 import { subLeafKeys } from '../consts';
+import { getCatalogList } from '@/api/dataCatalog';
 
 interface ITreeData {
   id: string | number;
@@ -94,7 +95,11 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
             showLoading?: boolean;
           }): Promise<Partial<CatalogTreeState>> => {
             // 模拟异步操作
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            // await new Promise((resolve) => setTimeout(resolve, 500));
+            const { activeTab } = this.getState();
+            const res = await getCatalogList({
+              root_type: activeTab === 'source' ? 1 : 2
+            });
 
             const tmpData = this.convertRawDataToTreeData(fakeData);
 
