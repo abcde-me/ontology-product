@@ -23,13 +23,14 @@ export type CodeNodeType = CommonNodeType & {
   code_language: CodeLanguage;
   code: string;
   outputs: OutputVar;
-  app_scenarios: number;
+  app_scenarios: string;
   enha_modle_id: number;
   generate_sample_num: number; // 生成样本数
   similarity_threshold: number; // 相似度阈值
   sample_num: number; // 指令生成依赖样本数
   prompt: string;
   prompt_checkbox: boolean;
+  enhanced_proportion: number; // 任务描述增强占比
 };
 
 export type CodeDependency = any;

@@ -7,15 +7,15 @@ import { useStoreApi } from 'reactflow';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
-  const { app_scenarios, enha_modle_id, sample_num, similarity_threshold, generate_sample_num, prompt } = props.data;
+  const { app_scenarios, enha_modle_id, enhanced_proportion, sample_num, similarity_threshold, generate_sample_num, prompt } = props.data;
   console.log(props.data, '=========enh');
   const store = useStoreApi();
-  const appScenarios: { [key: number]: string } = {
-    1: '按通用',
-    2: '文本分类',
-    3: '文本提取',
-    4: '文本生成',
-    5: '多轮回答'
+  const appScenarios: { [key: string]: string } = {
+    'tongyong': '通用',
+    'fenlei': '文本分类',
+    'tiqu': '文本提取',
+    'shengcheng': '文本生成',
+    'duolong': '多轮回答'
   };
   const enhaModle: { [key: number]: string } = {
     1: '模型1',
@@ -36,8 +36,11 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {enha_modle_id && (
           <div className="enhancement-item">{enhaModle[enha_modle_id]}</div>
         )}
-        {(app_scenarios === 1 || app_scenarios === 5) && sample_num > 0 && (
-          <div className="enhancement-item">{`生成依赖样本数目: ${sample_num}`}</div>
+        {(app_scenarios === 'tongyong' || app_scenarios === 'duolong') && sample_num > 0 && (
+          <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>
+        )}
+        {(app_scenarios === 'fenlei' || app_scenarios === 'shengcheng') && enhanced_proportion > 0 && (
+          <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
         )}
         {similarity_threshold && (
           <div className="enhancement-item">{`过滤相似度阈值: ${similarity_threshold}`}</div>
