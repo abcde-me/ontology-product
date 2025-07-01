@@ -5,23 +5,24 @@ import {
   WorkflowOperationParams,
   WorkflowOperation
 } from '@/types/workflowApi';
+import UAPI from '@/api';
 
 // 创建工作流
 export async function createWorkflow(
   params: CreateWorkflowParams
 ): Promise<ApiRes<CreateWorkflowRes>> {
   // TODO: 联调
-  // return await UAPI.RES.createWorkflow({}).post(params).inRegion().do();
-  return Promise.resolve({
-    code: '',
-    message: 'ok',
-    data: {
-      ds_workflow_id: 3242242,
-      workflow_uuid: 'app-903a7d22-dd9d-4ab9-8748-2659c2dbf1ce'
-    },
-    requestId: '',
-    status: 200
-  });
+  return await UAPI.RES.createWorkflow({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: '',
+  //   message: 'ok',
+  //   data: {
+  //     ds_workflow_id: 3242242,
+  //     workflow_uuid: 'app-903a7d22-dd9d-4ab9-8748-2659c2dbf1ce'
+  //   },
+  //   requestId: '',
+  //   status: 200
+  // });
 }
 
 // 获取工作流详情

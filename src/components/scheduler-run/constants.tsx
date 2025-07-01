@@ -1,14 +1,35 @@
-import { CycleValues } from './types';
+import { CycleValues, WeekValues } from './types';
 
 // 每周的数据
 export const WEEKLY_OPTIONS = [
-  '周一',
-  '周二',
-  '周三',
-  '周四',
-  '周五',
-  '周六',
-  '周日'
+  {
+    lable: '周一',
+    value: WeekValues.MONDAY
+  },
+  {
+    lable: '周二',
+    value: WeekValues.TUESDAY
+  },
+  {
+    lable: '周三',
+    value: WeekValues.WEDNESDAY
+  },
+  {
+    lable: '周四',
+    value: WeekValues.THURSDAY
+  },
+  {
+    lable: '周五',
+    value: WeekValues.FRIDAY
+  },
+  {
+    lable: '周六',
+    value: WeekValues.SATURDAY
+  },
+  {
+    lable: '周日',
+    value: WeekValues.SUNDAY
+  }
 ];
 // 每月的数据
 export const MONTHLY_OPTIONS = Array.from(
