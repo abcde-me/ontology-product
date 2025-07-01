@@ -13,12 +13,11 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-import { CatalogTypeEnum, subLeafKeys } from '../../consts';
-import { addCatalog } from '@/api/dataCatalog';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
+import { addCatalog, addVolume } from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
-    isEditing,
     activeTab,
     searchValue,
     inputRef,
@@ -27,7 +26,6 @@ export function useEditableTree({ catalogTreeStore }) {
     expandedKeys,
     loading
   } = catalogTreeStore.useGetState([
-    'isEditing',
     'activeTab',
     'searchValue',
     'inputRef',
@@ -98,7 +96,7 @@ export function useEditableTree({ catalogTreeStore }) {
     if (dataRef?.isLastLeaf) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
-        selectedFullPath: dataRef?.fullPath
+        selectedPath: dataRef?.fullPath
       });
     }
   };
@@ -239,7 +237,8 @@ export function useEditableTree({ catalogTreeStore }) {
             key: `volume-${Date.now()}`,
             type: 2,
             isLastLeaf: true,
-            showInput: true
+            showInput: true,
+            parent_id: dataRef.parent_id
           });
         }
         return item;
@@ -272,10 +271,11 @@ export function useEditableTree({ catalogTreeStore }) {
           // 新建目录
           const res = await addCatalog({
             name: fileName,
-            root_type: CatalogTypeEnum.catalog
+            root_type: RootTypeEnum[activeTab]
           });
           if (res && res.status === 200) {
             newTreeData = await catalogTreeStore.getRawData();
+            // TODO 获取 id 并展开节点
           }
         } else {
           // 编辑目录
@@ -296,19 +296,14 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
 
       case CatalogTypeEnum.volume:
-        const { pathParentKeys } = props;
-        if (pathParentKeys) {
-          newTreeData = handleTarget(pathParentKeys, (target) => {
-            if (target) {
-              const newTarget = [...target];
-              newTarget.splice(0, 1, {
-                ...dataRef,
-                title: fileName,
-                showInput: false
-              });
-              return newTarget;
-            }
-          });
+        const res = await addVolume({
+          name: fileName,
+          parent_id: dataRef.parent_id,
+          root_type: RootTypeEnum[activeTab]
+        });
+        if (res && res.status === 200) {
+          // TODO 需复查
+          newTreeData = await catalogTreeStore.getRawData();
         }
         break;
 

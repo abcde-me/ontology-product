@@ -21,12 +21,9 @@ const InputSearch = Input.Search;
 export default function Eltable() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { activeTab, selectedKey, selectedFullPath } =
-    catalogTreeStore.useGetState([
-      'activeTab',
-      'selectedKey',
-      'selectedFullPath'
-    ]);
+  const { activeTab, selectedKey, selectedPath } = catalogTreeStore.useGetState(
+    ['activeTab', 'selectedKey', 'selectedPath']
+  );
 
   // 通用状态管理
   const [selectedRows, setSelectedRows] = useState([]); // 用于存储选中的行数据
