@@ -247,7 +247,7 @@ const Header: FC = () => {
       <div className="left-part">
         <div
           className="back-icon"
-          onClick={() => history.push('/tenant/compute/appforge/workflowList')}
+          onClick={() => history.push('/tenant/compute/modaforge/workflowList')}
         >
           <BackIcon className="size-[16px]" />
         </div>
