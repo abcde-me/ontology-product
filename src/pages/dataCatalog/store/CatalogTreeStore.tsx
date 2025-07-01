@@ -1,63 +1,29 @@
-import { Model } from '@/models';
+import { Model, createAsyncEffect } from '@/models';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { subLeafKeys } from '../components/editable-tree/consts';
-import { NodeProps } from '@arco-design/web-react/es/Cascader';
+import { subLeafKeys } from '../consts';
+import { getCatalogList } from '@/api/dataCatalog';
 
-interface ITreeData {
-  id: string | number;
+interface BaseTreeData {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name?: string;
   name: string;
-  type: string;
-  parent_id?: string | number;
-  children?: {
-    volume?: Array<{
-      id: number;
-      name: string;
-      parent_id: number;
-    }>;
-    db?: Array<{
-      id: number;
-      name: string;
-      parent_id: number;
-    }>;
-  };
+  base_dir: string;
+  isLastLeaf?: boolean;
+  fullPath?: string;
 }
 
-const fakeData: ITreeData[] = [
-  {
-    type: 'catalog',
-    id: 1,
-    name: '目录1',
-    children: {
-      volume: [
-        {
-          id: 10,
-          name: 'source-vol',
-          parent_id: 1
-        },
-        {
-          id: 11,
-          name: 'source-vol-22222',
-          parent_id: 1
-        }
-      ],
-      db: [
-        {
-          id: 20,
-          name: 'source-db-1',
-          parent_id: 1
-        },
-        {
-          id: 21,
-          name: 'source-db-2',
-          parent_id: 1
-        }
-      ]
-    }
-  }
-];
+interface ITreeData extends BaseTreeData {
+  children?: {
+    volume?: BaseTreeData[];
+    // TODO 下一期做
+    db?: BaseTreeData[];
+  };
+}
 
 interface CatalogTreeState {
   activeTab: string;
@@ -67,44 +33,76 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
+  isEditing: boolean;
+  selectedFullPath: string;
+  loading?: boolean;
 }
 
 interface Effects {
-  fetchData: () => Promise<void>;
+  fetchData: (options?: {
+    showLoading?: boolean;
+  }) => Promise<Partial<CatalogTreeState>>;
 }
 
 export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
-  // public inputRef = React.createRef<RefInputType>();
-
   constructor(public member: DataCatalog) {
     super({
       state: {
-        activeTab: 'source',
+        activeTab: 'src',
         searchValue: '',
         inputValue: '',
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
-        inputRef: React.createRef<RefInputType>()
+        isEditing: false,
+        inputRef: React.createRef<RefInputType>(),
+        selectedFullPath: ''
       },
       effects: {
-        fetchData: () => {
-          const tmpData = this.convertRawDataToTreeData(fakeData);
-          this.setState({
-            treeData: tmpData,
-            expandedKeys: [
-              tmpData?.[0]?.key || '',
-              tmpData?.[0]?.children?.[0]?.key || '',
-              tmpData?.[0]?.children?.[1]?.key || ''
-            ],
-            searchValue: '',
-            selectedKey: tmpData?.[0]?.children?.[0]?.children?.[0]?.key || ''
-          });
-          return new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-        }
+        fetchData: createAsyncEffect(
+          async (options?: {
+            showLoading?: boolean;
+          }): Promise<Partial<CatalogTreeState>> => {
+            try {
+              const cacheTreeData = await this.getRawData();
+
+              return {
+                treeData: cacheTreeData,
+                expandedKeys: [
+                  cacheTreeData?.[0]?.key || '',
+                  cacheTreeData?.[0]?.children?.[0]?.key || '',
+                  cacheTreeData?.[0]?.children?.[1]?.key || ''
+                ],
+                searchValue: '',
+                selectedKey: String(
+                  cacheTreeData?.[0]?.children?.[0]?.children?.[0]?.key || ''
+                )
+              };
+            } catch (err) {
+              console.log(err);
+            }
+
+            return {};
+          },
+          { loadingKey: 'loading' }
+        )
       }
+    });
+  }
+
+  async getRawData() {
+    const { activeTab } = this.getState();
+
+    const res = await getCatalogList({
+      root_type: activeTab === 'src' ? 1 : 2
+    });
+
+    return this.convertRawDataToTreeData(res.data?.[activeTab] || []);
+  }
+
+  setActiveTab(value: string) {
+    this.setState({
+      activeTab: value
     });
   }
 
@@ -120,25 +118,28 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
-  convertRawDataToTreeData(fakeData: ITreeData[]) {
-    if (!Array.isArray(fakeData)) return [];
+  convertRawDataToTreeData(data: ITreeData[]) {
+    if (!Array.isArray(data)) return [];
 
-    const cache = fakeData.map((catalog) => {
+    const cache = data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
+
       if (catalog.children) {
         Object.entries(catalog.children).forEach(([type, arr]) => {
+          const volumeKey = `${catalog.id}-${type}`;
           const subChildren = {
             title: subLeafKeys[type],
-            key: `${catalog.id}-${type}`,
+            key: volumeKey,
             type: type,
             children:
               arr?.map((item) => {
                 return {
+                  ...item,
                   title: item.name,
-                  key: `${type}-${item.id}`,
-                  isLeaf: true,
+                  key: String(item.id), // 转换为字符串
+                  parent_id: volumeKey,
                   isLastLeaf: true,
-                  type: `${type}-child`
+                  fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };
@@ -147,9 +148,9 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       }
 
       return {
+        ...catalog,
         title: catalog.name,
-        key: `catalog-${catalog.id}`,
-        type: catalog.type,
+        key: String(catalog.id), // 转换为字符串
         children: childrenArr
       };
     });
