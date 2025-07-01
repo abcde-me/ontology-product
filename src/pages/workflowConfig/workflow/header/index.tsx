@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useContext, useContextSelector } from 'use-context-selector';
 import { useStore, useWorkflowStore } from '../store';
-import { BlockEnum, InputVarType, WorkflowVersion } from '../types';
+import { BlockEnum, InputVarType } from '../types';
 import type { StartNodeType } from '../nodes/start/types';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
@@ -18,9 +18,8 @@ import {
   useWorkflowRun
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
-import Toast, { ToastContext } from '@/pages/workflowConfig/components/toast';
+import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
-import { CreateAppModal } from './create-app-modal';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import AppContext from '@/pages/workflowConfig/context/app-context';
@@ -82,7 +81,6 @@ const SuccessModal = ({ visible, onClose }) => {
 const Header: FC = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const history = useHistory();
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showRuningModal, setShowRuningModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
@@ -91,20 +89,14 @@ const Header: FC = () => {
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const systemFeatures = useContextSelector(
-    AppContext,
-    (state) => state.systemFeatures
-  );
   const workflowUuid = appDetail?.workflow_uuid ?? '';
   const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
-  const isChatMode = useIsChatMode();
   const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
   const { handleNodeSelect } = useNodesInteractions();
   const publishedAt = useStore((s) => s.publishedAt);
   const draftUpdatedAt = useStore((s) => s.draftUpdatedAt);
   const toolPublished = useStore((s) => s.toolPublished);
-  const currentVersion = useStore((s) => s.currentVersion);
   const setShowWorkflowVersionHistoryPanel = useStore(
     (s) => s.setShowWorkflowVersionHistoryPanel
   );
@@ -183,22 +175,6 @@ const Header: FC = () => {
         } else {
           notify({ type: 'error', message: '下线失败' });
         }
-      }
-
-      if (workflowRes?.data) {
-        // Notification.success({
-        //     title: 'Success',
-        //     content: 'This is a success Notification!',
-        //   })
-        // if (op === WorkflowOperation.ONLINE) {
-        //   notify({ type: 'success', message: '上线成功' });
-        // } else if (op === WorkflowOperation.OFFLINE) {
-        //   notify({ type: 'success', message: '下线成功' });
-        // }
-        // updateAppDetail();
-        // console.log('res.created_at', workflowRes?.data.created_at);
-        // workflowStore.getState().setPublishedAt(workflowRes?.data.created_at);
-        // resetWorkflowVersionHistory();
       }
     },
     [
@@ -313,7 +289,6 @@ const Header: FC = () => {
           }}
         />
       </div>
-      <CreateAppModal visible={showEditModal} setVisible={setShowEditModal} />
       <SuccessModal
         visible={showRuningModal}
         onClose={() => setShowRuningModal(false)}
