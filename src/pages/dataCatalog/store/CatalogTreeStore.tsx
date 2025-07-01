@@ -87,6 +87,7 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
+  isEditing: boolean;
   loading?: boolean;
 }
 
@@ -106,6 +107,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
+        isEditing: false,
         inputRef: React.createRef<RefInputType>()
       },
       effects: {
@@ -113,16 +115,9 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           async (options?: {
             showLoading?: boolean;
           }): Promise<Partial<CatalogTreeState>> => {
-            const { activeTab } = this.getState();
             try {
-              const res = await getCatalogList({
-                root_type: activeTab === 'src' ? 1 : 2
-              });
+              const cacheTreeData = await this.getRawData();
 
-              const cacheTreeData = this.convertRawDataToTreeData(
-                res.data?.[activeTab] || []
-              );
-              // debugger
               return {
                 treeData: cacheTreeData,
                 expandedKeys: [
@@ -145,6 +140,16 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         )
       }
     });
+  }
+
+  async getRawData() {
+    const { activeTab } = this.getState();
+
+    const res = await getCatalogList({
+      root_type: activeTab === 'src' ? 1 : 2
+    });
+
+    return this.convertRawDataToTreeData(res.data?.[activeTab] || []);
   }
 
   setActiveTab(value: string) {

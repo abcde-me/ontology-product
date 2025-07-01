@@ -14,9 +14,11 @@ import {
   IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, subLeafKeys } from '../../consts';
+import { addCatalog } from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
+    isEditing,
     activeTab,
     searchValue,
     inputRef,
@@ -25,6 +27,7 @@ export function useEditableTree({ catalogTreeStore }) {
     expandedKeys,
     loading
   } = catalogTreeStore.useGetState([
+    'isEditing',
     'activeTab',
     'searchValue',
     'inputRef',
@@ -204,7 +207,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }, 0);
   };
 
-  const addCatalog = () => {
+  const onCatalogAdd = () => {
     const name = `目录${Date.now()}`;
     catalogTreeStore.setState({
       inputValue: name,
@@ -217,7 +220,8 @@ export function useEditableTree({ catalogTreeStore }) {
           showInput: true
         },
         ...treeData
-      ]
+      ],
+      isEditing: true
     });
     focusAndSelectInput();
   };
@@ -248,7 +252,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }
   };
 
-  const onEditFinish = (props: NodeProps) => {
+  const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
 
     const fileName = inputValue.trim();
@@ -261,26 +265,32 @@ export function useEditableTree({ catalogTreeStore }) {
 
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
-        newTreeData = treeData.map((item: TreeDataType) => {
-          if (item.key === dataRef.key) {
-            return {
-              ...dataRef,
-              title: fileName,
-              showInput: false,
-              children: dataRef?.children?.length
-                ? dataRef?.children
-                : [
-                    {
-                      title: '数据卷',
-                      key: `catalog-${fileName}-volume`,
-                      type: 'volume',
-                      children: []
-                    }
-                  ]
-            };
+        const isAdd = !dataRef?.children?.length;
+        if (isAdd) {
+          // 新建目录
+          const res = await addCatalog({
+            name: fileName,
+            root_type: CatalogTypeEnum.catalog
+          });
+          if (res && res.status === 200) {
+            newTreeData = await catalogTreeStore.getRawData();
           }
-          return item;
-        });
+        } else {
+          // 编辑目录
+          // TODO 接口
+          newTreeData = treeData.map((item: TreeDataType) => {
+            if (item.key === dataRef.key) {
+              return {
+                ...dataRef,
+                title: fileName,
+                showInput: false,
+                children: dataRef?.children
+              };
+            }
+            return item;
+          });
+        }
+
         break;
 
       case CatalogTypeEnum.volume:
@@ -432,7 +442,7 @@ export function useEditableTree({ catalogTreeStore }) {
     onSearchChange,
     handleExpand,
     handleSelect,
-    addCatalog,
+    onCatalogAdd,
     renderExtra,
     renderTitle,
     loading

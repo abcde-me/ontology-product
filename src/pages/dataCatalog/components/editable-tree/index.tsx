@@ -23,7 +23,7 @@ export default function EditableTree() {
     onSearchChange,
     handleExpand,
     handleSelect,
-    addCatalog,
+    onCatalogAdd,
     renderExtra,
     renderTitle
   } = useEditableTree({ catalogTreeStore });
@@ -40,7 +40,7 @@ export default function EditableTree() {
         />
         <div
           className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-          onClick={addCatalog}
+          onClick={onCatalogAdd}
         >
           <IconPlus className="mr-2" />
           新建
