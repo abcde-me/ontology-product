@@ -10,7 +10,7 @@ RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
 COPY ./dist /usr/share/nginx/html
 
 # 设置默认执行用户
-RUN useradd -u 1000 apps
-USER apps
+# RUN useradd -u 1000 apps
+# USER apps
 
 EXPOSE 5001
