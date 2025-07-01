@@ -33,7 +33,6 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
-  isEditing: boolean;
   selectedFullPath: string;
   loading?: boolean;
 }
@@ -54,7 +53,6 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
-        isEditing: false,
         inputRef: React.createRef<RefInputType>(),
         selectedFullPath: ''
       },
@@ -131,13 +129,14 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
             title: subLeafKeys[type],
             key: volumeKey,
             type: type,
+            parent_id: catalog.id,
             children:
               arr?.map((item) => {
                 return {
                   ...item,
                   title: item.name,
                   key: String(item.id), // 转换为字符串
-                  parent_id: volumeKey,
+                  parent_id: catalog.id,
                   isLastLeaf: true,
                   fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
                 };
