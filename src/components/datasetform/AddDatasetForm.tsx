@@ -442,7 +442,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           rules={[{ required: false, message: '请选择至少一个标签' }]}
         >
           <Select
-            placeholder="请输入或选择标签（用逗号分隔）..."
+            placeholder="请输入或选择标签..."
             mode="multiple"
             options={tagList}
             allowCreate
@@ -572,41 +572,39 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                   />
                 </FormItem>
 
-                {connectorFileInformation.length > 0 && (
-                  <FormItem
-                    label="选择数据文件:"
-                    field="selectedFiles"
-                    rules={[{ required: true, message: '请选择至少一个文件' }]}
-                    labelCol={{ span: 4 }}
-                    wrapperCol={{ span: 20 }}
-                    extra={
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          color: '#86909c',
-                          marginLeft: 10
-                        }}
-                      >
-                        目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                      </span>
-                    }
-                  >
-                    <Select
-                      placeholder="请选择要使用的文件..."
-                      mode="multiple"
-                      options={connectorFileInformation}
-                      style={{ marginLeft: 10 }}
-                      onChange={setSelectedFiles}
-                      value={selectedFiles}
-                      // renderOption={(option) => (
-                      //   <div>
-                      //     <div>{option.data.name}</div>
-                      //     <small>{option.data.last_modified}</small>
-                      //   </div>
-                      // )}
-                    />
-                  </FormItem>
-                )}
+                <FormItem
+                  label="选择数据文件:"
+                  field="selectedFiles"
+                  rules={[{ required: true, message: '请选择至少一个文件' }]}
+                  labelCol={{ span: 4 }}
+                  wrapperCol={{ span: 20 }}
+                  extra={
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        color: '#86909c',
+                        marginLeft: 10
+                      }}
+                    >
+                      目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                    </span>
+                  }
+                >
+                  <Select
+                    placeholder="请选择要使用的文件..."
+                    mode="multiple"
+                    options={connectorFileInformation}
+                    style={{ marginLeft: 10 }}
+                    onChange={setSelectedFiles}
+                    value={selectedFiles}
+                    // renderOption={(option) => (
+                    //   <div>
+                    //     <div>{option.data.name}</div>
+                    //     <small>{option.data.last_modified}</small>
+                    //   </div>
+                    // )}
+                  />
+                </FormItem>
               </>
             )}
           </div>

@@ -22,7 +22,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { getDatasetList, createDataset } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
-import './index.css';
+import styles from './index.module.css';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -65,7 +65,7 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     render: (name: string, record: Dataset) => (
       <Button
         type="text"
-        className="dataset-name-link"
+        className={styles.datasetNameLink}
         onClick={() => handleGoToDetail(record.id)}
       >
         {name}
@@ -76,7 +76,7 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     title: '标签',
     dataIndex: 'tags',
     width: 160,
-    filterIcon: <IconFilter />,
+    // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList.forEach((dataset) => {
@@ -90,11 +90,13 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     render: (tags: string[]) => (
       <Space size="mini">
         {tags.length > 0 && (
-          <Tag className="tag-green">
-            {tags[0].length > 8 ? `${tags[0].substring(0, 8)}...` : tags[0]}
+          <Tag className={styles.tagGreen}>
+            {tags[0].length > 5 ? `${tags[0].substring(0, 5)}...` : tags[0]}
           </Tag>
         )}
-        {tags.length > 1 && <Tag className="tag-green">+{tags.length - 1}</Tag>}
+        {tags.length > 1 && (
+          <Tag className={styles.tagGreen}>+{tags.length - 1}</Tag>
+        )}
       </Space>
     )
   },
@@ -129,7 +131,9 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     onFilter: (value: string, record: Dataset) => {
       return record.src_model === value;
     },
-    render: (src_model: string) => <Tag className="tag-purple">{src_model}</Tag>
+    render: (src_model: string) => (
+      <Tag className={styles.tagPurple}>{src_model}</Tag>
+    )
   },
   {
     title: '创建人',
@@ -185,15 +189,21 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
       <Space size={8}>
-        <Button type="text" className="action-button export">
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${styles.export}`}
+        >
           编辑
         </Button>
-        <Button type="text" className="action-button export">
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${styles.export}`}
+        >
           导出
         </Button>
         <Button
           type="text"
-          className="action-button delete"
+          className={`${styles.actionButton} ${styles.delete}`}
           onClick={() => handleDelete(record)}
         >
           删除
@@ -451,19 +461,19 @@ const DatasetManagement: React.FC = () => {
   };
 
   return (
-    <div className="dataset-management">
-      <div className="dataset-content-card">
-        <div className="dataset-header">
-          <div className="dataset-title">数据集管理</div>
-          <div className="dataset-description">
+    <div className={styles.datasetManagement}>
+      <div className={styles.datasetContentCard}>
+        <div className={styles.datasetHeader}>
+          <div className={styles.datasetTitle}>数据集管理</div>
+          <div className={styles.datasetDescription}>
             管理用于模型精调和训练的数据集
           </div>
         </div>
 
-        <div className="search-toolbar">
-          <div className="search-group">
+        <div className={styles.searchToolbar}>
+          <div className={styles.searchGroup}>
             <Select
-              className="search-field-select"
+              className={styles.searchFieldSelect}
               value={searchField}
               onChange={(value) => setSearchField(value)}
               options={searchOptions}
@@ -471,17 +481,17 @@ const DatasetManagement: React.FC = () => {
             <Input.Search
               allowClear
               placeholder="输入关键字搜索"
-              className="search-input"
+              className={styles.searchInput}
               value={search}
               onChange={(value) => setSearch(value)}
               onPressEnter={handleSearch}
               onSearch={handleSearch}
             />
           </div>
-          <div className="action-buttons">
+          <div className={styles.actionButtons}>
             <Button
               icon={<IconDelete />}
-              className="batch-delete-btn"
+              className={styles.batchDeleteBtn}
               disabled={selectedRowKeys.length === 0}
               onClick={handleBatchDelete}
             >
@@ -489,7 +499,7 @@ const DatasetManagement: React.FC = () => {
             </Button>
             <Button
               icon={<IconDownload />}
-              className="batch-export-btn"
+              className={styles.batchExportBtn}
               disabled={selectedRowKeys.length === 0}
               onClick={handleBatchExport}
             >
@@ -507,7 +517,7 @@ const DatasetManagement: React.FC = () => {
 
         <Table
           rowKey="id"
-          className="dataset-table"
+          className={styles.datasetTable}
           columns={columns(handleGoToDetail, handleDelete, datasetList)}
           data={datasetList}
           rowSelection={rowSelection}
