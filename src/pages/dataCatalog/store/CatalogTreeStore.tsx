@@ -24,61 +24,6 @@ interface ITreeData extends BaseTreeData {
   };
 }
 
-const fakeData: ITreeData[] = [
-  {
-    id: 1,
-    parent_id: 0,
-    type: 1,
-    type_name: 'catalog',
-    name: 'test1',
-    base_dir: '/user/xxd',
-    children: {
-      volume: [
-        {
-          id: 2,
-          parent_id: 1,
-          type: 2,
-          type_name: 'volume',
-          name: 'test11',
-          base_dir: '/user/xxd'
-        },
-        {
-          id: 4,
-          parent_id: 1,
-          type: 2,
-          type_name: 'volume',
-          name: 'test12',
-          base_dir: '/user/xxd'
-        }
-      ]
-    }
-  },
-  {
-    id: 5,
-    parent_id: 0,
-    type: 1,
-    type_name: 'catalog',
-    name: '新建的',
-    base_dir: '/user/xxd'
-  },
-  {
-    id: 6,
-    parent_id: 0,
-    type: 1,
-    type_name: 'catalog',
-    name: '9999',
-    base_dir: '/user/xxd'
-  },
-  {
-    id: 7,
-    parent_id: 0,
-    type: 1,
-    type_name: 'catalog',
-    name: '8888',
-    base_dir: '/user/xxd'
-  }
-];
-
 interface CatalogTreeState {
   activeTab: string;
   searchValue: string;
