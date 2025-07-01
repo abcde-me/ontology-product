@@ -34,7 +34,23 @@ export const TIMEARR = {
   }
 };
 
-const CycleLoadingForm: React.FC = () => {
+interface CycleText {
+  minute: string; // 10代表第10分钟
+  hour: string; // 10代表10点
+  date: string; // *代表每日，"1,3"代表1号和3号执行，"L"代表最后一天，默认空字符，代表未选择
+  month: string; // *代表每月，默认空字符，代表未选择
+  week: string; // *代表每周，默认空字符，代表未选择
+}
+
+interface CycleLoadingFormProps {
+  options: CycleText;
+  onOptionsChange: (options: CycleText) => void;
+}
+
+const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
+  options,
+  onOptionsChange
+}) => {
   // 频率选择器选择的数据
   const [frequencyData, setFrequencyData] = useState('');
   const [form] = Form.useForm();
@@ -44,7 +60,7 @@ const CycleLoadingForm: React.FC = () => {
   // 周期设置为月时 后面选择框改变的方法
   const monthlyHan = (val) => {
     const monthIndex = val.some((item) => item == '每月最后一天');
-    setPromptState(monthIndex);
+    // setPromptState(monthIndex);
   };
   // 点击快捷选项的回调
   const shortcutHan = (value) => {
