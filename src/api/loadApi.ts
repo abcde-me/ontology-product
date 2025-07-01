@@ -44,7 +44,15 @@ export async function runLoad(params) {
 export async function getLoadRecord(task_id) {
   return await UAPI.RES.getLoadRecordApi({ task_id }).get().inRegion().do();
 }
+export async function getLoadRecordList(params) {
+  return await UAPI.RES.getdetailListApi({}).post(params).inRegion().do();
+}
 
 export async function getLoadTaskFiles(params: any = {}) {
   return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
+}
+
+// 获取数据集列表
+export async function getDirectoryList(params: any = {}) {
+  return await UAPI.RES.catalogListApi(params).get().inRegion().do();
 }

@@ -11,6 +11,8 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import { useHistory } from 'react-router-dom';
+import { getLoadRecordList } from '@/api/loadApi';
+import { ExecutionHistory } from '../type';
 const InputSearch = Input.Search;
 
 const TableDetail = (props) => {
@@ -18,7 +20,7 @@ const TableDetail = (props) => {
   const columns = [
     {
       title: '运行ID',
-      dataIndex: 'execution_name',
+      dataIndex: 'name',
       width: 240,
       ellipsis: true
     },
@@ -60,7 +62,7 @@ const TableDetail = (props) => {
                 cursor: 'pointer'
               }}
               onClick={() => {
-                stopTaskHan(item.execution_id);
+                stopTaskHan(item.id);
               }}
             >
               停止
@@ -91,10 +93,10 @@ const TableDetail = (props) => {
         <div style={{ display: 'flex' }}>
           <div
             style={{ color: 'green' }}
-          >{`成功：${item.details.success_files.toLocaleString()}`}</div>
+          >{`成功：${item.success_files.toLocaleString()}`}</div>
           <div
             style={{ color: 'red', marginLeft: '10px' }}
-          >{`失败：${item.details.failed_files.toLocaleString()}`}</div>
+          >{`失败：${item.failed_files.toLocaleString()}`}</div>
         </div>
       )
     },
@@ -116,7 +118,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access/${item.execution_id}`
+              `/tenant/compute/modaforge/dataLoad/access/${item.id}`
             );
           }}
         >
@@ -125,18 +127,16 @@ const TableDetail = (props) => {
       )
     }
   ];
-  const [data, setData] = useState([
+  const [data, setData] = useState<ExecutionHistory[]>([
     {
-      execution_id: '7891',
-      execution_name: 'RUN-20250306-001',
+      id: 7891,
+      name: 'RUN-20250306-001',
       status: 'succeed',
       start_time: '2025-06-16 18:40:36',
       end_time: '2025-06-16 18:40:36',
-      details: {
-        success_files: 245,
-        failed_files: 2,
-        error_message: null
-      }
+      success_files: 245,
+      failed_files: 2,
+      error_message: null
     }
   ]);
   // 分页的数据
@@ -172,9 +172,18 @@ const TableDetail = (props) => {
   const modalNo = () => {
     setVisible(false);
   };
-
+  // 获取详情页面数据列表
+  const getDetailList = async () => {
+    const res = await getLoadRecordList({
+      task_id: props.taskId,
+      page: current,
+      page_size: pageSize
+    });
+    console.log(res.data);
+    // setData(res.data);
+  };
   useEffect(() => {
-    setData(props.data);
+    getDetailList();
   }, []);
   return (
     <div>
@@ -218,7 +227,7 @@ const TableDetail = (props) => {
           border={false}
           pagination={false}
           style={{ width: '100%', padding: '0px 30px 0px 0px' }}
-          rowKey="execution_id"
+          rowKey="id"
         />
         <Pagination
           sizeOptions={[1, 5, 10, 20]}

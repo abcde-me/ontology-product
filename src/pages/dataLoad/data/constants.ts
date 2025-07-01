@@ -1,6 +1,8 @@
 // 每周的数据
 
 import { getConnectionList } from '@/api/connectionApi';
+import { getDirectoryList } from '@/api/loadApi';
+import { Children } from 'react';
 
 // export  const Weekly_Options=['周一', '周二', '周三', '周四', '周五', '周六','周日']
 export const Weekly_Options = [
@@ -53,12 +55,35 @@ async function request() {
     page: 1,
     page_size: 1000
   });
-  console.log(res);
   Connection_Options = res.data.items.map((item) => {
     return {
-      key: item.id,
-      label: item.name
+      key: item.connector_id,
+      label: item.connector_id_name
     };
   });
 }
 request();
+export let directoryData = [];
+async function fn() {
+  const res = await getDirectoryList({
+    root_type: 1
+  });
+  console.log(res.data.src);
+
+  directoryData = res.data.src.map((item) => {
+    return item.children
+      ? {
+          value: item.id,
+          label: item.name,
+          children: item.children.volume.map((items) => {
+            return {
+              value: items.id,
+              label: items.name
+            };
+          })
+        }
+      : { value: item.id, label: item.name };
+  });
+  console.log(directoryData);
+}
+fn();

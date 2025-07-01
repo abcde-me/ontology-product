@@ -7,67 +7,22 @@ import {
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import { Router } from 'react-router';
 import TableDetail from './table-detail';
 import './index.css';
 import Edit from '../edit';
-import {
-  ApiResponse,
-  ExecutionStatus,
-  LoadType,
-  SourceType,
-  TaskStatus
-} from '../type';
+import { ExecutionHistory, TaskInfo } from '../type';
+import { useParams } from '@/utils/url';
+import { getLoad } from '@/api/loadApi';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
+
 const DataLoadDetail = () => {
+  const loadId = useParams('task_id');
   // 默认详情的数据
-  const [listDetail, setListDetail] = useState<ApiResponse | null>({
-    task_info: {
-      id: 123,
-      name: 'daily-image-import',
-      source_type: SourceType.HDFS,
-      connector: {
-        id: 456,
-        name: 'hdfs-prod-01',
-        type: SourceType.HDFS
-      },
-      load_type: LoadType.Cron,
-      cron_expression: '0 0 3 * * ?',
-      dest_path: 'minio/vision-data',
-      status: TaskStatus.Running,
-      created_at: '2025-06-16 18:40:36',
-      last_run_time: '2025-06-16 18:40:36',
-      creator: 'user123'
-    },
-    execution_history: [
-      {
-        execution_id: 7891,
-        execution_name: 'RUN-20250306-001',
-        status: ExecutionStatus.Running,
-        start_time: '2025-06-16 18:40:36',
-        end_time: '2025-06-16 18:40:36',
-        details: {
-          success_files: 2451213213,
-          failed_files: 21231232,
-          error_message: null
-        }
-      },
-      {
-        execution_id: 7890,
-        execution_name: 'RUN-20250306-002',
-        status: ExecutionStatus.Failed,
-        start_time: '2025-06-16 18:40:36',
-        end_time: '2025-06-16 18:40:36',
-        details: {
-          success_files: 0,
-          failed_files: 0,
-          error_message: 'Connection timeout to HDFS server'
-        }
-      }
-    ]
-  });
+  const [listDetail, setListDetail] = useState<TaskInfo | null>(null);
+  // 相切页面的例表数据
+  const [detailList, setDetailList] = useState<ExecutionHistory[] | null>(null);
   // 存在运行中的状态
   const [runningFlag, setRunningFlag] = useState<number | null>(null);
 
@@ -78,18 +33,18 @@ const DataLoadDetail = () => {
       return -1; // 这里假设返回 -1 表示没有运行中的任务，根据实际情况调整
     }
 
-    const runningIndex = listDetail.execution_history.findIndex((item) => {
+    const runningIndex = detailList?.findIndex((item) => {
       return item.status === 'running';
     });
-    setRunningFlag(runningIndex);
+    setRunningFlag(runningIndex && runningIndex > -1 ? runningIndex : null);
   };
   // 点击停止运行
   const stopehan = () => {
-    listDetail?.execution_history.forEach((item: any) => {
-      if (item.execution_id == 7891) {
-        item.status = 'failed';
-      }
-    });
+    // listDetail?.execution_history.forEach((item: any) => {
+    //   if (item.execution_id == 7891) {
+    //     item.status = 'failed';
+    //   }
+    // });
   };
   // 编辑弹框的状态
   const [editVisible, setEditVisible] = useState(false);
@@ -101,7 +56,14 @@ const DataLoadDetail = () => {
   const OneLevelUpHan = () => {
     history.back();
   };
+  // 通过路由id获取数据
+  const getTask_idHan = async () => {
+    const res = await getLoad(loadId);
+    console.log(res.data);
+    setListDetail(res.data);
+  };
   useEffect(() => {
+    getTask_idHan();
     judgmentTask();
   }, []);
 
@@ -125,7 +87,7 @@ const DataLoadDetail = () => {
           <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
             数据载入
           </BreadcrumbItem>
-          <BreadcrumbItem>新建成功的载入名称</BreadcrumbItem>
+          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
@@ -164,9 +126,7 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 载入位置：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.dest_path}
-              </Col>
+              <Col span={21}>{listDetail && listDetail.data_path_name}</Col>
             </Row>
             <Row
               style={{
@@ -178,7 +138,7 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建人：
               </Col>
-              <Col span={21}>{listDetail && listDetail.task_info.creator}</Col>
+              <Col span={21}>{listDetail && listDetail.createor}</Col>
             </Row>
             <Row
               style={{
@@ -190,9 +150,7 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建时间：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.created_at}
-              </Col>
+              <Col span={21}>{listDetail && listDetail.created_at}</Col>
             </Row>
             <Row
               style={{
@@ -204,9 +162,7 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 更新时间：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.last_run_time}
-              </Col>
+              <Col span={21}>{listDetail && listDetail.last_run_time}</Col>
             </Row>
           </div>
           <div className="info-column">
@@ -220,9 +176,7 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 数据源类型：
               </Col>
-              <Col span={20}>
-                {listDetail && listDetail.task_info.source_type}
-              </Col>
+              <Col span={20}>{listDetail && listDetail.source_type}</Col>
             </Row>
             <Row
               style={{
@@ -234,9 +188,7 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 连接器名称：
               </Col>
-              <Col span={20}>
-                {listDetail && listDetail.task_info.connector.name}
-              </Col>
+              <Col span={20}>{listDetail && listDetail.connector_name}</Col>
             </Row>
             <Row
               style={{
@@ -249,10 +201,10 @@ const DataLoadDetail = () => {
                 载入形式：
               </Col>
               <Col span={20}>
-                {listDetail && listDetail.task_info.load_type == 'once'
+                {listDetail && listDetail.load_type == 'once'
                   ? '单次载入'
                   : '周期载入'}
-                {listDetail && listDetail.task_info.load_type == 'cron' && (
+                {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
                     checkedText="启用"
                     uncheckedText="停止"
@@ -262,7 +214,7 @@ const DataLoadDetail = () => {
                 )}
               </Col>
             </Row>
-            {listDetail && listDetail.task_info.load_type == 'cron' && (
+            {listDetail && listDetail.load_type == 'cron' && (
               <Row
                 style={{
                   marginBottom: 16,
@@ -273,13 +225,13 @@ const DataLoadDetail = () => {
                 <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                   周期设置：
                 </Col>
-                <Col span={20}>{listDetail.task_info.cron_expression}</Col>
+                <Col span={20}>{listDetail.cron_expression}</Col>
               </Row>
             )}
           </div>
         </div>
         <TableDetail
-          data={listDetail && listDetail.execution_history}
+          id={listDetail && listDetail.task_id}
           runningStatus={runningFlag}
           judgmentTaskHan={judgmentTask}
           tHan={stopehan}

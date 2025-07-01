@@ -19,7 +19,8 @@ export interface dataLodaAddForm {
 }
 export enum TaskStatus {
   Running = 'running',
-  Stopped = 'stopped'
+  Stopped = 'stopped',
+  succeed = 'succeed'
 }
 
 export enum ExecutionStatus {
@@ -44,39 +45,30 @@ interface Connector {
 }
 
 // 任务信息类型
-interface TaskInfo {
+export interface TaskInfo {
+  connector_id: number;
+  connector_name: string;
+  created_at: string;
+  createor: string;
+  data_path_id: number;
+  data_path_name: string;
+  last_run_time: string;
+  load_type: LoadType;
+  name: string;
+  source_type: SourceType;
+  status: TaskStatus;
+  task_id: number;
+  cron_expression: string;
+}
+
+// 执行历史记录列表类型
+export interface ExecutionHistory {
   id: number;
   name: string;
-  source_type: SourceType; // 使用枚举类型
-  connector: Connector;
-  load_type: LoadType; // 使用枚举类型
-  cron_expression: string;
-  dest_path: string;
-  status: TaskStatus; // 使用枚举类型
-  created_at: string;
-  last_run_time: string;
-  creator: string;
-}
-
-// 执行详情类型
-interface ExecutionDetails {
-  success_files: number;
-  failed_files: number;
-  error_message: string | null;
-}
-
-// 执行历史记录类型
-interface ExecutionHistory {
-  execution_id: number;
-  execution_name: string;
   status: ExecutionStatus; // 使用枚举类型
   start_time: string;
   end_time: string;
-  details: ExecutionDetails;
-}
-
-// 数据类型
-export interface ApiResponse {
-  task_info: TaskInfo;
-  execution_history: ExecutionHistory[];
+  success_files: number;
+  failed_files: number;
+  error_message: string | null;
 }

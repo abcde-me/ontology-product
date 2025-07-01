@@ -54,9 +54,7 @@ const AccessDetail = () => {
             <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
               数据载入
             </BreadcrumbItem>
-            <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad/detail">
-              新建成功的载入名称
-            </BreadcrumbItem>
+            <BreadcrumbItem>新建成功的载入名称</BreadcrumbItem>
             <BreadcrumbItem>载入名称记录</BreadcrumbItem>
           </Breadcrumb>
           <div

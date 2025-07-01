@@ -84,7 +84,6 @@ export default function DataLoad() {
     },
     {
       title: '载入形式',
-      dataIndex: 'load_type',
       width: 150,
       filters: [
         {
@@ -96,10 +95,10 @@ export default function DataLoad() {
           value: LoadType[Load.CRON].value
         }
       ],
-      onFilter: (value, row) => row.zairutype == value,
+      onFilter: (value, row) => row.load_type == value,
       render: (_, item) => (
         <div>
-          {item.zairutype == Load.ONCE
+          {item.load_type == LoadType[Load.ONCE].value
             ? LoadType[Load.ONCE].text
             : LoadType[Load.CRON].text}
         </div>
@@ -107,7 +106,6 @@ export default function DataLoad() {
     },
     {
       title: '最近运行状态',
-      dataIndex: 'status',
       width: 170,
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -122,7 +120,9 @@ export default function DataLoad() {
                     ? RunStateType[RunState.SUCCEED].color
                     : item.status == 'running'
                       ? RunStateType[RunState.RUNNING].color
-                      : RunStateType[RunState.STOPPED].color,
+                      : item.status == 'running'
+                        ? RunStateType[RunState.STOPPED].color
+                        : undefined,
               borderRadius: '50%'
             }}
           ></div>
@@ -160,7 +160,6 @@ export default function DataLoad() {
     },
     {
       title: '数据源类型',
-      dataIndex: 'source_type',
       width: 170,
       render: (_, item) => (
         <span>
@@ -196,15 +195,13 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      render: (_, item) => <span>{item.created_at}</span>,
-      sorter: (a, b) => a.created_at - b.created_at // 排序
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at) // 排序
     },
     {
       title: '更新时间',
       dataIndex: 'last_run_time',
       width: 240,
-      render: (_, item) => <span>{item.last_run_time}</span>,
-      sorter: (a, b) => a.last_run_time - b.last_run_time // 排序
+      sorter: (a, b) => a.last_run_time.localeCompare(b.last_run_time) // 排序
     },
     {
       title: '操作',
@@ -213,6 +210,10 @@ export default function DataLoad() {
       render: (_, item) => {
         return (
           <div
+            className={Styles.hoverStyle}
+            onClick={() => {
+              // 跳转到详情页
+            }}
             style={{
               width: '100%',
               display: 'flex',
@@ -222,7 +223,7 @@ export default function DataLoad() {
             <span
               className={Styles.hoverStyle}
               onClick={() => {
-                gotoDetail(item.id);
+                gotoDetail(item.task_id);
               }}
             >
               详情
@@ -259,6 +260,7 @@ export default function DataLoad() {
   ] as any;
   const [data, setData] = useState([
     {
+      task_id: '1',
       connector_id: '1',
       connector_name: '中科院大数据库任务1',
       name: '1234',
@@ -279,6 +281,7 @@ export default function DataLoad() {
   // 改变数据的逻辑
   const handlePageChange = (page) => {
     setCurrent(page);
+    getdataLoadList();
   };
   const [loadloading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -289,13 +292,6 @@ export default function DataLoad() {
       return connector.name.toLowerCase().includes(query);
     });
   }, [data, searchValue]);
-
-  const currentPageData = useMemo(() => {
-    const startIndex = (current - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredConnectors.slice(startIndex, endIndex);
-  }, [current, pageSize, filteredConnectors]);
-
   // 点击删除的逻辑
   const deleteHan = (id) => {
     console.log('删除了' + id);
@@ -310,8 +306,10 @@ export default function DataLoad() {
     setVisible(false);
   };
   // 跳转到详情页面
-  const gotoDetail = (id: number) => {
-    history.push(`/tenant/compute/modaforge/dataLoad/detail/${id}`);
+  const gotoDetail = (task_id: number) => {
+    history.push(
+      `/tenant/compute/modaforge/dataLoad/detail?task_id=${task_id}`
+    );
   };
   // 查询载入任务列表
   const getdataLoadList = async () => {
@@ -326,6 +324,7 @@ export default function DataLoad() {
         source_type: 'hdfs'
       });
       if (res.message == 'ok') {
+        console.log(res.data.items);
         setData(res.data.items);
         setLoadTotal(res.data.total);
       }
@@ -396,10 +395,10 @@ export default function DataLoad() {
       <Table
         loading={loadloading}
         columns={columns}
-        data={currentPageData}
+        data={data}
         style={{ padding: '10px 20px' }}
         pagination={false}
-        rowKey="connector_id"
+        rowKey="task_id"
         border={false}
         scroll={{
           x: true
@@ -411,8 +410,6 @@ export default function DataLoad() {
           pageSize={pageSize}
           onPageSizeChange={(pageSize) => {
             setPageSize(pageSize);
-            console.log(pageSize);
-
             setCurrent(1);
           }}
           onChange={handlePageChange}
@@ -436,13 +433,13 @@ export default function DataLoad() {
         // maskClosable={false}
         unmountOnExit={true}
       >
-        <LoadAddModal hideModalHan={hideEditModal} getList={getLoadList} />
+        <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
       </Modal>
-      <Route
+      {/* <Route
         key="/tenant/compute/modaforge/dataLoad/detail"
         path="/tenant/compute/modaforge/dataLoad/detail"
         component={React.lazy(async () => import('../detail/dataLoad-detail'))}
-      />
+      /> */}
     </div>
   );
 }

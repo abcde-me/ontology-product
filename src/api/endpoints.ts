@@ -160,14 +160,14 @@ export const ResourceEndpointsV2 = {
   fileDeleteApi: Prefix + `/files/delete/{file_id}`,
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
-// 数据目录
-catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
-catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
-volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
-volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
-catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
-targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  // 数据目录
+  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
+  catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
+  volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
+  catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
+  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: Prefix + `/files/export`,
@@ -308,6 +308,8 @@ export const ModaForgeResourceEndpoints = {
   runLoadApi: PrefixAimdp + '/load_tasks/{task_id}/exec',
   // 删除指定文件
   delFileApi: PrefixAimdp + '/load_tasks/files',
+  // 查询载入任务详情的列表
+  getdetailListApi: PrefixAimdp + '/load_tasks/records/page',
   // 查询单个载入任务的执行记录
   getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
   // 查询单个载入任务已加载文件信息
