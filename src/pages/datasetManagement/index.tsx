@@ -53,7 +53,7 @@ interface Dataset {
   created_at: string;
   updated_at: string;
   deleted_at: null;
-  tags: string[];
+  tag_names: string[];
   src_model: string;
 }
 
@@ -74,28 +74,30 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
   },
   {
     title: '标签',
-    dataIndex: 'tags',
+    dataIndex: 'tag_names',
     width: 160,
     // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList.forEach((dataset) => {
-        dataset.tags.forEach((tag) => tagSet.add(tag));
+        dataset.tag_names.forEach((tag) => tagSet.add(tag));
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
     })(),
     onFilter: (value: string, record: Dataset) => {
-      return record.tags.includes(value);
+      return record.tag_names.includes(value);
     },
-    render: (tags: string[]) => (
+    render: (tag_names: string[]) => (
       <Space size="mini">
-        {tags.length > 0 && (
+        {tag_names.length > 0 && (
           <Tag className={styles.tagGreen}>
-            {tags[0].length > 5 ? `${tags[0].substring(0, 5)}...` : tags[0]}
+            {tag_names[0].length > 5
+              ? `${tag_names[0].substring(0, 5)}...`
+              : tag_names[0]}
           </Tag>
         )}
-        {tags.length > 1 && (
-          <Tag className={styles.tagGreen}>+{tags.length - 1}</Tag>
+        {tag_names.length > 1 && (
+          <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
         )}
       </Space>
     )
@@ -225,7 +227,7 @@ const data: Dataset[] = [
     created_at: '2025-05-15T10:30:45+08:00',
     updated_at: '2025-06-01T08:15:22+08:00',
     deleted_at: null,
-    tags: ['文本11111111111111111', '训练'],
+    tag_names: ['文本11111111111111111', '训练'],
     src_model: 'gpt-3.5-turbo'
   },
   {
@@ -239,7 +241,7 @@ const data: Dataset[] = [
     created_at: '2025-05-10T14:22:33+08:00',
     updated_at: '2025-05-28T16:45:10+08:00',
     deleted_at: null,
-    tags: ['图片', '分类'],
+    tag_names: ['图片', '分类'],
     src_model: 'vision-model'
   },
   {
@@ -253,7 +255,7 @@ const data: Dataset[] = [
     created_at: '2025-04-22T09:12:18+08:00',
     updated_at: '2025-05-30T11:33:47+08:00',
     deleted_at: null,
-    tags: ['混合', '自定义', '测试'],
+    tag_names: ['混合', '自定义', '测试'],
     src_model: 'claude-3-sonnet'
   }
 ];
@@ -419,12 +421,12 @@ const DatasetManagement: React.FC = () => {
       search: search,
       search_field: searchField
     }).then((res) => {
+      console.log('李帆测试', res.data.list);
       setDatasetList(res.data.list);
       setTotal(res.data.total);
-      console.log(res);
     });
-    setDatasetList(data); // 测试数据
-    setTotal(1000); // 设置总条数
+    // setDatasetList(data); // 测试数据
+    // setTotal(1000); // 设置总条数
   }, [currentPage, pageSize]);
 
   // 批量删除
@@ -469,7 +471,6 @@ const DatasetManagement: React.FC = () => {
             管理用于模型精调和训练的数据集
           </div>
         </div>
-
         <div className={styles.searchToolbar}>
           <div className={styles.searchGroup}>
             <Select

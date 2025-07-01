@@ -160,14 +160,14 @@ export const ResourceEndpointsV2 = {
   fileDeleteApi: Prefix + `/files/delete/{file_id}`,
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
-// 数据目录
-catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
-catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
-volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
-volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
-catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
-targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  // 数据目录
+  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
+  catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
+  volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
+  catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
+  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: Prefix + `/files/export`,
@@ -253,7 +253,7 @@ export const ModaForgeResourceEndpoints = {
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixV1 + '/dataset',
+  datasetsApi: PrefixAimdp + '/datasets',
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集

@@ -9,8 +9,11 @@ import {
   Checkbox,
   Cascader,
   Typography,
-  Modal
+  Modal,
+  Tooltip
 } from '@arco-design/web-react';
+
+const { Option } = Select;
 import React, { useState, useEffect } from 'react';
 import styles from './AddDatasetForm.module.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
@@ -163,6 +166,13 @@ const tagOptions = [
     name: 'gan'
   }
 ];
+// 格式化日期时间
+function formatDateTime(isoString) {
+  const date = new Date(isoString);
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 //标签列表转换为select选项
 function convertTotagSelectOptions(data = []) {
   return data.map((item) => ({
@@ -214,7 +224,7 @@ const csconnectorFileInformation = [
   }
 ];
 
-//连接器文件信息转换为select选项的函数
+//连接器文件信息转换为select选项的函数，咱不使用
 function transformToSelectOptions(fileList) {
   return fileList.map((file) => ({
     label: `${file.name}`,
@@ -290,12 +300,17 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
+  const [selectedConnector, setSelectedConnector] = useState<string | null>(
+    null
+  ); //选择的连接器ID
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]); //选择文件
   const [showFileSelection, setShowFileSelection] = useState(false); //文件选择
   const [showDataPreview, setShowDataPreview] = useState(false); //数据预览
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]); //目标数据源选项
   const [connectorList, setConnectorList] = useState([]); //连接器列表
-  const [connectorFileInformation, setConnectorFileInformation] = useState([]); //连接器文件信息
+  const [connectorFileInformation, setConnectorFileInformation] = useState<
+    any[]
+  >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [previewColumns, setPreviewColumns] = useState([]); //数据目录预览表格列（从后端获取）
   //标签列表
@@ -336,9 +351,14 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     form.setFieldValue('dataSource', value);
     setShowFileSelection(false); //不显示文件选择
     setShowDataPreview(false); //不显示数据预览
+    setSelectedConnector(null); //清除连接器选择
     setSelectedFiles([]);
+    setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setPreviewColumns([]); //重置表格列
+    // 清除表单字段
+    form.setFieldValue('connector', undefined);
+    form.setFieldValue('selectedFiles', []);
   };
 
   // 处理目标数据源选择
@@ -355,17 +375,27 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       const path = `${catalogpath}/dst/${catalogId}/${selectedItem}`;
       console.log('选择的数据目录卷路径:', path);
       getVolumePreviewData(path);
-    } else if (dataSource === 'connector') {
-      console.log('选择的连接器ID:', value);
-      getConnectorFileInformationfun(value as string, 'jsonl');
     }
+  };
+
+  // 处理连接器选择
+  const handleConnectorChange = (value: string) => {
+    console.log('选择的连接器ID:', value);
+    setSelectedConnector(value);
+    form.setFieldValue('connector', value);
+    // 清除之前的文件选择
+    setSelectedFiles([]);
+    setConnectorFileInformation([]);
+    form.setFieldValue('selectedFiles', []);
+    // 获取连接器文件信息
+    getConnectorFileInformationfun(value, 'jsonl');
   };
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
     getConnectorFileList({ connector_id: id, type: type }).then((res) => {
       console.log(res.data);
-      setConnectorFileInformation(transformToSelectOptions(res.data.files));
+      setConnectorFileInformation(res.data.files);
     });
     // setConnectorFileInformation(
     //   transformToSelectOptions(csconnectorFileInformation)
@@ -486,7 +516,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           </Radio.Group>
         </FormItem>
 
-        {
+        {dataSource === 'volume' && (
           <div
             style={{
               border: '1px solid rgba(0, 0, 0, 0.2)',
@@ -495,120 +525,165 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
               marginLeft: 20
             }}
           >
-            {dataSource === 'volume' ? (
-              <>
-                <FormItem
-                  label="选择目标数据目录卷/卷:"
-                  field="targetDataSource"
-                  rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                >
-                  <Cascader
-                    placeholder="请选择"
-                    options={targetDataSourceOptions}
-                    style={{ marginLeft: 10, marginRight: 20 }}
-                    onChange={handleTargetDataSourceChange}
-                    expandTrigger="hover"
-                    showSearch
-                  />
-                </FormItem>
-                <div
+            <FormItem
+              label="选择目标数据目录卷/卷:"
+              field="targetDataSource"
+              rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+            >
+              <Cascader
+                placeholder="请选择"
+                options={targetDataSourceOptions}
+                style={{ marginLeft: 10, marginRight: 20 }}
+                onChange={handleTargetDataSourceChange}
+                expandTrigger="hover"
+                showSearch
+              />
+            </FormItem>
+            <div
+              style={{
+                marginLeft: 20,
+                marginTop: 8,
+                fontSize: '12px',
+                color: '#86909c'
+              }}
+            >
+              {previewData ? (
+                <span>
+                  <span style={{ fontWeight: '500', color: '#000' }}>预览</span>{' '}
+                  目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                </span>
+              ) : (
+                <span>
+                  <span style={{ fontWeight: '500', color: '#000' }}>
+                    预览：
+                  </span>
+                  请先选择目标数据目录卷/卷
+                </span>
+              )}
+            </div>
+            {previewData ? (
+              <div className={styles.previewContainer}>
+                <Table
+                  className={styles.previewTable}
+                  columns={previewColumns}
+                  data={previewData}
+                  pagination={false}
+                  scroll={{
+                    x: Math.max(800, previewColumns.length * 200),
+                    y: 300
+                  }}
+                  size="small"
+                  loading={false}
+                  placeholder="暂无数据"
+                />
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {dataSource === 'connector' && (
+          <div
+            style={{
+              border: '1px solid rgba(0, 0, 0, 0.2)',
+              borderRadius: '10px',
+              padding: '10px 30px 10px 0px',
+              marginLeft: 20
+            }}
+          >
+            <FormItem
+              label="选择连接器:"
+              field="connector"
+              rules={[{ required: true, message: '请选择连接器' }]}
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 20 }}
+            >
+              <Select
+                placeholder="请选择连接器"
+                options={connectorList}
+                style={{ marginLeft: 10 }}
+                onChange={handleConnectorChange}
+                value={selectedConnector || undefined}
+              />
+            </FormItem>
+
+            <FormItem
+              label="选择数据文件:"
+              field="selectedFiles"
+              rules={[{ required: true, message: '请选择至少一个文件' }]}
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 20 }}
+              extra={
+                <span
                   style={{
-                    marginLeft: 20,
-                    marginTop: 8,
                     fontSize: '12px',
-                    color: '#86909c'
+                    color: '#86909c',
+                    marginLeft: 10
                   }}
                 >
-                  {previewData ? (
-                    <span>
-                      <span style={{ fontWeight: '500', color: '#000' }}>
-                        预览
-                      </span>{' '}
-                      目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
-                    </span>
-                  ) : (
-                    <span>
-                      <span style={{ fontWeight: '500', color: '#000' }}>
-                        预览：
-                      </span>
-                      请先选择目标数据目录卷/卷
-                    </span>
-                  )}
-                </div>
-                {previewData ? (
-                  <div className={styles.previewContainer}>
-                    <Table
-                      className={styles.previewTable}
-                      columns={previewColumns}
-                      data={previewData}
-                      pagination={false}
-                      scroll={{
-                        x: Math.max(800, previewColumns.length * 200),
-                        y: 300
-                      }}
-                      size="small"
-                      loading={false}
-                      placeholder="暂无数据"
-                    />
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <FormItem
-                  label="选择连接器:"
-                  field="connector"
-                  rules={[{ required: true, message: '请选择连接器' }]}
-                  labelCol={{ span: 4 }}
-                  wrapperCol={{ span: 20 }}
-                >
+                  目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                </span>
+              }
+            >
+              <Tooltip
+                content={!selectedConnector ? '请先选择连接器' : ''}
+                disabled={!!selectedConnector}
+              >
+                <div style={{ marginLeft: 10 }}>
                   <Select
-                    placeholder="请选择"
-                    options={connectorList}
-                    style={{ marginLeft: 10 }}
-                    onChange={handleTargetDataSourceChange}
-                  />
-                </FormItem>
-
-                <FormItem
-                  label="选择数据文件:"
-                  field="selectedFiles"
-                  rules={[{ required: true, message: '请选择至少一个文件' }]}
-                  labelCol={{ span: 4 }}
-                  wrapperCol={{ span: 20 }}
-                  extra={
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: '#86909c',
-                        marginLeft: 10
-                      }}
-                    >
-                      目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                    </span>
-                  }
-                >
-                  <Select
-                    placeholder="请选择要使用的文件..."
+                    placeholder={
+                      !selectedConnector
+                        ? '请先选择连接器'
+                        : '请选择要使用的文件...'
+                    }
                     mode="multiple"
-                    options={connectorFileInformation}
-                    style={{ marginLeft: 10 }}
-                    onChange={setSelectedFiles}
+                    // options={connectorFileInformation}
+                    disabled={!selectedConnector}
+                    onChange={(values) => {
+                      // labelInValue 为 true 时，values 是对象数组
+                      console.log('选择的文件:', values);
+                      const fileValues = values.map((v: any) => v.value);
+                      setSelectedFiles(fileValues);
+                      form.setFieldValue('selectedFiles', fileValues);
+                    }}
                     value={selectedFiles}
-                    // renderOption={(option) => (
-                    //   <div>
-                    //     <div>{option.data.name}</div>
-                    //     <small>{option.data.last_modified}</small>
-                    //   </div>
-                    // )}
-                  />
-                </FormItem>
-              </>
-            )}
+                    style={{ width: '100%' }}
+                    labelInValue
+                    renderFormat={(values: any) => {
+                      console.log('李帆测试', values);
+                      return values.label;
+                    }}
+                  >
+                    {connectorFileInformation.map((item, index) => (
+                      // @ts-expect-error
+                      <Option
+                        key={index}
+                        value={item.path + '/' + item.name}
+                        label={item.name}
+                      >
+                        <div
+                          style={{
+                            fontFamily: 'Arial, sans-serif',
+                            fontSize: '14px',
+                            color: '#4E5969',
+                            lineHeight: '1.8',
+                            margin: '10px'
+                          }}
+                        >
+                          <div>{item.name}</div>
+                          <div style={{ color: '#86909c' }}>
+                            修改时间：{formatDateTime(item.last_modified)}
+                          </div>
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </Tooltip>
+            </FormItem>
           </div>
-        }
+        )}
 
         <FormItem wrapperCol={{ span: 24 }}>
           <div
