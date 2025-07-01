@@ -31,7 +31,7 @@ export default function WorkflowTask() {
   // 数据总数
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // 组件初始化
   useEffect(() => {
