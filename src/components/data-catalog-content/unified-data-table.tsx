@@ -8,7 +8,7 @@ import {
   Modal
 } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
-
+import { getTargetDataFileList } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable from './unified-table';
 import Pages from './components/pages';
@@ -183,6 +183,13 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
     }
   }, [selectedPath, tableType]);
 
+  const getTableList = async () => {
+    const res = await getTargetDataFileList('/src/test1/volume/test11');
+    console.log(res);
+  };
+  useEffect(() => {
+    getTableList();
+  }, []);
   // 控制下载弹框的显示和隐藏 - 使用useCallback避免重新创建
   const downloadShow = React.useCallback(
     (visible: boolean, downloaddata?: any) => {
@@ -401,6 +408,7 @@ function UnifiedDataTable(props: UnifiedDataTableProps) {
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
       <FormComponent
         downloadData={downloadData}
+        
         onCancel={() => setVisible(false)}
         visible={visible}
       />

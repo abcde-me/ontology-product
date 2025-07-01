@@ -10,8 +10,10 @@ import {
   Message
 } from '@arco-design/web-react';
 import { exportFile } from '@/api/dataCatalog';
+import { getConnectionList } from '@/api/connectionApi';
 const FormItem = Form.Item;
 interface FormProps {
+  names?: string;
   downloadData?: any;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
@@ -20,11 +22,18 @@ interface FormProps {
 const FormComponent: React.FC<FormProps> = ({
   downloadData,
   onCancel,
-  visible = false
+  visible = false,
+  names
 }) => {
   const handleExport = async () => {
     //导出逻辑
-    exportFile({});
+    const res = await exportFile({
+      file_names: form.getFieldValue('name'),
+      output_path: form.getFieldValue('path'),
+      file_path: form.getFieldValue('path'),
+      connector_id: Number(form.getFieldValue('province'))
+    });
+    console.log(res);
     try {
       await form.validate();
       Message.success('导出成功');
@@ -40,25 +49,41 @@ const FormComponent: React.FC<FormProps> = ({
     onCancel && onCancel();
   };
   //导出
-  const handExport = () => {
-    console.log('导出');
-    onCancel && onCancel();
-  };
+  // const handExport = () => {
+  //   console.log('导出');
+  //   onCancel && onCancel();
+  // };
   //显示弹窗的状态由外部传入，不再在内部管理
   const [form] = Form.useForm();
   const formItemLayout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 20 }
+    labelCol: { span: 5 },
+    wrapperCol: { span: 19 }
   };
 
-  // 当downloadData变化时，设置表单初始值
+  const [connectorList, setConnectorList] = useState([]);
+  const getConnectorList = async () => {
+    const res = await getConnectionList({});
+    setConnectorList(res.data.items);
+  };
+
+  // 修改为监听 visible 变化，当弹窗打开时设置表单值
   useEffect(() => {
-    if (downloadData) {
-      form.setFieldsValue({
-        name: downloadData.content
-      });
+    if (visible) {
+      // 当弹窗显示时，设置表单值
+      if (names) {
+        form.setFieldsValue({
+          name: names
+        });
+      } else if (downloadData && downloadData.content) {
+        form.setFieldsValue({
+          name: downloadData.content
+        });
+      }
+      // 获取连接器列表
+      getConnectorList();
     }
-  }, [downloadData, form]);
+  }, [visible, form, names, downloadData]);
+
   return (
     <Modal
       title="导出设置"
@@ -99,8 +124,11 @@ const FormComponent: React.FC<FormProps> = ({
         >
           <Select
             allowClear
-            placeholder="please select"
-            options={['Beijing', 'Shanghai']}
+            placeholder="请选择连接器"
+            options={connectorList.map((item:any) => ({
+              label: item.name,
+              value: item.id
+            }))}
           ></Select>
         </Form.Item>
         <FormItem
@@ -115,7 +143,7 @@ const FormComponent: React.FC<FormProps> = ({
             }
           ]}
         >
-          <Input placeholder="please enter your username" />
+          <Input placeholder="请输入保存路径" />
         </FormItem>
       </Form>
       <div style={{ marginTop: '20px', textAlign: 'right', marginBottom: 20 }}>

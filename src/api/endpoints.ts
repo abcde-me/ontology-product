@@ -166,11 +166,11 @@ catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
 volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
 volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
 catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
+targetDataFileListApi: PrefixAimdp + '/directory{path}', //查询目标数据文件列表
 targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: Prefix + `/files/export`,
+  fileExportApi: PrefixAimdp + `/connectors/files/output`,
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,

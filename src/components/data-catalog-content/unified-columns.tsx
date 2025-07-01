@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Popover, DatePicker } from '@arco-design/web-react';
+import { Button, Popover, DatePicker,Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
@@ -94,7 +94,7 @@ const renderActionColumn = (_, record, setVisible) => (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record.id)}
+      onClick={() => handleDelete(record)}
     >
       删除
     </span>
@@ -172,6 +172,8 @@ export const getUnifiedColumns = (
       {
         title: '上传用户',
         dataIndex: 'meta',
+        ellipsis: true,
+        width:180,
         render: (_, record) => (
           <div>
             <div>原文件: {record.file}</div>
@@ -322,19 +324,33 @@ export const getUnifiedColumns = (
   return [];
 };
 
-// 处理下载操作
+// 处理导出操作
 const handleDownload = (record, setVisible) => {
-  console.log('下载', record);
+  console.log('导出', record);
   setVisible(true, record);
 };
 
 // 处理删除操作
-const handleDelete = (id) => {
-  console.log('删除', id);
-  const token = localStorage.getItem('loginToken');
-  if (!token) {
-    Message.error('请先登录');
-    return;
+const handleDelete = (data) => {
+  
+  try {
+    Modal.confirm({
+      title: '确认删除文件吗?',
+      content: '删除后，文件不可恢复',
+      onOk() {
+        console.log('删除', data);
+        // await deleteinterTuningUpdata(appid, e.id, {});
+        Message.success('删除成功');
+        // creatsuccess();
+      }
+    });
+  } catch {
+    Message.error('删除失败，请重试');
   }
+  // const token = localStorage.getItem('loginToken');
+  // if (!token) {
+  //   Message.error('请先登录');
+  //   return;
+  // }
   // deleteFileById(id)
 };

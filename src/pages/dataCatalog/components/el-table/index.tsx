@@ -10,6 +10,7 @@ import {
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
 import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
+import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
@@ -44,6 +45,9 @@ export default function Eltable() {
     keyword: '',
     isActive: false
   }); // Target表格搜索条件状态，传递给子组件
+
+  const [visible, setVisible] = useState(false); // 下载弹框控制
+  const [downloadData, setDownloadData] = useState([]); // 下载的数据
 
   // 通用的行选择处理函数
   const handleSelectionChange = (selectedRowKeys, selectedRowsData) => {
@@ -159,6 +163,15 @@ export default function Eltable() {
     } catch {
       Message.error('删除失败，请重试');
     }
+  };
+  // 批量导出
+  const [defaultName, setDefaultName] = useState('');
+  const handleExport = () => {
+    // 根据当前标签页设置默认文件名
+    const fileName = activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
+    setDefaultName(fileName);
+    console.log('导出', selectedRows);
+    setVisible(true);
   };
 
   // 通用的时间选择器事件处理
@@ -307,7 +320,7 @@ export default function Eltable() {
             }}
             disabled={!hasSelectedRows}
             onClick={() => {
-              // 批量导出逻辑
+              handleExport()
             }}
           >
             批量导出
@@ -324,7 +337,7 @@ export default function Eltable() {
           }}
           disabled={!hasSelectedRows}
           onClick={() => {
-            // 批量导出逻辑
+            handleExport()
           }}
         >
           批量导出
@@ -389,6 +402,12 @@ export default function Eltable() {
           />
         </div>
       </div>
+      <FormComponent
+        downloadData={downloadData}
+        onCancel={() => setVisible(false)}
+        visible={visible}
+        names={defaultName}
+      />
     </div>
   );
 }
