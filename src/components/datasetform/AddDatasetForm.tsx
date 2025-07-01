@@ -454,6 +454,13 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           label="描述说明:"
           field="description"
           rules={[{ required: false, message: '请输入描述信息' }]}
+          extra={
+            <span
+              style={{ fontSize: '12px', color: '#86909c', marginLeft: 10 }}
+            >
+              指定导出文件的保存路径目录
+            </span>
+          }
         >
           <Input.TextArea
             placeholder="这里输入对数据集的描述和说明信息..."
@@ -463,7 +470,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
             style={{ marginLeft: 10 }}
           />
         </FormItem>
-
         <FormItem
           label="数据来源:"
           field="dataSource"
@@ -485,7 +491,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
             style={{
               border: '1px solid rgba(0, 0, 0, 0.2)',
               borderRadius: '10px',
-              padding: '10px 30px 10px 10px'
+              padding: '10px 30px 10px 0px',
+              marginLeft: 20
             }}
           >
             {dataSource === 'volume' ? (
@@ -554,8 +561,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                   label="选择连接器:"
                   field="connector"
                   rules={[{ required: true, message: '请选择连接器' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
+                  labelCol={{ span: 4 }}
+                  wrapperCol={{ span: 20 }}
                 >
                   <Select
                     placeholder="请选择"
@@ -567,11 +574,22 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
                 {connectorFileInformation.length > 0 && (
                   <FormItem
-                    label="选择文件:"
+                    label="选择数据文件:"
                     field="selectedFiles"
                     rules={[{ required: true, message: '请选择至少一个文件' }]}
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 19 }}
+                    labelCol={{ span: 4 }}
+                    wrapperCol={{ span: 20 }}
+                    extra={
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          color: '#86909c',
+                          marginLeft: 10
+                        }}
+                      >
+                        目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                      </span>
+                    }
                   >
                     <Select
                       placeholder="请选择要使用的文件..."
