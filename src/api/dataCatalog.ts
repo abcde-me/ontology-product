@@ -1,5 +1,6 @@
 import UAPI from '@/api';
 import { Get, Post } from '@/utils/request';
+import { Message } from '@arco-design/web-react';
 
 // 数据目录相关接口
 
@@ -43,8 +44,11 @@ export async function deleteVolume(id: string) {
   return await UAPI.RES.volumeDeleteApi({ id }).delete().inRegion().do();
 }
 //重命名目录
-export async function renameCatalog(id:string,params: any) {
-  return await UAPI.RES.catalogRenameApi({catalogId: id}).put(params).inRegion().do();
+export async function renameCatalog(id: string, params: any) {
+  return await UAPI.RES.catalogRenameApi({ catalogId: id })
+    .put(params)
+    .inRegion()
+    .do();
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(param: any = {}) {

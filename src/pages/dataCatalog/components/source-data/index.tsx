@@ -3,14 +3,9 @@ import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import EditableTree from '../editable-tree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import SourceDataTree from './components/sourcedata-tree';
+import { tabKeys } from '../../consts';
 
 const TabPane = Tabs.TabPane;
-
-const tabKeys = [
-  { key: 'source', title: '源数据' },
-  { key: 'target', title: '目标数据' }
-];
 
 export default function SourceData() {
   const dataCatalog = useDataCatalog();
@@ -37,9 +32,6 @@ export default function SourceData() {
               <EditableTree />
             </TabPane>
           ))}
-          {/* <TabPane key={'source'} title={'数据集'}>
-            <SourceDataTree />
-          </TabPane> */}
         </Tabs>
       </div>
     </div>
