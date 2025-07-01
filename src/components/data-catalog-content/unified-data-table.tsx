@@ -122,6 +122,8 @@ interface UnifiedDataTableProps {
   tableType: 'source' | 'target';
   // 数据类型标识
   dataType?: 'volume' | 'database';
+  // 选中节点的完整路径
+  selectedFullPath?: string;
 }
 
 /**
@@ -136,7 +138,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     startTime = '',
     endTime = '',
     tableType,
-    dataType = 'volume'
+    dataType = 'volume',
+    selectedFullPath
   } = props;
 
   // 添加调试信息
@@ -147,12 +150,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     endTime,
     tableType,
     dataType,
+    selectedFullPath,
     selectedNode: selectedNode ? 'has value' : 'null'
   });
 
   // 使用zustand获取路径
   const selectedPath = useStore((state: any) => state.selectedPath);
-
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
   const [downloadData, setDownloadData] = useState([]); // 下载的数据
@@ -167,20 +170,22 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   // 表格选择状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
-
+  
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
   const childRef = useRef(null);
+   // 分解searchCondition对象，避免引用比较导致的无限循环
+   const searchConditionType = searchCondition?.type || '';
+   const searchConditionKeyword = searchCondition?.keyword || '';
+   const searchConditionIsActive = searchCondition?.isActive || false;
   // 监听选中路径变化
-  // useEffect(() => {
-  //   if (selectedPath) {
-  //     console.log(
-  //       `UnifiedDataTable (${tableType}) - selectedPath:`,
-  //       selectedPath
-  //     );
-  //     // 获取到路径后直接传递给后端，然后前端根据路径获取数据
-  //   }
-  // }, [selectedPath, tableType]);
+  useEffect(() => {
+    console.log(
+          '选中的路径selectedFullPath9999999999999',
+          selectedFullPath
+        );
+      // 获取到路径后直接传递给后端，然后前端根据路径获取数据
+  }, [selectedFullPath]);
   // 将getTableList方法暴露给父组件
   useImperativeHandle(ref, () => ({
     getTableList
@@ -231,7 +236,18 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   };
   useEffect(() => {
     getTableList();
-  }, []);
+  }, [
+    searchValue,
+    searchConditionType,
+    searchConditionKeyword,
+    searchConditionIsActive,
+    startTime,
+    endTime,
+    selectedFilePath,
+    currentPage,
+    pageSize,
+    tableType
+  ]);
   // 控制下载弹框的显示和隐藏 - 使用useCallback避免重新创建
   const downloadShow = React.useCallback(
     (visible: boolean, downloaddata?: any) => {
@@ -324,94 +340,91 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
 
-  // 分解searchCondition对象，避免引用比较导致的无限循环
-  const searchConditionType = searchCondition?.type || '';
-  const searchConditionKeyword = searchCondition?.keyword || '';
-  const searchConditionIsActive = searchCondition?.isActive || false;
+ 
 
   // 监听搜索条件变化 - 根据表格类型使用不同的搜索逻辑
-  useEffect(() => {
-    console.log(`UnifiedDataTable (${tableType}) - 搜索条件变化`);
+  // useEffect(() => {
+  //   console.log(`UnifiedDataTable (${tableType}) - 搜索条件变化`);
 
-    // 这里可以调用真实的API
-    // getDataCatalogList({
-    //   start_time: startTime ? toUnixTimestamp(startTime) : undefined,
-    //   end_time: endTime ? toUnixTimestamp(endTime) : undefined,
-    //   file_name: tableType === 'source' ? searchValue : searchConditionKeyword,
-    //   file_path: selectedFilePath,
-    //   page: currentPage,
-    //   page_size: pageSize,
-    // }).then(res => {
-    //   console.log('API返回数据:', res);
-    //   setTableData(res.data.list || []);
-    //   setTotal(res.data.total || 0);
-    // })
+  //   // 这里可以调用真实的API
+  //   // getDataCatalogList({
+  //   //   start_time: startTime ? toUnixTimestamp(startTime) : undefined,
+  //   //   end_time: endTime ? toUnixTimestamp(endTime) : undefined,
+  //   //   file_name: tableType === 'source' ? searchValue : searchConditionKeyword,
+  //   //   file_path: selectedFilePath,
+  //   //   page: currentPage,
+  //   //   page_size: pageSize,
+  //   // }).then(res => {
+  //   //   console.log('API返回数据:', res);
+  //   //   setTableData(res.data.list || []);
+  //   //   setTotal(res.data.total || 0);
+  //   // })
 
-    // 测试用的本地数据过滤逻辑
-    let filteredData = [...mockData];
+  //   // 测试用的本地数据过滤逻辑
+  //   let filteredData = [...mockData];
 
-    // 根据表格类型使用不同的搜索逻辑
-    if (tableType === 'source') {
-      // Source表格：简单关键词搜索
-      if (searchValue) {
-        filteredData = filteredData.filter(
-          (item) =>
-            item.content.includes(searchValue) ||
-            item.file.includes(searchValue) ||
-            item.workflowId.includes(searchValue)
-        );
-      }
-    } else if (tableType === 'target') {
-      // Target表格：高级搜索（按类型搜索）
-      if (searchConditionIsActive && searchConditionKeyword) {
-        if (searchConditionType === '数据内容') {
-          filteredData = filteredData.filter((item) =>
-            item.content.includes(searchConditionKeyword)
-          );
-        } else if (searchConditionType === 'ID') {
-          filteredData = filteredData.filter((item) =>
-            item.id.toString().includes(searchConditionKeyword)
-          );
-        }
-      }
-    }
+  //   // 根据表格类型使用不同的搜索逻辑
+  //   if (tableType === 'source') {
+  //     // Source表格：简单关键词搜索
+  //     if (searchValue) {
+  //       filteredData = filteredData.filter(
+  //         (item) =>
+  //           item.content.includes(searchValue) ||
+  //           item.file.includes(searchValue) ||
+  //           item.workflowId.includes(searchValue)
+  //       );
+  //     }
+  //   } else if (tableType === 'target') {
+  //     // Target表格：高级搜索（按类型搜索）
+  //     if (searchConditionIsActive && searchConditionKeyword) {
+  //       if (searchConditionType === '数据内容') {
+  //         filteredData = filteredData.filter((item) =>
+  //           item.content.includes(searchConditionKeyword)
+  //         );
+  //       } else if (searchConditionType === 'ID') {
+  //         filteredData = filteredData.filter((item) =>
+  //           item.id.toString().includes(searchConditionKeyword)
+  //         );
+  //       }
+  //     }
+  //   }
 
-    // 根据日期范围过滤（通用逻辑）
-    if (startTime && endTime) {
-      filteredData = filteredData.filter((item) => {
-        const itemDate = new Date(item.createdAt);
-        const start = new Date(startTime);
-        const end = new Date(endTime);
-        return itemDate >= start && itemDate <= end;
-      });
-    }
+  //   // 根据日期范围过滤（通用逻辑）
+  //   if (startTime && endTime) {
+  //     filteredData = filteredData.filter((item) => {
+  //       const itemDate = new Date(item.createdAt);
+  //       const start = new Date(startTime);
+  //       const end = new Date(endTime);
+  //       return itemDate >= start && itemDate <= end;
+  //     });
+  //   }
 
-    // 根据文件路径过滤（如果需要）
-    if (selectedFilePath) {
-      console.log(
-        `UnifiedDataTable (${tableType}) - 根据文件路径过滤:`,
-        selectedFilePath
-      );
-    }
+  //   // 根据文件路径过滤（如果需要）
+  //   if (selectedFilePath) {
+  //     console.log(
+  //       `UnifiedDataTable (${tableType}) - 根据文件路径过滤:`,
+  //       selectedFilePath
+  //     );
+  //   }
 
-    console.log(
-      `UnifiedDataTable (${tableType}) - 过滤后的数据:`,
-      filteredData
-    );
-    setTableData(filteredData);
-    setTotal(filteredData.length);
-  }, [
-    searchValue,
-    searchConditionType,
-    searchConditionKeyword,
-    searchConditionIsActive,
-    startTime,
-    endTime,
-    selectedFilePath,
-    currentPage,
-    pageSize,
-    tableType
-  ]);
+  //   console.log(
+  //     `UnifiedDataTable (${tableType}) - 过滤后的数据:`,
+  //     filteredData
+  //   );
+  //   setTableData(filteredData);
+  //   setTotal(filteredData.length);
+  // }, [
+  //   searchValue,
+  //   searchConditionType,
+  //   searchConditionKeyword,
+  //   searchConditionIsActive,
+  //   startTime,
+  //   endTime,
+  //   selectedFilePath,
+  //   currentPage,
+  //   pageSize,
+  //   tableType
+  // ]);
 
   return (
     <>
@@ -449,7 +462,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
       <FormComponent
         downloadData={downloadData}
-
         onCancel={() => setVisible(false)}
         visible={visible}
       />

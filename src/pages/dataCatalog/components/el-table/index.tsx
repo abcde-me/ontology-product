@@ -44,7 +44,9 @@ export default function Eltable() {
       'selectedKey',
       'selectedFullPath'
     ]);
-
+  useEffect(()=>{
+   console.log('activeTab',activeTab);
+  },[activeTab])
   // 通用状态管理
   const [selectedRows, setSelectedRows] = useState<TableRow[]>([]); // 用于存储选中的行数据
   const [startTime, setStartTime] = React.useState(''); // 开始时间
@@ -244,7 +246,7 @@ export default function Eltable() {
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
-    if (activeTab === 'source') {
+    if (activeTab === 'src') {
       // Source表格的简单搜索区域
       return (
         <div
@@ -429,18 +431,19 @@ export default function Eltable() {
             selectedNode={selectedKey}
             onSelectionChange={handleSelectionChange}
             // Source表格专用属性
-            searchValue={activeTab === 'source' ? searchValue : undefined}
+            searchValue={activeTab === 'src' ? searchValue : undefined}
             // Target表格专用属性
             searchCondition={
-              activeTab === 'target' ? searchCondition : undefined
+              activeTab === 'dst' ? searchCondition : undefined
             }
             // 通用属性
             startTime={startTime}
             endTime={endTime}
             // 表格类型标识，根据active值决定
-            tableType={activeTab as 'source' | 'target'}
+            tableType={activeTab === 'src' ? 'source' : 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
+            selectedFullPath={selectedFullPath}
           />
         </div>
       </div>
