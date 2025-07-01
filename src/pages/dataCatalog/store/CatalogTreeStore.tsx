@@ -33,7 +33,7 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
-  selectedFullPath: string;
+  selectedPath: string;
   loading?: boolean;
 }
 
@@ -54,7 +54,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         expandedKeys: [],
         selectedKey: '',
         inputRef: React.createRef<RefInputType>(),
-        selectedFullPath: ''
+        selectedPath: ''
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -63,18 +63,21 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           }): Promise<Partial<CatalogTreeState>> => {
             try {
               const cacheTreeData = await this.getRawData();
+              const defaultNode = cacheTreeData?.[0];
+              const defaultExpand = [
+                defaultNode.key || '',
+                defaultNode?.children?.[0]?.key || '',
+                defaultNode?.children?.[1]?.key || ''
+              ];
+              const defaultSelectedNode =
+                defaultNode?.children?.[0]?.children?.[0];
 
               return {
                 treeData: cacheTreeData,
-                expandedKeys: [
-                  cacheTreeData?.[0]?.key || '',
-                  cacheTreeData?.[0]?.children?.[0]?.key || '',
-                  cacheTreeData?.[0]?.children?.[1]?.key || ''
-                ],
+                expandedKeys: defaultExpand,
                 searchValue: '',
-                selectedKey: String(
-                  cacheTreeData?.[0]?.children?.[0]?.children?.[0]?.key || ''
-                )
+                selectedKey: defaultSelectedNode?.key || '',
+                selectedPath: defaultSelectedNode?.fullPath || ''
               };
             } catch (err) {
               console.log(err);

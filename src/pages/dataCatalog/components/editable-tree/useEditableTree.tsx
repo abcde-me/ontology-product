@@ -13,7 +13,7 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-import { CatalogTypeEnum, subLeafKeys } from '../../consts';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import { addCatalog, addVolume } from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
@@ -96,7 +96,7 @@ export function useEditableTree({ catalogTreeStore }) {
     if (dataRef?.isLastLeaf) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
-        selectedFullPath: dataRef?.fullPath
+        selectedPath: dataRef?.fullPath
       });
     }
   };
@@ -271,7 +271,7 @@ export function useEditableTree({ catalogTreeStore }) {
           // 新建目录
           const res = await addCatalog({
             name: fileName,
-            root_type: CatalogTypeEnum.catalog
+            root_type: RootTypeEnum[activeTab]
           });
           if (res && res.status === 200) {
             newTreeData = await catalogTreeStore.getRawData();
@@ -299,7 +299,7 @@ export function useEditableTree({ catalogTreeStore }) {
         const res = await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
-          root_type: dataRef.type
+          root_type: RootTypeEnum[activeTab]
         });
         if (res && res.status === 200) {
           // TODO 需复查
