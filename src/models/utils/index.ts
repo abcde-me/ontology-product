@@ -9,7 +9,7 @@ interface IComputedConfig<TState extends Record<string, any>> {
 export function calcDiffKeys(
   obj1: object,
   obj2: object,
-  keys: (string | number | symbol)[],
+  keys: (string | number | symbol)[]
 ) {
   const diffKeysMap: Record<string | number | symbol, boolean> = {};
   let diff = false;
@@ -21,14 +21,14 @@ export function calcDiffKeys(
   });
   return {
     diffKeysMap,
-    diff,
+    diff
   };
 }
 
 export function calcComputedState<TState extends Record<string, any>>({
   prevState,
   nextState,
-  computed,
+  computed
 }: IComputedConfig<TState>) {
   if (computed) {
     computed.reduce((currentNextState, computedItem) => {
@@ -39,10 +39,14 @@ export function calcComputedState<TState extends Record<string, any>>({
         const { diffKeysMap, diff } = calcDiffKeys(
           prevState,
           currentNextState,
-          computedItem.keys,
+          computedItem.keys
         );
         if (diff) {
-          partialState = computedItem.hander(currentNextState, diffKeysMap, prevState);
+          partialState = computedItem.hander(
+            currentNextState,
+            diffKeysMap,
+            prevState
+          );
         }
       }
 
@@ -55,7 +59,6 @@ export function calcComputedState<TState extends Record<string, any>>({
   return nextState;
 }
 
-
 interface IWatchConfig<TState extends Record<string, any>> {
   prevState: TState;
   nextState: TState;
@@ -64,7 +67,7 @@ interface IWatchConfig<TState extends Record<string, any>> {
 export function execWatchHandler<TState extends Record<string, any>>({
   prevState,
   nextState,
-  watch,
+  watch
 }: IWatchConfig<TState>) {
   if (watch) {
     watch.forEach((watchItem) => {
@@ -72,11 +75,12 @@ export function execWatchHandler<TState extends Record<string, any>>({
         const { diffKeysMap, diff } = calcDiffKeys(
           prevState,
           nextState,
-          watchItem.keys,
+          watchItem.keys
         );
         if (diff) {
           // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          watchItem.hander && watchItem.hander(nextState, diffKeysMap, prevState);
+          watchItem.hander &&
+            watchItem.hander(nextState, diffKeysMap, prevState);
         }
       }
     });
@@ -85,7 +89,7 @@ export function execWatchHandler<TState extends Record<string, any>>({
 // 数组转对象
 export function arrayToMap<
   T = any,
-  GetValue extends (item: T) => any = () => T,
+  GetValue extends (item: T) => any = () => T
 >(arr: T[], getKey?: (item: T) => string, getValue?: GetValue) {
   const map: Record<string, ReturnType<GetValue>> = {};
   const _getValue = getValue || ((item: T) => item);
@@ -100,7 +104,7 @@ export function arrayToMap<
 export function isSameObject(
   obj1: Record<string, any>,
   obj2: Record<string, any>,
-  keys?: string[],
+  keys?: string[]
 ) {
   if (!obj1 || !obj2) return false;
   const keys1 = Object.keys(obj1);
@@ -122,7 +126,6 @@ export function shallowEqualKeys(obj1: object, obj2: object, keys?: string[]) {
   }
   return false;
 }
-
 
 function S4() {
   return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -186,5 +189,3 @@ export class EventEmitter<TEventName extends string = string> {
 //     ...args: Parameters<Listeners[Type][0]>
 //   ) => boolean;
 // }
-
-
