@@ -21,16 +21,22 @@ import ParseNode from './components/parse-node';
 import DataCleaningNode from './components/data-cleaning-node';
 import DataAugmentationNode from './components/data-augmentation-node';
 import './detail.css';
-import { getTaskDetail } from '@/api/taskDetail';
+import {
+  getTaskDetail,
+  getTaskDetailNode,
+  taskRerun,
+  taskStop
+} from '@/api/taskDetail';
+import { useUserInfo } from '@/store/userInfoStore';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
 
 // 枚举作业运行状态
 enum TaskRunStatus {
-  success = 1,
-  fail = 2,
-  running = 3,
+  running = 1,
+  success = 2,
+  fail = 3,
   stop = 4
 }
 
@@ -81,6 +87,7 @@ interface nodeDataObject {
 export default function WorkflowTaskDetail() {
   const taskId = useParams('id');
   const history = useHistory();
+  const userInfo = useUserInfo();
   // 初始化作业详情数据
   const [taskDetailData, setTaskDetailData] = useState<TaskDetailObject>({});
   // 初始化节点数据
@@ -95,6 +102,12 @@ export default function WorkflowTaskDetail() {
   const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({});
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 初始化分页数据
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 100
+  });
 
   // 初始化详情基本数据
   useEffect(() => {
@@ -118,6 +131,11 @@ export default function WorkflowTaskDetail() {
         setNodeData(res.data.result_info.task_type_list);
         if (isParse) {
           setParseNodeData(res.data.result_info.data_parse);
+          setPagination({
+            current: res.data.result_info.data_parse.page_info.page,
+            pageSize: res.data.result_info.data_parse.page_info.page_size,
+            total: res.data.result_info.data_parse.page_info.total
+          });
         } else {
           setCleaningAugmentNodeData(res.data.result_info.data_dispose);
         }
@@ -163,10 +181,7 @@ export default function WorkflowTaskDetail() {
                   title="确定重新运行吗？"
                   content="已处理数据将被覆盖"
                   onOk={() => {
-                    handleRetryWorkflow(taskId);
-                    Message.success({
-                      content: '提交成功'
-                    });
+                    handleRetryWorkflow(taskId!);
                   }}
                   onCancel={() => {
                     Message.error({
@@ -188,10 +203,7 @@ export default function WorkflowTaskDetail() {
                   title="确定停止吗？"
                   content="未处理完的数据将停止处理"
                   onOk={() => {
-                    handleStopWorkflow(taskId);
-                    Message.success({
-                      content: '停止成功'
-                    });
+                    handleStopWorkflow(taskId!);
                   }}
                   onCancel={() => {
                     Message.error({
@@ -257,6 +269,16 @@ export default function WorkflowTaskDetail() {
     }
   };
 
+  // 获取子组件的分页数据
+  const handleChildData = (current: number, pageSize: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      current,
+      pageSize
+    }));
+    getNodeDetail(current, pageSize);
+  };
+
   // 切换节点tab
   const handleChangeTab = (val: string) => {
     const isParse =
@@ -266,6 +288,28 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
+    getNodeDetail();
+  };
+
+  // 获取节点详情
+  const getNodeDetail = async (current?: number, pageSize?: number) => {
+    if (!taskId) return;
+    const params = {
+      id: taskId,
+      task_type: activeNode,
+      search_key: '',
+      page: current || pagination.current,
+      page_size: pageSize || pagination.pageSize
+    };
+    const res = await getTaskDetailNode(params);
+    if (isParseNode) {
+      setParseNodeData(res.data.data_parse);
+      setPagination({
+        current: res.data.data_parse.page_info.page,
+        pageSize: res.data.data_parse.page_info.page_size,
+        total: res.data.data_parse.page_info.total
+      });
+    } else setCleaningAugmentNodeData(res.data.data_dispose);
   };
 
   // 获取作业内容区域dom
@@ -299,7 +343,12 @@ export default function WorkflowTaskDetail() {
               >
                 <Typography.Paragraph style={{ marginTop: 20 }}>
                   {isParseNode ? (
-                    <ParseNode dataSource={parseNodeData} loading={loading} />
+                    <ParseNode
+                      dataSource={parseNodeData}
+                      loading={loading}
+                      onSendData={handleChildData}
+                      pagination={pagination}
+                    />
                   ) : item.task_type === NodeType.cleaning ? (
                     <DataCleaningNode
                       dataSource={cleaningAugmentNodeData}
@@ -321,13 +370,41 @@ export default function WorkflowTaskDetail() {
   };
 
   // 运行失败状态下重试操作
-  const handleRetryWorkflow = (id: string | null) => {
-    console.log('重试', id);
+  const handleRetryWorkflow = async (id: string) => {
+    const params = {
+      id: id,
+      uid: userInfo?.id
+    };
+    const res = await taskRerun(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '提交成功！'
+      });
+      getDetailData();
+    } else {
+      Message.error({
+        content: '提交失败，请稍后重试'
+      });
+    }
   };
 
   // 进行中状态下停止操作
-  const handleStopWorkflow = (id: string | null) => {
-    console.log('停止', id);
+  const handleStopWorkflow = async (id: string) => {
+    const params = {
+      id: id,
+      uid: userInfo?.id
+    };
+    const res = await taskStop(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '停止成功'
+      });
+      getDetailData();
+    } else {
+      Message.error({
+        content: '停止失败，请稍后重试'
+      });
+    }
   };
 
   return (

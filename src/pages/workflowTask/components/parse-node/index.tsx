@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
 import { Pagination, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -7,6 +7,7 @@ import TxtIcon from '@/assets/txt-icon.svg';
 import EpubIcon from '@/assets/epub-icon.svg';
 import TimeFormatting from '@/utils/timeFormatting';
 import noDataElement from '@/components/no-data';
+import { debounce } from 'lodash';
 
 // 枚举文件类型
 enum FileType {
@@ -15,12 +16,26 @@ enum FileType {
   epub = 'epub'
 }
 
-export default function ParseNode(props: { dataSource; loading }) {
-  const { dataSource } = props;
-  // 当前的第几页
-  const [current, setCurrent] = useState(1);
-  // 每页展示数据的数据量
-  const [pageSize, setPageSize] = useState(10);
+export default function ParseNode(props: {
+  dataSource;
+  loading;
+  onSendData;
+  pagination;
+}) {
+  const { dataSource, onSendData, pagination } = props;
+
+  // 使用防抖控制onSendData
+  const changeRef = useRef(debounce(onSendData, 100));
+
+  // 分页change事件
+  const handlePageChange = (page: number, pageSize?: number) => {
+    changeRef.current(page, pageSize || pagination.pageSize);
+  };
+
+  // 组件销毁时取消防抖
+  useEffect(() => {
+    return () => changeRef.current.cancel();
+  }, []);
 
   const columns: ColumnProps[] = [
     {
@@ -91,15 +106,21 @@ export default function ParseNode(props: { dataSource; loading }) {
       title: '开始时间',
       dataIndex: 'start_time',
       width: 150,
-      render: (_, record) => <span>{TimeFormatting(record.start_time)}</span>,
-      sorter: (a, b) => a.start_time.length - b.start_time.length
+      render: (_, record) => <span>{record.start_time}</span>,
+      sorter: (a, b) => {
+        return (
+          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+        );
+      }
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 150,
-      render: (_, record) => <span>{TimeFormatting(record.end_time)}</span>,
-      sorter: (a, b) => a.end_time.length - b.end_time.length
+      render: (_, record) => <span>{record.end_time}</span>,
+      sorter: (a, b) => {
+        return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
+      }
     }
   ];
   return (
@@ -135,18 +156,15 @@ export default function ParseNode(props: { dataSource; loading }) {
       />
       {/* 分页 */}
       <Pagination
-        current={current}
-        pageSize={pageSize}
+        current={pagination.current}
+        pageSize={pagination.pageSize}
+        onChange={handlePageChange}
         onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
-        }}
-        onChange={(page) => {
-          setCurrent(page);
+          handlePageChange(1, pageSize);
         }}
         sizeOptions={[2, 5, 10, 20]}
         showTotal
-        total={100}
+        total={pagination.total}
         showJumper
         sizeCanChange
         style={{ justifyContent: 'flex-end', marginTop: '10px' }}

@@ -33,8 +33,7 @@ interface CatalogTreeState {
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
-  isEditing: boolean;
-  selectedFullPath: string;
+  selectedPath: string;
   loading?: boolean;
 }
 
@@ -54,9 +53,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         expandedKeys: [],
         selectedKey: '',
-        isEditing: false,
         inputRef: React.createRef<RefInputType>(),
-        selectedFullPath: ''
+        selectedPath: ''
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -65,18 +63,21 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           }): Promise<Partial<CatalogTreeState>> => {
             try {
               const cacheTreeData = await this.getRawData();
+              const defaultNode = cacheTreeData?.[0];
+              const defaultExpand = [
+                defaultNode.key || '',
+                defaultNode?.children?.[0]?.key || '',
+                defaultNode?.children?.[1]?.key || ''
+              ];
+              const defaultSelectedNode =
+                defaultNode?.children?.[0]?.children?.[0];
 
               return {
                 treeData: cacheTreeData,
-                expandedKeys: [
-                  cacheTreeData?.[0]?.key || '',
-                  cacheTreeData?.[0]?.children?.[0]?.key || '',
-                  cacheTreeData?.[0]?.children?.[1]?.key || ''
-                ],
+                expandedKeys: defaultExpand,
                 searchValue: '',
-                selectedKey: String(
-                  cacheTreeData?.[0]?.children?.[0]?.children?.[0]?.key || ''
-                )
+                selectedKey: defaultSelectedNode?.key || '',
+                selectedPath: defaultSelectedNode?.fullPath || ''
               };
             } catch (err) {
               console.log(err);
@@ -131,13 +132,14 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
             title: subLeafKeys[type],
             key: volumeKey,
             type: type,
+            parent_id: catalog.id,
             children:
               arr?.map((item) => {
                 return {
                   ...item,
                   title: item.name,
                   key: String(item.id), // 转换为字符串
-                  parent_id: volumeKey,
+                  parent_id: catalog.id,
                   isLastLeaf: true,
                   fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
                 };
