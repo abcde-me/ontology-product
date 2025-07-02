@@ -14,7 +14,8 @@
         height: 100%;
       }
 
-      &:has(.last-leaf-text, .arco-input) {
+      &:has(.last-leaf-text),
+      &:has(.last-leaf-input) {
         .arco-tree-node-indent {
           &::after {
             top: -2px;

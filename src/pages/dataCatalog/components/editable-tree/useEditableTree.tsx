@@ -160,23 +160,13 @@ export function useEditableTree({ catalogTreeStore }) {
 
     switch (dataRef.type) {
       case CatalogTypeEnum.catalog:
+        const res = deleteVolume(dataRef?.id, {
+          root_type: RootTypeEnum[activeTab]
+        });
+        debugger;
         newTreeData = treeData.filter(
           (item: TreeDataType) => item.key !== _key
         );
-        break;
-
-      case 'volume':
-        newTreeData = treeData.map((item: TreeDataType) => {
-          if (item.key === pathParentKeys?.[0]) {
-            return {
-              ...item,
-              children: item.children?.map((child: TreeDataType) =>
-                child.key === _key ? { ...child, children: [] } : child
-              )
-            };
-          }
-          return item;
-        });
         break;
 
       case CatalogTypeEnum.volume:
@@ -185,9 +175,6 @@ export function useEditableTree({ catalogTreeStore }) {
             return target?.filter((child) => child.key !== _key);
           });
         }
-        // if (dataRef.id) {
-        //   const res = await deleteVolume(String(dataRef.id))
-        // }
         break;
 
       default:
@@ -280,7 +267,7 @@ export function useEditableTree({ catalogTreeStore }) {
           }
         } else {
           // TODO 编辑目录
-          const res = await renameCatalog(dataRef.id, {
+          await renameCatalog(dataRef.id, {
             new_name: fileName,
             root_type: RootTypeEnum[activeTab]
           });
@@ -407,7 +394,10 @@ export function useEditableTree({ catalogTreeStore }) {
               onEditFinish(props);
             }}
             maxLength={256}
-            className="h-8 focus:border-[rgb(var(--primary-6))]"
+            className={classNames(
+              'h-8 focus:border-[rgb(var(--primary-6))]',
+              dataRef?.isLastLeaf ? 'last-leaf-input' : ''
+            )}
           />
         ) : (
           <Tooltip
