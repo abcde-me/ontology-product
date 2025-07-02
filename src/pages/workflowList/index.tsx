@@ -78,9 +78,12 @@ export default function WorkflowList() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (id: number | string) => {
+  const viewDetailWorkflow = (
+    workflow_uuid: number | string,
+    ds_workflow_id: number | string
+  ) => {
     window.open(
-      '/tenant/compute/modaforge/workflowConfig?id=' + id,
+      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -117,7 +120,7 @@ export default function WorkflowList() {
         <span
           className="hover-change"
           onClick={() => {
-            viewDetailWorkflow(record.workflow_uuid);
+            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
           }}
         >
           {record.workflow_name}
@@ -226,7 +229,7 @@ export default function WorkflowList() {
           <span
             className="operate-text"
             onClick={() => {
-              viewDetailWorkflow(record.workflow_uuid);
+              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
           >
             详情
