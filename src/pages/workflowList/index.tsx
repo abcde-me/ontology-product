@@ -16,7 +16,7 @@ import {
   IconClockCircle
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
-import { getWorkflowList, workflowOperation } from '@/api/workflowList';
+import { getWorkflowList, workflowDelete } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
@@ -93,7 +93,7 @@ export default function WorkflowList() {
 
   // 删除工作流
   const handleDeleteWorkflow = async (id: number | string, version: string) => {
-    const res = await workflowOperation(id, version);
+    const res = await workflowDelete(id, version);
     if (res.status === 200 && res.code === '') {
       Message.success({
         content: '删除成功'

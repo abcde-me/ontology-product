@@ -234,6 +234,11 @@ export const ModaForgeResourceEndpoints = {
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
   // workflowDraft: PrefixAimdp + '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  // 工作流删除
+  workflowDelete:
+    PrefixAimdp + '/workflow/operation/{workflow_uuid}/{workflow_version}',
+  // 工作流复制
+  workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',

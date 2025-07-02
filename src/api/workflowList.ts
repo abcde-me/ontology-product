@@ -10,13 +10,18 @@ export async function getWorkflowList(params: {
   return await UAPI.RES.workflowList({}).get(params).inRegion().do();
 }
 
-// 工作流操作
-export async function workflowOperation(
+// 工作流删除
+export async function workflowDelete(
   workflow_uuid: string | number,
   workflow_version: string
 ) {
-  return await UAPI.RES.workflowOperation({ workflow_uuid, workflow_version })
+  return await UAPI.RES.workflowDelete({ workflow_uuid, workflow_version })
     .delete()
     .inRegion()
     .do();
+}
+
+// 工作流复制
+export async function workflowCopy(workflow_uuid: string | number) {
+  return await UAPI.RES.workflowCopy({ workflow_uuid }).post().inRegion().do();
 }
