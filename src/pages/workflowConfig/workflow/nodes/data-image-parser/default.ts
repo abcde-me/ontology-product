@@ -13,7 +13,7 @@ const nodeDefault: NodeDefault<ImageParserNodeType> = {
     files: [],
     selected_files_num: -1,
     pic_model_id: '',
-    pic_embc_model_id: ''
+    pic_emb_model_id: ''
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -31,10 +31,13 @@ const nodeDefault: NodeDefault<ImageParserNodeType> = {
   },
   checkValid(payload: ImageParserNodeType, t: any) {
     let errorMessages = '';
-    const { selected_files_num } = payload;
+    const { selected_files_num, pic_model_id, pic_emb_model_id } = payload;
 
     if (selected_files_num <= 0) {
       errorMessages = '需要选择至少一个图片文件';
+    }
+    if (!pic_model_id || !pic_emb_model_id) {
+      errorMessages = '需要选择模型';
     }
     return {
       isValid: !errorMessages,

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { TextParserNodeType } from './types';
@@ -7,6 +7,8 @@ import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split'
 import { type NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import { Form, Select, InputNumber, Checkbox } from '@arco-design/web-react';
 import FileList from './file-list';
+import { getModelList } from '@/api/modelV2';
+import { FileOptions } from '../start/default';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -23,11 +25,43 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const [ocrModels, setOcrModels] = useState<Record<string, any>[]>([]);
+  const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
+  const [textEmbModels, setTextEmbModels] = useState<Record<string, any>[]>([]);
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
     data
   );
+
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      const ocrList =
+        res.data.find((d) => d.type === 'text_ocr_model')?.model_data || [];
+      const picList =
+        res.data.find((d) => d.type === 'text_pic_model')?.model_data || [];
+      const textList =
+        res.data.find((d) => d.type === 'text_emb_model')?.model_data || [];
+
+      setOcrModels(ocrList);
+      setPicModels(picList);
+      setTextEmbModels(textList);
+
+      const defaultOcrId = ocrList[0]?.id || '';
+      const defaultPicId = picList[0]?.id || '';
+      const defaultTextId = textList[0]?.id || '';
+
+      if (!inputs.text_ocr_model_id) {
+        form.setFieldValue('text_ocr_model_id', defaultOcrId);
+      }
+      if (!inputs.text_pic_model_id) {
+        form.setFieldValue('text_pic_model_id', defaultPicId);
+      }
+      if (!inputs.text_ocr_model_id) {
+        form.setFieldValue('text_emb_model_id', defaultTextId);
+      }
+    });
+  }, []);
 
   return (
     <div className="wk-node-panel-content text-parser-panel-content mt-[16px]">
@@ -41,8 +75,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           ...data
         }}
         layout="vertical"
-        onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
+        onValuesChange={(_, v: any) => {
+          console.log('text parser valuechange', _, v);
+          handleFiledsChange(v);
         }}
       >
         <FormItem
@@ -53,6 +88,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={1}
+            fileTypes={FileOptions.doc}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}
             handleFilesChange={handleFilesChange}
@@ -103,9 +139,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           extra="当遇到文本文件（例如：ppt，pdf，doc）中的图片时采用的ocr模型名称。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {ocrModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>
@@ -117,9 +153,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {picModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>
@@ -131,9 +167,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           extra="指定对文本内容进行embedding 的模型。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {textEmbModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>

@@ -16,19 +16,15 @@ import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
-import StartNodeDefault from './default';
+import StartNodeDefault, { FileOptions } from './default';
 import { useNodes } from 'reactflow';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { getCatalogList } from '@/api/dataCatalog';
+import { getLoadTaskFiles } from '@/api/loadApi';
 
 const FormItem = Form.Item;
 const i18nPrefix = 'workflow.nodes.start';
-const FileOptions = {
-  doc: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
-  image: ['JPEG', 'PNG', 'JPG'],
-  audio: ['WAV', 'MP3', 'AAC', 'FLAC'],
-  video: ['MP4', 'MOV', 'MKV']
-};
+
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
@@ -59,15 +55,21 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
         .split('/')
         .map((f) => f.toLowerCase());
       console.log('sourcePath', sourcePath, formats);
-
-      targetNodes.forEach((n: any) => {
-        handleNodeDataUpdateWithSyncDraft({
-          id: n.id,
-          data: {
-            ...n.data,
-            selected_files_num: 100,
-            files: []
-          }
+      getLoadTaskFiles({
+        data_path_id: sourcePath,
+        file_type: formats,
+        page_size: 1,
+        page: 1
+      }).then((res: any) => {
+        targetNodes.forEach((n: any) => {
+          handleNodeDataUpdateWithSyncDraft({
+            id: n.id,
+            data: {
+              ...n.data,
+              selected_files_num: res.total,
+              files: []
+            }
+          });
         });
       });
     } else {
