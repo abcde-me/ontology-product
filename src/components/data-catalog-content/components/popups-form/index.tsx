@@ -36,7 +36,7 @@ const FormComponent: React.FC<FormProps> = ({
     console.log(exportdatas,'打印看啊看exportdatas');
     
     const exportNames: Array<string> = [];
-    if (exportdatas.length > 0) {
+    if (exportdatas && exportdatas.length > 0) {
       // 使用扁平数组而不是嵌套数组
       exportdatas.forEach(item => {
         if (item.extras && item.extras.file_name) {
@@ -49,7 +49,7 @@ const FormComponent: React.FC<FormProps> = ({
       exportNames.push(exportdataset.latest_file_name)
     }
     let full_paths = ''
-    if (exportdatas.length > 0) {
+    if (exportdatas && exportdatas.length > 0) {
       full_paths = exportdatas[0].full_path
     } else if(downloadData) {
       full_paths = downloadData.full_path
