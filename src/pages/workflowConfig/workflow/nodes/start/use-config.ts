@@ -36,8 +36,8 @@ const useConfig = (id: string, payload: StartNodeType) => {
   const updateInputs = useCallback(
     (payload: StartNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
-        draft.source_path = payload.source_path;
-        draft.source_path_name = payload.source_path_name;
+        draft.data_path_id = payload.data_path_id;
+        draft.data_path_name = payload.data_path_name;
         draft.data_category = payload.data_category;
       });
       setInputs(newInputs);
