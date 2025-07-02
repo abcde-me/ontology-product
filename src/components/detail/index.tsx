@@ -109,14 +109,12 @@ const generateArcoColumns = (
 ) => {
   const cols = headers.map((header) => ({
     title: header,
-    dataIndex: header,
+    dataIndex: ['data', header],
     key: header,
     minWidth: 150,
     maxWidth: 300,
-    // align: 'center',
-    // ellipsis: true,
     render: (value: any, record: any) => {
-      if (editingRowKey == record.line) {
+      if (editingRowKey === record.line) {
         return (
           <Input.TextArea
             value={
@@ -142,7 +140,7 @@ const generateArcoColumns = (
     width: 140,
     fixed: 'right',
     render: (_, record) => {
-      if (editingRowKey == record.line) {
+      if (editingRowKey === record.line) {
         // 编辑模式：显示确认和取消按钮
         return (
           <Space>
@@ -224,39 +222,50 @@ const csversionHistory = [
   }
 ];
 
+// 格式化日期
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 // 版本历史表格列定义
 const versionColumns = [
   {
     title: '版本号',
-    dataIndex: 'version',
-
-    render: (version: string, record: any) => (
+    dataIndex: 'version_id',
+    render: (version: string) => (
       <Space>
-        <Text
-          style={{
-            fontWeight: record.status === 'current' ? 'bold' : 'normal'
-          }}
-        >
-          {version}
-        </Text>
-        {record.status === 'current' && (
-          <span className="version-current-tag">当前版本</span>
-        )}
+        <Text>{version}</Text>
       </Space>
     )
   },
   {
-    title: '日期',
-    dataIndex: 'date'
+    title: '修改类型',
+    dataIndex: 'type',
+    render: (type: number) => {
+      const typeMap = {
+        1: '导入',
+        2: '修改',
+        3: '删除'
+      };
+      return typeMap[type] || '-';
+    }
   },
   {
-    title: '描述',
+    title: '创建时间',
+    dataIndex: 'created_at',
+    render: (time: string) => formatDate(time)
+  },
+  {
+    title: '更变记录',
     dataIndex: 'description'
-  },
-  {
-    title: '更改数量',
-    dataIndex: 'changes',
-    render: (changes: number) => `${changes} 项更改`
   }
 ];
 
@@ -266,6 +275,7 @@ const DatasetDetail: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('content');
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
+
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
@@ -273,6 +283,7 @@ const DatasetDetail: React.FC = () => {
   const [pageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
+  const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
   const { id } = useParams<{ id: string }>(); //数据集id
   const history = useHistory();
 
@@ -324,8 +335,20 @@ const DatasetDetail: React.FC = () => {
     updateDataset(updateData)
       .then((res) => {
         console.log(res);
-        Message.success('数据集更新成功');
-        setEditModalVisible(false);
+        if (!res.code) {
+          Message.success('数据集更新成功');
+          setEditModalVisible(false);
+          // 刷新数据
+          getDatasetDetailPage({ id: datasetDetail.id.toString() }).then(
+            (detailRes) => {
+              if (!detailRes.code) {
+                setDatasetDetail(detailRes.data);
+              }
+            }
+          );
+        } else {
+          Message.error(res.msg || '数据集更新失败');
+        }
       })
       .catch((err) => {
         Message.error('数据集更新失败');
@@ -386,10 +409,21 @@ const DatasetDetail: React.FC = () => {
   // 删除
   const handleContinue = (lineNumber: number) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除第 ${lineNumber} 行数据吗？`,
-      okText: '确认删除',
+      title: '确认删除文件吗？',
+      content: '删除后，文件不可恢复',
+      okText: '确定',
       cancelText: '取消',
+      okButtonProps: {
+        type: 'primary',
+        style: { backgroundColor: '#1677ff', borderColor: '#1677ff' }
+      },
+      cancelButtonProps: {
+        type: 'outline',
+        style: { color: '#1677ff', borderColor: '#1677ff' }
+      },
+      style: {
+        textAlign: 'right'
+      },
       onOk: () => {
         const newContentData = contentData.filter(
           (item) => item.line !== lineNumber
@@ -454,7 +488,6 @@ const DatasetDetail: React.FC = () => {
   // 提交数据修改
   const handleSubmitChanges = () => {
     if (!datasetDetail) return;
-
     // 构造提交数据
     const submitData: DataChangeItem[] = [];
 
@@ -498,18 +531,18 @@ const DatasetDetail: React.FC = () => {
         setEditingData({});
         // 重新加载数据 - 刷新内容数据
         const refreshParams = {
-          dataset_id: id,
+          id: id,
           page: currentPage,
           page_size: pageSize,
-          search: actualSearchValue || undefined
+          search: actualSearchValue
         };
         getDatasetContents(refreshParams)
           .then((res) => {
-            if (res.data && res.data.length > 0) {
-              const responseData = res.data[0];
-              setContentData(responseData.list || []);
-              setContentDatabackup(responseData.list || []);
-              setTotal(responseData.total || 0);
+            if (res.data && res.data.list && res.data.list.length > 0) {
+              setContentData(res.data.list || []);
+              setContentColumnslist(res.data.field_names || []);
+              setTotal(res.data.total || 0);
+              setContentDatabackup(res.data.list || []);
             }
           })
           .catch((err) => {
@@ -522,18 +555,6 @@ const DatasetDetail: React.FC = () => {
       });
   };
 
-  // 格式化日期
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   React.useEffect(() => {
     if (id) {
       getDatasetDetailPage({ id: id })
@@ -544,17 +565,14 @@ const DatasetDetail: React.FC = () => {
         .catch((err) => {
           console.error('获取数据集详情失败:', err);
           Message.error('加载数据集详情失败');
-          // 如果请求失败，使用测试数据
-          setDatasetDetail(csdatasetDetail);
-          setTotal(cscontentData.length);
         });
 
-      // getDatasetVersionList({ integer : id }).then((res)=>{
-      //   console.log('历史数据',res);
-      //   setVersionHistory(res.data);
-      // })
+      getDatasetVersionList({ id: id }).then((res) => {
+        console.log('历史数据', res);
+        setVersionHistory(res.data);
+      });
       // 测试数据
-      setVersionHistory(csversionHistory);
+      // setVersionHistory(csversionHistory);
     }
   }, [id]);
 
@@ -572,12 +590,31 @@ const DatasetDetail: React.FC = () => {
     setCurrentPage(1);
   };
 
+  // 更新表格列配置 - 只在编辑状态变化时执行
+  React.useEffect(() => {
+    if (contentColumnslist.length > 0) {
+      setContentColumns(
+        generateArcoColumns(
+          contentColumnslist,
+          handleEditContent,
+          handleContinue,
+          editingRowKey,
+          editingData,
+          handleEditDataChange,
+          handleInlineEditSubmit,
+          handleInlineEditCancel
+        )
+      );
+    }
+  }, [contentColumnslist, editingRowKey, editingData]);
+
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
     // 查询数据集数据内容
     if (datasetDetail && id) {
       const params = {
-        dataset_id: id,
+        version_id: datasetDetail.latest_version,
+        id: id,
         page: currentPage,
         page_size: pageSize,
         search: actualSearchValue || undefined
@@ -585,54 +622,20 @@ const DatasetDetail: React.FC = () => {
 
       getDatasetContents(params)
         .then((res) => {
-          // 根据接口文档处理返回数据
-          if (res.data && res.data.length > 0) {
-            const responseData = res.data[0]; // API返回的data是数组，取第一个元素
-            setContentData(responseData.list || []);
-            setTotal(responseData.total || 0);
-            setContentDatabackup(responseData.list || []);
-            // 动态生成列配置（如果有field_names）
-            if (
-              responseData.field_names &&
-              responseData.field_names.length > 0
-            ) {
-              // 这里可以根据实际字段名动态生成列
-              // setContentColumns(generateArcoColumns(...))
-            }
+          console.log('获取数据集内容响应:', res.data);
+          if (res.data) {
+            setContentData(res.data.list || []);
+            setContentColumnslist(res.data.field_names || []);
+            setTotal(res.data.total || 0);
+            setContentDatabackup(res.data.list || []);
           }
         })
         .catch((err) => {
           console.error('获取数据集内容失败:', err);
           Message.error('加载数据失败');
-          // 如果请求失败，使用测试数据
-          setContentData(cscontentData);
-          console.log(cscontentData);
-          setContentDatabackup(cscontentData);
-          setTotal(cscontentData.length);
         });
-    } else {
-      // 测试数据 - 只在需要重新加载数据时设置
-      setContentData(cscontentData);
-      setContentDatabackup(cscontentData); // 备份测试数据
-      setTotal(cscontentData.length);
     }
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
-
-  // 更新表格列配置 - 只在编辑状态变化时执行
-  React.useEffect(() => {
-    setContentColumns(
-      generateArcoColumns(
-        cscontentColumns,
-        handleEditContent,
-        handleContinue,
-        editingRowKey,
-        editingData,
-        handleEditDataChange,
-        handleInlineEditSubmit,
-        handleInlineEditCancel
-      )
-    );
-  }, [editingRowKey, editingData, contentData]);
 
   return (
     <div className="dataset-detail">
@@ -814,13 +817,15 @@ const DatasetDetail: React.FC = () => {
 
             {/* 内容数据表格 */}
             {activeTab === 'content' ? (
-              <Table
-                columns={contentColumns}
-                data={contentData}
-                pagination={false}
-                scroll={{ x: 'max-content' }}
-                border
-              />
+              <>
+                <Table
+                  columns={contentColumns}
+                  data={contentData}
+                  pagination={false}
+                  scroll={{ x: 'max-content' }}
+                  border
+                />
+              </>
             ) : null}
 
             {/* 分页控件 */}
