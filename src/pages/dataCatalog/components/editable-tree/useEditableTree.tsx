@@ -14,7 +14,7 @@ import {
   IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
-import { addCatalog, addVolume } from '@/api/dataCatalog';
+import { addCatalog, addVolume, deleteVolume } from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -187,6 +187,9 @@ export function useEditableTree({ catalogTreeStore }) {
             return target?.filter((child) => child.key !== _key);
           });
         }
+        // if (dataRef.id) {
+        //   const res = await deleteVolume(String(dataRef.id))
+        // }
         break;
 
       default:
@@ -302,7 +305,6 @@ export function useEditableTree({ catalogTreeStore }) {
           root_type: RootTypeEnum[activeTab]
         });
         if (res && res.status === 200) {
-          // TODO 需复查
           newTreeData = await catalogTreeStore.getRawData();
         }
         break;
@@ -330,7 +332,9 @@ export function useEditableTree({ catalogTreeStore }) {
               />
             </Tooltip>
           )}
-          {dataRef?.type !== CatalogTypeEnum.db && (
+          {['volume', 'db', CatalogTypeEnum.db].every(
+            (key) => dataRef?.type !== key
+          ) && (
             <Tooltip color="white" content="删除">
               <IconDelete
                 onClick={() => {
@@ -421,7 +425,7 @@ export function useEditableTree({ catalogTreeStore }) {
                 'overflow-hidden text-ellipsis whitespace-nowrap',
                 dataRef?.isLastLeaf ? 'last-leaf-text' : '',
                 dataRef?.type === CatalogTypeEnum.db ? 'no-operation' : '',
-                dataRef?.type === CatalogTypeEnum.volume
+                dataRef?.type === CatalogTypeEnum.catalog
                   ? 'catalog-title-text'
                   : ''
               )}
