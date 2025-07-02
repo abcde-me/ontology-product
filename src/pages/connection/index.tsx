@@ -83,7 +83,8 @@ export default function Connection() {
     current: 1,
     // 每页默认显示10条
     pageSize: 10,
-    total: 0
+    total: 0,
+    name: ''
   });
   // 点击确认按钮编辑连接器
   const editConnectorBtnHandel = async () => {
@@ -94,8 +95,7 @@ export default function Connection() {
       const newfrom = {
         name,
         type,
-        config: { ...filteredValues },
-        creator: 'test1'
+        config: { ...filteredValues }
       };
       setEditLoadingState(true);
       const res = await updataConnectionList({
@@ -114,6 +114,7 @@ export default function Connection() {
       console.log('验证失败', error);
     } finally {
       setEditLoadingState(false);
+      getlist();
     }
   };
   // 连接器配置项
@@ -270,24 +271,14 @@ export default function Connection() {
     }));
   };
 
-  // 根据搜索条件过滤连接器
-  const filteredConnectors = useMemo(() => {
-    return ConnectionData.filter((connector) => {
-      const query = searchValue.toLowerCase();
-      return (
-        connector.name.toLowerCase().includes(query) ||
-        connector.type.toLowerCase().includes(query) ||
-        connector.creator.toLowerCase().includes(query)
-      );
-    });
-  }, [ConnectionData, searchValue]);
   // 获取连接器列表
   const getlist = async () => {
     try {
       setTableLoding(true); // 请求开始时设置为 true
       const res = await getConnectionList({
         page: pagination.current,
-        page_size: pagination.pageSize
+        page_size: pagination.pageSize,
+        name: searchValue
       });
       setConnectionData(res.data.items);
       setPagination((prev) => ({
@@ -300,10 +291,13 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+  const handlePressEnter = (e) => {
+    setSearchValue(e.target.value);
+  };
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
-  }, [pagination.current, pagination.pageSize]);
+  }, [pagination.current, pagination.pageSize, searchValue]);
   return (
     <div
       style={{
@@ -334,10 +328,7 @@ export default function Connection() {
         <InputSearch
           placeholder="输入关键词搜索"
           style={{ width: 230 }}
-          value={searchValue}
-          onChange={(value) => {
-            setSearchValue(value);
-          }}
+          onPressEnter={handlePressEnter}
         />
         <Button
           type="primary"
@@ -352,7 +343,7 @@ export default function Connection() {
       <Table
         border={false}
         columns={columns}
-        data={filteredConnectors}
+        data={ConnectionData}
         style={{ padding: '10px 20px' }}
         pagination={false}
         rowKey="id"
