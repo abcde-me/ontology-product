@@ -201,7 +201,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     try {
       // 如果是target表格，调用特定API获取数据
       const params = {
-        full_path: selectedFullPath,
+        full_path: '/src/test1/volume/test11',
         page: currentPage,
         limit: pageSize
       }
@@ -227,29 +227,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         console.log('获取最新表格数据成功:', res.data);
       }
       
-      // 根据搜索条件过滤数据
-      // if (searchValue) {
-      //   filteredData = filteredData.filter(
-      //     (item) =>
-      //       item.content.includes(searchValue) ||
-      //       item.file.includes(searchValue) ||
-      //       item.workflowId.includes(searchValue)
-      //   );
-      // }
-
-      // // 根据日期范围过滤
-      // if (startTime && endTime) {
-      //   filteredData = filteredData.filter((item) => {
-      //     const itemDate = new Date(item.createdAt);
-      //     const start = new Date(startTime);
-      //     const end = new Date(endTime);
-      //     return itemDate >= start && itemDate <= end;
-      //   });
-      // }
-
-      // setTableData(filteredData);
-      // setTotal(filteredData.length);
-      // console.log('获取最新表格数据成功 (模拟):', filteredData);
     } catch (error) {
       console.error('获取表格数据失败:', error);
     }

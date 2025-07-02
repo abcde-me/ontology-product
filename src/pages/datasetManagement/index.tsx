@@ -27,7 +27,7 @@ import {
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
-
+import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -204,6 +204,7 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[], handleE
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
+          onClick={() => handleExport(record)}
         >
           导出
         </Button>
@@ -552,7 +553,7 @@ const DatasetManagement: React.FC = () => {
         <Table
           rowKey="id"
           className={styles.datasetTable}
-          columns={columns(handleGoToDetail, handleDelete, datasetList)}
+          columns={columns(handleGoToDetail, handleDelete, datasetList,handleExport)}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
