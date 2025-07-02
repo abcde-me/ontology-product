@@ -27,12 +27,12 @@ const Node: FC<NodeProps<AudioParserNodeType>> = (props) => {
   //       .join('/')
   //       .split('/')
   //       .map((f) => f.toLowerCase());
-  //     const sourcePath = startNode.data.source_path;
+  //     const sourcePath = startNode.data.data_path_id;
   //     getLoadTaskFiles({ data_path_id: sourcePath, file_type: formats, page_size: 1, page: 1 }).then((res: any) => {
   //       setTotalFiles(res.data.total)
   //     })
   //   }
-  // }, [startNode.data.data_category, startNode.data.source_path])
+  // }, [startNode.data.data_category, startNode.data.data_path_id])
 
   return (
     <div className={`wk-node-content`}>

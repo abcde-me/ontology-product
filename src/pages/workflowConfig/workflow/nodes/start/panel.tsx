@@ -40,8 +40,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { readOnly, inputs, updateInputs } = useConfig(id, data);
 
   const handleChanged = (values: any) => {
-    const name = srcDirs.find((s) => s.id === values.source_path)?.name;
-    updateInputs({ ...values, source_path_name: name });
+    const name = srcDirs.find((s) => s.id === values.data_path_id)?.name;
+    updateInputs({ ...values, data_path_name: name });
   };
 
   const doFileConfigChange = (nodeType: BlockEnum, config: any) => {
@@ -49,7 +49,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       (node: any) => node.data.type === nodeType
     );
     if (config.enabled && config.format.length) {
-      const sourcePath = form.getFieldValue('source_path');
+      const sourcePath = form.getFieldValue('data_path_id');
       const formats = config.format
         .join('/')
         .split('/')
@@ -113,9 +113,10 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     getCatalogList({ root_type: 1 }).then((res) => {
       const dirs: Record<string, any>[] = [];
       res.data.src.forEach((catalog) => {
-        dirs.push(...catalog.children.volume);
+        dirs.push(...(catalog.children?.volume || []));
       });
       setSrcDirs(dirs);
+      console.log('dirs', dirs);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -138,7 +139,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       >
         <FormItem
           label="源数据目录"
-          field="source_path"
+          field="data_path_id"
           rules={[{ required: true, message: '源数据目录必须选择' }]}
           extra="选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。"
         >
