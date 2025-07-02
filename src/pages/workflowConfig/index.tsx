@@ -48,7 +48,9 @@ function WorkflowConfig({ setHeight }) {
 
   return (
     <Initor>
-      <div className={`app-workflow-page h-full w-full overflow-x-auto ${setHeight ? 'setHeight' : ''}`}>
+      <div
+        className={`app-workflow-page h-full w-full overflow-x-auto ${setHeight ? 'setHeight' : ''}`}
+      >
         {!loading && <Workflow />}
       </div>
     </Initor>

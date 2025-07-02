@@ -61,7 +61,12 @@ interface Dataset {
   src_model: string;
 }
 
-const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[], handleExport: (record: Dataset) => void) => [
+const columns = (
+  handleGoToDetail,
+  handleDelete,
+  datasetList: Dataset[],
+  handleExport: (record: Dataset) => void
+) => [
   {
     title: '名称',
     dataIndex: 'name',
@@ -294,7 +299,6 @@ const DatasetManagement: React.FC = () => {
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
-
   //导出弹窗相关
   const [downloadData, setDownloadData] = React.useState([]);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
@@ -347,19 +351,19 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-            path:
-              formData.targetDataSource[0][0] +
-              '/dst' +
-              '/' +
-              formData.targetDataSource[0][1] +
-              '/' +
-              formData.targetDataSource[1][0],
-            path_id: formData.targetDataSource[1][1]
-          }
+              path:
+                formData.targetDataSource[0][0] +
+                '/dst' +
+                '/' +
+                formData.targetDataSource[0][1] +
+                '/' +
+                formData.targetDataSource[1][0],
+              path_id: formData.targetDataSource[1][1]
+            }
           : {
-            connector_id: parseInt(formData.targetDataSource) || 0,
-            connector_files: formData.selectedFiles || []
-          }
+              connector_id: parseInt(formData.targetDataSource) || 0,
+              connector_files: formData.selectedFiles || []
+            }
     };
 
     console.log('提交数据:', submitData);
@@ -482,7 +486,7 @@ const DatasetManagement: React.FC = () => {
   // 导出数据集
   const handleExport = (record: Dataset) => {
     console.log('导出数据集:', record);
-    setDownloadData(record); 
+    setDownloadData(record);
     setVisible(true);
   };
   // 批量导出
@@ -553,7 +557,12 @@ const DatasetManagement: React.FC = () => {
         <Table
           rowKey="id"
           className={styles.datasetTable}
-          columns={columns(handleGoToDetail, handleDelete, datasetList,handleExport)}
+          columns={columns(
+            handleGoToDetail,
+            handleDelete,
+            datasetList,
+            handleExport
+          )}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
@@ -591,5 +600,3 @@ const DatasetManagement: React.FC = () => {
 };
 
 export default DatasetManagement;
-
-

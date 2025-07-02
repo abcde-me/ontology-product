@@ -64,9 +64,9 @@ interface TargetDataFileQueryParams {
   full_path: string;
   start_time: string;
   end_time: string;
-  search_content:string;
-  search_id:number;
-  limit:number;
+  search_content: string;
+  search_id: number;
+  limit: number;
 }
 
 // 定义删除目标文件的参数接口

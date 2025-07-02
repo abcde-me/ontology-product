@@ -356,8 +356,8 @@ const Workflow: FC<WorkflowProps> = memo(
             size={2}
             className="react-flow-bg bg-workflow-canvas-workflow-bg"
             color="var(--color-workflow-canvas-workflow-dot-color)"
-          // color='#c8ceda20'
-          // variant={BackgroundVariant.Lines}
+            // color='#c8ceda20'
+            // variant={BackgroundVariant.Lines}
           />
         </ReactFlow>
       </div>

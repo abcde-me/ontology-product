@@ -115,6 +115,11 @@ export default function WorkflowTaskDetail() {
     if (taskId) getDetailData();
   }, [taskId]);
 
+  // 确保activeNode数据变化后再调用getNodeDetail
+  useEffect(() => {
+    if (taskId && activeNode) getNodeDetail();
+  }, [activeNode]);
+
   const getDetailData = async () => {
     setLoading(true);
     try {
@@ -289,7 +294,6 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
-    getNodeDetail();
   };
 
   // 获取节点详情
@@ -303,6 +307,7 @@ export default function WorkflowTaskDetail() {
       page_size: pageSize || pagination.pageSize
     };
     const res = await getTaskDetailNode(params);
+    if (!res?.data) return;
     if (isParseNode) {
       setParseNodeData(res.data.data_parse);
       setPagination({
@@ -384,7 +389,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '提交失败，请稍后重试'
+        content: res.message || '提交失败，请稍后重试'
       });
     }
   };
@@ -403,7 +408,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '停止失败，请稍后重试'
+        content: res.message || '停止失败，请稍后重试'
       });
     }
   };

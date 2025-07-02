@@ -31,11 +31,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   useEffect(() => {
     setIsShow(
       inputs?.app_scenarios === 'tongyong' ||
-      inputs?.app_scenarios === 'duolong'
+        inputs?.app_scenarios === 'duolong'
     );
     setIsShowWB(
       inputs?.app_scenarios === 'fenlei' ||
-      inputs?.app_scenarios === 'shengcheng'
+        inputs?.app_scenarios === 'shengcheng'
     );
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
@@ -45,11 +45,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   // 模型数据筛选
   const getModelData = () => {
     getModelList().then((res) => {
-      setModelList(res?.data?.find(item => item.type === 'enha_model')?.model_data || []);
+      setModelList(
+        res?.data?.find((item) => item.type === 'enha_model')?.model_data || []
+      );
     });
-  }
+  };
   useEffect(() => {
-    getModelData()
+    getModelData();
   }, []);
   const onValuesChange = (changeValue: any, values: any) => {
     updateInputs({ ...values, modelList: modelList });
@@ -203,15 +205,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           style={{ margin: 0 }}
         >
           <Select placeholder="请选择模型" style={{ width: '100%' }}>
-            {
-              modelList.map((item) => {
-                return (
-                  <Option key={item.id} value={item.id}>
-                    {item.type}
-                  </Option>
-                )
-              })
-            }
+            {modelList.map((item) => {
+              return (
+                <Option key={item.id} value={item.id}>
+                  {item.type}
+                </Option>
+              );
+            })}
           </Select>
         </FormItem>
         <div className="content-tips-text" style={{ marginTop: '8px' }}>

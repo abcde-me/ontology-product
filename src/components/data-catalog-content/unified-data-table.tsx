@@ -204,7 +204,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         full_path: '/src/test1/volume/test11',
         page: currentPage,
         limit: pageSize
-      }
+      };
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
       if (searchConditionIsActive && searchConditionKeyword) {
@@ -214,11 +214,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           newParams.search_id = searchConditionKeyword;
         }
       }
-      if(startTime){
-        newParams.start_time = startTime
+      if (startTime) {
+        newParams.start_time = startTime;
       }
-      if(endTime){
-        newParams.end_time = endTime
+      if (endTime) {
+        newParams.end_time = endTime;
       }
       const res = await getTargetDataFileList(newParams);
       if (res && res.data) {
@@ -226,7 +226,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         setTotal(res.data.total || 0);
         console.log('获取最新表格数据成功:', res.data);
       }
-      
     } catch (error) {
       console.error('获取表格数据失败:', error);
     }
@@ -262,17 +261,38 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
-    return getUnifiedColumns(tableType, dataType, downloadShow, null, getTableList, selectedKey);
+    return getUnifiedColumns(
+      tableType,
+      dataType,
+      downloadShow,
+      null,
+      getTableList,
+      selectedKey
+    );
   }, [tableType, dataType, downloadShow, selectedKey]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
     if (tableType === 'target' && dataType === 'volume') {
       // 只有Target表格才需要动态更新hoveredRowId
-      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId, getTableList, selectedKey);
+      return getUnifiedColumns(
+        tableType,
+        dataType,
+        downloadShow,
+        hoveredRowId,
+        getTableList,
+        selectedKey
+      );
     }
     return baseColumns;
-  }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId, selectedKey]);
+  }, [
+    baseColumns,
+    tableType,
+    dataType,
+    downloadShow,
+    hoveredRowId,
+    selectedKey
+  ]);
 
   // 处理表格选择变化 - 使用useCallback避免重新创建
   const handleSelectionChange = React.useCallback(
