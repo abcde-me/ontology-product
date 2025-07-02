@@ -23,20 +23,35 @@ const getFileIcon = (type, size = 16) => {
   };
   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
 };
+//格式化时间函数
+const formatDateTime = (dateTimeString: string): string => {
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
 
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    return dateTimeString; // 如果格式化失败，返回原字符串
+  }
+};
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
   const handleWorkflowClick = () => {
     // 这里添加跳转逻辑，例如跳转到工作流详情页
     // 您可以根据实际需求修改跳转路径
-    if (record.workflowId) {
-      window.open(`/workflow/${record.workflowId}`, '_blank');
+    if (record.extras.workflow_id) {
+      window.open(`/workflow/${record.workflow_id}`, '_blank');
     }
   };
 
   return (
     <div>
-      <div>原文件: {record.file}</div>
+      <div>原文件: {record.extras.file_name}</div>
       <div>
         工作流ID:{' '}
         <a
@@ -58,7 +73,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
             (e.target as HTMLAnchorElement).style.textDecoration = 'none';
           }}
         >
-          {record.workflowId}
+          {record.extras.workflow_id}
           {showIcon && (
             <>
               &nbsp;
@@ -72,7 +87,13 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible, refreshData) => (
+const renderActionColumn = (
+  _,
+  record,
+  setVisible,
+  refreshData,
+  selectedKey
+) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -94,7 +115,7 @@ const renderActionColumn = (_, record, setVisible, refreshData) => (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record, refreshData)}
+      onClick={() => handleDelete(record, refreshData, selectedKey)}
     >
       删除
     </span>
@@ -110,7 +131,8 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {} // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
+  selectedKey?: string // 添加selectedKey参数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -162,7 +184,7 @@ export const getUnifiedColumns = (
             }}
           >
             {getFileIcon(record.type, 16)}
-            <span>{record.type}</span>
+            <span>{record.file_type}</span>
           </div>
         )
       },
@@ -175,12 +197,7 @@ export const getUnifiedColumns = (
         dataIndex: 'meta',
         ellipsis: true,
         width: 180,
-        render: (_, record) => (
-          <div>
-            <div>原文件: {record.file}</div>
-            <div>工作流ID: {record.workflowId}</div>
-          </div>
-        )
+        render: (_, record) => <div></div>
       },
       {
         title: '载入开始时间',
@@ -211,7 +228,7 @@ export const getUnifiedColumns = (
         fixed: 'right' as const,
         width: 112,
         render: (_, record) =>
-          renderActionColumn(_, record, setVisible, refreshData)
+          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
       }
     ];
   }
@@ -262,6 +279,7 @@ export const getUnifiedColumns = (
 
           return recordDate >= startDate && recordDate <= endDate;
         },
+        render: (_, record) => formatDateTime(record.created_at),
         width: 180
       },
       {
@@ -294,7 +312,7 @@ export const getUnifiedColumns = (
             }}
           >
             {getFileIcon(record.type, 16)}
-            <span>{record.type}</span>
+            <span>{record.file_type}</span>
           </div>
         )
       },
@@ -304,7 +322,7 @@ export const getUnifiedColumns = (
         fixed: 'right' as const,
         width: 112,
         render: (_, record) =>
-          renderActionColumn(_, record, setVisible, refreshData)
+          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
       }
     ];
   }
@@ -322,7 +340,6 @@ export const getUnifiedColumns = (
       // 可根据实际需求添加数据库相关列配置
     ];
   }
-
   // 默认返回空数组
   return [];
 };
@@ -334,7 +351,7 @@ const handleDownload = (record, setVisible) => {
 };
 
 // 处理删除操作
-const handleDelete = (data, refreshData) => {
+const handleDelete = (data, refreshData, selectedKey) => {
   const ids: Array<string> = [];
   try {
     Modal.confirm({
@@ -343,7 +360,11 @@ const handleDelete = (data, refreshData) => {
       onOk: async () => {
         ids.push(data.id);
         console.log('查看删除的数据和数组们', data, ids);
-        await deleteTargetFile({ full_path: data.file, file_ids: ids });
+        await deleteTargetFile({
+          full_path: data.full_path,
+          file_ids: ids,
+          path_id: selectedKey
+        });
         Message.success('删除成功');
         // 删除成功后刷新数据
         if (typeof refreshData === 'function') {
@@ -354,10 +375,4 @@ const handleDelete = (data, refreshData) => {
   } catch {
     Message.error('删除失败，请重试');
   }
-  // const token = localStorage.getItem('loginToken');
-  // if (!token) {
-  //   Message.error('请先登录');
-  //   return;
-  // }
-  // deleteFileById(id)
 };

@@ -29,6 +29,7 @@ const AppPublisher = ({
   onToggle
 }: AppPublisherProps) => {
   const [published, setPublished] = useState(false);
+  const [cycleText, setCycleText] = useState();
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
 
@@ -37,13 +38,11 @@ const AppPublisher = ({
       op: WorkflowOperation,
       params?: ModelAndParameter | PublishWorkflowParams
     ) => {
-      if (op === WorkflowOperation.CRON_RUNNING) {
-        setSchedulerDialogVisible(false);
-        return;
-      }
-
-      console.log('点击操作按钮params:', params);
       try {
+        if (op === WorkflowOperation.CRON_RUNNING) {
+          setSchedulerDialogVisible(false);
+        }
+
         await onOperate?.(op, params);
         setPublished(true);
         // 发布操作在弹框里面时，需要去掉下面这个计时器
@@ -58,7 +57,7 @@ const AppPublisher = ({
   );
 
   const handleOptionsChange = (options) => {
-    console.log('-----------------', options);
+    setCycleText(options);
   };
 
   // useKeyPress(
@@ -99,16 +98,20 @@ const AppPublisher = ({
             title="定时任务设置"
             style={{ width: '640px' }}
             visible={schedulerDialogVisible}
-            onOk={() => handleOperate(WorkflowOperation.CRON_RUNNING)}
+            onOk={() =>
+              handleOperate(WorkflowOperation.CRON_RUNNING, {
+                cycleText
+              })
+            }
             onCancel={() => setSchedulerDialogVisible(false)}
           >
             <SchedulerRun
               options={{
-                minute: '10',
-                hour: '10',
-                date: '1',
+                minute: '',
+                hour: '',
+                date: '',
                 month: '',
-                week: '*'
+                week: ''
               }}
               onOptionsChange={handleOptionsChange}
             ></SchedulerRun>

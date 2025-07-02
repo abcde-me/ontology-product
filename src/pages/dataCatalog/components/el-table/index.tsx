@@ -22,12 +22,14 @@ const InputSearch = Input.Search;
 
 // 定义表格行的接口
 interface TableRow {
+  full_path: string;
   id: string;
   file: string;
   content?: string;
   type?: string;
   createdAt?: string;
   workflowId?: string;
+  file_type?: string;
 }
 
 // 定义表格引用类型
@@ -178,13 +180,18 @@ export default function Eltable() {
         onOk: async () => {
           const idList = selectedRows.map((item: { id: string }) => item.id);
           ids.push(...idList);
-          console.log(selectedRows, '打印selectedRows');
+          console.log(
+            selectedRows[0].full_path,
+            selectedKey,
+            '打印selectedRows88888888888'
+          );
 
           // 调用删除API
-          if (selectedRows.length > 0 && selectedRows[0]?.file) {
+          if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
             await deleteTargetFile({
-              full_path: selectedRows[0].file,
-              file_ids: ids
+              full_path: selectedRows[0].full_path,
+              file_ids: ids,
+              path_id: selectedKey
             });
             Message.success('删除成功');
 
@@ -441,6 +448,7 @@ export default function Eltable() {
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
             selectedFullPath={selectedPath}
+            selectedKey={selectedKey}
           />
         </div>
       </div>
