@@ -42,7 +42,7 @@ export function useEditableTree({ catalogTreeStore }) {
   ]);
 
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
-    return treeData.map((item) => {
+    return treeData?.map?.((item) => {
       const { children, key, ...rest } = item;
       return (
         <Tree.Node key={key} {...rest} dataRef={item}>
