@@ -30,7 +30,7 @@ const LoginCard = () => {
       }
     }
     // 默认重定向到应用商店页面
-    return '/tenant/compute/modaforge/appStoreTwo';
+    return '/tenant/compute/modaforge/connection';
   };
 
   const handleSubmit = async (values: any) => {
