@@ -50,12 +50,30 @@ export async function renameCatalog(id: string, params: any) {
     .inRegion()
     .do();
 }
+
+// 定义查询目标数据文件的参数接口
+interface TargetDataFileQueryParams {
+  page: number;
+  full_path: string;
+  start_time: string;
+  end_time: string;
+  search_content:string;
+  search_id:string;
+  limit:number;
+}
+
+// 定义删除目标文件的参数接口
+interface TargetFileDeleteParams {
+  file_ids: Array<string>;
+  full_path: string;
+}
+
 //查询目标数据文件列表
-export async function getTargetDataFileList(params: Record<string, any>) {
+export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 //删除目标文件
-export async function deleteTargetFile(param: Record<string, any>) {
+export async function deleteTargetFile(param: TargetFileDeleteParams) {
   return await UAPI.RES.targetDataFileDeleteApi({}).delete(param).inRegion().do();
 }
 
