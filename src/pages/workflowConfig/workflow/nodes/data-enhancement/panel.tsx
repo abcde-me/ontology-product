@@ -1,15 +1,9 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
-import type {
-  CodeNodeType,
-} from './types';
-import { CodeLanguage } from './types';
+import type { CodeNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import {
-  Table,
   Form,
   Input,
   Select,
@@ -17,30 +11,48 @@ import {
   Checkbox
 } from '@arco-design/web-react';
 import { cloneDeep } from 'lodash-es';
-import { v4 as uuid4 } from 'uuid';
+import { getModelList } from '@/api/modelV2';
 import './data-enhancement.scss';
 
 // default 示例数据
-const defaultPrompt = '{ "instruction": "公司最近的战略计划是什么？", "context": "公司计划在未来两年内扩大海外市场，重点关注东南亚和欧洲地区。公司已在这些地区设立了办事处，并计划在当地招聘销售和市场团队。", "response": "公司计划在未来两年重点拓展东南亚和欧洲市场，并已设立办事处和开始本地化招聘。"}';
+const defaultPrompt =
+  '{ "instruction": "公司最近的战略计划是什么？", "context": "公司计划在未来两年内扩大海外市场，重点关注东南亚和欧洲地区。公司已在这些地区设立了办事处，并计划在当地招聘销售和市场团队。", "response": "公司计划在未来两年重点拓展东南亚和欧洲市场，并已设立办事处和开始本地化招聘。"}';
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  const { readOnly, inputs, updateInputs } = useConfig(id, data);
+  const { inputs, updateInputs } = useConfig(id, data);
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const [isShow, setIsShow] = useState(false);
   const [isShowWB, setIsShowWB] = useState(false);
   useEffect(() => {
-    setIsShow(inputs?.app_scenarios === 'tongyong' || inputs?.app_scenarios === 'duolong');
-    setIsShowWB(inputs?.app_scenarios === 'fenlei' || inputs?.app_scenarios === 'shengcheng');
+    setIsShow(
+      inputs?.app_scenarios === 'tongyong' ||
+      inputs?.app_scenarios === 'duolong'
+    );
+    setIsShowWB(
+      inputs?.app_scenarios === 'fenlei' ||
+      inputs?.app_scenarios === 'shengcheng'
+    );
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
 
+  // 获取模型数据
+  const [modelList, setModelList] = useState<any[]>([]);
+  // 模型数据筛选
+  const getModelData = () => {
+    getModelList().then((res) => {
+      setModelList(res?.data?.find(item => item.type === 'enha_model')?.model_data || []);
+    });
+  }
+  useEffect(() => {
+    getModelData()
+  }, []);
   const onValuesChange = (changeValue: any, values: any) => {
-    updateInputs(values);
+    updateInputs({ ...values, modelList: modelList });
   };
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
@@ -54,7 +66,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           app_scenarios: inputs?.app_scenarios,
           enha_modle_id: inputs?.enha_modle_id,
           sample_data: defaultPrompt,
-          vars: cloneDeep(inputs.variables || []),
+          vars: cloneDeep(inputs.variables || [])
         }}
         onChange={onValuesChange}
       >
@@ -66,7 +78,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            margin: 0,
+            margin: 0
           }}
         />
         <div>
@@ -82,19 +94,19 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               placeholder="请选择场景"
               style={{ width: '100%', margin: 0 }}
             >
-              <Option key='tongyong' value='tongyong'>
+              <Option key="tongyong" value="tongyong">
                 通用
               </Option>
-              <Option key='fenlei' value='fenlei'>
+              <Option key="fenlei" value="fenlei">
                 文本分类
               </Option>
-              <Option key='tiqu' value='tiqu'>
+              <Option key="tiqu" value="tiqu">
                 文本提取
               </Option>
-              <Option key='shengcheng' value='shengcheng'>
+              <Option key="shengcheng" value="shengcheng">
                 文本生成
               </Option>
-              <Option key='duolong' value='duolong'>
+              <Option key="duolong" value="duolong">
                 多轮回答
               </Option>
             </Select>
@@ -104,27 +116,57 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </div>
         </div>
         <div className="content-box">
-          {isShow && <><FormItem label="指令生成依赖样本数:" field="sample_num" layout="vertical">
-            <InputNumber placeholder="请输入指令" />
-          </FormItem>
-            <div className="content-tips-text">
-              该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
-              部分，增加到prompt 中去。
-            </div></>}
-          {isShowWB && <><FormItem label="任务描述增强占比:" field="enhanced_proportion" layout="vertical">
-            <InputNumber min={0} max={1} step={0.1} placeholder="请输入指令" />
-          </FormItem>
-            <div className="content-tips-text">
-              节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0 ~ 1
-            </div></>}
-          <FormItem label="过滤相似度阈值:" field="similarity_threshold" layout="vertical">
+          {isShow && (
+            <>
+              <FormItem
+                label="指令生成依赖样本数:"
+                field="sample_num"
+                layout="vertical"
+              >
+                <InputNumber placeholder="请输入指令" />
+              </FormItem>
+              <div className="content-tips-text">
+                该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+                部分，增加到prompt 中去。
+              </div>
+            </>
+          )}
+          {isShowWB && (
+            <>
+              <FormItem
+                label="任务描述增强占比:"
+                field="enhanced_proportion"
+                layout="vertical"
+              >
+                <InputNumber
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  placeholder="请输入指令"
+                />
+              </FormItem>
+              <div className="content-tips-text">
+                节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
+                ~ 1
+              </div>
+            </>
+          )}
+          <FormItem
+            label="过滤相似度阈值:"
+            field="similarity_threshold"
+            layout="vertical"
+          >
             <InputNumber min={0} max={1} step={0.1} placeholder="请输入阈值" />
           </FormItem>
           <div className="content-tips-text">
             这里通过Rouge-L
             分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。
           </div>
-          <FormItem label="生成样本数:" field="generate_sample_num" layout="vertical">
+          <FormItem
+            label="生成样本数:"
+            field="generate_sample_num"
+            layout="vertical"
+          >
             <Input placeholder="请输入样本数" />
           </FormItem>
           <div className="content-tips-text">指定生成的数据集的条数。</div>
@@ -147,9 +189,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             自定义提示词
           </Checkbox>
         </FormItem>
-        {customPromptChecked && <FormItem field="prompt" label={null}>
-          <Input placeholder='请输入提示词' style={{ width: '100%' }} />
-        </FormItem>}
+        {customPromptChecked && (
+          <FormItem field="prompt" label={null}>
+            <Input placeholder="请输入提示词" style={{ width: '100%' }} />
+          </FormItem>
+        )}
         <FormItem
           layout="vertical"
           label="模型选择:"
@@ -159,24 +203,20 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           style={{ margin: 0 }}
         >
           <Select placeholder="请选择模型" style={{ width: '100%' }}>
-            <Option key={1} value={1}>
-              模型1
-            </Option>
-            <Option key={2} value={2}>
-              模型1
-            </Option>
-            <Option key={3} value={3}>
-              模型3
-            </Option>
-            <Option key={4} value={4}>
-              模型4
-            </Option>
-            <Option key={5} value={5}>
-              模型5
-            </Option>
+            {
+              modelList.map((item) => {
+                return (
+                  <Option key={item.id} value={item.id}>
+                    {item.type}
+                  </Option>
+                )
+              })
+            }
           </Select>
         </FormItem>
-        <div className='content-tips-text' style={{ marginTop: '8px' }}>常见的针对SFT的模型微调场景生成数据集。</div>
+        <div className="content-tips-text" style={{ marginTop: '8px' }}>
+          常见的针对SFT的模型微调场景生成数据集。
+        </div>
       </Form>
     </div>
   );
