@@ -207,7 +207,7 @@ export default function WorkflowList() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 180,
+      width: 150,
       render: (_, record) => (
         <span>{new Date(record.create_time).toLocaleString()}</span>
       ),
@@ -220,7 +220,7 @@ export default function WorkflowList() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 100,
+      width: 130,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span

@@ -114,6 +114,11 @@ export default function WorkflowTaskDetail() {
     if (taskId) getDetailData();
   }, [taskId]);
 
+  // 确保activeNode数据变化后再调用getNodeDetail
+  useEffect(() => {
+    if (taskId && activeNode) getNodeDetail();
+  }, [activeNode]);
+
   const getDetailData = async () => {
     setLoading(true);
     try {
@@ -288,7 +293,6 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
-    getNodeDetail();
   };
 
   // 获取节点详情
@@ -302,6 +306,7 @@ export default function WorkflowTaskDetail() {
       page_size: pageSize || pagination.pageSize
     };
     const res = await getTaskDetailNode(params);
+    if (!res?.data) return;
     if (isParseNode) {
       setParseNodeData(res.data.data_parse);
       setPagination({
