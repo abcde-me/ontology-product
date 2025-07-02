@@ -3,7 +3,7 @@ import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { subLeafKeys } from '../consts';
+import { RootTypeEnum, subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
 
 interface BaseTreeData {
@@ -15,6 +15,7 @@ interface BaseTreeData {
   base_dir: string;
   isLastLeaf?: boolean;
   fullPath?: string;
+  isAdd?: boolean;
 }
 
 interface ITreeData extends BaseTreeData {
@@ -40,6 +41,7 @@ interface CatalogTreeState {
 interface Effects {
   fetchData: (options?: {
     showLoading?: boolean;
+    activeTab?: string;
   }) => Promise<Partial<CatalogTreeState>>;
 }
 
@@ -60,30 +62,10 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         fetchData: createAsyncEffect(
           async (options?: {
             showLoading?: boolean;
+            activeTab?: string;
           }): Promise<Partial<CatalogTreeState>> => {
-            try {
-              const cacheTreeData = await this.getRawData();
-              const defaultNode = cacheTreeData?.[0];
-              const defaultExpand = [
-                defaultNode.key || '',
-                defaultNode?.children?.[0]?.key || '',
-                defaultNode?.children?.[1]?.key || ''
-              ];
-              const defaultSelectedNode =
-                defaultNode?.children?.[0]?.children?.[0];
-
-              return {
-                treeData: cacheTreeData,
-                expandedKeys: defaultExpand,
-                searchValue: '',
-                selectedKey: defaultSelectedNode?.key || '',
-                selectedPath: defaultSelectedNode?.fullPath || ''
-              };
-            } catch (err) {
-              console.log(err);
-            }
-
-            return {};
+            const { activeTab } = this.getState();
+            return await this.initTreeData(options?.activeTab || activeTab);
           },
           { loadingKey: 'loading' }
         )
@@ -91,14 +73,40 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
-  async getRawData() {
-    const { activeTab } = this.getState();
+  async getRawData(activeKey?: string) {
+    const { activeTab: stateActiveTab } = this.getState();
+    const activeTab = activeKey || stateActiveTab;
 
     const res = await getCatalogList({
-      root_type: activeTab === 'src' ? 1 : 2
+      root_type: RootTypeEnum[activeTab]
     });
+    return this.convertRawDataToTreeData(res?.data?.[activeTab] || []);
+  }
 
-    return this.convertRawDataToTreeData(res.data?.[activeTab] || []);
+  async initTreeData(activeTab: string) {
+    try {
+      const cacheTreeData = await this.getRawData(activeTab);
+
+      const defaultNode = cacheTreeData?.[0];
+      const defaultExpand = [
+        defaultNode?.key || '',
+        defaultNode?.children?.[0]?.key || '',
+        defaultNode?.children?.[1]?.key || ''
+      ];
+      const defaultSelectedNode = defaultNode?.children?.[0]?.children?.[0];
+
+      return {
+        treeData: cacheTreeData,
+        expandedKeys: defaultExpand,
+        searchValue: '',
+        selectedKey: defaultSelectedNode?.key || '',
+        selectedPath: defaultSelectedNode?.fullPath || ''
+      };
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {};
   }
 
   setActiveTab(value: string) {
@@ -122,7 +130,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   convertRawDataToTreeData(data: ITreeData[]) {
     if (!Array.isArray(data)) return [];
 
-    const cache = data.map((catalog) => {
+    return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
       if (catalog.children) {
@@ -156,7 +164,5 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         children: childrenArr
       };
     });
-
-    return cache;
   }
 }

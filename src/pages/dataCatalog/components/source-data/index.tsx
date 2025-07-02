@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import EditableTree from '../editable-tree';
@@ -11,6 +11,12 @@ export default function SourceData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
   const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
+
+  useEffect(() => {
+    if (activeTab) {
+      catalogTreeStore.getEffect('fetchData')();
+    }
+  }, [activeTab]);
 
   const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
