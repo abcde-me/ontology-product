@@ -152,40 +152,52 @@ export function useEditableTree({ catalogTreeStore }) {
     const { _key, dataRef, pathParentKeys } = node;
 
     if (!_key || !dataRef?.type) {
-      Message.error('删除失败：节点信息不完整');
+      Message.error('删除失败，请稍后重试');
       return;
     }
 
-    let newTreeData: TreeDataType[] = [];
+    let newTreeData: TreeDataType[] = treeData.map((item) => item);
 
-    switch (dataRef.type) {
-      case CatalogTypeEnum.catalog:
-        const res = deleteVolume(dataRef?.id, {
-          root_type: RootTypeEnum[activeTab]
-        });
-        debugger;
-        newTreeData = treeData.filter(
-          (item: TreeDataType) => item.key !== _key
-        );
-        break;
-
-      case CatalogTypeEnum.volume:
-        if (pathParentKeys) {
-          newTreeData = handleTarget(pathParentKeys, (target) => {
-            return target?.filter((child) => child.key !== _key);
-          });
-        }
-        break;
-
-      default:
-        throw new Error(`不支持的节点类型: ${dataRef.type}`);
+    const res = await deleteVolume(dataRef?.id, {
+      root_type: RootTypeEnum[activeTab]
+    });
+    if (res && res.status === 200) {
+      newTreeData = await catalogTreeStore.getRawData();
+      catalogTreeStore.setState({ treeData: newTreeData });
+      Message.success('删除成功!');
+    } else {
+      Message.error('删除失败，请稍后重试');
     }
+    // debugger;
+
+    // switch (dataRef.type) {
+    //   case CatalogTypeEnum.catalog:
+    //     const res = await deleteVolume(dataRef?.id, {
+    //       root_type: RootTypeEnum[activeTab]
+    //     });
+    //     debugger;
+    //     // newTreeData = treeData.filter(
+    //     //   (item: TreeDataType) => item.key !== _key
+    //     // );
+    //     newTreeData = await catalogTreeStore.getRawData();
+    //     break;
+
+    //   case CatalogTypeEnum.volume:
+    //     if (pathParentKeys) {
+    //       newTreeData = handleTarget(pathParentKeys, (target) => {
+    //         return target?.filter((child) => child.key !== _key);
+    //       });
+    //     }
+    //     break;
+
+    //   default:
+    //     throw new Error(`不支持的节点类型: ${dataRef.type}`);
+    // }
 
     // 模拟异步操作
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // await new Promise((resolve) => setTimeout(resolve, 500));
 
-    catalogTreeStore.setState({ treeData: newTreeData });
-    Message.success('删除成功!');
+    // Message.success('删除成功!');
   };
 
   const focusAndSelectInput = () => {
