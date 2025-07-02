@@ -38,10 +38,13 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
   },
   checkValid(payload: VideoParserNodeType, t: any) {
     let errorMessages = '';
-    const { selected_files_num } = payload;
+    const { selected_files_num, audio_model_id } = payload;
 
     if (selected_files_num <= 0) {
       errorMessages = '需要选择至少一个视频文件';
+    }
+    if (!audio_model_id) {
+      errorMessages = '需要选择模型';
     }
     return {
       isValid: !errorMessages,

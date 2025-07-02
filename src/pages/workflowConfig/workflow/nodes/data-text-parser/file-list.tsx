@@ -6,9 +6,11 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
+import { getLoadTaskFiles } from '@/api/loadApi';
 
 type FileListProps = {
   catetoryId: number;
+  fileTypes: string[];
   files: string[];
   selectedFilesNum: number;
   handleFilesChange: (files: string[], selectedCount: number) => void;
@@ -16,6 +18,7 @@ type FileListProps = {
 
 function FileList({
   catetoryId,
+  fileTypes,
   files,
   selectedFilesNum,
   handleFilesChange
@@ -38,7 +41,7 @@ function FileList({
   const columns: any[] = [
     {
       title: '文件名',
-      dataIndex: 'name',
+      dataIndex: 'file_name',
       width: 170,
       filterIcon: <IconSearch />,
       filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
@@ -58,7 +61,8 @@ function FileList({
           </div>
         );
       },
-      onFilter: (value, row) => (value ? row.name.indexOf(value) !== -1 : true),
+      onFilter: (value, row) =>
+        value ? row.file_name.indexOf(value) !== -1 : true,
       onFilterDropdownVisibleChange: (visible) => {
         if (visible) {
           setTimeout(() => inputRef.current?.focus(), 150);
@@ -74,78 +78,91 @@ function FileList({
     },
     {
       title: '类型',
-      dataIndex: 'type',
-      filters: [
-        {
-          text: 'docx',
-          value: 'docx'
-        },
-        {
-          text: 'pdf',
-          value: 'pdf'
-        }
-      ],
-      onFilter: (value, row) => row.type.indexOf(value) > -1
+      dataIndex: 'file_type',
+      filters: fileTypes
+        .join('/')
+        .split('/')
+        .map((f) => ({ text: f.toLowerCase(), value: f.toLowerCase() })),
+      // filters: [
+      //   {
+      //     text: 'docx',
+      //     value: 'docx'
+      //   },
+      //   {
+      //     text: 'pdf',
+      //     value: 'pdf'
+      //   }
+      // ],
+      onFilter: (value, row) => row.file_type.indexOf(value) > -1
     },
     {
       title: '文件大小',
-      dataIndex: 'size'
+      dataIndex: 'file_size',
+      render(col, record) {
+        return <>{`${(+col / 8 / 8).toFixed(2)}MB`}</>;
+      }
     },
     {
       title: '创建时间',
-      dataIndex: 'created_at',
+      dataIndex: 'task_load_start_time',
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     }
   ];
 
-  const loadFiles = (params: any) => {
+  const loadFiles = async (params: any) => {
     const fileConfig = startNode?.data.data_category.find(
       (c) => c.id === catetoryId
     );
 
     try {
       setLoading(true);
-      let item;
+      let result;
       if (fileConfig?.enabled && fileConfig.format.length) {
         const formats = fileConfig.format
           .join('/')
           .split('/')
           .map((f) => f.toLowerCase());
         const sourcePath = startNode?.data.source_path;
-        item = {
-          data: {
-            data: [...new Array(5)].map((_, index) => {
-              return {
-                id: String(1000 * params.page + index),
-                name:
-                  String(1000 * params.page + index) +
-                  'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
-                type: index % 2 === 0 ? 'docx' : 'pdf',
-                size: '3.8M',
-                created_at: '2025-05-05 05:05:05' + index
-              };
-            }),
-            total: 100
-          }
-        };
+        // item = {
+        //   data: {
+        //     data: [...new Array(5)].map((_, index) => {
+        //       return {
+        //         id: 1000 * params.page + index,
+        //         file_name:
+        //           String(1000 * params.page + index) +
+        //           'Jane DoeJane DoeJane DoeJane DoeJane DoeJane Doe ',
+        //         file_type: index % 2 === 0 ? 'docx' : 'pdf',
+        //         file_size: 39089,
+        //         task_load_start_time: '2025-05-05 05:05:05' + index
+        //       };
+        //     }),
+        //     total: 100
+        //   }
+        // };
+        result = await getLoadTaskFiles({
+          data_path_id: sourcePath,
+          file_type: formats,
+          page_size: pagination.limit,
+          page: params.page
+        });
       } else {
-        item = {
+        result = {
           data: {
-            data: [],
+            items: [],
             total: 0
           }
         };
       }
       // console.log('列表数据:', item);
-      const { data = [], total = 0 } = item.data;
-      setFilesData(data || []);
+      const { items = [], total = 0 } = result.data;
+      setFilesData(items || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
         total: total
       }));
 
       const keysSet = new Set([...selectedRowKeys]);
-      data
+      items
         .filter((d) => !files?.includes(d.id))
         .forEach((d) => {
           keysSet.add(d.id);

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
@@ -26,27 +26,46 @@ import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
 import FileList from '../data-text-parser/file-list';
+import { getModelList } from '@/api/modelV2';
+import { FileOptions } from '../start/default';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-// 分段方式选项
-const segmentationOptions: any = [
-  { value: 1, label: '按字符' },
-  { value: 2, label: '按句子' },
-  { value: 3, label: '按段落' }
-];
-
 const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
+  const [picEmbModels, setPicEmbModels] = useState<Record<string, any>[]>([]);
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
     data
   );
+
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      const picList =
+        res.data.find((d) => d.type === 'pic_model')?.model_data || [];
+      const picEmbList =
+        res.data.find((d) => d.type === 'pic_emb_model')?.model_data || [];
+
+      setPicModels(picList);
+      setPicEmbModels(picEmbList);
+
+      const defaultPicId = picList[0]?.id || '';
+      const defaultPicEmbId = picEmbList[0]?.id || '';
+
+      if (!inputs.pic_model_id) {
+        form.setFieldValue('pic_model_id', defaultPicId);
+      }
+      if (!inputs.pic_emb_model_id) {
+        form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
+      }
+    });
+  }, []);
 
   return (
     <div className="wk-node-panel-content image-parser-panel-content mt-[16px]">
@@ -60,8 +79,9 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
           ...data
         }}
         layout="vertical"
-        onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
+        onValuesChange={(_, v: any) => {
+          console.log('img parser valuechange', _, v);
+          handleFiledsChange(v);
         }}
       >
         <FormItem
@@ -72,6 +92,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={2}
+            fileTypes={FileOptions.image}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}
             handleFilesChange={handleFilesChange}
@@ -85,23 +106,23 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
           extra="用于指定对文本文件中的图片进行caption 时使用的模型。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {picModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>
         </FormItem>
         <FormItem
           label="图片嵌入模型："
-          field="pic_embc_model_id"
+          field="pic_emb_model_id"
           labelAlign="left"
           extra="指定对图片caption进行embedding 的模型。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {picEmbModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>

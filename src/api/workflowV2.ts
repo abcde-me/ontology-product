@@ -1,18 +1,38 @@
 import UAPI from '@/api';
 import { getModels, getModelsGroupByProvider, getProviders } from './modelV2';
 
-export async function getWorkflowDraft(
-  appId: string | number,
-  params: any = {}
-) {
-  return UAPI.RES.workflowDraft({ appId }).get(params).inRegion().do();
+export async function getWorkflowDraft(params: any = {}) {
+  const searchParams = new URLSearchParams(location.search);
+  const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
+  const dsWorkflowId =
+    params.dsWorkflowId || searchParams.get('ds_workflow_id');
+  const workflowVersion =
+    params.workflowVersion || searchParams.get('workflow_version') || '';
+  return UAPI.RES.workflowDraft({
+    workflow_uuid: workflowUUID,
+    ds_workflow_id: dsWorkflowId,
+    workflow_version: workflowVersion
+  })
+    .get({})
+    .inRegion()
+    .do();
 }
 
-export async function createWorkflowDraft(
-  appId: string | number,
-  params: any = {}
-) {
-  return UAPI.RES.workflowDraft({ appId }).post(params).inRegion().do();
+export async function createWorkflowDraft(params: any = {}) {
+  const searchParams = new URLSearchParams(location.search);
+  const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
+  const dsWorkflowId =
+    params.dsWorkflowId || searchParams.get('ds_workflow_id');
+  const workflowVersion =
+    params.workflowVersion || searchParams.get('workflow_version') || '';
+  return UAPI.RES.workflowDraft({
+    workflow_uuid: workflowUUID,
+    ds_workflow_id: dsWorkflowId,
+    workflow_version: workflowVersion
+  })
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 export async function publishWorkflow(appId: string, params: any = {}) {

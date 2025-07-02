@@ -78,7 +78,8 @@ UAPI_CONFIG.addResponseInterceptor(
         'SUCCESS',
         'success',
         200,
-        'AIAP.DraftWorkflowNotFound'
+        'AIAP.DraftWorkflowNotFound',
+        'AIMDP.WorkflowDraftNotFound'
       ];
       if (
         successCode.includes(res.code) ||
