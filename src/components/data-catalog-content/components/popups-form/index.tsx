@@ -30,7 +30,7 @@ const FormComponent: React.FC<FormProps> = ({
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    const exportNames: Array<string> = []
+    const exportNames: Array<string> = [];
     if (exportdatas) {
       // 使用扁平数组而不是嵌套数组
       exportdatas.forEach(item => {

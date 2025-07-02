@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle
+} from 'react';
 import useStore from '@/pages/dataCatalog/store';
 import {
   Tree,
@@ -183,10 +189,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const searchConditionIsActive = searchCondition?.isActive || false;
   // 监听选中路径变化
   useEffect(() => {
-    console.log(
-      '选中的路径selectedFullPath9999999999999',
-      selectedFullPath
-    );
+    console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
     // 获取到路径后直接传递给后端，然后前端根据路径获取数据
   }, [selectedFullPath]);
   // 将getTableList方法暴露给父组件

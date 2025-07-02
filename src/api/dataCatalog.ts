@@ -75,7 +75,10 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
 }
 //删除目标文件
 export async function deleteTargetFile(param: TargetFileDeleteParams) {
-  return await UAPI.RES.targetDataFileDeleteApi({}).delete(param).inRegion().do();
+  return await UAPI.RES.targetDataFileDeleteApi({})
+    .delete(param)
+    .inRegion()
+    .do();
 }
 
 //预览/搜索数据集

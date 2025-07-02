@@ -1,8 +1,10 @@
-/* 数据集管理页面样式 - 使用 CSS Modules 进行样式隔离 */
+/* 数据集管理页面样式 - 百分百还原设计稿 */
 .datasetManagement {
   background: #f5f5f5;
   padding: 24px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 主内容卡片 */
@@ -11,6 +13,9 @@
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 标题区域样式 */
@@ -133,7 +138,7 @@
   font-weight: 500;
 }
 
-.datasetManagement :global(.arco-btn-primary):hover {
+.datasetManagement :global(.arco-btn-primary:hover) {
   background: #0e42d2;
   border-color: #0e42d2;
 }
@@ -141,9 +146,16 @@
 /* 表格样式 */
 .datasetTable {
   border-radius: 8px;
-  overflow: hidden;
   border: 1px solid #f0f0f0;
-  height: 742px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 确保表格内容区域可以滚动 */
+.datasetTable :global(.arco-table-container) {
+  flex: 1;
+  overflow: auto;
 }
 
 .datasetTable :global(.arco-table-thead th) {
@@ -161,13 +173,13 @@
   font-size: 14px;
 }
 
-.datasetTable :global(.arco-table-tbody .arco-table-tr):hover :global(td) {
+.datasetTable :global(.arco-table-tbody .arco-table-tr:hover td) {
   background-color: #f5f5f5;
 }
 
 /* 表格内链接样式 */
 .datasetNameLink {
-  color: #165dff !important;
+  color: #0e42d2 !important;
   font-weight: 500 !important;
   padding: 0 !important;
   height: auto !important;
@@ -175,13 +187,8 @@
   font-size: 14px;
 }
 
-.datasetNameLink:hover {
-  color: #0e42d2 !important;
-  text-decoration: underline;
-}
-
 /* 操作列样式优化 */
-.datasetTable :global(.arco-table-tbody td):last-child {
+.datasetTable :global(.arco-table-tbody td:last-child) {
   width: 148px !important;
   height: 47px !important;
   padding: 12px !important;
@@ -204,19 +211,19 @@
   min-width: auto !important;
 }
 
-.actionButtonExport {
+.actionButton.export {
   color: #165dff !important;
 }
 
-.actionButtonExport:hover {
+.actionButton.export:hover {
   background-color: rgba(22, 93, 255, 0.1) !important;
 }
 
-.actionButtonDelete {
+.actionButton.delete {
   color: #f53f3f !important;
 }
 
-.actionButtonDelete:hover {
+.actionButton.delete:hover {
   background-color: rgba(245, 63, 63, 0.1) !important;
 }
 
@@ -229,20 +236,20 @@
 
 /* 标签样式 */
 .tagGreen {
-  background-color: #f6ffed !important;
-  color: #52c41a !important;
-  border: 1px solid #b7eb8f !important;
+  background-color: #e2e8f0 !important;
+  color: #000 !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 4px;
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 4px 4px;
 }
 
 .tagPurple {
-  background-color: #f9f0ff !important;
-  color: #722ed1 !important;
-  border: 1px solid #d3adf7 !important;
+  background-color: transparent !important;
+  color: #000 !important;
+  border: none !important;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
   padding: 2px 6px;
 }
 
@@ -256,28 +263,12 @@
   border-color: #165dff;
 }
 
-/* 分页样式 - 关键的样式隔离 */
-.datasetTable :global(.arco-pagination) {
+/* 分页器固定在底部 */
+.datasetTable :global(.arco-table-pagination) {
   margin-top: 16px;
-  justify-content: flex-end;
-}
-
-.datasetTable :global(.arco-pagination-item) {
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.datasetTable :global(.arco-pagination-item-active) {
-  background-color: #165dff !important;
-  border-color: #165dff !important;
-}
-
-.datasetTable
-  :global(.arco-pagination-item):hover:not(
-    :global(.arco-pagination-item-active)
-  ) {
-  background-color: rgba(22, 93, 255, 0.1) !important;
-  border-color: #165dff !important;
+  padding: 0 20px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
 }
 
 /* 筛选图标样式 */
@@ -285,7 +276,7 @@
   color: #86909c;
 }
 
-.datasetTable :global(.arco-table-filters-trigger):hover {
+.datasetTable :global(.arco-table-filters-trigger:hover) {
   color: #165dff;
 }
 
@@ -294,7 +285,7 @@
   color: #86909c;
 }
 
-.datasetTable :global(.arco-table-sorter):hover {
+.datasetTable :global(.arco-table-sorter:hover) {
   color: #165dff;
 }
 

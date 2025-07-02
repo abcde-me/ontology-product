@@ -42,7 +42,7 @@ interface UpdateDatasetParams {
 }
 
 interface DatasetContentsParams {
-  dataset_id: string;
+  id: string;
   page?: number;
   page_size?: number;
   search?: string;
@@ -123,7 +123,7 @@ export async function getConnectorFileList(params: ConnectorFileListParams) {
 
 //修改数据集
 export async function updateDataset(params: UpdateDatasetParams) {
-  return UAPI.RES.updateDatasetApi({ id: params.id })
+  return UAPI.RES.updateDatasetApi({ dataset_id: params.id })
     .put(params)
     .inRegion()
     .do();
@@ -131,7 +131,10 @@ export async function updateDataset(params: UpdateDatasetParams) {
 
 //获取数据集详情页
 export async function getDatasetDetailPage(params: DatasetDetailPageParams) {
-  return UAPI.RES.datasetDetailPageApi({ id: params.id }).get().inRegion().do();
+  return UAPI.RES.datasetDetailPageApi({ dataset_id: params.id })
+    .get()
+    .inRegion()
+    .do();
 }
 
 //获取数据集详情页的数据内容
@@ -147,6 +150,14 @@ export async function editDatasetVersion(params: EditDatasetVersionParams) {
 //获取数据集版本列表
 export async function getDatasetVersionList(params: any) {
   return UAPI.RES.datasetVersionListApi({}).get(params).inRegion().do();
+}
+
+//删除数据集
+export async function deleteDataset(params: any) {
+  return UAPI.RES.deleteDatasetApi({ dataset_id: params.id })
+    .delete()
+    .inRegion()
+    .do();
 }
 
 //获取连接器列表

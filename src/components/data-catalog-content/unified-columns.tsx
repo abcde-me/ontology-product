@@ -353,7 +353,7 @@ const handleDelete = (data, refreshData, selectedKey) => {
       title: '确认删除文件吗?',
       content: '删除后，文件不可恢复',
       onOk: async () => {
-        ids.push(data.id)
+        ids.push(data.id);
         console.log('查看删除的数据和数组们', data, ids);
         await deleteTargetFile({ full_path: data.full_path, file_ids: ids, path_id: selectedKey });
         Message.success('删除成功');

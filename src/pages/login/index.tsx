@@ -6,7 +6,7 @@ import {
   removeLocalStorage,
   getLocalStorage
 } from '@/utils/storage';
-import { Button, Card, Form, Input } from '@arco-design/web-react';
+import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -84,19 +84,7 @@ const LoginCard = () => {
         }}
       >
         {/* Logo 和标题部分 */}
-        <div className="mb-8 flex w-full max-w-md flex-col items-center">
-          <div className="flex w-full flex-row items-center justify-between">
-            <div className="flex items-center">
-              <img
-                src={LogoPng}
-                alt="Logo"
-                className="mr-6 w-48 object-contain"
-              />
-              <div className="mx-4 h-6 w-px bg-gray-400" />
-            </div>
-            <div className="text-xl font-bold text-gray-800">ModaForge</div>
-          </div>
-        </div>
+        <Header />
 
         {/* 表单部分 */}
         <Form
@@ -107,7 +95,7 @@ const LoginCard = () => {
         >
           <Form.Item
             label={
-              <div className="text-[14px] font-bold text-gray-800">账号</div>
+              <div className="text-[14px] font-bold text-gray-800">用户名</div>
             }
             field="account"
             rules={[{ required: true, message: '请输入用户名' }]}
@@ -144,3 +132,15 @@ const LoginCard = () => {
 };
 
 export default LoginCard;
+
+function Header() {
+  return (
+    <div className="flex justify-center">
+      <Space className="mb-8">
+        <img className="w-48 object-contain" src={LogoPng} />
+        <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
+        <div className="text-xl font-bold text-gray-800">多模态治理平台</div>
+      </Space>
+    </div>
+  );
+}
