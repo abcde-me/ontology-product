@@ -62,3 +62,7 @@ export async function stopeLoad(params) {
   console.log(params);
   return await UAPI.RES.stopLoadApi({}).post(params).inRegion().do();
 }
+
+export async function getLoadTaskFiles(params: any = {}) {
+  return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
+}

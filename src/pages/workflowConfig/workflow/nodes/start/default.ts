@@ -8,7 +8,7 @@ import {
 const nodeDefault: NodeDefault<StartNodeType> = {
   defaultValue: {
     variables: [],
-    data_path_id: '',
+    data_path_id: 0,
     data_path_name: '',
     data_category: [
       {
@@ -47,27 +47,17 @@ const nodeDefault: NodeDefault<StartNodeType> = {
     return nodes;
   },
   checkValid(data: StartNodeType) {
-    // TODO: ts错误
-    // @ts-expect-error
-    if (!data.srcDir) {
+    if (!data.data_path_id) {
       return {
         isValid: false,
         errorMessage: '请选择源数据目录'
       };
     }
     if (
-      // TODO: ts错误
-      // @ts-expect-error
-      (data.doc.enabled && data.doc.types.length) ||
-      // TODO: ts错误
-      // @ts-expect-error
-      (data.image.enabled && data.image.types.length) ||
-      // TODO: ts错误
-      // @ts-expect-error
-      (data.audio.enabled && data.audio.types.length) ||
-      // TODO: ts错误
-      // @ts-expect-error
-      (data.video.enabled && data.video.types.length)
+      (data.data_category[0].enabled && data.data_category[0].format.length) ||
+      (data.data_category[1].enabled && data.data_category[1].format.length) ||
+      (data.data_category[2].enabled && data.data_category[2].format.length) ||
+      (data.data_category[3].enabled && data.data_category[3].format.length)
     ) {
       return {
         isValid: true
