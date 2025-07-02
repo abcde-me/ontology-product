@@ -56,9 +56,7 @@ export default function HomePage() {
           <div className="flex items-start justify-between">
             <div className="flex items-start">
               <Avatar size={64} className="ai-avatar">
-                {// TODO: ts错误
-                // @ts-expect-error
-                userInfo?.username[0]?.toLocaleUpperCase()}
+                {userInfo?.username[0]?.toLocaleUpperCase()}
               </Avatar>
               <div className="ml-5">
                 <div className="mb-2 text-[20px] font-bold">
@@ -70,11 +68,7 @@ export default function HomePage() {
                 <div className="mb-2 text-[16px] text-gray-600">
                   <span className="inline-block w-16 font-[500]">手机号</span>
                   <span className="ml-3">
-                    {
-                      // TODO: ts错误
-                      // @ts-expect-error
-                      formatPhoneNumber(userInfo?.phone)
-                    }
+                    {formatPhoneNumber(userInfo?.phone)}
                   </span>
                 </div>
                 <div className="text-[16px] text-gray-600">
@@ -119,11 +113,7 @@ export default function HomePage() {
           <div className="text-[16px]">
             <span className="inline-block w-12 font-[500]">角色</span>
             <span className="ml-4 text-gray-600">
-              {
-                // TODO: ts错误
-                // @ts-expect-error
-                roleMap[userInfo?.role] || userInfo?.role
-              }
+              {roleMap[userInfo?.role] || userInfo?.role}
             </span>
           </div>
         </div>

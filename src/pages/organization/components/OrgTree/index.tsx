@@ -91,15 +91,11 @@ export default function OrgTree() {
       const result = [];
       data.forEach((item) => {
         if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
-          // TODO: ts错误
-          // @ts-expect-error
           result.push({ ...item });
         } else if (item.children) {
           const filterData = loop(item.children);
 
           if (filterData.length) {
-            // TODO: ts错误
-            // @ts-expect-error
             result.push({ ...item, children: filterData });
           }
         }
@@ -126,8 +122,6 @@ export default function OrgTree() {
 
   // 基于用户信息初始化树的选中和展开状态
   useEffect(() => {
-    // TODO: ts错误
-    // @ts-expect-error
     if (treeData.length > 0 && !hasInitialized) {
       let targetNode = null;
       let targetKey = '';
@@ -136,15 +130,9 @@ export default function OrgTree() {
       // 优先使用用户的 organization_id
       if (userInfo?.organization_id) {
         console.log('Finding user organization:', userInfo.organization_id);
-        // TODO: ts错误
-        // @ts-expect-error
         targetNode = findNodeById(treeData, userInfo.organization_id);
         if (targetNode) {
-          // TODO: ts错误
-          // @ts-expect-error
           targetKey = String(targetNode.key || targetNode.id);
-          // TODO: ts错误
-          // @ts-expect-error
           pathToExpand = getPathToRoot(treeData, userInfo.organization_id);
           console.log('Found user organization node:', targetNode);
           console.log('Path to expand:', pathToExpand);
@@ -152,14 +140,8 @@ export default function OrgTree() {
       }
 
       // 如果没有找到用户组织或用户是超级管理员，使用第一个节点
-      // TODO: ts错误
-      // @ts-expect-error
       if (!targetNode && treeData.length > 0) {
-        // TODO: ts错误
-        // @ts-expect-error
         targetNode = treeData[0];
-        // TODO: ts错误
-        // @ts-expect-error
         targetKey = String(targetNode.key || targetNode.id);
         console.log('Using first node as default:', targetNode);
       }
@@ -425,7 +407,7 @@ export default function OrgTree() {
                           });
                         }}
                       >
-                        <div style={{ color: 'red' }}>删除部门</div>
+                        删除部门
                       </Menu.Item>
                     </Menu>
                   }
