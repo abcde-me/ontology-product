@@ -31,6 +31,7 @@ export type CodeNodeType = CommonNodeType & {
   prompt: string;
   prompt_checkbox: boolean;
   enhanced_proportion: number; // 任务描述增强占比
+  modelList: Array<any>;
 };
 
 export type CodeDependency = any;
@@ -62,4 +63,5 @@ export type EnhancementNodeType = {
   similarity_threshold: number; // 相似度阈值
   sample_num: number; // 指令生成依赖样本数
   prompt_checkbox: boolean; // 提示词 开关
+  modelList: Array<any>;
 };

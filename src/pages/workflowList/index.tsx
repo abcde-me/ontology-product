@@ -16,7 +16,11 @@ import {
   IconClockCircle
 } from '@arco-design/web-react/icon';
 import noDataElement from '@/components/no-data';
-import { getWorkflowList, workflowOperation } from '@/api/workflowList';
+import {
+  getWorkflowList,
+  workflowDelete,
+  workflowCopy
+} from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const InputSearch = Input.Search;
@@ -90,13 +94,31 @@ export default function WorkflowList() {
   };
 
   // 复制工作流
-  const handleCloneWorkflow = (id: number | string) => {
-    console.log(id);
+  const handleCloneWorkflow = async (workflow_uuid: number | string) => {
+    const res = await workflowCopy(workflow_uuid);
+    if (res.status === 200 && res.data) {
+      Message.success({
+        content: '复制成功'
+      });
+      window.open(
+        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+      getList();
+    } else {
+      Message.error({
+        content: res.message || '复制失败，请稍后重试'
+      });
+    }
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = async (id: number | string, version: string) => {
-    const res = await workflowOperation(id, version);
+  const handleDeleteWorkflow = async (
+    workflow_uuid: number | string,
+    workflow_version: string
+  ) => {
+    const res = await workflowDelete(workflow_uuid, workflow_version);
     if (res.status === 200 && res.code === '') {
       Message.success({
         content: '删除成功'
@@ -104,7 +126,7 @@ export default function WorkflowList() {
       getList();
     } else {
       Message.error({
-        content: '删除失败，请稍后重试'
+        content: res.message || '删除失败，请稍后重试'
       });
     }
   };
@@ -210,7 +232,7 @@ export default function WorkflowList() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 180,
+      width: 150,
       render: (_, record) => (
         <span>{new Date(record.create_time).toLocaleString()}</span>
       ),
@@ -223,7 +245,7 @@ export default function WorkflowList() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 100,
+      width: 130,
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
