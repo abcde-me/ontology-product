@@ -31,24 +31,31 @@ export async function downloadFileById(id: string, params: any = {}) {
 export async function getCatalogList(param: any = {}) {
   return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
 }
-//添加目录
+// 添加目录
 export async function addCatalog(data: any) {
   return await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
 }
-//新建卷
+// 新建卷
 export async function addVolume(data: any) {
   return await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
 }
-//删除数据卷
-export async function deleteVolume(id: string) {
-  return await UAPI.RES.volumeDeleteApi({ id }).delete().inRegion().do();
+// 删除数据卷
+export async function deleteVolume(
+  id: string,
+  params?: { root_type?: string }
+) {
+  return await UAPI.RES.volumeDeleteApi({ id }).delete(params).inRegion().do();
 }
-//重命名目录
+// 重命名目录
 export async function renameCatalog(id: string, params: any) {
-  return await UAPI.RES.catalogRenameApi({ catalogId: id })
+  const res = await UAPI.RES.catalogRenameApi({ catalogId: id })
     .put(params)
     .inRegion()
     .do();
+  if (res.status !== 200) {
+    Message.warning(res.message);
+  }
+  return res;
 }
 
 // 定义查询目标数据文件的参数接口
