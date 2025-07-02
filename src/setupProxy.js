@@ -59,6 +59,20 @@ module.exports = function (app) {
       })
     );
     app.use(
+      ['/api/aimdp/v1/workflow_instance'],
+      createProxyMiddleware({
+        target: 'http://10.252.26.5:30888/api/aimdp/v1/workflow',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        on: {
+          proxyReq: (proxyReq, req, res) => {
+            proxyReq.removeHeader('origin');
+          }
+        }
+      })
+    );
+    app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({
         target: 'http://10.252.26.5:30183/api/aimdp/v1',
