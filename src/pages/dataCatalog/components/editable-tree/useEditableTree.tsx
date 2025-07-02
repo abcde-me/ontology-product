@@ -20,6 +20,7 @@ import {
   deleteVolume,
   renameCatalog
 } from '@/api/dataCatalog';
+import { validateName } from '../../utils';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -221,8 +222,9 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef } = props;
 
     const fileName = inputValue.trim();
-    if (!fileName.length) {
-      Message.warning('名称不能为空');
+    const validateResult = validateName(fileName);
+    if (!validateResult.isValid && validateResult.errorMessage) {
+      Message.error(validateResult.errorMessage);
       return;
     }
 
