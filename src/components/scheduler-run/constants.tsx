@@ -1,4 +1,4 @@
-import { CycleValues, WeekValues } from './types';
+import { CycleValues, TimeType, WeekValues } from './types';
 
 // 每周的数据
 export const WEEKLY_OPTIONS = [
@@ -31,7 +31,16 @@ export const WEEKLY_OPTIONS = [
     value: WeekValues.SUNDAY
   }
 ];
-export const TIME_TAB = ['具体日期', '相对时间'];
+export const TIME_TAB = [
+  {
+    lable: '具体日期',
+    value: TimeType.SEPCIFICTIME
+  },
+  {
+    lable: '相对时间',
+    value: TimeType.RELATICELYTIME
+  }
+];
 // 每月的数据
 export const MONTHLY_OPTIONS = Array.from({ length: 31 }, (_, i) => {
   return {

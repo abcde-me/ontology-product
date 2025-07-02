@@ -7,8 +7,9 @@ import {
   Alert,
   Divider
 } from '@arco-design/web-react';
+import type { SelectHandle } from '@arco-design/web-react/es/Select/interface';
 import Styles from './index.module.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
 import {
   WEEKLY_OPTIONS,
@@ -29,15 +30,6 @@ const quickOptionsData = [
   '每周一上午9点'
 ];
 
-export const TIMEARR = {
-  [TimeType.SEPCIFICTIME]: {
-    text: '具体日期'
-  },
-  [TimeType.RELATICELYTIME]: {
-    text: '相对时间'
-  }
-};
-
 interface CycleLoadingFormProps {
   options: CycleText;
   onOptionsChange: (options: CycleText) => void;
@@ -57,13 +49,13 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       cycle: frequencyData,
-      date: options.date.split(','),
+      date: options.date?.split(',') ?? [],
       time: `${options.hour}:${options.minute}`
     };
   } else if (frequencyData === CycleValues.PER_WEEK) {
     return {
       cycle: frequencyData,
-      week: options.week.split(','),
+      date: options.date?.split(',') ?? [],
       time: `${options.hour}:${options.minute}`
     };
   } else {
@@ -80,7 +72,7 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
     return {
       minute,
       hour,
-      date: formVals.date.join(','),
+      date: formVals.date?.join(',') ?? '',
       month: '*',
       week: ''
     };
@@ -88,7 +80,7 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
     return {
       minute,
       hour,
-      date: formVals.date.join(','),
+      date: formVals.date?.join(',') ?? '',
       month: '',
       week: '*'
     };
@@ -108,19 +100,13 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
   onOptionsChange
 }) => {
   const [form] = Form.useForm();
+  const datePickerRef = useRef<SelectHandle>(null);
   // 频率选择器选择的数据
   const [frequencyData, setFrequencyData] = useState(
     initFrequencyData(options)
   );
   const initialValues = getInitialValues(frequencyData, options);
 
-  // 提示信息的状态
-  // const [promptState, setPromptState] = useState(false);
-  // 周期设置为月时 后面选择框改变的方法
-  // const monthlyHan = (val) => {
-  //   const monthIndex = val.some((item) => item == '每月最后一天');
-  //   // setPromptState(monthIndex);
-  // };
   // 点击快捷选项的回调
   const shortcutHan = (value) => {
     if (value == '每天凌晨0点') {
@@ -140,24 +126,29 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
       setFrequencyData(CycleValues.PER_WEEK);
       form.setFieldsValue({
         cycle: CycleValues.PER_WEEK,
-        week: ['1'],
+        date: ['1'],
         time: '09:00'
       });
     }
   };
-  const [timeFlag, setTimeFlag] = useState('具体日期');
-  const handleValuesChange = (changedValues, allValues) => {
+  const [timeFlag, setTimeFlag] = useState(TimeType.SEPCIFICTIME);
+  const handleValuesChange = (_, allValues) => {
     const optionsFormat = formatOptions(frequencyData, allValues);
-    console.log('变化的字段:', changedValues);
-    console.log('当前所有字段值:', allValues);
+    console.log('当前所有字段值:', allValues, frequencyData);
     console.log('格式后的字段值:', optionsFormat);
     onOptionsChange(optionsFormat);
   };
 
+  useEffect(() => {
+    handleValuesChange(null, form.getFieldsValue());
+  }, [frequencyData]);
+
   return (
-    // TODO: ts错误
-    // @ts-expect-error
-    <Form initialValues={initialValues} onValuesChange={handleValuesChange}>
+    <Form
+      form={form}
+      initialValues={initialValues}
+      onChange={handleValuesChange}
+    >
       <div className={Styles.cycleLoadingBox}>
         <div style={{ display: 'flex' }}>
           <Form.Item
@@ -168,8 +159,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
             <div
               style={{
                 display: 'flex',
-                alignItems: 'start',
-                justifyContent: 'space-between'
+                alignItems: 'start'
               }}
             >
               <Form.Item
@@ -179,7 +169,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
               >
                 <Select
                   placeholder="频率"
-                  style={{ width: 100 }}
+                  style={{ width: 80 }}
                   onChange={(val) => setFrequencyData(val)}
                 >
                   {CYCLE_OPTIONS.map((item) => {
@@ -193,10 +183,9 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
               </Form.Item>
               {frequencyData == CycleValues.PER_WEEK && (
                 <Form.Item
-                  field="week"
+                  field="date"
                   style={{
-                    flex: '0 0 120px',
-                    margin: '0 8px',
+                    margin: '0 0 0 12px',
                     display: 'flex',
                     alignItems: 'center'
                   }}
@@ -206,7 +195,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                     mode="multiple"
                     placeholder="请选择日期"
                     style={{
-                      width: 300
+                      minWidth: 300
                     }}
                   >
                     {WEEKLY_OPTIONS.map((item) => (
@@ -222,20 +211,17 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                   field="date"
                   key={frequencyData}
                   style={{
-                    flex: '0 0 120px',
-                    margin: '0 8px',
+                    margin: '0 0 0 12px',
                     display: 'flex',
                     alignItems: 'center'
                   }}
                   rules={[{ required: true, message: '请选择时间' }]}
                 >
                   <Select
-                    mode="multiple"
-                    style={{ width: 300 }}
+                    mode={'multiple'}
+                    style={{ minWidth: 300 }}
                     placeholder="请选择日期"
-                    onChange={(val) => {
-                      // monthlyHan(val);
-                    }}
+                    ref={datePickerRef}
                     dropdownRender={(menu) => (
                       <div>
                         <Divider style={{ margin: 0 }} />
@@ -252,14 +238,16 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                           {TIME_TAB.map((item) => {
                             return (
                               <div
-                                key={item}
+                                key={item.value}
                                 style={{
                                   width: '50%',
                                   height: '100%',
                                   background:
-                                    item == timeFlag ? 'white' : undefined,
+                                    item.value == timeFlag
+                                      ? 'white'
+                                      : undefined,
                                   color:
-                                    item == timeFlag
+                                    item.value == timeFlag
                                       ? 'rgb(0, 125, 250)'
                                       : undefined,
                                   cursor: 'pointer',
@@ -269,11 +257,12 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                                   borderRadius: '3px'
                                 }}
                                 onClick={() => {
-                                  setTimeFlag(item);
-                                  console.log(item);
+                                  // datePickerRef.current?.open();
+                                  // console.log('选中了选择器', datePickerRef.current?.open);
+                                  setTimeFlag(item.value);
                                 }}
                               >
-                                {item}
+                                {item.lable}
                               </div>
                             );
                           })}
@@ -283,13 +272,13 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                     )}
                     dropdownMenuStyle={{ maxHeight: 200 }}
                   >
-                    {timeFlag == TIMEARR[TimeType.SEPCIFICTIME].text &&
+                    {timeFlag == TimeType.SEPCIFICTIME &&
                       MONTHLY_OPTIONS.map((option) => (
                         <Option key={option.lable} value={option.value}>
                           {option.lable}
                         </Option>
                       ))}
-                    {timeFlag == TIMEARR[TimeType.RELATICELYTIME].text &&
+                    {timeFlag == TimeType.RELATICELYTIME &&
                       RELATIVE_TIME_OPTIONS.map((option) => (
                         <Option key={option.lable} value={option.value}>
                           {option.lable}
