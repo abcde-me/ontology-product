@@ -20,7 +20,11 @@ import {
   IconFilter
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
-import { getDatasetList, createDataset } from '@/api/datasetManagement';
+import {
+  getDatasetList,
+  createDataset,
+  deleteDataset
+} from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
 
@@ -364,24 +368,43 @@ const DatasetManagement: React.FC = () => {
     closeModal();
   };
 
+  // 删除数据集的方法
+  const deleteDatasetRecord = (record: Dataset) => {
+    deleteDataset(record)
+      .then((res) => {
+        getDatasetList({
+          page: currentPage,
+          page_size: pageSize,
+          search: search,
+          search_field: searchField
+        }).then((res) => {
+          setDatasetList(res.data.list);
+          setTotal(res.data.total);
+        });
+        Message.success('删除成功');
+      })
+      .catch((err) => {
+        Message.error('数据集删除失败！');
+      });
+  };
+
   // 删除数据集
   const handleDelete = (record: Dataset) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除数据集"${record.name}"吗？此操作不可撤销。`,
-      okText: '确认删除',
+      title: '确认删除文件吗？',
+      // 内容
+      content: '删除后，文件不可恢复',
+      // 按钮文字
+      okText: '确定',
       cancelText: '取消',
+      // 类型设为 warning，会自动使用橙色感叹号图标
       okButtonProps: { status: 'danger' },
+      // 居中显示
+      // centered: true,
       onOk: () => {
-        deleteDataset(record);
-        Message.success('数据集删除成功！');
+        deleteDatasetRecord(record);
       }
     });
-  };
-
-  // 删除数据集的方法
-  const deleteDataset = (record: Dataset) => {
-    console.log(record);
   };
 
   // 分页处理函数

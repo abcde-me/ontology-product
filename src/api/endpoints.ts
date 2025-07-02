@@ -161,7 +161,6 @@ export const ResourceEndpointsV2 = {
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
   // 数据目录
-  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
   catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
@@ -259,7 +258,7 @@ export const ModaForgeResourceEndpoints = {
   //创建数据集
   createDatasetApi: PrefixV1 + '/dataset',
   //获取标签列表
-  tagListApi: PrefixV1 + '/tag',
+  tagListApi: PrefixAimdp + '/tags',
   //删除数据集
   deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
@@ -267,9 +266,11 @@ export const ModaForgeResourceEndpoints = {
   //查询指定连接器加载成功的文件信息
   connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
   //修改数据集
-  updateDatasetApi: PrefixAimdp + '/dataset/{id}',
+  updateDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //获取数据集详细信息
-  datasetDetailPageApi: PrefixAimdp + '/datasets/{id}',
+  datasetDetailPageApi: PrefixAimdp + '/datasets/{dataset_id}',
+  //删除数据集
+  deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
   //编辑数据集版本数据

@@ -323,18 +323,20 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [previewColumns, setPreviewColumns] = useState([]); //数据目录预览表格列（从后端获取）
   //标签列表
-  const [tagList, setTagList] = useState([]); //标签列表
+  const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
+    []
+  );
   // 标签选项
 
   useEffect(() => {
-    //数据目录卷
-    // getCatalogList({ type: 2 }).then((res) => {
-    //   console.log(res);
-    //   setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
-    // }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
-    setTargetDataSourceOptions(
-      convertToCascaderOptions(cstargetDataSourceData)
-    ); //测试数据
+    // 数据目录卷
+    getCatalogList({ root_type: 2 }).then((res) => {
+      console.log('李帆测试', res);
+      setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
+    }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
+    // setTargetDataSourceOptions(
+    //   convertToCascaderOptions(cstargetDataSourceData)
+    // ); //测试数据
 
     //连接器
     // TODO: ts错误
@@ -345,13 +347,11 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
     //标签
-    // getTagList().then(res => {
-    //   setTagList(res.data)
-    //   console.log(res.data)
-    // })
-    // TODO: ts错误
-    // @ts-expect-error
-    setTagList(convertTotagSelectOptions(tagOptions)); //测试数据
+    getTagList().then((res) => {
+      setTagList(convertTotagSelectOptions(res.data));
+      console.log(res.data);
+    });
+    // setTagList(convertTotagSelectOptions(tagOptions)); //测试数据
   }, []);
 
   // 处理数据来源变化
@@ -675,15 +675,15 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                     labelInValue
                     renderFormat={(option: OptionInfo | null) => {
                       console.log('李帆测试', option);
-                      const value = option?.value as string;
-                      return value.split('/').pop() || '';
+                      const value = option?.value ?? '';
+                      return String(value).split('/').pop() || '';
                     }}
                   >
                     {connectorFileInformation.map((item, index) => (
-                      // @ts-expect-error
                       <Option
                         key={index}
                         value={item.path + '/' + item.name}
+                        // @ts-expect-error
                         label={item.name}
                       >
                         <div
