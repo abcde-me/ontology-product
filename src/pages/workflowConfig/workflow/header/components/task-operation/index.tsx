@@ -57,6 +57,10 @@ const AppPublisher = ({
     [onOperate]
   );
 
+  const handleOptionsChange = (options) => {
+    console.log('-----------------', options);
+  };
+
   // useKeyPress(
   //     `${getKeyboardKeyCodeBySystem('ctrl')}.shift.p`,
   //     (e) => {
@@ -98,7 +102,16 @@ const AppPublisher = ({
             onOk={() => handleOperate(WorkflowOperation.CRON_RUNNING)}
             onCancel={() => setSchedulerDialogVisible(false)}
           >
-            <SchedulerRun></SchedulerRun>
+            <SchedulerRun
+              options={{
+                minute: '10',
+                hour: '10',
+                date: '1',
+                month: '*',
+                week: ''
+              }}
+              onOptionsChange={handleOptionsChange}
+            ></SchedulerRun>
           </Modal>
         </div>
         <Button

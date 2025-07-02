@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Button, Popover, DatePicker } from '@arco-design/web-react';
+import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg'; // 直接导入为组件
 import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
 import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
-
+import { deleteTargetFile } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
 const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
 const TXTIcon = ({ size = 16 }) => <TxtIcon width={size} height={size} />;
-
+// const [ids, setIds] = useState([]);
 // 根据文件类型获取对应图标组件的函数
 const getFileIcon = (type, size = 16) => {
   const iconMap = {
@@ -72,7 +72,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible) => (
+const renderActionColumn = (_, record, setVisible, refreshData) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -94,7 +94,7 @@ const renderActionColumn = (_, record, setVisible) => (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record.id)}
+      onClick={() => handleDelete(record, refreshData)}
     >
       删除
     </span>
@@ -109,7 +109,8 @@ export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
-  hoveredRowId = null
+  hoveredRowId = null,
+  refreshData = () => { } // 添加刷新数据的回调函数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -172,6 +173,8 @@ export const getUnifiedColumns = (
       {
         title: '上传用户',
         dataIndex: 'meta',
+        ellipsis: true,
+        width: 180,
         render: (_, record) => (
           <div>
             <div>原文件: {record.file}</div>
@@ -207,7 +210,7 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData)
       }
     ];
   }
@@ -222,12 +225,12 @@ export const getUnifiedColumns = (
       },
       {
         title: '数据内容',
-        dataIndex: 'content',
+        dataIndex: 'short_content',
         ellipsis: true,
         width: 300,
         render: (_, record) => (
           <div>
-            <Popover content={record.content}>
+            <Popover content={record.short_content}>
               <span
                 style={{
                   display: 'block',
@@ -237,7 +240,7 @@ export const getUnifiedColumns = (
                   maxWidth: '100%'
                 }}
               >
-                {record.content}
+                {record.short_content}
               </span>
             </Popover>
           </div>
@@ -245,7 +248,7 @@ export const getUnifiedColumns = (
       },
       {
         title: '生成时间',
-        dataIndex: 'createdAt',
+        dataIndex: 'created_at',
         sorter: (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         onFilter: (value, record) => {
@@ -299,7 +302,7 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData)
       }
     ];
   }
@@ -322,19 +325,37 @@ export const getUnifiedColumns = (
   return [];
 };
 
-// 处理下载操作
+// 处理导出操作
 const handleDownload = (record, setVisible) => {
-  console.log('下载', record);
+  console.log('导出', record);
   setVisible(true, record);
 };
 
 // 处理删除操作
-const handleDelete = (id) => {
-  console.log('删除', id);
-  const token = localStorage.getItem('loginToken');
-  if (!token) {
-    Message.error('请先登录');
-    return;
+const handleDelete = (data, refreshData) => {
+  const ids: Array<string> = []
+  try {
+    Modal.confirm({
+      title: '确认删除文件吗?',
+      content: '删除后，文件不可恢复',
+      onOk: async () => {
+        ids.push(data.id)
+        console.log('查看删除的数据和数组们', data, ids);
+        await deleteTargetFile({ full_path: data.file, file_ids: ids });
+        Message.success('删除成功');
+        // 删除成功后刷新数据
+        if (typeof refreshData === 'function') {
+          refreshData();
+        }
+      }
+    });
+  } catch {
+    Message.error('删除失败，请重试');
   }
+  // const token = localStorage.getItem('loginToken');
+  // if (!token) {
+  //   Message.error('请先登录');
+  //   return;
+  // }
   // deleteFileById(id)
 };
