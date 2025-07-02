@@ -57,9 +57,9 @@ interface TargetDataFileQueryParams {
   full_path: string;
   start_time: string;
   end_time: string;
-  search_content:string;
-  search_id:string;
-  limit:number;
+  search_content: string;
+  search_id: string;
+  limit: number;
 }
 
 // 定义删除目标文件的参数接口
@@ -74,7 +74,10 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
 }
 //删除目标文件
 export async function deleteTargetFile(param: TargetFileDeleteParams) {
-  return await UAPI.RES.targetDataFileDeleteApi({}).delete(param).inRegion().do();
+  return await UAPI.RES.targetDataFileDeleteApi({})
+    .delete(param)
+    .inRegion()
+    .do();
 }
 
 //预览/搜索数据集

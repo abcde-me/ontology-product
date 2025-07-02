@@ -30,12 +30,11 @@ const FormComponent: React.FC<FormProps> = ({
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    const exportNames: Array<string> = []
+    const exportNames: Array<string> = [];
     if (exportdatas) {
-      exportNames.push(exportdatas.map(item => item.file_name))
-
+      exportNames.push(exportdatas.map((item) => item.file_name));
     } else {
-      exportNames.push(form.getFieldValue('name'))
+      exportNames.push(form.getFieldValue('name'));
     }
     const res = await exportFile({
       file_names: exportNames,
@@ -76,7 +75,7 @@ const FormComponent: React.FC<FormProps> = ({
   const getConnectorList = async () => {
     try {
       const res = await getConnectionList({});
-      if (res && res.data ) {
+      if (res && res.data) {
         setConnectorList(res.data.items);
       } else {
         setConnectorList([]);

@@ -35,10 +35,18 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
   },
   checkValid(payload: TextParserNodeType, t: any) {
     let errorMessages = '';
-    const { selected_files_num } = payload;
+    const {
+      selected_files_num,
+      text_emb_model_id,
+      text_ocr_model_id,
+      text_pic_model_id
+    } = payload;
 
-    if (selected_files_num <= 0) {
+    if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个文本文件';
+    }
+    if (!text_emb_model_id || !text_ocr_model_id || !text_pic_model_id) {
+      errorMessages = '需要选择模型';
     }
     return {
       isValid: !errorMessages,

@@ -81,4 +81,13 @@ const nodeDefault: NodeDefault<StartNodeType> = {
   }
 };
 
+const FileOptions = {
+  doc: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
+  image: ['JPEG', 'PNG', 'JPG'],
+  audio: ['WAV', 'MP3', 'AAC', 'FLAC'],
+  video: ['MP4', 'MOV', 'MKV']
+};
+
 export default nodeDefault;
+
+export { FileOptions };

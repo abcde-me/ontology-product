@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle
+} from 'react';
 import useStore from '@/pages/dataCatalog/store';
 import {
   Tree,
@@ -180,10 +186,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const searchConditionIsActive = searchCondition?.isActive || false;
   // 监听选中路径变化
   useEffect(() => {
-    console.log(
-      '选中的路径selectedFullPath9999999999999',
-      selectedFullPath
-    );
+    console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
     // 获取到路径后直接传递给后端，然后前端根据路径获取数据
   }, [selectedFullPath]);
   // 将getTableList方法暴露给父组件
@@ -198,7 +201,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         full_path: selectedFullPath,
         page: currentPage,
         page_size: pageSize
-      }
+      };
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
       if (searchConditionIsActive && searchConditionKeyword) {
@@ -272,14 +275,26 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
-    return getUnifiedColumns(tableType, dataType, downloadShow, null, getTableList);
+    return getUnifiedColumns(
+      tableType,
+      dataType,
+      downloadShow,
+      null,
+      getTableList
+    );
   }, [tableType, dataType, downloadShow]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
     if (tableType === 'target' && dataType === 'volume') {
       // 只有Target表格才需要动态更新hoveredRowId
-      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId, getTableList);
+      return getUnifiedColumns(
+        tableType,
+        dataType,
+        downloadShow,
+        hoveredRowId,
+        getTableList
+      );
     }
     return baseColumns;
   }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId]);

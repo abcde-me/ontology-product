@@ -68,7 +68,10 @@ export default function Eltable() {
   const tableRef = React.useRef<TableRefType>(null);
 
   // 通用的行选择处理函数
-  const handleSelectionChange = (selectedRowKeys, selectedRowsData: TableRow[]) => {
+  const handleSelectionChange = (
+    selectedRowKeys,
+    selectedRowsData: TableRow[]
+  ) => {
     console.log('选中的行Keys:', selectedRowKeys);
     console.log('选中的行数据:', selectedRowsData);
     setSelectedRows(selectedRowsData || []);
@@ -167,7 +170,7 @@ export default function Eltable() {
 
   // 通用的批量删除处理函数
   const handleDeleteMany = () => {
-    const ids: Array<string> = []
+    const ids: Array<string> = [];
     try {
       Modal.confirm({
         title: '确认删除文件吗?',
@@ -206,7 +209,8 @@ export default function Eltable() {
   const [defaultName, setDefaultName] = useState('');
   const handleExport = () => {
     // 根据当前标签页设置默认文件名
-    const fileName = activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
+    const fileName =
+      activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
     setDefaultName(fileName);
     console.log('导出', selectedRows);
     setVisible(true);
@@ -358,7 +362,7 @@ export default function Eltable() {
             }}
             disabled={!hasSelectedRows}
             onClick={() => {
-              handleExport()
+              handleExport();
             }}
           >
             批量导出
@@ -375,7 +379,7 @@ export default function Eltable() {
           }}
           disabled={!hasSelectedRows}
           onClick={() => {
-            handleExport()
+            handleExport();
           }}
         >
           批量导出
@@ -428,9 +432,7 @@ export default function Eltable() {
             // Source表格专用属性
             searchValue={activeTab === 'src' ? searchValue : undefined}
             // Target表格专用属性
-            searchCondition={
-              activeTab === 'dst' ? searchCondition : undefined
-            }
+            searchCondition={activeTab === 'dst' ? searchCondition : undefined}
             // 通用属性
             startTime={startTime}
             endTime={endTime}
