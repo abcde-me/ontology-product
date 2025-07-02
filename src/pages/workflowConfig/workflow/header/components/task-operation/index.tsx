@@ -107,8 +107,8 @@ const AppPublisher = ({
                 minute: '10',
                 hour: '10',
                 date: '1',
-                month: '*',
-                week: ''
+                month: '',
+                week: '*'
               }}
               onOptionsChange={handleOptionsChange}
             ></SchedulerRun>

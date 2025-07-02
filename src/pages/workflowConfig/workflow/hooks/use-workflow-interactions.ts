@@ -225,7 +225,7 @@ export const useWorkflowUpdate = () => {
       setConversationVariables
     } = workflowStore.getState();
     setIsSyncingWorkflowDraft(true);
-    getWorkflowDraft(appId)
+    getWorkflowDraft()
       .then(({ data: response }) => {
         handleUpdateWorkflowCanvas(response.graph as WorkflowDataUpdater);
         setSyncWorkflowDraftHash(response.hash);
@@ -299,9 +299,7 @@ export const useDSL = () => {
   const exportCheck = useCallback(async () => {
     if (!appDetail) return;
     try {
-      const { data: workflowDraft } = await getWorkflowDraft(
-        appDetail?.workflow_uuid
-      );
+      const { data: workflowDraft } = await getWorkflowDraft();
       const list = (workflowDraft.environment_variables || []).filter(
         (env) => env.value_type === 'secret'
       );
