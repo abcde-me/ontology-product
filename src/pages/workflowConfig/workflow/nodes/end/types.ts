@@ -6,4 +6,5 @@ import type {
 export type EndNodeType = CommonNodeType & {
   outputs: Variable[];
   target_path: string;
+  dataSource: Array<any>;
 };

@@ -72,3 +72,17 @@ export async function operateWorkflow(
   //   status: 200
   // });
 }
+
+// 获取结束节点目标目录
+export async function getWorkflowTargetPath(
+  root_type: number, // 0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录
+  search: string
+) {
+  return await UAPI.RES.workflowTargetPath({ root_type, search })
+    .get({
+      root_type,
+      search
+    })
+    .inRegion()
+    .do();
+}

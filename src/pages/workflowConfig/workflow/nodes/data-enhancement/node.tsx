@@ -7,8 +7,7 @@ import { useStoreApi } from 'reactflow';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
-  const { app_scenarios, enha_modle_id, enhanced_proportion, sample_num, similarity_threshold, generate_sample_num, prompt } = props.data;
-  console.log(props.data, '=========enh');
+  const { app_scenarios, enha_modle_id, enhanced_proportion, sample_num, similarity_threshold, generate_sample_num, prompt, modelList } = props.data;
   const store = useStoreApi();
   const appScenarios: { [key: string]: string } = {
     'tongyong': '通用',
@@ -17,13 +16,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     'shengcheng': '文本生成',
     'duolong': '多轮回答'
   };
-  const enhaModle: { [key: number]: string } = {
-    1: '模型1',
-    2: '模型2',
-    3: '模型3',
-    4: '模型4',
-    5: '模型5'
-  };
+
   return (
     <div className={`wk-node-content data-enhancement-node`}>
       <div className="input-header">
@@ -31,10 +24,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       </div>
       <div className="enhancement-content">
         {app_scenarios && (
-          <div className="enhancement-item">{appScenarios[app_scenarios]}</div>
+          <div className="enhancement-item">场景：{appScenarios[app_scenarios]}</div>
         )}
         {enha_modle_id && (
-          <div className="enhancement-item">{enhaModle[enha_modle_id]}</div>
+          <div className="enhancement-item">模型：{modelList?.find(item => item.id === enha_modle_id)?.type || ''}</div>
         )}
         {(app_scenarios === 'tongyong' || app_scenarios === 'duolong') && sample_num > 0 && (
           <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>

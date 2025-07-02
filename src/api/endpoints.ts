@@ -234,6 +234,8 @@ export const ModaForgeResourceEndpoints = {
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  // 工作流 - 结束节点目标目录
+  workflowTargetPath: PrefixAimdp + '/directory',
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',

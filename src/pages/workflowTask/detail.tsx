@@ -28,6 +28,7 @@ import {
   taskStop
 } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
+import Workflow from '../workflowConfig/index';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -424,6 +425,7 @@ export default function WorkflowTaskDetail() {
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
         <span>工作流拓扑图</span>
+        <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}
       {getTaskContentDom()}

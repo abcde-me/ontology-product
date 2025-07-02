@@ -10,7 +10,7 @@ import './styles/index.css';
 import './styles/markdown.scss';
 import './styles/custom.scss';
 
-function WorkflowConfig() {
+function WorkflowConfig({ setHeight }) {
   const { setWorkflowDetail } = useStore(
     useShallow((state) => ({
       setWorkflowDetail: state.setWorkflowDetail
@@ -48,7 +48,7 @@ function WorkflowConfig() {
 
   return (
     <Initor>
-      <div className="app-workflow-page h-full w-full overflow-x-auto">
+      <div className={`app-workflow-page h-full w-full overflow-x-auto ${setHeight ? 'setHeight' : ''}`}>
         {!loading && <Workflow />}
       </div>
     </Initor>
