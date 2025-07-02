@@ -4,7 +4,6 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 module.exports = function (app) {
   if (process.env.SINGLE_APP === 'true') {
-    console.log('==================>enable proxy', process.env.SINGLE_APP);
     app.use(
       ['/api/aiap/v1'],
       createProxyMiddleware({
@@ -31,7 +30,34 @@ module.exports = function (app) {
         }
       })
     );
-    // TODO：连接器联调，非正式环境
+    app.use(
+      ['/api/aimdp/v1/model'],
+      createProxyMiddleware({
+        target: 'http://10.252.26.5:30888/api/aimdp/v1/model',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        on: {
+          proxyReq: (proxyReq, req, res) => {
+            proxyReq.removeHeader('origin');
+          }
+        }
+      })
+    );
+    app.use(
+      ['/api/aimdp/v1/workflow'],
+      createProxyMiddleware({
+        target: 'http://10.252.26.5:30888/api/aimdp/v1/workflow',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        on: {
+          proxyReq: (proxyReq, req, res) => {
+            proxyReq.removeHeader('origin');
+          }
+        }
+      })
+    );
     app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({

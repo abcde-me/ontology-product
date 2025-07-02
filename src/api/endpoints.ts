@@ -160,14 +160,14 @@ export const ResourceEndpointsV2 = {
   fileDeleteApi: Prefix + `/files/delete/{file_id}`,
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
-// 数据目录
-catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
-catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
-volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
-volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
-catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
-targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  // 数据目录
+  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
+  catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
+  volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
+  catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
+  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: Prefix + `/files/export`,
@@ -214,7 +214,7 @@ targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文
   // 用户管理搜索
   memberSearch: PrefixAuth + '/user/organization/search',
 
-  workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
+  // workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
   workflowPublish: PrefixV2 + '/apps/{appId}/workflows/publish',
   workflowPublishHistory: PrefixV2 + '/apps/{appId}/workflows',
   workflowBlockConfig:
@@ -234,14 +234,16 @@ export const ModaForgeResourceEndpoints = {
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
-  // workflowDraft: PrefixAimdp + '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  workflowDraft:
+    PrefixAimdp +
+    '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
   // 作业详情
   taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
 
-  modelGet: PrefixAimdp + '/model/get',
+  modelGet: PrefixAimdp + '/model/model_list',
 
   //数据目录
   //获取数据目录
