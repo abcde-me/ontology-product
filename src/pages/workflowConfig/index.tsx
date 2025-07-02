@@ -35,8 +35,8 @@ function WorkflowConfig() {
           workflow_name: '新建工作流'
         });
 
-        if (workflowInfo?.data?.[0]?.workflow_uuid) {
-          const { workflow_uuid, ds_workflow_id } = workflowInfo.data[0];
+        if (workflowInfo?.data?.workflow_uuid) {
+          const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
           history.push(
             `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );

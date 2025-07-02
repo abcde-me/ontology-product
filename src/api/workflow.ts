@@ -59,16 +59,16 @@ export async function operateWorkflow(
   params: WorkflowOperationParams
 ) {
   // TODO: 联调
-  // return UAPI.RES.workflowOperation({ workflow_uuid })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+  return UAPI.RES.workflowOperation({ workflow_uuid })
+    .put(params)
+    .inRegion()
+    .do();
 
-  return Promise.resolve({
-    code: '',
-    message: 'ok',
-    data: {},
-    requestId: 'AIMDP-ff704d3e-388c-4929-9353-9ce7f5386616',
-    status: 200
-  });
+  // return Promise.resolve({
+  //   code: '',
+  //   message: 'ok',
+  //   data: {},
+  //   requestId: 'AIMDP-ff704d3e-388c-4929-9353-9ce7f5386616',
+  //   status: 200
+  // });
 }
