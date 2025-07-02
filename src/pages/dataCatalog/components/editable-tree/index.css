@@ -28,20 +28,22 @@
       }
 
       &.arco-tree-node-is-leaf.arco-tree-node-is-tail {
-        .arco-tree-node-indent {
-          height: 36px;
+        &:has(.last-leaf-text) {
+          .arco-tree-node-indent {
+            height: 36px;
 
-          &::after {
-            content: '';
-            position: absolute;
-            box-sizing: border-box;
-            border-left: 1px solid #e2e8f0;
-            width: 1px;
-            height: 38px;
-            transform: translateX(50%);
-            bottom: -5px;
-            top: -2px;
-            right: 35%;
+            &::after {
+              content: '';
+              position: absolute;
+              box-sizing: border-box;
+              border-left: 1px solid #e2e8f0;
+              width: 1px;
+              height: 38px;
+              transform: translateX(50%);
+              bottom: -5px;
+              top: -2px;
+              right: 35%;
+            }
           }
         }
       }

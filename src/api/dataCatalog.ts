@@ -45,10 +45,14 @@ export async function deleteVolume(id: string) {
 }
 //重命名目录
 export async function renameCatalog(id: string, params: any) {
-  return await UAPI.RES.catalogRenameApi({ catalogId: id })
+  const res = await UAPI.RES.catalogRenameApi({ catalogId: id })
     .put(params)
     .inRegion()
     .do();
+  if (res.status !== 200) {
+    Message.warning(res.message);
+  }
+  return res;
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(param: any = {}) {

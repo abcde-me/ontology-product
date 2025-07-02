@@ -5,7 +5,7 @@ import {
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
 import classNames from 'classnames';
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import {
   IconPlus,
   IconDelete,
@@ -14,7 +14,12 @@ import {
   IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
-import { addCatalog, addVolume, deleteVolume } from '@/api/dataCatalog';
+import {
+  addCatalog,
+  addVolume,
+  deleteVolume,
+  renameCatalog
+} from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -35,10 +40,6 @@ export function useEditableTree({ catalogTreeStore }) {
     'loading'
   ]);
 
-  useEffect(() => {
-    catalogTreeStore.getEffect('fetchData')();
-  }, [activeTab]);
-
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
     return treeData.map((item) => {
       const { children, key, ...rest } = item;
@@ -51,7 +52,6 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const onSearchChange = (value: string) => {
-    // 遍历treeData，找出所有节点 title 中包含 searchValue 的节点 key，存储到一个 keys 数组中
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
       data.forEach((item) => {
@@ -220,7 +220,8 @@ export function useEditableTree({ catalogTreeStore }) {
           key: `catalog-${Date.now()}`,
           children: [],
           type: 1,
-          showInput: true
+          showInput: true,
+          isAdd: true
         },
         ...treeData
       ],
@@ -269,8 +270,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
-        const isAdd = !dataRef?.children?.length;
-        if (isAdd) {
+        if (dataRef?.isAdd) {
           // 新建目录
           const res = await addCatalog({
             name: fileName,
@@ -281,21 +281,13 @@ export function useEditableTree({ catalogTreeStore }) {
             // TODO 获取 id 并展开节点
           }
         } else {
-          // 编辑目录
-          // TODO 接口
-          newTreeData = treeData.map((item: TreeDataType) => {
-            if (item.key === dataRef.key) {
-              return {
-                ...dataRef,
-                title: fileName,
-                showInput: false,
-                children: dataRef?.children
-              };
-            }
-            return item;
+          // TODO 编辑目录
+          const res = await renameCatalog(dataRef.id, {
+            new_name: fileName,
+            root_type: RootTypeEnum[activeTab]
           });
+          newTreeData = await catalogTreeStore.getRawData();
         }
-
         break;
 
       case CatalogTypeEnum.volume:
