@@ -114,13 +114,13 @@ export default function DataLoad() {
               width: '5px',
               height: '5px',
               background:
-                item.status == 'failed'
+                item.status == RunState.FAILED
                   ? RunStateType[RunState.FAILED].color
-                  : item.status == 'succeed'
+                  : item.status == RunState.SUCCEED
                     ? RunStateType[RunState.SUCCEED].color
-                    : item.status == 'running'
+                    : item.status == RunState.RUNNING
                       ? RunStateType[RunState.RUNNING].color
-                      : item.status == 'running'
+                      : item.status == RunState.STOPPED
                         ? RunStateType[RunState.STOPPED].color
                         : undefined,
               borderRadius: '50%'

@@ -58,9 +58,13 @@ const DataLoadDetail = () => {
   };
   // 通过路由id获取数据
   const getTask_idHan = async () => {
-    const res = await getLoad(loadId);
-    console.log(res.data);
-    setListDetail(res.data);
+    try {
+      const res = await getLoad(loadId);
+      console.log(res.data);
+      setListDetail(res.data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
   useEffect(() => {
     getTask_idHan();

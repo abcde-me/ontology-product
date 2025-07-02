@@ -130,17 +130,21 @@ const LoadAddModal = (props: any) => {
   };
   // 获取连接器名称
   const getConnector_name_type = async () => {
-    const res = await getConnectionList({
-      page: 1,
-      page_size: 1000
-    });
-    const newres = res.data.items.map((item) => {
-      return {
-        key: item.id,
-        label: item.name
-      };
-    });
-    setConnectName(newres);
+    try {
+      const res = await getConnectionList({
+        page: 1,
+        page_size: 1000
+      });
+      const newres = res.data.items.map((item) => {
+        return {
+          key: item.id,
+          label: item.name
+        };
+      });
+      setConnectName(newres);
+    } catch (error) {
+      console.error('获取连接器名称失败:', error);
+    }
   };
   useEffect(() => {
     getConnector_name_type();
