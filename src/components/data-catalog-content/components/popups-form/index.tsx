@@ -32,21 +32,32 @@ const FormComponent: React.FC<FormProps> = ({
     //导出逻辑
     const exportNames: Array<string> = []
     if (exportdatas) {
-      exportNames.push(exportdatas.map(item => item.file_name))
-
+      // 使用扁平数组而不是嵌套数组
+      exportdatas.forEach(item => {
+        if (item.extras && item.extras.file_name) {
+          exportNames.push(item.extras.file_name);
+        }
+      });
     } else {
-      exportNames.push(form.getFieldValue('name'))
+      exportNames.push(downloadData.extras.file_name)
+    }
+    let full_paths = ''
+    if (exportdatas) {
+      full_paths = exportdatas[0].full_path
+    } else {
+      full_paths = downloadData.full_path
     }
     const res = await exportFile({
       file_names: exportNames,
       output_path: form.getFieldValue('path'),
-      file_path: form.getFieldValue('path'),
+      file_path: full_paths,
       connector_id: Number(form.getFieldValue('province'))
     });
     console.log(res);
     try {
       console.log('导出文件名', exportNames);
       await form.validate();
+      form.resetFields();
       onCancel && onCancel();
       Message.success('导出成功');
     } catch (e) {
@@ -76,7 +87,7 @@ const FormComponent: React.FC<FormProps> = ({
   const getConnectorList = async () => {
     try {
       const res = await getConnectionList({});
-      if (res && res.data ) {
+      if (res && res.data) {
         setConnectorList(res.data.items);
       } else {
         setConnectorList([]);
@@ -92,18 +103,9 @@ const FormComponent: React.FC<FormProps> = ({
   // 修改为监听 visible 变化，当弹窗打开时设置表单值
   useEffect(() => {
     if (visible) {
-      // 当弹窗显示时，设置表单值
-      if (names) {
-        form.setFieldsValue({
-          name: names
-        });
-      } else if (downloadData && downloadData.content) {
-        form.setFieldsValue({
-          name: downloadData.content
-        });
-      }
       // 获取连接器列表
       getConnectorList();
+      console.log(downloadData, 'downloadData888888888888888888888888888888');
     }
   }, [visible, form, names, downloadData]);
 
@@ -124,22 +126,6 @@ const FormComponent: React.FC<FormProps> = ({
         {...formItemLayout}
         style={{ width: 584 }}
       >
-        <FormItem
-          label="文件名称："
-          field="name"
-          required
-          extra="文件将以原始格式导出，保持数据完整性"
-          rules={[
-            {
-              required: true,
-              message: '请填写'
-            }
-          ]}
-        >
-          <Input placeholder="please enter your username" />
-        </FormItem>
-        {/* <FormItem wrapperCol={{ offset: 5 }}>
-      </FormItem> */}
         <Form.Item
           label="选择连接器："
           field="province"

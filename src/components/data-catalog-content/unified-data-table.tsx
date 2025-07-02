@@ -124,6 +124,7 @@ interface UnifiedDataTableProps {
   dataType?: 'volume' | 'database';
   // 选中节点的完整路径
   selectedFullPath?: string;
+  selectedKey?: string;
 }
 
 /**
@@ -139,7 +140,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     endTime = '',
     tableType,
     dataType = 'volume',
-    selectedFullPath
+    selectedFullPath,
+    selectedKey
   } = props;
 
   // 添加调试信息
@@ -151,6 +153,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     tableType,
     dataType,
     selectedFullPath,
+    selectedKey,
     selectedNode: selectedNode ? 'has value' : 'null'
   });
 
@@ -197,7 +200,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       const params = {
         full_path: selectedFullPath,
         page: currentPage,
-        page_size: pageSize
+        limit: pageSize
       }
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
@@ -208,12 +211,19 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           newParams.search_id = searchConditionKeyword;
         }
       }
+      if(startTime){
+        newParams.start_time = startTime
+      }
+      if(endTime){
+        newParams.end_time = endTime
+      }
       const res = await getTargetDataFileList(newParams);
       if (res && res.data) {
         setTableData(res.data.list || []);
         setTotal(res.data.total || 0);
         console.log('获取最新表格数据成功:', res.data);
       }
+      
       // 根据搜索条件过滤数据
       // if (searchValue) {
       //   filteredData = filteredData.filter(
@@ -272,17 +282,17 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
-    return getUnifiedColumns(tableType, dataType, downloadShow, null, getTableList);
-  }, [tableType, dataType, downloadShow]);
+    return getUnifiedColumns(tableType, dataType, downloadShow, null, getTableList, selectedKey);
+  }, [tableType, dataType, downloadShow, selectedKey]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
     if (tableType === 'target' && dataType === 'volume') {
       // 只有Target表格才需要动态更新hoveredRowId
-      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId, getTableList);
+      return getUnifiedColumns(tableType, dataType, downloadShow, hoveredRowId, getTableList, selectedKey);
     }
     return baseColumns;
-  }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId]);
+  }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId, selectedKey]);
 
   // 处理表格选择变化 - 使用useCallback避免重新创建
   const handleSelectionChange = React.useCallback(

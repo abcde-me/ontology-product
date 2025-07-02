@@ -58,7 +58,7 @@ interface TargetDataFileQueryParams {
   start_time: string;
   end_time: string;
   search_content:string;
-  search_id:string;
+  search_id:number;
   limit:number;
 }
 
@@ -66,6 +66,7 @@ interface TargetDataFileQueryParams {
 interface TargetFileDeleteParams {
   file_ids: Array<string>;
   full_path: string;
+  path_id: string;
 }
 
 //查询目标数据文件列表

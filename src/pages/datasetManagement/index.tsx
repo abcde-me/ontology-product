@@ -22,6 +22,8 @@ import {
 import { useHistory } from 'react-router-dom';
 import { getDatasetList, createDataset } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
+import FormComponent from '@/components/data-catalog-content/components/popups-form';
+
 import './index.css';
 
 // 时间格式化函数
@@ -57,7 +59,7 @@ interface Dataset {
   src_model: string;
 }
 
-const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
+const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[], handleExport: (record: Dataset) => void) => [
   {
     title: '名称',
     dataIndex: 'name',
@@ -188,7 +190,7 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
         <Button type="text" className="action-button export">
           编辑
         </Button>
-        <Button type="text" className="action-button export">
+        <Button type="text" className="action-button export" onClick={() => handleExport(record)}>
           导出
         </Button>
         <Button
@@ -277,6 +279,10 @@ const DatasetManagement: React.FC = () => {
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
+
+  //导出弹窗相关
+  const [downloadData, setDownloadData] = React.useState([]);
+  const [visible, setVisible] = React.useState(false); // 导出弹框控制
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
@@ -326,19 +332,19 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-              path:
-                formData.targetDataSource[0][0] +
-                '/dst' +
-                '/' +
-                formData.targetDataSource[0][1] +
-                '/' +
-                formData.targetDataSource[1][0],
-              path_id: formData.targetDataSource[1][1]
-            }
+            path:
+              formData.targetDataSource[0][0] +
+              '/dst' +
+              '/' +
+              formData.targetDataSource[0][1] +
+              '/' +
+              formData.targetDataSource[1][0],
+            path_id: formData.targetDataSource[1][1]
+          }
           : {
-              connector_id: parseInt(formData.targetDataSource) || 0,
-              connector_files: formData.selectedFiles || []
-            }
+            connector_id: parseInt(formData.targetDataSource) || 0,
+            connector_files: formData.selectedFiles || []
+          }
     };
 
     console.log('提交数据:', submitData);
@@ -439,6 +445,12 @@ const DatasetManagement: React.FC = () => {
     });
   };
 
+  // 导出数据集
+  const handleExport = (record: Dataset) => {
+    console.log('导出数据集:', record);
+    setDownloadData(record); 
+    setVisible(true);
+  };
   // 批量导出
   const handleBatchExport = () => {
     if (selectedRowKeys.length === 0) {
@@ -508,7 +520,7 @@ const DatasetManagement: React.FC = () => {
         <Table
           rowKey="id"
           className="dataset-table"
-          columns={columns(handleGoToDetail, handleDelete, datasetList)}
+          columns={columns(handleGoToDetail, handleDelete, datasetList,handleExport)}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
@@ -533,9 +545,18 @@ const DatasetManagement: React.FC = () => {
           onSubmit={handleSubmit}
           onCancel={closeModal}
         />
+        {/* 导出数据集弹窗 */}
+        <FormComponent
+          downloadData={downloadData}
+          onCancel={() => setVisible(false)}
+          visible={visible}
+          exportdatas={selectedRows}
+        />
       </div>
     </div>
   );
 };
 
 export default DatasetManagement;
+
+
