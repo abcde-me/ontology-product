@@ -225,12 +225,12 @@ export const getUnifiedColumns = (
       },
       {
         title: '数据内容',
-        dataIndex: 'content',
+        dataIndex: 'short_content',
         ellipsis: true,
         width: 300,
         render: (_, record) => (
           <div>
-            <Popover content={record.content}>
+            <Popover content={record.short_content}>
               <span
                 style={{
                   display: 'block',
@@ -240,7 +240,7 @@ export const getUnifiedColumns = (
                   maxWidth: '100%'
                 }}
               >
-                {record.content}
+                {record.short_content}
               </span>
             </Popover>
           </div>
@@ -248,7 +248,7 @@ export const getUnifiedColumns = (
       },
       {
         title: '生成时间',
-        dataIndex: 'createdAt',
+        dataIndex: 'created_at',
         sorter: (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         onFilter: (value, record) => {

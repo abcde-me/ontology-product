@@ -30,11 +30,11 @@ const FormComponent: React.FC<FormProps> = ({
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    const exportNames:Array<string> = []
-    if(exportdatas){
-      exportNames.push(exportdatas.map(item=>item.file_name))
-      
-    }else{
+    const exportNames: Array<string> = []
+    if (exportdatas) {
+      exportNames.push(exportdatas.map(item => item.file_name))
+
+    } else {
       exportNames.push(form.getFieldValue('name'))
     }
     const res = await exportFile({
@@ -45,7 +45,7 @@ const FormComponent: React.FC<FormProps> = ({
     });
     console.log(res);
     try {
-      console.log('导出文件名',exportNames);
+      console.log('导出文件名', exportNames);
       await form.validate();
       onCancel && onCancel();
       Message.success('导出成功');
@@ -74,8 +74,19 @@ const FormComponent: React.FC<FormProps> = ({
 
   const [connectorList, setConnectorList] = useState([]);
   const getConnectorList = async () => {
-    const res = await getConnectionList({});
-    setConnectorList(res.data.items);
+    try {
+      const res = await getConnectionList({});
+      if (res && res.data ) {
+        setConnectorList(res.data.items);
+      } else {
+        setConnectorList([]);
+        Message.error('获取连接器列表失败：数据格式异常');
+      }
+    } catch (error) {
+      console.error('获取连接器列表出错:', error);
+      setConnectorList([]);
+      Message.error('获取连接器列表失败，请稍后重试');
+    }
   };
 
   // 修改为监听 visible 变化，当弹窗打开时设置表单值
@@ -137,7 +148,7 @@ const FormComponent: React.FC<FormProps> = ({
           <Select
             allowClear
             placeholder="请选择连接器"
-            options={connectorList.map((item:any) => ({
+            options={connectorList.map((item: any) => ({
               label: item.name,
               value: item.id
             }))}

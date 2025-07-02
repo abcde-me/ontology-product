@@ -51,11 +51,11 @@ export async function renameCatalog(id: string, params: any) {
     .do();
 }
 //查询目标数据文件列表
-export async function getTargetDataFileList(params: any) {
+export async function getTargetDataFileList(params: Record<string, any>) {
   return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 //删除目标文件
-export async function deleteTargetFile( param: any = {}) {
+export async function deleteTargetFile(param: Record<string, any>) {
   return await UAPI.RES.targetDataFileDeleteApi({}).delete(param).inRegion().do();
 }
 

@@ -41,64 +41,64 @@ function toUnixTimestamp(dateString: string) {
 }
 
 // 模拟数据
-const mockData = [
-  {
-    id: 4,
-    content: '插图展示唐僧与孙悟空在火焰山对战红孩儿的场景...',
-    type: 'pdf',
-    createdAt: '2025-02-25 09:18:45',
-    file: '西游插图.jpg',
-    workflowId: 'WF-20250225-001'
-  },
-  {
-    id: 5,
-    content: '音频片段包含经典西游记电视剧主题曲《敢不敢》的部分片段...',
-    type: 'txt',
-    createdAt: '2025-02-25 10:40:18',
-    file: '西游配乐.mp3',
-    workflowId: 'WF-20250225-002'
-  },
-  {
-    id: 6,
-    content: '视频片段展示1986年版西游记电视剧中孙悟空大闹天宫的经典场景...',
-    type: 'doc',
-    createdAt: '2025-02-25 15:05:32',
-    file: '西游片段.mp4',
-    workflowId: 'WF-20250225-003'
-  },
-  {
-    id: 0,
-    content: '第一回 灵根子守山神，孙悟空开石洞。一日，花果山顶突然石破天惊...',
-    type: 'pdf',
-    createdAt: '2025-02-24 17:40:22',
-    file: '西游.pdf',
-    workflowId: 'WF-20250224-001'
-  },
-  {
-    id: 1,
-    content: '唐僧取经路上遭遇了九九八十一难，其中最著名的是白骨精三打...',
-    type: 'doc',
-    createdAt: '2025-02-24 17:42:15',
-    file: '西游.pdf',
-    workflowId: 'WF-20250224-001'
-  },
-  {
-    id: 2,
-    content: '网络安全防护包括防火墙配置、入侵检测系统、加密措施等核心内容...',
-    type: 'txt',
-    createdAt: '2025-02-26 10:30:45',
-    file: '信息安全必知.pdf',
-    workflowId: 'WF-20250226-002'
-  },
-  {
-    id: 3,
-    content: '2025年第一季度销售数据显示，电子产品类别同比增长12.7%...',
-    type: 'pdf',
-    createdAt: '2025-03-10 12:20:18',
-    file: '数据报告.pdf',
-    workflowId: 'WF-20250310-003'
-  }
-];
+// const mockData = [
+//   {
+//     id: 4,
+//     content: '插图展示唐僧与孙悟空在火焰山对战红孩儿的场景...',
+//     type: 'pdf',
+//     createdAt: '2025-02-25 09:18:45',
+//     file: '西游插图.jpg',
+//     workflowId: 'WF-20250225-001'
+//   },
+//   {
+//     id: 5,
+//     content: '音频片段包含经典西游记电视剧主题曲《敢不敢》的部分片段...',
+//     type: 'txt',
+//     createdAt: '2025-02-25 10:40:18',
+//     file: '西游配乐.mp3',
+//     workflowId: 'WF-20250225-002'
+//   },
+//   {
+//     id: 6,
+//     content: '视频片段展示1986年版西游记电视剧中孙悟空大闹天宫的经典场景...',
+//     type: 'doc',
+//     createdAt: '2025-02-25 15:05:32',
+//     file: '西游片段.mp4',
+//     workflowId: 'WF-20250225-003'
+//   },
+//   {
+//     id: 0,
+//     content: '第一回 灵根子守山神，孙悟空开石洞。一日，花果山顶突然石破天惊...',
+//     type: 'pdf',
+//     createdAt: '2025-02-24 17:40:22',
+//     file: '西游.pdf',
+//     workflowId: 'WF-20250224-001'
+//   },
+//   {
+//     id: 1,
+//     content: '唐僧取经路上遭遇了九九八十一难，其中最著名的是白骨精三打...',
+//     type: 'doc',
+//     createdAt: '2025-02-24 17:42:15',
+//     file: '西游.pdf',
+//     workflowId: 'WF-20250224-001'
+//   },
+//   {
+//     id: 2,
+//     content: '网络安全防护包括防火墙配置、入侵检测系统、加密措施等核心内容...',
+//     type: 'txt',
+//     createdAt: '2025-02-26 10:30:45',
+//     file: '信息安全必知.pdf',
+//     workflowId: 'WF-20250226-002'
+//   },
+//   {
+//     id: 3,
+//     content: '2025年第一季度销售数据显示，电子产品类别同比增长12.7%...',
+//     type: 'pdf',
+//     createdAt: '2025-03-10 12:20:18',
+//     file: '数据报告.pdf',
+//     workflowId: 'WF-20250310-003'
+//   }
+// ];
 
 // 统一数据表格组件属性类型
 interface UnifiedDataTableProps {
@@ -170,21 +170,21 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   // 表格选择状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
-  
+
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
   const childRef = useRef(null);
-   // 分解searchCondition对象，避免引用比较导致的无限循环
-   const searchConditionType = searchCondition?.type || '';
-   const searchConditionKeyword = searchCondition?.keyword || '';
-   const searchConditionIsActive = searchCondition?.isActive || false;
+  // 分解searchCondition对象，避免引用比较导致的无限循环
+  const searchConditionType = searchCondition?.type || '';
+  const searchConditionKeyword = searchCondition?.keyword || '';
+  const searchConditionIsActive = searchCondition?.isActive || false;
   // 监听选中路径变化
   useEffect(() => {
     console.log(
-          '选中的路径selectedFullPath9999999999999',
-          selectedFullPath
-        );
-      // 获取到路径后直接传递给后端，然后前端根据路径获取数据
+      '选中的路径selectedFullPath9999999999999',
+      selectedFullPath
+    );
+    // 获取到路径后直接传递给后端，然后前端根据路径获取数据
   }, [selectedFullPath]);
   // 将getTableList方法暴露给父组件
   useImperativeHandle(ref, () => ({
@@ -194,42 +194,49 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const getTableList = async () => {
     try {
       // 如果是target表格，调用特定API获取数据
-      if (tableType === 'target') {
-        const res = await getTargetDataFileList({ file_id: selectedNode });
-        if (res && res.data) {
-          setTableData(res.data.list || []);
-          setTotal(res.data.total || 0);
-          console.log('获取最新表格数据成功:', res.data);
-        }
-      } else {
-        // 如果是source表格，调用对应的API
-        // 此处使用模拟数据，实际项目中应替换为真实API
-        let filteredData = [...mockData];
-
-        // 根据搜索条件过滤数据
-        if (searchValue) {
-          filteredData = filteredData.filter(
-            (item) =>
-              item.content.includes(searchValue) ||
-              item.file.includes(searchValue) ||
-              item.workflowId.includes(searchValue)
-          );
-        }
-
-        // 根据日期范围过滤
-        if (startTime && endTime) {
-          filteredData = filteredData.filter((item) => {
-            const itemDate = new Date(item.createdAt);
-            const start = new Date(startTime);
-            const end = new Date(endTime);
-            return itemDate >= start && itemDate <= end;
-          });
-        }
-
-        setTableData(filteredData);
-        setTotal(filteredData.length);
-        console.log('获取最新表格数据成功 (模拟):', filteredData);
+      const params = {
+        full_path: selectedFullPath,
+        page: currentPage,
+        page_size: pageSize
       }
+      // 修复类型报错，先扩展params类型
+      const newParams: any = { ...params };
+      if (searchConditionIsActive && searchConditionKeyword) {
+        if (searchConditionType === '数据内容') {
+          newParams.search_content = searchConditionKeyword;
+        } else if (searchConditionType === 'ID') {
+          newParams.search_id = searchConditionKeyword;
+        }
+      }
+      const res = await getTargetDataFileList(newParams);
+      if (res && res.data) {
+        setTableData(res.data.list || []);
+        setTotal(res.data.total || 0);
+        console.log('获取最新表格数据成功:', res.data);
+      }
+      // 根据搜索条件过滤数据
+      // if (searchValue) {
+      //   filteredData = filteredData.filter(
+      //     (item) =>
+      //       item.content.includes(searchValue) ||
+      //       item.file.includes(searchValue) ||
+      //       item.workflowId.includes(searchValue)
+      //   );
+      // }
+
+      // // 根据日期范围过滤
+      // if (startTime && endTime) {
+      //   filteredData = filteredData.filter((item) => {
+      //     const itemDate = new Date(item.createdAt);
+      //     const start = new Date(startTime);
+      //     const end = new Date(endTime);
+      //     return itemDate >= start && itemDate <= end;
+      //   });
+      // }
+
+      // setTableData(filteredData);
+      // setTotal(filteredData.length);
+      // console.log('获取最新表格数据成功 (模拟):', filteredData);
     } catch (error) {
       console.error('获取表格数据失败:', error);
     }
@@ -340,7 +347,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
 
- 
+
 
   // 监听搜索条件变化 - 根据表格类型使用不同的搜索逻辑
   // useEffect(() => {

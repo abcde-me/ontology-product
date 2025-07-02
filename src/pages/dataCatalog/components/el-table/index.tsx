@@ -438,7 +438,7 @@ export default function Eltable() {
             tableType={activeTab === 'src' ? 'source' : 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
-            selectedFullPath={selectedFullPath}
+            selectedFullPath={selectedPath}
           />
         </div>
       </div>
