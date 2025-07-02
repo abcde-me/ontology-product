@@ -63,12 +63,15 @@ export interface TaskInfo {
 
 // 执行历史记录列表类型
 export interface ExecutionHistory {
-  id: number;
-  name: string;
-  status: ExecutionStatus; // 使用枚举类型
-  start_time: string;
+  enable: number;
   end_time: string;
-  success_files: number;
+  error_log: string; // 使用枚举类型
+  execution_id: string;
+  execution_name: string;
   failed_files: number;
-  error_message: string | null;
+  seatunnel_job_id: string;
+  start_time: string;
+  status: string;
+  success_files: number;
+  task_id: number;
 }

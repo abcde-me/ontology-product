@@ -233,10 +233,7 @@ export default function DataLoad() {
               title="删除该连接器"
               content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
               onOk={() => {
-                deleteHan(item.id);
-                Message.success({
-                  content: '删除成功'
-                });
+                deleteLoadHan(item.task_id);
               }}
               onCancel={() => {
                 Message.error({
@@ -244,14 +241,7 @@ export default function DataLoad() {
                 });
               }}
             >
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  deleteLoadHan(item.connector_id);
-                }}
-              >
-                删除
-              </span>
+              <span className={Styles.hoverStyle}>删除</span>
             </Popconfirm>
           </div>
         );
@@ -285,18 +275,6 @@ export default function DataLoad() {
   };
   const [loadloading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  // 根据搜索条件过滤连接器
-  const filteredConnectors = useMemo(() => {
-    return data.filter((connector) => {
-      const query = searchValue.toLowerCase();
-      return connector.name.toLowerCase().includes(query);
-    });
-  }, [data, searchValue]);
-  // 点击删除的逻辑
-  const deleteHan = (id) => {
-    console.log('删除了' + id);
-  };
-
   // 模态框默认状态
   const [visible, setVisible] = React.useState(false);
   // 整体数据
@@ -318,10 +296,10 @@ export default function DataLoad() {
       const res = await getLoadList({
         page: current,
         page_size: pageSize,
-        name: '',
-        status: ['running'],
-        load_type: 'once',
-        source_type: 'hdfs'
+        name: searchValue,
+        status: [],
+        load_type: '',
+        source_type: ''
       });
       if (res.message == 'ok') {
         console.log(res.data.items);
@@ -334,19 +312,26 @@ export default function DataLoad() {
       setLoading(false);
     }
   };
+  const handlePressEnter = (e) => {
+    setSearchValue(e.target.value);
+  };
   // 删除列表的方法
   const deleteLoadHan = async (id) => {
-    const res = await delLoad(id);
-    if (res.message == 'ok') {
-      Message.success('删除成功');
-      getdataLoadList();
-    } else {
-      Message.error(res.message);
+    try {
+      const res = await delLoad(id);
+      if (res.message == 'ok') {
+        Message.success('删除成功');
+        getdataLoadList();
+      } else {
+        Message.error(res.message);
+      }
+    } catch {
+      console.error('网络错误');
     }
   };
   useEffect(() => {
     getdataLoadList();
-  }, [current, pageSize]);
+  }, [current, pageSize, searchValue]);
   return (
     <div
       style={{
@@ -378,9 +363,7 @@ export default function DataLoad() {
         <InputSearch
           placeholder="输入关键词搜索"
           style={{ width: 230 }}
-          onChange={(value) => {
-            setSearchValue(value);
-          }}
+          onPressEnter={handlePressEnter}
         />
         <Button
           type="primary"

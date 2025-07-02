@@ -19,6 +19,7 @@ import { dataLodaAddForm } from '../type';
 import { addLoad, getDirectoryList } from '@/api/loadApi';
 import { getConnectionList } from '@/api/connectionApi';
 import { directoryData } from '../data/constants';
+import { useHistory } from 'react-router';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -30,6 +31,7 @@ const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
 const LoadAddModal = (props: any) => {
+  const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
   // 整体表单实例
@@ -40,6 +42,7 @@ const LoadAddModal = (props: any) => {
     try {
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
+      const pathId = rest.dest_path.at(-1);
       if (loadVal !== 'once') {
         const [hour, minute] = time.split(':');
         await form.validate();
@@ -63,7 +66,6 @@ const LoadAddModal = (props: any) => {
           default:
             dataValue = '*';
         }
-
         const formData = {
           task_name: rest.name,
           connector_id: rest.connector_id,
@@ -78,34 +80,50 @@ const LoadAddModal = (props: any) => {
               week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
             }
           },
-          dest_path: 2,
+          dest_path_id: pathId,
           creator: 'user123'
         };
         const res = await addLoad(formData);
-        console.log(res);
-        props.getList();
-        console.log(formData);
+        if (res.message == 'ok') {
+          history.push(
+            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+          );
+        } else {
+          Message.error(res.message);
+        }
       } else {
         const formData = {
           task_name: rest.name,
-          connector_id: rest.connector_id,
+          connector_id: 15,
           source_type: rest.source_type,
           run_cycle: {
-            type: '0'
+            type: 0,
+            cycle_text: {
+              minute: '0',
+              hour: '0',
+              date: '*',
+              month: '*',
+              week: ''
+            }
           },
-          dest_path: rest.dest_path,
-          creator: 'userlsc'
+          dest_path_id: 2,
+          creator: 'user123'
         };
-        // const res = await addLoad(formData);
         console.log(formData);
+        const res = await addLoad(formData);
+        if (res.message == 'ok') {
+          history.push(
+            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+          );
+        } else {
+          Message.error(res.message);
+        }
       }
       cancelHan();
-      props.getList();
     } catch (error) {
       console.error('表单处理失败:', error);
     }
   };
-
   // 点击取消按钮的逻辑
   const cancelHan = () => {
     // 点击取消隐藏弹框并且重置表单数据

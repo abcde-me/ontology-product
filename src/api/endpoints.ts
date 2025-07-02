@@ -316,7 +316,9 @@ export const ModaForgeResourceEndpoints = {
   getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
-  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page'
+  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page',
+  // 停止单个载入任务
+  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop'
 };
 
 /**

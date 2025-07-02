@@ -65,25 +65,29 @@ async function request() {
 request();
 export let directoryData = [];
 async function fn() {
-  const res = await getDirectoryList({
-    root_type: 1
-  });
-  console.log(res.data.src);
+  try {
+    const res = await getDirectoryList({
+      root_type: 1
+    });
+    console.log(res.data.src);
 
-  directoryData = res.data.src.map((item) => {
-    return item.children
-      ? {
-          value: item.id,
-          label: item.name,
-          children: item.children.volume.map((items) => {
-            return {
-              value: items.id,
-              label: items.name
-            };
-          })
-        }
-      : { value: item.id, label: item.name };
-  });
-  console.log(directoryData);
+    directoryData = res.data.src.map((item) => {
+      return item.children
+        ? {
+            value: item.id,
+            label: item.name,
+            children: item.children.volume.map((items) => {
+              return {
+                value: items.id,
+                label: items.name
+              };
+            })
+          }
+        : { value: item.id, label: item.name };
+    });
+    console.log(directoryData);
+  } catch (err) {
+    console.error(err);
+  }
 }
 fn();

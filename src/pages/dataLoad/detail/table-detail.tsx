@@ -1,26 +1,16 @@
-import {
-  Button,
-  Input,
-  Message,
-  Modal,
-  Pagination,
-  Table
-} from '@arco-design/web-react';
+import { Message, Modal, Table } from '@arco-design/web-react';
 import { RunState, RunStateType } from '../list/list';
-import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import { useHistory } from 'react-router-dom';
-import { getLoadRecordList } from '@/api/loadApi';
 import { ExecutionHistory } from '../type';
-const InputSearch = Input.Search;
-
+import { stopeLoad } from '@/api/loadApi';
 const TableDetail = (props) => {
   const history = useHistory();
   const columns = [
     {
       title: '运行ID',
-      dataIndex: 'name',
+      dataIndex: 'execution_name',
       width: 240,
       ellipsis: true
     },
@@ -62,7 +52,7 @@ const TableDetail = (props) => {
                 cursor: 'pointer'
               }}
               onClick={() => {
-                stopTaskHan(item.id);
+                stopTaskHan(item.execution_id);
               }}
             >
               停止
@@ -88,7 +78,7 @@ const TableDetail = (props) => {
     },
     {
       title: '载入结果',
-      width: 300,
+      width: 200,
       render: (_, item) => (
         <div style={{ display: 'flex' }}>
           <div
@@ -127,28 +117,10 @@ const TableDetail = (props) => {
       )
     }
   ];
-  const [data, setData] = useState<ExecutionHistory[]>([
-    {
-      id: 7891,
-      name: 'RUN-20250306-001',
-      status: 'succeed',
-      start_time: '2025-06-16 18:40:36',
-      end_time: '2025-06-16 18:40:36',
-      success_files: 245,
-      failed_files: 2,
-      error_message: null
-    }
-  ]);
-  // 分页的数据
-  // 当前页码
-  const [current, setCurrent] = useState(1);
-  // 每页几条
-  const [pageSize, setPageSize] = useState(10);
+  const [data, setData] = useState<ExecutionHistory[]>();
 
   // 改变数据的逻辑
-  const handlePageChange = (page) => {
-    setCurrent(page);
-  };
+
   // 模态框的值
   const [visible, setVisible] = useState(false);
   // 停止单个运行任务
@@ -157,62 +129,36 @@ const TableDetail = (props) => {
   const [taskId, setTaskId] = useState(0);
   const stopTaskHan = (id) => {
     setVisible(true);
-    // 请求后端接口
     setTaskId(id);
   };
   // 模态框点击确认的按钮
-  const modalOk = () => {
+  const modalOk = async () => {
+    try {
+      const res = await stopeLoad({
+        task_id: props.taskId,
+        execution_id: taskId
+      });
+      if (res.message == 'ok') {
+        props.judgmentTaskHan();
+        Message.success('操作成功,停止运行');
+      } else {
+        Message.error('操作失败');
+      }
+      setVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
     // 请求接口
-    props.tHan();
-    props.judgmentTaskHan();
-    Message.success('操作成功,停止运行');
-    setVisible(false);
   };
   // 模态框点击取消
   const modalNo = () => {
     setVisible(false);
   };
-  // 获取详情页面数据列表
-  const getDetailList = async () => {
-    const res = await getLoadRecordList({
-      task_id: props.taskId,
-      page: current,
-      page_size: pageSize
-    });
-    console.log(res.data);
-    // setData(res.data);
-  };
   useEffect(() => {
-    getDetailList();
-  }, []);
+    setData(props.datalist);
+  }, [props.datalist]);
   return (
     <div>
-      <div
-        style={{
-          margin: '15px 0px 15px 20px',
-          fontSize: '17px',
-          fontWeight: '600'
-        }}
-      >
-        运行历史
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          padding: '0px 15px'
-        }}
-      >
-        <InputSearch placeholder="搜索运行ID" style={{ width: 230 }} />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          disabled={props.runningStatus !== -1 ? true : false}
-        >
-          新建运行
-        </Button>
-      </div>
       <div
         style={{
           margin: '15px 0px 15px 15px',
@@ -227,16 +173,8 @@ const TableDetail = (props) => {
           border={false}
           pagination={false}
           style={{ width: '100%', padding: '0px 30px 0px 0px' }}
-          rowKey="id"
-        />
-        <Pagination
-          sizeOptions={[1, 5, 10, 20]}
-          showTotal
-          total={data.length}
-          showJumper
-          sizeCanChange
-          style={{ margin: '20px 30px' }}
-          onChange={handlePageChange}
+          rowKey="seatunnel_job_id"
+          loading={props.loading}
         />
         <Modal
           visible={visible}
