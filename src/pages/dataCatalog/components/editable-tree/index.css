@@ -84,11 +84,11 @@
       }
 
       .catalog-title-text {
-        width: 178px;
+        width: 168px;
       }
 
       .last-leaf-text {
-        width: 120px;
+        width: 110px;
       }
 
       &:hover {
@@ -97,12 +97,12 @@
         }
 
         .catalog-title-text {
-          width: 130px;
+          width: 128px;
         }
 
         &:not(:has(.no-operation)) {
           .last-leaf-text {
-            width: 110px;
+            width: 90px;
           }
         }
       }

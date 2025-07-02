@@ -180,7 +180,8 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const onCatalogAdd = () => {
-    const name = `目录${Date.now()}`;
+    const name = `${activeTab === 'src' ? '源' : '目标'}目录${Date.now()}`;
+
     catalogTreeStore.setState({
       inputValue: name,
       treeData: [
@@ -202,7 +203,7 @@ export function useEditableTree({ catalogTreeStore }) {
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
     if (dataRef) {
-      const name = `source-vol${Date.now()}`;
+      const name = `${activeTab === 'src' ? '源' : '目标'}数据卷${Date.now()}`;
       const cachTreeData = treeData.map((item: TreeDataType) => {
         if (item.key === node.pathParentKeys?.[0]) {
           item.children?.[0]?.children?.unshift({
