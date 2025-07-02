@@ -116,7 +116,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
         dirs.push(...(catalog.children?.volume || []));
       });
       setSrcDirs(dirs);
-      console.log('dirs', dirs);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
