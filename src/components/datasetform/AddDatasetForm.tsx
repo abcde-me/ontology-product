@@ -12,6 +12,7 @@ import {
   Modal,
   Tooltip
 } from '@arco-design/web-react';
+import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 
 const { Option } = Select;
 import React, { useState, useEffect } from 'react';
@@ -40,6 +41,14 @@ interface DataFile {
   filename: string;
   size: string;
   modifyTime: string;
+}
+
+interface ConnectorFile {
+  name: string;
+  path: string;
+  size: number;
+  last_modified: string;
+  type: string;
 }
 
 interface DatasetFormProps {
@@ -309,7 +318,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]); //目标数据源选项
   const [connectorList, setConnectorList] = useState([]); //连接器列表
   const [connectorFileInformation, setConnectorFileInformation] = useState<
-    any[]
+    ConnectorFile[]
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [previewColumns, setPreviewColumns] = useState([]); //数据目录预览表格列（从后端获取）
@@ -393,13 +402,27 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
-    getConnectorFileList({ connector_id: id, type: type }).then((res) => {
-      console.log(res.data);
-      setConnectorFileInformation(res.data.files);
-    });
-    // setConnectorFileInformation(
-    //   transformToSelectOptions(csconnectorFileInformation)
-    // );
+    getConnectorFileList({ connector_id: id, type: type })
+      .then((res) => {
+        // 判断接口返回状态
+        if (res.stat !== 0 && !res.code) {
+          // 有业务结果且无错误
+          if (res.data && Array.isArray(res.data.files)) {
+            setConnectorFileInformation(res.data.files);
+          } else {
+            setConnectorFileInformation([]);
+            console.warn('文件列表为空或格式不正确');
+          }
+        } else {
+          // 无业务结果或接口返回错误
+          console.error('获取文件列表失败:', res.msg);
+          setConnectorFileInformation([]);
+        }
+      })
+      .catch((error) => {
+        console.error('请求文件列表出错:', error);
+        setConnectorFileInformation([]);
+      });
   }; //查询指定连接器加载成功的文件信息
 
   // 获取数据目录卷预览数据的方法
@@ -643,16 +666,17 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                     onChange={(values) => {
                       // labelInValue 为 true 时，values 是对象数组
                       console.log('选择的文件:', values);
-                      const fileValues = values.map((v: any) => v.value);
+                      const fileValues = values.map((v: OptionInfo) => v.value);
                       setSelectedFiles(fileValues);
                       form.setFieldValue('selectedFiles', fileValues);
                     }}
                     value={selectedFiles}
                     style={{ width: '100%' }}
                     labelInValue
-                    renderFormat={(values: any) => {
-                      console.log('李帆测试', values);
-                      return values.label;
+                    renderFormat={(option: OptionInfo | null) => {
+                      console.log('李帆测试', option);
+                      const value = option?.value as string;
+                      return value.split('/').pop() || '';
                     }}
                   >
                     {connectorFileInformation.map((item, index) => (
