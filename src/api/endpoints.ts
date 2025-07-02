@@ -169,7 +169,7 @@ export const ResourceEndpointsV2 = {
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: Prefix + `/files/export`,
+  fileExportApi: PrefixAimdp + `/connectors/files/output`,
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,
@@ -239,6 +239,12 @@ export const ModaForgeResourceEndpoints = {
   taskList: PrefixAimdp + '/workflow_instance/list',
   // 作业详情
   taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+  // 作业详情节点
+  taskDetailNode: PrefixAimdp + '/workflow_instance/task_detail',
+  // 作业重跑
+  taskRerun: PrefixAimdp + '/workflow_instance/task_rerun',
+  // 作业停用
+  taskStop: PrefixAimdp + '/workflow_instance/task_stop',
 
   modelGet: PrefixAimdp + '/model/get',
 

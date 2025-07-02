@@ -10,26 +10,40 @@ import {
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
 import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
+import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
+import { deleteTargetFile } from '@/api/dataCatalog';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 const InputSearch = Input.Search;
 
+// 定义表格行的接口
+interface TableRow {
+  id: string;
+  file: string;
+  content?: string;
+  type?: string;
+  createdAt?: string;
+  workflowId?: string;
+}
+
+// 定义表格引用类型
+interface TableRefType {
+  getTableList: () => void;
+}
+
 export default function Eltable() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { activeTab, selectedKey, selectedFullPath } =
-    catalogTreeStore.useGetState([
-      'activeTab',
-      'selectedKey',
-      'selectedFullPath'
-    ]);
+  const { activeTab, selectedKey, selectedPath } = catalogTreeStore.useGetState(
+    ['activeTab', 'selectedKey', 'selectedPath']
+  );
 
   // 通用状态管理
-  const [selectedRows, setSelectedRows] = useState([]); // 用于存储选中的行数据
+  const [selectedRows, setSelectedRows] = useState<TableRow[]>([]); // 用于存储选中的行数据
   const [startTime, setStartTime] = React.useState(''); // 开始时间
   const [endTime, setEndTime] = React.useState(''); // 结束时间
   const [dateRange, setDateRange] = React.useState([]); // 日期范围状态
@@ -47,8 +61,17 @@ export default function Eltable() {
     isActive: false
   }); // Target表格搜索条件状态，传递给子组件
 
+  const [visible, setVisible] = useState(false); // 下载弹框控制
+  const [downloadData, setDownloadData] = useState([]); // 下载的数据
+
+  // 表格引用，用于调用表格内部方法
+  const tableRef = React.useRef<TableRefType>(null);
+
   // 通用的行选择处理函数
-  const handleSelectionChange = (selectedRowKeys, selectedRowsData) => {
+  const handleSelectionChange = (
+    selectedRowKeys,
+    selectedRowsData: TableRow[]
+  ) => {
     console.log('选中的行Keys:', selectedRowKeys);
     console.log('选中的行数据:', selectedRowsData);
     setSelectedRows(selectedRowsData || []);
@@ -147,20 +170,50 @@ export default function Eltable() {
 
   // 通用的批量删除处理函数
   const handleDeleteMany = () => {
+    const ids: Array<string> = [];
     try {
       Modal.confirm({
         title: '确认删除文件吗?',
         content: '删除后，文件不可恢复',
-        onOk() {
+        onOk: async () => {
+          const idList = selectedRows.map((item: { id: string }) => item.id);
+          ids.push(...idList);
           console.log(selectedRows, '打印selectedRows');
-          // await deleteinterTuningUpdata(appid, e.id, {});
-          Message.success('删除成功');
-          // creatsuccess();
+
+          // 调用删除API
+          if (selectedRows.length > 0 && selectedRows[0]?.file) {
+            await deleteTargetFile({
+              full_path: selectedRows[0].file,
+              file_ids: ids
+            });
+            Message.success('删除成功');
+
+            // 清空选择
+            setSelectedRows([]);
+
+            // 刷新表格数据
+            if (tableRef.current && tableRef.current.getTableList) {
+              tableRef.current.getTableList();
+            } else {
+              // 如果无法调用方法，则强制刷新页面
+              window.location.reload();
+            }
+          }
         }
       });
     } catch {
       Message.error('删除失败，请重试');
     }
+  };
+  // 批量导出
+  const [defaultName, setDefaultName] = useState('');
+  const handleExport = () => {
+    // 根据当前标签页设置默认文件名
+    const fileName =
+      activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
+    setDefaultName(fileName);
+    console.log('导出', selectedRows);
+    setVisible(true);
   };
 
   // 通用的时间选择器事件处理
@@ -192,7 +245,7 @@ export default function Eltable() {
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
-    if (activeTab === 'source') {
+    if (activeTab === 'src') {
       // Source表格的简单搜索区域
       return (
         <div
@@ -309,7 +362,7 @@ export default function Eltable() {
             }}
             disabled={!hasSelectedRows}
             onClick={() => {
-              // 批量导出逻辑
+              handleExport();
             }}
           >
             批量导出
@@ -326,7 +379,7 @@ export default function Eltable() {
           }}
           disabled={!hasSelectedRows}
           onClick={() => {
-            // 批量导出逻辑
+            handleExport();
           }}
         >
           批量导出
@@ -373,24 +426,31 @@ export default function Eltable() {
         {/* 使用统一的数据表格组件，根据active类型动态切换 */}
         <div className="data-catalog-content">
           <UnifiedDataTable
+            ref={tableRef}
             selectedNode={selectedKey}
             onSelectionChange={handleSelectionChange}
             // Source表格专用属性
-            searchValue={activeTab === 'source' ? searchValue : undefined}
+            searchValue={activeTab === 'src' ? searchValue : undefined}
             // Target表格专用属性
-            searchCondition={
-              activeTab === 'target' ? searchCondition : undefined
-            }
+            searchCondition={activeTab === 'dst' ? searchCondition : undefined}
             // 通用属性
             startTime={startTime}
             endTime={endTime}
             // 表格类型标识，根据active值决定
-            tableType={activeTab as 'source' | 'target'}
+            tableType={activeTab === 'src' ? 'source' : 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
+            selectedFullPath={selectedPath}
           />
         </div>
       </div>
+      <FormComponent
+        downloadData={downloadData}
+        onCancel={() => setVisible(false)}
+        visible={visible}
+        names={defaultName}
+        exportdatas={selectedRows}
+      />
     </div>
   );
 }

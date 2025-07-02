@@ -13,3 +13,8 @@ export enum CatalogTypeEnum {
   volume = 2,
   db = 3
 }
+
+export enum RootTypeEnum {
+  src = 1,
+  dst = 2
+}

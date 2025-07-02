@@ -86,20 +86,17 @@ export default function MemberForm() {
         <FormItem
           label="组织名称"
           field="name"
+          extra="可使用中文、英文及数字"
           required
           rules={[
             { required: true, message: '请输入组织名称' },
             {
               match: /^[\u4e00-\u9fa5a-zA-Z0-9_]+$/,
               message: '组织名称是中文、英文及数字'
-            },
-            {
-              maxLength: 30,
-              message: '组织名称不能超过30个字符'
             }
           ]}
         >
-          <Input placeholder="请输入组织名称" />
+          <Input placeholder="请输入组织名称" showWordLimit maxLength={50} />
         </FormItem>
 
         <FormItem label="上级部门" field="parent_org_id">
@@ -111,9 +108,7 @@ export default function MemberForm() {
             treeCheckedStrategy={TreeSelect.SHOW_ALL}
             renderFormat={(nodeProps, value) => {
               // 确定要显示路径的目标节点
-              // TODO: ts错误
-              // @ts-expect-error
-              const targetKey = (value || nodeProps._key) as string;
+              const targetKey = (value || nodeProps?._key) as string;
 
               if (targetKey) {
                 const pathTitles = getNodePathTitles(orgData, targetKey);
@@ -135,7 +130,11 @@ export default function MemberForm() {
             }
           ]}
         >
-          <Input.TextArea placeholder="请输入组织描述" />
+          <Input.TextArea
+            placeholder="请输入组织描述"
+            showWordLimit
+            maxLength={200}
+          />
         </FormItem>
       </Form>
     </Modal>
