@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
@@ -26,28 +26,39 @@ import { RiAddLine } from '@remixicon/react';
 import { cloneDeep } from 'lodash-es';
 import { v4 as uuid4 } from 'uuid';
 import FileList from '../data-text-parser/file-list';
+import { getModelList } from '@/api/modelV2';
+import { FileOptions } from '../start/default';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
-
-// 分段方式选项
-const segmentationOptions: any = [
-  { value: 1, label: '按字符' },
-  { value: 2, label: '按句子' },
-  { value: 3, label: '按段落' }
-];
 
 const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const activityMode = Form.useWatch('activity_mode', form);
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const [audioModels, setAudioModels] = useState<Record<string, any>[]>([]);
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
     data
   );
+
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      const audioList =
+        res.data.find((d) => d.type === 'audio_model')?.model_data || [];
+
+      setAudioModels(audioList);
+
+      const defaultAudioId = audioList[0]?.id || '';
+
+      if (!inputs.audio_model_id) {
+        form.setFieldValue('audio_model_id', defaultAudioId);
+      }
+    });
+  }, []);
 
   return (
     <div className="wk-node-panel-content video-parser-panel-content mt-[16px]">
@@ -61,8 +72,9 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
           ...data
         }}
         layout="vertical"
-        onValuesChange={(_, v) => {
-          // console.log('valuechange', _, v);
+        onValuesChange={(_, v: any) => {
+          console.log('video parser valuechange', _, v);
+          handleFiledsChange(v);
         }}
       >
         <FormItem
@@ -73,6 +85,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={4}
+            fileTypes={FileOptions.video}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}
             handleFilesChange={handleFilesChange}
@@ -119,12 +132,12 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
           label="音频解析模型："
           field="audio_model_id"
           labelAlign="left"
-          extra="指定对图片caption进行embedding 的模型。"
+          extra="指定音频解析的模型。"
         >
           <Select>
-            {segmentationOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
+            {audioModels.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.type}
               </Option>
             ))}
           </Select>

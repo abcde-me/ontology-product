@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Button, Popover, DatePicker } from '@arco-design/web-react';
+import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg'; // 直接导入为组件
 import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
 import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
-
+import { deleteTargetFile } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
 const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
 const TXTIcon = ({ size = 16 }) => <TxtIcon width={size} height={size} />;
-
+// const [ids, setIds] = useState([]);
 // 根据文件类型获取对应图标组件的函数
 const getFileIcon = (type, size = 16) => {
   const iconMap = {
@@ -23,20 +23,35 @@ const getFileIcon = (type, size = 16) => {
   };
   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
 };
+//格式化时间函数
+const formatDateTime = (dateTimeString: string): string => {
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
 
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    return dateTimeString; // 如果格式化失败，返回原字符串
+  }
+};
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
   const handleWorkflowClick = () => {
     // 这里添加跳转逻辑，例如跳转到工作流详情页
     // 您可以根据实际需求修改跳转路径
-    if (record.workflowId) {
-      window.open(`/workflow/${record.workflowId}`, '_blank');
+    if (record.extras.workflow_id) {
+      window.open(`/workflow/${record.workflow_id}`, '_blank');
     }
   };
 
   return (
     <div>
-      <div>原文件: {record.file}</div>
+      <div>原文件: {record.extras.file_name}</div>
       <div>
         工作流ID:{' '}
         <a
@@ -58,7 +73,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
             (e.target as HTMLAnchorElement).style.textDecoration = 'none';
           }}
         >
-          {record.workflowId}
+          {record.extras.workflow_id}
           {showIcon && (
             <>
               &nbsp;
@@ -72,7 +87,13 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible) => (
+const renderActionColumn = (
+  _,
+  record,
+  setVisible,
+  refreshData,
+  selectedKey
+) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -94,7 +115,7 @@ const renderActionColumn = (_, record, setVisible) => (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record.id)}
+      onClick={() => handleDelete(record, refreshData, selectedKey)}
     >
       删除
     </span>
@@ -109,7 +130,9 @@ export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
-  hoveredRowId = null
+  hoveredRowId = null,
+  refreshData = () => {}, // 添加刷新数据的回调函数
+  selectedKey?: string // 添加selectedKey参数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -161,7 +184,7 @@ export const getUnifiedColumns = (
             }}
           >
             {getFileIcon(record.type, 16)}
-            <span>{record.type}</span>
+            <span>{record.file_type}</span>
           </div>
         )
       },
@@ -172,12 +195,9 @@ export const getUnifiedColumns = (
       {
         title: '上传用户',
         dataIndex: 'meta',
-        render: (_, record) => (
-          <div>
-            <div>原文件: {record.file}</div>
-            <div>工作流ID: {record.workflowId}</div>
-          </div>
-        )
+        ellipsis: true,
+        width: 180,
+        render: (_, record) => <div></div>
       },
       {
         title: '载入开始时间',
@@ -207,7 +227,8 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible)
+        render: (_, record) =>
+          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
       }
     ];
   }
@@ -222,12 +243,12 @@ export const getUnifiedColumns = (
       },
       {
         title: '数据内容',
-        dataIndex: 'content',
+        dataIndex: 'short_content',
         ellipsis: true,
         width: 300,
         render: (_, record) => (
           <div>
-            <Popover content={record.content}>
+            <Popover content={record.short_content}>
               <span
                 style={{
                   display: 'block',
@@ -237,7 +258,7 @@ export const getUnifiedColumns = (
                   maxWidth: '100%'
                 }}
               >
-                {record.content}
+                {record.short_content}
               </span>
             </Popover>
           </div>
@@ -245,7 +266,7 @@ export const getUnifiedColumns = (
       },
       {
         title: '生成时间',
-        dataIndex: 'createdAt',
+        dataIndex: 'created_at',
         sorter: (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         onFilter: (value, record) => {
@@ -258,6 +279,7 @@ export const getUnifiedColumns = (
 
           return recordDate >= startDate && recordDate <= endDate;
         },
+        render: (_, record) => formatDateTime(record.created_at),
         width: 180
       },
       {
@@ -290,7 +312,7 @@ export const getUnifiedColumns = (
             }}
           >
             {getFileIcon(record.type, 16)}
-            <span>{record.type}</span>
+            <span>{record.file_type}</span>
           </div>
         )
       },
@@ -299,7 +321,8 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible)
+        render: (_, record) =>
+          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
       }
     ];
   }
@@ -317,24 +340,39 @@ export const getUnifiedColumns = (
       // 可根据实际需求添加数据库相关列配置
     ];
   }
-
   // 默认返回空数组
   return [];
 };
 
-// 处理下载操作
+// 处理导出操作
 const handleDownload = (record, setVisible) => {
-  console.log('下载', record);
+  console.log('导出', record);
   setVisible(true, record);
 };
 
 // 处理删除操作
-const handleDelete = (id) => {
-  console.log('删除', id);
-  const token = localStorage.getItem('loginToken');
-  if (!token) {
-    Message.error('请先登录');
-    return;
+const handleDelete = (data, refreshData, selectedKey) => {
+  const ids: Array<string> = [];
+  try {
+    Modal.confirm({
+      title: '确认删除文件吗?',
+      content: '删除后，文件不可恢复',
+      onOk: async () => {
+        ids.push(data.id);
+        console.log('查看删除的数据和数组们', data, ids);
+        await deleteTargetFile({
+          full_path: data.full_path,
+          file_ids: ids,
+          path_id: selectedKey
+        });
+        Message.success('删除成功');
+        // 删除成功后刷新数据
+        if (typeof refreshData === 'function') {
+          refreshData();
+        }
+      }
+    });
+  } catch {
+    Message.error('删除失败，请重试');
   }
-  // deleteFileById(id)
 };

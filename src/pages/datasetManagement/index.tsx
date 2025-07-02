@@ -20,10 +20,14 @@ import {
   IconFilter
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
-import { getDatasetList, createDataset } from '@/api/datasetManagement';
+import {
+  getDatasetList,
+  createDataset,
+  deleteDataset
+} from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
-import './index.css';
-
+import styles from './index.module.css';
+import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -53,11 +57,16 @@ interface Dataset {
   created_at: string;
   updated_at: string;
   deleted_at: null;
-  tags: string[];
+  tag_names: string[];
   src_model: string;
 }
 
-const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
+const columns = (
+  handleGoToDetail,
+  handleDelete,
+  datasetList: Dataset[],
+  handleExport: (record: Dataset) => void
+) => [
   {
     title: '名称',
     dataIndex: 'name',
@@ -65,7 +74,7 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     render: (name: string, record: Dataset) => (
       <Button
         type="text"
-        className="dataset-name-link"
+        className={styles.datasetNameLink}
         onClick={() => handleGoToDetail(record.id)}
       >
         {name}
@@ -74,27 +83,31 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
   },
   {
     title: '标签',
-    dataIndex: 'tags',
+    dataIndex: 'tag_names',
     width: 160,
-    filterIcon: <IconFilter />,
+    // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList.forEach((dataset) => {
-        dataset.tags.forEach((tag) => tagSet.add(tag));
+        dataset.tag_names.forEach((tag) => tagSet.add(tag));
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
     })(),
     onFilter: (value: string, record: Dataset) => {
-      return record.tags.includes(value);
+      return record.tag_names.includes(value);
     },
-    render: (tags: string[]) => (
+    render: (tag_names: string[]) => (
       <Space size="mini">
-        {tags.length > 0 && (
-          <Tag className="tag-green">
-            {tags[0].length > 8 ? `${tags[0].substring(0, 8)}...` : tags[0]}
+        {tag_names.length > 0 && (
+          <Tag className={styles.tagGreen}>
+            {tag_names[0].length > 5
+              ? `${tag_names[0].substring(0, 5)}...`
+              : tag_names[0]}
           </Tag>
         )}
-        {tags.length > 1 && <Tag className="tag-green">+{tags.length - 1}</Tag>}
+        {tag_names.length > 1 && (
+          <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+        )}
       </Space>
     )
   },
@@ -129,7 +142,9 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     onFilter: (value: string, record: Dataset) => {
       return record.src_model === value;
     },
-    render: (src_model: string) => <Tag className="tag-purple">{src_model}</Tag>
+    render: (src_model: string) => (
+      <Tag className={styles.tagPurple}>{src_model}</Tag>
+    )
   },
   {
     title: '创建人',
@@ -185,15 +200,22 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[]) => [
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
       <Space size={8}>
-        <Button type="text" className="action-button export">
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${styles.export}`}
+        >
           编辑
         </Button>
-        <Button type="text" className="action-button export">
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${styles.export}`}
+          onClick={() => handleExport(record)}
+        >
           导出
         </Button>
         <Button
           type="text"
-          className="action-button delete"
+          className={`${styles.actionButton} ${styles.delete}`}
           onClick={() => handleDelete(record)}
         >
           删除
@@ -215,7 +237,7 @@ const data: Dataset[] = [
     created_at: '2025-05-15T10:30:45+08:00',
     updated_at: '2025-06-01T08:15:22+08:00',
     deleted_at: null,
-    tags: ['文本11111111111111111', '训练'],
+    tag_names: ['文本11111111111111111', '训练'],
     src_model: 'gpt-3.5-turbo'
   },
   {
@@ -229,7 +251,7 @@ const data: Dataset[] = [
     created_at: '2025-05-10T14:22:33+08:00',
     updated_at: '2025-05-28T16:45:10+08:00',
     deleted_at: null,
-    tags: ['图片', '分类'],
+    tag_names: ['图片', '分类'],
     src_model: 'vision-model'
   },
   {
@@ -243,7 +265,7 @@ const data: Dataset[] = [
     created_at: '2025-04-22T09:12:18+08:00',
     updated_at: '2025-05-30T11:33:47+08:00',
     deleted_at: null,
-    tags: ['混合', '自定义', '测试'],
+    tag_names: ['混合', '自定义', '测试'],
     src_model: 'claude-3-sonnet'
   }
 ];
@@ -277,6 +299,9 @@ const DatasetManagement: React.FC = () => {
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
+  //导出弹窗相关
+  const [downloadData, setDownloadData] = React.useState([]);
+  const [visible, setVisible] = React.useState(false); // 导出弹框控制
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
@@ -352,24 +377,43 @@ const DatasetManagement: React.FC = () => {
     closeModal();
   };
 
+  // 删除数据集的方法
+  const deleteDatasetRecord = (record: Dataset) => {
+    deleteDataset(record)
+      .then((res) => {
+        getDatasetList({
+          page: currentPage,
+          page_size: pageSize,
+          search: search,
+          search_field: searchField
+        }).then((res) => {
+          setDatasetList(res.data.list);
+          setTotal(res.data.total);
+        });
+        Message.success('删除成功');
+      })
+      .catch((err) => {
+        Message.error('数据集删除失败！');
+      });
+  };
+
   // 删除数据集
   const handleDelete = (record: Dataset) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除数据集"${record.name}"吗？此操作不可撤销。`,
-      okText: '确认删除',
+      title: '确认删除文件吗？',
+      // 内容
+      content: '删除后，文件不可恢复',
+      // 按钮文字
+      okText: '确定',
       cancelText: '取消',
+      // 类型设为 warning，会自动使用橙色感叹号图标
       okButtonProps: { status: 'danger' },
+      // 居中显示
+      // centered: true,
       onOk: () => {
-        deleteDataset(record);
-        Message.success('数据集删除成功！');
+        deleteDatasetRecord(record);
       }
     });
-  };
-
-  // 删除数据集的方法
-  const deleteDataset = (record: Dataset) => {
-    console.log(record);
   };
 
   // 分页处理函数
@@ -409,12 +453,12 @@ const DatasetManagement: React.FC = () => {
       search: search,
       search_field: searchField
     }).then((res) => {
+      console.log('李帆测试', res.data.list);
       setDatasetList(res.data.list);
       setTotal(res.data.total);
-      console.log(res);
     });
-    setDatasetList(data); // 测试数据
-    setTotal(1000); // 设置总条数
+    // setDatasetList(data); // 测试数据
+    // setTotal(1000); // 设置总条数
   }, [currentPage, pageSize]);
 
   // 批量删除
@@ -439,6 +483,12 @@ const DatasetManagement: React.FC = () => {
     });
   };
 
+  // 导出数据集
+  const handleExport = (record: Dataset) => {
+    console.log('导出数据集:', record);
+    setDownloadData(record);
+    setVisible(true);
+  };
   // 批量导出
   const handleBatchExport = () => {
     if (selectedRowKeys.length === 0) {
@@ -451,19 +501,18 @@ const DatasetManagement: React.FC = () => {
   };
 
   return (
-    <div className="dataset-management">
-      <div className="dataset-content-card">
-        <div className="dataset-header">
-          <div className="dataset-title">数据集管理</div>
-          <div className="dataset-description">
+    <div className={styles.datasetManagement}>
+      <div className={styles.datasetContentCard}>
+        <div className={styles.datasetHeader}>
+          <div className={styles.datasetTitle}>数据集管理</div>
+          <div className={styles.datasetDescription}>
             管理用于模型精调和训练的数据集
           </div>
         </div>
-
-        <div className="search-toolbar">
-          <div className="search-group">
+        <div className={styles.searchToolbar}>
+          <div className={styles.searchGroup}>
             <Select
-              className="search-field-select"
+              className={styles.searchFieldSelect}
               value={searchField}
               onChange={(value) => setSearchField(value)}
               options={searchOptions}
@@ -471,17 +520,17 @@ const DatasetManagement: React.FC = () => {
             <Input.Search
               allowClear
               placeholder="输入关键字搜索"
-              className="search-input"
+              className={styles.searchInput}
               value={search}
               onChange={(value) => setSearch(value)}
               onPressEnter={handleSearch}
               onSearch={handleSearch}
             />
           </div>
-          <div className="action-buttons">
+          <div className={styles.actionButtons}>
             <Button
               icon={<IconDelete />}
-              className="batch-delete-btn"
+              className={styles.batchDeleteBtn}
               disabled={selectedRowKeys.length === 0}
               onClick={handleBatchDelete}
             >
@@ -489,7 +538,7 @@ const DatasetManagement: React.FC = () => {
             </Button>
             <Button
               icon={<IconDownload />}
-              className="batch-export-btn"
+              className={styles.batchExportBtn}
               disabled={selectedRowKeys.length === 0}
               onClick={handleBatchExport}
             >
@@ -507,8 +556,13 @@ const DatasetManagement: React.FC = () => {
 
         <Table
           rowKey="id"
-          className="dataset-table"
-          columns={columns(handleGoToDetail, handleDelete, datasetList)}
+          className={styles.datasetTable}
+          columns={columns(
+            handleGoToDetail,
+            handleDelete,
+            datasetList,
+            handleExport
+          )}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
@@ -532,6 +586,13 @@ const DatasetManagement: React.FC = () => {
           visible={modalVisible}
           onSubmit={handleSubmit}
           onCancel={closeModal}
+        />
+        {/* 导出数据集弹窗 */}
+        <FormComponent
+          exportdataset={downloadData}
+          onCancel={() => setVisible(false)}
+          visible={visible}
+          exportdatas={selectedRows}
         />
       </div>
     </div>

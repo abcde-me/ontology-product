@@ -11,9 +11,9 @@ const InputSearch = Input.Search;
 
 // 枚举作业运行状态
 enum TaskRunStatus {
-  success = 1,
-  fail = 2,
-  running = 3,
+  running = 1,
+  success = 2,
+  fail = 3,
   stop = 4
 }
 
@@ -31,7 +31,7 @@ export default function WorkflowTask() {
   // 数据总数
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // 组件初始化
   useEffect(() => {
@@ -60,8 +60,14 @@ export default function WorkflowTask() {
   };
 
   // 跳转详情
-  const handleToTaskDeatil = (id: number) => {
-    history.push(`/tenant/compute/modaforge/workflowTaskDetail?id=${id}`);
+  const handleToTaskDeatil = (
+    id: number,
+    workflow_uuid: string | number,
+    ds_workflow_id: string | number
+  ) => {
+    history.push(
+      `/tenant/compute/modaforge/workflowTaskDetail?id=${id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+    );
   };
 
   // 跳转目录
@@ -79,7 +85,13 @@ export default function WorkflowTask() {
       render: (_, record) => (
         <span
           className="hover-change"
-          onClick={() => handleToTaskDeatil(record.id)}
+          onClick={() =>
+            handleToTaskDeatil(
+              record.id,
+              record.workflow_uuid,
+              record.ds_workflow_id
+            )
+          }
         >
           {record.id}
         </span>
@@ -152,7 +164,13 @@ export default function WorkflowTask() {
       render: (_, record) => (
         <span
           className="hover-change"
-          onClick={() => handleToTaskDeatil(record.id)}
+          onClick={() =>
+            handleToTaskDeatil(
+              record.id,
+              record.workflow_uuid,
+              record.ds_workflow_id
+            )
+          }
           title={record.workflow_name}
         >
           {record.workflow_name}
@@ -194,14 +212,20 @@ export default function WorkflowTask() {
       dataIndex: 'start_time',
       width: 170,
       render: (_, record) => <span>{record.start_time}</span>,
-      sorter: (a, b) => a.start_time.length - b.start_time.length
+      sorter: (a, b) => {
+        return (
+          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+        );
+      }
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 170,
       render: (_, record) => <span>{record.end_time}</span>,
-      sorter: (a, b) => a.end_time.length - b.end_time.length
+      sorter: (a, b) => {
+        return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
+      }
     },
     {
       title: '操作',
@@ -210,7 +234,13 @@ export default function WorkflowTask() {
       render: (_, record) => (
         <span
           className="operate-text"
-          onClick={() => handleToTaskDeatil(record.id)}
+          onClick={() =>
+            handleToTaskDeatil(
+              record.id,
+              record.workflow_uuid,
+              record.ds_workflow_id
+            )
+          }
         >
           详情
         </span>

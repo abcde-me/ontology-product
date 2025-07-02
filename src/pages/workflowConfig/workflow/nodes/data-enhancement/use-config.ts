@@ -27,7 +27,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     similarity_threshold: inputs?.similarity_threshold, // 过滤相似度阈值,0~1
     generate_sample_num: inputs?.generate_sample_num, //生成样本数
     prompt: inputs?.prompt, // 提示词
-    enha_modle_id: inputs?.enha_modle_id // 和音频解析模型冲突？？？另外格式不正确吧
+    enha_modle_id: inputs?.enha_modle_id // 数据增强模型
   };
 
   const updateInputs = useCallback(
@@ -41,6 +41,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.prompt = payload.prompt;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.newDataEnhancement = newDataEnhancement;
+        draft.modelList = payload.modelList;
       });
       setInputs(newInputs);
     },

@@ -1,6 +1,7 @@
 import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './EditDatasetForm.module.css';
+import { getTagList } from '@/api/datasetManagement';
 
 interface Dataset {
   key?: string;
@@ -32,6 +33,9 @@ const EditDatasetForm: React.FC<Props> = ({
   const [description, setDescription] = useState<string>(
     initialData?.description || ''
   );
+  const [tagOptions, setTagOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   // 模型选项
   const modelOptions = [
@@ -40,15 +44,22 @@ const EditDatasetForm: React.FC<Props> = ({
     { label: '骆驼 3', value: '骆驼 3' }
   ];
 
-  // 标签选项
-  const tagOptions = [
-    { label: '小说情节', value: '小说情节' },
-    { label: '文本', value: '文本' },
-    { label: 'AI生成', value: 'AI生成' },
-    { label: '剧情', value: '剧情' },
-    { label: '对话', value: '对话' },
-    { label: '描述', value: '描述' }
-  ];
+  // 获取标签列表
+  useEffect(() => {
+    getTagList()
+      .then((res) => {
+        if (!res.code) {
+          const options = res.data.map((tag: any) => ({
+            label: tag.name,
+            value: tag.name
+          }));
+          setTagOptions(options);
+        }
+      })
+      .catch((err) => {
+        console.error('获取标签列表失败:', err);
+      });
+  }, []);
 
   // 回显编辑数据 - 使用传入的真实数据
   useEffect(() => {

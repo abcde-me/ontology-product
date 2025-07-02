@@ -10,23 +10,65 @@ import {
   Message
 } from '@arco-design/web-react';
 import { exportFile } from '@/api/dataCatalog';
+import { getConnectionList } from '@/api/connectionApi';
 const FormItem = Form.Item;
 interface FormProps {
+  names?: string;
   downloadData?: any;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
+  exportdatas?: any;
+  exportdataset?: any;
 }
 
 const FormComponent: React.FC<FormProps> = ({
   downloadData,
   onCancel,
-  visible = false
+  visible = false,
+  names,
+  exportdatas,
+  exportdataset
 }) => {
+  // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    exportFile({});
+    console.log(downloadData, '打印看啊看downloadData');
+    console.log(exportdatas, '打印看啊看exportdatas');
+
+    const exportNames: Array<string> = [];
+    if (exportdatas && exportdatas.length > 0) {
+      // 使用扁平数组而不是嵌套数组
+      exportdatas.forEach((item) => {
+        if (item.extras && item.extras.file_name) {
+          exportNames.push(item.extras.file_name);
+        }
+      });
+    } else if (downloadData) {
+      exportNames.push(downloadData.extras.file_name);
+    } else {
+      exportNames.push(exportdataset.latest_file_name);
+    }
+    let full_paths = '';
+    if (exportdatas && exportdatas.length > 0) {
+      full_paths = exportdatas[0].full_path;
+    } else if (downloadData) {
+      full_paths = downloadData.full_path;
+    } else {
+      full_paths =
+        exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
+    }
+    const res = await exportFile({
+      file_names: exportNames,
+      output_path: form.getFieldValue('path'),
+      file_path: full_paths,
+      connector_id: Number(form.getFieldValue('province'))
+    });
+    console.log(res);
     try {
+      console.log('导出文件名', exportNames);
       await form.validate();
+      form.resetFields();
+      onCancel && onCancel();
       Message.success('导出成功');
     } catch (e) {
       Message.error('导出失败，请重试');
@@ -40,25 +82,43 @@ const FormComponent: React.FC<FormProps> = ({
     onCancel && onCancel();
   };
   //导出
-  const handExport = () => {
-    console.log('导出');
-    onCancel && onCancel();
-  };
+  // const handExport = () => {
+  //   console.log('导出');
+  //   onCancel && onCancel();
+  // };
   //显示弹窗的状态由外部传入，不再在内部管理
   const [form] = Form.useForm();
   const formItemLayout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 20 }
+    labelCol: { span: 5 },
+    wrapperCol: { span: 19 }
   };
 
-  // 当downloadData变化时，设置表单初始值
-  useEffect(() => {
-    if (downloadData) {
-      form.setFieldsValue({
-        name: downloadData.content
-      });
+  const [connectorList, setConnectorList] = useState([]);
+  const getConnectorList = async () => {
+    try {
+      const res = await getConnectionList({});
+      if (res && res.data) {
+        setConnectorList(res.data.items);
+      } else {
+        setConnectorList([]);
+        Message.error('获取连接器列表失败：数据格式异常');
+      }
+    } catch (error) {
+      console.error('获取连接器列表出错:', error);
+      setConnectorList([]);
+      Message.error('获取连接器列表失败，请稍后重试');
     }
-  }, [downloadData, form]);
+  };
+
+  // 修改为监听 visible 变化，当弹窗打开时设置表单值
+  useEffect(() => {
+    if (visible) {
+      // 获取连接器列表
+      getConnectorList();
+      console.log(exportdataset, 'exportdataset888888888888888888888888888888');
+    }
+  }, [visible, form, names, downloadData, exportdataset]);
+
   return (
     <Modal
       title="导出设置"
@@ -76,22 +136,6 @@ const FormComponent: React.FC<FormProps> = ({
         {...formItemLayout}
         style={{ width: 584 }}
       >
-        <FormItem
-          label="文件名称："
-          field="name"
-          required
-          extra="文件将以原始格式导出，保持数据完整性"
-          rules={[
-            {
-              required: true,
-              message: '请填写'
-            }
-          ]}
-        >
-          <Input placeholder="please enter your username" />
-        </FormItem>
-        {/* <FormItem wrapperCol={{ offset: 5 }}>
-      </FormItem> */}
         <Form.Item
           label="选择连接器："
           field="province"
@@ -99,8 +143,11 @@ const FormComponent: React.FC<FormProps> = ({
         >
           <Select
             allowClear
-            placeholder="please select"
-            options={['Beijing', 'Shanghai']}
+            placeholder="请选择连接器"
+            options={connectorList.map((item: any) => ({
+              label: item.name,
+              value: item.id
+            }))}
           ></Select>
         </Form.Item>
         <FormItem
@@ -115,7 +162,7 @@ const FormComponent: React.FC<FormProps> = ({
             }
           ]}
         >
-          <Input placeholder="please enter your username" />
+          <Input placeholder="请输入保存路径" />
         </FormItem>
       </Form>
       <div style={{ marginTop: '20px', textAlign: 'right', marginBottom: 20 }}>

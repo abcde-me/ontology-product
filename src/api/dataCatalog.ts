@@ -1,5 +1,6 @@
 import UAPI from '@/api';
 import { Get, Post } from '@/utils/request';
+import { Message } from '@arco-design/web-react';
 
 // 数据目录相关接口
 
@@ -30,29 +31,67 @@ export async function downloadFileById(id: string, params: any = {}) {
 export async function getCatalogList(param: any = {}) {
   return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
 }
-//添加目录
+// 添加目录
 export async function addCatalog(data: any) {
   return await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
 }
-//新建卷
+// 新建卷
 export async function addVolume(data: any) {
   return await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
 }
-//删除数据卷
-export async function deleteVolume(id: string) {
-  return await UAPI.RES.volumeDeleteApi({ id }).delete().inRegion().do();
+// 删除数据卷
+export async function deleteVolume(
+  id: string,
+  params?: { root_type?: string }
+) {
+  return await UAPI.RES.volumeDeleteApi({ id }).delete(params).inRegion().do();
 }
-//重命名目录
-export async function renameCatalog(id:string,params: any) {
-  return await UAPI.RES.catalogRenameApi({catalogId: id}).put(params).inRegion().do();
+// 重命名目录
+export async function renameCatalog(id: string, params: any) {
+  const res = await UAPI.RES.catalogRenameApi({ catalogId: id })
+    .put(params)
+    .inRegion()
+    .do();
+  if (res.status !== 200) {
+    Message.warning(res.message);
+  }
+  return res;
 }
+
+// 定义查询目标数据文件的参数接口
+interface TargetDataFileQueryParams {
+  page: number;
+  full_path: string;
+  start_time: string;
+  end_time: string;
+  search_content: string;
+  search_id: number;
+  limit: number;
+}
+
+// 定义删除目标文件的参数接口
+interface TargetFileDeleteParams {
+  file_ids: Array<string>;
+  full_path: string;
+  path_id: string;
+}
+
 //查询目标数据文件列表
-export async function getTargetDataFileList(param: any = {}) {
-  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
+export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
+  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 //删除目标文件
-export async function deleteTargetFile(param: any) {
-  return await UAPI.RES.targetDataFileListApi({}).delete(param).inRegion().do();
+export async function deleteTargetFile(params: TargetFileDeleteParams) {
+  const { file_ids, ...restParams } = params;
+  const customParams: Record<string, string> = {
+    ...restParams,
+    file_ids: file_ids.join(',')
+  };
+  return await UAPI.RES.targetDataFileDeleteApi({})
+    .delete()
+    .withConfig({ params: customParams })
+    .inRegion()
+    .do();
 }
 
 //预览/搜索数据集
@@ -80,7 +119,7 @@ export async function getDataCatalogList(param: any = {}) {
 export async function createCatalog(data: any) {
   return await UAPI.RES.CatalogCreateApi({}).post(data).inRegion().do();
 }
-
+//导出文件
 export async function exportFile(params: any = {}) {
   return await UAPI.RES.fileExportApi({}).post(params).inRegion().do();
 }

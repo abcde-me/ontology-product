@@ -538,10 +538,10 @@ export const useWorkflowInit = () => {
 
   const handleGetInitialWorkflowData = useCallback(async () => {
     try {
-      const result = await getWorkflowDraft(appDetail?.workflow_uuid ?? '');
-      if (result.code.indexOf('DraftWorkflowNotFound') > -1) {
+      const result = await getWorkflowDraft();
+      if (result.code.indexOf('WorkflowDraftNotFound') > -1) {
         workflowStore.setState({ notInitialWorkflow: true });
-        createWorkflowDraft(appDetail?.workflow_uuid ?? '', {
+        createWorkflowDraft({
           graph: {
             nodes: nodesTemplate,
             edges: edgesTemplate
@@ -550,7 +550,8 @@ export const useWorkflowInit = () => {
             retriever_resource: { enabled: true }
           },
           environment_variables: [],
-          conversation_variables: []
+          conversation_variables: [],
+          version: 'draft'
         }).then(({ data: res }) => {
           workflowStore.getState().setDraftUpdatedAt(res.updated_at);
           handleGetInitialWorkflowData();
@@ -584,7 +585,7 @@ export const useWorkflowInit = () => {
         error.json().then((err: any) => {
           if (err.code === 'draft_workflow_not_exist') {
             workflowStore.setState({ notInitialWorkflow: true });
-            createWorkflowDraft(appDetail.workflow_uuid, {
+            createWorkflowDraft({
               graph: {
                 nodes: nodesTemplate,
                 edges: edgesTemplate
@@ -593,7 +594,8 @@ export const useWorkflowInit = () => {
                 retriever_resource: { enabled: true }
               },
               environment_variables: [],
-              conversation_variables: []
+              conversation_variables: [],
+              version: 'draft'
             }).then(({ data: res }) => {
               workflowStore.getState().setDraftUpdatedAt(res.updated_at);
               handleGetInitialWorkflowData();
@@ -675,6 +677,7 @@ export const useNodesReadOnly = () => {
   const workflowRunningData = useStore((s) => s.workflowRunningData);
   const historyWorkflowData = useStore((s) => s.historyWorkflowData);
   const isRestoring = useStore((s) => s.isRestoring);
+  const currentUrl = window.location.pathname;
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -682,6 +685,7 @@ export const useNodesReadOnly = () => {
 
     return (
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
+      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring
     );
@@ -690,6 +694,7 @@ export const useNodesReadOnly = () => {
   return {
     nodesReadOnly: !!(
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
+      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring
     ),

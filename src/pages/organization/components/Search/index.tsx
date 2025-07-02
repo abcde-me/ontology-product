@@ -57,9 +57,7 @@ export default function Search() {
           type="primary"
           className="flex items-center gap-1 px-3"
           onClick={() => {
-            // TODO: ts错误
-            // @ts-expect-error
-            orgStore.setCurrentMember(null);
+            orgStore.setCurrentMember({});
             orgStore.setVisible(true);
           }}
         >

@@ -7,10 +7,18 @@ import {
   Alert,
   Divider
 } from '@arco-design/web-react';
+import type { SelectHandle } from '@arco-design/web-react/es/Select/interface';
 import Styles from './index.module.css';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
-import { WEEKLY_OPTIONS, MONTHLY_OPTIONS } from './constants';
+import {
+  WEEKLY_OPTIONS,
+  MONTHLY_OPTIONS,
+  CYCLE_OPTIONS,
+  RELATIVE_TIME_OPTIONS,
+  TIME_TAB
+} from './constants';
+import { CycleText, CycleValues, TimeType } from './types';
 // 选择器的实例
 const Option = Select.Option;
 
@@ -21,53 +29,126 @@ const quickOptionsData = [
   '每月一日凌晨0点',
   '每周一上午9点'
 ];
-export enum timeType {
-  SEPCIFICTIME = 'Specific',
-  RELATICELYTIME = 'relatively'
+
+interface CycleLoadingFormProps {
+  options: CycleText;
+  onOptionsChange: (options: CycleText) => void;
 }
-export const TIMEARR = {
-  [timeType.SEPCIFICTIME]: {
-    text: '具体日期'
-  },
-  [timeType.RELATICELYTIME]: {
-    text: '相对时间'
+
+const initFrequencyData = (options: CycleText) => {
+  if (options.month === '*') {
+    return CycleValues.PER_MONTH;
+  } else if (options.week === '*') {
+    return CycleValues.PER_WEEK;
+  } else {
+    return CycleValues.PER_DAY;
   }
 };
 
-const CycleLoadingForm: React.FC = () => {
-  // 频率选择器选择的数据
-  const [frequencyData, setFrequencyData] = useState('');
-  const [form] = Form.useForm();
+const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
+  if (frequencyData === CycleValues.PER_MONTH) {
+    return {
+      cycle: frequencyData,
+      date: options.date?.split(',') ?? [],
+      time: `${options.hour}:${options.minute}`
+    };
+  } else if (frequencyData === CycleValues.PER_WEEK) {
+    return {
+      cycle: frequencyData,
+      date: options.date?.split(',') ?? [],
+      time: `${options.hour}:${options.minute}`
+    };
+  } else {
+    return {
+      cycle: frequencyData,
+      time: `${options.hour}:${options.minute}`
+    };
+  }
+};
 
-  // 提示信息的状态
-  const [promptState, setPromptState] = useState(false);
-  // 周期设置为月时 后面选择框改变的方法
-  const monthlyHan = (val) => {
-    const monthIndex = val.some((item) => item == '每月最后一天');
-    setPromptState(monthIndex);
-  };
+const formatOptions = (frequencyData: CycleValues, formVals) => {
+  const [hour, minute] = formVals.time.split(':');
+  if (frequencyData === CycleValues.PER_MONTH) {
+    return {
+      minute,
+      hour,
+      date: formVals.date?.join(',') ?? '',
+      month: '*',
+      week: ''
+    };
+  } else if (frequencyData === CycleValues.PER_WEEK) {
+    return {
+      minute,
+      hour,
+      date: formVals.date?.join(',') ?? '',
+      month: '',
+      week: '*'
+    };
+  } else {
+    return {
+      minute,
+      hour,
+      date: '*',
+      month: '',
+      week: ''
+    };
+  }
+};
+
+const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
+  options,
+  onOptionsChange
+}) => {
+  const [form] = Form.useForm();
+  const datePickerRef = useRef<SelectHandle>(null);
+  // 频率选择器选择的数据
+  const [frequencyData, setFrequencyData] = useState(
+    initFrequencyData(options)
+  );
+  const initialValues = getInitialValues(frequencyData, options);
+
   // 点击快捷选项的回调
   const shortcutHan = (value) => {
     if (value == '每天凌晨0点') {
-      setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '00:00' });
+      setFrequencyData(CycleValues.PER_DAY);
+      form.setFieldsValue({ cycle: CycleValues.PER_DAY, time: '00:00' });
     } else if (value == '每天中午12点') {
-      setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '12:00' });
+      setFrequencyData(CycleValues.PER_DAY);
+      form.setFieldsValue({ cycle: CycleValues.PER_DAY, time: '12:00' });
     } else if (value == '每月一日凌晨0点') {
-      setFrequencyData('每月');
-      form.setFieldsValue({ cycle: '每月', day: ['1号'], time: '00:00' });
+      setFrequencyData(CycleValues.PER_MONTH);
+      form.setFieldsValue({
+        cycle: CycleValues.PER_MONTH,
+        date: ['1'],
+        time: '00:00'
+      });
     } else if (value == '每周一上午9点') {
-      setFrequencyData('每周');
-      form.setFieldsValue({ cycle: '每周', week: ['周一'], time: '09:00' });
+      setFrequencyData(CycleValues.PER_WEEK);
+      form.setFieldsValue({
+        cycle: CycleValues.PER_WEEK,
+        date: ['1'],
+        time: '09:00'
+      });
     }
   };
+  const [timeFlag, setTimeFlag] = useState(TimeType.SEPCIFICTIME);
+  const handleValuesChange = (_, allValues) => {
+    const optionsFormat = formatOptions(frequencyData, allValues);
+    console.log('当前所有字段值:', allValues, frequencyData);
+    console.log('格式后的字段值:', optionsFormat);
+    onOptionsChange(optionsFormat);
+  };
 
-  const [time, setTime] = useState(['具体日期', '相对时间']);
-  const [rtime, setRTime] = useState(['每月最后一天']);
-  const [timeFlag, setTimeFlag] = useState('具体日期');
+  useEffect(() => {
+    handleValuesChange(null, form.getFieldsValue());
+  }, [frequencyData]);
+
   return (
-    <Form>
+    <Form
+      form={form}
+      initialValues={initialValues}
+      onChange={handleValuesChange}
+    >
       <div className={Styles.cycleLoadingBox}>
         <div style={{ display: 'flex' }}>
           <Form.Item
@@ -78,8 +159,7 @@ const CycleLoadingForm: React.FC = () => {
             <div
               style={{
                 display: 'flex',
-                alignItems: 'start',
-                justifyContent: 'space-between'
+                alignItems: 'start'
               }}
             >
               <Form.Item
@@ -89,21 +169,23 @@ const CycleLoadingForm: React.FC = () => {
               >
                 <Select
                   placeholder="频率"
-                  style={{ width: 100 }}
+                  style={{ width: 80 }}
                   onChange={(val) => setFrequencyData(val)}
                 >
-                  <Option value="每日">每日</Option>
-                  <Option value="每周">每周</Option>
-                  <Option value="每月">每月</Option>
+                  {CYCLE_OPTIONS.map((item) => {
+                    return (
+                      <Option value={item.value} key={item.value}>
+                        {item.lable}
+                      </Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
-              {frequencyData == '每天' && null}
-              {frequencyData == '每周' && (
+              {frequencyData == CycleValues.PER_WEEK && (
                 <Form.Item
-                  field="week"
+                  field="date"
                   style={{
-                    flex: '0 0 120px',
-                    margin: '0 8px',
+                    margin: '0 0 0 12px',
                     display: 'flex',
                     alignItems: 'center'
                   }}
@@ -111,32 +193,35 @@ const CycleLoadingForm: React.FC = () => {
                 >
                   <Select
                     mode="multiple"
-                    options={WEEKLY_OPTIONS}
                     placeholder="请选择日期"
                     style={{
-                      width: 300
+                      minWidth: 300
                     }}
-                  />
+                  >
+                    {WEEKLY_OPTIONS.map((item) => (
+                      <Option value={item.value} key={item.value}>
+                        {item.lable}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               )}
-              {frequencyData == '每月' && (
+              {frequencyData == CycleValues.PER_MONTH && (
                 <Form.Item
-                  field="day"
+                  field="date"
+                  key={frequencyData}
                   style={{
-                    flex: '0 0 120px',
-                    margin: '0 8px',
+                    margin: '0 0 0 12px',
                     display: 'flex',
                     alignItems: 'center'
                   }}
                   rules={[{ required: true, message: '请选择时间' }]}
                 >
                   <Select
-                    mode="multiple"
-                    style={{ width: 300 }}
+                    mode={'multiple'}
+                    style={{ minWidth: 300 }}
                     placeholder="请选择日期"
-                    onChange={(val) => {
-                      monthlyHan(val);
-                    }}
+                    ref={datePickerRef}
                     dropdownRender={(menu) => (
                       <div>
                         <Divider style={{ margin: 0 }} />
@@ -150,17 +235,19 @@ const CycleLoadingForm: React.FC = () => {
                             height: '35px'
                           }}
                         >
-                          {time.map((item) => {
+                          {TIME_TAB.map((item) => {
                             return (
                               <div
-                                key={item}
+                                key={item.value}
                                 style={{
                                   width: '50%',
                                   height: '100%',
                                   background:
-                                    item == timeFlag ? 'white' : undefined,
+                                    item.value == timeFlag
+                                      ? 'white'
+                                      : undefined,
                                   color:
-                                    item == timeFlag
+                                    item.value == timeFlag
                                       ? 'rgb(0, 125, 250)'
                                       : undefined,
                                   cursor: 'pointer',
@@ -170,11 +257,12 @@ const CycleLoadingForm: React.FC = () => {
                                   borderRadius: '3px'
                                 }}
                                 onClick={() => {
-                                  setTimeFlag(item);
-                                  console.log(item);
+                                  // datePickerRef.current?.open();
+                                  // console.log('选中了选择器', datePickerRef.current?.open);
+                                  setTimeFlag(item.value);
                                 }}
                               >
-                                {item}
+                                {item.lable}
                               </div>
                             );
                           })}
@@ -184,16 +272,16 @@ const CycleLoadingForm: React.FC = () => {
                     )}
                     dropdownMenuStyle={{ maxHeight: 200 }}
                   >
-                    {timeFlag == TIMEARR[timeType.SEPCIFICTIME].text &&
+                    {timeFlag == TimeType.SEPCIFICTIME &&
                       MONTHLY_OPTIONS.map((option) => (
-                        <Option key={option} value={option}>
-                          {option}
+                        <Option key={option.lable} value={option.value}>
+                          {option.lable}
                         </Option>
                       ))}
-                    {timeFlag == TIMEARR[timeType.RELATICELYTIME].text &&
-                      rtime.map((option) => (
-                        <Option key={option} value={option}>
-                          {option}
+                    {timeFlag == TimeType.RELATICELYTIME &&
+                      RELATIVE_TIME_OPTIONS.map((option) => (
+                        <Option key={option.lable} value={option.value}>
+                          {option.lable}
                         </Option>
                       ))}
                   </Select>
@@ -204,6 +292,7 @@ const CycleLoadingForm: React.FC = () => {
         </div>
         <Form.Item
           label="时间设置："
+          key={frequencyData}
           field="time"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
