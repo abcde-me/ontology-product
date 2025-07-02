@@ -262,7 +262,7 @@ export const ModaForgeResourceEndpoints = {
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
-  createDatasetApi: PrefixV1 + '/dataset',
+  createDatasetApi: PrefixAimdp + '/datasets',
   //获取标签列表
   tagListApi: PrefixAimdp + '/tags',
   //删除数据集

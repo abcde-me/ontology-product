@@ -249,6 +249,12 @@ const versionColumns = [
   {
     title: '修改类型',
     dataIndex: 'type',
+    filters: [
+      { text: '导入', value: 1 },
+      { text: '修改', value: 2 },
+      { text: '删除', value: 3 }
+    ],
+    onFilter: (value: number, record: any) => record.type === value,
     render: (type: number) => {
       const typeMap = {
         1: '导入',
