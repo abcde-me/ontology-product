@@ -388,7 +388,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '提交失败，请稍后重试'
+        content: res.message || '提交失败，请稍后重试'
       });
     }
   };
@@ -407,7 +407,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '停止失败，请稍后重试'
+        content: res.message || '停止失败，请稍后重试'
       });
     }
   };

@@ -235,8 +235,7 @@ export const ModaForgeResourceEndpoints = {
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
   // 工作流删除
-  workflowDelete:
-    PrefixAimdp + '/workflow/operation/{workflow_uuid}/{workflow_version}',
+  workflowDelete: PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
   // 工作流复制
   workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
   workflowDraft:
