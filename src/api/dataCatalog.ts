@@ -64,15 +64,16 @@ interface TargetDataFileQueryParams {
   full_path: string;
   start_time: string;
   end_time: string;
-  search_content: string;
-  search_id: string;
-  limit: number;
+  search_content:string;
+  search_id:number;
+  limit:number;
 }
 
 // 定义删除目标文件的参数接口
 interface TargetFileDeleteParams {
   file_ids: Array<string>;
   full_path: string;
+  path_id: string;
 }
 
 //查询目标数据文件列表
@@ -80,9 +81,15 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 //删除目标文件
-export async function deleteTargetFile(param: TargetFileDeleteParams) {
+export async function deleteTargetFile(params: TargetFileDeleteParams) {
+  const { file_ids, ...restParams } = params;
+  const customParams: Record<string, string> = {
+    ...restParams,
+    file_ids: file_ids.join(',')
+  };
   return await UAPI.RES.targetDataFileDeleteApi({})
-    .delete(param)
+    .delete()
+    .withConfig({ params: customParams })
     .inRegion()
     .do();
 }
