@@ -94,7 +94,7 @@ const LoginCard = () => {
               />
               <div className="mx-4 h-6 w-px bg-gray-400" />
             </div>
-            <div className="text-xl font-bold text-gray-800">AppForge</div>
+            <div className="text-xl font-bold text-gray-800">ModaForge</div>
           </div>
         </div>
 
