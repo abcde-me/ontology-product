@@ -110,7 +110,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { } // 添加刷新数据的回调函数
+  refreshData = () => {} // 添加刷新数据的回调函数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -210,7 +210,8 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData)
+        render: (_, record) =>
+          renderActionColumn(_, record, setVisible, refreshData)
       }
     ];
   }
@@ -302,7 +303,8 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData)
+        render: (_, record) =>
+          renderActionColumn(_, record, setVisible, refreshData)
       }
     ];
   }
@@ -333,13 +335,13 @@ const handleDownload = (record, setVisible) => {
 
 // 处理删除操作
 const handleDelete = (data, refreshData) => {
-  const ids: Array<string> = []
+  const ids: Array<string> = [];
   try {
     Modal.confirm({
       title: '确认删除文件吗?',
       content: '删除后，文件不可恢复',
       onOk: async () => {
-        ids.push(data.id)
+        ids.push(data.id);
         console.log('查看删除的数据和数组们', data, ids);
         await deleteTargetFile({ full_path: data.file, file_ids: ids });
         Message.success('删除成功');
