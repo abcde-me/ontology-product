@@ -149,7 +149,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   // 删除目录 or 卷
   const handleDelete = async (node: NodeProps) => {
-    const { _key, dataRef, pathParentKeys } = node;
+    const { _key, dataRef } = node;
 
     if (!_key || !dataRef?.type) {
       Message.error('删除失败，请稍后重试');
@@ -166,38 +166,10 @@ export function useEditableTree({ catalogTreeStore }) {
       catalogTreeStore.setState({ treeData: newTreeData });
       Message.success('删除成功!');
     } else {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log(res.message);
       Message.error('删除失败，请稍后重试');
     }
-    // debugger;
-
-    // switch (dataRef.type) {
-    //   case CatalogTypeEnum.catalog:
-    //     const res = await deleteVolume(dataRef?.id, {
-    //       root_type: RootTypeEnum[activeTab]
-    //     });
-    //     debugger;
-    //     // newTreeData = treeData.filter(
-    //     //   (item: TreeDataType) => item.key !== _key
-    //     // );
-    //     newTreeData = await catalogTreeStore.getRawData();
-    //     break;
-
-    //   case CatalogTypeEnum.volume:
-    //     if (pathParentKeys) {
-    //       newTreeData = handleTarget(pathParentKeys, (target) => {
-    //         return target?.filter((child) => child.key !== _key);
-    //       });
-    //     }
-    //     break;
-
-    //   default:
-    //     throw new Error(`不支持的节点类型: ${dataRef.type}`);
-    // }
-
-    // 模拟异步操作
-    // await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Message.success('删除成功!');
   };
 
   const focusAndSelectInput = () => {
@@ -263,44 +235,34 @@ export function useEditableTree({ catalogTreeStore }) {
       return;
     }
 
+    const root_type = RootTypeEnum[activeTab];
     let newTreeData: TreeDataType[] = [];
-
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
         if (dataRef?.isAdd) {
-          // 新建目录
-          const res = await addCatalog({
-            name: fileName,
-            root_type: RootTypeEnum[activeTab]
-          });
-          if (res && res.status === 200) {
-            newTreeData = await catalogTreeStore.getRawData();
-            // TODO 获取 id 并展开节点
-          }
+          await addCatalog({ name: fileName, root_type: root_type });
         } else {
           // TODO 编辑目录
           await renameCatalog(dataRef.id, {
             new_name: fileName,
-            root_type: RootTypeEnum[activeTab]
+            root_type: root_type
           });
-          newTreeData = await catalogTreeStore.getRawData();
         }
         break;
 
       case CatalogTypeEnum.volume:
-        const res = await addVolume({
+        await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
-          root_type: RootTypeEnum[activeTab]
+          root_type: root_type
         });
-        if (res && res.status === 200) {
-          newTreeData = await catalogTreeStore.getRawData();
-        }
         break;
 
       default:
         break;
     }
+
+    newTreeData = await catalogTreeStore.getRawData();
 
     catalogTreeStore.setState({
       treeData: newTreeData,
