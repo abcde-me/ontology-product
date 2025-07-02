@@ -5,7 +5,7 @@ import {
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
 import classNames from 'classnames';
-import React, { useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect } from 'react';
 import {
   IconPlus,
   IconDelete,
@@ -13,18 +13,31 @@ import {
   IconStorage,
   IconArchive
 } from '@arco-design/web-react/icon';
-import { subLeafKeys } from './consts';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
+import { addCatalog, addVolume } from '@/api/dataCatalog';
 
 export function useEditableTree({ catalogTreeStore }) {
-  const { inputRef, inputValue, treeData } = catalogTreeStore.useGetState([
+  const {
+    activeTab,
+    searchValue,
+    inputRef,
+    inputValue,
+    treeData,
+    expandedKeys,
+    loading
+  } = catalogTreeStore.useGetState([
+    'activeTab',
+    'searchValue',
     'inputRef',
     'inputValue',
-    'treeData'
+    'treeData',
+    'expandedKeys',
+    'loading'
   ]);
 
   useEffect(() => {
     catalogTreeStore.getEffect('fetchData')();
-  }, []);
+  }, [activeTab]);
 
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
     return treeData.map((item) => {
@@ -34,6 +47,32 @@ export function useEditableTree({ catalogTreeStore }) {
           {children ? generatorTreeNodes(children) : null}
         </Tree.Node>
       );
+    });
+  };
+
+  const onSearchChange = (value: string) => {
+    // 遍历treeData，找出所有节点 title 中包含 searchValue 的节点 key，存储到一个 keys 数组中
+    const keys: string[] = [];
+    const loop = (data: TreeDataType[]) => {
+      data.forEach((item) => {
+        if (
+          typeof item.title === 'string' &&
+          item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
+        ) {
+          if (item.parentKey) {
+            keys.push(item.parentKey);
+          }
+        } else if (item.children) {
+          loop(item.children);
+        }
+      });
+    };
+    loop(treeData);
+
+    const newKeys = new Set([...expandedKeys, ...keys]);
+    catalogTreeStore.setState({
+      searchValue: value,
+      expandedKeys: [...newKeys]
     });
   };
 
@@ -53,9 +92,11 @@ export function useEditableTree({ catalogTreeStore }) {
     }
   ) => {
     const { props } = extra.node;
-    if (props.dataRef?.isLastLeaf) {
+    const { dataRef } = props;
+    if (dataRef?.isLastLeaf) {
       catalogTreeStore.setState({
-        selectedKey: selectedKeys[0]
+        selectedKey: selectedKeys[0],
+        selectedPath: dataRef?.fullPath
       });
     }
   };
@@ -63,7 +104,7 @@ export function useEditableTree({ catalogTreeStore }) {
   // 重命名目录
   const handleEdit = (node: any) => {
     const { _key, dataRef } = node;
-    if (dataRef?.type === 'catalog') {
+    if (dataRef?.type === CatalogTypeEnum.catalog) {
       catalogTreeStore.setState({
         inputValue: dataRef?.title,
         treeData: treeData.map((item: TreeDataType) => {
@@ -73,7 +114,7 @@ export function useEditableTree({ catalogTreeStore }) {
           return item;
         })
       });
-      catalogTreeStore.focusAndSelectInput();
+      focusAndSelectInput();
       // TODO
       // Message.success('修改成功!'); // 成功提示
     }
@@ -82,16 +123,25 @@ export function useEditableTree({ catalogTreeStore }) {
   // 操作子资源
   const handleTarget = useCallback(
     (
-      pathParentKeys,
-      targetFn: (target: TreeDataType[] | undefined) => void
+      pathParentKeys: string[],
+      targetFn: (
+        target: TreeDataType[] | undefined
+      ) => TreeDataType[] | undefined
     ) => {
       return treeData.map((item: TreeDataType) => {
         if (item.key === pathParentKeys[0]) {
-          item.children?.forEach((subItem: TreeDataType) => {
-            if (subItem.key === pathParentKeys[1]) {
-              targetFn(subItem.children);
-            }
-          });
+          return {
+            ...item,
+            children: item.children?.map((subItem: TreeDataType) => {
+              if (subItem.key === pathParentKeys[1]) {
+                return {
+                  ...subItem,
+                  children: targetFn(subItem.children)
+                };
+              }
+              return subItem;
+            })
+          };
         }
         return item;
       });
@@ -111,14 +161,13 @@ export function useEditableTree({ catalogTreeStore }) {
     let newTreeData: TreeDataType[] = [];
 
     switch (dataRef.type) {
-      case 'catalog':
+      case CatalogTypeEnum.catalog:
         newTreeData = treeData.filter(
           (item: TreeDataType) => item.key !== _key
         );
         break;
 
       case 'volume':
-        // 删除卷：清空该卷的子节点
         newTreeData = treeData.map((item: TreeDataType) => {
           if (item.key === pathParentKeys?.[0]) {
             return {
@@ -132,10 +181,10 @@ export function useEditableTree({ catalogTreeStore }) {
         });
         break;
 
-      case 'volume-child':
+      case CatalogTypeEnum.volume:
         if (pathParentKeys) {
           newTreeData = handleTarget(pathParentKeys, (target) => {
-            target = target?.filter((child) => child.key !== _key);
+            return target?.filter((child) => child.key !== _key);
           });
         }
         break;
@@ -158,7 +207,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }, 0);
   };
 
-  const addCatalog = () => {
+  const onCatalogAdd = () => {
     const name = `目录${Date.now()}`;
     catalogTreeStore.setState({
       inputValue: name,
@@ -167,77 +216,94 @@ export function useEditableTree({ catalogTreeStore }) {
           title: name,
           key: `catalog-${Date.now()}`,
           children: [],
-          type: 'catalog',
+          type: 1,
           showInput: true
         },
         ...treeData
-      ]
+      ],
+      isEditing: true
     });
     focusAndSelectInput();
   };
 
   const addSubVolume = (node: NodeProps) => {
-    if (node.dataRef) {
+    const { dataRef } = node;
+    if (dataRef) {
       const name = `source-vol${Date.now()}`;
       const cachTreeData = treeData.map((item: TreeDataType) => {
         if (item.key === node.pathParentKeys?.[0]) {
           item.children?.[0]?.children?.unshift({
             title: name,
             key: `volume-${Date.now()}`,
-            type: `volume-child`,
+            type: 2,
             isLastLeaf: true,
-            showInput: true
+            showInput: true,
+            parent_id: dataRef.parent_id
           });
         }
         return item;
       });
 
-      catalogTreeStore.setState({ inputValue: name, treeData: cachTreeData });
+      catalogTreeStore.setState({
+        inputValue: name,
+        treeData: cachTreeData,
+        expandedKeys: [...new Set([...expandedKeys, dataRef.key])]
+      });
       focusAndSelectInput();
     }
   };
 
-  const onEditFinish = (props: NodeProps) => {
+  const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
 
-    const fileName =
-      inputValue.trim() ||
-      `${dataRef?.type === 'catalog' ? '目录' : 'source-vol'}${Date.now()}`;
+    const fileName = inputValue.trim();
+    if (!fileName.length) {
+      Message.warning('名称不能为空');
+      return;
+    }
 
     let newTreeData: TreeDataType[] = [];
 
     switch (dataRef?.type) {
-      case 'catalog':
-        newTreeData = [
-          {
-            ...dataRef,
-            title: fileName,
-            showInput: false,
-            children: dataRef?.children?.length
-              ? dataRef?.children
-              : [
-                  {
-                    title: '数据卷',
-                    key: `catalog-${fileName}-volume`,
-                    type: 'volume',
-                    children: []
-                  }
-                ]
-          },
-          ...treeData.slice(1)
-        ];
+      case CatalogTypeEnum.catalog:
+        const isAdd = !dataRef?.children?.length;
+        if (isAdd) {
+          // 新建目录
+          const res = await addCatalog({
+            name: fileName,
+            root_type: RootTypeEnum[activeTab]
+          });
+          if (res && res.status === 200) {
+            newTreeData = await catalogTreeStore.getRawData();
+            // TODO 获取 id 并展开节点
+          }
+        } else {
+          // 编辑目录
+          // TODO 接口
+          newTreeData = treeData.map((item: TreeDataType) => {
+            if (item.key === dataRef.key) {
+              return {
+                ...dataRef,
+                title: fileName,
+                showInput: false,
+                children: dataRef?.children
+              };
+            }
+            return item;
+          });
+        }
+
         break;
 
-      case 'volume-child':
-        const { pathParentKeys } = props;
-        if (pathParentKeys) {
-          newTreeData = handleTarget(pathParentKeys, (target) => {
-            target?.splice(0, 1, {
-              ...dataRef,
-              title: fileName,
-              showInput: false
-            });
-          });
+      case CatalogTypeEnum.volume:
+        const res = await addVolume({
+          name: fileName,
+          parent_id: dataRef.parent_id,
+          root_type: RootTypeEnum[activeTab]
+        });
+        if (res && res.status === 200) {
+          // TODO 需复查
+          newTreeData = await catalogTreeStore.getRawData();
         }
         break;
 
@@ -253,16 +319,10 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
-
     return (
       !dataRef?.showInput && (
-        <div
-          className={classNames(
-            'flex items-center justify-between',
-            'extra-container'
-          )}
-        >
-          {dataRef?.type === 'catalog' && (
+        <div className={'extra-container flex items-center justify-between'}>
+          {dataRef?.type === CatalogTypeEnum.catalog && (
             <Tooltip color="white" content="重命名">
               <IconEdit
                 className={'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'}
@@ -270,7 +330,7 @@ export function useEditableTree({ catalogTreeStore }) {
               />
             </Tooltip>
           )}
-          {!dataRef?.type.includes('db') && (
+          {dataRef?.type !== CatalogTypeEnum.db && (
             <Tooltip color="white" content="删除">
               <IconDelete
                 onClick={() => {
@@ -281,7 +341,6 @@ export function useEditableTree({ catalogTreeStore }) {
                       try {
                         await handleDelete(node);
                       } catch (apiError: any) {
-                        console.error('删除节点失败:', apiError);
                         Message.error(
                           '删除失败: ' + (apiError.message || '请稍后重试')
                         );
@@ -293,7 +352,7 @@ export function useEditableTree({ catalogTreeStore }) {
               />
             </Tooltip>
           )}
-          {!dataRef?.isLastLeaf && dataRef?.type === 'volume' && (
+          {dataRef?.type === 'volume' && (
             <Tooltip color="white" content="新建">
               <IconPlus
                 className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
@@ -310,12 +369,28 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef, title } = props;
 
     const IconComponent = dataRef?.isLastLeaf ? (
-      dataRef?.type === 'volume-child' ? (
+      [CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(dataRef?.type) ? (
         <IconStorage className="mr-2 text-base" />
       ) : (
         <IconArchive className="mr-2 text-base" />
       )
     ) : null;
+
+    let TitleText: ReactNode = title;
+    if (searchValue.length && typeof title === 'string') {
+      const index = title.toLowerCase().indexOf(searchValue.toLowerCase());
+      if (index !== -1) {
+        const prefix = title.slice(0, index);
+        const suffix = title.slice(index + searchValue.length);
+        TitleText = (
+          <>
+            {prefix}
+            <span className="text-[rgb(var(--primary-6))]">{searchValue}</span>
+            {suffix}
+          </>
+        );
+      }
+    }
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
@@ -333,6 +408,7 @@ export function useEditableTree({ catalogTreeStore }) {
             onPressEnter={() => {
               onEditFinish(props);
             }}
+            maxLength={256}
             className="h-8 focus:border-[rgb(var(--primary-6))]"
           />
         ) : (
@@ -344,11 +420,13 @@ export function useEditableTree({ catalogTreeStore }) {
               className={classNames(
                 'overflow-hidden text-ellipsis whitespace-nowrap',
                 dataRef?.isLastLeaf ? 'last-leaf-text' : '',
-                dataRef?.type === 'db' ? 'no-operation' : '',
-                dataRef?.type === 'catalog' ? 'catalog-title-text' : ''
+                dataRef?.type === CatalogTypeEnum.db ? 'no-operation' : '',
+                dataRef?.type === CatalogTypeEnum.volume
+                  ? 'catalog-title-text'
+                  : ''
               )}
             >
-              {title}
+              {TitleText}
             </div>
           </Tooltip>
         )}
@@ -358,10 +436,12 @@ export function useEditableTree({ catalogTreeStore }) {
 
   return {
     generatorTreeNodes,
+    onSearchChange,
     handleExpand,
     handleSelect,
-    addCatalog,
+    onCatalogAdd,
     renderExtra,
-    renderTitle
+    renderTitle,
+    loading
   };
 }

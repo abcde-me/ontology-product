@@ -52,7 +52,7 @@ export class MemberStore extends Model<InfoStoreState> {
   };
 
   // 设置当前编辑的成员
-  setCurrentMember = (member: DataSet) => {
+  setCurrentMember = (member: any) => {
     this.setState({
       currentMember: member
     });

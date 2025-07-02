@@ -170,7 +170,7 @@ export const ResourceEndpointsV2 = {
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: Prefix + `/files/export`,
+  fileExportApi: PrefixAimdp + `/connectors/files/output`,
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,
@@ -242,6 +242,12 @@ export const ModaForgeResourceEndpoints = {
   taskList: PrefixAimdp + '/workflow_instance/list',
   // 作业详情
   taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+  // 作业详情节点
+  taskDetailNode: PrefixAimdp + '/workflow_instance/task_detail',
+  // 作业重跑
+  taskRerun: PrefixAimdp + '/workflow_instance/task_rerun',
+  // 作业停用
+  taskStop: PrefixAimdp + '/workflow_instance/task_stop',
 
   modelGet: PrefixAimdp + '/model/model_list',
 
@@ -255,13 +261,13 @@ export const ModaForgeResourceEndpoints = {
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixV1 + '/dataset',
+  datasetsApi: PrefixAimdp + '/datasets',
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
   createDatasetApi: PrefixV1 + '/dataset',
   //获取标签列表
-  tagListApi: PrefixV1 + '/tag',
+  tagListApi: PrefixAimdp + '/tags',
   //删除数据集
   deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
@@ -269,9 +275,11 @@ export const ModaForgeResourceEndpoints = {
   //查询指定连接器加载成功的文件信息
   connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
   //修改数据集
-  updateDatasetApi: PrefixAimdp + '/dataset/{id}',
+  updateDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //获取数据集详细信息
-  datasetDetailPageApi: PrefixAimdp + '/datasets/{id}',
+  datasetDetailPageApi: PrefixAimdp + '/datasets/{dataset_id}',
+  //删除数据集
+  deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
   //编辑数据集版本数据

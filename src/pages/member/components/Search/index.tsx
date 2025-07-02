@@ -195,7 +195,7 @@ export default function Search() {
       processedOrgData.length > 0 &&
       !hasSetDefault
     ) {
-      let orgKey = null;
+      let orgKey: string | null = null;
 
       // 优先使用 organization_id
       if (userInfo.organization_id) {
@@ -204,7 +204,6 @@ export default function Search() {
       }
       // 如果没有 organization_id，则通过 organization 名称查找
       else if (userInfo.organization) {
-        // @ts-expect-error
         orgKey = findOrgKeyByTitle(processedOrgData, userInfo.organization);
         console.log(
           'Found organization key by name:',
@@ -251,8 +250,6 @@ export default function Search() {
         type="primary"
         className="flex items-center gap-1 px-3"
         onClick={() => {
-          // TODO: ts错误
-          // @ts-expect-error
           memberStore.setCurrentMember(null);
           memberStore.setVisible(true);
         }}
