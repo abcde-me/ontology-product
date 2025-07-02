@@ -93,7 +93,7 @@ export function useEditableTree({ catalogTreeStore }) {
   ) => {
     const { props } = extra.node;
     const { dataRef } = props;
-    if (dataRef?.isLastLeaf) {
+    if (dataRef?.isLastLeaf && !dataRef?.showInput) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
         selectedPath: dataRef?.fullPath
@@ -115,8 +115,6 @@ export function useEditableTree({ catalogTreeStore }) {
         })
       });
       focusAndSelectInput();
-      // TODO
-      // Message.success('修改成功!'); // 成功提示
     }
   };
 
@@ -365,11 +363,15 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef, title } = props;
 
     const IconComponent = dataRef?.isLastLeaf ? (
-      [CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(dataRef?.type) ? (
-        <IconStorage className="mr-2 text-base" />
-      ) : (
-        <IconArchive className="mr-2 text-base" />
-      )
+      <div className="mr-2 w-4">
+        {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
+          dataRef?.type
+        ) ? (
+          <IconStorage className="text-base" />
+        ) : (
+          <IconArchive className="text-base" />
+        )}
+      </div>
     ) : null;
 
     let TitleText: ReactNode = title;
