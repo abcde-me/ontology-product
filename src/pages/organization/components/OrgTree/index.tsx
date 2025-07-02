@@ -87,8 +87,8 @@ export default function OrgTree() {
   };
 
   function searchData(inputValue: any) {
-    const loop = (data) => {
-      const result = [];
+    const loop = (data: any[]): any[] => {
+      const result: any[] = [];
       data.forEach((item) => {
         if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
           result.push({ ...item });
@@ -103,7 +103,7 @@ export default function OrgTree() {
       return result;
     };
 
-    return loop(orgData);
+    return loop(orgData || []);
   }
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function OrgTree() {
 
   // 基于用户信息初始化树的选中和展开状态
   useEffect(() => {
-    if (treeData.length > 0 && !hasInitialized) {
+    if (treeData && treeData.length > 0 && !hasInitialized) {
       let targetNode = null;
       let targetKey = '';
       let pathToExpand: string[] = [];
@@ -132,7 +132,7 @@ export default function OrgTree() {
         console.log('Finding user organization:', userInfo.organization_id);
         targetNode = findNodeById(treeData, userInfo.organization_id);
         if (targetNode) {
-          targetKey = String(targetNode.key || targetNode.id);
+          targetKey = String((targetNode as any).key || (targetNode as any).id);
           pathToExpand = getPathToRoot(treeData, userInfo.organization_id);
           console.log('Found user organization node:', targetNode);
           console.log('Path to expand:', pathToExpand);
@@ -142,7 +142,7 @@ export default function OrgTree() {
       // 如果没有找到用户组织或用户是超级管理员，使用第一个节点
       if (!targetNode && treeData.length > 0) {
         targetNode = treeData[0];
-        targetKey = String(targetNode.key || targetNode.id);
+        targetKey = String((targetNode as any).key || (targetNode as any).id);
         console.log('Using first node as default:', targetNode);
       }
 

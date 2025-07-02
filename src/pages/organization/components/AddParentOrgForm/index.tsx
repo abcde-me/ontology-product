@@ -39,7 +39,7 @@ export default function MemberForm() {
       }
       return null;
     };
-    return findInTree(orgData);
+    return findInTree(orgData || []);
   };
 
   // 处理确定按钮点击
@@ -142,7 +142,7 @@ export default function MemberForm() {
               } else {
                 // 回显时，显示默认值（用户组织或第一个节点）
                 targetKey = (userInfo?.organization_id ||
-                  nodeProps._key) as string;
+                  nodeProps?._key) as string;
               }
               const pathTitles = getNodePathTitles(orgData, targetKey);
               return <span> {pathTitles.join(' / ')}</span>;

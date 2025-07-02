@@ -1,8 +1,13 @@
 // 递归查找节点路径的标题
-export function getNodePathTitles(treeData, targetKey) {
-  const path = [];
+export function getNodePathTitles(
+  treeData: any[] | undefined,
+  targetKey: string | number
+) {
+  if (!treeData) return [];
 
-  function traverse(nodes) {
+  const path: string[] = [];
+
+  function traverse(nodes: any[]) {
     for (const node of nodes) {
       path.push(node.title); // 将当前节点加入路径
       if (node.key === targetKey) {
@@ -20,15 +25,18 @@ export function getNodePathTitles(treeData, targetKey) {
   return path;
 }
 
-export function findParentByKeyIterative(tree, targetKey) {
-  const stack = [...tree.map((node) => ({ node, parent: null }))];
+export function findParentByKeyIterative(
+  tree: any[],
+  targetKey: string | number
+): any | null {
+  const stack = [...tree.map((node: any) => ({ node, parent: null }))];
 
   while (stack.length) {
-    const { node, parent } = stack.pop();
+    const { node, parent } = stack.pop()!;
     if (node.key === targetKey) return parent;
     if (node.children) {
       stack.push(
-        ...node.children.map((child) => ({
+        ...node.children.map((child: any) => ({
           node: child,
           parent: node
         }))
@@ -39,10 +47,13 @@ export function findParentByKeyIterative(tree, targetKey) {
 }
 
 // 获取父节点的路径标题
-export function getParentNodePathTitles(treeData, targetKey) {
+export function getParentNodePathTitles(
+  treeData: any[],
+  targetKey: string | number
+) {
   const parent = findParentByKeyIterative(treeData, targetKey);
-  if (!parent) {
-    return []; // 如果没有父节点，返回空数组
+  if (!parent || !parent.key) {
+    return []; // 如果没有父节点或父节点没有key，返回空数组
   }
   return getNodePathTitles(treeData, parent.key);
 }

@@ -57,7 +57,7 @@ export default function Search() {
           type="primary"
           className="flex items-center gap-1 px-3"
           onClick={() => {
-            orgStore.setCurrentMember(null);
+            orgStore.setCurrentMember({});
             orgStore.setVisible(true);
           }}
         >

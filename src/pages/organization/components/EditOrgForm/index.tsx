@@ -108,7 +108,7 @@ export default function MemberForm() {
             treeCheckedStrategy={TreeSelect.SHOW_ALL}
             renderFormat={(nodeProps, value) => {
               // 确定要显示路径的目标节点
-              const targetKey = (value || nodeProps._key) as string;
+              const targetKey = (value || nodeProps?._key) as string;
 
               if (targetKey) {
                 const pathTitles = getNodePathTitles(orgData, targetKey);
