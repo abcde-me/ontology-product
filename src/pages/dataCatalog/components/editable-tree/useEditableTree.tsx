@@ -118,35 +118,6 @@ export function useEditableTree({ catalogTreeStore }) {
     }
   };
 
-  // 操作子资源
-  const handleTarget = useCallback(
-    (
-      pathParentKeys: string[],
-      targetFn: (
-        target: TreeDataType[] | undefined
-      ) => TreeDataType[] | undefined
-    ) => {
-      return treeData.map((item: TreeDataType) => {
-        if (item.key === pathParentKeys[0]) {
-          return {
-            ...item,
-            children: item.children?.map((subItem: TreeDataType) => {
-              if (subItem.key === pathParentKeys[1]) {
-                return {
-                  ...subItem,
-                  children: targetFn(subItem.children)
-                };
-              }
-              return subItem;
-            })
-          };
-        }
-        return item;
-      });
-    },
-    [treeData]
-  );
-
   // 删除目录 or 卷
   const handleDelete = async (node: NodeProps) => {
     const { _key, dataRef } = node;
@@ -179,9 +150,25 @@ export function useEditableTree({ catalogTreeStore }) {
     }, 0);
   };
 
-  const onCatalogAdd = () => {
-    const name = `${activeTab === 'src' ? '源' : '目标'}目录${Date.now()}`;
+  const generateName = useCallback(
+    (data: TreeDataType[], typeText?: string) => {
+      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const nameArr = new Set(data.map((item) => item.name));
+      let x = data.length + 1;
+      let name = `${baseName}${x}`;
 
+      while (nameArr.has(name)) {
+        x++;
+        name = `${baseName}${x}`;
+      }
+
+      return name;
+    },
+    [activeTab]
+  );
+
+  const onCatalogAdd = () => {
+    const name = generateName(treeData);
     catalogTreeStore.setState({
       inputValue: name,
       treeData: [
@@ -203,7 +190,10 @@ export function useEditableTree({ catalogTreeStore }) {
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
     if (dataRef) {
-      const name = `${activeTab === 'src' ? '源' : '目标'}数据卷${Date.now()}`;
+      const name = generateName(
+        dataRef?.children || [],
+        subLeafKeys[dataRef.type]
+      );
       const cachTreeData = treeData.map((item: TreeDataType) => {
         if (item.key === node.pathParentKeys?.[0]) {
           item.children?.[0]?.children?.unshift({
