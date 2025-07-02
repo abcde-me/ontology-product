@@ -24,7 +24,7 @@ export async function createWorkflowDraft(params: any = {}) {
   const dsWorkflowId =
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
-    params.workflowVersion || searchParams.get('workflow_version') || '0';
+    params.workflowVersion || searchParams.get('workflow_version') || '';
   return UAPI.RES.workflowDraft({
     workflow_uuid: workflowUUID,
     ds_workflow_id: dsWorkflowId,
