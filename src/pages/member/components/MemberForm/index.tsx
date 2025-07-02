@@ -245,12 +245,13 @@ export default function MemberForm() {
             }
           ]}
         >
-          <Input placeholder="请输入姓名" maxLength={30} />
+          <Input placeholder="请输入姓名" showWordLimit maxLength={30} />
         </FormItem>
 
         <FormItem
           label="用户名"
           field="account"
+          extra="用户名只能包含英文、数字和下划线，且必须以英文开头"
           disabled={isEdit}
           required
           rules={[
@@ -262,20 +263,17 @@ export default function MemberForm() {
             {
               minLength: 2,
               message: '用户名最少2个字符'
-            },
-            {
-              maxLength: 30,
-              message: '用户名最多30个字符'
             }
           ]}
         >
-          <Input placeholder="请输入姓名" maxLength={30} />
+          <Input placeholder="请输入姓名" showWordLimit maxLength={50} />
         </FormItem>
 
         {isEdit ? null : (
           <FormItem
             label="密码"
             field="password"
+            extra="密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息"
             required
             rules={[
               { required: true, message: '请输入密码' },
@@ -295,6 +293,7 @@ export default function MemberForm() {
           <FormItem
             label="确认密码"
             field="confirmPassword"
+            extra="密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息"
             required
             rules={[
               { required: true, message: '请确认密码' },
@@ -356,6 +355,13 @@ export default function MemberForm() {
         <FormItem
           label="角色"
           field="role_id"
+          extra={
+            <>
+              <p>管理员: 管理本组织及下属组织的成员，组织空间的应用读写</p>
+              <p>开发者: 组织空间的应用读写</p>
+              <p>成员: 组织空间中发布应用的使用权限</p>
+            </>
+          }
           required
           rules={[{ required: true, message: '请选择角色' }]}
         >
@@ -379,19 +385,15 @@ export default function MemberForm() {
             }
           ]}
         >
-          <Input placeholder="请输入职位" />
+          <Input placeholder="请输入职位" showWordLimit maxLength={20} />
         </FormItem>
-        <FormItem
-          label="备注"
-          field="mark"
-          rules={[
-            {
-              maxLength: 300,
-              message: '备注最多300个字符'
-            }
-          ]}
-        >
-          <Input.TextArea placeholder="请输入备注" />
+        <FormItem label="备注" field="mark">
+          {/* 100限制 */}
+          <Input.TextArea
+            placeholder="请输入备注"
+            showWordLimit
+            maxLength={100}
+          />
         </FormItem>
       </Form>
     </Modal>
