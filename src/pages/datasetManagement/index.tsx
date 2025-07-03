@@ -88,7 +88,7 @@ const columns = (
     // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
-      datasetList.forEach((dataset) => {
+      datasetList?.forEach((dataset) => {
         dataset.tag_names?.forEach((tag) => tagSet.add(tag));
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
@@ -129,7 +129,7 @@ const columns = (
     width: 150,
     filters: (() => {
       const modelSet = new Set<string>();
-      datasetList.forEach((dataset) => {
+      datasetList?.forEach((dataset) => {
         if (dataset.src_model) {
           modelSet.add(dataset.src_model);
         }
@@ -153,7 +153,7 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: (() => {
       const creatorSet = new Set<string>();
-      datasetList.forEach((dataset) => {
+      datasetList?.forEach((dataset) => {
         if (dataset.creator_name) {
           creatorSet.add(dataset.creator_name);
         }
@@ -200,12 +200,12 @@ const columns = (
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
       <Space size={8}>
-        <Button
+        {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
-        </Button>
+        </Button> */}
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
@@ -369,12 +369,26 @@ const DatasetManagement: React.FC = () => {
     console.log('提交数据:', submitData);
     createDataset(submitData)
       .then((res) => {
-        Message.success(res.msg);
+        if (res.status === 200) {
+          Message.success('数据集创建成功！');
+          // 刷新数据列表
+          getDatasetList({
+            page: currentPage,
+            limit: pageSize,
+            search: search,
+            search_field: searchField
+          }).then((res) => {
+            setDatasetList(res.data.list);
+            setTotal(res.data.total);
+          });
+          closeModal();
+        } else {
+          Message.error(res.message || '数据集创建失败！');
+        }
       })
       .catch((err) => {
         Message.error('数据集创建失败！');
       });
-    closeModal();
   };
 
   // 删除数据集的方法
@@ -383,7 +397,7 @@ const DatasetManagement: React.FC = () => {
       .then((res) => {
         getDatasetList({
           page: currentPage,
-          page_size: pageSize,
+          limit: pageSize,
           search: search,
           search_field: searchField
         }).then((res) => {
@@ -433,7 +447,7 @@ const DatasetManagement: React.FC = () => {
     setCurrentPage(1); // 重置到第一页
     getDatasetList({
       page: 1,
-      page_size: pageSize,
+      limit: pageSize,
       search: search,
       search_field: searchField
     }).then((res) => {
@@ -449,7 +463,7 @@ const DatasetManagement: React.FC = () => {
   React.useEffect(() => {
     getDatasetList({
       page: currentPage,
-      page_size: pageSize,
+      limit: pageSize,
       search: search,
       search_field: searchField
     }).then((res) => {
@@ -486,6 +500,8 @@ const DatasetManagement: React.FC = () => {
   // 导出数据集
   const handleExport = (record: Dataset) => {
     console.log('导出数据集:', record);
+    // TODO: ts错误
+    // @ts-expect-error
     setDownloadData(record);
     setVisible(true);
   };
@@ -501,100 +517,124 @@ const DatasetManagement: React.FC = () => {
   };
 
   return (
-    <div className={styles.datasetManagement}>
-      <div className={styles.datasetContentCard}>
-        <div className={styles.datasetHeader}>
-          <div className={styles.datasetTitle}>数据集管理</div>
-          <div className={styles.datasetDescription}>
-            管理用于模型精调和训练的数据集
-          </div>
-        </div>
-        <div className={styles.searchToolbar}>
-          <div className={styles.searchGroup}>
-            <Select
-              className={styles.searchFieldSelect}
-              value={searchField}
-              onChange={(value) => setSearchField(value)}
-              options={searchOptions}
-            />
-            <Input.Search
-              allowClear
-              placeholder="输入关键字搜索"
-              className={styles.searchInput}
-              value={search}
-              onChange={(value) => setSearch(value)}
-              onPressEnter={handleSearch}
-              onSearch={handleSearch}
-            />
-          </div>
-          <div className={styles.actionButtons}>
-            <Button
-              icon={<IconDelete />}
-              className={styles.batchDeleteBtn}
-              disabled={selectedRowKeys.length === 0}
-              onClick={handleBatchDelete}
-            >
-              批量删除
-            </Button>
-            <Button
-              icon={<IconDownload />}
-              className={styles.batchExportBtn}
-              disabled={selectedRowKeys.length === 0}
-              onClick={handleBatchExport}
-            >
-              批量导出
-            </Button>
-            <Button
-              type="primary"
-              icon={<IconPlus />}
-              onClick={openCreateModal}
-            >
-              新建数据集
-            </Button>
-          </div>
-        </div>
-
-        <Table
-          rowKey="id"
-          className={styles.datasetTable}
-          columns={columns(
-            handleGoToDetail,
-            handleDelete,
-            datasetList,
-            handleExport
-          )}
-          data={datasetList}
-          rowSelection={rowSelection}
-          pagination={{
-            current: currentPage,
-            total: total,
-            pageSize: pageSize,
-            showTotal: (total, range) => `共${total}条`,
-            sizeCanChange: true,
-            showJumper: true,
-            pageSizeChangeResetCurrent: true,
-            onChange: handlePageChange,
-            onPageSizeChange: handlePageSizeChange,
-            sizeOptions: [10, 20, 50, 100]
+    <div
+      style={{
+        backgroundColor: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '10px 20px 10px 0px',
+        borderRadius: '10px',
+        padding: '20px'
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            margin: '0px 15px 0px 0px',
+            color: '#0F172A'
           }}
-          border={false}
-          scroll={{ x: 1200 }}
-        />
-
-        {/* 新建数据集弹框 */}
-        <DatasetForm
-          visible={modalVisible}
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
-        />
-        {/* 导出数据集弹窗 */}
-        <FormComponent
-          exportdataset={downloadData}
-          onCancel={() => setVisible(false)}
-          visible={visible}
-          exportdatas={selectedRows}
-        />
+        >
+          数据集管理
+        </h1>
+        <div
+          style={{
+            color: '#334155',
+            margin: '0px'
+          }}
+        >
+          管理用于模型精调和训练的数据集
+        </div>
       </div>
+      <div className={styles.searchToolbar}>
+        <Input.Group compact>
+          <Select
+            style={{ width: 100, height: 32 }}
+            value={searchField}
+            onChange={(value) => setSearchField(value)}
+            options={searchOptions}
+          />
+          <Input.Search
+            allowClear
+            placeholder="输入关键字搜索"
+            style={{ width: 160, height: 32 }}
+            value={search}
+            onChange={(value) => setSearch(value)}
+            onPressEnter={handleSearch}
+            onSearch={handleSearch}
+          />
+        </Input.Group>
+        <div className={styles.actionButtons}>
+          {/* <Button
+            icon={<IconDelete />}
+            className={styles.batchDeleteBtn}
+            disabled={selectedRowKeys.length === 0}
+            onClick={handleBatchDelete}
+          >
+            批量删除
+          </Button>
+          <Button
+            icon={<IconDownload />}
+            className={styles.batchExportBtn}
+            disabled={selectedRowKeys.length === 0}
+            onClick={handleBatchExport}
+          >
+            批量导出
+          </Button> */}
+          <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
+            新建数据集
+          </Button>
+        </div>
+      </div>
+
+      <Table
+        rowKey="id"
+        className={styles.datasetTable}
+        columns={columns(
+          handleGoToDetail,
+          handleDelete,
+          datasetList,
+          handleExport
+        )}
+        data={datasetList}
+        rowSelection={rowSelection}
+        pagination={{
+          current: currentPage,
+          total: total,
+          pageSize: pageSize,
+          showTotal: (total, range) => `共${total}条`,
+          sizeCanChange: true,
+          showJumper: true,
+          pageSizeChangeResetCurrent: true,
+          onChange: handlePageChange,
+          onPageSizeChange: handlePageSizeChange,
+          sizeOptions: [10, 20, 50, 100]
+        }}
+        border={false}
+        scroll={{ x: 1200 }}
+      />
+
+      {/* 新建数据集弹框 */}
+      <DatasetForm
+        visible={modalVisible}
+        onSubmit={handleSubmit}
+        onCancel={closeModal}
+      />
+      {/* 导出数据集弹窗 */}
+      <FormComponent
+        exportdataset={downloadData}
+        onCancel={() => setVisible(false)}
+        visible={visible}
+        exportdatas={selectedRows}
+      />
     </div>
   );
 };

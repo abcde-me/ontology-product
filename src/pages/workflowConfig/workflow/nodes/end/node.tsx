@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import React from 'react';
 import type { EndNodeType } from './types';
+import { findVariableNameById } from '../utils';
 import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import './end.scss';
 
@@ -12,8 +13,7 @@ const Node: FC<NodeProps<EndNodeType>> = ({ id, data }) => {
       <div className="end-node-content-item">
         <div className="txt">目标数据目录</div>
         <div className="val">
-          {dataSource?.find((item) => item?.id === target_path)?.name ||
-            '未配置'}
+          {findVariableNameById(target_path, dataSource, 'name') || '未配置'}
         </div>
       </div>
     </div>
