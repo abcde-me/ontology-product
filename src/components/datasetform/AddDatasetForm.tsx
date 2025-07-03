@@ -433,7 +433,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     // 这里应该调用真实的API
     getCatalogPreview({ path: volumeId }).then((res) => {
       setPreviewData(res.data.list); //这里的数据不能直接赋值，需要处理一下
-      setPreviewColumns(formatTableData(res.data.filed_names)); //设置表格列（从后端返回的列配置）
+      setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
     });
 
     // setPreviewData(csmockPreviewData);
