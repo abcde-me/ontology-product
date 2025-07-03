@@ -53,6 +53,7 @@ const Edit = (props: any) => {
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             initialValue={props.editObj.name}
+            disabled
           >
             <Input placeholder="请输入" />
           </FormItem>
@@ -64,6 +65,7 @@ const Edit = (props: any) => {
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             initialValue={props.editObj.type}
+            disabled
           >
             <RadioGroup
               defaultValue={setStorageType}
@@ -157,11 +159,25 @@ const Edit = (props: any) => {
               </FormItem>
               <FormItem
                 label="Port："
-                rules={[{ required: true, message: '请输入Port' }]}
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 field="port"
+                rules={[
+                  {
+                    validator: (value, cb) => {
+                      if (!value || value.trim() === '') {
+                        return cb('请输入Port端口号');
+                      }
+                      const regex =
+                        /^(6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]?\d{1,4}|0)$/;
+                      if (!regex.test(value)) {
+                        return cb('请输入合法的端口号，范围在0-65535之间');
+                      }
+                      return cb();
+                    }
+                  }
+                ]}
                 initialValue={props.editObj.config.port}
               >
                 <Input placeholder="请输入" />

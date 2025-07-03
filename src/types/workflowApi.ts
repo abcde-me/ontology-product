@@ -40,6 +40,8 @@ export interface WorkflowDetailRes {
   user_id: string;
   /** 创建人姓名 */
   user_name: string;
+  /** 定时运行 */
+  cycle_text?: CycleText;
 }
 
 export enum WorkflowOperation {
@@ -67,4 +69,12 @@ export interface WorkflowOperationParams {
   ds_workflow_id: number;
   op: WorkflowOperation;
   cycle_text?: CycleText;
+}
+
+/** 工作流操作 */
+export interface WorkflowOperationRes {
+  ds_workflow_id: number;
+  workflow_uuid: number;
+  workflow_version: number;
+  job_id: number;
 }

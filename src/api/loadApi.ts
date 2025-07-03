@@ -17,7 +17,7 @@ export async function delLoad(task_id) {
 }
 // 修改载入任务
 export async function editLoad(params) {
-  console.log(params);
+  console.log(params.formData);
   return await UAPI.RES.editLoadApi({ task_id: params.task_id })
     .put(params)
     .inRegion()
@@ -36,10 +36,8 @@ export async function startAndStopeLoad(params) {
 }
 // 立即运行载入任务
 export async function runLoad(params) {
-  return await UAPI.RES.runLoadApi({ task_id: params.task_id })
-    .post()
-    .inRegion()
-    .do();
+  console.log(params);
+  return await UAPI.RES.runLoadApi({}).post(params).inRegion().do();
 }
 // 查询载入任务记录
 export async function getLoadRecord(task_id) {
@@ -65,4 +63,9 @@ export async function stopeLoad(params) {
 
 export async function getLoadTaskFiles(params: any = {}) {
   return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
+  // return await UAPI.RES.getLoadTaskFiles({}).post({...params, data_path_id: 122, file_type: ['jsonl']}).inRegion().do();
+}
+// 查询单个任务已加载文件列表分页
+export async function getLoadRecordLists(params: any = {}) {
+  return await UAPI.RES.getLoadRecordListApi({}).post(params).inRegion().do();
 }

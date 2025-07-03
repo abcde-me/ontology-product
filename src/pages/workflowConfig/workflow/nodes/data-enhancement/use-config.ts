@@ -42,6 +42,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.newDataEnhancement = newDataEnhancement;
         draft.modelList = payload.modelList;
+        draft.enhanced_proportion = payload.enhanced_proportion;
       });
       setInputs(newInputs);
     },

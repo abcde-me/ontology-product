@@ -22,6 +22,8 @@ const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
 
 const AppPublisher = ({
   workflowStatus,
+  // @ts-expect-error
+  cycleText,
   disabled = false,
   publishDisabled = false,
   onOperate,
@@ -29,7 +31,7 @@ const AppPublisher = ({
   onToggle
 }: AppPublisherProps) => {
   const [published, setPublished] = useState(false);
-  const [cycleText, setCycleText] = useState();
+  const [newCycleText, setNewCycleText] = useState(cycleText);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
 
@@ -57,7 +59,7 @@ const AppPublisher = ({
   );
 
   const handleOptionsChange = (options) => {
-    setCycleText(options);
+    setNewCycleText(options);
   };
 
   // useKeyPress(
@@ -100,19 +102,13 @@ const AppPublisher = ({
             visible={schedulerDialogVisible}
             onOk={() =>
               handleOperate(WorkflowOperation.CRON_RUNNING, {
-                cycleText
+                cycle_text: newCycleText
               })
             }
             onCancel={() => setSchedulerDialogVisible(false)}
           >
             <SchedulerRun
-              options={{
-                minute: '',
-                hour: '',
-                date: '',
-                month: '',
-                week: ''
-              }}
+              options={newCycleText}
               onOptionsChange={handleOptionsChange}
             ></SchedulerRun>
           </Modal>

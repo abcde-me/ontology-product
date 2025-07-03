@@ -34,6 +34,33 @@ const add = forwardRef((props: any, ref) => {
       setStorageType('s3');
     }
   }));
+  const handleStorageTypeChange = (value: string) => {
+    setStorageType(value);
+    // 清空与存储类型相关的字段
+    if (value === 's3') {
+      form.setFieldsValue({
+        endpoint: '',
+        access_key: '',
+        secret_key: '',
+        region: '',
+        path: '',
+        host: undefined, // 清空 hdfs 字段
+        port: undefined,
+        user: undefined
+      });
+    } else if (value === 'hdfs') {
+      form.setFieldsValue({
+        host: '',
+        port: '',
+        user: 'root', // 默认值
+        path: '',
+        endpoint: undefined, // 清空 s3 字段
+        access_key: undefined,
+        secret_key: undefined,
+        region: undefined
+      });
+    }
+  };
   // 点击创建的按钮
   const createConnectionHan = async () => {
     try {
@@ -69,6 +96,8 @@ const add = forwardRef((props: any, ref) => {
     form.setFieldsValue({ type: 's3' });
     setStorageType('s3');
   };
+  // 输入框onchange的正则校验
+  const [values, setValues] = useState('');
   return (
     <div>
       <Modal
@@ -120,10 +149,26 @@ const add = forwardRef((props: any, ref) => {
               label="连接器名称："
               required
               field="name"
-              rules={[{ required: true, message: '请输入连接器名称' }]}
               labelCol={{ span: 5 }}
               wrapperCol={{ span: 19 }}
               labelAlign="right"
+              rules={[
+                {
+                  validator: (value, cb) => {
+                    if (!value || value.trim() === '') {
+                      return cb('请输入连接器名称');
+                    }
+                    const regex =
+                      /^[\u4e00-\u9fa5a-zA-Z0-9][\u4e00-\u9fa5a-zA-Z0-9_-]{0,255}$/;
+                    if (!regex.test(value)) {
+                      return cb(
+                        '名称应包含中文、英文、数字或 "-", "_"，且不能以特殊字符开头，长度不超过256个字符'
+                      );
+                    }
+                    return cb();
+                  }
+                }
+              ]}
             >
               <Input placeholder="请输入" />
             </FormItem>
@@ -138,9 +183,7 @@ const add = forwardRef((props: any, ref) => {
             >
               <RadioGroup
                 defaultValue="s3"
-                onChange={(value) => {
-                  setStorageType(value);
-                }}
+                onChange={(value) => handleStorageTypeChange(value)}
               >
                 <Radio value="s3">对象存储</Radio>
                 <Radio value="hdfs">HDFS</Radio>
@@ -206,7 +249,7 @@ const add = forwardRef((props: any, ref) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="<桶名>/<文件夹路径>或<桶名>" />
                 </FormItem>
               </div>
             ) : (
@@ -223,15 +266,30 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="Port："
-                  rules={[{ required: true, message: '请输入Port' }]}
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   field="port"
+                  rules={[
+                    {
+                      validator: (value, cb) => {
+                        if (!value || value.trim() === '') {
+                          return cb('请输入Port端口号');
+                        }
+                        const regex =
+                          /^(6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]?\d{1,4}|0)$/;
+                        if (!regex.test(value)) {
+                          return cb('请输入合法的端口号，范围在0-65535之间');
+                        }
+                        return cb();
+                      }
+                    }
+                  ]}
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入HDFS端口号，如8020" />
                 </FormItem>
                 <FormItem
+                  initialValue={'root'}
                   label="用户名："
                   rules={[{ required: true, message: '请输入用户名' }]}
                   labelCol={{ span: 5 }}
@@ -249,7 +307,7 @@ const add = forwardRef((props: any, ref) => {
                   labelAlign="right"
                   field="path"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入HDFS日录路径，如/user/data" />
                 </FormItem>
               </div>
             )}

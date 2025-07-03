@@ -91,6 +91,8 @@ export default function WorkflowTaskDetail() {
   const userInfo = useUserInfo();
   // 初始化作业详情数据
   const [taskDetailData, setTaskDetailData] = useState<TaskDetailObject>({});
+  // 初始化工作流名称
+  const [workflowName, setWorkflowName] = useState('');
   // 初始化节点数据
   const [nodeData, setNodeData] = useState<nodeDataObject[]>([]);
   // 初始化解析节点数据
@@ -126,6 +128,7 @@ export default function WorkflowTaskDetail() {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
+        setWorkflowName(res.data.workflow_name);
         setActiveNode(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
@@ -429,7 +432,7 @@ export default function WorkflowTaskDetail() {
       {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
-        <span>工作流拓扑图</span>
+        <div className="workflow-name">{workflowName}</div>
         <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}

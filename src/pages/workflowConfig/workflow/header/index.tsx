@@ -15,7 +15,8 @@ import {
   useNodesReadOnly,
   useNodesSyncDraft,
   useWorkflowMode,
-  useWorkflowRun
+  useWorkflowRun,
+  useWorkflowTemplate
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
@@ -26,7 +27,11 @@ import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
 import { operateWorkflow } from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
-import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
+import {
+  IsOnline,
+  WorkflowOperation,
+  WorkflowOperationParams
+} from '@/types/workflowApi';
 import {
   Button,
   Input,
@@ -37,8 +42,18 @@ import {
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
 import './index.scss';
+import { createWorkflowDraft } from '@/api/workflowV2';
+import { version } from 'os';
 
-const SuccessModal = ({ visible, onClose }) => {
+const SuccessModal = ({ visible, params, onClose }) => {
+  const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
+    params ?? {};
+  const history = useHistory();
+  const handleClick = () => {
+    const jumpUrl = `/tenant/compute/modaforge/workflowTaskDetail?id=${job_id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
+    history.push(jumpUrl);
+  };
+
   return (
     <Modal
       title={null}
@@ -62,7 +77,7 @@ const SuccessModal = ({ visible, onClose }) => {
         type="secondary"
         style={{ margin: '4px 0 16px', lineHeight: '22px', display: 'block' }}
       >
-        运行详情请到作业（job_123）中查看。
+        {`运行详情请到作业（${job_id}）中查看。`}
       </Typography.Text>
 
       <Space
@@ -70,7 +85,7 @@ const SuccessModal = ({ visible, onClose }) => {
         style={{ marginBottom: 20, justifyContent: 'end', width: '100%' }}
       >
         <Button onClick={onClose}>关闭</Button>
-        <Button type="primary" onClick={onClose}>
+        <Button type="primary" onClick={handleClick}>
           去查看
         </Button>
       </Space>
@@ -83,6 +98,7 @@ const Header: FC = () => {
   const history = useHistory();
   const [showRuningModal, setShowRuningModal] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef(null);
 
   const workflowStore = useWorkflowStore();
@@ -92,6 +108,13 @@ const Header: FC = () => {
   const workflowUuid = appDetail?.workflow_uuid ?? '';
   const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const cycleText = appDetail?.cycle_text ?? {
+    minute: '',
+    hour: '',
+    date: '',
+    month: '',
+    week: ''
+  };
   const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
   const { handleNodeSelect } = useNodesInteractions();
   const publishedAt = useStore((s) => s.publishedAt);
@@ -146,30 +169,70 @@ const Header: FC = () => {
   }, [workflowUuid, setAppDetail]);
 
   const onOperate = useCallback(
-    async (op: WorkflowOperation, params?: PublishWorkflowParams) => {
+    async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
       // if (!handleCheckBeforePublish()) {
       //   throw new Error('Checklist failed');
       // }
+
+      if (op === WorkflowOperation.ONLINE) {
+        // const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+        //   uid: userInfo?.id ?? '',
+        //   ds_workflow_id: dsWorkflowId ?? 0,
+        //   op
+        // });
+
+        // if (workflowRes?.data) {
+        //   notify({ type: 'success', message: '上线成功' });
+        // } else {
+        //   notify({
+        //     type: 'error',
+        //     message: workflowRes?.message ?? '上线失败'
+        //   });
+        // }
+        // 上线前，保存画布最新信息
+        handleSyncWorkflowDraft(
+          true,
+          true,
+          {
+            onSuccess: async () => {
+              const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+                uid: userInfo?.id ?? '',
+                ds_workflow_id: dsWorkflowId ?? 0,
+                op
+              });
+
+              if (workflowRes?.data) {
+                notify({ type: 'success', message: '上线成功' });
+              } else {
+                notify({
+                  type: 'error',
+                  message: workflowRes?.message ?? '上线失败'
+                });
+              }
+            },
+            onError: () => {
+              notify({
+                type: 'error',
+                message: '上线失败'
+              });
+            }
+          },
+          {
+            version: 'publish'
+          }
+        );
+
+        return;
+      }
 
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
         uid: userInfo?.id ?? '',
         ds_workflow_id: dsWorkflowId ?? 0,
         op,
-        // TODO: ts错误
-        // @ts-expect-error
-        cycle_text: params?.cycleText
+        cycle_text: params?.cycle_text
       });
 
-      if (op === WorkflowOperation.ONLINE) {
-        if (workflowRes?.data) {
-          notify({ type: 'success', message: '上线成功' });
-        } else {
-          notify({
-            type: 'error',
-            message: workflowRes?.message ?? '上线失败'
-          });
-        }
-      } else if (op === WorkflowOperation.OFFLINE) {
+      if (op === WorkflowOperation.OFFLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '下线成功', duration: 100000 });
         } else {
@@ -180,6 +243,7 @@ const Header: FC = () => {
         }
       } else if (op === WorkflowOperation.RUNNING) {
         if (workflowRes?.data) {
+          setWorkflowOperationRes(workflowRes.data);
           setShowRuningModal(true);
         } else {
           notify({
@@ -189,11 +253,14 @@ const Header: FC = () => {
         }
       } else if (op === WorkflowOperation.CRON_RUNNING) {
         if (workflowRes?.data) {
-          setShowRuningModal(true);
+          notify({
+            type: 'success',
+            message: '定时任务设置成功'
+          });
         } else {
           notify({
             type: 'error',
-            message: workflowRes?.message ?? '运行失败'
+            message: workflowRes?.message ?? '定时任务设置失败'
           });
         }
       }
@@ -208,24 +275,6 @@ const Header: FC = () => {
       updateAppDetail
     ]
   );
-
-  const onStartRestoring = useCallback(() => {
-    workflowStore.setState({ isRestoring: true });
-    handleBackupDraft();
-    // clear right panel
-    if (selectedNode) handleNodeSelect(selectedNode.id, true);
-    setShowWorkflowVersionHistoryPanel(true);
-    setShowEnvPanel(false);
-    setShowDebugAndPreviewPanel(false);
-  }, [
-    handleBackupDraft,
-    workflowStore,
-    handleNodeSelect,
-    selectedNode,
-    setShowWorkflowVersionHistoryPanel,
-    setShowEnvPanel,
-    setShowDebugAndPreviewPanel
-  ]);
 
   const onPublisherToggle = useCallback(
     (state: boolean) => {
@@ -298,6 +347,7 @@ const Header: FC = () => {
         <TaskOperation
           {...{
             workflowStatus,
+            cycleText,
             publishedAt,
             draftUpdatedAt,
             disabled: nodesReadOnly,
@@ -313,6 +363,7 @@ const Header: FC = () => {
       <SuccessModal
         visible={showRuningModal}
         onClose={() => setShowRuningModal(false)}
+        params={workflowOperationRes}
       />
     </div>
   );

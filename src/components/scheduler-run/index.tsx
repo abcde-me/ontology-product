@@ -40,8 +40,10 @@ const initFrequencyData = (options: CycleText) => {
     return CycleValues.PER_MONTH;
   } else if (options.week === '*') {
     return CycleValues.PER_WEEK;
-  } else {
+  } else if (options.date === '*') {
     return CycleValues.PER_DAY;
+  } else {
+    return CycleValues.UNKNOWN;
   }
 };
 
@@ -58,21 +60,28 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
       date: options.date?.split(',') ?? [],
       time: `${options.hour}:${options.minute}`
     };
-  } else {
+  } else if (frequencyData === CycleValues.PER_DAY) {
     return {
       cycle: frequencyData,
       time: `${options.hour}:${options.minute}`
+    };
+  } else {
+    return {
+      cycle: undefined,
+      time: ''
     };
   }
 };
 
 const formatOptions = (frequencyData: CycleValues, formVals) => {
-  const [hour, minute] = formVals.time.split(':');
+  const [hour = '', minute = ''] = formVals.time.split(':');
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       minute,
       hour,
-      date: formVals.date?.join(',') ?? '',
+      date: Array.isArray(formVals.date)
+        ? formVals.date.join(',')
+        : formVals.date,
       month: '*',
       week: ''
     };
@@ -84,11 +93,19 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
       month: '',
       week: '*'
     };
-  } else {
+  } else if (frequencyData === CycleValues.PER_DAY) {
     return {
       minute,
       hour,
       date: '*',
+      month: '',
+      week: ''
+    };
+  } else {
+    return {
+      minute,
+      hour,
+      date: '',
       month: '',
       week: ''
     };
@@ -137,6 +154,12 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
     console.log('当前所有字段值:', allValues, frequencyData);
     console.log('格式后的字段值:', optionsFormat);
     onOptionsChange(optionsFormat);
+  };
+  const handleClickTimeTab = (tab) => {
+    datePickerRef.current?.focus();
+    setTimeFlag(tab);
+    const currentFieldsValue = form.getFieldsValue();
+    form.setFieldsValue({ ...currentFieldsValue, date: undefined });
   };
 
   useEffect(() => {
@@ -218,10 +241,18 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                   rules={[{ required: true, message: '请选择时间' }]}
                 >
                   <Select
-                    mode={'multiple'}
+                    mode={
+                      timeFlag === TimeType.RELATICELYTIME
+                        ? undefined
+                        : 'multiple'
+                    }
+                    key={timeFlag}
                     style={{ minWidth: 300 }}
                     placeholder="请选择日期"
                     ref={datePickerRef}
+                    triggerProps={{
+                      trigger: 'focus'
+                    }}
                     dropdownRender={(menu) => (
                       <div>
                         <Divider style={{ margin: 0 }} />
@@ -256,11 +287,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                                   justifyContent: 'center',
                                   borderRadius: '3px'
                                 }}
-                                onClick={() => {
-                                  // datePickerRef.current?.open();
-                                  // console.log('选中了选择器', datePickerRef.current?.open);
-                                  setTimeFlag(item.value);
-                                }}
+                                onClick={() => handleClickTimeTab(item.value)}
                               >
                                 {item.lable}
                               </div>

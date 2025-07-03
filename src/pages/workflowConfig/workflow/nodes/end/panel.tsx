@@ -27,7 +27,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   }, []);
 
   const onValuesChange = (_, values) => {
-    console.log(values, 'values');
     updateInputs({ ...values, dataSource: dataSource });
   };
   return (

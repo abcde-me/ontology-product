@@ -1,9 +1,9 @@
 export interface CycleText {
-  minute: string; // 10代表第10分钟
-  hour: string; // 10代表10点
-  date: string; // *代表每日，"1,3"代表1号和3号执行，"L"代表最后一天，默认空字符，代表未选择
-  month: string; // *代表每月，默认空字符，代表未选择
-  week: string; // *代表每周，默认空字符，代表未选择
+  minute?: string; // 10代表第10分钟
+  hour?: string; // 10代表10点
+  date?: string; // *代表每日，"1,3"代表1号和3号执行，"L"代表最后一天，默认空字符，代表未选择
+  month?: string; // *代表每月，默认空字符，代表未选择
+  week?: string; // *代表每周，默认空字符，代表未选择
 }
 
 export enum CycleValues {
@@ -12,7 +12,9 @@ export enum CycleValues {
   /** 每周 */
   PER_WEEK = 'per_week',
   /** 每月 */
-  PER_MONTH = 'per_month'
+  PER_MONTH = 'per_month',
+  /** 未定义 */
+  UNKNOWN = ''
 }
 
 export enum WeekValues {
