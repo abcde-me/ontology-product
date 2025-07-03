@@ -18,7 +18,7 @@ interface FormProps {
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
   exportdatas?: any;
-  exportdataset?:any;
+  exportdataset?: any;
 }
 
 const FormComponent: React.FC<FormProps> = ({
@@ -32,29 +32,30 @@ const FormComponent: React.FC<FormProps> = ({
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    console.log(downloadData,'打印看啊看downloadData');
-    console.log(exportdatas,'打印看啊看exportdatas');
-    
+    console.log(downloadData, '打印看啊看downloadData');
+    console.log(exportdatas, '打印看啊看exportdatas');
+
     const exportNames: Array<string> = [];
     if (exportdatas && exportdatas.length > 0) {
       // 使用扁平数组而不是嵌套数组
-      exportdatas.forEach(item => {
+      exportdatas.forEach((item) => {
         if (item.extras && item.extras.file_name) {
           exportNames.push(item.extras.file_name);
         }
       });
-    } else if(downloadData) {
-      exportNames.push(downloadData.extras.file_name)
-    }else{
-      exportNames.push(exportdataset.latest_file_name)
+    } else if (downloadData) {
+      exportNames.push(downloadData.extras.file_name);
+    } else {
+      exportNames.push(exportdataset.latest_file_name);
     }
-    let full_paths = ''
+    let full_paths = '';
     if (exportdatas && exportdatas.length > 0) {
-      full_paths = exportdatas[0].full_path
-    } else if(downloadData) {
-      full_paths = downloadData.full_path
-    }else{
-      full_paths = exportdataset.latest_file_path+'/'+exportdataset.latest_file_name
+      full_paths = exportdatas[0].full_path;
+    } else if (downloadData) {
+      full_paths = downloadData.full_path;
+    } else {
+      full_paths =
+        exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
     }
     const res = await exportFile({
       file_names: exportNames,
@@ -115,9 +116,8 @@ const FormComponent: React.FC<FormProps> = ({
       // 获取连接器列表
       getConnectorList();
       console.log(exportdataset, 'exportdataset888888888888888888888888888888');
-
     }
-  }, [visible, form, names, downloadData,exportdataset]);
+  }, [visible, form, names, downloadData, exportdataset]);
 
   return (
     <Modal

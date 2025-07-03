@@ -57,11 +57,16 @@ interface Dataset {
   created_at: string;
   updated_at: string;
   deleted_at: null;
-  tag_names: string[];
+  tag_names?: string[];
   src_model: string;
 }
 
-const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[], handleExport: (record: Dataset) => void) => [
+const columns = (
+  handleGoToDetail,
+  handleDelete,
+  datasetList: Dataset[],
+  handleExport: (record: Dataset) => void
+) => [
   {
     title: '名称',
     dataIndex: 'name',
@@ -84,23 +89,23 @@ const columns = (handleGoToDetail, handleDelete, datasetList: Dataset[], handleE
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList.forEach((dataset) => {
-        dataset.tag_names.forEach((tag) => tagSet.add(tag));
+        dataset.tag_names?.forEach((tag) => tagSet.add(tag));
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
     })(),
     onFilter: (value: string, record: Dataset) => {
-      return record.tag_names.includes(value);
+      return record.tag_names?.includes(value) || false;
     },
     render: (tag_names: string[]) => (
       <Space size="mini">
-        {tag_names.length > 0 && (
+        {tag_names && tag_names.length > 0 && (
           <Tag className={styles.tagGreen}>
             {tag_names[0].length > 5
               ? `${tag_names[0].substring(0, 5)}...`
               : tag_names[0]}
           </Tag>
         )}
-        {tag_names.length > 1 && (
+        {tag_names && tag_names.length > 1 && (
           <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
         )}
       </Space>
@@ -294,7 +299,6 @@ const DatasetManagement: React.FC = () => {
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
-
   //导出弹窗相关
   const [downloadData, setDownloadData] = React.useState<Dataset | null>(null);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
@@ -347,19 +351,19 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-            path:
-              formData.targetDataSource[0][0] +
-              '/dst' +
-              '/' +
-              formData.targetDataSource[0][1] +
-              '/' +
-              formData.targetDataSource[1][0],
-            path_id: formData.targetDataSource[1][1]
-          }
+              path:
+                // formData.targetDataSource[0][0] +
+                '/dst' +
+                '/' +
+                formData.targetDataSource[0][1] +
+                '/volume/' +
+                formData.targetDataSource[1][0],
+              path_id: formData.targetDataSource[1][1]
+            }
           : {
-            connector_id: parseInt(formData.targetDataSource) || 0,
-            connector_files: formData.selectedFiles || []
-          }
+              connector_id: parseInt(formData.targetDataSource) || 0,
+              connector_files: formData.selectedFiles || []
+            }
     };
 
     console.log('提交数据:', submitData);
@@ -482,7 +486,7 @@ const DatasetManagement: React.FC = () => {
   // 导出数据集
   const handleExport = (record: Dataset) => {
     console.log('导出数据集:', record);
-    setDownloadData(record); 
+    setDownloadData(record);
     setVisible(true);
   };
   // 批量导出
@@ -553,7 +557,12 @@ const DatasetManagement: React.FC = () => {
         <Table
           rowKey="id"
           className={styles.datasetTable}
-          columns={columns(handleGoToDetail, handleDelete, datasetList,handleExport)}
+          columns={columns(
+            handleGoToDetail,
+            handleDelete,
+            datasetList,
+            handleExport
+          )}
           data={datasetList}
           rowSelection={rowSelection}
           pagination={{
@@ -591,5 +600,3 @@ const DatasetManagement: React.FC = () => {
 };
 
 export default DatasetManagement;
-
-

@@ -1,110 +1,130 @@
 import {
   Breadcrumb,
+  Button,
+  Form,
   Grid,
+  Input,
+  Message,
   Modal,
   Pagination,
   Switch
 } from '@arco-design/web-react';
-import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
+import { IconArrowLeft, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import { Router } from 'react-router';
 import TableDetail from './table-detail';
 import './index.css';
 import Edit from '../edit';
-import {
-  ApiResponse,
-  ExecutionStatus,
-  LoadType,
-  SourceType,
-  TaskStatus
-} from '../type';
+import { ExecutionHistory, TaskInfo } from '../type';
+import { useParams } from '@/utils/url';
+import { getLoad, getLoadRecordList, runLoad } from '@/api/loadApi';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
+const InputSearch = Input.Search;
 const DataLoadDetail = () => {
+  const [form] = Form.useForm();
+  const loadId = useParams('task_id');
   // 默认详情的数据
-  const [listDetail, setListDetail] = useState<ApiResponse | null>({
-    task_info: {
-      id: 123,
-      name: 'daily-image-import',
-      source_type: SourceType.HDFS,
-      connector: {
-        id: 456,
-        name: 'hdfs-prod-01',
-        type: SourceType.HDFS
-      },
-      load_type: LoadType.Cron,
-      cron_expression: '0 0 3 * * ?',
-      dest_path: 'minio/vision-data',
-      status: TaskStatus.Running,
-      created_at: '2025-06-16 18:40:36',
-      last_run_time: '2025-06-16 18:40:36',
-      creator: 'user123'
-    },
-    execution_history: [
-      {
-        execution_id: 7891,
-        execution_name: 'RUN-20250306-001',
-        status: ExecutionStatus.Running,
-        start_time: '2025-06-16 18:40:36',
-        end_time: '2025-06-16 18:40:36',
-        details: {
-          success_files: 2451213213,
-          failed_files: 21231232,
-          error_message: null
-        }
-      },
-      {
-        execution_id: 7890,
-        execution_name: 'RUN-20250306-002',
-        status: ExecutionStatus.Failed,
-        start_time: '2025-06-16 18:40:36',
-        end_time: '2025-06-16 18:40:36',
-        details: {
-          success_files: 0,
-          failed_files: 0,
-          error_message: 'Connection timeout to HDFS server'
-        }
-      }
-    ]
-  });
+  const [listDetail, setListDetail] = useState<TaskInfo | null>(null);
+  // 详情页面的例表数据
+  const [detailList, setDetailList] = useState<ExecutionHistory[] | null>([]);
   // 存在运行中的状态
-  const [runningFlag, setRunningFlag] = useState<number | null>(null);
-
+  const [runningFlag, setRunningFlag] = useState<boolean | null>(false);
+  // 分页的数据
+  // 当前页码
+  const [current, setCurrent] = useState(1);
+  // 每页几条
+  const [pageSize, setPageSize] = useState(10);
+  // 总条数
+  const [total, setTotal] = useState(0);
   // 判断任务中是否存在运行的任务
-  const judgmentTask = () => {
-    if (listDetail == null) {
-      // 处理 listDetail 为空的情况，例如返回默认值或抛出错误
-      return -1; // 这里假设返回 -1 表示没有运行中的任务，根据实际情况调整
-    }
+  const handlePageChange = (page) => {
+    setCurrent(page);
+  };
 
-    const runningIndex = listDetail.execution_history.findIndex((item) => {
-      return item.status === 'running';
-    });
-    setRunningFlag(runningIndex);
-  };
   // 点击停止运行
-  const stopehan = () => {
-    listDetail?.execution_history.forEach((item: any) => {
-      if (item.execution_id == 7891) {
-        item.status = 'failed';
-      }
-    });
-  };
+  const stopehan = (id) => {};
   // 编辑弹框的状态
   const [editVisible, setEditVisible] = useState(false);
+  // 相切列表loding的状态
+  const [detailListLoading, setDetailListLoading] = useState(false);
   // 点击编辑显示弹框
   const hideEditModal = () => {
+    console.log(form.getFieldsValue());
+
     setEditVisible(false);
   };
   // 返回上一层的函数
   const OneLevelUpHan = () => {
     history.back();
   };
-  useEffect(() => {
-    judgmentTask();
-  }, []);
+  // 通过路由id获取数据
+  const getTask_idHan = async () => {
+    try {
+      const res = await getLoad(loadId);
+      console.log(res.data);
+      setListDetail(res.data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  // 点击新建运行
+  const runningHan = async () => {
+    try {
+      const res = await runLoad({
+        task_id: Number(loadId)
+      });
+      if (res.message == '') {
+        Message.success('新建运行成功');
+      } else {
+        Message.error(res.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    getDetailList();
+  };
 
+  // 获取详情页面数据列表
+  const getDetailList = async () => {
+    try {
+      setDetailListLoading(true);
+      const res = await getLoadRecordList({
+        task_id: Number(loadId),
+        page: current,
+        page_size: pageSize
+      });
+      setTotal(res.data.total);
+      setDetailList(res.data.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailListLoading(false);
+    }
+  };
+  const judgmentTask = () => {
+    getDetailList();
+    const boo = detailList?.findIndex((item) => item.status == 'running');
+    setRunningFlag(boo == -1 ? false : true);
+    console.log(boo);
+  };
+  useEffect(() => {
+    getDetailList();
+    // judgmentTask();
+  }, [current, pageSize]);
+  useEffect(() => {
+    getTask_idHan();
+  }, []);
+  useEffect(() => {
+    if (detailList) {
+      const hasRunningTask = detailList.some(
+        (item) => item.status === 'running'
+      );
+      console.log(hasRunningTask);
+
+      setRunningFlag(hasRunningTask);
+    }
+  }, [detailList]);
   return (
     <div>
       <div
@@ -125,7 +145,7 @@ const DataLoadDetail = () => {
           <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
             数据载入
           </BreadcrumbItem>
-          <BreadcrumbItem>新建成功的载入名称</BreadcrumbItem>
+          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
@@ -141,8 +161,8 @@ const DataLoadDetail = () => {
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
           <div
             style={{
-              color: runningFlag !== -1 ? '#ccc' : 'rgb(0, 125, 250)',
-              pointerEvents: runningFlag !== -1 ? 'none' : undefined,
+              color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
+              pointerEvents: runningFlag ? 'none' : undefined,
               cursor: 'pointer'
             }}
             onClick={() => {
@@ -164,21 +184,23 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 载入位置：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.dest_path}
+              <Col span={21} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.data_path_name}
               </Col>
             </Row>
             <Row
               style={{
                 marginBottom: 16,
-                display: 'flex',
-                alignItems: 'center'
+                display: 'flex'
+                // alignItems: 'center'
               }}
             >
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建人：
               </Col>
-              <Col span={21}>{listDetail && listDetail.task_info.creator}</Col>
+              <Col span={21} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.createor}
+              </Col>
             </Row>
             <Row
               style={{
@@ -190,8 +212,8 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 创建时间：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.created_at}
+              <Col span={21} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.created_at}
               </Col>
             </Row>
             <Row
@@ -204,8 +226,8 @@ const DataLoadDetail = () => {
               <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 更新时间：
               </Col>
-              <Col span={21}>
-                {listDetail && listDetail.task_info.last_run_time}
+              <Col span={21} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.last_run_time}
               </Col>
             </Row>
           </div>
@@ -220,8 +242,8 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 数据源类型：
               </Col>
-              <Col span={20}>
-                {listDetail && listDetail.task_info.source_type}
+              <Col span={20} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.source_type}
               </Col>
             </Row>
             <Row
@@ -234,8 +256,8 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 连接器名称：
               </Col>
-              <Col span={20}>
-                {listDetail && listDetail.task_info.connector.name}
+              <Col span={20} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.connector_name}
               </Col>
             </Row>
             <Row
@@ -248,12 +270,13 @@ const DataLoadDetail = () => {
               <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                 载入形式：
               </Col>
-              <Col span={20}>
-                {listDetail && listDetail.task_info.load_type == 'once'
+              <Col span={20} style={{ fontSize: '14px' }}>
+                {listDetail && listDetail.load_type == 'once'
                   ? '单次载入'
                   : '周期载入'}
-                {listDetail && listDetail.task_info.load_type == 'cron' && (
+                {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
+                    defaultChecked={true}
                     checkedText="启用"
                     uncheckedText="停止"
                     style={{ marginLeft: '10px' }}
@@ -262,7 +285,7 @@ const DataLoadDetail = () => {
                 )}
               </Col>
             </Row>
-            {listDetail && listDetail.task_info.load_type == 'cron' && (
+            {listDetail && listDetail.load_type == 'cron' && (
               <Row
                 style={{
                   marginBottom: 16,
@@ -273,17 +296,71 @@ const DataLoadDetail = () => {
                 <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
                   周期设置：
                 </Col>
-                <Col span={20}>{listDetail.task_info.cron_expression}</Col>
+                <Col span={20} style={{ fontSize: '14px' }}>
+                  {listDetail.cron_expression}
+                </Col>
               </Row>
             )}
           </div>
         </div>
-        <TableDetail
-          data={listDetail && listDetail.execution_history}
-          runningStatus={runningFlag}
-          judgmentTaskHan={judgmentTask}
-          tHan={stopehan}
-        />
+        <div
+          style={{
+            margin: '15px 0px 15px 20px',
+            fontSize: '17px',
+            fontWeight: '600'
+          }}
+        >
+          运行历史
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+            padding: '0px 15px'
+          }}
+        >
+          <InputSearch placeholder="搜索运行ID" style={{ width: 230 }} />
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            disabled={runningFlag ? true : false}
+            onClick={() => {
+              runningHan();
+            }}
+          >
+            新建运行
+          </Button>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'end'
+          }}
+        >
+          <TableDetail
+            taskId={listDetail && listDetail.task_id}
+            judgmentTaskHan={judgmentTask}
+            tHan={stopehan}
+            {...detailList}
+            datalist={detailList}
+            loading={detailListLoading}
+          />
+          <Pagination
+            sizeOptions={[1, 5, 10, 20]}
+            showTotal
+            total={total}
+            showJumper
+            sizeCanChange
+            style={{ margin: '20px 30px' }}
+            onChange={handlePageChange}
+            onPageSizeChange={(pageSize) => {
+              setPageSize(pageSize);
+              setCurrent(1);
+            }}
+          />
+        </div>
         <Modal
           style={{ width: '600px' }}
           title="编辑数据载入任务"
@@ -296,7 +373,13 @@ const DataLoadDetail = () => {
           // maskClosable={false}
           unmountOnExit={true}
         >
-          <Edit hideEditModalHan={hideEditModal} detailData={listDetail} />
+          <Edit
+            hideEditModalHan={hideEditModal}
+            detailData={listDetail}
+            editForm={form}
+            getDetailList={getTask_idHan}
+            loadId={loadId}
+          />
         </Modal>
       </div>
     </div>

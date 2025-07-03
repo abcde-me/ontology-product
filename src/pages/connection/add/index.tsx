@@ -44,8 +44,7 @@ const add = forwardRef((props: any, ref) => {
       const newfrom = {
         name,
         type,
-        config: { ...filteredValues },
-        creator: 'testlsc'
+        config: { ...filteredValues }
       };
       setLoading(true);
       const res = await addconnectionList(newfrom);

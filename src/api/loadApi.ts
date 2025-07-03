@@ -17,6 +17,7 @@ export async function delLoad(task_id) {
 }
 // 修改载入任务
 export async function editLoad(params) {
+  console.log(params);
   return await UAPI.RES.editLoadApi({ task_id: params.task_id })
     .put(params)
     .inRegion()
@@ -43,6 +44,23 @@ export async function runLoad(params) {
 // 查询载入任务记录
 export async function getLoadRecord(task_id) {
   return await UAPI.RES.getLoadRecordApi({ task_id }).get().inRegion().do();
+}
+export async function getLoadRecordList(params) {
+  return await UAPI.RES.getdetailListApi({}).post(params).inRegion().do();
+}
+
+interface CatalogListParams {
+  root_type?: number; // 如果 root_type 是可选的，可以加上 ?
+  // 其他可能的字段...
+}
+// 获取数据集列表
+export async function getDirectoryList(params) {
+  return await UAPI.RES.catalogListApi(params).get().inRegion().do();
+}
+// 停止单个载入任务
+export async function stopeLoad(params) {
+  console.log(params);
+  return await UAPI.RES.stopLoadApi({}).post(params).inRegion().do();
 }
 
 export async function getLoadTaskFiles(params: any = {}) {

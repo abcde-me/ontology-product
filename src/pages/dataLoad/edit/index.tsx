@@ -3,6 +3,7 @@ import {
   Cascader,
   Form,
   Input,
+  Message,
   Radio,
   Select,
   TreeSelect
@@ -10,15 +11,18 @@ import {
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import EditLoadingForm from './edit-loading-form';
+import { convertWeekDaysToString, WeekDay } from '@/utils/conversionArco';
+import { editLoad } from '@/api/loadApi';
+import { directoryData } from '../data/constants';
 // 单选框实例
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
 const Edit = (props) => {
-  const [form] = Form.useForm();
+  const form = props.editForm;
   // 载入类型的默认值
-  const [loadVal, setLoadVal] = useState(props.detailData.task_info.load_type);
+  const [loadVal, setLoadVal] = useState(props.detailData.load_type);
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -57,14 +61,91 @@ const Edit = (props) => {
     props.hideEditModalHan();
   };
   // 点击确定
-  const okHan = () => {
-    props.hideEditModalHan();
+  const okHan = async () => {
+    try {
+      const formValues = await form.validate();
+      const { time, day, cycle, ...rest } = formValues;
+      const pathId = rest.dest_path.at(-1);
+      if (loadVal !== 'once') {
+        const [hour, minute] = time.split(':');
+        await form.validate();
+        props.hideModalHan();
+
+        const isLastDayOfMonth =
+          day?.findIndex((item) => item === '每月最后一天') !== -1;
+
+        // 转换星期为数字字符串
+        let dataValue: string;
+        switch (cycle) {
+          case '每日':
+            dataValue = '*';
+            break;
+          case '每周':
+            dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
+            break;
+          case '每月':
+            dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
+            break;
+          default:
+            dataValue = '*';
+        }
+        const formData = {
+          task_name: rest.name,
+          connector_id: rest.connector_id,
+          source_type: rest.source_type,
+          run_cycle: {
+            type: loadVal == 'once' ? 0 : 1,
+            cycle_text: {
+              minute,
+              hour,
+              date: dataValue,
+              month: cycle == '每月' ? '*' : '',
+              week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
+            }
+          },
+          dest_path_id: pathId,
+          creator: 'user123'
+        };
+        const res = await editLoad({
+          task_id: rest.task_id,
+          formData
+        });
+      } else {
+        const formData = {
+          task_name: rest.name,
+          connector_id: 15,
+          source_type: rest.source_type,
+          run_cycle: {
+            type: 0,
+            cycle_text: {
+              minute: '0',
+              hour: '0',
+              date: '*',
+              month: '*',
+              week: ''
+            }
+          },
+          dest_path_id: pathId,
+          creator: 'user123'
+        };
+        console.log(formData);
+        const res = await editLoad({
+          task_id: props.loadId,
+          formData
+        });
+      }
+      cancelHan();
+      props.getDetailList();
+    } catch (error) {
+      console.error('表单处理失败:', error);
+    }
   };
   // 默认数据
   // const [obj, setObj] = useState({})
-  // useEffect(() => {
-  //     setObj(props.detailData)
-  // }, [])
+  useEffect(() => {
+    // setObj(props.detailData)
+    console.log(props.detailData);
+  }, []);
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -72,12 +153,12 @@ const Edit = (props) => {
         autoComplete="off"
         form={form}
         initialValues={{
-          dest_path: props.detailData.task_info.dest_path || []
+          dest_path: props.detailData.data_path_name || []
         }}
       >
         <FormItem
           label="任务名称："
-          initialValue={props.detailData.task_info.name}
+          initialValue={props.detailData.name}
           field="name"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
@@ -99,11 +180,11 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
-          initialValue={props.detailData.task_info.source_type}
+          initialValue={props.detailData.source_type}
         >
           <RadioGroup disabled={true}>
             <Radio value="s3">对象存储</Radio>
-            <Radio value="HDFS">HDFS</Radio>
+            <Radio value="hdfs">HDFS</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem
@@ -113,13 +194,13 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请输入任务名称' }]}
-          initialValue={props.detailData.task_info.connector.name}
+          initialValue={props.detailData.connector_name}
         >
           <Select placeholder="请选择连接器" disabled={true}></Select>
         </FormItem>
         <FormItem
           label="载入形式："
-          initialValue={props.detailData.task_info.load_type}
+          initialValue={props.detailData.load_type}
           field="load_type"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
@@ -144,17 +225,12 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
-          initialValue={props.detailData.task_info.dest_path}
+          initialValue={props.detailData.data_path_name}
         >
           <Cascader
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
-            options={treeData}
-            fieldNames={{
-              label: 'title',
-              value: 'value', // 实际值使用 value
-              children: 'children'
-            }}
+            options={directoryData}
           />
         </FormItem>
       </Form>

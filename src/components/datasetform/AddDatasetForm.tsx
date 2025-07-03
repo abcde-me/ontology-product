@@ -126,15 +126,19 @@ const cstargetDataSourceData = [
 
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
+  console.log('李帆测试22222', dataSourceData);
   return dataSourceData.map((catalog) => ({
     label: catalog.name,
     value: [catalog.base_dir, catalog.name],
-    children: (catalog.children.volume || []).map((volume) => ({
-      label: volume.name,
-      value: [volume.name, volume.id],
-      type: 'volume',
-      originalData: volume
-    }))
+    children:
+      catalog.children && catalog.children.volume
+        ? catalog.children.volume.map((volume) => ({
+            label: volume.name,
+            value: [volume.name, volume.id],
+            type: 'volume',
+            originalData: volume
+          }))
+        : []
   }));
 }
 
@@ -331,7 +335,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   useEffect(() => {
     // 数据目录卷
     getCatalogList({ root_type: 2 }).then((res) => {
-      console.log('李帆测试', res);
       setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
     }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     // setTargetDataSourceOptions(
@@ -379,9 +382,9 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       const catalogpath = value[0][0];
       const catalogId = value[0][1];
       const selectedItem = value[1][0];
-
+      console.log(1111111, value);
       // 构建路径：catalog_id/type_itemId
-      const path = `${catalogpath}/dst/${catalogId}/${selectedItem}`;
+      const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
       console.log('选择的数据目录卷路径:', path);
       getVolumePreviewData(path);
     }
@@ -428,14 +431,13 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   // 获取数据目录卷预览数据的方法
   const getVolumePreviewData = (volumeId: string) => {
     // 这里应该调用真实的API
-    // getCatalogPreview({ path: volumeId }).then(res => {
-    //   setPreviewData(res.data.list)//这里的数据不能直接赋值，需要处理一下
-    //   setPreviewColumns(formatTableData(res.data.filed_names))//设置表格列（从后端返回的列配置）
-    // })
-    // TODO: ts错误
-    // @ts-expect-error
-    setPreviewData(csmockPreviewData);
-    setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
+    getCatalogPreview({ path: volumeId }).then((res) => {
+      setPreviewData(res.data.list); //这里的数据不能直接赋值，需要处理一下
+      setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
+    });
+
+    // setPreviewData(csmockPreviewData);
+    // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
   //提交数据

@@ -180,7 +180,11 @@ export default function Eltable() {
         onOk: async () => {
           const idList = selectedRows.map((item: { id: string }) => item.id);
           ids.push(...idList);
-          console.log(selectedRows[0].full_path,selectedKey, '打印selectedRows88888888888');
+          console.log(
+            selectedRows[0].full_path,
+            selectedKey,
+            '打印selectedRows88888888888'
+          );
 
           // 调用删除API
           if (selectedRows.length > 0 && selectedRows[0]?.full_path) {

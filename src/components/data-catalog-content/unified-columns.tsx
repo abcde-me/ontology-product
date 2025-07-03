@@ -125,7 +125,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string // 添加selectedKey参数
 ) => {
   // Source表格的卷数据列配置
@@ -364,7 +364,11 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
         if(tableType === 'target'){
           ids.push(data.id);
         console.log('查看删除的数据和数组们', data, ids);
-        await deleteTargetFile({ full_path: data.full_path, file_ids: ids, path_id: selectedKey });
+        await deleteTargetFile({
+          full_path: data.full_path,
+          file_ids: ids,
+          path_id: selectedKey
+        });
         Message.success('删除成功');
         }else{
           await deleteSourceFile(data.id);

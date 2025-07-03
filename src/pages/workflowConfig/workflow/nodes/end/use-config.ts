@@ -20,6 +20,7 @@ const useConfig = (id: string, payload: EndNodeType) => {
     (payload: EndNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.target_path = payload.target_path;
+        draft.dataSource = payload.dataSource;
       });
       setInputs(newInputs);
     },
