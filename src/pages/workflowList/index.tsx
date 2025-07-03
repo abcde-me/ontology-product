@@ -246,6 +246,7 @@ export default function WorkflowList() {
       title: '操作',
       dataIndex: 'operate',
       width: 130,
+      fixed: 'right',
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span
