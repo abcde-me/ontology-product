@@ -40,7 +40,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         onValuesChange={onValuesChange}
         initialValues={{
-          target_path: inputs?.target_path
+          target_path: inputs?.target_path || inputs?.target_path_name
         }}
       >
         <FormItem
