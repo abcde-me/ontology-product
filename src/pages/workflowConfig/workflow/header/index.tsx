@@ -163,6 +163,9 @@ const Header: FC = () => {
       if (op === WorkflowOperation.ONLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '上线成功' });
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
           notify({
             type: 'error',
@@ -172,6 +175,9 @@ const Header: FC = () => {
       } else if (op === WorkflowOperation.OFFLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '下线成功', duration: 100000 });
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
           notify({
             type: 'error',
@@ -208,24 +214,6 @@ const Header: FC = () => {
       updateAppDetail
     ]
   );
-
-  const onStartRestoring = useCallback(() => {
-    workflowStore.setState({ isRestoring: true });
-    handleBackupDraft();
-    // clear right panel
-    if (selectedNode) handleNodeSelect(selectedNode.id, true);
-    setShowWorkflowVersionHistoryPanel(true);
-    setShowEnvPanel(false);
-    setShowDebugAndPreviewPanel(false);
-  }, [
-    handleBackupDraft,
-    workflowStore,
-    handleNodeSelect,
-    selectedNode,
-    setShowWorkflowVersionHistoryPanel,
-    setShowEnvPanel,
-    setShowDebugAndPreviewPanel
-  ]);
 
   const onPublisherToggle = useCallback(
     (state: boolean) => {
