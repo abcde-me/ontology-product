@@ -53,7 +53,7 @@ export function useEditableTree({ catalogTreeStore }) {
   const onSearchChange = (value: string) => {
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
-      data.forEach((item) => {
+      data?.forEach?.((item) => {
         if (
           typeof item.title === 'string' &&
           item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
