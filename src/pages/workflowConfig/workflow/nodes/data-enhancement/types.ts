@@ -64,4 +64,5 @@ export type EnhancementNodeType = {
   sample_num: number; // 指令生成依赖样本数
   prompt_checkbox: boolean; // 提示词 开关
   modelList: Array<any>;
+  enhanced_proportion: number; // 任务描述占比值
 };

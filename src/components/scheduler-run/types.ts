@@ -12,7 +12,9 @@ export enum CycleValues {
   /** 每周 */
   PER_WEEK = 'per_week',
   /** 每月 */
-  PER_MONTH = 'per_month'
+  PER_MONTH = 'per_month',
+  /** 未定义 */
+  UNKNOWN = ''
 }
 
 export enum WeekValues {
