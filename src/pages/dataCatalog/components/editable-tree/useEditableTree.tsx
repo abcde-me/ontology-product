@@ -29,16 +29,14 @@ export function useEditableTree({ catalogTreeStore }) {
     inputRef,
     inputValue,
     treeData,
-    expandedKeys,
-    loading
+    expandedKeys
   } = catalogTreeStore.useGetState([
     'activeTab',
     'searchValue',
     'inputRef',
     'inputValue',
     'treeData',
-    'expandedKeys',
-    'loading'
+    'expandedKeys'
   ]);
 
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
@@ -128,20 +126,21 @@ export function useEditableTree({ catalogTreeStore }) {
       return;
     }
 
-    let newTreeData: TreeDataType[] = treeData.map((item) => item);
+    let newTreeData: TreeDataType[] = [...treeData];
 
     const res = await deleteVolume(dataRef?.id, {
       root_type: RootTypeEnum[activeTab]
     });
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
-      catalogTreeStore.setState({ treeData: newTreeData });
       Message.success('删除成功!');
     } else {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log(res.message);
       Message.error('删除失败，请稍后重试');
+      // console.log(res.message);
     }
+
+    catalogTreeStore.setState({ treeData: newTreeData });
   };
 
   const focusAndSelectInput = () => {
@@ -235,7 +234,6 @@ export function useEditableTree({ catalogTreeStore }) {
         if (dataRef?.isAdd) {
           await addCatalog({ name: fileName, root_type: root_type });
         } else {
-          // TODO 编辑目录
           await renameCatalog(dataRef.id, {
             new_name: fileName,
             root_type: root_type
@@ -313,20 +311,8 @@ export function useEditableTree({ catalogTreeStore }) {
     );
   };
 
-  const renderTitle = (props: NodeProps) => {
+  const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-
-    const IconComponent = dataRef?.isLastLeaf ? (
-      <div className="mr-2 w-4">
-        {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
-          dataRef?.type
-        ) ? (
-          <IconStorage className="text-base" />
-        ) : (
-          <IconArchive className="text-base" />
-        )}
-      </div>
-    ) : null;
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
@@ -345,8 +331,39 @@ export function useEditableTree({ catalogTreeStore }) {
     }
 
     return (
+      <Tooltip color="white" content={!subLeafKeys[dataRef?.type] ? title : ''}>
+        <div
+          className={classNames(
+            'overflow-hidden text-ellipsis whitespace-nowrap',
+            dataRef?.isLastLeaf ? 'last-leaf-text' : '',
+            dataRef?.type === CatalogTypeEnum.db ? 'no-operation' : '',
+            dataRef?.type === CatalogTypeEnum.catalog
+              ? 'catalog-title-text'
+              : ''
+          )}
+        >
+          {TitleText}
+        </div>
+      </Tooltip>
+    );
+  };
+
+  const renderTitle = (props: NodeProps) => {
+    const { dataRef } = props;
+
+    return (
       <div className={classNames('flex items-center overflow-hidden')}>
-        {IconComponent}
+        {dataRef?.isLastLeaf && (
+          <div className="mr-2 w-4">
+            {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
+              dataRef?.type
+            ) ? (
+              <IconStorage className="text-base" />
+            ) : (
+              <IconArchive className="text-base" />
+            )}
+          </div>
+        )}
         {dataRef?.showInput ? (
           <Input
             ref={inputRef}
@@ -367,23 +384,7 @@ export function useEditableTree({ catalogTreeStore }) {
             )}
           />
         ) : (
-          <Tooltip
-            color="white"
-            content={!subLeafKeys[dataRef?.type] ? title : ''}
-          >
-            <div
-              className={classNames(
-                'overflow-hidden text-ellipsis whitespace-nowrap',
-                dataRef?.isLastLeaf ? 'last-leaf-text' : '',
-                dataRef?.type === CatalogTypeEnum.db ? 'no-operation' : '',
-                dataRef?.type === CatalogTypeEnum.catalog
-                  ? 'catalog-title-text'
-                  : ''
-              )}
-            >
-              {TitleText}
-            </div>
-          </Tooltip>
+          renderTitleText(props)
         )}
       </div>
     );
@@ -396,7 +397,6 @@ export function useEditableTree({ catalogTreeStore }) {
     handleSelect,
     onCatalogAdd,
     renderExtra,
-    renderTitle,
-    loading
+    renderTitle
   };
 }
