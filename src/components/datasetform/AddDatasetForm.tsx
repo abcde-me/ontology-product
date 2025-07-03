@@ -468,6 +468,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       style={{ width: '960px', minHeight: '436px' }}
       onCancel={onCancel}
       maskClosable={false}
+      // unmountOnExit={true}
     >
       <Form
         form={form}

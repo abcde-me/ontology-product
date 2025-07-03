@@ -105,17 +105,19 @@ export const useNodesSyncDraft = () => {
         onSuccess?: () => void;
         onError?: () => void;
         onSettled?: () => void;
-      }
+      },
+      params = {}
     ) => {
       if (getNodesReadOnly()) return;
       const postParams = getPostParams();
+      console.log('paramsparamsparamsparams', params);
 
       if (postParams) {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
           const { data: res } = await createWorkflowDraft(
-            Object.assign({}, postParams.params, { version: 'draft' })
+            Object.assign({}, postParams.params, { version: 'draft' }, params)
           );
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
@@ -153,11 +155,12 @@ export const useNodesSyncDraft = () => {
         onSuccess?: () => void;
         onError?: () => void;
         onSettled?: () => void;
-      }
+      },
+      params = {}
     ) => {
       if (getNodesReadOnly()) return;
 
-      if (sync) doSyncWorkflowDraft(notRefreshWhenSyncError, callback);
+      if (sync) doSyncWorkflowDraft(notRefreshWhenSyncError, callback, params);
       else debouncedSyncWorkflowDraft(doSyncWorkflowDraft);
     },
     [debouncedSyncWorkflowDraft, doSyncWorkflowDraft, getNodesReadOnly]

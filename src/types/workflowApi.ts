@@ -40,6 +40,8 @@ export interface WorkflowDetailRes {
   user_id: string;
   /** 创建人姓名 */
   user_name: string;
+  /** 定时运行 */
+  cycle_text?: CycleText;
 }
 
 export enum WorkflowOperation {

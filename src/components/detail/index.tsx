@@ -691,7 +691,36 @@ const DatasetDetail: React.FC = () => {
                     { label: '名称:', value: datasetDetail.name },
                     {
                       label: '标签:',
-                      value: datasetDetail.tag_names?.join('、') || '-'
+                      value: datasetDetail.tag_names?.length ? (
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '8px',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          {datasetDetail.tag_names.map((tag, index) => (
+                            <Tag
+                              key={index}
+                              style={{
+                                background: '#E2E8F0',
+                                color: '#0F172A',
+                                // padding: '3px 8px',
+                                borderRadius: '16px',
+                                fontSize: '12px',
+                                // border: '1px solid #e5eaff',
+                                height: '18px',
+                                // display: 'inline-flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              {tag}
+                            </Tag>
+                          ))}
+                        </div>
+                      ) : (
+                        '-'
+                      )
                     },
                     { label: '创建人:', value: datasetDetail.creator_name },
                     { label: '生成模型:', value: datasetDetail.src_model }
@@ -700,7 +729,7 @@ const DatasetDetail: React.FC = () => {
                   labelStyle={{
                     width: 80,
                     fontWeight: 'normal',
-                    color: '#666666'
+                    color: '#1E293B'
                   }}
                   valueStyle={{
                     color: '#333333',
@@ -744,7 +773,7 @@ const DatasetDetail: React.FC = () => {
                   labelStyle={{
                     width: 80,
                     fontWeight: 'normal',
-                    color: '#666666'
+                    color: '#1E293B'
                   }}
                   valueStyle={{
                     color: '#333333',

@@ -68,6 +68,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           app_scenarios: inputs?.app_scenarios,
           enha_modle_id: inputs?.enha_modle_id,
           sample_data: defaultPrompt,
+          enhanced_proportion: inputs?.enhanced_proportion,
           vars: cloneDeep(inputs.variables || [])
         }}
         onChange={onValuesChange}
@@ -124,6 +125,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 label="指令生成依赖样本数:"
                 field="sample_num"
                 layout="vertical"
+                rules={[
+                  {
+                    type: 'number',
+                    min: 1,
+                    max: 10000,
+                    message: '指令生成依赖样本数范围1~10000'
+                  }
+                ]}
               >
                 <InputNumber placeholder="请输入指令" />
               </FormItem>
@@ -139,13 +148,16 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 label="任务描述增强占比:"
                 field="enhanced_proportion"
                 layout="vertical"
+                rules={[
+                  {
+                    type: 'number',
+                    min: 0,
+                    max: 1,
+                    message: '过滤相似度阈值范围为0~1'
+                  }
+                ]}
               >
-                <InputNumber
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  placeholder="请输入指令"
-                />
+                <InputNumber step={0.1} placeholder="请输入指令" />
               </FormItem>
               <div className="content-tips-text">
                 节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
@@ -157,8 +169,16 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             label="过滤相似度阈值:"
             field="similarity_threshold"
             layout="vertical"
+            rules={[
+              {
+                type: 'number',
+                min: 0,
+                max: 1,
+                message: '过滤相似度阈值范围为0~1'
+              }
+            ]}
           >
-            <InputNumber min={0} max={1} step={0.1} placeholder="请输入阈值" />
+            <InputNumber step={0.1} placeholder="请输入阈值" />
           </FormItem>
           <div className="content-tips-text">
             这里通过Rouge-L
@@ -168,8 +188,16 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             label="生成样本数:"
             field="generate_sample_num"
             layout="vertical"
+            rules={[
+              {
+                type: 'number',
+                min: 1,
+                max: 20000,
+                message: '最大生成样本数范围1~20000'
+              }
+            ]}
           >
-            <Input placeholder="请输入样本数" />
+            <InputNumber placeholder="请输入生成样本数" />
           </FormItem>
           <div className="content-tips-text">指定生成的数据集的条数。</div>
         </div>

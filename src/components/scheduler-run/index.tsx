@@ -40,8 +40,10 @@ const initFrequencyData = (options: CycleText) => {
     return CycleValues.PER_MONTH;
   } else if (options.week === '*') {
     return CycleValues.PER_WEEK;
-  } else {
+  } else if (options.date === '*') {
     return CycleValues.PER_DAY;
+  } else {
+    return CycleValues.UNKNOWN;
   }
 };
 
@@ -58,16 +60,21 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
       date: options.date?.split(',') ?? [],
       time: `${options.hour}:${options.minute}`
     };
-  } else {
+  } else if (frequencyData === CycleValues.PER_DAY) {
     return {
       cycle: frequencyData,
       time: `${options.hour}:${options.minute}`
+    };
+  } else {
+    return {
+      cycle: undefined,
+      time: ''
     };
   }
 };
 
 const formatOptions = (frequencyData: CycleValues, formVals) => {
-  const [hour, minute] = formVals.time.split(':');
+  const [hour = '', minute = ''] = formVals.time.split(':');
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       minute,
@@ -84,11 +91,19 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
       month: '',
       week: '*'
     };
-  } else {
+  } else if (frequencyData === CycleValues.PER_DAY) {
     return {
       minute,
       hour,
       date: '*',
+      month: '',
+      week: ''
+    };
+  } else {
+    return {
+      minute,
+      hour,
+      date: '',
       month: '',
       week: ''
     };

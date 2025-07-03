@@ -1,16 +1,14 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import useConfig from './use-config';
-import type {
-  CodeNodeType,
-} from './types';
+import type { CodeNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import {
   Form,
   Input,
   Select,
   Checkbox,
-  Switch,
+  Switch
   // Table,
   // Space,
   // Slider,
@@ -40,11 +38,7 @@ import {
 import './date-cleaning.scss';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const {
-    readOnly,
-    inputs,
-    updateInputs,
-  } = useConfig(id, data);
+  const { readOnly, inputs, updateInputs } = useConfig(id, data);
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -61,9 +55,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [imputationSwitch, setImputationSwitch] = useState(false);
   const [outlierHandlingSwitch, setOutlierHandlingSwitch] = useState(false);
   // 获取from内容
-  const onValuesChange = useMemo(() => (changeValue, values) => {
-    updateInputs(values);
-  }, [upperLowerStatus]);
+  const onValuesChange = useMemo(
+    () => (changeValue, values) => {
+      updateInputs(values);
+    },
+    [upperLowerStatus]
+  );
   useEffect(() => {
     setImputationSwitch(inputs?.df_is);
     setOutlierHandlingSwitch(inputs?.oh_is);
@@ -71,8 +68,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     setSensitiveSwitch(inputs?.mg_is);
     setDataStandardizationSwitch(inputs?.ts_remove);
     setSwitchChecked(inputs?.data_standardization);
-    setFilterChecked(inputs?.threshold_switch)
-  }, [inputs])
+    setFilterChecked(inputs?.threshold_switch);
+  }, [inputs]);
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
@@ -142,7 +139,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   field="case_uniformity"
                   labelAlign="left"
                 >
-                  <Checkbox onChange={(checked) => { setUpperLowerStatus(!checked) }}>大小写统一</Checkbox>
+                  <Checkbox
+                    onChange={(checked) => {
+                      setUpperLowerStatus(!checked);
+                    }}
+                  >
+                    大小写统一
+                  </Checkbox>
                 </FormItem>
                 <FormItem
                   layout="vertical"
@@ -151,9 +154,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   labelAlign="left"
                 >
                   <Select
-                    size='mini'
+                    size="mini"
                     placeholder="请选择"
-                    style={{ width: '120px', height: '22px', marginLeft: '8px' }}
+                    style={{
+                      width: '120px',
+                      height: '22px',
+                      marginLeft: '8px'
+                    }}
                     disabled={upperLowerStatus}
                   >
                     <Option key={1} value={1}>
@@ -203,9 +210,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 field="threshold"
                 layout="inline"
                 label="字符串长度阈值"
-
               >
-                <Input size='mini' style={{ marginLeft: '16px' }} placeholder="请输入发阈值" min={0} />
+                <Input
+                  size="mini"
+                  style={{ marginLeft: '16px' }}
+                  placeholder="请输入发阈值"
+                  min={0}
+                />
               </FormItem>
               <div className="date-cleaning-info">
                 <div className="info-before">
