@@ -677,6 +677,7 @@ export const useNodesReadOnly = () => {
   const workflowRunningData = useStore((s) => s.workflowRunningData);
   const historyWorkflowData = useStore((s) => s.historyWorkflowData);
   const isRestoring = useStore((s) => s.isRestoring);
+  const currentUrl = window.location.pathname;
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -684,6 +685,7 @@ export const useNodesReadOnly = () => {
 
     return (
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
+      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring
     );
@@ -692,6 +694,7 @@ export const useNodesReadOnly = () => {
   return {
     nodesReadOnly: !!(
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
+      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring
     ),

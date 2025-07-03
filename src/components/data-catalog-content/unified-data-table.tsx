@@ -130,6 +130,7 @@ interface UnifiedDataTableProps {
   dataType?: 'volume' | 'database';
   // 选中节点的完整路径
   selectedFullPath?: string;
+  selectedKey?: string;
 }
 
 /**
@@ -145,7 +146,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     endTime = '',
     tableType,
     dataType = 'volume',
-    selectedFullPath
+    selectedFullPath,
+    selectedKey
   } = props;
 
   // 添加调试信息
@@ -157,6 +159,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     tableType,
     dataType,
     selectedFullPath,
+    selectedKey,
     selectedNode: selectedNode ? 'has value' : 'null'
   });
 
@@ -198,9 +201,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     try {
       // 如果是target表格，调用特定API获取数据
       const params = {
-        full_path: selectedFullPath,
+        full_path: '/src/test1/volume/test11',
         page: currentPage,
-        page_size: pageSize
+        limit: pageSize
       };
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
@@ -211,35 +214,18 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           newParams.search_id = searchConditionKeyword;
         }
       }
+      if (startTime) {
+        newParams.start_time = startTime;
+      }
+      if (endTime) {
+        newParams.end_time = endTime;
+      }
       const res = await getTargetDataFileList(newParams);
       if (res && res.data) {
         setTableData(res.data.list || []);
         setTotal(res.data.total || 0);
         console.log('获取最新表格数据成功:', res.data);
       }
-      // 根据搜索条件过滤数据
-      // if (searchValue) {
-      //   filteredData = filteredData.filter(
-      //     (item) =>
-      //       item.content.includes(searchValue) ||
-      //       item.file.includes(searchValue) ||
-      //       item.workflowId.includes(searchValue)
-      //   );
-      // }
-
-      // // 根据日期范围过滤
-      // if (startTime && endTime) {
-      //   filteredData = filteredData.filter((item) => {
-      //     const itemDate = new Date(item.createdAt);
-      //     const start = new Date(startTime);
-      //     const end = new Date(endTime);
-      //     return itemDate >= start && itemDate <= end;
-      //   });
-      // }
-
-      // setTableData(filteredData);
-      // setTotal(filteredData.length);
-      // console.log('获取最新表格数据成功 (模拟):', filteredData);
     } catch (error) {
       console.error('获取表格数据失败:', error);
     }
@@ -280,9 +266,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       dataType,
       downloadShow,
       null,
-      getTableList
+      getTableList,
+      selectedKey
     );
-  }, [tableType, dataType, downloadShow]);
+  }, [tableType, dataType, downloadShow, selectedKey]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
@@ -293,11 +280,19 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         dataType,
         downloadShow,
         hoveredRowId,
-        getTableList
+        getTableList,
+        selectedKey
       );
     }
     return baseColumns;
-  }, [baseColumns, tableType, dataType, downloadShow, hoveredRowId]);
+  }, [
+    baseColumns,
+    tableType,
+    dataType,
+    downloadShow,
+    hoveredRowId,
+    selectedKey
+  ]);
 
   // 处理表格选择变化 - 使用useCallback避免重新创建
   const handleSelectionChange = React.useCallback(

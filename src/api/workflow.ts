@@ -59,16 +59,30 @@ export async function operateWorkflow(
   params: WorkflowOperationParams
 ) {
   // TODO: 联调
-  // return UAPI.RES.workflowOperation({ workflow_uuid })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+  return UAPI.RES.workflowOperation({ workflow_uuid })
+    .put(params)
+    .inRegion()
+    .do();
 
-  return Promise.resolve({
-    code: '',
-    message: 'ok',
-    data: {},
-    requestId: 'AIMDP-ff704d3e-388c-4929-9353-9ce7f5386616',
-    status: 200
-  });
+  // return Promise.resolve({
+  //   code: '',
+  //   message: 'ok',
+  //   data: {},
+  //   requestId: 'AIMDP-ff704d3e-388c-4929-9353-9ce7f5386616',
+  //   status: 200
+  // });
+}
+
+// 获取结束节点目标目录
+export async function getWorkflowTargetPath(
+  root_type: number, // 0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录
+  search: string
+) {
+  return await UAPI.RES.workflowTargetPath({ root_type, search })
+    .get({
+      root_type,
+      search
+    })
+    .inRegion()
+    .do();
 }

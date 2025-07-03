@@ -166,7 +166,7 @@ export const ResourceEndpointsV2 = {
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-  targetDataFileListApi: PrefixAimdp + '/directory', //查询目标数据文件列表
+  targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
@@ -234,6 +234,12 @@ export const ModaForgeResourceEndpoints = {
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  // 工作流删除
+  workflowDelete: PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
+  // 工作流复制
+  workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
+  // 工作流 - 结束节点目标目录
+  workflowTargetPath: PrefixAimdp + '/directory',
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
@@ -265,7 +271,7 @@ export const ModaForgeResourceEndpoints = {
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
-  createDatasetApi: PrefixV1 + '/dataset',
+  createDatasetApi: PrefixAimdp + '/datasets',
   //获取标签列表
   tagListApi: PrefixAimdp + '/tags',
   //删除数据集
@@ -318,13 +324,17 @@ export const ModaForgeResourceEndpoints = {
   runLoadApi: PrefixAimdp + '/load_tasks/{task_id}/exec',
   // 删除指定文件
   delFileApi: PrefixAimdp + '/load_tasks/files',
+  // 查询载入任务详情的列表
+  getdetailListApi: PrefixAimdp + '/load_tasks/records/page',
   // 查询单个载入任务的执行记录
   getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
   // 查询单个载入任务已加载文件信息
   getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
-  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page'
+  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page',
+  // 停止单个载入任务
+  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop'
 };
 
 /**

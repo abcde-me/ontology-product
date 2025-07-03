@@ -5,8 +5,8 @@ import type {
 
 export type StartNodeType = CommonNodeType & {
   variables?: InputVar[];
-  source_path: string;
-  source_path_name: string;
+  data_path_id: number;
+  data_path_name: string;
   data_category: Array<{
     id: number;
     category: string;

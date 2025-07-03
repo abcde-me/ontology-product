@@ -152,28 +152,49 @@ const Header: FC = () => {
       // }
 
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
-        uid: userInfo?.account ?? '',
+        uid: userInfo?.id ?? '',
         ds_workflow_id: dsWorkflowId ?? 0,
-        op
+        op,
+        // TODO: ts错误
+        // @ts-expect-error
+        cycle_text: params?.cycleText
       });
 
       if (op === WorkflowOperation.ONLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '上线成功' });
         } else {
-          notify({ type: 'error', message: '上线失败' });
+          notify({
+            type: 'error',
+            message: workflowRes?.message ?? '上线失败'
+          });
         }
       } else if (op === WorkflowOperation.OFFLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '下线成功', duration: 100000 });
         } else {
-          notify({ type: 'error', message: '下线失败' });
+          notify({
+            type: 'error',
+            message: workflowRes?.message ?? '下线失败'
+          });
         }
       } else if (op === WorkflowOperation.RUNNING) {
         if (workflowRes?.data) {
           setShowRuningModal(true);
         } else {
-          notify({ type: 'error', message: '下线失败' });
+          notify({
+            type: 'error',
+            message: workflowRes?.message ?? '运行失败'
+          });
+        }
+      } else if (op === WorkflowOperation.CRON_RUNNING) {
+        if (workflowRes?.data) {
+          setShowRuningModal(true);
+        } else {
+          notify({
+            type: 'error',
+            message: workflowRes?.message ?? '运行失败'
+          });
         }
       }
     },

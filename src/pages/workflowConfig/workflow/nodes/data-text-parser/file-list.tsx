@@ -122,7 +122,7 @@ function FileList({
           .join('/')
           .split('/')
           .map((f) => f.toLowerCase());
-        const sourcePath = startNode?.data.source_path;
+        const sourcePath = startNode?.data.data_path_id;
         // item = {
         //   data: {
         //     data: [...new Array(5)].map((_, index) => {

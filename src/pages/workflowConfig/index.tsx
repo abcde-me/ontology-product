@@ -10,7 +10,7 @@ import './styles/index.css';
 import './styles/markdown.scss';
 import './styles/custom.scss';
 
-function WorkflowConfig() {
+function WorkflowConfig({ setHeight }) {
   const { setWorkflowDetail } = useStore(
     useShallow((state) => ({
       setWorkflowDetail: state.setWorkflowDetail
@@ -35,8 +35,8 @@ function WorkflowConfig() {
           workflow_name: '新建工作流'
         });
 
-        if (workflowInfo?.data?.[0]?.workflow_uuid) {
-          const { workflow_uuid, ds_workflow_id } = workflowInfo.data[0];
+        if (workflowInfo?.data?.workflow_uuid) {
+          const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
           history.push(
             `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );
@@ -48,7 +48,9 @@ function WorkflowConfig() {
 
   return (
     <Initor>
-      <div className="app-workflow-page h-full w-full overflow-x-auto">
+      <div
+        className={`app-workflow-page h-full w-full overflow-x-auto ${setHeight ? 'setHeight' : ''}`}
+      >
         {!loading && <Workflow />}
       </div>
     </Initor>

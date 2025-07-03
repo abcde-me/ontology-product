@@ -28,6 +28,7 @@ import {
   taskStop
 } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
+import Workflow from '../workflowConfig/index';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -113,6 +114,11 @@ export default function WorkflowTaskDetail() {
   useEffect(() => {
     if (taskId) getDetailData();
   }, [taskId]);
+
+  // 确保activeNode数据变化后再调用getNodeDetail
+  useEffect(() => {
+    if (taskId && activeNode) getNodeDetail();
+  }, [activeNode]);
 
   const getDetailData = async () => {
     setLoading(true);
@@ -288,7 +294,6 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
-    getNodeDetail();
   };
 
   // 获取节点详情
@@ -302,6 +307,7 @@ export default function WorkflowTaskDetail() {
       page_size: pageSize || pagination.pageSize
     };
     const res = await getTaskDetailNode(params);
+    if (!res?.data) return;
     if (isParseNode) {
       setParseNodeData(res.data.data_parse);
       setPagination({
@@ -383,7 +389,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '提交失败，请稍后重试'
+        content: res.message || '提交失败，请稍后重试'
       });
     }
   };
@@ -402,7 +408,7 @@ export default function WorkflowTaskDetail() {
       getDetailData();
     } else {
       Message.error({
-        content: '停止失败，请稍后重试'
+        content: res.message || '停止失败，请稍后重试'
       });
     }
   };
@@ -424,6 +430,7 @@ export default function WorkflowTaskDetail() {
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
         <span>工作流拓扑图</span>
+        <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}
       {getTaskContentDom()}

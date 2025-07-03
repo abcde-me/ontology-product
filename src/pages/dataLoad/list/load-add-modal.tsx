@@ -10,13 +10,20 @@ import {
   TimePicker,
   TreeSelect
 } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import CycleLoadingForm from '../list/cycle-loading-form-modal';
 import { convertWeekDaysToString } from '../../../utils/conversionArco';
 import { WeekDay } from '../../../utils/conversionArco';
 import { dataLodaAddForm } from '../type';
-import { addLoad } from '@/api/loadApi';
+import { addLoad, getDirectoryList } from '@/api/loadApi';
+import { getConnectionList } from '@/api/connectionApi';
+import { directoryData } from '../data/constants';
+import { useHistory } from 'react-router';
+interface connecort_nameType {
+  key: number;
+  label: string;
+}
 // 单选框实例
 const RadioGroup = Radio.Group;
 // 表单实例
@@ -24,43 +31,18 @@ const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
 const LoadAddModal = (props: any) => {
+  const history = useHistory();
+  // 存放连接器名称表单的数据
+  const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
   // 整体表单实例
   const [form] = Form.useForm();
-
-  // 绑定连接器下拉框数据
-  const [connectionoPtions, setConnectionOptions] = React.useState([
-    { key: '1', title: '连接器名称1' },
-    { key: '2', title: '连接器名称2' },
-    { key: '3', title: '连接器名称3' },
-    { key: '4', title: '连接器名称4' }
-  ]);
-
-  const [value, setValue] = useState<string[]>([]);
-  // 载入位置的下拉数据
-  const treeData = [
-    {
-      title: '酒店数据目录',
-      value: 'hotel',
-      children: [
-        { title: '北京市豪华酒店', value: '北京市豪华酒店' },
-        { title: '上海市豪华酒店', value: '上海市豪华酒店' }
-      ]
-    },
-    {
-      title: '餐厅数据',
-      value: 'restaurant',
-      children: [
-        { title: '广州餐厅', value: '广州餐厅' },
-        { title: '深圳餐厅', value: '深圳餐厅' }
-      ]
-    }
-  ];
 
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
     try {
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
+      const pathId = rest.dest_path.at(-1);
       if (loadVal !== 'once') {
         const [hour, minute] = time.split(':');
         await form.validate();
@@ -84,39 +66,64 @@ const LoadAddModal = (props: any) => {
           default:
             dataValue = '*';
         }
-
         const formData = {
           task_name: rest.name,
           connector_id: rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
-            type: isLastDayOfMonth ? '0' : '1',
+            type: loadVal == 'once' ? 0 : 1,
             cycle_text: {
               minute,
               hour,
-              data: dataValue,
+              date: dataValue,
               month: cycle == '每月' ? '*' : '',
               week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
             }
           },
-          dest_path: rest.dest_path,
-          creator: 'userlsc'
+          dest_path_id: pathId,
+          creator: 'user123'
         };
-        await addLoad(formData);
+        const res = await addLoad(formData);
+        if (res.message == 'ok') {
+          history.push(
+            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+          );
+        } else {
+          Message.error(res.message);
+        }
       } else {
-        // const formData = {
-        //   task_name: rest.name
-        // }
-        console.log('单次载入');
-        cancelHan();
+        const formData = {
+          task_name: rest.name,
+          connector_id: 15,
+          source_type: rest.source_type,
+          run_cycle: {
+            type: 0,
+            cycle_text: {
+              minute: '0',
+              hour: '0',
+              date: '*',
+              month: '*',
+              week: ''
+            }
+          },
+          dest_path_id: 2,
+          creator: 'user123'
+        };
+        console.log(formData);
+        const res = await addLoad(formData);
+        if (res.message == 'ok') {
+          history.push(
+            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+          );
+        } else {
+          Message.error(res.message);
+        }
       }
-      // cancelHan()
-      props.getList();
+      cancelHan();
     } catch (error) {
       console.error('表单处理失败:', error);
     }
   };
-
   // 点击取消按钮的逻辑
   const cancelHan = () => {
     // 点击取消隐藏弹框并且重置表单数据
@@ -139,6 +146,27 @@ const LoadAddModal = (props: any) => {
     }
     setLoadVal(val);
   };
+  // 获取连接器名称
+  const getConnector_name_type = async () => {
+    try {
+      const res = await getConnectionList({
+        page: 1,
+        page_size: 1000
+      });
+      const newres = res.data.items.map((item) => {
+        return {
+          key: item.id,
+          label: item.name
+        };
+      });
+      setConnectName(newres);
+    } catch (error) {
+      console.error('获取连接器名称失败:', error);
+    }
+  };
+  useEffect(() => {
+    getConnector_name_type();
+  }, []);
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form style={{ width: '100%' }} autoComplete="off" form={form}>
@@ -182,9 +210,9 @@ const LoadAddModal = (props: any) => {
           rules={[{ required: true, message: '请输入任务名称' }]}
         >
           <Select placeholder="请选择连接器">
-            {connectionoPtions.map((option, index) => (
-              <Option key={option.key} value={option.title}>
-                {option.title}
+            {connectName.map((option, index) => (
+              <Option key={option.key} value={option.key}>
+                {option.label}
               </Option>
             ))}
           </Select>
@@ -219,12 +247,7 @@ const LoadAddModal = (props: any) => {
           <Cascader
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
-            options={treeData}
-            fieldNames={{
-              label: 'title', // 显示文本使用 title
-              value: 'value', // 实际值使用 value
-              children: 'children'
-            }}
+            options={directoryData}
           />
         </FormItem>
       </Form>
