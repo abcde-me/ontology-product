@@ -108,7 +108,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access/${item.id}`
+              `/tenant/compute/modaforge/dataLoad/access?records_id=${item.execution_id}`
             );
           }}
         >
@@ -126,23 +126,23 @@ const TableDetail = (props) => {
   // 停止单个运行任务
 
   // 存放id
-  const [taskId, setTaskId] = useState(0);
+  const [executionId, setExecutionId] = useState(0);
   const stopTaskHan = (id) => {
     setVisible(true);
-    setTaskId(id);
+    setExecutionId(id);
   };
   // 模态框点击确认的按钮
   const modalOk = async () => {
     try {
       const res = await stopeLoad({
         task_id: props.taskId,
-        execution_id: taskId
+        execution_id: executionId
       });
       if (res.message == 'ok') {
         props.judgmentTaskHan();
         Message.success('操作成功,停止运行');
       } else {
-        Message.error('操作失败');
+        Message.error(res.message);
       }
       setVisible(false);
     } catch (error) {

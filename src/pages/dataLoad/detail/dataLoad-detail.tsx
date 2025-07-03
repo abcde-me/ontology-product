@@ -74,15 +74,16 @@ const DataLoadDetail = () => {
       const res = await runLoad({
         task_id: Number(loadId)
       });
+      console.log(res);
       if (res.message == '') {
         Message.success('新建运行成功');
+        judgmentTask();
       } else {
         Message.error(res.message);
       }
     } catch (error) {
       console.error('Error:', error);
     }
-    getDetailList();
   };
 
   // 获取详情页面数据列表
@@ -378,7 +379,7 @@ const DataLoadDetail = () => {
             detailData={listDetail}
             editForm={form}
             getDetailList={getTask_idHan}
-            loadId={loadId}
+            loadId={Number(loadId)}
           />
         </Modal>
       </div>
