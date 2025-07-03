@@ -57,7 +57,7 @@ interface Dataset {
   created_at: string;
   updated_at: string;
   deleted_at: null;
-  tag_names: string[];
+  tag_names?: string[];
   src_model: string;
 }
 
@@ -89,23 +89,23 @@ const columns = (
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList.forEach((dataset) => {
-        dataset.tag_names.forEach((tag) => tagSet.add(tag));
+        dataset.tag_names?.forEach((tag) => tagSet.add(tag));
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
     })(),
     onFilter: (value: string, record: Dataset) => {
-      return record.tag_names.includes(value);
+      return record.tag_names?.includes(value) || false;
     },
     render: (tag_names: string[]) => (
       <Space size="mini">
-        {tag_names.length > 0 && (
+        {tag_names && tag_names.length > 0 && (
           <Tag className={styles.tagGreen}>
             {tag_names[0].length > 5
               ? `${tag_names[0].substring(0, 5)}...`
               : tag_names[0]}
           </Tag>
         )}
-        {tag_names.length > 1 && (
+        {tag_names && tag_names.length > 1 && (
           <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
         )}
       </Space>
@@ -300,7 +300,7 @@ const DatasetManagement: React.FC = () => {
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
   //导出弹窗相关
-  const [downloadData, setDownloadData] = React.useState([]);
+  const [downloadData, setDownloadData] = React.useState<Dataset | null>(null);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
   // 搜索字段选项
   const searchOptions = [
@@ -352,11 +352,11 @@ const DatasetManagement: React.FC = () => {
         formData.dataSource === 'volume'
           ? {
               path:
-                formData.targetDataSource[0][0] +
+                // formData.targetDataSource[0][0] +
                 '/dst' +
                 '/' +
                 formData.targetDataSource[0][1] +
-                '/' +
+                '/volume/' +
                 formData.targetDataSource[1][0],
               path_id: formData.targetDataSource[1][1]
             }
