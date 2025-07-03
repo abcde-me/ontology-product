@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
-
+// 导入无数据组件
+import NoData from '../no-data';
+import noDataElement from '@/components/no-data';
 // 统一表格组件的属性类型定义
 type UnifiedTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
@@ -20,11 +22,6 @@ type UnifiedTableProps<RecordType> = {
 
 /**
  * 统一的表格组件
- * 整合了原SmartTable和TargetTable的功能
- * - 支持任意列和数据结构
- * - 支持行选择功能
- * - 支持行悬浮功能（主要用于Target表格）
- * - 根据tableType自动启用对应功能
  */
 function UnifiedTable<RecordType extends Record<string, unknown>>({
   columns,
@@ -116,6 +113,10 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
     return {};
   };
 
+  // 自定义无数据显示内容
+  // 根据tableType显示不同的描述文本
+  const noDataDescription = tableType === 'source' ? '暂无源数据' : '暂无目标数据';
+
   return (
     <Table<RecordType>
       columns={columns}
@@ -128,6 +129,13 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
       pagination={false}
       border={true}
       onRow={getRowProps}
+      // 自定义无数据显示
+      noDataElement={
+        noDataElement({
+          description: '暂无数据',
+          // btnText: '创建工作流',
+        })
+      }
       {...restProps}
     />
   );

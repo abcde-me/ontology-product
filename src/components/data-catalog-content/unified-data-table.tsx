@@ -14,7 +14,7 @@ import {
   Modal
 } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
-import { getTargetDataFileList } from '@/api/dataCatalog';
+import { getTargetDataFileList, getDataCatalogList } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable from './unified-table';
 import Pages from './components/pages';
@@ -38,6 +38,7 @@ interface TableDataItem {
   createdAt: string;
   file: string;
   workflowId: string;
+  full_path?: string;
 }
 
 // 将日期字符串转换为时间戳的工具函数
@@ -45,66 +46,6 @@ function toUnixTimestamp(dateString: string) {
   const date = new Date(dateString.replace(' ', 'T'));
   return Math.floor(date.getTime() / 1000);
 }
-
-// 模拟数据
-// const mockData = [
-//   {
-//     id: 4,
-//     content: '插图展示唐僧与孙悟空在火焰山对战红孩儿的场景...',
-//     type: 'pdf',
-//     createdAt: '2025-02-25 09:18:45',
-//     file: '西游插图.jpg',
-//     workflowId: 'WF-20250225-001'
-//   },
-//   {
-//     id: 5,
-//     content: '音频片段包含经典西游记电视剧主题曲《敢不敢》的部分片段...',
-//     type: 'txt',
-//     createdAt: '2025-02-25 10:40:18',
-//     file: '西游配乐.mp3',
-//     workflowId: 'WF-20250225-002'
-//   },
-//   {
-//     id: 6,
-//     content: '视频片段展示1986年版西游记电视剧中孙悟空大闹天宫的经典场景...',
-//     type: 'doc',
-//     createdAt: '2025-02-25 15:05:32',
-//     file: '西游片段.mp4',
-//     workflowId: 'WF-20250225-003'
-//   },
-//   {
-//     id: 0,
-//     content: '第一回 灵根子守山神，孙悟空开石洞。一日，花果山顶突然石破天惊...',
-//     type: 'pdf',
-//     createdAt: '2025-02-24 17:40:22',
-//     file: '西游.pdf',
-//     workflowId: 'WF-20250224-001'
-//   },
-//   {
-//     id: 1,
-//     content: '唐僧取经路上遭遇了九九八十一难，其中最著名的是白骨精三打...',
-//     type: 'doc',
-//     createdAt: '2025-02-24 17:42:15',
-//     file: '西游.pdf',
-//     workflowId: 'WF-20250224-001'
-//   },
-//   {
-//     id: 2,
-//     content: '网络安全防护包括防火墙配置、入侵检测系统、加密措施等核心内容...',
-//     type: 'txt',
-//     createdAt: '2025-02-26 10:30:45',
-//     file: '信息安全必知.pdf',
-//     workflowId: 'WF-20250226-002'
-//   },
-//   {
-//     id: 3,
-//     content: '2025年第一季度销售数据显示，电子产品类别同比增长12.7%...',
-//     type: 'pdf',
-//     createdAt: '2025-03-10 12:20:18',
-//     file: '数据报告.pdf',
-//     workflowId: 'WF-20250310-003'
-//   }
-// ];
 
 // 统一数据表格组件属性类型
 interface UnifiedDataTableProps {
@@ -170,6 +111,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [downloadData, setDownloadData] = useState([]); // 下载的数据
   const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
+  const [loading, setLoading] = useState(false); // 添加加载状态
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -199,14 +141,20 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   const getTableList = async () => {
     try {
-      // 如果是target表格，调用特定API获取数据
+      // 开始加载
+      setLoading(true);
+      
+      // 构建请求参数
       const params = {
-        full_path: '/src/test1/volume/test11',
+        full_path: '/src/test1/volume/test11',  // 使用选中路径或默认路径
         page: currentPage,
         limit: pageSize
       }
+      
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
+      
+      // 添加搜索条件
       if (searchConditionIsActive && searchConditionKeyword) {
         if (searchConditionType === '数据内容') {
           newParams.search_content = searchConditionKeyword;
@@ -214,28 +162,63 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           newParams.search_id = searchConditionKeyword;
         }
       }
+      
+      // 添加时间范围
       if(startTime){
         newParams.start_time = startTime
       }
       if(endTime){
         newParams.end_time = endTime
       }
-      const res = await getTargetDataFileList(newParams);
-      if (res && res.data) {
-        setTableData(res.data.list || []);
-        setTotal(res.data.total || 0);
-        console.log('获取最新表格数据成功:', res.data);
+
+      // 根据表格类型调用不同的API
+      let res;
+      if (tableType === 'target') {
+        // 调用目标数据API
+        res = await getTargetDataFileList(newParams);
+        console.log('调用目标数据API，参数:', newParams);
+      } else {
+        // 调用源数据API
+        res = await getDataCatalogList(newParams);
+        console.log('调用源数据API，参数:', newParams);
       }
       
+      // 处理API响应
+      if (res && res.data) {
+        if (res.data.list && res.data.list.length > 0) {
+          // 有数据
+          setTableData(res.data.list || []);
+          setTotal(res.data.total || 0);
+          console.log(`获取${tableType}表格数据成功:`, res.data);
+        } else {
+          // 无数据情况，设置为空数组
+          setTableData([]);
+          setTotal(0);
+          console.log(`${tableType}表格无数据`);
+        }
+      } else {
+        // 响应异常，设置为空数组
+        setTableData([]);
+        setTotal(0);
+        console.log(`获取${tableType}表格数据响应异常`);
+      }
     } catch (error) {
-      console.error('获取表格数据失败:', error);
+      // 发生错误，设置为空数组
+      setTableData([]);
+      setTotal(0);
+      console.error(`获取${tableType}表格数据失败:`, error);
+    } finally {
+      // 结束加载状态
+      setLoading(false);
     }
   };
+  
+  // 监听依赖项变化，重新获取数据
   useEffect(() => {
     getTableList();
   }, [
     searchValue,
-    searchConditionType,
+    // searchConditionType,
     searchConditionKeyword,
     searchConditionIsActive,
     startTime,
@@ -243,8 +226,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedFilePath,
     currentPage,
     pageSize,
-    tableType
+    tableType, // 当表格类型变化时重新获取数据
+    selectedFullPath // 当选中路径变化时重新获取数据
   ]);
+  
   // 控制下载弹框的显示和隐藏 - 使用useCallback避免重新创建
   const downloadShow = React.useCallback(
     (visible: boolean, downloaddata?: any) => {
@@ -349,25 +334,28 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           // Target表格特有的悬浮功能
           hoveredRowId={tableType === 'target' ? hoveredRowId : undefined}
           onRowHover={tableType === 'target' ? setHoveredRowId : undefined}
+          loading={loading} // 添加加载状态
         />
-        {/* 分页组件 */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: '12px'
-          }}
-        >
-          <span></span>
-          <Pages
-            current={currentPage}
-            total={total}
-            pageSize={pageSize}
-            onChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        </div>
+        {/* 分页组件 - 只有在有数据时才显示 */}
+        {tableData.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '12px'
+            }}
+          >
+            <span></span>
+            <Pages
+              current={currentPage}
+              total={total}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}

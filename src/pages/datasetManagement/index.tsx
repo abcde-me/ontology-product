@@ -296,7 +296,7 @@ const DatasetManagement: React.FC = () => {
 
 
   //导出弹窗相关
-  const [downloadData, setDownloadData] = React.useState([]);
+  const [downloadData, setDownloadData] = React.useState<Dataset | null>(null);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
   // 搜索字段选项
   const searchOptions = [

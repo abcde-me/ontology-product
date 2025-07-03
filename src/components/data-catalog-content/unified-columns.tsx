@@ -45,7 +45,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
     // 这里添加跳转逻辑，例如跳转到工作流详情页
     // 您可以根据实际需求修改跳转路径
     if (record.extras.workflow_id) {
-      window.open(`/workflow/${record.workflow_id}`, '_blank');
+      window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${record.extras.workflow_id}`, '_blank');
     }
   };
 

@@ -14,7 +14,7 @@ export default function noDataElement(props: {
       imgSrc={emptyList}
       description={
         btnText ? (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column'}}>
             <span className="description-text">{description}</span>
             <Button
               type="primary"
@@ -25,7 +25,7 @@ export default function noDataElement(props: {
             </Button>
           </div>
         ) : (
-          <span className="description-text">{description}</span>
+          <span className="description-text" >{description}</span>
         )
       }
     />
