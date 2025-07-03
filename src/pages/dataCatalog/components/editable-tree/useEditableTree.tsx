@@ -234,10 +234,13 @@ export function useEditableTree({ catalogTreeStore }) {
         if (dataRef?.isAdd) {
           await addCatalog({ name: fileName, root_type: root_type });
         } else {
-          await renameCatalog(dataRef.id, {
-            new_name: fileName,
-            root_type: root_type
-          });
+          // 编辑
+          if (fileName !== dataRef.name) {
+            await renameCatalog(dataRef.id, {
+              new_name: fileName,
+              root_type: root_type
+            });
+          }
         }
         break;
 
@@ -379,7 +382,7 @@ export function useEditableTree({ catalogTreeStore }) {
             }}
             maxLength={256}
             className={classNames(
-              'h-8 focus:border-[rgb(var(--primary-6))]',
+              'h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]',
               dataRef?.isLastLeaf ? 'last-leaf-input' : ''
             )}
           />
