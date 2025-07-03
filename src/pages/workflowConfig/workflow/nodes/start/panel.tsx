@@ -66,7 +66,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             id: n.id,
             data: {
               ...n.data,
-              selected_files_num: res.total,
+              selected_files_num: res.data.total,
               files: []
             }
           });
