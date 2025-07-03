@@ -27,7 +27,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   }, []);
 
   const onValuesChange = (_, values) => {
-    console.log(values, 'values');
     updateInputs({ ...values, dataSource: dataSource });
   };
   return (
@@ -40,7 +39,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         onValuesChange={onValuesChange}
         initialValues={{
-          target_path: inputs?.target_path || inputs?.target_path_name
+          target_path: inputs?.target_path
         }}
       >
         <FormItem
