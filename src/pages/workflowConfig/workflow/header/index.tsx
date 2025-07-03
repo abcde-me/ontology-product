@@ -15,7 +15,8 @@ import {
   useNodesReadOnly,
   useNodesSyncDraft,
   useWorkflowMode,
-  useWorkflowRun
+  useWorkflowRun,
+  useWorkflowTemplate
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
@@ -37,6 +38,8 @@ import {
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
 import './index.scss';
+import { createWorkflowDraft } from '@/api/workflowV2';
+import { version } from 'os';
 
 const SuccessModal = ({ visible, onClose }) => {
   return (
@@ -92,6 +95,13 @@ const Header: FC = () => {
   const workflowUuid = appDetail?.workflow_uuid ?? '';
   const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const cycleText = appDetail?.cycle_text ?? {
+    minute: '',
+    hour: '',
+    date: '',
+    month: '',
+    week: ''
+  };
   const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
   const { handleNodeSelect } = useNodesInteractions();
   const publishedAt = useStore((s) => s.publishedAt);
@@ -151,6 +161,44 @@ const Header: FC = () => {
       //   throw new Error('Checklist failed');
       // }
 
+      if (op === WorkflowOperation.ONLINE) {
+        handleSyncWorkflowDraft(
+          true,
+          true,
+          {
+            onSuccess: async () => {
+              const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+                uid: userInfo?.id ?? '',
+                ds_workflow_id: dsWorkflowId ?? 0,
+                op,
+                // @ts-expect-error
+                cycle_text: params?.cycleText ?? {}
+              });
+
+              if (workflowRes?.data) {
+                notify({ type: 'success', message: '上线成功' });
+              } else {
+                notify({
+                  type: 'error',
+                  message: workflowRes?.message ?? '上线失败'
+                });
+              }
+            },
+            onError: () => {
+              notify({
+                type: 'error',
+                message: '上线失败'
+              });
+            }
+          },
+          {
+            version: 'publish'
+          }
+        );
+
+        return;
+      }
+
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
         uid: userInfo?.id ?? '',
         ds_workflow_id: dsWorkflowId ?? 0,
@@ -160,24 +208,9 @@ const Header: FC = () => {
         cycle_text: params?.cycleText
       });
 
-      if (op === WorkflowOperation.ONLINE) {
-        if (workflowRes?.data) {
-          notify({ type: 'success', message: '上线成功' });
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
-        } else {
-          notify({
-            type: 'error',
-            message: workflowRes?.message ?? '上线失败'
-          });
-        }
-      } else if (op === WorkflowOperation.OFFLINE) {
+      if (op === WorkflowOperation.OFFLINE) {
         if (workflowRes?.data) {
           notify({ type: 'success', message: '下线成功', duration: 100000 });
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
         } else {
           notify({
             type: 'error',
@@ -286,6 +319,7 @@ const Header: FC = () => {
         <TaskOperation
           {...{
             workflowStatus,
+            cycleText,
             publishedAt,
             draftUpdatedAt,
             disabled: nodesReadOnly,

@@ -486,6 +486,8 @@ const DatasetManagement: React.FC = () => {
   // 导出数据集
   const handleExport = (record: Dataset) => {
     console.log('导出数据集:', record);
+    // TODO: ts错误
+    // @ts-expect-error
     setDownloadData(record);
     setVisible(true);
   };
