@@ -14,7 +14,7 @@ import {
   Modal
 } from '@arco-design/web-react';
 import { IconFolder } from '@arco-design/web-react/icon';
-import { getTargetDataFileList, getDataCatalogList } from '@/api/dataCatalog';
+import { getTargetDataFileList, getDataCatalogList, getSourceDataFileList } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable from './unified-table';
 import Pages from './components/pages';
@@ -129,6 +129,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const searchConditionType = searchCondition?.type || '';
   const searchConditionKeyword = searchCondition?.keyword || '';
   const searchConditionIsActive = searchCondition?.isActive || false;
+  const isFirstRender = useRef(true);
   // 监听选中路径变化
   useEffect(() => {
     console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
@@ -143,34 +144,49 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     try {
       // 开始加载
       setLoading(true);
-      
       // 构建请求参数
       const params = {
-        full_path: '/src/test1/volume/test11',  // 使用选中路径或默认路径
+        full_path: '/src/test1/volume/test11',  // 使用默认路径,后续修改为selectedFullPath
         page: currentPage,
-        limit: pageSize
+        limit: pageSize,
+        start_time: startTime,
+        end_time: endTime,
+        search_content: searchValue,
+        search_id: searchConditionKeyword,
+        file_type:[]
       }
-      
+      const sourceParams = {
+        page: currentPage,
+        page_size: pageSize,
+        file_name: searchValue,
+        data_path_id: Number(122), //后续修改为selectedKey
+        start: startTime,
+        end: endTime,
+        file_type:['json1']
+      }
       // 修复类型报错，先扩展params类型
       const newParams: any = { ...params };
-      
+      const newSourceParams: any = { ...sourceParams };
       // 添加搜索条件
-      if (searchConditionIsActive && searchConditionKeyword) {
-        if (searchConditionType === '数据内容') {
-          newParams.search_content = searchConditionKeyword;
-        } else if (searchConditionType === 'ID') {
-          newParams.search_id = searchConditionKeyword;
-        }
-      }
-      
+      // if (searchConditionIsActive && searchConditionKeyword) {
+      //   if (searchConditionType === '数据内容') {
+      //     newParams.search_content = searchConditionKeyword;
+      //   } else if (searchConditionType === 'ID') {
+      //     newParams.search_id = searchConditionKeyword;
+      //   }
+      // }
       // 添加时间范围
-      if(startTime){
-        newParams.start_time = startTime
-      }
-      if(endTime){
-        newParams.end_time = endTime
-      }
-
+      // if(startTime){
+      //   newParams.start_time = startTime
+      //   newSourceParams.start = startTime
+      // }
+      // if(endTime){
+      //   newParams.end_time = endTime
+      //   newSourceParams.end = endTime
+      // }
+      // if(selectedKey){
+      //   newSourceParams.data_path_id = selectedKey
+      // }
       // 根据表格类型调用不同的API
       let res;
       if (tableType === 'target') {
@@ -179,8 +195,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         console.log('调用目标数据API，参数:', newParams);
       } else {
         // 调用源数据API
-        res = await getDataCatalogList(newParams);
-        console.log('调用源数据API，参数:', newParams);
+        res = await getSourceDataFileList(newSourceParams);
+        console.log('调用源数据API，参数:', newSourceParams);
       }
       
       // 处理API响应
@@ -215,12 +231,17 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   
   // 监听依赖项变化，重新获取数据
   useEffect(() => {
+    if(isFirstRender.current){
+      isFirstRender.current = false;
+      return;
+    }
     getTableList();
   }, [
     searchValue,
     // searchConditionType,
     searchConditionKeyword,
     searchConditionIsActive,
+    selectedKey,
     startTime,
     endTime,
     selectedFilePath,

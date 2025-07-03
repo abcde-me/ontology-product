@@ -75,7 +75,16 @@ interface TargetFileDeleteParams {
   full_path: string;
   path_id: string;
 }
-
+//查询源数据文件参数接口
+interface SourceDataFileQueryParams {
+  page: number;
+  page_size: number;
+  file_name: string;
+  data_path_id:number;
+  start:string;
+  end:string;
+  file_type:Array<string>;
+}
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
@@ -93,6 +102,15 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
     .inRegion()
     .do();
 }
+//查询源数据文件列表
+export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
+  return await UAPI.RES.sourceDataFileListApi({}).post(params).inRegion().do();
+}
+//删除源数据目录单个文件
+export async function deleteSourceFile(id:string) {
+  return await UAPI.RES.sourceDataFileDeleteApi({id}).delete().inRegion().do();
+}
+/////////////////////////////////////////////////////////////////
 
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {

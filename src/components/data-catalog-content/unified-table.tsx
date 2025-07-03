@@ -3,7 +3,8 @@ import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 // 导入无数据组件
 import NoData from '../no-data';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
+import NoDataEmpty from '@/components/NoDataEmpty';
 // 统一表格组件的属性类型定义
 type UnifiedTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
@@ -112,11 +113,6 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
     // Source表格返回空对象
     return {};
   };
-
-  // 自定义无数据显示内容
-  // 根据tableType显示不同的描述文本
-  const noDataDescription = tableType === 'source' ? '暂无源数据' : '暂无目标数据';
-
   return (
     <Table<RecordType>
       columns={columns}
@@ -129,13 +125,7 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
       pagination={false}
       border={true}
       onRow={getRowProps}
-      // 自定义无数据显示
-      noDataElement={
-        noDataElement({
-          description: '暂无数据',
-          // btnText: '创建工作流',
-        })
-      }
+      noDataElement={<NoDataEmpty />}
       {...restProps}
     />
   );
