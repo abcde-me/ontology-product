@@ -178,7 +178,8 @@ export default function Connection() {
     {
       title: '创建人',
       dataIndex: 'creator',
-      width: 120
+      width: 120,
+      ellipsis: true
     },
     {
       title: '创建时间',
@@ -372,7 +373,7 @@ export default function Connection() {
       {/* 详情逻辑 */}
 
       <Modal
-        style={{ width: '700px', height: '500px' }}
+        style={{ width: '700px' }}
         visible={visible2}
         footer={null}
         onCancel={() => {

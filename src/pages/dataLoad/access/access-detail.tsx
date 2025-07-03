@@ -11,12 +11,18 @@ import React, { useEffect, useState } from 'react';
 import { Router } from 'react-router';
 import './index.css';
 import AccessTable from './access-tabel';
+import { useParams } from '@/utils/url';
+import { getLoadRecord, getLoadRecordLists } from '@/api/loadApi';
 
 const InputSearch = Input.Search;
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
+
 const AccessDetail = () => {
+  const recordsId = useParams('records_id');
+  console.log(recordsId);
+
   // 文件 成功  失败
   const filed = {
     fild: 125123,
@@ -27,6 +33,18 @@ const AccessDetail = () => {
   const OneLevelUpHan = () => {
     history.back();
   };
+  // 获取上面的详情
+  const getDetail = async () => {
+    try {
+      const res = await getLoadRecord(recordsId);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    // getDetail();
+  });
   return (
     <div>
       <div
@@ -145,7 +163,7 @@ const AccessDetail = () => {
           placeholder="搜索文件名"
           style={{ width: 200, marginLeft: '17px' }}
         />
-        <AccessTable />
+        <AccessTable records_id={recordsId} />
       </div>
     </div>
   );

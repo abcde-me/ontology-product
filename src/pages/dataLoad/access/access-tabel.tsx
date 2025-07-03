@@ -1,9 +1,11 @@
+import { getLoadRecordLists } from '@/api/loadApi';
 import { Pagination, Table, Tooltip } from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { RecordingType } from '../type';
 enum StatusType {
-  SYCCESS = '成功',
-  FAIL = '失败'
+  SYCCESS = 'succeed',
+  FAIL = 'fail'
 }
 const STATUSTYPEARR = {
   [StatusType.SYCCESS]: {
@@ -15,12 +17,13 @@ const STATUSTYPEARR = {
     color: 'red'
   }
 };
+
 const AccessTable = (props) => {
   const columns = [
     {
       title: '文件名',
-      dataIndex: 'filed',
-      width: 500,
+      dataIndex: 'file_name',
+      width: 420,
       ellipsis: true
     },
     {
@@ -38,9 +41,13 @@ const AccessTable = (props) => {
                   : STATUSTYPEARR[StatusType.SYCCESS].color
             }}
           ></div>
-          <div style={{ margin: '0px 3px 0px 5px' }}>{item.status}</div>
+          <div style={{ margin: '0px 3px 0px 5px' }}>
+            {item.status == StatusType.FAIL
+              ? STATUSTYPEARR[StatusType.FAIL].txt
+              : STATUSTYPEARR[StatusType.SYCCESS].txt}
+          </div>
           {item.status == StatusType.FAIL && (
-            <Tooltip mini content="失败原因">
+            <Tooltip mini content={item.error_message}>
               <IconExclamationCircle
                 style={{ color: 'orange', fontSize: '17px' }}
               />
@@ -51,47 +58,52 @@ const AccessTable = (props) => {
     },
     {
       title: '类型',
-      dataIndex: 'type'
+      dataIndex: 'file_type'
     },
     {
       title: '开始时间',
-      render: (_, item) => <div>{item.create_time}</div>,
-      sorter: (a, b) => a.create_time - b.create_time
+      render: (_, item) => <div>{item.start_time}</div>,
+      sorter: (a, b) => a.start_time - b.start_time
     },
     {
       title: '结束时间',
-      render: (_, item) => <div>{item.update_time}</div>,
-      sorter: (a, b) => a.update_time - b.update_time
+      render: (_, item) => <div>{item.end_time}</div>,
+      sorter: (a, b) => a.end_time - b.end_time
     }
   ];
-  const data = [
-    {
-      key: '1',
-      filed: '文件名',
-      status: '失败',
-      type: 'pdf',
-      create_time: '2',
-      update_time: '1'
-    },
-    {
-      key: '2',
-      filed: '文件名',
-      status: '成功',
-      type: 'pdf',
-      create_time: '4',
-      update_time: '3'
-    }
-  ];
-  const handlePageChange = () => {
-    console.log(123);
+  const [data, setData] = useState<RecordingType[] | null>([]);
+  const handlePageChange = (val) => {
+    setCurrent(val);
   };
+  // 当前页数
+  const [current, setCurrent] = useState(1);
+  // 每页显示几条
+  const [pageSize, setPageSize] = useState(10);
+  // 总条数
+  const [total, setTotal] = useState(0);
+  const getRecordingList = async () => {
+    try {
+      const res = await getLoadRecordLists({
+        page: current,
+        page_size: pageSize,
+        record_id: 'Job20250703-jtsl4VBQFfF29HuQ'
+      });
+      setTotal(res.data.total);
+      setData(res.data.items);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getRecordingList();
+  }, [current, pageSize]);
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}
     >
       <Table
         columns={columns}
-        data={data}
+        data={data ?? []}
         style={{ padding: '16px', width: '100%' }}
         border={false}
         pagination={false}
@@ -99,11 +111,17 @@ const AccessTable = (props) => {
       <Pagination
         sizeOptions={[1, 5, 10, 20]}
         showTotal
-        total={data.length}
+        total={total}
         showJumper
         sizeCanChange
         style={{ margin: '20px 30px' }}
-        onChange={handlePageChange}
+        onChange={(val) => {
+          handlePageChange(val);
+        }}
+        onPageSizeChange={(pageSize) => {
+          setPageSize(pageSize);
+          setCurrent(1);
+        }}
       />
     </div>
   );
