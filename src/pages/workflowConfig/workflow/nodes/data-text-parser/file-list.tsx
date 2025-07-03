@@ -99,13 +99,14 @@ function FileList({
       title: '文件大小',
       dataIndex: 'file_size',
       render(col, record) {
-        return <>{`${(+col / 8 / 8).toFixed(2)}MB`}</>;
+        return <>{`${(+col / 1024 / 1024).toFixed(2)}MB`}</>;
       }
     },
     {
       title: '创建时间',
       dataIndex: 'task_load_start_time',
-      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
+      sorter: (a, b) =>
+        a.task_load_start_time.localeCompare(b.task_load_start_time)
     }
   ];
 

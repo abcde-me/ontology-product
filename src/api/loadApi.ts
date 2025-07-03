@@ -65,4 +65,5 @@ export async function stopeLoad(params) {
 
 export async function getLoadTaskFiles(params: any = {}) {
   return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
+  // return await UAPI.RES.getLoadTaskFiles({}).post({...params, data_path_id: 122, file_type: ['jsonl']}).inRegion().do();
 }
