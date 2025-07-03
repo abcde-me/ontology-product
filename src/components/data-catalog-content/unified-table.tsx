@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle} from 'react';
 import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 // 导入无数据组件
 import NoData from '../no-data';
 // import noDataElement from '@/components/no-data';
 import NoDataEmpty from '@/components/NoDataEmpty';
+
+// 表格引用类型定义
+export interface UnifiedTableRef {
+  resetSelection: () => void;
+}
+
 // 统一表格组件的属性类型定义
 type UnifiedTableProps<RecordType> = {
   columns: ColumnProps<RecordType>[];
@@ -24,19 +30,36 @@ type UnifiedTableProps<RecordType> = {
 /**
  * 统一的表格组件
  */
-function UnifiedTable<RecordType extends Record<string, unknown>>({
-  columns,
-  data,
-  rowKey = 'id',
-  onSelectionChange,
-  hoveredRowId,
-  onRowHover,
-  tableType = 'source',
-  ...restProps
-}: UnifiedTableProps<RecordType>) {
+const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
+  props: UnifiedTableProps<RecordType>,
+  ref: React.Ref<UnifiedTableRef>
+) => {
+  const {
+    columns,
+    data,
+    rowKey = 'id',
+    onSelectionChange,
+    hoveredRowId,
+    onRowHover,
+    tableType = 'source',
+    ...restProps
+  } = props;
+
   // 表格选择状态管理
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<RecordType[]>([]);
+  
+  // 暴露给父组件的重置选择状态方法
+  useImperativeHandle(ref, () => ({
+    resetSelection: () => {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      // 同时触发选择变化回调，通知父组件选择已重置
+      if (onSelectionChange) {
+        onSelectionChange([], []);
+      }
+    }
+  }), [onSelectionChange]);
 
   // 内部行悬浮状态管理（当外部未提供时使用）
   const [internalHoveredRowId, setInternalHoveredRowId] = useState<
@@ -113,6 +136,7 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
     // Source表格返回空对象
     return {};
   };
+
   return (
     <Table<RecordType>
       columns={columns}
@@ -126,9 +150,11 @@ function UnifiedTable<RecordType extends Record<string, unknown>>({
       border={true}
       onRow={getRowProps}
       noDataElement={<NoDataEmpty />}
+      
       {...restProps}
+      
     />
   );
-}
+});
 
 export default UnifiedTable;

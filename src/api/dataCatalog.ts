@@ -67,6 +67,7 @@ interface TargetDataFileQueryParams {
   search_content: string;
   search_id: number;
   limit: number;
+  file_type:Array<string>;
 }
 
 // 定义删除目标文件的参数接口
@@ -108,7 +109,7 @@ export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
 }
 //删除源数据目录单个文件
 export async function deleteSourceFile(id:string) {
-  return await UAPI.RES.sourceDataFileDeleteApi({id}).delete().inRegion().do();
+  return await UAPI.RES.sourceDataFileDeleteApi({file_id:id}).delete().inRegion().do();
 }
 /////////////////////////////////////////////////////////////////
 

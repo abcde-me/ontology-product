@@ -3,9 +3,9 @@ import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
-import DocIcon from './icon/DOC.svg'; // 直接导入为组件
-import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
-import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
+import DocIcon from './icon/DOC.svg'; 
+import PdfIcon from './icon/PDF.svg'; 
+import TxtIcon from './icon/TXT.svg'; 
 import { deleteTargetFile, deleteSourceFile } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
@@ -41,17 +41,20 @@ const formatDateTime = (dateTimeString: string): string => {
 };
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
+  // 添加空值检查
+  const extras = record?.extras || {};
+  const fileName = extras.file_name || '无文件名';
+  const workflowId = extras.workflow_id || '无ID';
+
   const handleWorkflowClick = () => {
-    // 这里添加跳转逻辑，例如跳转到工作流详情页
-    // 您可以根据实际需求修改跳转路径
-    if (record.extras.workflow_id) {
-      window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${record.extras.workflow_id}`, '_blank');
+    if (extras.workflow_id) {
+      window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`, '_blank');
     }
   };
 
   return (
     <div>
-      <div>原文件: {record.extras.file_name}</div>
+      <div>原文件: {fileName}</div>
       <div>
         工作流ID:{' '}
         <a
@@ -73,7 +76,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
             (e.target as HTMLAnchorElement).style.textDecoration = 'none';
           }}
         >
-          {record.extras.workflow_id}
+          {workflowId}
           {showIcon && (
             <>
               &nbsp;
@@ -87,7 +90,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType) => (
+const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -97,7 +100,7 @@ const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tab
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDownload(record, setVisible)}
+      onClick={() => handleDownload(record, setVisible, selectedFullPath)}
     >
       导出
     </span>
@@ -117,16 +120,14 @@ const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tab
 );
 
 // 统一的列配置生成函数
-/**
- * 根据表格类型和活动状态生成对应的列配置
- */
 export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
   refreshData = () => {}, // 添加刷新数据的回调函数
-  selectedKey?: string // 添加selectedKey参数
+  selectedKey?: string, // 添加selectedKey参数
+  selectedFullPath?: string // 添加selectedFullPath参数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -168,7 +169,8 @@ export const getUnifiedColumns = (
           { text: 'txt', value: 'txt' },
           { text: 'doc', value: 'doc' }
         ],
-        onFilter: (value, row) => row.type == value,
+        // onFilter: (value, row) => row.type == value,
+        // onChange: (value, row) => row.type == value,
         render: (_, record) => (
           <div
             style={{
@@ -184,7 +186,7 @@ export const getUnifiedColumns = (
       },
       {
         title: '文件大小',
-        // width: 180
+        width: 120,
         dataIndex: 'file_size',
         render: (_, record) => (
           <div>
@@ -197,11 +199,6 @@ export const getUnifiedColumns = (
         dataIndex: 'upload_user',
         ellipsis: true,
         width: 100,
-        render: (_, record) => (
-          <div>
-            {record.upload_user}
-          </div>
-        )
       },
       {
         title: '载入开始时间',
@@ -225,14 +222,29 @@ export const getUnifiedColumns = (
         title: '连接器名称',
         dataIndex: 'connector_name',
         ellipsis: true,
-        width: 160
+        width: 160,
+        render: (_, record) => (
+          <div>
+            <Popover content={record.connector_name}>
+              <span
+               style={{
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+              >{record.connector_name}</span>
+            </Popover>
+          </div>
+        )
       },
       {
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
       }
     ];
   }
@@ -305,7 +317,7 @@ export const getUnifiedColumns = (
           { text: 'txt', value: 'txt' },
           { text: 'doc', value: 'doc' }
         ],
-        onFilter: (value, row) => row.type == value,
+        // onFilter: (value, row) => row.type == value,
         width: 134,
         render: (_, record) => (
           <div
@@ -325,32 +337,35 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
       }
     ];
   }
 
-  // Source表格的数据库列配置（目前为空，可根据需要扩展）
-  if (tableType === 'source' && dataType === 'database') {
-    return [
-      // 可根据实际需求添加数据库相关列配置
-    ];
-  }
+  // // Source表格的数据库列配置（目前为空，可根据需要扩展）
+  // if (tableType === 'source' && dataType === 'database') {
+  //   return [
+  //     // 可根据实际需求添加数据库相关列配置
+  //   ];
+  // }
 
-  // Target表格的数据库列配置（目前为空，可根据需要扩展）
-  if (tableType === 'target' && dataType === 'database') {
-    return [
-      // 可根据实际需求添加数据库相关列配置
-    ];
-  }
+  // // Target表格的数据库列配置（目前为空，可根据需要扩展）
+  // if (tableType === 'target' && dataType === 'database') {
+  //   return [
+  //     // 可根据实际需求添加数据库相关列配置
+  //   ];
+  // }
   // 默认返回空数组
   return [];
 };
 
 // 处理导出操作
-const handleDownload = (record, setVisible) => {
+const handleDownload = (record, setVisible, selectedFullPath) => {
   console.log('导出', record);
-  setVisible(true, record);
+  // 如果record有full_path属性，优先使用它，否则使用selectedFullPath
+  const filePath = record.full_path || selectedFullPath;
+  const downloadData = { ...record, filePath };
+  setVisible(true, downloadData);
 };
 
 // 处理删除操作
