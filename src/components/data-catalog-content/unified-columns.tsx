@@ -3,10 +3,10 @@ import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
-import DocIcon from './icon/DOC.svg'; // 直接导入为组件
-import PdfIcon from './icon/PDF.svg'; // 直接导入为组件
-import TxtIcon from './icon/TXT.svg'; // 直接导入为组件
-import { deleteTargetFile } from '@/api/dataCatalog';
+import DocIcon from './icon/DOC.svg'; 
+import PdfIcon from './icon/PDF.svg'; 
+import TxtIcon from './icon/TXT.svg'; 
+import { deleteTargetFile, deleteSourceFile } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
 // 图标组件定义
@@ -41,17 +41,20 @@ const formatDateTime = (dateTimeString: string): string => {
 };
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
+  // 添加空值检查
+  const extras = record?.extras || {};
+  const fileName = extras.file_name || '无文件名';
+  const workflowId = extras.workflow_id || '无ID';
+
   const handleWorkflowClick = () => {
-    // 这里添加跳转逻辑，例如跳转到工作流详情页
-    // 您可以根据实际需求修改跳转路径
-    if (record.extras.workflow_id) {
-      window.open(`/workflow/${record.workflow_id}`, '_blank');
+    if (extras.workflow_id) {
+      window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`, '_blank');
     }
   };
 
   return (
     <div>
-      <div>原文件: {record.extras.file_name}</div>
+      <div>原文件: {fileName}</div>
       <div>
         工作流ID:{' '}
         <a
@@ -73,7 +76,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
             (e.target as HTMLAnchorElement).style.textDecoration = 'none';
           }}
         >
-          {record.extras.workflow_id}
+          {workflowId}
           {showIcon && (
             <>
               &nbsp;
@@ -87,13 +90,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (
-  _,
-  record,
-  setVisible,
-  refreshData,
-  selectedKey
-) => (
+const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -103,7 +100,7 @@ const renderActionColumn = (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDownload(record, setVisible)}
+      onClick={() => handleDownload(record, setVisible, selectedFullPath)}
     >
       导出
     </span>
@@ -115,7 +112,7 @@ const renderActionColumn = (
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record, refreshData, selectedKey)}
+      onClick={() => handleDelete(record, refreshData, selectedKey, tableType)}
     >
       删除
     </span>
@@ -123,16 +120,14 @@ const renderActionColumn = (
 );
 
 // 统一的列配置生成函数
-/**
- * 根据表格类型和活动状态生成对应的列配置
- */
 export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
   refreshData = () => {}, // 添加刷新数据的回调函数
-  selectedKey?: string // 添加selectedKey参数
+  selectedKey?: string, // 添加selectedKey参数
+  selectedFullPath?: string // 添加selectedFullPath参数
 ) => {
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
@@ -144,12 +139,12 @@ export const getUnifiedColumns = (
       },
       {
         title: '文件名',
-        dataIndex: 'content',
+        dataIndex: 'file_name',
         ellipsis: true,
-        width: 300,
+        width: 200,
         render: (_, record) => (
           <div>
-            <Popover content={record.content}>
+            <Popover content={record.file_name}>
               <span
                 style={{
                   display: 'block',
@@ -159,22 +154,23 @@ export const getUnifiedColumns = (
                   maxWidth: '100%'
                 }}
               >
-                {record.content}
+                {record.file_name}
               </span>
             </Popover>
           </div>
         )
       },
       {
-        title: '类型',
-        dataIndex: 'type',
-        width: 100,
+        title: '文件类型',
+        dataIndex: 'file_type',
+        width: 120,
         filters: [
           { text: 'pdf', value: 'pdf' },
           { text: 'txt', value: 'txt' },
           { text: 'doc', value: 'doc' }
         ],
-        onFilter: (value, row) => row.type == value,
+        // onFilter: (value, row) => row.type == value,
+        // onChange: (value, row) => row.type == value,
         render: (_, record) => (
           <div
             style={{
@@ -183,52 +179,72 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.type, 16)}
+            {getFileIcon(record.file_type, 16)}
             <span>{record.file_type}</span>
           </div>
         )
       },
       {
         title: '文件大小',
-        width: 180
+        width: 120,
+        dataIndex: 'file_size',
+        render: (_, record) => (
+          <div>
+            {record.file_size}
+          </div>
+        )
       },
       {
         title: '上传用户',
-        dataIndex: 'meta',
+        dataIndex: 'upload_user',
         ellipsis: true,
-        width: 180,
-        render: (_, record) => <div></div>
+        width: 100,
       },
       {
         title: '载入开始时间',
-        dataIndex: 'createdAt',
+        dataIndex: 'task_load_start_time',
         width: 180,
         sorter: (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          new Date(a.task_load_start_time).getTime() - new Date(b.task_load_start_time).getTime(),
         onFilter: (value, record) => {
           if (!value || value.length !== 2) return true;
-          if (!record.createdAt) return false;
+          if (!record.task_load_start_time) return false;
 
-          const recordDate = new Date(record.createdAt);
+          const recordDate = new Date(record.task_load_start_time);
           const startDate = new Date(value[0]);
           const endDate = new Date(value[1]);
 
           return recordDate >= startDate && recordDate <= endDate;
-        }
+        },
+        render: (_, record) => formatDateTime(record.task_load_start_time)
       },
       {
         title: '连接器名称',
-        dataIndex: 'connectorName',
+        dataIndex: 'connector_name',
         ellipsis: true,
-        width: 180
+        width: 160,
+        render: (_, record) => (
+          <div>
+            <Popover content={record.connector_name}>
+              <span
+               style={{
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+              >{record.connector_name}</span>
+            </Popover>
+          </div>
+        )
       },
       {
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) =>
-          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
       }
     ];
   }
@@ -301,7 +317,7 @@ export const getUnifiedColumns = (
           { text: 'txt', value: 'txt' },
           { text: 'doc', value: 'doc' }
         ],
-        onFilter: (value, row) => row.type == value,
+        // onFilter: (value, row) => row.type == value,
         width: 134,
         render: (_, record) => (
           <div
@@ -321,44 +337,47 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) =>
-          renderActionColumn(_, record, setVisible, refreshData, selectedKey)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
       }
     ];
   }
 
-  // Source表格的数据库列配置（目前为空，可根据需要扩展）
-  if (tableType === 'source' && dataType === 'database') {
-    return [
-      // 可根据实际需求添加数据库相关列配置
-    ];
-  }
+  // // Source表格的数据库列配置（目前为空，可根据需要扩展）
+  // if (tableType === 'source' && dataType === 'database') {
+  //   return [
+  //     // 可根据实际需求添加数据库相关列配置
+  //   ];
+  // }
 
-  // Target表格的数据库列配置（目前为空，可根据需要扩展）
-  if (tableType === 'target' && dataType === 'database') {
-    return [
-      // 可根据实际需求添加数据库相关列配置
-    ];
-  }
+  // // Target表格的数据库列配置（目前为空，可根据需要扩展）
+  // if (tableType === 'target' && dataType === 'database') {
+  //   return [
+  //     // 可根据实际需求添加数据库相关列配置
+  //   ];
+  // }
   // 默认返回空数组
   return [];
 };
 
 // 处理导出操作
-const handleDownload = (record, setVisible) => {
+const handleDownload = (record, setVisible, selectedFullPath) => {
   console.log('导出', record);
-  setVisible(true, record);
+  // 如果record有full_path属性，优先使用它，否则使用selectedFullPath
+  const filePath = record.full_path || selectedFullPath;
+  const downloadData = { ...record, filePath };
+  setVisible(true, downloadData);
 };
 
 // 处理删除操作
-const handleDelete = (data, refreshData, selectedKey) => {
-  const ids: Array<string> = [];
+const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'target') => {
+  const ids: Array<string> = []
   try {
     Modal.confirm({
       title: '确认删除文件吗?',
       content: '删除后，文件不可恢复',
       onOk: async () => {
-        ids.push(data.id);
+        if(tableType === 'target'){
+          ids.push(data.id);
         console.log('查看删除的数据和数组们', data, ids);
         await deleteTargetFile({
           full_path: data.full_path,
@@ -366,6 +385,10 @@ const handleDelete = (data, refreshData, selectedKey) => {
           path_id: selectedKey
         });
         Message.success('删除成功');
+        }else{
+          await deleteSourceFile(data.id);
+          Message.success('删除成功');
+        }
         // 删除成功后刷新数据
         if (typeof refreshData === 'function') {
           refreshData();

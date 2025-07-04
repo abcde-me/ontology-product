@@ -9,7 +9,7 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
+import { IconDelete, IconDownload, IconCloseCircle, IconSearch } from '@arco-design/web-react/icon';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
@@ -35,6 +35,7 @@ interface TableRow {
 // 定义表格引用类型
 interface TableRefType {
   getTableList: () => void;
+  resetSelection: () => void;
 }
 
 export default function Eltable() {
@@ -195,12 +196,19 @@ export default function Eltable() {
             });
             Message.success('删除成功');
 
-            // 清空选择
+            // 清空选择状态
             setSelectedRows([]);
-
-            // 刷新表格数据
-            if (tableRef.current && tableRef.current.getTableList) {
-              tableRef.current.getTableList();
+            
+            // 使用表格引用重置选中框
+            if (tableRef.current) {
+              // 先重置选择状态
+              if (tableRef.current.resetSelection) {
+                tableRef.current.resetSelection();
+              }
+              // 然后刷新表格数据
+              if (tableRef.current.getTableList) {
+                tableRef.current.getTableList();
+              }
             } else {
               // 如果无法调用方法，则强制刷新页面
               window.location.reload();
@@ -216,9 +224,9 @@ export default function Eltable() {
   const [defaultName, setDefaultName] = useState('');
   const handleExport = () => {
     // 根据当前标签页设置默认文件名
-    const fileName =
-      activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
-    setDefaultName(fileName);
+    // const fileName =
+    //   activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
+    // setDefaultName(fileName);
     console.log('导出', selectedRows);
     setVisible(true);
   };
@@ -454,10 +462,22 @@ export default function Eltable() {
       </div>
       <FormComponent
         downloadData={downloadData}
-        onCancel={() => setVisible(false)}
+        onCancel={() => {
+          setVisible(false);
+          // 取消导出时不重置选中状态
+        }}
         visible={visible}
         names={defaultName}
         exportdatas={selectedRows}
+        selectedPath={selectedPath}
+        onExportSuccess={() => {
+          // 导出成功后重置选中状态
+          setSelectedRows([]);
+          // 使用表格引用重置选中框
+          if (tableRef.current && tableRef.current.resetSelection) {
+            tableRef.current.resetSelection();
+          }
+        }}
       />
     </div>
   );

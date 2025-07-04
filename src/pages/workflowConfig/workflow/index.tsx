@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import useSWR from 'swr';
 import { setAutoFreeze } from 'immer';
+import { useLocation } from 'react-router-dom';
 import { useEventListener } from 'ahooks';
 import ReactFlow, {
   Background,
@@ -83,11 +84,6 @@ import Confirm from '@/pages/workflowConfig/components/confirm';
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
 import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConfig.json';
 
-// 作业详情不需要显示 其他正常显示
-const currentUrl = window.location.pathname;
-const isShowChatMode =
-  currentUrl === '/tenant/compute/modaforge/workflowTaskDetail';
-console.log(isShowChatMode, ' ======', currentUrl);
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
   [CUSTOM_NOTE_NODE]: CustomNoteNode,
@@ -117,6 +113,10 @@ const Workflow: FC<WorkflowProps> = memo(
     const showConfirm = useStore((s) => s.showConfirm);
     const showImportDSLModal = useStore((s) => s.showImportDSLModal);
 
+    // 作业详情不需要显示 其他正常显示
+    const location = useLocation(); // 获取当前路由信息
+    const isShowChatMode =
+      location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
     const {
       setShowConfirm,
       setControlPromptEditorRerenderKey,
