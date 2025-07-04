@@ -73,20 +73,6 @@ interface DatasetDetail {
   deleted_at?: string | null; // 可选字段，因为API响应中可能没有这个字段
 }
 
-// 内容数据测试数据
-const cscontentData = [
-  {
-    line: 0,
-    data: {
-      姓名: '张11111111111111111111三张11111111111111111111三张11111111111111111111三张11111111111111111111三',
-      年龄: 28,
-      性别: '男'
-    }
-  },
-  { line: 1, data: { 姓名: '李四', 年龄: 34, 性别: '女' } },
-  { line: 2, data: { 姓名: '王五', 年龄: 22, 性别: '男' } }
-];
-
 // 内容数据表格列定义
 const cscontentColumns = ['姓名', '年龄', '性别'];
 
@@ -240,6 +226,7 @@ const versionColumns = [
   {
     title: '版本号',
     dataIndex: 'version_id',
+    width: 260,
     render: (version: string) => (
       <Space>
         <Text>{version}</Text>
@@ -249,6 +236,7 @@ const versionColumns = [
   {
     title: '修改类型',
     dataIndex: 'type',
+    width: 226,
     filters: [
       { text: '数据导入', value: 1 },
       { text: '用户手动修改', value: 2 },
@@ -267,10 +255,12 @@ const versionColumns = [
   {
     title: '创建时间',
     dataIndex: 'created_at',
+    width: 226,
     render: (time: string) => formatDate(time)
   },
   {
     title: '更变记录',
+    width: 470,
     dataIndex: 'description'
   }
 ];
