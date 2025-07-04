@@ -7,6 +7,7 @@ import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
+import { useUnmountedRef } from 'ahooks';
 
 type FileListProps = {
   catetoryId: number;
@@ -24,6 +25,7 @@ function FileList({
   handleFilesChange
 }: FileListProps) {
   // console.log('fileList......', files, selectedFilesNum)
+  const unmountedRef = useUnmountedRef();
   const nodes = useNodes();
   const startNode = nodes.find(
     (node: any) => node.data.type === BlockEnum.Start
@@ -154,6 +156,7 @@ function FileList({
           }
         };
       }
+      if (unmountedRef.current) return;
       // console.log('列表数据:', item);
       const { items = [], total = 0 } = result.data;
       setFilesData(items || []);
@@ -174,6 +177,7 @@ function FileList({
     } catch (error) {
       setFilesData([]);
     } finally {
+      if (unmountedRef.current) return;
       setLoading(false);
     }
   };

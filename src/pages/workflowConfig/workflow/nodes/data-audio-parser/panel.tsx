@@ -28,6 +28,7 @@ import { v4 as uuid4 } from 'uuid';
 import FileList from '../data-text-parser/file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
+import { useUnmountedRef } from 'ahooks';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -39,6 +40,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [audioModels, setAudioModels] = useState<Record<string, any>[]>([]);
+  const unmountedRef = useUnmountedRef();
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
@@ -47,6 +49,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
 
   useEffect(() => {
     getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
       const audioList =
         res.data.find((d) => d.type === 'audio_model')?.model_data || [];
 
