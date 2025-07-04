@@ -7,11 +7,13 @@ import { useWorkflowUpdate } from '../hooks';
 import { useNodesReadOnly } from './use-workflow';
 import { createWorkflowDraft } from '@/api/workflowV2';
 import { PrefixV2 } from '@/api/endpoints';
-import { useParams } from '@/utils/url';
+import { updateQueryParams, useParams } from '@/utils/url';
+import { useHistory } from 'react-router';
 
 export const useNodesSyncDraft = () => {
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
+  const history = useHistory();
 
   const { getNodesReadOnly } = useNodesReadOnly();
   const { handleRefreshWorkflowDraft } = useWorkflowUpdate();
@@ -112,7 +114,6 @@ export const useNodesSyncDraft = () => {
       const postParams = getPostParams();
 
       if (postParams) {
-        const searchParams = new URLSearchParams(location.search);
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
@@ -124,7 +125,9 @@ export const useNodesSyncDraft = () => {
           );
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
-          searchParams.set('ds_workflow_id', res.ds_workflow_id);
+          updateQueryParams(history, {
+            ds_workflow_id: res.ds_workflow_id
+          });
           callback?.onSuccess && callback.onSuccess();
         } catch (error: any) {
           if (error && error.json && !error.bodyUsed) {
