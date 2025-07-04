@@ -3,29 +3,28 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useContext, useContextSelector } from 'use-context-selector';
+import { useContext } from 'use-context-selector';
 import { useStore, useWorkflowStore } from '../store';
 import { BlockEnum, InputVarType } from '../types';
 import type { StartNodeType } from '../nodes/start/types';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
   useChecklistBeforePublish,
-  useIsChatMode,
   useNodesInteractions,
   useNodesReadOnly,
   useNodesSyncDraft,
-  useWorkflowMode,
-  useWorkflowRun,
-  useWorkflowTemplate
+  useWorkflowMode
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
-import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
-import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
-import { getWorkflowDetail, operateWorkflow } from '@/api/workflow';
+import {
+  editWorkflow,
+  getWorkflowDetail,
+  operateWorkflow
+} from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import {
   IsOnline,
@@ -122,6 +121,10 @@ const Header: FC = () => {
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
   const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const [workflowName, setWorkflowName] = useState(
+    appDetail?.workflow_name ?? ''
+  );
+
   const cycleText = appDetail?.cycle_text ?? {
     minute: '',
     hour: '',
@@ -284,11 +287,7 @@ const Header: FC = () => {
   }, [workflowStore]);
 
   const handleWorkflowNameChange = (workflow_name: string) => {
-    appDetail &&
-      setAppDetail({
-        ...appDetail,
-        workflow_name
-      });
+    setWorkflowName(workflowName);
   };
 
   const handleEdit = () => {
@@ -297,15 +296,33 @@ const Header: FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleSave = () => {
+  const handleSave = async (workflow_name: string) => {
     setEditing(false);
     // 这里可以添加保存逻辑
+    const workflowRes = await editWorkflow(workflowUuid ?? '', {
+      workflow_name
+    });
+
+    if (workflowRes?.data) {
+      appDetail &&
+        setAppDetail({
+          ...appDetail,
+          workflow_name
+        });
+      notify({
+        type: 'success',
+        message: '修改工作流名称成功'
+      });
+    } else {
+      notify({
+        type: 'error',
+        message: workflowRes?.message ?? '修改工作流名称失败'
+      });
+    }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    }
+  const handlePressEnter = (workflow_name: string) => {
+    handleSave(workflow_name);
   };
 
   return (
@@ -324,8 +341,8 @@ const Header: FC = () => {
               ref={inputRef}
               value={appDetail?.workflow_name}
               onChange={handleWorkflowNameChange}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
+              onBlur={() => handleSave(workflowName)}
+              onPressEnter={() => handlePressEnter(workflowName)}
               style={{ width: 200 }}
             />
           ) : (

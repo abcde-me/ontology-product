@@ -695,11 +695,6 @@ export const useNodesReadOnly = () => {
     );
   }, [workflowStore]);
 
-  console.log(
-    'workflowStatusworkflowStatus:',
-    workflowStatus === IsOnline.online
-  );
-
   return {
     nodesReadOnly: !!(
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
