@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
 import type { VideoParserNodeType, OutputVar } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
@@ -13,6 +13,11 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
 
   const defaultConfig = TextNodeDefault.defaultValue;
   const { inputs, setInputs } = useNodeCrud<VideoParserNodeType>(id, payload);
+  const inputRef = useRef(inputs);
+
+  useEffect(() => {
+    inputRef.current = inputs;
+  }, [inputs]);
 
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
@@ -27,27 +32,19 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
 
   const handleFilesChange = useCallback(
     (files: string[], count: number) => {
-      const newInputs = produce(inputs, (draft) => {
+      const newInputs = produce(inputRef.current, (draft) => {
         draft.files = files;
         draft.selected_files_num = count;
       });
       console.log('handleFilesChange', files, inputs, newInputs);
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
-  // const handleFilesCountChange = useCallback(
-  //   (count: number) => {
-  //     const newInputs = produce(inputs, (draft) => {
-  //       draft.selected_files_num = count;
-  //     });
-  //     setInputs(newInputs);
-  //   },
-  //   [inputs, setInputs]
-  // );
+
   const handleFiledsChange = useCallback(
     (fields: VideoParserNodeType) => {
-      const newInputs = produce(inputs, (draft) => {
+      const newInputs = produce(inputRef.current, (draft) => {
         draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1;
         (draft.activity_mode = fields.activity_mode),
           (draft.is_open_multi_conv = fields.vad_options.includes('conv')
@@ -62,7 +59,7 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
       });
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
 
   return {
@@ -70,7 +67,6 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
     inputs,
     handleFilesChange,
     handleFiledsChange
-    // handleFilesCountChange
   };
 };
 

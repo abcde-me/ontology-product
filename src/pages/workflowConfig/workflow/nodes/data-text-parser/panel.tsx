@@ -51,14 +51,21 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
       const defaultPicId = picList[0]?.id || '';
       const defaultTextId = textList[0]?.id || '';
 
+      const fields = {} as Record<string, any>;
       if (!inputs.text_ocr_model_id) {
-        form.setFieldValue('text_ocr_model_id', defaultOcrId);
+        // form.setFieldValue('text_ocr_model_id', defaultOcrId);
+        fields.text_ocr_model_id = defaultOcrId;
       }
       if (!inputs.text_pic_model_id) {
-        form.setFieldValue('text_pic_model_id', defaultPicId);
+        // form.setFieldValue('text_pic_model_id', defaultPicId);
+        fields.text_pic_model_id = defaultPicId;
       }
       if (!inputs.text_ocr_model_id) {
-        form.setFieldValue('text_emb_model_id', defaultTextId);
+        // form.setFieldValue('text_emb_model_id', defaultTextId);
+        fields.text_emb_model_id = defaultTextId;
+      }
+      if (Object.keys(fields).length) {
+        form.setFieldsValue(fields);
       }
     });
   }, []);

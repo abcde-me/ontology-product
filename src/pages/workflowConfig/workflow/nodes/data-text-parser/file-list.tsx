@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import { Table, Input } from '@arco-design/web-react';
 import { useNodes, type Node } from 'reactflow';
@@ -124,9 +124,9 @@ function FileList({
           .split('/')
           .map((f) => f.toLowerCase());
         const sourcePath = startNode?.data.data_path_id;
-        // item = {
+        // result = {
         //   data: {
-        //     data: [...new Array(5)].map((_, index) => {
+        //     items: [...new Array(5)].map((_, index) => {
         //       return {
         //         id: 1000 * params.page + index,
         //         file_name:
@@ -201,7 +201,6 @@ function FileList({
       page: pagination.page,
       limit: pagination.limit
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
