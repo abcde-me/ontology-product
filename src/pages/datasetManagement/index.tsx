@@ -24,7 +24,8 @@ import { useHistory } from 'react-router-dom';
 import {
   getDatasetList,
   createDataset,
-  deleteDataset
+  deleteDataset,
+  batchDeleteDataset
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
@@ -478,15 +479,28 @@ const DatasetManagement: React.FC = () => {
 
     Modal.confirm({
       title: '批量删除确认',
-      content: `确定要删除选中的 ${selectedRowKeys.length} 个数据集吗？此操作不可撤销。`,
+      content: `删除后，文件不可恢复`,
       okText: '确认删除',
       cancelText: '取消',
       okButtonProps: { status: 'danger' },
       onOk: () => {
         console.log('批量删除:', selectedRows);
-        Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
+        batchDeleteDataset({
+          ids: selectedRowKeys.map((key) => key.toString())
+        })
+          .then((res) => {
+            console.log('批量删除结果:', res);
+            if (res.status === 200) {
+              Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
+              setSelectedRowKeys([]);
+              setSelectedRows([]);
+            } else {
+              Message.error('批量删除失败！');
+            }
+          })
+          .catch((err) => {
+            Message.error('批量删除失败！');
+          });
       }
     });
   };
@@ -565,7 +579,7 @@ const DatasetManagement: React.FC = () => {
           />
         </Input.Group>
         <div className={styles.actionButtons}>
-          {/* <Button
+          <Button
             icon={<IconDelete />}
             className={styles.batchDeleteBtn}
             disabled={selectedRowKeys.length === 0}
@@ -573,7 +587,7 @@ const DatasetManagement: React.FC = () => {
           >
             批量删除
           </Button>
-          <Button
+          {/* <Button
             icon={<IconDownload />}
             className={styles.batchExportBtn}
             disabled={selectedRowKeys.length === 0}
