@@ -58,11 +58,17 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
       const defaultPicId = picList[0]?.id || '';
       const defaultPicEmbId = picEmbList[0]?.id || '';
 
+      const fields = {} as Record<string, any>;
       if (!inputs.pic_model_id) {
-        form.setFieldValue('pic_model_id', defaultPicId);
+        // form.setFieldValue('pic_model_id', defaultPicId);
+        fields.pic_model_id = defaultPicId;
       }
       if (!inputs.pic_emb_model_id) {
-        form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
+        // form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
+        fields.pic_emb_model_id = defaultPicEmbId;
+      }
+      if (Object.keys(fields).length) {
+        form.setFieldsValue(fields);
       }
     });
   }, []);
