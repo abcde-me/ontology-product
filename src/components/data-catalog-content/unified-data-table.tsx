@@ -91,19 +91,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedKey
   } = props;
 
-  // 添加调试信息
-  console.log(`UnifiedDataTable (${tableType}) 接收到的 props:`, {
-    searchValue,
-    searchCondition,
-    startTime,
-    endTime,
-    tableType,
-    dataType,
-    selectedFullPath,
-    selectedKey,
-    selectedNode: selectedNode ? 'has value' : 'null'
-  });
-
 
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
@@ -122,10 +109,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
+  // 跨页选中状态
+  const [crossPageSelectedKeys, setCrossPageSelectedKeys] = useState<React.Key[]>([]);
+  const [crossPageSelectedRows, setCrossPageSelectedRows] = useState<any[]>([]);
+
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
   const childRef = useRef(null);
-  
+
   // 表格组件引用，用于调用表格内部方法
   const tableRef = useRef<UnifiedTableRef>(null);
   // 分解searchCondition对象，避免引用比较导致的无限循环
@@ -133,6 +124,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const searchConditionKeyword = searchCondition?.keyword || '';
   const searchConditionIsActive = searchCondition?.isActive || false;
   const isFirstRender = useRef(true);
+  // 防止重复请求
+  const isDataFetching = useRef(false);
+
   // 监听选中路径变化
   useEffect(() => {
     console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
@@ -149,19 +143,42 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       // 同时重置当前组件的选择状态
       setSelectedRowKeys([]);
       setSelectedRows([]);
+      // 重置跨页选择状态
+      setCrossPageSelectedKeys([]);
+      setCrossPageSelectedRows([]);
+    },
+    // 导出跨页选择的数据
+    getSelectedData: () => {
+      return {
+        selectedRowKeys: crossPageSelectedKeys,
+        selectedRows: crossPageSelectedRows
+      };
+    },
+    // 清除所有选择状态（包括跨页）
+    clearAllSelections: () => {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setCrossPageSelectedKeys([]);
+      setCrossPageSelectedRows([]);
+      if (tableRef.current) {
+        tableRef.current.resetSelection();
+      }
     }
   }));
 
   const getTableList = async () => {
+    // 防止重复请求
+    if (isDataFetching.current) {
+      console.log(`${tableType}表格 - 已有请求正在进行，跳过`);
+      return;
+    }
+
     try {
-      // 开始加载
+      // 标记开始加载
+      isDataFetching.current = true;
       setLoading(true);
-      // 构建请求参数
-      // 检查fileTypeFilters是否为有效数组
-      const validFileTypes = Array.isArray(fileTypeFilters) && fileTypeFilters.length > 0 
-        ? fileTypeFilters 
-        : [];
-      
+
+      const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
       const params = {
         full_path: '/src/test1/volume/test11',  // 使用默认路径,后续修改为selectedFullPath
@@ -171,9 +188,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         end_time: endTime || '',
         search_content: searchValue || '',
         search_id: searchConditionKeyword || '',
-        file_type: validFileTypes // 使用筛选条件中的文件类型
+        // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       }
-      
+
       // 源数据表参数
       const sourceParams = {
         page: currentPage,
@@ -186,27 +203,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
-      // 添加搜索条件
-      // if (searchConditionIsActive && searchConditionKeyword) {
-      //   if (searchConditionType === '数据内容') {
-      //     newParams.search_content = searchConditionKeyword;
-      //   } else if (searchConditionType === 'ID') {
-      //     newParams.search_id = searchConditionKeyword;
-      //   }
-      // }
-      // 添加时间范围
-      // if(startTime){
-      //   newParams.start_time = startTime
-      //   newSourceParams.start = startTime
-      // }
-      // if(endTime){
-      //   newParams.end_time = endTime
-      //   newSourceParams.end = endTime
-      // }
-      // if(selectedKey){
-      //   newSourceParams.data_path_id = selectedKey
-      // }
-      // 根据表格类型调用不同的API
+      if (validFileTypes.length > 0) {
+        newParams.file_type = validFileTypes;
+      }
       let res;
       if (tableType === 'target') {
         // 调用目标数据API
@@ -217,21 +216,21 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         res = await getSourceDataFileList(newSourceParams);
         console.log('调用源数据API，参数:', newSourceParams);
       }
-      
+
       // 处理API响应
       if (res && res.data) {
         // 先检查有没有list数据结构
         if (res.data.list && Array.isArray(res.data.list) && res.data.list.length > 0) {
           setTableData(res.data.list);
           setTotal(res.data.total || res.data.list.length || 0);
-          console.log(`获取${tableType}表格数据成功:`, res.data);
-        } 
+          // console.log(`获取${tableType}表格数据成功:`, res.data);
+        }
         // 再检查有没有items数据结构
         else if (res.data.items && Array.isArray(res.data.items) && res.data.items.length > 0) {
           setTableData(res.data.items);
           setTotal(res.data.total || res.data.items.length || 0);
-          console.log(`获取${tableType}表格数据成功:`, res.data);
-        } 
+          // console.log(`获取${tableType}表格数据成功:`, res.data);
+        }
         // 无数据的情况
         else {
           // 无数据情况，设置为空数组
@@ -253,19 +252,48 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     } finally {
       // 结束加载状态
       setLoading(false);
+      // 标记请求完成
+      isDataFetching.current = false;
     }
   };
-  
-  // 监听依赖项变化，重新获取数据
+  //重置选中数据
+  const handAllReset = () => {
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setCrossPageSelectedKeys([]);
+    setCrossPageSelectedRows([]);
+    if (tableRef.current) {
+      tableRef.current.resetSelection();
+      tableRef.current.updateSelection([]);
+    } else {
+      console.log('不存在');
+    }
+    setTimeout(() => {
+      if (crossPageSelectedKeys.length > 0 || selectedRowKeys.length > 0) {
+        setSelectedRowKeys([]);
+        setSelectedRows([]);
+        setCrossPageSelectedKeys([]);
+        setCrossPageSelectedRows([]);
+      } else {
+        console.log('unified-data-table - 选中状态已正确清除');
+      }
+      getTableList();
+    }, 100);
+  }
+  // 合并的useEffect处理所有数据获取逻辑
   useEffect(() => {
-    if(isFirstRender.current){
+    // 首次渲染标记
+    if (isFirstRender.current) {
       isFirstRender.current = false;
+      getTableList(); // 首次渲染也获取数据
       return;
     }
-    getTableList();
+    const timer = setTimeout(() => {
+      getTableList();
+    }, 50);
+    return () => clearTimeout(timer);
   }, [
     searchValue,
-    // searchConditionType,
     searchConditionKeyword,
     searchConditionIsActive,
     selectedKey,
@@ -274,25 +302,28 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedFilePath,
     currentPage,
     pageSize,
-    tableType, // 当表格类型变化时重新获取数据
-    selectedFullPath, // 当选中路径变化时重新获取数据
-    fileTypeFilters // 当文件类型筛选条件变化时重新获取数据
+    selectedFullPath,
+    fileTypeFilters,
+    tableType
   ]);
-  
-  // 当tableType变化时重置相关状态，防止切换tab出错
+
+  // 当tableType变化时重置相关状态，不再重复调用getTableList
   useEffect(() => {
     // 重置页码和选择状态
     setCurrentPage(1);
     setSelectedRowKeys([]);
     setSelectedRows([]);
     setHoveredRowId(null);
-    
-    // 不是首次渲染时重新获取数据
-    if(!isFirstRender.current) {
-      getTableList();
+    // 重置文件类型筛选条件
+    setFileTypeFilters([]);
+    // 重置跨页选择状态
+    setCrossPageSelectedKeys([]);
+    setCrossPageSelectedRows([]);
+    if (tableRef.current) {
+      tableRef.current.resetSelection();
     }
   }, [tableType]);
-  
+
   // 控制下载弹框的显示和隐藏 - 使用useCallback避免重新创建
   const downloadShow = React.useCallback(
     (visible: boolean, downloaddata?: any) => {
@@ -317,9 +348,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       null,
       getTableList,
       selectedKey,
-      selectedFullPath
+      selectedFullPath,
+      undefined,
+      handAllReset 
     );
-  }, [tableType, dataType, downloadShow, selectedKey, selectedFullPath]);
+  }, [tableType, dataType, downloadShow, selectedKey, selectedFullPath, handAllReset]);
 
   // 处理带有hoveredRowId的列配置
   const columns = React.useMemo(() => {
@@ -332,7 +365,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         hoveredRowId,
         getTableList,
         selectedKey,
-        selectedFullPath
+        selectedFullPath,
+        undefined, 
+        handAllReset 
       );
     }
     return baseColumns;
@@ -343,10 +378,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     downloadShow,
     hoveredRowId,
     selectedKey,
-    selectedFullPath
+    selectedFullPath,
+    handAllReset
   ]);
 
-  // 处理表格选择变化 - 使用useCallback避免重新创建
+  // 处理表格选择变化 - 支持跨页选择
   const handleSelectionChange = React.useCallback(
     (selectedRowKeys: React.Key[], selectedRows: any[]) => {
       setSelectedRowKeys(selectedRowKeys);
@@ -357,13 +393,37 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedRows
       );
 
-      // 调用外部传入的回调函数
+
+      const currentPageDataIds = tableData.map(item => item.id);
+      const remainingKeys = crossPageSelectedKeys.filter(
+        key => !currentPageDataIds.includes(Number(key)) || selectedRowKeys.includes(key)
+      );
+      const remainingRows = crossPageSelectedRows.filter(
+        row => !currentPageDataIds.includes(Number(row.id)) || selectedRowKeys.includes(row.id)
+      );
+
+
+      const newKeys = [...remainingKeys];
+      const newRows = [...remainingRows];
+
+      selectedRows.forEach(row => {
+        if (!newKeys.includes(row.id)) {
+          newKeys.push(row.id);
+          newRows.push(row);
+        }
+      });
+
+      // 更新跨页选择状态
+      setCrossPageSelectedKeys(newKeys);
+      setCrossPageSelectedRows(newRows);
+
+      // 调用外部传入的回调函数，传递跨页选择的结果
       if (onSelectionChange) {
-        console.log(`UnifiedDataTable (${tableType}) - 调用外部回调函数`);
-        onSelectionChange(selectedRowKeys, selectedRows);
+        console.log(`UnifiedDataTable (${tableType}) - 调用外部回调函数，传递跨页选择结果`);
+        onSelectionChange(newKeys, newRows);
       }
     },
-    [tableType, onSelectionChange]
+    [tableType, onSelectionChange, tableData, crossPageSelectedKeys, crossPageSelectedRows]
   );
 
   // 处理从外部传入的selectedNode
@@ -388,7 +448,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       );
       setCurrentPage(page);
       setPageSize(size);
-      // 这里可以添加获取数据的逻辑
     },
     [tableType]
   );
@@ -404,21 +463,20 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       );
       setCurrentPage(page);
       setPageSize(size);
-      // 这里可以添加获取数据的逻辑
     },
     [tableType]
   );
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log('Table changed:', { pagination, filters, sorter, tableType });
+    // console.log('Table changed:', { pagination, filters, sorter, tableType });
     let newFileTypes: string[] = [];
     if (sorter && sorter.file_type && Array.isArray(sorter.file_type)) {
       newFileTypes = sorter.file_type;
-      console.log('从sorter.file_type获取筛选条件:', newFileTypes);
-    } 
+      // console.log('从sorter.file_type获取筛选条件:', newFileTypes);
+    }
     else if (sorter && sorter.type && Array.isArray(sorter.type)) {
       newFileTypes = sorter.type;
-      console.log('从sorter.type获取筛选条件:', newFileTypes);
-    } 
+      // console.log('从sorter.type获取筛选条件:', newFileTypes);
+    }
     // // 检查filters中的file_type
     // else if (filters && filters.file_type && Array.isArray(filters.file_type) && filters.file_type.length > 0) {
     //   newFileTypes = filters.file_type;
@@ -431,23 +489,41 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // }
     else if (sorter && typeof sorter.file_type === 'string') {
       newFileTypes = [sorter.file_type];
-      console.log('从sorter.file_type字符串获取筛选条件:', newFileTypes);
+      // console.log('从sorter.file_type字符串获取筛选条件:', newFileTypes);
     }
     else if (sorter && typeof sorter.type === 'string') {
       newFileTypes = [sorter.type];
-      console.log('从sorter.type字符串获取筛选条件:', newFileTypes);
+      // console.log('从sorter.type字符串获取筛选条件:', newFileTypes);
     }
-    
+
     // 设置文件类型筛选条件
-    console.log(`${tableType}表格设置文件类型筛选条件:`, newFileTypes);
+    // console.log(`${tableType}表格设置文件类型筛选条件:`, newFileTypes);
     setFileTypeFilters(newFileTypes);
-    
+
     // 当筛选条件变化时，重置到第一页
-    if ((filters && Object.keys(filters).length > 0) || 
-        (sorter && Object.keys(sorter).length > 0)) {
+    if ((filters && Object.keys(filters).length > 0) ||
+      (sorter && Object.keys(sorter).length > 0)) {
       setCurrentPage(1);
     }
   };
+
+  // 在数据加载完成后，设置当前页中应该被选中的行
+  useEffect(() => {
+    if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
+      const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
+        tableData.some(item => item.id === Number(key))
+      );
+      setSelectedRowKeys(currentPageSelectedKeys);
+      const currentPageSelectedRows = tableData.filter(item =>
+        currentPageSelectedKeys.includes(item.id)
+      );
+      setSelectedRows(currentPageSelectedRows);
+      if (tableRef.current) {
+        tableRef.current.updateSelection(currentPageSelectedKeys);
+      }
+    }
+  }, [tableData, crossPageSelectedKeys]);
+
   return (
     <>
       <div>
@@ -459,6 +535,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           onSelectionChange={handleSelectionChange}
           onChange={handleTableChange}
           tableType={tableType}
+          selectedRowKeys={selectedRowKeys}
           // Target表格特有的悬浮功能
           hoveredRowId={tableType === 'target' ? hoveredRowId : undefined}
           onRowHover={tableType === 'target' ? setHoveredRowId : undefined}
@@ -491,6 +568,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         downloadData={downloadData}
         onCancel={() => setVisible(false)}
         visible={visible}
+        resetSelectedData={handAllReset}
       />
     </>
   );
