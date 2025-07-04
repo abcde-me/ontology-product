@@ -60,7 +60,25 @@ interface Dataset {
   deleted_at: null;
   tag_names?: string[];
   src_model: string;
+  status:
+    | 'creating'
+    | 'create_fail'
+    | 'normal'
+    | 'version_generating'
+    | 'version_generating_fail';
 }
+
+// 状态显示配置
+const getStatusConfig = (status: string) => {
+  const statusMap = {
+    creating: { text: '创建中', color: 'blue' },
+    create_fail: { text: '创建失败', color: 'red' },
+    normal: { text: '正常', color: 'green' },
+    version_generating: { text: '版本生成中', color: 'orange' },
+    version_generating_fail: { text: '版本生成失败', color: 'red' }
+  };
+  return statusMap[status] || { text: status, color: 'gray' };
+};
 
 const columns = (
   handleGoToDetail,
@@ -71,7 +89,7 @@ const columns = (
   {
     title: '名称',
     dataIndex: 'name',
-    width: 180,
+    width: 200,
     render: (name: string, record: Dataset) => (
       <Button
         type="text"
@@ -85,7 +103,7 @@ const columns = (
   {
     title: '标签',
     dataIndex: 'tag_names',
-    width: 160,
+    width: 150,
     // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
@@ -116,6 +134,26 @@ const columns = (
     title: '版本',
     dataIndex: 'latest_version',
     width: 100
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: '创建中', value: 'creating' },
+      { text: '创建失败', value: 'create_fail' },
+      { text: '正常', value: 'normal' },
+      { text: '版本生成中', value: 'version_generating' },
+      { text: '版本生成失败', value: 'version_generating_fail' }
+    ],
+    onFilter: (value: string, record: Dataset) => {
+      return record.status === value;
+    },
+    render: (status: string) => {
+      const statusConfig = getStatusConfig(status);
+      return <Tag color={statusConfig.color}>{statusConfig.text}</Tag>;
+    }
   },
   {
     title: '描述说明',
@@ -223,51 +261,6 @@ const columns = (
         </Button>
       </Space>
     )
-  }
-];
-
-const data: Dataset[] = [
-  {
-    id: 1,
-    name: '数据集1',
-    description: '这是一个文本数据集',
-    latest_version: 'v1.0.0',
-    src: 1,
-    creator_id: 'admin001',
-    creator_name: '行政',
-    created_at: '2025-05-15T10:30:45+08:00',
-    updated_at: '2025-06-01T08:15:22+08:00',
-    deleted_at: null,
-    tag_names: ['文本11111111111111111', '训练'],
-    src_model: 'gpt-3.5-turbo'
-  },
-  {
-    id: 2,
-    name: '数据集2',
-    description: '这是一个图片数据集',
-    latest_version: 'v1.0.0',
-    src: 0,
-    creator_id: 'system',
-    creator_name: '行政',
-    created_at: '2025-05-10T14:22:33+08:00',
-    updated_at: '2025-05-28T16:45:10+08:00',
-    deleted_at: null,
-    tag_names: ['图片', '分类'],
-    src_model: 'vision-model'
-  },
-  {
-    id: 3,
-    name: '用户自定义数据集',
-    description: '这是一个用户自定义的混合数据集',
-    latest_version: 'v1.0.0',
-    src: 1,
-    creator_id: 'admin001',
-    creator_name: '行政',
-    created_at: '2025-04-22T09:12:18+08:00',
-    updated_at: '2025-05-30T11:33:47+08:00',
-    deleted_at: null,
-    tag_names: ['混合', '自定义', '测试'],
-    src_model: 'claude-3-sonnet'
   }
 ];
 
