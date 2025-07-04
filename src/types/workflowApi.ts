@@ -70,3 +70,11 @@ export interface WorkflowOperationParams {
   op: WorkflowOperation;
   cycle_text?: CycleText;
 }
+
+/** 工作流操作 */
+export interface WorkflowOperationRes {
+  ds_workflow_id: number;
+  workflow_uuid: number;
+  workflow_version: number;
+  job_id: number;
+}

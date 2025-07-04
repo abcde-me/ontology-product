@@ -80,7 +80,7 @@ const LoadAddModal = (props: any) => {
               week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
             }
           },
-          dest_path_id: pathId,
+          dest_path_id: 122,
           creator: 'user123'
         };
         const res = await addLoad(formData);
@@ -106,7 +106,7 @@ const LoadAddModal = (props: any) => {
               week: ''
             }
           },
-          dest_path_id: 2,
+          dest_path_id: 122,
           creator: 'user123'
         };
         console.log(formData);

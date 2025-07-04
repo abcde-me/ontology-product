@@ -37,3 +37,7 @@
     color: rgba(0, 125, 250, 0.5);
   }
 }
+
+.arco-trigger {
+  min-width: 315px;
+}

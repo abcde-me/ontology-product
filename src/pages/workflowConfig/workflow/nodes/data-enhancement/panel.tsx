@@ -12,11 +12,9 @@ import {
 } from '@arco-design/web-react';
 import { cloneDeep } from 'lodash-es';
 import { getModelList } from '@/api/modelV2';
+import TextPlan from './textDefault';
 import './data-enhancement.scss';
 
-// default 示例数据
-const defaultPrompt =
-  '{ "instruction": "公司最近的战略计划是什么？", "context": "公司计划在未来两年内扩大海外市场，重点关注东南亚和欧洲地区。公司已在这些地区设立了办事处，并计划在当地招聘销售和市场团队。", "response": "公司计划在未来两年重点拓展东南亚和欧洲市场，并已设立办事处和开始本地化招聘。"}';
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -30,12 +28,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [isShowWB, setIsShowWB] = useState(false);
   useEffect(() => {
     setIsShow(
-      inputs?.app_scenarios === 'tongyong' ||
-        inputs?.app_scenarios === 'duolong'
+      inputs?.app_scenarios_name === 'tongyong' ||
+      inputs?.app_scenarios_name === 'duolong'
     );
     setIsShowWB(
-      inputs?.app_scenarios === 'fenlei' ||
-        inputs?.app_scenarios === 'shengcheng'
+      inputs?.app_scenarios_name === 'fenlei' ||
+      inputs?.app_scenarios_name === 'shengcheng'
     );
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
@@ -64,12 +62,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          prompt: inputs?.prompt,
-          app_scenarios: inputs?.app_scenarios,
+          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
+          app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          sample_data: defaultPrompt,
-          enhanced_proportion: inputs?.enhanced_proportion,
-          vars: cloneDeep(inputs.variables || [])
+          sample_data: inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
+          enhanced_proportion: inputs?.enhanced_proportion | 0.5,
+          sample_num: inputs?.sample_num || 1,
+          similarity_threshold: inputs?.similarity_threshold || 0.1,
+          generate_sample_num: inputs?.generate_sample_num || 1,
         }}
         onChange={onValuesChange}
       >
@@ -88,10 +88,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <FormItem
             layout="horizontal"
             label={null}
-            field="app_scenarios"
+            field="app_scenarios_name"
             labelAlign="left"
             required
             style={{ margin: 0 }}
+            extra="常见的针对SFT的模型微调场景生成数据集。"
           >
             <Select
               placeholder="请选择场景"
@@ -114,9 +115,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </Option>
             </Select>
           </FormItem>
-          <div className="content-tips-text">
-            常见的针对SFT的模型微调场景生成数据集。
-          </div>
         </div>
         <div className="content-box">
           {isShow && (
@@ -125,6 +123,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 label="指令生成依赖样本数:"
                 field="sample_num"
                 layout="vertical"
+                extra="该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+                部分，增加到prompt 中去。"
                 rules={[
                   {
                     type: 'number',
@@ -136,10 +136,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               >
                 <InputNumber placeholder="请输入指令" />
               </FormItem>
-              <div className="content-tips-text">
-                该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
-                部分，增加到prompt 中去。
-              </div>
             </>
           )}
           {isShowWB && (
@@ -148,6 +144,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 label="任务描述增强占比:"
                 field="enhanced_proportion"
                 layout="vertical"
+                extra="节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
+                ~ 1"
                 rules={[
                   {
                     type: 'number',
@@ -159,16 +157,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               >
                 <InputNumber step={0.1} placeholder="请输入指令" />
               </FormItem>
-              <div className="content-tips-text">
-                节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
-                ~ 1
-              </div>
             </>
           )}
           <FormItem
             label="过滤相似度阈值:"
             field="similarity_threshold"
             layout="vertical"
+            extra="这里通过Rouge-L
+            分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。"
             rules={[
               {
                 type: 'number',
@@ -180,14 +176,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           >
             <InputNumber step={0.1} placeholder="请输入阈值" />
           </FormItem>
-          <div className="content-tips-text">
-            这里通过Rouge-L
-            分数来计算生成的训练数据集的相似度，超过这个阀值就认为两条生成数据是相同的，只保留其中之一。
-          </div>
           <FormItem
             label="生成样本数:"
             field="generate_sample_num"
             layout="vertical"
+            extra="指定生成的数据集的条数。"
             rules={[
               {
                 type: 'number',
@@ -199,7 +192,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           >
             <InputNumber placeholder="请输入生成样本数" />
           </FormItem>
-          <div className="content-tips-text">指定生成的数据集的条数。</div>
         </div>
         <FormItem
           layout="vertical"
@@ -221,7 +213,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         {customPromptChecked && (
           <FormItem field="prompt" label={null}>
-            <Input placeholder="请输入提示词" style={{ width: '100%' }} />
+            <TextArea style={{ minHeight: 64, minWidth: 350 }} placeholder="请输入提示词"
+            />
           </FormItem>
         )}
         <FormItem
@@ -231,6 +224,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           labelAlign="left"
           required
           style={{ margin: 0 }}
+          extra="常见的针对SFT的模型微调场景生成数据集。"
         >
           <Select placeholder="请选择模型" style={{ width: '100%' }}>
             {modelList.map((item) => {
@@ -242,9 +236,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             })}
           </Select>
         </FormItem>
-        <div className="content-tips-text" style={{ marginTop: '8px' }}>
-          常见的针对SFT的模型微调场景生成数据集。
-        </div>
       </Form>
     </div>
   );

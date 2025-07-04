@@ -75,3 +75,13 @@ export interface ExecutionHistory {
   success_files: number;
   task_id: number;
 }
+// 载入任务记录列表类型
+export interface RecordingType {
+  id: number;
+  file_name: string;
+  status: string;
+  file_type: string;
+  start_time: string;
+  end_time: string;
+  error_message: string | null;
+}

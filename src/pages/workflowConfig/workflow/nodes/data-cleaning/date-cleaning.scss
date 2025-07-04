@@ -46,6 +46,7 @@
   .date-switch {
     display: flex;
     align-items: center;
+    position: relative;
 
     .date-switch-text {
       font-size: 14px;
@@ -53,6 +54,9 @@
       margin-left: 8px;
       color: #0f172a;
       display: block;
+      position: absolute;
+      top: 6px;
+      left: 28px;
     }
   }
 

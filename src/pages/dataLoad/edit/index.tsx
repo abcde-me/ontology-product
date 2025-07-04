@@ -90,8 +90,8 @@ const Edit = (props) => {
             dataValue = '*';
         }
         const formData = {
+          task_id: props.loadId,
           task_name: rest.name,
-          connector_id: rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
             type: loadVal == 'once' ? 0 : 1,
@@ -103,18 +103,20 @@ const Edit = (props) => {
               week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
             }
           },
-          dest_path_id: pathId,
-          creator: 'user123'
+          dest_path_id: pathId
         };
         const res = await editLoad({
-          task_id: rest.task_id,
           formData
         });
+        if (res.message == 'ok') {
+          Message.success('修改成功');
+        } else {
+          Message.error(res.message);
+        }
       } else {
         const formData = {
+          task_id: props.loadId,
           task_name: rest.name,
-          connector_id: 15,
-          source_type: rest.source_type,
           run_cycle: {
             type: 0,
             cycle_text: {
@@ -125,14 +127,14 @@ const Edit = (props) => {
               week: ''
             }
           },
-          dest_path_id: pathId,
-          creator: 'user123'
+          dest_path_id: 2
         };
-        console.log(formData);
-        const res = await editLoad({
-          task_id: props.loadId,
-          formData
-        });
+        const res = await editLoad(formData);
+        if (res.message == 'ok') {
+          Message.success('修改成功');
+        } else {
+          Message.error(res.message);
+        }
       }
       cancelHan();
       props.getDetailList();
@@ -239,6 +241,7 @@ const Edit = (props) => {
           取消
         </Button>
         <Button
+          type="primary"
           onClick={() => {
             okHan();
           }}

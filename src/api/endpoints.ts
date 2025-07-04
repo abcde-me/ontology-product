@@ -168,6 +168,8 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
+  sourceDataFileDeleteApi: PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/connectors/files/output`,
@@ -321,7 +323,7 @@ export const ModaForgeResourceEndpoints = {
   // 启停单个载入任务
   startAndStopeLoadApi: PrefixAimdp + '/load_tasks/{task_id}/{action}',
   // 立即运行指定载入任务
-  runLoadApi: PrefixAimdp + '/load_tasks/{task_id}/exec',
+  runLoadApi: PrefixAimdp + '/load_tasks/new_start',
   // 删除指定文件
   delFileApi: PrefixAimdp + '/load_tasks/files',
   // 查询载入任务详情的列表
@@ -334,7 +336,9 @@ export const ModaForgeResourceEndpoints = {
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
   getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page',
   // 停止单个载入任务
-  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop'
+  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop',
+  // 查询个人载入记录列表
+  getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page'
 };
 
 /**
