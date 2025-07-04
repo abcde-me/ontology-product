@@ -88,7 +88,12 @@ interface SourceDataFileQueryParams {
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
-  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+  const queryParams: any = { ...params };
+  // 将file_type数组转换为JSON字符串
+  if (queryParams.file_type && Array.isArray(queryParams.file_type)) {
+    queryParams.file_type = JSON.stringify(queryParams.file_type);
+  }
+  return await UAPI.RES.targetDataFileListApi({}).get(queryParams).inRegion().do();
 }
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
