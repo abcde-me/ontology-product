@@ -29,11 +29,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   useEffect(() => {
     setIsShow(
       inputs?.app_scenarios_name === 'tongyong' ||
-      inputs?.app_scenarios_name === 'duolong'
+        inputs?.app_scenarios_name === 'duolong'
     );
     setIsShowWB(
       inputs?.app_scenarios_name === 'fenlei' ||
-      inputs?.app_scenarios_name === 'shengcheng'
+        inputs?.app_scenarios_name === 'shengcheng'
     );
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
@@ -62,10 +62,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
+          prompt:
+            inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
           app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          sample_data: inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
+          sample_data:
+            inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
           enhanced_proportion: inputs?.enhanced_proportion | 0.5,
           sample_num: inputs?.sample_num || 1,
           similarity_threshold: inputs?.similarity_threshold || 0.1,
@@ -213,7 +215,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         {customPromptChecked && (
           <FormItem field="prompt" label={null}>
-            <TextArea style={{ minHeight: 64, minWidth: 350 }} placeholder="请输入提示词"
+            <TextArea
+              style={{ minHeight: 64, minWidth: 350 }}
+              placeholder="请输入提示词"
             />
           </FormItem>
         )}

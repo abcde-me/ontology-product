@@ -9,6 +9,7 @@ import { useHistory } from 'react-router-dom';
 import './styles/index.css';
 import './styles/markdown.scss';
 import './styles/custom.scss';
+import { useWorkflowStore } from './workflow/store';
 
 function WorkflowConfig({ setHeight }) {
   const { setWorkflowDetail } = useStore(
@@ -16,6 +17,7 @@ function WorkflowConfig({ setHeight }) {
       setWorkflowDetail: state.setWorkflowDetail
     }))
   );
+  const workflowStore = useWorkflowStore();
   const [loading, setLoading] = useState(true);
   const appId = useParams('workflow_uuid');
   const history = useHistory();
@@ -37,6 +39,7 @@ function WorkflowConfig({ setHeight }) {
 
         if (workflowInfo?.data?.workflow_uuid) {
           const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
+
           history.push(
             `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );

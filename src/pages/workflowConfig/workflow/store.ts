@@ -155,6 +155,8 @@ type Shape = {
   setMousePosition: (mousePosition: Shape['mousePosition']) => void;
   syncWorkflowDraftHash: string;
   setSyncWorkflowDraftHash: (hash: string) => void;
+  dsWorkflowId: number;
+  // setDsWorkflowId: (dsWorkflowId: number) => void;
   showConfirm?: { title: string; desc?: string; onConfirm: () => void };
   setShowConfirm: (showConfirm: Shape['showConfirm']) => void;
   showAssignVariablePopup?: {
@@ -335,6 +337,8 @@ export const createWorkflowStore = () => {
     syncWorkflowDraftHash: '',
     setSyncWorkflowDraftHash: (syncWorkflowDraftHash) =>
       set(() => ({ syncWorkflowDraftHash })),
+    dsWorkflowId: 0,
+    // setDsWorkflowId: (dsWorkflowId) => set(() => ({ dsWorkflowId })),
     showConfirm: undefined,
     setShowConfirm: (showConfirm) => set(() => ({ showConfirm })),
     showAssignVariablePopup: undefined,

@@ -3,29 +3,28 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useContext, useContextSelector } from 'use-context-selector';
+import { useContext } from 'use-context-selector';
 import { useStore, useWorkflowStore } from '../store';
 import { BlockEnum, InputVarType } from '../types';
 import type { StartNodeType } from '../nodes/start/types';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
   useChecklistBeforePublish,
-  useIsChatMode,
   useNodesInteractions,
   useNodesReadOnly,
   useNodesSyncDraft,
-  useWorkflowMode,
-  useWorkflowRun,
-  useWorkflowTemplate
+  useWorkflowMode
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
-import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
-import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
-import { operateWorkflow } from '@/api/workflow';
+import {
+  editWorkflow,
+  getWorkflowDetail,
+  operateWorkflow
+} from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import {
   IsOnline,
@@ -42,8 +41,8 @@ import {
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
 import './index.scss';
-import { createWorkflowDraft } from '@/api/workflowV2';
-import { version } from 'os';
+import { useShallow } from 'zustand/react/shallow';
+import { useParams } from '@/utils/url';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -100,14 +99,32 @@ const Header: FC = () => {
   const [editing, setEditing] = useState(false);
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef(null);
+  const workflowUuid = useParams('workflow_uuid') ?? '';
+
+  const { setWorkflowDetail } = useTaskStore(
+    useShallow((state) => ({
+      setWorkflowDetail: state.setWorkflowDetail
+    }))
+  );
+
+  const updateWorkFlowStatus = async () => {
+    const workflowDetailRes = await getWorkflowDetail(workflowUuid);
+
+    if (workflowDetailRes?.data) {
+      setWorkflowDetail(workflowDetailRes.data);
+    }
+  };
 
   const workflowStore = useWorkflowStore();
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const workflowUuid = appDetail?.workflow_uuid ?? '';
   const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const [workflowName, setWorkflowName] = useState(
+    appDetail?.workflow_name ?? ''
+  );
+
   const cycleText = appDetail?.cycle_text ?? {
     minute: '',
     hour: '',
@@ -120,13 +137,6 @@ const Header: FC = () => {
   const publishedAt = useStore((s) => s.publishedAt);
   const draftUpdatedAt = useStore((s) => s.draftUpdatedAt);
   const toolPublished = useStore((s) => s.toolPublished);
-  const setShowWorkflowVersionHistoryPanel = useStore(
-    (s) => s.setShowWorkflowVersionHistoryPanel
-  );
-  const setShowEnvPanel = useStore((s) => s.setShowEnvPanel);
-  const setShowDebugAndPreviewPanel = useStore(
-    (s) => s.setShowDebugAndPreviewPanel
-  );
   const nodes = useNodes<StartNodeType>();
   const startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
   const selectedNode = nodes.find((node) => node.data.selected);
@@ -149,7 +159,6 @@ const Header: FC = () => {
     return data;
   }, [fileSettings?.image?.enabled, startVariables]);
 
-  const { handleLoadBackupDraft, handleBackupDraft } = useWorkflowRun();
   const { handleCheckBeforePublish } = useChecklistBeforePublish();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
   const { notify } = useContext(ToastContext);
@@ -170,27 +179,13 @@ const Header: FC = () => {
 
   const onOperate = useCallback(
     async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
-      if (op !== WorkflowOperation.OFFLINE) {
-        if (!handleCheckBeforePublish()) {
-          throw new Error('Checklist failed');
-        }
-      }
+      // if (op !== WorkflowOperation.OFFLINE) {
+      //   if (!handleCheckBeforePublish()) {
+      //     throw new Error('Checklist failed');
+      //   }
+      // }
 
       if (op === WorkflowOperation.ONLINE) {
-        // const workflowRes = await operateWorkflow(workflowUuid ?? '', {
-        //   uid: userInfo?.id ?? '',
-        //   ds_workflow_id: dsWorkflowId ?? 0,
-        //   op
-        // });
-
-        // if (workflowRes?.data) {
-        //   notify({ type: 'success', message: '上线成功' });
-        // } else {
-        //   notify({
-        //     type: 'error',
-        //     message: workflowRes?.message ?? '上线失败'
-        //   });
-        // }
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
@@ -205,6 +200,7 @@ const Header: FC = () => {
 
               if (workflowRes?.data) {
                 notify({ type: 'success', message: '上线成功' });
+                updateWorkFlowStatus();
               } else {
                 notify({
                   type: 'error',
@@ -236,7 +232,8 @@ const Header: FC = () => {
 
       if (op === WorkflowOperation.OFFLINE) {
         if (workflowRes?.data) {
-          notify({ type: 'success', message: '下线成功', duration: 100000 });
+          notify({ type: 'success', message: '下线成功', duration: 500 });
+          updateWorkFlowStatus();
         } else {
           notify({
             type: 'error',
@@ -290,11 +287,7 @@ const Header: FC = () => {
   }, [workflowStore]);
 
   const handleWorkflowNameChange = (workflow_name: string) => {
-    appDetail &&
-      setAppDetail({
-        ...appDetail,
-        workflow_name
-      });
+    setWorkflowName(workflowName);
   };
 
   const handleEdit = () => {
@@ -303,15 +296,33 @@ const Header: FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleSave = () => {
+  const handleSave = async (workflow_name: string) => {
     setEditing(false);
     // 这里可以添加保存逻辑
+    const workflowRes = await editWorkflow(workflowUuid ?? '', {
+      workflow_name
+    });
+
+    if (workflowRes?.data) {
+      appDetail &&
+        setAppDetail({
+          ...appDetail,
+          workflow_name
+        });
+      notify({
+        type: 'success',
+        message: '修改工作流名称成功'
+      });
+    } else {
+      notify({
+        type: 'error',
+        message: workflowRes?.message ?? '修改工作流名称失败'
+      });
+    }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    }
+  const handlePressEnter = (workflow_name: string) => {
+    handleSave(workflow_name);
   };
 
   return (
@@ -330,8 +341,8 @@ const Header: FC = () => {
               ref={inputRef}
               value={appDetail?.workflow_name}
               onChange={handleWorkflowNameChange}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
+              onBlur={() => handleSave(workflowName)}
+              onPressEnter={() => handlePressEnter(workflowName)}
               style={{ width: 200 }}
             />
           ) : (

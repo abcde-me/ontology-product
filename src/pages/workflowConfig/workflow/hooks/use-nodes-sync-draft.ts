@@ -110,9 +110,9 @@ export const useNodesSyncDraft = () => {
     ) => {
       if (getNodesReadOnly()) return;
       const postParams = getPostParams();
-      console.log('paramsparamsparamsparams', params);
 
       if (postParams) {
+        const searchParams = new URLSearchParams(location.search);
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
@@ -124,6 +124,7 @@ export const useNodesSyncDraft = () => {
           );
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
+          searchParams.set('ds_workflow_id', res.ds_workflow_id);
           callback?.onSuccess && callback.onSuccess();
         } catch (error: any) {
           if (error && error.json && !error.bodyUsed) {
