@@ -42,6 +42,7 @@ import { CUSTOM_LOOP_START_NODE } from '@/pages/workflowConfig/workflow/nodes/lo
 // import { useWorkflowConfig } from '@/service/use-workflow'
 import { canFindTool } from '@/pages/workflowConfig/utils';
 import workflowsDraftConfig from '@/pages/workflowConfig/mockData/workflowsDraftConfig.json';
+import { IsOnline } from '@/types/workflowApi';
 // import defaultWorkflowBlockConfigs from '@/pages/workflowConfig/mockData/defaultWorkflowBlockConfigs.json'
 // import workflowsPublish from '@/pages/workflowConfig/mockData/workflowsPublish.json'
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
@@ -678,6 +679,8 @@ export const useNodesReadOnly = () => {
   const historyWorkflowData = useStore((s) => s.historyWorkflowData);
   const isRestoring = useStore((s) => s.isRestoring);
   const currentUrl = window.location.pathname;
+  const appDetail = useTaskStore((s) => s.workflowDetail);
+  const workflowStatus = appDetail?.is_online ?? IsOnline.offline;
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -687,16 +690,23 @@ export const useNodesReadOnly = () => {
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
-      isRestoring
+      isRestoring ||
+      workflowStatus === IsOnline.online
     );
   }, [workflowStore]);
+
+  console.log(
+    'workflowStatusworkflowStatus:',
+    workflowStatus === IsOnline.online
+  );
 
   return {
     nodesReadOnly: !!(
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
-      isRestoring
+      isRestoring ||
+      workflowStatus === IsOnline.online
     ),
     getNodesReadOnly
   };
