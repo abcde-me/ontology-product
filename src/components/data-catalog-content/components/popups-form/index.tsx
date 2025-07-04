@@ -19,6 +19,8 @@ interface FormProps {
   visible?: boolean; // 添加visible属性，用于控制弹框显示
   exportdatas?: any;
   exportdataset?: any;
+  selectedPath?: string;
+  onExportSuccess?: () => void; // 添加导出成功回调
 }
 
 const FormComponent: React.FC<FormProps> = ({
@@ -27,65 +29,83 @@ const FormComponent: React.FC<FormProps> = ({
   visible = false,
   names,
   exportdatas,
-  exportdataset
+  exportdataset,
+  selectedPath,
+  onExportSuccess
 }) => {
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
-    console.log(downloadData, '打印看啊看downloadData');
-    console.log(exportdatas, '打印看啊看exportdatas');
-
-    const exportNames: Array<string> = [];
-    if (exportdatas && exportdatas.length > 0) {
-      // 使用扁平数组而不是嵌套数组
-      exportdatas.forEach((item) => {
-        if (item.extras && item.extras.file_name) {
-          exportNames.push(item.extras.file_name);
-        }
-      });
-    } else if (downloadData) {
-      exportNames.push(downloadData.extras.file_name);
-    } else {
-      exportNames.push(exportdataset.latest_file_name);
-    }
-    let full_paths = '';
-    if (exportdatas && exportdatas.length > 0) {
-      full_paths = exportdatas[0].full_path;
-    } else if (downloadData) {
-      full_paths = downloadData.full_path;
-    } else {
-      full_paths =
-        exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
-    }
-    const res = await exportFile({
-      file_names: exportNames,
-      output_path: form.getFieldValue('path'),
-      file_path: full_paths,
-      connector_id: Number(form.getFieldValue('province'))
-    });
-    console.log(res);
     try {
-      console.log('导出文件名', exportNames);
       await form.validate();
+      console.log(downloadData, '打印看啊看downloadData');
+      console.log(exportdatas, '打印看啊看exportdatas');
+      const exportNames: Array<string> = [];
+      if (exportdatas && exportdatas.length > 0) {
+        // 使用扁平数组而不是嵌套数组
+        exportdatas.forEach((item) => {
+          if (item.extras && item.extras.file_name) {
+            exportNames.push(item.extras.file_name);
+          }else if(item.file_name){
+            exportNames.push(item.file_name);
+          }
+        });
+      }else if(downloadData && downloadData.file_name){
+        exportNames.push(downloadData.file_name);
+      }
+      else if (downloadData && downloadData.extras && downloadData.extras.file_name) {
+        exportNames.push(downloadData.extras.file_name);
+      } else if (exportdataset && exportdataset.latest_file_name) {
+        exportNames.push(exportdataset.latest_file_name);
+      } else {
+        Message.error('无有效的文件名称可导出');
+        return;
+      }
+      
+      let full_paths = '';
+      if (exportdatas && exportdatas.length > 0 && !selectedPath) {
+        full_paths = exportdatas[0].full_path;
+      } else if (selectedPath) {
+        full_paths = selectedPath;
+      }else if (downloadData && downloadData.filePath) {
+        full_paths = downloadData.filePath;
+      } else if (downloadData && downloadData.full_path) {
+        full_paths = downloadData.full_path;
+      } else if (exportdataset && exportdataset.latest_file_path && exportdataset.latest_file_name) {
+        full_paths =
+          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
+      } else {
+        Message.error('无有效的文件路径可导出');
+        return;
+      }
+      
+      const res = await exportFile({
+        file_names: exportNames,
+        output_path: form.getFieldValue('path'),
+        file_path: full_paths,
+        connector_id: Number(form.getFieldValue('province'))
+      });
+      console.log(res);
+      console.log('导出文件名', exportNames);
       form.resetFields();
-      onCancel && onCancel();
       Message.success('导出成功');
+      // 先调用导出成功回调，再关闭弹窗
+      if (onExportSuccess) {
+        onExportSuccess();
+      }
+      onCancel && onCancel();
     } catch (e) {
-      Message.error('导出失败，请重试');
+      // 处理验证失败或导出失败的情况
+      console.error('导出失败:', e);
+      Message.error('导出失败，请稍后重试');
     }
   };
-
   const handleCancel = () => {
     // 重置表单
     form.resetFields();
     // 调用父组件的取消回调
     onCancel && onCancel();
   };
-  //导出
-  // const handExport = () => {
-  //   console.log('导出');
-  //   onCancel && onCancel();
-  // };
   //显示弹窗的状态由外部传入，不再在内部管理
   const [form] = Form.useForm();
   const formItemLayout = {
@@ -115,7 +135,6 @@ const FormComponent: React.FC<FormProps> = ({
     if (visible) {
       // 获取连接器列表
       getConnectorList();
-      console.log(exportdataset, 'exportdataset888888888888888888888888888888');
     }
   }, [visible, form, names, downloadData, exportdataset]);
 
