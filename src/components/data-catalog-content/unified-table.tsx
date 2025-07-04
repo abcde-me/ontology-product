@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle} from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 // 导入无数据组件
@@ -9,6 +9,7 @@ import NoDataEmpty from '@/components/NoDataEmpty';
 // 表格引用类型定义
 export interface UnifiedTableRef {
   resetSelection: () => void;
+  updateSelection: (selectedRowKeys: React.Key[]) => void;
 }
 
 // 统一表格组件的属性类型定义
@@ -25,6 +26,8 @@ type UnifiedTableProps<RecordType> = {
   onRowHover?: (rowId: string | null) => void;
   // 表格类型标识，用于决定是否启用特定功能
   tableType?: 'source' | 'target';
+  // 选中的行 keys
+  selectedRowKeys?: React.Key[];
 } & Omit<TableProps<RecordType>, 'columns' | 'data' | 'rowKey'>;
 
 /**
@@ -42,14 +45,31 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
     hoveredRowId,
     onRowHover,
     tableType = 'source',
+    selectedRowKeys: externalSelectedRowKeys,
     ...restProps
   } = props;
 
   // 表格选择状态管理
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(externalSelectedRowKeys || []);
   const [selectedRows, setSelectedRows] = useState<RecordType[]>([]);
-  
-  // 暴露给父组件的重置选择状态方法
+
+  // 当外部传入的 selectedRowKeys 变化时更新内部状态
+  React.useEffect(() => {
+    if (externalSelectedRowKeys) {
+      setSelectedRowKeys(externalSelectedRowKeys);
+
+      // 同步更新选中的行数据
+      if (data && data.length > 0) {
+        const newSelectedRows = data.filter((item) => {
+          const itemKey = typeof rowKey === 'function' ? rowKey(item) : item[rowKey as keyof RecordType];
+          return externalSelectedRowKeys.includes(itemKey as React.Key);
+        });
+        setSelectedRows(newSelectedRows);
+      }
+    }
+  }, [externalSelectedRowKeys, data, rowKey]);
+
+  // 暴露给父组件的方法
   useImperativeHandle(ref, () => ({
     resetSelection: () => {
       setSelectedRowKeys([]);
@@ -58,8 +78,20 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
       if (onSelectionChange) {
         onSelectionChange([], []);
       }
+    },
+    updateSelection: (newSelectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+
+      // 同步更新选中的行数据
+      if (data && data.length > 0) {
+        const newSelectedRows = data.filter((item) => {
+          const itemKey = typeof rowKey === 'function' ? rowKey(item) : item[rowKey as keyof RecordType];
+          return newSelectedRowKeys.includes(itemKey as React.Key);
+        });
+        setSelectedRows(newSelectedRows);
+      }
     }
-  }), [onSelectionChange]);
+  }), [onSelectionChange, data, rowKey]);
 
   // 内部行悬浮状态管理（当外部未提供时使用）
   const [internalHoveredRowId, setInternalHoveredRowId] = useState<
@@ -141,7 +173,7 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
     <Table<RecordType>
       columns={columns}
       scroll={{
-        x: Math.max(totalWidth + 100, 1300) // 确保有足够的宽度触发横向滚动
+        x: Math.max(totalWidth + 100, 1300) 
       }}
       rowSelection={rowSelection}
       data={data}
@@ -150,9 +182,8 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
       border={true}
       onRow={getRowProps}
       noDataElement={<NoDataEmpty />}
-      
       {...restProps}
-      
+
     />
   );
 });

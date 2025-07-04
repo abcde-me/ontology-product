@@ -167,9 +167,11 @@ export const ResourceEndpointsV2 = {
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
+  targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
   sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
   sourceDataFileDeleteApi: PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
+  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/connectors/files/output`,
