@@ -18,7 +18,6 @@ function WorkflowConfig({ setHeight }) {
     }))
   );
   const workflowStore = useWorkflowStore();
-  const { setDsWorkflowId } = workflowStore.getState();
   const [loading, setLoading] = useState(true);
   const appId = useParams('workflow_uuid');
   const history = useHistory();
@@ -30,7 +29,6 @@ function WorkflowConfig({ setHeight }) {
 
         if (workflowDetailRes?.data) {
           setWorkflowDetail(workflowDetailRes.data);
-          setDsWorkflowId(workflowDetailRes.data?.ds_workflow_id);
         }
 
         setLoading(false);
