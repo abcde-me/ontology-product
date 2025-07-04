@@ -72,6 +72,14 @@
     padding: 20px;
     gap: 20px;
     background-color: #f8fafd;
+
+    .workflow-name {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      vertical-align: middle;
+      margin: 0 0 5px 0;
+    }
   }
 
   /* 作业区域 */

@@ -231,6 +231,7 @@ export default function WorkflowTask() {
       title: '操作',
       dataIndex: 'operate',
       width: 80,
+      fixed: 'right',
       render: (_, record) => (
         <span
           className="operate-text"

@@ -102,7 +102,7 @@ const AppPublisher = ({
             visible={schedulerDialogVisible}
             onOk={() =>
               handleOperate(WorkflowOperation.CRON_RUNNING, {
-                cycleText
+                cycle_text: newCycleText
               })
             }
             onCancel={() => setSchedulerDialogVisible(false)}
