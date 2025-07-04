@@ -100,6 +100,7 @@ const Header: FC = () => {
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
+  const dsWorkflowId = useParams('ds_workflow_id') ?? '';
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -119,7 +120,6 @@ const Header: FC = () => {
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
   const [workflowName, setWorkflowName] = useState(
     appDetail?.workflow_name ?? ''
@@ -194,7 +194,7 @@ const Header: FC = () => {
             onSuccess: async () => {
               const workflowRes = await operateWorkflow(workflowUuid ?? '', {
                 uid: userInfo?.id ?? '',
-                ds_workflow_id: dsWorkflowId ?? 0,
+                ds_workflow_id: Number(dsWorkflowId) ?? 0,
                 op
               });
 
@@ -225,7 +225,7 @@ const Header: FC = () => {
 
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
         uid: userInfo?.id ?? '',
-        ds_workflow_id: dsWorkflowId ?? 0,
+        ds_workflow_id: Number(dsWorkflowId) ?? 0,
         op,
         cycle_text: params?.cycle_text
       });
