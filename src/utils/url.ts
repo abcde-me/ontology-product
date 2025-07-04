@@ -11,6 +11,12 @@ export function goParams(history, params: Record<string, string>) {
   history.push(history.location.pathname + '?' + origin.toString());
 }
 
+export const getQueryParams = (history, paramName) => {
+  const searchParams = new URLSearchParams(history.location.search);
+
+  return searchParams.get(paramName);
+};
+
 export const updateQueryParams = (history, newParams) => {
   // 获取当前路径和查询参数
   const currentPath = history.location.pathname;

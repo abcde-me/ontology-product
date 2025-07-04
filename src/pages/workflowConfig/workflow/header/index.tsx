@@ -42,7 +42,7 @@ import {
 import { RiCheckboxCircleFill } from '@remixicon/react';
 import './index.scss';
 import { useShallow } from 'zustand/react/shallow';
-import { useParams } from '@/utils/url';
+import { getQueryParams, useParams } from '@/utils/url';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -100,7 +100,6 @@ const Header: FC = () => {
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
-  const dsWorkflowId = useParams('ds_workflow_id') ?? '';
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -192,9 +191,11 @@ const Header: FC = () => {
           true,
           {
             onSuccess: async () => {
+              const ds_workflow_id =
+                getQueryParams(history, 'ds_workflow_id') ?? '';
               const workflowRes = await operateWorkflow(workflowUuid ?? '', {
                 uid: userInfo?.id ?? '',
-                ds_workflow_id: Number(dsWorkflowId) ?? 0,
+                ds_workflow_id: Number(ds_workflow_id),
                 op
               });
 
@@ -223,9 +224,10 @@ const Header: FC = () => {
         return;
       }
 
+      const ds_workflow_id = getQueryParams(history, 'ds_workflow_id') ?? '';
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
         uid: userInfo?.id ?? '',
-        ds_workflow_id: Number(dsWorkflowId) ?? 0,
+        ds_workflow_id: Number(ds_workflow_id),
         op,
         cycle_text: params?.cycle_text
       });
