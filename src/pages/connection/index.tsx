@@ -21,6 +21,7 @@ import {
 import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
+import { useParams } from '@/utils/url';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -58,6 +59,8 @@ const TYPE_CONFIG = {
 };
 
 export default function Connection() {
+  // 获取url路由的参数
+  const connectionId = useParams('connector_id');
   // 默认编辑弹框状态
   const [editVisible, setEditVisible] = React.useState(false);
   const [editObject, setEditObject] = React.useState<ConnectionType>({});
@@ -76,7 +79,9 @@ export default function Connection() {
   // 详情页面的默认id
   const [cId, setCId] = useState('0');
   // 搜索框的默认值
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(
+    connectionId ? connectionId : ''
+  );
   const [ConnectionData, setConnectionData] = useState([]) as any;
   const [pagination, setPagination] = useState({
     // 当前第1页
@@ -330,6 +335,7 @@ export default function Connection() {
           placeholder="输入关键词搜索"
           style={{ width: 230 }}
           onPressEnter={handlePressEnter}
+          defaultValue={searchValue}
         />
         <Button
           type="primary"

@@ -344,7 +344,9 @@ export const ModaForgeResourceEndpoints = {
   // 停止单个载入任务
   stopLoadApi: PrefixAimdp + '/load_tasks/records/stop',
   // 查询个人载入记录列表
-  getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page'
+  getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
+  // 查询任务单个执行记录详情
+  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{id}'
 };
 
 /**
