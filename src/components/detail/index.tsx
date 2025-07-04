@@ -250,16 +250,16 @@ const versionColumns = [
     title: '修改类型',
     dataIndex: 'type',
     filters: [
-      { text: '导入', value: 1 },
-      { text: '修改', value: 2 },
-      { text: '删除', value: 3 }
+      { text: '数据导入', value: 1 },
+      { text: '用户手动修改', value: 2 },
+      { text: '工作流修改', value: 3 }
     ],
     onFilter: (value: number, record: any) => record.type === value,
     render: (type: number) => {
       const typeMap = {
-        1: '导入',
-        2: '修改',
-        3: '删除'
+        1: '数据导入',
+        2: '用户手动修改',
+        3: '工作流修改'
       };
       return typeMap[type] || '-';
     }
@@ -902,7 +902,7 @@ const DatasetDetail: React.FC = () => {
       <Modal
         title="编辑基本信息"
         visible={editModalVisible}
-        // onCancel={handleCloseEditModal}
+        onCancel={handleCloseEditModal}
         footer={null}
         style={{ width: 640 }}
         autoFocus={false}

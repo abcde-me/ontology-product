@@ -17,7 +17,8 @@ import {
   IconUpload,
   IconDelete,
   IconDownload,
-  IconFilter
+  IconFilter,
+  IconEmpty
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import {
@@ -618,6 +619,12 @@ const DatasetManagement: React.FC = () => {
         }}
         border={false}
         scroll={{ x: 1200 }}
+        noDataElement={
+          <div className={styles.noData}>
+            <IconEmpty />
+            <div className={styles.noDataText}>暂无数据</div>
+          </div>
+        }
       />
 
       {/* 新建数据集弹框 */}

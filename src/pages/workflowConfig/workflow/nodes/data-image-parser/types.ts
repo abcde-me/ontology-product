@@ -15,7 +15,7 @@ export type OutputVar = Record<
 
 export type ImageParserNodeType = CommonNodeType & {
   files: string[];
-  pic_model_id: string;
-  pic_emb_model_id: string;
-  selected_files_num: number;
+  pic_model_id: string | number;
+  pic_emb_model_id: string | number;
+  selected_files_num: number | number;
 };
