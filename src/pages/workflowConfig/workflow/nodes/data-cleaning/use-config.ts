@@ -97,7 +97,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.traditional_to_simplified = payload.traditional_to_simplified;
         draft.case_transform = payload.case_transform;
         draft.case_uniformity = payload.case_uniformity;
-        draft.dataCleaning = dataCleaning;
+        draft.data = dataCleaning;
       });
       setInputs(newInputs);
     },
