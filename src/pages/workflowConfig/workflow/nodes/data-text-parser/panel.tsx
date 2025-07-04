@@ -9,6 +9,7 @@ import { Form, Select, InputNumber, Checkbox } from '@arco-design/web-react';
 import FileList from './file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
+import { useUnmountedRef } from 'ahooks';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -28,6 +29,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [ocrModels, setOcrModels] = useState<Record<string, any>[]>([]);
   const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
   const [textEmbModels, setTextEmbModels] = useState<Record<string, any>[]>([]);
+  const unmountedRef = useUnmountedRef();
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
@@ -36,6 +38,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
 
   useEffect(() => {
     getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
       const ocrList =
         res.data.find((d) => d.type === 'text_ocr_model')?.model_data || [];
       const picList =
