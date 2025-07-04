@@ -84,4 +84,15 @@ export interface RecordingType {
   start_time: string;
   end_time: string;
   error_message: string | null;
+  connector_id: number;
+  data_path_id: number;
+  execution_id: string;
+  file_size: number;
+  hash_code: string | null;
+  task_id: number;
+  upload_user_name: string;
 }
+// 记录详情的类型
+// interface accessType {
+
+// }

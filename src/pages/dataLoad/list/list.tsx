@@ -11,10 +11,9 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
 import Styles from './index.module.css';
 import LoadAddModal from './load-add-modal';
-import { Route } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
-import { OperationColumn } from '@ccf2e/arco-material';
+import './index.css';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -182,8 +181,17 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
-      dataIndex: 'connector_name',
-      width: 230
+      width: 230,
+      render: (_, item) => {
+        return (
+          <a
+            onClick={() => gotoConnector(item.connector_name)}
+            className="jump-a"
+          >
+            {item.connector_name}
+          </a>
+        );
+      }
     },
     {
       title: '载入位置',
@@ -287,6 +295,12 @@ export default function DataLoad() {
   const gotoDetail = (task_id: number) => {
     history.push(
       `/tenant/compute/modaforge/dataLoad/detail?task_id=${task_id}`
+    );
+  };
+  // 点击跳转到连接器页面
+  const gotoConnector = (connectorId) => {
+    history.push(
+      `/tenant/compute/modaforge/connection?connector_id=${connectorId}`
     );
   };
   // 查询载入任务列表

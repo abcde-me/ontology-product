@@ -40,3 +40,6 @@
   border-radius: 3px;
   margin-left: 5px;
 }
+.arco-row-align-start {
+  align-items: 'center';
+}

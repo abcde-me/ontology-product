@@ -124,7 +124,6 @@ const Edit = (props: any) => {
               <FormItem
                 label="区域："
                 field="region"
-                rules={[{ required: true, message: '请输入区域' }]}
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"

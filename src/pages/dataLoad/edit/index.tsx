@@ -5,15 +5,13 @@ import {
   Input,
   Message,
   Radio,
-  Select,
-  TreeSelect
+  Select
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
-import EditLoadingForm from './edit-loading-form';
-import { convertWeekDaysToString, WeekDay } from '@/utils/conversionArco';
-import { editLoad } from '@/api/loadApi';
+import SchedulerRun from '../../../components/scheduler-run';
 import { directoryData } from '../data/constants';
+import { editLoad } from '@/api/loadApi';
 // 单选框实例
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
@@ -23,6 +21,10 @@ const Edit = (props) => {
   const form = props.editForm;
   // 载入类型的默认值
   const [loadVal, setLoadVal] = useState(props.detailData.load_type);
+  // 按钮以及表单的禁用状态
+  const [loading, setLoading] = useState(false);
+  // 默认表达式的状态
+  const [obj, setObj] = useState({}) as any;
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -63,51 +65,22 @@ const Edit = (props) => {
   // 点击确定
   const okHan = async () => {
     try {
+      setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
       if (loadVal !== 'once') {
-        const [hour, minute] = time.split(':');
-        await form.validate();
-        props.hideModalHan();
-
-        const isLastDayOfMonth =
-          day?.findIndex((item) => item === '每月最后一天') !== -1;
-
-        // 转换星期为数字字符串
-        let dataValue: string;
-        switch (cycle) {
-          case '每日':
-            dataValue = '*';
-            break;
-          case '每周':
-            dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
-            break;
-          case '每月':
-            dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
-            break;
-          default:
-            dataValue = '*';
-        }
         const formData = {
-          task_id: props.loadId,
+          task_id: Number(props.loadId),
           task_name: rest.name,
-          source_type: rest.source_type,
           run_cycle: {
-            type: loadVal == 'once' ? 0 : 1,
-            cycle_text: {
-              minute,
-              hour,
-              date: dataValue,
-              month: cycle == '每月' ? '*' : '',
-              week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
-            }
+            type: 1,
+            cycle_text: obj
           },
-          dest_path_id: pathId
+          dest_path_id: 2
         };
-        const res = await editLoad({
-          formData
-        });
+        console.log(formData);
+        const res = await editLoad(formData);
         if (res.message == 'ok') {
           Message.success('修改成功');
         } else {
@@ -115,7 +88,7 @@ const Edit = (props) => {
         }
       } else {
         const formData = {
-          task_id: props.loadId,
+          task_id: Number(props.loadId),
           task_name: rest.name,
           run_cycle: {
             type: 0,
@@ -129,17 +102,20 @@ const Edit = (props) => {
           },
           dest_path_id: 2
         };
+        console.log(formData);
         const res = await editLoad(formData);
         if (res.message == 'ok') {
           Message.success('修改成功');
+          cancelHan();
         } else {
           Message.error(res.message);
         }
       }
-      cancelHan();
       props.getDetailList();
     } catch (error) {
       console.error('表单处理失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
   // 默认数据
@@ -219,7 +195,16 @@ const Edit = (props) => {
             <Radio value="cron">周期载入</Radio>
           </RadioGroup>
         </FormItem>
-        {loadVal == 'cron' ? <EditLoadingForm form={form} /> : null}
+        {loadVal == 'cron' ? (
+          <div className={Styles.cycleLoadingBox}>
+            <SchedulerRun
+              options={{}}
+              onOptionsChange={(val) => {
+                setObj(val);
+              }}
+            ></SchedulerRun>
+          </div>
+        ) : null}
         <FormItem
           label="载入位置："
           field="dest_path"
@@ -241,6 +226,7 @@ const Edit = (props) => {
           取消
         </Button>
         <Button
+          disabled={loading}
           type="primary"
           onClick={() => {
             okHan();

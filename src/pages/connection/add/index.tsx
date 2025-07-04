@@ -274,12 +274,14 @@ const add = forwardRef((props: any, ref) => {
                     {
                       validator: (value, cb) => {
                         if (!value || value.trim() === '') {
-                          return cb('请输入Port端口号');
+                          return cb('请输入连接器名称');
                         }
                         const regex =
-                          /^(6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]?\d{1,4}|0)$/;
+                          /^[\u4e00-\u9fa5a-zA-Z0-9][\u4e00-\u9fa5a-zA-Z0-9_-]{0,255}$/;
                         if (!regex.test(value)) {
-                          return cb('请输入合法的端口号，范围在0-65535之间');
+                          return cb(
+                            '名称应包含中文、英文、数字或 "-", "_"，且不能以特殊字符开头，长度不超过256个字符'
+                          );
                         }
                         return cb();
                       }
