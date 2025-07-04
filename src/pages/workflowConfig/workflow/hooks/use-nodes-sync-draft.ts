@@ -124,8 +124,7 @@ export const useNodesSyncDraft = () => {
           );
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
-          params.set('ds_workflow_id', res.ds_workflow_id);
-          // setDsWorkflowId(res.ds_workflow_id);
+          searchParams.set('ds_workflow_id', res.ds_workflow_id);
           callback?.onSuccess && callback.onSuccess();
         } catch (error: any) {
           if (error && error.json && !error.bodyUsed) {
