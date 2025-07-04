@@ -36,7 +36,7 @@ export const findVariableWhenOnLLMVision = (
 };
 
 export const findVariableNameById = (
-  id: string,
+  id: string | number,
   dataSource: Array<any>,
   name: any
 ) => {

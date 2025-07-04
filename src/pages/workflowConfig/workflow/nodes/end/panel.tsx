@@ -39,12 +39,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         onValuesChange={onValuesChange}
         initialValues={{
-          target_path: inputs?.target_path
+          target_path_id: inputs?.target_path_id
         }}
       >
         <FormItem
           label="目标数据目录"
-          field="target_path"
+          field="target_path_id"
           rules={[{ required: true, message: '目标数据目录不可为空' }]}
           style={{ margin: 0 }}
         >
