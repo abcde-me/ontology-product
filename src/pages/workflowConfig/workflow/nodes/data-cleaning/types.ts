@@ -39,6 +39,7 @@ export type CodeNodeType = CommonNodeType & {
   remove_url: boolean;
   remove_invisible: boolean;
   remove_html: boolean;
+  sample_data: string;
 };
 
 export type CodeDependency = any;

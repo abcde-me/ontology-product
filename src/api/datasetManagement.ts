@@ -73,6 +73,11 @@ export interface EditDatasetVersionParams {
   datas: DataChangeItem[]; // 数据变更列表
 }
 
+//批量删除数据集参数接口
+export interface BatchDeleteDatasetParams {
+  ids: string[];
+}
+
 /**
  * 获取数据集列表
  */
@@ -158,6 +163,11 @@ export async function deleteDataset(params: any) {
     .delete()
     .inRegion()
     .do();
+}
+
+//批量删除数据集
+export async function batchDeleteDataset(params: BatchDeleteDatasetParams) {
+  return UAPI.RES.batchDeleteDatasetApi({}).post(params).inRegion().do();
 }
 
 //获取连接器列表

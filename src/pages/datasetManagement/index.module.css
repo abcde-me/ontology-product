@@ -159,7 +159,7 @@
 }
 
 .datasetTable :global(.arco-table-thead th) {
-  background-color: #fafafa;
+  background-color: #f5f9ff;
   color: #000000d9;
   font-weight: 500;
   font-size: 14px;
@@ -190,7 +190,7 @@
 /* 操作列样式优化 */
 .datasetTable :global(.arco-table-tbody td:last-child) {
   width: 148px !important;
-  height: 47px !important;
+  height: 65px !important;
   padding: 12px !important;
   vertical-align: middle;
 }

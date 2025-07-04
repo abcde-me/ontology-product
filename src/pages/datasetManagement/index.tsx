@@ -17,13 +17,15 @@ import {
   IconUpload,
   IconDelete,
   IconDownload,
-  IconFilter
+  IconFilter,
+  IconEmpty
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import {
   getDatasetList,
   createDataset,
-  deleteDataset
+  deleteDataset,
+  batchDeleteDataset
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
@@ -59,7 +61,25 @@ interface Dataset {
   deleted_at: null;
   tag_names?: string[];
   src_model: string;
+  status:
+    | 'creating'
+    | 'create_fail'
+    | 'normal'
+    | 'version_generating'
+    | 'version_generating_fail';
 }
+
+// 状态显示配置
+const getStatusConfig = (status: string) => {
+  const statusMap = {
+    creating: { text: '创建中', color: 'blue' },
+    create_fail: { text: '创建失败', color: 'red' },
+    normal: { text: '正常', color: 'green' },
+    version_generating: { text: '版本生成中', color: 'orange' },
+    version_generating_fail: { text: '版本生成失败', color: 'red' }
+  };
+  return statusMap[status] || { text: status, color: 'gray' };
+};
 
 const columns = (
   handleGoToDetail,
@@ -70,7 +90,7 @@ const columns = (
   {
     title: '名称',
     dataIndex: 'name',
-    width: 180,
+    width: 200,
     render: (name: string, record: Dataset) => (
       <Button
         type="text"
@@ -84,7 +104,7 @@ const columns = (
   {
     title: '标签',
     dataIndex: 'tag_names',
-    width: 160,
+    width: 150,
     // filterIcon: <IconFilter />,
     filters: (() => {
       const tagSet = new Set<string>();
@@ -115,6 +135,26 @@ const columns = (
     title: '版本',
     dataIndex: 'latest_version',
     width: 100
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: '创建中', value: 'creating' },
+      { text: '创建失败', value: 'create_fail' },
+      { text: '正常', value: 'normal' },
+      { text: '版本生成中', value: 'version_generating' },
+      { text: '版本生成失败', value: 'version_generating_fail' }
+    ],
+    onFilter: (value: string, record: Dataset) => {
+      return record.status === value;
+    },
+    render: (status: string) => {
+      const statusConfig = getStatusConfig(status);
+      return <Tag color={statusConfig.color}>{statusConfig.text}</Tag>;
+    }
   },
   {
     title: '描述说明',
@@ -222,51 +262,6 @@ const columns = (
         </Button>
       </Space>
     )
-  }
-];
-
-const data: Dataset[] = [
-  {
-    id: 1,
-    name: '数据集1',
-    description: '这是一个文本数据集',
-    latest_version: 'v1.0.0',
-    src: 1,
-    creator_id: 'admin001',
-    creator_name: '行政',
-    created_at: '2025-05-15T10:30:45+08:00',
-    updated_at: '2025-06-01T08:15:22+08:00',
-    deleted_at: null,
-    tag_names: ['文本11111111111111111', '训练'],
-    src_model: 'gpt-3.5-turbo'
-  },
-  {
-    id: 2,
-    name: '数据集2',
-    description: '这是一个图片数据集',
-    latest_version: 'v1.0.0',
-    src: 0,
-    creator_id: 'system',
-    creator_name: '行政',
-    created_at: '2025-05-10T14:22:33+08:00',
-    updated_at: '2025-05-28T16:45:10+08:00',
-    deleted_at: null,
-    tag_names: ['图片', '分类'],
-    src_model: 'vision-model'
-  },
-  {
-    id: 3,
-    name: '用户自定义数据集',
-    description: '这是一个用户自定义的混合数据集',
-    latest_version: 'v1.0.0',
-    src: 1,
-    creator_id: 'admin001',
-    creator_name: '行政',
-    created_at: '2025-04-22T09:12:18+08:00',
-    updated_at: '2025-05-30T11:33:47+08:00',
-    deleted_at: null,
-    tag_names: ['混合', '自定义', '测试'],
-    src_model: 'claude-3-sonnet'
   }
 ];
 
@@ -484,15 +479,28 @@ const DatasetManagement: React.FC = () => {
 
     Modal.confirm({
       title: '批量删除确认',
-      content: `确定要删除选中的 ${selectedRowKeys.length} 个数据集吗？此操作不可撤销。`,
+      content: `删除后，文件不可恢复`,
       okText: '确认删除',
       cancelText: '取消',
       okButtonProps: { status: 'danger' },
       onOk: () => {
         console.log('批量删除:', selectedRows);
-        Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
+        batchDeleteDataset({
+          ids: selectedRowKeys.map((key) => key.toString())
+        })
+          .then((res) => {
+            console.log('批量删除结果:', res);
+            if (res.status === 200) {
+              Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
+              setSelectedRowKeys([]);
+              setSelectedRows([]);
+            } else {
+              Message.error('批量删除失败！');
+            }
+          })
+          .catch((err) => {
+            Message.error('批量删除失败！');
+          });
       }
     });
   };
@@ -571,7 +579,7 @@ const DatasetManagement: React.FC = () => {
           />
         </Input.Group>
         <div className={styles.actionButtons}>
-          {/* <Button
+          <Button
             icon={<IconDelete />}
             className={styles.batchDeleteBtn}
             disabled={selectedRowKeys.length === 0}
@@ -579,7 +587,7 @@ const DatasetManagement: React.FC = () => {
           >
             批量删除
           </Button>
-          <Button
+          {/* <Button
             icon={<IconDownload />}
             className={styles.batchExportBtn}
             disabled={selectedRowKeys.length === 0}
@@ -618,6 +626,12 @@ const DatasetManagement: React.FC = () => {
         }}
         border={false}
         scroll={{ x: 1200 }}
+        noDataElement={
+          <div className={styles.noData}>
+            <IconEmpty />
+            <div className={styles.noDataText}>暂无数据</div>
+          </div>
+        }
       />
 
       {/* 新建数据集弹框 */}

@@ -290,6 +290,8 @@ export const ModaForgeResourceEndpoints = {
   datasetDetailPageApi: PrefixAimdp + '/datasets/{dataset_id}',
   //删除数据集
   deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
+  //批量删除数据集
+  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch_delete',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
   //编辑数据集版本数据

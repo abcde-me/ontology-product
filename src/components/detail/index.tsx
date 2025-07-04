@@ -14,7 +14,8 @@ import {
   Input,
   Select,
   Pagination,
-  Tooltip
+  Tooltip,
+  Empty
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -73,30 +74,13 @@ interface DatasetDetail {
   deleted_at?: string | null; // 可选字段，因为API响应中可能没有这个字段
 }
 
-// 内容数据测试数据
-const cscontentData = [
-  {
-    line: 0,
-    data: {
-      姓名: '张11111111111111111111三张11111111111111111111三张11111111111111111111三张11111111111111111111三',
-      年龄: 28,
-      性别: '男'
-    }
-  },
-  { line: 1, data: { 姓名: '李四', 年龄: 34, 性别: '女' } },
-  { line: 2, data: { 姓名: '王五', 年龄: 22, 性别: '男' } }
-];
-
-// 内容数据表格列定义
-const cscontentColumns = ['姓名', '年龄', '性别'];
-
 //headers:表头
 //handleEditContent:编辑内容
 //handleContinue:删除
 //editingRowKey:当前编辑行
 //editingData:当前编辑数据
 //onDataChange:处理编辑数据变化
-
+//idName:唯一标识符字段名
 const generateArcoColumns = (
   headers,
   handleEditContent,
@@ -105,22 +89,23 @@ const generateArcoColumns = (
   editingData,
   onDataChange,
   handleInlineEditSubmit,
-  handleInlineEditCancel
+  handleInlineEditCancel,
+  idName
 ) => {
   const cols = headers.map((header) => ({
     title: header,
-    dataIndex: ['data', header],
+    dataIndex: header,
     key: header,
     minWidth: 150,
     maxWidth: 300,
     render: (value: any, record: any) => {
-      if (editingRowKey === record.line) {
+      if (editingRowKey === record[idName]) {
         return (
           <Input.TextArea
             value={
               editingData[header] !== undefined
                 ? editingData[header]
-                : record.data[header]
+                : record[header]
             }
             onChange={(value) => onDataChange(header, value)}
             style={{ margin: '-5px 0' }}
@@ -129,7 +114,7 @@ const generateArcoColumns = (
           />
         );
       }
-      return <div>{record.data[header]}</div>;
+      return <div>{record[header]}</div>;
     }
   }));
 
@@ -140,7 +125,7 @@ const generateArcoColumns = (
     width: 140,
     fixed: 'right',
     render: (_, record) => {
-      if (editingRowKey === record.line) {
+      if (editingRowKey === record[idName]) {
         // 编辑模式：显示确认和取消按钮
         return (
           <Space>
@@ -165,23 +150,39 @@ const generateArcoColumns = (
       }
 
       // 正常模式：显示编辑和删除按钮
+      const isOtherRowEditing =
+        editingRowKey !== null && editingRowKey !== record[idName];
+
       return (
         <Space>
-          <Button
-            type="text"
-            size="small"
-            onClick={() => handleEditContent(record.line)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="text"
-            status="danger"
-            size="small"
-            onClick={() => handleContinue(record.line)}
-          >
-            删除
-          </Button>
+          <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
+            <Button
+              type="text"
+              size="small"
+              disabled={isOtherRowEditing}
+              onClick={() => handleEditContent(record[idName])}
+              style={{
+                color: isOtherRowEditing ? '#c9cdd4' : undefined,
+                cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+              }}
+            >
+              编辑
+            </Button>
+          </Tooltip>
+          <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
+            <Button
+              type="text"
+              // status="danger"
+              size="small"
+              onClick={() => handleContinue(record[idName])}
+              style={{
+                color: isOtherRowEditing ? '#c9cdd4' : undefined,
+                cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+              }}
+            >
+              删除
+            </Button>
+          </Tooltip>
         </Space>
       );
     }
@@ -189,38 +190,6 @@ const generateArcoColumns = (
 
   return cols;
 };
-
-// 版本历史测试数据
-const csversionHistory = [
-  {
-    version: 'v1.10',
-    date: '2025-06-23',
-    description: '当前版本',
-    status: 'current',
-    changes: 15
-  },
-  {
-    version: 'v1.09',
-    date: '2025-06-20',
-    description: '重新版本',
-    status: 'archived',
-    changes: 8
-  },
-  {
-    version: 'v1.08',
-    date: '2025-06-18',
-    description: '优化内容',
-    status: 'archived',
-    changes: 12
-  },
-  {
-    version: 'v1.07',
-    date: '2025-06-15',
-    description: '修复问题',
-    status: 'archived',
-    changes: 5
-  }
-];
 
 // 格式化日期
 const formatDate = (dateString: string) => {
@@ -240,6 +209,7 @@ const versionColumns = [
   {
     title: '版本号',
     dataIndex: 'version_id',
+    width: 260,
     render: (version: string) => (
       <Space>
         <Text>{version}</Text>
@@ -249,17 +219,18 @@ const versionColumns = [
   {
     title: '修改类型',
     dataIndex: 'type',
+    width: 226,
     filters: [
-      { text: '导入', value: 1 },
-      { text: '修改', value: 2 },
-      { text: '删除', value: 3 }
+      { text: '数据导入', value: 1 },
+      { text: '用户手动修改', value: 2 },
+      { text: '工作流修改', value: 3 }
     ],
     onFilter: (value: number, record: any) => record.type === value,
     render: (type: number) => {
       const typeMap = {
-        1: '导入',
-        2: '修改',
-        3: '删除'
+        1: '数据导入',
+        2: '用户手动修改',
+        3: '工作流修改'
       };
       return typeMap[type] || '-';
     }
@@ -267,10 +238,12 @@ const versionColumns = [
   {
     title: '创建时间',
     dataIndex: 'created_at',
+    width: 226,
     render: (time: string) => formatDate(time)
   },
   {
     title: '更变记录',
+    width: 470,
     dataIndex: 'description'
   }
 ];
@@ -290,16 +263,15 @@ const DatasetDetail: React.FC = () => {
   const [total, setTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
+  const [idName, setIdName] = React.useState<string>(''); //唯一标识符字段名
   const { id } = useParams<{ id: string }>(); //数据集id
   const history = useHistory();
 
   // 编辑数据
   const [editingRowKey, setEditingRowKey] = React.useState<string | null>(null); //当前编辑行
   const [editingData, setEditingData] = React.useState<any>({}); //当前编辑数据
-  const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的行
-  const [deletedRows, setDeletedRows] = React.useState<number[]>([]); // 记录删除的行号
-  const [confirmModalVisible, setConfirmModalVisible] = React.useState(false); //确认弹窗
-  const [pendingEditRow, setPendingEditRow] = React.useState<any>(null); // 待编辑的行（用于确认切换）
+  const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的数据
+  const [deletedRows, setDeletedRows] = React.useState<string[]>([]); // 记录删除的数据
 
   //历史数据
   const [versionHistory, setVersionHistory] = React.useState<any[]>([]);
@@ -365,11 +337,8 @@ const DatasetDetail: React.FC = () => {
   const handleEditContent = (record: any) => {
     console.log('编辑内容:', record);
 
-    // 如果当前已经在编辑状态，且点击的不是同一行
+    // 如果当前已经在编辑状态，且点击的不是同一行，则不处理（按钮已禁用）
     if (editingRowKey !== null && editingRowKey !== record) {
-      // 显示确认弹框
-      setPendingEditRow(record); //待编辑的行
-      setConfirmModalVisible(true); //确认弹框
       return;
     }
 
@@ -378,42 +347,22 @@ const DatasetDetail: React.FC = () => {
   };
 
   // 开始编辑指定行
-  const startEditRow = (record: any) => {
-    setEditingRowKey(record);
+  const startEditRow = (recordId: any) => {
+    setEditingRowKey(recordId);
     console.log(contentData);
     // 初始化编辑数据
-    const currentRow = contentData.find((item: any) => item.line === record);
+    const currentRow = contentData.find(
+      (item: any) => item[idName] === recordId
+    );
     if (currentRow) {
-      setEditingData({ ...currentRow.data });
+      setEditingData({ ...currentRow });
     }
 
-    Message.info(`编辑第${record}条内容`);
-  };
-
-  // 确认放弃当前编辑并切换到新行
-  const handleConfirmSwitchEdit = () => {
-    if (pendingEditRow !== null) {
-      // 重置当前编辑状态
-      setEditingRowKey(null);
-      setEditingData({});
-
-      // 开始编辑新行
-      startEditRow(pendingEditRow);
-    }
-
-    // 关闭弹框
-    setConfirmModalVisible(false);
-    setPendingEditRow(null);
-  };
-
-  // 取消切换编辑
-  const handleCancelSwitchEdit = () => {
-    setConfirmModalVisible(false);
-    setPendingEditRow(null);
+    Message.info(`编辑数据`);
   };
 
   // 删除
-  const handleContinue = (lineNumber: number) => {
+  const handleContinue = (recordId: string) => {
     Modal.confirm({
       title: '确认删除文件吗？',
       content: '删除后，文件不可恢复',
@@ -432,15 +381,15 @@ const DatasetDetail: React.FC = () => {
       },
       onOk: () => {
         const newContentData = contentData.filter(
-          (item) => item.line !== lineNumber
+          (item) => item[idName] !== recordId
         );
         setContentData(newContentData);
 
-        // 将删除的行号添加到数组中
-        setDeletedRows((prev) => [...prev, lineNumber]);
+        // 将删除的数据ID添加到数组中
+        setDeletedRows((prev) => [...prev, recordId]);
 
-        Message.success(`第 ${lineNumber} 行已删除`);
-        console.log('已删除的行:', [...deletedRows, lineNumber]);
+        Message.success(`数据已删除`);
+        console.log('已删除的数据:', [...deletedRows, recordId]);
       }
     });
   };
@@ -458,20 +407,16 @@ const DatasetDetail: React.FC = () => {
     // console.log(contentData)
     // 更新数据
     const newData = contentData.map((item: any) => {
-      if (item.line === editingRowKey) {
+      if (item[idName] === editingRowKey) {
         return {
-          ...item,
-          data: {
-            ...item.data, // 保留原有的所有字段
-            ...editingData // 用编辑的数据覆盖修改的字段
-          }
+          ...editingData // 直接使用编辑的数据替换整个记录
         };
       }
       return item;
     });
     setContentData(newData);
 
-    // 记录修改的行
+    // 记录修改的数据
     if (!changedRows.includes(editingRowKey!.toString())) {
       setChangedRows([...changedRows, editingRowKey!.toString()]);
     }
@@ -481,7 +426,7 @@ const DatasetDetail: React.FC = () => {
     setEditingData({});
 
     Message.success('数据修改成功');
-    console.log('已修改的行:', [...changedRows, editingRowKey]);
+    console.log('已修改的数据:', [...changedRows, editingRowKey]);
   };
 
   // 取消内联编辑
@@ -495,28 +440,30 @@ const DatasetDetail: React.FC = () => {
   const handleSubmitChanges = () => {
     if (!datasetDetail) return;
     // 构造提交数据
-    const submitData: DataChangeItem[] = [];
+    const submitData: any[] = [];
 
-    // 处理修改的行
-    changedRows.forEach((lineStr) => {
-      const line = parseInt(lineStr);
-      const modifiedRow = contentData.find((item) => item.line === line);
+    // 处理修改的数据
+    changedRows.forEach((recordId) => {
+      const modifiedRow = contentData.find((item) => item[idName] === recordId);
       if (modifiedRow) {
         submitData.push({
-          line: line,
           change_type: 1, // 修改
-          new_data: modifiedRow.data
+          new_data: modifiedRow // 直接提交整行数据
         });
       }
     });
 
-    // 处理删除的行
-    deletedRows.forEach((line) => {
-      submitData.push({
-        line: line,
-        change_type: 2, // 删除
-        new_data: {}
-      });
+    // 处理删除的数据
+    deletedRows.forEach((recordId) => {
+      const deletedRow = contentDatabackup.find(
+        (item) => item[idName] === recordId
+      );
+      if (deletedRow) {
+        submitData.push({
+          change_type: 2, // 删除
+          new_data: deletedRow // 提交原始数据用于删除
+        });
+      }
     });
 
     const params = {
@@ -544,9 +491,10 @@ const DatasetDetail: React.FC = () => {
         };
         getDatasetContents(refreshParams)
           .then((res) => {
-            if (res.data && res.data.list && res.data.list.length > 0) {
+            if (res.data) {
               setContentData(res.data.list || []);
               setContentColumnslist(res.data.field_names || []);
+              setIdName(res.data.id_name || '');
               setTotal(res.data.total || 0);
               setContentDatabackup(res.data.list || []);
             }
@@ -598,7 +546,7 @@ const DatasetDetail: React.FC = () => {
 
   // 更新表格列配置 - 只在编辑状态变化时执行
   React.useEffect(() => {
-    if (contentColumnslist.length > 0) {
+    if (contentColumnslist.length > 0 && idName) {
       setContentColumns(
         generateArcoColumns(
           contentColumnslist,
@@ -608,11 +556,12 @@ const DatasetDetail: React.FC = () => {
           editingData,
           handleEditDataChange,
           handleInlineEditSubmit,
-          handleInlineEditCancel
+          handleInlineEditCancel,
+          idName
         )
       );
     }
-  }, [contentColumnslist, editingRowKey, editingData]);
+  }, [contentColumnslist, editingRowKey, editingData, idName]);
 
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
@@ -632,6 +581,7 @@ const DatasetDetail: React.FC = () => {
           if (res.data) {
             setContentData(res.data.list || []);
             setContentColumnslist(res.data.field_names || []);
+            setIdName(res.data.id_name || '');
             setTotal(res.data.total || 0);
             setContentDatabackup(res.data.list || []);
           }
@@ -786,7 +736,14 @@ const DatasetDetail: React.FC = () => {
         )}
 
         {/* 数据管理标签页 */}
-        <Tabs activeTab={activeTab} onChange={setActiveTab}>
+        <Tabs
+          activeTab={activeTab}
+          onChange={(e) => {
+            console.log(e);
+            setActiveTab(e);
+            // setCurrentPage(1);
+          }}
+        >
           <TabPane key="content" title="内容数据">
             {/* 搜索系统 */}
             <div
@@ -806,7 +763,6 @@ const DatasetDetail: React.FC = () => {
                 allowClear
                 suffix={<IconSearch style={{ color: '#999' }} />}
               />
-              {/* 只有在有修改内容或正在编辑时才显示按钮 */}
               {(changedRows.length > 0 ||
                 editingRowKey !== null ||
                 deletedRows.length > 0) && (
@@ -835,7 +791,7 @@ const DatasetDetail: React.FC = () => {
                       });
                     }}
                   >
-                    取消
+                    取消本轮编辑
                   </Button>
                   <Button
                     type="primary"
@@ -844,42 +800,50 @@ const DatasetDetail: React.FC = () => {
                       changedRows.length === 0 && deletedRows.length === 0
                     }
                   >
-                    确定
+                    保存本轮编辑
                   </Button>
                 </Space>
               )}
             </div>
-
-            {/* 内容数据表格 */}
-            {activeTab === 'content' ? (
+            {contentData.length !== 0 && contentColumns.length !== 0 ? (
               <>
-                <Table
-                  columns={contentColumns}
-                  data={contentData}
-                  pagination={false}
-                  scroll={{ x: 'max-content' }}
-                  border
-                />
-              </>
-            ) : null}
+                {/* 内容数据表格 */}
+                {activeTab === 'content' ? (
+                  <>
+                    <Table
+                      columns={contentColumns}
+                      data={contentData}
+                      noDataElement={
+                        <Empty description="这里空空如也，快去添加数据吧！" />
+                      }
+                      pagination={false}
+                      scroll={{ x: 'max-content' }}
+                      border
+                    />
+                  </>
+                ) : null}
 
-            {/* 分页控件 */}
-            <div className="pagination-wrapper">
-              <Pagination
-                current={currentPage}
-                pageSize={pageSize}
-                total={total}
-                onChange={(page) => {
-                  console.log('页码变更:', page);
-                  setCurrentPage(page);
-                }}
-                showTotal={(total, range) =>
-                  `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                }
-                showJumper
-                sizeCanChange={false}
-              />
-            </div>
+                {/* 分页控件 */}
+                <div className="pagination-wrapper">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={total}
+                    onChange={(page) => {
+                      console.log('页码变更:', page);
+                      setCurrentPage(page);
+                    }}
+                    showTotal={(total, range) =>
+                      `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                    }
+                    showJumper
+                    sizeCanChange={false}
+                  />
+                </div>
+              </>
+            ) : (
+              <Empty description="这里空空如也，快去添加数据吧！" />
+            )}
           </TabPane>
 
           <TabPane key="version" title="版本历史">
@@ -902,7 +866,7 @@ const DatasetDetail: React.FC = () => {
       <Modal
         title="编辑基本信息"
         visible={editModalVisible}
-        // onCancel={handleCloseEditModal}
+        onCancel={handleCloseEditModal}
         footer={null}
         style={{ width: 640 }}
         autoFocus={false}
@@ -923,25 +887,6 @@ const DatasetDetail: React.FC = () => {
             onCancel={handleCloseEditModal}
           />
         )}
-      </Modal>
-
-      {/* 切换编辑确认弹窗 */}
-      <Modal
-        title="切换编辑"
-        visible={confirmModalVisible}
-        onOk={handleConfirmSwitchEdit}
-        onCancel={handleCancelSwitchEdit}
-        okText="确认切换"
-        cancelText="继续当前编辑"
-        okButtonProps={{ status: 'warning' }}
-      >
-        <div
-          style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}
-        >
-          <IconEdit style={{ color: '#ff7d00', marginRight: 8 }} />
-          {/* <span>您当前正在编辑第 {editingRowKey} 行数据</span> */}
-        </div>
-        <p>切换到新的编辑行将放弃当前的修改内容，确定要继续吗？</p>
       </Modal>
     </div>
   );

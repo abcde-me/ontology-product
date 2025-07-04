@@ -269,14 +269,6 @@ const Workflow: FC<WorkflowProps> = memo(
       >
         <SyncingDataModal />
         <CandidateNode />
-        <button
-          onClick={() => {
-            const handleClick = () => {
-              const jumpUrl = `/tenant/compute/modaforge/workflowTaskDetail?id=20&workflow_uuid=0d1615af-4738-11f0-8454-26c15098fac3&ds_workflow_id=145425608187424&workflow_version=1751524002602`;
-              history?.push(jumpUrl);
-            };
-          }}
-        ></button>
         {!isShowChatMode && <Header />}
         {!isShowChatMode && (
           <SubHeader
