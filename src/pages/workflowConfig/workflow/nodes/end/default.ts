@@ -1,33 +1,38 @@
-import { BlockEnum } from '../../types'
-import type { NodeDefault } from '../../types'
-import type { EndNodeType } from './types'
-import { ALL_CHAT_AVAILABLE_BLOCKS, ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks'
+import { BlockEnum } from '../../types';
+import type { NodeDefault } from '../../types';
+import type { EndNodeType } from './types';
+import {
+  ALL_CHAT_AVAILABLE_BLOCKS,
+  ALL_COMPLETION_AVAILABLE_BLOCKS
+} from '@/pages/workflowConfig/workflow/blocks';
 
 const nodeDefault: NodeDefault<EndNodeType> = {
   defaultValue: {
-    outputs: [],
+    outputs: []
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
-      : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(type => type !== BlockEnum.End)
-    return nodes
+      : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
+          (type) => type !== BlockEnum.End
+        );
+    return nodes;
   },
   getAvailableNextNodes() {
-    return []
+    return [];
   },
   checkValid(payload: EndNodeType) {
-    let isValid = true
-    let errorMessages = ''
-    if (payload.type) {
-      isValid = true
-      errorMessages = ''
+    let isValid = true;
+    let errorMessages = '';
+    if (payload.target_path_id === undefined) {
+      isValid = true;
+      errorMessages = '数据目标目录未配置';
     }
     return {
       isValid,
-      errorMessage: errorMessages,
-    }
-  },
-}
+      errorMessage: errorMessages
+    };
+  }
+};
 
-export default nodeDefault
+export default nodeDefault;

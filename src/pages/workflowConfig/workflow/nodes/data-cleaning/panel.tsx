@@ -8,7 +8,8 @@ import {
   Input,
   Select,
   Checkbox,
-  Switch
+  Switch,
+  InputNumber
   // Table,
   // Space,
   // Slider,
@@ -36,6 +37,7 @@ import {
   dataOutlierHandlingAfter
 } from './date-text';
 import './date-cleaning.scss';
+import { number } from 'mobx-state-tree/dist/internal';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const { readOnly, inputs, updateInputs } = useConfig(id, data);
@@ -210,12 +212,17 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 field="threshold"
                 layout="inline"
                 label="字符串长度阈值"
+                rules={
+                  [
+                    { min: 5, max: 1204, type: 'number', message: '长度范围为5~1024个字符' }
+                  ]
+                }
               >
-                <Input
+                <InputNumber
+                  step={1}
                   size="mini"
-                  style={{ marginLeft: '16px' }}
-                  placeholder="请输入发阈值"
-                  min={0}
+                  placeholder="请输入发阈值 范围5~1024"
+                  maxLength={1024}
                 />
               </FormItem>
               <div className="date-cleaning-info">

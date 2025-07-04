@@ -16,18 +16,34 @@ const useConfig = (id: string, payload: EndNodeType) => {
     },
     varKey: 'outputs'
   });
-
+  console.log(
+    findVariableNameById(payload.target_path_id, inputs?.dataSource, 'name'),
+    '11111111111'
+  );
+  const data = {
+    type: 'end',
+    title: '结束节点',
+    desc: '',
+    selected: false,
+    target_path_id: payload.target_path_id,
+    target_path_name: findVariableNameById(
+      payload.target_path_id,
+      inputs?.dataSource,
+      'name'
+    )
+  };
   const updateInputs = useCallback(
     (payload: EndNodeType) => {
-      // 通过target_path来取dataSource中对应的name
+      // 通过target_path_id来取dataSource中对应的name
       const newInputs = produce(inputs, (draft: any) => {
-        draft.target_path = payload.target_path;
+        draft.target_path_id = payload.target_path_id;
         draft.target_path_name = findVariableNameById(
-          payload.target_path,
+          payload.target_path_id,
           inputs?.dataSource,
           'name'
         );
         draft.dataSource = payload.dataSource;
+        draft.data = data;
       });
       setInputs(newInputs);
     },

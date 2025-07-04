@@ -9,7 +9,7 @@ import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const {
-    app_scenarios,
+    app_scenarios_name,
     enha_modle_id,
     enhanced_proportion,
     sample_num,
@@ -33,9 +33,9 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         <span className="txt">增强类型</span>
       </div>
       <div className="enhancement-content">
-        {app_scenarios && (
+        {app_scenarios_name && (
           <div className="enhancement-item">
-            场景：{appScenarios[app_scenarios]}
+            场景：{appScenarios[app_scenarios_name]}
           </div>
         )}
         {enha_modle_id && (
@@ -44,13 +44,13 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
             {modelList?.find((item) => item.id === enha_modle_id)?.type || ''}
           </div>
         )}
-        {(app_scenarios === 'tongyong' || app_scenarios === 'duolong') &&
+        {(app_scenarios_name === 'tongyong' || app_scenarios_name === 'duolong') &&
           sample_num > 0 && (
             <Tooltip content={`指令生成依赖样本数: ${sample_num}`}>
               <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>
             </Tooltip>
           )}
-        {(app_scenarios === 'fenlei' || app_scenarios === 'shengcheng') &&
+        {(app_scenarios_name === 'fenlei' || app_scenarios_name === 'shengcheng') &&
           enhanced_proportion > 0 && (
             <Tooltip content={`任务描述增强占比: ${enhanced_proportion}`}>
               <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
