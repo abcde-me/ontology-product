@@ -12,7 +12,7 @@ import {
 } from '@arco-design/web-react';
 import { cloneDeep } from 'lodash-es';
 import { getModelList } from '@/api/modelV2';
-import TextPlan from './text-default';
+import TextPlan from './textDefault';
 import './data-enhancement.scss';
 
 // default 示例数据
@@ -31,12 +31,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [isShowWB, setIsShowWB] = useState(false);
   useEffect(() => {
     setIsShow(
-      inputs?.app_scenarios === 'tongyong' ||
-      inputs?.app_scenarios === 'duolong'
+      inputs?.app_scenarios_name === 'tongyong' ||
+      inputs?.app_scenarios_name === 'duolong'
     );
     setIsShowWB(
-      inputs?.app_scenarios === 'fenlei' ||
-      inputs?.app_scenarios === 'shengcheng'
+      inputs?.app_scenarios_name === 'fenlei' ||
+      inputs?.app_scenarios_name === 'shengcheng'
     );
     setCustomPromptChecked(inputs?.prompt_checkbox);
   }, [inputs]);
@@ -65,10 +65,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios]?.prompt,
+          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
           app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          sample_data: inputs?.sample_data || TextPlan[inputs?.app_scenarios]?.data,
+          sample_data: inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
           enhanced_proportion: inputs?.enhanced_proportion | 0.5,
           sample_num: inputs?.sample_num || 1,
           similarity_threshold: inputs?.similarity_threshold || 0.1,
