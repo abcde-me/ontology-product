@@ -287,7 +287,7 @@ const Header: FC = () => {
   }, [workflowStore]);
 
   const handleWorkflowNameChange = (workflow_name: string) => {
-    setWorkflowName(workflowName);
+    setWorkflowName(workflow_name);
   };
 
   const handleEdit = () => {
@@ -339,7 +339,7 @@ const Header: FC = () => {
             <Input
               className="app-name--editing"
               ref={inputRef}
-              value={appDetail?.workflow_name}
+              value={workflowName}
               onChange={handleWorkflowNameChange}
               onBlur={() => handleSave(workflowName)}
               onPressEnter={() => handlePressEnter(workflowName)}
