@@ -10,7 +10,8 @@ export default function DataAugmentationNode(props: { dataSource; loading }) {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          overflow: 'hidden'
         }}
       >
         <div className="item-box">
