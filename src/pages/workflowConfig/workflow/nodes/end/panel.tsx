@@ -9,7 +9,7 @@ import { getWorkflowTargetPath } from '@/api/workflow';
 import './end.scss';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
-  const { readOnly, inputs, updateInputs } = useConfig(id, data);
+  const { readOnly, inputs, onValuesChange } = useConfig(id, data);
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
@@ -26,9 +26,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     fetchData();
   }, []);
 
-  const onValuesChange = (_, values) => {
-    updateInputs({ ...values, dataSource: dataSource });
-  };
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form
@@ -37,7 +34,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
-        onValuesChange={onValuesChange}
+        onValuesChange={(_, v: any) => { onValuesChange(v, dataSource) }}
         initialValues={{
           target_path_id: inputs?.target_path_id
         }}
@@ -47,6 +44,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           field="target_path_id"
           rules={[{ required: true, message: '目标数据目录不可为空' }]}
           style={{ margin: 0 }}
+          extra="选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。"
         >
           <Select
             allowCreate
@@ -61,9 +59,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
-        <div className="content-tips-text">
-          选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。
-        </div>
       </Form>
     </div>
   );
