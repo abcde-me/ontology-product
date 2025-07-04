@@ -16,6 +16,10 @@ const useConfig = (id: string, payload: EndNodeType) => {
     },
     varKey: 'outputs'
   });
+  console.log(
+    findVariableNameById(payload.target_path_id, inputs?.dataSource, 'name'),
+    '11111111111'
+  );
   const data = {
     type: 'end',
     title: '结束节点',
@@ -39,7 +43,7 @@ const useConfig = (id: string, payload: EndNodeType) => {
           'name'
         );
         draft.dataSource = payload.dataSource;
-        draft.data = payload.data;
+        draft.data = data;
       });
       setInputs(newInputs);
     },

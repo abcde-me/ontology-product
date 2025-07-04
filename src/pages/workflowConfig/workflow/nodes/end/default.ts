@@ -24,7 +24,7 @@ const nodeDefault: NodeDefault<EndNodeType> = {
   checkValid(payload: EndNodeType) {
     let isValid = true;
     let errorMessages = '';
-    if (payload.target_path === undefined) {
+    if (payload.target_path_id === undefined) {
       isValid = true;
       errorMessages = '数据目标目录未配置';
     }
