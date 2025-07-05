@@ -254,7 +254,7 @@ const csdatasetDetail = {
   name: 'Project 李帆',
   tag_names: ['urgent', 'high_priority'],
   description: 'A project focusing on upgrading the system architecture.',
-  status: 'normal',
+  status: 'version_update_failed',
   error_reason: '网络连接超时，请重试',
   latest_version: 'v2.1',
   latest_file_path: '/path/to/file/v2.1/upgrade-package.zip',

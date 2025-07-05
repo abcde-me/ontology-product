@@ -170,8 +170,10 @@ export const ResourceEndpointsV2 = {
   targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
   sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
-  sourceDataFileDeleteApi: PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
-  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
+  sourceDataFileDeleteApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
+  sourceDataFileDeleteBatcheApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/connectors/files/output`,
@@ -300,7 +302,8 @@ export const ModaForgeResourceEndpoints = {
   editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
   //获取数据集版本列表
   datasetVersionListApi: PrefixAimdp + '/datasets/version',
-
+  //版本重新生成
+  datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/rebuild',
   // 连接器接口
 
   // 获取连接器数据列表
