@@ -1059,7 +1059,7 @@ const DatasetDetail: React.FC = () => {
                       }
                       pagination={false}
                       scroll={{ x: 'max-content' }}
-                      border
+                      border={false}
                     />
                   </>
                 ) : null}
@@ -1094,7 +1094,7 @@ const DatasetDetail: React.FC = () => {
                 data={versionHistory}
                 pagination={false}
                 // scroll={{ x: 'max-content' }}
-                border
+                border={false}
               />
             ) : (
               ''

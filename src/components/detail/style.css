@@ -64,7 +64,7 @@
   padding: 24px;
 }
 .arco-tabs-header-nav-line .arco-tabs-header-title {
-  margin: 0 10px;
+  margin: 0 20px;
   padding: 0;
 }
 .basic-info-card .arco-typography {
@@ -201,7 +201,6 @@
 /* 表格样式 - 标准Arco设计 */
 .basic-info-card .arco-table {
   border-radius: 4px;
-  border: 1px solid #f0f0f0;
   width: 100%;
   max-width: 100%;
 }
