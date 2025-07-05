@@ -1,9 +1,10 @@
 import { getLoadRecordLists } from '@/api/loadApi';
-import { Pagination, Table, Tooltip } from '@arco-design/web-react';
+import { Input, Pagination, Table, Tooltip } from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
 import './index.css';
+const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
   FAIL = 'fail'
@@ -20,6 +21,8 @@ const STATUSTYPEARR = {
 };
 
 const AccessTable = (props) => {
+  // 输入框的默认状态
+  const [searchValue, setSearchValue] = useState('');
   const columns = [
     {
       title: '文件名',
@@ -109,9 +112,9 @@ const AccessTable = (props) => {
         page_size: pageSize,
         record_id: props.records_id,
         // record_id: 'Job20250703-jtsl4VBQFfF29HuQ',
-        file_name: props.searchValue
+        file_name: searchValue
       });
-      if (res.message == 'ok') {
+      if (res.code == '') {
         setTotal(res.data.total);
         setData(res.data.items);
       }
@@ -123,35 +126,47 @@ const AccessTable = (props) => {
   };
   useEffect(() => {
     getRecordingList();
-  }, [current, pageSize, props.searchValue]);
+  }, [current, pageSize]);
   return (
-    <div
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}
-    >
-      <Table
-        columns={columns}
-        data={data ?? []}
-        style={{ padding: '16px', width: '100%' }}
-        border={false}
-        pagination={false}
-        rowKey={(record) => record.id}
-        loading={loading}
-      />
-      <Pagination
-        sizeOptions={[1, 5, 10, 20]}
-        showTotal
-        total={total}
-        showJumper
-        sizeCanChange
-        style={{ margin: '20px 30px' }}
-        onChange={(val) => {
-          handlePageChange(val);
+    <div>
+      <InputSearch
+        placeholder="搜索文件名"
+        style={{ width: 200, marginLeft: '17px' }}
+        onPressEnter={(e) => {
+          getRecordingList();
         }}
-        onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
+        onChange={(value) => {
+          setSearchValue(value);
         }}
       />
+      <div
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}
+      >
+        <Table
+          columns={columns}
+          data={data ?? []}
+          style={{ padding: '16px', width: '100%' }}
+          border={false}
+          pagination={false}
+          rowKey={(record) => record.id}
+          loading={loading}
+        />
+        <Pagination
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{ margin: '20px 30px' }}
+          onChange={(val) => {
+            handlePageChange(val);
+          }}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+        />
+      </div>
     </div>
   );
 };

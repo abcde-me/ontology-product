@@ -81,7 +81,7 @@ const Edit = (props) => {
         };
         console.log(formData);
         const res = await editLoad(formData);
-        if (res.message == 'ok') {
+        if (res.code == '') {
           Message.success('修改成功');
         } else {
           Message.error(res.message);
@@ -212,7 +212,7 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
-          initialValue={props.detailData.data_path_name}
+          initialValue={[props.detailData.data_path_name]}
         >
           <Cascader
             placeholder="请输入载入位置"

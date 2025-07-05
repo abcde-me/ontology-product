@@ -173,7 +173,6 @@ const LoadAddModal = (props: any) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
-          initialValue="s3"
         >
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>
