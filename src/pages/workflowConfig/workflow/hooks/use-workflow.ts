@@ -680,7 +680,6 @@ export const useNodesReadOnly = () => {
   const isRestoring = useStore((s) => s.isRestoring);
   const currentUrl = window.location.pathname;
   const appDetail = useTaskStore((s) => s.workflowDetail);
-  const workflowStatus = appDetail?.is_online ?? IsOnline.offline;
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -691,7 +690,7 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      workflowStatus === IsOnline.online
+      appDetail?.is_online === IsOnline.online
     );
   }, [workflowStore]);
 
@@ -701,7 +700,7 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      workflowStatus === IsOnline.online
+      appDetail?.is_online === IsOnline.online
     ),
     getNodesReadOnly
   };
