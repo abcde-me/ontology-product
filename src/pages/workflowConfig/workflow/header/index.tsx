@@ -144,11 +144,11 @@ const Header: FC = () => {
 
   const onOperate = useCallback(
     async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
-      // if (op !== WorkflowOperation.OFFLINE) {
-      //   if (!handleCheckBeforePublish()) {
-      //     throw new Error('Checklist failed');
-      //   }
-      // }
+      if (op !== WorkflowOperation.OFFLINE) {
+        if (!handleCheckBeforePublish()) {
+          throw new Error('Checklist failed');
+        }
+      }
 
       if (op === WorkflowOperation.ONLINE) {
         // 上线前，保存画布最新信息
