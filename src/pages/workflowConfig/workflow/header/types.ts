@@ -1,5 +1,9 @@
 import type { InputVar } from '@/pages/workflowConfig/workflow/types';
-import type { IsOnline, WorkflowOperation } from '@/types/workflowApi';
+import type {
+  CycleText,
+  IsOnline,
+  WorkflowOperation
+} from '@/types/workflowApi';
 
 export type ModelAndParameter = any;
 
@@ -18,4 +22,10 @@ export type AppPublisherProps = {
   toolPublished?: boolean;
   inputs?: InputVar[];
   onRefreshData?: () => void;
+};
+
+export type TaskOperationProps = {
+  workflowStatus: IsOnline;
+  cycleText: CycleText;
+  onOperate: (op: WorkflowOperation, params?: any) => Promise<any> | any;
 };
