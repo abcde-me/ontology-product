@@ -33,6 +33,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         form={form}
         autoComplete="off"
         labelCol={{ span: 0 }}
+        disabled={readOnly}
         wrapperCol={{ span: 24 }}
         onValuesChange={(_, v: any) => { onValuesChange(v, dataSource) }}
         initialValues={{

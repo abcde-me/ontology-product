@@ -16,8 +16,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     similarity_threshold,
     generate_sample_num,
     prompt,
-    modelList
+    modelList,
+    prompt_checkbox
   } = props.data;
+  console.log(props, 'pppppppppppp');
   const store = useStoreApi();
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
@@ -66,7 +68,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
             <div className="enhancement-item">{`生成样本数: ${generate_sample_num}`}</div>
           </Tooltip>
         )}
-        {prompt && (
+        {prompt_checkbox && (
           <Tooltip content={`提示词: ${prompt}`}>
             <div className="enhancement-item">{`提示词: ${prompt}`}</div>
           </Tooltip>
