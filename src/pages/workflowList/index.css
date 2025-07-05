@@ -28,6 +28,11 @@
     color: rgba(0, 125, 250, 0.5);
   }
 
+  .disabled-text {
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+
   .arco-table-tr:hover .hover-change {
     color: rgb(0, 125, 250);
     cursor: pointer;

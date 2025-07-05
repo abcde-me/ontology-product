@@ -16,12 +16,14 @@ export default function DataAugmentationNode(props: { dataSource; loading }) {
       >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">{dataSource.raw_data_num || '-'}</span>
+          <span className="item-content">
+            {dataSource.raw_data_num || '--'}
+          </span>
         </div>
         <div className="item-box">
           <span className="item-title">增强后数据量</span>
           <span className="item-content">
-            {dataSource.cleansed_data_num || '-'}
+            {dataSource.cleansed_data_num || '--'}
           </span>
         </div>
       </div>
