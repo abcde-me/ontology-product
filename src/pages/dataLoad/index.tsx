@@ -11,7 +11,6 @@ export default function DataLoad() {
           from="/tenant/compute/modaforge/dataLoad"
           to="/tenant/compute/modaforge/dataLoad/list"
         />
-
         {routes[2].children.map((route) => {
           return (
             <Route

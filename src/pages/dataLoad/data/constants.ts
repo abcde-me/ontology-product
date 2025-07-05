@@ -51,10 +51,7 @@ export const Monthly_Options = [
 // 连接器数据
 export let Connection_Options = [];
 async function request() {
-  const res = await getConnectionList({
-    page: 1,
-    page_size: 1000
-  });
+  const res = await getConnectionList({});
   Connection_Options = res.data.items.map((item) => {
     return {
       key: item.connector_id,

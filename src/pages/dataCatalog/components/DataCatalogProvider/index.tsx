@@ -19,10 +19,6 @@ const DataCatalogProvider = ({
     return new DataCatalog();
   }, [dataCatalogStore]);
 
-  // fetchData
-  // useEffect(() => {
-  // }, []);
-
   return (
     <DataCatalogContext.Provider value={dataCatalog}>
       {children}

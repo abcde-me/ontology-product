@@ -7,6 +7,7 @@ import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
 const TableDetail = (props) => {
   const history = useHistory();
+  console.log(props.name);
   const columns = [
     {
       title: '运行ID',
@@ -108,7 +109,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access?records_id=${item.execution_id}`
+              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}`
             );
           }}
         >

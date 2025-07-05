@@ -137,7 +137,6 @@ export function useEditableTree({ catalogTreeStore }) {
     } else {
       await new Promise((resolve) => setTimeout(resolve, 500));
       Message.error('删除失败，请稍后重试');
-      // console.log(res.message);
     }
 
     catalogTreeStore.setState({ treeData: newTreeData });
@@ -227,25 +226,36 @@ export function useEditableTree({ catalogTreeStore }) {
       return;
     }
 
+    const updateFn = async () => {
+      newTreeData = await catalogTreeStore.getRawData();
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        inputValue: ''
+      });
+    };
+
     const root_type = RootTypeEnum[activeTab];
     let newTreeData: TreeDataType[] = [];
+    let res: Partial<ApiRes<any>> = {};
+
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
         if (dataRef?.isAdd) {
-          await addCatalog({ name: fileName, root_type: root_type });
+          res = await addCatalog({ name: fileName, root_type: root_type });
         } else {
           // 编辑
           if (fileName !== dataRef.name) {
-            await renameCatalog(dataRef.id, {
+            res = await renameCatalog(dataRef.id, {
               new_name: fileName,
               root_type: root_type
             });
           }
+          await updateFn();
         }
         break;
 
       case CatalogTypeEnum.volume:
-        await addVolume({
+        res = await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
           root_type: root_type
@@ -256,12 +266,9 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
     }
 
-    newTreeData = await catalogTreeStore.getRawData();
-
-    catalogTreeStore.setState({
-      treeData: newTreeData,
-      inputValue: ''
-    });
+    if (res.status === 200) {
+      await updateFn();
+    }
   };
 
   const renderExtra = (node: NodeProps) => {
