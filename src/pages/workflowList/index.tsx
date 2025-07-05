@@ -266,6 +266,7 @@ export default function WorkflowList() {
             复制
           </span>
           <Popconfirm
+            disabled={record.is_online}
             focusLock
             title="确定删除工作流吗？"
             content="删除该工作流后，工作流中的内容将全部清除。"
@@ -281,7 +282,11 @@ export default function WorkflowList() {
               });
             }}
           >
-            <span className="operate-text">删除</span>
+            <span
+              className={record.is_online ? 'disabled-text' : 'operate-text'}
+            >
+              删除
+            </span>
           </Popconfirm>
         </div>
       )
