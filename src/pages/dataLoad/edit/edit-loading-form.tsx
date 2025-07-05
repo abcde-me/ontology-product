@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import Styles from './index.module.css';
 import React, { useEffect, useState } from 'react';
+import SchedulerRun from '../../../components/scheduler-run';
 import './index.css';
 // 导入每周数据
 import { Weekly_Options } from '../data/constants';
@@ -94,7 +95,7 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
   return (
     <div className={Styles.cycleLoadingBox}>
       <div style={{ display: 'flex' }}>
-        <Form.Item
+        {/* <Form.Item
           label="周期设置："
           labelAlign="right"
           rules={[{ required: true }]}
@@ -232,7 +233,7 @@ const EditLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
               </Form.Item>
             )}
           </div>
-        </Form.Item>
+        </Form.Item> */}
       </div>
       {promptState == -1 ? null : (
         <Alert

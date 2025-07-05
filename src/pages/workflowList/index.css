@@ -38,6 +38,7 @@
   }
 }
 
-.arco-trigger {
+.arco-popover-content,
+.arco-popconfirm-content {
   min-width: 315px;
 }

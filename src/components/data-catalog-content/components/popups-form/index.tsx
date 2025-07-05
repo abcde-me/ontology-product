@@ -21,6 +21,7 @@ interface FormProps {
   exportdataset?: any;
   selectedPath?: string;
   onExportSuccess?: () => void; // 添加导出成功回调
+  resetSelectedData?: () => void; // 添加重置选中状态的回调函数
 }
 
 const FormComponent: React.FC<FormProps> = ({
@@ -31,7 +32,8 @@ const FormComponent: React.FC<FormProps> = ({
   exportdatas,
   exportdataset,
   selectedPath,
-  onExportSuccess
+  onExportSuccess,
+  resetSelectedData
 }) => {
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
@@ -46,11 +48,11 @@ const FormComponent: React.FC<FormProps> = ({
         exportdatas.forEach((item) => {
           if (item.extras && item.extras.file_name) {
             exportNames.push(item.extras.file_name);
-          }else if(item.file_name){
+          } else if (item.file_name) {
             exportNames.push(item.file_name);
           }
         });
-      }else if(downloadData && downloadData.file_name){
+      } else if (downloadData && downloadData.file_name) {
         exportNames.push(downloadData.file_name);
       }
       else if (downloadData && downloadData.extras && downloadData.extras.file_name) {
@@ -61,13 +63,13 @@ const FormComponent: React.FC<FormProps> = ({
         Message.error('无有效的文件名称可导出');
         return;
       }
-      
+
       let full_paths = '';
       if (exportdatas && exportdatas.length > 0 && !selectedPath) {
         full_paths = exportdatas[0].full_path;
       } else if (selectedPath) {
         full_paths = selectedPath;
-      }else if (downloadData && downloadData.filePath) {
+      } else if (downloadData && downloadData.filePath) {
         full_paths = downloadData.filePath;
       } else if (downloadData && downloadData.full_path) {
         full_paths = downloadData.full_path;
@@ -78,7 +80,7 @@ const FormComponent: React.FC<FormProps> = ({
         Message.error('无有效的文件路径可导出');
         return;
       }
-      
+
       const res = await exportFile({
         file_names: exportNames,
         output_path: form.getFieldValue('path'),
@@ -89,10 +91,20 @@ const FormComponent: React.FC<FormProps> = ({
       console.log('导出文件名', exportNames);
       form.resetFields();
       Message.success('导出成功');
-      // 先调用导出成功回调，再关闭弹窗
+
+      // 先调用导出成功回调，再清空选中状态和缓存数据
       if (onExportSuccess) {
         onExportSuccess();
       }
+
+      // 重置选中状态和缓存数据
+      if (resetSelectedData) {
+        resetSelectedData();
+      } else {
+        console.log('回调未提供');
+      }
+
+      // 最后关闭弹窗
       onCancel && onCancel();
     } catch (e) {
       // 处理验证失败或导出失败的情况

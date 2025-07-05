@@ -1,12 +1,16 @@
-.arco-timepicker-container{
-  width:430px !important;
+.arco-timepicker-container {
+  width: 430px !important;
 }
-.arco-timepicker-list{
+.arco-timepicker-list {
   width: 50% !important;
 }
-.arco-select-popup .arco-select-option-selected{
+.arco-select-popup .arco-select-option-selected {
   background-color: white;
 }
-.arco-select-size-default.arco-select-multiple .arco-select-view{
+.arco-select-size-default.arco-select-multiple .arco-select-view {
   margin-left: 7px;
+}
+.jump-a:hover {
+  color: rgb(0, 125, 250) !important;
+  cursor: pointer !important;
 }

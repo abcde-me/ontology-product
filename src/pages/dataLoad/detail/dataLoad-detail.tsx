@@ -37,6 +37,8 @@ const DataLoadDetail = () => {
   const [pageSize, setPageSize] = useState(10);
   // 总条数
   const [total, setTotal] = useState(0);
+  // 搜索框的状态
+  const [searchValue, setSearchValue] = useState('');
   // 判断任务中是否存在运行的任务
   const handlePageChange = (page) => {
     setCurrent(page);
@@ -51,7 +53,6 @@ const DataLoadDetail = () => {
   // 点击编辑显示弹框
   const hideEditModal = () => {
     console.log(form.getFieldsValue());
-
     setEditVisible(false);
   };
   // 返回上一层的函数
@@ -93,7 +94,8 @@ const DataLoadDetail = () => {
       const res = await getLoadRecordList({
         task_id: Number(loadId),
         page: current,
-        page_size: pageSize
+        page_size: pageSize,
+        record_id: searchValue
       });
       setTotal(res.data.total);
       setDetailList(res.data.items);
@@ -111,8 +113,7 @@ const DataLoadDetail = () => {
   };
   useEffect(() => {
     getDetailList();
-    // judgmentTask();
-  }, [current, pageSize]);
+  }, [current, pageSize, searchValue]);
   useEffect(() => {
     getTask_idHan();
   }, []);
@@ -321,7 +322,11 @@ const DataLoadDetail = () => {
             padding: '0px 15px'
           }}
         >
-          <InputSearch placeholder="搜索运行ID" style={{ width: 230 }} />
+          <InputSearch
+            placeholder="搜索运行ID"
+            style={{ width: 230 }}
+            onPressEnter={(e) => setSearchValue(e.target.value)}
+          />
           <Button
             type="primary"
             icon={<IconPlus />}
@@ -347,6 +352,7 @@ const DataLoadDetail = () => {
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}
+            name={listDetail?.name || ''}
           />
           <Pagination
             sizeOptions={[1, 5, 10, 20]}

@@ -22,7 +22,7 @@
   background-color: white;
   border-radius: 8px;
   width: 700px !important;
-  height: 500px !important;
+  /* height: 500px !important; */
   max-width: 90%;
   max-height: 90%;
   overflow-y: auto;
@@ -59,7 +59,7 @@
 }
 
 .label {
-  width: 120px;
+  width: 130px;
 }
 
 .value {

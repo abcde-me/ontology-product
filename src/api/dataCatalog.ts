@@ -88,7 +88,16 @@ interface SourceDataFileQueryParams {
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
-  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+  const queryParams: any = { ...params };
+  // 将file_type数组转换为JSON字符串
+  if (queryParams.file_type && Array.isArray(queryParams.file_type)) {
+    queryParams.file_type = JSON.stringify(queryParams.file_type);
+  }
+  return await UAPI.RES.targetDataFileListApi({}).get(queryParams).inRegion().do();
+}
+//查询目标数据文件类型列表
+export async function getTargetFileTypeList() {
+  return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
 }
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
@@ -103,6 +112,8 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
     .inRegion()
     .do();
 }
+
+
 //查询源数据文件列表
 export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
   return await UAPI.RES.sourceDataFileListApi({}).post(params).inRegion().do();
@@ -111,6 +122,11 @@ export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
 export async function deleteSourceFile(id:string) {
   return await UAPI.RES.sourceDataFileDeleteApi({file_id:id}).delete().inRegion().do();
 }
+//批量删除源数据文件
+export async function deleteSourceFileBatch(params: any) {
+  return await UAPI.RES.sourceDataFileDeleteBatcheApi({}).post(params).inRegion().do();
+}
+
 /////////////////////////////////////////////////////////////////
 
 //预览/搜索数据集

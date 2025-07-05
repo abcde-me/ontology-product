@@ -3,6 +3,7 @@ import { Pagination, Table, Tooltip } from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
+import './index.css';
 enum StatusType {
   SYCCESS = 'succeed',
   FAIL = 'fail'
@@ -71,10 +72,29 @@ const AccessTable = (props) => {
       sorter: (a, b) => a.end_time - b.end_time
     }
   ];
-  const [data, setData] = useState<RecordingType[] | null>([]);
+  const [data, setData] = useState<RecordingType[] | null>([
+    // {
+    //   id: 1,
+    //   file_name: 'string',
+    //   status: 'string',
+    //   file_type: 'string',
+    //   start_time: 'string',
+    //   end_time: 'string',
+    //   error_message: 'string',
+    //   connector_id: 1,
+    //   data_path_id: 1,
+    //   execution_id: 'string',
+    //   file_size: 1,
+    //   hash_code: 'string',
+    //   task_id: 1,
+    //   upload_user_name: 'string',
+    // }
+  ]);
   const handlePageChange = (val) => {
     setCurrent(val);
   };
+  // 默认表格的loading状态
+  const [loading, setLoading] = useState(false);
   // 当前页数
   const [current, setCurrent] = useState(1);
   // 每页显示几条
@@ -83,20 +103,27 @@ const AccessTable = (props) => {
   const [total, setTotal] = useState(0);
   const getRecordingList = async () => {
     try {
+      setLoading(true);
       const res = await getLoadRecordLists({
         page: current,
         page_size: pageSize,
-        record_id: 'Job20250703-jtsl4VBQFfF29HuQ'
+        record_id: props.records_id,
+        // record_id: 'Job20250703-jtsl4VBQFfF29HuQ',
+        file_name: props.searchValue
       });
-      setTotal(res.data.total);
-      setData(res.data.items);
+      if (res.message == 'ok') {
+        setTotal(res.data.total);
+        setData(res.data.items);
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
     getRecordingList();
-  }, [current, pageSize]);
+  }, [current, pageSize, props.searchValue]);
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}
@@ -107,6 +134,8 @@ const AccessTable = (props) => {
         style={{ padding: '16px', width: '100%' }}
         border={false}
         pagination={false}
+        rowKey={(record) => record.id}
+        loading={loading}
       />
       <Pagination
         sizeOptions={[1, 5, 10, 20]}

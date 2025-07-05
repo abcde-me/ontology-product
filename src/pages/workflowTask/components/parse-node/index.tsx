@@ -129,7 +129,8 @@ export default function ParseNode(props: {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          overflow: 'hidden'
         }}
       >
         <div className="item-box">

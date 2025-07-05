@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
 import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
-import DocIcon from './icon/DOC.svg'; 
-import PdfIcon from './icon/PDF.svg'; 
-import TxtIcon from './icon/TXT.svg'; 
-import { deleteTargetFile, deleteSourceFile } from '@/api/dataCatalog';
+import DocIcon from './icon/DOC.svg';
+import PdfIcon from './icon/PDF.svg';
+import TxtIcon from './icon/TXT.svg';
+import { deleteTargetFile, deleteSourceFile, getTargetFileTypeList } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
 const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
 const TXTIcon = ({ size = 16 }) => <TxtIcon width={size} height={size} />;
-// const [ids, setIds] = useState([]);
+
+// 默认文件类型筛选器
+let fileTypeFilters = [
+  { text: 'pdf', value: 'pdf' },
+  { text: 'txt', value: 'txt' },
+  { text: 'doc', value: 'doc' }
+];
+
 // 根据文件类型获取对应图标组件的函数
 const getFileIcon = (type, size = 16) => {
   const iconMap = {
@@ -23,6 +30,7 @@ const getFileIcon = (type, size = 16) => {
   };
   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
 };
+
 //格式化时间函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -39,13 +47,77 @@ const formatDateTime = (dateTimeString: string): string => {
     return dateTimeString; // 如果格式化失败，返回原字符串
   }
 };
+//转换文件大小
+const formatFileSize = (size: number): string => {
+  if (size < 1024) {
+    return `${size}B`;
+  } else if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(2)}KB`;
+  } else if (size < 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024).toFixed(2)}MB`;
+  } else {
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+  }
+};
+// 从后端获取文件类型列表
+const getFileTypeList = async () => {
+  try {
+    const res = await getTargetFileTypeList();
+    console.log('目标数据文件类型列表', res.data.dst_file_type);
+    if (res && res.data && res.data.dst_file_type && Array.isArray(res.data.dst_file_type)) {
+      // 更新全局的fileTypeFilters变量
+      fileTypeFilters = res.data.dst_file_type.map(type => ({
+        text: type,
+        value: type
+      }));
+      console.log('更新后的文件类型筛选器:', fileTypeFilters);
+    }
+    return res;
+  } catch (error) {
+    console.error('获取文件类型列表失败:', error);
+    return [];
+  }
+};
+
+// 初始化文件类型筛选器
+(async () => {
+  try {
+    await getFileTypeList();
+  } catch (error) {
+    console.error('初始化文件类型筛选器失败:', error);
+  }
+})();
+
+export const useFileTypeFilters = () => {
+  const [filters, setFilters] = useState(fileTypeFilters);
+  useEffect(() => {
+    const fetchFileTypes = async () => {
+      try {
+        const fileTypes = await getFileTypeList();
+        if (fileTypes && Array.isArray(fileTypes)) {
+          // 将API返回的文件类型转换为筛选器格式
+          const newFilters = fileTypes.map(type => ({
+            text: type,
+            value: type
+          }));
+          setFilters(newFilters);
+        }
+      } catch (error) {
+        console.error('获取文件类型列表失败:', error);
+      }
+    };
+
+    fetchFileTypes();
+  }, []);
+  return filters;
+};
+
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
   // 添加空值检查
   const extras = record?.extras || {};
   const fileName = extras.file_name || '无文件名';
   const workflowId = extras.workflow_id || '无ID';
-
   const handleWorkflowClick = () => {
     if (extras.workflow_id) {
       window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`, '_blank');
@@ -90,7 +162,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath) => (
+const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -112,7 +184,7 @@ const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tab
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record, refreshData, selectedKey, tableType)}
+      onClick={() => handleDelete(record, refreshData, selectedKey, tableType, handAllReset)}
     >
       删除
     </span>
@@ -125,17 +197,22 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {}, // 添加刷新数据的回调函数
+  refreshData = () => { }, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
-  selectedFullPath?: string // 添加selectedFullPath参数
+  selectedFullPath?: string, // 添加selectedFullPath参数
+  customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
+  handAllReset?: () => void // 修改为函数类型而不是数组
 ) => {
+  // 使用传入的自定义筛选器或全局变量中的筛选器
+  const filters = customFileTypeFilters || fileTypeFilters;
+
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
     return [
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50
+        width: 50,
       },
       {
         title: '文件名',
@@ -167,7 +244,9 @@ export const getUnifiedColumns = (
         filters: [
           { text: 'pdf', value: 'pdf' },
           { text: 'txt', value: 'txt' },
-          { text: 'doc', value: 'doc' }
+          { text: 'doc', value: 'doc' },
+          { text: 'md', value: 'md' },
+          { text: 'ppt', value: 'ppt' },
         ],
         // onFilter: (value, row) => row.type == value,
         // onChange: (value, row) => row.type == value,
@@ -190,7 +269,7 @@ export const getUnifiedColumns = (
         dataIndex: 'file_size',
         render: (_, record) => (
           <div>
-            {record.file_size}
+            {formatFileSize(record.file_size)}
           </div>
         )
       },
@@ -227,13 +306,13 @@ export const getUnifiedColumns = (
           <div>
             <Popover content={record.connector_name}>
               <span
-               style={{
-                display: 'block',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '100%'
-              }}
+                style={{
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%'
+                }}
               >{record.connector_name}</span>
             </Popover>
           </div>
@@ -244,7 +323,7 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset)
       }
     ];
   }
@@ -312,12 +391,7 @@ export const getUnifiedColumns = (
       {
         title: '原文件类型',
         dataIndex: 'type',
-        filters: [
-          { text: 'pdf', value: 'pdf' },
-          { text: 'txt', value: 'txt' },
-          { text: 'doc', value: 'doc' }
-        ],
-        // onFilter: (value, row) => row.type == value,
+        filters: filters, // 使用动态获取的文件类型筛选器
         width: 134,
         render: (_, record) => (
           <div
@@ -337,25 +411,11 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath)
+        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset)
       }
     ];
   }
 
-  // // Source表格的数据库列配置（目前为空，可根据需要扩展）
-  // if (tableType === 'source' && dataType === 'database') {
-  //   return [
-  //     // 可根据实际需求添加数据库相关列配置
-  //   ];
-  // }
-
-  // // Target表格的数据库列配置（目前为空，可根据需要扩展）
-  // if (tableType === 'target' && dataType === 'database') {
-  //   return [
-  //     // 可根据实际需求添加数据库相关列配置
-  //   ];
-  // }
-  // 默认返回空数组
   return [];
 };
 
@@ -369,29 +429,31 @@ const handleDownload = (record, setVisible, selectedFullPath) => {
 };
 
 // 处理删除操作
-const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'target') => {
+const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'target', handAllReset) => {
   const ids: Array<string> = []
   try {
     Modal.confirm({
       title: '确认删除文件吗?',
       content: '删除后，文件不可恢复',
       onOk: async () => {
-        if(tableType === 'target'){
+        if (tableType === 'target') {
           ids.push(data.id);
-        console.log('查看删除的数据和数组们', data, ids);
-        await deleteTargetFile({
-          full_path: data.full_path,
-          file_ids: ids,
-          path_id: selectedKey
-        });
-        Message.success('删除成功');
-        }else{
-          await deleteSourceFile(data.id);
+          console.log('查看删除的数据和数组们', data, ids);
+          await deleteTargetFile({
+            full_path: data.full_path,
+            file_ids: ids,
+            path_id: selectedKey
+          });
           Message.success('删除成功');
+        } else {
+          handAllReset();
+          await deleteSourceFile(data.id);
         }
         // 删除成功后刷新数据
         if (typeof refreshData === 'function') {
+          Message.success('删除成功');
           refreshData();
+          handAllReset();
         }
       }
     });

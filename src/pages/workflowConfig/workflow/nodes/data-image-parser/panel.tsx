@@ -28,6 +28,7 @@ import { v4 as uuid4 } from 'uuid';
 import FileList from '../data-text-parser/file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
+import { useUnmountedRef } from 'ahooks';
 
 const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
@@ -39,6 +40,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
   const [picEmbModels, setPicEmbModels] = useState<Record<string, any>[]>([]);
+  const unmountedRef = useUnmountedRef();
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
@@ -47,6 +49,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
 
   useEffect(() => {
     getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
       const picList =
         res.data.find((d) => d.type === 'pic_model')?.model_data || [];
       const picEmbList =
@@ -58,11 +61,17 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
       const defaultPicId = picList[0]?.id || '';
       const defaultPicEmbId = picEmbList[0]?.id || '';
 
+      const fields = {} as Record<string, any>;
       if (!inputs.pic_model_id) {
-        form.setFieldValue('pic_model_id', defaultPicId);
+        // form.setFieldValue('pic_model_id', defaultPicId);
+        fields.pic_model_id = defaultPicId;
       }
       if (!inputs.pic_emb_model_id) {
-        form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
+        // form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
+        fields.pic_emb_model_id = defaultPicEmbId;
+      }
+      if (Object.keys(fields).length) {
+        form.setFieldsValue(fields);
       }
     });
   }, []);

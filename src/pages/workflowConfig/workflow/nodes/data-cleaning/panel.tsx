@@ -41,7 +41,7 @@ import { number } from 'mobx-state-tree/dist/internal';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const { readOnly, inputs, updateInputs, onValuesChange } = useConfig(id, data);
+  const { readOnly, inputs, onValuesChange } = useConfig(id, data);
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -75,7 +75,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         }}
         layout="inline"
         onValuesChange={(_, v) => {
-          onValuesChange(v)
+          // TODO: ts错误
+          // @ts-expect-error
+          onValuesChange(v);
         }}
       >
         <FormItem
@@ -87,10 +89,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           {/* switch 开关 */}
           <div className="date-switch">
-            <FormItem field="data_standardization" labelAlign="left" extra="将数据转换为标准格式或单位，例如日期、时间、货币等。">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+            <FormItem
+              field="data_standardization"
+              labelAlign="left"
+              extra="将数据转换为标准格式或单位，例如日期、时间、货币等。"
+            >
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">数据标准化</span>
           </div>
@@ -119,9 +123,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   field="case_uniformity"
                   labelAlign="left"
                 >
-                  <Checkbox>
-                    大小写统一
-                  </Checkbox>
+                  <Checkbox>大小写统一</Checkbox>
                 </FormItem>
                 <FormItem
                   layout="vertical"
@@ -168,10 +170,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             {/* 数据过滤开关 */}
-            <FormItem field="threshold_switch" labelAlign="left" extra="根据规则过滤数据，去除无效、错误或低质量数据">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+            <FormItem
+              field="threshold_switch"
+              labelAlign="left"
+              extra="根据规则过滤数据，去除无效、错误或低质量数据"
+            >
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">数据过滤</span>
           </div>
@@ -181,11 +185,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 field="threshold"
                 layout="inline"
                 label="字符串长度阈值"
-                rules={
-                  [
-                    { min: 5, max: 1204, type: 'number', message: '长度范围为5~1024个字符' }
-                  ]
-                }
+                rules={[
+                  {
+                    min: 5,
+                    max: 1204,
+                    type: 'number',
+                    message: '长度范围为5~1024个字符'
+                  }
+                ]}
               >
                 <InputNumber
                   step={1}
@@ -213,10 +220,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </div>
         <div className="file-box">
           <div className="date-switch">
-            <FormItem field="ts_remove" labelAlign="left" extra="将数据转换为标准格式或单位">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+            <FormItem
+              field="ts_remove"
+              labelAlign="left"
+              extra="将数据转换为标准格式或单位"
+            >
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">特殊字符删除</span>
           </div>
@@ -319,9 +328,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             <FormItem field="mg_is" labelAlign="left">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">去除敏感词</span>
           </div>
@@ -447,9 +454,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             <FormItem field="qd_is">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">数据去毒化</span>
           </div>
@@ -477,8 +482,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             <FormItem field="df_is">
-              <Switch
-                style={{ margin: 0, width: 'auto' }} />
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">数据填补</span>
           </div>
@@ -506,9 +510,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="file-box">
           <div className="date-switch">
             <FormItem field="oh_is">
-              <Switch
-                style={{ margin: 0, width: 'auto' }}
-              />
+              <Switch style={{ margin: 0, width: 'auto' }} />
             </FormItem>
             <span className="date-switch-text">异常值处理</span>
           </div>
