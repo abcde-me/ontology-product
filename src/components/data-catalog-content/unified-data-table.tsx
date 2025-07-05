@@ -208,10 +208,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newSourceParams.file_type = validFileTypes;
       }
       if(startTime){
-        newSourceParams.start_time = startTime;
+        newSourceParams.start = startTime;
       }
       if(endTime){
-        newSourceParams.end_time = endTime;
+        newSourceParams.end = endTime;
       }
       let res;
       if (tableType === 'target') {
