@@ -166,7 +166,16 @@ const columns = (
   {
     title: '版本',
     dataIndex: 'latest_version',
-    width: 100
+    width: 100,
+    render: (latest_version: string) => {
+      return (
+        <div>
+          <Tooltip content={latest_version}>
+            <div className={styles.datasetVersion}>{latest_version}</div>
+          </Tooltip>
+        </div>
+      );
+    }
   },
   {
     title: '状态',
