@@ -70,7 +70,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         )}
         {prompt_checkbox && (
           <Tooltip content={`提示词: ${prompt}`}>
-            <div className="enhancement-item">{`提示词: ${prompt}`}</div>
+            <div className="enhancement-item">{`提示词: ${prompt || ''}`}</div>
           </Tooltip>
         )}
       </div>

@@ -9,7 +9,8 @@ import {
   Modal,
   Message,
   Select,
-  Checkbox
+  Checkbox,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -62,11 +63,11 @@ interface Dataset {
   tag_names?: string[];
   src_model: string;
   status:
-    | 'creating'
-    | 'create_fail'
-    | 'normal'
-    | 'version_generating'
-    | 'version_generating_fail';
+  | 'creating'
+  | 'create_fail'
+  | 'normal'
+  | 'version_generating'
+  | 'version_generating_fail';
 }
 
 // 状态显示配置
@@ -87,183 +88,192 @@ const columns = (
   datasetList: Dataset[],
   handleExport: (record: Dataset) => void
 ) => [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    width: 200,
-    render: (name: string, record: Dataset) => (
-      <Button
-        type="text"
-        className={styles.datasetNameLink}
-        onClick={() => handleGoToDetail(record.id)}
-      >
-        {name}
-      </Button>
-    )
-  },
-  {
-    title: '标签',
-    dataIndex: 'tag_names',
-    width: 150,
-    // filterIcon: <IconFilter />,
-    filters: (() => {
-      const tagSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        dataset.tag_names?.forEach((tag) => tagSet.add(tag));
-      });
-      return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.tag_names?.includes(value) || false;
+    {
+      title: '名称',
+      dataIndex: 'name',
+      width: 200,
+      render: (name: string, record: Dataset) => (
+        <Button
+          type="text"
+          className={styles.datasetNameLink}
+          onClick={() => handleGoToDetail(record.id)}
+        >
+          {name}
+        </Button>
+      )
     },
-    render: (tag_names: string[]) => (
-      <Space size="mini">
-        {tag_names && tag_names.length > 0 && (
-          <Tag className={styles.tagGreen}>
-            {tag_names[0].length > 5
-              ? `${tag_names[0].substring(0, 5)}...`
-              : tag_names[0]}
-          </Tag>
-        )}
-        {tag_names && tag_names.length > 1 && (
-          <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
-        )}
-      </Space>
-    )
-  },
-  {
-    title: '版本',
-    dataIndex: 'latest_version',
-    width: 100
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    width: 120,
-    filterIcon: <IconFilter />,
-    filters: [
-      { text: '创建中', value: 'creating' },
-      { text: '创建失败', value: 'create_fail' },
-      { text: '正常', value: 'normal' },
-      { text: '版本生成中', value: 'version_generating' },
-      { text: '版本生成失败', value: 'version_generating_fail' }
-    ],
-    onFilter: (value: string, record: Dataset) => {
-      return record.status === value;
+    {
+      title: '标签',
+      dataIndex: 'tag_names',
+      width: 150,
+      // filterIcon: <IconFilter />,
+      filters: (() => {
+        const tagSet = new Set<string>();
+        datasetList?.forEach((dataset) => {
+          dataset.tag_names?.forEach((tag) => tagSet.add(tag));
+        });
+        return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
+      })(),
+      onFilter: (value: string, record: Dataset) => {
+        return record.tag_names?.includes(value) || false;
+      },
+      render: (tag_names: string[]) => (
+        <Space size="mini">
+          {tag_names && tag_names.length > 0 && (
+            <Tag className={styles.tagGreen}>
+              {tag_names[0].length > 5
+                ? `${tag_names[0].substring(0, 5)}...`
+                : tag_names[0]}
+            </Tag>
+          )}
+          {tag_names && tag_names.length > 1 && (
+            <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+          )}
+        </Space>
+      )
     },
-    render: (status: string) => {
-      const statusConfig = getStatusConfig(status);
-      return <Tag color={statusConfig.color}>{statusConfig.text}</Tag>;
-    }
-  },
-  {
-    title: '描述说明',
-    dataIndex: 'description',
-    width: 200,
-    ellipsis: true
-  },
-  {
-    title: '生成模型',
-    dataIndex: 'src_model',
-    filterIcon: <IconFilter />,
-    width: 150,
-    filters: (() => {
-      const modelSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.src_model) {
-          modelSet.add(dataset.src_model);
-        }
-      });
-      return Array.from(modelSet).map((model) => ({
-        text: model,
-        value: model
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.src_model === value;
+    {
+      title: '版本',
+      dataIndex: 'latest_version',
+      width: 100,
+      render: (latest_version: string) => {
+        return (
+          <div>
+            <Tooltip content={latest_version}>
+              <div className={styles.datasetVersion}>{latest_version}</div>
+            </Tooltip>
+          </div>
+        );
+      }
     },
-    render: (src_model: string) => (
-      <Tag className={styles.tagPurple}>{src_model}</Tag>
-    )
-  },
-  {
-    title: '创建人',
-    dataIndex: 'creator_name',
-    width: 120,
-    filterIcon: <IconFilter />,
-    filters: (() => {
-      const creatorSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.creator_name) {
-          creatorSet.add(dataset.creator_name);
-        }
-      });
-      return Array.from(creatorSet).map((creator) => ({
-        text: creator,
-        value: creator
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.creator_name === value;
-    }
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'created_at',
-    width: 220,
-    sorter: (a: Dataset, b: Dataset) => {
-      // 直接比较 ISO 8601 格式的时间字符串
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB;
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 120,
+      filterIcon: <IconFilter />,
+      filters: [
+        { text: '创建中', value: 'creating' },
+        { text: '创建失败', value: 'create_fail' },
+        { text: '正常', value: 'normal' },
+        { text: '版本生成中', value: 'version_generating' },
+        { text: '版本生成失败', value: 'version_generating_fail' }
+      ],
+      onFilter: (value: string, record: Dataset) => {
+        return record.status === value;
+      },
+      render: (status: string) => {
+        const statusConfig = getStatusConfig(status);
+        return status !== undefined && <Tag color={statusConfig.color}>{statusConfig.text}</Tag>;
+      }
     },
-    sortDirections: ['ascend' as const, 'descend' as const],
-    render: (created_at: string) => formatDateTime(created_at)
-  },
-  {
-    title: '最近更新',
-    dataIndex: 'updated_at',
-    width: 220,
-    sorter: (a: Dataset, b: Dataset) => {
-      // 直接比较 ISO 8601 格式的时间字符串
-      const dateA = new Date(a.updated_at).getTime();
-      const dateB = new Date(b.updated_at).getTime();
-      return dateA - dateB;
+    {
+      title: '描述说明',
+      dataIndex: 'description',
+      width: 200,
+      ellipsis: true
     },
-    sortDirections: ['ascend' as const, 'descend' as const],
-    render: (updated_at: string) => formatDateTime(updated_at)
-  },
-  {
-    title: '操作',
-    dataIndex: 'op',
-    width: 148,
-    fixed: 'right' as const,
-    render: (_: unknown, record: Dataset) => (
-      <Space size={8}>
-        {/* <Button
+    {
+      title: '生成模型',
+      dataIndex: 'src_model',
+      filterIcon: <IconFilter />,
+      width: 150,
+      filters: (() => {
+        const modelSet = new Set<string>();
+        datasetList?.forEach((dataset) => {
+          if (dataset.src_model) {
+            modelSet.add(dataset.src_model);
+          }
+        });
+        return Array.from(modelSet).map((model) => ({
+          text: model,
+          value: model
+        }));
+      })(),
+      onFilter: (value: string, record: Dataset) => {
+        return record.src_model === value;
+      },
+      render: (src_model: string) => (
+        <Tag className={styles.tagPurple}>{src_model}</Tag>
+      )
+    },
+    {
+      title: '创建人',
+      dataIndex: 'creator_name',
+      width: 120,
+      filterIcon: <IconFilter />,
+      filters: (() => {
+        const creatorSet = new Set<string>();
+        datasetList?.forEach((dataset) => {
+          if (dataset.creator_name) {
+            creatorSet.add(dataset.creator_name);
+          }
+        });
+        return Array.from(creatorSet).map((creator) => ({
+          text: creator,
+          value: creator
+        }));
+      })(),
+      onFilter: (value: string, record: Dataset) => {
+        return record.creator_name === value;
+      }
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'created_at',
+      width: 220,
+      sorter: (a: Dataset, b: Dataset) => {
+        // 直接比较 ISO 8601 格式的时间字符串
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateA - dateB;
+      },
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (created_at: string) => formatDateTime(created_at)
+    },
+    {
+      title: '最近更新',
+      dataIndex: 'updated_at',
+      width: 220,
+      sorter: (a: Dataset, b: Dataset) => {
+        // 直接比较 ISO 8601 格式的时间字符串
+        const dateA = new Date(a.updated_at).getTime();
+        const dateB = new Date(b.updated_at).getTime();
+        return dateA - dateB;
+      },
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (updated_at: string) => formatDateTime(updated_at)
+    },
+    {
+      title: '操作',
+      dataIndex: 'op',
+      width: 148,
+      fixed: 'right' as const,
+      render: (_: unknown, record: Dataset) => (
+        <Space size={8}>
+          {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
         </Button> */}
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.export}`}
-          onClick={() => handleExport(record)}
-        >
-          导出
-        </Button>
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.delete}`}
-          onClick={() => handleDelete(record)}
-        >
-          删除
-        </Button>
-      </Space>
-    )
-  }
-];
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${styles.export}`}
+            onClick={() => handleExport(record)}
+          >
+            导出
+          </Button>
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${styles.delete}`}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
+        </Space>
+      )
+    }
+  ];
 
 enum searchFieldType {
   name = 'name',
@@ -346,19 +356,19 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-              path:
-                // formData.targetDataSource[0][0] +
-                '/dst' +
-                '/' +
-                formData.targetDataSource[0][1] +
-                '/volume/' +
-                formData.targetDataSource[1][0],
-              path_id: formData.targetDataSource[1][1]
-            }
+            path:
+              // formData.targetDataSource[0][0] +
+              '/dst' +
+              '/' +
+              formData.targetDataSource[0][1] +
+              '/volume/' +
+              formData.targetDataSource[1][0],
+            path_id: formData.targetDataSource[1][1]
+          }
           : {
-              connector_id: parseInt(formData.targetDataSource) || 0,
-              connector_files: formData.selectedFiles || []
-            }
+            connector_id: parseInt(formData.targetDataSource) || 0,
+            connector_files: formData.selectedFiles || []
+          }
     };
 
     console.log('提交数据:', submitData);
