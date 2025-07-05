@@ -1,4 +1,5 @@
 import UAPI from '@/api';
+import { number } from 'echarts';
 // 数据集管理相关接口
 
 // 类型定义
@@ -76,6 +77,11 @@ export interface EditDatasetVersionParams {
 //批量删除数据集参数接口
 export interface BatchDeleteDatasetParams {
   ids: string[];
+}
+//版本重新生成参数接口
+export interface DatasetVersionRebuildParams {
+  id: string | number;
+  version_id: string;
 }
 
 /**
@@ -168,6 +174,13 @@ export async function deleteDataset(params: any) {
 //批量删除数据集
 export async function batchDeleteDataset(params: BatchDeleteDatasetParams) {
   return UAPI.RES.batchDeleteDatasetApi({}).post(params).inRegion().do();
+}
+
+//版本重新生成
+export async function datasetVersionRebuild(
+  params: DatasetVersionRebuildParams
+) {
+  return UAPI.RES.datasetVersionRebuildApi({}).post(params).inRegion().do();
 }
 
 //获取连接器列表
