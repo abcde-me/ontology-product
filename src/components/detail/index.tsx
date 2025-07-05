@@ -41,7 +41,8 @@ import {
   getDatasetDetailPage,
   editDatasetVersion,
   type DataChangeItem,
-  getDatasetVersionList
+  getDatasetVersionList,
+  datasetVersionRebuild
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
@@ -355,7 +356,11 @@ const statusConfig = {
 };
 
 // 渲染状态标签
-const renderStatusTag = (status: string, errorReason?: string) => {
+const renderStatusTag = (
+  status: string,
+  errorReason?: string,
+  handleVersionRebuild?: () => void
+) => {
   const config = statusConfig[status];
   if (!config) return null;
 
@@ -400,7 +405,9 @@ const renderStatusTag = (status: string, errorReason?: string) => {
             height: 'auto'
           }}
         >
-          重试
+          <span style={{ color: '#165dff' }} onClick={handleVersionRebuild}>
+            重试
+          </span>
         </Button>
       </div>
     );
@@ -808,6 +815,16 @@ const DatasetDetail: React.FC = () => {
     }
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
 
+  const handleVersionRebuild = () => {
+    if (!datasetDetail) return;
+    datasetVersionRebuild({ id: id, version_id: datasetDetail.latest_version })
+      .then((res) => {
+        console.log('版本重新生成', res);
+      })
+      .catch((err) => {
+        console.error('版本重新生成失败:', err);
+      });
+  };
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
@@ -866,7 +883,8 @@ const DatasetDetail: React.FC = () => {
                           <span>{datasetDetail.name}</span>
                           {renderStatusTag(
                             datasetDetail.status,
-                            datasetDetail.error_reason
+                            datasetDetail.error_reason,
+                            handleVersionRebuild
                           )}
                         </div>
                       )

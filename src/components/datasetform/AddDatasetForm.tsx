@@ -460,6 +460,14 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
         console.log('表单数据:', formData);
+        form.resetFields();
+        setDataSource('volume'); //重置数据源
+        setSelectedConnector(null); //重置连接器
+        setSelectedFiles([]); //重置选择文件
+        setConnectorFileInformation([]); //重置连接器文件信息
+        setPreviewData(null); //重置预览数据
+        setPreviewColumns([]); //重置预览表格列
+        // setTargetDataSourceOptions([]);//重置目标数据源选项
         onSubmit(formData);
       })
       .catch((error) => {
