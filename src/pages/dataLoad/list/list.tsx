@@ -410,7 +410,7 @@ export default function DataLoad() {
             setCurrent(1);
           }}
           onChange={handlePageChange}
-          sizeOptions={[1, 2, 5, 10]}
+          sizeOptions={[10, 20, 50, 100]}
           showTotal
           total={loadTotal}
           showJumper
