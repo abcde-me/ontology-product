@@ -104,20 +104,15 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
-  async getRawData({
-    activeKey,
-    searchValue
-  }: {
-    activeKey?: string;
-    searchValue?: string;
-  }) {
+  async getRawData(props?: { activeKey?: string; searchValue?: string }) {
     const { activeTab: stateActiveTab } = this.getState();
-    const activeTab = activeKey || stateActiveTab;
+    const activeTab = props?.activeKey || stateActiveTab;
 
     const res = await getCatalogList({
       root_type: RootTypeEnum[activeTab],
-      search: searchValue
+      search: props?.searchValue
     });
+
     return this.convertRawDataToTreeData(res?.data?.[activeTab] || []);
   }
 
