@@ -5,6 +5,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import TimeFormatting from '../../../utils/timeFormatting';
 import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
+import copy from 'copy-to-clipboard';
 const ModalDetail = (props) => {
   // 默认显示对象为空
   const [DetailData, setDetailData] = useState<connectorDetailType | null>(
@@ -12,24 +13,6 @@ const ModalDetail = (props) => {
   );
   // 默认弹框的状态
   const [loading, setLoading] = useState(false);
-  // 点击复制的逻辑
-  const handleCopy = (text?: string) => {
-    if (!text) {
-      console.warn('没有可复制的内容');
-      return;
-    }
-
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        // 复制成功回调
-        Message.success('复制成功');
-      })
-      .catch((err) => {
-        console.error('复制失败:', err);
-        Message.error('复制失败');
-      });
-  };
   // 获取详情页的数据
   const getdetailListHan = async () => {
     try {
@@ -122,7 +105,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.endpoint);
+                              copy(DetailData?.config.endpoint || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -134,7 +118,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.access_key);
+                              copy(DetailData?.config.access_key || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -146,7 +131,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.secret_key);
+                              copy(DetailData?.config.secret_key || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -158,7 +144,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData.config.path);
+                              copy(DetailData.config.path || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -173,7 +160,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.host);
+                              copy(DetailData?.config.host || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -185,7 +173,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.port);
+                              copy(DetailData?.config.port || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -197,7 +186,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.user);
+                              copy(DetailData?.config.user || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>
@@ -209,7 +199,8 @@ const ModalDetail = (props) => {
                           <IconCopy
                             className="set-mouse"
                             onClick={() => {
-                              handleCopy(DetailData?.config.path);
+                              copy(DetailData?.config.path || '');
+                              Message.success('复制成功');
                             }}
                           />
                         </span>

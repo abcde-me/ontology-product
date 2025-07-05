@@ -20,35 +20,35 @@ export interface ConnectionType {
   creator?: string; // 创建者
 }
 interface s3Type {
-  access_key: String;
-  secret_key: String;
-  endpoint: String;
-  path: String;
+  access_key: string;
+  secret_key: string;
+  endpoint: string;
+  path: string;
 }
 interface hdfsType {
-  host: String;
-  port: String;
-  user: String;
-  path: String;
+  host: string;
+  port: string;
+  user: string;
+  path: string;
 }
 
 // 连接器详情数据类型
 export interface connectorDetailType {
-  id: Number;
-  name: String;
-  type: String;
+  id: number;
+  name: string;
+  type: string;
   config: {
-    access_key?: String;
-    secret_key?: String;
-    endpoint?: String;
-    path?: String;
-    host?: String;
-    port?: String;
-    user?: String;
+    access_key?: string;
+    secret_key?: string;
+    endpoint?: string;
+    path?: string;
+    host?: string;
+    port?: string;
+    user?: string;
   };
-  creator: String;
-  created_at: String;
-  updated_at: String;
-  status: String;
-  perms: Array<String> | null;
+  creator: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  perms: Array<string> | null;
 }

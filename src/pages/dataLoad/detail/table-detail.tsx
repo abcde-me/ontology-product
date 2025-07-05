@@ -94,12 +94,12 @@ const TableDetail = (props) => {
     {
       title: '开始时间',
       dataIndex: 'start_time',
-      sorter: (a, b) => a.start_time - b.start_time
+      sorter: (a, b) => a.start_time.localeCompare(b.start_time)
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
-      sorter: (a, b) => a.end_time - b.end_time
+      sorter: (a, b) => a.end_time.localeCompare(b.end_time)
     },
     {
       title: '操作',
