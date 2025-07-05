@@ -253,6 +253,14 @@
   padding: 2px 6px;
 }
 
+.datasetVersion {
+  color: #000;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* 复选框样式 */
 .datasetTable :global(.arco-checkbox) {
   margin-right: 0;
