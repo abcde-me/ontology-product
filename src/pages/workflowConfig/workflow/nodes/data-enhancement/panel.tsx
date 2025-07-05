@@ -21,7 +21,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  const { inputs, updateInputs } = useConfig(id, data);
+  const { inputs, onValuesChange, readOnly } = useConfig(id, data);
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const [isShow, setIsShow] = useState(false);
@@ -29,13 +29,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   useEffect(() => {
     setIsShow(
       inputs?.app_scenarios_name === 'tongyong' ||
-        inputs?.app_scenarios_name === 'duolong'
+      inputs?.app_scenarios_name === 'duolong'
     );
     setIsShowWB(
       inputs?.app_scenarios_name === 'fenlei' ||
-        inputs?.app_scenarios_name === 'shengcheng'
+      inputs?.app_scenarios_name === 'shengcheng'
     );
-    setCustomPromptChecked(inputs?.prompt_checkbox);
+    setCustomPromptChecked(inputs?.prompt_checkbox || inputs?.app_scenarios ? true : false);
   }, [inputs]);
 
   // 获取模型数据
@@ -51,19 +51,17 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   useEffect(() => {
     getModelData();
   }, []);
-  const onValuesChange = (changeValue: any, values: any) => {
-    updateInputs({ ...values, modelList: modelList });
-  };
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
         form={form}
         autoComplete="off"
+        disabled={readOnly}
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          prompt:
-            inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
+          ...data,
+          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
           app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
           sample_data:
@@ -73,7 +71,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           similarity_threshold: inputs?.similarity_threshold || 0.1,
           generate_sample_num: inputs?.generate_sample_num || 1,
         }}
-        onChange={onValuesChange}
+        onChange={(_, v: any) => { onValuesChange(v) }}
       >
         <FormItem
           layout="inline"
