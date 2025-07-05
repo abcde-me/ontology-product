@@ -249,7 +249,7 @@ export default function Eltable() {
         }
       });
     } catch {
-      Message.error('删除失败，请重试');
+      Message.error('删除失败，请稍后重试');
     }
   };
   // 批量导出
@@ -448,13 +448,13 @@ export default function Eltable() {
             {/* 根据active类型渲染不同的搜索区域 */}
             {renderSearchArea()}
             {/* 通用的时间范围选择器 */}
-            <RangePicker
+            <DatePicker.RangePicker
               style={{ width: 260 }}
               showTime={{
-                defaultValue: ['00:00', '04:05'],
-                format: 'HH:mm'
+                defaultValue: ['00:00:00', '04:05:05'],
+                format: 'HH:mm:ss'
               }}
-              format="YYYY-MM-DD HH:mm"
+              format="YYYY-MM-DD HH:mm:ss"
               onChange={onChange}
               onSelect={onSelect}
               onOk={onOk}

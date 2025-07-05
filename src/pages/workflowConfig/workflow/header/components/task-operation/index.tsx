@@ -10,7 +10,7 @@ import {
 } from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
-import { AppPublisherProps, ModelAndParameter } from '../../types';
+import { TaskOperationProps, ModelAndParameter } from '../../types';
 import SchedulerRun from '@/components/scheduler-run';
 import CircleIcon from '@/assets/workflow-header-circle.svg';
 import CircleIconDisabled from '@/assets/workflow-header-circle-disabled.svg';
@@ -25,14 +25,9 @@ const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
 
 const AppPublisher = ({
   workflowStatus,
-  // @ts-expect-error
   cycleText,
-  disabled = false,
-  publishDisabled = false,
-  onOperate,
-  onRestore,
-  onToggle
-}: AppPublisherProps) => {
+  onOperate
+}: TaskOperationProps) => {
   const [published, setPublished] = useState(false);
   const [newCycleText, setNewCycleText] = useState(cycleText);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
@@ -64,16 +59,6 @@ const AppPublisher = ({
   const handleOptionsChange = (options) => {
     setNewCycleText(options);
   };
-
-  // useKeyPress(
-  //     `${getKeyboardKeyCodeBySystem('ctrl')}.shift.p`,
-  //     (e) => {
-  //         e.preventDefault();
-  //         if (publishDisabled || published) return;
-  //         handleOperate();
-  //     },
-  //     { exactMatch: true, useCapture: true }
-  // );
 
   return (
     <>
