@@ -179,12 +179,17 @@
 
 /* 表格内链接样式 */
 .datasetNameLink {
-  color: #0e42d2 !important;
   font-weight: 500 !important;
   padding: 0 !important;
   height: auto !important;
   text-decoration: none;
   font-size: 14px;
+}
+
+/* 鼠标移入变蓝 */
+.datasetTable :global(.arco-table-tr:hover) .datasetNameHover {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
 }
 
 /* 操作列样式优化 */
@@ -213,6 +218,10 @@
 
 .actionButton.export {
   color: #007dfa !important;
+}
+
+.actionButton.disabled {
+  color: #94a3b8 !important;
 }
 
 /* .actionButton.export:hover {
@@ -251,6 +260,14 @@
   border-radius: 4px;
   font-size: 14px;
   padding: 2px 6px;
+}
+
+.datasetVersion {
+  color: #000;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 复选框样式 */
@@ -317,6 +334,15 @@
 
 .datasetManagement :global(.arco-modal-body) {
   padding: 24px;
+}
+
+.retryText {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  color: #007dfa;
+  cursor: pointer;
+  margin: 0 0 0 5px;
 }
 
 /* 响应式设计 */

@@ -33,9 +33,7 @@ const EditingTitle = () => {
         ) : (
           <Clock1Icon className="mr-[6px] size-[16px]" />
         )}
-        {workflowDetail?.is_online === IsOnline.online
-          ? `${t('workflow.common.published')}`
-          : t('workflow.common.unpublished')}
+        {workflowDetail?.is_online === IsOnline.online ? '已上线' : '未上线'}
       </div>
       {isSyncingWorkflowDraft && (
         <div className="syncing-data-part">
