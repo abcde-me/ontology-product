@@ -196,7 +196,7 @@ const columns = (
       const statusConfig = getStatusConfig(status);
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {getStatusIcon(status)}
+          {status && getStatusIcon(status)}
           <span>{statusConfig.text}</span>
           {status === datasetStatus.version_generating_fail ||
           status === datasetStatus.create_fail ? (
