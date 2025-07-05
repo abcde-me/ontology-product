@@ -10,7 +10,8 @@ import {
   Cascader,
   Typography,
   Modal,
-  Tooltip
+  Tooltip,
+  Message
 } from '@arco-design/web-react';
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 
@@ -381,7 +382,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       // value 是一个数组，格式为 [catalog_id, "volume_id" 或 "db_id"]
       const catalogpath = value[0][0];
       const catalogId = value[0][1];
-      const selectedItem = value[1][0];
+      const selectedItem = value[1]?.[0];
       console.log(1111111, value);
       // 构建路径：catalog_id/type_itemId
       const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
@@ -432,7 +433,11 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const getVolumePreviewData = (volumeId: string) => {
     // 这里应该调用真实的API
     getCatalogPreview({ path: volumeId }).then((res) => {
-      setPreviewData(res.data.list); //这里的数据不能直接赋值，需要处理一下
+      if (res.status == 0) {
+        Message.error(res.message);
+        return;
+      }
+      setPreviewData(res.data.list || []); //这里的数据不能直接赋值，需要处理一下
       setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
     });
 
