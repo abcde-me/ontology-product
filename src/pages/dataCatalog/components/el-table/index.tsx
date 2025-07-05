@@ -36,6 +36,13 @@ interface TableRow {
 interface TableRefType {
   getTableList: () => void;
   resetSelection: () => void;
+  clearAllSelections?: () => void;
+  handAllReset?: () => void;
+  updateSelection?: (keys: React.Key[]) => void;
+  getSelectedData?: () => {
+    selectedRowKeys: React.Key[];
+    selectedRows: TableRow[];
+  };
 }
 
 export default function Eltable() {
@@ -65,10 +72,24 @@ export default function Eltable() {
   }); // Target表格搜索条件状态，传递给子组件
 
   const [visible, setVisible] = useState(false); // 下载弹框控制
-  const [downloadData, setDownloadData] = useState([]); // 下载的数据
+  const [downloadData, setDownloadData] = useState([]); // 导出的数据
 
   // 表格引用，用于调用表格内部方法
   const tableRef = React.useRef<TableRefType>(null);
+
+  // 监听activeTab变化，在切换标签页时重置选中状态
+  useEffect(() => {
+    console.log('标签页切换，重置选中状态', activeTab);
+    // 清空选中行数据
+    setSelectedRows([]);
+    if (tableRef.current) {
+      if (tableRef.current.clearAllSelections) {
+        tableRef.current.clearAllSelections();
+      } else if (tableRef.current.resetSelection) {
+        tableRef.current.resetSelection();
+      }
+    }
+  }, [activeTab]);
 
   // 通用的行选择处理函数
   const handleSelectionChange = (
@@ -171,6 +192,36 @@ export default function Eltable() {
     });
   };
 
+  // 清除所有选择状态和缓存的函数
+  const clearAllSelectionsAndCache = () => {
+    setSelectedRows([]);
+    if (tableRef.current) {
+        if (tableRef.current.clearAllSelections) {
+          tableRef.current.clearAllSelections();
+        }
+        if (tableRef.current.resetSelection) {
+          tableRef.current.resetSelection();
+        }
+        if (tableRef.current.getTableList) {
+          tableRef.current.getTableList();
+        }
+    }
+    setTimeout(() => {
+      setSelectedRows([]);
+      if (tableRef.current) {
+        if (tableRef.current.clearAllSelections) {
+          tableRef.current.clearAllSelections();
+        }
+        if (tableRef.current.resetSelection) {
+          tableRef.current.resetSelection();
+        }
+        if (tableRef.current.getTableList) {
+          tableRef.current.getTableList();
+        }
+      }
+    }, 100);
+  };
+
   // 通用的批量删除处理函数
   const handleDeleteMany = () => {
     const ids: Array<string> = [];
@@ -179,54 +230,31 @@ export default function Eltable() {
         title: '确认删除文件吗?',
         content: '删除后，文件不可恢复',
         onOk: async () => {
-          const idList = selectedRows.map((item: { id: string }) => item.id);
-          ids.push(...idList);
-          console.log(
-            selectedRows[0].full_path,
-            selectedKey,
-            '打印selectedRows88888888888'
-          );
-
-          // 调用删除API
-          if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
-            await deleteTargetFile({
-              full_path: selectedRows[0].full_path,
-              file_ids: ids,
-              path_id: selectedKey
-            });
-            Message.success('删除成功');
-
-            // 清空选择状态
-            setSelectedRows([]);
-            
-            // 使用表格引用重置选中框
-            if (tableRef.current) {
-              // 先重置选择状态
-              if (tableRef.current.resetSelection) {
-                tableRef.current.resetSelection();
-              }
-              // 然后刷新表格数据
-              if (tableRef.current.getTableList) {
-                tableRef.current.getTableList();
-              }
-            } else {
-              // 如果无法调用方法，则强制刷新页面
-              window.location.reload();
+          if (activeTab === 'dst') {
+            const idList = selectedRows.map((item: { id: string }) => item.id);
+            ids.push(...idList);
+            // 调用删除API
+            if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
+              await deleteTargetFile({
+                full_path: selectedRows[0].full_path,
+                file_ids: ids,
+                path_id: selectedKey
+              });
+              Message.success('删除成功');
+              clearAllSelectionsAndCache();
             }
+          } else {
+            clearAllSelectionsAndCache();
           }
         }
       });
     } catch {
-      Message.error('删除失败，请重试');
+      Message.error('删除失败，请稍后重试');
     }
   };
   // 批量导出
   const [defaultName, setDefaultName] = useState('');
   const handleExport = () => {
-    // 根据当前标签页设置默认文件名
-    // const fileName =
-    //   activeTab === 'source' ? '默认文件名称.zip' : '默认文件名称.json';
-    // setDefaultName(fileName);
     console.log('导出', selectedRows);
     setVisible(true);
   };
@@ -275,7 +303,7 @@ export default function Eltable() {
         >
           <Input.Search
             allowClear
-            placeholder="输入关键词搜索"
+            placeholder="输入文件名搜索"
             value={inputValue}
             onChange={(value) => setInputValue(value)}
             onSearch={handleSourceSearch}
@@ -314,7 +342,7 @@ export default function Eltable() {
               <Select.Option value="ID">ID</Select.Option>
             </Select>
             <InputSearch
-              placeholder={`输入${searchType}搜索`}
+              placeholder={`输入关键字搜索`}
               style={{ width: '160px' }}
               value={searchKeyword}
               onChange={(value) => setSearchKeyword(value)}
@@ -419,15 +447,14 @@ export default function Eltable() {
           <Space>
             {/* 根据active类型渲染不同的搜索区域 */}
             {renderSearchArea()}
-
             {/* 通用的时间范围选择器 */}
-            <RangePicker
+            <DatePicker.RangePicker
               style={{ width: 260 }}
               showTime={{
-                defaultValue: ['00:00', '04:05'],
-                format: 'HH:mm'
+                defaultValue: ['00:00:00', '04:05:05'],
+                format: 'HH:mm:ss'
               }}
-              format="YYYY-MM-DD HH:mm"
+              format="YYYY-MM-DD HH:mm:ss"
               onChange={onChange}
               onSelect={onSelect}
               onOk={onOk}
@@ -446,12 +473,9 @@ export default function Eltable() {
             onSelectionChange={handleSelectionChange}
             // Source表格专用属性
             searchValue={activeTab === 'src' ? searchValue : undefined}
-            // Target表格专用属性
             searchCondition={activeTab === 'dst' ? searchCondition : undefined}
-            // 通用属性
             startTime={startTime}
             endTime={endTime}
-            // 表格类型标识，根据active值决定
             tableType={activeTab === 'src' ? 'source' : 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType="volume"
@@ -471,13 +495,8 @@ export default function Eltable() {
         exportdatas={selectedRows}
         selectedPath={selectedPath}
         onExportSuccess={() => {
-          // 导出成功后重置选中状态
-          setSelectedRows([]);
-          // 使用表格引用重置选中框
-          if (tableRef.current && tableRef.current.resetSelection) {
-            tableRef.current.resetSelection();
-          }
         }}
+        resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
   );

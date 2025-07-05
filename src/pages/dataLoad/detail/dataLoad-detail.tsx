@@ -37,6 +37,8 @@ const DataLoadDetail = () => {
   const [pageSize, setPageSize] = useState(10);
   // 总条数
   const [total, setTotal] = useState(0);
+  // 搜索框的状态
+  const [searchValue, setSearchValue] = useState('');
   // 判断任务中是否存在运行的任务
   const handlePageChange = (page) => {
     setCurrent(page);
@@ -51,7 +53,6 @@ const DataLoadDetail = () => {
   // 点击编辑显示弹框
   const hideEditModal = () => {
     console.log(form.getFieldsValue());
-
     setEditVisible(false);
   };
   // 返回上一层的函数
@@ -68,23 +69,6 @@ const DataLoadDetail = () => {
       console.error('Error:', error);
     }
   };
-  // 点击新建运行
-  const runningHan = async () => {
-    try {
-      const res = await runLoad({
-        task_id: Number(loadId)
-      });
-      console.log(res);
-      if (res.message == '') {
-        Message.success('新建运行成功');
-        judgmentTask();
-      } else {
-        Message.error(res.message);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   // 获取详情页面数据列表
   const getDetailList = async () => {
@@ -93,7 +77,8 @@ const DataLoadDetail = () => {
       const res = await getLoadRecordList({
         task_id: Number(loadId),
         page: current,
-        page_size: pageSize
+        page_size: pageSize,
+        record_id: searchValue
       });
       setTotal(res.data.total);
       setDetailList(res.data.items);
@@ -107,12 +92,28 @@ const DataLoadDetail = () => {
     getDetailList();
     const boo = detailList?.findIndex((item) => item.status == 'running');
     setRunningFlag(boo == -1 ? false : true);
-    console.log(boo);
+  };
+  // 点击新建运行
+  const runningHan = async () => {
+    try {
+      const res = await runLoad({
+        task_id: Number(loadId)
+      });
+      console.log(res);
+      if (res.code == '') {
+        Message.success('新建运行成功');
+        getDetailList();
+        judgmentTask();
+      } else {
+        Message.error(res.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
   useEffect(() => {
     getDetailList();
-    // judgmentTask();
-  }, [current, pageSize]);
+  }, [current, pageSize, searchValue]);
   useEffect(() => {
     getTask_idHan();
   }, []);
@@ -175,103 +176,117 @@ const DataLoadDetail = () => {
         </div>
         <div className="info-container">
           <div className="info-column">
-            <Row
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+              >
                 载入位置：
-              </Col>
-              <Col span={21} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.data_path_name}
-              </Col>
-            </Row>
-            <Row
+              </div>
+            </div>
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex'
                 // alignItems: 'center'
               }}
             >
-              <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+              >
                 创建人：
-              </Col>
-              <Col span={21} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.createor}
-              </Col>
-            </Row>
-            <Row
+              </div>
+            </div>
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+              >
                 创建时间：
-              </Col>
-              <Col span={21} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.created_at}
-              </Col>
-            </Row>
-            <Row
+              </div>
+            </div>
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={3} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+              >
                 更新时间：
-              </Col>
-              <Col span={21} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.last_run_time}
-              </Col>
-            </Row>
+              </div>
+            </div>
           </div>
           <div className="info-column">
-            <Row
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+              >
                 数据源类型：
-              </Col>
-              <Col span={20} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.source_type}
-              </Col>
-            </Row>
-            <Row
+              </div>
+            </div>
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+              >
                 连接器名称：
-              </Col>
-              <Col span={20} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.connector_name}
-              </Col>
-            </Row>
-            <Row
+              </div>
+            </div>
+            <div
               style={{
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center'
               }}
             >
-              <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+              <div
+                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+              >
                 载入形式：
-              </Col>
-              <Col span={20} style={{ fontSize: '14px' }}>
+              </div>
+              <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.load_type == 'once'
                   ? '单次载入'
                   : '周期载入'}
@@ -284,23 +299,29 @@ const DataLoadDetail = () => {
                     onChange={(val) => console.log(!val)}
                   />
                 )}
-              </Col>
-            </Row>
+              </div>
+            </div>
             {listDetail && listDetail.load_type == 'cron' && (
-              <Row
+              <div
                 style={{
                   marginBottom: 16,
                   display: 'flex',
                   alignItems: 'center'
                 }}
               >
-                <Col span={4} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: '15px',
+                    width: '90px'
+                  }}
+                >
                   周期设置：
-                </Col>
-                <Col span={20} style={{ fontSize: '14px' }}>
+                </div>
+                <div style={{ fontSize: '14px' }}>
                   {listDetail.cron_expression}
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -321,7 +342,11 @@ const DataLoadDetail = () => {
             padding: '0px 15px'
           }}
         >
-          <InputSearch placeholder="搜索运行ID" style={{ width: 230 }} />
+          <InputSearch
+            placeholder="搜索运行ID"
+            style={{ width: 230 }}
+            onPressEnter={(e) => setSearchValue(e.target.value)}
+          />
           <Button
             type="primary"
             icon={<IconPlus />}
@@ -347,9 +372,10 @@ const DataLoadDetail = () => {
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}
+            name={listDetail?.name || ''}
           />
           <Pagination
-            sizeOptions={[1, 5, 10, 20]}
+            sizeOptions={[10, 20, 50, 100]}
             showTotal
             total={total}
             showJumper

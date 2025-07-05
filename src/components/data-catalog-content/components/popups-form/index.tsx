@@ -21,6 +21,7 @@ interface FormProps {
   exportdataset?: any;
   selectedPath?: string;
   onExportSuccess?: () => void; // 添加导出成功回调
+  resetSelectedData?: () => void; // 添加重置选中状态的回调函数
 }
 
 const FormComponent: React.FC<FormProps> = ({
@@ -31,7 +32,8 @@ const FormComponent: React.FC<FormProps> = ({
   exportdatas,
   exportdataset,
   selectedPath,
-  onExportSuccess
+  onExportSuccess,
+  resetSelectedData
 }) => {
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
@@ -40,59 +42,96 @@ const FormComponent: React.FC<FormProps> = ({
       await form.validate();
       console.log(downloadData, '打印看啊看downloadData');
       console.log(exportdatas, '打印看啊看exportdatas');
-      const exportNames: Array<string> = [];
-      if (exportdatas && exportdatas.length > 0) {
-        // 使用扁平数组而不是嵌套数组
-        exportdatas.forEach((item) => {
-          if (item.extras && item.extras.file_name) {
-            exportNames.push(item.extras.file_name);
-          }else if(item.file_name){
-            exportNames.push(item.file_name);
-          }
-        });
-      }else if(downloadData && downloadData.file_name){
-        exportNames.push(downloadData.file_name);
-      }
-      else if (downloadData && downloadData.extras && downloadData.extras.file_name) {
-        exportNames.push(downloadData.extras.file_name);
-      } else if (exportdataset && exportdataset.latest_file_name) {
-        exportNames.push(exportdataset.latest_file_name);
-      } else {
-        Message.error('无有效的文件名称可导出');
-        return;
-      }
+      console.log(exportdataset, '打印看啊看exportdataset');
       
-      let full_paths = '';
-      if (exportdatas && exportdatas.length > 0 && !selectedPath) {
-        full_paths = exportdatas[0].full_path;
-      } else if (selectedPath) {
-        full_paths = selectedPath;
-      }else if (downloadData && downloadData.filePath) {
-        full_paths = downloadData.filePath;
-      } else if (downloadData && downloadData.full_path) {
-        full_paths = downloadData.full_path;
-      } else if (exportdataset && exportdataset.latest_file_path && exportdataset.latest_file_name) {
-        full_paths =
-          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
-      } else {
-        Message.error('无有效的文件路径可导出');
-        return;
+      // const exportNames: Array<string> = [];
+      // if (exportdatas && exportdatas.length > 0) {
+      //   exportdatas.forEach((item) => {
+      //     if (item.extras && item.extras.file_name) {
+      //       exportNames.push(item.extras.file_name);
+      //     } else if (item.file_name) {
+      //       exportNames.push(item.file_name);
+      //     } else if (item.latest_file_name) {
+      //       exportNames.push(item.latest_file_name);
+      //     }
+      //   });
+      // } else if (downloadData && downloadData.file_name) {
+      //   exportNames.push(downloadData.file_name);
+      // }
+      // else if (downloadData && downloadData.extras && downloadData.extras.file_name) {
+      //   exportNames.push(downloadData.extras.file_name);
+      // } else if (exportdataset && exportdataset.latest_file_name) {
+      //   exportNames.push(exportdataset.latest_file_name);
+      // } else {
+      //   Message.error('无有效的文件名称可导出');
+      //   return;
+      // }
+
+      // let full_paths = '';
+      // if (exportdatas && exportdatas.length > 0 && !selectedPath) {
+      //  if(exportdatas[0].full_path){
+      //   full_paths = exportdatas[0].full_path;
+      //  }else if(exportdatas[0].src_extra){
+      //   full_paths = exportdatas[0].src_extra.path;
+      //  }
+      // } else if (selectedPath) {
+      //   full_paths = selectedPath;
+      // } else if (downloadData && downloadData.filePath) {
+      //   full_paths = downloadData.filePath;
+      // } else if (downloadData && downloadData.full_path) {
+      //   full_paths = downloadData.full_path;
+      // } else if (exportdataset && exportdataset.latest_file_path && exportdataset.latest_file_name) {
+      //   full_paths =
+      //     exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
+      // } else {
+      //   Message.error('无有效的文件路径可导出');
+      //   return;
+      // }
+      const filesArray: string[] = [];
+      if(downloadData && downloadData.data_path_id){
+        filesArray.push(downloadData.abs_data_path+'/'+downloadData.file_name);
+      }else if(downloadData && downloadData.extras){
+        filesArray.push(downloadData.full_path+'/'+downloadData.extras.file_name);
+      }else if(exportdataset && exportdataset.latest_file_path){
+        filesArray.push(exportdataset.latest_file_path+'/'+exportdataset.latest_file_name);
       }
-      
+      if(exportdatas && exportdatas.length > 0){
+        if(exportdatas[0].data_path_id){
+          exportdatas.forEach((item:any)=>{
+            filesArray.push(item.abs_data_path+'/'+item.file_name);
+          })
+        }else if(exportdatas[0].extras){
+          exportdatas.forEach((item:any)=>{
+            filesArray.push(item.full_path+'/'+item.extras.file_name);
+          })
+        }else if(exportdatas[0].latest_file_path){
+          exportdatas.forEach((item:any)=>{
+            filesArray.push(item.latest_file_path+'/'+item.latest_file_name);
+          })
+        }
+      }
       const res = await exportFile({
-        file_names: exportNames,
+        // file_names: exportNames,
         output_path: form.getFieldValue('path'),
-        file_path: full_paths,
-        connector_id: Number(form.getFieldValue('province'))
+        // file_path: full_paths,
+        connector_id: Number(form.getFieldValue('province')),
+        files:filesArray,
       });
       console.log(res);
-      console.log('导出文件名', exportNames);
+      // console.log('导出文件名', exportNames);
       form.resetFields();
       Message.success('导出成功');
-      // 先调用导出成功回调，再关闭弹窗
+      // 先调用导出成功回调，再清空选中状态和缓存数据
       if (onExportSuccess) {
         onExportSuccess();
       }
+      // 重置选中状态和缓存数据
+      if (resetSelectedData) {
+        resetSelectedData();
+      } else {
+        console.log('回调未提供');
+      }
+      // 最后关闭弹窗
       onCancel && onCancel();
     } catch (e) {
       // 处理验证失败或导出失败的情况

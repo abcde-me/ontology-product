@@ -21,6 +21,7 @@ import {
 import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
+import { useParams } from '@/utils/url';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -58,6 +59,8 @@ const TYPE_CONFIG = {
 };
 
 export default function Connection() {
+  // 获取url路由的参数
+  const connectionId = useParams('connector_id');
   // 默认编辑弹框状态
   const [editVisible, setEditVisible] = React.useState(false);
   const [editObject, setEditObject] = React.useState<ConnectionType>({});
@@ -76,7 +79,9 @@ export default function Connection() {
   // 详情页面的默认id
   const [cId, setCId] = useState('0');
   // 搜索框的默认值
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(
+    connectionId ? connectionId : ''
+  );
   const [ConnectionData, setConnectionData] = useState([]) as any;
   const [pagination, setPagination] = useState({
     // 当前第1页
@@ -84,7 +89,7 @@ export default function Connection() {
     // 每页默认显示10条
     pageSize: 10,
     total: 0,
-    name: ''
+    name: connectionId || ''
   });
   // 点击确认按钮编辑连接器
   const editConnectorBtnHandel = async () => {
@@ -219,12 +224,7 @@ export default function Connection() {
             title="删除该连接器"
             content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
             onOk={() => {
-              DeleteMethod(record);
-            }}
-            onCancel={() => {
-              Message.error({
-                content: '删除失败，请重试'
-              });
+              DeleteMethod(record.id);
             }}
           >
             <span className="hover">删除</span>
@@ -244,10 +244,12 @@ export default function Connection() {
   const DeleteMethod = async (id: string) => {
     const res = await delconnectionList(id);
     console.log(res);
-    if (res.message) {
+    if (res.code == '') {
       Message.success({
         content: '删除成功'
       });
+    } else {
+      Message.success(res.message);
     }
     getlist();
     console.log(id);
@@ -263,7 +265,15 @@ export default function Connection() {
       addandsetchildRef.current.displayModalView();
     }
   };
-
+  // 回车触发的事件
+  const handlePressEnter = () => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1, // 搜索时重置到第一页
+      name: searchValue
+    }));
+    getlist();
+  };
   // 改变数据的逻辑
   const handlePageChange = (page) => {
     setPagination((prev) => ({
@@ -292,13 +302,11 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
-  const handlePressEnter = (e) => {
-    setSearchValue(e.target.value);
-  };
+
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
-  }, [pagination.current, pagination.pageSize, searchValue]);
+  }, [pagination.current, pagination.pageSize]);
   return (
     <div
       style={{
@@ -326,10 +334,12 @@ export default function Connection() {
           padding: '0px 20px'
         }}
       >
-        <InputSearch
+        <Input.Search
           placeholder="输入关键词搜索"
           style={{ width: 230 }}
           onPressEnter={handlePressEnter}
+          defaultValue={searchValue}
+          onChange={(value) => setSearchValue(value)}
         />
         <Button
           type="primary"
@@ -362,7 +372,7 @@ export default function Connection() {
           }));
         }}
         onChange={handlePageChange}
-        sizeOptions={[1, 5, 10, 20]}
+        sizeOptions={[10, 20, 50, 100]}
         showTotal
         total={pagination.total}
         showJumper

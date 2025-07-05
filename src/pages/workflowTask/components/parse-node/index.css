@@ -8,9 +8,8 @@
 
   .item-title {
     font-weight: 500;
-    font-size: 14px;
+    font-size: clamp(6px, 2vw, 14px);
     line-height: 22px;
-    letter-spacing: 0%;
     text-align: center;
     color: #1e293b;
   }
@@ -18,9 +17,8 @@
   .item-content {
     font-family: Inter;
     font-weight: 600;
-    font-size: 36px;
+    font-size: clamp(10px, 2vw, 36px);
     line-height: 54px;
-    letter-spacing: 0%;
     text-align: center;
     color: #1e293b;
   }

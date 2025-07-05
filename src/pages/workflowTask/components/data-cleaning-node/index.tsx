@@ -10,29 +10,32 @@ export default function DataCleaningNode(props: { dataSource; loading }) {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          overflow: 'hidden'
         }}
       >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">{dataSource.raw_data_num || '-'}</span>
+          <span className="item-content">
+            {dataSource.raw_data_num || '--'}
+          </span>
         </div>
         <div className="item-box">
           <span className="item-title">清洗后数据量</span>
           <span className="item-content">
-            {dataSource.cleansed_data_num || '-'}
+            {dataSource.cleansed_data_num || '--'}
           </span>
         </div>
         <div className="item-box">
           <span className="item-title">删除重复数据</span>
           <span className="item-content">
-            {dataSource.remove_duplicates_num || '-'}
+            {dataSource.remove_duplicates_num || '--'}
           </span>
         </div>
         <div className="item-box">
           <span className="item-title">删除有害信息数据</span>
           <span className="item-content">
-            {dataSource.missing_value_num || '-'}
+            {dataSource.missing_value_num || '--'}
           </span>
         </div>
       </div>

@@ -129,22 +129,23 @@ export default function ParseNode(props: {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          overflow: 'hidden'
         }}
       >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">{dataSource.total || '-'}</span>
+          <span className="item-content">{dataSource.total || '--'}</span>
         </div>
         <div className="item-box">
           <span className="item-title">成功</span>
           <span className="item-content">
-            {dataSource.success_total || '-'}
+            {dataSource.success_total || '--'}
           </span>
         </div>
         <div className="item-box">
           <span className="item-title">失败</span>
-          <span className="item-content">{dataSource.fail_total || '-'}</span>
+          <span className="item-content">{dataSource.fail_total || '--'}</span>
         </div>
       </div>
       <Table

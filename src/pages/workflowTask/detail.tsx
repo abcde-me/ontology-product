@@ -43,9 +43,10 @@ enum TaskRunStatus {
 
 // 枚举节点运行状态
 enum NodeRunStatus {
-  running = 1,
-  success = 2,
-  fail = 3
+  running = 0,
+  completeSuccess = 1,
+  completeFail = 2,
+  wait = 3
 }
 
 // 枚举节点类型
@@ -137,7 +138,15 @@ export default function WorkflowTaskDetail() {
           res.data.result_info.task_type === NodeType.video ||
           res.data.result_info.task_type === NodeType.audio;
         setIsParseNode(isParse);
-        setNodeData(res.data.result_info.task_type_list);
+        // 将节点状态列表第一个运行中后面的状态都改为未开始
+        const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
+          (item: { status: number }) => item.status === 0
+        );
+        const updatedData = res.data.result_info.task_type_list.map(
+          (item: { status: number }, index: number) =>
+            index > firstZeroIndex ? { ...item, status: 3 } : item
+        );
+        setNodeData(updatedData);
         if (isParse) {
           setParseNodeData(res.data.result_info.data_parse);
           setPagination({
@@ -336,12 +345,13 @@ export default function WorkflowTaskDetail() {
             return (
               <TabPane
                 key={item.task_type}
-                disabled={item.status === NodeRunStatus.fail}
+                disabled={item.status === NodeRunStatus.wait}
                 title={
                   <span>
                     {item.status === NodeRunStatus.running ? (
                       <IconLoading style={{ marginRight: 6 }} />
-                    ) : item.status === NodeRunStatus.success ? (
+                    ) : item.status === NodeRunStatus.completeSuccess ||
+                      item.status === NodeRunStatus.completeFail ? (
                       <IconCheckCircle style={{ marginRight: 6 }} />
                     ) : (
                       <IconClockCircle style={{ marginRight: 6 }} />

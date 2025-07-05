@@ -21,6 +21,7 @@ import {
   renameCatalog
 } from '@/api/dataCatalog';
 import { validateName } from '../../utils';
+import { string } from 'mobx-state-tree/dist/internal';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -137,7 +138,6 @@ export function useEditableTree({ catalogTreeStore }) {
     } else {
       await new Promise((resolve) => setTimeout(resolve, 500));
       Message.error('删除失败，请稍后重试');
-      // console.log(res.message);
     }
 
     catalogTreeStore.setState({ treeData: newTreeData });
@@ -219,7 +219,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
-
+    console.log(dataRef, '打印看啊看dataRef');
     const fileName = inputValue.trim();
     const validateResult = validateName(fileName);
     if (!validateResult.isValid && validateResult.errorMessage) {
@@ -227,28 +227,41 @@ export function useEditableTree({ catalogTreeStore }) {
       return;
     }
 
+    const updateFn = async () => {
+      newTreeData = await catalogTreeStore.getRawData();
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        inputValue: ''
+      });
+    };
+
     const root_type = RootTypeEnum[activeTab];
     let newTreeData: TreeDataType[] = [];
+    let res: Partial<ApiRes<any>> = {};
+
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
         if (dataRef?.isAdd) {
-          await addCatalog({ name: fileName, root_type: root_type });
+          res = await addCatalog({ name: fileName, root_type: root_type });
         } else {
           // 编辑
           if (fileName !== dataRef.name) {
-            await renameCatalog(dataRef.id, {
+            res = await renameCatalog(dataRef.id, {
               new_name: fileName,
-              root_type: root_type
+              root_type: root_type,
+              type:dataRef?.type
             });
           }
+          await updateFn();
         }
         break;
 
       case CatalogTypeEnum.volume:
-        await addVolume({
+        res = await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
-          root_type: root_type
+          root_type: root_type,
+          
         });
         break;
 
@@ -256,12 +269,9 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
     }
 
-    newTreeData = await catalogTreeStore.getRawData();
-
-    catalogTreeStore.setState({
-      treeData: newTreeData,
-      inputValue: ''
-    });
+    if (res.status === 200) {
+      await updateFn();
+    }
   };
 
   const renderExtra = (node: NodeProps) => {

@@ -121,17 +121,16 @@ const Edit = (props: any) => {
               >
                 <Input placeholder="请输入" />
               </FormItem>
-              <FormItem
+              {/* <FormItem
                 label="区域："
                 field="region"
-                rules={[{ required: true, message: '请输入区域' }]}
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 initialValue={props.editObj.config.region}
               >
                 <Input placeholder="请输入" />
-              </FormItem>
+              </FormItem> */}
               <FormItem
                 label="文件路径："
                 field="path"
@@ -162,6 +161,7 @@ const Edit = (props: any) => {
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
+                required
                 field="port"
                 rules={[
                   {

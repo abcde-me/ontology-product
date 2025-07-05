@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
 import type { ImageParserNodeType, OutputVar } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
@@ -13,6 +13,11 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
 
   const defaultConfig = TextNodeDefault.defaultValue;
   const { inputs, setInputs } = useNodeCrud<ImageParserNodeType>(id, payload);
+  const inputRef = useRef(inputs);
+
+  useEffect(() => {
+    inputRef.current = inputs;
+  }, [inputs]);
 
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
@@ -27,35 +32,25 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
 
   const handleFilesChange = useCallback(
     (files: string[], count: number) => {
-      const newInputs = produce(inputs, (draft) => {
+      const newInputs = produce(inputRef.current, (draft) => {
         draft.files = files;
         draft.selected_files_num = count;
       });
       console.log('handleFilesChange', files, inputs, newInputs);
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
-
-  // const handleFilesCountChange = useCallback(
-  //   (count: number) => {
-  //     const newInputs = produce(inputs, (draft) => {
-  //       draft.selected_files_num = count;
-  //     });
-  //     setInputs(newInputs);
-  //   },
-  //   [inputs, setInputs]
-  // );
 
   const handleFiledsChange = useCallback(
     (fields: ImageParserNodeType) => {
-      const newInputs = produce(inputs, (draft) => {
+      const newInputs = produce(inputRef.current, (draft) => {
         draft.pic_model_id = fields.pic_model_id;
         draft.pic_emb_model_id = fields.pic_emb_model_id;
       });
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
 
   return {

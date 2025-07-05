@@ -33,6 +33,7 @@ export type CodeNodeType = CommonNodeType & {
   modelList: Array<any>;
   sample_data: string;
   app_scenarios_name: string;
+  customPromptChecked: boolean;
   app_scenarios: {
     name: string;
     type: string;
@@ -90,4 +91,5 @@ export type EnhancementNodeType = {
   modelList: Array<any>;
   enhanced_proportion: number; // 任务描述占比值
   app_scenarios_name: string; // 场景
+  customPromptChecked: boolean;
 };

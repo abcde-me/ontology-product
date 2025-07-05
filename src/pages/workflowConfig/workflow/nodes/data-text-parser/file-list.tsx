@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import { Table, Input } from '@arco-design/web-react';
 import { useNodes, type Node } from 'reactflow';
@@ -7,6 +7,7 @@ import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
+import { useUnmountedRef } from 'ahooks';
 
 type FileListProps = {
   catetoryId: number;
@@ -24,6 +25,7 @@ function FileList({
   handleFilesChange
 }: FileListProps) {
   // console.log('fileList......', files, selectedFilesNum)
+  const unmountedRef = useUnmountedRef();
   const nodes = useNodes();
   const startNode = nodes.find(
     (node: any) => node.data.type === BlockEnum.Start
@@ -124,9 +126,9 @@ function FileList({
           .split('/')
           .map((f) => f.toLowerCase());
         const sourcePath = startNode?.data.data_path_id;
-        // item = {
+        // result = {
         //   data: {
-        //     data: [...new Array(5)].map((_, index) => {
+        //     items: [...new Array(5)].map((_, index) => {
         //       return {
         //         id: 1000 * params.page + index,
         //         file_name:
@@ -154,6 +156,7 @@ function FileList({
           }
         };
       }
+      if (unmountedRef.current) return;
       // console.log('列表数据:', item);
       const { items = [], total = 0 } = result.data;
       setFilesData(items || []);
@@ -174,6 +177,7 @@ function FileList({
     } catch (error) {
       setFilesData([]);
     } finally {
+      if (unmountedRef.current) return;
       setLoading(false);
     }
   };
@@ -201,7 +205,6 @@ function FileList({
       page: pagination.page,
       limit: pagination.limit
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

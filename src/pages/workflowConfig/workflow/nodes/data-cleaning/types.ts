@@ -24,21 +24,21 @@ export type CodeNodeType = CommonNodeType & {
   code_language: CodeLanguage;
   code: string;
   outputs: OutputVar;
-  data_standardization: boolean;
+  data_standardization: boolean | number;
   threshold: number;
   threshold_switch: boolean;
-  unicode: boolean;
-  traditional_to_simplified: boolean;
+  unicode: boolean | number;
+  traditional_to_simplified: boolean | number;
   case_uniformity: boolean;
   case_transform: number; // 1 大写。2 小写
-  oh_is: boolean;
-  df_is: boolean;
-  qd_is: boolean;
-  mg_is: boolean;
-  ts_remove: boolean;
-  remove_url: boolean;
-  remove_invisible: boolean;
-  remove_html: boolean;
+  oh_is: boolean | number;
+  df_is: boolean | number;
+  qd_is: boolean | number;
+  mg_is: boolean | number;
+  ts_remove: boolean | number;
+  remove_url: boolean | number;
+  remove_invisible: boolean | number;
+  remove_html: boolean | number;
   sample_data: string;
 };
 

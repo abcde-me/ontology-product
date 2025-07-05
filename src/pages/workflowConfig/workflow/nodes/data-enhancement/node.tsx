@@ -16,8 +16,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     similarity_threshold,
     generate_sample_num,
     prompt,
-    modelList
+    modelList,
+    prompt_checkbox
   } = props.data;
+  console.log(props, 'pppppppppppp');
   const store = useStoreApi();
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
@@ -44,13 +46,15 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
             {modelList?.find((item) => item.id === enha_modle_id)?.type || ''}
           </div>
         )}
-        {(app_scenarios_name === 'tongyong' || app_scenarios_name === 'duolong') &&
+        {(app_scenarios_name === 'tongyong' ||
+          app_scenarios_name === 'duolong') &&
           sample_num > 0 && (
             <Tooltip content={`指令生成依赖样本数: ${sample_num}`}>
               <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>
             </Tooltip>
           )}
-        {(app_scenarios_name === 'fenlei' || app_scenarios_name === 'shengcheng') &&
+        {(app_scenarios_name === 'fenlei' ||
+          app_scenarios_name === 'shengcheng') &&
           enhanced_proportion > 0 && (
             <Tooltip content={`任务描述增强占比: ${enhanced_proportion}`}>
               <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
@@ -66,9 +70,9 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
             <div className="enhancement-item">{`生成样本数: ${generate_sample_num}`}</div>
           </Tooltip>
         )}
-        {prompt && (
+        {prompt_checkbox && (
           <Tooltip content={`提示词: ${prompt}`}>
-            <div className="enhancement-item">{`提示词: ${prompt}`}</div>
+            <div className="enhancement-item">{`提示词: ${prompt || ''}`}</div>
           </Tooltip>
         )}
       </div>

@@ -33,11 +33,19 @@ export async function getCatalogList(param: any = {}) {
 }
 // 添加目录
 export async function addCatalog(data: any) {
-  return await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
+  const res = await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
+  if (res.status !== 200) {
+    Message.warning(res.message);
+  }
+  return res;
 }
 // 新建卷
 export async function addVolume(data: any) {
-  return await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
+  const res = await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
+  if (res.status !== 200) {
+    Message.warning(res.message);
+  }
+  return res;
 }
 // 删除数据卷
 export async function deleteVolume(
@@ -67,7 +75,7 @@ interface TargetDataFileQueryParams {
   search_content: string;
   search_id: number;
   limit: number;
-  file_type:Array<string>;
+  file_type: Array<string>;
 }
 
 // 定义删除目标文件的参数接口
@@ -81,14 +89,26 @@ interface SourceDataFileQueryParams {
   page: number;
   page_size: number;
   file_name: string;
-  data_path_id:number;
-  start:string;
-  end:string;
-  file_type:Array<string>;
+  data_path_id: number;
+  start: string;
+  end: string;
+  file_type: Array<string>;
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
-  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+  const queryParams: any = { ...params };
+  // 将file_type数组转换为JSON字符串
+  if (queryParams.file_type && Array.isArray(queryParams.file_type)) {
+    queryParams.file_type = JSON.stringify(queryParams.file_type);
+  }
+  return await UAPI.RES.targetDataFileListApi({})
+    .get(queryParams)
+    .inRegion()
+    .do();
+}
+//查询目标数据文件类型列表
+export async function getTargetFileTypeList() {
+  return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
 }
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
@@ -103,14 +123,26 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
     .inRegion()
     .do();
 }
+
 //查询源数据文件列表
 export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
   return await UAPI.RES.sourceDataFileListApi({}).post(params).inRegion().do();
 }
 //删除源数据目录单个文件
-export async function deleteSourceFile(id:string) {
-  return await UAPI.RES.sourceDataFileDeleteApi({file_id:id}).delete().inRegion().do();
+export async function deleteSourceFile(id: string) {
+  return await UAPI.RES.sourceDataFileDeleteApi({ file_id: id })
+    .delete()
+    .inRegion()
+    .do();
 }
+//批量删除源数据文件
+export async function deleteSourceFileBatch(params: any) {
+  return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
 /////////////////////////////////////////////////////////////////
 
 //预览/搜索数据集

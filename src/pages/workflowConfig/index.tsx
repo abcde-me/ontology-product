@@ -6,6 +6,7 @@ import { useStore } from '@/pages/workflowConfig/task/store';
 import { createWorkflow, getWorkflowDetail } from '@/api/workflow';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router-dom';
+import { Message } from '@arco-design/web-react';
 import './styles/index.css';
 import './styles/markdown.scss';
 import './styles/custom.scss';
@@ -27,6 +28,8 @@ function WorkflowConfig({ setHeight }) {
 
         if (workflowDetailRes?.data) {
           setWorkflowDetail(workflowDetailRes.data);
+        } else {
+          Message.error('获取工作流失败');
         }
 
         setLoading(false);
@@ -37,9 +40,12 @@ function WorkflowConfig({ setHeight }) {
 
         if (workflowInfo?.data?.workflow_uuid) {
           const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
+
           history.push(
             `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );
+        } else {
+          Message.error('创建工作流失败');
         }
       }
     };

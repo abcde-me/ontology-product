@@ -1,31 +1,21 @@
 import { FC, useRef, useState } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useNodes } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useContext, useContextSelector } from 'use-context-selector';
-import { useStore, useWorkflowStore } from '../store';
-import { BlockEnum, InputVarType } from '../types';
-import type { StartNodeType } from '../nodes/start/types';
+import { useContext } from 'use-context-selector';
+import { useWorkflowStore } from '../store';
 import { useUserInfo } from '@/store/userInfoStore';
-import {
-  useChecklistBeforePublish,
-  useIsChatMode,
-  useNodesInteractions,
-  useNodesReadOnly,
-  useNodesSyncDraft,
-  useWorkflowMode,
-  useWorkflowRun,
-  useWorkflowTemplate
-} from '../hooks';
+import { useChecklistBeforePublish, useNodesSyncDraft } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
-import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
-import AppContext from '@/pages/workflowConfig/context/app-context';
 import { getAppDetail } from '@/api/appsV2';
-import { operateWorkflow } from '@/api/workflow';
+import {
+  editWorkflow,
+  getWorkflowDetail,
+  operateWorkflow
+} from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import {
   IsOnline,
@@ -35,6 +25,7 @@ import {
 import {
   Button,
   Input,
+  Message,
   Modal,
   Popover,
   Space,
@@ -42,8 +33,10 @@ import {
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
 import './index.scss';
-import { createWorkflowDraft } from '@/api/workflowV2';
-import { version } from 'os';
+import { useShallow } from 'zustand/react/shallow';
+import { getQueryParams, useParams } from '@/utils/url';
+import { RefInputType } from '@arco-design/web-react/es/Input/interface';
+import { validateName } from '@/utils/valiate';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -99,15 +92,31 @@ const Header: FC = () => {
   const [showRuningModal, setShowRuningModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
-  const inputRef = useRef(null);
+  const inputRef = useRef<RefInputType>(null);
+  const workflowUuid = useParams('workflow_uuid') ?? '';
+
+  const { setWorkflowDetail } = useTaskStore(
+    useShallow((state) => ({
+      setWorkflowDetail: state.setWorkflowDetail
+    }))
+  );
+
+  const updateWorkFlowStatus = async () => {
+    const workflowDetailRes = await getWorkflowDetail(workflowUuid);
+
+    if (workflowDetailRes?.data) {
+      setWorkflowDetail(workflowDetailRes.data);
+    }
+  };
 
   const workflowStore = useWorkflowStore();
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const workflowUuid = appDetail?.workflow_uuid ?? '';
-  const dsWorkflowId = appDetail?.ds_workflow_id ?? 0;
   const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const [workflowName, setWorkflowName] = useState(
+    appDetail?.workflow_name ?? ''
+  );
   const cycleText = appDetail?.cycle_text ?? {
     minute: '',
     hour: '',
@@ -115,45 +124,10 @@ const Header: FC = () => {
     month: '',
     week: ''
   };
-  const { nodesReadOnly, getNodesReadOnly } = useNodesReadOnly();
-  const { handleNodeSelect } = useNodesInteractions();
-  const publishedAt = useStore((s) => s.publishedAt);
-  const draftUpdatedAt = useStore((s) => s.draftUpdatedAt);
-  const toolPublished = useStore((s) => s.toolPublished);
-  const setShowWorkflowVersionHistoryPanel = useStore(
-    (s) => s.setShowWorkflowVersionHistoryPanel
-  );
-  const setShowEnvPanel = useStore((s) => s.setShowEnvPanel);
-  const setShowDebugAndPreviewPanel = useStore(
-    (s) => s.setShowDebugAndPreviewPanel
-  );
-  const nodes = useNodes<StartNodeType>();
-  const startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
-  const selectedNode = nodes.find((node) => node.data.selected);
-  const startVariables = startNode?.data.variables;
-  const fileSettings = {} as any;
-  const variables = useMemo(() => {
-    const data = startVariables || [];
-    if (fileSettings?.image?.enabled) {
-      return [
-        ...data,
-        {
-          type: InputVarType.files,
-          variable: '__image',
-          required: false,
-          label: 'files'
-        }
-      ];
-    }
 
-    return data;
-  }, [fileSettings?.image?.enabled, startVariables]);
-
-  const { handleLoadBackupDraft, handleBackupDraft } = useWorkflowRun();
   const { handleCheckBeforePublish } = useChecklistBeforePublish();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
   const { notify } = useContext(ToastContext);
-  const { normal, restoring, viewHistory } = useWorkflowMode();
 
   console.warn('API NOT IMPLEMENTED ', 'resetWorkflowVersionHistory');
   const resetWorkflowVersionHistory = () => {}; // 这里是重新查询version history，暂时无用
@@ -170,53 +144,36 @@ const Header: FC = () => {
 
   const onOperate = useCallback(
     async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
-      if (op !== WorkflowOperation.OFFLINE) {
-        if (!handleCheckBeforePublish()) {
-          throw new Error('Checklist failed');
-        }
-      }
+      // if (op !== WorkflowOperation.OFFLINE) {
+      //   if (!handleCheckBeforePublish()) {
+      //     throw new Error('Checklist failed');
+      //   }
+      // }
 
       if (op === WorkflowOperation.ONLINE) {
-        // const workflowRes = await operateWorkflow(workflowUuid ?? '', {
-        //   uid: userInfo?.id ?? '',
-        //   ds_workflow_id: dsWorkflowId ?? 0,
-        //   op
-        // });
-
-        // if (workflowRes?.data) {
-        //   notify({ type: 'success', message: '上线成功' });
-        // } else {
-        //   notify({
-        //     type: 'error',
-        //     message: workflowRes?.message ?? '上线失败'
-        //   });
-        // }
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
           true,
           {
             onSuccess: async () => {
+              const ds_workflow_id =
+                getQueryParams(history, 'ds_workflow_id') ?? '';
               const workflowRes = await operateWorkflow(workflowUuid ?? '', {
                 uid: userInfo?.id ?? '',
-                ds_workflow_id: dsWorkflowId ?? 0,
+                ds_workflow_id: Number(ds_workflow_id),
                 op
               });
 
-              if (workflowRes?.data) {
-                notify({ type: 'success', message: '上线成功' });
+              if (workflowRes?.status === 200) {
+                Message.success('上线成功');
+                updateWorkFlowStatus();
               } else {
-                notify({
-                  type: 'error',
-                  message: workflowRes?.message ?? '上线失败'
-                });
+                Message.error(workflowRes?.message ?? '上线失败');
               }
             },
             onError: () => {
-              notify({
-                type: 'error',
-                message: '上线失败'
-              });
+              Message.error('上线失败');
             }
           },
           {
@@ -227,43 +184,33 @@ const Header: FC = () => {
         return;
       }
 
+      const ds_workflow_id = getQueryParams(history, 'ds_workflow_id') ?? '';
       const workflowRes = await operateWorkflow(workflowUuid ?? '', {
         uid: userInfo?.id ?? '',
-        ds_workflow_id: dsWorkflowId ?? 0,
+        ds_workflow_id: Number(ds_workflow_id),
         op,
         cycle_text: params?.cycle_text
       });
 
       if (op === WorkflowOperation.OFFLINE) {
-        if (workflowRes?.data) {
-          notify({ type: 'success', message: '下线成功', duration: 100000 });
+        if (workflowRes?.status === 200) {
+          Message.success('下线成功');
+          updateWorkFlowStatus();
         } else {
-          notify({
-            type: 'error',
-            message: workflowRes?.message ?? '下线失败'
-          });
+          Message.error(workflowRes?.message ?? '下线失败');
         }
       } else if (op === WorkflowOperation.RUNNING) {
         if (workflowRes?.data) {
           setWorkflowOperationRes(workflowRes.data);
           setShowRuningModal(true);
         } else {
-          notify({
-            type: 'error',
-            message: workflowRes?.message ?? '运行失败'
-          });
+          Message.error(workflowRes?.message ?? '运行失败');
         }
       } else if (op === WorkflowOperation.CRON_RUNNING) {
-        if (workflowRes?.data) {
-          notify({
-            type: 'success',
-            message: '定时任务设置成功'
-          });
+        if (workflowRes?.status === 200) {
+          Message.success('定时任务设置成功');
         } else {
-          notify({
-            type: 'error',
-            message: workflowRes?.message ?? '定时任务设置失败'
-          });
+          Message.error(workflowRes?.message ?? '定时任务设置失败');
         }
       }
     },
@@ -278,40 +225,41 @@ const Header: FC = () => {
     ]
   );
 
-  const onPublisherToggle = useCallback(
-    (state: boolean) => {
-      if (state) handleSyncWorkflowDraft(true);
-    },
-    [handleSyncWorkflowDraft]
-  );
-
-  const handleToolConfigureUpdate = useCallback(() => {
-    workflowStore.setState({ toolPublished: true });
-  }, [workflowStore]);
-
   const handleWorkflowNameChange = (workflow_name: string) => {
-    appDetail &&
-      setAppDetail({
-        ...appDetail,
-        workflow_name
-      });
+    setWorkflowName(workflow_name);
   };
 
   const handleEdit = () => {
     setEditing(true);
-    // @ts-expect-error
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleSave = () => {
+  const handleSave = async (workflow_name: string) => {
     setEditing(false);
     // 这里可以添加保存逻辑
+    const workflowRes = await editWorkflow(workflowUuid ?? '', {
+      workflow_name
+    });
+
+    if (workflowRes?.data) {
+      appDetail &&
+        setAppDetail({
+          ...appDetail,
+          workflow_name
+        });
+      Message.success('修改工作流名称成功');
+    } else {
+      Message.error('修改工作流名称失败');
+    }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSave();
+  const handlePressEnter = (workflow_name: string) => {
+    if (!validateName(workflowName)) {
+      Message.error('工作流名称命名不符合规则');
+      return;
     }
+
+    handleSave(workflow_name);
   };
 
   return (
@@ -328,10 +276,10 @@ const Header: FC = () => {
             <Input
               className="app-name--editing"
               ref={inputRef}
-              value={appDetail?.workflow_name}
+              value={workflowName}
               onChange={handleWorkflowNameChange}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
+              onBlur={() => handleSave(workflowName)}
+              onPressEnter={() => handlePressEnter(workflowName)}
               style={{ width: 200 }}
             />
           ) : (
@@ -342,7 +290,7 @@ const Header: FC = () => {
               </Popover>
             </div>
           )}
-          {normal && <EditingTitle />}
+          <EditingTitle />
         </div>
       </div>
       <div className="right-part">
@@ -350,15 +298,7 @@ const Header: FC = () => {
           {...{
             workflowStatus,
             cycleText,
-            publishedAt,
-            draftUpdatedAt,
-            disabled: nodesReadOnly,
-            toolPublished,
-            inputs: variables,
-            onRefreshData: handleToolConfigureUpdate,
-            onOperate,
-            onToggle: onPublisherToggle,
-            crossAxisOffset: 4
+            onOperate
           }}
         />
       </div>

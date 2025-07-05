@@ -226,13 +226,13 @@ const add = forwardRef((props: any, ref) => {
                   rules={[
                     { required: true, message: '请输入AccessKey Secret' }
                   ]}
-                  labelCol={{ span: 5 }}
+                  labelCol={{ span: 5, style: { whiteSpace: 'nowrap' } }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
-                <FormItem
+                {/* <FormItem
                   label="区域："
                   field="region"
                   labelCol={{ span: 5 }}
@@ -240,7 +240,7 @@ const add = forwardRef((props: any, ref) => {
                   labelAlign="right"
                 >
                   <Input placeholder="请输入" />
-                </FormItem>
+                </FormItem> */}
                 <FormItem
                   label="文件路径："
                   field="path"
@@ -270,6 +270,7 @@ const add = forwardRef((props: any, ref) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   field="port"
+                  required
                   rules={[
                     {
                       validator: (value, cb) => {

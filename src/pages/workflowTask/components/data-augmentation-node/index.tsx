@@ -10,17 +10,20 @@ export default function DataAugmentationNode(props: { dataSource; loading }) {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          overflow: 'hidden'
         }}
       >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">{dataSource.raw_data_num || '-'}</span>
+          <span className="item-content">
+            {dataSource.raw_data_num || '--'}
+          </span>
         </div>
         <div className="item-box">
           <span className="item-title">增强后数据量</span>
           <span className="item-content">
-            {dataSource.cleansed_data_num || '-'}
+            {dataSource.cleansed_data_num || '--'}
           </span>
         </div>
       </div>

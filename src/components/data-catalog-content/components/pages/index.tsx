@@ -16,7 +16,7 @@ const Pages: React.FC<PagesProps> = ({
   onChange,
   onPageSizeChange
 }) => {
-  console.log('分页参数:', { current, total, pageSize });
+
 
   return (
     <Pagination
