@@ -1,3 +1,5 @@
+import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
+
 /**
  * 验证名称是否符合规范
  * @param name 待验证的名称
@@ -77,4 +79,72 @@ export function validateName(name: string): ValidateNameResult {
  */
 export function isValidName(name: string): boolean {
   return validateName(name).isValid;
+}
+
+/**
+ * 搜索树形数据，保持树形结构
+ * @param treeData 原始树形数据
+ * @param searchValue 搜索值
+ * @returns 过滤后的数据和需要展开的节点key列表
+ */
+export function searchTreeData(
+  treeData: TreeDataType[],
+  searchValue: string
+): {
+  filteredData: TreeDataType[];
+  expandedKeys: string[];
+} {
+  const expandedKeys: string[] = [];
+
+  const filterNode = (node: TreeDataType): TreeDataType | null => {
+    const nodeTitle = String(node.title || '').toLowerCase();
+    const searchLower = searchValue.toLowerCase();
+
+    // 检查当前节点是否匹配
+    const currentMatches = nodeTitle.includes(searchLower);
+
+    // 递归过滤子节点
+    let filteredChildren: TreeDataType[] = [];
+    let hasMatchingChildren = false;
+
+    if (node.children && node.children.length > 0) {
+      filteredChildren = node.children
+        .map((child) => filterNode(child))
+        .filter((child) => child !== null) as TreeDataType[];
+
+      hasMatchingChildren = filteredChildren.length > 0;
+
+      // 如果有匹配的子节点，将当前节点添加到展开列表
+      if (hasMatchingChildren) {
+        expandedKeys.push(String(node.key));
+      }
+    }
+
+    // 如果当前节点匹配或有匹配的子节点，则保留该节点
+    if (currentMatches || hasMatchingChildren) {
+      // 如果当前节点匹配，也要展开其父节点路径
+      if (currentMatches) {
+        expandedKeys.push(String(node.key));
+      }
+
+      return {
+        ...node,
+        children: filteredChildren
+      };
+    }
+
+    return null;
+  };
+
+  const filteredData = treeData
+    .map((node) => filterNode(node))
+    .filter((node) => node !== null) as TreeDataType[];
+
+  // 去重展开的keys
+  const uniqueExpandedKeys = Array.from(new Set(expandedKeys));
+
+  return {
+    filteredData,
+    expandedKeys: uniqueExpandedKeys
+  };
 }

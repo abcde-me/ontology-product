@@ -78,7 +78,7 @@ export default function WorkflowList() {
 
   // 跳转目录
   const handleToDirectoryPath = (path: string) => {
-    history.push(path);
+    history.push('/tenant/compute/modaforge/dataCatalog');
   };
 
   // 查看详情
@@ -343,7 +343,7 @@ export default function WorkflowList() {
         onChange={(page) => {
           setCurrent(page);
         }}
-        sizeOptions={[2, 5, 10, 20]}
+        sizeOptions={[10, 20, 50, 100]}
         showTotal
         total={total}
         showJumper

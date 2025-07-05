@@ -257,20 +257,20 @@ export default function DataLoad() {
     }
   ] as any;
   const [data, setData] = useState([
-    {
-      task_id: '1',
-      connector_id: '1',
-      connector_name: '中科院大数据库任务1',
-      name: '1234',
-      source_type: 'hdfs',
-      load_type: 'once',
-      status: 'succeed',
-      data_path_id: '2',
-      data_path_name: '1234',
-      creator: '111',
-      created_at: '1234',
-      last_run_time: '1234'
-    }
+    // {
+    //   task_id: '1',
+    //   connector_id: '1',
+    //   connector_name: '中科院大数据库任务1',
+    //   name: '1234',
+    //   source_type: 'hdfs',
+    //   load_type: 'once',
+    //   status: 'succeed',
+    //   data_path_id: '2',
+    //   data_path_name: '1234',
+    //   creator: '111',
+    //   created_at: '1234',
+    //   last_run_time: '1234'
+    // }
   ]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
@@ -410,7 +410,7 @@ export default function DataLoad() {
             setCurrent(1);
           }}
           onChange={handlePageChange}
-          sizeOptions={[1, 2, 5, 10]}
+          sizeOptions={[10, 20, 50, 100]}
           showTotal
           total={loadTotal}
           showJumper

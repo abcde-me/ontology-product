@@ -140,7 +140,10 @@ export function useEditableTree({ catalogTreeStore }) {
       Message.error('删除失败，请稍后重试');
     }
 
-    catalogTreeStore.setState({ treeData: newTreeData });
+    catalogTreeStore.setState({
+      treeData: newTreeData,
+      rawTreeData: newTreeData
+    });
   };
 
   const focusAndSelectInput = () => {
@@ -231,6 +234,7 @@ export function useEditableTree({ catalogTreeStore }) {
       newTreeData = await catalogTreeStore.getRawData();
       catalogTreeStore.setState({
         treeData: newTreeData,
+        rawTreeData: newTreeData,
         inputValue: ''
       });
     };
@@ -249,7 +253,7 @@ export function useEditableTree({ catalogTreeStore }) {
             res = await renameCatalog(dataRef.id, {
               new_name: fileName,
               root_type: root_type,
-              type:dataRef?.type
+              type: dataRef?.type
             });
           }
           await updateFn();
@@ -260,8 +264,7 @@ export function useEditableTree({ catalogTreeStore }) {
         res = await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
-          root_type: root_type,
-          
+          root_type: root_type
         });
         break;
 

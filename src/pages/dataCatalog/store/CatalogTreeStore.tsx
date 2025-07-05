@@ -5,6 +5,7 @@ import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
 import { RootTypeEnum, subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
+import { searchTreeData } from '../utils';
 
 interface BaseTreeData {
   id: number;
@@ -31,6 +32,7 @@ interface CatalogTreeState {
   searchValue: string;
   inputValue: string;
   treeData: TreeDataType[];
+  rawTreeData: TreeDataType[];
   expandedKeys: string[];
   selectedKey: string;
   inputRef: React.RefObject<RefInputType>;
@@ -53,6 +55,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         searchValue: '',
         inputValue: '',
         treeData: [],
+        rawTreeData: [],
         expandedKeys: [],
         selectedKey: '',
         inputRef: React.createRef<RefInputType>(),
@@ -70,36 +73,26 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           { loadingKey: 'loading' }
         )
       },
-      watch: [
-        // 监听 searchValue 变化，实现搜索防抖
-        (() => {
-          let debounceTimer: NodeJS.Timeout;
-          return {
-            keys: ['searchValue'],
-            hander: (
-              nextState: CatalogTreeState,
-              keyMap: Record<string, boolean>
-            ) => {
-              if (keyMap.searchValue) {
-                // 清除之前的定时器
-                if (debounceTimer) {
-                  clearTimeout(debounceTimer);
-                }
+      computed: [
+        {
+          keys: ['searchValue', 'rawTreeData'],
+          hander: (state: CatalogTreeState) => {
+            const { searchValue, rawTreeData } = state;
 
-                debounceTimer = setTimeout(async () => {
-                  try {
-                    const treeData = await this.getRawData({
-                      searchValue: nextState.searchValue
-                    });
-                    this.setState({ treeData });
-                  } catch (error) {
-                    console.error('Search failed:', error);
-                  }
-                }, 500);
-              }
+            if (!searchValue.trim()) {
+              return {
+                treeData: rawTreeData
+              };
             }
-          };
-        })()
+
+            const result = searchTreeData(rawTreeData, searchValue.trim());
+
+            return {
+              treeData: result.filteredData,
+              expandedKeys: result.expandedKeys
+            };
+          }
+        }
       ]
     });
   }
@@ -130,6 +123,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
       return {
         treeData: cacheTreeData,
+        rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
         searchValue: '',
         selectedKey: defaultSelectedNode?.key || '',
@@ -163,6 +157,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   convertRawDataToTreeData(data: ITreeData[]) {
     if (!Array.isArray(data)) return [];
 
+    const { activeTab } = this.getState();
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
@@ -182,7 +177,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                   key: String(item.id), // 转换为字符串
                   parent_id: catalog.id,
                   isLastLeaf: true,
-                  fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
+                  fullPath: `${item.base_dir}${activeTab || 'src'}/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };

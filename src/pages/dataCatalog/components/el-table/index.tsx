@@ -9,7 +9,12 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import { IconDelete, IconDownload, IconCloseCircle, IconSearch } from '@arco-design/web-react/icon';
+import {
+  IconDelete,
+  IconDownload,
+  IconCloseCircle,
+  IconSearch
+} from '@arco-design/web-react/icon';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
@@ -548,8 +553,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {
-        }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

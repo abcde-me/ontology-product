@@ -19,3 +19,36 @@ export interface ConnectionType {
   };
   creator?: string; // 创建者
 }
+interface s3Type {
+  access_key: string;
+  secret_key: string;
+  endpoint: string;
+  path: string;
+}
+interface hdfsType {
+  host: string;
+  port: string;
+  user: string;
+  path: string;
+}
+
+// 连接器详情数据类型
+export interface connectorDetailType {
+  id: number;
+  name: string;
+  type: string;
+  config: {
+    access_key?: string;
+    secret_key?: string;
+    endpoint?: string;
+    path?: string;
+    host?: string;
+    port?: string;
+    user?: string;
+  };
+  creator: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  perms: Array<string> | null;
+}
