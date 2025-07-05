@@ -69,23 +69,56 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           },
           { loadingKey: 'loading' }
         )
-      }
+      },
+      watch: [
+        // 监听 searchValue 变化，实现搜索防抖
+        (() => {
+          let debounceTimer: NodeJS.Timeout;
+          return {
+            keys: ['searchValue'],
+            hander: (
+              nextState: CatalogTreeState,
+              keyMap: Record<string, boolean>
+            ) => {
+              if (keyMap.searchValue) {
+                // 清除之前的定时器
+                if (debounceTimer) {
+                  clearTimeout(debounceTimer);
+                }
+
+                debounceTimer = setTimeout(async () => {
+                  try {
+                    const treeData = await this.getRawData({
+                      searchValue: nextState.searchValue
+                    });
+                    this.setState({ treeData });
+                  } catch (error) {
+                    console.error('Search failed:', error);
+                  }
+                }, 500);
+              }
+            }
+          };
+        })()
+      ]
     });
   }
 
-  async getRawData(activeKey?: string) {
+  async getRawData(props?: { activeKey?: string; searchValue?: string }) {
     const { activeTab: stateActiveTab } = this.getState();
-    const activeTab = activeKey || stateActiveTab;
+    const activeTab = props?.activeKey || stateActiveTab;
 
     const res = await getCatalogList({
-      root_type: RootTypeEnum[activeTab]
+      root_type: RootTypeEnum[activeTab],
+      search: props?.searchValue
     });
+
     return this.convertRawDataToTreeData(res?.data?.[activeTab] || []);
   }
 
   async initTreeData(activeTab: string) {
     try {
-      const cacheTreeData = await this.getRawData(activeTab);
+      const cacheTreeData = await this.getRawData({ activeKey: activeTab });
 
       const defaultNode = cacheTreeData?.[0];
       const defaultExpand = [
