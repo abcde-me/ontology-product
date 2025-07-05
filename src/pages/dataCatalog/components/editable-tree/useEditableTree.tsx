@@ -69,9 +69,13 @@ export function useEditableTree({ catalogTreeStore }) {
     loop(treeData);
 
     const newKeys = new Set([...expandedKeys, ...keys]);
+    // const newTreeData = catalogTreeStore.getRawData({
+    //   searchValue: value
+    // });
     catalogTreeStore.setState({
       searchValue: value,
       expandedKeys: [...newKeys]
+      // treeData: newTreeData
     });
   };
 
