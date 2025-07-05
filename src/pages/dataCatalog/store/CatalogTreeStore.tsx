@@ -163,6 +163,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   convertRawDataToTreeData(data: ITreeData[]) {
     if (!Array.isArray(data)) return [];
 
+    const { activeTab } = this.getState();
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
@@ -182,7 +183,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                   key: String(item.id), // 转换为字符串
                   parent_id: catalog.id,
                   isLastLeaf: true,
-                  fullPath: `${item.base_dir}src/${catalog.name}/volume/${item.name}`
+                  fullPath: `${item.base_dir}${activeTab || 'src'}/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };
