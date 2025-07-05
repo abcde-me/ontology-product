@@ -181,7 +181,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
       const params = {
-        full_path: '/src/test1/volume/test11',  // 使用默认路径,后续修改为selectedFullPath
+        full_path: selectedFullPath,  // 使用默认路径,后续修改为selectedFullPath
         page: currentPage,
         limit: pageSize,
         start_time: startTime || '',
@@ -196,10 +196,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         page: currentPage,
         page_size: pageSize,
         file_name: searchValue || '',
-        data_path_id: Number(122), // 优先使用选中ID
-        start: startTime || "2025-01-02 12:02:01",
-        end: endTime || "2025-10-02 12:02:01",
-        file_type: validFileTypes.length > 0 ? validFileTypes : ['jsonl'] // 使用筛选条件中的文件类型
+        data_path_id: selectedKey, // 优先使用选中ID
+        start: startTime,
+        end: endTime,
+        file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
       }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
