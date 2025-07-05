@@ -149,11 +149,11 @@ const Header: FC = () => {
 
   const onOperate = useCallback(
     async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
-      // if (op !== WorkflowOperation.OFFLINE) {
-      //   if (!handleCheckBeforePublish()) {
-      //     throw new Error('Checklist failed');
-      //   }
-      // }
+      if (op !== WorkflowOperation.OFFLINE) {
+        if (!handleCheckBeforePublish()) {
+          throw new Error('Checklist failed');
+        }
+      }
 
       if (op === WorkflowOperation.ONLINE) {
         handleNodeSelect('', false);
