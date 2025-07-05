@@ -164,7 +164,7 @@ const Header: FC = () => {
   const { normal, restoring, viewHistory } = useWorkflowMode();
 
   console.warn('API NOT IMPLEMENTED ', 'resetWorkflowVersionHistory');
-  const resetWorkflowVersionHistory = () => {}; // 这里是重新查询version history，暂时无用
+  const resetWorkflowVersionHistory = () => { }; // 这里是重新查询version history，暂时无用
 
   const updateAppDetail = useCallback(async () => {
     try {
@@ -185,6 +185,7 @@ const Header: FC = () => {
       // }
 
       if (op === WorkflowOperation.ONLINE) {
+        handleNodeSelect('', false);
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
