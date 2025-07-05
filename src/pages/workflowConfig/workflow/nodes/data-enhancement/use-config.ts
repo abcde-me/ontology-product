@@ -1,3 +1,4 @@
+import { changeNodesAndEdgesId } from './../../utils';
 import { useCallback } from 'react';
 import produce from 'immer';
 import useVarList from '../_base/hooks/use-var-list';
@@ -44,9 +45,10 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     }
   };
 
-  const updateInputs = useCallback(
+  const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
+        console.log(payload, draft, '=========111111');
         draft.enha_modle_id = payload.enha_modle_id;
         draft.generate_sample_num = payload?.generate_sample_num;
         draft.similarity_threshold = payload?.similarity_threshold;
@@ -58,6 +60,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.enhanced_proportion = payload.enhanced_proportion;
         draft.sample_data = payload.sample_data;
         draft.app_scenarios_name = payload.app_scenarios_name;
+        draft.customPromptChecked = payload.customPromptChecked;
       });
       setInputs(newInputs);
     },
@@ -68,7 +71,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     inputs,
     handleVarListChange,
     handleAddVariable,
-    updateInputs
+    onValuesChange
   };
 };
 

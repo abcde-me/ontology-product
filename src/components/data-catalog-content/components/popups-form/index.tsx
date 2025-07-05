@@ -44,12 +44,13 @@ const FormComponent: React.FC<FormProps> = ({
       console.log(exportdatas, '打印看啊看exportdatas');
       const exportNames: Array<string> = [];
       if (exportdatas && exportdatas.length > 0) {
-        // 使用扁平数组而不是嵌套数组
         exportdatas.forEach((item) => {
           if (item.extras && item.extras.file_name) {
             exportNames.push(item.extras.file_name);
           } else if (item.file_name) {
             exportNames.push(item.file_name);
+          } else if (item.latest_file_name) {
+            exportNames.push(item.latest_file_name);
           }
         });
       } else if (downloadData && downloadData.file_name) {
@@ -66,7 +67,11 @@ const FormComponent: React.FC<FormProps> = ({
 
       let full_paths = '';
       if (exportdatas && exportdatas.length > 0 && !selectedPath) {
+       if(exportdatas[0].full_path){
         full_paths = exportdatas[0].full_path;
+       }else if(exportdatas[0].src_extra){
+        full_paths = exportdatas[0].src_extra.path;
+       }
       } else if (selectedPath) {
         full_paths = selectedPath;
       } else if (downloadData && downloadData.filePath) {
