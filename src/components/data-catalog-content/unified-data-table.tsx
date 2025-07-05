@@ -196,7 +196,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         page: currentPage,
         page_size: pageSize,
         file_name: searchValue || '',
-        data_path_id: Number(122), // 优先使用选中ID 后期改成selectedKey
+        data_path_id: Number(selectedKey), // 优先使用选中ID 后期改成selectedKey
         // start: startTime, //后期改成startTime
         // end: endTime, //后期改成endTime
         // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
