@@ -513,13 +513,13 @@ const DatasetManagement: React.FC = () => {
   };
   // 批量导出
   const handleBatchExport = () => {
-    if (selectedRowKeys.length === 0) {
-      Message.warning('请先选择要导出的数据集');
-      return;
-    }
-
+    // if (selectedRowKeys.length === 0) {
+    //   Message.warning('请先选择要导出的数据集');
+    //   return;
+    // }
+    setVisible(true);
     console.log('批量导出:', selectedRows);
-    Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
+    // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
   };
 
   return (
@@ -587,14 +587,14 @@ const DatasetManagement: React.FC = () => {
           >
             批量删除
           </Button>
-          {/* <Button
+          <Button
             icon={<IconDownload />}
             className={styles.batchExportBtn}
             disabled={selectedRowKeys.length === 0}
             onClick={handleBatchExport}
           >
             批量导出
-          </Button> */}
+          </Button>
           <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
             新建数据集
           </Button>
