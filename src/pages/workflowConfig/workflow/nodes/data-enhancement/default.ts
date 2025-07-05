@@ -32,14 +32,14 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
   checkValid(payload: CodeNodeType, t: any) {
     let errorMessages = '';
     const {
-      app_scenarios,
+      app_scenarios_name,
       enha_modle_id,
       enhanced_proportion,
       sample_num,
       similarity_threshold,
       generate_sample_num
     } = payload;
-    if (app_scenarios === undefined) {
+    if (app_scenarios_name === undefined) {
       errorMessages = '场景未选择';
     }
     if (enha_modle_id === undefined) {
