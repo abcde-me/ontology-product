@@ -438,7 +438,7 @@ export default function WorkflowTaskDetail() {
             onClick={() =>
               history.push('/tenant/compute/modaforge/workflowTask')
             }
-            style={{ cursor: 'pointer' }}
+            className={'breadcrumb-text'}
           >
             作业详情
           </BreadcrumbItem>
