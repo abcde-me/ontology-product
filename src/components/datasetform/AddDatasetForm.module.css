@@ -1,9 +1,10 @@
 /* 数据集表单样式 */
 
-/* Modal内容区域样式调整 */
-:global(.arco-modal-content) {
+/* Modal内容区域样式调整 - 只影响这个组件的Modal */
+.modalWrapper :global(.arco-modal-content) {
   padding-left: 1px !important;
 }
+
 .previewContainer {
   margin-top: 16px;
   border-radius: 8px;
@@ -28,9 +29,9 @@
 }
 
 /* 表格头部样式 */
-.previewTable :global(.arco-table-thead) {
+/* .previewTable :global(.arco-table-thead) {
   background: #f7f8fa;
-}
+} */
 
 .previewTable :global(.arco-table-thead th) {
   background-color: #f7f8fa !important;
