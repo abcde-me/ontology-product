@@ -196,9 +196,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         page: currentPage,
         page_size: pageSize,
         file_name: searchValue || '',
-        data_path_id: selectedKey, // 优先使用选中ID
-        start: startTime,
-        end: endTime,
+        data_path_id: Number(122), // 优先使用选中ID 后期改成selectedKey
+        // start: startTime, //后期改成startTime
+        // end: endTime, //后期改成endTime
         // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
       }
       const newParams: any = { ...params };
@@ -206,6 +206,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       if (validFileTypes.length > 0) {
         newParams.file_type = validFileTypes;
         newSourceParams.file_type = validFileTypes;
+      }
+      if(startTime){
+        newSourceParams.start_time = startTime;
+      }
+      if(endTime){
+        newSourceParams.end_time = endTime;
       }
       let res;
       if (tableType === 'target') {

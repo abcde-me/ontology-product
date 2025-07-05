@@ -249,7 +249,7 @@ export default function Eltable() {
         }
       });
     } catch {
-      Message.error('删除失败，请重试');
+      Message.error('删除失败，请稍后重试');
     }
   };
   // 批量导出

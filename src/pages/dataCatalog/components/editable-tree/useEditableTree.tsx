@@ -21,6 +21,7 @@ import {
   renameCatalog
 } from '@/api/dataCatalog';
 import { validateName } from '../../utils';
+import { string } from 'mobx-state-tree/dist/internal';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -219,14 +220,14 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
-
+    console.log(dataRef, '打印看啊看dataRef');
     const fileName = inputValue.trim();
     const validateResult = validateName(fileName);
     if (!validateResult.isValid && validateResult.errorMessage) {
       Message.error(validateResult.errorMessage);
       return;
     }
-
+    const type = dataRef?.type_name === 'catalog' ? 1 : dataRef?.type_name === 'volume' ? 2 : 3;
     const root_type = RootTypeEnum[activeTab];
     let newTreeData: TreeDataType[] = [];
     switch (dataRef?.type) {
@@ -238,7 +239,8 @@ export function useEditableTree({ catalogTreeStore }) {
           if (fileName !== dataRef.name) {
             await renameCatalog(dataRef.id, {
               new_name: fileName,
-              root_type: root_type
+              root_type: root_type,
+              type:dataRef?.type
             });
           }
         }
@@ -248,7 +250,8 @@ export function useEditableTree({ catalogTreeStore }) {
         await addVolume({
           name: fileName,
           parent_id: dataRef.parent_id,
-          root_type: root_type
+          root_type: root_type,
+          
         });
         break;
 
