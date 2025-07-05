@@ -433,8 +433,10 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const getVolumePreviewData = (volumeId: string) => {
     // 这里应该调用真实的API
     getCatalogPreview({ path: volumeId }).then((res) => {
-      if (res.status == 0) {
+      if (res.status !== 200) {
         Message.error(res.message);
+        setPreviewData(null);
+        setPreviewColumns([]);
         return;
       }
       setPreviewData(res.data.list || []); //这里的数据不能直接赋值，需要处理一下
