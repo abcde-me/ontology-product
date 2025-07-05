@@ -22,7 +22,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     type: 'cleaning',
     title: '数据清洗节点',
     desc: '',
-    desc_type: [
+    dclean_type: [
       {
         type: 'data_standardization',
         title: '数据标准化',
