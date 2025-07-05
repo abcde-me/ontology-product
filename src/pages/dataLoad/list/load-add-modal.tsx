@@ -5,14 +5,12 @@ import {
   Input,
   Message,
   Radio,
-  Select,
-  Tag,
-  TimePicker,
-  TreeSelect
+  Select
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import CycleLoadingForm from '../list/cycle-loading-form-modal';
+import SchedulerRun from '../../../components/scheduler-run';
 import { convertWeekDaysToString } from '../../../utils/conversionArco';
 import { WeekDay } from '../../../utils/conversionArco';
 import { dataLodaAddForm } from '../type';
@@ -34,54 +32,29 @@ const LoadAddModal = (props: any) => {
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
+  // 按钮以及输入框的状态
+  const [loading, setLoading] = useState(false);
   // 整体表单实例
   const [form] = Form.useForm();
-
+  // 获取表达式的状态
+  const [expression, setExpression] = useState({});
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
     try {
+      setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
       if (loadVal !== 'once') {
-        const [hour, minute] = time.split(':');
-        await form.validate();
-        props.hideModalHan();
-
-        const isLastDayOfMonth =
-          day?.findIndex((item) => item === '每月最后一天') !== -1;
-
-        // 转换星期为数字字符串
-        let dataValue: string;
-        switch (cycle) {
-          case '每日':
-            dataValue = '*';
-            break;
-          case '每周':
-            dataValue = convertWeekDaysToString(day as WeekDay[]); // 转换为'1,2,3'格式
-            break;
-          case '每月':
-            dataValue = isLastDayOfMonth ? 'L' : day?.join(',') || ''; // 每月日期直接用逗号连接
-            break;
-          default:
-            dataValue = '*';
-        }
         const formData = {
           task_name: rest.name,
           connector_id: rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
             type: loadVal == 'once' ? 0 : 1,
-            cycle_text: {
-              minute,
-              hour,
-              date: dataValue,
-              month: cycle == '每月' ? '*' : '',
-              week: cycle === '每周' ? rest.week?.join(',') || '*' : '' // 如果week也需要转换
-            }
+            cycle_text: expression
           },
-          dest_path_id: 122,
-          creator: 'user123'
+          dest_path_id: 122
         };
         const res = await addLoad(formData);
         if (res.message == 'ok') {
@@ -106,8 +79,7 @@ const LoadAddModal = (props: any) => {
               week: ''
             }
           },
-          dest_path_id: 122,
-          creator: 'user123'
+          dest_path_id: 122
         };
         console.log(formData);
         const res = await addLoad(formData);
@@ -122,6 +94,8 @@ const LoadAddModal = (props: any) => {
       cancelHan();
     } catch (error) {
       console.error('表单处理失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
   // 点击取消按钮的逻辑
@@ -169,7 +143,12 @@ const LoadAddModal = (props: any) => {
   }, []);
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <Form style={{ width: '100%' }} autoComplete="off" form={form}>
+      <Form
+        style={{ width: '100%' }}
+        autoComplete="off"
+        form={form}
+        disabled={loading}
+      >
         <FormItem
           label="任务名称："
           field="name"
@@ -235,7 +214,16 @@ const LoadAddModal = (props: any) => {
             <Radio value="cron">周期载入</Radio>
           </RadioGroup>
         </FormItem>
-        {loadVal == 'cron' ? <CycleLoadingForm form={form} /> : null}
+        {loadVal == 'cron' ? (
+          <div className={Styles.cycleLoadingBox}>
+            <SchedulerRun
+              options={{}}
+              onOptionsChange={(val) => {
+                setExpression(val);
+              }}
+            ></SchedulerRun>
+          </div>
+        ) : null}
         <FormItem
           label="载入位置："
           field="dest_path"
@@ -255,7 +243,7 @@ const LoadAddModal = (props: any) => {
         <Button onClick={cancelHan} style={{ marginRight: '12px' }}>
           取消
         </Button>
-        <Button onClick={handleSubmit} type="primary">
+        <Button onClick={handleSubmit} type="primary" disabled={loading}>
           确认
         </Button>
       </div>

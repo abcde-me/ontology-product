@@ -66,7 +66,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             id: n.id,
             data: {
               ...n.data,
-              selected_files_num: res.data.total,
+              selected_files_num: res.data?.total || 0,
               files: []
             }
           });
@@ -184,7 +184,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             <FormItem
               field="data_category[0].format"
               noStyle
-              disabled={!docParams?.enabled}
+              disabled={!docParams?.enabled || readOnly}
             >
               <Checkbox.Group
                 options={FileOptions.doc}
@@ -207,7 +207,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             <FormItem
               field="data_category[1].format"
               noStyle
-              disabled={!imageParams?.enabled}
+              disabled={!imageParams?.enabled || readOnly}
             >
               <Checkbox.Group
                 options={FileOptions.image}
@@ -230,7 +230,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             <FormItem
               field="data_category[2].format"
               noStyle
-              disabled={!audioParams?.enabled}
+              disabled={!audioParams?.enabled || readOnly}
             >
               <Checkbox.Group
                 options={FileOptions.audio}
@@ -253,7 +253,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             <FormItem
               field="data_category[3].format"
               noStyle
-              disabled={!videoParams?.enabled}
+              disabled={!videoParams?.enabled || readOnly}
             >
               <Checkbox.Group
                 options={FileOptions.video}

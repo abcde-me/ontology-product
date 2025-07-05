@@ -31,7 +31,7 @@ const ModalDetail = (props) => {
           </div>
           <div className="modal-content" style={{ fontSize: '14px' }}>
             <section className="section">
-              <h3 style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
                 连接器信息
               </h3>
               <div className="info-item">
@@ -81,7 +81,7 @@ const ModalDetail = (props) => {
             </section>
             <hr />
             <section className="section">
-              <h3 style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
                 连接信息
               </h3>
               {DetailData.type == 's3' ? (

@@ -63,7 +63,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
           app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          sample_data: inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
+          sample_data:
+            inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
           enhanced_proportion: inputs?.enhanced_proportion | 0.5,
           sample_num: inputs?.sample_num || 1,
           similarity_threshold: inputs?.similarity_threshold || 0.1,
@@ -211,7 +212,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         </FormItem>
         {customPromptChecked && (
           <FormItem field="prompt" label={null}>
-            <TextArea style={{ minHeight: 64, minWidth: 350 }} placeholder="请输入提示词"
+            <TextArea
+              style={{ minHeight: 64, minWidth: 350 }}
+              placeholder="请输入提示词"
             />
           </FormItem>
         )}

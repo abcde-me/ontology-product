@@ -15,7 +15,7 @@ const nodeDefault: NodeDefault<StartNodeType> = {
         id: 1,
         category: '文档',
         enabled: true,
-        format: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD']
+        format: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD', 'JSONL']
       },
       {
         id: 2,
@@ -72,7 +72,7 @@ const nodeDefault: NodeDefault<StartNodeType> = {
 };
 
 const FileOptions = {
-  doc: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD'],
+  doc: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD', 'JSONL'],
   image: ['JPEG', 'PNG', 'JPG'],
   audio: ['WAV', 'MP3', 'AAC', 'FLAC'],
   video: ['MP4', 'MOV', 'MKV']

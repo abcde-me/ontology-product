@@ -72,8 +72,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           remove_invisible: inputs?.remove_invisible,
           remove_html: inputs?.remove_html,
           threshold: inputs?.threshold || 800,
-          unicode: inputs?.unicode === 2 ? true : false,
-          traditional_to_simplified: inputs?.traditional_to_simplified === 2 ? true : false,
+          unicode: inputs?.unicode,
+          traditional_to_simplified: inputs?.traditional_to_simplified,
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           vars: cloneDeep(inputs.variables || [])
