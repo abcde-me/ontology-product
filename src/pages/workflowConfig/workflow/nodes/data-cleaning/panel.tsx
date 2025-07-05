@@ -41,7 +41,7 @@ import { number } from 'mobx-state-tree/dist/internal';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
-  const { readOnly, inputs, updateInputs, onValuesChange } = useConfig(id, data);
+  const { readOnly, inputs, onValuesChange } = useConfig(id, data);
 
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -63,18 +63,23 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
+          ...data,
+          mg_is: inputs?.mg_is,
+          qd_is: inputs?.qd_is,
+          df_is: inputs?.df_is,
+          oh_is: inputs?.oh_is,
           remove_url: inputs?.remove_url,
           remove_invisible: inputs?.remove_invisible,
           remove_html: inputs?.remove_html,
           threshold: inputs?.threshold || 800,
-          unicode: inputs?.unicode,
-          traditional_to_simplified: inputs?.traditional_to_simplified,
+          unicode: inputs?.unicode === 2 ? true : false,
+          traditional_to_simplified: inputs?.traditional_to_simplified === 2 ? true : false,
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           vars: cloneDeep(inputs.variables || [])
         }}
         layout="inline"
-        onValuesChange={(_, v) => {
+        onValuesChange={(_, v: any) => {
           onValuesChange(v)
         }}
       >
