@@ -290,7 +290,7 @@ export default function WorkflowTask() {
         onChange={(page) => {
           setCurrent(page);
         }}
-        sizeOptions={[2, 5, 10, 20]}
+        sizeOptions={[10, 20, 50, 100]}
         showTotal
         total={total}
         showJumper

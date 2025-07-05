@@ -9,7 +9,12 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import { IconDelete, IconDownload, IconCloseCircle, IconSearch } from '@arco-design/web-react/icon';
+import {
+  IconDelete,
+  IconDownload,
+  IconCloseCircle,
+  IconSearch
+} from '@arco-design/web-react/icon';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
@@ -90,6 +95,56 @@ export default function Eltable() {
       }
     }
   }, [activeTab]);
+  useEffect(() => {
+    const handleResetSearch = (event) => {
+      const { tableType } = event.detail;
+      console.log('接收到重置搜索输入的事件', tableType);
+      // 重置日期范围
+      setDateRange([]);
+      setStartTime('');
+      setEndTime('');
+      if (tableType === 'source' || !tableType) {
+        // 重置源表格搜索
+        setSearchValue('');
+        setInputValue('');
+      }
+      if (tableType === 'target' || !tableType) {
+        // 重置目标表格搜索
+        setSearchKeyword('');
+        setSearchType('数据内容');
+        setSearchCondition({
+          type: '数据内容',
+          keyword: '',
+          isActive: false
+        });
+      }
+    };
+    window.addEventListener('resetSearchInputs', handleResetSearch);
+    return () => {
+      window.removeEventListener('resetSearchInputs', handleResetSearch);
+    };
+  }, []);
+
+  // 监听搜索类型改变的事件
+  useEffect(() => {
+    const handleResetSearchKeyword = (event) => {
+      const { tableType, searchType } = event.detail;
+      if (tableType === 'target') {
+        console.log('接收到搜索类型变化事件，重置关键词输入:', searchType);
+        // 清空搜索关键词，保留搜索类型
+        setSearchKeyword('');
+        setSearchCondition(prev => ({
+          ...prev,
+          keyword: '',
+          isActive: false
+        }));
+      }
+    };
+    window.addEventListener('resetSearchKeyword', handleResetSearchKeyword);
+    return () => {
+      window.removeEventListener('resetSearchKeyword', handleResetSearchKeyword);
+    };
+  }, []);
 
   // 通用的行选择处理函数
   const handleSelectionChange = (
@@ -121,15 +176,19 @@ export default function Eltable() {
   // Target表格搜索类型变化处理
   const handleSearchTypeChange = (value) => {
     setSearchType(value);
-    // 更新搜索条件
     setSearchCondition((prev) => ({
       ...prev,
-      type: value
+      type: value,
+      keyword: '',
+      isActive: false
     }));
+
+    // 清空搜索关键字
+    setSearchKeyword('');
     // 如果有搜索关键字，重新执行搜索
-    if (searchKeyword) {
-      handleTargetSearch(searchKeyword, value);
-    }
+    // if (searchKeyword) {
+    //   handleTargetSearch(searchKeyword, value);
+    // }
   };
 
   // Target表格的搜索逻辑（支持按类型搜索）
@@ -196,15 +255,15 @@ export default function Eltable() {
   const clearAllSelectionsAndCache = () => {
     setSelectedRows([]);
     if (tableRef.current) {
-        if (tableRef.current.clearAllSelections) {
-          tableRef.current.clearAllSelections();
-        }
-        if (tableRef.current.resetSelection) {
-          tableRef.current.resetSelection();
-        }
-        if (tableRef.current.getTableList) {
-          tableRef.current.getTableList();
-        }
+      if (tableRef.current.clearAllSelections) {
+        tableRef.current.clearAllSelections();
+      }
+      if (tableRef.current.resetSelection) {
+        tableRef.current.resetSelection();
+      }
+      if (tableRef.current.getTableList) {
+        tableRef.current.getTableList();
+      }
     }
     setTimeout(() => {
       setSelectedRows([]);
@@ -494,8 +553,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {
-        }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

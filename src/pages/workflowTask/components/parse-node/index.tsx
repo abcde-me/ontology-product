@@ -165,7 +165,7 @@ export default function ParseNode(props: {
         onPageSizeChange={(pageSize) => {
           handlePageChange(1, pageSize);
         }}
-        sizeOptions={[2, 5, 10, 20]}
+        sizeOptions={[10, 20, 50, 100]}
         showTotal
         total={pagination.total}
         showJumper

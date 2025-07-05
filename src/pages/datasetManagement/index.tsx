@@ -599,7 +599,11 @@ const DatasetManagement: React.FC = () => {
     console.log('批量导出:', selectedRows);
     // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
   };
-
+  //清除选中状态函数
+  const handClear=()=>{
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+  }
   return (
     <div
       style={{
@@ -724,6 +728,7 @@ const DatasetManagement: React.FC = () => {
         onCancel={() => setVisible(false)}
         visible={visible}
         exportdatas={selectedRows}
+        handlClear={handClear}
       />
     </div>
   );

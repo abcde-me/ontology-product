@@ -51,6 +51,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   useEffect(() => {
     getModelData();
   }, []);
+  // 实时获取数据示例 和 提示词
+  const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
+  const prompt_text = TextPlan[app_scenarios_name]?.prompt;
+  const sample_data_text = TextPlan[app_scenarios_name]?.data;
+  form.setFieldValue('prompt', form.getFieldValue('prompt') || prompt_text);
+  form.setFieldValue('sample_data', (form.getFieldValue('sample_data') || sample_data_text));
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -61,11 +67,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           ...data,
-          prompt: inputs?.prompt || TextPlan[inputs?.app_scenarios_name]?.prompt,
           app_scenarios: inputs?.app_scenarios || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          sample_data:
-            inputs?.sample_data || TextPlan[inputs?.app_scenarios_name]?.data,
           enhanced_proportion: inputs?.enhanced_proportion | 0.5,
           sample_num: inputs?.sample_num || 1,
           similarity_threshold: inputs?.similarity_threshold || 0.1,

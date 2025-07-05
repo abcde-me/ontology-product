@@ -127,11 +127,57 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   // 防止重复请求
   const isDataFetching = useRef(false);
 
+  useEffect(() => {
+    isFirstRender.current = false;
+  }, []);
   // 监听选中路径变化
   useEffect(() => {
     console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
     // 获取到路径后直接传递给后端，然后前端根据路径获取数据
   }, [selectedFullPath]);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      return;
+    }
+    console.log('数据卷发生变化，重置输入框内容', selectedKey, selectedFullPath);
+    // 重置页码
+    setCurrentPage(1);
+    // 触发自定义事件通知父组件重置搜索输入
+    if (window) {
+      const resetEvent = new CustomEvent('resetSearchInputs', {
+        detail: { tableType }
+      });
+      window.dispatchEvent(resetEvent);
+    }
+    // 重置选择状态和过滤条件
+    if (typeof handAllReset === 'function') {
+      handAllReset();
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
+      setCrossPageSelectedKeys([]);
+      setCrossPageSelectedRows([]);
+      setFileTypeFilters([]);
+      if (tableRef.current) {
+        tableRef.current.resetSelection();
+      }
+    }
+  }, [selectedKey, selectedFullPath]);
+  // 监听搜索类型变化
+  useEffect(() => {
+    if (isFirstRender.current) {
+      return;
+    }
+    if (searchConditionType && tableType === 'target') {
+      console.log('搜索类型发生变化:', searchConditionType);
+      const resetSearchEvent = new CustomEvent('resetSearchKeyword', {
+        detail: { tableType, searchType: searchConditionType }
+      });
+      window.dispatchEvent(resetSearchEvent);
+      setCurrentPage(1);
+      setTableData([]);
+    }
+  }, [searchConditionType, tableType]);
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     getTableList,
@@ -186,8 +232,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         limit: pageSize,
         start_time: startTime || '',
         end_time: endTime || '',
-        search_content: searchValue || '',
-        search_id: searchConditionKeyword || '',
+        search_content: searchConditionType === '数据内容' ? searchConditionKeyword : '',
+        search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
         // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       }
 
@@ -207,10 +253,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newParams.file_type = validFileTypes;
         newSourceParams.file_type = validFileTypes;
       }
-      if(startTime){
+      if (startTime) {
         newSourceParams.start = startTime;
       }
-      if(endTime){
+      if (endTime) {
         newSourceParams.end = endTime;
       }
       let res;
@@ -357,7 +403,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       selectedKey,
       selectedFullPath,
       undefined,
-      handAllReset 
+      handAllReset
     );
   }, [tableType, dataType, downloadShow, selectedKey, selectedFullPath, handAllReset]);
 
@@ -373,8 +419,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         getTableList,
         selectedKey,
         selectedFullPath,
-        undefined, 
-        handAllReset 
+        undefined,
+        handAllReset
       );
     }
     return baseColumns;
