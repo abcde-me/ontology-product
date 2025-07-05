@@ -142,7 +142,7 @@
 /* 表格样式 */
 .datasetTable {
   border-radius: 8px;
-  border: 1px solid #f0f0f0;
+  border: none;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -152,6 +152,11 @@
 .datasetTable :global(.arco-table-container) {
   flex: 1;
   overflow: auto;
+}
+
+/* 表头颜色样式 */
+.datasetTable :global(.arco-table-tr > th) {
+  background-color: rgb(245, 249, 255) !important;
 }
 
 .datasetTable :global(.arco-table-thead th) {
@@ -195,7 +200,6 @@
   padding: 12px;
   vertical-align: middle;
 }
-
 /* 表格内操作按钮 */
 /* .actionButton {
   font-size: 14px;

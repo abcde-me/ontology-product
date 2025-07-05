@@ -26,8 +26,13 @@ import {
   IconHistory,
   IconRefresh,
   IconCheck,
-  IconClose
+  IconClose,
+  IconCheckCircleFill,
+  IconExclamationCircleFill,
+  IconLoading,
+  IconInfoCircle
 } from '@arco-design/web-react/icon';
+
 import { Breadcrumb } from '@arco-design/web-react';
 import {
   getDatasetDetail,
@@ -45,33 +50,22 @@ import { render } from '@headlessui/react/dist/utils/render';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
-// 测试数据 - 按照API接口字段顺序排列
-const csdatasetDetail = {
-  id: 0,
-  name: '西游三打白骨精',
-  tag_names: ['小说情节'],
-  description: 'liuxiaoyu-test',
-  latest_version: 'v1.10',
-  src: 0,
-  src_model: 'GPT-4o',
-  creator_id: 'user_001',
-  creator_name: '张三',
-  created_at: '2025-05-05 05:05:05',
-  updated_at: '2025-05-05 05:05:05'
-};
 interface DatasetDetail {
   id: number;
   name: string;
   tag_names: string[];
   description: string;
+  status: string;
+  error_reason: string;
   latest_version: string;
+  latest_file_path: string;
+  latest_file_name: string;
   src: number;
   src_model: string;
   creator_id: string;
   creator_name: string;
   created_at: string;
   updated_at: string;
-  deleted_at?: string | null; // 可选字段，因为API响应中可能没有这个字段
 }
 
 //headers:表头
@@ -80,7 +74,10 @@ interface DatasetDetail {
 //editingRowKey:当前编辑行
 //editingData:当前编辑数据
 //onDataChange:处理编辑数据变化
+//handleInlineEditSubmit:确认编辑
+//handleInlineEditCancel:取消编辑
 //idName:唯一标识符字段名
+//updateStatus:更新状态
 const generateArcoColumns = (
   headers,
   handleEditContent,
@@ -90,7 +87,8 @@ const generateArcoColumns = (
   onDataChange,
   handleInlineEditSubmit,
   handleInlineEditCancel,
-  idName
+  idName,
+  updateStatus
 ) => {
   const cols = headers.map((header) => ({
     title: header,
@@ -99,7 +97,7 @@ const generateArcoColumns = (
     minWidth: 150,
     maxWidth: 300,
     render: (value: any, record: any) => {
-      if (editingRowKey === record[idName]) {
+      if (updateStatus && editingRowKey === record[idName]) {
         return (
           <Input.TextArea
             value={
@@ -113,80 +111,83 @@ const generateArcoColumns = (
             placeholder="请输入内容"
           />
         );
+      } else {
+        return <div>{record[header]}</div>;
       }
-      return <div>{record[header]}</div>;
     }
   }));
 
-  // 在最后追加一列 "操作"
-  cols.push({
-    title: '操作',
-    key: 'action',
-    width: 140,
-    fixed: 'right',
-    render: (_, record) => {
-      if (editingRowKey === record[idName]) {
-        // 编辑模式：显示确认和取消按钮
+  // 只有在编辑状态下才显示操作列
+  if (updateStatus) {
+    cols.push({
+      title: '操作',
+      key: 'action',
+      width: 140,
+      fixed: 'right',
+      render: (_, record) => {
+        console.log('李帆测试111', record);
+        if (editingRowKey === record[idName]) {
+          // 编辑模式：显示确认和取消按钮
+          return (
+            <Space>
+              <Button
+                type="text"
+                size="small"
+                icon={<IconCheck style={{ color: '#00b42a' }} />}
+                onClick={() => handleInlineEditSubmit(record)}
+                style={{ color: '#00b42a' }}
+                title="确认"
+              />
+              <Button
+                type="text"
+                size="small"
+                icon={<IconClose style={{ color: '#f53f3f' }} />}
+                onClick={handleInlineEditCancel}
+                style={{ color: '#f53f3f' }}
+                title="取消"
+              />
+            </Space>
+          );
+        }
+
+        // 正常模式：显示编辑和删除按钮
+        const isOtherRowEditing =
+          editingRowKey !== null && editingRowKey !== record[idName];
+
         return (
           <Space>
-            <Button
-              type="text"
-              size="small"
-              icon={<IconCheck style={{ color: '#00b42a' }} />}
-              onClick={() => handleInlineEditSubmit(record)}
-              style={{ color: '#00b42a' }}
-              title="确认"
-            />
-            <Button
-              type="text"
-              size="small"
-              icon={<IconClose style={{ color: '#f53f3f' }} />}
-              onClick={handleInlineEditCancel}
-              style={{ color: '#f53f3f' }}
-              title="取消"
-            />
+            <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
+              <Button
+                type="text"
+                size="small"
+                disabled={isOtherRowEditing}
+                onClick={() => handleEditContent(record[idName])}
+                style={{
+                  color: isOtherRowEditing ? '#c9cdd4' : undefined,
+                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+                }}
+              >
+                编辑
+              </Button>
+            </Tooltip>
+            <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
+              <Button
+                type="text"
+                size="small"
+                onClick={() => handleContinue(record[idName])}
+                style={{
+                  color: isOtherRowEditing ? '#c9cdd4' : undefined,
+                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+                }}
+              >
+                删除
+              </Button>
+            </Tooltip>
           </Space>
         );
       }
-
-      // 正常模式：显示编辑和删除按钮
-      const isOtherRowEditing =
-        editingRowKey !== null && editingRowKey !== record[idName];
-
-      return (
-        <Space>
-          <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
-            <Button
-              type="text"
-              size="small"
-              disabled={isOtherRowEditing}
-              onClick={() => handleEditContent(record[idName])}
-              style={{
-                color: isOtherRowEditing ? '#c9cdd4' : undefined,
-                cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
-              }}
-            >
-              编辑
-            </Button>
-          </Tooltip>
-          <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
-            <Button
-              type="text"
-              // status="danger"
-              size="small"
-              onClick={() => handleContinue(record[idName])}
-              style={{
-                color: isOtherRowEditing ? '#c9cdd4' : undefined,
-                cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
-              }}
-            >
-              删除
-            </Button>
-          </Tooltip>
-        </Space>
-      );
-    }
-  });
+    });
+  }
 
   return cols;
 };
@@ -248,13 +249,172 @@ const versionColumns = [
   }
 ];
 
+const csdatasetDetail = {
+  id: 1,
+  name: 'Project 李帆',
+  tag_names: ['urgent', 'high_priority'],
+  description: 'A project focusing on upgrading the system architecture.',
+  status: 'normal',
+  error_reason: '网络连接超时，请重试',
+  latest_version: 'v2.1',
+  latest_file_path: '/path/to/file/v2.1/upgrade-package.zip',
+  latest_file_name: 'upgrade-package.zip',
+  src: 2,
+  src_model: 'system_upgrade',
+  creator_id: 'user_12345',
+  creator_name: 'John Doe',
+  created_at: '2025-07-05T10:00:00',
+  updated_at: '2025-07-05T12:30:00'
+};
+
+// 测试数据 - 唯一标识符字段名
+const csidName = 'id';
+
+// 测试数据 - 表头
+const cscontentColumnslist = [
+  'id',
+  'name',
+  'age',
+  'email',
+  'department',
+  'salary'
+];
+
+// 测试数据 - 内容数据
+const cscontentData = [
+  {
+    id: 1,
+    name: '张三',
+    age: 28,
+    email: 'zhangsan@example.com',
+    department: '技术部',
+    salary: 15000
+  },
+  {
+    id: 2,
+    name: '李四',
+    age: 32,
+    email: 'lisi@example.com',
+    department: '产品部',
+    salary: 18000
+  },
+  {
+    id: 3,
+    name: '王五',
+    age: 25,
+    email: 'wangwu@example.com',
+    department: '设计部',
+    salary: 12000
+  },
+  {
+    id: 4,
+    name: '赵六',
+    age: 30,
+    email: 'zhaoliu@example.com',
+    department: '运营部',
+    salary: 16000
+  },
+  {
+    id: 5,
+    name: '钱七',
+    age: 26,
+    email: 'qianqi@example.com',
+    department: '技术部',
+    salary: 14000
+  }
+];
+
+// 测试数据 - 总数
+const cstotal = 5;
+
+// 测试数据 - 内容数据备份
+
+// 状态配置
+const statusConfig = {
+  normal: {
+    label: '正常',
+    icon: (
+      <IconCheckCircleFill style={{ color: '#00b42a', fontSize: '14px' }} />
+    ),
+    color: '#00b42a'
+  },
+  version_updating: {
+    label: '版本更新中',
+    icon: <IconLoading style={{ color: '#165dff', fontSize: '14px' }} />,
+    color: '#165dff'
+  },
+  version_update_failed: {
+    label: '版本更新失败',
+    icon: (
+      <IconExclamationCircleFill
+        style={{ color: '#ff7d00', fontSize: '14px' }}
+      />
+    ),
+    color: '#ff7d00'
+  }
+};
+
+// 渲染状态标签
+const renderStatusTag = (status: string, errorReason?: string) => {
+  const config = statusConfig[status];
+  if (!config) return null;
+
+  const statusElement = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      {config.icon}
+      <span style={{ color: config.color, fontSize: '14px' }}>
+        {config.label}
+      </span>
+    </div>
+  );
+
+  // 为失败状态添加工具提示
+  const statusWithTooltip =
+    status === 'version_update_failed' && errorReason ? (
+      <Tooltip content={errorReason}>{statusElement}</Tooltip>
+    ) : (
+      statusElement
+    );
+
+  // 如果是版本更新失败状态，添加重试链接
+  if (status === 'version_update_failed') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {statusElement}
+        <Tooltip content={errorReason || '发生错误'}>
+          <IconInfoCircle
+            style={{
+              color: '#86909c',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          />
+        </Tooltip>
+        <Button
+          type="text"
+          size="small"
+          style={{
+            color: '#165dff',
+            padding: '0 4px',
+            fontSize: '14px',
+            height: 'auto'
+          }}
+        >
+          重试
+        </Button>
+      </div>
+    );
+  }
+
+  return statusWithTooltip;
+};
+
 const DatasetDetail: React.FC = () => {
   const [datasetDetail, setDatasetDetail] =
-    React.useState<DatasetDetail | null>(null);
-  const [editModalVisible, setEditModalVisible] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState('content');
+    React.useState<DatasetDetail | null>(null); //数据集详情
+  const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
+  const [activeTab, setActiveTab] = React.useState('content'); //当前选中的tab
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
-
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
@@ -268,6 +428,7 @@ const DatasetDetail: React.FC = () => {
   const history = useHistory();
 
   // 编辑数据
+  const [updateStatus, setUpdateStatus] = React.useState<boolean>(false); //更新状态
   const [editingRowKey, setEditingRowKey] = React.useState<string | null>(null); //当前编辑行
   const [editingData, setEditingData] = React.useState<any>({}); //当前编辑数据
   const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的数据
@@ -335,6 +496,8 @@ const DatasetDetail: React.FC = () => {
 
   // 编辑内容
   const handleEditContent = (record: any) => {
+    if (!updateStatus) return; // 非编辑状态下不允许编辑
+
     console.log('编辑内容:', record);
 
     // 如果当前已经在编辑状态，且点击的不是同一行，则不处理（按钮已禁用）
@@ -363,6 +526,14 @@ const DatasetDetail: React.FC = () => {
 
   // 删除
   const handleContinue = (recordId: string) => {
+    if (!updateStatus) return; // 非编辑状态下不允许删除
+
+    // 如果有行正在编辑中，不允许删除
+    if (editingRowKey !== null) {
+      Message.warning('请先完成当前编辑');
+      return;
+    }
+
     Modal.confirm({
       title: '确认删除文件吗？',
       content: '删除后，文件不可恢复',
@@ -396,6 +567,8 @@ const DatasetDetail: React.FC = () => {
 
   // 处理编辑数据变化
   const handleEditDataChange = (field: string, value: any) => {
+    if (!updateStatus) return; // 非编辑状态下不允许修改数据
+
     setEditingData((prev) => ({
       ...prev,
       [field]: value
@@ -404,7 +577,7 @@ const DatasetDetail: React.FC = () => {
 
   // 确认保存内联编辑
   const handleInlineEditSubmit = (record: any) => {
-    // console.log(contentData)
+    if (!updateStatus) return; // 非编辑状态下不允许提交编辑
     // 更新数据
     const newData = contentData.map((item: any) => {
       if (item[idName] === editingRowKey) {
@@ -417,8 +590,19 @@ const DatasetDetail: React.FC = () => {
     setContentData(newData);
 
     // 记录修改的数据
-    if (!changedRows.includes(editingRowKey!.toString())) {
-      setChangedRows([...changedRows, editingRowKey!.toString()]);
+    const currentRecordId = editingRowKey!.toString();
+    console.log(
+      '正在记录修改的数据 ID:',
+      currentRecordId,
+      '类型:',
+      typeof currentRecordId
+    );
+    console.log('当前 changedRows:', changedRows);
+
+    if (!changedRows.includes(currentRecordId)) {
+      const newChangedRows = [...changedRows, currentRecordId];
+      console.log('更新 changedRows 为:', newChangedRows);
+      setChangedRows(newChangedRows);
     }
 
     // 重置编辑状态
@@ -426,11 +610,12 @@ const DatasetDetail: React.FC = () => {
     setEditingData({});
 
     Message.success('数据修改成功');
-    console.log('已修改的数据:', [...changedRows, editingRowKey]);
   };
 
   // 取消内联编辑
   const handleInlineEditCancel = () => {
+    if (!updateStatus) return; // 非编辑状态下不允许取消编辑
+
     setEditingRowKey(null);
     setEditingData({});
     Message.info('已取消编辑');
@@ -439,12 +624,33 @@ const DatasetDetail: React.FC = () => {
   // 提交数据修改
   const handleSubmitChanges = () => {
     if (!datasetDetail) return;
+
+    // 添加调试信息
+    console.log('提交数据时的状态:');
+    console.log('changedRows:', changedRows);
+    console.log('deletedRows:', deletedRows);
+    console.log('contentData:', contentData);
+    console.log('contentDatabackup:', contentDatabackup);
+    console.log('idName:', idName);
+
     // 构造提交数据
     const submitData: any[] = [];
 
     // 处理修改的数据
     changedRows.forEach((recordId) => {
-      const modifiedRow = contentData.find((item) => item[idName] === recordId);
+      console.log('处理修改的记录 ID:', recordId, '类型:', typeof recordId);
+      const modifiedRow = contentData.find((item) => {
+        console.log(
+          '比较:',
+          item[idName],
+          '===',
+          recordId,
+          '结果:',
+          item[idName] === recordId
+        );
+        return item[idName] == recordId; // 使用 == 而不是 === 来处理类型转换
+      });
+      console.log('找到的修改行:', modifiedRow);
       if (modifiedRow) {
         submitData.push({
           change_type: 1, // 修改
@@ -455,9 +661,11 @@ const DatasetDetail: React.FC = () => {
 
     // 处理删除的数据
     deletedRows.forEach((recordId) => {
+      console.log('处理删除的记录 ID:', recordId, '类型:', typeof recordId);
       const deletedRow = contentDatabackup.find(
-        (item) => item[idName] === recordId
+        (item) => item[idName] == recordId // 使用 == 而不是 === 来处理类型转换
       );
+      console.log('找到的删除行:', deletedRow);
       if (deletedRow) {
         submitData.push({
           change_type: 2, // 删除
@@ -466,14 +674,13 @@ const DatasetDetail: React.FC = () => {
       }
     });
 
+    console.log('最终提交数据:', submitData);
+
     const params = {
       id: datasetDetail.id.toString(),
       version_id: datasetDetail.latest_version,
       datas: submitData
     };
-
-    console.log('提交数据修改:', params);
-
     editDatasetVersion(params)
       .then((res) => {
         Message.success('数据修改成功');
@@ -482,6 +689,7 @@ const DatasetDetail: React.FC = () => {
         setDeletedRows([]);
         setEditingRowKey(null);
         setEditingData({});
+        setUpdateStatus(false); // 退出编辑状态
         // 重新加载数据 - 刷新内容数据
         const refreshParams = {
           id: id,
@@ -511,23 +719,23 @@ const DatasetDetail: React.FC = () => {
 
   React.useEffect(() => {
     if (id) {
-      getDatasetDetailPage({ id: id })
-        .then((res) => {
-          console.log(res);
-          setDatasetDetail(res.data);
-        })
-        .catch((err) => {
-          console.error('获取数据集详情失败:', err);
-          Message.error('加载数据集详情失败');
-        });
+      //   getDatasetDetailPage({ id: id })
+      //     .then((res) => {
+      //       console.log(res);
+      //       setDatasetDetail(res.data);
+      //     })
+      //     .catch((err) => {
+      //       console.error('获取数据集详情失败:', err);
+      //       Message.error('加载数据集详情失败');
+      //     });
 
       getDatasetVersionList({ id: id }).then((res) => {
         console.log('历史数据', res);
         setVersionHistory(res.data);
       });
-      // 测试数据
-      // setVersionHistory(csversionHistory);
     }
+    // 测试数据
+    setDatasetDetail(csdatasetDetail);
   }, [id]);
 
   // 处理搜索
@@ -557,11 +765,12 @@ const DatasetDetail: React.FC = () => {
           handleEditDataChange,
           handleInlineEditSubmit,
           handleInlineEditCancel,
-          idName
+          idName,
+          updateStatus
         )
       );
     }
-  }, [contentColumnslist, editingRowKey, editingData, idName]);
+  }, [contentColumnslist, editingRowKey, editingData, idName, updateStatus]);
 
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
@@ -575,21 +784,27 @@ const DatasetDetail: React.FC = () => {
         search: actualSearchValue || undefined
       };
 
-      getDatasetContents(params)
-        .then((res) => {
-          console.log('获取数据集内容响应:', res.data);
-          if (res.data) {
-            setContentData(res.data.list || []);
-            setContentColumnslist(res.data.field_names || []);
-            setIdName(res.data.id_name || '');
-            setTotal(res.data.total || 0);
-            setContentDatabackup(res.data.list || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
+      //   getDatasetContents(params)
+      //     .then((res) => {
+      //       console.log('获取数据集内容响应:', res.data);
+      //       if (res.data) {
+      //         setContentData(res.data.list || []);
+      //         setContentColumnslist(res.data.field_names || []);
+      //         setIdName(res.data.id_name || '');
+      //         setTotal(res.data.total || 0);
+      //         setContentDatabackup(res.data.list || []);
+      //       }
+      //     })
+      //     .catch((err) => {
+      //       console.error('获取数据集内容失败:', err);
+      //       Message.error('加载数据失败');
+      //     });
+      // 测试数据
+      setContentData(cscontentData);
+      setContentColumnslist(cscontentColumnslist);
+      setIdName(csidName);
+      setTotal(cstotal);
+      setContentDatabackup(cscontentData);
     }
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
 
@@ -638,7 +853,24 @@ const DatasetDetail: React.FC = () => {
               <div>
                 <Descriptions
                   data={[
-                    { label: '名称:', value: datasetDetail.name },
+                    {
+                      label: '名称:',
+                      value: (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <span>{datasetDetail.name}</span>
+                          {renderStatusTag(
+                            datasetDetail.status,
+                            datasetDetail.error_reason
+                          )}
+                        </div>
+                      )
+                    },
                     {
                       label: '标签:',
                       value: datasetDetail.tag_names?.length ? (
@@ -737,6 +969,7 @@ const DatasetDetail: React.FC = () => {
 
         {/* 数据管理标签页 */}
         <Tabs
+          className="custom-tabs"
           activeTab={activeTab}
           onChange={(e) => {
             console.log(e);
@@ -751,7 +984,8 @@ const DatasetDetail: React.FC = () => {
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                marginBottom: 16
               }}
             >
               <Input
@@ -763,32 +997,17 @@ const DatasetDetail: React.FC = () => {
                 allowClear
                 suffix={<IconSearch style={{ color: '#999' }} />}
               />
-              {(changedRows.length > 0 ||
-                editingRowKey !== null ||
-                deletedRows.length > 0) && (
+              {updateStatus ? (
                 <Space>
                   <Button
                     onClick={() => {
-                      Modal.confirm({
-                        title: '确认取消',
-                        content:
-                          '确定要取消所有修改吗？此操作将清空所有修改和删除的内容，无法撤销。',
-                        okText: '确认取消',
-                        cancelText: '继续编辑',
-                        onOk: () => {
-                          // 清空所有修改和删除记录
-                          setDeletedRows([]);
-                          setChangedRows([]);
-                          setEditingRowKey(null);
-                          setEditingData({});
-
-                          // 恢复原始数据
-                          console.log(contentDatabackup);
-                          setContentData(contentDatabackup);
-
-                          Message.success('已取消所有修改并恢复数据');
-                        }
-                      });
+                      // 取消编辑模式时，清空所有编辑状态并恢复原始数据
+                      setEditingRowKey(null);
+                      setEditingData({});
+                      setChangedRows([]);
+                      setDeletedRows([]);
+                      setContentData(contentDatabackup);
+                      setUpdateStatus(false);
                     }}
                   >
                     取消本轮编辑
@@ -803,6 +1022,28 @@ const DatasetDetail: React.FC = () => {
                     保存本轮编辑
                   </Button>
                 </Space>
+              ) : (
+                <Tooltip
+                  content={
+                    !datasetDetail || datasetDetail.status !== 'normal'
+                      ? '当前状态下不能进行编辑'
+                      : ''
+                  }
+                >
+                  <Button
+                    // type="primary"
+                    disabled={
+                      !datasetDetail || datasetDetail.status !== 'normal'
+                    }
+                    onClick={() => setUpdateStatus(true)}
+                    type="text"
+                    icon={<IconEdit />}
+                    // onClick={handleEdit}
+                    className="edit-btn"
+                  >
+                    编辑
+                  </Button>
+                </Tooltip>
               )}
             </div>
             {contentData.length !== 0 && contentColumns.length !== 0 ? (
@@ -818,7 +1059,7 @@ const DatasetDetail: React.FC = () => {
                       }
                       pagination={false}
                       scroll={{ x: 'max-content' }}
-                      border
+                      border={false}
                     />
                   </>
                 ) : null}
@@ -852,8 +1093,8 @@ const DatasetDetail: React.FC = () => {
                 columns={versionColumns}
                 data={versionHistory}
                 pagination={false}
-                scroll={{ x: 'max-content' }}
-                border
+                // scroll={{ x: 'max-content' }}
+                border={false}
               />
             ) : (
               ''
