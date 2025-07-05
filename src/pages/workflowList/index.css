@@ -11,10 +11,6 @@
     background-color: rgb(245, 249, 255) !important;
   }
 
-  .arco-table-content-scroll .arco-table-content-inner {
-    min-height: 335px;
-  }
-
   .arco-pagination-total-text {
     line-height: 32px;
   }
@@ -41,9 +37,4 @@
   .arco-table-tr:hover .hover-change:hover {
     color: rgba(0, 125, 250, 0.5);
   }
-}
-
-.arco-popover-content,
-.arco-popconfirm-content {
-  min-width: 315px;
 }
