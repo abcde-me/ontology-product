@@ -236,7 +236,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
     const root_type = RootTypeEnum[activeTab];
     let newTreeData: TreeDataType[] = [];
-    let res;
+    let res: Partial<ApiRes<any>> = {};
 
     switch (dataRef?.type) {
       case CatalogTypeEnum.catalog:
