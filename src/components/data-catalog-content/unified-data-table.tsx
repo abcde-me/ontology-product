@@ -199,12 +199,13 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         data_path_id: selectedKey, // 优先使用选中ID
         start: startTime,
         end: endTime,
-        file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
+        // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
       }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
       if (validFileTypes.length > 0) {
         newParams.file_type = validFileTypes;
+        newSourceParams.file_type = validFileTypes;
       }
       let res;
       if (tableType === 'target') {
