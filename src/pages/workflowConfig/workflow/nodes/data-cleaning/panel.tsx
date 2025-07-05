@@ -37,12 +37,10 @@ import {
   dataOutlierHandlingAfter
 } from './date-text';
 import './date-cleaning.scss';
-import { number } from 'mobx-state-tree/dist/internal';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const { readOnly, inputs, onValuesChange } = useConfig(id, data);
-
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
@@ -55,6 +53,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const df_is = useWatch('df_is', form);
   const oh_is = useWatch('oh_is', form);
   const case_uniformity = useWatch('case_uniformity', form);
+  const isChecked_data_standardization = () => {
+    return [inputs?.unicode, inputs?.traditional_to_simplified, inputs?.case_uniformity].some(Boolean);
+  };
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
@@ -62,12 +63,14 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
+        disabled={readOnly}
         initialValues={{
-          ...data,
+          // ...data,
           mg_is: inputs?.mg_is,
           qd_is: inputs?.qd_is,
           df_is: inputs?.df_is,
           oh_is: inputs?.oh_is,
+          data_standardization: inputs?.data_standardization,
           remove_url: inputs?.remove_url,
           remove_invisible: inputs?.remove_invisible,
           remove_html: inputs?.remove_html,
@@ -76,7 +79,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           traditional_to_simplified: inputs?.traditional_to_simplified,
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
-          vars: cloneDeep(inputs.variables || [])
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {

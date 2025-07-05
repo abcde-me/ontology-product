@@ -4,7 +4,6 @@ import type {
   Variable
 } from '@/pages/workflowConfig/workflow/types';
 import exp from 'constants';
-import { number } from 'echarts';
 
 export enum CodeLanguage {
   python3 = 'python3',

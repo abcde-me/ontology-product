@@ -21,7 +21,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  const { inputs, onValuesChange } = useConfig(id, data);
+  const { inputs, onValuesChange, readOnly } = useConfig(id, data);
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const [isShow, setIsShow] = useState(false);
@@ -56,6 +56,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       <Form
         form={form}
         autoComplete="off"
+        disabled={readOnly}
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
