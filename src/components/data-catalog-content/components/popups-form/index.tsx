@@ -22,6 +22,7 @@ interface FormProps {
   selectedPath?: string;
   onExportSuccess?: () => void; // 添加导出成功回调
   resetSelectedData?: () => void; // 添加重置选中状态的回调函数
+  handlClear?: () => void; // 添加清除选中状态的回调函数
 }
 
 const FormComponent: React.FC<FormProps> = ({
@@ -33,7 +34,8 @@ const FormComponent: React.FC<FormProps> = ({
   exportdataset,
   selectedPath,
   onExportSuccess,
-  resetSelectedData
+  resetSelectedData,
+  handlClear
 }) => {
   // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
@@ -43,7 +45,7 @@ const FormComponent: React.FC<FormProps> = ({
       console.log(downloadData, '打印看啊看downloadData');
       console.log(exportdatas, '打印看啊看exportdatas');
       console.log(exportdataset, '打印看啊看exportdataset');
-      
+
       // const exportNames: Array<string> = [];
       // if (exportdatas && exportdatas.length > 0) {
       //   exportdatas.forEach((item) => {
@@ -88,25 +90,25 @@ const FormComponent: React.FC<FormProps> = ({
       //   return;
       // }
       const filesArray: string[] = [];
-      if(downloadData && downloadData.data_path_id){
-        filesArray.push(downloadData.abs_data_path+'/'+downloadData.file_name);
-      }else if(downloadData && downloadData.extras){
-        filesArray.push(downloadData.full_path+'/'+downloadData.extras.file_name);
-      }else if(exportdataset && exportdataset.latest_file_path){
-        filesArray.push(exportdataset.latest_file_path+'/'+exportdataset.latest_file_name);
+      if (downloadData && downloadData.data_path_id) {
+        filesArray.push(downloadData.abs_data_path + '/' + downloadData.file_name);
+      } else if (downloadData && downloadData.extras) {
+        filesArray.push(downloadData.full_path + '/' + downloadData.extras.file_name);
+      } else if (exportdataset && exportdataset.latest_file_path) {
+        filesArray.push(exportdataset.latest_file_path + '/' + exportdataset.latest_file_name);
       }
-      if(exportdatas && exportdatas.length > 0){
-        if(exportdatas[0].data_path_id){
-          exportdatas.forEach((item:any)=>{
-            filesArray.push(item.abs_data_path+'/'+item.file_name);
+      if (exportdatas && exportdatas.length > 0) {
+        if (exportdatas[0].data_path_id) {
+          exportdatas.forEach((item: any) => {
+            filesArray.push(item.abs_data_path + '/' + item.file_name);
           })
-        }else if(exportdatas[0].extras){
-          exportdatas.forEach((item:any)=>{
-            filesArray.push(item.full_path+'/'+item.extras.file_name);
+        } else if (exportdatas[0].extras) {
+          exportdatas.forEach((item: any) => {
+            filesArray.push(item.full_path + '/' + item.extras.file_name);
           })
-        }else if(exportdatas[0].latest_file_path){
-          exportdatas.forEach((item:any)=>{
-            filesArray.push(item.latest_file_path+'/'+item.latest_file_name);
+        } else if (exportdatas[0].latest_file_path) {
+          exportdatas.forEach((item: any) => {
+            filesArray.push(item.latest_file_path + '/' + item.latest_file_name);
           })
         }
       }
@@ -115,12 +117,13 @@ const FormComponent: React.FC<FormProps> = ({
         output_path: form.getFieldValue('path'),
         // file_path: full_paths,
         connector_id: Number(form.getFieldValue('province')),
-        files:filesArray,
+        files: filesArray,
       });
       console.log(res);
       // console.log('导出文件名', exportNames);
       form.resetFields();
       Message.success('导出成功');
+      handlClear && handlClear();
       // 先调用导出成功回调，再清空选中状态和缓存数据
       if (onExportSuccess) {
         onExportSuccess();
