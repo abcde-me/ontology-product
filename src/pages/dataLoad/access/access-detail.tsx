@@ -5,8 +5,6 @@ import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
 import { getLoadRecord } from '@/api/loadApi';
-
-const InputSearch = Input.Search;
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -15,8 +13,7 @@ const AccessDetail = () => {
   const recordsId = useParams('execution_id');
   const name = useParams('name');
   const [arressDetail, setArressDetail] = useState<any>({});
-  // 输入框的默认状态
-  const [searchValue, setSearchValue] = useState('');
+
   // 返回上一层的函数
   const OneLevelUpHan = () => {
     history.back();
@@ -161,15 +158,8 @@ const AccessDetail = () => {
         >
           文件详情
         </div>
-        <InputSearch
-          allowClear
-          placeholder="搜索文件名"
-          style={{ width: 200, marginLeft: '17px' }}
-          onPressEnter={(e) => {
-            setSearchValue(e.target.value);
-          }}
-        />
-        <AccessTable records_id={recordsId} searchValue={searchValue} />
+
+        <AccessTable records_id={recordsId} />
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ import Styles from './index.module.css';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
-import './index.css';
+// import './index.css';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -277,9 +277,8 @@ export default function DataLoad() {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 改变数据的逻辑
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrent(page);
-    getdataLoadList();
   };
   const [loadloading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -326,8 +325,8 @@ export default function DataLoad() {
       setLoading(false);
     }
   };
-  const handlePressEnter = (e) => {
-    setSearchValue(e.target.value);
+  const handlePressEnter = () => {
+    getdataLoadList();
   };
   // 删除列表的方法
   const deleteLoadHan = async (id) => {
@@ -345,7 +344,7 @@ export default function DataLoad() {
   };
   useEffect(() => {
     getdataLoadList();
-  }, [current, pageSize, searchValue]);
+  }, [current, pageSize]);
   return (
     <div
       style={{
@@ -378,6 +377,9 @@ export default function DataLoad() {
           placeholder="输入关键词搜索"
           style={{ width: 230 }}
           onPressEnter={handlePressEnter}
+          onChange={(value) => {
+            setSearchValue(value);
+          }}
         />
         <Button
           type="primary"
@@ -409,6 +411,7 @@ export default function DataLoad() {
             setPageSize(pageSize);
             setCurrent(1);
           }}
+          defaultCurrent={10}
           onChange={handlePageChange}
           sizeOptions={[10, 20, 50, 100]}
           showTotal
