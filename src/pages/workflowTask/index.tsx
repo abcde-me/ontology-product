@@ -72,7 +72,7 @@ export default function WorkflowTask() {
 
   // 跳转目录
   const handleToDirectoryPath = (path: string) => {
-    history.push(path);
+    history.push('/tenant/compute/modaforge/dataCatalog');
   };
 
   // table columns
