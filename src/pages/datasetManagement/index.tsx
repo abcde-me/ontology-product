@@ -33,11 +33,13 @@ import {
   createDataset,
   deleteDataset,
   batchDeleteDataset,
-  datasetVersionRebuild
+  datasetVersionRebuild,
+  getTagList
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
+import { filter } from 'lodash';
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -119,7 +121,13 @@ const columns = (
   handleGoToDetail,
   handleDelete,
   datasetList: Dataset[],
-  handleExport: (record: Dataset) => void
+  handleExport: (record: Dataset) => void,
+  tagList: { id: number; name: string }[],
+  selectedTagFilters: string[],
+  selectedStatusFilters: string[], //状态过滤
+  sortField: string,
+  sortOrder: string,
+  handleTableChange: (pagination: any, sorter: any, filters: any) => void
 ) => [
   {
     title: '名称',
@@ -148,20 +156,9 @@ const columns = (
     title: '标签',
     dataIndex: 'tag_names',
     width: 120,
-    filters: (() => {
-      const tagSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        dataset.tag_names?.forEach((tag) => {
-          if (tag) {
-            tagSet.add(tag);
-          }
-        });
-      });
-      return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.tag_names?.includes(value) || false;
-    },
+    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
+    filteredValue: selectedTagFilters,
+    filterMultiple: true,
     render: (tag_names: string[]) => (
       <Space size="mini">
         {tag_names && tag_names.length > 0 && tag_names[0] && (
@@ -203,9 +200,8 @@ const columns = (
       { text: '版本生成中', value: datasetStatus.version_generating },
       { text: '版本生成失败', value: datasetStatus.version_generating_fail }
     ],
-    onFilter: (value: string, record: Dataset) => {
-      return record.status === value;
-    },
+    filteredValue: selectedStatusFilters,
+    filterMultiple: true,
     render: (status: string, record: Dataset) => {
       const statusConfig = getStatusConfig(status);
       return (
@@ -285,12 +281,15 @@ const columns = (
     title: '创建时间',
     dataIndex: 'created_at',
     width: 220,
-    sorter: (a: Dataset, b: Dataset) => {
-      // 直接比较 ISO 8601 格式的时间字符串
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB;
-    },
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'created_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
     sortDirections: ['ascend' as const, 'descend' as const],
     render: (created_at: string) => formatDateTime(created_at)
   },
@@ -298,12 +297,15 @@ const columns = (
     title: '最近更新',
     dataIndex: 'updated_at',
     width: 220,
-    sorter: (a: Dataset, b: Dataset) => {
-      // 直接比较 ISO 8601 格式的时间字符串
-      const dateA = new Date(a.updated_at).getTime();
-      const dateB = new Date(b.updated_at).getTime();
-      return dateA - dateB;
-    },
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'updated_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
     sortDirections: ['ascend' as const, 'descend' as const],
     render: (updated_at: string) => formatDateTime(updated_at)
   },
@@ -368,7 +370,9 @@ enum datasetStatus {
 
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
-
+  const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
+    []
+  ); //标签列表
   const [datasetList, setDatasetList] = React.useState<Dataset[]>([]); //数据集列表
   const [search, setSearch] = React.useState<string>(''); //搜索
   const [searchField, setSearchField] = React.useState<searchFieldType>(
@@ -384,6 +388,25 @@ const DatasetManagement: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]); //选择行
   const [selectedRows, setSelectedRows] = React.useState<Dataset[]>([]); //选择行数据
 
+  // 标签过滤相关状态
+  const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
+    []
+  ); //选中的标签过滤
+
+  // 状态过滤相关状态
+  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<
+    string[]
+  >([]); //选中的状态过滤
+
+  // 排序相关状态
+  const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
+  const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
+
+  // 监听排序状态变化
+  React.useEffect(() => {
+    console.log('排序状态已更新:', { sortField, sortOrder });
+  }, [sortField, sortOrder]);
+
   // Modal相关状态
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
@@ -393,10 +416,7 @@ const DatasetManagement: React.FC = () => {
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
-    // { label: '标签', value: 'tags' },
     { label: '描述说明', value: 'description' }
-    // { label: '生成模型', value: 'src_model' },
-    // { label: '创建人', value: 'creator_name' }
   ];
 
   // 行选择配置
@@ -460,12 +480,32 @@ const DatasetManagement: React.FC = () => {
         if (res.status === 200) {
           Message.success('数据集创建成功！');
           // 刷新数据列表
-          getDatasetList({
+          const params: any = {
             page: currentPage,
             limit: pageSize,
-            search: search,
-            search_field: searchField
-          }).then((res) => {
+            search: actualSearch,
+            search_field: actualSearchField
+          };
+
+          // 添加标签过滤参数
+          if (selectedTagFilters.length > 0) {
+            params.tag_names = selectedTagFilters;
+          }
+
+          // 添加状态过滤参数
+          if (selectedStatusFilters.length > 0) {
+            params.status = selectedStatusFilters;
+          }
+
+          // 添加排序参数
+          if (sortField) {
+            params.sort_field = sortField;
+          }
+          if (sortOrder) {
+            params.sort_order = sortOrder;
+          }
+
+          getDatasetList(params).then((res) => {
             setDatasetList(res.data.list);
             setTotal(res.data.total);
           });
@@ -483,12 +523,32 @@ const DatasetManagement: React.FC = () => {
   const deleteDatasetRecord = (record: Dataset) => {
     deleteDataset(record)
       .then((res) => {
-        getDatasetList({
+        const params: any = {
           page: currentPage,
           limit: pageSize,
-          search: search,
-          search_field: searchField
-        }).then((res) => {
+          search: actualSearch,
+          search_field: actualSearchField
+        };
+
+        // 添加标签过滤参数
+        if (selectedTagFilters.length > 0) {
+          params.tag_names = selectedTagFilters;
+        }
+
+        // 添加状态过滤参数
+        if (selectedStatusFilters.length > 0) {
+          params.status = selectedStatusFilters;
+        }
+
+        // 添加排序参数
+        if (sortField) {
+          params.sort_field = sortField;
+        }
+        if (sortOrder) {
+          params.sort_order = sortOrder;
+        }
+
+        getDatasetList(params).then((res) => {
           setDatasetList(res.data.list);
           setTotal(res.data.total);
         });
@@ -543,14 +603,83 @@ const DatasetManagement: React.FC = () => {
     setActualSearchField(searchField); // 设置实际搜索字段
   };
 
+  // 处理表格变化（包括过滤器变化）
+  const handleTableChange = (pagination: any, sorter: any, filters: any) => {
+    // 处理标签过滤
+    if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
+      setSelectedTagFilters(filters.tag_names);
+      setCurrentPage(1); // 重置到第一页
+    }
+    // 处理状态过滤
+    if (filters.status && filters.status !== selectedStatusFilters) {
+      setSelectedStatusFilters(filters.status);
+      setCurrentPage(1); // 重置到第一页
+    }
+
+    if (filters.tag_names === undefined) {
+      setSelectedTagFilters([]);
+      setCurrentPage(1);
+    }
+
+    if (filters.status === undefined) {
+      setSelectedStatusFilters([]);
+      setCurrentPage(1);
+    }
+
+    if (sorter && sorter.field) {
+      const newSortField = sorter.field;
+      const newSortOrder =
+        sorter.direction === 'ascend'
+          ? 'asc'
+          : sorter.direction === 'descend'
+            ? 'desc'
+            : '';
+
+      if (newSortField !== sortField || newSortOrder !== sortOrder) {
+        setSortField(newSortField);
+        setSortOrder(newSortOrder);
+        setCurrentPage(1); // 重置到第一页
+      }
+    } else {
+      // 清除排序
+      if (sortField || sortOrder) {
+        setSortField('');
+        setSortOrder('');
+        setCurrentPage(1); // 重置到第一页
+      }
+    }
+  };
+
   // 获取数据集列表,当页码或者每页条数变化时，重新获取数据
   React.useEffect(() => {
-    getDatasetList({
+    const params: any = {
       page: currentPage,
       limit: pageSize,
       search: actualSearch,
       search_field: actualSearchField
-    })
+    };
+
+    // 添加标签过滤参数
+    if (selectedTagFilters.length > 0) {
+      params.tag_names = selectedTagFilters;
+    }
+
+    // 添加状态过滤参数
+    if (selectedStatusFilters.length > 0) {
+      params.status = selectedStatusFilters;
+    }
+
+    // 添加排序参数
+    if (sortField) {
+      params.sort_field = sortField;
+    }
+    if (sortOrder) {
+      params.sort_order = sortOrder;
+    }
+
+    console.log('发送API请求，参数:', params);
+
+    getDatasetList(params)
       .then((res) => {
         console.log('李帆测试', res.data?.list);
         setDatasetList(res.data?.list || []);
@@ -561,7 +690,33 @@ const DatasetManagement: React.FC = () => {
         setDatasetList([]);
         setTotal(0);
       });
-  }, [currentPage, pageSize, actualSearch, actualSearchField]); // 使用实际搜索状态作为依赖
+  }, [
+    currentPage,
+    pageSize,
+    actualSearch,
+    actualSearchField,
+    selectedTagFilters,
+    selectedStatusFilters,
+    sortField,
+    sortOrder
+  ]); // 添加排序参数依赖
+
+  React.useEffect(() => {
+    getTagList()
+      .then((res) => {
+        if (res.data && Array.isArray(res.data)) {
+          setTagList(res.data);
+        } else {
+          console.error('标签列表数据格式错误:', res);
+          setTagList([]);
+        }
+      })
+      .catch((err) => {
+        console.error('获取标签列表失败:', err);
+        setTagList([]);
+        Message.error('获取标签列表失败');
+      });
+  }, []);
 
   // 批量删除
   const handleBatchDelete = () => {
@@ -587,6 +742,37 @@ const DatasetManagement: React.FC = () => {
               Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
               setSelectedRowKeys([]);
               setSelectedRows([]);
+
+              // 重新获取数据列表
+              const params: any = {
+                page: currentPage,
+                limit: pageSize,
+                search: actualSearch,
+                search_field: actualSearchField
+              };
+
+              // 添加标签过滤参数
+              if (selectedTagFilters.length > 0) {
+                params.tag_names = selectedTagFilters;
+              }
+
+              // 添加状态过滤参数
+              if (selectedStatusFilters.length > 0) {
+                params.status = selectedStatusFilters;
+              }
+
+              // 添加排序参数
+              if (sortField) {
+                params.sort_field = sortField;
+              }
+              if (sortOrder) {
+                params.sort_order = sortOrder;
+              }
+
+              getDatasetList(params).then((res) => {
+                setDatasetList(res.data?.list || []);
+                setTotal(res.data?.total || 0);
+              });
             } else {
               Message.error('批量删除失败！');
             }
@@ -705,7 +891,13 @@ const DatasetManagement: React.FC = () => {
           handleGoToDetail,
           handleDelete,
           datasetList,
-          handleExport
+          handleExport,
+          tagList,
+          selectedTagFilters,
+          selectedStatusFilters,
+          sortField,
+          sortOrder,
+          handleTableChange
         )}
         data={datasetList}
         rowSelection={rowSelection}
@@ -729,6 +921,7 @@ const DatasetManagement: React.FC = () => {
             <div className={styles.noDataText}>暂无数据</div>
           </div>
         }
+        onChange={handleTableChange}
       />
 
       {/* 新建数据集弹框 */}
