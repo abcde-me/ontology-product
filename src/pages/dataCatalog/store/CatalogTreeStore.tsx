@@ -17,6 +17,7 @@ interface BaseTreeData {
   isLastLeaf?: boolean;
   fullPath?: string;
   isAdd?: boolean;
+  defaultName?: string;
 }
 
 interface ITreeData extends BaseTreeData {
@@ -27,7 +28,7 @@ interface ITreeData extends BaseTreeData {
   };
 }
 
-interface CatalogTreeState {
+export interface CatalogTreeState {
   activeTab: string;
   searchValue: string;
   inputValue: string;
