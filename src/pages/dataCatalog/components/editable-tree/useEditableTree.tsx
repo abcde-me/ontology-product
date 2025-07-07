@@ -29,17 +29,19 @@ export function useEditableTree({ catalogTreeStore }) {
     inputRef,
     inputValue,
     treeData,
-    expandedKeys
+    expandedKeys,
+    defaultName
   } = catalogTreeStore.useGetState([
     'activeTab',
     'searchValue',
     'inputRef',
     'inputValue',
     'treeData',
-    'expandedKeys'
+    'expandedKeys',
+    'defaultName'
   ]);
 
-  const generatorTreeNodes = (treeData: TreeDataType[]) => {
+  const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
     return treeData?.map?.((item) => {
       const { children, key, ...rest } = item;
       return (
@@ -48,7 +50,41 @@ export function useEditableTree({ catalogTreeStore }) {
         </Tree.Node>
       );
     });
-  };
+  }, []);
+
+  const generateName = useCallback(
+    (data: TreeDataType[], typeText?: string) => {
+      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const nameArr = new Set(data.map((item) => item.name));
+      let x = data.length + 1;
+      let name = `${baseName}${x}`;
+
+      while (nameArr.has(name)) {
+        x++;
+        name = `${baseName}${x}`;
+      }
+
+      return name;
+    },
+    [activeTab]
+  );
+
+  const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
+    const newNode: TreeDataType = {
+      title: name,
+      key: `${node?.dataRef?.type || 'catalog'}-${Date.now()}`,
+      type: CatalogTypeEnum[node?.dataRef?.type || 'catalog'],
+      isLastLeaf: node ? true : false,
+      showInput: true,
+      isAdd: true
+    };
+    if (node) {
+      newNode.parent_id = node.dataRef?.parent_id;
+    } else {
+      newNode.children = [];
+    }
+    return newNode;
+  }, []);
 
   const onSearchChange = (value: string) => {
     const keys: string[] = [];
@@ -101,7 +137,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const handleEdit = (node: any) => {
-    const { _key, dataRef } = node;
+    const { name, _key, dataRef } = node;
 
     let newTreeData: TreeDataType[] = [];
     switch (dataRef?.type) {
@@ -132,7 +168,8 @@ export function useEditableTree({ catalogTreeStore }) {
     }
 
     catalogTreeStore.setState({
-      inputValue: dataRef?.title,
+      inputValue: name,
+      defaultName: name,
       treeData: newTreeData
     });
     focusAndSelectInput();
@@ -173,38 +210,12 @@ export function useEditableTree({ catalogTreeStore }) {
     }, 0);
   };
 
-  const generateName = useCallback(
-    (data: TreeDataType[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const nameArr = new Set(data.map((item) => item.name));
-      let x = data.length + 1;
-      let name = `${baseName}${x}`;
-
-      while (nameArr.has(name)) {
-        x++;
-        name = `${baseName}${x}`;
-      }
-
-      return name;
-    },
-    [activeTab]
-  );
-
   const onCatalogAdd = () => {
     const name = generateName(treeData);
     catalogTreeStore.setState({
       inputValue: name,
-      treeData: [
-        {
-          title: name,
-          key: `catalog-${Date.now()}`,
-          children: [],
-          type: 1,
-          showInput: true,
-          isAdd: true
-        },
-        ...treeData
-      ],
+      defaultName: name,
+      treeData: [genereteInputNode(name), ...treeData],
       isEditing: true
     });
     focusAndSelectInput();
@@ -212,39 +223,30 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
-    if (dataRef) {
-      const name = generateName(
-        dataRef?.children || [],
-        subLeafKeys[dataRef.type]
-      );
-      const cachTreeData = treeData.map((item: TreeDataType) => {
-        if (item.key === node.pathParentKeys?.[0]) {
-          item.children?.[0]?.children?.unshift({
-            title: name,
-            key: `volume-${Date.now()}`,
-            type: 2,
-            isLastLeaf: true,
-            showInput: true,
-            parent_id: dataRef.parent_id,
-            isAdd: true
-          });
-        }
-        return item;
-      });
+    const name = generateName(
+      dataRef?.children || [],
+      subLeafKeys[dataRef?.type]
+    );
+    const cachTreeData = treeData.map((item: TreeDataType) => {
+      if (item.key === node.pathParentKeys?.[0]) {
+        item.children?.[0]?.children?.unshift(genereteInputNode(name, node));
+      }
+      return item;
+    });
 
-      catalogTreeStore.setState({
-        inputValue: name,
-        treeData: cachTreeData,
-        expandedKeys: [...new Set([...expandedKeys, dataRef.key])]
-      });
-      focusAndSelectInput();
-    }
+    catalogTreeStore.setState({
+      inputValue: name,
+      defaultName: name,
+      treeData: cachTreeData,
+      expandedKeys: [...new Set([...expandedKeys, dataRef?.key])]
+    });
+    focusAndSelectInput();
   };
 
   const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
-    console.log(dataRef, '打印看啊看dataRef');
-    const fileName = inputValue.trim();
+
+    const fileName = inputValue.trim() || defaultName;
     const validateResult = validateName(fileName);
     if (!validateResult.isValid && validateResult.errorMessage) {
       Message.error(validateResult.errorMessage);
@@ -256,7 +258,8 @@ export function useEditableTree({ catalogTreeStore }) {
       catalogTreeStore.setState({
         treeData: newTreeData,
         rawTreeData: newTreeData,
-        inputValue: ''
+        inputValue: '',
+        defaultName: ''
       });
     };
 
