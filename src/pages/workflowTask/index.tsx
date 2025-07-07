@@ -133,19 +133,19 @@ export default function WorkflowTask() {
       filters: [
         {
           text: '运行完成',
-          value: 0
-        },
-        {
-          text: '运行失败',
-          value: 1
-        },
-        {
-          text: '进行中',
           value: 2
         },
         {
-          text: '已停止',
+          text: '运行失败',
           value: 3
+        },
+        {
+          text: '进行中',
+          value: 1
+        },
+        {
+          text: '已停止',
+          value: 4
         }
       ],
       onFilter: (value, row) => row.status == value
