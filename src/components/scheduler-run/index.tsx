@@ -189,6 +189,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                 field="cycle"
                 style={{ flex: 1, marginBottom: 0 }}
                 rules={[{ required: true, message: '请选择频率' }]}
+                validateTrigger={['onBlur', 'onChange']}
               >
                 <Select
                   placeholder="频率"
@@ -213,6 +214,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                     alignItems: 'center'
                   }}
                   rules={[{ required: true, message: '请选择时间' }]}
+                  validateTrigger={['onBlur', 'onChange']}
                 >
                   <Select
                     mode="multiple"
@@ -239,6 +241,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
                     alignItems: 'center'
                   }}
                   rules={[{ required: true, message: '请选择时间' }]}
+                  validateTrigger={['onBlur', 'onChange']}
                 >
                   <Select
                     mode={
@@ -325,6 +328,7 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择时间' }]}
+          validateTrigger={['onBlur', 'onChange']}
         >
           <TimePicker style={{ width: '100%' }} format="HH:mm" size="large" />
         </Form.Item>
