@@ -119,23 +119,24 @@ const FormComponent: React.FC<FormProps> = ({
         connector_id: Number(form.getFieldValue('province')),
         files: filesArray,
       });
-      console.log(res);
+      console.log(res,'这是导出返回的结果666666666666666');
       // console.log('导出文件名', exportNames);
-      form.resetFields();
-      Message.success('导出成功');
-      handlClear && handlClear();
-      // 先调用导出成功回调，再清空选中状态和缓存数据
-      if (onExportSuccess) {
-        onExportSuccess();
+      if(res.status !== 0&&res.code===''){
+        form.resetFields();
+        Message.success('导出成功');
+        handlClear && handlClear();
+        if (onExportSuccess) {
+          onExportSuccess();
+        }
+        if (resetSelectedData) {
+          resetSelectedData();
+        } else {
+          console.log('回调未提供');
+        }
+        onCancel && onCancel();
+      }else{
+        Message.error('导出失败，请稍后重试');
       }
-      // 重置选中状态和缓存数据
-      if (resetSelectedData) {
-        resetSelectedData();
-      } else {
-        console.log('回调未提供');
-      }
-      // 最后关闭弹窗
-      onCancel && onCancel();
     } catch (e) {
       // 处理验证失败或导出失败的情况
       console.error('导出失败:', e);
