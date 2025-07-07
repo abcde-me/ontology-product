@@ -115,7 +115,10 @@ export default function WorkflowTaskDetail() {
 
   // 初始化详情基本数据
   useEffect(() => {
-    if (taskId) getDetailData();
+    if (taskId) getDetailData(true);
+
+    const intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
+    return () => clearInterval(intervalDetailData); // 组件卸载时清理
   }, [taskId]);
 
   // 确保activeNode数据变化后再调用getNodeDetail
@@ -123,14 +126,14 @@ export default function WorkflowTaskDetail() {
     if (taskId && activeNode) getNodeDetail();
   }, [activeNode]);
 
-  const getDetailData = async () => {
+  const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
     try {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
         setWorkflowName(res.data.workflow_name);
-        setActiveNode(res.data.result_info.task_type);
+        isSetActiveNode && setActiveNode(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||

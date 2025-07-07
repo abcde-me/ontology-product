@@ -162,19 +162,7 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          onClick={() =>
-            handleToTaskDeatil(
-              record.id,
-              record.workflow_uuid,
-              record.ds_workflow_id
-            )
-          }
-          title={record.workflow_name}
-        >
-          {record.workflow_name}
-        </span>
+        <span title={record.workflow_name}>{record.workflow_name}</span>
       )
     },
     {
