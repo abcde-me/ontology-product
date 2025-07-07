@@ -118,7 +118,7 @@ const Header: FC = () => {
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const workflowStatus = appDetail?.is_online ?? IsOnline.online;
+  const workflowStatus = appDetail?.is_online ?? IsOnline.offline;
   const [workflowName, setWorkflowName] = useState(
     appDetail?.workflow_name ?? ''
   );
