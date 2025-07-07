@@ -295,23 +295,32 @@ export default function Eltable() {
             ids.push(...idList);
             // 调用删除API
             if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
-              await deleteTargetFile({
+              const res = await deleteTargetFile({
                 full_path: selectedRows[0].full_path,
                 file_ids: ids,
                 path_id: selectedKey
               });
-              Message.success('删除成功');
-              clearAllSelectionsAndCache();
+              if(res.code==''){
+                Message.success('删除成功');
+                clearAllSelectionsAndCache();
+              }else{
+                Message.success('删除失败，请稍后重试');
+              }
+              
             }
           } else {
             const fileIds = selectedRows.map((item: { id: string }) => item.id);
             ids.push(...fileIds);
             if (selectedRows.length > 0) {
-              await deleteSourceFileBatch({
+              const res = await deleteSourceFileBatch({
                 ids: ids
               });
-              Message.success('删除成功');
-              clearAllSelectionsAndCache();
+              if(res.code==''){
+                Message.success('删除成功');
+                clearAllSelectionsAndCache();
+              }else{
+                Message.success('删除失败，请稍后重试');
+              }
             }
           }
         }

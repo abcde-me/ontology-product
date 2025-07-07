@@ -439,15 +439,26 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
         if (tableType === 'target') {
           ids.push(data.id);
           console.log('查看删除的数据和数组们', data, ids);
-          await deleteTargetFile({
+          const res = await deleteTargetFile({
             full_path: data.full_path,
             file_ids: ids,
             path_id: selectedKey
           });
-          Message.success('删除成功');
+          if(res.code==0){
+            Message.success('删除成功');
+          }else{
+            Message.success('删除失败，请稍后重试');
+            return
+          }
         } else {
-          handAllReset();
-          await deleteSourceFile(data.id);
+          // handAllReset();
+          const res = await deleteSourceFile(data.id);
+          if(res.code==0){
+            Message.success('删除成功');
+          }else{
+            Message.success('删除失败，请稍后重试');
+            return
+          }
         }
         // 删除成功后刷新数据
         if (typeof refreshData === 'function') {
