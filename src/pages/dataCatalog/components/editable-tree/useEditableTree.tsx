@@ -288,7 +288,8 @@ export function useEditableTree({ catalogTreeStore }) {
         res = await renameCatalog(dataRef?.id, {
           new_name: fileName,
           root_type: root_type,
-          type: dataRef?.type
+          type: dataRef?.type,
+          parent_id: dataRef?.parent_id
         });
       }
     }
