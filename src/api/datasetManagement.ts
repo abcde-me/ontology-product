@@ -8,6 +8,10 @@ interface DatasetListParams {
   limit?: number;
   search?: string;
   search_field?: string;
+  tag_names?: string[];
+  status?: string[];
+  sort_field?: string;
+  sort_order?: string;
 }
 
 interface CreateDatasetParams {
@@ -69,7 +73,7 @@ export interface DataChangeItem {
 
 // 编辑数据集版本参数接口
 export interface EditDatasetVersionParams {
-  id: string;
+  id: number;
   version_id: string;
   datas: DataChangeItem[]; // 数据变更列表
 }
@@ -90,7 +94,16 @@ export interface DatasetVersionRebuildParams {
 
 //获取数据集列表
 export async function getDatasetList(params: DatasetListParams = {}) {
-  const { page, limit, search_field, search } = params;
+  const {
+    page,
+    limit,
+    search_field,
+    search,
+    tag_names,
+    status,
+    sort_field,
+    sort_order
+  } = params;
   const queryParams: Record<string, any> = {
     page,
     limit
@@ -98,7 +111,21 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   if (search_field && search) {
     queryParams[search_field] = search;
   }
-  return UAPI.RES.datasetsApi({}).get(queryParams).inRegion().do();
+  if (tag_names && tag_names.length > 0) {
+    queryParams.tags = tag_names; // 直接赋值数组
+  }
+  if (status && status.length > 0) {
+    queryParams.status_list = status; // 直接赋值数组
+  }
+  // 添加排序参数
+  if (sort_field) {
+    queryParams.sort_field = sort_field; // created_at 或 updated_at
+  }
+  if (sort_order) {
+    queryParams.sort_order = sort_order; // asc 或 desc
+  }
+  console.log('queryParams', queryParams);
+  return UAPI.RES.datasetsApi({}).post(queryParams).inRegion().do();
 }
 
 //获取数据集详情

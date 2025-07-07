@@ -46,7 +46,6 @@ import {
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
-import { render } from '@headlessui/react/dist/utils/render';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -255,7 +254,7 @@ const csdatasetDetail = {
   name: 'Project 李帆',
   tag_names: ['urgent', 'high_priority'],
   description: 'A project focusing on upgrading the system architecture.',
-  status: 'version_update_failed',
+  status: 'version_updating',
   error_reason: '网络连接超时，请重试',
   latest_version: 'v2.1',
   latest_file_path: '/path/to/file/v2.1/upgrade-package.zip',
@@ -286,44 +285,65 @@ const cscontentData = [
   {
     id: 1,
     name: '张三',
-    age: 28,
+    age: '28',
     email: 'zhangsan@example.com',
     department: '技术部',
-    salary: 15000
+    salary: '15000'
   },
   {
     id: 2,
     name: '李四',
-    age: 32,
+    age: '32',
     email: 'lisi@example.com',
     department: '产品部',
-    salary: 18000
+    salary: '18000'
   },
   {
     id: 3,
     name: '王五',
-    age: 25,
+    age: '25',
     email: 'wangwu@example.com',
     department: '设计部',
-    salary: 12000
+    salary: '12000'
   },
   {
     id: 4,
     name: '赵六',
-    age: 30,
+    age: '30',
     email: 'zhaoliu@example.com',
     department: '运营部',
-    salary: 16000
+    salary: '16000'
   },
   {
     id: 5,
     name: '钱七',
-    age: 26,
+    age: '26',
     email: 'qianqi@example.com',
     department: '技术部',
-    salary: 14000
+    salary: '14000'
   }
 ];
+
+// 转换数据类型
+function convertKeyType(arr, key, type) {
+  return arr.map((item) => {
+    const newItem = { ...item };
+    if (newItem.hasOwnProperty(key)) {
+      if (type === 'string') {
+        newItem[key] = String(newItem[key]);
+      } else if (type === 'number') {
+        // NaN 兼容处理
+        const n = Number(newItem[key]);
+        newItem[key] = isNaN(n) ? newItem[key] : n;
+      } else if (type === 'boolean') {
+        // 简单转换
+        newItem[key] = Boolean(newItem[key]);
+      }
+      // 可以扩展更多类型
+    }
+    return newItem;
+  });
+}
 
 // 测试数据 - 总数
 const cstotal = 5;
@@ -655,7 +675,7 @@ const DatasetDetail: React.FC = () => {
           '结果:',
           item[idName] === recordId
         );
-        return item[idName] == recordId; // 使用 == 而不是 === 来处理类型转换
+        return item[idName] === recordId;
       });
       console.log('找到的修改行:', modifiedRow);
       if (modifiedRow) {
@@ -670,7 +690,7 @@ const DatasetDetail: React.FC = () => {
     deletedRows.forEach((recordId) => {
       console.log('处理删除的记录 ID:', recordId, '类型:', typeof recordId);
       const deletedRow = contentDatabackup.find(
-        (item) => item[idName] == recordId // 使用 == 而不是 === 来处理类型转换
+        (item) => item[idName] === recordId
       );
       console.log('找到的删除行:', deletedRow);
       if (deletedRow) {
@@ -684,9 +704,9 @@ const DatasetDetail: React.FC = () => {
     console.log('最终提交数据:', submitData);
 
     const params = {
-      id: datasetDetail.id.toString(),
+      id: datasetDetail.id,
       version_id: datasetDetail.latest_version,
-      datas: submitData
+      datas: convertKeyType(submitData, 'id', 'number')
     };
     editDatasetVersion(params)
       .then((res) => {
@@ -726,15 +746,15 @@ const DatasetDetail: React.FC = () => {
 
   React.useEffect(() => {
     if (id) {
-      //   getDatasetDetailPage({ id: id })
-      //     .then((res) => {
-      //       console.log(res);
-      //       setDatasetDetail(res.data);
-      //     })
-      //     .catch((err) => {
-      //       console.error('获取数据集详情失败:', err);
-      //       Message.error('加载数据集详情失败');
-      //     });
+      getDatasetDetailPage({ id: id })
+        .then((res) => {
+          console.log(res);
+          setDatasetDetail(res.data);
+        })
+        .catch((err) => {
+          console.error('获取数据集详情失败:', err);
+          Message.error('加载数据集详情失败');
+        });
 
       getDatasetVersionList({ id: id }).then((res) => {
         console.log('历史数据', res);
@@ -742,7 +762,7 @@ const DatasetDetail: React.FC = () => {
       });
     }
     // 测试数据
-    setDatasetDetail(csdatasetDetail);
+    // setDatasetDetail(csdatasetDetail);
   }, [id]);
 
   // 处理搜索
@@ -791,27 +811,27 @@ const DatasetDetail: React.FC = () => {
         search: actualSearchValue || undefined
       };
 
-      //   getDatasetContents(params)
-      //     .then((res) => {
-      //       console.log('获取数据集内容响应:', res.data);
-      //       if (res.data) {
-      //         setContentData(res.data.list || []);
-      //         setContentColumnslist(res.data.field_names || []);
-      //         setIdName(res.data.id_name || '');
-      //         setTotal(res.data.total || 0);
-      //         setContentDatabackup(res.data.list || []);
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       console.error('获取数据集内容失败:', err);
-      //       Message.error('加载数据失败');
-      //     });
+      getDatasetContents(params)
+        .then((res) => {
+          console.log('获取数据集内容响应:', res.data);
+          if (res.data) {
+            setContentData(res.data.list || []);
+            setContentColumnslist(res.data.field_names || []);
+            setIdName(res.data.id_name || '');
+            setTotal(res.data.total || 0);
+            setContentDatabackup(res.data.list || []);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
       // 测试数据
-      setContentData(cscontentData);
-      setContentColumnslist(cscontentColumnslist);
-      setIdName(csidName);
-      setTotal(cstotal);
-      setContentDatabackup(cscontentData);
+      // setContentData(convertKeyType(cscontentData, csidName, 'string'));
+      // setContentColumnslist(cscontentColumnslist);
+      // setIdName(csidName);
+      // setTotal(cstotal);
+      // setContentDatabackup(convertKeyType(cscontentData, csidName, 'string'));
     }
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
 
@@ -855,14 +875,24 @@ const DatasetDetail: React.FC = () => {
             {/* 标题区域 */}
             <div className="basic-info-header">
               <Title heading={4}>基本信息</Title>
-              <Button
-                type="text"
-                icon={<IconEdit />}
-                onClick={handleEdit}
-                className="edit-btn"
+              <Tooltip
+                content={
+                  !datasetDetail || datasetDetail.status !== 'normal'
+                    ? '当前状态下不能进行编辑'
+                    : ''
+                }
               >
-                编辑
-              </Button>
+                <Button
+                  // type="primary"
+                  disabled={!datasetDetail || datasetDetail.status !== 'normal'}
+                  onClick={handleEdit}
+                  type="text"
+                  icon={<IconEdit />}
+                  className="edit-btn"
+                >
+                  编辑
+                </Button>
+              </Tooltip>
             </div>
 
             {/* 内容区域 */}
@@ -1019,13 +1049,39 @@ const DatasetDetail: React.FC = () => {
                 <Space>
                   <Button
                     onClick={() => {
-                      // 取消编辑模式时，清空所有编辑状态并恢复原始数据
-                      setEditingRowKey(null);
-                      setEditingData({});
-                      setChangedRows([]);
-                      setDeletedRows([]);
-                      setContentData(contentDatabackup);
-                      setUpdateStatus(false);
+                      // 检查是否有改动
+                      const hasChanges =
+                        changedRows.length > 0 || deletedRows.length > 0;
+
+                      if (!hasChanges) {
+                        // 没有改动，直接取消编辑
+                        setEditingRowKey(null);
+                        setEditingData({});
+                        setChangedRows([]);
+                        setDeletedRows([]);
+                        setContentData(contentDatabackup);
+                        setUpdateStatus(false);
+                      } else {
+                        // 有改动，弹窗确认
+                        Modal.confirm({
+                          title: '确定放弃编辑?',
+                          content: '放弃后，当前修改不会保存',
+                          okText: '确定',
+                          cancelText: '取消',
+                          onOk: () => {
+                            // 用户确认放弃编辑
+                            setEditingRowKey(null);
+                            setEditingData({});
+                            setChangedRows([]);
+                            setDeletedRows([]);
+                            setContentData(contentDatabackup);
+                            setUpdateStatus(false);
+                          },
+                          onCancel: () => {
+                            // 用户取消，不做任何操作
+                          }
+                        });
+                      }
                     }}
                   >
                     取消本轮编辑
@@ -1034,7 +1090,8 @@ const DatasetDetail: React.FC = () => {
                     type="primary"
                     onClick={handleSubmitChanges}
                     disabled={
-                      changedRows.length === 0 && deletedRows.length === 0
+                      editingRowKey !== null ||
+                      (changedRows.length === 0 && deletedRows.length === 0)
                     }
                   >
                     保存本轮编辑
@@ -1056,7 +1113,6 @@ const DatasetDetail: React.FC = () => {
                     onClick={() => setUpdateStatus(true)}
                     type="text"
                     icon={<IconEdit />}
-                    // onClick={handleEdit}
                     className="edit-btn"
                   >
                     编辑
