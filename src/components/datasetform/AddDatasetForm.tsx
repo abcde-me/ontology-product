@@ -365,6 +365,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     setSelectedConnector(null); //清除连接器选择
     setSelectedFiles([]);
     setConnectorFileInformation([]); //清除连接器文件信息
+    // TODO：ts错误
+    // @ts-expect-error
     setPreviewData(null);
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
@@ -433,6 +435,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     getCatalogPreview({ path: volumeId }).then((res) => {
       if (res.status !== 200) {
         Message.error(res.message);
+        // TODO：ts错误
+        // @ts-expect-error
         setPreviewData(null);
         setPreviewColumns([]);
         return;
