@@ -28,11 +28,10 @@ function WorkflowConfig({ setHeight }) {
 
         if (workflowDetailRes?.data) {
           setWorkflowDetail(workflowDetailRes.data);
+          setLoading(false);
         } else {
           Message.error('获取工作流失败');
         }
-
-        setLoading(false);
       } else {
         const workflowInfo = await createWorkflow({
           workflow_name: '新建工作流'
