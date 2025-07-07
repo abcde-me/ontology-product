@@ -56,7 +56,6 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.prompt = payload.prompt;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.data = data;
-        draft.modelList = payload.modelList;
         draft.enhanced_proportion = payload.enhanced_proportion;
         draft.sample_data = payload.sample_data;
         draft.app_scenarios_name = payload.app_scenarios_name;
@@ -66,12 +65,23 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     },
     [inputs, setInputs]
   );
+
+  const setBoostPageData = useCallback(
+    (modelList) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.modelList = modelList;
+      })
+      setInputs(newInputs)
+    },
+    [inputs, setInputs]
+  );
   return {
     readOnly,
     inputs,
     handleVarListChange,
     handleAddVariable,
-    onValuesChange
+    onValuesChange,
+    setBoostPageData
   };
 };
 
