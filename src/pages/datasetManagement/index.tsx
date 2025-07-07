@@ -27,6 +27,7 @@ import {
   IconInfoCircle
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
+
 import {
   getDatasetList,
   createDataset,
@@ -136,12 +137,15 @@ const columns = (
   {
     title: '标签',
     dataIndex: 'tag_names',
-    width: 150,
-    // filterIcon: <IconFilter />,
+    width: 120,
     filters: (() => {
       const tagSet = new Set<string>();
       datasetList?.forEach((dataset) => {
-        dataset.tag_names?.forEach((tag) => tagSet.add(tag));
+        dataset.tag_names?.forEach((tag) => {
+          if (tag) {
+            tagSet.add(tag);
+          }
+        });
       });
       return Array.from(tagSet).map((tag) => ({ text: tag, value: tag }));
     })(),
@@ -150,7 +154,7 @@ const columns = (
     },
     render: (tag_names: string[]) => (
       <Space size="mini">
-        {tag_names && tag_names.length > 0 && (
+        {tag_names && tag_names.length > 0 && tag_names[0] && (
           <Tag className={styles.tagGreen}>
             {tag_names[0].length > 5
               ? `${tag_names[0].substring(0, 5)}...`
@@ -166,7 +170,7 @@ const columns = (
   {
     title: '版本',
     dataIndex: 'latest_version',
-    width: 100,
+    width: 185,
     render: (latest_version: string) => {
       return (
         <div>
@@ -214,14 +218,14 @@ const columns = (
   {
     title: '描述说明',
     dataIndex: 'description',
-    width: 200,
+    width: 160,
     ellipsis: true
   },
   {
     title: '生成模型',
     dataIndex: 'src_model',
     filterIcon: <IconFilter />,
-    width: 150,
+    width: 130,
     filters: (() => {
       const modelSet = new Set<string>();
       datasetList?.forEach((dataset) => {
@@ -244,7 +248,7 @@ const columns = (
   {
     title: '创建人',
     dataIndex: 'creator_name',
-    width: 120,
+    width: 100,
     filterIcon: <IconFilter />,
     filters: (() => {
       const creatorSet = new Set<string>();
@@ -511,21 +515,17 @@ const DatasetManagement: React.FC = () => {
     console.log('每页显示', size, '条数据');
   };
 
-  // 执行搜索函数
+  // 添加一个独立的搜索状态
+  const [actualSearch, setActualSearch] = React.useState('');
+  const [actualSearchField, setActualSearchField] = React.useState(
+    searchFieldType.name
+  );
+
+  // 修改 handleSearch 函数
   const handleSearch = () => {
-    setCurrentPage(1); // 重置到第一页
-    getDatasetList({
-      page: 1,
-      limit: pageSize,
-      search: search,
-      search_field: searchField
-    }).then((res) => {
-      setDatasetList(res.data.list);
-      setTotal(res.data.total);
-      console.log(res);
-    });
-    // setDatasetList(data); // 测试数据
-    // setTotal(1000); // 设置总条数
+    setCurrentPage(1);
+    setActualSearch(search); // 设置实际搜索词
+    setActualSearchField(searchField); // 设置实际搜索字段
   };
 
   // 获取数据集列表,当页码或者每页条数变化时，重新获取数据
@@ -533,16 +533,20 @@ const DatasetManagement: React.FC = () => {
     getDatasetList({
       page: currentPage,
       limit: pageSize,
-      search: search,
-      search_field: searchField
-    }).then((res) => {
-      console.log('李帆测试', res.data.list);
-      setDatasetList(res.data.list);
-      setTotal(res.data.total);
-    });
-    // setDatasetList(data); // 测试数据
-    // setTotal(1000); // 设置总条数
-  }, [currentPage, pageSize]);
+      search: actualSearch,
+      search_field: actualSearchField
+    })
+      .then((res) => {
+        console.log('李帆测试', res.data?.list);
+        setDatasetList(res.data?.list || []);
+        setTotal(res.data?.total || 0);
+      })
+      .catch((err) => {
+        console.error('获取数据失败:', err);
+        setDatasetList([]);
+        setTotal(0);
+      });
+  }, [currentPage, pageSize, actualSearch, actualSearchField]); // 使用实际搜索状态作为依赖
 
   // 批量删除
   const handleBatchDelete = () => {
@@ -595,7 +599,11 @@ const DatasetManagement: React.FC = () => {
     console.log('批量导出:', selectedRows);
     // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
   };
-
+  //清除选中状态函数
+  const handClear=()=>{
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+  }
   return (
     <div
       style={{
@@ -720,6 +728,7 @@ const DatasetManagement: React.FC = () => {
         onCancel={() => setVisible(false)}
         visible={visible}
         exportdatas={selectedRows}
+        handlClear={handClear}
       />
     </div>
   );

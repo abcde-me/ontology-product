@@ -17,8 +17,6 @@ import Edit from '../edit';
 import { ExecutionHistory, TaskInfo } from '../type';
 import { useParams } from '@/utils/url';
 import { getLoad, getLoadRecordList, runLoad } from '@/api/loadApi';
-const Row = Grid.Row;
-const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 const DataLoadDetail = () => {
@@ -113,7 +111,7 @@ const DataLoadDetail = () => {
   };
   useEffect(() => {
     getDetailList();
-  }, [current, pageSize, searchValue]);
+  }, [current, pageSize]);
   useEffect(() => {
     getTask_idHan();
   }, []);
@@ -165,7 +163,7 @@ const DataLoadDetail = () => {
             style={{
               color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
               pointerEvents: runningFlag ? 'none' : undefined,
-              cursor: 'pointer'
+              cursor: runningFlag ? 'not-allowed' : 'pointer'
             }}
             onClick={() => {
               setEditVisible(true);
@@ -345,7 +343,12 @@ const DataLoadDetail = () => {
           <InputSearch
             placeholder="搜索运行ID"
             style={{ width: 230 }}
-            onPressEnter={(e) => setSearchValue(e.target.value)}
+            onPressEnter={() => {
+              getDetailList();
+            }}
+            onChange={(value) => {
+              setSearchValue(value);
+            }}
           />
           <Button
             type="primary"

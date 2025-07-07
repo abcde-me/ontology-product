@@ -139,15 +139,15 @@ const menus: MenuModel[] = [
         ),
         path: '/tenant/compute/modaforge/member',
         key: 'userMgmt'
-      },
-      {
-        title: 'API-KEY',
-        icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        path: '/tenant/compute/modaforge/apiKey',
-        key: 'apiKey'
       }
+      // {
+      //   title: 'API-KEY',
+      //   icon: (
+      //     <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+      //   ),
+      //   path: '/tenant/compute/modaforge/apiKey',
+      //   key: 'apiKey'
+      // }
     ]
   }
 ];

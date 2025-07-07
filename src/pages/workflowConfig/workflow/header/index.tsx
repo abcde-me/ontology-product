@@ -5,7 +5,11 @@ import { useHistory } from 'react-router-dom';
 import { useContext } from 'use-context-selector';
 import { useWorkflowStore } from '../store';
 import { useUserInfo } from '@/store/userInfoStore';
-import { useChecklistBeforePublish, useNodesSyncDraft } from '../hooks';
+import {
+  useChecklistBeforePublish,
+  useNodesInteractions,
+  useNodesSyncDraft
+} from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
@@ -94,6 +98,7 @@ const Header: FC = () => {
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef<RefInputType>(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
+  const { handleNodeSelect } = useNodesInteractions();
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -144,13 +149,14 @@ const Header: FC = () => {
 
   const onOperate = useCallback(
     async (op: WorkflowOperation, params?: WorkflowOperationParams) => {
-      // if (op !== WorkflowOperation.OFFLINE) {
-      //   if (!handleCheckBeforePublish()) {
-      //     throw new Error('Checklist failed');
-      //   }
-      // }
+      if (op !== WorkflowOperation.OFFLINE) {
+        if (!handleCheckBeforePublish()) {
+          throw new Error('Checklist failed');
+        }
+      }
 
       if (op === WorkflowOperation.ONLINE) {
+        handleNodeSelect('', false);
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
