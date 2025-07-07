@@ -5,7 +5,11 @@ import { useHistory } from 'react-router-dom';
 import { useContext } from 'use-context-selector';
 import { useWorkflowStore } from '../store';
 import { useUserInfo } from '@/store/userInfoStore';
-import { useChecklistBeforePublish, useNodesSyncDraft } from '../hooks';
+import {
+  useChecklistBeforePublish,
+  useNodesInteractions,
+  useNodesSyncDraft
+} from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
 import { ToastContext } from '@/pages/workflowConfig/components/toast';
 import EditingTitle from './editing-title';
@@ -94,6 +98,7 @@ const Header: FC = () => {
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef<RefInputType>(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
+  const { handleNodeSelect } = useNodesInteractions();
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -130,7 +135,7 @@ const Header: FC = () => {
   const { notify } = useContext(ToastContext);
 
   console.warn('API NOT IMPLEMENTED ', 'resetWorkflowVersionHistory');
-  const resetWorkflowVersionHistory = () => { }; // 这里是重新查询version history，暂时无用
+  const resetWorkflowVersionHistory = () => {}; // 这里是重新查询version history，暂时无用
 
   const updateAppDetail = useCallback(async () => {
     try {

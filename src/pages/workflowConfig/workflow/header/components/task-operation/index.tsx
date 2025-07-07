@@ -44,14 +44,7 @@ const AppPublisher = ({
         }
 
         await onOperate?.(op, params);
-        setPublished(true);
-        // 发布操作在弹框里面时，需要去掉下面这个计时器
-        window.setTimeout(() => {
-          setPublished(false);
-        }, 1000);
-      } catch {
-        setPublished(false);
-      }
+      } catch {}
     },
     [onOperate]
   );
@@ -62,7 +55,7 @@ const AppPublisher = ({
 
   return (
     <>
-      <Space>
+      <Space className="task-operation">
         <Button
           type="outline"
           className="toggle-btn"

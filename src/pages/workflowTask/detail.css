@@ -9,6 +9,11 @@
   .head-breadcrumb-box {
     display: flex;
     align-items: center;
+
+    .breadcrumb-text:hover {
+      cursor: pointer;
+      color: #000000;
+    }
   }
 
   /* 状态区域 */
