@@ -140,6 +140,8 @@ const FormComponent: React.FC<FormProps> = ({
       // 处理验证失败或导出失败的情况
       console.error('导出失败:', e);
       Message.error('导出失败，请稍后重试');
+      form.resetFields();
+      onCancel && onCancel();
     }
   };
   const handleCancel = () => {
@@ -220,6 +222,14 @@ const FormComponent: React.FC<FormProps> = ({
             {
               required: true,
               message: '请填写'
+            },
+            {
+              match: /^[\u4e00-\u9fa5a-zA-Z0-9\/_]+$/,
+              message: '只能包含中文、英文、数字、斜杠"/"和下划线"_"'
+            },
+            {
+              maxLength: 256,
+              message: '长度不能超过256个字符'
             }
           ]}
         >

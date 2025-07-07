@@ -9,6 +9,7 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
+import './index.css';
 import {
   IconDelete,
   IconDownload,
@@ -19,7 +20,7 @@ import FormComponent from '@/components/data-catalog-content/components/popups-f
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import { deleteTargetFile } from '@/api/dataCatalog';
+import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -303,7 +304,15 @@ export default function Eltable() {
               clearAllSelectionsAndCache();
             }
           } else {
-            clearAllSelectionsAndCache();
+            const fileIds = selectedRows.map((item: { id: string }) => item.id);
+            ids.push(...fileIds);
+            if (selectedRows.length > 0) {
+              await deleteSourceFileBatch({
+                ids: ids
+              });
+              Message.success('删除成功');
+              clearAllSelectionsAndCache();
+            }
           }
         }
       });
@@ -420,7 +429,7 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -453,7 +462,7 @@ export default function Eltable() {
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -553,7 +562,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
