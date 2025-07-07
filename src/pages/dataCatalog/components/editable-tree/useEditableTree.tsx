@@ -21,7 +21,6 @@ import {
   renameCatalog
 } from '@/api/dataCatalog';
 import { validateName } from '../../utils';
-import { string } from 'mobx-state-tree/dist/internal';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -101,21 +100,42 @@ export function useEditableTree({ catalogTreeStore }) {
     }
   };
 
-  // 重命名目录
   const handleEdit = (node: any) => {
     const { _key, dataRef } = node;
-    if (dataRef?.type === CatalogTypeEnum.catalog) {
-      catalogTreeStore.setState({
-        inputValue: dataRef?.title,
-        treeData: treeData.map((item: TreeDataType) => {
+
+    let newTreeData: TreeDataType[] = [];
+    switch (dataRef?.type) {
+      case CatalogTypeEnum.catalog:
+        newTreeData = treeData.map((item: TreeDataType) => {
           if (item.key === _key) {
             item.showInput = true;
           }
           return item;
-        })
-      });
-      focusAndSelectInput();
+        });
+        break;
+
+      case CatalogTypeEnum.volume:
+        newTreeData = treeData.map((data: TreeDataType) => {
+          if (data.id === dataRef?.parent_id) {
+            data.children?.[0]?.children?.forEach((item: TreeDataType) => {
+              if (item.key === _key) {
+                item.showInput = true;
+              }
+            });
+          }
+          return data;
+        });
+        break;
+
+      default:
+        break;
     }
+
+    catalogTreeStore.setState({
+      inputValue: dataRef?.title,
+      treeData: newTreeData
+    });
+    focusAndSelectInput();
   };
 
   // 删除目录 or 卷
@@ -205,7 +225,8 @@ export function useEditableTree({ catalogTreeStore }) {
             type: 2,
             isLastLeaf: true,
             showInput: true,
-            parent_id: dataRef.parent_id
+            parent_id: dataRef.parent_id,
+            isAdd: true
           });
         }
         return item;
@@ -243,33 +264,32 @@ export function useEditableTree({ catalogTreeStore }) {
     let newTreeData: TreeDataType[] = [];
     let res: Partial<ApiRes<any>> = {};
 
-    switch (dataRef?.type) {
-      case CatalogTypeEnum.catalog:
-        if (dataRef?.isAdd) {
+    if (dataRef?.isAdd) {
+      switch (dataRef?.type) {
+        case CatalogTypeEnum.catalog:
           res = await addCatalog({ name: fileName, root_type: root_type });
-        } else {
-          // 编辑
-          if (fileName !== dataRef.name) {
-            res = await renameCatalog(dataRef.id, {
-              new_name: fileName,
-              root_type: root_type,
-              type: dataRef?.type
-            });
-          }
-          await updateFn();
-        }
-        break;
-
-      case CatalogTypeEnum.volume:
-        res = await addVolume({
-          name: fileName,
-          parent_id: dataRef.parent_id,
-          root_type: root_type
+          break;
+        case CatalogTypeEnum.volume:
+          res = await addVolume({
+            name: fileName,
+            parent_id: dataRef.parent_id,
+            root_type: root_type
+          });
+          break;
+        default:
+          break;
+      }
+    } else {
+      // 编辑
+      if (fileName !== dataRef?.name) {
+        res = await renameCatalog(dataRef?.id, {
+          new_name: fileName,
+          root_type: root_type,
+          type: dataRef?.type
         });
-        break;
-
-      default:
-        break;
+      } else {
+        await updateFn();
+      }
     }
 
     if (res.status === 200) {
@@ -282,37 +302,39 @@ export function useEditableTree({ catalogTreeStore }) {
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {dataRef?.type === CatalogTypeEnum.catalog && (
-            <Tooltip color="white" content="重命名">
-              <IconEdit
-                className={'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'}
-                onClick={() => handleEdit(node)}
-              />
-            </Tooltip>
-          )}
           {['volume', 'db', CatalogTypeEnum.db].every(
             (key) => dataRef?.type !== key
           ) && (
-            <Tooltip color="white" content="删除">
-              <IconDelete
-                onClick={() => {
-                  Modal.confirm({
-                    title: '确认删除文件?',
-                    content: '删除后，该目录下所有内容将被删除，不可恢复',
-                    async onOk() {
-                      try {
-                        await handleDelete(node);
-                      } catch (apiError: any) {
-                        Message.error(
-                          '删除失败: ' + (apiError.message || '请稍后重试')
-                        );
+            <>
+              <Tooltip color="white" content="重命名">
+                <IconEdit
+                  className={
+                    'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                  }
+                  onClick={() => handleEdit(node)}
+                />
+              </Tooltip>
+              <Tooltip color="white" content="删除">
+                <IconDelete
+                  onClick={() => {
+                    Modal.confirm({
+                      title: '确认删除目录?',
+                      content: '删除后，该目录下所有内容将被删除，不可恢复',
+                      async onOk() {
+                        try {
+                          await handleDelete(node);
+                        } catch (apiError: any) {
+                          Message.error(
+                            '删除失败: ' + (apiError.message || '请稍后重试')
+                          );
+                        }
                       }
-                    }
-                  });
-                }}
-                className="hover:text-[rgb(var(--primary-6))]"
-              />
-            </Tooltip>
+                    });
+                  }}
+                  className="hover:text-[rgb(var(--primary-6))]"
+                />
+              </Tooltip>
+            </>
           )}
           {dataRef?.type === 'volume' && (
             <Tooltip color="white" content="新建">
