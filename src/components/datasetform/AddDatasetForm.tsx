@@ -127,7 +127,6 @@ const cstargetDataSourceData = [
 
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
-  console.log('李帆测试22222', dataSourceData);
   return dataSourceData.map((catalog) => ({
     label: catalog.name,
     value: [catalog.base_dir, catalog.name],
@@ -325,8 +324,8 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   const [connectorFileInformation, setConnectorFileInformation] = useState<
     ConnectorFile[]
   >([]); //连接器文件信息
-  const [previewData, setPreviewData] = useState(null); //数据目录预览数据
-  const [previewColumns, setPreviewColumns] = useState([]); //数据目录预览表格列（从后端获取）
+  const [previewData, setPreviewData] = useState<[]>([]); //数据目录预览数据
+  const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
     []
@@ -353,7 +352,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     //标签
     getTagList().then((res) => {
       setTagList(convertTotagSelectOptions(res.data));
-      console.log(res.data);
     });
     // setTagList(convertTotagSelectOptions(tagOptions)); //测试数据
   }, []);
@@ -459,15 +457,14 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
-        console.log('表单数据:', formData);
         form.resetFields();
         setDataSource('volume'); //重置数据源
         setSelectedConnector(null); //重置连接器
         setSelectedFiles([]); //重置选择文件
         setConnectorFileInformation([]); //重置连接器文件信息
-        setPreviewData(null); //重置预览数据
+        setPreviewData([]); //重置预览数据
         setPreviewColumns([]); //重置预览表格列
-        // setTargetDataSourceOptions([]);//重置目标数据源选项
+        setTargetDataSourceOptions([]); //重置目标数据源选项
         onSubmit(formData);
       })
       .catch((error) => {
@@ -693,7 +690,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
                     style={{ width: '100%' }}
                     labelInValue
                     renderFormat={(option: OptionInfo | null) => {
-                      console.log('李帆测试', option);
                       const value = option?.value ?? '';
                       return String(value).split('/').pop() || '';
                     }}
