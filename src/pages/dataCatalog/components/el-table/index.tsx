@@ -9,6 +9,7 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
+import './index.css';
 import {
   IconDelete,
   IconDownload,
@@ -420,7 +421,7 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -453,7 +454,7 @@ export default function Eltable() {
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -553,7 +554,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
