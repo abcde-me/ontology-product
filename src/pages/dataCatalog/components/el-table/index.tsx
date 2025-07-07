@@ -9,6 +9,7 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
+import './index.css';
 import {
   IconDelete,
   IconDownload,
@@ -19,7 +20,7 @@ import FormComponent from '@/components/data-catalog-content/components/popups-f
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import { deleteTargetFile } from '@/api/dataCatalog';
+import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -294,16 +295,33 @@ export default function Eltable() {
             ids.push(...idList);
             // 调用删除API
             if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
-              await deleteTargetFile({
+              const res = await deleteTargetFile({
                 full_path: selectedRows[0].full_path,
                 file_ids: ids,
                 path_id: selectedKey
               });
-              Message.success('删除成功');
-              clearAllSelectionsAndCache();
+              if(res.code==''){
+                Message.success('删除成功');
+                clearAllSelectionsAndCache();
+              }else{
+                Message.success('删除失败，请稍后重试');
+              }
+              
             }
           } else {
-            clearAllSelectionsAndCache();
+            const fileIds = selectedRows.map((item: { id: string }) => item.id);
+            ids.push(...fileIds);
+            if (selectedRows.length > 0) {
+              const res = await deleteSourceFileBatch({
+                ids: ids
+              });
+              if(res.code==''){
+                Message.success('删除成功');
+                clearAllSelectionsAndCache();
+              }else{
+                Message.success('删除失败，请稍后重试');
+              }
+            }
           }
         }
       });
@@ -420,7 +438,7 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -453,7 +471,7 @@ export default function Eltable() {
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content={<span>请先选择文件</span>}>
+        <Popover content='请先选择文件' className='narrow-popover'>
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -553,7 +571,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
