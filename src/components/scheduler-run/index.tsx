@@ -74,7 +74,7 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
 };
 
 const formatOptions = (frequencyData: CycleValues, formVals) => {
-  const [hour = '', minute = ''] = formVals.time.split(':');
+  const [hour = '', minute = ''] = formVals.time?.split(':') ?? [];
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       minute,
