@@ -8,6 +8,7 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
 import { useUnmountedRef } from 'ahooks';
+import { formatFileSize } from '@/utils/format';
 
 type FileListProps = {
   catetoryId: number;
@@ -101,7 +102,7 @@ function FileList({
       title: '文件大小',
       dataIndex: 'file_size',
       render(col, record) {
-        return <>{`${(+col / 1024 / 1024).toFixed(2)}MB`}</>;
+        return <>{formatFileSize(+col)}</>;
       }
     },
     {
