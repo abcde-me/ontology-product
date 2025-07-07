@@ -20,7 +20,7 @@ import FormComponent from '@/components/data-catalog-content/components/popups-f
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import { deleteTargetFile } from '@/api/dataCatalog';
+import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -304,7 +304,15 @@ export default function Eltable() {
               clearAllSelectionsAndCache();
             }
           } else {
-            clearAllSelectionsAndCache();
+            const fileIds = selectedRows.map((item: { id: string }) => item.id);
+            ids.push(...fileIds);
+            if (selectedRows.length > 0) {
+              await deleteSourceFileBatch({
+                ids: ids
+              });
+              Message.success('删除成功');
+              clearAllSelectionsAndCache();
+            }
           }
         }
       });
