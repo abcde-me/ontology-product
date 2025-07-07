@@ -13,7 +13,7 @@ import Styles from './index.module.css';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
-// import './index.css';
+import './index.css';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -154,8 +154,7 @@ export default function DataLoad() {
           text: RunStateType[RunState.STOPPED].text,
           value: RunStateType[RunState.STOPPED].value
         }
-      ],
-      onFilter: (value, row) => row.status == value
+      ]
     },
     {
       title: '数据源类型',
@@ -195,9 +194,19 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
-      dataIndex: 'data_path_name',
       width: 200,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, item) => {
+        return (
+          <span
+            onClick={() => {
+              history.push('/tenant/compute/modaforge/dataCatalog');
+            }}
+          >
+            {item.data_path_name}
+          </span>
+        );
+      }
     },
     {
       title: '创建时间',
@@ -290,6 +299,7 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
+  const [loadSiftObject, setLoadSiftObject] = useState();
   // 跳转到详情页面
   const gotoDetail = (task_id: number) => {
     history.push(
@@ -324,6 +334,13 @@ export default function DataLoad() {
     } finally {
       setLoading(false);
     }
+  };
+  const loadSiftHan = (sorter, filters) => {
+    console.log(sorter, filters);
+    const newSiftObj = {
+      status: filters.status
+    };
+    console.log(newSiftObj);
   };
   const handlePressEnter = () => {
     getdataLoadList();
@@ -401,6 +418,9 @@ export default function DataLoad() {
         border={false}
         scroll={{
           x: true
+        }}
+        onChange={(pagination, filters, sorter) => {
+          loadSiftHan(filters, sorter);
         }}
       />
       <div className={Styles.arcoPagination}>

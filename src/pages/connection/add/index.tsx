@@ -113,7 +113,13 @@ const add = forwardRef((props: any, ref) => {
           resetHan();
         }}
         footer={
-          <div style={{ marginBottom: '20px' }}>
+          <div
+            style={{
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}
+          >
             <Button
               onClick={() => {
                 setVisible(false);
