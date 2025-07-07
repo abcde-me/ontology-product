@@ -330,7 +330,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       } else {
         console.log('unified-data-table - 选中状态已正确清除');
       }
-      getTableList();
     }, 100);
   }
   // 合并的useEffect处理所有数据获取逻辑
