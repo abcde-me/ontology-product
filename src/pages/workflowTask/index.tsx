@@ -133,19 +133,19 @@ export default function WorkflowTask() {
       filters: [
         {
           text: '运行完成',
-          value: 2
+          value: TaskRunStatus.success
         },
         {
           text: '运行失败',
-          value: 3
+          value: TaskRunStatus.fail
         },
         {
           text: '进行中',
-          value: 1
+          value: TaskRunStatus.running
         },
         {
           text: '已停止',
-          value: 4
+          value: TaskRunStatus.stop
         }
       ],
       onFilter: (value, row) => row.status == value
