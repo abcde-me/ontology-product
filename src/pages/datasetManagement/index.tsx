@@ -32,7 +32,8 @@ import {
   getDatasetList,
   createDataset,
   deleteDataset,
-  batchDeleteDataset
+  batchDeleteDataset,
+  datasetVersionRebuild
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import styles from './index.module.css';
@@ -103,6 +104,15 @@ const getStatusIcon = (status: string) => {
       style={{ color: '#F97316', margin: '0 5px 0 0' }}
     />
   );
+};
+
+// 重试
+const handleRetry = async (id: number | string, version_id: string) => {
+  const params = {
+    id,
+    version_id
+  };
+  const res = await datasetVersionRebuild(params);
 };
 
 const columns = (
@@ -196,7 +206,7 @@ const columns = (
     onFilter: (value: string, record: Dataset) => {
       return record.status === value;
     },
-    render: (status: string) => {
+    render: (status: string, record: Dataset) => {
       const statusConfig = getStatusConfig(status);
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -209,7 +219,12 @@ const columns = (
             </Tooltip>
           ) : null}
           {status === datasetStatus.version_generating_fail ? (
-            <span className={styles.retryText}>重试</span>
+            <span
+              className={styles.retryText}
+              onClick={() => handleRetry(record.id, record.latest_version)}
+            >
+              重试
+            </span>
           ) : null}
         </div>
       );
@@ -600,10 +615,10 @@ const DatasetManagement: React.FC = () => {
     // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
   };
   //清除选中状态函数
-  const handClear=()=>{
+  const handClear = () => {
     setSelectedRowKeys([]);
     setSelectedRows([]);
-  }
+  };
   return (
     <div
       style={{
