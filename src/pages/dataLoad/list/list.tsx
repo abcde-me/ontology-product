@@ -83,6 +83,7 @@ export default function DataLoad() {
     },
     {
       title: '载入形式',
+      dataIndex: 'load_type',
       width: 150,
       filters: [
         {
@@ -94,7 +95,6 @@ export default function DataLoad() {
           value: LoadType[Load.CRON].value
         }
       ],
-      onFilter: (value, row) => row.load_type == value,
       render: (_, item) => (
         <div>
           {item.load_type == LoadType[Load.ONCE].value
@@ -106,6 +106,7 @@ export default function DataLoad() {
     {
       title: '最近运行状态',
       width: 170,
+      dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -159,6 +160,7 @@ export default function DataLoad() {
     {
       title: '数据源类型',
       width: 170,
+      dataIndex: 'source_type',
       render: (_, item) => (
         <span>
           {item.source_type == TYPE_CONFIG[ConnectorType.S3].value
@@ -173,10 +175,9 @@ export default function DataLoad() {
         },
         {
           text: TYPE_CONFIG[ConnectorType.S3].text,
-          value: TYPE_CONFIG[ConnectorType.S3].value
+          value: 'oss'
         }
-      ],
-      onFilter: (value, row) => row.source_type == value
+      ]
     },
     {
       title: '连接器名称',
@@ -212,13 +213,13 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      sorter: (a, b) => a.created_at.localeCompare(b.created_at) // 排序
+      sorter: (a, b) => {} // 排序
     },
     {
       title: '更新时间',
       dataIndex: 'last_run_time',
       width: 240,
-      sorter: (a, b) => a.last_run_time.localeCompare(b.last_run_time) // 排序
+      sorter: (a, b) => {} // 排序
     },
     {
       title: '操作',
@@ -299,7 +300,7 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
-  const [loadSiftObject, setLoadSiftObject] = useState();
+  const [loadSiftObject, setLoadSiftObject] = useState({});
   // 跳转到详情页面
   const gotoDetail = (task_id: number) => {
     history.push(
@@ -320,9 +321,7 @@ export default function DataLoad() {
         page: current,
         page_size: pageSize,
         name: searchValue,
-        status: [],
-        load_type: '',
-        source_type: ''
+        ...loadSiftObject
       });
       if (res.message == 'ok') {
         console.log(res.data.items);
@@ -336,11 +335,19 @@ export default function DataLoad() {
     }
   };
   const loadSiftHan = (sorter, filters) => {
-    console.log(sorter, filters);
     const newSiftObj = {
-      status: filters.status
+      status: filters.status == undefined ? [] : filters.status,
+      load_type: filters.load_type == undefined ? [] : filters.load_type,
+      source_type: filters.source_type == undefined ? [] : filters.source_type,
+      order_by:
+        sorter.field == undefined
+          ? ''
+          : sorter.field == 'last_run_time'
+            ? 'updateTime'
+            : 'createdTime',
+      sort: sorter.direction == undefined ? '' : sorter.direction
     };
-    console.log(newSiftObj);
+    setLoadSiftObject(newSiftObj);
   };
   const handlePressEnter = () => {
     getdataLoadList();
@@ -361,7 +368,7 @@ export default function DataLoad() {
   };
   useEffect(() => {
     getdataLoadList();
-  }, [current, pageSize]);
+  }, [current, pageSize, loadSiftObject]);
   return (
     <div
       style={{

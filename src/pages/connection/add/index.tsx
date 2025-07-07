@@ -66,16 +66,17 @@ const add = forwardRef((props: any, ref) => {
     try {
       const values = await form.validate();
       const { type, name } = values;
+      delete values.name;
+      delete values.type;
       // 如果选中有字段，不选的话没有字段的一个函数
-      const filteredValues = filterValues(values);
+      // const filteredValues = filterValues(values);
       const newfrom = {
         name,
         type,
-        config: { ...filteredValues }
+        config: { ...values }
       };
       setLoading(true);
       const res = await addconnectionList(newfrom);
-      console.log(res);
       if (res.message == 'ok') {
         Message.success('测试通过，连接器创建成功');
         setVisible(false);
