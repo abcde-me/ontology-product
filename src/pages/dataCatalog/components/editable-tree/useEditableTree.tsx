@@ -290,14 +290,10 @@ export function useEditableTree({ catalogTreeStore }) {
           root_type: root_type,
           type: dataRef?.type
         });
-      } else {
-        await updateFn();
       }
     }
 
-    if (res.status === 200) {
-      await updateFn();
-    }
+    await updateFn();
   };
 
   const renderExtra = (node: NodeProps) => {
