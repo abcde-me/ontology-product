@@ -4,6 +4,7 @@ import {
   Input,
   Message,
   Pagination,
+  PaginationProps,
   Popconfirm,
   Table,
   Tag
@@ -22,6 +23,7 @@ import {
   workflowCopy
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 const InputSearch = Input.Search;
 
@@ -40,11 +42,16 @@ export default function WorkflowList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = useState({
+    run_cycle: '',
+    sort: ''
+  });
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, pageSize]);
+  }, [userInfo, current, pageSize, sortValue]);
 
   const getList = async () => {
     setLoading(true);
@@ -53,7 +60,8 @@ export default function WorkflowList() {
         uid: userInfo?.id,
         search_content: searchValue,
         page: current, //第几页
-        page_size: pageSize //每页个数
+        page_size: pageSize, //每页个数
+        ...sortValue
       };
       const res = await getWorkflowList(params);
       if (res.status === 200 && res.data) {
@@ -77,8 +85,10 @@ export default function WorkflowList() {
   };
 
   // 跳转目录
-  const handleToDirectoryPath = (path: string) => {
-    history.push('/tenant/compute/modaforge/dataCatalog');
+  const handleToDirectoryPath = (id: string, parent_id: string) => {
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog?root_type=1&id=${id}&parent_id=${parent_id}`
+    );
   };
 
   // 查看详情
@@ -131,6 +141,27 @@ export default function WorkflowList() {
     }
   };
 
+  // 筛选排序操作
+  const handleTableChange = (
+    _pagination: PaginationProps,
+    sorter: SorterInfo,
+    filters: Partial<Record<string | number | symbol, string[]>>
+  ) => {
+    setCurrent(1);
+    const sortdata = {
+      run_cycle:
+        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
+      sort:
+        sorter.direction === undefined
+          ? ''
+          : sorter.direction === 'ascend'
+            ? 'asc'
+            : 'desc'
+    };
+
+    setSortValue(sortdata);
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -164,8 +195,8 @@ export default function WorkflowList() {
           text: '周期运行',
           value: 1
         }
-      ],
-      onFilter: (value, row) => row.run_cycle == value
+      ]
+      // onFilter: (value, row) => row.run_cycle == value
     },
     {
       title: '状态',
@@ -190,8 +221,8 @@ export default function WorkflowList() {
           text: '已上线',
           value: 1
         }
-      ],
-      onFilter: (value, row) => row.is_online == value
+      ]
+      // onFilter: (value, row) => row.is_online == value
     },
     {
       title: '源数据目录',
@@ -202,7 +233,12 @@ export default function WorkflowList() {
         <span
           className="hover-change"
           title={record.source_path}
-          onClick={() => handleToDirectoryPath(record.source_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.parent_source_path_id
+            )
+          }
         >
           {record.source_path}
         </span>
@@ -217,7 +253,12 @@ export default function WorkflowList() {
         <span
           className="hover-change"
           title={record.target_path}
-          onClick={() => handleToDirectoryPath(record.target_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.target_path_id,
+              record.parent_target_path_id
+            )
+          }
         >
           {record.target_path}
         </span>
@@ -236,11 +277,7 @@ export default function WorkflowList() {
       render: (_, record) => (
         <span>{new Date(record.create_time).toLocaleString()}</span>
       ),
-      sorter: (a, b) => {
-        return (
-          new Date(a.create_time).getTime() - new Date(b.create_time).getTime()
-        );
-      }
+      sorter: true
     },
     {
       title: '操作',
@@ -331,6 +368,9 @@ export default function WorkflowList() {
         })}
         rowKey="id"
         loading={loading}
+        onChange={(pagination, sorter, filters) =>
+          handleTableChange(pagination, sorter, filters)
+        }
       />
       {/* 分页 */}
       <Pagination
