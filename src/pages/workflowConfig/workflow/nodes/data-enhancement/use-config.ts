@@ -32,11 +32,6 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     duolong: '多轮回答'
   };
 
-<<<<<<< HEAD
-
-  console.log(payload, '==use-top');
-=======
->>>>>>> @{-1}
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
       console.log(payload, '==use');
