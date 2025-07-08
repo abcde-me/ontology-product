@@ -636,7 +636,7 @@ const DatasetDetail: React.FC = () => {
     setEditingRowKey(null);
     setEditingData({});
 
-    Message.success('数据修改成功');
+    Message.success('编辑成功');
   };
 
   // 取消内联编辑
@@ -910,7 +910,13 @@ const DatasetDetail: React.FC = () => {
                             gap: '8px'
                           }}
                         >
-                          <span>{datasetDetail.name}</span>
+                          {datasetDetail.name.length > 14 ? (
+                            <Tooltip content={datasetDetail.name}>
+                              <span>{`${datasetDetail.name.substring(0, 14)}...`}</span>
+                            </Tooltip>
+                          ) : (
+                            <span>{datasetDetail.name}</span>
+                          )}
                           {renderStatusTag(
                             datasetDetail.status,
                             datasetDetail.error_reason,
@@ -1065,7 +1071,17 @@ const DatasetDetail: React.FC = () => {
                         // 有改动，弹窗确认
                         Modal.confirm({
                           title: '确定放弃编辑?',
-                          content: '放弃后，当前修改不会保存',
+                          content: (
+                            <div
+                              style={{
+                                fontSize: '14px',
+                                paddingLeft: '28px'
+                                // lineHeight: '1.5'
+                              }}
+                            >
+                              放弃后，当前修改不会保存
+                            </div>
+                          ),
                           okText: '确定',
                           cancelText: '取消',
                           onOk: () => {
