@@ -27,6 +27,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const unmountedRef = useUnmountedRef();
   const [modelList, setModelList] = useState<any[]>([]);
+  const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
   useEffect(() => {
     setCustomPromptChecked(inputs?.prompt?.length > 0 ? true : false);
     getModelList().then((res) => {
@@ -44,13 +45,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       }
       setBoostPageData(ModelLs)
     });
-  }, []);
+    const prompt_text = TextPlan[app_scenarios_name]?.prompt;
+    const sample_data_text = TextPlan[app_scenarios_name]?.data;
+    form.setFieldValue('prompt', prompt_text);
+    form.setFieldValue('sample_data', sample_data_text);
+  }, [app_scenarios_name]);
 
-  const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
-  const prompt_text = TextPlan[app_scenarios_name]?.prompt;
-  const sample_data_text = TextPlan[app_scenarios_name]?.data;
-  form.setFieldValue('prompt', form.getFieldValue('prompt') || prompt_text);
-  form.setFieldValue('sample_data', (form.getFieldValue('sample_data') || sample_data_text));
+
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -68,7 +69,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           similarity_threshold: inputs?.similarity_threshold || 0.7,
           generate_sample_num: inputs?.generate_sample_num || 100,
         }}
-        onChange={(_, v: any) => { onValuesChange(v) }}
+        onValuesChange={(_, v: any) => { onValuesChange(v) }}
       >
         <FormItem
           layout="inline"
