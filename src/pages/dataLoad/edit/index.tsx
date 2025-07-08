@@ -77,12 +77,13 @@ const Edit = (props) => {
             type: 1,
             cycle_text: obj
           },
-          dest_path_id: 2
+          dest_path_id: pathId
         };
         console.log(formData);
         const res = await editLoad(formData);
-        if (res.code == '') {
+        if (res.code == '' && res.status == 200) {
           Message.success('修改成功');
+          props.hideEditModalHan();
         } else {
           Message.error(res.message);
         }
@@ -100,13 +101,11 @@ const Edit = (props) => {
               week: ''
             }
           },
-          dest_path_id: 2
+          dest_path_id: pathId
         };
-        console.log(formData);
         const res = await editLoad(formData);
-        if (res.message == 'ok') {
+        if (res.code == '' && res.status == 200) {
           Message.success('修改成功');
-          cancelHan();
         } else {
           Message.error(res.message);
         }
@@ -198,7 +197,7 @@ const Edit = (props) => {
         {loadVal == 'cron' ? (
           <div className={Styles.cycleLoadingBox}>
             <SchedulerRun
-              options={{}}
+              options={props.detailData.cron_expression}
               onOptionsChange={(val) => {
                 setObj(val);
               }}

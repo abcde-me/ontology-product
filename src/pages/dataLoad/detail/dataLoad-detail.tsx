@@ -10,16 +10,37 @@ import {
   Switch
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconPlus } from '@arco-design/web-react/icon';
+import { cronToHumanReadable } from './parseCron';
 import React, { useEffect, useState } from 'react';
 import TableDetail from './table-detail';
 import './index.css';
 import Edit from '../edit';
 import { ExecutionHistory, TaskInfo } from '../type';
 import { useParams } from '@/utils/url';
-import { getLoad, getLoadRecordList, runLoad } from '@/api/loadApi';
+import {
+  getLoad,
+  getLoadRecordList,
+  runLoad,
+  startAndStopeLoad
+} from '@/api/loadApi';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
+// 转换
+function findParent(data, childId) {
+  for (const item of data) {
+    if (item.children && item.children.some((child) => child.id === childId)) {
+      return item; // 返回父级
+    }
+    // 递归查找子节点
+    if (item.children) {
+      const found = findParent(item.children, childId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 const DataLoadDetail = () => {
+  const [directoryArr, setDirectoryArr] = useState();
   const [form] = Form.useForm();
   const loadId = useParams('task_id');
   // 默认详情的数据
@@ -41,16 +62,12 @@ const DataLoadDetail = () => {
   const handlePageChange = (page) => {
     setCurrent(page);
   };
-
-  // 点击停止运行
-  const stopehan = (id) => {};
   // 编辑弹框的状态
   const [editVisible, setEditVisible] = useState(false);
   // 相切列表loding的状态
   const [detailListLoading, setDetailListLoading] = useState(false);
   // 点击编辑显示弹框
   const hideEditModal = () => {
-    console.log(form.getFieldsValue());
     setEditVisible(false);
   };
   // 返回上一层的函数
@@ -91,6 +108,18 @@ const DataLoadDetail = () => {
     const boo = detailList?.findIndex((item) => item.status == 'running');
     setRunningFlag(boo == -1 ? false : true);
   };
+  // 启停任务
+  const startAndStoponchange = async (val) => {
+    try {
+      const res = await startAndStopeLoad({
+        task_id: 116,
+        cron_enable: val
+      });
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   // 点击新建运行
   const runningHan = async () => {
     try {
@@ -98,7 +127,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId)
       });
       console.log(res);
-      if (res.code == '') {
+      if (res.code == '' && res.status == '200') {
         Message.success('新建运行成功');
         getDetailList();
         judgmentTask();
@@ -163,7 +192,7 @@ const DataLoadDetail = () => {
             style={{
               color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
               pointerEvents: runningFlag ? 'none' : undefined,
-              cursor: runningFlag ? 'not-allowed' : 'pointer'
+              cursor: runningFlag ? '' : 'pointer'
             }}
             onClick={() => {
               setEditVisible(true);
@@ -290,11 +319,13 @@ const DataLoadDetail = () => {
                   : '周期载入'}
                 {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
-                    defaultChecked={true}
+                    defaultChecked={false}
                     checkedText="启用"
                     uncheckedText="停止"
                     style={{ marginLeft: '10px' }}
-                    onChange={(val) => console.log(!val)}
+                    onChange={(val) => {
+                      startAndStoponchange(val);
+                    }}
                   />
                 )}
               </div>
@@ -317,7 +348,7 @@ const DataLoadDetail = () => {
                   周期设置：
                 </div>
                 <div style={{ fontSize: '14px' }}>
-                  {listDetail.cron_expression}
+                  {/* {cronToHumanReadable('0 0 12  * *')} */}
                 </div>
               </div>
             )}
@@ -371,7 +402,6 @@ const DataLoadDetail = () => {
           <TableDetail
             taskId={listDetail && listDetail.task_id}
             judgmentTaskHan={judgmentTask}
-            tHan={stopehan}
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}
@@ -395,12 +425,11 @@ const DataLoadDetail = () => {
           style={{ width: '600px' }}
           title="编辑数据载入任务"
           visible={editVisible}
-          onOk={() => setEditVisible(false)}
+          // onOk={() => setEditVisible(false)}
           onCancel={() => setEditVisible(false)}
           autoFocus={false}
           focusLock={true}
           footer={null}
-          // maskClosable={false}
           unmountOnExit={true}
         >
           <Edit
