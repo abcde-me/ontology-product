@@ -32,185 +32,177 @@ const ModalDetail = (props) => {
     <div>
       <div className="modal-overlay">
         <div className="modal">
-          {loading == true ? (
-            <div>正在加载中...</div>
-          ) : (
-            <div className="modal">
-              <div className="modal-header">
-                <h2>连接器详情</h2>
+          <div className="modal-header">
+            <h2>连接器详情</h2>
+          </div>
+          <div className="modal-content" style={{ fontSize: '14px' }}>
+            <section className="section">
+              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+                连接器信息
+              </h3>
+              <div className="info-item">
+                <span className="label">连接器名称:</span>
+                <span className="value">{DetailData?.name}</span>
               </div>
-              <div className="modal-content" style={{ fontSize: '14px' }}>
-                <section className="section">
-                  <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-                    连接器信息
-                  </h3>
-                  <div className="info-item">
-                    <span className="label">连接器名称:</span>
-                    <span className="value">{DetailData?.name}</span>
+              <div className="info-item">
+                <span className="label">状态:</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginLeft: '20px'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      backgroundColor:
+                        DetailData?.status == 'connected' ? 'green' : 'red',
+                      borderRadius: '50%',
+                      marginRight: '5px'
+                    }}
+                  ></div>
+                  <div>
+                    {DetailData?.status == 'connected' ? '已连接' : '已断开'}
                   </div>
+                </div>
+              </div>
+              <div className="info-item">
+                <span className="label">数据源类型:</span>
+                <span className="value">{DetailData?.type}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">创建人:</span>
+                <span className="value">默认</span>
+              </div>
+              <div className="info-item">
+                <span className="label">创建时间:</span>
+                <span className="value">{DetailData?.created_at}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">更新时间:</span>
+                <span className="value">{DetailData?.updated_at} </span>
+              </div>
+            </section>
+            <hr />
+            <section className="section">
+              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+                连接信息
+              </h3>
+              {DetailData?.type == 's3' ? (
+                <div>
                   <div className="info-item">
-                    <span className="label">状态:</span>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginLeft: '20px'
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '5px',
-                          height: '5px',
-                          backgroundColor:
-                            DetailData?.status == 'connected' ? 'green' : 'red',
-                          borderRadius: '50%',
-                          marginRight: '5px'
+                    <span className="label">Endpoint:</span>
+                    <span className="value">
+                      {DetailData?.config.endpoint}{' '}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.endpoint || '');
+                          Message.success('复制成功');
                         }}
-                      ></div>
-                      <div>
-                        {DetailData?.status == 'connected'
-                          ? '已连接'
-                          : '已断开'}
-                      </div>
-                    </div>
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">数据源类型:</span>
-                    <span className="value">{DetailData?.type}</span>
+                    <span className="label">AccessKey ID:</span>
+                    <span className="value">
+                      {DetailData?.config.access_key}{' '}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.access_key || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">创建人:</span>
-                    <span className="value">默认</span>
+                    <span className="label">AccessKey Secret:</span>
+                    <span className="value">
+                      {DetailData?.config.secret_key}{' '}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.secret_key || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">创建时间:</span>
-                    <span className="value">{DetailData?.created_at}</span>
+                    <span className="label">文件路径:</span>
+                    <span className="value">
+                      {DetailData.config.path}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData.config.path || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="info-item">
+                    <span className="label">Host:</span>
+                    <span className="value">
+                      {DetailData?.config.host}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.host || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">更新时间:</span>
-                    <span className="value">{DetailData?.updated_at} </span>
+                    <span className="label">port:</span>
+                    <span className="value">
+                      {DetailData?.config.port}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.port || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
                   </div>
-                </section>
-                <hr />
-                <section className="section">
-                  <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-                    连接信息
-                  </h3>
-                  {DetailData?.type == 's3' ? (
-                    <div>
-                      <div className="info-item">
-                        <span className="label">Endpoint:</span>
-                        <span className="value">
-                          {DetailData?.config.endpoint}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.endpoint || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">AccessKey ID:</span>
-                        <span className="value">
-                          {DetailData?.config.access_key}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.access_key || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">AccessKey Secret:</span>
-                        <span className="value">
-                          {DetailData?.config.secret_key}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.secret_key || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">文件路径:</span>
-                        <span className="value">
-                          {DetailData.config.path}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData.config.path || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="info-item">
-                        <span className="label">Host:</span>
-                        <span className="value">
-                          {DetailData?.config.host}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.host || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">port:</span>
-                        <span className="value">
-                          {DetailData?.config.port}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.port || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">user:</span>
-                        <span className="value">
-                          {DetailData?.config.user}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.user || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="label">文件路径:</span>
-                        <span className="value">
-                          {DetailData?.config.path}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.path || '');
-                              Message.success('复制成功');
-                            }}
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              </div>
-            </div>
-          )}
+                  <div className="info-item">
+                    <span className="label">user:</span>
+                    <span className="value">
+                      {DetailData?.config.user}{' '}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.user || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="label">文件路径:</span>
+                    <span className="value">
+                      {DetailData?.config.path}{' '}
+                      <IconCopy
+                        className="set-mouse"
+                        onClick={() => {
+                          copy(DetailData?.config.path || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </span>
+                  </div>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </div>

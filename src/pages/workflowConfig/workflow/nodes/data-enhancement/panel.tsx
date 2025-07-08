@@ -22,7 +22,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  const { inputs, onValuesChange, readOnly, setBoostPageData } = useConfig(id, data);
+  const { inputs, onValuesChange, readOnly, setBoostPageData } = useConfig(
+    id,
+    data
+  );
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const unmountedRef = useUnmountedRef();
@@ -31,7 +34,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     setCustomPromptChecked(inputs?.prompt?.length > 0 ? true : false);
     getModelList().then((res) => {
       if (unmountedRef.current) return;
-      const ModelLs = res?.data?.find((item) => item.type === 'enha_model')?.model_data || []
+      const ModelLs =
+        res?.data?.find((item) => item.type === 'enha_model')?.model_data || [];
       setModelList(ModelLs);
       const defaultModelId = ModelLs[0]?.id || '';
       const fields = {} as Record<string, any>;
@@ -42,15 +46,18 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       if (Object.keys(fields).length) {
         form.setFieldsValue(fields);
       }
-      setBoostPageData(ModelLs)
+      setBoostPageData(ModelLs);
     });
-  }, [inputs, modelList]);
+  }, []);
 
   const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
   const prompt_text = TextPlan[app_scenarios_name]?.prompt;
   const sample_data_text = TextPlan[app_scenarios_name]?.data;
   form.setFieldValue('prompt', form.getFieldValue('prompt') || prompt_text);
-  form.setFieldValue('sample_data', (form.getFieldValue('sample_data') || sample_data_text));
+  form.setFieldValue(
+    'sample_data',
+    form.getFieldValue('sample_data') || sample_data_text
+  );
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -66,9 +73,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           enhanced_proportion: inputs?.enhanced_proportion | 0.7,
           sample_num: inputs?.sample_num || 10,
           similarity_threshold: inputs?.similarity_threshold || 0.7,
-          generate_sample_num: inputs?.generate_sample_num || 100,
+          generate_sample_num: inputs?.generate_sample_num || 100
         }}
-        onChange={(_, v: any) => { onValuesChange(v) }}
+        onChange={(_, v: any) => {
+          onValuesChange(v);
+        }}
       >
         <FormItem
           layout="inline"
@@ -114,7 +123,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </FormItem>
         </div>
         <div className="content-box">
-          {(app_scenarios_name === 'tongyong' || app_scenarios_name === 'duolong') && (
+          {(app_scenarios_name === 'tongyong' ||
+            app_scenarios_name === 'duolong') && (
             <>
               <FormItem
                 label="指令生成依赖样本数:"
@@ -135,7 +145,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </FormItem>
             </>
           )}
-          {(app_scenarios_name === 'fenlei' || app_scenarios_name === 'shengcheng') && (
+          {(app_scenarios_name === 'fenlei' ||
+            app_scenarios_name === 'shengcheng') && (
             <>
               <FormItem
                 label="任务描述增强占比:"
@@ -152,7 +163,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   }
                 ]}
               >
-                <InputNumber min={0} max={1} step={0.1} placeholder="请输入指令" />
+                <InputNumber
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  placeholder="请输入指令"
+                />
               </FormItem>
             </>
           )}

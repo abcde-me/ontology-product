@@ -27,7 +27,7 @@ import {
   IconInfoCircle
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
-
+import noDataElement from '@/components/no-data';
 import {
   getDatasetList,
   createDataset,
@@ -125,24 +125,36 @@ const columns = (
     title: '名称',
     dataIndex: 'name',
     width: 200,
-    render: (name: string, record: Dataset) => (
-      <span
-        className={
-          record.status === datasetStatus.create_failed ||
-          record.status === datasetStatus.creating
-            ? styles.datasetNameLink
-            : `${styles.datasetNameLink} ${styles.datasetNameHover}`
-        }
-        onClick={() => {
-          record.status === datasetStatus.create_failed ||
-          record.status === datasetStatus.creating
-            ? null
-            : handleGoToDetail(record.id);
-        }}
-      >
-        {name}
-      </span>
-    )
+    render: (name: string, record: Dataset) => {
+      const isLongName = name.length > 14;
+      const displayName = isLongName ? `${name.substring(0, 14)}...` : name;
+
+      const nameElement = (
+        <span
+          className={
+            record.status === datasetStatus.create_failed ||
+            record.status === datasetStatus.creating
+              ? styles.datasetNameLink
+              : `${styles.datasetNameLink} ${styles.datasetNameHover}`
+          }
+          onClick={() => {
+            record.status === datasetStatus.create_failed ||
+            record.status === datasetStatus.creating
+              ? null
+              : handleGoToDetail(record.id);
+          }}
+        >
+          {displayName}
+        </span>
+      );
+
+      // 如果名称过长，用 Tooltip 包裹显示完整内容
+      if (isLongName) {
+        return <Tooltip content={name}>{nameElement}</Tooltip>;
+      }
+
+      return nameElement;
+    }
   },
   {
     title: '标签',
@@ -547,7 +559,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('删除成功');
       })
       .catch((err) => {
-        Message.error('数据集删除失败！');
+        Message.error('删除失败，请稍候重试');
       });
   };
 
@@ -774,7 +786,7 @@ const DatasetManagement: React.FC = () => {
       onOk: () => {
         console.log('批量删除:', selectedRows);
         batchDeleteDataset({
-          ids: selectedRowKeys.map((key) => key.toString())
+          ids: selectedRowKeys.map((key) => Number(key))
         })
           .then((res) => {
             console.log('批量删除结果:', res);
@@ -902,22 +914,32 @@ const DatasetManagement: React.FC = () => {
           />
         </Input.Group>
         <div className={styles.actionButtons}>
-          <Button
-            icon={<IconDelete />}
-            className={styles.batchDeleteBtn}
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchDelete}
+          <Tooltip
+            content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+            disabled={selectedRowKeys.length > 0}
           >
-            批量删除
-          </Button>
-          <Button
-            icon={<IconDownload />}
-            className={styles.batchExportBtn}
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchExport}
+            <Button
+              icon={<IconDelete />}
+              className={styles.batchDeleteBtn}
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchDelete}
+            >
+              批量删除
+            </Button>
+          </Tooltip>
+          <Tooltip
+            content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+            disabled={selectedRowKeys.length > 0}
           >
-            批量导出
-          </Button>
+            <Button
+              icon={<IconDownload />}
+              className={styles.batchExportBtn}
+              disabled={selectedRowKeys.length === 0}
+              onClick={handleBatchExport}
+            >
+              批量导出
+            </Button>
+          </Tooltip>
           <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
             新建数据集
           </Button>
@@ -942,6 +964,10 @@ const DatasetManagement: React.FC = () => {
         )}
         data={datasetList}
         rowSelection={rowSelection}
+        noDataElement={noDataElement({
+          description: '暂无数据'
+          // btnText: '新建数据集',
+        })}
         pagination={{
           current: currentPage,
           total: total,
@@ -956,12 +982,6 @@ const DatasetManagement: React.FC = () => {
         }}
         border={false}
         scroll={{ x: 1200 }}
-        noDataElement={
-          <div className={styles.noData}>
-            <IconEmpty />
-            <div className={styles.noDataText}>暂无数据</div>
-          </div>
-        }
         onChange={handleTableChange}
       />
 

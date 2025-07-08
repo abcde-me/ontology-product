@@ -80,7 +80,7 @@ export interface EditDatasetVersionParams {
 
 //批量删除数据集参数接口
 export interface BatchDeleteDatasetParams {
-  ids: string[];
+  ids: number[];
 }
 //版本重新生成参数接口
 export interface DatasetVersionRebuildParams {

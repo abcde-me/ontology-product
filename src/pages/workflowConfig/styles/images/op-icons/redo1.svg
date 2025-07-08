@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <rect id="path-1" x="0" y="0" width="16" height="16"></rect>
+    </defs>
+    <g id="4.数据展示/图标/重做" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <g id="矩形"></g>
+        <g id="撤销" mask="url(#mask-2)" fill="#334155" fill-rule="nonzero">
+            <g transform="translate(8.000000, 8.024900) scale(-1, 1) translate(-8.000000, -8.024900) translate(2.000000, 3.500000)"
+                id="路径">
+                <path
+                    d="M9.45,2.4498 L3.68489333,2.4498 L3.68489333,0 L0,2.8578 L3.68489333,5.5374 L3.68489333,3.3498 L9.45,3.3498 C10.4060933,3.3498 11.1,4.04370667 11.1,4.9998 L11.1,6.4998 C11.1,6.996 10.9686,8.1498 9.75,8.1498 L1.65,8.1498 L1.65,9.0498 L9.75,9.0498 C11.1168,9.0498 12,8.049 12,6.4998 L12,4.9998 C12,3.546 10.9038,2.4498 9.45,2.4498 Z">
+                </path>
+            </g>
+        </g>
+    </g>
+</svg>

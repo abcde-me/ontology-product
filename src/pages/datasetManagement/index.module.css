@@ -89,13 +89,13 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
-  padding: 0 12px;
+  /* padding: 0 12px; */
 }
 
-.batchDeleteBtn:hover {
+/* .batchDeleteBtn:hover {
   background-color: #165dff;
   color: #fff;
-}
+} */
 
 .batchDeleteBtn:disabled {
   color: #c9cdd4;
@@ -109,13 +109,13 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
-  padding: 0 12px;
+  /* padding: 0 12px; */
 }
 
-.batchExportBtn:hover {
+/* .batchExportBtn:hover {
   background-color: #165dff;
   color: #fff;
-}
+} */
 
 .batchExportBtn:disabled {
   color: #c9cdd4;

@@ -37,14 +37,16 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       enhanced_proportion,
       sample_num,
       similarity_threshold,
-      generate_sample_num
+      generate_sample_num,
+      modelList
     } = payload;
+    // console.log(enha_modle_id, payload, '===123', modelList?.[0]?.id);
     if (app_scenarios_name === undefined) {
       errorMessages = '场景未选择';
     }
-    if (enha_modle_id === undefined) {
-      errorMessages = '模型未选择';
-    }
+    // if (enha_modle_id ?? modelList?.[0]?.id === undefined) {
+    //   errorMessages = '模型未选择';
+    // }
     if (enhanced_proportion > 1) {
       errorMessages = '任务描述增强占比为非法内容';
     }

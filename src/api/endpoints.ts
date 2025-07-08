@@ -295,7 +295,7 @@ export const ModaForgeResourceEndpoints = {
   //删除数据集
   deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //批量删除数据集
-  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch_delete',
+  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch-delete',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
   //编辑数据集版本数据
@@ -331,7 +331,7 @@ export const ModaForgeResourceEndpoints = {
   // 查看单个载入任务详情
   getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 启停单个载入任务
-  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/{task_id}/{action}',
+  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/cron/release',
   // 立即运行指定载入任务
   runLoadApi: PrefixAimdp + '/load_tasks/new_start',
   // 删除指定文件

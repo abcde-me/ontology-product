@@ -27,7 +27,7 @@ const AccessTable = (props) => {
     {
       title: '文件名',
       dataIndex: 'file_name',
-      width: 420,
+      width: 400,
       ellipsis: true
     },
     {
@@ -67,12 +67,14 @@ const AccessTable = (props) => {
     {
       title: '开始时间',
       render: (_, item) => <div>{item.start_time}</div>,
-      sorter: (a, b) => a.start_time - b.start_time
+      sorter: (a, b) => a.start_time - b.start_time,
+      width: 230
     },
     {
       title: '结束时间',
       render: (_, item) => <div>{item.end_time}</div>,
-      sorter: (a, b) => a.end_time - b.end_time
+      sorter: (a, b) => a.end_time - b.end_time,
+      width: 230
     }
   ];
   const [data, setData] = useState<RecordingType[] | null>([
@@ -114,7 +116,7 @@ const AccessTable = (props) => {
         // record_id: 'Job20250703-jtsl4VBQFfF29HuQ',
         file_name: searchValue
       });
-      if (res.code == '') {
+      if (res.code == '' && res.status == 200) {
         setTotal(res.data.total);
         setData(res.data.items);
       }
