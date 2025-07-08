@@ -206,6 +206,13 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                   style={{ flex: 1, marginBottom: 0 }}
                   rules={[{ required: true, message: '请选择频率' }]}
                   validateTrigger={['onBlur', 'onChange']}
+                  onChange={(val) => {
+                    // Clear other fields when cycle changes
+                    form.setFieldsValue({
+                      date: [],
+                      time: ''
+                    });
+                  }}
                 >
                   <Select
                     placeholder="频率"

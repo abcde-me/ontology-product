@@ -10,7 +10,6 @@ import {
   Switch
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconPlus } from '@arco-design/web-react/icon';
-import { cronToHumanReadable } from './parseCron';
 import React, { useEffect, useState } from 'react';
 import TableDetail from './table-detail';
 import './index.css';
@@ -336,9 +335,7 @@ const DataLoadDetail = () => {
                 >
                   周期设置：
                 </div>
-                <div style={{ fontSize: '14px' }}>
-                  {/* {cronToHumanReadable('0 0 12  * *')} */}
-                </div>
+                <div style={{ fontSize: '14px' }}></div>
               </div>
             )}
           </div>
