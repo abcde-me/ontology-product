@@ -82,6 +82,8 @@ export default function Connection() {
   const [searchValue, setSearchValue] = useState(
     connectionId ? connectionId : ''
   );
+  // 连接器筛选的默认值
+  const [siftValue, setSiftValue] = useState({});
   const [ConnectionData, setConnectionData] = useState([]) as any;
   const [pagination, setPagination] = useState({
     // 当前第1页
@@ -107,7 +109,7 @@ export default function Connection() {
         connector_id: editObject.id,
         newfrom
       });
-      if (res.message == 'ok') {
+      if (res.code == '' && res.status == 200) {
         setEditLoadingState(false);
         // 确保数据更新完成后再调用 getListHan
         setEditVisible(false);
@@ -132,6 +134,7 @@ export default function Connection() {
     },
     {
       title: '状态',
+      dataIndex: 'status',
       width: 130,
       render: (_, item) => {
         const statusConfig =
@@ -161,12 +164,12 @@ export default function Connection() {
           text: STATUS_CONFIG[ConnectionStatus.CONNECTED].text,
           value: ConnectionStatus.CONNECTED
         }
-      ],
-      onFilter: (value, row) => row.status === value
+      ]
     },
     {
       title: '数据源类型',
       width: 150,
+      dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
         {
@@ -177,8 +180,7 @@ export default function Connection() {
           text: TYPE_CONFIG[ConnectorType.HDFS],
           value: ConnectorType.HDFS
         }
-      ],
-      onFilter: (value, row) => row.type === value
+      ]
     },
     {
       title: '创建人',
@@ -188,6 +190,7 @@ export default function Connection() {
     },
     {
       title: '创建时间',
+      dataIndex: 'created_at',
       width: 200,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
@@ -195,7 +198,9 @@ export default function Connection() {
     {
       title: '更新时间',
       width: 200,
-      render: (_, item) => <div className="fontMM">{item.updated_at}</div>
+      dataIndex: 'updated_at',
+      render: (_, item) => <div className="fontMM">{item.updated_at}</div>,
+      sorter: (a, b) => a.updated_at.localeCompare(b.updated_at)
     },
     {
       title: '操作',
@@ -244,7 +249,7 @@ export default function Connection() {
   const DeleteMethod = async (id: string) => {
     const res = await delconnectionList(id);
     console.log(res);
-    if (res.code == '') {
+    if (res.code == '' && res.status == 200) {
       Message.success({
         content: '删除成功'
       });
@@ -281,7 +286,25 @@ export default function Connection() {
       current: page
     }));
   };
+  const siftHan = (sorter, filters) => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1
+    }));
+    const siftdata = {
+      status: filters.status == undefined ? '' : filters.status.join(','),
+      type: filters.type == undefined ? '' : filters.type.join(','),
+      sort:
+        sorter.direction == undefined
+          ? ''
+          : sorter.direction == 'ascend'
+            ? 'asc'
+            : 'desc',
+      sort_by: sorter.field == undefined ? '' : sorter.field
+    };
 
+    setSiftValue(siftdata);
+  };
   // 获取连接器列表
   const getlist = async () => {
     try {
@@ -289,7 +312,8 @@ export default function Connection() {
       const res = await getConnectionList({
         page: pagination.current,
         page_size: pagination.pageSize,
-        name: searchValue
+        name: searchValue,
+        ...siftValue
       });
       setConnectionData(res.data.items);
       setPagination((prev) => ({
@@ -306,7 +330,7 @@ export default function Connection() {
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
-  }, [pagination.current, pagination.pageSize]);
+  }, [pagination.current, pagination.pageSize, siftValue]);
   return (
     <div
       style={{
@@ -359,6 +383,9 @@ export default function Connection() {
         pagination={false}
         rowKey="id"
         loading={tableLoding}
+        onChange={(pagination, sorter, filters) => {
+          siftHan(sorter, filters);
+        }}
       />
       {/* 分页 */}
       <Pagination
@@ -406,7 +433,13 @@ export default function Connection() {
           setEditVisible(false);
         }}
         footer={
-          <div style={{ marginBottom: '20px' }}>
+          <div
+            style={{
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}
+          >
             <Button
               style={{ fontSize: '14px', fontWeight: '400' }}
               onClick={() => {

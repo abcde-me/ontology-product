@@ -19,36 +19,35 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     setInputs
   });
   const appScenarios: { [key: string]: string } = {
-    tongyong: '通用',
-    fenlei: '文本分类',
-    tiqu: '文本提取',
-    shengcheng: '文本生成',
-    duolong: '多轮回答'
+    'tongyong': '通用',
+    'fenlei': '文本分类',
+    'tiqu': '文本提取',
+    'shengcheng': '文本生成',
+    'duolong': '多轮回答'
   };
 
-  const data = {
-    type: 'enhancement',
-    title: '数据增强节点',
-    desc: '',
-    enha_modle_id: inputs?.enha_modle_id, // 数据增强模型
-    app_scenarios: {
-      name: appScenarios[inputs?.app_scenarios_name],
-      type: inputs?.app_scenarios,
-      option: {
-        sample_num: inputs?.sample_num,
-        similarity_threshold: inputs?.similarity_threshold,
-        generate_sample_num: inputs?.generate_sample_num,
-        enhanced_proportion: inputs?.enhanced_proportion,
-        prompt: inputs?.prompt,
-        sample_data: inputs?.sample_data
-      }
-    }
-  };
 
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
+      const data = {
+        type: 'enhancement',
+        title: '数据增强节点',
+        desc: '',
+        enha_modle_id: payload?.enha_modle_id, // 数据增强模型
+        app_scenarios: {
+          name: appScenarios[payload?.app_scenarios_name],
+          type: payload?.app_scenarios_name,
+          option: {
+            sample_num: payload?.sample_num,
+            similarity_threshold: payload?.similarity_threshold,
+            generate_sample_num: payload?.generate_sample_num,
+            enhanced_proportion: payload?.enhanced_proportion,
+            prompt: payload?.prompt,
+            sample_data: payload?.sample_data
+          }
+        }
+      };
       const newInputs = produce(inputs, (draft: any) => {
-        console.log(payload, draft, '=========111111');
         draft.enha_modle_id = payload.enha_modle_id;
         draft.generate_sample_num = payload?.generate_sample_num;
         draft.similarity_threshold = payload?.similarity_threshold;
@@ -56,7 +55,6 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.prompt = payload.prompt;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.data = data;
-        draft.modelList = payload.modelList;
         draft.enhanced_proportion = payload.enhanced_proportion;
         draft.sample_data = payload.sample_data;
         draft.app_scenarios_name = payload.app_scenarios_name;
@@ -66,12 +64,23 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     },
     [inputs, setInputs]
   );
+
+  const setBoostPageData = useCallback(
+    (modelList) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.modelList = modelList;
+      })
+      setInputs(newInputs)
+    },
+    [inputs, setInputs]
+  );
   return {
     readOnly,
     inputs,
     handleVarListChange,
     handleAddVariable,
-    onValuesChange
+    onValuesChange,
+    setBoostPageData
   };
 };
 

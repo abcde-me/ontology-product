@@ -54,10 +54,11 @@ const LoadAddModal = (props: any) => {
             type: loadVal == 'once' ? 0 : 1,
             cycle_text: expression
           },
-          dest_path_id: 122
+          dest_path_id: pathId
         };
         const res = await addLoad(formData);
-        if (res.message == 'ok') {
+        if (res.code == '' && res.status == 200) {
+          cancelHan();
           history.push(
             `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
           );
@@ -79,11 +80,11 @@ const LoadAddModal = (props: any) => {
               week: ''
             }
           },
-          dest_path_id: 122
+          dest_path_id: pathId
         };
-        console.log(formData);
         const res = await addLoad(formData);
-        if (res.message == 'ok') {
+        if (res.code == '' && res.status == 200) {
+          cancelHan();
           history.push(
             `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
           );
@@ -91,7 +92,6 @@ const LoadAddModal = (props: any) => {
           Message.error(res.message);
         }
       }
-      cancelHan();
     } catch (error) {
       console.error('表单处理失败:', error);
     } finally {
@@ -162,7 +162,6 @@ const LoadAddModal = (props: any) => {
               <div>名称建议:北京市各区GDP数据_2024</div>
             </div>
           }
-          initialValue="s3"
         >
           <Input placeholder="请输入任务名称" />
         </FormItem>
@@ -173,6 +172,7 @@ const LoadAddModal = (props: any) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
+          initialValue="s3"
         >
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>

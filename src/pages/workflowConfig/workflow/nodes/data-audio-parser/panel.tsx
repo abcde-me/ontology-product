@@ -84,6 +84,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
           label={`选择文件：已选择${inputs.selected_files_num}个文件`}
           field="files"
           labelAlign="left"
+          extra="系统限制，只展示文件大小大于0且小于2G的文件"
           required
         >
           <FileList

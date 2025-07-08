@@ -33,8 +33,11 @@ const nodeDefault: NodeDefault<ImageParserNodeType> = {
     let errorMessages = '';
     const { selected_files_num, pic_model_id, pic_emb_model_id } = payload;
 
-    if (selected_files_num <= 0) {
+    if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个图片文件';
+    }
+    if (selected_files_num > 65536) {
+      errorMessages = '最多选择65536个图片文件';
     }
     if (!pic_model_id || !pic_emb_model_id) {
       errorMessages = '需要选择模型';

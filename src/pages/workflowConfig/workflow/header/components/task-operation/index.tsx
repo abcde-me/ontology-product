@@ -1,4 +1,10 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState
+} from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useKeyPress } from 'ahooks';
@@ -32,6 +38,7 @@ const AppPublisher = ({
   const [newCycleText, setNewCycleText] = useState(cycleText);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
+  const SchedulerRunRef = useRef<HTMLFormElement>(null);
 
   const handleOperate = useCallback(
     async (
@@ -81,14 +88,22 @@ const AppPublisher = ({
             title="定时任务设置"
             style={{ width: '640px' }}
             visible={schedulerDialogVisible}
-            onOk={() =>
+            onOk={async () => {
+              const valid = await SchedulerRunRef.current?.validate();
+
+              if (!valid) {
+                return;
+              }
+
               handleOperate(WorkflowOperation.CRON_RUNNING, {
                 cycle_text: newCycleText
-              })
-            }
+              });
+            }}
             onCancel={() => setSchedulerDialogVisible(false)}
           >
             <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
               options={newCycleText}
               onOptionsChange={handleOptionsChange}
             ></SchedulerRun>

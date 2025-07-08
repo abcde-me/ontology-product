@@ -133,19 +133,19 @@ export default function WorkflowTask() {
       filters: [
         {
           text: '运行完成',
-          value: 0
+          value: TaskRunStatus.success
         },
         {
           text: '运行失败',
-          value: 1
+          value: TaskRunStatus.fail
         },
         {
           text: '进行中',
-          value: 2
+          value: TaskRunStatus.running
         },
         {
           text: '已停止',
-          value: 3
+          value: TaskRunStatus.stop
         }
       ],
       onFilter: (value, row) => row.status == value
@@ -162,19 +162,7 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          onClick={() =>
-            handleToTaskDeatil(
-              record.id,
-              record.workflow_uuid,
-              record.ds_workflow_id
-            )
-          }
-          title={record.workflow_name}
-        >
-          {record.workflow_name}
-        </span>
+        <span title={record.workflow_name}>{record.workflow_name}</span>
       )
     },
     {

@@ -15,3 +15,16 @@ export const formatTime = (num: number) => {
   }
   return `${num.toFixed(2)} ${units[index]}`;
 };
+
+export function formatFileSize(bytes: number) {
+  if (bytes >= 1073741824) {
+    // 1GB = 1024^3 bytes
+    return (bytes / 1073741824).toFixed(2) + 'GB';
+  } else if (bytes >= 1048576) {
+    // 1MB = 1024^2 bytes
+    return (bytes / 1048576).toFixed(2) + 'MB';
+  } else {
+    // 小于1MB
+    return (bytes / 1024).toFixed(2) + 'KB';
+  }
+}

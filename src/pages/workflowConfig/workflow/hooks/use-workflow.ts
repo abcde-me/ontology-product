@@ -46,6 +46,7 @@ import { IsOnline } from '@/types/workflowApi';
 // import defaultWorkflowBlockConfigs from '@/pages/workflowConfig/mockData/defaultWorkflowBlockConfigs.json'
 // import workflowsPublish from '@/pages/workflowConfig/mockData/workflowsPublish.json'
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
+import { useLocation } from 'react-router-dom';
 
 export const useIsChatMode = () => {
   const appDetail = useTaskStore((s) => s.workflowDetail);
@@ -537,6 +538,10 @@ export const useWorkflowInit = () => {
     workflowStore.setState({ appId: appDetail?.workflow_uuid });
   }, [appDetail?.workflow_uuid, workflowStore]);
 
+  const location = useLocation(); // 获取当前路由信息
+  // 只有在作业详情的时候处理
+  const isShowChatMode =
+    location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
   const handleGetInitialWorkflowData = useCallback(async () => {
     try {
       const result = await getWorkflowDraft();
@@ -559,7 +564,28 @@ export const useWorkflowInit = () => {
         });
       } else {
         const res = result.data;
-        setData(res);
+        const setRes = result?.data?.graph?.nodes?.map((node, index) => {
+          return {
+            ...node,
+            position: {
+              ...node.position,
+              y: node?.position?.y - 180,
+            },
+            positionAbsolute: {
+              ...node.positionAbsolute,
+              y: node?.positionAbsolute?.y - 180,
+            }
+          };
+        });
+        const newRes = {
+          ...res,
+          graph: {
+            ...res?.graph,
+            nodes: setRes,
+          }
+        }
+        // 在作业详情的时候修改节点位置，其他情况还是原始数据不处理
+        setData(isShowChatMode ? newRes : res);
         workflowStore.setState({
           envSecrets: (res.environment_variables || [])
             .filter((env) => env.value_type === 'secret')
