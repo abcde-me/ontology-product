@@ -90,8 +90,14 @@ export default function WorkflowTask() {
   };
 
   // 跳转目录
-  const handleToDirectoryPath = (path: string) => {
-    history.push('/tenant/compute/modaforge/dataCatalog');
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    root_type: string | number
+  ) => {
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+    );
   };
 
   // 筛选排序操作
@@ -218,7 +224,13 @@ export default function WorkflowTask() {
         <span
           className="hover-change"
           title={record.source_path}
-          onClick={() => handleToDirectoryPath(record.source_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.source_parent_id,
+              1
+            )
+          }
         >
           {record.source_path}
         </span>
@@ -233,7 +245,13 @@ export default function WorkflowTask() {
         <span
           className="hover-change"
           title={record.target_path}
-          onClick={() => handleToDirectoryPath(record.target_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.target_path_id,
+              record.target_parent_id,
+              1
+            )
+          }
         >
           {record.target_path}
         </span>

@@ -85,9 +85,13 @@ export default function WorkflowList() {
   };
 
   // 跳转目录
-  const handleToDirectoryPath = (id: string, parent_id: string) => {
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    root_type: string | number
+  ) => {
     history.push(
-      `/tenant/compute/modaforge/dataCatalog?root_type=1&id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
   };
 
@@ -236,7 +240,8 @@ export default function WorkflowList() {
           onClick={() =>
             handleToDirectoryPath(
               record.source_path_id,
-              record.parent_source_path_id
+              record.parent_source_path_id,
+              1
             )
           }
         >
@@ -256,7 +261,8 @@ export default function WorkflowList() {
           onClick={() =>
             handleToDirectoryPath(
               record.target_path_id,
-              record.parent_target_path_id
+              record.parent_target_path_id,
+              2
             )
           }
         >
