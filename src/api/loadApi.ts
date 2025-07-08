@@ -29,6 +29,7 @@ export async function getLoad(task_id) {
 }
 // 启停单个载入任务
 export async function startAndStopeLoad(params) {
+  console.log(params);
   return await UAPI.RES.startAndStopeLoadApi({}).post(params).inRegion().do();
 }
 // 立即运行载入任务

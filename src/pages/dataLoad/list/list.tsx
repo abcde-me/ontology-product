@@ -345,7 +345,12 @@ export default function DataLoad() {
           : sorter.field == 'last_run_time'
             ? 'updateTime'
             : 'createdTime',
-      sort: sorter.direction == undefined ? '' : sorter.direction
+      sort:
+        sorter.direction == undefined
+          ? ''
+          : sorter.direction == 'ascend'
+            ? 'asc'
+            : 'desc'
     };
     setLoadSiftObject(newSiftObj);
   };

@@ -67,7 +67,7 @@ function convertToCron(options): string {
  * @param cronExpression cron表达式
  * @returns 人类可读的时间描述
  */
-function cronToHumanReadable(cronExpression: string): string {
+export function cronToHumanReadable(cronExpression: string): string {
   const parts = cronExpression.split(' ');
   if (parts.length !== 5) {
     throw new Error('无效的cron表达式');

@@ -91,25 +91,33 @@ const FormComponent: React.FC<FormProps> = ({
       // }
       const filesArray: string[] = [];
       if (downloadData && downloadData.data_path_id) {
-        filesArray.push(downloadData.abs_data_path + '/' + downloadData.file_name);
+        filesArray.push(
+          downloadData.abs_data_path + '/' + downloadData.file_name
+        );
       } else if (downloadData && downloadData.extras) {
-        filesArray.push(downloadData.full_path + '/' + downloadData.extras.file_name);
+        filesArray.push(
+          downloadData.full_path + '/' + downloadData.extras.file_name
+        );
       } else if (exportdataset && exportdataset.latest_file_path) {
-        filesArray.push(exportdataset.latest_file_path + '/' + exportdataset.latest_file_name);
+        filesArray.push(
+          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
+        );
       }
       if (exportdatas && exportdatas.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.abs_data_path + '/' + item.file_name);
-          })
+          });
         } else if (exportdatas[0].extras) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.full_path + '/' + item.extras.file_name);
-          })
+          });
         } else if (exportdatas[0].latest_file_path) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.latest_file_path + '/' + item.latest_file_name);
-          })
+            filesArray.push(
+              item.latest_file_path + '/' + item.latest_file_name
+            );
+          });
         }
       }
       const res = await exportFile({
@@ -117,11 +125,11 @@ const FormComponent: React.FC<FormProps> = ({
         output_path: form.getFieldValue('path'),
         // file_path: full_paths,
         connector_id: Number(form.getFieldValue('province')),
-        files: filesArray,
+        files: filesArray
       });
-      console.log(res,'这是导出返回的结果666666666666666');
+      console.log(res, '这是导出返回的结果666666666666666');
       // console.log('导出文件名', exportNames);
-      if(res.status !== 0&&res.code===''){
+      if (res.status !== 0 && res.code === '') {
         form.resetFields();
         Message.success('导出成功');
         handlClear && handlClear();
@@ -134,7 +142,7 @@ const FormComponent: React.FC<FormProps> = ({
           console.log('回调未提供');
         }
         onCancel && onCancel();
-      }else{
+      } else {
         Message.error('导出失败，请稍后重试');
          form.resetFields();
          onCancel && onCancel();
