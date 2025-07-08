@@ -652,14 +652,20 @@ const DatasetDetail: React.FC = () => {
   };
 
   // 比较两个数据对象是否相同（排除 idName 字段）
-  const isDataEqual = (data1: any, data2: any) => {
-    if (!data1 || !data2) return false;
+  const isDataEqual = (
+    updateData: Record<string, unknown>,
+    backupData: Record<string, unknown>
+  ) => {
+    if (!updateData || !backupData) return false;
 
     // 获取需要比较的字段（排除 idName）
-    const fieldsToCompare = Object.keys(data1).filter((key) => key !== idName);
+    const fieldsToCompare = Object.keys(updateData).filter(
+      (key) => key !== idName
+    );
 
     return fieldsToCompare.every((field) => {
-      return data1[field] === data2[field];
+      console.log(field, updateData[field], backupData[field]);
+      return updateData[field] === backupData[field];
     });
   };
 
