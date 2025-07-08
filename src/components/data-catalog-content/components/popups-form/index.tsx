@@ -144,8 +144,8 @@ const FormComponent: React.FC<FormProps> = ({
         onCancel && onCancel();
       } else {
         Message.error('导出失败，请稍后重试');
-         form.resetFields();
-         onCancel && onCancel();
+        form.resetFields();
+        onCancel && onCancel();
       }
     } catch (e) {
       // 处理验证失败或导出失败的情况

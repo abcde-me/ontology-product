@@ -569,11 +569,11 @@ export const useWorkflowInit = () => {
             ...node,
             position: {
               ...node.position,
-              y: node?.position?.y - 180,
+              y: node?.position?.y - 180
             },
             positionAbsolute: {
               ...node.positionAbsolute,
-              y: node?.positionAbsolute?.y - 180,
+              y: node?.positionAbsolute?.y - 180
             }
           };
         });
@@ -581,9 +581,9 @@ export const useWorkflowInit = () => {
           ...res,
           graph: {
             ...res?.graph,
-            nodes: setRes,
+            nodes: setRes
           }
-        }
+        };
         // 在作业详情的时候修改节点位置，其他情况还是原始数据不处理
         setData(isShowChatMode ? newRes : res);
         workflowStore.setState({

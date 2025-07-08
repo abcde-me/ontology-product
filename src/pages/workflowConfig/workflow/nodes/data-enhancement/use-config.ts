@@ -25,15 +25,18 @@ const useConfig = (id: string, payload: CodeNodeType) => {
   }, [inputs]);
 
   const appScenarios: { [key: string]: string } = {
-    'tongyong': '通用',
-    'fenlei': '文本分类',
-    'tiqu': '文本提取',
-    'shengcheng': '文本生成',
-    'duolong': '多轮回答'
+    tongyong: '通用',
+    fenlei: '文本分类',
+    tiqu: '文本提取',
+    shengcheng: '文本生成',
+    duolong: '多轮回答'
   };
 
+<<<<<<< HEAD
 
   console.log(payload, '==use-top');
+=======
+>>>>>>> @{-1}
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
       console.log(payload, '==use');
@@ -77,8 +80,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     (modelList) => {
       const newInputs = produce(inputRef.current, (draft: any) => {
         draft.modelList = modelList;
-      })
-      setInputs(newInputs)
+      });
+      setInputs(newInputs);
     },
     [setInputs]
   );
