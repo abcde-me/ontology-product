@@ -119,9 +119,9 @@ const FormComponent: React.FC<FormProps> = ({
         connector_id: Number(form.getFieldValue('province')),
         files: filesArray,
       });
-      console.log(res,'这是导出返回的结果666666666666666');
+      console.log(res, '这是导出返回的结果666666666666666');
       // console.log('导出文件名', exportNames);
-      if(res.status !== 0&&res.code===''){
+      if (res.status !== 0 && res.code === '') {
         form.resetFields();
         Message.success('导出成功');
         handlClear && handlClear();
@@ -134,10 +134,10 @@ const FormComponent: React.FC<FormProps> = ({
           console.log('回调未提供');
         }
         onCancel && onCancel();
-      }else{
+      } else {
         Message.error('导出失败，请稍后重试');
-         form.resetFields();
-         onCancel && onCancel();
+        form.resetFields();
+        onCancel && onCancel();
       }
     } catch (e) {
       // 处理验证失败或导出失败的情况
@@ -177,6 +177,11 @@ const FormComponent: React.FC<FormProps> = ({
     }
   };
 
+  // 添加处理连接器选择变化的函数
+  const handleConnectorChange = (value, option) => {
+    const selectedConnector = connectorList.find((item: any) => item.id === value);
+  };
+
   // 修改为监听 visible 变化，当弹窗打开时设置表单值
   useEffect(() => {
     if (visible) {
@@ -210,6 +215,7 @@ const FormComponent: React.FC<FormProps> = ({
           <Select
             allowClear
             placeholder="请选择连接器"
+            onChange={handleConnectorChange}
             options={connectorList.map((item: any) => ({
               label: item.name,
               value: item.id

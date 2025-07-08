@@ -99,6 +99,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
   const [loading, setLoading] = useState(false); // 添加加载状态
   const [fileTypeFilters, setFileTypeFilters] = useState<string[]>([]); // 文件类型筛选条件
+  const [sortField, setSortField] = useState<string>(''); // 排序字段
+  const [sortOrder, setSortOrder] = useState<string>(''); // 排序方向 asc/desc
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -127,20 +129,29 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   // 防止重复请求
   const isDataFetching = useRef(false);
 
+  // 组件挂载时的初始化处理
   useEffect(() => {
     isFirstRender.current = false;
+    // 组件卸载时清理
+    return () => {
+      console.log(`${tableType}表格组件卸载`);
+      isDataFetching.current = false;
+    };
   }, []);
+
   // 监听选中路径变化
-  useEffect(() => {
-    console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
-    // 获取到路径后直接传递给后端，然后前端根据路径获取数据
-  }, [selectedFullPath]);
+  // useEffect(() => {
+  //   console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
+  //   // 获取到路径后直接传递给后端，然后前端根据路径获取数据
+  //   if (!isFirstRender.current && selectedFullPath) {
+  //     setCurrentPage(1);
+  //     getTableList();
+  //   }
+  // }, [selectedFullPath]);
   useEffect(() => {
     if (isFirstRender.current) {
       return;
     }
-    console.log('数据卷发生变化，重置输入框内容', selectedKey, selectedFullPath);
-    // 重置页码
     setCurrentPage(1);
     // 触发自定义事件通知父组件重置搜索输入
     if (window) {
@@ -175,7 +186,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       });
       window.dispatchEvent(resetSearchEvent);
       setCurrentPage(1);
-      setTableData([]);
     }
   }, [searchConditionType, tableType]);
   // 将方法暴露给父组件
@@ -219,6 +229,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       return;
     }
 
+    // 检查目标表格是否有有效路径
+    if (tableType === 'target' && !selectedFullPath) {
+      console.log('目标表格缺少有效路径，跳过请求');
+      setTableData([]);
+      setTotal(0);
+      return;
+    }
+
     try {
       // 标记开始加载
       isDataFetching.current = true;
@@ -227,7 +245,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
       const params = {
-        full_path: selectedFullPath,  // 使用默认路径,后续修改为selectedFullPath
+        full_path: selectedFullPath,  // 使用选中的完整路径
         page: currentPage,
         limit: pageSize,
         start_time: startTime || '',
@@ -249,6 +267,13 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
+
+      // 添加排序参数
+      if (sortField && sortOrder) {
+        // newParams.sort = sortOrder;
+        newSourceParams.sort = sortOrder;
+      }
+
       if (validFileTypes.length > 0) {
         newParams.file_type = validFileTypes;
         newSourceParams.file_type = validFileTypes;
@@ -337,7 +362,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // 首次渲染标记
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      getTableList(); // 首次渲染也获取数据
+      // getTableList(); // 首次渲染也获取数据
+      return;
+    }
+    // 防止在没有路径的情况下请求目标数据
+    if (tableType === 'target' && !selectedFullPath) {
       return;
     }
     const timer = setTimeout(() => {
@@ -356,7 +385,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     pageSize,
     selectedFullPath,
     fileTypeFilters,
-    tableType
+    tableType,
+    sortField,
+    sortOrder
   ]);
 
   // 当tableType变化时重置相关状态，不再重复调用getTableList
@@ -444,8 +475,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedRowKeys,
         selectedRows
       );
-
-
       const currentPageDataIds = tableData.map(item => item.id);
       const remainingKeys = crossPageSelectedKeys.filter(
         key => !currentPageDataIds.includes(Number(key)) || selectedRowKeys.includes(key)
@@ -453,8 +482,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       const remainingRows = crossPageSelectedRows.filter(
         row => !currentPageDataIds.includes(Number(row.id)) || selectedRowKeys.includes(row.id)
       );
-
-
       const newKeys = [...remainingKeys];
       const newRows = [...remainingRows];
 
@@ -519,8 +546,22 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
   const handleTableChange = (pagination, filters, sorter) => {
-    // console.log('Table changed:', { pagination, filters, sorter, tableType });
+    console.log('Table changed:', { pagination, filters, sorter, tableType });
     let newFileTypes: string[] = [];
+    console.log('sorter6666666666666666666666666666666', filters);
+    // 处理排序参数
+    let newSortField = '';
+    let newSortOrder = '';
+    if (filters && filters.field) {
+      newSortField = filters.field;
+      newSortOrder = filters.direction === 'ascend' ? 'asc' : 'desc';
+      setSortField(newSortField);
+      setSortOrder(newSortOrder);
+    } else {
+      setSortField('');
+      setSortOrder('');
+    }
+
     if (sorter && sorter.file_type && Array.isArray(sorter.file_type)) {
       newFileTypes = sorter.file_type;
       // console.log('从sorter.file_type获取筛选条件:', newFileTypes);
@@ -529,16 +570,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       newFileTypes = sorter.type;
       // console.log('从sorter.type获取筛选条件:', newFileTypes);
     }
-    // // 检查filters中的file_type
-    // else if (filters && filters.file_type && Array.isArray(filters.file_type) && filters.file_type.length > 0) {
-    //   newFileTypes = filters.file_type;
-    //   console.log('从filters.file_type获取筛选条件:', newFileTypes);
-    // }
-    // // 检查filters中的type
-    // else if (filters && filters.type && Array.isArray(filters.type) && filters.type.length > 0) {
-    //   newFileTypes = filters.type;
-    //   console.log('从filters.type获取筛选条件:', newFileTypes);
-    // }
     else if (sorter && typeof sorter.file_type === 'string') {
       newFileTypes = [sorter.file_type];
       // console.log('从sorter.file_type字符串获取筛选条件:', newFileTypes);
@@ -557,6 +588,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       (sorter && Object.keys(sorter).length > 0)) {
       setCurrentPage(1);
     }
+
+    // 重新获取数据
+    // getTableList();
   };
 
   // 在数据加载完成后，设置当前页中应该被选中的行

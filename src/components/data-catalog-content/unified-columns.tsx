@@ -283,18 +283,11 @@ export const getUnifiedColumns = (
         title: '载入开始时间',
         dataIndex: 'task_load_start_time',
         width: 180,
-        sorter: (a, b) =>
-          new Date(a.task_load_start_time).getTime() - new Date(b.task_load_start_time).getTime(),
-        onFilter: (value, record) => {
-          if (!value || value.length !== 2) return true;
-          if (!record.task_load_start_time) return false;
+        sorter: true,
 
-          const recordDate = new Date(record.task_load_start_time);
-          const startDate = new Date(value[0]);
-          const endDate = new Date(value[1]);
-
-          return recordDate >= startDate && recordDate <= endDate;
-        },
+        // sortOrder: 'ascend',
+        // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+        sortDirections: ['ascend' as const, 'descend' as const],
         render: (_, record) => formatDateTime(record.task_load_start_time)
       },
       {
@@ -362,20 +355,10 @@ export const getUnifiedColumns = (
       {
         title: '生成时间',
         dataIndex: 'created_at',
-        sorter: (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        onFilter: (value, record) => {
-          if (!value || value.length !== 2) return true;
-          if (!record.createdAt) return false;
-
-          const recordDate = new Date(record.createdAt);
-          const startDate = new Date(value[0]);
-          const endDate = new Date(value[1]);
-
-          return recordDate >= startDate && recordDate <= endDate;
-        },
-        render: (_, record) => formatDateTime(record.created_at),
-        width: 180
+        width: 180,
+        sorter: true,
+        // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+        render: (_, record) => formatDateTime(record.created_at)
       },
       {
         title: '其他信息',
@@ -444,27 +427,25 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
             file_ids: ids,
             path_id: selectedKey
           });
-          if(res.code==0){
+          if (res.code == 0) {
             Message.success('删除成功');
-          }else{
+            refreshData();
+            handAllReset();
+          } else {
             Message.error('删除失败，请稍后重试');
             return
           }
         } else {
           // handAllReset();
           const res = await deleteSourceFile(data.id);
-          if(res.code==0){
+          if (res.code == 0) {
             Message.success('删除成功');
-          }else{
+            refreshData();
+            handAllReset();
+          } else {
             Message.error('删除失败，请稍后重试');
             return
           }
-        }
-        // 删除成功后刷新数据
-        if (typeof refreshData === 'function') {
-          Message.success('删除成功');
-          refreshData();
-          handAllReset();
         }
       }
     });

@@ -28,7 +28,9 @@ type UnifiedTableProps<RecordType> = {
   tableType?: 'source' | 'target';
   // 选中的行 keys
   selectedRowKeys?: React.Key[];
-} & Omit<TableProps<RecordType>, 'columns' | 'data' | 'rowKey'>;
+  // 排序和筛选变化回调
+  onChange?: (pagination: any, filters: any, sorter: any) => void;
+} & Omit<TableProps<RecordType>, 'columns' | 'data' | 'rowKey' | 'onChange'>;
 
 /**
  * 统一的表格组件
@@ -46,6 +48,7 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
     onRowHover,
     tableType = 'source',
     selectedRowKeys: externalSelectedRowKeys,
+    onChange,
     ...restProps
   } = props;
 
@@ -141,6 +144,13 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
     }
   };
 
+  // 处理表格的排序、筛选变化
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (onChange) {
+      onChange(pagination, filters, sorter);
+    }
+  };
+
   // 计算表格总宽度，确保有足够的宽度来触发横向滚动
   const totalWidth = columns.reduce(
     (sum, col) => sum + (Number(col.width) || 150),
@@ -173,7 +183,7 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
     <Table<RecordType>
       columns={columns}
       scroll={{
-        x: Math.max(totalWidth + 100, 1300) 
+        x: Math.max(totalWidth + 100, 1300)
       }}
       rowSelection={rowSelection}
       data={data}
@@ -182,6 +192,7 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
       border={true}
       onRow={getRowProps}
       noDataElement={<NoDataEmpty />}
+      onChange={handleTableChange}
       {...restProps}
 
     />

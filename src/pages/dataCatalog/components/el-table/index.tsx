@@ -83,11 +83,14 @@ export default function Eltable() {
   // 表格引用，用于调用表格内部方法
   const tableRef = React.useRef<TableRefType>(null);
 
-  // 监听activeTab变化，在切换标签页时重置选中状态
+  // 监听activeTab变化，在切换标签页时重置选中状态和日期选择器
   useEffect(() => {
-    console.log('标签页切换，重置选中状态', activeTab);
     // 清空选中行数据
     setSelectedRows([]);
+    // 清空日期选择器
+    setDateRange([]);
+    setStartTime('');
+    setEndTime('');
     if (tableRef.current) {
       if (tableRef.current.clearAllSelections) {
         tableRef.current.clearAllSelections();
@@ -183,13 +186,7 @@ export default function Eltable() {
       keyword: '',
       isActive: false
     }));
-
-    // 清空搜索关键字
     setSearchKeyword('');
-    // 如果有搜索关键字，重新执行搜索
-    // if (searchKeyword) {
-    //   handleTargetSearch(searchKeyword, value);
-    // }
   };
 
   // Target表格的搜索逻辑（支持按类型搜索）
@@ -300,25 +297,27 @@ export default function Eltable() {
                 file_ids: ids,
                 path_id: selectedKey
               });
-              if(res.code==''){
+              if (res.code == '') {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
-              }else{
+              } else {
                 Message.error('删除失败，请稍后重试');
               }
-              
+
             }
           } else {
             const fileIds = selectedRows.map((item: { id: string }) => item.id);
+            console.log(fileIds);
+
             ids.push(...fileIds);
             if (selectedRows.length > 0) {
               const res = await deleteSourceFileBatch({
                 ids: ids
               });
-              if(res.code==''){
+              if (res.code == '') {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
-              }else{
+              } else {
                 Message.error('删除失败，请稍后重试');
               }
             }
@@ -535,6 +534,8 @@ export default function Eltable() {
               onChange={onChange}
               onSelect={onSelect}
               onOk={onOk}
+              value={dateRange.length > 0 ? dateRange : undefined}
+              allowClear={true}
             />
           </Space>
 
@@ -558,6 +559,7 @@ export default function Eltable() {
             dataType="volume"
             selectedFullPath={selectedPath}
             selectedKey={selectedKey}
+            key={`${activeTab}-${selectedKey}-${selectedPath}`}
           />
         </div>
       </div>
