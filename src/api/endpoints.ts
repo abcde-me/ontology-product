@@ -295,7 +295,7 @@ export const ModaForgeResourceEndpoints = {
   //删除数据集
   deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
   //批量删除数据集
-  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch_delete',
+  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch-delete',
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/datasets/version/data',
   //编辑数据集版本数据
@@ -303,7 +303,7 @@ export const ModaForgeResourceEndpoints = {
   //获取数据集版本列表
   datasetVersionListApi: PrefixAimdp + '/datasets/versionld',
   //版本重新生成
-  datasetVersionRebuildApi: PrefixAimdp + 'datasets/version/retry',
+  datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
 
   // 连接器接口
 
