@@ -55,11 +55,11 @@ export function useEditableTree({ catalogTreeStore }) {
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const nameArr = new Set(data.map((item) => item.name));
+      const set = new Set(data.map((item) => item.name));
       let x = data.length + 1;
       let name = `${baseName}${x}`;
 
-      while (nameArr.has(name)) {
+      while (set.has(name)) {
         x++;
         name = `${baseName}${x}`;
       }

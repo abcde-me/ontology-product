@@ -45,6 +45,8 @@ interface Effects {
   fetchData: (options?: {
     showLoading?: boolean;
     activeTab?: string;
+    parent_id?: string;
+    id?: string;
   }) => Promise<Partial<CatalogTreeState>>;
 }
 
@@ -52,7 +54,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   constructor(public member: DataCatalog) {
     super({
       state: {
-        activeTab: 'src',
+        activeTab: '',
         searchValue: '',
         inputValue: '',
         treeData: [],
@@ -64,12 +66,10 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       },
       effects: {
         fetchData: createAsyncEffect(
-          async (options?: {
-            showLoading?: boolean;
-            activeTab?: string;
-          }): Promise<Partial<CatalogTreeState>> => {
-            const { activeTab } = this.getState();
-            return await this.initTreeData(options?.activeTab || activeTab);
+          async (
+            options?: Parameters<Effects['fetchData']>[0]
+          ): Promise<Partial<CatalogTreeState>> => {
+            return await this.initTreeData(options);
           },
           { loadingKey: 'loading' }
         )
@@ -110,25 +110,41 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     return this.convertRawDataToTreeData(res?.data?.[activeTab] || []);
   }
 
-  async initTreeData(activeTab: string) {
-    try {
-      const cacheTreeData = await this.getRawData({ activeKey: activeTab });
+  async initTreeData(options: Parameters<Effects['fetchData']>[0]) {
+    const { activeTab } = this.getState();
 
-      const defaultNode = cacheTreeData?.[0];
-      const defaultExpand = [
+    try {
+      const cacheTreeData = await this.getRawData({
+        activeKey: options?.activeTab || activeTab
+      });
+
+      let defaultExpand: string[] = [];
+      let defaultNode = cacheTreeData?.[0];
+      let selectedNode = defaultNode?.children?.[0]?.children?.[0];
+
+      if (options?.parent_id && options.id) {
+        defaultNode =
+          cacheTreeData.find((d) => d.key === options?.parent_id) ||
+          defaultNode;
+        selectedNode =
+          defaultNode?.children?.[0]?.children?.find((item) => {
+            return item.key === options?.id;
+          }) || selectedNode;
+      }
+
+      defaultExpand = [
         defaultNode?.key || '',
-        defaultNode?.children?.[0]?.key || '',
-        defaultNode?.children?.[1]?.key || ''
+        defaultNode?.children?.[0]?.key || ''
       ];
-      const defaultSelectedNode = defaultNode?.children?.[0]?.children?.[0];
 
       return {
+        searchValue: '',
+        activeTab: options?.activeTab || activeTab,
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
-        searchValue: '',
-        selectedKey: defaultSelectedNode?.key || '',
-        selectedPath: defaultSelectedNode?.fullPath || ''
+        selectedKey: selectedNode?.key || '',
+        selectedPath: selectedNode?.fullPath || ''
       };
     } catch (err) {
       console.log(err);
