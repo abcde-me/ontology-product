@@ -248,13 +248,12 @@ export default function Connection() {
   // 点击删除按钮执行的方法
   const DeleteMethod = async (id: string) => {
     const res = await delconnectionList(id);
-    console.log(res);
     if (res.code == '' && res.status == 200) {
       Message.success({
         content: '删除成功'
       });
     } else {
-      Message.success(res.message);
+      Message.error(res.message);
     }
     getlist();
     console.log(id);

@@ -44,7 +44,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       }
       setBoostPageData(ModelLs)
     });
-  }, [inputs, modelList]);
+  }, []);
 
   const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
   const prompt_text = TextPlan[app_scenarios_name]?.prompt;
