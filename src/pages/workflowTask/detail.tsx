@@ -69,6 +69,12 @@ enum NodeTypeName {
   enhancement = '数据增强'
 }
 
+// 枚举开始时间结束时间字段
+enum StartOrEnd {
+  start_time = 'start_time',
+  end_time = 'end_time'
+}
+
 // 定义taskDetailData值的类型
 interface TaskDetailObject {
   job_name?: string;
@@ -112,19 +118,25 @@ export default function WorkflowTaskDetail() {
     pageSize: 10,
     total: 100
   });
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = useState({
+    status: '',
+    file_type: '',
+    sort: '',
+    sort_by: ''
+  });
 
   // 初始化详情基本数据
   useEffect(() => {
     if (taskId) getDetailData(true);
-
     const intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
     return () => clearInterval(intervalDetailData); // 组件卸载时清理
   }, [taskId]);
 
-  // 确保activeNode数据变化后再调用getNodeDetail
+  // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
     if (taskId && activeNode) getNodeDetail();
-  }, [activeNode]);
+  }, [activeNode, sortValue]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
@@ -300,6 +312,32 @@ export default function WorkflowTaskDetail() {
     getNodeDetail(current, pageSize);
   };
 
+  // 获取子节点的筛选条件数据
+  const handleChildSortData = (pagination, sorter, filters) => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1
+    }));
+    const sortdata = {
+      status: filters.status === undefined ? '' : filters.status.join(','),
+      file_type:
+        filters.file_type === undefined ? '' : filters.file_type.join(','),
+      sort:
+        sorter.direction === undefined
+          ? ''
+          : sorter.direction === 'ascend'
+            ? 'asc'
+            : 'desc',
+      sort_by:
+        sorter.field === undefined
+          ? ''
+          : sorter.field === StartOrEnd.start_time
+            ? 'start_run_time'
+            : 'end_run_time'
+    };
+    setSortValue(sortdata);
+  };
+
   // 切换节点tab
   const handleChangeTab = (val: string) => {
     const isParse =
@@ -319,7 +357,8 @@ export default function WorkflowTaskDetail() {
       task_type: activeNode,
       search_key: '',
       page: current || pagination.current,
-      page_size: pageSize || pagination.pageSize
+      page_size: pageSize || pagination.pageSize,
+      ...sortValue
     };
     const res = await getTaskDetailNode(params);
     if (!res?.data) return;
@@ -370,6 +409,7 @@ export default function WorkflowTaskDetail() {
                       loading={loading}
                       onSendData={handleChildData}
                       pagination={pagination}
+                      onSortData={handleChildSortData}
                     />
                   ) : item.task_type === NodeType.cleaning ? (
                     <DataCleaningNode

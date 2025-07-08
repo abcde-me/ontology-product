@@ -2,17 +2,32 @@ import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
 import { Pagination, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import PdfIcon from '@/assets/pdf-icon.svg';
-import TxtIcon from '@/assets/txt-icon.svg';
-import EpubIcon from '@/assets/epub-icon.svg';
-import TimeFormatting from '@/utils/timeFormatting';
+import PdfIcon from '@/assets/file/pdf-icon.svg';
+import TxtIcon from '@/assets/file/txt-icon.svg';
+import EpubIcon from '@/assets/file/epub-icon.svg';
 import noDataElement from '@/components/no-data';
 import { debounce } from 'lodash';
+import getFileIcon from '@/components/file-icon';
 
 // 枚举文件类型
 enum FileType {
+  doc = 'doc',
+  docx = 'docx',
+  jpg = 'jpg',
+  m4a = 'm4a',
+  mp4 = 'mp4',
   pdf = 'pdf',
+  ppt = 'ppt',
+  pptx = 'pptx',
+  text = 'text',
   txt = 'txt',
+  wav = 'wav',
+  exe = 'exe',
+  bucket = 'bucket',
+  dmg = 'dmg',
+  torrent = 'torrent',
+  apk = 'apk',
+  rar = 'rar',
   epub = 'epub'
 }
 
@@ -27,8 +42,9 @@ export default function ParseNode(props: {
   loading;
   onSendData;
   pagination;
+  onSortData;
 }) {
-  const { dataSource, onSendData, pagination } = props;
+  const { dataSource, onSendData, pagination, onSortData } = props;
 
   // 使用防抖控制onSendData
   const changeRef = useRef(debounce(onSendData, 100));
@@ -60,7 +76,8 @@ export default function ParseNode(props: {
             style={{
               width: '5px',
               height: '5px',
-              backgroundColor: record.status ? '#10B981' : '#EF4444',
+              backgroundColor:
+                record.status === FileStatus.success ? '#10B981' : '#EF4444',
               borderRadius: '50%',
               marginRight: '5px'
             }}
@@ -71,14 +88,13 @@ export default function ParseNode(props: {
       filters: [
         {
           text: '成功',
-          value: true
+          value: FileStatus.success
         },
         {
           text: '失败',
-          value: false
+          value: FileStatus.fail
         }
-      ],
-      onFilter: (value, row) => row.status == value
+      ]
     },
     {
       title: '文件类型',
@@ -86,47 +102,98 @@ export default function ParseNode(props: {
       width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {record.file_type === FileType.pdf ? (
-            <PdfIcon />
-          ) : record.file_type === FileType.txt ? (
-            <TxtIcon />
-          ) : (
-            <EpubIcon />
-          )}
+          {getFileIcon(record.file_type)}
           <div style={{ margin: '0 0 0 5px' }}>{record.file_type}</div>
         </div>
       ),
       filters: [
         {
-          text: '成功',
-          value: true
+          text: FileType.doc,
+          value: FileType.doc
         },
         {
-          text: '失败',
-          value: false
+          text: FileType.docx,
+          value: FileType.docx
+        },
+        {
+          text: FileType.jpg,
+          value: FileType.jpg
+        },
+        {
+          text: FileType.m4a,
+          value: FileType.m4a
+        },
+        {
+          text: FileType.mp4,
+          value: FileType.mp4
+        },
+        {
+          text: FileType.pdf,
+          value: FileType.pdf
+        },
+        {
+          text: FileType.ppt,
+          value: FileType.ppt
+        },
+        {
+          text: FileType.pptx,
+          value: FileType.pptx
+        },
+        {
+          text: FileType.text,
+          value: FileType.text
+        },
+        {
+          text: FileType.txt,
+          value: FileType.txt
+        },
+        {
+          text: FileType.wav,
+          value: FileType.wav
+        },
+        {
+          text: FileType.exe,
+          value: FileType.exe
+        },
+        {
+          text: FileType.bucket,
+          value: FileType.bucket
+        },
+        {
+          text: FileType.dmg,
+          value: FileType.dmg
+        },
+        {
+          text: FileType.torrent,
+          value: FileType.torrent
+        },
+        {
+          text: FileType.apk,
+          value: FileType.apk
+        },
+        {
+          text: FileType.rar,
+          value: FileType.rar
+        },
+        {
+          text: FileType.epub,
+          value: FileType.epub
         }
-      ],
-      onFilter: (value, row) => row.status == value
+      ]
     },
     {
       title: '开始时间',
       dataIndex: 'start_time',
       width: 150,
       render: (_, record) => <span>{record.start_time}</span>,
-      sorter: (a, b) => {
-        return (
-          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-        );
-      }
+      sorter: true
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 150,
       render: (_, record) => <span>{record.end_time}</span>,
-      sorter: (a, b) => {
-        return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
-      }
+      sorter: true
     }
   ];
   return (
@@ -162,6 +229,9 @@ export default function ParseNode(props: {
         noDataElement={noDataElement({ description: '暂无数据' })}
         rowKey="id"
         style={{ margin: '10px 0' }}
+        onChange={(pagination, sorter, filters) =>
+          onSortData(pagination, sorter, filters)
+        }
       />
       {/* 分页 */}
       <Pagination
