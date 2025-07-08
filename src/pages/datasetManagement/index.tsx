@@ -63,6 +63,7 @@ interface Dataset {
   name: string;
   description: string;
   latest_version: string;
+  error_reason: string;
   src: number;
   creator_id: string;
   creator_name: string;
@@ -214,7 +215,7 @@ const columns = (
           <span>{statusConfig.text}</span>
           {status === datasetStatus.version_update_failed ||
           status === datasetStatus.create_failed ? (
-            <Tooltip mini content="123456789">
+            <Tooltip mini content={record.error_reason || ''}>
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
@@ -264,22 +265,22 @@ const columns = (
     title: '创建人',
     dataIndex: 'creator_name',
     width: 100,
-    filterIcon: <IconFilter />,
-    filters: (() => {
-      const creatorSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.creator_name) {
-          creatorSet.add(dataset.creator_name);
-        }
-      });
-      return Array.from(creatorSet).map((creator) => ({
-        text: creator,
-        value: creator
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.creator_name === value;
-    }
+    filterIcon: <IconFilter />
+    // filters: (() => {
+    //   const creatorSet = new Set<string>();
+    //   datasetList?.forEach((dataset) => {
+    //     if (dataset.creator_name) {
+    //       creatorSet.add(dataset.creator_name);
+    //     }
+    //   });
+    //   return Array.from(creatorSet).map((creator) => ({
+    //     text: creator,
+    //     value: creator
+    //   }));
+    // })(),
+    // onFilter: (value: string, record: Dataset) => {
+    //   return record.creator_name === value;
+    // }
   },
   {
     title: '创建时间',

@@ -301,7 +301,7 @@ export const ModaForgeResourceEndpoints = {
   //编辑数据集版本数据
   editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
   //获取数据集版本列表
-  datasetVersionListApi: PrefixAimdp + '/datasets/versionld',
+  datasetVersionListApi: PrefixAimdp + '/datasets/version',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
 
