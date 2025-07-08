@@ -447,7 +447,7 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
           if(res.code==0){
             Message.success('删除成功');
           }else{
-            Message.success('删除失败，请稍后重试');
+            Message.error('删除失败，请稍后重试');
             return
           }
         } else {
@@ -456,7 +456,7 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
           if(res.code==0){
             Message.success('删除成功');
           }else{
-            Message.success('删除失败，请稍后重试');
+            Message.error('删除失败，请稍后重试');
             return
           }
         }

@@ -304,7 +304,7 @@ export default function Eltable() {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               }else{
-                Message.success('删除失败，请稍后重试');
+                Message.error('删除失败，请稍后重试');
               }
               
             }
@@ -319,7 +319,7 @@ export default function Eltable() {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               }else{
-                Message.success('删除失败，请稍后重试');
+                Message.error('删除失败，请稍后重试');
               }
             }
           }
