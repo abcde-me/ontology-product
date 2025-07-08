@@ -1,5 +1,5 @@
 import { changeNodesAndEdgesId } from './../../utils';
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import produce from 'immer';
 import useVarList from '../_base/hooks/use-var-list';
 import { useStore } from '../../store';
@@ -18,6 +18,12 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     inputs,
     setInputs
   });
+  const inputRef = useRef(inputs);
+
+  useEffect(() => {
+    inputRef.current = inputs;
+  }, [inputs]);
+
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
     fenlei: '文本分类',
@@ -28,6 +34,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
 
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
+      console.log(payload, '==use');
       const data = {
         type: 'enhancement',
         title: '数据增强节点',
@@ -46,7 +53,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
           }
         }
       };
-      const newInputs = produce(inputs, (draft: any) => {
+      const newInputs = produce(inputRef.current, (draft: any) => {
         draft.enha_modle_id = payload.enha_modle_id;
         draft.generate_sample_num = payload?.generate_sample_num;
         draft.similarity_threshold = payload?.similarity_threshold;
@@ -61,17 +68,17 @@ const useConfig = (id: string, payload: CodeNodeType) => {
       });
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
 
   const setBoostPageData = useCallback(
     (modelList) => {
-      const newInputs = produce(inputs, (draft: any) => {
+      const newInputs = produce(inputRef.current, (draft: any) => {
         draft.modelList = modelList;
       });
       setInputs(newInputs);
     },
-    [inputs, setInputs]
+    [setInputs]
   );
   return {
     readOnly,

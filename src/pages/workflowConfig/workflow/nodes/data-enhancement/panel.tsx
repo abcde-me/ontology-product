@@ -30,6 +30,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
   const unmountedRef = useUnmountedRef();
   const [modelList, setModelList] = useState<any[]>([]);
+  const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
   useEffect(() => {
     setCustomPromptChecked(inputs?.prompt?.length > 0 ? true : false);
     getModelList().then((res) => {
@@ -48,16 +49,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       }
       setBoostPageData(ModelLs);
     });
-  }, []);
+    const prompt_text = TextPlan[app_scenarios_name]?.prompt;
+    const sample_data_text = TextPlan[app_scenarios_name]?.data;
+    form.setFieldValue('prompt', prompt_text);
+    form.setFieldValue('sample_data', sample_data_text);
+  }, [app_scenarios_name]);
 
-  const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
-  const prompt_text = TextPlan[app_scenarios_name]?.prompt;
-  const sample_data_text = TextPlan[app_scenarios_name]?.data;
-  form.setFieldValue('prompt', form.getFieldValue('prompt') || prompt_text);
-  form.setFieldValue(
-    'sample_data',
-    form.getFieldValue('sample_data') || sample_data_text
-  );
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -75,9 +72,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           similarity_threshold: inputs?.similarity_threshold || 0.7,
           generate_sample_num: inputs?.generate_sample_num || 100
         }}
-        onChange={(_, v: any) => {
-          onValuesChange(v);
-        }}
+        onValuesChange={(_, v: any) => { onValuesChange(v) }}
       >
         <FormItem
           layout="inline"
@@ -125,53 +120,53 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="content-box">
           {(app_scenarios_name === 'tongyong' ||
             app_scenarios_name === 'duolong') && (
-            <>
-              <FormItem
-                label="指令生成依赖样本数:"
-                field="sample_num"
-                layout="vertical"
-                extra="该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+              <>
+                <FormItem
+                  label="指令生成依赖样本数:"
+                  field="sample_num"
+                  layout="vertical"
+                  extra="该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
                 部分，增加到prompt 中去。"
-                rules={[
-                  {
-                    type: 'number',
-                    min: 1,
-                    max: 10000,
-                    message: '指令生成依赖样本数范围1~10000'
-                  }
-                ]}
-              >
-                <InputNumber min={1} max={10000} placeholder="请输入指令" />
-              </FormItem>
-            </>
-          )}
+                  rules={[
+                    {
+                      type: 'number',
+                      min: 1,
+                      max: 10000,
+                      message: '指令生成依赖样本数范围1~10000'
+                    }
+                  ]}
+                >
+                  <InputNumber min={1} max={10000} placeholder="请输入指令" />
+                </FormItem>
+              </>
+            )}
           {(app_scenarios_name === 'fenlei' ||
             app_scenarios_name === 'shengcheng') && (
-            <>
-              <FormItem
-                label="任务描述增强占比:"
-                field="enhanced_proportion"
-                layout="vertical"
-                extra="节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
+              <>
+                <FormItem
+                  label="任务描述增强占比:"
+                  field="enhanced_proportion"
+                  layout="vertical"
+                  extra="节点将基于内置的Prompt配置（暂不支持自定义），仿照种子的格式，通过替换【待分析内容】部分生成增强的数据。假如生成样本数为10条，任务占比为0.3，表示新生成的10条增强数据中，30%（3条）的【待分析内容】部分会被大模型替换为等价表述，70%（7条）的【待分析内容】保持不变，该参数取值范围0
                 ~ 1"
-                rules={[
-                  {
-                    type: 'number',
-                    min: 0,
-                    max: 1,
-                    message: '过滤相似度阈值范围为0~1'
-                  }
-                ]}
-              >
-                <InputNumber
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  placeholder="请输入指令"
-                />
-              </FormItem>
-            </>
-          )}
+                  rules={[
+                    {
+                      type: 'number',
+                      min: 0,
+                      max: 1,
+                      message: '过滤相似度阈值范围为0~1'
+                    }
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    placeholder="请输入指令"
+                  />
+                </FormItem>
+              </>
+            )}
           <FormItem
             label="过滤相似度阈值:"
             field="similarity_threshold"
