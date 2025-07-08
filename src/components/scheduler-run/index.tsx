@@ -210,7 +210,13 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                   <Select
                     placeholder="频率"
                     style={{ width: 80 }}
-                    onChange={(val) => setFrequencyData(val)}
+                    onChange={(val) => {
+                      form.setFieldsValue({
+                        date: [],
+                        time: ''
+                      });
+                      setFrequencyData(val);
+                    }}
                   >
                     {CYCLE_OPTIONS.map((item) => {
                       return (
