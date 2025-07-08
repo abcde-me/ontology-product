@@ -345,7 +345,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     //连接器
     // TODO: ts错误
     // @ts-expect-error
-    getConnectorList({ scope: 2 }).then((res) => {
+    getConnectorList({ scope: 1 }).then((res) => {
       setConnectorList(convertToSelectOptions(res.data.items));
     });
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
