@@ -34,7 +34,7 @@ function WorkflowConfig({ setHeight }) {
         }
       } else {
         const workflowInfo = await createWorkflow({
-          workflow_name: '新建工作流'
+          workflow_name: `新建工作流_${Date.now()}`
         });
 
         if (workflowInfo?.data?.workflow_uuid) {

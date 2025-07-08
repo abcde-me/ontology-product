@@ -30,6 +30,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
   const [textEmbModels, setTextEmbModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
+  const textSlice = Form.useWatch('text_slice_rule', form);
 
   const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
     id,
@@ -56,15 +57,12 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
 
       const fields = {} as Record<string, any>;
       if (!inputs.text_ocr_model_id) {
-        // form.setFieldValue('text_ocr_model_id', defaultOcrId);
         fields.text_ocr_model_id = defaultOcrId;
       }
       if (!inputs.text_pic_model_id) {
-        // form.setFieldValue('text_pic_model_id', defaultPicId);
         fields.text_pic_model_id = defaultPicId;
       }
       if (!inputs.text_ocr_model_id) {
-        // form.setFieldValue('text_emb_model_id', defaultTextId);
         fields.text_emb_model_id = defaultTextId;
       }
       if (Object.keys(fields).length) {
@@ -94,6 +92,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           label={`选择文件：已选择${inputs.selected_files_num}个文件`}
           field="files"
           labelAlign="left"
+          extra="系统限制，只展示文件大小大于0且小于2G的文件"
           required
         >
           <FileList
@@ -124,6 +123,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
           label="分段最大长度："
           field="slice_max_size"
           labelAlign="left"
+          hidden={textSlice !== 1}
           required
           extra="取值范围：800-1200"
         >
@@ -142,7 +142,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
             ]}
           />
         </FormItem>
-        <FormItem
+        {/* <FormItem
           label="多模态模型："
           field="text_ocr_model_id"
           labelAlign="left"
@@ -169,7 +169,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
               </Option>
             ))}
           </Select>
-        </FormItem>
+        </FormItem> */}
         <FormItem
           label="文本嵌入模型："
           field="text_emb_model_id"

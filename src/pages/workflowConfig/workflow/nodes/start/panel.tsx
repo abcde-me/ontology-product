@@ -17,10 +17,11 @@ import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
 import StartNodeDefault, { FileOptions } from './default';
-import { useNodes } from 'reactflow';
+import { useStoreApi } from 'reactflow';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getLoadTaskFiles } from '@/api/loadApi';
+import { useHistory } from 'react-router-dom';
 
 const FormItem = Form.Item;
 const i18nPrefix = 'workflow.nodes.start';
@@ -29,8 +30,9 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
   const [form] = Form.useForm();
-  const nodes = useNodes();
+  const store = useStoreApi();
   const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  const history = useHistory();
 
   const docParams = Form.useWatch('data_category[0]', form);
   const imageParams = Form.useWatch('data_category[1]', form);
@@ -39,13 +41,18 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
 
   const { readOnly, inputs, updateInputs } = useConfig(id, data);
 
+  const gotoData = () => {
+    history.push(`/tenant/compute/modaforge/dataCatalog`);
+  };
+
   const handleChanged = (values: any) => {
     const name = srcDirs.find((s) => s.id === values.data_path_id)?.name;
     updateInputs({ ...values, data_path_name: name });
   };
 
   const doFileConfigChange = (nodeType: BlockEnum, config: any) => {
-    const targetNodes = nodes.filter(
+    const { getNodes } = store.getState();
+    const targetNodes = getNodes().filter(
       (node: any) => node.data.type === nodeType
     );
     if (config.enabled && config.format.length) {
@@ -140,7 +147,25 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
           label="源数据目录"
           field="data_path_id"
           rules={[{ required: true, message: '源数据目录必须选择' }]}
-          extra="选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。"
+          disabled={readOnly || !srcDirs.length}
+          extra={
+            srcDirs.length ? (
+              '选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。'
+            ) : (
+              <>
+                <span>
+                  暂无源数据目录，请先到
+                  <span
+                    className="cursor-pointer text-[#007DFA]"
+                    onClick={gotoData}
+                  >
+                    数据目录
+                  </span>
+                  中创建
+                </span>
+              </>
+            )
+          }
         >
           <Select placeholder="请选择源数据目录" onChange={handlePathChange}>
             {srcDirs.map((s) => (

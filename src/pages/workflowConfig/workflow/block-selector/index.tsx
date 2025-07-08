@@ -1,51 +1,39 @@
-import type {
-  FC,
-  MouseEventHandler,
-} from 'react'
-import React, {
-  memo,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
-import { useTranslation } from 'react-i18next'
-import type {
-  OffsetOptions,
-  Placement,
-} from '@floating-ui/react'
-import type { BlockEnum, OnSelectBlock } from '../types'
-import Tabs from './tabs'
-import { TabsEnum } from './types'
+import type { FC, MouseEventHandler } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { OffsetOptions, Placement } from '@floating-ui/react';
+import type { BlockEnum, OnSelectBlock } from '../types';
+import Tabs from './tabs';
+import { TabsEnum } from './types';
 import {
   PortalToFollowElem,
   PortalToFollowElemContent,
-  PortalToFollowElemTrigger,
-} from '@/pages/workflowConfig/components/portal-to-follow-elem'
-import Input from '@/pages/workflowConfig/components/input'
-import SearchBox from '@/pages/workflowConfig/plugins/marketplace/search-box'
+  PortalToFollowElemTrigger
+} from '@/pages/workflowConfig/components/portal-to-follow-elem';
+import Input from '@/pages/workflowConfig/components/input';
+import SearchBox from '@/pages/workflowConfig/plugins/marketplace/search-box';
+import { useStoreApi } from 'reactflow';
 
-import {
-  RiAddLargeFill,
-  RiAddFill
-} from '@remixicon/react'
+import { RiAddLargeFill, RiAddFill } from '@remixicon/react';
+import { Message } from '@arco-design/web-react';
 // import classNames from '@/pages/workflowConfig/utils/classnames'
 
 type NodeSelectorProps = {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSelect: OnSelectBlock
-  trigger?: (open: boolean) => React.ReactNode
-  placement?: Placement
-  offset?: OffsetOptions
-  triggerStyle?: React.CSSProperties
-  triggerClassName?: (open: boolean) => string
-  triggerInnerClassName?: string
-  popupClassName?: string
-  asChild?: boolean
-  availableBlocksTypes?: BlockEnum[]
-  disabled?: boolean
-  noBlocks?: boolean
-}
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSelect: OnSelectBlock;
+  trigger?: (open: boolean) => React.ReactNode;
+  placement?: Placement;
+  offset?: OffsetOptions;
+  triggerStyle?: React.CSSProperties;
+  triggerClassName?: (open: boolean) => string;
+  triggerInnerClassName?: string;
+  popupClassName?: string;
+  asChild?: boolean;
+  availableBlocksTypes?: BlockEnum[];
+  disabled?: boolean;
+  noBlocks?: boolean;
+};
 const NodeSelector: FC<NodeSelectorProps> = ({
   open: openFromProps,
   onOpenChange,
@@ -60,47 +48,65 @@ const NodeSelector: FC<NodeSelectorProps> = ({
   asChild,
   availableBlocksTypes,
   disabled,
-  noBlocks = false,
+  noBlocks = false
 }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const [searchText, setSearchText] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [localOpen, setLocalOpen] = useState(false)
-  const open = openFromProps === undefined ? localOpen : openFromProps
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const [searchText, setSearchText] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [localOpen, setLocalOpen] = useState(false);
+  const store = useStoreApi();
+  const open = openFromProps === undefined ? localOpen : openFromProps;
+  const MAX_NODES_NUM = 16;
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    setLocalOpen(newOpen)
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      setLocalOpen(newOpen);
 
-    if (!newOpen)
-      setSearchText('')
+      if (!newOpen) setSearchText('');
 
-    if (onOpenChange)
-      onOpenChange(newOpen)
-  }, [onOpenChange])
-  const handleTrigger = useCallback<MouseEventHandler<HTMLDivElement>>((e) => {
-    if (disabled)
-      return
-    e.stopPropagation()
-    handleOpenChange(!open)
-  }, [handleOpenChange, open, disabled])
-  const handleSelect = useCallback<OnSelectBlock>((type, toolDefaultValue) => {
-    handleOpenChange(false)
-    onSelect(type, toolDefaultValue)
-  }, [handleOpenChange, onSelect])
+      if (onOpenChange) onOpenChange(newOpen);
+    },
+    [onOpenChange]
+  );
+  const handleTrigger = useCallback<MouseEventHandler<HTMLDivElement>>(
+    (e) => {
+      if (disabled) return;
+      e.stopPropagation();
+      handleOpenChange(!open);
+    },
+    [handleOpenChange, open, disabled]
+  );
+  const handleSelect = useCallback<OnSelectBlock>(
+    (type, toolDefaultValue) => {
+      const { getNodes } = store.getState();
+      const count = getNodes().filter((node) => node.data.type === type).length;
+      if (
+        count + 1 > MAX_NODES_NUM &&
+        ['text', 'pic', 'video', 'audio'].includes(type)
+      ) {
+        Message.warning('该种类型节点最多允许添加' + MAX_NODES_NUM + '个');
+        return;
+      }
 
-  const [activeTab, setActiveTab] = useState(noBlocks ? TabsEnum.Tools : TabsEnum.Blocks)
+      handleOpenChange(false);
+      onSelect(type, toolDefaultValue);
+    },
+    [handleOpenChange, onSelect]
+  );
+
+  const [activeTab, setActiveTab] = useState(
+    noBlocks ? TabsEnum.Tools : TabsEnum.Blocks
+  );
   // const [activeTab, setActiveTab] = useState(TabsEnum.Tools)
   const handleActiveTabChange = useCallback((newActiveTab: TabsEnum) => {
-    setActiveTab(newActiveTab)
-  }, [])
+    setActiveTab(newActiveTab);
+  }, []);
   const searchPlaceholder = useMemo(() => {
-    if (activeTab === TabsEnum.Blocks)
-      return t('workflow.tabs.searchBlock')
+    if (activeTab === TabsEnum.Blocks) return t('workflow.tabs.searchBlock');
 
-    if (activeTab === TabsEnum.Tools)
-      return t('workflow.tabs.searchTool')
-    return ''
-  }, [activeTab, t])
+    if (activeTab === TabsEnum.Tools) return t('workflow.tabs.searchTool');
+    return '';
+  }, [activeTab, t]);
 
   return (
     <PortalToFollowElem
@@ -114,25 +120,25 @@ const NodeSelector: FC<NodeSelectorProps> = ({
         onClick={handleTrigger}
         className={triggerInnerClassName}
       >
-        {
-          trigger
-            ? trigger(open)
-            : (
-              <div
-                className={`
-                  flex items-center justify-center 
-                  w-4 h-4 rounded-full bg-components-button-primary-bg text-text-primary-on-surface hover:bg-components-button-primary-bg-hover cursor-pointer z-10
+        {trigger ? (
+          trigger(open)
+        ) : (
+          <div
+            className={`
+                  z-10 flex h-4 
+                  w-4 cursor-pointer items-center justify-center rounded-full bg-components-button-primary-bg text-text-primary-on-surface hover:bg-components-button-primary-bg-hover
                   ${triggerClassName?.(open)}
                 `}
-                style={triggerStyle}
-              >
-                <RiAddLargeFill className='w-2 h-2' />
-              </div>
-            )
-        }
+            style={triggerStyle}
+          >
+            <RiAddLargeFill className="h-2 w-2" />
+          </div>
+        )}
       </PortalToFollowElemTrigger>
-      <PortalToFollowElemContent className='z-[1000]'>
-        <div className={`rounded-[12px] min-w-[240px] border-[0.5px] border-gray-200 bg-white shadow-lg ${popupClassName} wk-nodes-selector`}>
+      <PortalToFollowElemContent className="z-[1000]">
+        <div
+          className={`min-w-[240px] rounded-[12px] border-[0.5px] border-gray-200 bg-white shadow-lg ${popupClassName} wk-nodes-selector`}
+        >
           {/* <div className='px-2 pt-2 header-wrapper' onClick={e => e.stopPropagation()}>
             {activeTab === TabsEnum.Blocks && (
               <Input
@@ -171,7 +177,7 @@ const NodeSelector: FC<NodeSelectorProps> = ({
         </div>
       </PortalToFollowElemContent>
     </PortalToFollowElem>
-  )
-}
+  );
+};
 
-export default memo(NodeSelector)
+export default memo(NodeSelector);
