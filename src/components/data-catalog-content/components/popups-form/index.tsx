@@ -91,25 +91,33 @@ const FormComponent: React.FC<FormProps> = ({
       // }
       const filesArray: string[] = [];
       if (downloadData && downloadData.data_path_id) {
-        filesArray.push(downloadData.abs_data_path + '/' + downloadData.file_name);
+        filesArray.push(
+          downloadData.abs_data_path + '/' + downloadData.file_name
+        );
       } else if (downloadData && downloadData.extras) {
-        filesArray.push(downloadData.full_path + '/' + downloadData.extras.file_name);
+        filesArray.push(
+          downloadData.full_path + '/' + downloadData.extras.file_name
+        );
       } else if (exportdataset && exportdataset.latest_file_path) {
-        filesArray.push(exportdataset.latest_file_path + '/' + exportdataset.latest_file_name);
+        filesArray.push(
+          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
+        );
       }
       if (exportdatas && exportdatas.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.abs_data_path + '/' + item.file_name);
-          })
+          });
         } else if (exportdatas[0].extras) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.full_path + '/' + item.extras.file_name);
-          })
+          });
         } else if (exportdatas[0].latest_file_path) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.latest_file_path + '/' + item.latest_file_name);
-          })
+            filesArray.push(
+              item.latest_file_path + '/' + item.latest_file_name
+            );
+          });
         }
       }
       const res = await exportFile({
@@ -117,29 +125,32 @@ const FormComponent: React.FC<FormProps> = ({
         output_path: form.getFieldValue('path'),
         // file_path: full_paths,
         connector_id: Number(form.getFieldValue('province')),
-        files: filesArray,
+        files: filesArray
       });
-      console.log(res);
+      console.log(res, '这是导出返回的结果666666666666666');
       // console.log('导出文件名', exportNames);
-      form.resetFields();
-      Message.success('导出成功');
-      handlClear && handlClear();
-      // 先调用导出成功回调，再清空选中状态和缓存数据
-      if (onExportSuccess) {
-        onExportSuccess();
-      }
-      // 重置选中状态和缓存数据
-      if (resetSelectedData) {
-        resetSelectedData();
+      if (res.status !== 0 && res.code === '') {
+        form.resetFields();
+        Message.success('导出成功');
+        handlClear && handlClear();
+        if (onExportSuccess) {
+          onExportSuccess();
+        }
+        if (resetSelectedData) {
+          resetSelectedData();
+        } else {
+          console.log('回调未提供');
+        }
+        onCancel && onCancel();
       } else {
-        console.log('回调未提供');
+        Message.error('导出失败，请稍后重试');
       }
-      // 最后关闭弹窗
-      onCancel && onCancel();
     } catch (e) {
       // 处理验证失败或导出失败的情况
       console.error('导出失败:', e);
       Message.error('导出失败，请稍后重试');
+      form.resetFields();
+      onCancel && onCancel();
     }
   };
   const handleCancel = () => {
@@ -220,6 +231,14 @@ const FormComponent: React.FC<FormProps> = ({
             {
               required: true,
               message: '请填写'
+            },
+            {
+              match: /^[\u4e00-\u9fa5a-zA-Z0-9\/_]+$/,
+              message: '只能包含中文、英文、数字、斜杠"/"和下划线"_"'
+            },
+            {
+              maxLength: 256,
+              message: '长度不能超过256个字符'
             }
           ]}
         >

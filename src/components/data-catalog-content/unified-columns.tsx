@@ -6,7 +6,11 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
-import { deleteTargetFile, deleteSourceFile, getTargetFileTypeList } from '@/api/dataCatalog';
+import {
+  deleteTargetFile,
+  deleteSourceFile,
+  getTargetFileTypeList
+} from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
 // 图标组件定义
@@ -64,9 +68,14 @@ const getFileTypeList = async () => {
   try {
     const res = await getTargetFileTypeList();
     console.log('目标数据文件类型列表', res.data.dst_file_type);
-    if (res && res.data && res.data.dst_file_type && Array.isArray(res.data.dst_file_type)) {
+    if (
+      res &&
+      res.data &&
+      res.data.dst_file_type &&
+      Array.isArray(res.data.dst_file_type)
+    ) {
       // 更新全局的fileTypeFilters变量
-      fileTypeFilters = res.data.dst_file_type.map(type => ({
+      fileTypeFilters = res.data.dst_file_type.map((type) => ({
         text: type,
         value: type
       }));
@@ -96,7 +105,7 @@ export const useFileTypeFilters = () => {
         const fileTypes = await getFileTypeList();
         if (fileTypes && Array.isArray(fileTypes)) {
           // 将API返回的文件类型转换为筛选器格式
-          const newFilters = fileTypes.map(type => ({
+          const newFilters = fileTypes.map((type) => ({
             text: type,
             value: type
           }));
@@ -120,7 +129,10 @@ const WorkflowIdCell = ({ record, showIcon }) => {
   const workflowId = extras.workflow_id || '无ID';
   const handleWorkflowClick = () => {
     if (extras.workflow_id) {
-      window.open(`/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`, '_blank');
+      window.open(
+        `/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`,
+        '_blank'
+      );
     }
   };
 
@@ -162,7 +174,16 @@ const WorkflowIdCell = ({ record, showIcon }) => {
 };
 
 // 通用的操作列渲染
-const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset) => (
+const renderActionColumn = (
+  _,
+  record,
+  setVisible,
+  refreshData,
+  selectedKey,
+  tableType,
+  selectedFullPath,
+  handAllReset
+) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
       style={{
@@ -184,7 +205,9 @@ const renderActionColumn = (_, record, setVisible, refreshData, selectedKey, tab
         textAlign: 'center',
         cursor: 'pointer'
       }}
-      onClick={() => handleDelete(record, refreshData, selectedKey, tableType, handAllReset)}
+      onClick={() =>
+        handleDelete(record, refreshData, selectedKey, tableType, handAllReset)
+      }
     >
       删除
     </span>
@@ -197,7 +220,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -212,7 +235,7 @@ export const getUnifiedColumns = (
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50,
+        width: 50
       },
       {
         title: '文件名',
@@ -246,7 +269,7 @@ export const getUnifiedColumns = (
           { text: 'txt', value: 'txt' },
           { text: 'doc', value: 'doc' },
           { text: 'md', value: 'md' },
-          { text: 'ppt', value: 'ppt' },
+          { text: 'ppt', value: 'ppt' }
         ],
         // onFilter: (value, row) => row.type == value,
         // onChange: (value, row) => row.type == value,
@@ -267,24 +290,21 @@ export const getUnifiedColumns = (
         title: '文件大小',
         width: 120,
         dataIndex: 'file_size',
-        render: (_, record) => (
-          <div>
-            {formatFileSize(record.file_size)}
-          </div>
-        )
+        render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
       },
       {
         title: '上传用户',
         dataIndex: 'upload_user',
         ellipsis: true,
-        width: 100,
+        width: 100
       },
       {
         title: '载入开始时间',
         dataIndex: 'task_load_start_time',
         width: 180,
         sorter: (a, b) =>
-          new Date(a.task_load_start_time).getTime() - new Date(b.task_load_start_time).getTime(),
+          new Date(a.task_load_start_time).getTime() -
+          new Date(b.task_load_start_time).getTime(),
         onFilter: (value, record) => {
           if (!value || value.length !== 2) return true;
           if (!record.task_load_start_time) return false;
@@ -313,7 +333,9 @@ export const getUnifiedColumns = (
                   whiteSpace: 'nowrap',
                   maxWidth: '100%'
                 }}
-              >{record.connector_name}</span>
+              >
+                {record.connector_name}
+              </span>
             </Popover>
           </div>
         )
@@ -323,7 +345,17 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset)
+        render: (_, record) =>
+          renderActionColumn(
+            _,
+            record,
+            setVisible,
+            refreshData,
+            selectedKey,
+            tableType,
+            selectedFullPath,
+            handAllReset
+          )
       }
     ];
   }
@@ -411,7 +443,17 @@ export const getUnifiedColumns = (
         dataIndex: 'actions',
         fixed: 'right' as const,
         width: 112,
-        render: (_, record) => renderActionColumn(_, record, setVisible, refreshData, selectedKey, tableType, selectedFullPath, handAllReset)
+        render: (_, record) =>
+          renderActionColumn(
+            _,
+            record,
+            setVisible,
+            refreshData,
+            selectedKey,
+            tableType,
+            selectedFullPath,
+            handAllReset
+          )
       }
     ];
   }
@@ -429,8 +471,14 @@ const handleDownload = (record, setVisible, selectedFullPath) => {
 };
 
 // 处理删除操作
-const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'target', handAllReset) => {
-  const ids: Array<string> = []
+const handleDelete = (
+  data,
+  refreshData,
+  selectedKey,
+  tableType: 'source' | 'target',
+  handAllReset
+) => {
+  const ids: Array<string> = [];
   try {
     Modal.confirm({
       title: '确认删除文件吗?',
@@ -439,15 +487,26 @@ const handleDelete = (data, refreshData, selectedKey, tableType: 'source' | 'tar
         if (tableType === 'target') {
           ids.push(data.id);
           console.log('查看删除的数据和数组们', data, ids);
-          await deleteTargetFile({
+          const res = await deleteTargetFile({
             full_path: data.full_path,
             file_ids: ids,
             path_id: selectedKey
           });
-          Message.success('删除成功');
+          if (res.code == 0) {
+            Message.success('删除成功');
+          } else {
+            Message.success('删除失败，请稍后重试');
+            return;
+          }
         } else {
-          handAllReset();
-          await deleteSourceFile(data.id);
+          // handAllReset();
+          const res = await deleteSourceFile(data.id);
+          if (res.code == 0) {
+            Message.success('删除成功');
+          } else {
+            Message.success('删除失败，请稍后重试');
+            return;
+          }
         }
         // 删除成功后刷新数据
         if (typeof refreshData === 'function') {

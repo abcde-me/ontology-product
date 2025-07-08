@@ -39,14 +39,25 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
       selected_files_num,
       text_emb_model_id,
       text_ocr_model_id,
-      text_pic_model_id
+      text_pic_model_id,
+      text_slice_rule,
+      slice_max_size
     } = payload;
 
     if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个文本文件';
     }
+    if (selected_files_num > 65536) {
+      errorMessages = '最多选择65536个文本文件';
+    }
     if (!text_emb_model_id || !text_ocr_model_id || !text_pic_model_id) {
       errorMessages = '需要选择模型';
+    }
+    if (!text_emb_model_id || !text_ocr_model_id || !text_pic_model_id) {
+      errorMessages = '需要选择模型';
+    }
+    if (text_slice_rule === 1 && !slice_max_size) {
+      errorMessages = '请填写分段最大长度';
     }
     return {
       isValid: !errorMessages,

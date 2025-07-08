@@ -275,7 +275,7 @@ export const ModaForgeResourceEndpoints = {
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixAimdp + '/datasets',
+  datasetsApi: PrefixAimdp + '/datasets/list',
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
@@ -331,7 +331,7 @@ export const ModaForgeResourceEndpoints = {
   // 查看单个载入任务详情
   getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 启停单个载入任务
-  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/load_tasks/cron/release',
+  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/cron/release',
   // 立即运行指定载入任务
   runLoadApi: PrefixAimdp + '/load_tasks/new_start',
   // 删除指定文件
