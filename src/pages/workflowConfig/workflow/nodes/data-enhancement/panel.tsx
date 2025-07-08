@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useConfig from './use-config';
 import type { CodeNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
@@ -13,6 +13,7 @@ import {
 import { cloneDeep } from 'lodash-es';
 import { getModelList } from '@/api/modelV2';
 import TextPlan from './textDefault';
+import { useUnmountedRef } from 'ahooks';
 import './data-enhancement.scss';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
@@ -21,42 +22,42 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  const { inputs, onValuesChange, readOnly } = useConfig(id, data);
+  const { inputs, onValuesChange, readOnly, setBoostPageData } = useConfig(
+    id,
+    data
+  );
 
   const [customPromptChecked, setCustomPromptChecked] = useState(false);
-  const [isShow, setIsShow] = useState(false);
-  const [isShowWB, setIsShowWB] = useState(false);
-  useEffect(() => {
-    setIsShow(
-      inputs?.app_scenarios_name === 'tongyong' ||
-      inputs?.app_scenarios_name === 'duolong'
-    );
-    setIsShowWB(
-      inputs?.app_scenarios_name === 'fenlei' ||
-      inputs?.app_scenarios_name === 'shengcheng'
-    );
-    setCustomPromptChecked(inputs?.prompt_checkbox || inputs?.app_scenarios ? true : false);
-  }, [inputs]);
-
-  // 获取模型数据
+  const unmountedRef = useUnmountedRef();
   const [modelList, setModelList] = useState<any[]>([]);
-  // 模型数据筛选
-  const getModelData = () => {
-    getModelList().then((res) => {
-      setModelList(
-        res?.data?.find((item) => item.type === 'enha_model')?.model_data || []
-      );
-    });
-  };
   useEffect(() => {
-    getModelData();
+    setCustomPromptChecked(inputs?.prompt?.length > 0 ? true : false);
+    getModelList().then((res) => {
+      if (unmountedRef.current) return;
+      const ModelLs =
+        res?.data?.find((item) => item.type === 'enha_model')?.model_data || [];
+      setModelList(ModelLs);
+      const defaultModelId = ModelLs[0]?.id || '';
+      const fields = {} as Record<string, any>;
+
+      if (!inputs.enha_modle_id) {
+        fields.enha_modle_id = defaultModelId;
+      }
+      if (Object.keys(fields).length) {
+        form.setFieldsValue(fields);
+      }
+      setBoostPageData(ModelLs);
+    });
   }, []);
-  // 实时获取数据示例 和 提示词
+
   const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
   const prompt_text = TextPlan[app_scenarios_name]?.prompt;
   const sample_data_text = TextPlan[app_scenarios_name]?.data;
   form.setFieldValue('prompt', form.getFieldValue('prompt') || prompt_text);
-  form.setFieldValue('sample_data', (form.getFieldValue('sample_data') || sample_data_text));
+  form.setFieldValue(
+    'sample_data',
+    form.getFieldValue('sample_data') || sample_data_text
+  );
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -67,14 +68,16 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           ...data,
-          app_scenarios: inputs?.app_scenarios || 'tongyong',
+          app_scenarios_name: inputs?.app_scenarios_name || 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          enhanced_proportion: inputs?.enhanced_proportion | 0.5,
-          sample_num: inputs?.sample_num || 1,
-          similarity_threshold: inputs?.similarity_threshold || 0.1,
-          generate_sample_num: inputs?.generate_sample_num || 1,
+          enhanced_proportion: inputs?.enhanced_proportion | 0.7,
+          sample_num: inputs?.sample_num || 10,
+          similarity_threshold: inputs?.similarity_threshold || 0.7,
+          generate_sample_num: inputs?.generate_sample_num || 100
         }}
-        onChange={(_, v: any) => { onValuesChange(v) }}
+        onChange={(_, v: any) => {
+          onValuesChange(v);
+        }}
       >
         <FormItem
           layout="inline"
@@ -120,7 +123,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </FormItem>
         </div>
         <div className="content-box">
-          {isShow && (
+          {(app_scenarios_name === 'tongyong' ||
+            app_scenarios_name === 'duolong') && (
             <>
               <FormItem
                 label="指令生成依赖样本数:"
@@ -137,11 +141,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   }
                 ]}
               >
-                <InputNumber placeholder="请输入指令" />
+                <InputNumber min={1} max={10000} placeholder="请输入指令" />
               </FormItem>
             </>
           )}
-          {isShowWB && (
+          {(app_scenarios_name === 'fenlei' ||
+            app_scenarios_name === 'shengcheng') && (
             <>
               <FormItem
                 label="任务描述增强占比:"
@@ -158,7 +163,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   }
                 ]}
               >
-                <InputNumber step={0.1} placeholder="请输入指令" />
+                <InputNumber
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  placeholder="请输入指令"
+                />
               </FormItem>
             </>
           )}
@@ -177,7 +187,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               }
             ]}
           >
-            <InputNumber step={0.1} placeholder="请输入阈值" />
+            <InputNumber min={0} max={1} step={0.1} placeholder="请输入阈值" />
           </FormItem>
           <FormItem
             label="生成样本数:"
@@ -193,7 +203,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               }
             ]}
           >
-            <InputNumber placeholder="请输入生成样本数" />
+            <InputNumber min={1} max={20000} placeholder="请输入生成样本数" />
           </FormItem>
         </div>
         <FormItem

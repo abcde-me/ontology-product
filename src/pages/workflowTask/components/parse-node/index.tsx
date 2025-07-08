@@ -16,6 +16,12 @@ enum FileType {
   epub = 'epub'
 }
 
+// 枚举文件状态
+enum FileStatus {
+  success = 1,
+  fail = 2
+}
+
 export default function ParseNode(props: {
   dataSource;
   loading;
@@ -59,7 +65,7 @@ export default function ParseNode(props: {
               marginRight: '5px'
             }}
           ></div>
-          <div>{record.status ? '成功' : '失败'}</div>
+          <div>{record.status === FileStatus.success ? '成功' : '失败'}</div>
         </div>
       ),
       filters: [

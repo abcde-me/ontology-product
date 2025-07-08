@@ -19,7 +19,6 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     modelList,
     prompt_checkbox
   } = props.data;
-  console.log(props, 'pppppppppppp');
   const store = useStoreApi();
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
@@ -28,7 +27,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     shengcheng: '文本生成',
     duolong: '多轮回答'
   };
-
+  const ModelLs =
+    modelList?.find((item) => item.type === 'enha_model')?.model_data || [];
+  const defaultModelId = ModelLs[0]?.id || '';
+  console.log(ModelLs, defaultModelId, '=======node-ebch', modelList);
   return (
     <div className={`wk-node-content data-enhancement-node`}>
       <div className="input-header">
@@ -43,7 +45,9 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {enha_modle_id && (
           <div className="enhancement-item">
             模型：
-            {modelList?.find((item) => item.id === enha_modle_id)?.type || ''}
+            {modelList?.find(
+              (item) => item.id === enha_modle_id || defaultModelId
+            )?.type || ''}
           </div>
         )}
         {(app_scenarios_name === 'tongyong' ||

@@ -33,6 +33,7 @@ import {
   createDataset,
   deleteDataset,
   batchDeleteDataset,
+  datasetVersionRebuild,
   getTagList
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -72,20 +73,20 @@ interface Dataset {
   src_model: string;
   status:
     | 'creating'
-    | 'create_fail'
+    | 'create_failed'
     | 'normal'
-    | 'version_generating'
-    | 'version_generating_fail';
+    | 'version_updating'
+    | 'version_update_failed';
 }
 
 // 状态显示配置
 const getStatusConfig = (status: string) => {
   const statusMap = {
     creating: { text: datasetStatusName.creating },
-    create_fail: { text: datasetStatusName.create_fail },
+    create_failed: { text: datasetStatusName.create_failed },
     normal: { text: datasetStatusName.normal },
-    version_generating: { text: datasetStatusName.version_generating },
-    version_generating_fail: { text: datasetStatusName.version_generating_fail }
+    version_updating: { text: datasetStatusName.version_updating },
+    version_update_failed: { text: datasetStatusName.version_update_failed }
   };
   return statusMap[status] || { text: status };
 };
@@ -94,11 +95,11 @@ const getStatusConfig = (status: string) => {
 const getStatusIcon = (status: string) => {
   return status === datasetStatus.creating ? (
     <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
-  ) : status === datasetStatus.create_fail ? (
+  ) : status === datasetStatus.create_failed ? (
     <IconCloseCircleFill style={{ color: '#EF4444', margin: '0 5px 0 0' }} />
   ) : status === datasetStatus.normal ? (
     <IconCheckCircleFill style={{ color: '#10B981', margin: '0 5px 0 0' }} />
-  ) : status === datasetStatus.version_generating ? (
+  ) : status === datasetStatus.version_updating ? (
     <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
   ) : (
     <IconExclamationCircleFill
@@ -117,7 +118,8 @@ const columns = (
   selectedStatusFilters: string[], //状态过滤
   sortField: string,
   sortOrder: string,
-  handleTableChange: (pagination: any, sorter: any, filters: any) => void
+  handleTableChange: (pagination: any, sorter: any, filters: any) => void,
+  handleRetry: (id: string | number, version_id: string) => void
 ) => [
   {
     title: '名称',
@@ -130,13 +132,13 @@ const columns = (
       const nameElement = (
         <span
           className={
-            record.status === datasetStatus.create_fail ||
+            record.status === datasetStatus.create_failed ||
             record.status === datasetStatus.creating
               ? styles.datasetNameLink
               : `${styles.datasetNameLink} ${styles.datasetNameHover}`
           }
           onClick={() => {
-            record.status === datasetStatus.create_fail ||
+            record.status === datasetStatus.create_failed ||
             record.status === datasetStatus.creating
               ? null
               : handleGoToDetail(record.id);
@@ -197,27 +199,32 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: '创建中', value: datasetStatus.creating },
-      { text: '创建失败', value: datasetStatus.create_fail },
+      { text: '创建失败', value: datasetStatus.create_failed },
       { text: '正常', value: datasetStatus.normal },
-      { text: '版本生成中', value: datasetStatus.version_generating },
-      { text: '版本生成失败', value: datasetStatus.version_generating_fail }
+      { text: '版本生成中', value: datasetStatus.version_updating },
+      { text: '版本生成失败', value: datasetStatus.version_update_failed }
     ],
     filteredValue: selectedStatusFilters,
     filterMultiple: true,
-    render: (status: string) => {
+    render: (status: string, record: Dataset) => {
       const statusConfig = getStatusConfig(status);
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {status && getStatusIcon(status)}
           <span>{statusConfig.text}</span>
-          {status === datasetStatus.version_generating_fail ||
-          status === datasetStatus.create_fail ? (
+          {status === datasetStatus.version_update_failed ||
+          status === datasetStatus.create_failed ? (
             <Tooltip mini content="123456789">
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {status === datasetStatus.version_generating_fail ? (
-            <span className={styles.retryText}>重试</span>
+          {status === datasetStatus.version_update_failed ? (
+            <span
+              className={styles.retryText}
+              onClick={() => handleRetry(record.id, record.latest_version)}
+            >
+              重试
+            </span>
           ) : null}
         </div>
       );
@@ -350,19 +357,19 @@ enum searchFieldType {
 // 枚举数据集状态
 enum datasetStatusName {
   creating = '创建中',
-  create_fail = '创建失败',
+  create_failed = '创建失败',
   normal = '正常',
-  version_generating = '版本生成中',
-  version_generating_fail = '版本生成失败'
+  version_updating = '版本生成中',
+  version_update_failed = '版本生成失败'
 }
 
 // 枚举数据集状态名称
 enum datasetStatus {
   creating = 'creating',
-  create_fail = 'create_fail',
+  create_failed = 'create_failed',
   normal = 'normal',
-  version_generating = 'version_generating',
-  version_generating_fail = 'version_generating_fail'
+  version_updating = 'version_updating',
+  version_update_failed = 'version_update_failed'
 }
 
 const DatasetManagement: React.FC = () => {
@@ -573,6 +580,54 @@ const DatasetManagement: React.FC = () => {
         deleteDatasetRecord(record);
       }
     });
+  };
+
+  // 重试
+  const handleRetry = async (id: number | string, version_id: string) => {
+    const params = {
+      id,
+      version_id
+    };
+    const res = await datasetVersionRebuild(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '重试成功'
+      });
+      // 重新获取数据列表
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+        search: actualSearch,
+        search_field: actualSearchField
+      };
+
+      // 添加标签过滤参数
+      if (selectedTagFilters.length > 0) {
+        params.tag_names = selectedTagFilters;
+      }
+
+      // 添加状态过滤参数
+      if (selectedStatusFilters.length > 0) {
+        params.status = selectedStatusFilters;
+      }
+
+      // 添加排序参数
+      if (sortField) {
+        params.sort_field = sortField;
+      }
+      if (sortOrder) {
+        params.sort_order = sortOrder;
+      }
+
+      getDatasetList(params).then((res) => {
+        setDatasetList(res.data?.list || []);
+        setTotal(res.data?.total || 0);
+      });
+    } else {
+      Message.error({
+        content: res.message || '重试失败，请稍后重试'
+      });
+    }
   };
 
   // 分页处理函数
@@ -904,7 +959,8 @@ const DatasetManagement: React.FC = () => {
           selectedStatusFilters,
           sortField,
           sortOrder,
-          handleTableChange
+          handleTableChange,
+          handleRetry
         )}
         data={datasetList}
         rowSelection={rowSelection}
