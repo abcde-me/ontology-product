@@ -38,13 +38,24 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
   },
   checkValid(payload: VideoParserNodeType, t: any) {
     let errorMessages = '';
-    const { selected_files_num, audio_model_id } = payload;
+    const {
+      selected_files_num,
+      audio_model_id,
+      activity_mode,
+      activity_mode_num
+    } = payload;
 
-    if (selected_files_num <= 0) {
+    if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个视频文件';
+    }
+    if (selected_files_num > 4096) {
+      errorMessages = '最多选择4096个视频文件';
     }
     if (!audio_model_id) {
       errorMessages = '需要选择模型';
+    }
+    if (activity_mode === 2 && !activity_mode_num) {
+      errorMessages = '需要填写时长';
     }
     return {
       isValid: !errorMessages,

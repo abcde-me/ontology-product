@@ -197,10 +197,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 }
               >
                 <InputNumber
+                  min={5}
+                  max={1024}
                   step={1}
                   size="mini"
                   placeholder="请输入发阈值 范围5~1024"
-                  maxLength={1024}
                 />
               </FormItem>
               <div className="date-cleaning-info">
