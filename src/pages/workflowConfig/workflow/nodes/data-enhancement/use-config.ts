@@ -34,13 +34,16 @@ const useConfig = (id: string, payload: CodeNodeType) => {
 
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
-      console.log(payload, '==use');
-      const data = {
-        type: 'enhancement',
-        title: '数据增强节点',
-        desc: '',
-        enha_modle_id: payload?.enha_modle_id, // 数据增强模型
-        app_scenarios: {
+      const newInputs = produce(inputRef.current, (draft: any) => {
+        draft.type = 'enhancement';
+        draft.title = '数据增强节点';
+        draft.enha_modle_id = payload.enha_modle_id;
+        draft.generate_sample_num = payload?.generate_sample_num;
+        draft.similarity_threshold = payload?.similarity_threshold;
+        draft.sample_num = payload?.sample_num;
+        draft.prompt = payload.prompt;
+        draft.prompt_checkbox = payload.prompt_checkbox;
+        draft.app_scenarios = {
           name: appScenarios[payload?.app_scenarios_name],
           type: payload?.app_scenarios_name,
           option: {
@@ -51,16 +54,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             prompt: payload?.prompt,
             sample_data: payload?.sample_data
           }
-        }
-      };
-      const newInputs = produce(inputRef.current, (draft: any) => {
-        draft.enha_modle_id = payload.enha_modle_id;
-        draft.generate_sample_num = payload?.generate_sample_num;
-        draft.similarity_threshold = payload?.similarity_threshold;
-        draft.sample_num = payload?.sample_num;
-        draft.prompt = payload.prompt;
-        draft.prompt_checkbox = payload.prompt_checkbox;
-        draft.data = data;
+        };
         draft.enhanced_proportion = payload.enhanced_proportion;
         draft.sample_data = payload.sample_data;
         draft.app_scenarios_name = payload.app_scenarios_name;
