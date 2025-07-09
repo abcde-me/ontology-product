@@ -260,8 +260,9 @@ const Header: FC = () => {
   };
 
   const handlePressEnter = (workflow_name: string) => {
-    if (!validateName(workflowName)) {
-      Message.error('工作流名称命名不符合规则');
+    const validateResult = validateName(workflowName);
+    if (!validateResult.isValid && validateResult.errorMessage) {
+      Message.error(validateResult.errorMessage);
       return;
     }
 

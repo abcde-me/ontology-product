@@ -235,18 +235,34 @@ export function validateName(name) {
   // 规则1: 名称中允许包含中文，英文字符和阿拉伯数字
   // 规则2: 名称中允许包含的特殊字符为 '-', '_'
   const validCharsRegex = /^[\u4e00-\u9fa5a-zA-Z0-9\-_]+$/;
+  if (!validCharsRegex.test(name)) {
+    return {
+      isValid: false,
+      errorMessage:
+        '名称中只允许包含中文，英文字符，阿拉伯数字及特殊字符（-、_）'
+    };
+  }
 
-  // 规则3: 名称长度不能超过256个字符
-  if (name.length > 256) {
-    return false;
+  // 规则3: 名称长度不能超过256个字符（UTF-8编码）
+  const encoder = new TextEncoder();
+  const byteLength = encoder.encode(name).length;
+  if (byteLength > 256) {
+    return {
+      isValid: false,
+      errorMessage: '长度不能超过256个字符'
+    };
   }
 
   // 规则4: 名称应该以中文、英文、数字开头，不允许以特殊字符开头
   const firstCharRegex = /^[\u4e00-\u9fa5a-zA-Z0-9]/;
   if (!firstCharRegex.test(name.charAt(0))) {
-    return false;
+    return {
+      isValid: false,
+      errorMessage: '名称应该以中文、英文、数字开头，不允许以特殊字符开头'
+    };
   }
 
-  // 检查所有字符是否合法
-  return validCharsRegex.test(name);
+  return {
+    isValid: true
+  };
 }

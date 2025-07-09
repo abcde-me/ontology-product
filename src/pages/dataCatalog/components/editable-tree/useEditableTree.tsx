@@ -20,7 +20,7 @@ import {
   deleteVolume,
   renameCatalog
 } from '@/api/dataCatalog';
-import { validateName } from '../../utils';
+import { validateName } from '@/utils/valiate';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
