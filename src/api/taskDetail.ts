@@ -12,6 +12,10 @@ export async function getTaskDetailNode(params: {
   search_key?: string;
   page?: number;
   page_size?: number;
+  file_type?: string;
+  status?: string;
+  sort?: string;
+  sort_by?: string;
 }) {
   return await UAPI.RES.taskDetailNode({}).get(params).inRegion().do();
 }

@@ -1,11 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Input, Pagination, Table } from '@arco-design/web-react';
+import {
+  Input,
+  Pagination,
+  PaginationProps,
+  Table
+} from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import './index.css';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 const InputSearch = Input.Search;
 
@@ -15,6 +21,12 @@ enum TaskRunStatus {
   success = 2,
   fail = 3,
   stop = 4
+}
+
+// 枚举开始时间结束时间字段
+enum StartOrEnd {
+  start_time = 'start_time',
+  end_time = 'end_time'
 }
 
 export default function WorkflowTask() {
@@ -32,11 +44,17 @@ export default function WorkflowTask() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = useState({
+    status: '',
+    sort: '',
+    sort_by: ''
+  });
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, pageSize]);
+  }, [userInfo, current, pageSize, sortValue]);
 
   const getList = async () => {
     setLoading(true);
@@ -45,7 +63,8 @@ export default function WorkflowTask() {
         uid: userInfo?.id,
         search_value: searchValue,
         page: current,
-        page_size: pageSize
+        page_size: pageSize,
+        ...sortValue
       };
       const res = await getTaskList(params);
       if (res.status === 200 && res.data) {
@@ -71,8 +90,40 @@ export default function WorkflowTask() {
   };
 
   // 跳转目录
-  const handleToDirectoryPath = (path: string) => {
-    history.push('/tenant/compute/modaforge/dataCatalog');
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    root_type: string | number
+  ) => {
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+    );
+  };
+
+  // 筛选排序操作
+  const handleTableChange = (
+    _pagination: PaginationProps,
+    sorter: SorterInfo,
+    filters: Partial<Record<string | number | symbol, string[]>>
+  ) => {
+    setCurrent(1);
+    const sortdata = {
+      status: filters.status === undefined ? '' : filters.status.join(','),
+      sort:
+        sorter.direction === undefined
+          ? ''
+          : sorter.direction === 'ascend'
+            ? 'asc'
+            : 'desc',
+      sort_by:
+        sorter.field === undefined
+          ? ''
+          : sorter.field === StartOrEnd.start_time
+            ? 'start_run_time'
+            : 'end_run_time'
+    };
+
+    setSortValue(sortdata);
   };
 
   // table columns
@@ -147,8 +198,7 @@ export default function WorkflowTask() {
           text: '已停止',
           value: TaskRunStatus.stop
         }
-      ],
-      onFilter: (value, row) => row.status == value
+      ]
     },
     {
       title: '运行时长',
@@ -174,7 +224,13 @@ export default function WorkflowTask() {
         <span
           className="hover-change"
           title={record.source_path}
-          onClick={() => handleToDirectoryPath(record.source_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.source_parent_id,
+              1
+            )
+          }
         >
           {record.source_path}
         </span>
@@ -189,7 +245,13 @@ export default function WorkflowTask() {
         <span
           className="hover-change"
           title={record.target_path}
-          onClick={() => handleToDirectoryPath(record.target_path)}
+          onClick={() =>
+            handleToDirectoryPath(
+              record.target_path_id,
+              record.target_parent_id,
+              1
+            )
+          }
         >
           {record.target_path}
         </span>
@@ -200,20 +262,14 @@ export default function WorkflowTask() {
       dataIndex: 'start_time',
       width: 170,
       render: (_, record) => <span>{record.start_time}</span>,
-      sorter: (a, b) => {
-        return (
-          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-        );
-      }
+      sorter: true
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 170,
       render: (_, record) => <span>{record.end_time}</span>,
-      sorter: (a, b) => {
-        return new Date(a.end_time).getTime() - new Date(b.end_time).getTime();
-      }
+      sorter: true
     },
     {
       title: '操作',
@@ -266,6 +322,9 @@ export default function WorkflowTask() {
         noDataElement={noDataElement({ description: '暂无作业' })}
         rowKey="id"
         loading={loading}
+        onChange={(pagination, sorter, filters) =>
+          handleTableChange(pagination, sorter, filters)
+        }
       />
       {/* 分页 */}
       <Pagination
