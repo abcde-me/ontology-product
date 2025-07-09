@@ -99,15 +99,18 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   }
 
   async getRawData(props?: { activeKey?: string; searchValue?: string }) {
-    const { activeTab: stateActiveTab } = this.getState();
-    const activeTab = props?.activeKey || stateActiveTab;
+    const { activeTab } = this.getState();
+    const activeKey = props?.activeKey || activeTab;
 
     const res = await getCatalogList({
-      root_type: RootTypeEnum[activeTab],
+      root_type: RootTypeEnum[activeKey],
       search: props?.searchValue
     });
 
-    return this.convertRawDataToTreeData(res?.data?.[activeTab] || []);
+    return this.convertRawDataToTreeData({
+      data: res?.data?.[activeKey] || [],
+      activeKey
+    });
   }
 
   async initTreeData(options: Parameters<Effects['fetchData']>[0]) {
@@ -171,10 +174,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
-  convertRawDataToTreeData(data: ITreeData[]) {
+  convertRawDataToTreeData(options: { data: ITreeData[]; activeKey?: string }) {
+    const { data } = options;
     if (!Array.isArray(data)) return [];
 
     const { activeTab } = this.getState();
+    const activeKey = options.activeKey || activeTab;
+
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
@@ -194,7 +200,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                   key: String(item.id), // 转换为字符串
                   parent_id: catalog.id,
                   isLastLeaf: true,
-                  fullPath: `${item.base_dir}${activeTab || 'src'}/${catalog.name}/volume/${item.name}`
+                  fullPath: `${item.base_dir}${activeKey}/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };
