@@ -60,6 +60,10 @@ async function request() {
   });
 }
 request();
+export interface directoryDataType {
+  value: number | string;
+  label: string;
+}
 export let directoryData = [];
 async function fn() {
   try {
