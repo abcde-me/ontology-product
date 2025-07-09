@@ -337,7 +337,9 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   useEffect(() => {
     // 数据目录卷
     getCatalogList({ root_type: 2 }).then((res) => {
-      setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
+      setTargetDataSourceOptions(
+        convertToCascaderOptions(res?.data?.dst ?? [])
+      );
     }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     // setTargetDataSourceOptions(
     //   convertToCascaderOptions(cstargetDataSourceData)
@@ -347,7 +349,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     // TODO: ts错误
     // @ts-expect-error
     getConnectorList({ scope: 1 }).then((res) => {
-      setConnectorList(convertToSelectOptions(res.data.items));
+      setConnectorList(convertToSelectOptions(res?.data?.items ?? []));
     });
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
