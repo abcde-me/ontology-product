@@ -1,6 +1,6 @@
 function numberToUppercaseSimple(num) {
   const map = {
-    0: '日',
+    7: '日',
     1: '一',
     2: '二',
     3: '三',
@@ -16,6 +16,7 @@ function numberToUppercaseSimple(num) {
 }
 export function parseCron(cron) {
   const { minute, hour, date, month, week } = cron;
+  console.log(date);
 
   if (date == '*') {
     return `每天${hour}:${minute}运行`;
@@ -28,7 +29,7 @@ export function parseCron(cron) {
     }
     return `每月${result}   ${hour}:${minute}运行`;
   } else if (date != '*' && week == '*') {
-    const weekly = numberToUppercaseSimple(week);
+    const weekly = numberToUppercaseSimple(date);
     const arr = date && date.split(',');
     let result = '';
     for (let i = 0; i < arr.length; i++) {

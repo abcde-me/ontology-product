@@ -160,14 +160,14 @@ const TableDetail = (props) => {
     try {
       const res = await stopeLoad({
         task_id: props.taskId,
-        execution_id: executionId
+        record_id: executionId
       });
-      if (res.message == 'ok') {
-        props.judgmentTaskHan();
+      if (res.code == '' && res.status == 200) {
         Message.success('操作成功,停止运行');
       } else {
         Message.error(res.message);
       }
+      props.judgmentTaskHan();
       setVisible(false);
     } catch (error) {
       console.log(error);
