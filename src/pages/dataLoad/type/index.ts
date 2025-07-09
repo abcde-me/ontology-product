@@ -59,6 +59,17 @@ export interface TaskInfo {
   status: TaskStatus;
   task_id: number;
   cron_expression: string;
+  cron_enable: boolean;
+  run_config?: {
+    type: number;
+    cycle_text: {
+      minute: string;
+      hour: string;
+      date: string;
+      month: string;
+      week: string;
+    };
+  };
 }
 
 // 执行历史记录列表类型
