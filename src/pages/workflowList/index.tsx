@@ -327,6 +327,7 @@ export default function WorkflowList() {
           >
             <span
               className={record.is_online ? 'disabled-text' : 'operate-text'}
+              title={record.is_online ? '请先下线工作流' : ''}
             >
               删除
             </span>
