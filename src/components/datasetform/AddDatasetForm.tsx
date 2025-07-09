@@ -18,6 +18,7 @@ import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 const { Option } = Select;
 import React, { useState, useEffect } from 'react';
 import styles from './AddDatasetForm.module.css';
+import './AddDatasetForm.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import {
   getConnectorList,
@@ -344,7 +345,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     //连接器
     // TODO: ts错误
     // @ts-expect-error
-    getConnectorList({ scope: 2 }).then((res) => {
+    getConnectorList({ scope: 1 }).then((res) => {
       setConnectorList(convertToSelectOptions(res.data.items));
     });
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
@@ -468,7 +469,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
         setConnectorFileInformation([]); //重置连接器文件信息
         setPreviewData([]); //重置预览数据
         setPreviewColumns([]); //重置预览表格列
-        setTargetDataSourceOptions([]); //重置目标数据源选项
+        // setTargetDataSourceOptions([]); //重置目标数据源选项
         onSubmit(formData);
       })
       .catch((error) => {
@@ -477,277 +478,298 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   };
 
   return (
-    <Modal
-      title="新建数据集"
-      visible={visible}
-      footer={null}
-      style={{ width: '960px', minHeight: '436px' }}
-      onCancel={onCancel}
-      maskClosable={false}
-      className={styles.modalWrapper}
-      // unmountOnExit={true}
-    >
-      <Form
-        form={form}
-        autoComplete="off"
-        labelCol={{ span: 3 }}
-        wrapperCol={{ span: 21 }}
-        layout="horizontal"
-        labelAlign="right"
+    <div className={styles.datasetForm}>
+      <Modal
+        title="新建数据集"
+        visible={visible}
+        footer={null}
+        style={{ width: '960px', minHeight: '436px' }}
+        onCancel={onCancel}
+        maskClosable={false}
+        className={styles.modalWrapper}
+        // unmountOnExit={true}
       >
-        <Form.Item
-          label="数据集名称:"
-          field="name"
-          rules={[{ required: true, message: '请输入数据集名称' }]}
-          style={{ marginBottom: 16 }}
+        <Form
+          form={form}
+          autoComplete="off"
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+          layout="horizontal"
+          labelAlign="right"
         >
-          <Input
-            maxLength={128}
-            showWordLimit
-            style={{ width: '100%', marginLeft: 10 }}
-            placeholder="输入数据集名称..."
-          />
-        </Form.Item>
-
-        <FormItem
-          label="标签:"
-          field="tags"
-          rules={[{ required: false, message: '请选择至少一个标签' }]}
-        >
-          <Select
-            placeholder="请输入或选择标签..."
-            mode="multiple"
-            options={tagList}
-            allowCreate
-            style={{ marginLeft: 10 }}
-          />
-        </FormItem>
-
-        <FormItem
-          label="描述说明:"
-          field="description"
-          rules={[{ required: false, message: '请输入描述信息' }]}
-          extra={
-            <span
-              style={{ fontSize: '12px', color: '#86909c', marginLeft: 10 }}
-            >
-              指定导出文件的保存路径目录
-            </span>
-          }
-        >
-          <Input.TextArea
-            placeholder="这里输入对数据集的描述和说明信息..."
-            rows={1}
-            maxLength={500}
-            showWordLimit
-            style={{ marginLeft: 10 }}
-          />
-        </FormItem>
-        <FormItem
-          label="数据来源:"
-          field="dataSource"
-          rules={[{ required: true, message: '请选择数据来源' }]}
-          initialValue="volume"
-        >
-          <Radio.Group
-            value={dataSource}
-            onChange={handleDataSourceChange}
-            style={{ marginLeft: 10 }}
+          <Form.Item
+            label="数据集名称:"
+            field="name"
+            rules={[{ required: true, message: '请输入数据集名称' }]}
+            style={{ marginBottom: 16 }}
           >
-            <Radio value="volume">数据目录卷</Radio>
-            <Radio value="connector">连接器</Radio>
-          </Radio.Group>
-        </FormItem>
-
-        {dataSource === 'volume' && (
-          <div
-            style={{
-              border: '1px solid rgba(0, 0, 0, 0.2)',
-              borderRadius: '10px',
-              padding: '10px 30px 10px 0px',
-              marginLeft: 20
-            }}
-          >
+            <Input
+              maxLength={128}
+              showWordLimit
+              style={{ width: '100%', marginLeft: 10 }}
+              placeholder="输入数据集名称..."
+            />
+          </Form.Item>
+          <div className="formSelect">
             <FormItem
-              label="选择目标数据目录卷/卷:"
-              field="targetDataSource"
-              rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-            >
-              <Cascader
-                placeholder="请选择"
-                options={targetDataSourceOptions}
-                style={{ marginLeft: 10, marginRight: 20 }}
-                onChange={handleTargetDataSourceChange}
-                expandTrigger="hover"
-                showSearch
-              />
-            </FormItem>
-            <div
-              style={{
-                marginLeft: 20,
-                marginTop: 8,
-                fontSize: '12px',
-                color: '#86909c'
-              }}
-            >
-              {previewData ? (
-                <span>
-                  <span style={{ fontWeight: '500', color: '#000' }}>预览</span>{' '}
-                  目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
-                </span>
-              ) : (
-                <span>
-                  <span style={{ fontWeight: '500', color: '#000' }}>
-                    预览：
-                  </span>
-                  请先选择目标数据目录卷/卷
-                </span>
-              )}
-            </div>
-            {previewData ? (
-              <div className={styles.previewContainer}>
-                <Table
-                  className={styles.previewTable}
-                  columns={previewColumns}
-                  data={previewData}
-                  pagination={false}
-                  scroll={{
-                    x: Math.max(800, previewColumns.length * 200),
-                    y: 300
-                  }}
-                  size="small"
-                  loading={false}
-                  placeholder="暂无数据"
-                />
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {dataSource === 'connector' && (
-          <div
-            style={{
-              border: '1px solid rgba(0, 0, 0, 0.2)',
-              borderRadius: '10px',
-              padding: '10px 30px 10px 0px',
-              marginLeft: 20
-            }}
-          >
-            <FormItem
-              label="选择连接器:"
-              field="connector"
-              rules={[{ required: true, message: '请选择连接器' }]}
-              labelCol={{ span: 4 }}
-              wrapperCol={{ span: 20 }}
+              label="标签:"
+              field="tags"
+              rules={[{ required: false, message: '请选择至少一个标签' }]}
             >
               <Select
-                placeholder="请选择连接器"
-                options={connectorList}
+                placeholder="请输入或选择标签..."
+                mode="multiple"
+                options={tagList}
+                allowCreate
                 style={{ marginLeft: 10 }}
-                onChange={handleConnectorChange}
-                value={selectedConnector || undefined}
+                maxTagCount={{
+                  count: 10,
+                  render: (invisibleTagCount) => {
+                    // 从当前表单值获取完整的标签列表
+                    const allTags = form.getFieldValue('tags') || [];
+                    const remainingTags = allTags.slice(10);
+                    const remainingLabels = remainingTags.join(', ');
+
+                    return (
+                      <Tooltip content={`剩余标签: ${remainingLabels}`}>
+                        <span>+{invisibleTagCount}</span>
+                      </Tooltip>
+                    );
+                  }
+                }}
               />
             </FormItem>
-
-            <FormItem
-              label="选择数据文件:"
-              field="selectedFiles"
-              rules={[{ required: true, message: '请选择至少一个文件' }]}
-              labelCol={{ span: 4 }}
-              wrapperCol={{ span: 20 }}
-              extra={
-                <span
-                  style={{
-                    fontSize: '12px',
-                    color: '#86909c',
-                    marginLeft: 10
-                  }}
-                >
-                  目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                </span>
-              }
-            >
-              <Tooltip
-                content={!selectedConnector ? '请先选择连接器' : ''}
-                disabled={!!selectedConnector}
+          </div>
+          <FormItem
+            label="描述说明:"
+            field="description"
+            rules={[{ required: false, message: '请输入描述信息' }]}
+            extra={
+              <span
+                style={{ fontSize: '12px', color: '#86909c', marginLeft: 10 }}
               >
-                <div style={{ marginLeft: 10 }}>
-                  <Select
-                    placeholder={
-                      !selectedConnector
-                        ? '请先选择连接器'
-                        : '请选择要使用的文件...'
-                    }
-                    mode="multiple"
-                    // options={connectorFileInformation}
-                    disabled={!selectedConnector}
-                    onChange={(values) => {
-                      // labelInValue 为 true 时，values 是对象数组
-                      console.log('选择的文件:', values);
-                      const fileValues = values.map((v: OptionInfo) => v.value);
-                      setSelectedFiles(fileValues);
-                      form.setFieldValue('selectedFiles', fileValues);
+                指定导出文件的保存路径目录
+              </span>
+            }
+          >
+            <Input.TextArea
+              placeholder="这里输入对数据集的描述和说明信息..."
+              rows={1}
+              maxLength={500}
+              showWordLimit
+              style={{ marginLeft: 10 }}
+            />
+          </FormItem>
+          <FormItem
+            label="数据来源:"
+            field="dataSource"
+            rules={[{ required: true, message: '请选择数据来源' }]}
+            initialValue="volume"
+          >
+            <Radio.Group
+              value={dataSource}
+              onChange={handleDataSourceChange}
+              style={{ marginLeft: 10 }}
+            >
+              <Radio value="volume">数据目录卷</Radio>
+              <Radio value="connector">连接器</Radio>
+            </Radio.Group>
+          </FormItem>
+
+          {dataSource === 'volume' && (
+            <div
+              style={{
+                border: '1px solid rgba(0, 0, 0, 0.2)',
+                borderRadius: '10px',
+                padding: '10px 30px 10px 0px',
+                marginLeft: 20
+              }}
+            >
+              <FormItem
+                label="选择目标数据目录卷/卷:"
+                field="targetDataSource"
+                rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+                labelCol={{ span: 5 }}
+                wrapperCol={{ span: 19 }}
+              >
+                <Cascader
+                  placeholder="请选择"
+                  options={targetDataSourceOptions}
+                  style={{ marginLeft: 10, marginRight: 20 }}
+                  onChange={handleTargetDataSourceChange}
+                  expandTrigger="hover"
+                  showSearch
+                />
+              </FormItem>
+              <div
+                style={{
+                  marginLeft: 20,
+                  marginTop: 8,
+                  fontSize: '12px',
+                  color: '#86909c'
+                }}
+              >
+                {previewData ? (
+                  <span>
+                    <span style={{ fontWeight: '500', color: '#000' }}>
+                      预览
+                    </span>{' '}
+                    目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                  </span>
+                ) : (
+                  <span>
+                    <span style={{ fontWeight: '500', color: '#000' }}>
+                      预览：
+                    </span>
+                    请先选择目标数据目录卷/卷
+                  </span>
+                )}
+              </div>
+              {previewData ? (
+                <div className={styles.previewContainer}>
+                  <Table
+                    className={styles.previewTable}
+                    columns={previewColumns}
+                    data={previewData}
+                    pagination={false}
+                    scroll={{
+                      x: Math.max(800, previewColumns.length * 200),
+                      y: 300
                     }}
-                    value={selectedFiles}
-                    style={{ width: '100%' }}
-                    labelInValue
-                    renderFormat={(option: OptionInfo | null) => {
-                      const value = option?.value ?? '';
-                      return String(value).split('/').pop() || '';
+                    size="small"
+                    loading={false}
+                    placeholder="暂无数据"
+                  />
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {dataSource === 'connector' && (
+            <div
+              style={{
+                border: '1px solid rgba(0, 0, 0, 0.2)',
+                borderRadius: '10px',
+                padding: '10px 30px 10px 0px',
+                marginLeft: 20
+              }}
+            >
+              <FormItem
+                label="选择连接器:"
+                field="connector"
+                rules={[{ required: true, message: '请选择连接器' }]}
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 20 }}
+              >
+                <Select
+                  placeholder="请选择连接器"
+                  options={connectorList}
+                  style={{ marginLeft: 10 }}
+                  onChange={handleConnectorChange}
+                  value={selectedConnector || undefined}
+                />
+              </FormItem>
+
+              <FormItem
+                label="选择数据文件:"
+                field="selectedFiles"
+                rules={[{ required: true, message: '请选择至少一个文件' }]}
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 20 }}
+                extra={
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: '#86909c',
+                      marginLeft: 10
                     }}
                   >
-                    {connectorFileInformation.map((item, index) => (
-                      <Option
-                        key={index}
-                        value={item.path + '/' + item.name}
-                        // @ts-expect-error
-                        label={item.name}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Arial, sans-serif',
-                            fontSize: '14px',
-                            color: '#4E5969',
-                            lineHeight: '1.8',
-                            margin: '10px'
-                          }}
+                    目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                  </span>
+                }
+              >
+                <Tooltip
+                  content={!selectedConnector ? '请先选择连接器' : ''}
+                  disabled={!!selectedConnector}
+                >
+                  <div style={{ marginLeft: 10 }}>
+                    <Select
+                      placeholder={
+                        !selectedConnector
+                          ? '请先选择连接器'
+                          : '请选择要使用的文件...'
+                      }
+                      mode="multiple"
+                      // options={connectorFileInformation}
+                      disabled={!selectedConnector}
+                      onChange={(values) => {
+                        // labelInValue 为 true 时，values 是对象数组
+                        console.log('选择的文件:', values);
+                        const fileValues = values.map(
+                          (v: OptionInfo) => v.value
+                        );
+                        setSelectedFiles(fileValues);
+                        form.setFieldValue('selectedFiles', fileValues);
+                      }}
+                      value={selectedFiles}
+                      style={{ width: '100%' }}
+                      labelInValue
+                      renderFormat={(option: OptionInfo | null) => {
+                        const value = option?.value ?? '';
+                        return String(value).split('/').pop() || '';
+                      }}
+                    >
+                      {connectorFileInformation.map((item, index) => (
+                        <Option
+                          key={index}
+                          value={item.path + '/' + item.name}
+                          // @ts-expect-error
+                          label={item.name}
                         >
-                          <div>{item.name}</div>
-                          <div style={{ color: '#86909c' }}>
-                            修改时间：{formatDateTime(item.last_modified)}
+                          <div
+                            style={{
+                              fontFamily: 'Arial, sans-serif',
+                              fontSize: '14px',
+                              color: '#4E5969',
+                              lineHeight: '1.8',
+                              margin: '10px'
+                            }}
+                          >
+                            <div>{item.name}</div>
+                            <div style={{ color: '#86909c' }}>
+                              修改时间：{formatDateTime(item.last_modified)}
+                            </div>
                           </div>
-                        </div>
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </Tooltip>
-            </FormItem>
-          </div>
-        )}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                </Tooltip>
+              </FormItem>
+            </div>
+          )}
 
-        <FormItem wrapperCol={{ span: 24 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '12px',
-              marginTop: '24px',
-              paddingTop: '20px',
-              borderTop: '1px solid #f0f0f0'
-            }}
-          >
-            <Button onClick={onCancel}>取消</Button>
-            <Button type="primary" onClick={handleSubmit}>
-              确定
-            </Button>
-          </div>
-        </FormItem>
-      </Form>
-    </Modal>
+          <FormItem wrapperCol={{ span: 24 }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '12px',
+                marginTop: '24px',
+                paddingTop: '20px',
+                borderTop: '1px solid #f0f0f0'
+              }}
+            >
+              <Button onClick={onCancel}>取消</Button>
+              <Button type="primary" onClick={handleSubmit}>
+                确定
+              </Button>
+            </div>
+          </FormItem>
+        </Form>
+      </Modal>
+    </div>
   );
 }
 

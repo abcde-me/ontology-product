@@ -37,12 +37,13 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       enhanced_proportion,
       sample_num,
       similarity_threshold,
-      generate_sample_num
+      generate_sample_num,
+      modelList
     } = payload;
-    if (app_scenarios_name === undefined) {
+    if (!app_scenarios_name) {
       errorMessages = '场景未选择';
     }
-    if (enha_modle_id === undefined) {
+    if (!enha_modle_id) {
       errorMessages = '模型未选择';
     }
     if (enhanced_proportion > 1) {

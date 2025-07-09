@@ -68,7 +68,7 @@ const LoadAddModal = (props: any) => {
       } else {
         const formData = {
           task_name: rest.name,
-          connector_id: 15,
+          connector_id: rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
             type: 0,

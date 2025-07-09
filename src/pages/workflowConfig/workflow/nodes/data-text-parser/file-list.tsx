@@ -25,7 +25,6 @@ function FileList({
   selectedFilesNum,
   handleFilesChange
 }: FileListProps) {
-  // console.log('fileList......', files, selectedFilesNum)
   const unmountedRef = useUnmountedRef();
   const nodes = useNodes();
   const startNode = nodes.find(
@@ -39,6 +38,7 @@ function FileList({
     limit: 5,
     total: 0
   });
+  const [searchers, setSearchers] = useState<Record<string, any>>({});
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const columns: any[] = [
@@ -86,17 +86,7 @@ function FileList({
         .join('/')
         .split('/')
         .map((f) => ({ text: f.toLowerCase(), value: f.toLowerCase() })),
-      // filters: [
-      //   {
-      //     text: 'docx',
-      //     value: 'docx'
-      //   },
-      //   {
-      //     text: 'pdf',
-      //     value: 'pdf'
-      //   }
-      // ],
-      onFilter: (value, row) => row.file_type.indexOf(value) > -1
+      onFilter: (value, row) => value.includes(row.file_type)
     },
     {
       title: '文件大小',
@@ -184,7 +174,7 @@ function FileList({
   };
 
   const onChangeTable = (pagination, sorter, filters, extra) => {
-    // console.log('表格变化:', { pagination, sorter, filters, extra });
+    console.log('表格变化:', { pagination, sorter, filters, extra });
 
     if (extra.action === 'paginate') {
       setPagination((prev) => ({

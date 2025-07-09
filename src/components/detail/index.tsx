@@ -90,7 +90,10 @@ const generateArcoColumns = (
   idName,
   updateStatus
 ) => {
-  const cols = headers.map((header) => ({
+  // 过滤掉唯一标识符字段，不在页面显示
+  const displayHeaders = headers.filter((header) => header !== idName);
+
+  const cols = displayHeaders.map((header) => ({
     title: header,
     dataIndex: header,
     key: header,
@@ -636,7 +639,7 @@ const DatasetDetail: React.FC = () => {
     setEditingRowKey(null);
     setEditingData({});
 
-    Message.success('数据修改成功');
+    Message.success('编辑成功');
   };
 
   // 取消内联编辑
@@ -648,41 +651,60 @@ const DatasetDetail: React.FC = () => {
     Message.info('已取消编辑');
   };
 
+  // 比较两个数据对象是否相同（排除 idName 字段）
+  const isDataEqual = (
+    updateData: Record<string, unknown>,
+    backupData: Record<string, unknown>
+  ) => {
+    if (!updateData || !backupData) return false;
+
+    // 获取需要比较的字段（排除 idName）
+    const fieldsToCompare = Object.keys(updateData).filter(
+      (key) => key !== idName
+    );
+
+    return fieldsToCompare.every((field) => {
+      console.log(field, updateData[field], backupData[field]);
+      return updateData[field] === backupData[field];
+    });
+  };
+
   // 提交数据修改
   const handleSubmitChanges = () => {
     if (!datasetDetail) return;
-
-    // 添加调试信息
-    console.log('提交数据时的状态:');
-    console.log('changedRows:', changedRows);
-    console.log('deletedRows:', deletedRows);
-    console.log('contentData:', contentData);
-    console.log('contentDatabackup:', contentDatabackup);
-    console.log('idName:', idName);
 
     // 构造提交数据
     const submitData: any[] = [];
 
     // 处理修改的数据
     changedRows.forEach((recordId) => {
-      console.log('处理修改的记录 ID:', recordId, '类型:', typeof recordId);
       const modifiedRow = contentData.find((item) => {
-        console.log(
-          '比较:',
-          item[idName],
-          '===',
-          recordId,
-          '结果:',
-          item[idName] === recordId
-        );
         return item[idName] === recordId;
       });
-      console.log('找到的修改行:', modifiedRow);
+
       if (modifiedRow) {
-        submitData.push({
-          change_type: 1, // 修改
-          new_data: modifiedRow // 直接提交整行数据
+        // 找到对应的备份数据
+        const backupRow = contentDatabackup.find((item) => {
+          return item[idName] === recordId;
         });
+
+        // 如果找到备份数据，比较是否有实际变化
+        if (backupRow) {
+          if (!isDataEqual(modifiedRow, backupRow)) {
+            // 数据有变化，添加到提交列表
+            submitData.push({
+              change_type: 1, // 修改
+              new_data: modifiedRow // 直接提交整行数据
+            });
+          }
+          // 如果数据相同，跳过提交
+        } else {
+          // 没有找到备份数据，说明是新数据，直接提交
+          submitData.push({
+            change_type: 1, // 修改
+            new_data: modifiedRow
+          });
+        }
       }
     });
 
@@ -708,6 +730,10 @@ const DatasetDetail: React.FC = () => {
       version_id: datasetDetail.latest_version,
       datas: convertKeyType(submitData, 'id', 'number')
     };
+    if (params.datas.length === 0) {
+      Message.warning('没有需要修改的数据');
+      return;
+    }
     editDatasetVersion(params)
       .then((res) => {
         Message.success('数据修改成功');
@@ -910,7 +936,13 @@ const DatasetDetail: React.FC = () => {
                             gap: '8px'
                           }}
                         >
-                          <span>{datasetDetail.name}</span>
+                          {datasetDetail.name.length > 14 ? (
+                            <Tooltip content={datasetDetail.name}>
+                              <span>{`${datasetDetail.name.substring(0, 14)}...`}</span>
+                            </Tooltip>
+                          ) : (
+                            <span>{datasetDetail.name}</span>
+                          )}
                           {renderStatusTag(
                             datasetDetail.status,
                             datasetDetail.error_reason,
@@ -1065,7 +1097,17 @@ const DatasetDetail: React.FC = () => {
                         // 有改动，弹窗确认
                         Modal.confirm({
                           title: '确定放弃编辑?',
-                          content: '放弃后，当前修改不会保存',
+                          content: (
+                            <div
+                              style={{
+                                fontSize: '14px',
+                                paddingLeft: '28px'
+                                // lineHeight: '1.5'
+                              }}
+                            >
+                              放弃后，当前修改不会保存
+                            </div>
+                          ),
                           okText: '确定',
                           cancelText: '取消',
                           onOk: () => {

@@ -135,6 +135,10 @@
   font-size: 13px;
 }
 
+:global(.arco-select-option-wrapper .arco-select-highlight) {
+  color: #007dfa;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .previewTable {
@@ -192,4 +196,9 @@
 
 .dataTypeIndicator.object {
   background-color: #722ed1;
+}
+
+.form :global(.arco-select-highlight) {
+  background-color: #f5f5f5;
+  color: #145cec;
 }

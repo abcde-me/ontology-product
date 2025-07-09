@@ -137,7 +137,7 @@ export default function Eltable() {
         console.log('接收到搜索类型变化事件，重置关键词输入:', searchType);
         // 清空搜索关键词，保留搜索类型
         setSearchKeyword('');
-        setSearchCondition(prev => ({
+        setSearchCondition((prev) => ({
           ...prev,
           keyword: '',
           isActive: false
@@ -146,7 +146,10 @@ export default function Eltable() {
     };
     window.addEventListener('resetSearchKeyword', handleResetSearchKeyword);
     return () => {
-      window.removeEventListener('resetSearchKeyword', handleResetSearchKeyword);
+      window.removeEventListener(
+        'resetSearchKeyword',
+        handleResetSearchKeyword
+      );
     };
   }, []);
 
@@ -437,7 +440,7 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content='请先选择文件' className='narrow-popover'>
+        <Popover content="请先选择文件" className="narrow-popover">
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -470,7 +473,7 @@ export default function Eltable() {
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content='请先选择文件' className='narrow-popover'>
+        <Popover content="请先选择文件" className="narrow-popover">
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -573,7 +576,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => { }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

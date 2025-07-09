@@ -3,7 +3,7 @@ import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import EditableTree from '../editable-tree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import { tabKeys } from '../../consts';
+import { CatalogTypeEnum, RootTypeEnum, tabKeys } from '../../consts';
 
 const TabPane = Tabs.TabPane;
 
@@ -12,15 +12,27 @@ export default function SourceData() {
   const { catalogTreeStore } = dataCatalog;
   const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
 
+  const params = new URLSearchParams(window.location.search);
+  const root_type = params.get('root_type');
+  const parent_id = params.get('parent_id');
+  const id = params.get('id');
+
   useEffect(() => {
-    if (activeTab) {
-      catalogTreeStore.getEffect('fetchData')();
+    let activeKey = 'src';
+    if (root_type && root_type === String(RootTypeEnum.dst)) {
+      activeKey = 'dst';
     }
-  }, [activeTab]);
+
+    catalogTreeStore.getEffect('fetchData')({
+      activeTab: activeKey,
+      parent_id: parent_id || undefined,
+      id: id || undefined
+    });
+  }, [root_type, parent_id, id]);
 
   const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
-    catalogTreeStore.setState({
+    catalogTreeStore.getEffect('fetchData')({
       activeTab: value
     });
   };
