@@ -252,8 +252,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         start_time: startTime || '',
         end_time: endTime || '',
         search_content:
-          searchConditionType === '数据内容' ? searchConditionKeyword : '',
-        search_id: searchConditionType === 'ID' ? searchConditionKeyword : ''
+        searchConditionType === '数据内容' ? searchConditionKeyword : '',
+        search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
+        sort_field: 'generated_at',
+        sort_order: sortOrder || 'desc'
         // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       };
 
@@ -367,6 +369,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       }
     }, 100);
   };
+  // 重置页码
+  const resetPage = () => {
+    setCurrentPage(1);
+  };
   // 合并的useEffect处理所有数据获取逻辑
   useEffect(() => {
     // 首次渲染标记
@@ -417,6 +423,19 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     }
   }, [tableType]);
 
+  useEffect(() => {
+    const handleResetPage = (event) => {
+      const { tableType: eventTableType } = event.detail;
+      if (eventTableType === tableType) {
+        setCurrentPage(1);
+      }
+    };
+    window.addEventListener('resetPageToFirst', handleResetPage);
+    return () => {
+      window.removeEventListener('resetPageToFirst', handleResetPage);
+    };
+  }, [tableType]);
+
   // 控制下载弹框的显示和隐藏 - 使用useCallback避免重新创建
   const downloadShow = React.useCallback(
     (visible: boolean, downloaddata?: any) => {
@@ -443,7 +462,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       selectedKey,
       selectedFullPath,
       undefined,
-      handAllReset
+      handAllReset,
+      resetPage,
     );
   }, [
     tableType,
@@ -451,7 +471,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     downloadShow,
     selectedKey,
     selectedFullPath,
-    handAllReset
+    handAllReset,
+    resetPage
   ]);
 
   // 处理带有hoveredRowId的列配置

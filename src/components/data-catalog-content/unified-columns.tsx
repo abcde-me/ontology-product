@@ -182,7 +182,8 @@ const renderActionColumn = (
   selectedKey,
   tableType,
   selectedFullPath,
-  handAllReset
+  handAllReset,
+  resetPage
 ) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
@@ -206,7 +207,7 @@ const renderActionColumn = (
         cursor: 'pointer'
       }}
       onClick={() =>
-        handleDelete(record, refreshData, selectedKey, tableType, handAllReset)
+        handleDelete(record, refreshData, selectedKey, tableType, handAllReset, resetPage)
       }
     >
       删除
@@ -220,11 +221,12 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {}, // 添加刷新数据的回调函数
+  refreshData = () => { }, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
-  handAllReset?: () => void // 修改为函数类型而不是数组
+  handAllReset?: () => void, // 修改为函数类型而不是数组
+  resetPage?: () => void
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
@@ -434,7 +436,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];
@@ -458,7 +461,8 @@ const handleDelete = (
   refreshData,
   selectedKey,
   tableType: 'source' | 'target',
-  handAllReset
+  handAllReset,
+  resetPage
 ) => {
   const ids: Array<string> = [];
   try {
@@ -478,6 +482,7 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
             return
@@ -489,6 +494,7 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
             return

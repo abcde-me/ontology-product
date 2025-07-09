@@ -262,6 +262,10 @@ export default function Eltable() {
       if (tableRef.current.resetSelection) {
         tableRef.current.resetSelection();
       }
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
       if (tableRef.current.getTableList) {
         tableRef.current.getTableList();
       }
