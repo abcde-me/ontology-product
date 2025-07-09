@@ -5,6 +5,17 @@ import './index.css';
 import { useHistory } from 'react-router-dom';
 import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
+interface DataType {
+  status: Array<string>;
+  sort: string;
+  order_by: string;
+}
+interface PropsType {
+  change: (state: DataType) => void;
+  name: string;
+  taskId: number;
+  judmentTaskHan: (taskId: number) => void;
+}
 const TableDetail = (props) => {
   const history = useHistory();
   const columns: any = [
