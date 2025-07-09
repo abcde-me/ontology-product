@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './index.css';
-import { Pagination, Table } from '@arco-design/web-react';
+import { Pagination, Popover, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import PdfIcon from '@/assets/file/pdf-icon.svg';
-import TxtIcon from '@/assets/file/txt-icon.svg';
-import EpubIcon from '@/assets/file/epub-icon.svg';
 import noDataElement from '@/components/no-data';
 import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
@@ -64,7 +61,12 @@ export default function ParseNode(props: {
       title: '文件名称',
       dataIndex: 'file_name',
       width: 120,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, record) => (
+        <Popover trigger="hover" content={record.file_name} position="tl">
+          <span>{record.file_name}</span>
+        </Popover>
+      )
     },
     {
       title: '状态',

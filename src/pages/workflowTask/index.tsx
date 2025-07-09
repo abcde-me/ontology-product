@@ -3,6 +3,7 @@ import {
   Input,
   Pagination,
   PaginationProps,
+  Popover,
   Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
@@ -134,18 +135,20 @@ export default function WorkflowTask() {
       width: 80,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          onClick={() =>
-            handleToTaskDeatil(
-              record.id,
-              record.workflow_uuid,
-              record.ds_workflow_id
-            )
-          }
-        >
-          {record.id}
-        </span>
+        <Popover trigger="hover" content={record.id}>
+          <span
+            className="hover-change"
+            onClick={() =>
+              handleToTaskDeatil(
+                record.id,
+                record.workflow_uuid,
+                record.ds_workflow_id
+              )
+            }
+          >
+            {record.id}
+          </span>
+        </Popover>
       )
     },
     {
@@ -204,7 +207,12 @@ export default function WorkflowTask() {
       title: '运行时长',
       dataIndex: 'time_size',
       width: 170,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, record) => (
+        <Popover trigger="hover" content={record.id}>
+          <span>{record.time_size}</span>
+        </Popover>
+      )
     },
     {
       title: '工作流名称',
@@ -212,7 +220,9 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span title={record.workflow_name}>{record.workflow_name}</span>
+        <Popover trigger="hover" content={record.workflow_name}>
+          <span>{record.workflow_name}</span>
+        </Popover>
       )
     },
     {
@@ -221,19 +231,20 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          title={record.source_path}
-          onClick={() =>
-            handleToDirectoryPath(
-              record.source_path_id,
-              record.source_parent_id,
-              1
-            )
-          }
-        >
-          {record.source_path}
-        </span>
+        <Popover trigger="hover" content={record.source_path}>
+          <span
+            className="hover-change"
+            onClick={() =>
+              handleToDirectoryPath(
+                record.source_path_id,
+                record.source_parent_id,
+                1
+              )
+            }
+          >
+            {record.source_path}
+          </span>
+        </Popover>
       )
     },
     {
@@ -242,19 +253,20 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          title={record.target_path}
-          onClick={() =>
-            handleToDirectoryPath(
-              record.target_path_id,
-              record.target_parent_id,
-              1
-            )
-          }
-        >
-          {record.target_path}
-        </span>
+        <Popover trigger="hover" content={record.target_path}>
+          <span
+            className="hover-change"
+            onClick={() =>
+              handleToDirectoryPath(
+                record.target_path_id,
+                record.target_parent_id,
+                1
+              )
+            }
+          >
+            {record.target_path}
+          </span>
+        </Popover>
       )
     },
     {
