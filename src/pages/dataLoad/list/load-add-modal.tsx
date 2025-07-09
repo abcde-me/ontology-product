@@ -26,7 +26,11 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
-const LoadAddModal = (props: any) => {
+interface propsType {
+  hideModalHan: () => void;
+  getList: (visible: boolean) => void;
+}
+const LoadAddModal = (props: propsType) => {
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -143,6 +147,12 @@ const LoadAddModal = (props: any) => {
       option.props.children.toLowerCase().includes(input.toLowerCase())
     );
   };
+  const loadTypeChange = async (value) => {
+    const res = await getConnectionList({
+      type: value.target.value
+    });
+    console.log(res);
+  };
   useEffect(() => {
     getConnector_name_type();
   }, []);
@@ -193,6 +203,9 @@ const LoadAddModal = (props: any) => {
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
           initialValue="s3"
+          onChange={(value) => {
+            loadTypeChange(value);
+          }}
         >
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>
