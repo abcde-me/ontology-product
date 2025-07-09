@@ -153,7 +153,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       return;
     }
     setCurrentPage(1);
-    // 触发自定义事件通知父组件重置搜索输入
     if (window) {
       const resetEvent = new CustomEvent('resetSearchInputs', {
         detail: { tableType }
@@ -180,7 +179,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       return;
     }
     if (searchConditionType && tableType === 'target') {
-      console.log('搜索类型发生变化:', searchConditionType);
       const resetSearchEvent = new CustomEvent('resetSearchKeyword', {
         detail: { tableType, searchType: searchConditionType }
       });
@@ -225,13 +223,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const getTableList = async () => {
     // 防止重复请求
     if (isDataFetching.current) {
-      console.log(`${tableType}表格 - 已有请求正在进行，跳过`);
       return;
     }
 
     // 检查目标表格是否有有效路径
     if (tableType === 'target' && !selectedFullPath) {
-      console.log('目标表格缺少有效路径，跳过请求');
       setTableData([]);
       setTotal(0);
       return;
@@ -506,15 +502,15 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   );
 
   // 处理从外部传入的selectedNode
-  useEffect(() => {
-    if (selectedNode) {
-      console.log(
-        `UnifiedDataTable (${tableType}) - Selected node changed:`,
-        selectedNode
-      );
-      // 这里可以根据selectedNode来更新表格数据
-    }
-  }, [selectedNode, tableType]);
+  // useEffect(() => {
+  //   if (selectedNode) {
+  //     console.log(
+  //       `UnifiedDataTable (${tableType}) - Selected node changed:`,
+  //       selectedNode
+  //     );
+  //     // 这里可以根据selectedNode来更新表格数据
+  //   }
+  // }, [selectedNode, tableType]);
 
   // 页码变化处理 - 使用useCallback避免重新创建
   const handlePageChange = React.useCallback(
@@ -594,21 +590,21 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   };
 
   // 在数据加载完成后，设置当前页中应该被选中的行
-  useEffect(() => {
-    if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
-      const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
-        tableData.some(item => item.id === Number(key))
-      );
-      setSelectedRowKeys(currentPageSelectedKeys);
-      const currentPageSelectedRows = tableData.filter(item =>
-        currentPageSelectedKeys.includes(item.id)
-      );
-      setSelectedRows(currentPageSelectedRows);
-      if (tableRef.current) {
-        tableRef.current.updateSelection(currentPageSelectedKeys);
-      }
-    }
-  }, [tableData, crossPageSelectedKeys]);
+  // useEffect(() => {
+  //   if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
+  //     const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
+  //       tableData.some(item => item.id === Number(key))
+  //     );
+  //     setSelectedRowKeys(currentPageSelectedKeys);
+  //     const currentPageSelectedRows = tableData.filter(item =>
+  //       currentPageSelectedKeys.includes(item.id)
+  //     );
+  //     setSelectedRows(currentPageSelectedRows);
+  //     if (tableRef.current) {
+  //       tableRef.current.updateSelection(currentPageSelectedKeys);
+  //     }
+  //   }
+  // }, [tableData, crossPageSelectedKeys]);
 
   return (
     <>
