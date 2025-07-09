@@ -915,24 +915,63 @@ const DatasetDetail: React.FC = () => {
                             flexWrap: 'wrap'
                           }}
                         >
-                          {datasetDetail.tag_names.map((tag, index) => (
-                            <Tag
-                              key={index}
-                              style={{
-                                background: '#E2E8F0',
-                                color: '#0F172A',
-                                // padding: '3px 8px',
-                                borderRadius: '16px',
-                                fontSize: '12px',
-                                // border: '1px solid #e5eaff',
-                                height: '18px',
-                                // display: 'inline-flex',
-                                alignItems: 'center'
-                              }}
+                          {datasetDetail.tag_names
+                            .slice(0, 2)
+                            .map((tag, index) => (
+                              <Tag
+                                key={index}
+                                style={{
+                                  background: '#E2E8F0',
+                                  color: '#0F172A',
+                                  borderRadius: '16px',
+                                  fontSize: '12px',
+                                  height: '18px',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                {tag}
+                              </Tag>
+                            ))}
+                          {datasetDetail.tag_names.length > 2 && (
+                            <Tooltip
+                              content={
+                                <div style={{ maxWidth: '300px' }}>
+                                  {datasetDetail.tag_names
+                                    .slice(2)
+                                    .map((tag, index) => (
+                                      <Tag
+                                        key={index}
+                                        style={{
+                                          background: '#E2E8F0',
+                                          color: '#0F172A',
+                                          borderRadius: '16px',
+                                          fontSize: '12px',
+                                          height: '18px',
+                                          alignItems: 'center',
+                                          margin: '2px'
+                                        }}
+                                      >
+                                        {tag}
+                                      </Tag>
+                                    ))}
+                                </div>
+                              }
                             >
-                              {tag}
-                            </Tag>
-                          ))}
+                              <Tag
+                                style={{
+                                  background: '#E2E8F0',
+                                  color: '#0F172A',
+                                  borderRadius: '16px',
+                                  fontSize: '12px',
+                                  height: '18px',
+                                  alignItems: 'center',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                +{datasetDetail.tag_names.length - 2}
+                              </Tag>
+                            </Tooltip>
+                          )}
                         </div>
                       ) : (
                         '-'

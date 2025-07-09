@@ -1,132 +1,137 @@
-import React, {
-  memo,
-  useMemo,
-} from 'react'
-import { useTranslation } from 'react-i18next'
-import { useEdges } from 'reactflow'
-import { useNodeHelpLink } from '../../hooks/use-node-help-link'
-import ChangeBlock from './change-block'
-import {
-  canRunBySingle,
-} from '@/pages/workflowConfig/workflow/utils'
-import { useStore } from '@/pages/workflowConfig/workflow/store'
+import React, { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEdges } from 'reactflow';
+import { useNodeHelpLink } from '../../hooks/use-node-help-link';
+import ChangeBlock from './change-block';
+import { canRunBySingle } from '@/pages/workflowConfig/workflow/utils';
+import { useStore } from '@/pages/workflowConfig/workflow/store';
 import {
   useNodeDataUpdate,
   useNodesExtraData,
   useNodesInteractions,
   useNodesReadOnly,
-  useNodesSyncDraft,
-} from '@/pages/workflowConfig/workflow/hooks'
-import ShortcutsName from '@/pages/workflowConfig/workflow/shortcuts-name'
-import type { Node } from '@/pages/workflowConfig/workflow/types'
-import { BlockEnum } from '@/pages/workflowConfig/workflow/types'
-import { useGetLanguage } from '@/pages/workflowConfig/context/i18n'
-import { CollectionType } from '@/pages/workflowConfig/tools/types'
-import { canFindTool } from '@/pages/workflowConfig/utils'
+  useNodesSyncDraft
+} from '@/pages/workflowConfig/workflow/hooks';
+import ShortcutsName from '@/pages/workflowConfig/workflow/shortcuts-name';
+import type { Node } from '@/pages/workflowConfig/workflow/types';
+import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
+import { useGetLanguage } from '@/pages/workflowConfig/context/i18n';
+import { CollectionType } from '@/pages/workflowConfig/tools/types';
+import { canFindTool } from '@/pages/workflowConfig/utils';
 
 type PanelOperatorPopupProps = {
-  id: string
-  data: Node['data']
-  onClosePopup: () => void
-  showHelpLink?: boolean
-}
+  id: string;
+  data: Node['data'];
+  onClosePopup: () => void;
+  showHelpLink?: boolean;
+};
 const PanelOperatorPopup = ({
   id,
   data,
   onClosePopup,
-  showHelpLink,
+  showHelpLink
 }: PanelOperatorPopupProps) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const language = useGetLanguage()
-  const edges = useEdges()
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const language = useGetLanguage();
+  const edges = useEdges();
   const {
     handleNodeDelete,
     handleNodesDuplicate,
     handleNodeSelect,
-    handleNodesCopy,
-  } = useNodesInteractions()
-  const { handleNodeDataUpdate } = useNodeDataUpdate()
-  const { handleSyncWorkflowDraft } = useNodesSyncDraft()
-  const { nodesReadOnly } = useNodesReadOnly()
-  const nodesExtraData = useNodesExtraData()
-  const buildInTools = useStore(s => s.buildInTools)
-  const customTools = useStore(s => s.customTools)
-  const workflowTools = useStore(s => s.workflowTools)
-  const edge = edges.find(edge => edge.target === id)
+    handleNodesCopy
+  } = useNodesInteractions();
+  const { handleNodeDataUpdate } = useNodeDataUpdate();
+  const { handleSyncWorkflowDraft } = useNodesSyncDraft();
+  const { nodesReadOnly } = useNodesReadOnly();
+  const nodesExtraData = useNodesExtraData();
+  const buildInTools = useStore((s) => s.buildInTools);
+  const customTools = useStore((s) => s.customTools);
+  const workflowTools = useStore((s) => s.workflowTools);
+  const edge = edges.find((edge) => edge.target === id);
   const author = useMemo(() => {
-    if (data.type !== BlockEnum.Tool)
-      return nodesExtraData[data.type].author
+    if (data.type !== BlockEnum.Tool) return nodesExtraData[data.type].author;
 
     if (data.provider_type === CollectionType.builtIn)
-      return buildInTools.find(toolWithProvider => canFindTool(toolWithProvider.id, data.provider_id))?.author
+      return buildInTools.find((toolWithProvider) =>
+        canFindTool(toolWithProvider.id, data.provider_id)
+      )?.author;
 
     if (data.provider_type === CollectionType.workflow)
-      return workflowTools.find(toolWithProvider => toolWithProvider.id === data.provider_id)?.author
+      return workflowTools.find(
+        (toolWithProvider) => toolWithProvider.id === data.provider_id
+      )?.author;
 
-    return customTools.find(toolWithProvider => toolWithProvider.id === data.provider_id)?.author
-  }, [data, nodesExtraData, buildInTools, customTools, workflowTools])
+    return customTools.find(
+      (toolWithProvider) => toolWithProvider.id === data.provider_id
+    )?.author;
+  }, [data, nodesExtraData, buildInTools, customTools, workflowTools]);
 
   const about = useMemo(() => {
-    if (data.type !== BlockEnum.Tool)
-      return nodesExtraData[data.type].about
+    if (data.type !== BlockEnum.Tool) return nodesExtraData[data.type].about;
 
     if (data.provider_type === CollectionType.builtIn)
-      return buildInTools.find(toolWithProvider => canFindTool(toolWithProvider.id, data.provider_id))?.description[language]
+      return buildInTools.find((toolWithProvider) =>
+        canFindTool(toolWithProvider.id, data.provider_id)
+      )?.description[language];
 
     if (data.provider_type === CollectionType.workflow)
-      return workflowTools.find(toolWithProvider => toolWithProvider.id === data.provider_id)?.description[language]
+      return workflowTools.find(
+        (toolWithProvider) => toolWithProvider.id === data.provider_id
+      )?.description[language];
 
-    return customTools.find(toolWithProvider => toolWithProvider.id === data.provider_id)?.description[language]
-  }, [data, nodesExtraData, language, buildInTools, customTools, workflowTools])
+    return customTools.find(
+      (toolWithProvider) => toolWithProvider.id === data.provider_id
+    )?.description[language];
+  }, [
+    data,
+    nodesExtraData,
+    language,
+    buildInTools,
+    customTools,
+    workflowTools
+  ]);
 
   // const showChangeBlock = data.type !== BlockEnum.Start && !nodesReadOnly && data.type !== BlockEnum.Iteration && data.type !== BlockEnum.Loop
-  const showChangeBlock = false
+  const showChangeBlock = false;
 
-  const link = useNodeHelpLink(data.type)
+  const link = useNodeHelpLink(data.type);
 
   return (
-    <div className='w-[200px] border-[0.5px] border-gray-200 rounded-[4px] bg-white'>
-      {
-        (showChangeBlock || canRunBySingle(data.type)) && (
-          <>
-            <div className='p-1'>
-              {
-                canRunBySingle(data.type) && (
-                  <div
-                    className={`
-                      flex items-center px-3 h-8 text-sm text-gray-700 rounded-lg cursor-pointer
+    <div className="w-[200px] rounded-[4px] border-[0.5px] border-gray-200 bg-white">
+      {(showChangeBlock || canRunBySingle(data.type)) && (
+        <>
+          <div className="p-1">
+            {canRunBySingle(data.type) && (
+              <div
+                className={`
+                      flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm text-gray-700
                       hover:bg-gray-50
                     `}
-                    onClick={() => {
-                      handleNodeSelect(id)
-                      handleNodeDataUpdate({ id, data: { _isSingleRun: true } })
-                      handleSyncWorkflowDraft(true)
-                      onClosePopup()
-                    }}
-                  >
-                    {t('workflow.panel.runThisStep')}
-                  </div>
-                )
-              }
-              {
-                showChangeBlock && (
-                  <ChangeBlock
-                    nodeId={id}
-                    nodeData={data}
-                    sourceHandle={edge?.sourceHandle || 'source'}
-                  />
-                )
-              }
-            </div>
-            <div className='h-[1px] bg-gray-100'></div>
-          </>
-        )
-      }
-      {
-        data.type !== BlockEnum.Start && !nodesReadOnly && (
-          <>
-            <div className='pt-[4px]'>
-              <div
+                onClick={() => {
+                  handleNodeSelect(id);
+                  handleNodeDataUpdate({ id, data: { _isSingleRun: true } });
+                  handleSyncWorkflowDraft(true);
+                  onClosePopup();
+                }}
+              >
+                {t('workflow.panel.runThisStep')}
+              </div>
+            )}
+            {showChangeBlock && (
+              <ChangeBlock
+                nodeId={id}
+                nodeData={data}
+                sourceHandle={edge?.sourceHandle || 'source'}
+              />
+            )}
+          </div>
+          <div className="h-[1px] bg-gray-100"></div>
+        </>
+      )}
+      {data.type !== BlockEnum.Start && !nodesReadOnly && (
+        <>
+          <div className="pt-[4px]">
+            {/* <div
                 className='flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer hover:bg-[#D9EAFF]'
                 onClick={() => {
                   onClosePopup()
@@ -134,36 +139,35 @@ const PanelOperatorPopup = ({
                 }}
               >
                 {t('workflow.common.copy')}
-                {/* <ShortcutsName keys={['ctrl', 'c']} /> */}
-              </div>
-              <div
-                className='flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer hover:bg-[#D9EAFF]'
-                onClick={() => {
-                  onClosePopup()
-                  handleNodesDuplicate(id)
-                }}
-              >
-                {t('workflow.common.duplicate')}
-                {/* <ShortcutsName keys={['ctrl', 'd']} /> */}
-              </div>
+                <ShortcutsName keys={['ctrl', 'c']} />
+              </div> */}
+            <div
+              className="flex h-[32px] cursor-pointer items-center justify-between rounded-none px-[12px] pb-[7px] pt-[5px] text-[14px]/[20px] text-[#151B26] hover:bg-[#D9EAFF]"
+              onClick={() => {
+                onClosePopup();
+                handleNodesDuplicate(id);
+              }}
+            >
+              {t('workflow.common.duplicate')}
+              {/* <ShortcutsName keys={['ctrl', 'd']} /> */}
             </div>
-            <div className='h-[1px] bg-gray-100'></div>
-            <div className='pb-[4px]'>
-              <div
-                className={`
-                flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer
+          </div>
+          <div className="h-[1px] bg-gray-100"></div>
+          <div className="pb-[4px]">
+            <div
+              className={`
+                flex h-[32px] cursor-pointer items-center justify-between rounded-none px-[12px] pb-[7px] pt-[5px] text-[14px]/[20px] text-[#151B26]
                 hover:bg-rose-50 hover:text-red-500
                 `}
-                onClick={() => handleNodeDelete(id)}
-              >
-                {t('common.operation.delete')}
-                {/* <ShortcutsName keys={['del']} /> */}
-              </div>
+              onClick={() => handleNodeDelete(id)}
+            >
+              {t('common.operation.delete')}
+              {/* <ShortcutsName keys={['del']} /> */}
             </div>
-            <div className='h-[1px] bg-gray-100'></div>
-          </>
-        )
-      }
+          </div>
+          <div className="h-[1px] bg-gray-100"></div>
+        </>
+      )}
       {/* {
         showHelpLink && (
           <>
@@ -192,7 +196,7 @@ const PanelOperatorPopup = ({
         </div>
       </div> */}
     </div>
-  )
-}
+  );
+};
 
-export default memo(PanelOperatorPopup)
+export default memo(PanelOperatorPopup);

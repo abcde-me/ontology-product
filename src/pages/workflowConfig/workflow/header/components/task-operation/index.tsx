@@ -66,11 +66,12 @@ const AppPublisher = ({
         <Button
           type="outline"
           className="toggle-btn"
-          onClick={() =>
+          onClick={() => {
+            console.log('我进行了操作', isOnline);
             handleOperate(
               isOnline ? WorkflowOperation.OFFLINE : WorkflowOperation.ONLINE
-            )
-          }
+            );
+          }}
         >
           {isOnline ? '下线' : '上线'}
         </Button>

@@ -89,6 +89,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={3}
+            readOnly={readOnly}
             fileTypes={FileOptions.audio}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}

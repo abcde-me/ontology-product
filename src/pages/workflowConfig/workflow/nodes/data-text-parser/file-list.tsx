@@ -15,11 +15,13 @@ type FileListProps = {
   fileTypes: string[];
   files: string[];
   selectedFilesNum: number;
+  readOnly: boolean;
   handleFilesChange: (files: string[], selectedCount: number) => void;
 };
 
 function FileList({
   catetoryId,
+  readOnly,
   fileTypes,
   files,
   selectedFilesNum,
@@ -136,6 +138,7 @@ function FileList({
         result = await getLoadTaskFiles({
           data_path_id: sourcePath,
           file_type: formats,
+          file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
           page_size: pagination.limit,
           page: params.page
         });
@@ -213,6 +216,12 @@ function FileList({
       onChange={onChangeTable}
       rowSelection={{
         selectedRowKeys,
+        checkAll: !readOnly,
+        checkboxProps: (record) => {
+          return {
+            disabled: readOnly
+          };
+        },
         onSelect: (selected, record, selectedRows) => {
           console.log('onSelect:', selected, record, selectedRows);
           if (selected) {

@@ -16,7 +16,7 @@ import {
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 
 const { Option } = Select;
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle } from 'react';
 import styles from './AddDatasetForm.module.css';
 import './AddDatasetForm.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
@@ -62,71 +62,6 @@ interface DatasetFormProps {
 
 const FormItem = Form.Item;
 
-//模拟数据目录卷数据 - 新格式
-const cstargetDataSourceData = [
-  {
-    type: 'catalog',
-    id: 1,
-    name: 'Volume',
-    type_name: 'catalog',
-    base_dir: '/user/xxd',
-    children: {
-      volume: [
-        {
-          id: 10,
-          name: '目标数据源volume1',
-          parent_id: 1
-        },
-        {
-          id: 11,
-          name: '目标数据源volume2',
-          parent_id: 1
-        }
-      ],
-      db: [
-        {
-          id: 20,
-          name: '数据库连接1',
-          parent_id: 1
-        },
-        {
-          id: 21,
-          name: '数据库连接2',
-          parent_id: 1
-        }
-      ]
-    }
-  },
-  {
-    type: 'catalog',
-    id: 2,
-    name: 'Volume',
-    type_name: 'catalog',
-    base_dir: '/user/xxd',
-    children: {
-      volume: [
-        {
-          id: 30,
-          name: '目标数据源volume3',
-          parent_id: 2
-        },
-        {
-          id: 31,
-          name: '目标数据源volume4',
-          parent_id: 2
-        }
-      ],
-      db: [
-        {
-          id: 40,
-          name: '数据库连接3',
-          parent_id: 2
-        }
-      ]
-    }
-  }
-];
-
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
   return dataSourceData.map((catalog) => ({
@@ -144,24 +79,6 @@ function convertToCascaderOptions(dataSourceData) {
   }));
 }
 
-//模拟连接器列表数据
-const csconnectorList = [
-  {
-    id: 101,
-    name: 's3-production-updated',
-    type: 's3',
-    config: {
-      endpoint: 'https://s3.amazonaws.com',
-      access_key: 'AKIAxxxxxxxx',
-      secret_key: 'xxxxxxxx',
-      path: 'data-warehouse'
-    },
-    creator: 'user123',
-    created_at: 1712345678,
-    updated_at: 1712345679,
-    status: 'connected'
-  }
-];
 //连接器列表转换为select选项 函数
 function convertToSelectOptions(connectorList) {
   return connectorList.map((connector) => ({
@@ -200,45 +117,6 @@ function convertTotagSelectOptions(data = []) {
   }));
 }
 
-//模拟连接器文件信息
-const csconnectorFileInformation = [
-  {
-    name: '20230601.jsonl',
-    path: '/data/logs/20230601.jsonl',
-    size: 524288,
-    last_modified: '2025-06-18 09:15:20',
-    type: 'jsonl'
-  },
-  {
-    name: '20230602.jsonl',
-    path: '/data/logs/20230602.jsonl',
-    size: 1572864,
-    last_modified: '2025-06-18 09:20:11',
-    type: 'jsonl'
-  },
-  {
-    name: '20230603.jsonl',
-    path: '/data/logs/20230603.jsonl',
-    size: 3145728,
-    last_modified: '2025-06-18 09:23:45',
-    type: 'jsonl'
-  },
-  {
-    name: '20230604.jsonl',
-    path: '/data/logs/20230604.jsonl',
-    size: 10485760,
-    last_modified: '2025-06-18 09:28:03',
-    type: 'jsonl'
-  },
-  {
-    name: '20230605.jsonl',
-    path: '/data/logs/20230605.jsonl',
-    size: 20971520,
-    last_modified: '2025-06-18 09:35:00',
-    type: 'jsonl'
-  }
-];
-
 //连接器文件信息转换为select选项的函数，咱不使用
 function transformToSelectOptions(fileList) {
   return fileList.map((file) => ({
@@ -247,34 +125,6 @@ function transformToSelectOptions(fileList) {
     data: file
   }));
 }
-
-// 模拟选择目录后预览数据
-const csmockPreviewData = [
-  {
-    id: 100,
-    instruction: '请解释下面的历史事件',
-    content:
-      '马克思主义基本原理概论，它的意义和影响。当天终于能够自己做主，能够从世界社会主义运动的目标和理想出发，去考察社会主义革命发展规律。当确认了该主要政治目标，我们具有了真正认识资本主义的基础，为充分认识生产关系的规律奠定了基础。',
-    response:
-      '马克思主义的了新的立体形意识形态的演进。希望您能像您心中到意像，既可能让你的心了有农艺手续要在这理论的基础上，有力证明传统该不能作出充分的理论论证。正所谓资本主义的形成，总是每次了充实的仪式，选择性的发展演进和完善的了固面貌的塑造。对于事业的不懈追求并不是了爱伤像的'
-  },
-  {
-    id: 200,
-    instruction: '请分析以下金融案例的会计处理',
-    content:
-      '某公司于现金购置了一套新的生产设备，价值500万元。该设备的使用年限为10年，残值为50万元。假设使用直线法进行折旧计算，请你算计算年度折旧费用。另外如果某设备在8年后出售，售价为100万元，请计算处置损益。',
-    response:
-      '根据题目信息计算折旧和处置损益：1、年度折旧计算：（设备原值-残值）/使用年限=（500-50）/10=45万元/年  2、8年后的累计折旧：45×8=360万元  3、设备账面净值：500-360=140万元  4、处置损益：售价-账面净值=100-140=-40万元（处置损失）  因此，该设备年度折旧费用为45万元，8年后出售产生40万元的处置损失。'
-  },
-  {
-    id: 300,
-    instruction: '请详细分析这段文本的文学特征和写作风格',
-    content:
-      '夜，像是一副巨大的黑色丝绸，轻柔地铺展在大地之上。月亮像一枚银色的钮扣，缀在这片暗夜的幕布上。远山如墨，近树成影，偶尔传来几声鸟叫，打破了这份宁静。一阵微风吹过，树叶沙沙作响，仿佛在诉说着什么秘密。',
-    response:
-      '这段文本具有以下文学特征：1、修辞手法：运用了比喻（夜如丝绸、月如钮扣）、拟人（树叶诉说秘密）等手法，形象生动  2、感官描写：通过视觉（黑色、银色）、听觉（鸟叫、沙沙声）营造氛围  3、静中有动：以静态描写为主，点缀动态元素（微风、鸟叫）形成对比  4、诗意语言：语言优美、节奏感强，具有较强的画面感和音乐性  5、意境营造：通过自然景物的描绘，营造出宁静优美的夜晚意境，给读者以美的享受。'
-  }
-];
 
 // 数据预览表格列定义
 const cspreviewColumns = ['id', 'instruction', 'content', 'response'];
@@ -310,7 +160,11 @@ function formatTableData(columns) {
   }));
 }
 
-function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
+const DatasetForm = React.forwardRef<
+  { resetForm: () => void },
+  DatasetFormProps
+>((props, ref) => {
+  const { visible, onSubmit, onCancel } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -334,10 +188,28 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
   );
   // 标签选项
 
+  useImperativeHandle(ref, () => {
+    const resetForm = () => {
+      form.resetFields();
+      setDataSource('volume'); //重置数据源
+      setSelectedConnector(null); //重置连接器
+      setSelectedFiles([]); //重置选择文件
+      setConnectorFileInformation([]); //重置连接器文件信息
+      setPreviewData([]); //重置预览数据
+      setPreviewColumns([]); //重置预览表格列
+      // setTargetDataSourceOptions([]); //重置目标数据源选项
+    };
+    return {
+      resetForm
+    };
+  });
+
   useEffect(() => {
     // 数据目录卷
     getCatalogList({ root_type: 2 }).then((res) => {
-      setTargetDataSourceOptions(convertToCascaderOptions(res.data.dst));
+      setTargetDataSourceOptions(
+        convertToCascaderOptions(res?.data?.dst ?? [])
+      );
     }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     // setTargetDataSourceOptions(
     //   convertToCascaderOptions(cstargetDataSourceData)
@@ -347,7 +219,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
     // TODO: ts错误
     // @ts-expect-error
     getConnectorList({ scope: 1 }).then((res) => {
-      setConnectorList(convertToSelectOptions(res.data.items));
+      setConnectorList(convertToSelectOptions(res?.data?.items ?? []));
     });
     // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
@@ -389,7 +261,7 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       // 构建路径：catalog_id/type_itemId
       const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
       console.log('选择的数据目录卷路径:', path);
-      getVolumePreviewData(path);
+      if (selectedItem) getVolumePreviewData(path);
     }
   };
 
@@ -463,14 +335,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
-        form.resetFields();
-        setDataSource('volume'); //重置数据源
-        setSelectedConnector(null); //重置连接器
-        setSelectedFiles([]); //重置选择文件
-        setConnectorFileInformation([]); //重置连接器文件信息
-        setPreviewData([]); //重置预览数据
-        setPreviewColumns([]); //重置预览表格列
-        // setTargetDataSourceOptions([]); //重置目标数据源选项
         onSubmit(formData);
       })
       .catch((error) => {
@@ -783,6 +647,6 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
       </Modal>
     </div>
   );
-}
+});
 
 export default DatasetForm;

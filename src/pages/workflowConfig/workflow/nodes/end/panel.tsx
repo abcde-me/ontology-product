@@ -16,14 +16,14 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
 
-  const fetchData = async () => {
-    const res = await getWorkflowTargetPath(0, '');
-    if (res.status === 200) {
-      setDataSource(res?.data?.dst);
-    }
-  };
   useEffect(() => {
-    fetchData();
+    getWorkflowTargetPath(2, '').then(res => {
+      const dirsArr: Record<string, any>[] = [];
+      res.data.dst.forEach((catalog) => {
+        dirsArr.push(...(catalog.children?.volume || []));
+      });
+      setDataSource(dirsArr);
+    });
   }, []);
 
   return (
