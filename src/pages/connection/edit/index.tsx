@@ -1,3 +1,4 @@
+import { validateName } from '@/utils/valiate';
 import { Button, Form, Input, Modal, Radio } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 // 表单
@@ -48,7 +49,19 @@ const Edit = (props: any) => {
             label="连接器名称："
             required
             field="name"
-            rules={[{ required: true, message: '请输入连接器名称' }]}
+            rules={[
+              {
+                validator: (value, cb) => {
+                  if (!value || value.trim() === '') {
+                    return cb('请输入连接器名称');
+                  }
+                  if (validateName(value).isValid == false) {
+                    return cb(validateName(value).errorMessage);
+                  }
+                  return cb();
+                }
+              }
+            ]}
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
