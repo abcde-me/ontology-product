@@ -350,7 +350,7 @@ export const ModaForgeResourceEndpoints = {
   // 查询个人载入记录列表
   getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
   // 查询任务单个执行记录详情
-  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{id}'
+  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}'
 };
 
 /**
