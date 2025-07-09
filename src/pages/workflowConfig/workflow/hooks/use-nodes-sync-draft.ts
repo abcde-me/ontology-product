@@ -110,7 +110,9 @@ export const useNodesSyncDraft = () => {
       },
       params = {}
     ) => {
-      if (getNodesReadOnly()) return;
+      const isNodesReadOnly = getNodesReadOnly();
+      console.log('节点是否是只读的：', isNodesReadOnly);
+      if (isNodesReadOnly) return;
       const postParams = getPostParams();
 
       if (postParams) {
