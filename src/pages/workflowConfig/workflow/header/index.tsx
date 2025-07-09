@@ -300,7 +300,8 @@ const Header: FC = () => {
             <div className="app-name">
               <Typography.Paragraph
                 className="app-name-text"
-                ellipsis={{ rows: 1, showTooltip: true, wrapper: 'span' }}
+                style={{ maxWidth: '700px' }}
+                ellipsis={{ cssEllipsis: true, rows: 1, showTooltip: true }}
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
