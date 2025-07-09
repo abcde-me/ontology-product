@@ -155,12 +155,14 @@ export default function WorkflowList() {
     const sortdata = {
       run_cycle:
         filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
+      is_online:
+        filters.is_online === undefined ? '' : filters.is_online.join(','),
       sort:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'asc'
-            : 'desc'
+            ? 'create_time:ASC'
+            : 'create_time:DESC'
     };
 
     setSortValue(sortdata);
@@ -200,7 +202,6 @@ export default function WorkflowList() {
           value: 1
         }
       ]
-      // onFilter: (value, row) => row.run_cycle == value
     },
     {
       title: '状态',
@@ -226,7 +227,6 @@ export default function WorkflowList() {
           value: 1
         }
       ]
-      // onFilter: (value, row) => row.is_online == value
     },
     {
       title: '源数据目录',
