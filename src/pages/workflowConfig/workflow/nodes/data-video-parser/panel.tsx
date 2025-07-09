@@ -89,6 +89,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={4}
+            readOnly={readOnly}
             fileTypes={FileOptions.video}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}

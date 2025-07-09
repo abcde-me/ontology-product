@@ -97,6 +97,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={1}
+            readOnly={readOnly}
             fileTypes={FileOptions.doc}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}
