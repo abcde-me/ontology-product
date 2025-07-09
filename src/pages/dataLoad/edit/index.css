@@ -10,20 +10,15 @@
 .arco-select-size-default.arco-select-multiple .arco-select-view {
   margin-left: 7px;
 }
-.cascader-dropdown .arco-cascader-option-text {
+
+.cascader-dropdown .arco-cascader-list-item-label,
+.cascader-dropdown .arco-cascader-list-search-item-label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: red !important;
-}
-.cascader-dropdown .arco-cascader-list-item-label,
-.arco-cascader-list-search-item-label {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
 }
 .cascader-dropdown .arco-cascader-list-wrapper {
-  width: 212px !important;
+  width: 212px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

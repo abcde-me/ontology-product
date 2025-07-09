@@ -207,7 +207,14 @@ const renderActionColumn = (
         cursor: 'pointer'
       }}
       onClick={() =>
-        handleDelete(record, refreshData, selectedKey, tableType, handAllReset, resetPage)
+        handleDelete(
+          record,
+          refreshData,
+          selectedKey,
+          tableType,
+          handAllReset,
+          resetPage
+        )
       }
     >
       删除
@@ -221,7 +228,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -493,7 +500,7 @@ const handleDelete = (
             color: '#1D2129',
             height: 22,
             display: 'inline-block',
-            marginLeft: '28px',  // 左移一点
+            marginLeft: '28px' // 左移一点
           }}
         >
           删除后，文件不可恢复
@@ -515,7 +522,7 @@ const handleDelete = (
             // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         } else {
           // handAllReset();
@@ -527,7 +534,7 @@ const handleDelete = (
             // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         }
       }

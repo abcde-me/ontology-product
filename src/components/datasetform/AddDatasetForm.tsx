@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './AddDatasetForm.module.css';
 import './AddDatasetForm.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
+import { validateName } from '@/utils/valiate';
 import {
   getConnectorList,
   getConnectorFileList,
@@ -500,7 +501,18 @@ function DatasetForm({ visible, onSubmit, onCancel }: DatasetFormProps) {
           <Form.Item
             label="数据集名称:"
             field="name"
-            rules={[{ required: true, message: '请输入数据集名称' }]}
+            rules={[
+              { required: true, message: '请输入数据集名称' },
+              {
+                validator: (value, callback) => {
+                  if (!validateName(value)) {
+                    callback('数据集名称格式不正确');
+                  } else {
+                    callback();
+                  }
+                }
+              }
+            ]}
             style={{ marginBottom: 16 }}
           >
             <Input

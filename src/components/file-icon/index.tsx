@@ -14,27 +14,7 @@ import BucketIcon from '@/assets/file/bucket-icon.svg';
 import DmgIcon from '@/assets/file/dmg-icon.svg';
 import TorrentIcon from '@/assets/file/torrent-icon.svg';
 import './index.css';
-
-enum FileType {
-  doc = 'doc',
-  docx = 'docx',
-  jpg = 'jpg',
-  m4a = 'm4a',
-  mp4 = 'mp4',
-  pdf = 'pdf',
-  ppt = 'ppt',
-  pptx = 'pptx',
-  text = 'text',
-  txt = 'txt',
-  wav = 'wav',
-  exe = 'exe',
-  bucket = 'bucket',
-  dmg = 'dmg',
-  torrent = 'torrent',
-  apk = 'apk',
-  rar = 'rar',
-  epub = 'epub'
-}
+import { FileType } from '@/utils/type';
 
 export default function getFileIcon(file_type: string) {
   switch (file_type) {
