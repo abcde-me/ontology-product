@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import produce from 'immer';
 import useVarList from '../_base/hooks/use-var-list';
 import type { CodeNodeType } from './types';
@@ -16,79 +16,19 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     inputs,
     setInputs
   });
+  const inputRef = useRef(inputs);
 
-  // 数据清洗节点 数据整理
-  const dataCleaning = {
-    type: 'cleaning',
-    title: '数据清洗节点',
-    desc: '',
-    dclean_type: [
-      {
-        type: 'data_standardization',
-        title: '数据标准化',
-        options: {
-          // 1 处理 2 不处理
-          unicode: inputs?.unicode,
-          traditional_to_simplified: inputs?.traditional_to_simplified,
-          case_transform: inputs?.case_transform
-        }
-      },
-      {
-        type: 'data_filter',
-        title: '数据过滤',
-        options: {
-          threshold: inputs?.threshold
-        }
-      },
-      {
-        type: 'special_character_deletion',
-        title: '特殊字符删除',
-        options: {
-          // 1 删除 2 不删除
-          remove_url: inputs?.remove_url,
-          remove_invisible: inputs?.remove_invisible,
-          remove_html: inputs?.remove_html
-        }
-      },
-      {
-        type: 'delete_sensitive_words',
-        title: '去除敏感词',
-        options: {
-          // 1 处理 2 不处理
-          mg_is: inputs?.mg_is
-        }
-      },
-      {
-        type: 'data_detoxification',
-        title: '数据去毒化',
-        options: {
-          //  1 去毒 2 不去毒
-          qd_is: inputs?.qd_is
-        }
-      },
-      {
-        type: 'data_filling',
-        title: '数据填补',
-        options: {
-          // 1 处理 2 不处理
-          df_is: inputs?.df_is
-        }
-      },
-      {
-        type: 'outlier_handling',
-        title: '异常值处理',
-        options: {
-          // 1 处理 2 不处理
-          oh_is: inputs?.oh_is
-        }
-      }
-    ]
-  };
+  useEffect(() => {
+    inputRef.current = inputs;
+  }, [inputs]);
+
+
 
   const onValuesChange = useCallback(
     (payload: CodeNodeType) => {
-      console.log(payload, 'payload======');
-      const newInputs = produce(inputs, (draft: any) => {
+      const newInputs = produce(inputRef.current, (draft: any) => {
+        draft.type = 'cleaning';
+        draft.title = '数据清洗节点';
         draft.data_standardization = payload.data_standardization;
         draft.threshold = payload.threshold;
         draft.threshold_switch = payload.threshold_switch;
@@ -104,7 +44,67 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.traditional_to_simplified = payload.traditional_to_simplified;
         draft.case_transform = payload.case_transform;
         draft.case_uniformity = payload.case_uniformity;
-        draft.data = dataCleaning;
+        draft.dclean_type = [
+          {
+            type: 'data_standardization',
+            title: '数据标准化',
+            options: {
+              // 1 处理 0 不处理
+              unicode: payload?.unicode ? 1 : 0,
+              traditional_to_simplified: payload?.traditional_to_simplified ? 1 : 0,
+              case_transform: payload?.case_transform
+            }
+          },
+          {
+            type: 'data_filter',
+            title: '数据过滤',
+            options: {
+              threshold: payload?.threshold
+            }
+          },
+          {
+            type: 'special_character_deletion',
+            title: '特殊字符删除',
+            options: {
+              // 1 删除 0 不删除
+              remove_url: payload?.remove_url ? 1 : 0,
+              remove_invisible: payload?.remove_invisible ? 1 : 0,
+              remove_html: payload?.remove_html ? 1 : 0
+            }
+          },
+          {
+            type: 'delete_sensitive_words',
+            title: '去除敏感词',
+            options: {
+              // 1 处理 0 不处理
+              mg_is: payload?.mg_is ? 1 : 0,
+            }
+          },
+          {
+            type: 'data_detoxification',
+            title: '数据去毒化',
+            options: {
+              //  1 去毒 0 不去毒
+              qd_is: payload?.qd_is ? 1 : 0,
+            }
+          },
+          {
+            type: 'data_filling',
+            title: '数据填补',
+            options: {
+              // 1 处理 0 不处理
+              df_is: payload?.df_is ? 1 : 0
+            }
+          },
+          {
+            type: 'outlier_handling',
+            title: '异常值处理',
+            options: {
+              // 1 处理 0 不处理
+              oh_is: payload?.oh_is ? 1 : 0
+            }
+          }
+        ]
       });
       setInputs(newInputs);
     },

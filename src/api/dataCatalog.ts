@@ -76,6 +76,8 @@ interface TargetDataFileQueryParams {
   search_id: number;
   limit: number;
   file_type: Array<string>;
+  sort_field?: string;
+  sort_order?: string;
 }
 
 // 定义删除目标文件的参数接口
@@ -93,14 +95,28 @@ interface SourceDataFileQueryParams {
   start: string;
   end: string;
   file_type: Array<string>;
+  sort_field?: string;
+  sort_order?: string;
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
-  const queryParams: any = { ...params };
-  // 将file_type数组转换为JSON字符串
-  if (queryParams.file_type && Array.isArray(queryParams.file_type)) {
-    queryParams.file_type = JSON.stringify(queryParams.file_type);
+  const { file_type, ...restParams } = params;
+
+  const queryParams = new URLSearchParams();
+
+  Object.entries(restParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      // Convert value to string without unnecessary assertion
+      queryParams.append(key, String(value));
+    }
+  });
+
+  if (file_type && Array.isArray(file_type)) {
+    file_type.forEach(type => {
+      queryParams.append('file_type', type);
+    });
   }
+
   return await UAPI.RES.targetDataFileListApi({})
     .get(queryParams)
     .inRegion()
@@ -113,13 +129,24 @@ export async function getTargetFileTypeList() {
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
   const { file_ids, ...restParams } = params;
-  const customParams: Record<string, string> = {
-    ...restParams,
-    file_ids: file_ids.join(',')
-  };
+
+  const queryParams = new URLSearchParams();
+
+  Object.entries(restParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      queryParams.append(key, String(value));
+    }
+  });
+
+  file_ids.forEach(id => {
+    queryParams.append('file_ids', id);
+  });
+
   return await UAPI.RES.targetDataFileDeleteApi({})
     .delete()
-    .withConfig({ params: customParams })
+    .withConfig({
+      params: queryParams
+    })
     .inRegion()
     .do();
 }

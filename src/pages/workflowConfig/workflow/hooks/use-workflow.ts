@@ -567,6 +567,11 @@ export const useWorkflowInit = () => {
         const setRes = result?.data?.graph?.nodes?.map((node, index) => {
           return {
             ...node,
+            selected: false,
+            data: {
+              ...node?.data,
+              selected: false,
+            },
             position: {
               ...node.position,
               y: node?.position?.y - 180

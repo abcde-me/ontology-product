@@ -185,6 +185,11 @@ const FormComponent: React.FC<FormProps> = ({
     }
   };
 
+  // 添加处理连接器选择变化的函数
+  const handleConnectorChange = (value, option) => {
+    const selectedConnector = connectorList.find((item: any) => item.id === value);
+  };
+
   // 修改为监听 visible 变化，当弹窗打开时设置表单值
   useEffect(() => {
     if (visible) {
@@ -218,6 +223,7 @@ const FormComponent: React.FC<FormProps> = ({
           <Select
             allowClear
             placeholder="请选择连接器"
+            onChange={handleConnectorChange}
             options={connectorList.map((item: any) => ({
               label: item.name,
               value: item.id

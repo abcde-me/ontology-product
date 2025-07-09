@@ -242,12 +242,17 @@ const Header: FC = () => {
 
   const handleSave = async (workflow_name: string) => {
     setEditing(false);
+
+    if (workflowName === appDetail?.workflow_name) {
+      return;
+    }
+
     // 这里可以添加保存逻辑
     const workflowRes = await editWorkflow(workflowUuid ?? '', {
       workflow_name
     });
 
-    if (workflowRes?.data) {
+    if (workflowRes?.status === 200) {
       appDetail &&
         setAppDetail({
           ...appDetail,
@@ -255,13 +260,18 @@ const Header: FC = () => {
         });
       Message.success('修改工作流名称成功');
     } else {
-      Message.error('修改工作流名称失败');
+      Message.error(workflowRes?.message ?? '修改工作流名称失败');
     }
+
+    setWorkflowName(appDetail?.workflow_name ?? '');
   };
 
   const handlePressEnter = (workflow_name: string) => {
-    if (!validateName(workflowName)) {
-      Message.error('工作流名称命名不符合规则');
+    const validateResult = validateName(workflowName);
+    if (!validateResult.isValid && validateResult.errorMessage) {
+      Message.error(validateResult.errorMessage);
+      setEditing(false);
+      setWorkflowName(appDetail?.workflow_name ?? '');
       return;
     }
 

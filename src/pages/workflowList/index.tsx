@@ -4,7 +4,9 @@ import {
   Input,
   Message,
   Pagination,
+  PaginationProps,
   Popconfirm,
+  Popover,
   Table,
   Tag
 } from '@arco-design/web-react';
@@ -22,6 +24,7 @@ import {
   workflowCopy
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 const InputSearch = Input.Search;
 
@@ -40,11 +43,16 @@ export default function WorkflowList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = useState({
+    run_cycle: '',
+    sort: ''
+  });
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, pageSize]);
+  }, [userInfo, current, pageSize, sortValue]);
 
   const getList = async () => {
     setLoading(true);
@@ -53,7 +61,8 @@ export default function WorkflowList() {
         uid: userInfo?.id,
         search_content: searchValue,
         page: current, //第几页
-        page_size: pageSize //每页个数
+        page_size: pageSize, //每页个数
+        ...sortValue
       };
       const res = await getWorkflowList(params);
       if (res.status === 200 && res.data) {
@@ -77,8 +86,14 @@ export default function WorkflowList() {
   };
 
   // 跳转目录
-  const handleToDirectoryPath = (path: string) => {
-    history.push('/tenant/compute/modaforge/dataCatalog');
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    root_type: string | number
+  ) => {
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+    );
   };
 
   // 查看详情
@@ -131,6 +146,29 @@ export default function WorkflowList() {
     }
   };
 
+  // 筛选排序操作
+  const handleTableChange = (
+    _pagination: PaginationProps,
+    sorter: SorterInfo,
+    filters: Partial<Record<string | number | symbol, string[]>>
+  ) => {
+    setCurrent(1);
+    const sortdata = {
+      run_cycle:
+        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
+      is_online:
+        filters.is_online === undefined ? '' : filters.is_online.join(','),
+      sort:
+        sorter.direction === undefined
+          ? ''
+          : sorter.direction === 'ascend'
+            ? 'create_time:ASC'
+            : 'create_time:DESC'
+    };
+
+    setSortValue(sortdata);
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -139,14 +177,16 @@ export default function WorkflowList() {
       width: 100,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          onClick={() => {
-            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-          }}
-        >
-          {record.workflow_name}
-        </span>
+        <Popover trigger="hover" content={record.workflow_name}>
+          <span
+            className="hover-change"
+            onClick={() => {
+              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+            }}
+          >
+            {record.workflow_name}
+          </span>
+        </Popover>
       )
     },
     {
@@ -164,8 +204,7 @@ export default function WorkflowList() {
           text: '周期运行',
           value: 1
         }
-      ],
-      onFilter: (value, row) => row.run_cycle == value
+      ]
     },
     {
       title: '状态',
@@ -190,8 +229,7 @@ export default function WorkflowList() {
           text: '已上线',
           value: 1
         }
-      ],
-      onFilter: (value, row) => row.is_online == value
+      ]
     },
     {
       title: '源数据目录',
@@ -199,13 +237,20 @@ export default function WorkflowList() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          title={record.source_path}
-          onClick={() => handleToDirectoryPath(record.source_path)}
-        >
-          {record.source_path}
-        </span>
+        <Popover trigger="hover" content={record.source_path}>
+          <span
+            className="hover-change"
+            onClick={() =>
+              handleToDirectoryPath(
+                record.source_path_id,
+                record.parent_source_path_id,
+                1
+              )
+            }
+          >
+            {record.source_path}
+          </span>
+        </Popover>
       )
     },
     {
@@ -214,20 +259,32 @@ export default function WorkflowList() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <span
-          className="hover-change"
-          title={record.target_path}
-          onClick={() => handleToDirectoryPath(record.target_path)}
-        >
-          {record.target_path}
-        </span>
+        <Popover trigger="hover" content={record.target_path}>
+          <span
+            className="hover-change"
+            onClick={() =>
+              handleToDirectoryPath(
+                record.target_path_id,
+                record.parent_target_path_id,
+                2
+              )
+            }
+          >
+            {record.target_path}
+          </span>
+        </Popover>
       )
     },
     {
       title: '创建人',
       dataIndex: 'user_name',
       width: 80,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, record) => (
+        <Popover trigger="hover" content={record.user_name}>
+          <span>{record.user_name}</span>
+        </Popover>
+      )
     },
     {
       title: '创建时间',
@@ -236,11 +293,7 @@ export default function WorkflowList() {
       render: (_, record) => (
         <span>{new Date(record.create_time).toLocaleString()}</span>
       ),
-      sorter: (a, b) => {
-        return (
-          new Date(a.create_time).getTime() - new Date(b.create_time).getTime()
-        );
-      }
+      sorter: true
     },
     {
       title: '操作',
@@ -282,11 +335,17 @@ export default function WorkflowList() {
               });
             }}
           >
-            <span
-              className={record.is_online ? 'disabled-text' : 'operate-text'}
+            <Popover
+              trigger="hover"
+              content="请先下线工作流"
+              disabled={!record.is_online}
             >
-              删除
-            </span>
+              <span
+                className={record.is_online ? 'disabled-text' : 'operate-text'}
+              >
+                删除
+              </span>
+            </Popover>
           </Popconfirm>
         </div>
       )
@@ -331,6 +390,9 @@ export default function WorkflowList() {
         })}
         rowKey="id"
         loading={loading}
+        onChange={(pagination, sorter, filters) =>
+          handleTableChange(pagination, sorter, filters)
+        }
       />
       {/* 分页 */}
       <Pagination

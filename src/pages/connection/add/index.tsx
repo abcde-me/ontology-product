@@ -11,6 +11,7 @@ import '../index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 import { Connection } from '../type';
 import { filterValues } from '@/api/filterValues';
+import { validateName } from '@/utils/valiate';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const add = forwardRef((props: any, ref) => {
@@ -165,12 +166,8 @@ const add = forwardRef((props: any, ref) => {
                     if (!value || value.trim() === '') {
                       return cb('请输入连接器名称');
                     }
-                    const regex =
-                      /^[\u4e00-\u9fa5a-zA-Z0-9][\u4e00-\u9fa5a-zA-Z0-9_-]{0,255}$/;
-                    if (!regex.test(value)) {
-                      return cb(
-                        '名称应包含中文、英文、数字或 "-", "_"，且不能以特殊字符开头，长度不超过256个字符'
-                      );
+                    if (validateName(value).isValid == false) {
+                      return cb(validateName(value).errorMessage);
                     }
                     return cb();
                   }

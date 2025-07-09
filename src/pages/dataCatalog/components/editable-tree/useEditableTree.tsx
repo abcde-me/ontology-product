@@ -20,7 +20,7 @@ import {
   deleteVolume,
   renameCatalog
 } from '@/api/dataCatalog';
-import { validateName } from '../../utils';
+import { validateName } from '@/utils/valiate';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -415,7 +415,7 @@ export function useEditableTree({ catalogTreeStore }) {
             onPressEnter={() => {
               onEditFinish(props);
             }}
-            maxLength={256}
+            maxLength={255}
             className={classNames(
               'h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]',
               dataRef?.isLastLeaf ? 'last-leaf-input' : ''

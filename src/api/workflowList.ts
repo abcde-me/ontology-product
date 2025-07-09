@@ -6,6 +6,8 @@ export async function getWorkflowList(params: {
   search_content: string;
   page: number;
   page_size: number;
+  run_cycle: string;
+  sort: string;
 }) {
   return await UAPI.RES.workflowList({}).get(params).inRegion().do();
 }

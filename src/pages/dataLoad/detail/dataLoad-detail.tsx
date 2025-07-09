@@ -17,27 +17,34 @@ import Edit from '../edit';
 import { ExecutionHistory, TaskInfo } from '../type';
 import { useParams } from '@/utils/url';
 import {
+  getDirectoryList,
   getLoad,
   getLoadRecordList,
   runLoad,
   startAndStopeLoad
 } from '@/api/loadApi';
+import { parseCron } from './parseCron';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
 function findParent(data, childId) {
   for (const item of data) {
-    if (item.children && item.children.some((child) => child.id === childId)) {
+    if (
+      item.children.volume &&
+      item.children.volume.some((child) => child.id === childId)
+    ) {
       return item; // 返回父级
     }
     // 递归查找子节点
-    if (item.children) {
-      const found = findParent(item.children, childId);
+    if (item.children.volume) {
+      const found = findParent(item.children.volume, childId);
       if (found) return found;
+      console.log(found);
     }
   }
   return null;
 }
+
 const DataLoadDetail = () => {
   const [directoryArr, setDirectoryArr] = useState();
   const [form] = Form.useForm();
@@ -83,7 +90,24 @@ const DataLoadDetail = () => {
       console.error('Error:', error);
     }
   };
-
+  // 获取目录全部数据
+  const getdirectorylist = async () => {
+    try {
+      const res = await getDirectoryList({
+        root_type: 1
+      });
+      if (res.code == '' && res.status == 200) {
+        setDirectoryArr(res.data.src);
+      }
+    } catch (error) {
+      console.error('Error fetching directory list:', error);
+    }
+  };
+  const [directoryObj, setDirectoryObj] = useState({});
+  // 获取子级表格改变的状态
+  const getChildrenTableChange = (val) => {
+    setDirectoryObj(val);
+  };
   // 获取详情页面数据列表
   const getDetailList = async () => {
     try {
@@ -92,7 +116,8 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        record_id: searchValue
+        record_id: searchValue,
+        ...directoryObj
       });
       setTotal(res.data.total);
       setDetailList(res.data.items);
@@ -139,8 +164,9 @@ const DataLoadDetail = () => {
   };
   useEffect(() => {
     getDetailList();
-  }, [current, pageSize]);
+  }, [current, pageSize, directoryObj]);
   useEffect(() => {
+    getdirectorylist();
     getTask_idHan();
   }, []);
   useEffect(() => {
@@ -216,6 +242,7 @@ const DataLoadDetail = () => {
               </div>
               <div style={{ fontSize: '14px' }}>
                 {listDetail && listDetail.data_path_name}
+                {/* {findParent(directoryArr ? directoryArr : [], listDetail && listDetail.data_path_id)} */}
               </div>
             </div>
             <div
@@ -318,7 +345,7 @@ const DataLoadDetail = () => {
                   : '周期载入'}
                 {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
-                    defaultChecked={false}
+                    defaultChecked={listDetail && listDetail.cron_enable}
                     checkedText="启用"
                     uncheckedText="停止"
                     style={{ marginLeft: '10px' }}
@@ -334,7 +361,7 @@ const DataLoadDetail = () => {
                 style={{
                   marginBottom: 16,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'flex-start'
                 }}
               >
                 <div
@@ -346,7 +373,13 @@ const DataLoadDetail = () => {
                 >
                   周期设置：
                 </div>
-                <div style={{ fontSize: '14px' }}></div>
+                <div className="ellipsis-two-lines-cron">
+                  {parseCron(
+                    listDetail &&
+                      listDetail.run_config &&
+                      listDetail.run_config.cycle_text
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -403,6 +436,7 @@ const DataLoadDetail = () => {
             datalist={detailList}
             loading={detailListLoading}
             name={listDetail?.name || ''}
+            change={getChildrenTableChange}
           />
           <Pagination
             sizeOptions={[10, 20, 50, 100]}
@@ -435,6 +469,11 @@ const DataLoadDetail = () => {
             editForm={form}
             getDetailList={getTask_idHan}
             loadId={Number(loadId)}
+            cron={
+              listDetail &&
+              listDetail.run_config &&
+              listDetail.run_config.cycle_text
+            }
           />
         </Modal>
       </div>
