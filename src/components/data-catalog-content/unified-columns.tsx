@@ -6,6 +6,8 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
+import {FileType} from '@/utils/type';
+import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
   deleteSourceFile,
@@ -26,14 +28,14 @@ let fileTypeFilters = [
 ];
 
 // 根据文件类型获取对应图标组件的函数
-const getFileIcon = (type, size = 16) => {
-  const iconMap = {
-    pdf: <PDFIcon size={size} />,
-    txt: <TXTIcon size={size} />,
-    doc: <DOCIcon size={size} />
-  };
-  return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
-};
+// const getFileIcon = (type, size = 16) => {
+//   const iconMap = {
+//     pdf: <PDFIcon size={size} />,
+//     txt: <TXTIcon size={size} />,
+//     doc: <DOCIcon size={size} />
+//   };
+//   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
+// };
 
 //格式化时间函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -290,7 +292,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.file_type, 16)}
+            {getFileIcon(record.file_type)}
             <span>{record.file_type}</span>
           </div>
         )
@@ -425,7 +427,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.type, 16)}
+            {getFileIcon(record.type)}
             <span>{record.file_type}</span>
           </div>
         )
