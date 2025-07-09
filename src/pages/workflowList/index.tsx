@@ -6,6 +6,7 @@ import {
   Pagination,
   PaginationProps,
   Popconfirm,
+  Popover,
   Table,
   Tag
 } from '@arco-design/web-react';
@@ -325,11 +326,17 @@ export default function WorkflowList() {
               });
             }}
           >
-            <span
-              className={record.is_online ? 'disabled-text' : 'operate-text'}
+            <Popover
+              trigger="hover"
+              content="请先下线工作流"
+              disabled={!record.is_online}
             >
-              删除
-            </span>
+              <span
+                className={record.is_online ? 'disabled-text' : 'operate-text'}
+              >
+                删除
+              </span>
+            </Popover>
           </Popconfirm>
         </div>
       )
