@@ -5,7 +5,7 @@ export default function DataCleaningNode(props: { dataSource; loading }) {
   const { dataSource } = props;
 
   return (
-    <div className="data-cleaning-node">
+    <div className="task-data-cleaning-node">
       <div
         style={{
           display: 'flex',

@@ -159,7 +159,11 @@ export default function WorkflowTaskDetail() {
         );
         const updatedData = res.data.result_info.task_type_list.map(
           (item: { status: number }, index: number) =>
-            index > firstZeroIndex ? { ...item, status: 3 } : item
+            (res.data.base_info.run_status === TaskRunStatus.fail ||
+              index > firstZeroIndex) &&
+            item.status === 0
+              ? { ...item, status: 3 }
+              : item
         );
         setNodeData(updatedData);
         if (isParse) {
