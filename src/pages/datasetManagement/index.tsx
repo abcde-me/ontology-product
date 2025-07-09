@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Typography,
   Input,
@@ -421,6 +421,8 @@ const DatasetManagement: React.FC = () => {
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
 
+  const childRef = useRef<{ resetForm: () => void } | null>(null);
+
   // 监听排序状态变化
   React.useEffect(() => {
     console.log('排序状态已更新:', { sortField, sortOrder });
@@ -502,6 +504,7 @@ const DatasetManagement: React.FC = () => {
           // 刷新数据列表
           fetchDatasetList();
           closeModal();
+          childRef.current?.resetForm();
         } else {
           Message.error(res.message || '数据集创建失败！');
         }
@@ -948,6 +951,7 @@ const DatasetManagement: React.FC = () => {
         visible={modalVisible}
         onSubmit={handleSubmit}
         onCancel={closeModal}
+        ref={childRef}
       />
       {/* 导出数据集弹窗 */}
       <FormComponent
