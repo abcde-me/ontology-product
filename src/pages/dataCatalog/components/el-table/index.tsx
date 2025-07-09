@@ -262,6 +262,10 @@ export default function Eltable() {
       if (tableRef.current.resetSelection) {
         tableRef.current.resetSelection();
       }
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
       if (tableRef.current.getTableList) {
         tableRef.current.getTableList();
       }
@@ -287,8 +291,37 @@ export default function Eltable() {
     const ids: Array<string> = [];
     try {
       Modal.confirm({
-        title: '确认删除文件吗?',
-        content: '删除后，文件不可恢复',
+        // title: '确认删除文件吗?',
+        // content: '删除后，文件不可恢复',
+        title: (
+          <span
+            style={{
+              // fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 500,
+              fontSize: 16,
+              height: 24,
+              display: 'inline-block'
+            }}
+          >
+            确认删除文件吗
+          </span>
+        ),
+        content: (
+          <div
+            style={{
+              // fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              marginTop: '10px',
+              color: '#1D2129',
+              height: 22,
+              display: 'inline-block',
+              marginLeft: '28px',  // 左移一点
+            }}
+          >
+            删除后，文件不可恢复
+          </div>
+        ),
         onOk: async () => {
           if (activeTab === 'dst') {
             const idList = selectedRows.map((item: { id: string }) => item.id);
