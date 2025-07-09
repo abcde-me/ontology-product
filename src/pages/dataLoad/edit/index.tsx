@@ -14,6 +14,39 @@ import { directoryData } from '../data/constants';
 import { editLoad } from '@/api/loadApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
+
+// 定义目录数据类型
+interface DirectoryItem {
+  value: string | number;
+  label: string;
+  children?: DirectoryItem[];
+}
+
+// 添加根据ID构建级联路径的函数
+function findPathById(
+  data: DirectoryItem[],
+  targetId: string | number
+): string[] | null {
+  function findPath(
+    items: DirectoryItem[],
+    target: string | number,
+    currentPath: string[] = []
+  ): string[] | null {
+    for (const item of items) {
+      const newPath = [...currentPath, String(item.value)];
+      if (item.value === target) {
+        return newPath;
+      }
+      if (item.children) {
+        const result = findPath(item.children, target, newPath);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+  return findPath(data, targetId);
+}
+
 // 单选框实例
 const RadioGroup = Radio.Group;
 
@@ -29,6 +62,22 @@ const Edit = (props) => {
   const [loading, setLoading] = useState(false);
   // 默认表达式的状态
   const [obj, setObj] = useState({}) as any;
+  // 存储初始路径
+  const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
+
+  // 根据data_path_id构建级联路径
+  useEffect(() => {
+    if (props.detailData?.data_path_id && directoryData.length > 0) {
+      const path = findPathById(directoryData, props.detailData.data_path_id);
+      if (path) {
+        setInitialPath(path as (string | string[])[]);
+        form.setFieldsValue({
+          dest_path: path
+        });
+      }
+    }
+  }, [props.detailData?.data_path_id, directoryData]);
+
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -132,7 +181,7 @@ const Edit = (props) => {
         autoComplete="off"
         form={form}
         initialValues={{
-          dest_path: props.detailData.data_path_name || []
+          dest_path: initialPath
         }}
       >
         <FormItem
@@ -239,6 +288,11 @@ const Edit = (props) => {
             options={directoryData}
             showSearch={{ retainInputValueWhileSelect: false }}
             dropdownMenuClassName="cascader-dropdown"
+            onChange={(value) => {
+              setInitialPath(value);
+              console.log(value);
+              form.setFieldsValue({ dest_path: value });
+            }}
           />
         </FormItem>
       </Form>

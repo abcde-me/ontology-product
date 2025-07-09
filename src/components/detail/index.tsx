@@ -46,7 +46,7 @@ import {
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
-
+import { validateName } from '@/utils/valiate';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -252,81 +252,6 @@ const versionColumns = [
   }
 ];
 
-const csdatasetDetail = {
-  id: 1,
-  name: 'Project 李帆',
-  tag_names: ['urgent', 'high_priority'],
-  description: 'A project focusing on upgrading the system architecture.',
-  status: 'version_updating',
-  error_reason: '网络连接超时，请重试',
-  latest_version: 'v2.1',
-  latest_file_path: '/path/to/file/v2.1/upgrade-package.zip',
-  latest_file_name: 'upgrade-package.zip',
-  src: 2,
-  src_model: 'system_upgrade',
-  creator_id: 'user_12345',
-  creator_name: 'John Doe',
-  created_at: '2025-07-05T10:00:00',
-  updated_at: '2025-07-05T12:30:00'
-};
-
-// 测试数据 - 唯一标识符字段名
-const csidName = 'id';
-
-// 测试数据 - 表头
-const cscontentColumnslist = [
-  'id',
-  'name',
-  'age',
-  'email',
-  'department',
-  'salary'
-];
-
-// 测试数据 - 内容数据
-const cscontentData = [
-  {
-    id: 1,
-    name: '张三',
-    age: '28',
-    email: 'zhangsan@example.com',
-    department: '技术部',
-    salary: '15000'
-  },
-  {
-    id: 2,
-    name: '李四',
-    age: '32',
-    email: 'lisi@example.com',
-    department: '产品部',
-    salary: '18000'
-  },
-  {
-    id: 3,
-    name: '王五',
-    age: '25',
-    email: 'wangwu@example.com',
-    department: '设计部',
-    salary: '12000'
-  },
-  {
-    id: 4,
-    name: '赵六',
-    age: '30',
-    email: 'zhaoliu@example.com',
-    department: '运营部',
-    salary: '16000'
-  },
-  {
-    id: 5,
-    name: '钱七',
-    age: '26',
-    email: 'qianqi@example.com',
-    department: '技术部',
-    salary: '14000'
-  }
-];
-
 // 转换数据类型
 function convertKeyType(arr, key, type) {
   return arr.map((item) => {
@@ -449,7 +374,7 @@ const DatasetDetail: React.FC = () => {
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
-  const [pageSize] = React.useState(10); //每页条数
+  const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
@@ -565,8 +490,35 @@ const DatasetDetail: React.FC = () => {
     }
 
     Modal.confirm({
-      title: '确认删除文件吗？',
-      content: '删除后，文件不可恢复',
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除
+        </span>
+      ),
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            marginTop: '10px',
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block',
+            marginLeft: '28px' // 左移一点
+          }}
+        >
+          退出后，当前修改不会保存
+        </div>
+      ),
       okText: '确定',
       cancelText: '取消',
       okButtonProps: {
@@ -730,6 +682,7 @@ const DatasetDetail: React.FC = () => {
       version_id: datasetDetail.latest_version,
       datas: convertKeyType(submitData, 'id', 'number')
     };
+    console.log('提交数据', params);
     if (params.datas.length === 0) {
       Message.warning('没有需要修改的数据');
       return;
@@ -744,25 +697,8 @@ const DatasetDetail: React.FC = () => {
         setEditingData({});
         setUpdateStatus(false); // 退出编辑状态
         // 重新加载数据 - 刷新内容数据
-        const refreshParams = {
-          id: id,
-          page: currentPage,
-          page_size: pageSize,
-          search: actualSearchValue
-        };
-        getDatasetContents(refreshParams)
-          .then((res) => {
-            if (res.data) {
-              setContentData(res.data.list || []);
-              setContentColumnslist(res.data.field_names || []);
-              setIdName(res.data.id_name || '');
-              setTotal(res.data.total || 0);
-              setContentDatabackup(res.data.list || []);
-            }
-          })
-          .catch((err) => {
-            console.error('刷新数据失败:', err);
-          });
+        fetchDatasetContents();
+        fetchDatasetDetail();
       })
       .catch((err) => {
         console.error('数据修改失败:', err);
@@ -771,6 +707,10 @@ const DatasetDetail: React.FC = () => {
   };
 
   React.useEffect(() => {
+    fetchDatasetDetail();
+  }, [id]);
+
+  const fetchDatasetDetail = () => {
     if (id) {
       getDatasetDetailPage({ id: id })
         .then((res) => {
@@ -787,15 +727,15 @@ const DatasetDetail: React.FC = () => {
         setVersionHistory(res.data);
       });
     }
-    // 测试数据
-    // setDatasetDetail(csdatasetDetail);
-  }, [id]);
+  };
 
   // 处理搜索
   const handleSearch = () => {
-    setActualSearchValue(searchValue);
-    // 搜索时重置到第一页
-    setCurrentPage(1);
+    if (currentPage == 1) {
+      setActualSearchValue(searchValue);
+    } else {
+      setCurrentPage(1);
+    }
   };
 
   // 处理清空搜索，李帆标记，暂时不用后面要用
@@ -803,6 +743,43 @@ const DatasetDetail: React.FC = () => {
     setSearchValue('');
     setActualSearchValue('');
     setCurrentPage(1);
+  };
+
+  // 处理每页条数变化
+  const handlePageSizeChange = (newPageSize: number) => {
+    console.log('每页条数变更:', newPageSize);
+    setPageSize(newPageSize);
+    // 改变每页条数时重置到第一页
+    setCurrentPage(1);
+  };
+
+  // 封装获取数据集内容的通用方法
+  const fetchDatasetContents = () => {
+    if (!datasetDetail || !id) return Promise.resolve();
+
+    const params: any = {
+      id: id,
+      page: currentPage,
+      limit: pageSize,
+      keyword: actualSearchValue || undefined,
+      version_id: datasetDetail.latest_version
+    };
+
+    return getDatasetContents(params)
+      .then((res) => {
+        console.log('获取数据集内容响应:', res.data);
+        if (res.data) {
+          setContentData(res.data.list || []);
+          setContentColumnslist(res.data.field_names || []);
+          setIdName(res.data.id_name || '');
+          setTotal(res.data.total || 0);
+          setContentDatabackup(res.data.list || []);
+        }
+      })
+      .catch((err) => {
+        console.error('获取数据集内容失败:', err);
+        Message.error('加载数据失败');
+      });
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
@@ -828,37 +805,13 @@ const DatasetDetail: React.FC = () => {
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
     // 查询数据集数据内容
-    if (datasetDetail && id) {
-      const params = {
-        version_id: datasetDetail.latest_version,
-        id: id,
-        page: currentPage,
-        page_size: pageSize,
-        search: actualSearchValue || undefined
-      };
-
-      getDatasetContents(params)
-        .then((res) => {
-          console.log('获取数据集内容响应:', res.data);
-          if (res.data) {
-            setContentData(res.data.list || []);
-            setContentColumnslist(res.data.field_names || []);
-            setIdName(res.data.id_name || '');
-            setTotal(res.data.total || 0);
-            setContentDatabackup(res.data.list || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-      // 测试数据
-      // setContentData(convertKeyType(cscontentData, csidName, 'string'));
-      // setContentColumnslist(cscontentColumnslist);
-      // setIdName(csidName);
-      // setTotal(cstotal);
-      // setContentDatabackup(convertKeyType(cscontentData, csidName, 'string'));
-    }
+    fetchDatasetContents();
+    // 测试数据
+    // setContentData(convertKeyType(cscontentData, csidName, 'string'));
+    // setContentColumnslist(cscontentColumnslist);
+    // setIdName(csidName);
+    // setTotal(cstotal);
+    // setContentDatabackup(convertKeyType(cscontentData, csidName, 'string'));
   }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
 
   const handleVersionRebuild = () => {
@@ -871,6 +824,7 @@ const DatasetDetail: React.FC = () => {
         console.error('版本重新生成失败:', err);
       });
   };
+
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
@@ -984,8 +938,14 @@ const DatasetDetail: React.FC = () => {
                         '-'
                       )
                     },
-                    { label: '创建人:', value: datasetDetail.creator_name },
-                    { label: '生成模型:', value: datasetDetail.src_model }
+                    {
+                      label: '创建人:',
+                      value: datasetDetail.creator_name || '-'
+                    },
+                    {
+                      label: '生成模型:',
+                      value: datasetDetail.src_model || '-'
+                    }
                   ]}
                   column={1}
                   labelStyle={{
@@ -1020,15 +980,31 @@ const DatasetDetail: React.FC = () => {
                     },
                     {
                       label: '创建时间:',
-                      value: formatDate(datasetDetail.created_at)
+                      value: formatDate(datasetDetail.created_at) || '-'
                     },
                     {
                       label: '更新时间:',
-                      value: formatDate(datasetDetail.updated_at)
+                      value: formatDate(datasetDetail.updated_at) || '-'
                     },
                     {
                       label: '描述说明:',
-                      value: datasetDetail.description || '-'
+                      value: (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          {datasetDetail.description?.length > 14 ? (
+                            <Tooltip content={datasetDetail.description}>
+                              <span>{`${datasetDetail.description.substring(0, 14)}...`}</span>
+                            </Tooltip>
+                          ) : (
+                            <span>{datasetDetail.description || '-'}</span>
+                          )}
+                        </div>
+                      )
                     }
                   ]}
                   column={1}
@@ -1128,16 +1104,18 @@ const DatasetDetail: React.FC = () => {
                   >
                     取消本轮编辑
                   </Button>
-                  <Button
-                    type="primary"
-                    onClick={handleSubmitChanges}
-                    disabled={
-                      editingRowKey !== null ||
-                      (changedRows.length === 0 && deletedRows.length === 0)
-                    }
-                  >
-                    保存本轮编辑
-                  </Button>
+                  <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
+                    <Button
+                      type="primary"
+                      onClick={handleSubmitChanges}
+                      disabled={
+                        editingRowKey !== null ||
+                        (changedRows.length === 0 && deletedRows.length === 0)
+                      }
+                    >
+                      保存本轮编辑
+                    </Button>
+                  </Tooltip>
                 </Space>
               ) : (
                 <Tooltip
@@ -1190,11 +1168,12 @@ const DatasetDetail: React.FC = () => {
                       console.log('页码变更:', page);
                       setCurrentPage(page);
                     }}
+                    onPageSizeChange={handlePageSizeChange}
                     showTotal={(total, range) =>
                       `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
                     }
                     showJumper
-                    sizeCanChange={false}
+                    sizeCanChange={true}
                   />
                 </div>
               </>
@@ -1237,7 +1216,7 @@ const DatasetDetail: React.FC = () => {
               description: datasetDetail.description || '',
               version: datasetDetail.latest_version || 'v1.0.0',
               tags: datasetDetail.tag_names || [],
-              model: datasetDetail.src_model || 'GPT-4o',
+              model: datasetDetail.src_model,
               creator: datasetDetail.creator_name || ''
             }}
             onSubmit={handleEditSubmit}

@@ -220,6 +220,7 @@ const DataLoadDetail = () => {
               cursor: runningFlag ? '' : 'pointer'
             }}
             onClick={() => {
+              console.log(listDetail);
               setEditVisible(true);
             }}
           >
