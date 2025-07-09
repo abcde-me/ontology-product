@@ -2,7 +2,7 @@ import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './EditDatasetForm.module.css';
 import { getTagList } from '@/api/datasetManagement';
-
+import { validateName } from '@/utils/valiate';
 interface Dataset {
   key?: string;
   name: string;
@@ -36,13 +36,6 @@ const EditDatasetForm: React.FC<Props> = ({
   const [tagOptions, setTagOptions] = useState<
     { label: string; value: string }[]
   >([]);
-
-  // 模型选项
-  const modelOptions = [
-    { label: 'GPT-4o', value: 'GPT-4o' },
-    { label: '克劳德3号作品', value: '克劳德3号作品' },
-    { label: '骆驼 3', value: '骆驼 3' }
-  ];
 
   // 获取标签列表
   useEffect(() => {
@@ -121,7 +114,18 @@ const EditDatasetForm: React.FC<Props> = ({
         <FormItem
           label="数据集名称"
           field="name"
-          rules={[{ required: true, message: '请输入数据集名称' }]}
+          rules={[
+            { required: true, message: '请输入数据集名称' },
+            {
+              validator: (value, callback) => {
+                if (!validateName(value)) {
+                  callback('数据集名称格式不正确');
+                } else {
+                  callback();
+                }
+              }
+            }
+          ]}
         >
           <Input
             placeholder="请输入数据集名称..."
@@ -136,7 +140,8 @@ const EditDatasetForm: React.FC<Props> = ({
         >
           <Select
             placeholder="请选择生成模型..."
-            options={modelOptions}
+            options={[]}
+            value={initialData.model}
             disabled={true}
             style={{ marginLeft: '8px' }}
           />
