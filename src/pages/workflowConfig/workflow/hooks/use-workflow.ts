@@ -589,7 +589,6 @@ export const useWorkflowInit = () => {
             nodes: setRes
           }
         };
-        console.log(newRes, 'newRes===');
         // 在作业详情的时候修改节点位置，其他情况还是原始数据不处理
         setData(isShowChatMode ? newRes : res);
         workflowStore.setState({
