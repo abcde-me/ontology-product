@@ -623,21 +623,21 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   };
 
   // 在数据加载完成后，设置当前页中应该被选中的行
-  // useEffect(() => {
-  //   if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
-  //     const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
-  //       tableData.some(item => item.id === Number(key))
-  //     );
-  //     setSelectedRowKeys(currentPageSelectedKeys);
-  //     const currentPageSelectedRows = tableData.filter(item =>
-  //       currentPageSelectedKeys.includes(item.id)
-  //     );
-  //     setSelectedRows(currentPageSelectedRows);
-  //     if (tableRef.current) {
-  //       tableRef.current.updateSelection(currentPageSelectedKeys);
-  //     }
-  //   }
-  // }, [tableData, crossPageSelectedKeys]);
+  useEffect(() => {
+    if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
+      const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
+        tableData.some(item => item.id === Number(key))
+      );
+      setSelectedRowKeys(currentPageSelectedKeys);
+      const currentPageSelectedRows = tableData.filter(item =>
+        currentPageSelectedKeys.includes(item.id)
+      );
+      setSelectedRows(currentPageSelectedRows);
+      if (tableRef.current) {
+        tableRef.current.updateSelection(currentPageSelectedKeys);
+      }
+    }
+  }, [tableData, crossPageSelectedKeys]);
 
   return (
     <>
