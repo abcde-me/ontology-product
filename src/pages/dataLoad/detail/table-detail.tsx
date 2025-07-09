@@ -7,8 +7,7 @@ import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
 const TableDetail = (props) => {
   const history = useHistory();
-  console.log(props.name);
-  const columns = [
+  const columns: any = [
     {
       title: '运行ID',
       dataIndex: 'execution_name',
@@ -18,6 +17,7 @@ const TableDetail = (props) => {
     {
       title: '状态',
       width: 250,
+      dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -74,8 +74,7 @@ const TableDetail = (props) => {
           text: '运行中',
           value: RunState.RUNNING
         }
-      ],
-      onFilter: (value, row) => row.status == value
+      ]
     },
     {
       title: '载入结果',
@@ -104,6 +103,7 @@ const TableDetail = (props) => {
     {
       title: '操作',
       width: 100,
+      fixed: 'right',
       render: (_, item) => (
         <span
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
@@ -121,7 +121,19 @@ const TableDetail = (props) => {
   const [data, setData] = useState<ExecutionHistory[]>();
 
   // 改变数据的逻辑
-
+  const onchangeTable = (pagination, sorter, filters) => {
+    const newTable = {
+      status: filters.status ? filters.status : [],
+      sort:
+        sorter.direction == 'ascend'
+          ? 'asc'
+          : sorter.direction == 'descend'
+            ? 'desc'
+            : '',
+      order_by: sorter.field == undefined ? '' : sorter.field
+    };
+    props.change(newTable);
+  };
   // 模态框的值
   const [visible, setVisible] = useState(false);
   // 停止单个运行任务
@@ -176,6 +188,9 @@ const TableDetail = (props) => {
           style={{ width: '100%', padding: '0px 30px 0px 0px' }}
           rowKey="seatunnel_job_id"
           loading={props.loading}
+          onChange={(pagination, filters, sorter) => {
+            onchangeTable(pagination, filters, sorter);
+          }}
         />
         <Modal
           visible={visible}

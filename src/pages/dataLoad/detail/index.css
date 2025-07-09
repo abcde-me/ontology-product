@@ -43,3 +43,15 @@
 .arco-row-align-start {
   align-items: 'center';
 }
+.ellipsis-two-lines-cron {
+  width: 500px;
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* 限制显示的行数 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 可选：确保容器有明确的高度或宽度 */
+  max-height: calc(1em * 2 * 1.4); /* 1em(字体大小) * 2行 * 行高(默认约1.4) */
+  line-height: 1.4; /* 建议设置明确的行高 */
+}
