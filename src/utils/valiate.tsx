@@ -243,13 +243,13 @@ export function validateName(name) {
     };
   }
 
-  // 规则3: 名称长度不能超过256个字符（UTF-8编码）
+  // 规则3: 名称长度不能超过255个字符（UTF-8编码）
   const encoder = new TextEncoder();
   const byteLength = encoder.encode(name).length;
-  if (byteLength > 256) {
+  if (byteLength > 255) {
     return {
       isValid: false,
-      errorMessage: '长度不能超过256个字符'
+      errorMessage: '长度不能超过255个字符'
     };
   }
 

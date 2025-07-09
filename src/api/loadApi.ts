@@ -18,6 +18,9 @@ export async function delLoad(task_id) {
 // 修改载入任务
 export async function editLoad(params) {
   console.log(params.formData);
+  if (params.dest_path_id) {
+    params.dest_path_id = Number(params.dest_path_id);
+  }
   return await UAPI.RES.editLoadApi({ task_id: params.task_id })
     .put(params)
     .inRegion()

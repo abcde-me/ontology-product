@@ -159,7 +159,12 @@ export default function WorkflowTaskDetail() {
         );
         const updatedData = res.data.result_info.task_type_list.map(
           (item: { status: number }, index: number) =>
-            index > firstZeroIndex ? { ...item, status: 3 } : item
+            (res.data.base_info.run_status === TaskRunStatus.fail ||
+              res.data.base_info.run_status === TaskRunStatus.stop ||
+              index > firstZeroIndex) &&
+            item.status === 0
+              ? { ...item, status: 3 }
+              : item
         );
         setNodeData(updatedData);
         if (isParse) {
@@ -259,19 +264,25 @@ export default function WorkflowTaskDetail() {
           <div className="running-item">
             <span className="item-title">总用时</span>
             <div className="item-content-box">
-              <span className="item-content">{taskDetailData.time_size}</span>
+              <span className="item-content">
+                {taskDetailData.time_size || '--'}
+              </span>
             </div>
           </div>
           <div className="running-item">
             <span className="item-title">开始时间</span>
             <div className="item-content-box">
-              <span className="item-content">{taskDetailData.start_time}</span>
+              <span className="item-content">
+                {taskDetailData.start_time || '--'}
+              </span>
             </div>
           </div>
           <div className="running-item">
             <span className="item-title">结束时间</span>
             <div className="item-content-box">
-              <span className="item-content">{taskDetailData.end_time}</span>
+              <span className="item-content">
+                {taskDetailData.end_time || '--'}
+              </span>
             </div>
           </div>
         </div>

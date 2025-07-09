@@ -36,3 +36,17 @@ export const LoadType = {
     value: 'cron'
   }
 };
+export interface ITableData {
+  task_id: number;
+  connector_name: string;
+  connector_id: number;
+  name: string;
+  source_type: string;
+  status: string;
+  cron_expression: string;
+  data_path_id: number;
+  data_path_name: string;
+  createor: string;
+  created_at: string;
+  last_run_time: string;
+}

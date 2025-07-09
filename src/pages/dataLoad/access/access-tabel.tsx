@@ -4,6 +4,7 @@ import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
 import './index.css';
+import { RunState } from '../list/list';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
@@ -32,6 +33,7 @@ const AccessTable = (props) => {
     },
     {
       title: '状态',
+      dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -58,7 +60,17 @@ const AccessTable = (props) => {
             </Tooltip>
           )}
         </div>
-      )
+      ),
+      filters: [
+        {
+          text: '成功',
+          value: RunState.SUCCEED
+        },
+        {
+          text: '失败',
+          value: RunState.FAILED
+        }
+      ]
     },
     {
       title: '类型',
@@ -66,12 +78,14 @@ const AccessTable = (props) => {
     },
     {
       title: '开始时间',
+      dataIndex: 'start_time',
       render: (_, item) => <div>{item.start_time}</div>,
       sorter: (a, b) => a.start_time - b.start_time,
       width: 230
     },
     {
       title: '结束时间',
+      dataIndex: 'end_time',
       render: (_, item) => <div>{item.end_time}</div>,
       sorter: (a, b) => a.end_time - b.end_time,
       width: 230
@@ -106,6 +120,21 @@ const AccessTable = (props) => {
   const [pageSize, setPageSize] = useState(10);
   // 总条数
   const [total, setTotal] = useState(0);
+  // 默认筛选对象
+  const [RecordingObject, setRecordingObject] = useState({});
+  const RecordingChange = (sorter, filters) => {
+    const recoObj = {
+      status: filters.status ? filters.status : [],
+      sort:
+        sorter.direction == 'ascend'
+          ? 'asc'
+          : sorter.direction == 'descend'
+            ? 'desc'
+            : '',
+      order_by: sorter.field == undefined ? '' : sorter.field
+    };
+    setRecordingObject(recoObj);
+  };
   const getRecordingList = async () => {
     try {
       setLoading(true);
@@ -113,8 +142,8 @@ const AccessTable = (props) => {
         page: current,
         page_size: pageSize,
         record_id: props.records_id,
-        // record_id: 'Job20250703-jtsl4VBQFfF29HuQ',
-        file_name: searchValue
+        file_name: searchValue,
+        ...RecordingObject
       });
       if (res.code == '' && res.status == 200) {
         setTotal(res.data.total);
@@ -128,7 +157,7 @@ const AccessTable = (props) => {
   };
   useEffect(() => {
     getRecordingList();
-  }, [current, pageSize]);
+  }, [current, pageSize, RecordingObject]);
   return (
     <div>
       <InputSearch
@@ -152,6 +181,9 @@ const AccessTable = (props) => {
           pagination={false}
           rowKey={(record) => record.id}
           loading={loading}
+          onChange={(pagination, filters, sorter) => {
+            RecordingChange(filters, sorter);
+          }}
         />
         <Pagination
           sizeOptions={[10, 20, 50, 100]}

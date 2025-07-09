@@ -242,12 +242,17 @@ const Header: FC = () => {
 
   const handleSave = async (workflow_name: string) => {
     setEditing(false);
+
+    if (workflowName === appDetail?.workflow_name) {
+      return;
+    }
+
     // 这里可以添加保存逻辑
     const workflowRes = await editWorkflow(workflowUuid ?? '', {
       workflow_name
     });
 
-    if (workflowRes?.data) {
+    if (workflowRes?.status === 200) {
       appDetail &&
         setAppDetail({
           ...appDetail,
@@ -255,7 +260,8 @@ const Header: FC = () => {
         });
       Message.success('修改工作流名称成功');
     } else {
-      Message.error('修改工作流名称失败');
+      setWorkflowName(appDetail?.workflow_name ?? '');
+      Message.error(workflowRes?.message ?? '修改工作流名称失败');
     }
   };
 
@@ -263,6 +269,8 @@ const Header: FC = () => {
     const validateResult = validateName(workflowName);
     if (!validateResult.isValid && validateResult.errorMessage) {
       Message.error(validateResult.errorMessage);
+      setEditing(false);
+      setWorkflowName(appDetail?.workflow_name ?? '');
       return;
     }
 
@@ -287,11 +295,16 @@ const Header: FC = () => {
               onChange={handleWorkflowNameChange}
               onBlur={() => handleSave(workflowName)}
               onPressEnter={() => handlePressEnter(workflowName)}
-              style={{ width: 200 }}
             />
           ) : (
             <div className="app-name">
-              <span className="txt">{appDetail?.workflow_name}</span>
+              <Typography.Paragraph
+                className="app-name-text"
+                style={{ maxWidth: '700px' }}
+                ellipsis={{ cssEllipsis: true, rows: 1, showTooltip: true }}
+              >
+                {appDetail?.workflow_name}
+              </Typography.Paragraph>
               <Popover trigger="hover" title="编辑">
                 <div className="eidt-icon" onClick={handleEdit}></div>
               </Popover>

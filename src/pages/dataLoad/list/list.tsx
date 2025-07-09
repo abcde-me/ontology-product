@@ -10,6 +10,7 @@ import {
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
 import Styles from './index.module.css';
+import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
@@ -175,7 +176,7 @@ export default function DataLoad() {
         },
         {
           text: TYPE_CONFIG[ConnectorType.S3].text,
-          value: 'oss'
+          value: TYPE_CONFIG[ConnectorType.S3].value
         }
       ]
     },
@@ -266,7 +267,7 @@ export default function DataLoad() {
       }
     }
   ] as any;
-  const [data, setData] = useState([
+  const [data, setData] = useState<ITableData[]>([
     // {
     //   task_id: '1',
     //   connector_id: '1',
@@ -335,6 +336,9 @@ export default function DataLoad() {
     }
   };
   const loadSiftHan = (sorter, filters) => {
+    console.log(filters);
+    console.log(sorter);
+
     const newSiftObj = {
       status: filters.status == undefined ? [] : filters.status,
       load_type: filters.load_type == undefined ? [] : filters.load_type,
@@ -342,9 +346,9 @@ export default function DataLoad() {
       order_by:
         sorter.field == undefined
           ? ''
-          : sorter.field == 'last_run_time'
-            ? 'updateTime'
-            : 'createdTime',
+          : sorter.field == 'created_at'
+            ? 'created_at'
+            : 'last_run_time',
       sort:
         sorter.direction == undefined
           ? ''

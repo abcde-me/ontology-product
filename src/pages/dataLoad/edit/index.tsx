@@ -7,17 +7,54 @@ import {
   Radio,
   Select
 } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { directoryData } from '../data/constants';
 import { editLoad } from '@/api/loadApi';
+import './index.css';
+import { validateName } from '@/utils/valiate';
+
+// 定义目录数据类型
+interface DirectoryItem {
+  value: string | number;
+  label: string;
+  children?: DirectoryItem[];
+}
+
+// 添加根据ID构建级联路径的函数
+function findPathById(
+  data: DirectoryItem[],
+  targetId: string | number
+): string[] | null {
+  function findPath(
+    items: DirectoryItem[],
+    target: string | number,
+    currentPath: string[] = []
+  ): string[] | null {
+    for (const item of items) {
+      const newPath = [...currentPath, String(item.value)];
+      if (item.value === target) {
+        return newPath;
+      }
+      if (item.children) {
+        const result = findPath(item.children, target, newPath);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+  return findPath(data, targetId);
+}
+
 // 单选框实例
 const RadioGroup = Radio.Group;
+
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
 const Edit = (props) => {
+  const SchedulerRunRef = useRef<HTMLFormElement>(null);
   const form = props.editForm;
   // 载入类型的默认值
   const [loadVal, setLoadVal] = useState(props.detailData.load_type);
@@ -25,6 +62,22 @@ const Edit = (props) => {
   const [loading, setLoading] = useState(false);
   // 默认表达式的状态
   const [obj, setObj] = useState({}) as any;
+  // 存储初始路径
+  const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
+
+  // 根据data_path_id构建级联路径
+  useEffect(() => {
+    if (props.detailData?.data_path_id && directoryData.length > 0) {
+      const path = findPathById(directoryData, props.detailData.data_path_id);
+      if (path) {
+        setInitialPath(path as (string | string[])[]);
+        form.setFieldsValue({
+          dest_path: path
+        });
+      }
+    }
+  }, [props.detailData?.data_path_id, directoryData]);
+
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -64,12 +117,14 @@ const Edit = (props) => {
   };
   // 点击确定
   const okHan = async () => {
+    // const valid = await SchedulerRunRef.current?.validate();
+    // if (!valid) return
     try {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
-      if (loadVal !== 'once') {
+      if (props.detailData.load_type !== 'once') {
         const formData = {
           task_id: Number(props.loadId),
           task_name: rest.name,
@@ -106,6 +161,7 @@ const Edit = (props) => {
         const res = await editLoad(formData);
         if (res.code == '' && res.status == 200) {
           Message.success('修改成功');
+          props.hideEditModalHan();
         } else {
           Message.error(res.message);
         }
@@ -117,12 +173,7 @@ const Edit = (props) => {
       setLoading(false);
     }
   };
-  // 默认数据
-  // const [obj, setObj] = useState({})
-  useEffect(() => {
-    // setObj(props.detailData)
-    console.log(props.detailData);
-  }, []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -130,23 +181,36 @@ const Edit = (props) => {
         autoComplete="off"
         form={form}
         initialValues={{
-          dest_path: props.detailData.data_path_name || []
+          dest_path: initialPath
         }}
       >
         <FormItem
           label="任务名称："
+          required
           initialValue={props.detailData.name}
           field="name"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
           labelAlign="right"
-          rules={[{ required: true, message: '请输入任务名称' }]}
           extra={
             <div style={{ color: '#666', fontSize: 14 }}>
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议:北京市各区GDP数据_2024</div>
             </div>
           }
+          rules={[
+            {
+              validator: (value, cb) => {
+                if (!value || value.trim() === '') {
+                  return cb('请输入连接器名称');
+                }
+                if (validateName(value).isValid == false) {
+                  return cb(validateName(value).errorMessage);
+                }
+                return cb();
+              }
+            }
+          ]}
         >
           <Input placeholder="请输入任务名称" />
         </FormItem>
@@ -173,7 +237,11 @@ const Edit = (props) => {
           rules={[{ required: true, message: '请输入任务名称' }]}
           initialValue={props.detailData.connector_name}
         >
-          <Select placeholder="请选择连接器" disabled={true}></Select>
+          <Select
+            placeholder="请选择连接器"
+            disabled={true}
+            showSearch
+          ></Select>
         </FormItem>
         <FormItem
           label="载入形式："
@@ -197,7 +265,9 @@ const Edit = (props) => {
         {loadVal == 'cron' ? (
           <div className={Styles.cycleLoadingBox}>
             <SchedulerRun
-              options={props.detailData.cron_expression}
+              // @ts-expect-error
+              ref={SchedulerRunRef}
+              options={props.cron}
               onOptionsChange={(val) => {
                 setObj(val);
               }}
@@ -211,12 +281,18 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
-          initialValue={[props.detailData.data_path_name]}
         >
           <Cascader
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
             options={directoryData}
+            showSearch={{ retainInputValueWhileSelect: false }}
+            dropdownMenuClassName="cascader-dropdown"
+            onChange={(value) => {
+              setInitialPath(value);
+              console.log(value);
+              form.setFieldsValue({ dest_path: value });
+            }}
           />
         </FormItem>
       </Form>

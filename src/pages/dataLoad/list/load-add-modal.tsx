@@ -9,15 +9,13 @@ import {
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
-import CycleLoadingForm from '../list/cycle-loading-form-modal';
 import SchedulerRun from '../../../components/scheduler-run';
-import { convertWeekDaysToString } from '../../../utils/conversionArco';
-import { WeekDay } from '../../../utils/conversionArco';
 import { dataLodaAddForm } from '../type';
-import { addLoad, getDirectoryList } from '@/api/loadApi';
+import { addLoad } from '@/api/loadApi';
 import { getConnectionList } from '@/api/connectionApi';
 import { directoryData } from '../data/constants';
 import { useHistory } from 'react-router';
+import { validateName } from '@/utils/valiate';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -28,7 +26,11 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
-const LoadAddModal = (props: any) => {
+interface propsType {
+  hideModalHan: () => void;
+  getList: (visible: boolean) => void;
+}
+const LoadAddModal = (props: propsType) => {
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -120,6 +122,7 @@ const LoadAddModal = (props: any) => {
     }
     setLoadVal(val);
   };
+
   // 获取连接器名称
   const getConnector_name_type = async () => {
     try {
@@ -138,9 +141,23 @@ const LoadAddModal = (props: any) => {
       console.error('获取连接器名称失败:', error);
     }
   };
+  const filterOption = (input: string, option) => {
+    return (
+      option.props.children &&
+      option.props.children.toLowerCase().includes(input.toLowerCase())
+    );
+  };
+  const loadTypeChange = async (value) => {
+    const res = await getConnectionList({
+      type: value.target.value
+    });
+    console.log(res);
+  };
   useEffect(() => {
     getConnector_name_type();
   }, []);
+  // 自定义下拉框搜索的逻辑
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -155,13 +172,26 @@ const LoadAddModal = (props: any) => {
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
           labelAlign="right"
-          rules={[{ required: true, message: '请输入任务名称' }]}
+          required
           extra={
             <div style={{ color: '#666', fontSize: 14 }}>
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议:北京市各区GDP数据_2024</div>
             </div>
           }
+          rules={[
+            {
+              validator: (value, cb) => {
+                if (!value || value.trim() === '') {
+                  return cb('请输入连接器名称');
+                }
+                if (validateName(value).isValid == false) {
+                  return cb(validateName(value).errorMessage);
+                }
+                return cb();
+              }
+            }
+          ]}
         >
           <Input placeholder="请输入任务名称" />
         </FormItem>
@@ -173,6 +203,9 @@ const LoadAddModal = (props: any) => {
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
           initialValue="s3"
+          onChange={(value) => {
+            loadTypeChange(value);
+          }}
         >
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>
@@ -187,7 +220,11 @@ const LoadAddModal = (props: any) => {
           labelAlign="right"
           rules={[{ required: true, message: '请输入任务名称' }]}
         >
-          <Select placeholder="请选择连接器">
+          <Select
+            placeholder="请选择连接器"
+            showSearch
+            filterOption={filterOption}
+          >
             {connectName.map((option, index) => (
               <Option key={option.key} value={option.key}>
                 {option.label}
@@ -235,6 +272,8 @@ const LoadAddModal = (props: any) => {
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
             options={directoryData}
+            showSearch={{ retainInputValueWhileSelect: false }}
+            dropdownMenuClassName="cascader-dropdown"
           />
         </FormItem>
       </Form>

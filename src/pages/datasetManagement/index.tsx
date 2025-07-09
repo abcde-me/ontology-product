@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Typography,
   Input,
@@ -127,33 +127,34 @@ const columns = (
     dataIndex: 'name',
     width: 200,
     render: (name: string, record: Dataset) => {
-      const isLongName = name.length > 14;
-      const displayName = isLongName ? `${name.substring(0, 14)}...` : name;
-
       const nameElement = (
-        <span
-          className={
-            record.status === datasetStatus.create_failed ||
-            record.status === datasetStatus.creating
-              ? styles.datasetNameLink
-              : `${styles.datasetNameLink} ${styles.datasetNameHover}`
-          }
-          onClick={() => {
-            record.status === datasetStatus.create_failed ||
-            record.status === datasetStatus.creating
-              ? null
-              : handleGoToDetail(record.id);
-          }}
-        >
-          {displayName}
-        </span>
+        <Tooltip content={name}>
+          <span
+            className={
+              record.status === datasetStatus.create_failed ||
+              record.status === datasetStatus.creating
+                ? styles.datasetNameLink
+                : `${styles.datasetNameLink} ${styles.datasetNameHover}`
+            }
+            onClick={() => {
+              record.status === datasetStatus.create_failed ||
+              record.status === datasetStatus.creating
+                ? null
+                : handleGoToDetail(record.id);
+            }}
+            style={{
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              wordBreak: 'break-all'
+            }}
+          >
+            {name}
+          </span>
+        </Tooltip>
       );
-
-      // 如果名称过长，用 Tooltip 包裹显示完整内容
-      if (isLongName) {
-        return <Tooltip content={name}>{nameElement}</Tooltip>;
-      }
-
       return nameElement;
     }
   },
@@ -235,7 +236,20 @@ const columns = (
     title: '描述说明',
     dataIndex: 'description',
     width: 160,
-    ellipsis: true
+    render: (description: string) => (
+      <div
+        style={{
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: 2,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-all'
+        }}
+      >
+        <Tooltip content={description}>{description}</Tooltip>
+      </div>
+    )
   },
   {
     title: '生成模型',
@@ -407,6 +421,8 @@ const DatasetManagement: React.FC = () => {
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
 
+  const childRef = useRef<{ resetForm: () => void } | null>(null);
+
   // 监听排序状态变化
   React.useEffect(() => {
     console.log('排序状态已更新:', { sortField, sortOrder });
@@ -418,6 +434,7 @@ const DatasetManagement: React.FC = () => {
   //导出弹窗相关
   const [downloadData, setDownloadData] = React.useState<Dataset | null>(null);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
+
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
@@ -485,36 +502,9 @@ const DatasetManagement: React.FC = () => {
         if (res.status === 200) {
           Message.success('数据集创建成功！');
           // 刷新数据列表
-          const params: any = {
-            page: currentPage,
-            limit: pageSize,
-            search: actualSearch,
-            search_field: actualSearchField
-          };
-
-          // 添加标签过滤参数
-          if (selectedTagFilters.length > 0) {
-            params.tag_names = selectedTagFilters;
-          }
-
-          // 添加状态过滤参数
-          if (selectedStatusFilters.length > 0) {
-            params.status = selectedStatusFilters;
-          }
-
-          // 添加排序参数
-          if (sortField) {
-            params.sort_field = sortField;
-          }
-          if (sortOrder) {
-            params.sort_order = sortOrder;
-          }
-
-          getDatasetList(params).then((res) => {
-            setDatasetList(res.data.list);
-            setTotal(res.data.total);
-          });
+          fetchDatasetList();
           closeModal();
+          childRef.current?.resetForm();
         } else {
           Message.error(res.message || '数据集创建失败！');
         }
@@ -528,35 +518,7 @@ const DatasetManagement: React.FC = () => {
   const deleteDatasetRecord = (record: Dataset) => {
     deleteDataset(record)
       .then((res) => {
-        const params: any = {
-          page: currentPage,
-          limit: pageSize,
-          search: actualSearch,
-          search_field: actualSearchField
-        };
-
-        // 添加标签过滤参数
-        if (selectedTagFilters.length > 0) {
-          params.tag_names = selectedTagFilters;
-        }
-
-        // 添加状态过滤参数
-        if (selectedStatusFilters.length > 0) {
-          params.status = selectedStatusFilters;
-        }
-
-        // 添加排序参数
-        if (sortField) {
-          params.sort_field = sortField;
-        }
-        if (sortOrder) {
-          params.sort_order = sortOrder;
-        }
-
-        getDatasetList(params).then((res) => {
-          setDatasetList(res.data.list);
-          setTotal(res.data.total);
-        });
+        fetchDatasetList();
         Message.success('删除成功');
       })
       .catch((err) => {
@@ -567,16 +529,40 @@ const DatasetManagement: React.FC = () => {
   // 删除数据集
   const handleDelete = (record: Dataset) => {
     Modal.confirm({
-      title: '确认删除文件吗？',
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除文件吗？
+        </span>
+      ),
       // 内容
-      content: '删除后，文件不可恢复',
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            marginTop: '10px',
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block',
+            marginLeft: '28px' // 左移一点
+          }}
+        >
+          删除后，数据集不可恢复
+        </div>
+      ),
       // 按钮文字
       okText: '确定',
       cancelText: '取消',
-      // 类型设为 warning，会自动使用橙色感叹号图标
       okButtonProps: { status: 'danger' },
-      // 居中显示
-      // centered: true,
       onOk: () => {
         deleteDatasetRecord(record);
       }
@@ -595,35 +581,7 @@ const DatasetManagement: React.FC = () => {
         content: '重试成功'
       });
       // 重新获取数据列表
-      const params: any = {
-        page: currentPage,
-        limit: pageSize,
-        search: actualSearch,
-        search_field: actualSearchField
-      };
-
-      // 添加标签过滤参数
-      if (selectedTagFilters.length > 0) {
-        params.tag_names = selectedTagFilters;
-      }
-
-      // 添加状态过滤参数
-      if (selectedStatusFilters.length > 0) {
-        params.status = selectedStatusFilters;
-      }
-
-      // 添加排序参数
-      if (sortField) {
-        params.sort_field = sortField;
-      }
-      if (sortOrder) {
-        params.sort_order = sortOrder;
-      }
-
-      getDatasetList(params).then((res) => {
-        setDatasetList(res.data?.list || []);
-        setTotal(res.data?.total || 0);
-      });
+      fetchDatasetList();
     } else {
       Message.error({
         content: res.message || '重试失败，请稍后重试'
@@ -655,6 +613,57 @@ const DatasetManagement: React.FC = () => {
     setActualSearch(search); // 设置实际搜索词
     setActualSearchField(searchField); // 设置实际搜索字段
   };
+
+  // 封装获取数据集列表的通用函数
+  const fetchDatasetList = React.useCallback(async () => {
+    const params: any = {
+      page: currentPage,
+      limit: pageSize,
+      search: actualSearch,
+      search_field: actualSearchField
+    };
+
+    // 添加标签过滤参数
+    if (selectedTagFilters.length > 0) {
+      params.tag_names = selectedTagFilters;
+    }
+
+    // 添加状态过滤参数
+    if (selectedStatusFilters.length > 0) {
+      params.status = selectedStatusFilters;
+    }
+
+    // 添加排序参数
+    if (sortField) {
+      params.sort_field = sortField;
+    }
+    if (sortOrder) {
+      params.sort_order = sortOrder;
+    }
+
+    console.log('发送API请求，参数:', params);
+
+    try {
+      const res = await getDatasetList(params);
+      setDatasetList(res.data?.list || []);
+      setTotal(res.data?.total || 0);
+      return res;
+    } catch (err) {
+      console.error('获取数据失败:', err);
+      setDatasetList([]);
+      setTotal(0);
+      throw err;
+    }
+  }, [
+    currentPage,
+    pageSize,
+    actualSearch,
+    actualSearchField,
+    selectedTagFilters,
+    selectedStatusFilters,
+    sortField,
+    sortOrder
+  ]);
 
   // 处理表格变化（包括过滤器变化）
   const handleTableChange = (pagination: any, sorter: any, filters: any) => {
@@ -705,54 +714,8 @@ const DatasetManagement: React.FC = () => {
 
   // 获取数据集列表,当页码或者每页条数变化时，重新获取数据
   React.useEffect(() => {
-    const params: any = {
-      page: currentPage,
-      limit: pageSize,
-      search: actualSearch,
-      search_field: actualSearchField
-    };
-
-    // 添加标签过滤参数
-    if (selectedTagFilters.length > 0) {
-      params.tag_names = selectedTagFilters;
-    }
-
-    // 添加状态过滤参数
-    if (selectedStatusFilters.length > 0) {
-      params.status = selectedStatusFilters;
-    }
-
-    // 添加排序参数
-    if (sortField) {
-      params.sort_field = sortField;
-    }
-    if (sortOrder) {
-      params.sort_order = sortOrder;
-    }
-
-    console.log('发送API请求，参数:', params);
-
-    getDatasetList(params)
-      .then((res) => {
-        console.log('李帆测试', res.data?.list);
-        setDatasetList(res.data?.list || []);
-        setTotal(res.data?.total || 0);
-      })
-      .catch((err) => {
-        console.error('获取数据失败:', err);
-        setDatasetList([]);
-        setTotal(0);
-      });
-  }, [
-    currentPage,
-    pageSize,
-    actualSearch,
-    actualSearchField,
-    selectedTagFilters,
-    selectedStatusFilters,
-    sortField,
-    sortOrder
-  ]); // 添加排序参数依赖
+    fetchDatasetList();
+  }, [fetchDatasetList]);
 
   React.useEffect(() => {
     getTagList()
@@ -779,8 +742,35 @@ const DatasetManagement: React.FC = () => {
     }
 
     Modal.confirm({
-      title: '批量删除确认',
-      content: `删除后，文件不可恢复`,
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除
+        </span>
+      ),
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            marginTop: '10px',
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block',
+            marginLeft: '28px' // 左移一点
+          }}
+        >
+          退出后，当前修改不会保存
+        </div>
+      ),
       okText: '确认删除',
       cancelText: '取消',
       okButtonProps: { status: 'danger' },
@@ -795,37 +785,7 @@ const DatasetManagement: React.FC = () => {
               Message.success(`成功删除 ${selectedRowKeys.length} 个数据集！`);
               setSelectedRowKeys([]);
               setSelectedRows([]);
-
-              // 重新获取数据列表
-              const params: any = {
-                page: currentPage,
-                limit: pageSize,
-                search: actualSearch,
-                search_field: actualSearchField
-              };
-
-              // 添加标签过滤参数
-              if (selectedTagFilters.length > 0) {
-                params.tag_names = selectedTagFilters;
-              }
-
-              // 添加状态过滤参数
-              if (selectedStatusFilters.length > 0) {
-                params.status = selectedStatusFilters;
-              }
-
-              // 添加排序参数
-              if (sortField) {
-                params.sort_field = sortField;
-              }
-              if (sortOrder) {
-                params.sort_order = sortOrder;
-              }
-
-              getDatasetList(params).then((res) => {
-                setDatasetList(res.data?.list || []);
-                setTotal(res.data?.total || 0);
-              });
+              fetchDatasetList();
             } else {
               Message.error('批量删除失败！');
             }
@@ -991,6 +951,7 @@ const DatasetManagement: React.FC = () => {
         visible={modalVisible}
         onSubmit={handleSubmit}
         onCancel={closeModal}
+        ref={childRef}
       />
       {/* 导出数据集弹窗 */}
       <FormComponent

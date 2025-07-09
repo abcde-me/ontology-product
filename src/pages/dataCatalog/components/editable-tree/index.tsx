@@ -36,7 +36,7 @@ export default function EditableTree() {
           placeholder="输入搜索目录"
           value={searchValue}
           onChange={onSearchChange}
-          maxLength={256}
+          maxLength={255}
           allowClear={false}
           style={{ height: '32px', width: '130px' }}
         />

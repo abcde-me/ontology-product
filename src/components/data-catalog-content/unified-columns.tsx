@@ -182,7 +182,8 @@ const renderActionColumn = (
   selectedKey,
   tableType,
   selectedFullPath,
-  handAllReset
+  handAllReset,
+  resetPage
 ) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
@@ -206,7 +207,14 @@ const renderActionColumn = (
         cursor: 'pointer'
       }}
       onClick={() =>
-        handleDelete(record, refreshData, selectedKey, tableType, handAllReset)
+        handleDelete(
+          record,
+          refreshData,
+          selectedKey,
+          tableType,
+          handAllReset,
+          resetPage
+        )
       }
     >
       删除
@@ -224,7 +232,8 @@ export const getUnifiedColumns = (
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
-  handAllReset?: () => void // 修改为函数类型而不是数组
+  handAllReset?: () => void, // 修改为函数类型而不是数组
+  resetPage?: () => void
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
@@ -346,7 +355,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];
@@ -434,7 +444,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];
@@ -458,13 +469,43 @@ const handleDelete = (
   refreshData,
   selectedKey,
   tableType: 'source' | 'target',
-  handAllReset
+  handAllReset,
+  resetPage
 ) => {
   const ids: Array<string> = [];
   try {
     Modal.confirm({
-      title: '确认删除文件吗?',
-      content: '删除后，文件不可恢复',
+      // title: '确认删除文件吗?',
+      // content: '删除后，文件不可恢复',
+      title: (
+        <span
+          style={{
+            // fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除文件吗
+        </span>
+      ),
+      content: (
+        <div
+          style={{
+            // fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            marginTop: '10px',
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block',
+            marginLeft: '28px' // 左移一点
+          }}
+        >
+          删除后，文件不可恢复
+        </div>
+      ),
       onOk: async () => {
         if (tableType === 'target') {
           ids.push(data.id);
@@ -478,9 +519,10 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         } else {
           // handAllReset();
@@ -489,9 +531,10 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         }
       }
