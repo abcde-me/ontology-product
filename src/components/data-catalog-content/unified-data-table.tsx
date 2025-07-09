@@ -222,6 +222,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       if (tableRef.current) {
         tableRef.current.resetSelection();
       }
+    },
+    // 重置页码到第一页
+    resetPage: () => {
+      setCurrentPage(1);
     }
   }));
 
@@ -252,7 +256,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         start_time: startTime || '',
         end_time: endTime || '',
         search_content:
-        searchConditionType === '数据内容' ? searchConditionKeyword : '',
+          searchConditionType === '数据内容' ? searchConditionKeyword : '',
         search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
         sort_field: 'generated_at',
         sort_order: sortOrder || 'desc'

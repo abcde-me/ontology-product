@@ -348,7 +348,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];

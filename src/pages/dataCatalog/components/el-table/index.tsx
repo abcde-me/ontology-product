@@ -171,12 +171,20 @@ export default function Eltable() {
   const handleSourceSearch = (value) => {
     setSearchValue(value || inputValue);
     console.log('Source表格执行搜索:', value || inputValue);
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'source' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Source表格清空搜索
   const handleSourceClear = () => {
     setInputValue('');
     setSearchValue('');
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'source' }
+    });
+    window.dispatchEvent(event);
   };
 
   // ========== Target表格的搜索逻辑 ==========
@@ -190,6 +198,10 @@ export default function Eltable() {
       isActive: false
     }));
     setSearchKeyword('');
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Target表格的搜索逻辑（支持按类型搜索）
@@ -204,6 +216,10 @@ export default function Eltable() {
         keyword: '',
         isActive: false
       });
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: 'target' }
+      });
+      window.dispatchEvent(event);
       return;
     }
 
@@ -225,6 +241,11 @@ export default function Eltable() {
       // 按ID搜索的逻辑
       handleIdSearch(keyword, newSearchCondition);
     }
+
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Target表格按数据内容搜索
@@ -250,6 +271,10 @@ export default function Eltable() {
       keyword: '',
       isActive: false
     });
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // 清除所有选择状态和缓存的函数
@@ -383,20 +408,24 @@ export default function Eltable() {
       setStartTime(dateString[0]);
       setEndTime(dateString[1]);
       setDateRange(dateString);
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
     } else {
       setStartTime('');
       setEndTime('');
       setDateRange([]);
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
     }
   }
 
   function onOk(dateString, date) {
     console.log('onOk: ', dateString, date);
   }
-
-  // 调试信息
-  console.log(`${activeTab}Table - 当前选中的行数:`, selectedRows.length);
-  console.log(`${activeTab}Table - 按钮是否可用:`, hasSelectedRows);
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
@@ -609,7 +638,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
