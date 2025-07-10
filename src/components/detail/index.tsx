@@ -47,6 +47,7 @@ import {
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
+import { number } from 'echarts';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -128,7 +129,6 @@ const generateArcoColumns = (
       width: 140,
       fixed: 'right',
       render: (_, record) => {
-        console.log('李帆测试111', record);
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
           return (
@@ -629,17 +629,17 @@ const DatasetDetail: React.FC = () => {
     const submitData: any[] = [];
 
     // 处理修改的数据
+    console.log(1111, changedRows);
     changedRows.forEach((recordId) => {
       const modifiedRow = contentData.find((item) => {
-        return item[idName] === recordId;
+        return item[idName] === Number(recordId);
       });
-
       if (modifiedRow) {
         // 找到对应的备份数据
         const backupRow = contentDatabackup.find((item) => {
           return item[idName] === recordId;
         });
-
+        console.log(111, modifiedRow, 222, backupRow);
         // 如果找到备份数据，比较是否有实际变化
         if (backupRow) {
           if (!isDataEqual(modifiedRow, backupRow)) {
