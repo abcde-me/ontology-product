@@ -377,7 +377,7 @@ export default function DataLoad() {
   };
   useEffect(() => {
     getdataLoadList();
-  }, [current, pageSize, loadSiftObject]);
+  }, [current, pageSize, loadSiftObject, searchValue]);
   return (
     <div
       style={{
