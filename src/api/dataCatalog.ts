@@ -52,7 +52,14 @@ export async function deleteVolume(
   id: string,
   params?: { root_type?: string }
 ) {
-  return await UAPI.RES.volumeDeleteApi({ id }).delete(params).inRegion().do();
+  const res = await UAPI.RES.volumeDeleteApi({ id })
+    .delete(params)
+    .inRegion()
+    .do();
+  if (res.status !== 200) {
+    Message.error(res.message);
+  }
+  return res;
 }
 // 重命名目录
 export async function renameCatalog(id: string, params: any) {
@@ -112,7 +119,7 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   });
 
   if (file_type && Array.isArray(file_type)) {
-    file_type.forEach(type => {
+    file_type.forEach((type) => {
       queryParams.append('file_type', type);
     });
   }
@@ -138,7 +145,7 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
     }
   });
 
-  file_ids.forEach(id => {
+  file_ids.forEach((id) => {
     queryParams.append('file_ids', id);
   });
 
