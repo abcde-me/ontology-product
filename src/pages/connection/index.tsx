@@ -314,6 +314,11 @@ export default function Connection() {
         name: searchValue,
         ...siftValue
       });
+
+      if (res.status !== 200) {
+        return;
+      }
+
       setConnectionData(res.data.items);
       setPagination((prev) => ({
         ...prev,

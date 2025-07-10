@@ -118,7 +118,6 @@ const Header: FC = () => {
   const userInfo = useUserInfo();
   const appDetail = useTaskStore((s) => s.workflowDetail);
   const setAppDetail = useTaskStore((s) => s.setWorkflowDetail);
-  const workflowStatus = appDetail?.is_online ?? IsOnline.offline;
   const [workflowName, setWorkflowName] = useState(
     appDetail?.workflow_name ?? ''
   );
@@ -260,10 +259,9 @@ const Header: FC = () => {
         });
       Message.success('修改工作流名称成功');
     } else {
+      setWorkflowName(appDetail?.workflow_name ?? '');
       Message.error(workflowRes?.message ?? '修改工作流名称失败');
     }
-
-    setWorkflowName(appDetail?.workflow_name ?? '');
   };
 
   const handlePressEnter = (workflow_name: string) => {
@@ -296,11 +294,16 @@ const Header: FC = () => {
               onChange={handleWorkflowNameChange}
               onBlur={() => handleSave(workflowName)}
               onPressEnter={() => handlePressEnter(workflowName)}
-              style={{ width: 200 }}
             />
           ) : (
             <div className="app-name">
-              <span className="txt">{appDetail?.workflow_name}</span>
+              <Typography.Paragraph
+                className="app-name-text"
+                style={{ maxWidth: '700px' }}
+                ellipsis={{ cssEllipsis: true, rows: 1, showTooltip: true }}
+              >
+                {appDetail?.workflow_name}
+              </Typography.Paragraph>
               <Popover trigger="hover" title="编辑">
                 <div className="eidt-icon" onClick={handleEdit}></div>
               </Popover>
@@ -312,7 +315,7 @@ const Header: FC = () => {
       <div className="right-part">
         <TaskOperation
           {...{
-            workflowStatus,
+            workflowStatus: appDetail?.is_online ?? IsOnline.offline,
             cycleText,
             onOperate
           }}

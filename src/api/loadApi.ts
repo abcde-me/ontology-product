@@ -42,7 +42,10 @@ export async function runLoad(params) {
 }
 // 查询载入任务记录
 export async function getLoadRecord(id) {
-  return await UAPI.RES.getLoadRecordDetailApi(id).get().inRegion().do();
+  return await UAPI.RES.getLoadRecordDetailApi({ task_id: id })
+    .get()
+    .inRegion()
+    .do();
 }
 export async function getLoadRecordList(params) {
   return await UAPI.RES.getdetailListApi({}).post(params).inRegion().do();

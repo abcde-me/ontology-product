@@ -117,7 +117,6 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
         'selectedRows: ',
         selectedRows
       );
-
       // 调用外部传入的选择变化回调函数
       onSelectionChange?.(selectedRowKeys, selectedRows);
     },

@@ -6,6 +6,8 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
+import {FileType} from '@/utils/type';
+import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
   deleteSourceFile,
@@ -26,14 +28,14 @@ let fileTypeFilters = [
 ];
 
 // 根据文件类型获取对应图标组件的函数
-const getFileIcon = (type, size = 16) => {
-  const iconMap = {
-    pdf: <PDFIcon size={size} />,
-    txt: <TXTIcon size={size} />,
-    doc: <DOCIcon size={size} />
-  };
-  return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
-};
+// const getFileIcon = (type, size = 16) => {
+//   const iconMap = {
+//     pdf: <PDFIcon size={size} />,
+//     txt: <TXTIcon size={size} />,
+//     doc: <DOCIcon size={size} />
+//   };
+//   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
+// };
 
 //格式化时间函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -182,7 +184,8 @@ const renderActionColumn = (
   selectedKey,
   tableType,
   selectedFullPath,
-  handAllReset
+  handAllReset,
+  resetPage
 ) => (
   <div style={{ display: 'flex', gap: 8 }}>
     <span
@@ -206,7 +209,14 @@ const renderActionColumn = (
         cursor: 'pointer'
       }}
       onClick={() =>
-        handleDelete(record, refreshData, selectedKey, tableType, handAllReset)
+        handleDelete(
+          record,
+          refreshData,
+          selectedKey,
+          tableType,
+          handAllReset,
+          resetPage
+        )
       }
     >
       删除
@@ -224,7 +234,8 @@ export const getUnifiedColumns = (
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
-  handAllReset?: () => void // 修改为函数类型而不是数组
+  handAllReset?: () => void, // 修改为函数类型而不是数组
+  resetPage?: () => void
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
@@ -281,7 +292,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.file_type, 16)}
+            {getFileIcon(record.file_type)}
             <span>{record.file_type}</span>
           </div>
         )
@@ -346,7 +357,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];
@@ -415,7 +427,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.type, 16)}
+            {getFileIcon(record.type)}
             <span>{record.file_type}</span>
           </div>
         )
@@ -434,7 +446,8 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset
+            handAllReset,
+            resetPage
           )
       }
     ];
@@ -458,13 +471,43 @@ const handleDelete = (
   refreshData,
   selectedKey,
   tableType: 'source' | 'target',
-  handAllReset
+  handAllReset,
+  resetPage
 ) => {
   const ids: Array<string> = [];
   try {
     Modal.confirm({
-      title: '确认删除文件吗?',
-      content: '删除后，文件不可恢复',
+      // title: '确认删除文件吗?',
+      // content: '删除后，文件不可恢复',
+      title: (
+        <span
+          style={{
+            // fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除文件吗
+        </span>
+      ),
+      content: (
+        <div
+          style={{
+            // fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            marginTop: '10px',
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block',
+            marginLeft: '28px' // 左移一点
+          }}
+        >
+          删除后，文件不可恢复
+        </div>
+      ),
       onOk: async () => {
         if (tableType === 'target') {
           ids.push(data.id);
@@ -478,9 +521,10 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         } else {
           // handAllReset();
@@ -489,9 +533,10 @@ const handleDelete = (
             Message.success('删除成功');
             refreshData();
             handAllReset();
+            // resetPage();
           } else {
             Message.error('删除失败，请稍后重试');
-            return
+            return;
           }
         }
       }

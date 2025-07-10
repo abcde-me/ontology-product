@@ -171,12 +171,20 @@ export default function Eltable() {
   const handleSourceSearch = (value) => {
     setSearchValue(value || inputValue);
     console.log('Source表格执行搜索:', value || inputValue);
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'source' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Source表格清空搜索
   const handleSourceClear = () => {
     setInputValue('');
     setSearchValue('');
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'source' }
+    });
+    window.dispatchEvent(event);
   };
 
   // ========== Target表格的搜索逻辑 ==========
@@ -190,6 +198,10 @@ export default function Eltable() {
       isActive: false
     }));
     setSearchKeyword('');
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Target表格的搜索逻辑（支持按类型搜索）
@@ -204,6 +216,10 @@ export default function Eltable() {
         keyword: '',
         isActive: false
       });
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: 'target' }
+      });
+      window.dispatchEvent(event);
       return;
     }
 
@@ -225,6 +241,11 @@ export default function Eltable() {
       // 按ID搜索的逻辑
       handleIdSearch(keyword, newSearchCondition);
     }
+
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // Target表格按数据内容搜索
@@ -250,6 +271,10 @@ export default function Eltable() {
       keyword: '',
       isActive: false
     });
+    const event = new CustomEvent('resetPageToFirst', {
+      detail: { tableType: 'target' }
+    });
+    window.dispatchEvent(event);
   };
 
   // 清除所有选择状态和缓存的函数
@@ -262,6 +287,10 @@ export default function Eltable() {
       if (tableRef.current.resetSelection) {
         tableRef.current.resetSelection();
       }
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
       if (tableRef.current.getTableList) {
         tableRef.current.getTableList();
       }
@@ -287,8 +316,37 @@ export default function Eltable() {
     const ids: Array<string> = [];
     try {
       Modal.confirm({
-        title: '确认删除文件吗?',
-        content: '删除后，文件不可恢复',
+        // title: '确认删除文件吗?',
+        // content: '删除后，文件不可恢复',
+        title: (
+          <span
+            style={{
+              // fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 500,
+              fontSize: 16,
+              height: 24,
+              display: 'inline-block'
+            }}
+          >
+            确认删除文件吗
+          </span>
+        ),
+        content: (
+          <div
+            style={{
+              // fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              marginTop: '10px',
+              color: '#1D2129',
+              height: 22,
+              display: 'inline-block',
+              marginLeft: '28px',  // 左移一点
+            }}
+          >
+            删除后，文件不可恢复
+          </div>
+        ),
         onOk: async () => {
           if (activeTab === 'dst') {
             const idList = selectedRows.map((item: { id: string }) => item.id);
@@ -350,20 +408,24 @@ export default function Eltable() {
       setStartTime(dateString[0]);
       setEndTime(dateString[1]);
       setDateRange(dateString);
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
     } else {
       setStartTime('');
       setEndTime('');
       setDateRange([]);
+      const event = new CustomEvent('resetPageToFirst', {
+        detail: { tableType: activeTab === 'src' ? 'source' : 'target' }
+      });
+      window.dispatchEvent(event);
     }
   }
 
   function onOk(dateString, date) {
     console.log('onOk: ', dateString, date);
   }
-
-  // 调试信息
-  console.log(`${activeTab}Table - 当前选中的行数:`, selectedRows.length);
-  console.log(`${activeTab}Table - 按钮是否可用:`, hasSelectedRows);
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
@@ -576,7 +638,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

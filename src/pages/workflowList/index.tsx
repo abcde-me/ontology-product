@@ -177,7 +177,7 @@ export default function WorkflowList() {
       width: 100,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name}>
+        <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span
             className="hover-change"
             onClick={() => {
@@ -237,7 +237,7 @@ export default function WorkflowList() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path}>
+        <Popover trigger="hover" content={record.source_path} position="tl">
           <span
             className="hover-change"
             onClick={() =>
@@ -259,7 +259,7 @@ export default function WorkflowList() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path}>
+        <Popover trigger="hover" content={record.target_path} position="tl">
           <span
             className="hover-change"
             onClick={() =>
@@ -281,7 +281,7 @@ export default function WorkflowList() {
       width: 80,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.user_name}>
+        <Popover trigger="hover" content={record.user_name} position="tl">
           <span>{record.user_name}</span>
         </Popover>
       )
@@ -338,6 +338,7 @@ export default function WorkflowList() {
             <Popover
               trigger="hover"
               content="请先下线工作流"
+              position="tl"
               disabled={!record.is_online}
             >
               <span

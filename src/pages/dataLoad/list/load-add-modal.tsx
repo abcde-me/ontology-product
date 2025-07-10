@@ -26,7 +26,11 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
-const LoadAddModal = (props: any) => {
+interface propsType {
+  hideModalHan: () => void;
+  getList: (visible: boolean) => void;
+}
+const LoadAddModal = (props: propsType) => {
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -101,7 +105,8 @@ const LoadAddModal = (props: any) => {
     // 点击取消隐藏弹框并且重置表单数据
     props.hideModalHan();
   };
-
+  // 默认的类型
+  const [typeValue, setTypeValue] = useState('s3');
   // 载入类型的默认值
   const [loadVal, setLoadVal] = useState('once');
   // 切换载入类型的函数
@@ -123,8 +128,7 @@ const LoadAddModal = (props: any) => {
   const getConnector_name_type = async () => {
     try {
       const res = await getConnectionList({
-        page: 1,
-        page_size: 1000
+        type: 's3'
       });
       const newres = res.data.items.map((item) => {
         return {
@@ -142,6 +146,18 @@ const LoadAddModal = (props: any) => {
       option.props.children &&
       option.props.children.toLowerCase().includes(input.toLowerCase())
     );
+  };
+  const loadTypeChange = async (e) => {
+    const res = await getConnectionList({
+      type: e.target.value
+    });
+    const newres = res.data.items.map((item) => {
+      return {
+        key: item.id,
+        label: item.name
+      };
+    });
+    setConnectName(newres);
   };
   useEffect(() => {
     getConnector_name_type();
@@ -192,7 +208,10 @@ const LoadAddModal = (props: any) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
-          initialValue="s3"
+          initialValue={typeValue}
+          onChange={(value) => {
+            loadTypeChange(value);
+          }}
         >
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>

@@ -135,7 +135,7 @@ export default function WorkflowTask() {
       width: 80,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id}>
+        <Popover trigger="hover" content={record.id} position="tl">
           <span
             className="hover-change"
             onClick={() =>
@@ -209,7 +209,7 @@ export default function WorkflowTask() {
       width: 170,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id}>
+        <Popover trigger="hover" content={record.id} position="tl">
           <span>{record.time_size}</span>
         </Popover>
       )
@@ -220,7 +220,7 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name}>
+        <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span>{record.workflow_name}</span>
         </Popover>
       )
@@ -231,7 +231,7 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path}>
+        <Popover trigger="hover" content={record.source_path} position="tl">
           <span
             className="hover-change"
             onClick={() =>
@@ -253,7 +253,7 @@ export default function WorkflowTask() {
       width: 130,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path}>
+        <Popover trigger="hover" content={record.target_path} position="tl">
           <span
             className="hover-change"
             onClick={() =>

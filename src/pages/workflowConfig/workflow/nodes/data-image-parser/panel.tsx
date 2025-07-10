@@ -102,6 +102,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         >
           <FileList
             catetoryId={2}
+            readOnly={readOnly}
             fileTypes={FileOptions.image}
             files={inputs.files}
             selectedFilesNum={inputs.selected_files_num}

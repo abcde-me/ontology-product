@@ -52,6 +52,11 @@ export const Monthly_Options = [
 export let Connection_Options = [];
 async function request() {
   const res = await getConnectionList({});
+
+  if (res.status !== 200) {
+    return;
+  }
+
   Connection_Options = res.data.items.map((item) => {
     return {
       key: item.connector_id,
@@ -59,17 +64,24 @@ async function request() {
     };
   });
 }
+
 request();
+
 export interface directoryDataType {
   value: number | string;
   label: string;
 }
+
 export let directoryData = [];
 async function fn() {
   try {
     const res = await getDirectoryList({
       root_type: 1
     });
+
+    if (res.status !== 200) {
+      return;
+    }
     console.log(res.data.src);
 
     directoryData = res.data.src.map((item) => {
