@@ -120,7 +120,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.record_id}&name=${encodeURIComponent(props.name)}`
+              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}`
             );
           }}
         >
@@ -160,7 +160,7 @@ const TableDetail = (props) => {
     try {
       const res = await stopeLoad({
         task_id: props.taskId,
-        record_id: executionId
+        execution_id: executionId
       });
       if (res.code == '' && res.status == 200) {
         Message.success('操作成功,停止运行');

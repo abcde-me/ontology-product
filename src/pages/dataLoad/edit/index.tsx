@@ -10,8 +10,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
-import { directoryData } from '../data/constants';
-import { editLoad } from '@/api/loadApi';
+import { editLoad, getDirectoryList } from '@/api/loadApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
 
@@ -64,7 +63,35 @@ const Edit = (props) => {
   const [obj, setObj] = useState({}) as any;
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
+  const [directoryData, setDirectoryData] = useState([]);
+  async function getdirectoryDataList() {
+    try {
+      const res = await getDirectoryList({
+        root_type: 1
+      });
 
+      if (res.status !== 200) {
+        return;
+      }
+      const newdirectoryData = res.data.src.map((item) => {
+        return item.children
+          ? {
+              value: item.id,
+              label: item.name,
+              children: item.children.volume.map((items) => {
+                return {
+                  value: items.id,
+                  label: items.name
+                };
+              })
+            }
+          : { value: item.id, label: item.name };
+      });
+      setDirectoryData(newdirectoryData);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   // 根据data_path_id构建级联路径
   useEffect(() => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
@@ -77,7 +104,9 @@ const Edit = (props) => {
       }
     }
   }, [props.detailData?.data_path_id, directoryData]);
-
+  useEffect(() => {
+    getdirectoryDataList();
+  }, []);
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -97,16 +126,18 @@ const Edit = (props) => {
     // 点击取消隐藏弹框并且重置表单数据
     props.hideEditModalHan();
   };
+  console.log(props.detailData.load_type);
+
   // 点击确定
   const okHan = async () => {
-    // const valid = await SchedulerRunRef.current?.validate();
-    // if (!valid) return
     try {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
       if (props.detailData.load_type !== 'once') {
+        const valid = await SchedulerRunRef.current?.validate();
+        if (!valid) return;
         const formData = {
           task_id: Number(props.loadId),
           task_name: rest.name,

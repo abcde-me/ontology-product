@@ -19,16 +19,21 @@ const AccessDetail = () => {
   const OneLevelUpHan = () => {
     history.back();
   };
+  const [totalNum, setTotalNum] = useState(0);
   // 获取上面的详情
   const getDetail = async () => {
     console.log(recordsId);
     try {
       const res = await getLoadRecord(recordsId);
       setArressDetail(res.data);
+      if (res.code == '' && res.status == 200) {
+        setTotalNum(res.data.success_files + res.data.failed_files);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getDetail();
   }, []);
@@ -67,7 +72,9 @@ const AccessDetail = () => {
             >
               {name}
             </BreadcrumbItem>
-            <BreadcrumbItem>{arressDetail.execution_name}</BreadcrumbItem>
+            <BreadcrumbItem>
+              {arressDetail.execution_name}运行记录
+            </BreadcrumbItem>
           </Breadcrumb>
           <div
             style={{
@@ -152,7 +159,7 @@ const AccessDetail = () => {
           <div className="task-right">
             <div className="task-right-item" style={{ color: 'black' }}>
               <div>总文件</div>
-              <div className="fontSize">{arressDetail.enable}</div>
+              <div className="fontSize">{totalNum}</div>
             </div>
             <div className="task-right-item" style={{ color: 'green' }}>
               <div>成功</div>

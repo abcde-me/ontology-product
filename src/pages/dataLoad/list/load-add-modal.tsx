@@ -7,13 +7,12 @@ import {
   Radio,
   Select
 } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
-import { addLoad } from '@/api/loadApi';
+import { addLoad, getDirectoryList } from '@/api/loadApi';
 import { getConnectionList } from '@/api/connectionApi';
-import { directoryData } from '../data/constants';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 interface connecort_nameType {
@@ -31,6 +30,7 @@ interface propsType {
   getList: (visible: boolean) => void;
 }
 const LoadAddModal = (props: propsType) => {
+  const SchedulerRunRef = useRef<HTMLFormElement>(null);
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -42,6 +42,8 @@ const LoadAddModal = (props: propsType) => {
   const [expression, setExpression] = useState({});
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
+    const valid = await SchedulerRunRef.current?.validate();
+    if (!valid) return;
     try {
       setLoading(true);
       const formValues = await form.validate();
@@ -85,7 +87,8 @@ const LoadAddModal = (props: propsType) => {
           dest_path_id: pathId
         };
         const res = await addLoad(formData);
-        if (res.code == '' && res.status == 200) {
+        if (res.code === '' && res.status === 200) {
+          Message.success('新建任务成功');
           cancelHan();
           history.push(
             `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
@@ -159,7 +162,39 @@ const LoadAddModal = (props: propsType) => {
     });
     setConnectName(newres);
   };
+  const [directoryData, setDirectoryData] = useState([]);
+  async function getdirectoryDataList() {
+    try {
+      const res = await getDirectoryList({
+        root_type: 1
+      });
+
+      if (res.status !== 200) {
+        return;
+      }
+      console.log(res.data.src);
+
+      const newdirectoryData = res.data.src.map((item) => {
+        return item.children
+          ? {
+              value: item.id,
+              label: item.name,
+              children: item.children.volume.map((items) => {
+                return {
+                  value: items.id,
+                  label: items.name
+                };
+              })
+            }
+          : { value: item.id, label: item.name };
+      });
+      setDirectoryData(newdirectoryData);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   useEffect(() => {
+    getdirectoryDataList();
     getConnector_name_type();
   }, []);
   // 自定义下拉框搜索的逻辑
@@ -211,6 +246,9 @@ const LoadAddModal = (props: propsType) => {
           initialValue={typeValue}
           onChange={(value) => {
             loadTypeChange(value);
+            form.setFieldsValue({
+              connector_id: ''
+            });
           }}
         >
           <RadioGroup>
@@ -250,9 +288,6 @@ const LoadAddModal = (props: propsType) => {
           <RadioGroup
             onChange={(val) => {
               handoffLoadFormHan(val);
-              form.setFieldsValue({
-                connector_id: ''
-              });
             }}
           >
             <Radio value="once">单次载入</Radio>
@@ -262,6 +297,8 @@ const LoadAddModal = (props: propsType) => {
         {loadVal == 'cron' ? (
           <div className={Styles.cycleLoadingBox}>
             <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
               options={{}}
               onOptionsChange={(val) => {
                 setExpression(val);
