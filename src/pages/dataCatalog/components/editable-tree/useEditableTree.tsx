@@ -192,9 +192,6 @@ export function useEditableTree({ catalogTreeStore }) {
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
       Message.success('删除成功!');
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      Message.error('删除失败，请稍后重试');
     }
 
     catalogTreeStore.setState({
