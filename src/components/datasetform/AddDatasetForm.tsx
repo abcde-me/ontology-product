@@ -580,7 +580,6 @@ const DatasetForm = React.forwardRef<
                       disabled={!selectedConnector}
                       onChange={(values) => {
                         // labelInValue 为 true 时，values 是对象数组
-                        console.log('选择的文件:', values);
                         const fileValues = values.map(
                           (v: OptionInfo) => v.value
                         );
@@ -591,17 +590,47 @@ const DatasetForm = React.forwardRef<
                       style={{ width: '100%' }}
                       labelInValue
                       renderFormat={(option: OptionInfo | null) => {
-                        const value = option?.value ?? '';
-                        return String(value).split('/').pop() || '';
+                        const value =
+                          String(option?.value ?? '')
+                            .split('/')
+                            .pop() || '';
+                        return (
+                          <Tooltip content={value}>
+                            <div
+                              style={{
+                                display: 'inline-block',
+                                maxWidth: 200,
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis',
+                                verticalAlign: 'middle'
+                              }}
+                            >
+                              {value}
+                            </div>
+                          </Tooltip>
+                        );
+                      }}
+                      maxTagCount={{
+                        count: 3,
+                        render: (invisibleTagCount) => {
+                          // 从当前表单值获取完整的标签列表
+                          const allTags =
+                            form.getFieldValue('selectedFiles') || [];
+                          const remainingTags = allTags.slice(3);
+                          const remainingLabels = remainingTags.map((s) =>
+                            s.trim().split('/').pop()
+                          );
+                          return (
+                            <Tooltip content={`剩余标签: ${remainingLabels}`}>
+                              <span>+{invisibleTagCount}</span>
+                            </Tooltip>
+                          );
+                        }
                       }}
                     >
                       {connectorFileInformation.map((item, index) => (
-                        <Option
-                          key={index}
-                          value={item.path + '/' + item.name}
-                          // @ts-expect-error
-                          label={item.name}
-                        >
+                        <Option key={index} value={item.path + '/' + item.name}>
                           <div
                             style={{
                               fontFamily: 'Arial, sans-serif',

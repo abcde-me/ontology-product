@@ -1,4 +1,11 @@
-import { Form, Input, Button, Select, Space } from '@arco-design/web-react';
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  Space,
+  Tooltip
+} from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './EditDatasetForm.module.css';
 import { getTagList } from '@/api/datasetManagement';
@@ -156,6 +163,21 @@ const EditDatasetForm: React.FC<Props> = ({
             value={selectedTags}
             onChange={setSelectedTags}
             style={{ marginLeft: '8px' }}
+            maxTagCount={{
+              count: 5,
+              render: (invisibleTagCount) => {
+                // 从当前表单值获取完整的标签列表
+                const allTags = form.getFieldValue('tags') || [];
+                const remainingTags = allTags.slice(5);
+                const remainingLabels = remainingTags.join(', ');
+
+                return (
+                  <Tooltip content={`剩余标签: ${remainingLabels}`}>
+                    <span>+{invisibleTagCount}</span>
+                  </Tooltip>
+                );
+              }
+            }}
           />
         </FormItem>
 
