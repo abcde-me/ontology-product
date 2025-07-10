@@ -20,7 +20,14 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     getWorkflowTargetPath(2, '').then(res => {
       const dirsArr: Record<string, any>[] = [];
       res.data.dst.forEach((catalog) => {
-        dirsArr.push(...(catalog.children?.volume || []));
+        // 重置name结构
+        const restData = catalog.children?.volume.map(item => {
+          return {
+            ...item,
+            parent_name: catalog.name
+          }
+        })
+        dirsArr.push(...(restData || []));
       });
       setDataSource(dirsArr);
     });
@@ -55,7 +62,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           >
             {dataSource.map((option) => (
               <Option key={option.id} value={option.id}>
-                {option.name}
+                {`${option.parent_name}/${option.name}`}
               </Option>
             ))}
           </Select>
