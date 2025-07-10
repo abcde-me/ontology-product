@@ -271,7 +271,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">总用时</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.time_size || '--'}
+                {taskDetailData?.time_size ?? '--'}
               </span>
             </div>
           </div>
@@ -279,7 +279,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">开始时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.start_time || '--'}
+                {taskDetailData?.start_time ?? '--'}
               </span>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">结束时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.end_time || '--'}
+                {taskDetailData?.end_time ?? '--'}
               </span>
             </div>
           </div>
