@@ -59,7 +59,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             type: 'data_filter',
             title: '数据过滤',
             options: {
-              threshold: payload?.threshold
+              threshold: payload?.threshold_switch ? payload?.threshold : 0
             }
           },
           {
