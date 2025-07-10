@@ -570,7 +570,7 @@ export const useWorkflowInit = () => {
             selected: false,
             data: {
               ...node?.data,
-              selected: false,
+              selected: false
             },
             position: {
               ...node.position,
@@ -723,7 +723,7 @@ export const useNodesReadOnly = () => {
       isRestoring ||
       appDetail?.is_online === IsOnline.online
     );
-  }, [workflowStore]);
+  }, [workflowStore, appDetail]);
 
   return {
     nodesReadOnly: !!(
