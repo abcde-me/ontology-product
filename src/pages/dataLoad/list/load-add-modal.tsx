@@ -87,7 +87,7 @@ const LoadAddModal = (props: propsType) => {
           dest_path_id: pathId
         };
         const res = await addLoad(formData);
-        if (res.code == '' && res.status == 200) {
+        if (res.code === '' && res.status === 200) {
           Message.success('新建任务成功');
           cancelHan();
           history.push(

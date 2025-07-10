@@ -144,8 +144,14 @@ export default function WorkflowTaskDetail() {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
+        // 运行中状态定时刷新防止节点数据重新渲染
+        if (
+          !isSetActiveNode &&
+          res.data.base_info.run_status === TaskRunStatus.running
+        )
+          return;
         setWorkflowName(res.data.workflow_name);
-        isSetActiveNode && setActiveNode(res.data.result_info.task_type);
+        setActiveNode(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
@@ -265,7 +271,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">总用时</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.time_size || '--'}
+                {taskDetailData?.time_size ?? '--'}
               </span>
             </div>
           </div>
@@ -273,7 +279,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">开始时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.start_time || '--'}
+                {taskDetailData?.start_time ?? '--'}
               </span>
             </div>
           </div>
@@ -281,7 +287,7 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">结束时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData.end_time || '--'}
+                {taskDetailData?.end_time ?? '--'}
               </span>
             </div>
           </div>

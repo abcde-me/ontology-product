@@ -6,7 +6,7 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
-import {FileType} from '@/utils/type';
+import { FileType } from '@/utils/type';
 import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
@@ -477,37 +477,8 @@ const handleDelete = (
   const ids: Array<string> = [];
   try {
     Modal.confirm({
-      // title: '确认删除文件吗?',
-      // content: '删除后，文件不可恢复',
-      title: (
-        <span
-          style={{
-            // fontFamily: 'PingFang SC, sans-serif',
-            fontWeight: 500,
-            fontSize: 16,
-            height: 24,
-            display: 'inline-block'
-          }}
-        >
-          确认删除文件吗
-        </span>
-      ),
-      content: (
-        <div
-          style={{
-            // fontFamily: 'PingFang SC, sans-serif',
-            fontWeight: 400,
-            fontSize: 14,
-            marginTop: '10px',
-            color: '#1D2129',
-            height: 22,
-            display: 'inline-block',
-            marginLeft: '28px' // 左移一点
-          }}
-        >
-          删除后，文件不可恢复
-        </div>
-      ),
+      title: '确认删除文件吗?',
+      content: '删除后，文件不可恢复',
       onOk: async () => {
         if (tableType === 'target') {
           ids.push(data.id);
@@ -519,21 +490,30 @@ const handleDelete = (
           });
           if (res.code == 0) {
             Message.success('删除成功');
-            refreshData();
-            handAllReset();
-            // resetPage();
+            const event = new CustomEvent('resetPageToFirst', {
+              detail: { tableType }
+            });
+            window.dispatchEvent(event);
+            setTimeout(() => {
+              handAllReset();
+              refreshData();
+            }, 200);
           } else {
             Message.error('删除失败，请稍后重试');
             return;
           }
         } else {
-          // handAllReset();
           const res = await deleteSourceFile(data.id);
           if (res.code == 0) {
             Message.success('删除成功');
-            refreshData();
-            handAllReset();
-            // resetPage();
+            const event = new CustomEvent('resetPageToFirst', {
+              detail: { tableType }
+            });
+            window.dispatchEvent(event);
+            setTimeout(() => {
+              handAllReset();
+              refreshData();
+            }, 200);
           } else {
             Message.error('删除失败，请稍后重试');
             return;

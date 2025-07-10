@@ -316,37 +316,8 @@ export default function Eltable() {
     const ids: Array<string> = [];
     try {
       Modal.confirm({
-        // title: '确认删除文件吗?',
-        // content: '删除后，文件不可恢复',
-        title: (
-          <span
-            style={{
-              // fontFamily: 'PingFang SC, sans-serif',
-              fontWeight: 500,
-              fontSize: 16,
-              height: 24,
-              display: 'inline-block'
-            }}
-          >
-            确认删除文件吗
-          </span>
-        ),
-        content: (
-          <div
-            style={{
-              // fontFamily: 'PingFang SC, sans-serif',
-              fontWeight: 400,
-              fontSize: 14,
-              marginTop: '10px',
-              color: '#1D2129',
-              height: 22,
-              display: 'inline-block',
-              marginLeft: '28px',  // 左移一点
-            }}
-          >
-            删除后，文件不可恢复
-          </div>
-        ),
+        title: '确认删除文件吗?',
+        content: '删除后，文件不可恢复',
         onOk: async () => {
           if (activeTab === 'dst') {
             const idList = selectedRows.map((item: { id: string }) => item.id);
@@ -364,7 +335,6 @@ export default function Eltable() {
               } else {
                 Message.error('删除失败，请稍后重试');
               }
-
             }
           } else {
             const fileIds = selectedRows.map((item: { id: string }) => item.id);
@@ -638,7 +608,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => { }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

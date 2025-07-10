@@ -79,7 +79,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           remove_url: inputs?.remove_url,
           remove_invisible: inputs?.remove_invisible,
           remove_html: inputs?.remove_html,
-          threshold: inputs?.threshold || 800,
+          threshold: inputs?.threshold || 5,
           unicode: inputs?.unicode,
           traditional_to_simplified: inputs?.traditional_to_simplified,
           case_transform: inputs?.case_transform,

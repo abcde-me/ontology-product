@@ -22,8 +22,6 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     inputRef.current = inputs;
   }, [inputs]);
 
-
-
   const onValuesChange = useCallback(
     (payload: CodeNodeType) => {
       const newInputs = produce(inputRef.current, (draft: any) => {
@@ -51,7 +49,9 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             options: {
               // 1 处理 0 不处理
               unicode: payload?.unicode ? 1 : 0,
-              traditional_to_simplified: payload?.traditional_to_simplified ? 1 : 0,
+              traditional_to_simplified: payload?.traditional_to_simplified
+                ? 1
+                : 0,
               case_transform: payload?.case_transform
             }
           },
@@ -59,7 +59,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             type: 'data_filter',
             title: '数据过滤',
             options: {
-              threshold: payload?.threshold
+              threshold: payload?.threshold_switch ? payload?.threshold : 0
             }
           },
           {
@@ -77,7 +77,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             title: '去除敏感词',
             options: {
               // 1 处理 0 不处理
-              mg_is: payload?.mg_is ? 1 : 0,
+              mg_is: payload?.mg_is ? 1 : 0
             }
           },
           {
@@ -85,7 +85,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             title: '数据去毒化',
             options: {
               //  1 去毒 0 不去毒
-              qd_is: payload?.qd_is ? 1 : 0,
+              qd_is: payload?.qd_is ? 1 : 0
             }
           },
           {
@@ -104,7 +104,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               oh_is: payload?.oh_is ? 1 : 0
             }
           }
-        ]
+        ];
       });
       setInputs(newInputs);
     },
