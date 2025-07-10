@@ -143,7 +143,7 @@ const EditDatasetForm: React.FC<Props> = ({
         <FormItem
           label="生成模型"
           field="model"
-          rules={[{ required: true, message: '请选择生成模型' }]}
+          // rules={[{ required: true, message: '请选择生成模型' }]}
         >
           <Select
             placeholder="请选择生成模型..."
