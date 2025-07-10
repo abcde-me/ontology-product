@@ -144,8 +144,14 @@ export default function WorkflowTaskDetail() {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
+        // 运行中状态定时刷新防止节点数据重新渲染
+        if (
+          !isSetActiveNode &&
+          res.data.base_info.run_status === TaskRunStatus.running
+        )
+          return;
         setWorkflowName(res.data.workflow_name);
-        isSetActiveNode && setActiveNode(res.data.result_info.task_type);
+        setActiveNode(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
