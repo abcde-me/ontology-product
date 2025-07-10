@@ -17,15 +17,13 @@ export default function DataCleaningNode(props: { dataSource; loading }) {
         <div className="item-box">
           <span className="item-title">原始数据量</span>
           <span className="item-content">
-            {dataSource?.raw_data_num != null ? dataSource.raw_data_num : '--'}
+            {dataSource?.raw_data_num ?? '--'}
           </span>
         </div>
         <div className="item-box">
           <span className="item-title">清洗后数据量</span>
           <span className="item-content">
-            {dataSource?.processed_data_num != null
-              ? dataSource.processed_data_num
-              : '--'}
+            {dataSource?.processed_data_num ?? '--'}
           </span>
         </div>
       </div>
