@@ -203,8 +203,8 @@ const columns = (
       { text: '创建中', value: datasetStatus.creating },
       { text: '创建失败', value: datasetStatus.create_failed },
       { text: '正常', value: datasetStatus.normal },
-      { text: '版本生成中', value: datasetStatus.version_updating },
-      { text: '版本生成失败', value: datasetStatus.version_update_failed }
+      { text: '版本更新中', value: datasetStatus.version_updating },
+      { text: '版本更新失败', value: datasetStatus.version_update_failed }
     ],
     filteredValue: selectedStatusFilters,
     filterMultiple: true,
@@ -500,11 +500,11 @@ const DatasetManagement: React.FC = () => {
     createDataset(submitData)
       .then((res) => {
         if (res.status === 200) {
-          Message.success('数据集创建成功！');
           // 刷新数据列表
           fetchDatasetList();
           closeModal();
           childRef.current?.resetForm();
+          Message.success('数据集创建成功！');
         } else {
           Message.error(res.message || '数据集创建失败！');
         }
@@ -562,7 +562,7 @@ const DatasetManagement: React.FC = () => {
       // 按钮文字
       okText: '确定',
       cancelText: '取消',
-      okButtonProps: { status: 'danger' },
+      // okButtonProps: { status: 'danger' },
       onOk: () => {
         deleteDatasetRecord(record);
       }
