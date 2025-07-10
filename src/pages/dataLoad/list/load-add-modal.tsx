@@ -7,7 +7,7 @@ import {
   Radio,
   Select
 } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
@@ -30,6 +30,7 @@ interface propsType {
   getList: (visible: boolean) => void;
 }
 const LoadAddModal = (props: propsType) => {
+  const SchedulerRunRef = useRef<HTMLFormElement>(null);
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -41,6 +42,8 @@ const LoadAddModal = (props: propsType) => {
   const [expression, setExpression] = useState({});
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
+    const valid = await SchedulerRunRef.current?.validate();
+    if (!valid) return;
     try {
       setLoading(true);
       const formValues = await form.validate();
@@ -85,6 +88,7 @@ const LoadAddModal = (props: propsType) => {
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
+          Message.success('新建任务成功');
           cancelHan();
           history.push(
             `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
@@ -293,6 +297,8 @@ const LoadAddModal = (props: propsType) => {
         {loadVal == 'cron' ? (
           <div className={Styles.cycleLoadingBox}>
             <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
               options={{}}
               onOptionsChange={(val) => {
                 setExpression(val);
