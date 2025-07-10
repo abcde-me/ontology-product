@@ -201,8 +201,11 @@ export default function DataLoad() {
       render: (_, item) => {
         return (
           <span
+            className="jump-a"
             onClick={() => {
-              history.push('/tenant/compute/modaforge/dataCatalog');
+              history.push(
+                `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
+              );
             }}
           >
             {item.data_path_name}
@@ -366,7 +369,7 @@ export default function DataLoad() {
   const deleteLoadHan = async (id) => {
     try {
       const res = await delLoad(id);
-      if (res.message == 'ok') {
+      if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
         getdataLoadList();
       } else {

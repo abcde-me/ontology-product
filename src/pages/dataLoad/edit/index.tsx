@@ -73,8 +73,6 @@ const Edit = (props) => {
       if (res.status !== 200) {
         return;
       }
-      console.log(res.data.src);
-
       const newdirectoryData = res.data.src.map((item) => {
         return item.children
           ? {
@@ -128,16 +126,18 @@ const Edit = (props) => {
     // 点击取消隐藏弹框并且重置表单数据
     props.hideEditModalHan();
   };
+  console.log(props.detailData.load_type);
+
   // 点击确定
   const okHan = async () => {
-    const valid = await SchedulerRunRef.current?.validate();
-    if (!valid) return;
     try {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
       if (props.detailData.load_type !== 'once') {
+        const valid = await SchedulerRunRef.current?.validate();
+        if (!valid) return;
         const formData = {
           task_id: Number(props.loadId),
           task_name: rest.name,
