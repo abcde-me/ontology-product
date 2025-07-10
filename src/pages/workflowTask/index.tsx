@@ -262,7 +262,7 @@ export default function WorkflowTask() {
               handleToDirectoryPath(
                 record.target_path_id,
                 record.target_parent_id,
-                1
+                2
               )
             }
           >
