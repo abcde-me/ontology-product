@@ -127,8 +127,8 @@ const DataLoadDetail = () => {
       setDetailListLoading(false);
     }
   };
-  const judgmentTask = async () => {
-    await getDetailList();
+  const judgmentTask = () => {
+    getDetailList();
     const boo = detailList?.findIndex((item) => item.status == 'running');
     setRunningFlag(boo == -1 ? false : true);
   };
