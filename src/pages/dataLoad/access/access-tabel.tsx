@@ -27,9 +27,11 @@ const AccessTable = (props) => {
   const columns = [
     {
       title: '文件名',
-      dataIndex: 'file_name',
       width: 400,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, item) => {
+        return <Tooltip content={item.file_name}>{item.file_name}</Tooltip>;
+      }
     },
     {
       title: '状态',

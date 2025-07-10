@@ -239,7 +239,14 @@ const DataLoadDetail = () => {
               >
                 载入位置：
               </div>
-              <div style={{ fontSize: '14px' }}>
+              <div
+                style={{
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
                 {listDetail && listDetail.data_path_name}
                 {/* {findParent(directoryArr ? directoryArr : [], listDetail && listDetail.data_path_id)} */}
               </div>

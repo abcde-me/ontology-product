@@ -5,7 +5,8 @@ import {
   Modal,
   Pagination,
   Popconfirm,
-  Table
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -78,9 +79,13 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
-      dataIndex: 'name',
       width: 300,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, text) => (
+        <Tooltip content={text.name} position="tl">
+          {text.name}
+        </Tooltip>
+      )
     },
     {
       title: '载入形式',
@@ -189,10 +194,13 @@ export default function DataLoad() {
             onClick={() => gotoConnector(item.connector_name)}
             className="jump-a"
           >
-            {item.connector_name}
+            <Tooltip content={item.connector_name} position="tl">
+              {item.connector_name}
+            </Tooltip>
           </a>
         );
-      }
+      },
+      ellipsis: true
     },
     {
       title: '载入位置',
@@ -208,7 +216,9 @@ export default function DataLoad() {
               );
             }}
           >
-            {item.data_path_name}
+            <Tooltip content={item.data_path_name} position="tl">
+              {item.data_path_name}
+            </Tooltip>
           </span>
         );
       }
