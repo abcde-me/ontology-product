@@ -82,11 +82,12 @@ export default function WorkflowTask() {
   // 跳转详情
   const handleToTaskDeatil = (
     id: number,
-    workflow_uuid: string | number,
-    ds_workflow_id: string | number
+    workflow_uuid: string,
+    ds_workflow_id: string,
+    workflow_version: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/workflowTaskDetail?id=${id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+      `/tenant/compute/modaforge/workflowTaskDetail?id=${id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`
     );
   };
 
@@ -140,9 +141,10 @@ export default function WorkflowTask() {
             className="hover-change"
             onClick={() =>
               handleToTaskDeatil(
-                record.id,
-                record.workflow_uuid,
-                record.ds_workflow_id
+                record?.id ?? '',
+                record?.workflow_uuid ?? '',
+                record?.ds_workflow_id ?? '',
+                record?.workflow_version ?? ''
               )
             }
           >
@@ -293,9 +295,10 @@ export default function WorkflowTask() {
           className="operate-text"
           onClick={() =>
             handleToTaskDeatil(
-              record.id,
-              record.workflow_uuid,
-              record.ds_workflow_id
+              record?.id ?? '',
+              record?.workflow_uuid ?? '',
+              record?.ds_workflow_id ?? '',
+              record?.workflow_version ?? ''
             )
           }
         >
