@@ -120,7 +120,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}`
+              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.record_id}&name=${encodeURIComponent(props.name)}`
             );
           }}
         >

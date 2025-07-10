@@ -250,6 +250,9 @@ const LoadAddModal = (props: propsType) => {
           <RadioGroup
             onChange={(val) => {
               handoffLoadFormHan(val);
+              form.setFieldsValue({
+                connector_id: ''
+              });
             }}
           >
             <Radio value="once">单次载入</Radio>
