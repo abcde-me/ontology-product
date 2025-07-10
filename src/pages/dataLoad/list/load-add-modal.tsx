@@ -11,9 +11,8 @@ import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
-import { addLoad } from '@/api/loadApi';
+import { addLoad, getDirectoryList } from '@/api/loadApi';
 import { getConnectionList } from '@/api/connectionApi';
-import { directoryData } from '../data/constants';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 interface connecort_nameType {
@@ -159,7 +158,39 @@ const LoadAddModal = (props: propsType) => {
     });
     setConnectName(newres);
   };
+  const [directoryData, setDirectoryData] = useState([]);
+  async function getdirectoryDataList() {
+    try {
+      const res = await getDirectoryList({
+        root_type: 1
+      });
+
+      if (res.status !== 200) {
+        return;
+      }
+      console.log(res.data.src);
+
+      const newdirectoryData = res.data.src.map((item) => {
+        return item.children
+          ? {
+              value: item.id,
+              label: item.name,
+              children: item.children.volume.map((items) => {
+                return {
+                  value: items.id,
+                  label: items.name
+                };
+              })
+            }
+          : { value: item.id, label: item.name };
+      });
+      setDirectoryData(newdirectoryData);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   useEffect(() => {
+    getdirectoryDataList();
     getConnector_name_type();
   }, []);
   // 自定义下拉框搜索的逻辑
@@ -211,6 +242,9 @@ const LoadAddModal = (props: propsType) => {
           initialValue={typeValue}
           onChange={(value) => {
             loadTypeChange(value);
+            form.setFieldsValue({
+              connector_id: ''
+            });
           }}
         >
           <RadioGroup>
@@ -250,9 +284,6 @@ const LoadAddModal = (props: propsType) => {
           <RadioGroup
             onChange={(val) => {
               handoffLoadFormHan(val);
-              form.setFieldsValue({
-                connector_id: ''
-              });
             }}
           >
             <Radio value="once">单次载入</Radio>

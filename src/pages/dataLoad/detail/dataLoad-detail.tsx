@@ -152,7 +152,7 @@ const DataLoadDetail = () => {
       });
       console.log(res);
       if (res.code == '' && res.status == '200') {
-        Message.success('新建运行成功');
+        Message.success(`已成功发起载入任务${listDetail?.name}`);
         judgmentTask();
       } else {
         Message.error(res.message);

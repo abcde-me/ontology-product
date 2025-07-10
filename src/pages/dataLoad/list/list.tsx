@@ -357,6 +357,7 @@ export default function DataLoad() {
             : 'desc'
     };
     setLoadSiftObject(newSiftObj);
+    setCurrent(1);
   };
   const handlePressEnter = () => {
     getdataLoadList();
@@ -377,7 +378,7 @@ export default function DataLoad() {
   };
   useEffect(() => {
     getdataLoadList();
-  }, [current, pageSize, loadSiftObject, searchValue]);
+  }, [current, pageSize, loadSiftObject]);
   return (
     <div
       style={{

@@ -141,7 +141,7 @@ const AccessTable = (props) => {
       const res = await getLoadRecordLists({
         page: current,
         page_size: pageSize,
-        record_id: props.records_id,
+        execution_id: props.records_id,
         file_name: searchValue,
         ...RecordingObject
       });

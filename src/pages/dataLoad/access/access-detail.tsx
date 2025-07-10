@@ -67,7 +67,9 @@ const AccessDetail = () => {
             >
               {name}
             </BreadcrumbItem>
-            <BreadcrumbItem>{arressDetail.execution_name}</BreadcrumbItem>
+            <BreadcrumbItem>
+              {arressDetail.execution_name}运行记录
+            </BreadcrumbItem>
           </Breadcrumb>
           <div
             style={{
