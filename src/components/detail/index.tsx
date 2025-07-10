@@ -97,8 +97,8 @@ const generateArcoColumns = (
     title: header,
     dataIndex: header,
     key: header,
-    minWidth: 150,
-    maxWidth: 300,
+    width: header.length > 10 ? 250 : 150, // 使用固定宽度替代 minWidth/maxWidth
+    ellipsis: true,
     render: (value: any, record: any) => {
       if (updateStatus && editingRowKey === record[idName]) {
         return (
@@ -119,7 +119,7 @@ const generateArcoColumns = (
       }
     }
   }));
-
+  console.log(cols);
   // 只有在编辑状态下才显示操作列
   if (updateStatus) {
     cols.push({
@@ -128,7 +128,6 @@ const generateArcoColumns = (
       width: 140,
       fixed: 'right',
       render: (_, record) => {
-        console.log('李帆测试111', record);
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
           return (
@@ -272,11 +271,6 @@ function convertKeyType(arr, key, type) {
     return newItem;
   });
 }
-
-// 测试数据 - 总数
-const cstotal = 5;
-
-// 测试数据 - 内容数据备份
 
 // 状态配置
 const statusConfig = {
@@ -488,63 +482,16 @@ const DatasetDetail: React.FC = () => {
       Message.warning('请先完成当前编辑');
       return;
     }
+    const newContentData = contentData.filter(
+      (item) => item[idName] !== recordId
+    );
+    setContentData(newContentData);
 
-    Modal.confirm({
-      title: (
-        <span
-          style={{
-            fontFamily: 'PingFang SC, sans-serif',
-            fontWeight: 500,
-            fontSize: 16,
-            height: 24,
-            display: 'inline-block'
-          }}
-        >
-          确认删除
-        </span>
-      ),
-      content: (
-        <div
-          style={{
-            fontFamily: 'PingFang SC, sans-serif',
-            fontWeight: 400,
-            fontSize: 14,
-            marginTop: '10px',
-            color: '#1D2129',
-            height: 22,
-            display: 'inline-block',
-            marginLeft: '28px' // 左移一点
-          }}
-        >
-          退出后，当前修改不会保存
-        </div>
-      ),
-      okText: '确定',
-      cancelText: '取消',
-      okButtonProps: {
-        type: 'primary',
-        style: { backgroundColor: '#1677ff', borderColor: '#1677ff' }
-      },
-      cancelButtonProps: {
-        type: 'outline',
-        style: { color: '#1677ff', borderColor: '#1677ff' }
-      },
-      style: {
-        textAlign: 'right'
-      },
-      onOk: () => {
-        const newContentData = contentData.filter(
-          (item) => item[idName] !== recordId
-        );
-        setContentData(newContentData);
+    // 将删除的数据ID添加到数组中
+    setDeletedRows((prev) => [...prev, recordId]);
 
-        // 将删除的数据ID添加到数组中
-        setDeletedRows((prev) => [...prev, recordId]);
-
-        Message.success(`数据已删除`);
-        console.log('已删除的数据:', [...deletedRows, recordId]);
-      }
-    });
+    Message.success(`数据已删除`);
+    console.log('已删除的数据:', [...deletedRows, recordId]);
   };
 
   // 处理编辑数据变化
@@ -629,17 +576,17 @@ const DatasetDetail: React.FC = () => {
     const submitData: any[] = [];
 
     // 处理修改的数据
+    console.log(1111, changedRows);
     changedRows.forEach((recordId) => {
       const modifiedRow = contentData.find((item) => {
-        return item[idName] === recordId;
+        return item[idName] === Number(recordId);
       });
-
       if (modifiedRow) {
         // 找到对应的备份数据
         const backupRow = contentDatabackup.find((item) => {
           return item[idName] === recordId;
         });
-
+        console.log(111, modifiedRow, 222, backupRow);
         // 如果找到备份数据，比较是否有实际变化
         if (backupRow) {
           if (!isDataEqual(modifiedRow, backupRow)) {

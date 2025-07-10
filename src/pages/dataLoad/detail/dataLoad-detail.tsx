@@ -127,8 +127,8 @@ const DataLoadDetail = () => {
       setDetailListLoading(false);
     }
   };
-  const judgmentTask = () => {
-    getDetailList();
+  const judgmentTask = async () => {
+    await getDetailList();
     const boo = detailList?.findIndex((item) => item.status == 'running');
     setRunningFlag(boo == -1 ? false : true);
   };
@@ -153,7 +153,6 @@ const DataLoadDetail = () => {
       console.log(res);
       if (res.code == '' && res.status == '200') {
         Message.success('新建运行成功');
-        getDetailList();
         judgmentTask();
       } else {
         Message.error(res.message);
@@ -220,7 +219,6 @@ const DataLoadDetail = () => {
               cursor: runningFlag ? '' : 'pointer'
             }}
             onClick={() => {
-              console.log(listDetail);
               setEditVisible(true);
             }}
           >

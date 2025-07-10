@@ -5,6 +5,7 @@ import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
 import { getLoadRecord } from '@/api/loadApi';
+import { RunState, RunStateType } from '../list/list';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -20,6 +21,7 @@ const AccessDetail = () => {
   };
   // 获取上面的详情
   const getDetail = async () => {
+    console.log(recordsId);
     try {
       const res = await getLoadRecord(recordsId);
       setArressDetail(res.data);
@@ -79,12 +81,25 @@ const AccessDetail = () => {
               style={{
                 width: '7px',
                 height: '7px',
-                // background:arressDetail.status === '成功' ? '#52C41A' : '#F5222D',
+                background:
+                  arressDetail.status == RunState.STOPPED
+                    ? RunStateType[RunState.STOPPED].color
+                    : arressDetail.status == RunState.FAILED
+                      ? RunStateType[RunState.FAILED].color
+                      : arressDetail.status == RunState.RUNNING
+                        ? RunStateType[RunState.RUNNING].color
+                        : RunStateType[RunState.SUCCEED].color,
                 borderRadius: '50%'
               }}
             ></div>
             <div style={{ marginLeft: '5px', fontSize: '14px' }}>
-              {arressDetail.status}
+              {arressDetail.status == RunState.STOPPED
+                ? RunStateType[RunState.STOPPED].text
+                : arressDetail.status == RunState.RUNNING
+                  ? RunStateType[RunState.RUNNING].text
+                  : arressDetail.status == RunState.SUCCEED
+                    ? RunStateType[RunState.SUCCEED].text
+                    : RunStateType[RunState.FAILED].text}
             </div>
           </div>
         </div>

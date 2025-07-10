@@ -92,24 +92,6 @@ const Edit = (props) => {
     }
     setLoadVal(val);
   };
-  const treeData = [
-    {
-      title: '酒店数据目录',
-      value: 'hotel',
-      children: [
-        { title: '北京市豪华酒店', value: '北京市豪华酒店' },
-        { title: '上海市豪华酒店', value: '上海市豪华酒店' }
-      ]
-    },
-    {
-      title: '餐厅数据',
-      value: 'restaurant',
-      children: [
-        { title: '广州餐厅', value: '广州餐厅' },
-        { title: '深圳餐厅', value: '深圳餐厅' }
-      ]
-    }
-  ];
   // 点击取消按钮的逻辑
   const cancelHan = () => {
     // 点击取消隐藏弹框并且重置表单数据
@@ -290,7 +272,6 @@ const Edit = (props) => {
             dropdownMenuClassName="cascader-dropdown"
             onChange={(value) => {
               setInitialPath(value);
-              console.log(value);
               form.setFieldsValue({ dest_path: value });
             }}
           />
