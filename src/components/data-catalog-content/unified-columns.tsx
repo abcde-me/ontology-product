@@ -6,7 +6,7 @@ import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
-import {FileType} from '@/utils/type';
+import { FileType } from '@/utils/type';
 import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
@@ -230,7 +230,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {}, // 添加刷新数据的回调函数
+  refreshData = () => { }, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -519,21 +519,30 @@ const handleDelete = (
           });
           if (res.code == 0) {
             Message.success('删除成功');
-            refreshData();
-            handAllReset();
-            // resetPage();
+            const event = new CustomEvent('resetPageToFirst', {
+              detail: { tableType }
+            });
+            window.dispatchEvent(event);
+            setTimeout(() => {
+              handAllReset();
+              refreshData();
+            }, 200);
           } else {
             Message.error('删除失败，请稍后重试');
             return;
           }
         } else {
-          // handAllReset();
           const res = await deleteSourceFile(data.id);
           if (res.code == 0) {
             Message.success('删除成功');
-            refreshData();
-            handAllReset();
-            // resetPage();
+            const event = new CustomEvent('resetPageToFirst', {
+              detail: { tableType }
+            });
+            window.dispatchEvent(event);
+            setTimeout(() => {
+              handAllReset();
+              refreshData();
+            }, 200);
           } else {
             Message.error('删除失败，请稍后重试');
             return;
