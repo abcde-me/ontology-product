@@ -24,7 +24,7 @@ export function parseCron(cron) {
     const arr = date && date.split(',');
     let result = '';
     for (let i = 0; i < arr.length; i++) {
-      result += `  ${arr[i]}号 ${arr[i] >= 30 ? '(无' + arr[i] + '号安最后一天算)' : ''}`;
+      result += `  ${arr[i]}号 ${arr[i] >= 30 ? '(无' + arr[i] + '号则不执行)' : ''}`;
       if (i < arr.length - 1) result;
     }
     return `每月${result}   ${hour}:${minute}运行`;
