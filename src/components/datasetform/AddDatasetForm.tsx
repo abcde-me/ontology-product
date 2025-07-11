@@ -27,6 +27,7 @@ import {
   getTagList
 } from '@/api/datasetManagement';
 import { render } from '@headlessui/react/dist/utils/render';
+import { labelRect } from 'mermaid/dist/rendering-util/rendering-elements/shapes/labelRect';
 const { Text } = Typography;
 
 interface Dataset {
@@ -65,38 +66,40 @@ const FormItem = Form.Item;
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
   return dataSourceData.map((catalog) => ({
-    label: (
-      <Tooltip content={catalog.name}>
-        <div
-          style={{
-            width: '200px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          {catalog.name}
-        </div>
-      </Tooltip>
-    ),
+    // label: (
+    //   <Tooltip content={catalog.name}>
+    //     <div
+    //       style={{
+    //         width: '200px',
+    //         whiteSpace: 'nowrap',
+    //         overflow: 'hidden',
+    //         textOverflow: 'ellipsis'
+    //       }}
+    //     >
+    //       {catalog.name}
+    //     </div>
+    //   </Tooltip>
+    // ),
+    label: catalog.name,
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            label: (
-              <Tooltip content={volume.name}>
-                <div
-                  style={{
-                    width: '200px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}
-                >
-                  {volume.name}
-                </div>
-              </Tooltip>
-            ),
+            // label: (
+            //   <Tooltip content={volume.name}>
+            //     <div
+            //       style={{
+            //         width: '200px',
+            //         whiteSpace: 'nowrap',
+            //         overflow: 'hidden',
+            //         textOverflow: 'ellipsis'
+            //       }}
+            //     >
+            //       {volume.name}
+            //     </div>
+            //   </Tooltip>
+            // ),
+            label: volume.name,
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -318,14 +321,12 @@ const DatasetForm = React.forwardRef<
         const selectedItem = value[1]?.[0];
         const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
         console.log('二级目录路径:', path);
+        if (selectedItem == undefined) {
+          return;
+        }
         getVolumePreviewData(path);
       } else if (Array.isArray(value) && value.length === 2) {
-        // 一级目录选择：value = [catalog.base_dir, catalog.name]
-        const catalogpath = value[0];
-        const catalogId = value[1];
-        const path = `${catalogpath}dst/${catalogId}/volume`;
-        console.log('一级目录路径:', path);
-        getVolumePreviewData(path);
+        return;
       }
     }
   };
@@ -469,7 +470,6 @@ const DatasetForm = React.forwardRef<
                     const allTags = form.getFieldValue('tags') || [];
                     const remainingTags = allTags.slice(10);
                     const remainingLabels = remainingTags.join(', ');
-
                     return (
                       <Tooltip content={`剩余标签: ${remainingLabels}`}>
                         <span>+{invisibleTagCount}</span>
@@ -538,6 +538,14 @@ const DatasetForm = React.forwardRef<
                   style={{ marginLeft: 10, marginRight: 20 }}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"
+                  dropdownMenuColumnStyle={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '400px',
+                    display: 'inline-block',
+                    verticalAlign: 'middle'
+                  }}
                 />
               </FormItem>
               <div
