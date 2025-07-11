@@ -1,5 +1,11 @@
 import { getLoadRecordLists } from '@/api/loadApi';
-import { Input, Pagination, Table, Tooltip } from '@arco-design/web-react';
+import {
+  Input,
+  Pagination,
+  Popover,
+  Table,
+  Tooltip
+} from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
@@ -30,7 +36,11 @@ const AccessTable = (props) => {
       width: 400,
       ellipsis: true,
       render: (_, item) => {
-        return <Tooltip content={item.file_name}>{item.file_name}</Tooltip>;
+        return (
+          <Popover position="tl" content={item.file_name}>
+            {item.file_name}
+          </Popover>
+        );
       }
     },
     {

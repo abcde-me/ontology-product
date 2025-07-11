@@ -5,6 +5,7 @@ import {
   Modal,
   Pagination,
   Popconfirm,
+  Popover,
   Table,
   Tooltip
 } from '@arco-design/web-react';
@@ -194,9 +195,9 @@ export default function DataLoad() {
             onClick={() => gotoConnector(item.connector_name)}
             className="jump-a"
           >
-            <Tooltip content={item.connector_name} position="tl">
+            <Popover position="tl" content={item.connector_name}>
               {item.connector_name}
-            </Tooltip>
+            </Popover>
           </a>
         );
       },
@@ -216,17 +217,23 @@ export default function DataLoad() {
               );
             }}
           >
-            <Tooltip content={item.data_path_name} position="tl">
+            <Popover position="tl" content={item.data_path_name}>
               {item.data_path_name}
-            </Tooltip>
+            </Popover>
           </span>
         );
       }
     },
     {
       title: '创建人',
-      dataIndex: 'createor',
-      width: 130
+      width: 130,
+      render: (_, item) => {
+        return (
+          <Popover position="tl" content={item.createor}>
+            {item.createor}
+          </Popover>
+        );
+      }
     },
     {
       title: '创建时间',
