@@ -65,6 +65,9 @@
 .value {
   flex: 1;
   margin-left: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-disconnected {

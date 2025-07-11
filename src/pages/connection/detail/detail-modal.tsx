@@ -1,4 +1,4 @@
-import { Message, Modal } from '@arco-design/web-react';
+import { Message, Modal, Tooltip } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import '../index.css';
 import { IconCopy } from '@arco-design/web-react/icon';
@@ -42,7 +42,11 @@ const ModalDetail = (props) => {
               </h3>
               <div className="info-item">
                 <span className="label">连接器名称:</span>
-                <span className="value">{DetailData?.name}</span>
+                <span className="value">
+                  <Tooltip content={DetailData?.name} position="tl">
+                    {DetailData?.name}
+                  </Tooltip>
+                </span>
               </div>
               <div className="info-item">
                 <span className="label">状态:</span>

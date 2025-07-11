@@ -119,7 +119,6 @@ const generateArcoColumns = (
       }
     }
   }));
-  console.log(cols);
   // 只有在编辑状态下才显示操作列
   if (updateStatus) {
     cols.push({
@@ -208,7 +207,7 @@ const formatDate = (dateString: string) => {
 };
 
 // 版本历史表格列定义
-const versionColumns = [
+const versionColumns: any[] = [
   {
     title: '版本号',
     dataIndex: 'version_id',
@@ -242,6 +241,13 @@ const versionColumns = [
     title: '创建时间',
     dataIndex: 'created_at',
     width: 226,
+    sorter: (a: any, b: any) => {
+      const timeA = new Date(a.created_at).getTime();
+      const timeB = new Date(b.created_at).getTime();
+      return timeA - timeB;
+    },
+    sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+    showSorterTooltip: true,
     render: (time: string) => formatDate(time)
   },
   {
@@ -365,6 +371,7 @@ const DatasetDetail: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState('content'); //当前选中的tab
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
+
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
@@ -408,8 +415,6 @@ const DatasetDetail: React.FC = () => {
 
   // 处理编辑提交
   const handleEditSubmit = (formData: any) => {
-    console.log('编辑数据集:', formData);
-
     if (!datasetDetail) return;
 
     // 只传递需要的字段
@@ -422,7 +427,6 @@ const DatasetDetail: React.FC = () => {
 
     updateDataset(updateData)
       .then((res) => {
-        console.log(res);
         if (!res.code) {
           Message.success('数据集更新成功');
           setEditModalVisible(false);
@@ -447,8 +451,6 @@ const DatasetDetail: React.FC = () => {
   const handleEditContent = (record: any) => {
     if (!updateStatus) return; // 非编辑状态下不允许编辑
 
-    console.log('编辑内容:', record);
-
     // 如果当前已经在编辑状态，且点击的不是同一行，则不处理（按钮已禁用）
     if (editingRowKey !== null && editingRowKey !== record) {
       return;
@@ -461,7 +463,6 @@ const DatasetDetail: React.FC = () => {
   // 开始编辑指定行
   const startEditRow = (recordId: any) => {
     setEditingRowKey(recordId);
-    console.log(contentData);
     // 初始化编辑数据
     const currentRow = contentData.find(
       (item: any) => item[idName] === recordId
@@ -473,26 +474,30 @@ const DatasetDetail: React.FC = () => {
     Message.info(`编辑数据`);
   };
 
-  // 删除
-  const handleContinue = (recordId: string) => {
-    if (!updateStatus) return; // 非编辑状态下不允许删除
+  // 删除 - 使用 useCallback 避免闭包问题
+  const handleContinue = React.useCallback(
+    (recordId: string) => {
+      if (!updateStatus) return; // 非编辑状态下不允许删除
 
-    // 如果有行正在编辑中，不允许删除
-    if (editingRowKey !== null) {
-      Message.warning('请先完成当前编辑');
-      return;
-    }
-    const newContentData = contentData.filter(
-      (item) => item[idName] !== recordId
-    );
-    setContentData(newContentData);
+      // 如果有行正在编辑中，不允许删除
+      if (editingRowKey !== null) {
+        Message.warning('请先完成当前编辑');
+        return;
+      }
 
-    // 将删除的数据ID添加到数组中
-    setDeletedRows((prev) => [...prev, recordId]);
+      // 使用函数式更新避免闭包问题
+      setContentData((currentData) => {
+        const newContentData = currentData.filter(
+          (item) => item[idName] !== recordId
+        );
+        return newContentData;
+      });
 
-    Message.success(`数据已删除`);
-    console.log('已删除的数据:', [...deletedRows, recordId]);
-  };
+      setDeletedRows((prev) => [...prev, recordId]);
+      Message.success(`数据已删除`);
+    },
+    [updateStatus, editingRowKey, idName]
+  );
 
   // 处理编辑数据变化
   const handleEditDataChange = (field: string, value: any) => {
@@ -520,17 +525,9 @@ const DatasetDetail: React.FC = () => {
 
     // 记录修改的数据
     const currentRecordId = editingRowKey!.toString();
-    console.log(
-      '正在记录修改的数据 ID:',
-      currentRecordId,
-      '类型:',
-      typeof currentRecordId
-    );
-    console.log('当前 changedRows:', changedRows);
 
     if (!changedRows.includes(currentRecordId)) {
       const newChangedRows = [...changedRows, currentRecordId];
-      console.log('更新 changedRows 为:', newChangedRows);
       setChangedRows(newChangedRows);
     }
 
@@ -563,7 +560,6 @@ const DatasetDetail: React.FC = () => {
     );
 
     return fieldsToCompare.every((field) => {
-      console.log(field, updateData[field], backupData[field]);
       return updateData[field] === backupData[field];
     });
   };
@@ -576,7 +572,6 @@ const DatasetDetail: React.FC = () => {
     const submitData: any[] = [];
 
     // 处理修改的数据
-    console.log(1111, changedRows);
     changedRows.forEach((recordId) => {
       const modifiedRow = contentData.find((item) => {
         return item[idName] === Number(recordId);
@@ -586,7 +581,6 @@ const DatasetDetail: React.FC = () => {
         const backupRow = contentDatabackup.find((item) => {
           return item[idName] === recordId;
         });
-        console.log(111, modifiedRow, 222, backupRow);
         // 如果找到备份数据，比较是否有实际变化
         if (backupRow) {
           if (!isDataEqual(modifiedRow, backupRow)) {
@@ -609,11 +603,9 @@ const DatasetDetail: React.FC = () => {
 
     // 处理删除的数据
     deletedRows.forEach((recordId) => {
-      console.log('处理删除的记录 ID:', recordId, '类型:', typeof recordId);
       const deletedRow = contentDatabackup.find(
         (item) => item[idName] === recordId
       );
-      console.log('找到的删除行:', deletedRow);
       if (deletedRow) {
         submitData.push({
           change_type: 2, // 删除
@@ -622,34 +614,34 @@ const DatasetDetail: React.FC = () => {
       }
     });
 
-    console.log('最终提交数据:', submitData);
-
     const params = {
       id: datasetDetail.id,
       version_id: datasetDetail.latest_version,
       datas: convertKeyType(submitData, 'id', 'number')
     };
-    console.log('提交数据', params);
     if (params.datas.length === 0) {
       Message.warning('没有需要修改的数据');
       return;
     }
     editDatasetVersion(params)
       .then((res) => {
-        Message.success('数据修改成功');
-        // 清空修改记录
-        setChangedRows([]);
-        setDeletedRows([]);
-        setEditingRowKey(null);
-        setEditingData({});
-        setUpdateStatus(false); // 退出编辑状态
-        // 重新加载数据 - 刷新内容数据
-        fetchDatasetContents();
-        fetchDatasetDetail();
+        if (res.status === 200) {
+          Message.success('数据修改成功');
+          // 清空修改记录
+          setChangedRows([]);
+          setDeletedRows([]);
+          setEditingRowKey(null);
+          setEditingData({});
+          setUpdateStatus(false); // 退出编辑状态
+          // 重新加载数据 - 刷新内容数据
+          fetchDatasetContents();
+          fetchDatasetDetail();
+        } else {
+          Message.error(res.msg || '数据修改失败');
+        }
       })
       .catch((err) => {
-        console.error('数据修改失败:', err);
-        Message.error('数据修改失败');
+        Message.error('编辑失败，请稍后重试');
       });
   };
 
@@ -661,7 +653,6 @@ const DatasetDetail: React.FC = () => {
     if (id) {
       getDatasetDetailPage({ id: id })
         .then((res) => {
-          console.log(res);
           setDatasetDetail(res.data);
         })
         .catch((err) => {
@@ -670,7 +661,6 @@ const DatasetDetail: React.FC = () => {
         });
 
       getDatasetVersionList({ id: id }).then((res) => {
-        console.log('历史数据', res);
         setVersionHistory(res.data);
       });
     }
@@ -694,7 +684,6 @@ const DatasetDetail: React.FC = () => {
 
   // 处理每页条数变化
   const handlePageSizeChange = (newPageSize: number) => {
-    console.log('每页条数变更:', newPageSize);
     setPageSize(newPageSize);
     // 改变每页条数时重置到第一页
     setCurrentPage(1);
@@ -714,7 +703,6 @@ const DatasetDetail: React.FC = () => {
 
     return getDatasetContents(params)
       .then((res) => {
-        console.log('获取数据集内容响应:', res.data);
         if (res.data) {
           setContentData(res.data.list || []);
           setContentColumnslist(res.data.field_names || []);
@@ -751,6 +739,11 @@ const DatasetDetail: React.FC = () => {
 
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
+    // 如果处于编辑状态，不要重新获取数据（避免覆盖本地修改）
+    if (updateStatus) {
+      return;
+    }
+
     // 查询数据集数据内容
     fetchDatasetContents();
     // 测试数据
@@ -759,14 +752,19 @@ const DatasetDetail: React.FC = () => {
     // setIdName(csidName);
     // setTotal(cstotal);
     // setContentDatabackup(convertKeyType(cscontentData, csidName, 'string'));
-  }, [actualSearchValue, currentPage, pageSize, datasetDetail, id]);
+  }, [
+    actualSearchValue,
+    currentPage,
+    pageSize,
+    datasetDetail,
+    id,
+    updateStatus
+  ]);
 
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
     datasetVersionRebuild({ id: id, version_id: datasetDetail.latest_version })
-      .then((res) => {
-        console.log('版本重新生成', res);
-      })
+      .then((res) => {})
       .catch((err) => {
         console.error('版本重新生成失败:', err);
       });
@@ -1014,7 +1012,6 @@ const DatasetDetail: React.FC = () => {
           className="custom-tabs"
           activeTab={activeTab}
           onChange={(e) => {
-            console.log(e);
             setActiveTab(e);
             // setCurrentPage(1);
           }}
@@ -1151,7 +1148,6 @@ const DatasetDetail: React.FC = () => {
                     pageSize={pageSize}
                     total={total}
                     onChange={(page) => {
-                      console.log('页码变更:', page);
                       setCurrentPage(page);
                     }}
                     onPageSizeChange={handlePageSizeChange}

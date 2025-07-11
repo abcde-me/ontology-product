@@ -5,7 +5,8 @@ import {
   Modal,
   Pagination,
   Popconfirm,
-  Table
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -78,9 +79,13 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
-      dataIndex: 'name',
       width: 300,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, text) => (
+        <Tooltip content={text.name} position="tl">
+          {text.name}
+        </Tooltip>
+      )
     },
     {
       title: '载入形式',
@@ -189,10 +194,13 @@ export default function DataLoad() {
             onClick={() => gotoConnector(item.connector_name)}
             className="jump-a"
           >
-            {item.connector_name}
+            <Tooltip content={item.connector_name} position="tl">
+              {item.connector_name}
+            </Tooltip>
           </a>
         );
-      }
+      },
+      ellipsis: true
     },
     {
       title: '载入位置',
@@ -201,14 +209,24 @@ export default function DataLoad() {
       render: (_, item) => {
         return (
           <span
+            className="jump-a"
             onClick={() => {
-              history.push('/tenant/compute/modaforge/dataCatalog');
+              history.push(
+                `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
+              );
             }}
           >
-            {item.data_path_name}
+            <Tooltip content={item.data_path_name} position="tl">
+              {item.data_path_name}
+            </Tooltip>
           </span>
         );
       }
+    },
+    {
+      title: '创建人',
+      dataIndex: 'createor',
+      width: 130
     },
     {
       title: '创建时间',
@@ -217,7 +235,7 @@ export default function DataLoad() {
       sorter: (a, b) => {} // 排序
     },
     {
-      title: '更新时间',
+      title: '最后运行时间',
       dataIndex: 'last_run_time',
       width: 240,
       sorter: (a, b) => {} // 排序
@@ -366,7 +384,7 @@ export default function DataLoad() {
   const deleteLoadHan = async (id) => {
     try {
       const res = await delLoad(id);
-      if (res.message == 'ok') {
+      if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
         getdataLoadList();
       } else {

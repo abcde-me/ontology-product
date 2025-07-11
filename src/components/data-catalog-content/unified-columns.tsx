@@ -171,9 +171,9 @@ const WorkflowIdCell = ({ record, showIcon }) => {
   // 添加空值检查
   const extras = record?.extras || {};
   const fileName = extras.file_name || '无文件名';
-  const workflowId = extras.workflow_id || '无ID';
+  const workflowUuid = extras.workflow_uuid || '无ID';
   const handleWorkflowClick = () => {
-    if (extras.workflow_id) {
+    if (extras.workflow_uuid) {
       window.open(
         `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.ds_workflow_uuid}&ds_workflow_id=${extras.workflow_id}`,
         '_blank',
@@ -206,7 +206,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
             (e.target as HTMLAnchorElement).style.textDecoration = 'none';
           }}
         >
-          {workflowId}
+          {workflowUuid}
           {showIcon && (
             <>
               &nbsp;
@@ -434,11 +434,11 @@ export const getUnifiedColumns = (
       },
       {
         title: '生成时间',
-        dataIndex: 'created_at',
+        dataIndex: 'generated_at',
         width: 180,
         sorter: true,
         // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
-        render: (_, record) => formatDateTime(record.created_at)
+        render: (_, record) => formatDateTime(record.generated_at)
       },
       {
         title: '其他信息',
