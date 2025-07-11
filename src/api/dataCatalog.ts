@@ -133,6 +133,11 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
 export async function getTargetFileTypeList() {
   return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
 }
+//查询源数据文件类型列表
+export async function getSourceFileTypeList() {
+  return await UAPI.RES.sourceFileTypeListApi({}).get().inRegion().do();
+}
+
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
   const { file_ids, ...restParams } = params;

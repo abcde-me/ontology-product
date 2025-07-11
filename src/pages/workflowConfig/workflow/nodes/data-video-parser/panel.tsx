@@ -42,7 +42,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
   const [audioModels, setAudioModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
 
-  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+  const { readOnly, inputs, handleFilesChange, handleFieldsChange } = useConfig(
     id,
     data
   );
@@ -77,7 +77,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         layout="vertical"
         onValuesChange={(_, v: any) => {
           console.log('video parser valuechange', _, v);
-          handleFiledsChange(v);
+          handleFieldsChange(v);
         }}
       >
         <FormItem

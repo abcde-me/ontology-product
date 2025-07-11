@@ -26,13 +26,13 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const [ocrModels, setOcrModels] = useState<Record<string, any>[]>([]);
-  const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
+  // const [ocrModels, setOcrModels] = useState<Record<string, any>[]>([]);
+  // const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
   const [textEmbModels, setTextEmbModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
   const textSlice = Form.useWatch('text_slice_rule', form);
 
-  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+  const { readOnly, inputs, handleFilesChange, handleFieldsChange } = useConfig(
     id,
     data
   );
@@ -40,29 +40,29 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   useEffect(() => {
     getModelList().then((res: any) => {
       if (unmountedRef.current) return;
-      const ocrList =
-        res.data.find((d) => d.type === 'text_ocr_model')?.model_data || [];
-      const picList =
-        res.data.find((d) => d.type === 'text_pic_model')?.model_data || [];
+      // const ocrList =
+      //   res.data.find((d) => d.type === 'text_ocr_model')?.model_data || [];
+      // const picList =
+      //   res.data.find((d) => d.type === 'text_pic_model')?.model_data || [];
       const textList =
         res.data.find((d) => d.type === 'text_emb_model')?.model_data || [];
 
-      setOcrModels(ocrList);
-      setPicModels(picList);
+      // setOcrModels(ocrList);
+      // setPicModels(picList);
       setTextEmbModels(textList);
 
-      const defaultOcrId = ocrList[0]?.id || '';
-      const defaultPicId = picList[0]?.id || '';
+      // const defaultOcrId = ocrList[0]?.id || '';
+      // const defaultPicId = picList[0]?.id || '';
       const defaultTextId = textList[0]?.id || '';
 
       const fields = {} as Record<string, any>;
-      if (!inputs.text_ocr_model_id) {
-        fields.text_ocr_model_id = defaultOcrId;
-      }
-      if (!inputs.text_pic_model_id) {
-        fields.text_pic_model_id = defaultPicId;
-      }
-      if (!inputs.text_ocr_model_id) {
+      // if (!inputs.text_ocr_model_id) {
+      //   fields.text_ocr_model_id = defaultOcrId;
+      // }
+      // if (!inputs.text_pic_model_id) {
+      //   fields.text_pic_model_id = defaultPicId;
+      // }
+      if (!inputs.text_emb_model_id) {
         fields.text_emb_model_id = defaultTextId;
       }
       if (Object.keys(fields).length) {
@@ -85,7 +85,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         layout="vertical"
         onValuesChange={(_, v: any) => {
           console.log('text parser valuechange', _, v);
-          handleFiledsChange(v);
+          handleFieldsChange(v);
         }}
       >
         <FormItem

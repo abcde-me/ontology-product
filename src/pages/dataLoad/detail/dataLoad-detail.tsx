@@ -7,6 +7,7 @@ import {
   Message,
   Modal,
   Pagination,
+  Popover,
   Switch
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconPlus } from '@arco-design/web-react/icon';
@@ -116,7 +117,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        record_id: searchValue,
+        execution_id: searchValue,
         ...directoryObj
       });
       setTotal(res.data.total);
@@ -136,7 +137,7 @@ const DataLoadDetail = () => {
   const startAndStoponchange = async (val) => {
     try {
       const res = await startAndStopeLoad({
-        task_id: 116,
+        task_id: Number(loadId),
         cron_enable: val
       });
       console.log(res);
@@ -239,8 +240,20 @@ const DataLoadDetail = () => {
               >
                 载入位置：
               </div>
-              <div style={{ fontSize: '14px' }}>
-                {listDetail && listDetail.data_path_name}
+              <div
+                style={{
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '400px'
+                }}
+              >
+                {listDetail && (
+                  <Popover position="tl" content={listDetail.data_path_name}>
+                    {listDetail.data_path_name}
+                  </Popover>
+                )}
                 {/* {findParent(directoryArr ? directoryArr : [], listDetail && listDetail.data_path_id)} */}
               </div>
             </div>
@@ -322,8 +335,20 @@ const DataLoadDetail = () => {
               >
                 连接器名称：
               </div>
-              <div style={{ fontSize: '14px' }}>
-                {listDetail && listDetail.connector_name}
+              <div
+                style={{
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '400px'
+                }}
+              >
+                {listDetail && (
+                  <Popover position="tl" content={listDetail.data_path_name}>
+                    {listDetail.connector_name}
+                  </Popover>
+                )}
               </div>
             </div>
             <div

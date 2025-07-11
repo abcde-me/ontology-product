@@ -65,12 +65,38 @@ const FormItem = Form.Item;
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
   return dataSourceData.map((catalog) => ({
-    label: catalog.name,
+    label: (
+      <Tooltip content={catalog.name}>
+        <div
+          style={{
+            width: '200px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {catalog.name}
+        </div>
+      </Tooltip>
+    ),
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            label: volume.name,
+            label: (
+              <Tooltip content={volume.name}>
+                <div
+                  style={{
+                    width: '200px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {volume.name}
+                </div>
+              </Tooltip>
+            ),
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -79,10 +105,39 @@ function convertToCascaderOptions(dataSourceData) {
   }));
 }
 
+//高亮函数
+function highlight(text, keyword) {
+  if (!keyword) return text;
+  const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span style={{ color: '#007DFA' }}>
+        {text.slice(idx, idx + keyword.length)}
+      </span>
+      {text.slice(idx + keyword.length)}
+    </>
+  );
+}
+
 //连接器列表转换为select选项 函数
 function convertToSelectOptions(connectorList) {
   return connectorList.map((connector) => ({
-    label: connector.name,
+    label: (
+      <Tooltip content={connector.name}>
+        <div
+          style={{
+            width: '100%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {connector.name}
+        </div>
+      </Tooltip>
+    ),
     value: connector.id
   }));
 }
@@ -125,9 +180,6 @@ function transformToSelectOptions(fileList) {
     data: file
   }));
 }
-
-// 数据预览表格列定义
-const cspreviewColumns = ['id', 'instruction', 'content', 'response'];
 
 function formatTableData(columns) {
   return columns.map((col) => ({
@@ -186,11 +238,14 @@ const DatasetForm = React.forwardRef<
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
     []
   );
+  const [inputValue, setInputValue] = useState('');
   // 标签选项
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
-      form.resetFields();
+      // form.resetFields();
+      form.setFieldValue('name', '');
+      // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
       setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
@@ -253,15 +308,25 @@ const DatasetForm = React.forwardRef<
     value: string | (string | string[])[]
   ) => {
     if (dataSource === 'volume') {
-      // value 是一个数组，格式为 [catalog_id, "volume_id" 或 "db_id"]
-      const catalogpath = value[0][0];
-      const catalogId = value[0][1];
-      const selectedItem = value[1]?.[0];
-      console.log(1111111, value);
-      // 构建路径：catalog_id/type_itemId
-      const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
-      console.log('选择的数据目录卷路径:', path);
-      if (selectedItem) getVolumePreviewData(path);
+      console.log('选择的值:', value);
+
+      // 判断是一级目录还是二级目录
+      if (Array.isArray(value) && Array.isArray(value[0])) {
+        // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
+        const catalogpath = value[0][0];
+        const catalogId = value[0][1];
+        const selectedItem = value[1]?.[0];
+        const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
+        console.log('二级目录路径:', path);
+        getVolumePreviewData(path);
+      } else if (Array.isArray(value) && value.length === 2) {
+        // 一级目录选择：value = [catalog.base_dir, catalog.name]
+        const catalogpath = value[0];
+        const catalogId = value[1];
+        const path = `${catalogpath}dst/${catalogId}/volume`;
+        console.log('一级目录路径:', path);
+        getVolumePreviewData(path);
+      }
     }
   };
 
@@ -307,11 +372,10 @@ const DatasetForm = React.forwardRef<
   const getVolumePreviewData = (volumeId: string) => {
     // 这里应该调用真实的API
     getCatalogPreview({ path: volumeId }).then((res) => {
+      console.log(11111, res);
       if (res.status !== 200) {
         Message.error(res.message);
-        // TODO：ts错误
-        // @ts-expect-error
-        setPreviewData(null);
+        setPreviewData([]);
         setPreviewColumns([]);
         return;
       }
@@ -474,7 +538,6 @@ const DatasetForm = React.forwardRef<
                   style={{ marginLeft: 10, marginRight: 20 }}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"
-                  showSearch
                 />
               </FormItem>
               <div
@@ -628,6 +691,13 @@ const DatasetForm = React.forwardRef<
                           );
                         }
                       }}
+                      filterOption={(inputValue, option) => {
+                        const newvalue = option.props.value.split('/').pop();
+                        return newvalue.includes(inputValue);
+                      }}
+                      onSearch={(value) => {
+                        setInputValue(value);
+                      }}
                     >
                       {connectorFileInformation.map((item, index) => (
                         <Option key={index} value={item.path + '/' + item.name}>
@@ -640,7 +710,7 @@ const DatasetForm = React.forwardRef<
                               margin: '10px'
                             }}
                           >
-                            <div>{item.name}</div>
+                            <div>{highlight(item.name, inputValue)}</div>
                             <div style={{ color: '#86909c' }}>
                               修改时间：{formatDateTime(item.last_modified)}
                             </div>
@@ -661,9 +731,9 @@ const DatasetForm = React.forwardRef<
                 justifyContent: 'flex-end',
                 alignItems: 'center',
                 gap: '12px',
-                marginTop: '24px',
-                paddingTop: '20px',
-                borderTop: '1px solid #f0f0f0'
+                marginTop: '24px'
+                // paddingTop: '20px',
+                // borderTop: '1px solid #f0f0f0'
               }}
             >
               <Button onClick={onCancel}>取消</Button>

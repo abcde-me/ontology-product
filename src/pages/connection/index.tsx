@@ -6,7 +6,8 @@ import {
   Table,
   Button,
   Modal,
-  Form
+  Form,
+  Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
@@ -130,7 +131,14 @@ export default function Connection() {
       title: '连接器名称',
       dataIndex: 'name',
       width: 230,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, item) => {
+        return (
+          <Tooltip content={item.name} position="tl">
+            {item.name}
+          </Tooltip>
+        );
+      }
     },
     {
       title: '状态',
@@ -184,9 +192,15 @@ export default function Connection() {
     },
     {
       title: '创建人',
-      dataIndex: 'creator',
       width: 120,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, item) => {
+        return (
+          <Tooltip content={item.creator} position="tl">
+            {item.creator}
+          </Tooltip>
+        );
+      }
     },
     {
       title: '创建时间',

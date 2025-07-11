@@ -1,4 +1,4 @@
-import { Message, Modal, Table } from '@arco-design/web-react';
+import { Message, Modal, Popover, Table } from '@arco-design/web-react';
 import { RunState, RunStateType } from '../list/list';
 import React, { useEffect, useState } from 'react';
 import './index.css';
@@ -21,9 +21,18 @@ const TableDetail = (props) => {
   const columns: any = [
     {
       title: '运行ID',
-      dataIndex: 'execution_name',
-      width: 240,
-      ellipsis: true
+      dataIndex: 'execution_id',
+      width: 260,
+      ellipsis: true,
+      render: (text: string) => {
+        return (
+          <div>
+            <Popover position="tl" content={text}>
+              {text}
+            </Popover>
+          </div>
+        );
+      }
     },
     {
       title: '状态',

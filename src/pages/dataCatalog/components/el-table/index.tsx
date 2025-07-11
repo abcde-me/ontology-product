@@ -10,17 +10,13 @@ import {
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
 import './index.css';
-import {
-  IconDelete,
-  IconDownload,
-  IconCloseCircle,
-  IconSearch
-} from '@arco-design/web-react/icon';
+import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
+import styles from '../../modal.module.css';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -353,7 +349,8 @@ export default function Eltable() {
               }
             }
           }
-        }
+        },
+        className: styles['modalWrapper']
       });
     } catch {
       Message.error('删除失败，请稍后重试');
@@ -562,7 +559,7 @@ export default function Eltable() {
             <DatePicker.RangePicker
               style={{ width: 260 }}
               showTime={{
-                defaultValue: ['00:00:00', '04:05:05'],
+                defaultValue: ['00:00:00', '23:59:59'],
                 format: 'HH:mm:ss'
               }}
               format="YYYY-MM-DD HH:mm:ss"

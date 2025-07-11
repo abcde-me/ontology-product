@@ -41,3 +41,17 @@ export function parseCron(cron) {
     return `每月最后一天, ${hour}:${minute}运行`;
   }
 }
+export const formatRunTime = (totalSeconds: number) => {
+  if (totalSeconds == 0) return '0s'; // 处理 0 秒的情况
+  if (totalSeconds == -1) return ''; // 处理 0 秒的情况
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (seconds > 0 || parts.length == 0) parts.push(`${seconds}s`);
+  return parts.join(' ');
+};

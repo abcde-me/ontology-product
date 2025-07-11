@@ -42,7 +42,7 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
     [setInputs]
   );
 
-  const handleFiledsChange = useCallback(
+  const handleFieldsChange = useCallback(
     (fields: VideoParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1;
@@ -62,11 +62,24 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
     [setInputs]
   );
 
+  const handleModelChange = useCallback(
+    (fields: Partial<VideoParserNodeType>) => {
+      const newInputs = produce(inputRef.current, (draft) => {
+        if (fields.audio_model_id) {
+          draft.audio_model_id = fields.audio_model_id;
+        }
+      });
+      setInputs(newInputs);
+    },
+    [setInputs]
+  );
+
   return {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFiledsChange
+    handleFieldsChange,
+    handleModelChange
   };
 };
 

@@ -42,7 +42,7 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
     [setInputs]
   );
 
-  const handleFiledsChange = useCallback(
+  const handleFieldsChange = useCallback(
     (fields: ImageParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.pic_model_id = fields.pic_model_id;
@@ -53,11 +53,27 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
     [setInputs]
   );
 
+  const handleModelChange = useCallback(
+    (fields: Partial<ImageParserNodeType>) => {
+      const newInputs = produce(inputRef.current, (draft) => {
+        if (fields.pic_model_id) {
+          draft.pic_model_id = fields.pic_model_id;
+        }
+        if (fields.pic_emb_model_id) {
+          draft.pic_emb_model_id = fields.pic_emb_model_id;
+        }
+      });
+      setInputs(newInputs);
+    },
+    [setInputs]
+  );
+
   return {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFiledsChange
+    handleFieldsChange,
+    handleModelChange
   };
 };
 

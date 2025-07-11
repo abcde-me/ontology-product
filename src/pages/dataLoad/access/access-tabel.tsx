@@ -1,5 +1,11 @@
 import { getLoadRecordLists } from '@/api/loadApi';
-import { Input, Pagination, Table, Tooltip } from '@arco-design/web-react';
+import {
+  Input,
+  Pagination,
+  Popover,
+  Table,
+  Tooltip
+} from '@arco-design/web-react';
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
@@ -27,9 +33,15 @@ const AccessTable = (props) => {
   const columns = [
     {
       title: '文件名',
-      dataIndex: 'file_name',
       width: 400,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, item) => {
+        return (
+          <Popover position="tl" content={item.file_name}>
+            {item.file_name}
+          </Popover>
+        );
+      }
     },
     {
       title: '状态',

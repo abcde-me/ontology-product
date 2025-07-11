@@ -4,9 +4,15 @@
 .arco-timepicker-list {
   width: 50% !important;
 }
+/* .jump-a {
+  max-width: 160px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+} */
 .jump-a:hover {
-  color: rgb(0, 125, 250) !important;
-  cursor: pointer !important;
+  color: rgb(0, 125, 250);
+  cursor: pointer;
 }
 .cascader-dropdown .arco-cascader-list-item-label,
 .arco-cascader-list-search-item-label {
@@ -16,6 +22,11 @@
 }
 .cascader-dropdown .arco-cascader-list-wrapper {
   width: 212px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.omit {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

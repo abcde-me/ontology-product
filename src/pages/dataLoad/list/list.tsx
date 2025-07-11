@@ -5,7 +5,9 @@ import {
   Modal,
   Pagination,
   Popconfirm,
-  Table
+  Popover,
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -78,9 +80,13 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
-      dataIndex: 'name',
       width: 300,
-      ellipsis: true
+      ellipsis: true,
+      render: (_, text) => (
+        <Tooltip content={text.name} position="tl">
+          {text.name}
+        </Tooltip>
+      )
     },
     {
       title: '载入形式',
@@ -189,10 +195,13 @@ export default function DataLoad() {
             onClick={() => gotoConnector(item.connector_name)}
             className="jump-a"
           >
-            {item.connector_name}
+            <Popover position="tl" content={item.connector_name}>
+              {item.connector_name}
+            </Popover>
           </a>
         );
-      }
+      },
+      ellipsis: true
     },
     {
       title: '载入位置',
@@ -208,15 +217,23 @@ export default function DataLoad() {
               );
             }}
           >
-            {item.data_path_name}
+            <Popover position="tl" content={item.data_path_name}>
+              {item.data_path_name}
+            </Popover>
           </span>
         );
       }
     },
     {
       title: '创建人',
-      dataIndex: 'createor',
-      width: 130
+      width: 130,
+      render: (_, item) => {
+        return (
+          <Popover position="tl" content={item.createor}>
+            {item.createor}
+          </Popover>
+        );
+      }
     },
     {
       title: '创建时间',
