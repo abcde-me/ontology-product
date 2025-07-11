@@ -4,7 +4,7 @@ import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
-import './index.css';
+import styles from './index.module.css';
 
 const InputSearch = Input.Search;
 
@@ -62,7 +62,7 @@ export default function EditableTree() {
           onSelect={handleSelect}
           renderExtra={renderExtra}
           renderTitle={renderTitle}
-          className="tree-container"
+          className={styles['treeContainer']}
         >
           {generatorTreeNodes(treeData)}
         </Tree>

@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
-import { deleteFileById } from '@/api/dataCatalog';
 import { Message } from '@arco-design/web-react';
-import { IconStar, IconLaunch } from '@arco-design/web-react/icon';
+import { IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
 import PdfIcon from './icon/PDF.svg';
 import TxtIcon from './icon/TXT.svg';
-import { FileType } from '@/utils/type';
 import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
   deleteSourceFile,
   getTargetFileTypeList
 } from '@/api/dataCatalog';
-const { RangePicker } = DatePicker;
+import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
@@ -519,7 +517,8 @@ const handleDelete = (
             return;
           }
         }
-      }
+      },
+      className: styles['modalWrapper']
     });
   } catch {
     Message.error('删除失败，请重试');
