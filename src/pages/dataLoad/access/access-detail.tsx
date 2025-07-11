@@ -6,10 +6,11 @@ import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
 import { getLoadRecord } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
+import { formatRunTime } from '../detail/parseCron';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
-
+function zhuanhuanTime(time: number) {}
 const AccessDetail = () => {
   const recordsId = useParams('execution_id');
   const name = useParams('name');
@@ -152,7 +153,9 @@ const AccessDetail = () => {
                 运行时长：
               </Col>
               <Col span={20} style={{ fontSize: '14px' }}>
-                {arressDetail.enable}
+                {arressDetail.during_time
+                  ? formatRunTime(arressDetail.during_time)
+                  : ''}
               </Col>
             </Row>
           </div>
