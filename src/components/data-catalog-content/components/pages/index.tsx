@@ -16,14 +16,13 @@ const Pages: React.FC<PagesProps> = ({
   onChange,
   onPageSizeChange
 }) => {
-
-
   return (
     <Pagination
       // style={{ marginRight: '-1.5px' }}
       current={current}
       total={total}
       pageSize={pageSize}
+      sizeOptions={[10, 20, 50, 100]}
       sizeCanChange
       showTotal
       showJumper
