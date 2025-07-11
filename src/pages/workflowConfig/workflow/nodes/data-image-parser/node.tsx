@@ -8,31 +8,37 @@ import {
 import { useNodes, useStoreApi, type Node } from 'reactflow';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
+import { useUnmountedRef } from 'ahooks';
+import { getModelList } from '@/api/modelV2';
+import useConfig from './use-config';
 
 const Node: FC<NodeProps<ImageParserNodeType>> = (props) => {
   const { selected_files_num } = props.data;
 
-  // const nodes = useNodes();
-  // const startNode = nodes.find(
-  //   (node: any) => node.data.type === BlockEnum.Start
-  // ) as unknown as Node<StartNodeType>;
-  // const [totalFiles, setTotalFiles] = useState(0);
+  const unmountedRef = useUnmountedRef();
+  const { handleModelChange } = useConfig(props.id, props.data);
 
-  // useEffect(() => {
-  //   const fileConfig = startNode.data.data_category.find(
-  //     (c) => c.id === 2
-  //   )!;
-  //   if (fileConfig.enabled && fileConfig.format.length) {
-  //     const formats = fileConfig.format
-  //       .join('/')
-  //       .split('/')
-  //       .map((f) => f.toLowerCase());
-  //     const sourcePath = startNode.data.data_path_id;
-  //     getLoadTaskFiles({ data_path_id: sourcePath, file_type: formats, page_size: 1, page: 1 }).then((res: any) => {
-  //       setTotalFiles(res.data.total)
-  //     })
-  //   }
-  // }, [startNode.data.data_category, startNode.data.data_path_id])
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
+      const picList =
+        res.data.find((d) => d.type === 'pic_model')?.model_data || [];
+      const picEmbList =
+        res.data.find((d) => d.type === 'pic_emb_model')?.model_data || [];
+
+      const pic_model_id = picList[0]?.id || '';
+      const pic_emb_model_id = picEmbList[0]?.id || '';
+
+      const fields = {} as Record<string, any>;
+      if (!props.data.pic_model_id) {
+        fields.pic_model_id = pic_model_id;
+      }
+      if (!props.data.pic_emb_model_id) {
+        fields.pic_emb_model_id = pic_emb_model_id;
+      }
+      handleModelChange(fields);
+    });
+  }, []);
 
   return (
     <div className={`wk-node-content`}>

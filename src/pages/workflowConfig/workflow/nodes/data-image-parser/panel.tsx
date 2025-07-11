@@ -42,7 +42,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
   const [picEmbModels, setPicEmbModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
 
-  const { readOnly, inputs, handleFilesChange, handleFiledsChange } = useConfig(
+  const { readOnly, inputs, handleFilesChange, handleFieldsChange } = useConfig(
     id,
     data
   );
@@ -63,11 +63,9 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
 
       const fields = {} as Record<string, any>;
       if (!inputs.pic_model_id) {
-        // form.setFieldValue('pic_model_id', defaultPicId);
         fields.pic_model_id = defaultPicId;
       }
       if (!inputs.pic_emb_model_id) {
-        // form.setFieldValue('pic_emb_model_id', defaultPicEmbId);
         fields.pic_emb_model_id = defaultPicEmbId;
       }
       if (Object.keys(fields).length) {
@@ -90,7 +88,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         layout="vertical"
         onValuesChange={(_, v: any) => {
           console.log('img parser valuechange', _, v);
-          handleFiledsChange(v);
+          handleFieldsChange(v);
         }}
       >
         <FormItem

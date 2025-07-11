@@ -41,7 +41,7 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
     },
     [setInputs]
   );
-  const handleFiledsChange = useCallback(
+  const handleFieldsChange = useCallback(
     (fields: TextParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.text_slice_rule = fields.text_slice_rule;
@@ -55,12 +55,26 @@ const useConfig = (id: string, payload: TextParserNodeType) => {
     },
     [setInputs]
   );
+  const handleModelChange = useCallback(
+    (fields: Partial<TextParserNodeType>) => {
+      const newInputs = produce(inputRef.current, (draft) => {
+        // draft.text_ocr_model_id = fields.text_ocr_model_id!;
+        // draft.text_pic_model_id = fields.text_pic_model_id!;
+        if (fields.text_emb_model_id) {
+          draft.text_emb_model_id = fields.text_emb_model_id;
+        }
+      });
+      setInputs(newInputs);
+    },
+    [setInputs]
+  );
 
   return {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFiledsChange
+    handleFieldsChange,
+    handleModelChange
   };
 };
 
