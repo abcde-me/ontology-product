@@ -9,7 +9,14 @@ import {
   type InputVar,
   type NodePanelProps
 } from '@/pages/workflowConfig/workflow/types';
-import { Form, Input, Select, Checkbox, Switch } from '@arco-design/web-react';
+import {
+  Form,
+  Input,
+  Select,
+  Checkbox,
+  Switch,
+  Cascader
+} from '@arco-design/web-react';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, debounce } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
@@ -121,7 +128,12 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     getCatalogList({ root_type: 1 }).then((res) => {
       const dirs: Record<string, any>[] = [];
       res.data.src.forEach((catalog) => {
-        dirs.push(...(catalog.children?.volume || []));
+        dirs.push(
+          ...(catalog.children?.volume || []).map((v) => ({
+            ...v,
+            parent_name: catalog.name
+          }))
+        );
       });
       setSrcDirs(dirs);
     });
@@ -171,10 +183,15 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
           <Select placeholder="请选择源数据目录" onChange={handlePathChange}>
             {srcDirs.map((s) => (
               <Select.Option value={s.id} key={s.id}>
-                {s.name}
+                {`${s.parent_name} / ${s.name}`}
               </Select.Option>
             ))}
           </Select>
+          {/* <Cascader
+            placeholder='请选择源数据目录'
+            options={srcDirs}
+            fieldNames={{label: 'name', value: 'id'}}
+          /> */}
         </FormItem>
         <FormItem
           label="文件类型"

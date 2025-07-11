@@ -189,13 +189,17 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             size="md"
             toolIcon={toolIcon}
           />
-          <div
-            title={data.title}
-            className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary"
-          >
-            <div className="text-[12px]/[18px] font-bold text-[#1E293B]">
+          <div className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary">
+            <EllipsisPopover
+              value={data.title}
+              isEdit={false}
+              preferTypography
+              wrapperClassName="w-full"
+              className="text-[12px]/[18px] font-bold text-[#1E293B]"
+            />
+            {/* <div className="text-[12px]/[18px] font-bold text-[#1E293B]">
               {data.title}
-            </div>
+            </div> */}
             {data.type === BlockEnum.Iteration &&
               (data as IterationNodeType).is_parallel && (
                 <Tooltip
