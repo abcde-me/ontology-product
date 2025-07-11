@@ -42,14 +42,14 @@ const LoadAddModal = (props: propsType) => {
   const [expression, setExpression] = useState({});
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
-    const valid = await SchedulerRunRef.current?.validate();
-    if (!valid) return;
     try {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
       if (loadVal !== 'once') {
+        const valid = await SchedulerRunRef.current?.validate();
+        if (!valid) return;
         const formData = {
           task_name: rest.name,
           connector_id: rest.connector_id,

@@ -21,6 +21,7 @@ import {
   renameCatalog
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
+import styles from '../../modal.module.css';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -325,7 +326,8 @@ export function useEditableTree({ catalogTreeStore }) {
                             '删除失败: ' + (apiError.message || '请稍后重试')
                           );
                         }
-                      }
+                      },
+                      className: styles['modalWrapper']
                     });
                   }}
                   className="hover:text-[rgb(var(--primary-6))]"

@@ -157,6 +157,8 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
           time: '09:00'
         });
       }
+
+      handleValuesChange(null, form.getFieldsValue());
     };
     const [timeFlag, setTimeFlag] = useState(TimeType.SEPCIFICTIME);
     const handleValuesChange = (_, allValues) => {
@@ -178,9 +180,9 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
       }
     }));
 
-    useEffect(() => {
-      handleValuesChange(null, form.getFieldsValue());
-    }, [frequencyData]);
+    // useEffect(() => {
+    //   handleValuesChange(null, form.getFieldsValue());
+    // }, [frequencyData]);
 
     return (
       <Form

@@ -26,3 +26,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.omit {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
