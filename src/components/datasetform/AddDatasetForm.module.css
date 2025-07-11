@@ -68,6 +68,13 @@
   background-color: #fafafa;
 } */
 
+.showData :global(.arco-cascader-list-item-label) {
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* 单元格内容截断显示 */
 .cellContent {
   display: block;

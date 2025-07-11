@@ -546,6 +546,7 @@ const DatasetForm = React.forwardRef<
                     display: 'inline-block',
                     verticalAlign: 'middle'
                   }}
+                  dropdownMenuClassName="showData"
                 />
               </FormItem>
               <div

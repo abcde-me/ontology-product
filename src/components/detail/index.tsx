@@ -579,7 +579,7 @@ const DatasetDetail: React.FC = () => {
       if (modifiedRow) {
         // 找到对应的备份数据
         const backupRow = contentDatabackup.find((item) => {
-          return item[idName] === recordId;
+          return item[idName] == recordId;
         });
         // 如果找到备份数据，比较是否有实际变化
         if (backupRow) {
