@@ -109,7 +109,11 @@ export default function WorkflowTaskDetail() {
   // 初始化当前节点是否是解析节点
   const [isParseNode, setIsParseNode] = useState(true);
   // 初始化数据清洗节点及数据增强节点数据
-  const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({});
+  const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({
+    raw_data_num: 0,
+    processed_data_num: 0,
+    log: ''
+  });
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化分页数据
@@ -427,16 +431,19 @@ export default function WorkflowTaskDetail() {
                       onSendData={handleChildData}
                       pagination={pagination}
                       onSortData={handleChildSortData}
+                      status={item?.status}
                     />
                   ) : item.task_type === NodeType.cleaning ? (
                     <DataCleaningNode
                       dataSource={cleaningAugmentNodeData}
                       loading={loading}
+                      status={item?.status}
                     />
                   ) : (
                     <DataAugmentationNode
                       dataSource={cleaningAugmentNodeData}
                       loading={loading}
+                      status={item?.status}
                     />
                   )}
                 </Typography.Paragraph>
