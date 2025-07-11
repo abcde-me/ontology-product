@@ -52,7 +52,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               traditional_to_simplified: payload?.traditional_to_simplified
                 ? 1
                 : 0,
-              case_transform: payload?.case_transform
+              case_transform: payload?.case_uniformity ? payload?.case_transform : 0
             }
           },
           {

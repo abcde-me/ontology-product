@@ -155,10 +155,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   <Select
                     size="mini"
                     placeholder="请选择"
+                    className={!case_uniformity ? 'arco-select-disabled' : ''}
                     style={{
                       width: '120px',
                       height: '22px',
-                      marginLeft: '8px'
+                      marginLeft: '8px',
+                      pointerEvents: !case_uniformity ? 'none' : 'auto',
+                      cursor: !case_uniformity ? 'not-allowed' : 'auto'
                     }}
                     disabled={!case_uniformity}
                   >
