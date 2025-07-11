@@ -24,7 +24,7 @@ import UnifiedTable, { UnifiedTableRef } from './unified-table';
 import Pages from './components/pages';
 import FormComponent from './components/popups-form';
 import { getUnifiedColumns } from './unified-columns';
-import './index.css';
+import './index.scss';
 
 const { Text } = Typography;
 
@@ -250,7 +250,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
       const params = {
-        full_path: selectedFullPath,  // 使用选中的完整路径
+        full_path: selectedFullPath, // 使用选中的完整路径
         page: currentPage,
         limit: pageSize,
         start_time: startTime || '',
@@ -467,7 +467,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       selectedFullPath,
       undefined,
       handAllReset,
-      resetPage,
+      resetPage
     );
   }, [
     tableType,
@@ -517,7 +517,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedRowKeys,
         selectedRows
       );
-      const currentPageDataIds = tableData.map(item => item.id);
+      const currentPageDataIds = tableData.map((item) => item.id);
       const remainingKeys = crossPageSelectedKeys.filter(
         (key) =>
           !currentPageDataIds.includes(Number(key)) ||
@@ -622,8 +622,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     } else if (sorter && sorter.type && Array.isArray(sorter.type)) {
       newFileTypes = sorter.type;
       // console.log('从sorter.type获取筛选条件:', newFileTypes);
-    }
-    else if (sorter && typeof sorter.file_type === 'string') {
+    } else if (sorter && typeof sorter.file_type === 'string') {
       newFileTypes = [sorter.file_type];
       // console.log('从sorter.file_type字符串获取筛选条件:', newFileTypes);
     } else if (sorter && typeof sorter.type === 'string') {
@@ -650,11 +649,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   // 在数据加载完成后，设置当前页中应该被选中的行
   useEffect(() => {
     if (tableData.length > 0 && crossPageSelectedKeys.length > 0) {
-      const currentPageSelectedKeys = crossPageSelectedKeys.filter(key =>
-        tableData.some(item => item.id === Number(key))
+      const currentPageSelectedKeys = crossPageSelectedKeys.filter((key) =>
+        tableData.some((item) => item.id === Number(key))
       );
       setSelectedRowKeys(currentPageSelectedKeys);
-      const currentPageSelectedRows = tableData.filter(item =>
+      const currentPageSelectedRows = tableData.filter((item) =>
         currentPageSelectedKeys.includes(item.id)
       );
       setSelectedRows(currentPageSelectedRows);
