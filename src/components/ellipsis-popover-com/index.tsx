@@ -20,6 +20,7 @@ function EllipsisPopover(props: any, ref: any) {
     editType,
     handleEdit,
     className,
+    wrapperClassName,
     tips,
     validatorRules,
     preferTypography,
@@ -153,7 +154,7 @@ function EllipsisPopover(props: any, ref: any) {
     );
   };
   return (
-    <div className="ellipsis-popover-div">
+    <div className={`ellipsis-popover-div ${wrapperClassName || ''}`}>
       {renderPopover()}
       {isCopy && (
         <Popover

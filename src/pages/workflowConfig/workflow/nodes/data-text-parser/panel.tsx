@@ -89,7 +89,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         }}
       >
         <FormItem
-          label={`选择文件：已选择${inputs.selected_files_num}个文件`}
+          label={`选择文件：已选择${inputs.selected_files_num < 0 ? 0 : inputs.selected_files_num}个文件`}
           field="files"
           labelAlign="left"
           extra="系统限制，只展示文件大小大于0且小于2G的文件"
