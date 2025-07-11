@@ -559,7 +559,7 @@ export default function Eltable() {
             <DatePicker.RangePicker
               style={{ width: 260 }}
               showTime={{
-                defaultValue: ['00:00:00', '04:05:05'],
+                defaultValue: ['00:00:00', '23:59:59'],
                 format: 'HH:mm:ss'
               }}
               format="YYYY-MM-DD HH:mm:ss"
