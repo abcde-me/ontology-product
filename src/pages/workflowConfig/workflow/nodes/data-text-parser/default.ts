@@ -38,8 +38,6 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     const {
       selected_files_num,
       text_emb_model_id,
-      text_ocr_model_id,
-      text_pic_model_id,
       text_slice_rule,
       slice_max_size
     } = payload;
@@ -50,10 +48,7 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     if (selected_files_num > 65536) {
       errorMessages = '最多选择65536个文本文件';
     }
-    if (!text_emb_model_id || !text_ocr_model_id || !text_pic_model_id) {
-      errorMessages = '需要选择模型';
-    }
-    if (!text_emb_model_id || !text_ocr_model_id || !text_pic_model_id) {
+    if (!text_emb_model_id) {
       errorMessages = '需要选择模型';
     }
     if (text_slice_rule === 1 && !slice_max_size) {

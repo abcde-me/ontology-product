@@ -42,7 +42,7 @@ const useConfig = (id: string, payload: AudioParserNodeType) => {
     [setInputs]
   );
 
-  const handleFiledsChange = useCallback(
+  const handleFieldsChange = useCallback(
     (fields: AudioParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.audio_pret = fields.audio_pret;
@@ -61,11 +61,24 @@ const useConfig = (id: string, payload: AudioParserNodeType) => {
     [setInputs]
   );
 
+  const handleModelChange = useCallback(
+    (fields: Partial<AudioParserNodeType>) => {
+      const newInputs = produce(inputRef.current, (draft) => {
+        if (fields.audio_model_id) {
+          draft.audio_model_id = fields.audio_model_id;
+        }
+      });
+      setInputs(newInputs);
+    },
+    [setInputs]
+  );
+
   return {
     readOnly,
     inputs,
     handleFilesChange,
-    handleFiledsChange
+    handleFieldsChange,
+    handleModelChange
   };
 };
 
