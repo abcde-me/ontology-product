@@ -169,9 +169,9 @@ const WorkflowIdCell = ({ record, showIcon }) => {
   // 添加空值检查
   const extras = record?.extras || {};
   const fileName = extras.file_name || '无文件名';
-  const workflowUuid = extras.workflow_uuid || '无ID';
+  const workflowUuid = extras.workflow_id || '无ID';
   const handleWorkflowClick = () => {
-    if (extras.workflow_uuid) {
+    if (extras.workflow_id) {
       window.open(
         `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.ds_workflow_uuid}&ds_workflow_id=${extras.workflow_id}`,
         '_blank',
