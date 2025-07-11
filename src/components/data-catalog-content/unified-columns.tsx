@@ -11,7 +11,8 @@ import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
   deleteSourceFile,
-  getTargetFileTypeList
+  getTargetFileTypeList,
+  getSourceFileTypeList
 } from '@/api/dataCatalog';
 const { RangePicker } = DatePicker;
 
@@ -26,16 +27,13 @@ let fileTypeFilters = [
   { text: 'txt', value: 'txt' },
   { text: 'doc', value: 'doc' }
 ];
+let SourcefileTypeFilters = [
+  { text: 'pdf', value: 'pdf' },
+  { text: 'txt', value: 'txt' },
+  { text: 'doc', value: 'doc' }
+];
 
-// 根据文件类型获取对应图标组件的函数
-// const getFileIcon = (type, size = 16) => {
-//   const iconMap = {
-//     pdf: <PDFIcon size={size} />,
-//     txt: <TXTIcon size={size} />,
-//     doc: <DOCIcon size={size} />
-//   };
-//   return iconMap[type?.toLowerCase()] || <TXTIcon size={size} />; // 默认使用TXT图标
-// };
+
 
 //格式化时间函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -89,11 +87,31 @@ const getFileTypeList = async () => {
     return [];
   }
 };
+const getFileTypeLists = async () => {
+  try {
+    const res = await getSourceFileTypeList();
+    console.log('源数据文件类型列表66666666666666', res.data);
+    if (
+      res &&
+      res.data
+    ) {
+      SourcefileTypeFilters = res.data.filter(type => type).map((type) => ({
+        text: type,
+        value: type
+      }));
+    }
+    return res;
+  } catch (error) {
+    console.error('获取文件类型列表失败:', error);
+    return [];
+  }
+};
 
 // 初始化文件类型筛选器
 (async () => {
   try {
     await getFileTypeList();
+    await getFileTypeLists();
   } catch (error) {
     console.error('初始化文件类型筛选器失败:', error);
   }
@@ -122,6 +140,31 @@ export const useFileTypeFilters = () => {
   }, []);
   return filters;
 };
+export const useSourceFileTypeFilters = () => {
+  const [sourceFilters, setSourceFilters] = useState(SourcefileTypeFilters);
+  useEffect(() => {
+    const fetchFileTypes = async () => {
+      try {
+        const fileTypes = await getFileTypeLists();
+        if (fileTypes && Array.isArray(fileTypes)) {
+          const newFilters = fileTypes
+            .filter(type => type)
+            .map((type) => ({
+              text: type,
+              value: type
+            }));
+          setSourceFilters(newFilters);
+        }
+      } catch (error) {
+        console.error('获取文件类型列表失败:', error);
+      }
+    };
+
+    fetchFileTypes();
+  }, []);
+  return sourceFilters;
+};
+
 
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
@@ -132,8 +175,9 @@ const WorkflowIdCell = ({ record, showIcon }) => {
   const handleWorkflowClick = () => {
     if (extras.workflow_id) {
       window.open(
-        `/tenant/compute/modaforge/workflowConfig?workflow_id=${extras.workflow_id}`,
-        '_blank'
+        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.ds_workflow_uuid}&ds_workflow_id=${extras.workflow_id}`,
+        '_blank',
+        'noopener,noreferrer'
       );
     }
   };
@@ -230,16 +274,17 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {}, // 添加刷新数据的回调函数
+  refreshData = () => { }, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
   handAllReset?: () => void, // 修改为函数类型而不是数组
-  resetPage?: () => void
+  resetPage?: () => void,
+  sourceFileTypeFilters?: any[]
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
-
+  const sourceFilters = sourceFileTypeFilters || SourcefileTypeFilters;
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
     return [
@@ -267,7 +312,7 @@ export const getUnifiedColumns = (
               >
                 {record.file_name}
               </span>
-            </Popover>
+            </Popover >
           </div>
         )
       },
@@ -275,15 +320,7 @@ export const getUnifiedColumns = (
         title: '文件类型',
         dataIndex: 'file_type',
         width: 120,
-        filters: [
-          { text: 'pdf', value: 'pdf' },
-          { text: 'txt', value: 'txt' },
-          { text: 'doc', value: 'doc' },
-          { text: 'md', value: 'md' },
-          { text: 'ppt', value: 'ppt' }
-        ],
-        // onFilter: (value, row) => row.type == value,
-        // onChange: (value, row) => row.type == value,
+        filters: sourceFilters,
         render: (_, record) => (
           <div
             style={{

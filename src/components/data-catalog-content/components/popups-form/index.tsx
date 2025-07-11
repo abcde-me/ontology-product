@@ -11,6 +11,7 @@ import {
 } from '@arco-design/web-react';
 import { exportFile } from '@/api/dataCatalog';
 import { getConnectionList } from '@/api/connectionApi';
+import './index.css'
 const FormItem = Form.Item;
 interface FormProps {
   names?: string;
@@ -208,12 +209,13 @@ const FormComponent: React.FC<FormProps> = ({
       focusLock={true}
       footer={null} // 不显示默认按钮，使用自定义按钮
       style={{ width: 640 }}
+      className="modal-form"
     >
       <Form
         form={form}
         autoComplete="off"
         {...formItemLayout}
-        style={{ width: 584 }}
+        // style={{ width: 584 }}
       >
         <Form.Item
           label="选择连接器："
@@ -253,7 +255,7 @@ const FormComponent: React.FC<FormProps> = ({
           <Input placeholder="请输入保存路径" />
         </FormItem>
       </Form>
-      <div style={{ marginTop: '20px', textAlign: 'right', marginBottom: 20 }}>
+      <div style={{ textAlign: 'right', marginBottom: 20, marginRight: '25px',marginTop:'0px' }}>
         <Space>
           <Button onClick={handleCancel}>取消</Button>
           <Button type="primary" onClick={handleExport}>
