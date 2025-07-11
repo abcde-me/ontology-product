@@ -32,7 +32,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
       setDataSource(dirsArr);
     });
   }, []);
-
+  console.log(dataSource, 'dataSource===');
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form
@@ -55,10 +55,13 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           extra="选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。"
         >
           <Select
-            allowCreate
             placeholder="请输入或选择目标数据目录"
-            allowClear
             style={{ width: '100%' }}
+            allowClear
+            showSearch
+            filterOption={(inputValue, option) => {
+              return option?.props?.children?.includes(inputValue)
+            }}
           >
             {dataSource.map((option) => (
               <Option key={option.id} value={option.id}>
