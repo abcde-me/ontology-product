@@ -38,7 +38,12 @@ export default function DataCleaningNode(props: {
       <div className="running-detail">运行详情：</div>
       <div
         className="running-detail-content-box"
-        style={{ whiteSpace: 'pre-wrap' }}
+        style={{
+          whiteSpace: 'pre-wrap',
+          fontSize: '14px',
+          lineHeight: '12px',
+          color: '#1E293B'
+        }}
       >
         {dataSource.log}
       </div>
