@@ -1,10 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import './index.css';
-import { Pagination, Popover, Table } from '@arco-design/web-react';
+import {
+  Pagination,
+  PaginationProps,
+  Popover,
+  Table
+} from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import noDataElement from '@/components/no-data';
 import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 // 枚举文件类型
 enum FileType {
@@ -36,12 +42,21 @@ enum FileStatus {
 
 export default function ParseNode(props: {
   dataSource;
-  loading;
-  onSendData;
-  pagination;
-  onSortData;
+  loading: boolean;
+  onSendData: (page: number, pageSize: number) => void;
+  pagination: {
+    current: number;
+    pageSize: number;
+    total: number;
+  };
+  onSortData: (
+    pagination: PaginationProps,
+    sort: SorterInfo,
+    sort_by: Partial<Record<string | number | symbol, string[]>>
+  ) => void;
+  status: number | string;
 }) {
-  const { dataSource, onSendData, pagination, onSortData } = props;
+  const { dataSource, onSendData, pagination, onSortData, status } = props;
 
   // 使用防抖控制onSendData
   const changeRef = useRef(debounce(onSendData, 100));
@@ -210,17 +225,27 @@ export default function ParseNode(props: {
       >
         <div className="item-box">
           <span className="item-title">原始数据量</span>
-          <span className="item-content">{dataSource.total || '--'}</span>
+          <span className="item-content">
+            {status === 0 && dataSource?.total === 0
+              ? '--'
+              : dataSource?.total ?? '--'}
+          </span>
         </div>
         <div className="item-box">
           <span className="item-title">成功</span>
           <span className="item-content">
-            {dataSource.success_total || '--'}
+            {status === 0 && dataSource?.success_total === 0
+              ? '--'
+              : dataSource?.success_total ?? '--'}
           </span>
         </div>
         <div className="item-box">
           <span className="item-title">失败</span>
-          <span className="item-content">{dataSource.fail_total || '--'}</span>
+          <span className="item-content">
+            {status === 0 && dataSource?.fail_total === 0
+              ? '--'
+              : dataSource?.fail_total ?? '--'}
+          </span>
         </div>
       </div>
       <Table
