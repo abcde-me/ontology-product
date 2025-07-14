@@ -21,7 +21,7 @@
   }
 
   .operate-text:hover {
-    color: rgba(0, 125, 250, 0.5);
+    color: rgba(67, 141, 251, 1);
   }
 
   .disabled-text {
@@ -35,6 +35,6 @@
   }
 
   tbody .arco-table-tr:hover .hover-change:hover {
-    color: rgba(0, 125, 250, 0.5);
+    color: rgba(67, 141, 251, 1);
   }
 }

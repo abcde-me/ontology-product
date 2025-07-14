@@ -952,7 +952,10 @@ export type FormValue = Record<string, any>;
 export enum FileType {
   doc = 'doc',
   docx = 'docx',
+  word = 'word',
   jpg = 'jpg',
+  png = 'png',
+  jpeg = 'jpeg',
   m4a = 'm4a',
   mp4 = 'mp4',
   pdf = 'pdf',
@@ -967,5 +970,17 @@ export enum FileType {
   torrent = 'torrent',
   apk = 'apk',
   rar = 'rar',
-  epub = 'epub'
+  epub = 'epub',
+  json = 'json',
+  markdown = 'markdown',
+  md = 'md',
+  mp3 = 'mp3',
+  flv = 'flv',
+  ogg = 'ogg',
+  aac = 'aac',
+  webm = 'webm',
+  mov = 'mov',
+  mkv = 'mkv',
+  avi = 'avi',
+  wmv = 'wmv'
 }
