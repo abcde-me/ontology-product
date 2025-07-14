@@ -41,7 +41,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.generate_sample_num = payload?.generate_sample_num;
         draft.similarity_threshold = payload?.similarity_threshold;
         draft.sample_num = payload?.sample_num;
-        draft.prompt = payload.prompt;
+        draft.prompt = payload.prompt_checkbox ? payload.prompt : '';
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.app_scenarios = {
           name: appScenarios[payload?.app_scenarios_name],
@@ -51,7 +51,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             similarity_threshold: payload?.similarity_threshold,
             generate_sample_num: payload?.generate_sample_num,
             enhanced_proportion: payload?.enhanced_proportion,
-            prompt: payload?.prompt,
+            prompt: payload.prompt_checkbox ? payload.prompt : '',
             sample_data: payload?.sample_data
           }
         };

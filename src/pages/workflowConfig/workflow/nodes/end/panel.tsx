@@ -52,7 +52,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           field="target_path_id"
           rules={[{ required: true, message: '目标数据目录不可为空' }]}
           style={{ margin: 0 }}
-          extra="选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。"
+          extra="选择工作流处理后数据的目标数据"
         >
           <Select
             placeholder="请输入或选择目标数据目录"
