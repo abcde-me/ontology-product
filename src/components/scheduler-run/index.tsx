@@ -63,7 +63,8 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
   if (frequencyData === CycleValues.PER_MONTH) {
     return {
       cycle: frequencyData,
-      date: options.date?.split(',') ?? [],
+      date:
+        options.date === 'L' ? options.date : (options.date?.split(',') ?? []),
       time: hour && minute ? `${hour}:${minute}` : ''
     };
   } else if (frequencyData === CycleValues.PER_WEEK) {
@@ -140,7 +141,7 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
 const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
   ({ options, onOptionsChange }, ref) => {
     const [form] = Form.useForm();
-    const datePickerRef = useRef<SelectHandle>(null);
+    const [popupVisible, setPopupVisible] = useState(false);
     // 频率选择器选择的数据
     const [frequencyData, setFrequencyData] = useState(
       initFrequencyData(options)
@@ -173,8 +174,6 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
       handleValuesChange(null, form.getFieldsValue());
     };
-    const test = getTimeFlagInitialValues(frequencyData, options);
-    console.log('test', test);
     const [timeFlag, setTimeFlag] = useState(
       getTimeFlagInitialValues(frequencyData, options)
     );
@@ -185,7 +184,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
       onOptionsChange(optionsFormat);
     };
     const handleClickTimeTab = (tab) => {
-      datePickerRef.current?.focus();
+      setPopupVisible(true);
       setTimeFlag(tab);
       const currentFieldsValue = form.getFieldsValue();
       form.setFieldsValue({ ...currentFieldsValue, date: undefined });
@@ -196,10 +195,6 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
         return form.validate();
       }
     }));
-
-    // useEffect(() => {
-    //   handleValuesChange(null, form.getFieldsValue());
-    // }, [frequencyData]);
 
     return (
       <Form
@@ -293,9 +288,12 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                       key={timeFlag}
                       style={{ minWidth: 300 }}
                       placeholder="请选择日期"
-                      ref={datePickerRef}
+                      popupVisible={popupVisible}
                       triggerProps={{
                         trigger: 'focus'
+                      }}
+                      onVisibleChange={(visible) => {
+                        setPopupVisible(visible);
                       }}
                       dropdownRender={(menu) => (
                         <div>
