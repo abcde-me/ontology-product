@@ -85,3 +85,6 @@ hr {
 .fontMM {
   font-size: 14px;
 }
+.arco-form-label-item > label {
+  white-space: nowrap;
+}

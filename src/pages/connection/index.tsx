@@ -11,7 +11,7 @@ import {
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './index.css';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail/detail-modal';
 import Add from './add';
 import {
@@ -238,16 +238,16 @@ export default function Connection() {
           >
             编辑
           </span>
-          <Popconfirm
-            focusLock
-            title="删除该连接器"
-            content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
-            onOk={() => {
-              DeleteMethod(record.id);
+          <span
+            className="hover"
+            onClick={() => {
+              setDelId(record.id);
+              setDelTitle(record.title);
+              setDelVisible(true);
             }}
           >
-            <span className="hover">删除</span>
-          </Popconfirm>
+            删除
+          </span>
         </div>
       )
     }
@@ -260,9 +260,10 @@ export default function Connection() {
   };
 
   // 点击删除按钮执行的方法
-  const DeleteMethod = async (id: string) => {
-    const res = await delconnectionList(id);
+  const DeleteMethod = async () => {
+    const res = await delconnectionList(delId);
     if (res.code == '' && res.status == 200) {
+      setDelVisible(false);
       Message.success({
         content: '删除成功'
       });
@@ -270,7 +271,6 @@ export default function Connection() {
       Message.error(res.message);
     }
     getlist();
-    console.log(id);
   };
   // 点击查看执行的方法
   const viewDetailHan = (id) => {
@@ -325,7 +325,7 @@ export default function Connection() {
       const res = await getConnectionList({
         page: pagination.current,
         page_size: pagination.pageSize,
-        name: searchValue,
+        name: searchValue.trim(),
         ...siftValue
       });
 
@@ -344,7 +344,12 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
-
+  // 删除弹框的默认值
+  const [delVisible, setDelVisible] = useState(false);
+  // 存放删除的id
+  const [delId, setDelId] = useState(null);
+  // 存放删除的名称
+  const [delTitle, setDelTitle] = useState(null);
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -478,7 +483,7 @@ export default function Connection() {
                 fontWeight: '400'
               }}
             >
-              编辑连接器
+              测试并创建
             </Button>
           </div>
         }
@@ -488,6 +493,29 @@ export default function Connection() {
           editObj={editObject}
           editDisabled={editLoadingState}
         />
+      </Modal>
+      <Modal
+        title={
+          <div
+            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
+          >
+            <IconExclamationCircle
+              style={{ color: 'orange', fontSize: '20px' }}
+            />
+            删除该连接器
+          </div>
+        }
+        visible={delVisible}
+        onCancel={() => {
+          setDelVisible(false);
+        }}
+        onOk={() => {
+          DeleteMethod();
+        }}
+      >
+        <div style={{ fontSize: '14px' }}>
+          删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
+        </div>
       </Modal>
     </div>
   );

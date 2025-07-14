@@ -215,7 +215,7 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey lD :"
+                  label="AccessKey lD："
                   field="access_key"
                   rules={[{ required: true, message: '请输入AccessKey lD' }]}
                   labelCol={{ span: 5 }}
@@ -225,12 +225,12 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey Secret :"
+                  label="AccessKey Secret："
                   field="secret_key"
                   rules={[
                     { required: true, message: '请输入AccessKey Secret' }
                   ]}
-                  labelCol={{ span: 5, style: { whiteSpace: 'nowrap' } }}
+                  labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                 >
