@@ -221,6 +221,7 @@ const DataLoadDetail = () => {
             }}
             onClick={() => {
               setEditVisible(true);
+              console.log(listDetail?.run_config?.cycle_text);
             }}
           >
             <IconEdit /> 编辑

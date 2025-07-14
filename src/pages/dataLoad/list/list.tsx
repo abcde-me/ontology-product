@@ -28,22 +28,22 @@ export const RunStateType = {
   [RunState.SUCCEED]: {
     text: '运行成功',
     value: 'succeed',
-    color: 'green'
+    color: '#10B981'
   },
   [RunState.FAILED]: {
     text: '运行失败',
     value: 'failed',
-    color: 'red'
+    color: '#EF4444'
   },
   [RunState.RUNNING]: {
     text: '运行中',
     value: 'running',
-    color: 'rgb(0, 125, 249)'
+    color: '#007DFA'
   },
   [RunState.STOPPED]: {
     text: '运行停止',
     value: 'stopped',
-    color: 'rgb(148, 163, 184)'
+    color: '#94A3B8'
   }
 };
 export enum Load {
@@ -84,7 +84,14 @@ export default function DataLoad() {
       ellipsis: true,
       render: (_, text) => (
         <Tooltip content={text.name} position="tl">
-          {text.name}
+          <span
+            className="txt"
+            onClick={() => {
+              gotoDetail(text.task_id);
+            }}
+          >
+            {text.name}
+          </span>
         </Tooltip>
       )
     },
@@ -188,6 +195,7 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
+      ellipsis: true,
       width: 230,
       render: (_, item) => {
         return (
@@ -195,13 +203,16 @@ export default function DataLoad() {
             onClick={() => gotoConnector(item.connector_name)}
             className="jump-a"
           >
-            <Popover position="tl" content={item.connector_name}>
-              {item.connector_name}
+            <Popover
+              position="tl"
+              content={item.connector_name}
+              className={'txt'}
+            >
+              <span className="txt">{item.connector_name}</span>
             </Popover>
           </a>
         );
-      },
-      ellipsis: true
+      }
     },
     {
       title: '载入位置',
@@ -209,24 +220,22 @@ export default function DataLoad() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <div>
+          <Popover position="tl" content={item.data_path_name}>
             {item.data_path_name !== '' ? (
               <span
-                className="jump-a"
+                // className="jump-a"
                 onClick={() => {
                   history.push(
                     `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
                   );
                 }}
               >
-                <Popover position="tl" content={item.data_path_name}>
-                  {item.data_path_name}
-                </Popover>
+                <span className="txt">{item.data_path_name}</span>
               </span>
             ) : (
               <span>-</span>
             )}
-          </div>
+          </Popover>
         );
       }
     },

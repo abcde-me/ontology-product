@@ -20,6 +20,14 @@ interface DirectoryItem {
   label: string;
   children?: DirectoryItem[];
 }
+// 定义cron类型
+interface CronType {
+  date: string;
+  hour: string;
+  minute: string;
+  month: string;
+  week: string;
+}
 
 // 添加根据ID构建级联路径的函数
 function findPathById(
@@ -60,7 +68,7 @@ const Edit = (props) => {
   // 按钮以及表单的禁用状态
   const [loading, setLoading] = useState(false);
   // 默认表达式的状态
-  const [obj, setObj] = useState({}) as any;
+  const [obj, setObj] = useState(props.cron);
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
   const [directoryData, setDirectoryData] = useState([]);
