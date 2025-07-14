@@ -37,9 +37,9 @@ import {
   getTagList
 } from '@/api/datasetManagement';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
+import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
-import { filter } from 'lodash';
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -183,12 +183,23 @@ const columns = (
   {
     title: '版本',
     dataIndex: 'latest_version',
-    width: 185,
+    width: 120,
     render: (latest_version: string) => {
       return (
         <div>
           <Tooltip content={latest_version}>
-            <div className={styles.datasetVersion}>{latest_version}</div>
+            <div
+              style={{
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                wordBreak: 'break-all'
+              }}
+            >
+              {latest_version}
+            </div>
           </Tooltip>
         </div>
       );
@@ -235,7 +246,7 @@ const columns = (
   {
     title: '描述说明',
     dataIndex: 'description',
-    width: 160,
+    width: 260,
     render: (description: string) => (
       <div
         style={{
@@ -299,7 +310,7 @@ const columns = (
   {
     title: '创建时间',
     dataIndex: 'created_at',
-    width: 220,
+    width: 180,
     sorter: true, // 启用排序功能，但不提供排序函数
     sortOrder:
       sortField === 'created_at'
@@ -315,7 +326,7 @@ const columns = (
   {
     title: '最近更新',
     dataIndex: 'updated_at',
-    width: 220,
+    width: 180,
     sorter: true, // 启用排序功能，但不提供排序函数
     sortOrder:
       sortField === 'updated_at'
@@ -331,10 +342,10 @@ const columns = (
   {
     title: '操作',
     dataIndex: 'op',
-    width: 148,
+    width: 104,
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => (
-      <Space size={8}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
@@ -344,6 +355,7 @@ const columns = (
         <Button
           type="text"
           className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+          style={{ padding: '0 8px 0 5px' }}
           onClick={() => handleExport(record)}
           disabled={record.status !== datasetStatus.normal}
         >
@@ -352,11 +364,12 @@ const columns = (
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.delete}`}
+          style={{ padding: '0 8px 0 5px' }}
           onClick={() => handleDelete(record)}
         >
           删除
         </Button>
-      </Space>
+      </div>
     )
   }
 ];
@@ -925,10 +938,7 @@ const DatasetManagement: React.FC = () => {
         )}
         data={datasetList}
         rowSelection={rowSelection}
-        noDataElement={noDataElement({
-          description: '暂无数据'
-          // btnText: '新建数据集',
-        })}
+        noDataElement={<NoDataEmpty />}
         pagination={{
           current: currentPage,
           total: total,
