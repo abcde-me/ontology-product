@@ -211,7 +211,7 @@ export default function WorkflowTask() {
       width: 170,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id} position="tl">
+        <Popover trigger="hover" content={record.time_size} position="tl">
           <span>{record.time_size}</span>
         </Popover>
       )
