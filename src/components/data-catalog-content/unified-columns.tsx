@@ -31,8 +31,6 @@ let SourcefileTypeFilters = [
   { text: 'doc', value: 'doc' }
 ];
 
-
-
 //格式化时间函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -89,14 +87,13 @@ const getFileTypeLists = async () => {
   try {
     const res = await getSourceFileTypeList();
     console.log('源数据文件类型列表66666666666666', res.data);
-    if (
-      res &&
-      res.data
-    ) {
-      SourcefileTypeFilters = res.data.filter(type => type).map((type) => ({
-        text: type,
-        value: type
-      }));
+    if (res && res.data) {
+      SourcefileTypeFilters = res.data
+        .filter((type) => type)
+        .map((type) => ({
+          text: type,
+          value: type
+        }));
     }
     return res;
   } catch (error) {
@@ -146,7 +143,7 @@ export const useSourceFileTypeFilters = () => {
         const fileTypes = await getFileTypeLists();
         if (fileTypes && Array.isArray(fileTypes)) {
           const newFilters = fileTypes
-            .filter(type => type)
+            .filter((type) => type)
             .map((type) => ({
               text: type,
               value: type
@@ -163,55 +160,40 @@ export const useSourceFileTypeFilters = () => {
   return sourceFilters;
 };
 
-
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
   // 添加空值检查
   const extras = record?.extras || {};
-  const fileName = extras.file_name || '无文件名';
-  const workflowUuid = extras.workflow_id || '无ID';
-  const handleWorkflowClick = () => {
-    if (extras.workflow_id) {
-      window.open(
-        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.ds_workflow_uuid}&ds_workflow_id=${extras.workflow_id}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
-    }
-  };
 
   return (
-    <div>
-      <div>原文件: {fileName}</div>
-      <div>
-        工作流ID:{' '}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            handleWorkflowClick();
-          }}
-          style={{
-            textDecoration: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            (e.target as HTMLAnchorElement).style.color = '#0E42D2';
-            (e.target as HTMLAnchorElement).style.textDecoration = 'none';
-          }}
-          onMouseLeave={(e) => {
-            (e.target as HTMLAnchorElement).style.color = 'black';
-            (e.target as HTMLAnchorElement).style.textDecoration = 'none';
-          }}
-        >
-          {workflowUuid}
-          {showIcon && (
+    <div className="unified-columns-wrapper">
+      <div className="unified-columns">
+        <span className="unified-columns-label">原文件:&nbsp;</span>
+        <span className="unified-columns-content unified-columns-file">
+          {extras.file_name ?? '无文件名'}
+        </span>
+      </div>
+      <div className="unified-columns">
+        <span className="unified-columns-label unified-columns-workflow">
+          工作流ID:&nbsp;
+        </span>
+        <span className="unified-columns-content" style={{ maxWidth: 170 }}>
+          {extras.workflow_uuid ? (
             <>
-              &nbsp;
-              <IconLaunch />
+              <a
+                className="jump-workflow"
+                target="_blank"
+                rel="noreferrer"
+                href={`/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
+              >
+                {extras.workflow_uuid}
+              </a>
+              <span className="jump-workflow-icon"></span>
             </>
+          ) : (
+            '-'
           )}
-        </a>
+        </span>
       </div>
     </div>
   );
@@ -272,7 +254,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -310,7 +292,7 @@ export const getUnifiedColumns = (
               >
                 {record.file_name}
               </span>
-            </Popover >
+            </Popover>
           </div>
         )
       },
