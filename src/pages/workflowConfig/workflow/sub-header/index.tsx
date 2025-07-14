@@ -5,6 +5,7 @@ import Checklist from './checklist';
 import ZoomInOut from './zoom-in-out';
 import AddBlock from './add-block';
 import UndoRedo from './undo-redo';
+import './index.scss';
 
 export type HeaderProps = {
   handleUndo: () => void;
