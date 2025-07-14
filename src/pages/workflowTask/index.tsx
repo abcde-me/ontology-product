@@ -342,23 +342,25 @@ export default function WorkflowTask() {
         }
       />
       {/* 分页 */}
-      <Pagination
-        current={current}
-        pageSize={pageSize}
-        onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
-        }}
-        onChange={(page) => {
-          setCurrent(page);
-        }}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={total}
-        showJumper
-        sizeCanChange
-        style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-      />
+      {workflowTaskData && workflowTaskData.length > 0 && (
+        <Pagination
+          current={current}
+          pageSize={pageSize}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+          onChange={(page) => {
+            setCurrent(page);
+          }}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+        />
+      )}
     </div>
   );
 }
