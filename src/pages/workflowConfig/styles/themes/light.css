@@ -1,5 +1,5 @@
 /* Attention: Generate by code. Don't update by hand!!! */
-html[data-theme="light"],
+html[data-theme='light'],
 html {
   --color-components-input-bg-normal: #c8ceda40;
   --color-components-input-text-placeholder: #98a2b2;
@@ -435,10 +435,10 @@ html {
   --color-workflow-canvas-workflow-bg: #f2f4f7;
 
   /* --color-workflow-link-line-active: #296dff; */
-  --color-workflow-link-line-active: #007DFA;
-  --color-workflow-link-line-normal: #d0d5dc;
+  --color-workflow-link-line-active: #007dfa;
+  --color-workflow-link-line-normal: #94a3b8;
   /* --color-workflow-link-line-handle: #296dff; */
-  --color-workflow-link-line-handle: #007DFA;
+  --color-workflow-link-line-handle: #007dfa;
   --color-workflow-link-line-normal-transparent: #d0d5dc33;
   --color-workflow-link-line-failure-active: #f79009;
   --color-workflow-link-line-failure-handle: #f79009;
@@ -738,5 +738,4 @@ html {
 
   --color-saas-background: #fcfcfd;
   --color-saas-pricing-grid-bg: #c8ceda80;
-
 }

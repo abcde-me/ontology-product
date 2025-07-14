@@ -1057,8 +1057,8 @@ export const getEdgeColor = (
     return 'var(--color-workflow-link-line-handle)';
   }
 
-  // return 'var(--color-workflow-link-line-normal)'
-  return 'var(--color-workflow-link-line-handle)';
+  return 'var(--color-workflow-link-line-normal)';
+  // return 'var(--color-workflow-link-line-handle)';
 };
 
 export const isExceptionVariable = (variable: string, nodeType?: BlockEnum) => {
