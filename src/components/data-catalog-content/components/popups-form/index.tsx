@@ -13,8 +13,9 @@ import { exportFile } from '@/api/dataCatalog';
 import { getConnectionList } from '@/api/connectionApi';
 const FormItem = Form.Item;
 interface FormProps {
-  names?: string;
+  from: 'datasetManagement' | 'dataCatalog';
   downloadData?: any;
+  names?: string;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
   exportdatas?: any;
@@ -27,9 +28,10 @@ interface FormProps {
 
 const FormComponent: React.FC<FormProps> = ({
   downloadData,
+  names,
   onCancel,
   visible = false,
-  names,
+  from,
   exportdatas,
   exportdataset,
   selectedPath,
@@ -37,58 +39,15 @@ const FormComponent: React.FC<FormProps> = ({
   resetSelectedData,
   handlClear
 }) => {
-  // const [exportNames,setExportNames] = useState([])
   const handleExport = async () => {
     //导出逻辑
     try {
-      await form.validate();
-      console.log(downloadData, '打印看啊看downloadData');
-      console.log(exportdatas, '打印看啊看exportdatas');
-      console.log(exportdataset, '打印看啊看exportdataset');
+      const isValid = await form.validate();
 
-      // const exportNames: Array<string> = [];
-      // if (exportdatas && exportdatas.length > 0) {
-      //   exportdatas.forEach((item) => {
-      //     if (item.extras && item.extras.file_name) {
-      //       exportNames.push(item.extras.file_name);
-      //     } else if (item.file_name) {
-      //       exportNames.push(item.file_name);
-      //     } else if (item.latest_file_name) {
-      //       exportNames.push(item.latest_file_name);
-      //     }
-      //   });
-      // } else if (downloadData && downloadData.file_name) {
-      //   exportNames.push(downloadData.file_name);
-      // }
-      // else if (downloadData && downloadData.extras && downloadData.extras.file_name) {
-      //   exportNames.push(downloadData.extras.file_name);
-      // } else if (exportdataset && exportdataset.latest_file_name) {
-      //   exportNames.push(exportdataset.latest_file_name);
-      // } else {
-      //   Message.error('无有效的文件名称可导出');
-      //   return;
-      // }
+      if (!isValid) {
+        return;
+      }
 
-      // let full_paths = '';
-      // if (exportdatas && exportdatas.length > 0 && !selectedPath) {
-      //  if(exportdatas[0].full_path){
-      //   full_paths = exportdatas[0].full_path;
-      //  }else if(exportdatas[0].src_extra){
-      //   full_paths = exportdatas[0].src_extra.path;
-      //  }
-      // } else if (selectedPath) {
-      //   full_paths = selectedPath;
-      // } else if (downloadData && downloadData.filePath) {
-      //   full_paths = downloadData.filePath;
-      // } else if (downloadData && downloadData.full_path) {
-      //   full_paths = downloadData.full_path;
-      // } else if (exportdataset && exportdataset.latest_file_path && exportdataset.latest_file_name) {
-      //   full_paths =
-      //     exportdataset.latest_file_path + '/' + exportdataset.latest_file_name;
-      // } else {
-      //   Message.error('无有效的文件路径可导出');
-      //   return;
-      // }
       const filesArray: string[] = [];
       if (downloadData && downloadData.data_path_id) {
         filesArray.push(
@@ -103,7 +62,7 @@ const FormComponent: React.FC<FormProps> = ({
           exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
         );
       }
-      if (exportdatas && exportdatas.length > 0) {
+      if (!exportdataset && exportdatas && exportdatas.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.abs_data_path + '/' + item.file_name);
@@ -120,16 +79,27 @@ const FormComponent: React.FC<FormProps> = ({
           });
         }
       }
-      const res = await exportFile({
-        // file_names: exportNames,
+
+      const params = {
         output_path: form.getFieldValue('path'),
-        // file_path: full_paths,
         connector_id: Number(form.getFieldValue('province')),
         files: filesArray
-      });
-      console.log(res, '这是导出返回的结果666666666666666');
-      // console.log('导出文件名', exportNames);
-      if (res.status !== 0 && res.code === '') {
+      };
+
+      // 数据集管理请求体特殊处理
+      if (from === 'datasetManagement') {
+        let fileNames: string[] = [];
+        if (exportdataset) {
+          fileNames = [exportdataset.name];
+        } else if (exportdatas?.length) {
+          fileNames = exportdatas.map((item) => item.name);
+        }
+        params['file_names'] = fileNames;
+      }
+
+      const res = await exportFile(params);
+      console.log('这是导出返回的结果', res);
+      if (res.status === 200) {
         form.resetFields();
         Message.success('导出成功');
         handlClear && handlClear();
@@ -150,9 +120,7 @@ const FormComponent: React.FC<FormProps> = ({
     } catch (e) {
       // 处理验证失败或导出失败的情况
       console.error('导出失败:', e);
-      // Message.error('导出失败，请稍后重试');
-      // form.resetFields();
-      // onCancel && onCancel();
+      Message.error('导出失败，请稍后重试');
     }
   };
   const handleCancel = () => {
@@ -187,7 +155,9 @@ const FormComponent: React.FC<FormProps> = ({
 
   // 添加处理连接器选择变化的函数
   const handleConnectorChange = (value, option) => {
-    const selectedConnector = connectorList.find((item: any) => item.id === value);
+    const selectedConnector = connectorList.find(
+      (item: any) => item.id === value
+    );
   };
 
   // 修改为监听 visible 变化，当弹窗打开时设置表单值

@@ -85,6 +85,19 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
   }
 };
 
+const getTimeFlagInitialValues = (
+  frequencyData: CycleValues,
+  options: CycleText
+) => {
+  if (frequencyData !== CycleValues.PER_MONTH) {
+    return TimeType.SEPCIFICTIME;
+  }
+
+  return options?.date === 'L'
+    ? TimeType.RELATICELYTIME
+    : TimeType.SEPCIFICTIME;
+};
+
 const formatOptions = (frequencyData: CycleValues, formVals) => {
   const [hour = '', minute = ''] = formVals.time?.split(':') ?? [];
   if (frequencyData === CycleValues.PER_MONTH) {
@@ -160,7 +173,9 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
       handleValuesChange(null, form.getFieldsValue());
     };
-    const [timeFlag, setTimeFlag] = useState(TimeType.SEPCIFICTIME);
+    const [timeFlag, setTimeFlag] = useState(
+      getTimeFlagInitialValues(frequencyData, options)
+    );
     const handleValuesChange = (_, allValues) => {
       const optionsFormat = formatOptions(frequencyData, allValues);
       console.log('当前所有字段值:', allValues, frequencyData);

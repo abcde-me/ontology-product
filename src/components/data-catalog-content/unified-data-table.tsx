@@ -704,6 +704,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
       <FormComponent
+        from={'dataCatalog'}
         downloadData={downloadData}
         onCancel={() => setVisible(false)}
         visible={visible}
