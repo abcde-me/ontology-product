@@ -1,6 +1,10 @@
 .tabs-center .arco-tabs-header-nav {
   justify-content: center !important;
   display: flex !important;
+  position: fixed;
+  z-index: 100;
+  background-color: #fff;
+  width: 203px;
 }
 
 /* Custom tree node hover style */

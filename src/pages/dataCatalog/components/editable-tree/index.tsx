@@ -30,10 +30,10 @@ export default function EditableTree() {
   } = useEditableTree({ catalogTreeStore });
 
   return (
-    <div className={classNames('pl-3 pr-3 pt-2')}>
+    <div className={classNames('pl-3 pr-3 pt-10')}>
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <InputSearch
-          placeholder="输入搜索目录"
+          placeholder="输入名称搜索"
           value={searchValue}
           onChange={onSearchChange}
           maxLength={255}

@@ -68,7 +68,11 @@ export async function renameCatalog(id: string, params: any) {
     .inRegion()
     .do();
   if (res.status !== 200) {
-    Message.warning(res.message);
+    if (res.message === 'rename failed') {
+      Message.error('重命名失败');
+    } else {
+      Message.warning(res.message);
+    }
   }
   return res;
 }
