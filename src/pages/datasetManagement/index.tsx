@@ -965,6 +965,7 @@ const DatasetManagement: React.FC = () => {
       />
       {/* 导出数据集弹窗 */}
       <FormComponent
+        from={'datasetManagement'}
         exportdataset={downloadData}
         onCancel={() => setVisible(false)}
         visible={visible}

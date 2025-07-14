@@ -210,6 +210,13 @@ export async function createCatalog(data: any) {
   return await UAPI.RES.CatalogCreateApi({}).post(data).inRegion().do();
 }
 //导出文件
-export async function exportFile(params: any = {}) {
+export async function exportFile(
+  from: 'datasetManagement' | 'dataCatalog',
+  params: any = {}
+) {
+  if (from === 'datasetManagement') {
+    params['output_type'] = 'dataset';
+  }
+
   return await UAPI.RES.fileExportApi({}).post(params).inRegion().do();
 }
