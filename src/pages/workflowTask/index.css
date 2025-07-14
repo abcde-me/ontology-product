@@ -24,12 +24,12 @@
     color: rgba(0, 125, 250, 0.5);
   }
 
-  .arco-table-tr:hover .hover-change {
+  .arco-table-tr:hover .arco-table-cell-text-ellipsis {
     color: rgb(0, 125, 250);
     cursor: pointer;
   }
 
-  .arco-table-tr:hover .hover-change:hover {
+  .arco-table-tr:hover .arco-table-cell-text-ellipsis:hover {
     color: rgba(0, 125, 250, 0.5);
   }
 }
