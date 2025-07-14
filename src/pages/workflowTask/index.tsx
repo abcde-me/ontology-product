@@ -135,10 +135,10 @@ export default function WorkflowTask() {
       dataIndex: 'id',
       width: 80,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.id} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToTaskDeatil(
                 record?.id ?? '',
@@ -232,10 +232,10 @@ export default function WorkflowTask() {
       dataIndex: 'source_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.source_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.source_path_id,
@@ -254,10 +254,10 @@ export default function WorkflowTask() {
       dataIndex: 'target_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.target_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.target_path_id,
@@ -342,23 +342,25 @@ export default function WorkflowTask() {
         }
       />
       {/* 分页 */}
-      <Pagination
-        current={current}
-        pageSize={pageSize}
-        onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
-        }}
-        onChange={(page) => {
-          setCurrent(page);
-        }}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={total}
-        showJumper
-        sizeCanChange
-        style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-      />
+      {workflowTaskData && workflowTaskData.length > 0 && (
+        <Pagination
+          current={current}
+          pageSize={pageSize}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+          onChange={(page) => {
+            setCurrent(page);
+          }}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+        />
+      )}
     </div>
   );
 }

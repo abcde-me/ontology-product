@@ -217,7 +217,7 @@ const LoadAddModal = (props: propsType) => {
           extra={
             <div style={{ color: '#666', fontSize: 14 }}>
               <div>支持中文，英文，数字，下划线</div>
-              <div>名称建议:北京市各区GDP数据_2024</div>
+              <div>名称建议: 连接器connector_1</div>
             </div>
           }
           rules={[
@@ -247,7 +247,7 @@ const LoadAddModal = (props: propsType) => {
           onChange={(value) => {
             loadTypeChange(value);
             form.setFieldsValue({
-              connector_id: ''
+              connector_id: undefined
             });
           }}
         >
@@ -266,8 +266,8 @@ const LoadAddModal = (props: propsType) => {
         >
           <Select
             placeholder="请选择连接器"
-            showSearch
-            filterOption={filterOption}
+            // showSearch
+            // filterOption={filterOption}
           >
             {connectName.map((option, index) => (
               <Option key={option.key} value={option.key}>

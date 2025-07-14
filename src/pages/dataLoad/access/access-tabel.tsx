@@ -154,7 +154,7 @@ const AccessTable = (props) => {
         page: current,
         page_size: pageSize,
         execution_id: props.records_id,
-        file_name: searchValue,
+        file_name: searchValue.trim(),
         ...RecordingObject
       });
       if (res.code == '' && res.status == 200) {

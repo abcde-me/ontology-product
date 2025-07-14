@@ -208,7 +208,7 @@ const Edit = (props) => {
           extra={
             <div style={{ color: '#666', fontSize: 14 }}>
               <div>支持中文，英文，数字，下划线</div>
-              <div>名称建议:北京市各区GDP数据_2024</div>
+              <div>名称建议: 连接器connector_1</div>
             </div>
           }
           rules={[
