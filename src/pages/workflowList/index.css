@@ -29,12 +29,12 @@
     cursor: not-allowed;
   }
 
-  .arco-table-tr:hover .arco-table-cell-text-ellipsis {
+  tbody .arco-table-tr:hover .hover-change {
     color: rgb(0, 125, 250);
     cursor: pointer;
   }
 
-  .arco-table-tr:hover .arco-table-cell-text-ellipsis:hover {
+  tbody .arco-table-tr:hover .hover-change:hover {
     color: rgba(0, 125, 250, 0.5);
   }
 }

@@ -176,10 +176,10 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name',
       width: 100,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span
-            className="hover-change"
             onClick={() => {
               viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
@@ -236,10 +236,10 @@ export default function WorkflowList() {
       dataIndex: 'source_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.source_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.source_path_id,
@@ -258,10 +258,10 @@ export default function WorkflowList() {
       dataIndex: 'target_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.target_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.target_path_id,
