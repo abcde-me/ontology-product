@@ -79,7 +79,7 @@
 /* 操作按钮区域 */
 .actionButtons {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -89,6 +89,7 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
+  border: 1px solid #94a3b8;
   /* padding: 0 12px; */
 }
 
@@ -109,6 +110,7 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
+  border: 1px solid #94a3b8;
   /* padding: 0 12px; */
 }
 
@@ -262,13 +264,13 @@
   padding: 2px 6px;
 }
 
-.datasetVersion {
+/* .datasetVersion {
   color: #000;
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
+} */
 
 /* 复选框样式 */
 .datasetTable :global(.arco-checkbox) {
