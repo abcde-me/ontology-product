@@ -14,8 +14,8 @@ import { getConnectionList } from '@/api/connectionApi';
 const FormItem = Form.Item;
 interface FormProps {
   from: 'datasetManagement' | 'dataCatalog';
-  names?: string;
   downloadData?: any;
+  names?: string;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
   exportdatas?: any;
@@ -28,9 +28,9 @@ interface FormProps {
 
 const FormComponent: React.FC<FormProps> = ({
   downloadData,
+  names,
   onCancel,
   visible = false,
-  names,
   from,
   exportdatas,
   exportdataset,
@@ -42,7 +42,11 @@ const FormComponent: React.FC<FormProps> = ({
   const handleExport = async () => {
     //导出逻辑
     try {
-      await form.validate();
+      const isValid = await form.validate();
+
+      if (!isValid) {
+        return;
+      }
 
       const filesArray: string[] = [];
       if (downloadData && downloadData.data_path_id) {
@@ -58,7 +62,7 @@ const FormComponent: React.FC<FormProps> = ({
           exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
         );
       }
-      if (exportdatas && exportdatas.length > 0) {
+      if (!exportdataset && exportdatas && exportdatas.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.abs_data_path + '/' + item.file_name);
@@ -75,11 +79,25 @@ const FormComponent: React.FC<FormProps> = ({
           });
         }
       }
-      const res = await exportFile(from, {
+
+      const params = {
         output_path: form.getFieldValue('path'),
         connector_id: Number(form.getFieldValue('province')),
         files: filesArray
-      });
+      };
+
+      // 数据集管理请求体特殊处理
+      if (from === 'datasetManagement') {
+        let fileNames: string[] = [];
+        if (exportdataset) {
+          fileNames = [exportdataset.name];
+        } else if (exportdatas?.length) {
+          fileNames = exportdatas.map((item) => item.name);
+        }
+        params['file_names'] = fileNames;
+      }
+
+      const res = await exportFile(params);
       console.log('这是导出返回的结果', res);
       if (res.status === 200) {
         form.resetFields();
