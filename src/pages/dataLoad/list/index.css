@@ -10,10 +10,6 @@
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 } */
-.jump-a:hover {
-  color: rgb(0, 125, 250);
-  cursor: pointer;
-}
 .cascader-dropdown .arco-cascader-list-item-label,
 .arco-cascader-list-search-item-label {
   white-space: nowrap !important;
@@ -30,4 +26,18 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.text-ellipsis {
+  display: inline-block;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arco-table-tr:hover .arco-table-cell-text-ellipsis {
+  color: rgb(0, 125, 250);
+}
+.txt:hover {
+  color: rgba(0, 125, 250, 0.5);
+  cursor: pointer;
 }

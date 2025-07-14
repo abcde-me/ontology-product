@@ -85,7 +85,7 @@ export default function Connection() {
   );
   // 连接器筛选的默认值
   const [siftValue, setSiftValue] = useState({});
-  const [ConnectionData, setConnectionData] = useState([]) as any;
+  const [ConnectionData, setConnectionData] = useState([]);
   const [pagination, setPagination] = useState({
     // 当前第1页
     current: 1,

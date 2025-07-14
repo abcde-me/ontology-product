@@ -32,7 +32,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 20px 20px 0px 8px;
+  font-weight: 500px;
 }
 
 .modal-header h2 {
@@ -41,7 +42,7 @@
 }
 
 .modal-content {
-  padding: 16px;
+  padding: 20px 20px 20px 8px;
 }
 
 .section {

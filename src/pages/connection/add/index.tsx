@@ -103,7 +103,7 @@ const add = forwardRef((props: any, ref) => {
   return (
     <div>
       <Modal
-        style={{ width: '700px' }}
+        style={{ width: '760px' }}
         title={'创建连接器'}
         visible={visible}
         autoFocus={false}
@@ -148,7 +148,7 @@ const add = forwardRef((props: any, ref) => {
       >
         <div className="modal-overlay">
           <Form
-            style={{ width: 650 }}
+            style={{ width: 700 }}
             autoComplete="off"
             form={form}
             disabled={loading}

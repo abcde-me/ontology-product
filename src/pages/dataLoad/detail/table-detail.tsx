@@ -22,21 +22,19 @@ const TableDetail = (props) => {
     {
       title: '运行ID',
       dataIndex: 'execution_id',
-      width: 260,
+      width: 200,
       ellipsis: true,
       render: (text: string) => {
         return (
-          <div>
-            <Popover position="tl" content={text}>
-              {text}
-            </Popover>
-          </div>
+          <Popover position="tl" content={text}>
+            {text}
+          </Popover>
         );
       }
     },
     {
       title: '状态',
-      width: 250,
+      width: 200,
       dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -47,12 +45,12 @@ const TableDetail = (props) => {
               borderRadius: '50%',
               background:
                 item.status == 'succeed'
-                  ? 'green'
+                  ? '#10B981'
                   : item.status == 'failed'
-                    ? 'red'
+                    ? '#EF4444'
                     : item.status == 'running'
-                      ? 'rgb(0, 125, 250)'
-                      : 'rgb(148, 163, 184)'
+                      ? '#007DFA'
+                      : '#94A3B8'
             }}
           ></div>
           <div style={{ marginLeft: '7px' }}>
@@ -83,11 +81,11 @@ const TableDetail = (props) => {
       ),
       filters: [
         {
-          text: '成功',
+          text: '运行成功',
           value: RunState.SUCCEED
         },
         {
-          text: '失败',
+          text: '运行失败',
           value: RunState.FAILED
         },
         {
@@ -100,13 +98,19 @@ const TableDetail = (props) => {
       title: '载入结果',
       width: 200,
       render: (_, item) => (
-        <div style={{ display: 'flex' }}>
-          <div
-            style={{ color: 'green' }}
-          >{`成功：${item.success_files.toLocaleString()}`}</div>
-          <div
-            style={{ color: 'red', marginLeft: '10px' }}
-          >{`失败：${item.failed_files.toLocaleString()}`}</div>
+        <div>
+          {item.success_files === 0 && item.failed_files === 0 ? (
+            '-'
+          ) : (
+            <div style={{ display: 'flex' }}>
+              <div
+                style={{ color: 'green' }}
+              >{`成功：${item.success_files.toLocaleString()}`}</div>
+              <div
+                style={{ color: 'red', marginLeft: '10px' }}
+              >{`失败：${item.failed_files.toLocaleString()}`}</div>
+            </div>
+          )}
         </div>
       )
     },
@@ -225,7 +229,7 @@ const TableDetail = (props) => {
               textAlign: 'left',
               display: 'flex',
               alignItems: 'center',
-              margin: '15px'
+              padding: '24px 0px 5px 0px'
             }}
           >
             <div
@@ -245,7 +249,7 @@ const TableDetail = (props) => {
             </div>
             <div style={{ fontSize: '15px' }}>停止运行</div>
           </div>
-          <div style={{ padding: '0px 30px 0px 40px' }}>
+          <div style={{ padding: '0px 28px', fontSize: '14px' }}>
             该操作会停止当前数据载入运行任务，停止后将无法恢复运行，是否要继续当前操作?
           </div>
         </Modal>
