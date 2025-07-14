@@ -34,7 +34,9 @@ import {
   dataImputationBefore,
   dataImputationAfter,
   dataOutlierHandlingBefore,
-  dataOutlierHandlingAfter
+  dataOutlierHandlingAfter,
+  dataSensitiveBefore,
+  dataSensitiveAfter,
 } from './date-text';
 import './date-cleaning.scss';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
@@ -379,13 +381,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 <div className="info-before">
                   <span className="info-before-text">清洗前:</span>
                   <span className="info-before-content">
-                    {dataSpecialCharactersBefore}
+                    {dataSensitiveBefore}
                   </span>
                 </div>
                 <div className="info-after">
                   <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content info-line">
-                    {dataSpecialCharactersAfter}
+                    {dataSensitiveAfter}
                   </span>
                 </div>
               </div>
