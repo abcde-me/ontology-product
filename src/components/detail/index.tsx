@@ -285,12 +285,12 @@ const statusConfig = {
     icon: (
       <IconCheckCircleFill style={{ color: '#00b42a', fontSize: '14px' }} />
     ),
-    color: '#00b42a'
+    color: '#1E293B'
   },
   version_updating: {
     label: '版本更新中',
     icon: <IconLoading style={{ color: '#165dff', fontSize: '14px' }} />,
-    color: '#165dff'
+    color: '#1E293B'
   },
   version_update_failed: {
     label: '版本更新失败',
@@ -299,7 +299,7 @@ const statusConfig = {
         style={{ color: '#ff7d00', fontSize: '14px' }}
       />
     ),
-    color: '#ff7d00'
+    color: '#1E293B'
   }
 };
 
@@ -353,7 +353,7 @@ const renderStatusTag = (
             height: 'auto'
           }}
         >
-          <span style={{ color: '#165dff' }} onClick={handleVersionRebuild}>
+          <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
             重试
           </span>
         </Button>
@@ -1036,92 +1036,97 @@ const DatasetDetail: React.FC = () => {
                 allowClear
                 suffix={<IconSearch style={{ color: '#999' }} />}
               />
-              {updateStatus ? (
-                <Space>
-                  <Button
-                    onClick={() => {
-                      // 检查是否有改动
-                      const hasChanges =
-                        changedRows.length > 0 || deletedRows.length > 0;
+              {contentData.length !== 0 && contentColumns.length !== 0 ? (
+                <>
+                  {updateStatus ? (
+                    <Space>
+                      <Button
+                        onClick={() => {
+                          // 检查是否有改动
+                          const hasChanges =
+                            changedRows.length > 0 || deletedRows.length > 0;
 
-                      if (!hasChanges) {
-                        // 没有改动，直接取消编辑
-                        setEditingRowKey(null);
-                        setEditingData({});
-                        setChangedRows([]);
-                        setDeletedRows([]);
-                        setContentData(contentDatabackup);
-                        setUpdateStatus(false);
-                      } else {
-                        // 有改动，弹窗确认
-                        Modal.confirm({
-                          title: '确定放弃编辑?',
-                          content: (
-                            <div
-                              style={{
-                                fontSize: '14px',
-                                paddingLeft: '28px'
-                                // lineHeight: '1.5'
-                              }}
-                            >
-                              放弃后，当前修改不会保存
-                            </div>
-                          ),
-                          okText: '确定',
-                          cancelText: '取消',
-                          onOk: () => {
-                            // 用户确认放弃编辑
+                          if (!hasChanges) {
+                            // 没有改动，直接取消编辑
                             setEditingRowKey(null);
                             setEditingData({});
                             setChangedRows([]);
                             setDeletedRows([]);
                             setContentData(contentDatabackup);
                             setUpdateStatus(false);
-                          },
-                          onCancel: () => {
-                            // 用户取消，不做任何操作
+                          } else {
+                            // 有改动，弹窗确认
+                            Modal.confirm({
+                              title: '确定放弃编辑?',
+                              content: (
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    paddingLeft: '28px'
+                                    // lineHeight: '1.5'
+                                  }}
+                                >
+                                  放弃后，当前修改不会保存
+                                </div>
+                              ),
+                              okText: '确定',
+                              cancelText: '取消',
+                              onOk: () => {
+                                // 用户确认放弃编辑
+                                setEditingRowKey(null);
+                                setEditingData({});
+                                setChangedRows([]);
+                                setDeletedRows([]);
+                                setContentData(contentDatabackup);
+                                setUpdateStatus(false);
+                              },
+                              onCancel: () => {
+                                // 用户取消，不做任何操作
+                              }
+                            });
                           }
-                        });
-                      }
-                    }}
-                  >
-                    取消本轮编辑
-                  </Button>
-                  <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
-                    <Button
-                      type="primary"
-                      onClick={handleSubmitChanges}
-                      disabled={
-                        editingRowKey !== null ||
-                        (changedRows.length === 0 && deletedRows.length === 0)
+                        }}
+                      >
+                        取消本轮编辑
+                      </Button>
+                      <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
+                        <Button
+                          type="primary"
+                          onClick={handleSubmitChanges}
+                          disabled={
+                            editingRowKey !== null ||
+                            (changedRows.length === 0 &&
+                              deletedRows.length === 0)
+                          }
+                        >
+                          保存本轮编辑
+                        </Button>
+                      </Tooltip>
+                    </Space>
+                  ) : (
+                    <Tooltip
+                      content={
+                        !datasetDetail || datasetDetail.status !== 'normal'
+                          ? '当前状态下不能进行编辑'
+                          : ''
                       }
                     >
-                      保存本轮编辑
-                    </Button>
-                  </Tooltip>
-                </Space>
-              ) : (
-                <Tooltip
-                  content={
-                    !datasetDetail || datasetDetail.status !== 'normal'
-                      ? '当前状态下不能进行编辑'
-                      : ''
-                  }
-                >
-                  <Button
-                    // type="primary"
-                    disabled={
-                      !datasetDetail || datasetDetail.status !== 'normal'
-                    }
-                    onClick={() => setUpdateStatus(true)}
-                    type="text"
-                    icon={<IconEdit />}
-                    className="edit-btn"
-                  >
-                    编辑
-                  </Button>
-                </Tooltip>
-              )}
+                      <Button
+                        // type="primary"
+                        disabled={
+                          !datasetDetail || datasetDetail.status !== 'normal'
+                        }
+                        onClick={() => setUpdateStatus(true)}
+                        type="text"
+                        icon={<IconEdit />}
+                        className="edit-btn"
+                      >
+                        编辑
+                      </Button>
+                    </Tooltip>
+                  )}
+                </>
+              ) : null}
             </div>
             {contentData.length !== 0 && contentColumns.length !== 0 ? (
               <>

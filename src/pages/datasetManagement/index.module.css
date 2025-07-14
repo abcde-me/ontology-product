@@ -89,19 +89,9 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
-  border: 1px solid #94a3b8;
-  /* padding: 0 12px; */
 }
-
-/* .batchDeleteBtn:hover {
-  background-color: #165dff;
-  color: #fff;
-} */
-
-.batchDeleteBtn:disabled {
-  color: #c9cdd4;
-  border-color: #e5e6eb;
-  background: #f7f8fa;
+.batchDeleteBtn :global(.arco-btn-secondary.arco-btn-disabled) {
+  border: 1px solid #94a3b8;
 }
 
 /* 批量导出按钮 */
@@ -110,8 +100,10 @@
   border-radius: 6px;
   font-size: 14px;
   height: 32px;
+}
+
+.batchExportBtn :global(.arco-btn-secondary.arco-btn-disabled) {
   border: 1px solid #94a3b8;
-  /* padding: 0 12px; */
 }
 
 /* .batchExportBtn:hover {
@@ -220,6 +212,23 @@
 
 .actionButton.export {
   color: #007dfa;
+}
+
+/* 批量导出按钮hover效果 - 基于Arco Design的选择器模式 */
+.batchDeleteBtn:global(
+    .arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover
+  ) {
+  color: #438dfb !important;
+  background-color: transparent !important;
+  border: 1px solid #438dfb;
+}
+
+.batchExportBtn:global(
+    .arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover
+  ) {
+  color: #438dfb !important;
+  background-color: transparent !important;
+  border: 1px solid #438dfb;
 }
 
 .actionButton.disabled {

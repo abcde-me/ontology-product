@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Typography,
   Input,
@@ -40,6 +40,9 @@ import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
+// 名称显示组件 - 只有在文本被截断时才显示Tooltip
+import { NameCell } from './namecell';
+
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -58,7 +61,7 @@ const formatDateTime = (dateTimeString: string): string => {
 };
 
 // 数据集类型
-interface Dataset {
+export interface Dataset {
   id: number;
   name: string;
   description: string;
@@ -127,35 +130,13 @@ const columns = (
     dataIndex: 'name',
     width: 200,
     render: (name: string, record: Dataset) => {
-      const nameElement = (
-        <Tooltip content={name}>
-          <span
-            className={
-              record.status === datasetStatus.create_failed ||
-              record.status === datasetStatus.creating
-                ? styles.datasetNameLink
-                : `${styles.datasetNameLink} ${styles.datasetNameHover}`
-            }
-            onClick={() => {
-              record.status === datasetStatus.create_failed ||
-              record.status === datasetStatus.creating
-                ? null
-                : handleGoToDetail(record.id);
-            }}
-            style={{
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              wordBreak: 'break-all'
-            }}
-          >
-            {name}
-          </span>
-        </Tooltip>
+      return (
+        <NameCell
+          name={name}
+          record={record}
+          handleGoToDetail={handleGoToDetail}
+        />
       );
-      return nameElement;
     }
   },
   {
@@ -175,7 +156,25 @@ const columns = (
           </Tag>
         )}
         {tag_names && tag_names.length > 1 && (
-          <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+          <Tooltip
+            content={tag_names.map((tag, index) => (
+              <Tag
+                key={index}
+                style={{
+                  background: '#E2E8F0',
+                  color: '#0F172A',
+                  borderRadius: '16px',
+                  fontSize: '12px',
+                  height: '18px',
+                  alignItems: 'center'
+                }}
+              >
+                {tag}
+              </Tag>
+            ))}
+          >
+            <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+          </Tooltip>
         )}
       </Space>
     )
@@ -364,7 +363,7 @@ const columns = (
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.delete}`}
-          style={{ padding: '0 8px 0 5px' }}
+          style={{ padding: '0 5px 0 8px' }}
           onClick={() => handleDelete(record)}
         >
           删除
@@ -374,7 +373,7 @@ const columns = (
   }
 ];
 
-enum searchFieldType {
+export enum searchFieldType {
   name = 'name',
   // tags = 'tags',
   description = 'description'
@@ -383,7 +382,7 @@ enum searchFieldType {
 }
 
 // 枚举数据集状态
-enum datasetStatusName {
+export enum datasetStatusName {
   creating = '创建中',
   create_failed = '创建失败',
   normal = '正常',
@@ -392,7 +391,7 @@ enum datasetStatusName {
 }
 
 // 枚举数据集状态名称
-enum datasetStatus {
+export enum datasetStatus {
   creating = 'creating',
   create_failed = 'create_failed',
   normal = 'normal',
@@ -786,7 +785,7 @@ const DatasetManagement: React.FC = () => {
       ),
       okText: '确认删除',
       cancelText: '取消',
-      okButtonProps: { status: 'danger' },
+      // okButtonProps: { status: 'danger' },
       onOk: () => {
         console.log('批量删除:', selectedRows);
         batchDeleteDataset({
@@ -897,6 +896,7 @@ const DatasetManagement: React.FC = () => {
               className={styles.batchDeleteBtn}
               disabled={selectedRowKeys.length === 0}
               onClick={handleBatchDelete}
+              type="secondary"
             >
               批量删除
             </Button>
