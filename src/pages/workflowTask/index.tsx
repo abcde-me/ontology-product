@@ -13,6 +13,7 @@ import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { renderEmptyPlaceholder } from '@/utils/renderEmptyPlaceholder';
 
 const InputSearch = Input.Search;
 
@@ -135,10 +136,10 @@ export default function WorkflowTask() {
       dataIndex: 'id',
       width: 80,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.id} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToTaskDeatil(
                 record?.id ?? '',
@@ -148,7 +149,7 @@ export default function WorkflowTask() {
               )
             }
           >
-            {record.id}
+            {renderEmptyPlaceholder(record.id)}
           </span>
         </Popover>
       )
@@ -211,8 +212,8 @@ export default function WorkflowTask() {
       width: 170,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id} position="tl">
-          <span>{record.time_size}</span>
+        <Popover trigger="hover" content={record.time_size} position="tl">
+          <span>{renderEmptyPlaceholder(record.time_size)}</span>
         </Popover>
       )
     },
@@ -223,7 +224,7 @@ export default function WorkflowTask() {
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
-          <span>{record.workflow_name}</span>
+          <span>{renderEmptyPlaceholder(record.workflow_name)}</span>
         </Popover>
       )
     },
@@ -232,10 +233,10 @@ export default function WorkflowTask() {
       dataIndex: 'source_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.source_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.source_path_id,
@@ -244,7 +245,7 @@ export default function WorkflowTask() {
               )
             }
           >
-            {record.source_path}
+            {renderEmptyPlaceholder(record.source_path)}
           </span>
         </Popover>
       )
@@ -254,10 +255,10 @@ export default function WorkflowTask() {
       dataIndex: 'target_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.target_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.target_path_id,
@@ -266,7 +267,7 @@ export default function WorkflowTask() {
               )
             }
           >
-            {record.target_path}
+            {renderEmptyPlaceholder(record.target_path)}
           </span>
         </Popover>
       )
@@ -275,14 +276,18 @@ export default function WorkflowTask() {
       title: '开始时间',
       dataIndex: 'start_time',
       width: 170,
-      render: (_, record) => <span>{record.start_time}</span>,
+      render: (_, record) => (
+        <span>{renderEmptyPlaceholder(record.start_time)}</span>
+      ),
       sorter: true
     },
     {
       title: '结束时间',
       dataIndex: 'end_time',
       width: 170,
-      render: (_, record) => <span>{record.end_time}</span>,
+      render: (_, record) => (
+        <span>{renderEmptyPlaceholder(record.end_time)}</span>
+      ),
       sorter: true
     },
     {
@@ -342,23 +347,25 @@ export default function WorkflowTask() {
         }
       />
       {/* 分页 */}
-      <Pagination
-        current={current}
-        pageSize={pageSize}
-        onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
-        }}
-        onChange={(page) => {
-          setCurrent(page);
-        }}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={total}
-        showJumper
-        sizeCanChange
-        style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-      />
+      {workflowTaskData && workflowTaskData.length > 0 && (
+        <Pagination
+          current={current}
+          pageSize={pageSize}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+          onChange={(page) => {
+            setCurrent(page);
+          }}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+        />
+      )}
     </div>
   );
 }

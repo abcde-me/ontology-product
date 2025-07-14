@@ -304,7 +304,7 @@ const Header: FC = () => {
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              <Popover trigger="hover" title="编辑">
+              <Popover trigger="hover" content="编辑">
                 <div className="eidt-icon" onClick={handleEdit}></div>
               </Popover>
             </div>

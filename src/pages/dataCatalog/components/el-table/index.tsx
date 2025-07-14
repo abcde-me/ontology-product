@@ -596,6 +596,7 @@ export default function Eltable() {
         </div>
       </div>
       <FormComponent
+        from={'dataCatalog'}
         downloadData={downloadData}
         onCancel={() => {
           setVisible(false);

@@ -25,6 +25,7 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { renderEmptyPlaceholder } from '@/utils/renderEmptyPlaceholder';
 
 const InputSearch = Input.Search;
 
@@ -176,15 +177,15 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name',
       width: 100,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span
-            className="hover-change"
             onClick={() => {
               viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
           >
-            {record.workflow_name}
+            {renderEmptyPlaceholder(record.workflow_name)}
           </span>
         </Popover>
       )
@@ -236,10 +237,10 @@ export default function WorkflowList() {
       dataIndex: 'source_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.source_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.source_path_id,
@@ -248,7 +249,7 @@ export default function WorkflowList() {
               )
             }
           >
-            {record.source_path}
+            {renderEmptyPlaceholder(record.source_path)}
           </span>
         </Popover>
       )
@@ -258,10 +259,10 @@ export default function WorkflowList() {
       dataIndex: 'target_path',
       width: 130,
       ellipsis: true,
+      className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.target_path} position="tl">
           <span
-            className="hover-change"
             onClick={() =>
               handleToDirectoryPath(
                 record.target_path_id,
@@ -270,7 +271,7 @@ export default function WorkflowList() {
               )
             }
           >
-            {record.target_path}
+            {renderEmptyPlaceholder(record.target_path)}
           </span>
         </Popover>
       )
@@ -282,7 +283,7 @@ export default function WorkflowList() {
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.user_name} position="tl">
-          <span>{record.user_name}</span>
+          <span>{renderEmptyPlaceholder(record.user_name)}</span>
         </Popover>
       )
     },
@@ -291,7 +292,11 @@ export default function WorkflowList() {
       dataIndex: 'create_time',
       width: 150,
       render: (_, record) => (
-        <span>{new Date(record.create_time).toLocaleString()}</span>
+        <span>
+          {record.create_time == '' || record.create_time == null
+            ? '-'
+            : new Date(record.create_time).toLocaleString()}
+        </span>
       ),
       sorter: true
     },
@@ -396,23 +401,25 @@ export default function WorkflowList() {
         }
       />
       {/* 分页 */}
-      <Pagination
-        current={current}
-        pageSize={pageSize}
-        onPageSizeChange={(pageSize) => {
-          setPageSize(pageSize);
-          setCurrent(1);
-        }}
-        onChange={(page) => {
-          setCurrent(page);
-        }}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={total}
-        showJumper
-        sizeCanChange
-        style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-      />
+      {workflowData && workflowData.length > 0 && (
+        <Pagination
+          current={current}
+          pageSize={pageSize}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+          onChange={(page) => {
+            setCurrent(page);
+          }}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+        />
+      )}
     </div>
   );
 }

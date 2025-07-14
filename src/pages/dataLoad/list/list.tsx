@@ -9,7 +9,7 @@ import {
   Table,
   Tooltip
 } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
 import Styles from './index.module.css';
 import { ITableData } from './type';
@@ -209,18 +209,24 @@ export default function DataLoad() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <span
-            className="jump-a"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-              );
-            }}
-          >
-            <Popover position="tl" content={item.data_path_name}>
-              {item.data_path_name}
-            </Popover>
-          </span>
+          <div>
+            {item.data_path_name !== '' ? (
+              <span
+                className="jump-a"
+                onClick={() => {
+                  history.push(
+                    `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
+                  );
+                }}
+              >
+                <Popover position="tl" content={item.data_path_name}>
+                  {item.data_path_name}
+                </Popover>
+              </span>
+            ) : (
+              <span>-</span>
+            )}
+          </div>
         );
       }
     },
@@ -272,21 +278,16 @@ export default function DataLoad() {
             >
               详情
             </span>
-            <Popconfirm
-              focusLock
-              title="删除该连接器"
-              content="删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?"
-              onOk={() => {
-                deleteLoadHan(item.task_id);
-              }}
-              onCancel={() => {
-                Message.error({
-                  content: '删除失败，请重试'
-                });
+            <span
+              className={Styles.hoverStyle}
+              onClick={() => {
+                setDelVisible(true);
+                setDelId(item.task_id);
+                setDelTitle(item.name);
               }}
             >
-              <span className={Styles.hoverStyle}>删除</span>
-            </Popconfirm>
+              删除
+            </span>
           </div>
         );
       }
@@ -326,6 +327,10 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
+  // 存放删除的id
+  const [delId, setDelId] = useState(null);
+  // 存放删除的名称
+  const [delTitle, setDelTitle] = useState(null);
   const [loadSiftObject, setLoadSiftObject] = useState({});
   // 跳转到详情页面
   const gotoDetail = (task_id: number) => {
@@ -346,7 +351,7 @@ export default function DataLoad() {
       const res = await getLoadList({
         page: current,
         page_size: pageSize,
-        name: searchValue,
+        name: searchValue.trim(),
         ...loadSiftObject
       });
       if (res.message == 'ok') {
@@ -387,12 +392,15 @@ export default function DataLoad() {
   const handlePressEnter = () => {
     getdataLoadList();
   };
+  // 删除的弹框
+  const [delVisible, setDelVisible] = useState(false);
   // 删除列表的方法
-  const deleteLoadHan = async (id) => {
+  const deleteLoadHan = async () => {
     try {
-      const res = await delLoad(id);
+      const res = await delLoad(delId);
       if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
+        setDelVisible(false);
         getdataLoadList();
       } else {
         Message.error(res.message);
@@ -502,6 +510,29 @@ export default function DataLoad() {
         path="/tenant/compute/modaforge/dataLoad/detail"
         component={React.lazy(async () => import('../detail/dataLoad-detail'))}
       /> */}
+      <Modal
+        title={
+          <div
+            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
+          >
+            <IconExclamationCircle
+              style={{ color: 'orange', fontSize: '20px' }}
+            />
+            删除该载入任务
+          </div>
+        }
+        visible={delVisible}
+        onCancel={() => {
+          setDelVisible(false);
+        }}
+        onOk={() => {
+          deleteLoadHan();
+        }}
+      >
+        <div style={{ fontSize: '14px' }}>
+          删除该数据载入任务，{delTitle}，是否要继续操作?
+        </div>
+      </Modal>
     </div>
   );
 }
