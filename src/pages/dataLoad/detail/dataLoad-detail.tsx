@@ -117,7 +117,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue,
+        execution_id: searchValue.trim(),
         ...directoryObj
       });
       setTotal(res.data.total);
@@ -230,9 +230,9 @@ const DataLoadDetail = () => {
           <div className="info-column">
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -259,8 +259,8 @@ const DataLoadDetail = () => {
             </div>
             <div
               style={{
-                marginBottom: 16,
-                display: 'flex'
+                display: 'flex',
+                margin: '5px'
                 // alignItems: 'center'
               }}
             >
@@ -275,9 +275,9 @@ const DataLoadDetail = () => {
             </div>
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -291,9 +291,9 @@ const DataLoadDetail = () => {
             </div>
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -306,12 +306,15 @@ const DataLoadDetail = () => {
               </div>
             </div>
           </div>
-          <div className="info-column">
+          <div
+            className="info-column"
+            style={{ justifyContent: 'space-between' }}
+          >
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -325,9 +328,9 @@ const DataLoadDetail = () => {
             </div>
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -353,9 +356,9 @@ const DataLoadDetail = () => {
             </div>
             <div
               style={{
-                marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                margin: '5px'
               }}
             >
               <div
@@ -383,9 +386,9 @@ const DataLoadDetail = () => {
             {listDetail && listDetail.load_type == 'cron' && (
               <div
                 style={{
-                  marginBottom: 16,
                   display: 'flex',
-                  alignItems: 'flex-start'
+                  alignItems: 'flex-start',
+                  margin: '5px'
                 }}
               >
                 <div

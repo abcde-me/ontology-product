@@ -1,12 +1,12 @@
 function numberToUppercaseSimple(num) {
   const map = {
-    7: '日',
-    1: '一',
-    2: '二',
-    3: '三',
-    4: '四',
-    5: '五',
-    6: '六'
+    7: '周日',
+    1: '周一',
+    2: '周二',
+    3: '周三',
+    4: '周四',
+    5: '周五',
+    6: '周六'
   };
   return num
     .toString()
@@ -30,20 +30,21 @@ export function parseCron(cron) {
     return `每月${result}   ${hour}:${minute}运行`;
   } else if (date != '*' && week == '*') {
     const weekly = numberToUppercaseSimple(date);
-    const arr = date && date.split(',');
-    let result = '';
-    for (let i = 0; i < arr.length; i++) {
-      result += `${arr[i]}`;
-      if (i < arr.length - 1) result;
-    }
-    return `每周${weekly}  ${hour}:${minute}运行`;
+    // const newWeekly = weekly.map(item => `周${item}`)
+    // const arr = date && date.split(',');
+    // let result = '';
+    // for (let i = 0; i < arr.length; i++) {
+    //   result += `${arr[i]}`;
+    //   if (i < arr.length - 1)  result;
+    // }
+    return `每${weekly}  ${hour}:${minute}运行`;
   } else if (date == 'L' && month == '*') {
-    return `每月最后一天, ${hour}:${minute}运行`;
+    return `每月最后一天  ${hour}:${minute}运行`;
   }
 }
 export const formatRunTime = (totalSeconds: number) => {
   if (totalSeconds == 0) return '0s'; // 处理 0 秒的情况
-  if (totalSeconds == -1) return ''; // 处理 0 秒的情况
+  if (!totalSeconds) return '';
 
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
