@@ -173,6 +173,8 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
       handleValuesChange(null, form.getFieldsValue());
     };
+    const test = getTimeFlagInitialValues(frequencyData, options);
+    console.log('test', test);
     const [timeFlag, setTimeFlag] = useState(
       getTimeFlagInitialValues(frequencyData, options)
     );
