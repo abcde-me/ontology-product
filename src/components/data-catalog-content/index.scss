@@ -2,7 +2,12 @@
   background-color: rgb(245, 249, 255);
 }
 
-.unified-columns {
+.unified-columns-wrapper {
+  .unified-columns {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
   .unified-columns-label {
     color: var(--color-text-4);
     font-size: 14px;
@@ -15,13 +20,30 @@
     line-height: 22px;
     font-size: 14px;
     line-height: 22px;
+    position: relative;
+  }
+
+  .unified-columns-file {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 190px;
   }
 
   .jump-workflow {
+    display: block;
     text-decoration: none;
     cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 172px;
 
-    ::after {
+    &::after {
+      position: absolute;
+      right: -18px;
+      top: 50%;
+      transform: translateY(-50%);
       content: '';
       display: block;
       width: 14px;
@@ -32,8 +54,25 @@
     }
 
     &:hover {
-      color: '#0E42D2';
-      background-image: url(../../assets/jump-hover.svg);
+      color: #007dfa;
     }
+  }
+
+  .jump-workflow-icon {
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    content: '';
+    display: block;
+    width: 14px;
+    height: 14px;
+    background-image: url(../../assets/jump.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .jump-workflow:hover + .jump-workflow-icon {
+    background-image: url(../../assets/jump-hover.svg);
   }
 }

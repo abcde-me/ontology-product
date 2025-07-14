@@ -164,41 +164,32 @@ export const useSourceFileTypeFilters = () => {
 const WorkflowIdCell = ({ record, showIcon }) => {
   // 添加空值检查
   const extras = record?.extras || {};
-  const fileName = extras.file_name || '无文件名';
-  const handleWorkflowClick = () => {
-    if (extras.workflow_uuid) {
-      window.open(
-        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
-    }
-  };
 
   return (
-    <div className="unified-columns">
-      <div>
+    <div className="unified-columns-wrapper">
+      <div className="unified-columns">
         <span className="unified-columns-label">原文件:&nbsp;</span>
-        <span className="unified-columns-content">
+        <span className="unified-columns-content unified-columns-file">
           {extras.file_name ?? '无文件名'}
         </span>
       </div>
-      <div>
-        <span className="unified-columns-label">工作流ID:&nbsp;</span>
-        <span className="unified-columns-content">
+      <div className="unified-columns">
+        <span className="unified-columns-label unified-columns-workflow">
+          工作流ID:&nbsp;
+        </span>
+        <span className="unified-columns-content" style={{ maxWidth: 170 }}>
           {extras.workflow_uuid ? (
-            <a
-              className="jump-workflow"
-              target="_blank"
-              rel="noreferrer"
-              href={`/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
-              // onClick={(e) => {
-              //   e.preventDefault();
-              //   handleWorkflowClick();
-              // }}
-            >
-              {extras.workflow_uuid}
-            </a>
+            <>
+              <a
+                className="jump-workflow"
+                target="_blank"
+                rel="noreferrer"
+                href={`/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
+              >
+                {extras.workflow_uuid}
+              </a>
+              <span className="jump-workflow-icon"></span>
+            </>
           ) : (
             '-'
           )}
