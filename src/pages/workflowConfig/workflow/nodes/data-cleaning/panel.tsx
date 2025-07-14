@@ -182,7 +182,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataStandardizationAfter}
                   </span>
@@ -237,7 +237,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dateScreeningAfter}
                   </span>
@@ -302,7 +302,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">{dataSpecialAfter}</span>
                 </div>
               </div>
@@ -383,8 +383,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
-                  <span className="info-after-content">
+                  <span className="info-after-text">清洗后:</span>
+                  <span className="info-after-content info-line">
                     {dataSpecialCharactersAfter}
                   </span>
                 </div>
@@ -513,8 +513,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
-                  <span className="info-after-content">
+                  <span className="info-after-text">清洗后:</span>
+                  <span className="info-after-content info-line">
                     {dataDetoxificationAfter}
                   </span>
                 </div>
@@ -544,7 +544,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataImputationAfter}
                   </span>
@@ -574,7 +574,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataOutlierHandlingAfter}
                   </span>

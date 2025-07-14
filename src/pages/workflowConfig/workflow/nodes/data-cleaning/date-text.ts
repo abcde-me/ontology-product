@@ -10,9 +10,9 @@ export const dateScreeningAfter =
   '"This is a test", "Hello world!" (移除字符少于5个）';
 // 特殊字符删除
 export const dataSpecialBefore =
-  '<article><p style="margin-top: 0px; margin-bottom: 0px;"><span style="color: rgb(255, 0, 0);"><strong>百炼大模型服务平台</strong></span>是企业专属大模型生产平台，基于<span style="background-color: rgb(255, 255, 0);">通义基础大模型</span>，提供<em><span style="text-decoration: underline;">企业专属大模型开发</span></em>和应用的整套工具链。</p></article>';
+  'xxxx多模态数据治理平台xxxx是企业专属数据治理平台xxxx，基于大模型技术，xxx提供xxx企业专注多模态数据治理能力xxxxx和配套的各种工具链xxxxx';
 export const dataSpecialAfter =
-  '大模型服务平台是企业专属大模型生产平台，基于基础大模型，提供企业专属大模型开发和应用的整套工具链。';
+  '多模态数据治理平台是企业专属数据治理平台，基于大模型技术，提供企业专注多模态数据治理能力和配套的各种工具链。';
 // 特殊字符模版内容
 export const dataSpecialCharactersBefore =
   '您咨询的这个问题我暂时无法回答😭，请您提供更多信息以供参考😄{ordernumber}"12361283iasdas702739127"{userid}"123712378612"���🪓🪓';
