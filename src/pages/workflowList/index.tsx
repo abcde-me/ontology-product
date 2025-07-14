@@ -25,6 +25,7 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { renderEmptyPlaceholder } from '@/utils/renderEmptyPlaceholder';
 
 const InputSearch = Input.Search;
 
@@ -184,7 +185,7 @@ export default function WorkflowList() {
               viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
           >
-            {record.workflow_name}
+            {renderEmptyPlaceholder(record.workflow_name)}
           </span>
         </Popover>
       )
@@ -248,7 +249,7 @@ export default function WorkflowList() {
               )
             }
           >
-            {record.source_path}
+            {renderEmptyPlaceholder(record.source_path)}
           </span>
         </Popover>
       )
@@ -270,7 +271,7 @@ export default function WorkflowList() {
               )
             }
           >
-            {record.target_path}
+            {renderEmptyPlaceholder(record.target_path)}
           </span>
         </Popover>
       )
@@ -282,7 +283,7 @@ export default function WorkflowList() {
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.user_name} position="tl">
-          <span>{record.user_name}</span>
+          <span>{renderEmptyPlaceholder(record.user_name)}</span>
         </Popover>
       )
     },
@@ -291,7 +292,11 @@ export default function WorkflowList() {
       dataIndex: 'create_time',
       width: 150,
       render: (_, record) => (
-        <span>{new Date(record.create_time).toLocaleString()}</span>
+        <span>
+          {record.create_time == '' || record.create_time == null
+            ? '-'
+            : new Date(record.create_time).toLocaleString()}
+        </span>
       ),
       sorter: true
     },
