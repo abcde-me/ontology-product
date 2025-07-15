@@ -18,6 +18,7 @@
   .operate-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
+    margin-right: 16px;
   }
 
   .operate-text:hover {

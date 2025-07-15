@@ -177,12 +177,12 @@ export default function WorkflowList() {
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
-      width: 100,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span
+            style={{ fontWeight: 500 }}
             onClick={() => {
               viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
@@ -239,7 +239,6 @@ export default function WorkflowList() {
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 130,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -261,7 +260,6 @@ export default function WorkflowList() {
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 130,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -283,7 +281,7 @@ export default function WorkflowList() {
     {
       title: '创建人',
       dataIndex: 'user_name',
-      width: 80,
+      width: 100,
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.user_name} position="tl">
@@ -307,10 +305,10 @@ export default function WorkflowList() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 130,
       fixed: 'right',
+      width: 160,
       render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex' }}>
           <span
             className="operate-text"
             onClick={() => {
