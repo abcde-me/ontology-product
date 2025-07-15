@@ -57,11 +57,6 @@ export default function MemberForm() {
   // 调试日志：显示权限控制的结果
   React.useEffect(() => {
     if (processedOrgData.length > 0) {
-      console.log(
-        'Organization MemberForm TreeSelect 权限控制结果:',
-        processedOrgData
-      );
-
       // 统计禁用的节点数量
       const countDisabledNodes = (nodes: any[]): number => {
         let count = 0;
@@ -151,7 +146,6 @@ export default function MemberForm() {
       prevOrgIdRef.current !== null &&
       prevOrgIdRef.current !== currentOrgId
     ) {
-      console.log('Organization changed, clearing member form');
       // 清空表单
       form.resetFields();
       // 设置默认的组织ID

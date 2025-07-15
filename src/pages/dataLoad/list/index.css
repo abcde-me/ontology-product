@@ -17,12 +17,7 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  .cascader-dropdown .arco-cascader-list-wrapper {
-    width: 212px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+
   .omit {
     white-space: nowrap;
     overflow: hidden;
@@ -44,3 +39,12 @@
     cursor: pointer;
   }
 }
+.arco-cascader-list-item-label {
+  white-space: nowrap; /* 禁止换行 */
+  overflow: hidden; /* 隐藏溢出内容 */
+  text-overflow: ellipsis; /* 超出部分显示... */
+  max-width: 212px;
+}
+/* .cascader-dropdown .arco-cascader-list-wrapper {
+ 
+} */

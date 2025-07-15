@@ -87,15 +87,17 @@ export default function OrgTree() {
   };
 
   function searchData(inputValue: any) {
-    const loop = (data: any[]): any[] => {
-      const result: any[] = [];
+    const loop = (data) => {
+      const result = [];
       data.forEach((item) => {
         if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
+          // @ts-expect-error
           result.push({ ...item });
         } else if (item.children) {
           const filterData = loop(item.children);
 
           if (filterData.length) {
+            // @ts-expect-error
             result.push({ ...item, children: filterData });
           }
         }
@@ -103,7 +105,7 @@ export default function OrgTree() {
       return result;
     };
 
-    return loop(orgData || []);
+    return loop(orgData);
   }
 
   useEffect(() => {
@@ -129,21 +131,19 @@ export default function OrgTree() {
 
       // 优先使用用户的 organization_id
       if (userInfo?.organization_id) {
-        console.log('Finding user organization:', userInfo.organization_id);
         targetNode = findNodeById(treeData, userInfo.organization_id);
         if (targetNode) {
-          targetKey = String((targetNode as any).key || (targetNode as any).id);
+          // @ts-expect-error
+          targetKey = String(targetNode.key || targetNode.id);
           pathToExpand = getPathToRoot(treeData, userInfo.organization_id);
-          console.log('Found user organization node:', targetNode);
-          console.log('Path to expand:', pathToExpand);
         }
       }
 
       // 如果没有找到用户组织或用户是超级管理员，使用第一个节点
       if (!targetNode && treeData.length > 0) {
         targetNode = treeData[0];
-        targetKey = String((targetNode as any).key || (targetNode as any).id);
-        console.log('Using first node as default:', targetNode);
+        // @ts-expect-error
+        targetKey = String(targetNode.key || targetNode.id);
       }
 
       if (targetNode && targetKey) {
@@ -157,12 +157,6 @@ export default function OrgTree() {
         // 设置当前组织
         orgStore.setCurrentOrg(targetNode);
 
-        console.log('Initialized tree with:', {
-          selectedKey: targetKey,
-          expandedKeys: keysToExpand,
-          targetNode
-        });
-
         setHasInitialized(true);
       }
     }
@@ -170,21 +164,13 @@ export default function OrgTree() {
 
   // 同步 selectedKeys 和 currentOrg（只在初始化完成后生效）
   useEffect(() => {
-    console.log(
-      'currentOrg changed:',
-      currentOrg,
-      'hasInitialized:',
-      hasInitialized
-    );
     if (hasInitialized && currentOrg && (currentOrg.key || currentOrg.id)) {
       // 优先使用 key，如果没有 key 则使用 id
       const keyToSelect = String(currentOrg.key || currentOrg.id);
-      console.log('Setting selectedKeys to:', [keyToSelect]);
       setSelectedKeys([keyToSelect]);
     }
   }, [currentOrg, hasInitialized]);
 
-  console.log('selectedKeys', selectedKeys);
   return (
     <div>
       <PreDelModal />
@@ -308,19 +294,13 @@ export default function OrgTree() {
             );
           }}
           onSelect={(selectedKeys, info) => {
-            console.log('onSelect triggered:', selectedKeys, info);
             setSelectedKeys(selectedKeys);
             if (info.selectedNodes[0]) {
-              console.log(
-                'Setting currentOrg from onSelect:',
-                info.selectedNodes[0].props
-              );
               orgStore.setCurrentOrg(info.selectedNodes[0].props);
             }
           }}
           renderExtra={(node: any) => {
             const { perms, level } = node;
-            console.log('node', node);
             // 是否可以创建， 如果perms包括 "can_create"
             const canCreate = perms?.includes('can_create') && level < 7;
             // 是否可以编辑， 如果perms包括 "can_edit"

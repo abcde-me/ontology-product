@@ -23,6 +23,7 @@ import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
+import { OverflowTooltip } from './utils/textOverflow';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -125,18 +126,21 @@ export default function Connection() {
       getlist();
     }
   };
+  // 判断文字是否溢出
+  const txtOverflowHan = (txt) => {};
   // 连接器配置项
   const columns: any = [
     {
       title: '连接器名称',
       dataIndex: 'name',
-      width: 230,
+      width: 300,
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.name} position="tl">
+          <Tooltip content={item.name} position="tl" disabled={false}>
             {item.name}
           </Tooltip>
+          // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
     },
@@ -176,7 +180,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 150,
+      width: 130,
       dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
@@ -205,13 +209,13 @@ export default function Connection() {
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      width: 200,
+      width: 170,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
-      width: 200,
+      width: 170,
       dataIndex: 'updated_at',
       render: (_, item) => <div className="fontMM">{item.updated_at}</div>,
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at)
@@ -357,10 +361,12 @@ export default function Connection() {
   return (
     <div
       style={{
+        minHeight: '94%',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 10px 0px',
+        margin: '10px',
+        padding: '20px',
         borderRadius: '10px'
       }}
     >
@@ -368,7 +374,7 @@ export default function Connection() {
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
-          margin: '20px 0px 15px 20px'
+          margin: '0px 0px 15px 0px'
         }}
       >
         连接器
@@ -377,8 +383,7 @@ export default function Connection() {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          width: '100%',
-          padding: '0px 20px'
+          width: '100%'
         }}
       >
         <Input.Search
@@ -402,7 +407,7 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        style={{ padding: '10px 20px' }}
+        style={{ padding: '10px 0px' }}
         pagination={false}
         rowKey="id"
         loading={tableLoding}
@@ -433,7 +438,7 @@ export default function Connection() {
       {/* 详情逻辑 */}
 
       <Modal
-        style={{ width: '760px' }}
+        style={{ width: '760px', height: '553px' }}
         visible={visible2}
         footer={null}
         onCancel={() => {

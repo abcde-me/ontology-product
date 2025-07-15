@@ -89,6 +89,8 @@ export default function getFileIcon(file_type: string) {
       return <EpubIcon className="icon-size" />;
     case FileType.json:
       return <JsonIcon className="icon-size" />;
+    case FileType.jsonl:
+      return <JsonIcon className="icon-size" />;
     case FileType.markdown:
       return <MarkDownIcon className="icon-size" />;
     case FileType.md:

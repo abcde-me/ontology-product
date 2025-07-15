@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
@@ -12,6 +12,7 @@ import {
   getTargetFileTypeList,
   getSourceFileTypeList
 } from '@/api/dataCatalog';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 图标组件定义
@@ -279,21 +280,11 @@ export const getUnifiedColumns = (
         ellipsis: true,
         width: 200,
         render: (_, record) => (
-          <div>
-            <Popover content={record.file_name} style={{ fontSize: '14px' }}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.file_name}
-              </span>
-            </Popover>
-          </div>
+          <EllipsisPopover
+            value={record.file_name}
+            isEdit={false}
+            preferTypography
+          />
         )
       },
       {
@@ -343,21 +334,11 @@ export const getUnifiedColumns = (
         ellipsis: true,
         width: 160,
         render: (_, record) => (
-          <div>
-            <Popover content={record.connector_name}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.connector_name}
-              </span>
-            </Popover>
-          </div>
+          <EllipsisPopover
+            value={record.connector_name}
+            isEdit={false}
+            preferTypography
+          />
         )
       },
       {
@@ -395,21 +376,11 @@ export const getUnifiedColumns = (
         ellipsis: true,
         width: 300,
         render: (_, record) => (
-          <div>
-            <Popover content={record.short_content}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.short_content}
-              </span>
-            </Popover>
-          </div>
+          <EllipsisPopover
+            value={record.short_content}
+            isEdit={false}
+            preferTypography
+          />
         )
       },
       {

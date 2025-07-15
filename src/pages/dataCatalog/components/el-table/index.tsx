@@ -560,7 +560,7 @@ export default function Eltable() {
             alignItems: 'center',
             justifyContent: 'space-between',
             marginBottom: 12,
-            background: '#fff'
+            background: '#fff',
           }}
         >
           <Space>
@@ -587,7 +587,7 @@ export default function Eltable() {
         </div>
 
         {/* 使用统一的数据表格组件，根据active类型动态切换 */}
-        <div className="data-catalog-content" style={{ height: '100%' }}>
+        <div className="data-catalog-content">
           <UnifiedDataTable
             ref={tableRef}
             selectedNode={selectedKey}

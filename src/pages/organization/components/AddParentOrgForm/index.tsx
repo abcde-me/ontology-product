@@ -16,7 +16,6 @@ const FormItem = Form.Item;
 export default function MemberForm() {
   const [form] = Form.useForm();
   const userInfo = useUserInfo();
-  console.log('userinfo', userInfo);
   const [loading, setLoading] = useState(false);
   const org = useOrgEditor();
   const { orgStore } = org;
@@ -29,7 +28,7 @@ export default function MemberForm() {
   const findOrgIdByKey = (key: string) => {
     const findInTree = (nodes: any[]): string | null => {
       for (const node of nodes) {
-        if (node.key === key || node._key === key) {
+        if (node?.key === key || node?._key === key) {
           return node.id;
         }
         if (node.children) {
@@ -39,7 +38,7 @@ export default function MemberForm() {
       }
       return null;
     };
-    return findInTree(orgData || []);
+    return findInTree(orgData ?? []);
   };
 
   // 处理确定按钮点击
@@ -47,7 +46,6 @@ export default function MemberForm() {
     try {
       setLoading(true);
       const values = await form.validate();
-      console.log('values', values);
 
       // 如果 parent_org_id 是 key 值，需要转换为实际的 id
       if (values.parent_org_id) {

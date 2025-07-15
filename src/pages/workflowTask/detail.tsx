@@ -231,11 +231,6 @@ export default function WorkflowTaskDetail() {
                   onOk={() => {
                     handleRetryWorkflow(taskId!);
                   }}
-                  onCancel={() => {
-                    Message.error({
-                      content: '提交失败，请稍后重试'
-                    });
-                  }}
                 >
                   <span className="operate-text">重试</span>
                 </Popconfirm>
@@ -252,11 +247,6 @@ export default function WorkflowTaskDetail() {
                   content="未处理完的数据将停止处理"
                   onOk={() => {
                     handleStopWorkflow(taskId!);
-                  }}
-                  onCancel={() => {
-                    Message.error({
-                      content: '停止失败，请稍后重试'
-                    });
                   }}
                 >
                   <span className="operate-text">停止</span>

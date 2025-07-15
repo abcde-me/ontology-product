@@ -133,7 +133,6 @@ export default function MemberForm() {
     try {
       setLoading(true);
       const values = await form.validate();
-      console.log('values', values);
       const orgID = form.getFieldValue('organization_id');
       values.organization_id = orgID;
       values.id = isEdit ? currentMember.id : undefined; // 如果是编辑，添加id字段
@@ -161,9 +160,6 @@ export default function MemberForm() {
     memberStore.setVisible(false);
   };
 
-  console.log('currentMember', currentMember);
-  console.log('orgData', orgData);
-
   // 监听组织变化，当组织切换时清空表单
   useEffect(() => {
     const currentOrgId = searchParams.organization_id;
@@ -173,7 +169,6 @@ export default function MemberForm() {
       prevOrgIdRef.current !== null &&
       prevOrgIdRef.current !== currentOrgId
     ) {
-      console.log('Organization changed, clearing member form');
       // 清空表单
       form.resetFields();
       // 设置默认的组织ID

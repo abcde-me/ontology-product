@@ -1,12 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import './index.css';
-import {
-  Pagination,
-  PaginationProps,
-  Popover,
-  Table
-} from '@arco-design/web-react';
+import { Pagination, PaginationProps, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
@@ -57,9 +53,7 @@ export default function ParseNode(props: {
       width: 120,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.file_name} position="tl">
-          <span>{record.file_name}</span>
-        </Popover>
+        <EllipsisPopover value={record.file_name} isEdit={false} />
       )
     },
     {

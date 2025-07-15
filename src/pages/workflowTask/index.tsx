@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -154,41 +155,41 @@ export default function WorkflowTask() {
     {
       title: '作业ID',
       dataIndex: 'id',
-      width: 80,
+      width: 70,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id} position="tl">
-          <span
-            onClick={() =>
-              handleToTaskDeatil(
-                record?.id ?? '',
-                record?.workflow_uuid ?? '',
-                record?.ds_workflow_id ?? '',
-                record?.workflow_version ?? ''
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.id)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.id)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToTaskDeatil(
+              record?.id ?? '',
+              record?.workflow_uuid ?? '',
+              record?.ds_workflow_id ?? '',
+              record?.workflow_version ?? ''
+            );
+          }}
+        />
       )
     },
     {
       title: '作业名称',
       dataIndex: 'instance_name',
-      width: 120,
+      width: 200,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.instance_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.instance_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.instance_name)}
+          isEdit={false}
+        />
       )
     },
     {
       title: '状态',
       dataIndex: 'status',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -243,64 +244,64 @@ export default function WorkflowTask() {
       width: 170,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.time_size} position="tl">
-          <span>{renderEmptyPlaceholder(record.time_size)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.time_size)}
+          isEdit={false}
+        />
       )
     },
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
-      width: 130,
+      width: 200,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.workflow_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.workflow_name)}
+          isEdit={false}
+        />
       )
     },
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 130,
+      width: 200,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.source_parent_id,
-                1
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.source_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.source_path)}
+          isEdit={false}
+          isLink
+          handleLink={() =>
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.source_parent_id,
+              1
+            )
+          }
+        />
       )
     },
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 130,
+      width: 200,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.target_path_id,
-                record.target_parent_id,
-                2
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.target_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.target_path)}
+          isEdit={false}
+          isLink
+          handleLink={() =>
+            handleToDirectoryPath(
+              record.target_path_id,
+              record.target_parent_id,
+              2
+            )
+          }
+        />
       )
     },
     {
@@ -357,14 +358,18 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            style={{ width: 120 }}
+            style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}
           />
           <InputSearch
-            placeholder="输入作业ID搜索"
-            style={{ width: 230 }}
+            placeholder={
+              searchSelectValue === 'task_id'
+                ? '输入作业ID搜索'
+                : '输入作业名称搜索'
+            }
+            style={{ width: 160 }}
             value={searchValue}
             onChange={(value) => {
               setSearchValue(value);

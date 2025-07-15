@@ -24,7 +24,6 @@ export default function Search() {
       }
 
       // 先更新 store 中的搜索参数
-      console.log('Combined search params:', newSearchParams);
       orgStore.setSearchParams(newSearchParams);
 
       // 直接传递搜索参数给 fetchData，避免时序问题
@@ -57,7 +56,7 @@ export default function Search() {
           type="primary"
           className="flex items-center gap-1 px-3"
           onClick={() => {
-            orgStore.setCurrentMember({});
+            orgStore.setCurrentMember(null);
             orgStore.setVisible(true);
           }}
         >

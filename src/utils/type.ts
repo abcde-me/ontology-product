@@ -972,6 +972,7 @@ export enum FileType {
   rar = 'rar',
   epub = 'epub',
   json = 'json',
+  jsonl = 'jsonl',
   markdown = 'markdown',
   md = 'md',
   mp3 = 'mp3',

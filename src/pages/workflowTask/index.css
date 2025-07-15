@@ -24,12 +24,24 @@
     color: rgba(67, 141, 251, 1);
   }
 
-  tbody .arco-table-tr:hover .hover-change {
+  tbody .hover-change .ellipsis-text {
+    color: #1e293b;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
   }
 
-  tbody .arco-table-tr:hover .hover-change:hover {
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
     color: rgba(67, 141, 251, 1);
+  }
+
+  .arco-select-size-default.arco-select-single .arco-select-view {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .arco-input-inner-wrapper {
+    border-radius: 0 4px 4px 0;
   }
 }
