@@ -32,4 +32,12 @@
   tbody .arco-table-tr:hover .hover-change:hover {
     color: rgba(67, 141, 251, 1);
   }
+
+  .arco-select-size-default.arco-select-single .arco-select-view {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .arco-input-inner-wrapper {
+    border-radius: 0 4px 4px 0;
+  }
 }

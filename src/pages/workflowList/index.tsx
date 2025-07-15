@@ -177,12 +177,13 @@ export default function WorkflowList() {
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
+      width: 300,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
           <span
-            style={{ fontWeight: 500 }}
+            style={{ fontWeight: 600 }}
             onClick={() => {
               viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
             }}
@@ -239,6 +240,7 @@ export default function WorkflowList() {
     {
       title: '源数据目录',
       dataIndex: 'source_path',
+      width: 280,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -260,6 +262,7 @@ export default function WorkflowList() {
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
+      width: 280,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (

@@ -154,7 +154,7 @@ export default function WorkflowTask() {
     {
       title: '作业ID',
       dataIndex: 'id',
-      width: 80,
+      width: 70,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -177,7 +177,7 @@ export default function WorkflowTask() {
     {
       title: '作业名称',
       dataIndex: 'instance_name',
-      width: 120,
+      width: 200,
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.instance_name} position="tl">
@@ -188,7 +188,7 @@ export default function WorkflowTask() {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -251,7 +251,7 @@ export default function WorkflowTask() {
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
-      width: 130,
+      width: 200,
       ellipsis: true,
       render: (_, record) => (
         <Popover trigger="hover" content={record.workflow_name} position="tl">
@@ -262,7 +262,7 @@ export default function WorkflowTask() {
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 130,
+      width: 200,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -284,7 +284,7 @@ export default function WorkflowTask() {
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 130,
+      width: 200,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
@@ -357,14 +357,18 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            style={{ width: 120 }}
+            style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}
           />
           <InputSearch
-            placeholder="输入作业ID搜索"
-            style={{ width: 230 }}
+            placeholder={
+              searchSelectValue === 'task_id'
+                ? '输入作业ID搜索'
+                : '输入作业名称搜索'
+            }
+            style={{ width: 160 }}
             value={searchValue}
             onChange={(value) => {
               setSearchValue(value);
