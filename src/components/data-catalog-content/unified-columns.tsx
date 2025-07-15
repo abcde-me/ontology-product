@@ -280,7 +280,7 @@ export const getUnifiedColumns = (
         width: 200,
         render: (_, record) => (
           <div>
-            <Popover content={record.file_name}>
+            <Popover content={record.file_name} style={{ fontSize: '14px' }}>
               <span
                 style={{
                   display: 'block',

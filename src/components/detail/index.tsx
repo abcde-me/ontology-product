@@ -1087,8 +1087,8 @@ const DatasetDetail: React.FC = () => {
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 16
+                alignItems: 'center'
+                // marginBottom: 12
               }}
             >
               <Input
@@ -1224,6 +1224,9 @@ const DatasetDetail: React.FC = () => {
                 {/* 分页控件 */}
                 <div className="pagination-wrapper">
                   <Pagination
+                    style={{
+                      float: 'right'
+                    }}
                     current={currentPage}
                     pageSize={pageSize}
                     total={total}
@@ -1234,6 +1237,7 @@ const DatasetDetail: React.FC = () => {
                     showTotal={(total, range) =>
                       `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
                     }
+                    sizeOptions={[10, 20, 50, 100]}
                     showJumper
                     sizeCanChange={true}
                   />
@@ -1278,7 +1282,7 @@ const DatasetDetail: React.FC = () => {
               description: datasetDetail.description || '',
               version: datasetDetail.latest_version || 'v1.0.0',
               tags: datasetDetail.tag_names || [],
-              model: datasetDetail.src_model,
+              model: datasetDetail.src_model || '-',
               creator: datasetDetail.creator_name || ''
             }}
             onSubmit={handleEditSubmit}

@@ -225,7 +225,7 @@
   overflow-x: auto;
 }
 .arco-table-tr > th {
-  /* background-color: rgb(245, 249, 255); */
+  background-color: #f5f9ff;
 }
 .basic-info-card .arco-table-element {
   min-width: 1200px;

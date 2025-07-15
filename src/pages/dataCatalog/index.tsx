@@ -1,6 +1,6 @@
 import React from 'react';
 import SourceData from './components/source-data';
-import Eltable from './components/el-table';
+import ElTable from './components/el-table';
 import DataCatalogProvider from './components/DataCatalogProvider';
 import './index.css';
 
@@ -14,7 +14,7 @@ const DataCatalog: React.FC = () => {
           </div>
           <div className="flex w-full" style={{ height: 'calc(100% - 43px)' }}>
             <SourceData />
-            <Eltable />
+            <ElTable />
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import UAPI from '@/api';
 export async function getTaskList(params: {
   uid: string | number;
   search_value: string;
+  instance_name: string;
   page: number;
   page_size: number;
   status: string;

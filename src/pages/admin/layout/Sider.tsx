@@ -343,23 +343,11 @@ function LayoutWithSider(props: { children }) {
           <Sider
             collapsed={collapsed}
             onCollapse={handleCollapsed}
-            collapsible
-            trigger={
-              collapsed ? (
-                <IconMenuUnfold className="modaforge-icon-clickable" />
-              ) : (
-                <IconMenuFold className="modaforge-icon-clickable" />
-              )
-            }
-            breakpoint="xl"
             className={cn(
               'modaforge-sider bg-transparent shadow-none',
               collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
             )}
           >
-            {/* <div className="mb-[18px] mt-[26px] pl-[20px] text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-              {collapsed ? '' : '多模态治理平台'}
-            </div> */}
             {knowledgeDetailSidebar &&
               (collapsed ? (
                 <div

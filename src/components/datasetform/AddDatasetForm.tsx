@@ -447,7 +447,7 @@ const DatasetForm = React.forwardRef<
             maxLength={128}
             showWordLimit
             // style={{ width: '100%', marginLeft: 10 }}
-            placeholder="输入数据集名称..."
+            placeholder="输入数据集名称"
           />
         </Form.Item>
         <div className="formSelect">
@@ -457,7 +457,7 @@ const DatasetForm = React.forwardRef<
             rules={[{ required: false, message: '请选择至少一个标签' }]}
           >
             <Select
-              placeholder="请输入或选择标签..."
+              placeholder="请输入或选择标签"
               mode="multiple"
               options={tagList}
               dropdownMenuClassName={styles.dropdownMenuSelect}
@@ -493,7 +493,7 @@ const DatasetForm = React.forwardRef<
           // }
         >
           <Input.TextArea
-            placeholder="这里输入对数据集的描述和说明信息..."
+            placeholder="这里输入对数据集的描述和说明信息"
             rows={1}
             maxLength={500}
             showWordLimit
@@ -649,7 +649,7 @@ const DatasetForm = React.forwardRef<
                     placeholder={
                       !selectedConnector
                         ? '请先选择连接器'
-                        : '请选择要使用的文件...'
+                        : '请选择要使用的文件'
                     }
                     mode="multiple"
                     // options={connectorFileInformation}
