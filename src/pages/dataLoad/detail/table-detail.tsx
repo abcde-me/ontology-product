@@ -254,15 +254,14 @@ const TableDetail = (props) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 background: 'rgb(255, 125, 0)',
-                marginRight: '10px',
                 color: 'white'
               }}
             >
               !
             </div>
-            <div style={{ fontSize: '15px' }}>停止运行</div>
+            <div style={{ fontSize: '15px', marginLeft: '10px' }}>停止运行</div>
           </div>
-          <div style={{ padding: '0px 28px', fontSize: '14px' }}>
+          <div style={{ padding: '0px 30px', fontSize: '14px' }}>
             该操作会停止当前数据载入运行任务，停止后将无法恢复运行，是否要继续当前操作?
           </div>
         </Modal>

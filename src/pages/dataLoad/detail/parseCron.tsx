@@ -44,7 +44,7 @@ export function parseCron(cron) {
 }
 export const formatRunTime = (totalSeconds: number) => {
   if (totalSeconds == 0) return '0s'; // 处理 0 秒的情况
-  if (!totalSeconds) return '';
+  if (totalSeconds == -1) return '';
 
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
