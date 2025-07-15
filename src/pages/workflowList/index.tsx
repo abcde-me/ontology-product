@@ -6,13 +6,12 @@ import {
   Modal,
   Pagination,
   PaginationProps,
-  Popconfirm,
   Popover,
-  Table,
-  Tag
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
 import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
@@ -202,18 +201,16 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name',
       width: 300,
       ellipsis: true,
-      className: 'hover-change',
+      className: 'hover-change workflow-name',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name} position="tl">
-          <span
-            style={{ fontWeight: 600 }}
-            onClick={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          >
-            {renderEmptyPlaceholder(record.workflow_name)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.workflow_name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+          }}
+        />
       )
     },
     {
@@ -267,19 +264,18 @@ export default function WorkflowList() {
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.parent_source_path_id,
-                1
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.source_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.source_path)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.parent_source_path_id,
+              1
+            );
+          }}
+        />
       )
     },
     {
@@ -289,19 +285,18 @@ export default function WorkflowList() {
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.target_path_id,
-                record.parent_target_path_id,
-                2
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.target_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.target_path)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.parent_source_path_id,
+              2
+            );
+          }}
+        />
       )
     },
     {
@@ -310,9 +305,10 @@ export default function WorkflowList() {
       width: 100,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.user_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.user_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.user_name)}
+          isEdit={false}
+        />
       )
     },
     {
@@ -354,7 +350,7 @@ export default function WorkflowList() {
           <Popover
             trigger="hover"
             content="请先下线工作流"
-            position="tl"
+            position="top"
             disabled={!record.is_online}
           >
             <span

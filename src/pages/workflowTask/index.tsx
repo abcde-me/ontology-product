@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -158,20 +159,19 @@ export default function WorkflowTask() {
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.id} position="tl">
-          <span
-            onClick={() =>
-              handleToTaskDeatil(
-                record?.id ?? '',
-                record?.workflow_uuid ?? '',
-                record?.ds_workflow_id ?? '',
-                record?.workflow_version ?? ''
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.id)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.id)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToTaskDeatil(
+              record?.id ?? '',
+              record?.workflow_uuid ?? '',
+              record?.ds_workflow_id ?? '',
+              record?.workflow_version ?? ''
+            );
+          }}
+        />
       )
     },
     {
@@ -180,9 +180,10 @@ export default function WorkflowTask() {
       width: 200,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.instance_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.instance_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.instance_name)}
+          isEdit={false}
+        />
       )
     },
     {
@@ -243,9 +244,10 @@ export default function WorkflowTask() {
       width: 170,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.time_size} position="tl">
-          <span>{renderEmptyPlaceholder(record.time_size)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.time_size)}
+          isEdit={false}
+        />
       )
     },
     {
@@ -254,9 +256,10 @@ export default function WorkflowTask() {
       width: 200,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.workflow_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.workflow_name)}
+          isEdit={false}
+        />
       )
     },
     {
@@ -266,19 +269,18 @@ export default function WorkflowTask() {
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.source_parent_id,
-                1
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.source_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.source_path)}
+          isEdit={false}
+          isLink
+          handleLink={() =>
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.source_parent_id,
+              1
+            )
+          }
+        />
       )
     },
     {
@@ -288,19 +290,18 @@ export default function WorkflowTask() {
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.target_path_id,
-                record.target_parent_id,
-                2
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.target_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.target_path)}
+          isEdit={false}
+          isLink
+          handleLink={() =>
+            handleToDirectoryPath(
+              record.target_path_id,
+              record.target_parent_id,
+              2
+            )
+          }
+        />
       )
     },
     {
