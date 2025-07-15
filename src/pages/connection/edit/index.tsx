@@ -93,8 +93,8 @@ const Edit = (props: any) => {
           <span
             style={{
               margin: '13px 0px 13px 0px',
-              fontSize: '17px',
-              fontWeight: '500'
+              fontSize: '14px',
+              fontWeight: '600'
             }}
           >
             连接信息

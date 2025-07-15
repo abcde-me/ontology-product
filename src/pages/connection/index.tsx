@@ -433,7 +433,7 @@ export default function Connection() {
       {/* 详情逻辑 */}
 
       <Modal
-        style={{ width: '700px' }}
+        style={{ width: '760px' }}
         visible={visible2}
         footer={null}
         onCancel={() => {
