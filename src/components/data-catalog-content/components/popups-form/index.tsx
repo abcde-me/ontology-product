@@ -95,6 +95,7 @@ const FormComponent: React.FC<FormProps> = ({
           fileNames = exportdatas.map((item) => item.name);
         }
         params['file_names'] = fileNames;
+        params['output_type'] = 'dataset';
       }
 
       const res = await exportFile(params);
