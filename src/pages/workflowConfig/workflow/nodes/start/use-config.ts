@@ -45,9 +45,20 @@ const useConfig = (id: string, payload: StartNodeType) => {
     [inputs, setInputs]
   );
 
+  const updatePathName = useCallback(
+    (name: string) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.data_path_name = name;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
+
   return {
     readOnly,
     updateInputs,
+    updatePathName,
     inputs
   };
 };
