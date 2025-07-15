@@ -406,7 +406,7 @@ export default function Eltable() {
             background: '#f5f5f5',
             borderRadius: 4,
             overflow: 'hidden',
-            border: '1px solid #e5e6eb'
+            border: 0
           }}
         >
           <Input.Search
@@ -450,7 +450,7 @@ export default function Eltable() {
               <Select.Option value="ID">ID</Select.Option>
             </Select>
             <InputSearch
-              placeholder={`输入关键字搜索`}
+              placeholder={`输入ID/关键字搜索`}
               style={{ width: '160px' }}
               value={searchKeyword}
               onChange={(value) => setSearchKeyword(value)}
@@ -541,14 +541,14 @@ export default function Eltable() {
 
   return (
     <div style={{ flex: 1, overflowX: 'auto' }}>
-      <div>
+      <div style={{ height: 'calc(100% - 50px)' }}>
         {/* 通用的顶部操作栏 */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 16,
+            marginBottom: 12,
             background: '#fff'
           }}
         >
@@ -576,7 +576,7 @@ export default function Eltable() {
         </div>
 
         {/* 使用统一的数据表格组件，根据active类型动态切换 */}
-        <div className="data-catalog-content">
+        <div className="data-catalog-content" style={{ height: '100%' }}>
           <UnifiedDataTable
             ref={tableRef}
             selectedNode={selectedKey}
@@ -606,7 +606,7 @@ export default function Eltable() {
         names={defaultName}
         exportdatas={selectedRows}
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
