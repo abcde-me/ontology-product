@@ -5,7 +5,7 @@
   margin: 10px;
   padding: 20px;
   border-radius: 10px;
-  min-height: 94%;
+  min-height: 97%;
 
   .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;
@@ -18,6 +18,7 @@
   .operate-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
+    margin-right: 16px;
   }
 
   .operate-text:hover {
@@ -29,12 +30,59 @@
     cursor: not-allowed;
   }
 
-  tbody .arco-table-tr:hover .hover-change {
+  tbody .workflow-name .ellipsis-text {
+    font-weight: 600;
+  }
+
+  tbody .hover-change .ellipsis-text {
+    color: #1e293b;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
   }
 
-  tbody .arco-table-tr:hover .hover-change:hover {
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
     color: rgba(67, 141, 251, 1);
   }
+
+  .publish-part {
+    width: 75px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .published {
+    background: #dbf4ee;
+    color: #0ab58d;
+  }
+
+  .not-published {
+    background: #f7f7f9;
+    color: #84868c;
+  }
+}
+
+.workflow-list-modal-title {
+  font-weight: 500;
+  font-size: 16px;
+  height: 24px;
+}
+
+.workflow-list-modal-content {
+  font-weight: 400;
+  font-size: 14px;
+  color: #1d2129;
+  height: 22px;
+  margin: 10px 0 0 28px;
+}
+
+.arco-modal-footer .arco-btn-secondary:focus {
+  box-shadow: none;
 }

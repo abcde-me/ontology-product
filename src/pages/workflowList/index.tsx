@@ -3,20 +3,18 @@ import {
   Button,
   Input,
   Message,
+  Modal,
   Pagination,
   PaginationProps,
-  Popconfirm,
   Popover,
-  Table,
-  Tag
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
-import {
-  IconCheckCircleFill,
-  IconClockCircle
-} from '@arco-design/web-react/icon';
+import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
+import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
   getWorkflowList,
@@ -128,6 +126,28 @@ export default function WorkflowList() {
     }
   };
 
+  // 点击删除操作弹窗
+  const handleDelete = (
+    workflow_uuid: number | string,
+    workflow_version: string
+  ) => {
+    Modal.confirm({
+      title: (
+        <span className="workflow-list-modal-title">确认删除工作流吗？</span>
+      ),
+      content: (
+        <div className="workflow-list-modal-content">
+          删除该工作流后，工作流中的内容将全部清除。
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        handleDeleteWorkflow(workflow_uuid, workflow_version);
+      }
+    });
+  };
+
   // 删除工作流
   const handleDeleteWorkflow = async (
     workflow_uuid: number | string,
@@ -179,19 +199,18 @@ export default function WorkflowList() {
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
-      width: 100,
+      width: 300,
       ellipsis: true,
-      className: 'hover-change',
+      className: 'hover-change workflow-name',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.workflow_name} position="tl">
-          <span
-            onClick={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          >
-            {renderEmptyPlaceholder(record.workflow_name)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.workflow_name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+          }}
+        />
       )
     },
     {
@@ -217,13 +236,15 @@ export default function WorkflowList() {
       width: 100,
       render: (_, record) =>
         record.is_online ? (
-          <Tag color="green" icon={<IconCheckCircleFill />}>
-            已上线
-          </Tag>
+          <div className="publish-part published">
+            <Success11Icon className="mr-[6px] size-[16px]" />
+            <span>已上线</span>
+          </div>
         ) : (
-          <Tag color="gray" icon={<IconClockCircle />}>
-            未上线
-          </Tag>
+          <div className="publish-part not-published">
+            <Clock1Icon className="mr-[6px] size-[16px]" />
+            <span>未上线</span>
+          </div>
         ),
       filters: [
         {
@@ -239,56 +260,55 @@ export default function WorkflowList() {
     {
       title: '源数据目录',
       dataIndex: 'source_path',
-      width: 130,
+      width: 280,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.source_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.parent_source_path_id,
-                1
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.source_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.source_path)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.parent_source_path_id,
+              1
+            );
+          }}
+        />
       )
     },
     {
       title: '目标数据目录',
       dataIndex: 'target_path',
-      width: 130,
+      width: 280,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (
-        <Popover trigger="hover" content={record.target_path} position="tl">
-          <span
-            onClick={() =>
-              handleToDirectoryPath(
-                record.target_path_id,
-                record.parent_target_path_id,
-                2
-              )
-            }
-          >
-            {renderEmptyPlaceholder(record.target_path)}
-          </span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.target_path)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleToDirectoryPath(
+              record.source_path_id,
+              record.parent_source_path_id,
+              2
+            );
+          }}
+        />
       )
     },
     {
       title: '创建人',
       dataIndex: 'user_name',
-      width: 80,
+      width: 100,
       ellipsis: true,
       render: (_, record) => (
-        <Popover trigger="hover" content={record.user_name} position="tl">
-          <span>{renderEmptyPlaceholder(record.user_name)}</span>
-        </Popover>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.user_name)}
+          isEdit={false}
+        />
       )
     },
     {
@@ -307,10 +327,10 @@ export default function WorkflowList() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 130,
       fixed: 'right',
+      width: 160,
       render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex' }}>
           <span
             className="operate-text"
             onClick={() => {
@@ -327,36 +347,21 @@ export default function WorkflowList() {
           >
             复制
           </span>
-          <Popconfirm
-            disabled={record.is_online}
-            focusLock
-            title="确定删除工作流吗？"
-            content="删除该工作流后，工作流中的内容将全部清除。"
-            onOk={() => {
-              handleDeleteWorkflow(
-                record.workflow_uuid,
-                record.workflow_version
-              );
-            }}
-            onCancel={() => {
-              Message.error({
-                content: '删除失败，请稍后重试'
-              });
-            }}
+          <Popover
+            trigger="hover"
+            content="请先下线工作流"
+            position="top"
+            disabled={!record.is_online}
           >
-            <Popover
-              trigger="hover"
-              content="请先下线工作流"
-              position="tl"
-              disabled={!record.is_online}
+            <span
+              className={record.is_online ? 'disabled-text' : 'operate-text'}
+              onClick={() =>
+                handleDelete(record.workflow_uuid, record.workflow_version)
+              }
             >
-              <span
-                className={record.is_online ? 'disabled-text' : 'operate-text'}
-              >
-                删除
-              </span>
-            </Popover>
-          </Popconfirm>
+              删除
+            </span>
+          </Popover>
         </div>
       )
     }
