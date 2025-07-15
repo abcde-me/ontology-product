@@ -3,6 +3,7 @@ import {
   Button,
   Input,
   Message,
+  Modal,
   Pagination,
   PaginationProps,
   Popconfirm,
@@ -124,6 +125,28 @@ export default function WorkflowList() {
         content: res.message || '复制失败，请稍后重试'
       });
     }
+  };
+
+  // 点击删除操作弹窗
+  const handleDelete = (
+    workflow_uuid: number | string,
+    workflow_version: string
+  ) => {
+    Modal.confirm({
+      title: (
+        <span className="workflow-list-modal-title">确认删除工作流吗？</span>
+      ),
+      content: (
+        <div className="workflow-list-modal-content">
+          删除该工作流后，工作流中的内容将全部清除。
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        handleDeleteWorkflow(workflow_uuid, workflow_version);
+      }
+    });
   };
 
   // 删除工作流
@@ -328,31 +351,21 @@ export default function WorkflowList() {
           >
             复制
           </span>
-          <Popconfirm
-            disabled={record.is_online}
-            focusLock
-            title="确定删除工作流吗？"
-            content="删除该工作流后，工作流中的内容将全部清除。"
-            onOk={() => {
-              handleDeleteWorkflow(
-                record.workflow_uuid,
-                record.workflow_version
-              );
-            }}
+          <Popover
+            trigger="hover"
+            content="请先下线工作流"
+            position="tl"
+            disabled={!record.is_online}
           >
-            <Popover
-              trigger="hover"
-              content="请先下线工作流"
-              position="tl"
-              disabled={!record.is_online}
+            <span
+              className={record.is_online ? 'disabled-text' : 'operate-text'}
+              onClick={() =>
+                handleDelete(record.workflow_uuid, record.workflow_version)
+              }
             >
-              <span
-                className={record.is_online ? 'disabled-text' : 'operate-text'}
-              >
-                删除
-              </span>
-            </Popover>
-          </Popconfirm>
+              删除
+            </span>
+          </Popover>
         </div>
       )
     }
