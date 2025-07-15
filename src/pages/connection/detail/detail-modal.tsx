@@ -29,7 +29,7 @@ const ModalDetail = (props) => {
     getdetailListHan();
   }, [props.detailId]);
   return (
-    <div>
+    <div className="connector-detail">
       <div className="modal-overlay">
         <div className="modal">
           <div className="modal-header">
@@ -37,7 +37,13 @@ const ModalDetail = (props) => {
           </div>
           <div className="modal-content" style={{ fontSize: '14px' }}>
             <section className="section">
-              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+              <h3
+                style={{
+                  marginBottom: '15px',
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}
+              >
                 连接器信息
               </h3>
               <div className="info-item">
@@ -89,9 +95,15 @@ const ModalDetail = (props) => {
                 <span className="value">{DetailData?.updated_at} </span>
               </div>
             </section>
-            <hr />
+            <hr className="hr-border" />
             <section className="section">
-              <h3 style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+              <h3
+                style={{
+                  marginBottom: '15px',
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}
+              >
                 连接信息
               </h3>
               {DetailData?.type == 's3' ? (
