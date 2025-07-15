@@ -11,14 +11,17 @@ import {
 } from '@arco-design/web-react';
 import { exportFile } from '@/api/dataCatalog';
 import { getConnectionList } from '@/api/connectionApi';
+import { PopupsFormFrom, SourceDataItem, TargetDataItem } from './types';
+import { Dataset } from '@/pages/datasetManagement';
+
 const FormItem = Form.Item;
 interface FormProps {
-  from: 'datasetManagement' | 'dataCatalog';
-  downloadData?: any;
+  from: PopupsFormFrom;
+  downloadData?: (SourceDataItem & TargetDataItem & Dataset) | null | undefined;
   names?: string;
   onCancel?: () => void;
   visible?: boolean; // 添加visible属性，用于控制弹框显示
-  exportdatas?: any;
+  exportdatas?: Array<SourceDataItem & TargetDataItem & Dataset>;
   exportdataset?: any;
   selectedPath?: string;
   onExportSuccess?: () => void; // 添加导出成功回调
@@ -49,23 +52,23 @@ const FormComponent: React.FC<FormProps> = ({
       }
 
       const filesArray: string[] = [];
-      if (downloadData && downloadData.data_path_id) {
+      if (downloadData?.data_path_id) {
         filesArray.push(
-          downloadData.abs_data_path + '/' + downloadData.file_name
+          downloadData.abs_data_path + '/' + downloadData.file_sub_path
         );
-      } else if (downloadData && downloadData.extras) {
+      } else if (downloadData?.extras) {
         filesArray.push(
           downloadData.full_path + '/' + downloadData.extras.file_name
         );
-      } else if (exportdataset && exportdataset.latest_file_path) {
+      } else if (exportdataset?.latest_file_path) {
         filesArray.push(
           exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
         );
       }
-      if (!exportdataset && exportdatas && exportdatas.length > 0) {
+      if (!exportdataset && exportdatas && exportdatas?.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.abs_data_path + '/' + item.file_name);
+            filesArray.push(item.abs_data_path + '/' + item.file_sub_path);
           });
         } else if (exportdatas[0].extras) {
           exportdatas.forEach((item: any) => {
@@ -86,8 +89,8 @@ const FormComponent: React.FC<FormProps> = ({
         files: filesArray
       };
 
-      // 数据集管理请求体特殊处理
-      if (from === 'datasetManagement') {
+      if (from === PopupsFormFrom.DatasetManagement) {
+        // 数据集管理请求体特殊处理
         let fileNames: string[] = [];
         if (exportdataset) {
           fileNames = [exportdataset.name];
@@ -96,6 +99,15 @@ const FormComponent: React.FC<FormProps> = ({
         }
         params['file_names'] = fileNames;
         params['output_type'] = 'dataset';
+      } else if (from === PopupsFormFrom.SourceData) {
+        const sourceData = downloadData ? [downloadData] : exportdatas;
+        // 源数据请求体特殊处理
+        params['relative_paths'] =
+          sourceData?.map((item) => item.file_sub_path) ?? [];
+        params['output_type'] = 'src';
+      } else if (from === PopupsFormFrom.TargetData) {
+        // 目标数据请求体特殊处理
+        params['output_type'] = 'target';
       }
 
       const res = await exportFile(params);
