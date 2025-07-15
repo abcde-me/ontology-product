@@ -34,15 +34,6 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
     total: 0
   });
 
-  console.log(
-    'useTable - loading:',
-    loading,
-    'list length:',
-    list?.length,
-    'organization_id:',
-    organization_id
-  );
-
   const handlePaginationChange = async (page: number, pageSize: number) => {
     setPagination((prev) => ({
       ...prev,
@@ -62,7 +53,6 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
   };
 
   const fetchData = async () => {
-    console.log('useTable fetchData called with searchParams:', searchParams);
     setLoading(true);
     try {
       await orgStore.fetchData({
@@ -78,14 +68,7 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
 
   useEffect(() => {
     // 只有当有 organization_id 时才调用接口
-    console.log(
-      'useTable useEffect triggered, organization_id from searchParams:',
-      searchParams.organization_id,
-      'from props:',
-      organization_id
-    );
     if (searchParams.organization_id || organization_id) {
-      console.log('useTable calling fetchData');
       fetchData();
     } else {
       console.log('useTable skipping fetchData because no organization_id');
@@ -100,7 +83,6 @@ export function useTable(options: UseTableOptions = {}): UseTableReturn {
   // 当 organization_id 变化时，重置分页到第1页
   useEffect(() => {
     if (searchParams.organization_id || organization_id) {
-      console.log('Organization changed, resetting pagination to page 1');
       setPagination((prev) => ({
         ...prev,
         current: 1

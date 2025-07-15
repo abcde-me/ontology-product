@@ -10,7 +10,6 @@ export default function OrgTable() {
   const org = useOrgEditor();
   const { orgStore } = org;
   const { currentOrg } = orgStore.useGetState(['currentOrg']);
-  console.log('OrgTable currentOrg: ', currentOrg);
   const columns = useColumns();
 
   // 总是调用 useTable，让它内部处理 organization_id 的逻辑

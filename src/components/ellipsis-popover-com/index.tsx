@@ -20,31 +20,26 @@ function EllipsisPopover(props: any, ref: any) {
     editType,
     handleEdit,
     className,
-    wrapperClassName,
     tips,
     validatorRules,
     preferTypography,
     ellipsis
   } = props;
-  const valueRef = useRef(null);
+  const valueRef = useRef<any>(null);
   const editRef = useRef(null);
   const columnTextRef = useRef(null);
-  const columnInputRef = useRef(null);
+  const columnInputRef = useRef<HTMLInputElement | null>(null);
   const [isShowTooltip, setIsShowTooltip] = React.useState(false);
   const [columnTextVisible, setColumnTextVisible] = React.useState(false);
   const [columnInputVisible, setColumnInputVisible] = React.useState(false);
-  const columnTimerRef = useRef(null);
+  const columnTimerRef = useRef<null | NodeJS.Timeout>(null);
 
   useImperativeHandle(ref, () => ({}));
   const onMouseOver = () => {
-    // TODO: ts错误
-    // @ts-expect-error
-    clearTimeout(columnTimerRef.current);
+    columnTimerRef.current && clearTimeout(columnTimerRef.current);
     const columnTimer = setTimeout(() => {
       setColumnTextVisible(true);
     }, 200);
-    // TODO: ts错误
-    // @ts-expect-error
     columnTimerRef.current = columnTimer;
   };
   React.useEffect(() => {
@@ -53,9 +48,9 @@ function EllipsisPopover(props: any, ref: any) {
       const tag1 = columnTextRef.current;
       if (tag && tag1) {
         let parentWidth = Number(
-          // TODO: ts错误
-          // @ts-expect-error
-          window.getComputedStyle(tag.parentNode).width.replace('px', '')
+          window
+            .getComputedStyle(tag?.parentNode as Element)
+            .width.replace('px', '')
         ); // 获取元素父级宽度精确到小数
         const contentWidth = Number(
           window.getComputedStyle(tag1).width.replace('px', '')
@@ -72,7 +67,6 @@ function EllipsisPopover(props: any, ref: any) {
   const onMouseOut = () => {
     setIsShowTooltip(false);
     setColumnTextVisible(false);
-    // TODO: ts错误
     // @ts-expect-error
     clearTimeout(columnTimerRef.current);
   };
@@ -85,9 +79,7 @@ function EllipsisPopover(props: any, ref: any) {
   const handleCopy = () => {
     const oInput = columnInputRef.current;
     // 选择对象
-    // TODO: ts错误
-    // @ts-expect-error
-    oInput.select();
+    oInput?.select && oInput.select();
     // 执行浏览器复制命令
     try {
       document.execCommand('Copy');
@@ -154,7 +146,7 @@ function EllipsisPopover(props: any, ref: any) {
     );
   };
   return (
-    <div className={`ellipsis-popover-div ${wrapperClassName || ''}`}>
+    <div className="ellipsis-popover-div">
       {renderPopover()}
       {isCopy && (
         <Popover
