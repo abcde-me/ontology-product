@@ -13,10 +13,8 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import './index.css';
-import {
-  IconCheckCircleFill,
-  IconClockCircle
-} from '@arco-design/web-react/icon';
+import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
+import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
   getWorkflowList,
@@ -217,13 +215,15 @@ export default function WorkflowList() {
       width: 100,
       render: (_, record) =>
         record.is_online ? (
-          <Tag color="green" icon={<IconCheckCircleFill />}>
-            已上线
-          </Tag>
+          <div className="publish-part published">
+            <Success11Icon className="mr-[6px] size-[16px]" />
+            <span>已上线</span>
+          </div>
         ) : (
-          <Tag color="gray" icon={<IconClockCircle />}>
-            未上线
-          </Tag>
+          <div className="publish-part not-published">
+            <Clock1Icon className="mr-[6px] size-[16px]" />
+            <span>未上线</span>
+          </div>
         ),
       filters: [
         {

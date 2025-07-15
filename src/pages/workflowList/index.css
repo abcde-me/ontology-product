@@ -5,7 +5,7 @@
   margin: 10px;
   padding: 20px;
   border-radius: 10px;
-  min-height: 94%;
+  min-height: 97%;
 
   .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;
@@ -36,5 +36,26 @@
 
   tbody .arco-table-tr:hover .hover-change:hover {
     color: rgba(67, 141, 251, 1);
+  }
+
+  .publish-part {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .published {
+    background: #dbf4ee;
+    color: #0ab58d;
+  }
+
+  .not-published {
+    background: #f7f7f9;
+    color: #84868c;
   }
 }
