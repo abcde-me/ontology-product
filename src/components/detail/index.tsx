@@ -104,6 +104,7 @@ const generateArcoColumns = (
       if (updateStatus && editingRowKey === record[idName]) {
         return (
           <Input.TextArea
+            // @ts-expect-error
             borderless={true}
             value={
               editingData[header] !== undefined
