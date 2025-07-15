@@ -93,7 +93,6 @@ export class OrgStore extends Model<InfoStoreState> {
   };
 
   async preDelOrgOperate() {
-    console.log('vwwww', this.state.hoveredOrg);
     const res = await preDelOrg({
       orgId: this.state.hoveredOrg.id
     });
@@ -133,14 +132,12 @@ export class OrgStore extends Model<InfoStoreState> {
   };
   // 设置当前选择的组织
   setCurrentOrg = (org: any) => {
-    console.log('setCurrentOrg called with:', org);
-    console.log('setCurrentOrg call stack:', new Error().stack);
     this.setState({
       currentOrg: org
     });
   };
   // 设置当前编辑的成员
-  setCurrentMember = (member: any) => {
+  setCurrentMember = (member: DataSet | null) => {
     this.setState({
       currentMember: member
     });
@@ -169,7 +166,6 @@ export class OrgStore extends Model<InfoStoreState> {
   // 添加成员
   async addMember(data: any) {
     const res = await createUser(data);
-    console.log('addMember - currentOrg state:', this.state.currentOrg);
     if (res.success) {
       this.fetchData({
         page: 1,
@@ -243,10 +239,6 @@ export class OrgStore extends Model<InfoStoreState> {
       searchParams: overrideSearchParams
     } = options || {};
 
-    console.log('fetchData called with options:', options);
-    console.log('fetchData searchParams:', this.state.searchParams);
-    console.log('fetchData currentOrg:', this.state.currentOrg);
-
     return this.asyncManager('fetchData', {
       showLoading
     }).exec(async () => {
@@ -264,8 +256,6 @@ export class OrgStore extends Model<InfoStoreState> {
           params.organization_id = this.state.currentOrg.id;
         }
 
-        console.log('fetchData final params:', params);
-
         // 处理数组参数，转换为逗号分隔的字符串
         const processedParams = Object.fromEntries(
           Object.entries(params).map(([key, value]) => {
@@ -276,7 +266,6 @@ export class OrgStore extends Model<InfoStoreState> {
           })
         );
 
-        console.log('fetchData sending to API:', processedParams);
         const response = await getUsers(processedParams);
 
         this.setList(response.data?.data || []);
@@ -334,23 +323,13 @@ export class OrgStore extends Model<InfoStoreState> {
     }).exec(async () => {
       try {
         const response = await getOrganizationTree();
-        console.log('fetchOrgData response', response);
 
         let processedOrgData = addDisabledField(response.data) || [];
-        console.log(
-          'fetchOrgData processedOrgData (before level filter)',
-          processedOrgData
-        );
 
         // 根据level字段过滤，最多展示7级
         processedOrgData = this.filterOrgDataByLevel(processedOrgData, 7);
-        console.log(
-          'fetchOrgData processedOrgData (after level filter)',
-          processedOrgData
-        );
 
         // 移除自动设置第一个组织的逻辑，让 OrgTree 组件控制初始化
-        console.log('fetchOrgData setting orgData:', processedOrgData);
         this.setTreeData(processedOrgData);
         return {
           orgData: processedOrgData

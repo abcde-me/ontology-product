@@ -152,7 +152,6 @@ export default function Search() {
       }
 
       // 直接更新 store 中的搜索参数
-      console.log('Combined search params:', newSearchParams);
       memberStore.setSearchParams(newSearchParams);
 
       // 然后触发数据获取（不传递参数，让它使用 store 中的参数）
@@ -165,8 +164,6 @@ export default function Search() {
 
   // 专门处理 TreeSelect 组织选择的函数，避免重复调用
   const handleOrgChange = (value: string | undefined) => {
-    console.log('Selected organization:', value);
-
     // 直接更新搜索参数，不触发防抖
     const newSearchParams = { ...searchParams };
 
@@ -195,7 +192,7 @@ export default function Search() {
       processedOrgData.length > 0 &&
       !hasSetDefault
     ) {
-      let orgKey: string | null = null;
+      let orgKey = null;
 
       // 优先使用 organization_id
       if (userInfo.organization_id) {
@@ -204,6 +201,7 @@ export default function Search() {
       }
       // 如果没有 organization_id，则通过 organization 名称查找
       else if (userInfo.organization) {
+        // @ts-expect-error
         orgKey = findOrgKeyByTitle(processedOrgData, userInfo.organization);
         console.log(
           'Found organization key by name:',
