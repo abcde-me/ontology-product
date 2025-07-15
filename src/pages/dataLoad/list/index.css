@@ -39,9 +39,12 @@
     cursor: pointer;
   }
 }
-.cascader-dropdown .arco-cascader-list-wrapper {
-  width: 212px !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.arco-cascader-list-item-label {
+  white-space: nowrap; /* 禁止换行 */
+  overflow: hidden; /* 隐藏溢出内容 */
+  text-overflow: ellipsis; /* 超出部分显示... */
+  max-width: 212px;
 }
+/* .cascader-dropdown .arco-cascader-list-wrapper {
+ 
+} */
