@@ -11,28 +11,7 @@ import noDataElement from '@/components/no-data';
 import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-
-// 枚举文件类型
-enum FileType {
-  doc = 'doc',
-  docx = 'docx',
-  jpg = 'jpg',
-  m4a = 'm4a',
-  mp4 = 'mp4',
-  pdf = 'pdf',
-  ppt = 'ppt',
-  pptx = 'pptx',
-  text = 'text',
-  txt = 'txt',
-  wav = 'wav',
-  exe = 'exe',
-  bucket = 'bucket',
-  dmg = 'dmg',
-  torrent = 'torrent',
-  apk = 'apk',
-  rar = 'rar',
-  epub = 'epub'
-}
+import { FileType } from '@/utils/type';
 
 // 枚举文件状态
 enum FileStatus {
@@ -125,26 +104,6 @@ export default function ParseNode(props: {
       ),
       filters: [
         {
-          text: FileType.doc,
-          value: FileType.doc
-        },
-        {
-          text: FileType.docx,
-          value: FileType.docx
-        },
-        {
-          text: FileType.jpg,
-          value: FileType.jpg
-        },
-        {
-          text: FileType.m4a,
-          value: FileType.m4a
-        },
-        {
-          text: FileType.mp4,
-          value: FileType.mp4
-        },
-        {
           text: FileType.pdf,
           value: FileType.pdf
         },
@@ -157,44 +116,60 @@ export default function ParseNode(props: {
           value: FileType.pptx
         },
         {
-          text: FileType.text,
-          value: FileType.text
-        },
-        {
           text: FileType.txt,
           value: FileType.txt
+        },
+        {
+          text: FileType.md,
+          value: FileType.md
+        },
+        {
+          text: FileType.doc,
+          value: FileType.doc
+        },
+        {
+          text: FileType.docx,
+          value: FileType.docx
+        },
+        {
+          text: FileType.jpg,
+          value: FileType.jpg
+        },
+        {
+          text: FileType.png,
+          value: FileType.png
+        },
+        {
+          text: FileType.jpeg,
+          value: FileType.jpeg
         },
         {
           text: FileType.wav,
           value: FileType.wav
         },
         {
-          text: FileType.exe,
-          value: FileType.exe
+          text: FileType.mp3,
+          value: FileType.mp3
         },
         {
-          text: FileType.bucket,
-          value: FileType.bucket
+          text: FileType.aac,
+          value: FileType.aac
         },
         {
-          text: FileType.dmg,
-          value: FileType.dmg
+          text: FileType.flac,
+          value: FileType.flac
         },
         {
-          text: FileType.torrent,
-          value: FileType.torrent
+          text: FileType.mp4,
+          value: FileType.mp4
         },
         {
-          text: FileType.apk,
-          value: FileType.apk
+          text: FileType.mov,
+          value: FileType.mov
         },
         {
-          text: FileType.rar,
-          value: FileType.rar
-        },
-        {
-          text: FileType.epub,
-          value: FileType.epub
+          text: FileType.mkv,
+          value: FileType.mkv
         }
       ]
     },

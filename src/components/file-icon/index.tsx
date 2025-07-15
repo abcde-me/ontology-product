@@ -81,6 +81,8 @@ export default function getFileIcon(file_type: string) {
       return <M4aIcon className="icon-size" />;
     case FileType.aac:
       return <M4aIcon className="icon-size" />;
+    case FileType.flac:
+      return <M4aIcon className="icon-size" />;
     case FileType.webm:
       return <M4aIcon className="icon-size" />;
     case FileType.epub:
