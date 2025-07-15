@@ -19,7 +19,7 @@ export type AudioParserNodeType = CommonNodeType & {
   vad_enabled: number;
   audio_pret: number[];
   activity_mode: number;
-  activity_mode_num: number;
+  activity_mode_num: number | string;
   is_open_multi_conv: number;
   vad_options: string[];
   audio_model_id: string | number;
