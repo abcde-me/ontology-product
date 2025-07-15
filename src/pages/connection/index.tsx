@@ -133,11 +133,11 @@ export default function Connection() {
     {
       title: '连接器名称',
       dataIndex: 'name',
-      width: 230,
+      width: 300,
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.name} position="tl" disabled={true}>
+          <Tooltip content={item.name} position="tl" disabled={false}>
             {item.name}
           </Tooltip>
           // <OverflowTooltip width={230} children={item.name}  styles=''/>
@@ -180,7 +180,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 150,
+      width: 110,
       dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
@@ -209,13 +209,13 @@ export default function Connection() {
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      width: 200,
+      width: 170,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
-      width: 200,
+      width: 170,
       dataIndex: 'updated_at',
       render: (_, item) => <div className="fontMM">{item.updated_at}</div>,
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at)
@@ -438,7 +438,7 @@ export default function Connection() {
       {/* 详情逻辑 */}
 
       <Modal
-        style={{ width: '760px' }}
+        style={{ width: '760px', height: '553px' }}
         visible={visible2}
         footer={null}
         onCancel={() => {

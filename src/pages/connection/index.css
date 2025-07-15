@@ -29,6 +29,7 @@ hr {
 }
 .set-mouse {
   cursor: pointer;
+  margin-left: 4px;
 }
 .fontMM {
   font-size: 14px;
