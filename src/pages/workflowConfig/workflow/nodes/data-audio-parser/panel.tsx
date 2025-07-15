@@ -126,7 +126,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         </FormItem>
         {activityMode === 2 && (
           <FormItem
-            label="时长："
+            label="时长（秒）："
             field="activity_mode_num"
             labelAlign="left"
             required
