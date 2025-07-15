@@ -230,7 +230,7 @@ export const ResourceEndpointsV2 = {
   workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
 };
 
-// 多模态治理平台接口
+// 多模态数据治理平台接口
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
   // 新建工作流

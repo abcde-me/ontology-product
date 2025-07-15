@@ -80,7 +80,8 @@ const LoginCard = () => {
         bordered={false}
         style={{
           borderRadius: '12px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          padding: '20px 2px'
         }}
       >
         {/* Logo 和标题部分 */}
@@ -95,7 +96,9 @@ const LoginCard = () => {
         >
           <Form.Item
             label={
-              <div className="text-[14px] font-bold text-gray-800">用户名</div>
+              <div className="max-w-30 text-[14px] font-bold text-gray-800">
+                用户名
+              </div>
             }
             field="account"
             rules={[{ required: true, message: '请输入用户名' }]}
@@ -139,7 +142,9 @@ function Header() {
       <Space className="mb-8">
         <img className="w-48 object-contain" src={LogoPng} />
         <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
-        <div className="text-xl font-bold text-gray-800">多模态治理平台</div>
+        <div className="text-xl font-bold text-gray-800">
+          多模态数据治理平台
+        </div>
       </Space>
     </div>
   );

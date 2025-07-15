@@ -982,5 +982,6 @@ export enum FileType {
   mov = 'mov',
   mkv = 'mkv',
   avi = 'avi',
-  wmv = 'wmv'
+  wmv = 'wmv',
+  flac = 'flac'
 }
