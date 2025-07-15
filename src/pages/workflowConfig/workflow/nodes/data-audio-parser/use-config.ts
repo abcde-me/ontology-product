@@ -47,6 +47,7 @@ const useConfig = (id: string, payload: AudioParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.audio_pret = fields.audio_pret;
         draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1;
+        draft.activity_mode_num = fields.activity_mode_num;
         (draft.activity_mode = fields.activity_mode),
           (draft.is_open_multi_conv = fields.vad_options.includes('conv')
             ? 2

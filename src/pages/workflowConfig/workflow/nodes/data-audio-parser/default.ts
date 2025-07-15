@@ -15,6 +15,7 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
     audio_pret: [],
     vad_enabled: 1,
     activity_mode: 1,
+    activity_mode_num: '',
     is_open_multi_conv: 1,
     vad_options: ['vad', 'conv'],
     audio_model_id: '',
