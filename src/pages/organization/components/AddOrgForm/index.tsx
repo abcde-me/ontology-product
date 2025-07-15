@@ -30,7 +30,7 @@ export default function MemberForm() {
   const findOrgIdByKey = (key: string) => {
     const findInTree = (nodes: any[]): string | null => {
       for (const node of nodes) {
-        if (node.key === key || node._key === key) {
+        if (node?.key === key || node?._key === key) {
           return node.id;
         }
         if (node.children) {
@@ -40,7 +40,7 @@ export default function MemberForm() {
       }
       return null;
     };
-    return orgData ? findInTree(orgData) : null;
+    return findInTree(orgData ?? []);
   };
 
   // 处理确定按钮点击
@@ -48,8 +48,6 @@ export default function MemberForm() {
     try {
       setLoading(true);
       const values = await form.validate();
-      console.log('hoveredOrg', hoveredOrg);
-      console.log('values', values);
 
       // 如果 parent_org_id 是 key 值，需要转换为实际的 id
       if (values.parent_org_id) {
@@ -85,7 +83,7 @@ export default function MemberForm() {
       setUserManuallySelected(false);
       form.setFieldsValue({
         parent_org_id:
-          hoveredOrg._key || currentOrg?.parent_org_id || undefined,
+          hoveredOrg?._key || currentOrg?.parent_org_id || undefined,
         name: '',
         desc: ''
       });
@@ -101,7 +99,7 @@ export default function MemberForm() {
     if (
       orgModalVisible &&
       hoveredOrg &&
-      hoveredOrg._key &&
+      hoveredOrg?._key &&
       !userManuallySelected
     ) {
       form.setFieldValue('parent_org_id', hoveredOrg._key);
@@ -158,7 +156,6 @@ export default function MemberForm() {
             }}
             renderFormat={(nodeProps, value) => {
               let targetKey: string;
-              console.log('value', value);
               if (value) {
                 // 用户手动选择了新值，显示选择的部门路径
                 targetKey = value as string;
@@ -166,7 +163,6 @@ export default function MemberForm() {
                 // 回显时，显示当前悬浮部门作为默认上级部门
                 targetKey = (hoveredOrg?._key || nodeProps?._key) as string;
               }
-              console.log('targetKey', targetKey);
               const pathTitles = getNodePathTitles(orgData, targetKey);
               return <span> {pathTitles.join(' / ')}</span>;
             }}

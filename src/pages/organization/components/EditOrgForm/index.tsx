@@ -30,9 +30,8 @@ export default function MemberForm() {
     try {
       setLoading(true);
       const values = await form.validate();
-      console.log('values', values);
       // 在values添加id字段，从hoveredOrg中获取
-      values.id = hoveredOrg.id || currentOrg._key;
+      values.id = hoveredOrg.id || currentOrg?._key;
       const res = await orgStore.updateOrg(values);
       if (res.success) {
         Message.success('编辑成功');
