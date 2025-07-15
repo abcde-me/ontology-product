@@ -186,20 +186,20 @@ const columns = (
     render: (latest_version: string) => {
       return (
         <div>
-          <Tooltip content={latest_version}>
-            <div
-              style={{
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 2,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                wordBreak: 'break-all'
-              }}
-            >
-              {latest_version}
-            </div>
-          </Tooltip>
+          {/* <Tooltip content={latest_version}> */}
+          <div
+            style={{
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              wordBreak: 'break-all'
+            }}
+          >
+            {latest_version}
+          </div>
+          {/* </Tooltip> */}
         </div>
       );
     }
@@ -515,6 +515,22 @@ const DatasetManagement: React.FC = () => {
           // 刷新数据列表
           fetchDatasetList();
           closeModal();
+          //获取标签
+          getTagList()
+            .then((res) => {
+              if (res.data && Array.isArray(res.data)) {
+                setTagList(res.data);
+              } else {
+                console.error('标签列表数据格式错误:', res);
+                setTagList([]);
+              }
+            })
+            .catch((err) => {
+              console.error('获取标签列表失败:', err);
+              setTagList([]);
+              Message.error('获取标签列表失败');
+            });
+
           childRef.current?.resetForm();
           Message.success('数据集创建成功！');
         } else {
@@ -834,6 +850,7 @@ const DatasetManagement: React.FC = () => {
     <div
       style={{
         backgroundColor: 'white',
+        minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
         margin: '10px 20px 10px 0px',
@@ -862,7 +879,8 @@ const DatasetManagement: React.FC = () => {
         <div
           style={{
             color: '#334155',
-            margin: '0px'
+            margin: '0px',
+            fontSize: '14px'
           }}
         >
           管理用于模型精调和训练的数据集
