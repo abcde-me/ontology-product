@@ -17,6 +17,7 @@ import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
+import classNames from 'classnames';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -80,6 +81,7 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
+      className: 'hover-change',
       width: 300,
       ellipsis: true,
       render: (_, text) => (
@@ -195,6 +197,7 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
+      className: 'hover-change',
       ellipsis: true,
       width: 230,
       render: (_, item) => {
@@ -216,6 +219,7 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
+      className: 'hover-change',
       width: 200,
       ellipsis: true,
       render: (_, item) => {
@@ -423,6 +427,7 @@ export default function DataLoad() {
   }, [current, pageSize, loadSiftObject]);
   return (
     <div
+      className="load-list"
       style={{
         backgroundColor: 'white',
         display: 'flex',
