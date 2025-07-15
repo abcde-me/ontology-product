@@ -1,22 +1,68 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import InputVarTypeIcon from '../_base/components/input-var-type-icon';
 import type { StartNodeType } from './types';
-import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
+import {
+  BlockEnum,
+  type NodeProps
+} from '@/pages/workflowConfig/workflow/types';
 import { RiArrowDownSFill } from '@remixicon/react';
+import { getCatalogList } from '@/api/dataCatalog';
+import useConfig from './use-config';
+import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
+import { useStoreApi } from 'reactflow';
 
 const i18nPrefix = 'workflow.nodes.start';
 
-const Node: FC<NodeProps<StartNodeType>> = ({ data }) => {
+const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const { data_path_name, data_category } = data;
+  const { data_path_name, data_category, data_path_id } = data;
+  const { updatePathName } = useConfig(id, data);
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  const store = useStoreApi();
 
   const hasFileTypes =
     (data_category?.[0]?.enabled && data_category?.[0]?.format.length > 0) ||
     (data_category?.[1]?.enabled && data_category?.[1]?.format.length > 0) ||
     (data_category?.[2]?.enabled && data_category?.[2]?.format.length > 0) ||
     (data_category?.[3]?.enabled && data_category?.[3]?.format.length > 0);
+
+  useEffect(() => {
+    getCatalogList({ root_type: 1 }).then((res) => {
+      const dirs: Record<string, any>[] = [];
+      res.data.src.forEach((catalog) => {
+        dirs.push(...(catalog.children?.volume || []));
+      });
+      const selectedDir = dirs.find((d) => d.id === data_path_id);
+      if (selectedDir) {
+        if (selectedDir.name !== data_path_name) {
+          updatePathName(selectedDir.name);
+        }
+      } else {
+        const { getNodes } = store.getState();
+        const targetNodes = getNodes().filter((node: any) =>
+          [
+            BlockEnum.Pic,
+            BlockEnum.Text,
+            BlockEnum.Video,
+            BlockEnum.Audio
+          ].includes(node.data.type)
+        );
+        targetNodes.forEach((n: any) => {
+          handleNodeDataUpdateWithSyncDraft({
+            id: n.id,
+            data: {
+              ...n.data,
+              selected_files_num: 0,
+              files: []
+            }
+          });
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={`wk-node-content`}>
