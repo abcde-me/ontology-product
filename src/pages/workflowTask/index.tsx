@@ -4,7 +4,8 @@ import {
   Pagination,
   PaginationProps,
   Popover,
-  Table
+  Table,
+  Select
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -51,6 +52,8 @@ export default function WorkflowTask() {
     sort: '',
     sort_by: ''
   });
+  // 初始化搜索条件
+  const [searchSelectValue, setSearchSelectValue] = useState('task_id');
 
   // 组件初始化
   useEffect(() => {
@@ -62,7 +65,8 @@ export default function WorkflowTask() {
     try {
       const params = {
         uid: userInfo?.id,
-        search_value: searchValue,
+        search_value: searchSelectValue === 'task_id' ? searchValue : '',
+        instance_name: searchSelectValue === 'task_id' ? '' : searchValue,
         page: current,
         page_size: pageSize,
         ...sortValue
@@ -133,6 +137,18 @@ export default function WorkflowTask() {
     return value === '' || value == null ? '-' : value;
   };
 
+  // 搜索条件
+  const searchOptions = [
+    {
+      label: '作业ID',
+      value: 'task_id'
+    },
+    {
+      label: '作业名称',
+      value: 'workflow_name'
+    }
+  ];
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -155,6 +171,17 @@ export default function WorkflowTask() {
           >
             {renderEmptyPlaceholder(record.id)}
           </span>
+        </Popover>
+      )
+    },
+    {
+      title: '作业名称',
+      dataIndex: 'instance_name',
+      width: 120,
+      ellipsis: true,
+      render: (_, record) => (
+        <Popover trigger="hover" content={record.instance_name} position="tl">
+          <span>{renderEmptyPlaceholder(record.instance_name)}</span>
         </Popover>
       )
     },
@@ -328,15 +355,23 @@ export default function WorkflowTask() {
           margin: '15px 0'
         }}
       >
-        <InputSearch
-          placeholder="输入作业ID搜索"
-          style={{ width: 230 }}
-          value={searchValue}
-          onChange={(value) => {
-            setSearchValue(value);
-          }}
-          onPressEnter={() => getList()}
-        />
+        <Input.Group style={{ display: 'flex' }}>
+          <Select
+            style={{ width: 120 }}
+            value={searchSelectValue}
+            onChange={(value) => setSearchSelectValue(value)}
+            options={searchOptions}
+          />
+          <InputSearch
+            placeholder="输入作业ID搜索"
+            style={{ width: 230 }}
+            value={searchValue}
+            onChange={(value) => {
+              setSearchValue(value);
+            }}
+            onPressEnter={() => getList()}
+          />
+        </Input.Group>
       </div>
       <Table
         border={false}
