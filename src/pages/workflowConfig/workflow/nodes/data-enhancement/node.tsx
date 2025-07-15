@@ -1,10 +1,13 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import type { CodeNodeType } from './types';
 import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { RiArrowDownSFill } from '@remixicon/react';
 import { useStoreApi } from 'reactflow';
 import { Tooltip } from '@arco-design/web-react';
+import { useUnmountedRef } from 'ahooks';
+import { getModelList } from '@/api/modelV2';
+import useConfig from './use-config';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
@@ -20,6 +23,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     prompt_checkbox
   } = props.data;
   const store = useStoreApi();
+  const { handleModelChange } = useConfig(props.id, props.data);
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
     fenlei: '文本分类',
@@ -30,7 +34,23 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const ModelLs =
     modelList?.find((item) => item.type === 'enha_model')?.model_data || [];
   const defaultModelId = ModelLs[0]?.id || '';
-  console.log(ModelLs, defaultModelId, '=======node-ebch', modelList);
+  const unmountedRef = useUnmountedRef();
+
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
+      const textList =
+        res.data.find((d) => d.type === 'enha_model')?.model_data || [];
+
+      const model_emb_model_id = textList[0]?.id || '';
+
+      const fields = {} as Record<string, any>;
+      if (!props.data.enha_modle_id) {
+        fields.enha_modle_id = model_emb_model_id;
+      }
+      handleModelChange(fields);
+    });
+  }, []);
   return (
     <div className={`wk-node-content data-enhancement-node`}>
       <div className="input-header">
