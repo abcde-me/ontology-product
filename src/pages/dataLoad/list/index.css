@@ -1,43 +1,46 @@
-.arco-timepicker-container {
-  width: 430px !important;
-}
-.arco-timepicker-list {
-  width: 50% !important;
-}
-/* .jump-a {
-  max-width: 160px !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-} */
-.cascader-dropdown .arco-cascader-list-item-label,
-.arco-cascader-list-search-item-label {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-.cascader-dropdown .arco-cascader-list-wrapper {
-  width: 212px !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.omit {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.text-ellipsis {
-  display: inline-block;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.arco-table-tr:hover .arco-table-cell-text-ellipsis {
-  color: rgb(0, 125, 250);
-}
-.txt:hover {
-  color: rgba(0, 125, 250, 0.5);
-  cursor: pointer;
+.load-list {
+  .arco-timepicker-container {
+    width: 430px !important;
+  }
+  .arco-timepicker-list {
+    width: 50% !important;
+  }
+  /* .jump-a {
+    max-width: 160px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  } */
+  .cascader-dropdown .arco-cascader-list-item-label,
+  .arco-cascader-list-search-item-label {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .cascader-dropdown .arco-cascader-list-wrapper {
+    width: 212px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .omit {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .text-ellipsis {
+    display: inline-block;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tbody .arco-table-tr:hover .hover-change {
+    color: rgb(0, 125, 250);
+  }
+
+  tbody .arco-table-tr .txt:hover {
+    color: rgba(67, 141, 251, 1);
+    cursor: pointer;
+  }
 }

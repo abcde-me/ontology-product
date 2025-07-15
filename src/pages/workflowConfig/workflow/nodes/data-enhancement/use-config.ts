@@ -65,6 +65,21 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     [setInputs]
   );
 
+  const handleModelChange = useCallback(
+    (payload: Partial<EnhancementNodeType>) => {
+      const newInputs = produce(inputRef.current, (draft: EnhancementNodeType) => {
+        if (payload.enha_modle_id) {
+          draft.enha_modle_id = payload.enha_modle_id;
+        }
+        if (payload.app_scenarios_name) {
+          draft.app_scenarios_name = payload.app_scenarios_name;
+        }
+      });
+      setInputs(newInputs);
+    },
+    [setInputs]
+  );
+
   const setBoostPageData = useCallback(
     (modelList) => {
       const newInputs = produce(inputRef.current, (draft: any) => {
@@ -80,7 +95,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     handleVarListChange,
     handleAddVariable,
     onValuesChange,
-    setBoostPageData
+    setBoostPageData,
+    handleModelChange
   };
 };
 

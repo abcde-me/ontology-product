@@ -104,10 +104,10 @@ const TableDetail = (props) => {
           ) : (
             <div style={{ display: 'flex' }}>
               <div
-                style={{ color: 'green' }}
+                style={{ color: '#059669' }}
               >{`成功：${item.success_files.toLocaleString()}`}</div>
               <div
-                style={{ color: 'red', marginLeft: '10px' }}
+                style={{ color: '#DC2626', marginLeft: '10px' }}
               >{`失败：${item.failed_files.toLocaleString()}`}</div>
             </div>
           )}

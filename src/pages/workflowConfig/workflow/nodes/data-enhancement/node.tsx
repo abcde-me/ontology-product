@@ -1,10 +1,13 @@
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CodeNodeType } from './types';
 import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { RiArrowDownSFill } from '@remixicon/react';
 import { useStoreApi } from 'reactflow';
 import { Tooltip } from '@arco-design/web-react';
+import { useUnmountedRef } from 'ahooks';
+import { getModelList } from '@/api/modelV2';
+import useConfig from './use-config';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
@@ -20,6 +23,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     prompt_checkbox
   } = props.data;
   const store = useStoreApi();
+  const { handleModelChange, setBoostPageData } = useConfig(props.id, props.data);
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
     fenlei: '文本分类',
@@ -27,10 +31,28 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     shengcheng: '文本生成',
     duolong: '多轮回答'
   };
-  const ModelLs =
-    modelList?.find((item) => item.type === 'enha_model')?.model_data || [];
-  const defaultModelId = ModelLs[0]?.id || '';
-  console.log(ModelLs, defaultModelId, '=======node-ebch', modelList);
+  let defaultModelName = null;
+  const unmountedRef = useUnmountedRef();
+  useEffect(() => {
+    getModelList().then((res: any) => {
+      if (unmountedRef.current) return;
+      const modelList =
+        res.data.find((d) => d.type === 'enha_model')?.model_data || [];
+
+      const model_emb_model_id = modelList[0]?.id || '';
+      const model_emb_model_name = modelList[0]?.type || '';
+      defaultModelName = model_emb_model_name
+      const fields = {} as Record<string, any>;
+      if (!enha_modle_id) {
+        fields.enha_modle_id = model_emb_model_id;
+      }
+      if (!app_scenarios_name) {
+        fields.app_scenarios_name = 'tongyong';
+      }
+      handleModelChange(fields);
+      setBoostPageData(modelList)
+    });
+  }, []);
   return (
     <div className={`wk-node-content data-enhancement-node`}>
       <div className="input-header">
@@ -46,8 +68,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
           <div className="enhancement-item">
             模型：
             {modelList?.find(
-              (item) => item.id === enha_modle_id || defaultModelId
-            )?.type || ''}
+              (item) => item.id === enha_modle_id
+            )?.type || defaultModelName}
           </div>
         )}
         {(app_scenarios_name === 'tongyong' ||
