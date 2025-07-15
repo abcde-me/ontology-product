@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 // 导入无数据组件
@@ -184,6 +184,7 @@ const UnifiedTable = forwardRef(<RecordType extends Record<string, unknown>>(
       scroll={{
         x: Math.max(totalWidth + 100, 1300)
       }}
+      style={{ height: '100%' }}
       rowSelection={rowSelection}
       data={data}
       rowKey={rowKey}

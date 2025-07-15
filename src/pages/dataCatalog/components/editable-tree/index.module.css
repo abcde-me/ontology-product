@@ -43,7 +43,10 @@
 
 .treeContainer :global(.arco-tree-node):hover {
   background-color: transparent;
-
+  :global(.arco-icon-storage),
+  :global(.last-leaf-text) {
+    color: #0f172a;
+  }
   :global(.arco-tree-node-title) {
     background-color: var(--color-bg-5);
   }
