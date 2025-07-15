@@ -23,7 +23,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     prompt_checkbox
   } = props.data;
   const store = useStoreApi();
-  const { handleModelChange, setBoostPageData } = useConfig(props.id, props.data);
+  const { handleModelChange, setBoostPageData } = useConfig(
+    props.id,
+    props.data
+  );
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
     fenlei: '文本分类',
@@ -41,7 +44,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
 
       const model_emb_model_id = modelList[0]?.id || '';
       const model_emb_model_name = modelList[0]?.type || '';
-      defaultModelName = model_emb_model_name
+      defaultModelName = model_emb_model_name;
       const fields = {} as Record<string, any>;
       if (!enha_modle_id) {
         fields.enha_modle_id = model_emb_model_id;
@@ -50,7 +53,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         fields.app_scenarios_name = 'tongyong';
       }
       handleModelChange(fields);
-      setBoostPageData(modelList)
+      setBoostPageData(modelList);
     });
   }, []);
   return (
@@ -67,9 +70,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {enha_modle_id && (
           <div className="enhancement-item">
             模型：
-            {modelList?.find(
-              (item) => item.id === enha_modle_id
-            )?.type || defaultModelName}
+            {modelList?.find((item) => item.id === enha_modle_id)?.type ||
+              defaultModelName}
           </div>
         )}
         {(app_scenarios_name === 'tongyong' ||

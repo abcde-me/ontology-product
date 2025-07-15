@@ -1,0 +1,7 @@
+.customButton:global(
+    .arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover
+  ) {
+  color: #438dfb !important;
+  background-color: transparent !important;
+  border: 1px solid #438dfb;
+}

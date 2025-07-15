@@ -135,7 +135,9 @@ const EditDatasetForm: React.FC<Props> = ({
           ]}
         >
           <Input
-            placeholder="请输入数据集名称..."
+            maxLength={128}
+            showWordLimit
+            placeholder="请输入数据集名称"
             style={{ marginLeft: '8px' }}
           />
         </FormItem>
@@ -146,7 +148,7 @@ const EditDatasetForm: React.FC<Props> = ({
           // rules={[{ required: true, message: '请选择生成模型' }]}
         >
           <Select
-            placeholder="请选择生成模型..."
+            placeholder="请选择生成模型"
             options={[]}
             value={initialData.model}
             disabled={true}
@@ -157,7 +159,7 @@ const EditDatasetForm: React.FC<Props> = ({
         <FormItem label="标签" field="tags">
           <Select
             dropdownMenuClassName={styles.dropdownMenuSelect}
-            placeholder="请选择标签..."
+            placeholder="请选择标签"
             mode="multiple"
             options={tagOptions}
             allowCreate
@@ -184,7 +186,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="描述说明" field="description">
           <Input.TextArea
-            placeholder="请输入导出文件的路径说明..."
+            placeholder="请输入导出文件的路径说明"
             rows={2}
             maxLength={500}
             showWordLimit

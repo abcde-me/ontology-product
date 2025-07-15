@@ -622,7 +622,7 @@ export default function Eltable() {
           selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
         }
         selectedPath={selectedPath}
-        onExportSuccess={() => { }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
