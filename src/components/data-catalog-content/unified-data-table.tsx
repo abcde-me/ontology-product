@@ -25,6 +25,7 @@ import Pages from './components/pages';
 import FormComponent from './components/popups-form';
 import { getUnifiedColumns } from './unified-columns';
 import './index.scss';
+import { PopupsFormFrom } from './components/popups-form/types';
 
 const { Text } = Typography;
 
@@ -97,7 +98,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
-  const [downloadData, setDownloadData] = useState([]); // 下载的数据
+  const [downloadData, setDownloadData] = useState(null); // 下载的数据
   const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
   const [loading, setLoading] = useState(false); // 添加加载状态
@@ -602,7 +603,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const handleTableChange = (pagination, filters, sorter) => {
     console.log('Table changed:', { pagination, filters, sorter, tableType });
     let newFileTypes: string[] = [];
-    console.log('sorter6666666666666666666666666666666', filters);
     // 处理排序参数
     let newSortField = '';
     let newSortOrder = '';
@@ -704,7 +704,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
       {/* 导出设置表单组件 - 通过visible属性控制弹框显示 */}
       <FormComponent
-        from={'dataCatalog'}
+        from={
+          tableType === 'source'
+            ? PopupsFormFrom.SourceData
+            : PopupsFormFrom.TargetData
+        }
         downloadData={downloadData}
         onCancel={() => setVisible(false)}
         visible={visible}

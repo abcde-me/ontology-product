@@ -17,6 +17,12 @@ import UnifiedDataTable from '@/components/data-catalog-content/unified-data-tab
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
 import styles from '../../modal.module.css';
+import {
+  PopupsFormFrom,
+  SourceDataItem,
+  TargetDataItem
+} from '@/components/data-catalog-content/components/popups-form/types';
+import { Dataset } from '@/pages/datasetManagement';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -43,7 +49,7 @@ interface TableRefType {
   updateSelection?: (keys: React.Key[]) => void;
   getSelectedData?: () => {
     selectedRowKeys: React.Key[];
-    selectedRows: TableRow[];
+    selectedRows: Array<SourceDataItem & TargetDataItem>;
   };
 }
 
@@ -55,7 +61,9 @@ export default function Eltable() {
   );
 
   // 通用状态管理
-  const [selectedRows, setSelectedRows] = useState<TableRow[]>([]); // 用于存储选中的行数据
+  const [selectedRows, setSelectedRows] = useState<
+    Array<SourceDataItem & TargetDataItem>
+  >([]); // 用于存储选中的行数据
   const [startTime, setStartTime] = React.useState(''); // 开始时间
   const [endTime, setEndTime] = React.useState(''); // 结束时间
   const [dateRange, setDateRange] = React.useState([]); // 日期范围状态
@@ -74,7 +82,6 @@ export default function Eltable() {
   }); // Target表格搜索条件状态，传递给子组件
 
   const [visible, setVisible] = useState(false); // 下载弹框控制
-  const [downloadData, setDownloadData] = useState([]); // 导出的数据
 
   // 表格引用，用于调用表格内部方法
   const tableRef = React.useRef<TableRefType>(null);
@@ -152,7 +159,7 @@ export default function Eltable() {
   // 通用的行选择处理函数
   const handleSelectionChange = (
     selectedRowKeys,
-    selectedRowsData: TableRow[]
+    selectedRowsData: Array<SourceDataItem & TargetDataItem & Dataset>
   ) => {
     console.log('选中的行Keys:', selectedRowKeys);
     console.log('选中的行数据:', selectedRowsData);
@@ -316,7 +323,9 @@ export default function Eltable() {
         content: '删除后，文件不可恢复',
         onOk: async () => {
           if (activeTab === 'dst') {
-            const idList = selectedRows.map((item: { id: string }) => item.id);
+            const idList = selectedRows.map((item: { id: number }) =>
+              String(item.id)
+            );
             ids.push(...idList);
             // 调用删除API
             if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
@@ -333,7 +342,9 @@ export default function Eltable() {
               }
             }
           } else {
-            const fileIds = selectedRows.map((item: { id: string }) => item.id);
+            const fileIds = selectedRows.map((item: { id: number }) =>
+              String(item.id)
+            );
             console.log(fileIds);
 
             ids.push(...fileIds);
@@ -596,15 +607,20 @@ export default function Eltable() {
         </div>
       </div>
       <FormComponent
-        from={'dataCatalog'}
-        downloadData={downloadData}
+        from={
+          activeTab === 'src'
+            ? PopupsFormFrom.SourceData
+            : PopupsFormFrom.TargetData
+        }
         onCancel={() => {
           setVisible(false);
           // 取消导出时不重置选中状态
         }}
         visible={visible}
         names={defaultName}
-        exportdatas={selectedRows}
+        exportdatas={
+          selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
+        }
         selectedPath={selectedPath}
         onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}

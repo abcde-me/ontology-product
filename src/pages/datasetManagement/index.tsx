@@ -42,6 +42,11 @@ import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
 import { NameCell } from './namecell';
+import {
+  PopupsFormFrom,
+  SourceDataItem,
+  TargetDataItem
+} from '@/components/data-catalog-content/components/popups-form/types';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -75,6 +80,7 @@ export interface Dataset {
   deleted_at: null;
   tag_names?: string[];
   src_model: string;
+  latest_file_path: string;
   status:
     | 'creating'
     | 'create_failed'
@@ -417,7 +423,7 @@ const DatasetManagement: React.FC = () => {
 
   // 选择相关状态
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]); //选择行
-  const [selectedRows, setSelectedRows] = React.useState<Dataset[]>([]); //选择行数据
+  const [selectedRows, setSelectedRows] = React.useState<Array<Dataset>>([]); //选择行数据
 
   // 标签过滤相关状态
   const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
@@ -456,7 +462,7 @@ const DatasetManagement: React.FC = () => {
   // 行选择配置
   const rowSelection = {
     selectedRowKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Dataset[]) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Array<Dataset>) => {
       setSelectedRowKeys(selectedRowKeys);
       setSelectedRows(selectedRows);
     },
@@ -965,11 +971,13 @@ const DatasetManagement: React.FC = () => {
       />
       {/* 导出数据集弹窗 */}
       <FormComponent
-        from={'datasetManagement'}
+        from={PopupsFormFrom.DatasetManagement}
         exportdataset={downloadData}
         onCancel={() => setVisible(false)}
         visible={visible}
-        exportdatas={selectedRows}
+        exportdatas={
+          selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
+        }
         handlClear={handClear}
       />
     </div>
