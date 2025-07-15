@@ -17,12 +17,7 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  .cascader-dropdown .arco-cascader-list-wrapper {
-    width: 212px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+
   .omit {
     white-space: nowrap;
     overflow: hidden;
@@ -43,4 +38,10 @@
     color: rgba(67, 141, 251, 1);
     cursor: pointer;
   }
+}
+.cascader-dropdown .arco-cascader-list-wrapper {
+  width: 212px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

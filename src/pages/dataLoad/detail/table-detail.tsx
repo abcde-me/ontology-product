@@ -5,6 +5,7 @@ import './index.css';
 import { useHistory } from 'react-router-dom';
 import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
+import { IconLoading } from '@arco-design/web-react/icon';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -38,21 +39,28 @@ const TableDetail = (props) => {
       dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '5px',
-              height: '5px',
-              borderRadius: '50%',
-              background:
-                item.status == 'succeed'
-                  ? '#10B981'
-                  : item.status == 'failed'
-                    ? '#EF4444'
-                    : item.status == 'running'
-                      ? '#007DFA'
-                      : '#94A3B8'
-            }}
-          ></div>
+          {item.status === 'stopping' ? (
+            <IconLoading style={{ color: '#165dff', fontSize: '14px' }} />
+          ) : (
+            <div
+              style={{
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                background:
+                  item.status === 'succeed'
+                    ? '#10B981'
+                    : item.status === 'failed'
+                      ? '#EF4444'
+                      : item.status === 'running'
+                        ? '#007DFA'
+                        : item.status === 'stopped'
+                          ? '#94A3B8'
+                          : ''
+              }}
+            ></div>
+          )}
+
           <div style={{ marginLeft: '7px' }}>
             {item.status == RunStateType[RunState.SUCCEED].value &&
               RunStateType[RunState.SUCCEED].text}
@@ -62,6 +70,7 @@ const TableDetail = (props) => {
               RunStateType[RunState.RUNNING].text}
             {item.status == RunStateType[RunState.STOPPED].value &&
               RunStateType[RunState.STOPPED].text}
+            {item.status === 'stopping' && '停止中'}
           </div>
           {item.status == 'running' && (
             <span
@@ -176,7 +185,7 @@ const TableDetail = (props) => {
         execution_id: executionId
       });
       if (res.code == '' && res.status == 200) {
-        Message.success('操作成功,停止运行');
+        Message.success('操作成功');
       } else {
         Message.error(res.message);
       }
@@ -184,6 +193,10 @@ const TableDetail = (props) => {
       setVisible(false);
     } catch (error) {
       console.log(error);
+    } finally {
+      setTimeout(() => {
+        props.TimedStops();
+      }, 20000);
     }
     // 请求接口
   };

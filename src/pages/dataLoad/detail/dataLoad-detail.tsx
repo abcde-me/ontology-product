@@ -128,9 +128,45 @@ const DataLoadDetail = () => {
       setDetailListLoading(false);
     }
   };
+
   const judgmentTask = () => {
     getDetailList();
-    const boo = detailList?.findIndex((item) => item.status == 'running');
+    const boo = detailList?.findIndex(
+      (item) => item.status == 'succeed' || item.status == 'stopping'
+    );
+    setRunningFlag(boo == -1 ? false : true);
+  };
+  // 停止中的过程
+  const StopeJudgmentTask = async () => {
+    try {
+      setDetailListLoading(true);
+      const res = await getLoadRecordList({
+        task_id: Number(loadId),
+        page: current,
+        page_size: pageSize,
+        execution_id: searchValue.trim(),
+        ...directoryObj
+      });
+      if (res.data.items[0].status === 'stopped') {
+        Message.success('任务已停止');
+      } else {
+        if (res.data.items[0].status === 'failed') {
+          Message.error(res.data.items[0].error_msg);
+        } else {
+          Message.error('任务停止失败');
+        }
+      }
+
+      setTotal(res.data.total);
+      setDetailList(res.data.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailListLoading(false);
+    }
+    const boo = detailList?.findIndex(
+      (item) => item.status == 'running' || item.status === 'stopping'
+    );
     setRunningFlag(boo == -1 ? false : true);
   };
   // 启停任务
@@ -172,7 +208,7 @@ const DataLoadDetail = () => {
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
-        (item) => item.status === 'running'
+        (item) => item.status === 'running' || item.status === 'stopping'
       );
       console.log(hasRunningTask);
 
@@ -207,8 +243,9 @@ const DataLoadDetail = () => {
           backgroundColor: 'white',
           display: 'flex',
           flexDirection: 'column',
-          margin: '10px 20px 10px 0px',
-          borderRadius: '10px'
+          margin: '10px 10px 20px 10px',
+          borderRadius: '10px',
+          minHeight: '86vh'
         }}
       >
         <div className="box">
@@ -460,6 +497,7 @@ const DataLoadDetail = () => {
           <TableDetail
             taskId={listDetail && listDetail.task_id}
             judgmentTaskHan={judgmentTask}
+            TimedStops={StopeJudgmentTask}
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}
