@@ -67,9 +67,12 @@ const useConfig = (id: string, payload: CodeNodeType) => {
 
   const handleModelChange = useCallback(
     (payload: Partial<EnhancementNodeType>) => {
-      const newInputs = produce(inputRef.current, (draft) => {
+      const newInputs = produce(inputRef.current, (draft: EnhancementNodeType) => {
         if (payload.enha_modle_id) {
           draft.enha_modle_id = payload.enha_modle_id;
+        }
+        if (payload.app_scenarios_name) {
+          draft.app_scenarios_name = payload.app_scenarios_name;
         }
       });
       setInputs(newInputs);

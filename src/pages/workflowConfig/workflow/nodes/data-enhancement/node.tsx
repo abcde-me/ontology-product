@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CodeNodeType } from './types';
 import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { RiArrowDownSFill } from '@remixicon/react';
@@ -23,7 +23,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     prompt_checkbox
   } = props.data;
   const store = useStoreApi();
-  const { handleModelChange } = useConfig(props.id, props.data);
+  const { handleModelChange, setBoostPageData } = useConfig(props.id, props.data);
   const appScenarios: { [key: string]: string } = {
     tongyong: '通用',
     fenlei: '文本分类',
@@ -31,24 +31,26 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     shengcheng: '文本生成',
     duolong: '多轮回答'
   };
-  const ModelLs =
-    modelList?.find((item) => item.type === 'enha_model')?.model_data || [];
-  const defaultModelId = ModelLs[0]?.id || '';
+  let defaultModelName = null;
   const unmountedRef = useUnmountedRef();
-
   useEffect(() => {
     getModelList().then((res: any) => {
       if (unmountedRef.current) return;
-      const textList =
+      const modelList =
         res.data.find((d) => d.type === 'enha_model')?.model_data || [];
 
-      const model_emb_model_id = textList[0]?.id || '';
-
+      const model_emb_model_id = modelList[0]?.id || '';
+      const model_emb_model_name = modelList[0]?.type || '';
+      defaultModelName = model_emb_model_name
       const fields = {} as Record<string, any>;
-      if (!props.data.enha_modle_id) {
+      if (!enha_modle_id) {
         fields.enha_modle_id = model_emb_model_id;
       }
+      if (!app_scenarios_name) {
+        fields.app_scenarios_name = 'tongyong';
+      }
       handleModelChange(fields);
+      setBoostPageData(modelList)
     });
   }, []);
   return (
@@ -66,8 +68,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
           <div className="enhancement-item">
             模型：
             {modelList?.find(
-              (item) => item.id === enha_modle_id || defaultModelId
-            )?.type || ''}
+              (item) => item.id === enha_modle_id
+            )?.type || defaultModelName}
           </div>
         )}
         {(app_scenarios_name === 'tongyong' ||
