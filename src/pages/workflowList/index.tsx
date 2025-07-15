@@ -338,11 +338,6 @@ export default function WorkflowList() {
                 record.workflow_version
               );
             }}
-            onCancel={() => {
-              Message.error({
-                content: '删除失败，请稍后重试'
-              });
-            }}
           >
             <Popover
               trigger="hover"
