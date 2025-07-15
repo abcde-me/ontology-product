@@ -22,6 +22,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { CreateSpaceModal } from '@/pages/systemMgmt/createSpaceModal';
 import { getFlatRoutes, routes } from '../route';
+import OrganMenu from '@/assets/sider/organmenu.svg';
+import MemberMenu from '@/assets/sider/membermenu.svg';
 import './sider.css';
 
 const MenuItem = Menu.Item;
@@ -127,7 +129,7 @@ const menus: MenuModel[] = [
       {
         title: '组织管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'orgMgmt',
         path: '/tenant/compute/modaforge/organization'
@@ -135,7 +137,7 @@ const menus: MenuModel[] = [
       {
         title: '用户管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <MemberMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/member',
         key: 'userMgmt'
