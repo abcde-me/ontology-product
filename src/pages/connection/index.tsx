@@ -23,6 +23,7 @@ import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
+import { OverflowTooltip } from './utils/textOverflow';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -125,6 +126,8 @@ export default function Connection() {
       getlist();
     }
   };
+  // 判断文字是否溢出
+  const txtOverflowHan = (txt) => {};
   // 连接器配置项
   const columns: any = [
     {
@@ -134,9 +137,10 @@ export default function Connection() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.name} position="tl">
+          <Tooltip content={item.name} position="tl" disabled={true}>
             {item.name}
           </Tooltip>
+          // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
     },
@@ -357,10 +361,12 @@ export default function Connection() {
   return (
     <div
       style={{
+        minHeight: '94%',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 10px 0px',
+        margin: '10px',
+        padding: '20px',
         borderRadius: '10px'
       }}
     >
@@ -368,7 +374,7 @@ export default function Connection() {
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
-          margin: '20px 0px 15px 20px'
+          margin: '0px 0px 15px 0px'
         }}
       >
         连接器
@@ -377,8 +383,7 @@ export default function Connection() {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          width: '100%',
-          padding: '0px 20px'
+          width: '100%'
         }}
       >
         <Input.Search
@@ -402,7 +407,7 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        style={{ padding: '10px 20px' }}
+        style={{ padding: '10px 0px' }}
         pagination={false}
         rowKey="id"
         loading={tableLoding}

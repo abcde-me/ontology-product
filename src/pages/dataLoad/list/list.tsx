@@ -18,6 +18,7 @@ import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import classNames from 'classnames';
+import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -85,6 +86,7 @@ export default function DataLoad() {
       width: 300,
       ellipsis: true,
       render: (_, text) => (
+        //  <OverflowTooltip  width={300} children={text.name}  styles={'txt'}/>
         <Tooltip content={text.name} position="tl">
           <span
             className="txt"
@@ -432,16 +434,17 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 10px 0px',
+        margin: '10px 10px 20px 10px',
+        padding: '20px',
         borderRadius: '10px',
-        height: '94%'
+        minHeight: '94vh'
       }}
     >
       <h1
         style={{
           fontSize: '20px',
           fontWeight: '600',
-          margin: '20px 0px 15px 20px'
+          marginBottom: '15px'
         }}
       >
         数据载入
@@ -450,8 +453,7 @@ export default function DataLoad() {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          width: '100%',
-          padding: '0px 20px'
+          width: '100%'
         }}
       >
         <InputSearch
@@ -476,7 +478,7 @@ export default function DataLoad() {
         loading={loadloading}
         columns={columns}
         data={data}
-        style={{ padding: '10px 20px' }}
+        style={{ padding: '10px 0px' }}
         pagination={false}
         rowKey="task_id"
         border={false}

@@ -42,7 +42,7 @@ const AccessDetail = () => {
     <div>
       <div
         style={{
-          margin: '15px 0px',
+          margin: '10px 10px 20px 10px',
           fontSize: '20px',
           display: 'flex',
           alignItems: 'center'
@@ -83,6 +83,7 @@ const AccessDetail = () => {
               justifyContent: 'center',
               alignItems: 'center',
               marginLeft: '15px'
+              //  minHeight: '86vh'
             }}
           >
             <div
@@ -118,7 +119,8 @@ const AccessDetail = () => {
           display: 'flex',
           flexDirection: 'column',
           margin: '10px 20px 10px 0px',
-          borderRadius: '10px'
+          borderRadius: '10px',
+          minHeight: '86vh'
         }}
       >
         <div
