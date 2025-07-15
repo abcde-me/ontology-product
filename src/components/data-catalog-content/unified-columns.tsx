@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
@@ -247,6 +247,38 @@ const renderActionColumn = (
     </span>
   </div>
 );
+const SmartEllipsis = ({ text }) => {
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      const { offsetWidth, scrollWidth } = ref.current;
+      setShowPopover(scrollWidth > offsetWidth);
+    }
+  }, [text]);
+
+  return (
+    <div ref={ref} style={{ width: '100%' }}>
+      {showPopover ? (
+        <Popover position='tl' content={text}>
+          <span
+            style={{
+              display: 'block',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {text}
+          </span>
+        </Popover>
+      ) : (
+        <span>{text}</span>
+      )}
+    </div>
+  );
+};
 
 // 统一的列配置生成函数
 export const getUnifiedColumns = (
@@ -278,23 +310,7 @@ export const getUnifiedColumns = (
         dataIndex: 'file_name',
         ellipsis: true,
         width: 200,
-        render: (_, record) => (
-          <div>
-            <Popover content={record.file_name} style={{ fontSize: '14px' }}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.file_name}
-              </span>
-            </Popover>
-          </div>
-        )
+        render: (_, record) => <SmartEllipsis text={record.file_name} />
       },
       {
         title: '文件类型',
@@ -342,23 +358,7 @@ export const getUnifiedColumns = (
         dataIndex: 'connector_name',
         ellipsis: true,
         width: 160,
-        render: (_, record) => (
-          <div>
-            <Popover content={record.connector_name}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.connector_name}
-              </span>
-            </Popover>
-          </div>
-        )
+        render: (_, record) => <SmartEllipsis text={record.connector_name} />
       },
       {
         title: '操作',
@@ -394,23 +394,7 @@ export const getUnifiedColumns = (
         dataIndex: 'short_content',
         ellipsis: true,
         width: 300,
-        render: (_, record) => (
-          <div>
-            <Popover content={record.short_content}>
-              <span
-                style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {record.short_content}
-              </span>
-            </Popover>
-          </div>
-        )
+        render: (_, record) => <SmartEllipsis text={record.short_content} />
       },
       {
         title: '生成时间',
