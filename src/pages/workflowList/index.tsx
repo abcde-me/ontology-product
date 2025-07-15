@@ -25,7 +25,6 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { renderEmptyPlaceholder } from '@/utils/renderEmptyPlaceholder';
 
 const InputSearch = Input.Search;
 
@@ -168,6 +167,11 @@ export default function WorkflowList() {
     };
 
     setSortValue(sortdata);
+  };
+
+  // table数据为空时展示-
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
   };
 
   // table columns
