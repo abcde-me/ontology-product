@@ -107,6 +107,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               extra="将数据转换为标准格式或单位，例如日期、时间、货币等。"
             >
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('data_standardization')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -202,6 +203,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               extra="根据规则过滤数据，去除无效、错误或低质量数据"
             >
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('threshold_switch')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -256,6 +258,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               extra="将数据转换为标准格式或单位"
             >
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('ts_remove')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -368,6 +371,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <div className="date-switch">
             <FormItem field="mg_is" labelAlign="left">
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('mg_is')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -497,6 +501,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <div className="date-switch">
             <FormItem field="qd_is">
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('qd_is')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -528,6 +533,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <div className="date-switch">
             <FormItem field="df_is">
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('df_is')}
                 style={{ margin: 0, width: 'auto' }}
               />
@@ -559,6 +565,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <div className="date-switch">
             <FormItem field="oh_is">
               <Switch
+                checkedText='开' uncheckedText='关'
                 checked={form.getFieldValue('oh_is')}
                 style={{ margin: 0, width: 'auto' }}
               />
