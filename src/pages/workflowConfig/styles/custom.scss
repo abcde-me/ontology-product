@@ -590,8 +590,8 @@
     }
   }
   .wk-node-panel-content-scroller-container:has(
-      .wk-node-panel-content-wrapper .expanded-panel
-    ) {
+    .wk-node-panel-content-wrapper .expanded-panel
+  ) {
     overflow-y: hidden;
   }
   .wk-node-panel-content {
