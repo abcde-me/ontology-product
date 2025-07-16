@@ -107,7 +107,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
             handleFilesChange={handleFilesChange}
           />
         </FormItem>
-        <Split className="my-[16px]" />
+        <Split className="mb-[16px]" />
         <FormItem
           label="图片描述模型："
           field="pic_model_id"

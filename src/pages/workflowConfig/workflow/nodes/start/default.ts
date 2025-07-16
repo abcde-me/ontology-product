@@ -8,7 +8,7 @@ import {
 const nodeDefault: NodeDefault<StartNodeType> = {
   defaultValue: {
     variables: [],
-    data_path_id: '',
+    data_path_id: undefined,
     data_path_name: '',
     data_category: [
       {

@@ -1,6 +1,6 @@
-import type { FC } from 'react'
-import React, { memo } from 'react'
-import { BlockEnum } from './types'
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { BlockEnum } from './types';
 // import {
 //   Agent,
 //   Answer,
@@ -21,20 +21,20 @@ import { BlockEnum } from './types'
 //   TemplatingTransform,
 //   VariableX,
 // } from '@remixicon/react'
-import { RiApps2Fill } from '@remixicon/react'
-import AppIcon from '@/pages/workflowConfig/components/app-icon'
+import { RiApps2Fill } from '@remixicon/react';
+import AppIcon from '@/pages/workflowConfig/components/app-icon';
 
 type BlockIconProps = {
-  type: BlockEnum
-  size?: string
-  className?: string
-  toolIcon?: string | { content: string; background: string }
-}
+  type: BlockEnum;
+  size?: string;
+  className?: string;
+  toolIcon?: string | { content: string; background: string };
+};
 const ICON_CONTAINER_CLASSNAME_SIZE_MAP: Record<string, string> = {
   xs: 'w-4 h-4 rounded-[5px] shadow-xs',
   sm: 'w-5 h-5 rounded-md shadow-xs',
-  md: 'w-6 h-6 rounded-lg shadow-md',
-}
+  md: 'w-6 h-6 rounded-[4px] shadow-md'
+};
 const getIcon = (type: BlockEnum, className: string) => {
   // return {
   //   [BlockEnum.Start]: <Home className={className} />,
@@ -60,8 +60,8 @@ const getIcon = (type: BlockEnum, className: string) => {
   //   [BlockEnum.ListFilter]: <ListFilter className={className} />,
   //   [BlockEnum.Agent]: <Agent className={className} />,
   // }[type]
-  return <RiApps2Fill className={className} />
-}
+  return <RiApps2Fill className={className} />;
+};
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
   [BlockEnum.Text]: 'bg-util-colors-indigo-indigo-500',
@@ -70,7 +70,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.End]: 'bg-util-colors-warning-warning-500'
 
   // TODO：待删除
   // [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
@@ -95,10 +95,11 @@ const BlockIcon: FC<BlockIconProps> = ({
   type,
   size = 'sm',
   className,
-  toolIcon,
+  toolIcon
 }) => {
   return (
-    <div className={`
+    <div
+      className={`
       flex items-center justify-center border-[0.5px] border-white/2 text-white
       ${ICON_CONTAINER_CLASSNAME_SIZE_MAP[size]}
       ${ICON_CONTAINER_BG_COLOR_MAP[type]}
@@ -107,44 +108,31 @@ const BlockIcon: FC<BlockIconProps> = ({
       wk-icon ${type}
     `}
     >
-      {
-        toolIcon && (
-          <>
-            {
-              typeof toolIcon === 'string'
-                ? (
-                  <div
-                    className='shrink-0 w-full h-full bg-cover bg-center rounded-md'
-                    style={{
-                      backgroundImage: `url(${toolIcon})`,
-                    }}
-                  ></div>
-                )
-                : (
-                  <AppIcon
-                    className='shrink-0 !w-full !h-full'
-                    size='tiny'
-                    icon={toolIcon?.content}
-                    background={toolIcon?.background}
-                  />
-                )
-            }
-          </>
-        )
-      }
+      {toolIcon && (
+        <>
+          {typeof toolIcon === 'string' ? (
+            <div
+              className="h-full w-full shrink-0 rounded-md bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${toolIcon})`
+              }}
+            ></div>
+          ) : (
+            <AppIcon
+              className="!h-full !w-full shrink-0"
+              size="tiny"
+              icon={toolIcon?.content}
+              background={toolIcon?.background}
+            />
+          )}
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export const VarBlockIcon: FC<BlockIconProps> = ({
-  type,
-  className,
-}) => {
-  return (
-    <>
-      {getIcon(type, `w-3 h-3 ${className}`)}
-    </>
-  )
-}
+export const VarBlockIcon: FC<BlockIconProps> = ({ type, className }) => {
+  return <>{getIcon(type, `w-3 h-3 ${className}`)}</>;
+};
 
-export default memo(BlockIcon)
+export default memo(BlockIcon);

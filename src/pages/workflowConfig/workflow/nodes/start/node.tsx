@@ -73,7 +73,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
         <div className="input-list">
           {!!data_path_name && (
             <div className="input-var-item">
-              <span className="key-txt">{data_path_name}</span>
+              <span className="key-txt !font-semibold">{data_path_name}</span>
             </div>
           )}
           {!data_path_name && (
