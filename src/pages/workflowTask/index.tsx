@@ -358,7 +358,7 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            style={{ width: 100 }}
+            style={{ width: 100, borderRight: 0 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}
@@ -369,6 +369,7 @@ export default function WorkflowTask() {
                 ? '输入作业ID搜索'
                 : '输入作业名称搜索'
             }
+            allowClear
             style={{ width: 160 }}
             value={searchValue}
             onChange={(value) => {
