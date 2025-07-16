@@ -37,3 +37,8 @@
   :global(.arco-select-option-wrapper .arco-select-highlight) {
   color: #007dfa;
 }
+.editForm :global(.arco-form-item-label) {
+}
+:global(.arco-form-label-item > label) {
+  white-space: nowrap;
+}

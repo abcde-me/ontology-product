@@ -24,6 +24,7 @@ import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import { OverflowTooltip } from './utils/textOverflow';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -126,20 +127,24 @@ export default function Connection() {
       getlist();
     }
   };
-  // 判断文字是否溢出
-  const txtOverflowHan = (txt) => {};
   // 连接器配置项
   const columns: any = [
     {
       title: '连接器名称',
       dataIndex: 'name',
-      width: 300,
+      width: 230,
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.name} position="tl" disabled={false}>
-            {item.name}
-          </Tooltip>
+          <EllipsisPopover
+            value={item.name}
+            isEdit={false}
+            // isLink
+          />
+          // <Tooltip content={item.name} position="tl" disabled={false}>
+          //   {item.name}
+          // </Tooltip>
+
           // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
@@ -180,7 +185,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 110,
+      width: 130,
       dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
@@ -200,9 +205,11 @@ export default function Connection() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.creator} position="tl">
-            {item.creator}
-          </Tooltip>
+          <EllipsisPopover
+            value={item.creator}
+            isEdit={false}
+            // isLink
+          />
         );
       }
     },
@@ -388,7 +395,7 @@ export default function Connection() {
       >
         <Input.Search
           placeholder="输入关键词搜索"
-          style={{ width: 230 }}
+          style={{ width: 220 }}
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
@@ -407,7 +414,7 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        style={{ padding: '10px 0px' }}
+        style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="id"
         loading={tableLoding}
@@ -518,7 +525,7 @@ export default function Connection() {
           DeleteMethod();
         }}
       >
-        <div style={{ fontSize: '14px' }}>
+        <div style={{ fontSize: '14px', paddingLeft: '25px' }}>
           删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
         </div>
       </Modal>

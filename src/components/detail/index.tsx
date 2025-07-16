@@ -1,5 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
+import styles from './style.module.css';
+import NoDataEmpty from '@/components/NoDataEmpty';
 import {
   Typography,
   Button,
@@ -97,25 +99,39 @@ const generateArcoColumns = (
     title: header,
     dataIndex: header,
     key: header,
-    width: header.length > 10 ? 250 : 150, // 使用固定宽度替代 minWidth/maxWidth
     ellipsis: true,
     render: (value: any, record: any) => {
       if (updateStatus && editingRowKey === record[idName]) {
         return (
           <Input.TextArea
+            // @ts-expect-error
+            borderless={true}
             value={
               editingData[header] !== undefined
                 ? editingData[header]
                 : record[header]
             }
             onChange={(value) => onDataChange(header, value)}
-            style={{ margin: '-5px 0' }}
+            // style={{ margin: '-5px 0' }}
             autoSize={{ minRows: 2, maxRows: 6 }}
             placeholder="请输入内容"
           />
         );
       } else {
-        return <div>{record[header]}</div>;
+        return (
+          <Tooltip content={record[header]}>
+            <div
+              style={{
+                width: '200px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {record[header]}
+            </div>
+          </Tooltip>
+        );
       }
     }
   }));
@@ -124,8 +140,9 @@ const generateArcoColumns = (
     cols.push({
       title: '操作',
       key: 'action',
-      width: 140,
+      width: 112,
       fixed: 'right',
+      headerClassName: 'custom-table-header-action', // 自定义表头样式
       render: (_, record) => {
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
@@ -134,7 +151,7 @@ const generateArcoColumns = (
               <Button
                 type="text"
                 size="small"
-                icon={<IconCheck style={{ color: '#00b42a' }} />}
+                icon={<IconCheck style={{ color: '#00b42a', fontSize: 16 }} />}
                 onClick={() => handleInlineEditSubmit(record)}
                 style={{ color: '#00b42a' }}
                 title="确认"
@@ -142,7 +159,7 @@ const generateArcoColumns = (
               <Button
                 type="text"
                 size="small"
-                icon={<IconClose style={{ color: '#f53f3f' }} />}
+                icon={<IconClose style={{ color: '#f53f3f', fontSize: 16 }} />}
                 onClick={handleInlineEditCancel}
                 style={{ color: '#f53f3f' }}
                 title="取消"
@@ -156,7 +173,8 @@ const generateArcoColumns = (
           editingRowKey !== null && editingRowKey !== record[idName];
 
         return (
-          <Space>
+          // <Space>
+          <div>
             <Tooltip content={isOtherRowEditing ? '请完成当前编辑' : ''}>
               <Button
                 type="text"
@@ -165,7 +183,11 @@ const generateArcoColumns = (
                 onClick={() => handleEditContent(record[idName])}
                 style={{
                   color: isOtherRowEditing ? '#c9cdd4' : undefined,
-                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  padding: '0 0px',
+                  marginRight: '16px',
+                  marginLeft: '4px'
                 }}
               >
                 编辑
@@ -178,13 +200,18 @@ const generateArcoColumns = (
                 onClick={() => handleContinue(record[idName])}
                 style={{
                   color: isOtherRowEditing ? '#c9cdd4' : undefined,
-                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer'
+                  cursor: isOtherRowEditing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  padding: '0 0px',
+                  // marginRight: '16px',
+                  marginLeft: '4px'
                 }}
               >
                 删除
               </Button>
             </Tooltip>
-          </Space>
+          </div>
+          // </Space>
         );
       }
     });
@@ -212,9 +239,28 @@ const versionColumns: any[] = [
     title: '版本号',
     dataIndex: 'version_id',
     width: 260,
-    render: (version: string) => (
+    render: (version: string, record: any, index: number) => (
       <Space>
         <Text>{version}</Text>
+        {index === 0 && (
+          <span
+            style={{
+              width: '56px',
+              height: '18px',
+              backgroundColor: '#ECFDF5',
+              color: '#10b981',
+              borderRadius: '4px',
+              fontWeight: 400,
+              fontSize: '12px'
+              // marginLeft: '8px',
+              // display: 'flex',
+              // alignItems: 'center',
+              // justifyContent: 'center'
+            }}
+          >
+            最新版本
+          </span>
+        )}
       </Space>
     )
   },
@@ -471,7 +517,7 @@ const DatasetDetail: React.FC = () => {
       setEditingData({ ...currentRow });
     }
 
-    Message.info(`编辑数据`);
+    // Message.info(`编辑数据`);
   };
 
   // 删除 - 使用 useCallback 避免闭包问题
@@ -513,6 +559,20 @@ const DatasetDetail: React.FC = () => {
   const handleInlineEditSubmit = (record: any) => {
     if (!updateStatus) return; // 非编辑状态下不允许提交编辑
     // 更新数据
+
+    const originalData = contentDatabackup.find(
+      (item: any) => item[idName] === editingRowKey
+    );
+
+    // 检查数据是否有变化
+    if (originalData && isDataEqual(editingData, originalData)) {
+      // 数据没有变化，直接退出编辑状态
+      setEditingRowKey(null);
+      setEditingData({});
+      //       Message.info('数据未修改');
+      return;
+    }
+
     const newData = contentData.map((item: any) => {
       if (item[idName] === editingRowKey) {
         return {
@@ -778,6 +838,7 @@ const DatasetDetail: React.FC = () => {
           type="text"
           icon={<IconArrowLeft style={{ color: '#000' }} />}
           onClick={handleBack}
+          style={{ display: 'flex', alignItems: 'center' }}
         />
         <Breadcrumb style={{ fontSize: 18 }}>
           <Breadcrumb.Item>
@@ -788,7 +849,11 @@ const DatasetDetail: React.FC = () => {
               数据集管理
             </span>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <span style={{ fontWeight: '500', fontSize: '20px' }}>
+              数据集详情
+            </span>
+          </Breadcrumb.Item>
         </Breadcrumb>
       </div>
 
@@ -1023,8 +1088,8 @@ const DatasetDetail: React.FC = () => {
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 16
+                alignItems: 'center'
+                // marginBottom: 12
               }}
             >
               <Input
@@ -1032,7 +1097,14 @@ const DatasetDetail: React.FC = () => {
                 value={searchValue}
                 onChange={setSearchValue}
                 onPressEnter={handleSearch}
-                style={{ width: 300 }}
+                onClear={handleClearSearch}
+                className={'custom-input'}
+                style={{
+                  width: 300,
+                  minWidth: 300,
+                  maxWidth: 300,
+                  flexShrink: 0
+                }}
                 allowClear
                 suffix={<IconSearch style={{ color: '#999' }} />}
               />
@@ -1041,11 +1113,15 @@ const DatasetDetail: React.FC = () => {
                   {updateStatus ? (
                     <Space>
                       <Button
+                        style={{
+                          fontWeight: '400'
+                        }}
+                        className={styles.customButton}
                         onClick={() => {
                           // 检查是否有改动
                           const hasChanges =
                             changedRows.length > 0 || deletedRows.length > 0;
-
+                          console.log(changedRows, deletedRows);
                           if (!hasChanges) {
                             // 没有改动，直接取消编辑
                             setEditingRowKey(null);
@@ -1091,6 +1167,8 @@ const DatasetDetail: React.FC = () => {
                       </Button>
                       <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
                         <Button
+                          style={{ fontWeight: '400' }}
+                          className={'update-btn'}
                           type="primary"
                           onClick={handleSubmitChanges}
                           disabled={
@@ -1136,9 +1214,7 @@ const DatasetDetail: React.FC = () => {
                     <Table
                       columns={contentColumns}
                       data={contentData}
-                      noDataElement={
-                        <Empty description="这里空空如也，快去添加数据吧！" />
-                      }
+                      noDataElement={<NoDataEmpty />}
                       pagination={false}
                       scroll={{ x: 'max-content' }}
                       border={false}
@@ -1149,6 +1225,9 @@ const DatasetDetail: React.FC = () => {
                 {/* 分页控件 */}
                 <div className="pagination-wrapper">
                   <Pagination
+                    style={{
+                      float: 'right'
+                    }}
                     current={currentPage}
                     pageSize={pageSize}
                     total={total}
@@ -1159,13 +1238,14 @@ const DatasetDetail: React.FC = () => {
                     showTotal={(total, range) =>
                       `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
                     }
+                    sizeOptions={[10, 20, 50, 100]}
                     showJumper
                     sizeCanChange={true}
                   />
                 </div>
               </>
             ) : (
-              <Empty description="这里空空如也，快去添加数据吧！" />
+              <NoDataEmpty />
             )}
           </TabPane>
 
@@ -1203,7 +1283,7 @@ const DatasetDetail: React.FC = () => {
               description: datasetDetail.description || '',
               version: datasetDetail.latest_version || 'v1.0.0',
               tags: datasetDetail.tag_names || [],
-              model: datasetDetail.src_model,
+              model: datasetDetail.src_model || '-',
               creator: datasetDetail.creator_name || ''
             }}
             onSubmit={handleEditSubmit}

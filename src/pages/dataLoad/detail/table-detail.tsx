@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -23,14 +24,10 @@ const TableDetail = (props) => {
     {
       title: '运行ID',
       dataIndex: 'execution_id',
-      width: 200,
+      width: 300,
       ellipsis: true,
       render: (text: string) => {
-        return (
-          <Popover position="tl" content={text}>
-            {text}
-          </Popover>
-        );
+        return <EllipsisPopoverCom value={text} isEdit={false} />;
       }
     },
     {
@@ -222,7 +219,7 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
-          style={{ width: '100%', padding: '0px 30px 0px 0px' }}
+          style={{ width: '100%', padding: '1px 30px 0px 0px' }}
           rowKey="seatunnel_job_id"
           loading={props.loading}
           onChange={(pagination, filters, sorter) => {
@@ -254,15 +251,14 @@ const TableDetail = (props) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 background: 'rgb(255, 125, 0)',
-                marginRight: '10px',
                 color: 'white'
               }}
             >
               !
             </div>
-            <div style={{ fontSize: '15px' }}>停止运行</div>
+            <div style={{ fontSize: '15px', marginLeft: '10px' }}>停止运行</div>
           </div>
-          <div style={{ padding: '0px 28px', fontSize: '14px' }}>
+          <div style={{ padding: '0px 30px', fontSize: '14px' }}>
             该操作会停止当前数据载入运行任务，停止后将无法恢复运行，是否要继续当前操作?
           </div>
         </Modal>

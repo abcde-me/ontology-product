@@ -23,13 +23,16 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     prompt_checkbox
   } = props.data;
   const store = useStoreApi();
-  const { handleModelChange, setBoostPageData } = useConfig(props.id, props.data);
+  const { handleModelChange, setBoostPageData } = useConfig(
+    props.id,
+    props.data
+  );
   const appScenarios: { [key: string]: string } = {
-    tongyong: '通用',
-    fenlei: '文本分类',
-    tiqu: '文本提取',
-    shengcheng: '文本生成',
-    duolong: '多轮回答'
+    'tongyong': '通用',
+    'fenlei': '文本分类',
+    'tiqu': '文本提取',
+    'shengcheng': '文本生成',
+    'duolong': '多轮回答'
   };
   let defaultModelName = null;
   const unmountedRef = useUnmountedRef();
@@ -41,7 +44,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
 
       const model_emb_model_id = modelList[0]?.id || '';
       const model_emb_model_name = modelList[0]?.type || '';
-      defaultModelName = model_emb_model_name
+      defaultModelName = model_emb_model_name;
       const fields = {} as Record<string, any>;
       if (!enha_modle_id) {
         fields.enha_modle_id = model_emb_model_id;
@@ -50,7 +53,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         fields.app_scenarios_name = 'tongyong';
       }
       handleModelChange(fields);
-      setBoostPageData(modelList)
+      setBoostPageData(modelList);
     });
   }, []);
   return (
@@ -67,9 +70,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {enha_modle_id && (
           <div className="enhancement-item">
             模型：
-            {modelList?.find(
-              (item) => item.id === enha_modle_id
-            )?.type || defaultModelName}
+            {modelList?.find((item) => item.id === enha_modle_id)?.type ||
+              defaultModelName}
           </div>
         )}
         {(app_scenarios_name === 'tongyong' ||
@@ -81,12 +83,12 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
           )}
         {(app_scenarios_name === 'fenlei' ||
           app_scenarios_name === 'shengcheng') &&
-          enhanced_proportion > 0 && (
+          (enhanced_proportion || enhanced_proportion === 0) && (
             <Tooltip content={`任务描述增强占比: ${enhanced_proportion}`}>
               <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
             </Tooltip>
           )}
-        {similarity_threshold && (
+        {(similarity_threshold || similarity_threshold === 0) && (
           <Tooltip content={`过滤相似度阈值: ${similarity_threshold}`}>
             <div className="enhancement-item">{`过滤相似度阈值: ${similarity_threshold}`}</div>
           </Tooltip>

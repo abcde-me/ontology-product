@@ -316,16 +316,14 @@ export default function Eltable() {
 
   // 通用的批量删除处理函数
   const handleDeleteMany = () => {
-    const ids: Array<string> = [];
+    const ids: Array<number> = [];
     try {
       Modal.confirm({
         title: '确认删除文件吗?',
         content: '删除后，文件不可恢复',
         onOk: async () => {
           if (activeTab === 'dst') {
-            const idList = selectedRows.map((item: { id: number }) =>
-              String(item.id)
-            );
+            const idList = selectedRows.map((item: { id: number }) => item.id);
             ids.push(...idList);
             // 调用删除API
             if (selectedRows.length > 0 && selectedRows[0]?.full_path) {
@@ -342,9 +340,7 @@ export default function Eltable() {
               }
             }
           } else {
-            const fileIds = selectedRows.map((item: { id: number }) =>
-              String(item.id)
-            );
+            const fileIds = selectedRows.map((item: { id: number }) => item.id);
             console.log(fileIds);
 
             ids.push(...fileIds);
@@ -560,7 +556,7 @@ export default function Eltable() {
             alignItems: 'center',
             justifyContent: 'space-between',
             marginBottom: 12,
-            background: '#fff',
+            background: '#fff'
           }}
         >
           <Space>
@@ -622,7 +618,7 @@ export default function Eltable() {
           selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
         }
         selectedPath={selectedPath}
-        onExportSuccess={() => { }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

@@ -1,4 +1,6 @@
 .date-cleaning-panel {
+  font-size: 14px;
+
   .arco-checkbox-text {
     white-space: nowrap;
   }
@@ -12,7 +14,7 @@
     margin: 0;
   }
 
-  .arco-form-label-item>label {
+  .arco-form-label-item > label {
     display: flex;
   }
 
@@ -82,6 +84,15 @@
     margin: 12px 0;
   }
 
+  .info-after-text,
+  .info-before-text {
+    color: #6e7b8d;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+  }
+
   .info-line {
     text-decoration: line-through !important;
   }
@@ -94,7 +105,9 @@
 
   .node-title {
     margin: 8px 8px 4px 8px;
+    font-weight: 600;
     display: inline-block;
+    color: #1e293b;
   }
 
   .node-item-content {
@@ -111,10 +124,21 @@
     margin-bottom: 4px;
     padding: 0 4px;
     display: inline-block;
-    width: 95px;
+    width: 80px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .node-item-text {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0%;
+    color: #7f8c9f;
+    padding-bottom: 8px;
   }
 }

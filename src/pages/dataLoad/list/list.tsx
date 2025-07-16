@@ -19,6 +19,7 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import classNames from 'classnames';
 import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -87,16 +88,24 @@ export default function DataLoad() {
       ellipsis: true,
       render: (_, text) => (
         //  <OverflowTooltip  width={300} children={text.name}  styles={'txt'}/>
-        <Tooltip content={text.name} position="tl">
-          <span
-            className="txt"
-            onClick={() => {
-              gotoDetail(text.task_id);
-            }}
-          >
-            {text.name}
-          </span>
-        </Tooltip>
+        <EllipsisPopoverCom
+          value={text.name}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            gotoDetail(text.task_id);
+          }}
+        />
+        // <Tooltip content={text.name} position="tl">
+        //   <span
+        //     className="txt"
+        //     onClick={() => {
+        //       gotoDetail(text.task_id);
+        //     }}
+        //   >
+        //     {text.name}
+        //   </span>
+        // </Tooltip>
       )
     },
     {
@@ -204,18 +213,14 @@ export default function DataLoad() {
       width: 230,
       render: (_, item) => {
         return (
-          <a
-            onClick={() => gotoConnector(item.connector_name)}
-            className="jump-a"
-          >
-            <Popover
-              position="tl"
-              content={item.connector_name}
-              className={'txt'}
-            >
-              <span className="txt">{item.connector_name}</span>
-            </Popover>
-          </a>
+          <EllipsisPopoverCom
+            value={item.connector_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              gotoConnector(item.connector_name);
+            }}
+          />
         );
       }
     },
@@ -226,22 +231,39 @@ export default function DataLoad() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Popover position="tl" content={item.data_path_name}>
+          <div>
             {item.data_path_name !== '' ? (
-              <span
-                // className="jump-a"
-                onClick={() => {
+              <EllipsisPopoverCom
+                value={item.data_path_name}
+                isEdit={false}
+                isLink
+                handleLink={() => {
                   history.push(
                     `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
                   );
                 }}
-              >
-                <span className="txt">{item.data_path_name}</span>
-              </span>
+              />
             ) : (
-              <span>-</span>
+              '-'
             )}
-          </Popover>
+          </div>
+
+          // <Popover position="tl" content={item.data_path_name}>
+          //   {item.data_path_name !== '' ? (
+          //     <span
+          //       // className="jump-a"
+          //       onClick={() => {
+          //         history.push(
+          //           `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
+          //         );
+          //       }}
+          //     >
+          //       <span className="txt">{item.data_path_name}</span>
+          //     </span>
+          //   ) : (
+          //     <span>-</span>
+          //   )}
+          // </Popover>
         );
       }
     },
@@ -458,7 +480,7 @@ export default function DataLoad() {
       >
         <InputSearch
           placeholder="输入关键词搜索"
-          style={{ width: 230 }}
+          style={{ width: 220 }}
           onPressEnter={handlePressEnter}
           onChange={(value) => {
             setSearchValue(value);
@@ -478,7 +500,7 @@ export default function DataLoad() {
         loading={loadloading}
         columns={columns}
         data={data}
-        style={{ padding: '10px 0px' }}
+        style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="task_id"
         border={false}

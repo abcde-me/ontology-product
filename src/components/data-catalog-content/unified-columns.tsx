@@ -255,7 +255,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -280,11 +280,10 @@ export const getUnifiedColumns = (
         ellipsis: true,
         width: 200,
         render: (_, record) => (
-          <EllipsisPopover
-            value={record.file_name}
-            isEdit={false}
-            preferTypography
-          />
+          // 产品需求：文件名提示常驻
+          <Popover content={record.file_sub_path}>
+            <span>{record.file_name}</span>
+          </Popover>
         )
       },
       {

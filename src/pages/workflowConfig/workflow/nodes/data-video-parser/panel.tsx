@@ -96,7 +96,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
             handleFilesChange={handleFilesChange}
           />
         </FormItem>
-        <Split className="my-[16px]" />
+        <Split className="mb-[16px]" />
         <FormItem
           label="字幕与音频校验："
           field="audio_options"
@@ -125,7 +125,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         </FormItem>
         {activityMode === 2 && (
           <FormItem
-            label="时长："
+            label="时长（秒）："
             field="activity_mode_num"
             labelAlign="left"
             required
