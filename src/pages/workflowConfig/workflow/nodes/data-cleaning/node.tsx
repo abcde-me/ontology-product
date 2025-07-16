@@ -30,25 +30,44 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const isDataChecked = () => {
     return [unicode, traditional_to_simplified, case_uniformity].some(Boolean);
   };
+  const isCleaningChecked = () => {
+    return [
+      data_standardization && isDataChecked(),
+      ts_remove && isChecked(),
+      mg_is,
+      qd_is,
+      df_is,
+      oh_is,
+      threshold_switch && threshold > 0
+    ].some(Boolean);
+  };
   return (
-    <div className={`wk-node-content data-cleaning-node`}>
-      <span className="node-title">清洗类型</span>
-      <div className="node-item-content">
-        {data_standardization && isDataChecked() && (
-          <div className="node-item">数据标准化</div>
-        )}
-        {threshold_switch && threshold > 0 && (
-          <div className="node-item">数据过滤</div>
-        )}
-        {ts_remove && ts_remove && isChecked() && (
-          <div className="node-item">特殊字符删除</div>
-        )}
-        {mg_is && mg_is && <div className="node-item">去除敏感词</div>}
-        {qd_is && qd_is && <div className="node-item">数据去毒化</div>}
-        {df_is && df_is && <div className="node-item">数据填补</div>}
-        {oh_is && oh_is && <div className="node-item">异常值处理</div>}
+    isCleaningChecked() ?
+      <div className={`wk-node-content data-cleaning-node`}>
+        <span className="node-title">清洗类型</span>
+        <div className="node-item-content">
+          {data_standardization && isDataChecked() && (
+            <div className="node-item">数据标准化</div>
+          )}
+          {threshold_switch && threshold > 0 && (
+            <div className="node-item">数据过滤</div>
+          )}
+          {ts_remove && ts_remove && isChecked() && (
+            <div className="node-item">特殊字符删除</div>
+          )}
+          {mg_is && mg_is && <div className="node-item">去除敏感词</div>}
+          {qd_is && qd_is && <div className="node-item">数据去毒化</div>}
+          {df_is && df_is && <div className="node-item">数据填补</div>}
+          {oh_is && oh_is && <div className="node-item">异常值处理</div>}
+        </div>
       </div>
-    </div>
+      :
+      <div className={`wk-node-content data-cleaning-node`}>
+        <span className="node-title">清洗类型</span>
+        <div className="node-item-content">
+          <div className='node-item-text'>未配置</div>
+        </div>
+      </div>
   );
 };
 
