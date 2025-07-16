@@ -28,6 +28,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .item-text {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0%;
+    color: #7f8c9f;
   }
 
   .content-tips-text {
