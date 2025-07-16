@@ -468,7 +468,7 @@ const DataLoadDetail = () => {
         >
           <InputSearch
             placeholder="搜索运行ID"
-            style={{ width: 230 }}
+            style={{ width: 220 }}
             onPressEnter={() => {
               getDetailList();
             }}
