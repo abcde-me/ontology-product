@@ -370,9 +370,6 @@ export default function WorkflowTask() {
                 : '输入作业名称搜索'
             }
             allowClear
-            onClear={() => {
-              setSearchValue('');
-            }}
             style={{ width: 160 }}
             value={searchValue}
             onChange={(value) => {

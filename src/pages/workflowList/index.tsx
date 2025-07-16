@@ -383,9 +383,6 @@ export default function WorkflowList() {
           style={{ width: 230 }}
           value={searchValue}
           allowClear
-          onClear={() => {
-            setSearchValue('');
-          }}
           onChange={(value) => {
             setSearchValue(value);
           }}
