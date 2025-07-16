@@ -30,7 +30,18 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const isDataChecked = () => {
     return [unicode, traditional_to_simplified, case_uniformity].some(Boolean);
   };
-  return (
+  const isCleaningChecked = () => {
+    return [
+      data_standardization && isDataChecked(),
+      ts_remove && isChecked(),
+      mg_is,
+      qd_is,
+      df_is,
+      oh_is,
+      threshold_switch && threshold > 0
+    ].some(Boolean);
+  };
+  return isCleaningChecked() ? (
     <div className={`wk-node-content data-cleaning-node`}>
       <span className="node-title">清洗类型</span>
       <div className="node-item-content">
@@ -47,6 +58,13 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         {qd_is && qd_is && <div className="node-item">数据去毒化</div>}
         {df_is && df_is && <div className="node-item">数据填补</div>}
         {oh_is && oh_is && <div className="node-item">异常值处理</div>}
+      </div>
+    </div>
+  ) : (
+    <div className={`wk-node-content data-cleaning-node`}>
+      <span className="node-title">清洗类型</span>
+      <div className="node-item-content">
+        <div className="node-item-text">未配置</div>
       </div>
     </div>
   );

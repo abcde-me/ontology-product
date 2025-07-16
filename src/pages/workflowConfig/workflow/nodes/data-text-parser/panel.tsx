@@ -104,7 +104,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
             handleFilesChange={handleFilesChange}
           />
         </FormItem>
-        <Split className="my-[16px]" />
+        <Split className="mb-[16px]" />
         <FormItem
           label="分段方式："
           field="text_slice_rule"

@@ -42,7 +42,7 @@ const Node: FC<NodeProps<TextParserNodeType>> = (props) => {
         </div>
         <div className="output-list">
           {selected_files_num > 0 && (
-            <div className="output-var-item">
+            <div className="output-var-item !font-semibold">
               已选择{selected_files_num}个文件
             </div>
           )}

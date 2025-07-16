@@ -46,17 +46,21 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
     (fields: VideoParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1;
-        (draft.activity_mode = fields.activity_mode),
+        ((draft.activity_mode = fields.activity_mode),
           (draft.is_open_multi_conv = fields.vad_options.includes('conv')
             ? 2
             : 1),
-          (draft.vad_options = fields.vad_options);
+          (draft.vad_options = fields.vad_options));
         draft.audio_model_id = fields.audio_model_id;
         draft.after_proc = fields.after_proc;
-        draft.activity_mode_num = fields.activity_mode_num;
-        (draft.is_poly_orbit = fields.audio_options.includes('orbit') ? 2 : 1),
+        draft.activity_mode_num = [null, undefined, ''].includes(
+          fields.activity_mode_num
+        )
+          ? ''
+          : `${fields.activity_mode_num}`;
+        ((draft.is_poly_orbit = fields.audio_options.includes('orbit') ? 2 : 1),
           (draft.is_denoise = fields.audio_options.includes('denoise') ? 2 : 1),
-          (draft.audio_options = fields.audio_options);
+          (draft.audio_options = fields.audio_options));
       });
       setInputs(newInputs);
     },
