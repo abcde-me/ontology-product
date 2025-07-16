@@ -7,9 +7,6 @@
 .arco-select-popup .arco-select-option-selected {
   background-color: white;
 }
-.arco-select-size-default.arco-select-multiple .arco-select-view {
-  /* margin-left: 7px; */
-}
 
 .cascader-dropdown .arco-cascader-list-item-label,
 .cascader-dropdown .arco-cascader-list-search-item-label {
