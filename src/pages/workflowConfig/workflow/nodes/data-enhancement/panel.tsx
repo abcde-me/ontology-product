@@ -207,6 +207,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           layout="vertical"
           field="sample_data"
           label="数据示例（JSON格式）"
+          style={{ marginTop: '24px' }}
         >
           <TextArea
             placeholder="请在这里输入期望的数据集的示例数据（JSON格式）"

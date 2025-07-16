@@ -5,22 +5,36 @@
   border-radius: 12px;
   padding: 8px;
 
+  .input-header {
+    .txt {
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 18px;
+      color: #1E293B;
+      margin: 8px 8px 4px 0px;
+      display: block;
+    }
+  }
+
   .enhancement-content {
     display: flex;
     flex-wrap: wrap;
   }
 
   .enhancement-item {
-    background-color: #e2e8f0;
+    background-color: #E2E8F0;
     padding: 0 4px;
     margin-right: 4px;
     margin-bottom: 4px;
     border-radius: 5px;
-    width: 95px;
+    width: 80px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    font-size: 12px;
+    color: #0F172A;
+    line-height: 18px;
   }
 
   .arco-form-inline .arco-form-item {
@@ -37,7 +51,7 @@
   .content-box {
     border: 1px solid #e2e8f0;
     border-radius: 5px;
-    padding: 16px;
+    padding: 16px 16px 0 16px;
     margin-top: 24px;
 
     .arco-form-label-item {
