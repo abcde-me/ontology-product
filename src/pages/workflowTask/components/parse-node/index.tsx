@@ -230,20 +230,22 @@ export default function ParseNode(props: {
         }
       />
       {/* 分页 */}
-      <Pagination
-        current={pagination.current}
-        pageSize={pagination.pageSize}
-        onChange={handlePageChange}
-        onPageSizeChange={(pageSize) => {
-          handlePageChange(1, pageSize);
-        }}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={pagination.total}
-        showJumper
-        sizeCanChange
-        style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-      />
+      {dataSource.file && dataSource.file.length > 0 && (
+        <Pagination
+          current={pagination.current}
+          pageSize={pagination.pageSize}
+          onChange={handlePageChange}
+          onPageSizeChange={(pageSize) => {
+            handlePageChange(1, pageSize);
+          }}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={pagination.total}
+          showJumper
+          sizeCanChange
+          style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+        />
+      )}
     </div>
   );
 }
