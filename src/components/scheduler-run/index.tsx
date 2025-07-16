@@ -198,6 +198,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
     return (
       <Form
+        className={'schedulerForm'}
         form={form}
         initialValues={initialValues}
         onChange={handleValuesChange}
