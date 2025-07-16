@@ -2,6 +2,10 @@
 @font-size-body-3: 14px;
 /******** background ********/
 @color-bg-hover: rgb(67, 141, 251);
+@color-bg-btn-normal:#007DFA;
+@color-bg-btn-normal-hover:#438DFB;
+@color-bg-btn-line:#007DFA;
+@color-bg-btn-line-hover:#438DFB;
 /******** fontWeight ********/
 @font-weight-400: 400;
 @font-weight-600: 600;
@@ -190,3 +194,40 @@
 .arco-table-th-item-title {
   pointer-events: none !important;
 }
+.arco-input-tag .arco-input-tag-tag{
+  padding:1px 8px;
+  font-size:14px
+}
+ .arco-input-tag .arco-input-tag-tag {
+    background-color: #e7ecf0;
+  }
+  .arco-input-tag.arco-input-tag-focus .arco-input-tag-tag{
+     background-color: #e7ecf0;
+  }
+  .arco-select-option-wrapper:hover{
+    background-color:#EEF6FF;
+    border-radius: 4px;
+  }
+  .arco-select-popup:hover .arco-select-option:hover{
+    background-color:#EEF6FF;
+  }
+  // 正常按钮的颜色
+  .arco-btn-primary:not(.arco-btn-disabled){
+    background-color:@color-bg-btn-normal;
+    color: white;
+  }
+  // 正常按钮划入的颜色
+  .arco-btn-primary:not(.arco-btn-disabled):hover{
+    background-color:@color-bg-btn-normal-hover;
+    color: @color-bg-btn-normal-hover;
+  }
+  // 线性按钮的颜色
+  .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading){
+    color:@color-bg-btn-line;
+    background-color:white;
+  }
+  // 线性按钮的划入颜色
+  .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover{
+    background-color:@color-bg-btn-line;
+    color: @color-bg-btn-line;
+  }

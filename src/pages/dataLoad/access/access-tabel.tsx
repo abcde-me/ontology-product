@@ -20,11 +20,11 @@ enum StatusType {
 const STATUSTYPEARR = {
   [StatusType.SYCCESS]: {
     txt: '成功',
-    color: 'green'
+    color: 'rgb(16, 185, 129)'
   },
   [StatusType.FAIL]: {
     txt: '失败',
-    color: 'red'
+    color: 'rgb(220, 38, 38)'
   }
 };
 
@@ -170,6 +170,7 @@ const AccessTable = (props) => {
   return (
     <div>
       <InputSearch
+        allowClear
         placeholder="搜索文件名"
         style={{ width: 220, marginLeft: '17px' }}
         onPressEnter={(e) => {

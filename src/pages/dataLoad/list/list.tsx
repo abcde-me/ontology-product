@@ -479,6 +479,7 @@ export default function DataLoad() {
         }}
       >
         <InputSearch
+          allowClear
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
           onPressEnter={handlePressEnter}
