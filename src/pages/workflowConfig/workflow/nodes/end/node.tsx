@@ -12,17 +12,19 @@ const Node: FC<NodeProps<EndNodeType>> = ({ id, data }) => {
   const [targetPathName, setTargetPathName] = useState(target_path_name);
   useEffect(() => {
     getWorkflowTargetPath(2, '').then(res => {
-      const resData = res.data.dst.forEach((catalog) => {
-        // 重置name结构
-        const restData = catalog.children?.volume.map(item => {
-          return {
-            ...item,
-            parent_name: catalog.name
-          }
-        })
-        dirsArr.push(...(restData || []));
-      });
-      setTargetPathName(dirsArr?.find((item) => item?.id === target_path_id)?.name)
+      if (res.status === 200) {
+        const resData = res.data.dst.forEach((catalog) => {
+          // 重置name结构
+          const restData = catalog.children?.volume.map(item => {
+            return {
+              ...item,
+              parent_name: catalog.name
+            }
+          })
+          dirsArr.push(...(restData || []));
+        });
+        setTargetPathName(dirsArr?.find((item) => item?.id === target_path_id)?.name)
+      }
     });
   }, [targetPathName]);
   return (
