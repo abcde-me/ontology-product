@@ -57,7 +57,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     form.setFieldValue('prompt', prompt_text);
     form.setFieldValue('sample_data', sample_data_text);
   }, [app_scenarios_name])
-
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -68,12 +67,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           ...data,
-          app_scenarios_name: inputs?.app_scenarios_name || 'tongyong',
+          app_scenarios_name: inputs?.app_scenarios_name ?? 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
-          enhanced_proportion: inputs?.enhanced_proportion || 0.7,
-          sample_num: inputs?.sample_num || 10,
-          similarity_threshold: inputs?.similarity_threshold || 0.7,
-          generate_sample_num: inputs?.generate_sample_num || 100
+          enhanced_proportion: inputs?.enhanced_proportion ?? 0.7,
+          sample_num: inputs?.sample_num ?? 10,
+          similarity_threshold: inputs?.similarity_threshold ?? 0.7,
+          generate_sample_num: inputs?.generate_sample_num ?? 100
         }}
         onValuesChange={(_, v: any) => { onValuesChange(v) }}
       >
