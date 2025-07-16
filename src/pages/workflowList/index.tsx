@@ -52,11 +52,6 @@ export default function WorkflowList() {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
 
-  // 清空搜索条件时重置列表
-  useEffect(() => {
-    if (searchValue === '') getList();
-  }, [searchValue]);
-
   const getList = async () => {
     setLoading(true);
     try {
