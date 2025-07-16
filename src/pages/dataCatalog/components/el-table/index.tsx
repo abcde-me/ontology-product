@@ -443,7 +443,6 @@ export default function Eltable() {
             alignItems: 'center',
             borderRadius: 4,
             overflow: 'hidden',
-            border: '1px solid #e5e6eb',
             width: '260px'
           }}
         >
