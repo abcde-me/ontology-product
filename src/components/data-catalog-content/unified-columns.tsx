@@ -280,11 +280,10 @@ export const getUnifiedColumns = (
         ellipsis: true,
         width: 200,
         render: (_, record) => (
-          <EllipsisPopover
-            value={record.file_name}
-            isEdit={false}
-            preferTypography
-          />
+          // 产品需求：文件名提示常驻
+          <Popover content={record.file_sub_path}>
+            <span>{record.file_name}</span>
+          </Popover>
         )
       },
       {

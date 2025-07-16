@@ -195,7 +195,7 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
               isEdit={false}
               preferTypography
               wrapperClassName="w-full"
-              className="text-[12px]/[18px] font-bold text-[#1E293B]"
+              className="text-[14px]/[22px] font-semibold text-[#0F172A]"
             />
             {/* <div className="text-[12px]/[18px] font-bold text-[#1E293B]">
               {data.title}

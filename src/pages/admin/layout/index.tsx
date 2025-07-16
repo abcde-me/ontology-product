@@ -2,6 +2,7 @@ import useAuthTimeout from '@/hooks/useAuthTimeout';
 import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
+import '@/style/scrollbar.css';
 import useCheckHideRegion from '@/utils/useCheckHideRegion';
 import { Layout } from '@arco-design/web-react';
 import * as React from 'react';

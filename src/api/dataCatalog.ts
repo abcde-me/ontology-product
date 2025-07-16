@@ -89,7 +89,7 @@ interface TargetDataFileQueryParams {
 
 // 定义删除目标文件的参数接口
 interface TargetFileDeleteParams {
-  file_ids: Array<string>;
+  file_ids: Array<number | string>;
   full_path: string;
   path_id: string;
 }
@@ -151,7 +151,7 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
   });
 
   file_ids.forEach((id) => {
-    queryParams.append('file_ids', id);
+    queryParams.append('file_ids', String(id));
   });
 
   return await UAPI.RES.targetDataFileDeleteApi({})
