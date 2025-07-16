@@ -443,7 +443,6 @@ export default function Eltable() {
             alignItems: 'center',
             borderRadius: 4,
             overflow: 'hidden',
-            border: '1px solid #e5e6eb',
             width: '260px'
           }}
         >
@@ -618,7 +617,7 @@ export default function Eltable() {
           selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
         }
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
