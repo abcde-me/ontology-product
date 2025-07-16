@@ -155,7 +155,7 @@ export default function WorkflowTask() {
     {
       title: '作业ID',
       dataIndex: 'id',
-      width: 70,
+      width: 80,
       ellipsis: true,
       className: 'hover-change',
       render: (_, record) => (

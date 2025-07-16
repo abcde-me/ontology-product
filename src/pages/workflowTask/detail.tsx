@@ -202,10 +202,14 @@ export default function WorkflowTaskDetail() {
           taskDetailData.run_status === TaskRunStatus.success
             ? { backgroundColor: '#ECFDF5', border: '1px solid #10B981' }
             : taskDetailData.run_status === TaskRunStatus.fail
-              ? { backgroundColor: '#FEF2F2', border: '1px solid #EF4444' }
+              ? {
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #EF4444',
+                  minHeight: 106
+                }
               : taskDetailData.run_status === TaskRunStatus.running
                 ? { backgroundColor: '#EEF6FF', border: '1px solid #007DFA' }
-                : { backgroundColor: '#CBD5E1', border: '1px solid #CBD5E1' }
+                : { border: '1px solid #CBD5E1' }
         }
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -214,14 +218,24 @@ export default function WorkflowTaskDetail() {
             {taskDetailData.run_status === TaskRunStatus.success ? (
               <div className="item-content-box">
                 <IconCheckCircleFill
-                  style={{ color: '#10B981', margin: '0 5px 0 0' }}
+                  style={{
+                    color: '#10B981',
+                    margin: '0 8px 0 0',
+                    width: 16,
+                    height: 16
+                  }}
                 />
                 <span className="item-content">运行成功</span>
               </div>
             ) : taskDetailData.run_status === TaskRunStatus.fail ? (
               <div className="item-content-box">
                 <IconCloseCircleFill
-                  style={{ color: '#EF4444', margin: '0 5px 0 0' }}
+                  style={{
+                    color: '#EF4444',
+                    margin: '0 8px 0 0',
+                    width: 16,
+                    height: 16
+                  }}
                 />
                 <span className="item-content">运行失败</span>
                 <Popconfirm
@@ -238,7 +252,12 @@ export default function WorkflowTaskDetail() {
             ) : taskDetailData.run_status === TaskRunStatus.running ? (
               <div className="item-content-box">
                 <IconLoading
-                  style={{ color: '#007DFA', margin: '0 5px 0 0' }}
+                  style={{
+                    color: '#007DFA',
+                    margin: '0 8px 0 0',
+                    width: 16,
+                    height: 16
+                  }}
                 />
                 <span className="item-content">运行中</span>
                 <Popconfirm
@@ -255,7 +274,12 @@ export default function WorkflowTaskDetail() {
             ) : (
               <div className="item-content-box">
                 <IconExclamationCircleFill
-                  style={{ color: '#6E7B8D', margin: '0 5px 0 0' }}
+                  style={{
+                    color: '#6E7B8D',
+                    margin: '0 8px 0 0',
+                    width: 16,
+                    height: 16
+                  }}
                 />
                 <span className="item-content">已停止</span>
               </div>
@@ -265,7 +289,9 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">总用时</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData?.time_size ?? '--'}
+                {taskDetailData?.time_size === ''
+                  ? '-'
+                  : taskDetailData?.time_size ?? '-'}
               </span>
             </div>
           </div>
@@ -273,7 +299,9 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">开始时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData?.start_time ?? '--'}
+                {taskDetailData?.start_time === ''
+                  ? '-'
+                  : taskDetailData?.start_time ?? '-'}
               </span>
             </div>
           </div>
@@ -281,7 +309,9 @@ export default function WorkflowTaskDetail() {
             <span className="item-title">结束时间</span>
             <div className="item-content-box">
               <span className="item-content">
-                {taskDetailData?.end_time ?? '--'}
+                {taskDetailData?.end_time === ''
+                  ? '-'
+                  : taskDetailData?.end_time ?? '-'}
               </span>
             </div>
           </div>
@@ -402,18 +432,24 @@ export default function WorkflowTaskDetail() {
                 title={
                   <span>
                     {item.status === NodeRunStatus.running ? (
-                      <IconLoading style={{ marginRight: 6 }} />
+                      <IconLoading
+                        style={{ marginRight: 8, width: 14, height: 14 }}
+                      />
                     ) : item.status === NodeRunStatus.completeSuccess ||
                       item.status === NodeRunStatus.completeFail ? (
-                      <IconCheckCircle style={{ marginRight: 6 }} />
+                      <IconCheckCircle
+                        style={{ marginRight: 8, width: 14, height: 14 }}
+                      />
                     ) : (
-                      <IconClockCircle style={{ marginRight: 6 }} />
+                      <IconClockCircle
+                        style={{ marginRight: 8, width: 14, height: 14 }}
+                      />
                     )}
                     {getNodeName(item.task_type)}
                   </span>
                 }
               >
-                <Typography.Paragraph style={{ marginTop: 20 }}>
+                <Typography.Paragraph>
                   {isParseNode ? (
                     <ParseNode
                       dataSource={parseNodeData}
