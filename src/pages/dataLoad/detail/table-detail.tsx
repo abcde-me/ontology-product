@@ -32,7 +32,7 @@ const TableDetail = (props) => {
     },
     {
       title: '状态',
-      width: 200,
+      width: 170,
       dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
