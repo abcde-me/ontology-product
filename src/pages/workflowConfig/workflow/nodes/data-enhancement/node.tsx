@@ -28,11 +28,11 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     props.data
   );
   const appScenarios: { [key: string]: string } = {
-    'tongyong': '通用',
-    'fenlei': '文本分类',
-    'tiqu': '文本提取',
-    'shengcheng': '文本生成',
-    'duolong': '多轮回答'
+    tongyong: '通用',
+    fenlei: '文本分类',
+    tiqu: '文本提取',
+    shengcheng: '文本生成',
+    duolong: '多轮回答'
   };
   let defaultModelName = null;
   const unmountedRef = useUnmountedRef();

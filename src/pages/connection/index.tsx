@@ -407,6 +407,7 @@ export default function Connection() {
         }}
       >
         <Input.Search
+          allowClear
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
           onPressEnter={handlePressEnter}
