@@ -1,5 +1,5 @@
 import { Breadcrumb, Grid, Input } from '@arco-design/web-react';
-import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
+import { IconArrowLeft, IconEdit, IconHome } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import AccessTable from './access-tabel';
@@ -42,14 +42,14 @@ const AccessDetail = () => {
     <div>
       <div
         style={{
-          margin: '10px 10px 20px 10px',
+          margin: '16px 0px 16px 10px',
           fontSize: '20px',
           display: 'flex',
           alignItems: 'center'
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', fontSize: '16px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
@@ -61,7 +61,7 @@ const AccessDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Breadcrumb style={{ marginLeft: '15px', fontSize: '17px' }}>
+          <Breadcrumb style={{ marginLeft: '28px', fontSize: '18px' }}>
             <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
               数据载入
             </BreadcrumbItem>
@@ -73,7 +73,7 @@ const AccessDetail = () => {
             >
               {name}
             </BreadcrumbItem>
-            <BreadcrumbItem>
+            <BreadcrumbItem style={{ fontSize: '20px' }}>
               {arressDetail.execution_name}运行记录
             </BreadcrumbItem>
           </Breadcrumb>
@@ -118,7 +118,7 @@ const AccessDetail = () => {
           backgroundColor: 'white',
           display: 'flex',
           flexDirection: 'column',
-          margin: '10px 20px 10px 0px',
+          margin: '10px 20px 10px 10px',
           borderRadius: '10px',
           minHeight: '86vh'
         }}
