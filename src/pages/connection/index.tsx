@@ -252,9 +252,7 @@ export default function Connection() {
           <span
             className="hover"
             onClick={() => {
-              setDelId(record.id);
-              setDelTitle(record.title);
-              setDelVisible(true);
+              delModalHan(record.id);
             }}
           >
             删除
@@ -263,6 +261,28 @@ export default function Connection() {
       )
     }
   ];
+  // 点击删除显示弹框
+  const delModalHan = (id) => {
+    Modal.confirm({
+      title: <span>删除该连接器</span>,
+      content: (
+        <div
+          style={{
+            padding: '5px 28px 0px 23px',
+            fontSize: '14px',
+            fontWeight: '400'
+          }}
+        >
+          删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        DeleteMethod(id);
+      }
+    });
+  };
   // 点击详情的回调
   const editFormHandle = (obj) => {
     console.log(obj);
@@ -271,10 +291,9 @@ export default function Connection() {
   };
 
   // 点击删除按钮执行的方法
-  const DeleteMethod = async () => {
-    const res = await delconnectionList(delId);
+  const DeleteMethod = async (id) => {
+    const res = await delconnectionList(id);
     if (res.code == '' && res.status == 200) {
-      setDelVisible(false);
       Message.success({
         content: '删除成功'
       });
@@ -355,12 +374,6 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
-  // 删除弹框的默认值
-  const [delVisible, setDelVisible] = useState(false);
-  // 存放删除的id
-  const [delId, setDelId] = useState(null);
-  // 存放删除的名称
-  const [delTitle, setDelTitle] = useState(null);
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -483,7 +496,7 @@ export default function Connection() {
                 console.log(editObject);
               }}
             >
-              取消{' '}
+              取消
             </Button>
             <Button
               type="primary"
@@ -505,29 +518,6 @@ export default function Connection() {
           editObj={editObject}
           editDisabled={editLoadingState}
         />
-      </Modal>
-      <Modal
-        title={
-          <div
-            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
-          >
-            <IconExclamationCircle
-              style={{ color: 'orange', fontSize: '20px' }}
-            />
-            删除该连接器
-          </div>
-        }
-        visible={delVisible}
-        onCancel={() => {
-          setDelVisible(false);
-        }}
-        onOk={() => {
-          DeleteMethod();
-        }}
-      >
-        <div style={{ fontSize: '14px', paddingLeft: '25px' }}>
-          删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
-        </div>
       </Modal>
     </div>
   );

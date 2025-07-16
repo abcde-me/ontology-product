@@ -2,6 +2,9 @@
   .arco-timepicker-container {
     width: 430px !important;
   }
+  .arco-table-tr > th {
+    background-color: rgb(245, 249, 255) !important;
+  }
   .arco-timepicker-list {
     width: 50% !important;
   }

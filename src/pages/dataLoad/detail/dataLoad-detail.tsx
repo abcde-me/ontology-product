@@ -219,23 +219,29 @@ const DataLoadDetail = () => {
     <div>
       <div
         style={{
-          margin: '15px 0px',
+          margin: '16px 0px',
           fontSize: '20px',
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginLeft: '10px'
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', fontSize: '16px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
         />
-        <Breadcrumb style={{ marginLeft: '15px', fontSize: '17px' }}>
-          <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
+        <Breadcrumb style={{ marginLeft: '28px', fontSize: '18px' }}>
+          <BreadcrumbItem
+            href="/tenant/compute/modaforge/dataLoad"
+            style={{ fontSize: '18px' }}
+          >
             数据载入
           </BreadcrumbItem>
-          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
+          <BreadcrumbItem style={{ fontSize: '20px' }}>
+            {listDetail?.name}
+          </BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
@@ -245,7 +251,7 @@ const DataLoadDetail = () => {
           flexDirection: 'column',
           margin: '10px 10px 20px 10px',
           borderRadius: '10px',
-          minHeight: '86vh'
+          minHeight: '87vh'
         }}
       >
         <div className="box">
