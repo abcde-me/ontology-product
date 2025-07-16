@@ -90,7 +90,7 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
                   {needWarningNodes.map((node: any) => (
                     <div
                       key={node.id}
-                      className="checklist-list-item mb-[12px] cursor-pointer rounded-[4px] border-[0.5px] border-gray-200 bg-white shadow-xs last-of-type:mb-0"
+                      className="checklist-list-item mb-[12px] cursor-pointer rounded-[4px] border-[0.5px] border-gray-200 bg-white last-of-type:mb-0"
                       onClick={() => {
                         handleNodeSelect(node.id);
                         setOpen(false);
@@ -99,7 +99,7 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
                       <div className="mb-[12px] flex items-center text-xs font-medium text-gray-700">
                         <BlockIcon
                           type={node.type}
-                          className="mr-1.5 size-[16px]"
+                          className="mr-1.5 !size-[16px]"
                           toolIcon={node.toolIcon}
                         />
                         <span className="item-title grow truncate">
@@ -108,16 +108,16 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
                       </div>
                       <div className="item-warnings border-t-[0.5px] border-t-black/2">
                         {node.unConnected && (
-                          <div className="warnings-item rounded-b-[4px] bg-gray-25">
-                            <div className="flex text-xs leading-[18px] text-[#1E293B]">
+                          <div className="warnings-item rounded-b-[4px]">
+                            <div className="flex !text-[14px] text-xs leading-[18px] text-[#1E293B]">
                               <Warning1Icon className="mr-2 size-[16px] text-[#F79009]" />
                               {t('workflow.common.needConnectTip')}
                             </div>
                           </div>
                         )}
                         {node.errorMessage && (
-                          <div className="warnings-item rounded-b-[4px] bg-gray-25">
-                            <div className="flex text-xs leading-[18px] text-[#1E293B]">
+                          <div className="warnings-item rounded-b-[4px]">
+                            <div className="flex !text-[14px] text-xs leading-[18px] text-[#1E293B]">
                               <Warning1Icon className="mr-2 size-[16px] text-[#F79009]" />
                               {node.errorMessage}
                             </div>

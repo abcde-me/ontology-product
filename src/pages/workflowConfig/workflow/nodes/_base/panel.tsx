@@ -124,7 +124,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
         <div className="sticky top-0 z-10 bg-components-panel-bg">
           <div className="title-wrapper flex items-center px-[16px] pb-[8px] pt-[20px]">
             <BlockIcon
-              className="mr-[12px] size-[20px] shrink-0"
+              className="mr-[8px] size-[20px] shrink-0"
               type={data.type}
               toolIcon={toolIcon}
               size="md"

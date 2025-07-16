@@ -44,7 +44,7 @@ hr {
 .connector-detail {
   .modal {
     background-color: white;
-    border-radius: 8px;
+    /* border-radius: 8px; */
     width: 704px;
     /* height: 500px !important; */
     /* max-width: 90%;
@@ -56,17 +56,18 @@ hr {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 20px 0px 8px;
+    padding-bottom: 20px;
     font-weight: 500px;
   }
 
   .modal-header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 500;
   }
 
   .modal-content {
-    padding: 20px 20px 20px 8px;
+    padding-right: 10px;
   }
 
   .section {
@@ -75,7 +76,7 @@ hr {
 
   .section h3 {
     margin-top: 0;
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .info-item {

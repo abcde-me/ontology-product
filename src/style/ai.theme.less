@@ -258,7 +258,19 @@
   line-height: 30px;
 }
 
-arco-radio-size-mini.arco-radio-group-type-button,
+.arco-radio-size-small.arco-radio-group-type-button,
+.arco-radio-size-small .arco-radio-button {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.arco-radio-size-large.arco-radio-group-type-button,
+.arco-radio-group.arco-radio-size-large .arco-radio-button {
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.arco-radio-size-mini.arco-radio-group-type-button,
 .arco-radio-size-mini .arco-radio-button {
   font-size: 12px;
   line-height: 18px;
@@ -447,6 +459,11 @@ arco-radio-size-mini.arco-radio-group-type-button,
   opacity: 1;
 }
 
+// acro design < cecloud themes < 覆盖
+.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+  opacity: 1;
+}
+
 /******** tag ********/
 /******** TODO: 视觉设计暂未提供统一组件样式 ********/
 
@@ -535,16 +552,6 @@ arco-radio-size-mini.arco-radio-group-type-button,
     right: 0px;
     top: 0px;
   }
-}
-
-/******** popover ********/
-.arco-popover-content {
-  padding: 12px;
-}
-
-.arco-popover-content {
-  font-size: 14px;
-  border: none;
 }
 
 /******** 页面 右侧内容区域 ********/

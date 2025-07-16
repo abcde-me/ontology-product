@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
 import './index.css';
 import { RunState } from '../list/list';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
@@ -36,11 +37,7 @@ const AccessTable = (props) => {
       width: 400,
       ellipsis: true,
       render: (_, item) => {
-        return (
-          <Popover position="tl" content={item.file_name}>
-            {item.file_name}
-          </Popover>
-        );
+        return <EllipsisPopoverCom value={item.file_name} isEdit={false} />;
       }
     },
     {
@@ -174,7 +171,7 @@ const AccessTable = (props) => {
     <div>
       <InputSearch
         placeholder="搜索文件名"
-        style={{ width: 200, marginLeft: '17px' }}
+        style={{ width: 220, marginLeft: '17px' }}
         onPressEnter={(e) => {
           getRecordingList();
         }}
