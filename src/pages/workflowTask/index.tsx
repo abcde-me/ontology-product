@@ -61,6 +61,11 @@ export default function WorkflowTask() {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
 
+  // 清空搜索条件时重置列表
+  useEffect(() => {
+    if (searchValue === '') getList();
+  }, [searchValue]);
+
   const getList = async () => {
     setLoading(true);
     try {
@@ -369,6 +374,10 @@ export default function WorkflowTask() {
                 ? '输入作业ID搜索'
                 : '输入作业名称搜索'
             }
+            allowClear
+            onClear={() => {
+              setSearchValue('');
+            }}
             style={{ width: 160 }}
             value={searchValue}
             onChange={(value) => {

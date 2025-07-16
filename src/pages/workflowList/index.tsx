@@ -52,6 +52,11 @@ export default function WorkflowList() {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
 
+  // 清空搜索条件时重置列表
+  useEffect(() => {
+    if (searchValue === '') getList();
+  }, [searchValue]);
+
   const getList = async () => {
     setLoading(true);
     try {
@@ -382,6 +387,10 @@ export default function WorkflowList() {
           placeholder="输入工作流名称搜索"
           style={{ width: 230 }}
           value={searchValue}
+          allowClear
+          onClear={() => {
+            setSearchValue('');
+          }}
           onChange={(value) => {
             setSearchValue(value);
           }}
