@@ -17,13 +17,14 @@ import React from 'react';
 import { useMemberEditor } from '../components/MemberProvider/Context';
 import dayjs from 'dayjs';
 import { preDelUser } from '@/api/user';
+import { title } from 'process';
 
 export function useColumns() {
   const member = useMemberEditor();
   const { memberStore } = member;
   const columns = [
     {
-      title: '成员',
+      title: '姓名/用户名',
       dataIndex: 'username',
       key: 'username',
       width: 200,
@@ -96,6 +97,16 @@ export function useColumns() {
       dataIndex: 'phone',
       key: 'phone',
       width: 151,
+      render: (text: string) => {
+        return text || '-';
+      }
+    },
+    // 职位
+    {
+      title: '职位',
+      dataIndex: 'position',
+      key: 'position',
+      width: 150,
       render: (text: string) => {
         return text || '-';
       }

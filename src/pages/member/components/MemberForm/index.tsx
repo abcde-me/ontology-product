@@ -212,7 +212,9 @@ export default function MemberForm() {
             type="primary"
             loading={loading}
             onClick={handleOk}
-            className="ml-1"
+            style={{
+              marginLeft: '8px'
+            }}
           >
             确定
           </Button>
@@ -228,7 +230,7 @@ export default function MemberForm() {
         }}
       >
         <FormItem
-          label="姓名"
+          label="姓名:"
           field="username"
           required
           rules={[
@@ -244,7 +246,7 @@ export default function MemberForm() {
         </FormItem>
 
         <FormItem
-          label="用户名"
+          label="用户名:"
           field="account"
           extra="用户名只能包含英文、数字和下划线，且必须以英文开头"
           disabled={isEdit}
@@ -266,7 +268,7 @@ export default function MemberForm() {
 
         {isEdit ? null : (
           <FormItem
-            label="密码"
+            label="密码:"
             field="password"
             extra="密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息"
             required
@@ -286,7 +288,7 @@ export default function MemberForm() {
 
         {isEdit ? null : (
           <FormItem
-            label="确认密码"
+            label="确认密码:"
             field="confirmPassword"
             extra="密码需包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息"
             required
@@ -308,7 +310,7 @@ export default function MemberForm() {
         )}
 
         <FormItem
-          label="手机号"
+          label="手机号:"
           field="phone"
           rules={[
             {
@@ -321,7 +323,7 @@ export default function MemberForm() {
         </FormItem>
 
         <FormItem
-          label="所属组织"
+          label="所属组织:"
           field="organization_id"
           required
           rules={[{ required: true, message: '请选择所属组织' }]}
@@ -348,7 +350,7 @@ export default function MemberForm() {
         </FormItem>
 
         <FormItem
-          label="角色"
+          label="角色:"
           field="role_id"
           extra={
             <>
@@ -371,7 +373,7 @@ export default function MemberForm() {
           </Select>
         </FormItem>
         <FormItem
-          label="职位"
+          label="职位:"
           field="position"
           rules={[
             {
@@ -382,7 +384,7 @@ export default function MemberForm() {
         >
           <Input placeholder="请输入职位" showWordLimit maxLength={20} />
         </FormItem>
-        <FormItem label="备注" field="mark">
+        <FormItem label="备注:" field="mark">
           {/* 100限制 */}
           <Input.TextArea
             placeholder="请输入备注"
