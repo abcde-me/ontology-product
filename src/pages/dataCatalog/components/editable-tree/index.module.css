@@ -52,10 +52,14 @@
     opacity: 1;
     transition: opacity 0.2s ease;
   }
-
+  :global(.tree-icon),
+  :global(.whitespace-nowrap) {
+    color: #0f172a;
+  }
   :global(.catalog-title-text) {
     width: 128px;
     transition: width 0.2s ease;
+    color: #0f172a;
   }
 
   &:not(:has(.no-operation)) {

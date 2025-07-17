@@ -19,8 +19,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-        (type) => type !== BlockEnum.End
-      );
+          (type) => type !== BlockEnum.End
+        );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -56,7 +56,7 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       unicode,
       traditional_to_simplified,
       case_uniformity,
-      case_transform,
+      case_transform
     } = payload;
     // 是否有其中一项true
     const isCleaningChecked = () => {

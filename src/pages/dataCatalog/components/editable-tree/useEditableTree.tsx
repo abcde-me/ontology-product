@@ -391,7 +391,7 @@ export function useEditableTree({ catalogTreeStore }) {
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
         {dataRef?.isLastLeaf && (
-          <div className="mr-2 w-4">
+          <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
               dataRef?.type
             ) ? (

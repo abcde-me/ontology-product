@@ -48,11 +48,11 @@ enum ConnectorType {
 const STATUS_CONFIG = {
   [ConnectionStatus.CONNECTED]: {
     text: '已连接',
-    color: 'green'
+    color: '#059669'
   },
   [ConnectionStatus.DISCONNECTED]: {
     text: '已断开',
-    color: 'red'
+    color: '#DC2626'
   }
 };
 

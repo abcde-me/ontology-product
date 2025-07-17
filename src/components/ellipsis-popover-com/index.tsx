@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { forwardRef, useRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { Popover, Link, Message, Typography } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
@@ -102,7 +101,14 @@ function EllipsisPopover(props: any, ref: any) {
         ellipsis={{
           showTooltip: {
             type: 'popover',
-            props: { position: 'tl', className: 'compute-aidp-popover' }
+            props: {
+              position: 'tl',
+              className: 'compute-aidp-popover',
+              style: {
+                maxHeight: '350px',
+                overflow: 'auto'
+              }
+            }
           },
           ...ellipsis
         }}

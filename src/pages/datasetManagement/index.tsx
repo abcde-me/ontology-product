@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import './index.css';
 import {
   Typography,
   Input,
@@ -36,17 +37,19 @@ import {
   datasetVersionRebuild,
   getTagList
 } from '@/api/datasetManagement';
+import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
-import { NameCell } from './namecell';
 import {
   PopupsFormFrom,
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
+import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
+import { color } from 'echarts';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -118,6 +121,10 @@ const getStatusIcon = (status: string) => {
   );
 };
 
+const renderEmptyPlaceholder = (value: string | null) => {
+  return value === '' || value == null ? '-' : value;
+};
+
 const columns = (
   handleGoToDetail,
   handleDelete,
@@ -135,12 +142,22 @@ const columns = (
     title: '名称',
     dataIndex: 'name',
     width: 200,
+    className: 'hover-change workflow-name',
     render: (name: string, record: Dataset) => {
+      if (!name) return '-';
       return (
-        <NameCell
-          name={name}
-          record={record}
-          handleGoToDetail={handleGoToDetail}
+        // <NameCell
+        //   name={name}
+        //   record={record}
+        //   handleGoToDetail={handleGoToDetail}
+        // />
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleGoToDetail(record.id);
+          }}
         />
       );
     }
@@ -152,44 +169,50 @@ const columns = (
     filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
     filteredValue: selectedTagFilters,
     filterMultiple: true,
-    render: (tag_names: string[]) => (
-      <Space size="mini">
-        {tag_names && tag_names.length > 0 && tag_names[0] && (
-          <Tag className={styles.tagGreen}>
-            {tag_names[0].length > 5
-              ? `${tag_names[0].substring(0, 5)}...`
-              : tag_names[0]}
-          </Tag>
-        )}
-        {tag_names && tag_names.length > 1 && (
-          <Tooltip
-            content={tag_names.map((tag, index) => (
-              <Tag
-                key={index}
-                style={{
-                  background: '#E2E8F0',
-                  color: '#0F172A',
-                  borderRadius: '16px',
-                  fontSize: '12px',
-                  height: '18px',
-                  alignItems: 'center'
-                }}
-              >
-                {tag}
-              </Tag>
-            ))}
-          >
-            <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
-          </Tooltip>
-        )}
-      </Space>
-    )
+    render: (tag_names: string[]) => {
+      if (!tag_names || tag_names.length === 0) return '-';
+      return (
+        <Space size="mini">
+          {tag_names && tag_names.length > 0 && tag_names[0] && (
+            <Tag className={styles.tagGreen}>
+              {tag_names[0].length > 5
+                ? `${tag_names[0].substring(0, 5)}...`
+                : tag_names[0] || '-'}
+            </Tag>
+          )}
+          {tag_names && tag_names.length > 1 && (
+            <Tooltip
+              content={tag_names.map((tag, index) => (
+                <Tag
+                  key={index}
+                  style={{
+                    background: '#E2E8F0',
+                    color: '#0F172A',
+                    borderRadius: '16px',
+                    fontSize: '12px',
+                    height: '18px',
+                    alignItems: 'center'
+                  }}
+                >
+                  {tag}
+                </Tag>
+              ))}
+            >
+              <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+            </Tooltip>
+          )}
+        </Space>
+      );
+    }
   },
   {
     title: '版本',
     dataIndex: 'latest_version',
     width: 120,
     render: (latest_version: string) => {
+      if (!latest_version) {
+        return '-';
+      }
       return (
         <div>
           {/* <Tooltip content={latest_version}> */}
@@ -226,6 +249,7 @@ const columns = (
     filterMultiple: true,
     render: (status: string, record: Dataset) => {
       const statusConfig = getStatusConfig(status);
+      if (!status) return '-';
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {status && getStatusIcon(status)}
@@ -253,23 +277,38 @@ const columns = (
     dataIndex: 'description',
     width: 260,
     render: (description: string) => {
+      if (!description) return '-';
       return (
-        <div
-          style={{
-            display: '-webkit-box',
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-all'
+        // <div
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={description}>{description}</Tooltip>
+        // </div>
+        <EllipsisPopover
+          value={description}
+          preferTypography={true}
+          ellipsis={{
+            rows: 2,
+            showTooltip: {
+              hover: true,
+              click: false,
+              props: {
+                style: {
+                  maxWidth: 600,
+                  maxHeight: 400,
+                  overflow: 'auto'
+                }
+              }
+            }
           }}
-        >
-          {description === null || description === undefined ? (
-            '-'
-          ) : (
-            <Tooltip content={description}>{description}</Tooltip>
-          )}
-        </div>
+        ></EllipsisPopover>
       );
     }
   },
@@ -293,25 +332,34 @@ const columns = (
     onFilter: (value: string, record: Dataset) => {
       return record.src_model === value;
     },
-    render: (src_model: string) => (
-      <Tag
-        className={styles.tagPurple}
-        style={{
-          width: '130px', // 必须设置宽度（根据需求调整）
-          overflow: 'hidden', // 隐藏溢出内容
-          textOverflow: 'ellipsis', // 溢出显示省略号
-          whiteSpace: 'nowrap' // 强制文本不换行
-        }}
-      >
-        <Tooltip content={src_model}>{src_model}</Tooltip>
-      </Tag>
-    )
+    render: (src_model: string) => {
+      if (!src_model) return '-';
+      return (
+        <Tag
+          className={styles.tagPurple}
+          style={{
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-all'
+          }}
+        >
+          <Tooltip content={src_model}>{src_model}</Tooltip>
+        </Tag>
+      );
+    }
   },
   {
     title: '创建人',
     dataIndex: 'creator_name',
     width: 100,
-    filterIcon: <IconFilter />
+    filterIcon: <IconFilter />,
+    render: (creator_name: string) => {
+      if (!creator_name) return '-';
+      return creator_name;
+    }
     // filters: (() => {
     //   const creatorSet = new Set<string>();
     //   datasetList?.forEach((dataset) => {
@@ -505,7 +553,7 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 提交表单数据,新建数据集
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = async (formData: any) => {
     console.log('新建数据集:', formData);
     const submitData = {
       name: formData.name,
@@ -531,37 +579,39 @@ const DatasetManagement: React.FC = () => {
     };
 
     console.log('提交数据:', submitData);
-    createDataset(submitData)
-      .then((res) => {
-        if (res.status === 200) {
-          // 刷新数据列表
-          fetchDatasetList();
-          closeModal();
-          //获取标签
-          getTagList()
-            .then((res) => {
-              if (res.data && Array.isArray(res.data)) {
-                setTagList(res.data);
-              } else {
-                console.error('标签列表数据格式错误:', res);
-                setTagList([]);
-              }
-            })
-            .catch((err) => {
-              console.error('获取标签列表失败:', err);
-              setTagList([]);
-              Message.error('获取标签列表失败');
-            });
 
-          childRef.current?.resetForm();
-          Message.success('数据集创建成功！');
-        } else {
-          Message.error(res.message || '数据集创建失败！');
-        }
-      })
-      .catch((err) => {
+    try {
+      const createDatasetRes = await createDataset(submitData);
+
+      if (createDatasetRes.status !== 200) {
         Message.error('数据集创建失败！');
-      });
+        return;
+      }
+
+      // 刷新数据列表
+      fetchDatasetList();
+      closeModal();
+
+      //获取标签
+      const tagListRes = await getTagList();
+
+      try {
+        if (tagListRes.data && Array.isArray(tagListRes.data)) {
+          setTagList(tagListRes.data);
+        } else {
+          console.error('标签列表数据格式错误:', tagListRes);
+          setTagList([]);
+        }
+      } catch {
+        setTagList([]);
+        Message.error('获取标签列表失败');
+      }
+
+      childRef.current?.resetForm();
+      Message.success('数据集创建成功！');
+    } catch {
+      Message.error('数据集创建失败！');
+    }
   };
 
   // 删除数据集的方法
@@ -622,7 +672,7 @@ const DatasetManagement: React.FC = () => {
   // 重试
   const handleRetry = async (id: number | string, version_id: string) => {
     const params = {
-      id,
+      id: Number(id),
       version_id
     };
     const res = await datasetVersionRebuild(params);
@@ -918,7 +968,7 @@ const DatasetManagement: React.FC = () => {
           />
           <Input.Search
             allowClear
-            placeholder="输入 ID/数据内容 搜索"
+            placeholder="输入ID/数据内容搜索"
             style={{ width: 160, height: 32 }}
             value={search}
             onChange={(value) => setSearch(value)}

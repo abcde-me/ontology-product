@@ -76,4 +76,5 @@ ul li {
 }
 .arco-form-label-item > label {
   font-size: 14px;
+  white-space: nowrap;
 }
