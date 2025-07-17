@@ -1,0 +1,21 @@
+.disabled-text {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+tbody .workflow-name .ellipsis-text {
+  font-weight: 600;
+}
+
+tbody .hover-change .ellipsis-text {
+  color: #1e293b;
+}
+
+tbody .arco-table-tr:hover .hover-change .ellipsis-text {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
+}
+
+tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
+  color: rgba(67, 141, 251, 1);
+}

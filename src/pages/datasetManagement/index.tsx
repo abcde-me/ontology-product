@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import './index.css';
 import {
   Typography,
   Input,
@@ -42,13 +43,13 @@ import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
-import { NameCell } from './namecell';
 import {
   PopupsFormFrom,
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
 import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
+import { color } from 'echarts';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -120,6 +121,10 @@ const getStatusIcon = (status: string) => {
   );
 };
 
+const renderEmptyPlaceholder = (value: string | null) => {
+  return value === '' || value == null ? '-' : value;
+};
+
 const columns = (
   handleGoToDetail,
   handleDelete,
@@ -137,6 +142,7 @@ const columns = (
     title: '名称',
     dataIndex: 'name',
     width: 200,
+    className: 'hover-change workflow-name',
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
@@ -146,22 +152,11 @@ const columns = (
         //   handleGoToDetail={handleGoToDetail}
         // />
         <EllipsisPopover
-          value={
-            'jsgdljkaeyildqaekdiklaeudikpuaedipuaedwheipudwedeqeqwewqeqweqweqweqweqweqw'
-          }
-          onClick={() => handleGoToDetail(record.id)}
-          className={
-            record.status === datasetStatus.create_failed ||
-            record.status === datasetStatus.creating
-              ? styles.datasetNameLink
-              : `${styles.datasetNameLink} ${styles.datasetNameHover}`
-          }
-          isLink={true}
-          handleLink={() => handleGoToDetail(record.id)}
-          preferTypography={true}
-          ellipsis={{
-            rows: 2,
-            tooltip: true
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleGoToDetail(record.id);
           }}
         />
       );
