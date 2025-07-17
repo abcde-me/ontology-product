@@ -36,6 +36,7 @@ import {
   datasetVersionRebuild,
   getTagList
 } from '@/api/datasetManagement';
+import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
@@ -47,6 +48,7 @@ import {
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
+import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -138,10 +140,29 @@ const columns = (
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
-        <NameCell
-          name={name}
-          record={record}
-          handleGoToDetail={handleGoToDetail}
+        // <NameCell
+        //   name={name}
+        //   record={record}
+        //   handleGoToDetail={handleGoToDetail}
+        // />
+        <EllipsisPopover
+          value={
+            'jsgdljkaeyildqaekdiklaeudikpuaedipuaedwheipudwedeqeqwewqeqweqweqweqweqweqw'
+          }
+          onClick={() => handleGoToDetail(record.id)}
+          className={
+            record.status === datasetStatus.create_failed ||
+            record.status === datasetStatus.creating
+              ? styles.datasetNameLink
+              : `${styles.datasetNameLink} ${styles.datasetNameHover}`
+          }
+          isLink={true}
+          handleLink={() => handleGoToDetail(record.id)}
+          preferTypography={true}
+          ellipsis={{
+            rows: 2,
+            tooltip: true
+          }}
         />
       );
     }
@@ -263,18 +284,36 @@ const columns = (
     render: (description: string) => {
       if (!description) return '-';
       return (
-        <div
-          style={{
-            display: '-webkit-box',
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-all'
+        // <div
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={description}>{description}</Tooltip>
+        // </div>
+        <EllipsisPopover
+          value={description}
+          preferTypography={true}
+          ellipsis={{
+            rows: 2,
+            showTooltip: {
+              hover: true,
+              click: false,
+              props: {
+                style: {
+                  maxWidth: 600,
+                  maxHeight: 400,
+                  overflow: 'auto'
+                }
+              }
+            }
           }}
-        >
-          <Tooltip content={description}>{description}</Tooltip>
-        </div>
+        ></EllipsisPopover>
       );
     }
   },

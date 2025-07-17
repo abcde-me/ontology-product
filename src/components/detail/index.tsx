@@ -2,8 +2,6 @@ import React from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
 import styles from './style.module.css';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import Isshowtooltip from '@/components/isshowtooltip';
-// import TooltipOnOverflow from '../datasetform/tootioOnocweflow';
 import EllipsisPopover from '../ellipsis-popover-com';
 import {
   Typography,
@@ -145,15 +143,6 @@ const generateArcoColumns = (
                 textOverflow: 'ellipsis'
               }}
             />
-            {/* ) : (
-              <span>{value}</span>
-            )
-          <EllipsisPopover value={value} style={{
-            // width:'30%',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }} /> */}
           </div>
         );
       }
@@ -1032,7 +1021,12 @@ const DatasetDetail: React.FC = () => {
         console.error('版本重新生成失败:', err);
       });
   };
-
+  const getwidth = () => {
+    if (window.innerWidth) {
+      return `${(window.innerWidth - 400) / 2}px`;
+    }
+    // return `${(window.innerWidth - 400)/2}px`
+  };
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
@@ -1246,34 +1240,14 @@ const DatasetDetail: React.FC = () => {
                       value: (
                         <div
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            width: getwidth()
                           }}
                         >
-                          {/* {datasetDetail.description?.length > 14 ? (
-                            <Tooltip content={datasetDetail.description}>
-                              <span>{`${datasetDetail.description.substring(0, 14)}...`}</span>
-                            </Tooltip>
-                          ) : (
-                            <span>{datasetDetail.description || '-'}</span>
-                          )} */}
-                          <Isshowtooltip
-                            content={datasetDetail.description || '-'}
-                            multiline={true}
-                            lineClamp={1}
-                            width={
-                              divWidth ||
-                              (rightDescriptionsRef?.current?.offsetWidth
-                                ? rightDescriptionsRef.current.offsetWidth - 100
-                                : 200)
-                            }
-                            tooltipStyle={{
-                              width: '300px',
-                              height: '100px',
-                              overflow: 'auto'
-                            }}
-                          ></Isshowtooltip>
+                          <EllipsisPopover
+                            value={datasetDetail.description || '-'}
+                            isEdit={false}
+                          ></EllipsisPopover>
                         </div>
                       )
                     }
