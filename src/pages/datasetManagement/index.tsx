@@ -517,7 +517,7 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 提交表单数据,新建数据集
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = async (formData: any) => {
     console.log('新建数据集:', formData);
     const submitData = {
       name: formData.name,
@@ -543,37 +543,39 @@ const DatasetManagement: React.FC = () => {
     };
 
     console.log('提交数据:', submitData);
-    createDataset(submitData)
-      .then((res) => {
-        if (res.status === 200) {
-          // 刷新数据列表
-          fetchDatasetList();
-          closeModal();
-          //获取标签
-          getTagList()
-            .then((res) => {
-              if (res.data && Array.isArray(res.data)) {
-                setTagList(res.data);
-              } else {
-                console.error('标签列表数据格式错误:', res);
-                setTagList([]);
-              }
-            })
-            .catch((err) => {
-              console.error('获取标签列表失败:', err);
-              setTagList([]);
-              Message.error('获取标签列表失败');
-            });
 
-          childRef.current?.resetForm();
-          Message.success('数据集创建成功！');
-        } else {
-          Message.error('数据集创建失败！');
-        }
-      })
-      .catch((err) => {
+    try {
+      const createDatasetRes = await createDataset(submitData);
+
+      if (createDatasetRes.status !== 200) {
         Message.error('数据集创建失败！');
-      });
+        return;
+      }
+
+      // 刷新数据列表
+      fetchDatasetList();
+      closeModal();
+
+      //获取标签
+      const tagListRes = await getTagList();
+
+      try {
+        if (tagListRes.data && Array.isArray(tagListRes.data)) {
+          setTagList(tagListRes.data);
+        } else {
+          console.error('标签列表数据格式错误:', tagListRes);
+          setTagList([]);
+        }
+      } catch {
+        setTagList([]);
+        Message.error('获取标签列表失败');
+      }
+
+      childRef.current?.resetForm();
+      Message.success('数据集创建成功！');
+    } catch {
+      Message.error('数据集创建失败！');
+    }
   };
 
   // 删除数据集的方法
