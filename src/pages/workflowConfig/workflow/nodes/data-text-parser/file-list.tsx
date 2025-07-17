@@ -113,12 +113,13 @@ function FileList({
     try {
       setLoading(true);
       let result;
-      if (fileConfig?.enabled && fileConfig.format.length) {
+      const sourcePath = startNode?.data.data_path_id;
+      if (sourcePath && fileConfig?.enabled && fileConfig.format.length) {
         const formats = fileConfig.format
           .join('/')
           .split('/')
           .map((f) => f.toLowerCase());
-        const sourcePath = startNode?.data.data_path_id;
+
         // result = {
         //   data: {
         //     items: [...new Array(5)].map((_, index) => {
