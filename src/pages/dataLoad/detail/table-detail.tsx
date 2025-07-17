@@ -23,6 +23,7 @@ const TableDetail = (props) => {
   const columns: any = [
     {
       title: '运行ID',
+      fixed: 'left',
       dataIndex: 'execution_id',
       width: 300,
       ellipsis: true,
@@ -126,11 +127,13 @@ const TableDetail = (props) => {
     },
     {
       title: '开始时间',
+      width: 200,
       dataIndex: 'start_time',
       sorter: (a, b) => a.start_time.localeCompare(b.start_time)
     },
     {
       title: '结束时间',
+      width: 200,
       dataIndex: 'end_time',
       sorter: (a, b) => a.end_time.localeCompare(b.end_time)
     },
@@ -223,7 +226,7 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
-          style={{ width: '100%', padding: '1px 15px 0px 0px' }}
+          style={{ width: '100%', padding: '1px 10px 0px 0px' }}
           rowKey="seatunnel_job_id"
           loading={props.loading}
           onChange={(pagination, filters, sorter) => {

@@ -22,6 +22,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { CreateSpaceModal } from '@/pages/systemMgmt/createSpaceModal';
 import { getFlatRoutes, routes } from '../route';
+import Connection from '@/assets/sider/connection.svg';
+import DataLoad from '@/assets/sider/data-load.svg';
+import DataCatalog from '@/assets/sider/data-catalog.svg';
+import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import WorkflowList from '@/assets/sider/workflow-list.svg';
+import WorkflowTask from '@/assets/sider/workflow-task.svg';
+import OrganMenu from '@/assets/sider/organmenu.svg';
+import MemberMenu from '@/assets/sider/membermenu.svg';
 import './sider.css';
 
 const MenuItem = Menu.Item;
@@ -58,7 +66,7 @@ const menus: MenuModel[] = [
       {
         title: '连接器',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <Connection className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'connection',
         path: '/tenant/compute/modaforge/connection'
@@ -66,7 +74,7 @@ const menus: MenuModel[] = [
       {
         title: '数据载入',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <DataLoad className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad'
@@ -81,7 +89,7 @@ const menus: MenuModel[] = [
       {
         title: '工作流',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <WorkflowList className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'workflowList',
         path: '/tenant/compute/modaforge/workflowList'
@@ -89,7 +97,7 @@ const menus: MenuModel[] = [
       {
         title: '作业',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <WorkflowTask className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask'
@@ -104,7 +112,7 @@ const menus: MenuModel[] = [
       {
         title: '数据目录',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'dataCatalog',
         path: '/tenant/compute/modaforge/dataCatalog'
@@ -112,7 +120,7 @@ const menus: MenuModel[] = [
       {
         title: '数据集管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <DatasetManagement className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement'
@@ -127,7 +135,7 @@ const menus: MenuModel[] = [
       {
         title: '组织管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'orgMgmt',
         path: '/tenant/compute/modaforge/organization'
@@ -135,7 +143,7 @@ const menus: MenuModel[] = [
       {
         title: '用户管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <MemberMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/member',
         key: 'userMgmt'

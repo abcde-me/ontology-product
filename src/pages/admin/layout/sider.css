@@ -1,4 +1,7 @@
 .modaforge-sider {
+  .arco-layout-sider-trigger-light {
+    display: none;
+  }
   .arco-layout-sider-trigger {
     @apply justify-start border-none bg-transparent pl-[16px];
   }
@@ -11,17 +14,18 @@
     align-items: center;
   }
 
-  .modaforge-sider-icon {
+  .appforge-sider-icon {
     @apply text-[var(--color-text-4)];
+    margin-right: 8px;
   }
 
-  .arco-menu-selected .modaforge-sider-icon {
+  .arco-menu-selected .appforge-sider-icon {
     @apply text-[rgb(var(--primary-6))];
   }
 
   .arco-menu-item:hover,
   .arco-menu-inline-header:hover {
-    .modaforge-sider-icon {
+    .appforge-sider-icon {
       @apply text-[rgb(var(--primary-6))];
     }
   }
@@ -29,7 +33,6 @@
   .arco-menu-vertical .arco-menu-item,
   .arco-menu-vertical .arco-menu-pop-header,
   .arco-menu-vertical .arco-menu-inline-header {
-    padding: 0 7px;
     margin-bottom: 0;
   }
 
@@ -132,7 +135,6 @@
 .ai-menu.arco-menu {
   .arco-menu-group {
     .arco-menu-group-title {
-      padding: 0 16px;
       font-family: PingFangSC-Regular;
       font-size: 12px;
       color: #84868c;
@@ -154,7 +156,7 @@
       background: #ffffff;
       color: rgb(var(--primary-6)) !important;
       box-shadow: 0 2px 4px 0 rgba(203, 219, 255, 0.5);
-      .modaforge-sider-icon {
+      .appforge-sider-icon {
         color: rgb(var(--primary-6)) !important;
       }
     }
@@ -162,7 +164,7 @@
       background: #ffffff;
       color: #1e293b;
       box-shadow: 0 2px 4px 0 rgba(203, 219, 255, 0.5);
-      .modaforge-sider-icon {
+      .appforge-sider-icon {
         color: var(--color-text-4);
       }
     }

@@ -6,6 +6,7 @@ import TimeFormatting from '../../../utils/timeFormatting';
 import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
 import copy from 'copy-to-clipboard';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const ModalDetail = (props) => {
   // 默认显示对象为空
   const [DetailData, setDetailData] = useState<connectorDetailType | null>(
@@ -62,9 +63,10 @@ const ModalDetail = (props) => {
                   <div className="info-item">
                     <span className="label">连接器名称:</span>
                     <span className="value">
-                      <Popover position="tl" content={DetailData?.name}>
-                        {DetailData?.name}
-                      </Popover>
+                      <EllipsisPopoverCom
+                        value={DetailData?.name}
+                        isEdit={false}
+                      />
                     </span>
                   </div>
                   <div className="info-item">
@@ -82,9 +84,9 @@ const ModalDetail = (props) => {
                           height: '5px',
                           backgroundColor:
                             DetailData?.status == 'connected'
-                              ? 'green'
+                              ? '#059669'
                               : DetailData?.status == 'DetailData?.status'
-                                ? 'red'
+                                ? '#DC2626'
                                 : '',
                           borderRadius: '50%',
                           marginRight: '5px'

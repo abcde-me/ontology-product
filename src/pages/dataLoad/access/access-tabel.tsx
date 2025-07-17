@@ -43,6 +43,7 @@ const AccessTable = (props) => {
     {
       title: '状态',
       dataIndex: 'status',
+      width: 120,
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -87,7 +88,8 @@ const AccessTable = (props) => {
     },
     {
       title: '类型',
-      dataIndex: 'file_type'
+      dataIndex: 'file_type',
+      width: 120
     },
     {
       title: '开始时间',
@@ -190,7 +192,7 @@ const AccessTable = (props) => {
         <Table
           columns={columns}
           data={data ?? []}
-          style={{ padding: '16px', width: '100%' }}
+          style={{ padding: '15px', width: '100%' }}
           border={false}
           pagination={false}
           rowKey={(record) => record.id}

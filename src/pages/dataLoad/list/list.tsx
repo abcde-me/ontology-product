@@ -457,10 +457,10 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 10px 20px 10px',
+        // margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        height: 'calc(100% - 30px)'
+        minHeight: '94vh'
       }}
     >
       <h1
