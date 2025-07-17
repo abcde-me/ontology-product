@@ -7,7 +7,8 @@ import {
   Form,
   Input,
   Select,
-  Message
+  Message,
+  Alert
 } from '@arco-design/web-react';
 import { exportFile } from '@/api/dataCatalog';
 import { getConnectionList } from '@/api/connectionApi';
@@ -198,6 +199,7 @@ const FormComponent: React.FC<FormProps> = ({
         {...formItemLayout}
         style={{ width: 584 }}
       >
+        <Alert content="空文件不会被导出" style={{ marginBottom: 10 }} />
         <Form.Item
           label="选择连接器："
           field="province"

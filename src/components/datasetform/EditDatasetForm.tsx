@@ -122,13 +122,19 @@ const EditDatasetForm: React.FC<Props> = ({
           label="数据集名称"
           field="name"
           rules={[
-            { required: true, message: '请输入数据集名称' },
             {
+              required: true,
               validator: (value, callback) => {
-                if (!validateName(value)) {
-                  callback('数据集名称格式不正确');
+                if (value === '' || value === undefined) {
+                  return callback('请输入数据集名称');
+                }
+
+                if (!validateName(value).isValid) {
+                  return callback(
+                    validateName(value).errorMessage ?? '数据集名称格式不正确'
+                  );
                 } else {
-                  callback();
+                  return callback();
                 }
               }
             }
