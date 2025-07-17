@@ -407,11 +407,12 @@ const DatasetForm = React.forwardRef<
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
-        setIscreateTagDisabled(true);
+        // setIscreateTagDisabled(true);
 
         setCanSubmit(false);
 
         await onSubmit(formData);
+        console.log('111111111111111111111111');
 
         setCanSubmit(true);
       })
@@ -816,7 +817,6 @@ const DatasetForm = React.forwardRef<
                 type="primary"
                 loading={!canSubmit}
                 onClick={handleSubmit}
-                disabled={iscreateTagDisabled}
               >
                 确定
               </Button>

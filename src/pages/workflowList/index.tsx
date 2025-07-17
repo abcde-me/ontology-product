@@ -76,11 +76,7 @@ export default function WorkflowList() {
 
   // 创建工作流
   const handleCreateWorkflow = () => {
-    window.open(
-      '/tenant/compute/modaforge/workflowConfig',
-      '_blank',
-      'noopener,noreferrer'
-    );
+    window.open('/tenant/compute/modaforge/workflowConfig', '_blank');
   };
 
   // 跳转目录
