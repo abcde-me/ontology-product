@@ -7,8 +7,8 @@ import PreDelModal from './components/PreDelModal';
 export default function Member() {
   return (
     <MemberProvider>
-      <div className="knowledgeList h-full py-[20px] pr-[20px]">
-        <div className="h-full max-h-[calc(100vh-90px)] overflow-auto rounded-[12px] bg-white px-[24px] py-[20px]">
+      <div className="knowledgeList py-[20px] pr-[20px]">
+        <div className="overflow-auto rounded-[12px] bg-white px-[24px] py-[20px]">
           <div className="mb-5 text-[20px] font-[500] text-[#0F172A]">
             成员管理
           </div>
