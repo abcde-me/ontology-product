@@ -202,14 +202,7 @@ function formatTableData(columns) {
       const textStr = String(text || '');
 
       return (
-        <EllipsisPopover
-          value={textStr}
-          ellipsis={{
-            popupVisible: true
-          }}
-          isEdit={false}
-          preferTypography
-        />
+        <EllipsisPopover value={textStr} isEdit={false} preferTypography />
       );
     }
   }));
