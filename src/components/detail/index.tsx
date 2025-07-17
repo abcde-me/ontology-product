@@ -546,6 +546,26 @@ const DatasetDetail: React.FC = () => {
       return true; // 允许跳转
     });
 
+    const handleBeforeUnload = (e) => {
+      if (updateStatus) {
+        // 取消事件
+        e.preventDefault();
+        // Chrome 需要设置 returnValue
+        e.returnValue = '';
+        // 显示确认消息（部分浏览器可能忽略自定义消息）
+        return '您有未保存的更改，确定要离开吗？';
+      }
+    };
+
+    // 添加事件监听器
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // 组件卸载时清除拦截器
+      unblock();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+
     return () => unblock(); // 组件卸载时清除拦截器
   }, [history, updateStatus, isModalVisible]);
 
