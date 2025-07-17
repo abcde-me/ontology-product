@@ -260,7 +260,8 @@ const DataLoadDetail = () => {
             style={{
               color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
               pointerEvents: runningFlag ? 'none' : undefined,
-              cursor: runningFlag ? '' : 'pointer'
+              cursor: runningFlag ? '' : 'pointer',
+              fontSize: '14px'
             }}
             onClick={() => {
               setEditVisible(true);

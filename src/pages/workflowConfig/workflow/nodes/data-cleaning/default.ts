@@ -19,8 +19,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-          (type) => type !== BlockEnum.End
-        );
+        (type) => type !== BlockEnum.End
+      );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -55,7 +55,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       remove_html,
       unicode,
       traditional_to_simplified,
-      case_uniformity
+      case_uniformity,
+      case_transform,
     } = payload;
     // 是否有其中一项true
     const isCleaningChecked = () => {
@@ -69,6 +70,9 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
         threshold_switch && threshold > 0
       ].some(Boolean);
     };
+    if (case_uniformity && !case_transform) {
+      errorMessages = '请选择大小写统一';
+    }
     if (!isCleaningChecked()) {
       errorMessages = '数据清洗类型至少选择一项';
     }
