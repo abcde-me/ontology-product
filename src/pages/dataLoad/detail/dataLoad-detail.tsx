@@ -220,11 +220,10 @@ const DataLoadDetail = () => {
     <div>
       <div
         style={{
-          margin: '16px 0px',
+          margin: '14px 0px',
           fontSize: '20px',
           display: 'flex',
-          alignItems: 'center',
-          marginLeft: '10px'
+          alignItems: 'center'
         }}
       >
         <IconArrowLeft
@@ -464,7 +463,7 @@ const DataLoadDetail = () => {
         </div>
         <div
           style={{
-            margin: '10px 0px 15px 20px',
+            margin: '15px 0px 15px 20px',
             fontSize: '17px',
             fontWeight: '600'
           }}

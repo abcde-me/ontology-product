@@ -45,7 +45,7 @@ const AccessDetail = () => {
     <div>
       <div
         style={{
-          margin: '16px 0px 16px 10px',
+          margin: '14px 0px',
           fontSize: '20px',
           display: 'flex',
           alignItems: 'center'
