@@ -25,6 +25,7 @@ import {
   startAndStopeLoad
 } from '@/api/loadApi';
 import { parseCron } from './parseCron';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -249,7 +250,7 @@ const DataLoadDetail = () => {
           backgroundColor: 'white',
           display: 'flex',
           flexDirection: 'column',
-          margin: '10px 10px 20px 10px',
+          // margin: '10px 10px 20px 10px',
           borderRadius: '10px',
           minHeight: '87vh'
         }}
@@ -295,9 +296,10 @@ const DataLoadDetail = () => {
                 }}
               >
                 {listDetail && (
-                  <Popover position="tl" content={listDetail.data_path_name}>
-                    {listDetail.data_path_name}
-                  </Popover>
+                  <EllipsisPopoverCom
+                    value={listDetail.data_path_name}
+                    isEdit={false}
+                  />
                 )}
                 {/* {findParent(directoryArr ? directoryArr : [], listDetail && listDetail.data_path_id)} */}
               </div>
@@ -393,9 +395,10 @@ const DataLoadDetail = () => {
                 }}
               >
                 {listDetail && (
-                  <Popover position="tl" content={listDetail.data_path_name}>
-                    {listDetail.connector_name}
-                  </Popover>
+                  <EllipsisPopoverCom
+                    value={listDetail.connector_name}
+                    isEdit={false}
+                  />
                 )}
               </div>
             </div>
@@ -446,11 +449,14 @@ const DataLoadDetail = () => {
                   周期设置：
                 </div>
                 <div className="ellipsis-two-lines-cron">
-                  {parseCron(
-                    listDetail &&
-                      listDetail.run_config &&
-                      listDetail.run_config.cycle_text
-                  )}
+                  <EllipsisPopoverCom
+                    value={parseCron(
+                      listDetail &&
+                        listDetail.run_config &&
+                        listDetail.run_config.cycle_text
+                    )}
+                    isEdit={false}
+                  />
                 </div>
               </div>
             )}

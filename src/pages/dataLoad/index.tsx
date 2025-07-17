@@ -10,7 +10,7 @@ export default function DataLoad() {
     <div
       style={{
         height: 'calc(100% - 30px)',
-        backgroundColor: '#fff',
+        // backgroundColor: '#fff',
         borderRadius: '10px',
         margin: '10px',
         overflowY: 'auto'
