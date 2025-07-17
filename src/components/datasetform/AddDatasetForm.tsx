@@ -16,6 +16,7 @@ import {
 } from '@arco-design/web-react';
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 import TooltipOnOverflow from './tootioOnocweflow';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle } from 'react';
 import styles from './AddDatasetForm.module.css';
@@ -27,8 +28,8 @@ import {
   getConnectorFileList,
   getTagList
 } from '@/api/datasetManagement';
-import { render } from '@headlessui/react/dist/utils/render';
-import { labelRect } from 'mermaid/dist/rendering-util/rendering-elements/shapes/labelRect';
+import { debounce } from 'lodash-es';
+
 const { Text } = Typography;
 
 interface Dataset {
@@ -58,7 +59,7 @@ interface ConnectorFile {
 
 interface DatasetFormProps {
   visible: boolean;
-  onSubmit: (formData: any) => void;
+  onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -201,16 +202,7 @@ function formatTableData(columns) {
       const textStr = String(text || '');
 
       return (
-        <TooltipOnOverflow
-          text={textStr}
-          style={{ lineHeight: '1.5' }}
-          tooltipStyle={{
-            width: '400px', // 设置宽度
-            maxHeight: '200px', // 设置高度
-            overflow: 'auto', // 超出部分显示滚动条
-            whiteSpace: 'normal' // 允许文本换行
-          }}
-        />
+        <EllipsisPopover value={textStr} isEdit={false} preferTypography />
       );
     }
   }));
@@ -245,7 +237,8 @@ const DatasetForm = React.forwardRef<
   //是否禁用新建标签·
   const [iscreateTagDisabled, setIscreateTagDisabled] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  // 标签选项
+  const [tableLoading, setTableLoading] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(true);
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -324,8 +317,10 @@ const DatasetForm = React.forwardRef<
         const catalogId = value[0][1];
         const selectedItem = value[1]?.[0];
         const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
-        console.log('二级目录路径:', path);
+        console.log('二级目录路径:', path, selectedItem);
         if (selectedItem == undefined) {
+          setPreviewColumns([]);
+          Message.warning('请选择二级目录！');
           return;
         }
         getVolumePreviewData(path);
@@ -375,28 +370,32 @@ const DatasetForm = React.forwardRef<
 
   // 获取数据目录卷预览数据的方法
   const getVolumePreviewData = (volumeId: string) => {
+    setTableLoading(true);
     // 这里应该调用真实的API
-    getCatalogPreview({ path: volumeId }).then((res) => {
-      console.log(11111, res);
-      if (res.status !== 200) {
-        Message.error(res.message);
-        setPreviewData(null);
-        setPreviewColumns([]);
-        return;
-      }
-      setPreviewData(res.data.list || []); //这里的数据不能直接赋值，需要处理一下
-      setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
-    });
+    getCatalogPreview({ path: volumeId })
+      .then((res) => {
+        if (res.status !== 200) {
+          Message.error(res.message);
+          setPreviewData(null);
+          setPreviewColumns([]);
+          return;
+        }
+        setPreviewData(res.data.list || []); //这里的数据不能直接赋值，需要处理一下
+        setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
+      })
+      .finally(() => {
+        setTableLoading(false);
+      });
 
     // setPreviewData(csmockPreviewData);
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
   //提交数据
-  const handleSubmit = () => {
+  const handleSubmit = debounce(() => {
     form
       .validate()
-      .then((values) => {
+      .then(async (values) => {
         const formData: Dataset = {
           ...values,
           dataSource,
@@ -405,12 +404,20 @@ const DatasetForm = React.forwardRef<
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
         setIscreateTagDisabled(true);
-        onSubmit(formData);
+
+        setCanSubmit(false);
+
+        await onSubmit(formData);
+
+        setCanSubmit(true);
       })
       .catch((error) => {
         console.log('表单验证失败:', error);
+      })
+      .finally(() => {
+        setCanSubmit(true);
       });
-  };
+  }, 500);
 
   return (
     <Modal
@@ -425,8 +432,8 @@ const DatasetForm = React.forwardRef<
     >
       <div
         style={{
-          maxHeight: '600px',
-          overflowY: 'auto',
+          // maxHeight: '600px',
+          // overflowY: 'auto',
           paddingRight: '8px'
         }}
       >
@@ -536,7 +543,6 @@ const DatasetForm = React.forwardRef<
                 padding: '16px',
                 gap: '16px',
                 marginLeft: 28,
-                maxHeight: '366px',
                 overflow: 'hidden'
                 // display: 'flex',
                 // flexDirection: 'column'
@@ -602,7 +608,7 @@ const DatasetForm = React.forwardRef<
                       y: 250
                     }}
                     size="small"
-                    loading={false}
+                    loading={tableLoading}
                     placeholder="暂无数据"
                   />
                 </div>
@@ -798,6 +804,7 @@ const DatasetForm = React.forwardRef<
               <Button onClick={onCancel}>取消</Button>
               <Button
                 type="primary"
+                loading={!canSubmit}
                 onClick={handleSubmit}
                 disabled={iscreateTagDisabled}
               >
