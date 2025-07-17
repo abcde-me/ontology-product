@@ -104,19 +104,15 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         >
           <Checkbox.Group
             options={[
-              { label: '支持多音轨解析', value: 'orbit' },
+              { label: '支持多音轨解析', value: 'orbit', disabled: true },
               { label: '开启降噪处理', value: 'denoise' }
             ]}
           />
         </FormItem>
-        <FormItem
-          label="语音活动检测（VAD）与切片设置："
-          field="vad_options"
-          disabled={true}
-        >
+        <FormItem label="语音活动检测（VAD）与切片设置：" field="vad_options">
           <Checkbox.Group
             options={[
-              { label: '启用语音活体检测', value: 'vad' },
+              { label: '启用语音活体检测', value: 'vad', disabled: true },
               { label: '启用多说话人识别', value: 'conv' }
             ]}
           />
