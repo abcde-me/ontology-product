@@ -65,7 +65,7 @@
   padding: 24px;
   gap: 20px;
 }
-.arco-tabs-header-nav-line .arco-tabs-header-title {
+.custom-tabs.arco-tabs-header-nav-line .arco-tabs-header-title {
   margin: 0 20px;
   padding: 0;
 }
