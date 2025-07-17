@@ -37,7 +37,6 @@ export const NameCell: React.FC<{
       window.removeEventListener('resize', checkTextOverflow);
     };
   }, [name]);
-
   const spanElement = (
     <span
       ref={textRef}
