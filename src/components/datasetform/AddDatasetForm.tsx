@@ -256,8 +256,12 @@ const DatasetForm = React.forwardRef<
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
     };
+    const setcreateTagDisabled = () => {
+      setIscreateTagDisabled(false);
+    };
     return {
-      resetForm
+      resetForm,
+      setcreateTagDisabled
     };
   });
 
