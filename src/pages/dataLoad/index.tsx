@@ -7,7 +7,13 @@ const BreadcrumbItem = Breadcrumb.Item;
 const routes = require('../admin/route').routes || [];
 export default function DataLoad() {
   return (
-    <div>
+    <div style={{
+      height: 'calc(100% - 30px)',
+      backgroundColor: '#fff',
+      borderRadius: '10px',
+      margin: '10px',
+      overflowY: 'auto'
+    }}>
       <Switch>
         <Redirect
           exact

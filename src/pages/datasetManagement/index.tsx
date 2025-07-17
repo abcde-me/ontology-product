@@ -82,11 +82,11 @@ export interface Dataset {
   src_model: string;
   latest_file_path: string;
   status:
-    | 'creating'
-    | 'create_failed'
-    | 'normal'
-    | 'version_updating'
-    | 'version_update_failed';
+  | 'creating'
+  | 'create_failed'
+  | 'normal'
+  | 'version_updating'
+  | 'version_update_failed';
 }
 
 // 状态显示配置
@@ -131,68 +131,129 @@ const columns = (
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
   handleRetry: (id: string | number, version_id: string) => void
 ) => [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    width: 200,
-    render: (name: string, record: Dataset) => {
-      return (
-        <NameCell
-          name={name}
-          record={record}
-          handleGoToDetail={handleGoToDetail}
-        />
-      );
-    }
-  },
-  {
-    title: '标签',
-    dataIndex: 'tag_names',
-    width: 120,
-    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-    filteredValue: selectedTagFilters,
-    filterMultiple: true,
-    render: (tag_names: string[]) => (
-      <Space size="mini">
-        {tag_names && tag_names.length > 0 && tag_names[0] && (
-          <Tag className={styles.tagGreen}>
-            {tag_names[0].length > 5
-              ? `${tag_names[0].substring(0, 5)}...`
-              : tag_names[0]}
-          </Tag>
-        )}
-        {tag_names && tag_names.length > 1 && (
-          <Tooltip
-            content={tag_names.map((tag, index) => (
-              <Tag
-                key={index}
-                style={{
-                  background: '#E2E8F0',
-                  color: '#0F172A',
-                  borderRadius: '16px',
-                  fontSize: '12px',
-                  height: '18px',
-                  alignItems: 'center'
-                }}
+    {
+      title: '名称',
+      dataIndex: 'name',
+      width: 200,
+      render: (name: string, record: Dataset) => {
+        return (
+          <NameCell
+            name={name}
+            record={record}
+            handleGoToDetail={handleGoToDetail}
+          />
+        );
+      }
+    },
+    {
+      title: '标签',
+      dataIndex: 'tag_names',
+      width: 120,
+      filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
+      filteredValue: selectedTagFilters,
+      filterMultiple: true,
+      render: (tag_names: string[]) => (
+        <Space size="mini">
+          {tag_names && tag_names.length > 0 && tag_names[0] && (
+            <Tag className={styles.tagGreen}>
+              {tag_names[0].length > 5
+                ? `${tag_names[0].substring(0, 5)}...`
+                : tag_names[0]}
+            </Tag>
+          )}
+          {tag_names && tag_names.length > 1 && (
+            <Tooltip
+              content={tag_names.map((tag, index) => (
+                <Tag
+                  key={index}
+                  style={{
+                    background: '#E2E8F0',
+                    color: '#0F172A',
+                    borderRadius: '16px',
+                    fontSize: '12px',
+                    height: '18px',
+                    alignItems: 'center'
+                  }}
+                >
+                  {tag}
+                </Tag>
+              ))}
+            >
+              <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+            </Tooltip>
+          )}
+        </Space>
+      )
+    },
+    {
+      title: '版本',
+      dataIndex: 'latest_version',
+      width: 120,
+      render: (latest_version: string) => {
+        return (
+          <div>
+            {/* <Tooltip content={latest_version}> */}
+            <div
+              style={{
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                wordBreak: 'break-all'
+              }}
+            >
+              {latest_version}
+            </div>
+            {/* </Tooltip> */}
+          </div>
+        );
+      }
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 180,
+      filterIcon: <IconFilter />,
+      filters: [
+        { text: '创建中', value: datasetStatus.creating },
+        { text: '创建失败', value: datasetStatus.create_failed },
+        { text: '正常', value: datasetStatus.normal },
+        { text: '版本更新中', value: datasetStatus.version_updating },
+        { text: '版本更新失败', value: datasetStatus.version_update_failed }
+      ],
+      filteredValue: selectedStatusFilters,
+      filterMultiple: true,
+      render: (status: string, record: Dataset) => {
+        const statusConfig = getStatusConfig(status);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {status && getStatusIcon(status)}
+            <span>{statusConfig.text}</span>
+            {status === datasetStatus.version_update_failed ||
+              status === datasetStatus.create_failed ? (
+              <Tooltip mini content={record.error_reason || ''}>
+                <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
+              </Tooltip>
+            ) : null}
+            {status === datasetStatus.version_update_failed ? (
+              <span
+                className={styles.retryText}
+                onClick={() => handleRetry(record.id, record.latest_version)}
               >
-                {tag}
-              </Tag>
-            ))}
-          >
-            <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
-          </Tooltip>
-        )}
-      </Space>
-    )
-  },
-  {
-    title: '版本',
-    dataIndex: 'latest_version',
-    width: 120,
-    render: (latest_version: string) => {
-      return (
-        <div>
-          {/* <Tooltip content={latest_version}> */}
+                重试
+              </span>
+            ) : null}
+          </div>
+        );
+      }
+    },
+    {
+      title: '描述说明',
+      dataIndex: 'description',
+      width: 260,
+      render: (description: string) => {
+        return (
           <div
             style={{
               display: '-webkit-box',
@@ -203,191 +264,135 @@ const columns = (
               wordBreak: 'break-all'
             }}
           >
-            {latest_version}
+            {
+              description === null || description === undefined ? '-' : <Tooltip content={description}>{description}</Tooltip>
+            }
+
           </div>
-          {/* </Tooltip> */}
-        </div>
-      );
-    }
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    width: 180,
-    filterIcon: <IconFilter />,
-    filters: [
-      { text: '创建中', value: datasetStatus.creating },
-      { text: '创建失败', value: datasetStatus.create_failed },
-      { text: '正常', value: datasetStatus.normal },
-      { text: '版本更新中', value: datasetStatus.version_updating },
-      { text: '版本更新失败', value: datasetStatus.version_update_failed }
-    ],
-    filteredValue: selectedStatusFilters,
-    filterMultiple: true,
-    render: (status: string, record: Dataset) => {
-      const statusConfig = getStatusConfig(status);
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {status && getStatusIcon(status)}
-          <span>{statusConfig.text}</span>
-          {status === datasetStatus.version_update_failed ||
-          status === datasetStatus.create_failed ? (
-            <Tooltip mini content={record.error_reason || ''}>
-              <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
-            </Tooltip>
-          ) : null}
-          {status === datasetStatus.version_update_failed ? (
-            <span
-              className={styles.retryText}
-              onClick={() => handleRetry(record.id, record.latest_version)}
-            >
-              重试
-            </span>
-          ) : null}
-        </div>
-      );
-    }
-  },
-  {
-    title: '描述说明',
-    dataIndex: 'description',
-    width: 260,
-    render: (description: string) => (
-      <div
-        style={{
-          display: '-webkit-box',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 2,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          wordBreak: 'break-all'
-        }}
-      >
-        <Tooltip content={description}>{description}</Tooltip>
-      </div>
-    )
-  },
-  {
-    title: '生成模型',
-    dataIndex: 'src_model',
-    filterIcon: <IconFilter />,
-    width: 130,
-    filters: (() => {
-      const modelSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.src_model) {
-          modelSet.add(dataset.src_model);
-        }
-      });
-      return Array.from(modelSet).map((model) => ({
-        text: model,
-        value: model
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.src_model === value;
+        )
+      }
     },
-    render: (src_model: string) => (
-      <Tag
-        className={styles.tagPurple}
-        style={{
-          width: '130px', // 必须设置宽度（根据需求调整）
-          overflow: 'hidden', // 隐藏溢出内容
-          textOverflow: 'ellipsis', // 溢出显示省略号
-          whiteSpace: 'nowrap' // 强制文本不换行
-        }}
-      >
-        <Tooltip content={src_model}>{src_model}</Tooltip>
-      </Tag>
-    )
-  },
-  {
-    title: '创建人',
-    dataIndex: 'creator_name',
-    width: 100,
-    filterIcon: <IconFilter />
-    // filters: (() => {
-    //   const creatorSet = new Set<string>();
-    //   datasetList?.forEach((dataset) => {
-    //     if (dataset.creator_name) {
-    //       creatorSet.add(dataset.creator_name);
-    //     }
-    //   });
-    //   return Array.from(creatorSet).map((creator) => ({
-    //     text: creator,
-    //     value: creator
-    //   }));
-    // })(),
-    // onFilter: (value: string, record: Dataset) => {
-    //   return record.creator_name === value;
-    // }
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'created_at',
-    width: 180,
-    sorter: true, // 启用排序功能，但不提供排序函数
-    sortOrder:
-      sortField === 'created_at'
-        ? sortOrder === 'asc'
-          ? ('ascend' as const)
-          : sortOrder === 'desc'
-            ? ('descend' as const)
-            : undefined
-        : undefined,
-    sortDirections: ['ascend' as const, 'descend' as const],
-    render: (created_at: string) => formatDateTime(created_at)
-  },
-  {
-    title: '最近更新',
-    dataIndex: 'updated_at',
-    width: 180,
-    sorter: true, // 启用排序功能，但不提供排序函数
-    sortOrder:
-      sortField === 'updated_at'
-        ? sortOrder === 'asc'
-          ? ('ascend' as const)
-          : sortOrder === 'desc'
-            ? ('descend' as const)
-            : undefined
-        : undefined,
-    sortDirections: ['ascend' as const, 'descend' as const],
-    render: (updated_at: string) => formatDateTime(updated_at)
-  },
-  {
-    title: '操作',
-    dataIndex: 'op',
-    width: 104,
-    fixed: 'right' as const,
-    render: (_: unknown, record: Dataset) => (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {/* <Button
+    {
+      title: '生成模型',
+      dataIndex: 'src_model',
+      filterIcon: <IconFilter />,
+      width: 130,
+      filters: (() => {
+        const modelSet = new Set<string>();
+        datasetList?.forEach((dataset) => {
+          if (dataset.src_model) {
+            modelSet.add(dataset.src_model);
+          }
+        });
+        return Array.from(modelSet).map((model) => ({
+          text: model,
+          value: model
+        }));
+      })(),
+      onFilter: (value: string, record: Dataset) => {
+        return record.src_model === value;
+      },
+      render: (src_model: string) => (
+        <Tag
+          className={styles.tagPurple}
+          style={{
+            width: '130px', // 必须设置宽度（根据需求调整）
+            overflow: 'hidden', // 隐藏溢出内容
+            textOverflow: 'ellipsis', // 溢出显示省略号
+            whiteSpace: 'nowrap' // 强制文本不换行
+          }}
+        >
+          <Tooltip content={src_model}>{src_model}</Tooltip>
+        </Tag>
+      )
+    },
+    {
+      title: '创建人',
+      dataIndex: 'creator_name',
+      width: 100,
+      filterIcon: <IconFilter />
+      // filters: (() => {
+      //   const creatorSet = new Set<string>();
+      //   datasetList?.forEach((dataset) => {
+      //     if (dataset.creator_name) {
+      //       creatorSet.add(dataset.creator_name);
+      //     }
+      //   });
+      //   return Array.from(creatorSet).map((creator) => ({
+      //     text: creator,
+      //     value: creator
+      //   }));
+      // })(),
+      // onFilter: (value: string, record: Dataset) => {
+      //   return record.creator_name === value;
+      // }
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'created_at',
+      width: 180,
+      sorter: true, // 启用排序功能，但不提供排序函数
+      sortOrder:
+        sortField === 'created_at'
+          ? sortOrder === 'asc'
+            ? ('ascend' as const)
+            : sortOrder === 'desc'
+              ? ('descend' as const)
+              : undefined
+          : undefined,
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (created_at: string) => formatDateTime(created_at)
+    },
+    {
+      title: '最近更新',
+      dataIndex: 'updated_at',
+      width: 180,
+      sorter: true, // 启用排序功能，但不提供排序函数
+      sortOrder:
+        sortField === 'updated_at'
+          ? sortOrder === 'asc'
+            ? ('ascend' as const)
+            : sortOrder === 'desc'
+              ? ('descend' as const)
+              : undefined
+          : undefined,
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (updated_at: string) => formatDateTime(updated_at)
+    },
+    {
+      title: '操作',
+      dataIndex: 'op',
+      width: 104,
+      fixed: 'right' as const,
+      render: (_: unknown, record: Dataset) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
         </Button> */}
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-          style={{ padding: '0 8px 0 5px' }}
-          onClick={() => handleExport(record)}
-          disabled={record.status !== datasetStatus.normal}
-        >
-          导出
-        </Button>
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.delete}`}
-          style={{ padding: '0 5px 0 8px' }}
-          onClick={() => handleDelete(record)}
-        >
-          删除
-        </Button>
-      </div>
-    )
-  }
-];
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+            style={{ padding: '0 8px 0 5px' }}
+            onClick={() => handleExport(record)}
+            disabled={record.status !== datasetStatus.normal}
+          >
+            导出
+          </Button>
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${styles.delete}`}
+            style={{ padding: '0 5px 0 8px' }}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
+        </div>
+      )
+    }
+  ];
 
 export enum searchFieldType {
   name = 'name',
@@ -509,19 +514,19 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-              path:
-                // formData.targetDataSource[0][0] +
-                '/dst' +
-                '/' +
-                formData.targetDataSource[0][1] +
-                '/volume/' +
-                formData.targetDataSource[1][0],
-              path_id: formData.targetDataSource[1][1]
-            }
+            path:
+              // formData.targetDataSource[0][0] +
+              '/dst' +
+              '/' +
+              formData.targetDataSource[0][1] +
+              '/volume/' +
+              formData.targetDataSource[1][0],
+            path_id: formData.targetDataSource[1][1]
+          }
           : {
-              connector_id: parseInt(formData.targetDataSource) || 0,
-              connector_files: formData.selectedFiles || []
-            }
+            connector_id: parseInt(formData.targetDataSource) || 0,
+            connector_files: formData.selectedFiles || []
+          }
     };
 
     console.log('提交数据:', submitData);

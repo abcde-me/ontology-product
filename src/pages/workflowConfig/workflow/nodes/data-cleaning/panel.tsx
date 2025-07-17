@@ -159,6 +159,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                     size="mini"
                     placeholder="请选择"
                     className={!case_uniformity ? 'arco-select-disabled' : ''}
+                    allowClear
                     style={{
                       width: '120px',
                       height: '22px',
