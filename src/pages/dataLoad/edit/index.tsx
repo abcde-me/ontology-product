@@ -214,7 +214,7 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           extra={
-            <div style={{ color: '#666', fontSize: 14 }}>
+            <div style={{ color: '#666', fontSize: 12 }}>
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议: 连接器connector_1</div>
             </div>

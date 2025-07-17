@@ -215,7 +215,7 @@ const LoadAddModal = (props: propsType) => {
           labelAlign="right"
           required
           extra={
-            <div style={{ color: '#6E7B8D', fontSize: 14 }}>
+            <div style={{ color: '#6E7B8D', fontSize: 12 }}>
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议: 连接器connector_1</div>
             </div>

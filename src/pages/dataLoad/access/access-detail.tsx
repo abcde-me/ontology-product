@@ -7,6 +7,7 @@ import { useParams } from '@/utils/url';
 import { getLoadRecord } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
+import { useSetState } from 'ahooks';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -15,7 +16,7 @@ const AccessDetail = () => {
   const recordsId = useParams('execution_id');
   const name = useParams('name');
   const [arressDetail, setArressDetail] = useState<any>({});
-
+  const [loading, setLoading] = useState(false);
   // 返回上一层的函数
   const OneLevelUpHan = () => {
     history.back();
@@ -23,8 +24,8 @@ const AccessDetail = () => {
   const [totalNum, setTotalNum] = useState(0);
   // 获取上面的详情
   const getDetail = async () => {
-    console.log(recordsId);
     try {
+      setLoading(true);
       const res = await getLoadRecord(recordsId);
       setArressDetail(res.data);
       if (res.code == '' && res.status == 200) {
@@ -32,6 +33,8 @@ const AccessDetail = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,7 +77,8 @@ const AccessDetail = () => {
               {name}
             </BreadcrumbItem>
             <BreadcrumbItem style={{ fontSize: '20px' }}>
-              {arressDetail.execution_name}运行记录
+              {arressDetail.execution_name}
+              {!loading && '运行记录'}
             </BreadcrumbItem>
           </Breadcrumb>
           <div
@@ -97,7 +101,9 @@ const AccessDetail = () => {
                       ? RunStateType[RunState.FAILED].color
                       : arressDetail.status == RunState.RUNNING
                         ? RunStateType[RunState.RUNNING].color
-                        : RunStateType[RunState.SUCCEED].color,
+                        : arressDetail.status == RunState.SUCCEED
+                          ? RunStateType[RunState.SUCCEED].color
+                          : '',
                 borderRadius: '50%'
               }}
             ></div>
@@ -108,7 +114,9 @@ const AccessDetail = () => {
                   ? RunStateType[RunState.RUNNING].text
                   : arressDetail.status == RunState.SUCCEED
                     ? RunStateType[RunState.SUCCEED].text
-                    : RunStateType[RunState.FAILED].text}
+                    : arressDetail.status == RunState.FAILED
+                      ? RunStateType[RunState.FAILED].text
+                      : ''}
             </div>
           </div>
         </div>
