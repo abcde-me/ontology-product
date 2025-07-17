@@ -303,38 +303,38 @@ export function useEditableTree({ catalogTreeStore }) {
           {['volume', 'db', CatalogTypeEnum.db].every(
             (key) => dataRef?.type !== key
           ) && (
-            <>
-              <Tooltip color="white" content="重命名">
-                <IconEdit
-                  className={
-                    'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                  }
-                  onClick={() => handleEdit(node)}
-                />
-              </Tooltip>
-              <Tooltip color="white" content="删除">
-                <IconDelete
-                  onClick={() => {
-                    Modal.confirm({
-                      title: '确认删除目录?',
-                      content: '删除后，该目录下所有内容将被删除，不可恢复',
-                      async onOk() {
-                        try {
-                          await handleDelete(node);
-                        } catch (apiError: any) {
-                          Message.error(
-                            '删除失败: ' + (apiError.message || '请稍后重试')
-                          );
-                        }
-                      },
-                      className: styles['modalWrapper']
-                    });
-                  }}
-                  className="hover:text-[rgb(var(--primary-6))]"
-                />
-              </Tooltip>
-            </>
-          )}
+              <>
+                <Tooltip color="white" content="重命名">
+                  <IconEdit
+                    className={
+                      'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                    }
+                    onClick={() => handleEdit(node)}
+                  />
+                </Tooltip>
+                <Tooltip color="white" content="删除">
+                  <IconDelete
+                    onClick={() => {
+                      Modal.confirm({
+                        title: '确认删除目录?',
+                        content: '删除后，该目录下所有内容将被删除，不可恢复',
+                        async onOk() {
+                          try {
+                            await handleDelete(node);
+                          } catch (apiError: any) {
+                            Message.error(
+                              '删除失败: ' + (apiError.message || '请稍后重试')
+                            );
+                          }
+                        },
+                        className: styles['modalWrapper']
+                      });
+                    }}
+                    className="hover:text-[rgb(var(--primary-6))]"
+                  />
+                </Tooltip>
+              </>
+            )}
           {dataRef?.type === 'volume' && (
             <Tooltip color="white" content="新建">
               <IconPlus
@@ -391,7 +391,7 @@ export function useEditableTree({ catalogTreeStore }) {
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
         {dataRef?.isLastLeaf && (
-          <div className="mr-2 w-4">
+          <div className="mr-2 w-4 tree-icon">
             {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
               dataRef?.type
             ) ? (
