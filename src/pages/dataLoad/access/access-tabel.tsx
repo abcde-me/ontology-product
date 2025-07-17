@@ -15,7 +15,7 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
-  FAIL = 'fail'
+  FAIL = 'failed'
 }
 const STATUSTYPEARR = {
   [StatusType.SYCCESS]: {
@@ -51,7 +51,7 @@ const AccessTable = (props) => {
               height: '5px',
               borderRadius: '50%',
               background:
-                item.status == StatusType.FAIL
+                item.status === StatusType.FAIL
                   ? STATUSTYPEARR[StatusType.FAIL].color
                   : STATUSTYPEARR[StatusType.SYCCESS].color
             }}
@@ -62,9 +62,13 @@ const AccessTable = (props) => {
               : STATUSTYPEARR[StatusType.SYCCESS].txt}
           </div>
           {item.status == StatusType.FAIL && (
-            <Tooltip mini content={item.error_message}>
+            <Tooltip
+              mini
+              content={item.error_log}
+              style={{ maxHeight: '200px', overflow: 'auto' }}
+            >
               <IconExclamationCircle
-                style={{ color: 'orange', fontSize: '17px' }}
+                style={{ color: '#FB923C', fontSize: '16px' }}
               />
             </Tooltip>
           )}

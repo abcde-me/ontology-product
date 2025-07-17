@@ -95,6 +95,10 @@ const TableDetail = (props) => {
           value: RunState.FAILED
         },
         {
+          text: '运行停止',
+          value: RunState.STOPPED
+        },
+        {
           text: '运行中',
           value: RunState.RUNNING
         }
@@ -219,7 +223,7 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
-          style={{ width: '100%', padding: '1px 30px 0px 0px' }}
+          style={{ width: '100%', padding: '1px 15px 0px 0px' }}
           rowKey="seatunnel_job_id"
           loading={props.loading}
           onChange={(pagination, filters, sorter) => {
