@@ -2,9 +2,10 @@
   background-color: rgb(245, 249, 255) !important;
 }
 .task-box {
-  width: 97%;
+  width: 100%;
   margin: 10px auto;
   display: flex;
+  padding-left: 17px;
 }
 .task-left,
 .task-right {
@@ -36,6 +37,7 @@
   align-items: center;
   border-radius: 7px;
   margin: 0px 8px;
+  font-size: 14px;
 }
 .fontSize {
   font-size: 32px;
