@@ -33,8 +33,8 @@ const Node: FC<NodeProps<EndNodeType>> = ({ id, data }) => {
     <div className={`wk-node-content end-node-content`}>
       <div className="end-node-content-item">
         <div className="txt">目标数据目录</div>
-        {target_path_name && target_path_name ? (
-          <div className="val">{target_path_name}</div>
+        {targetPathName && targetPathName ? (
+          <div className="val">{targetPathName}</div>
         ) : (
           <div className="item-text">未配置</div>
         )}
