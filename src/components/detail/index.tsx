@@ -135,6 +135,8 @@ const generateArcoColumns = (
           <div style={{ width: cellWidth }}>
             {/* {header === 'name' ? ( */}
             <EllipsisPopover
+              preferTypography
+              isEdit={false}
               value={value}
               style={{
                 // width:'30%',
@@ -1277,8 +1279,10 @@ const DatasetDetail: React.FC = () => {
                           }}
                         >
                           <EllipsisPopover
+                            preferTypography
                             value={datasetDetail.description || '-'}
                             isEdit={false}
+                            className="dataset-detail-description"
                           ></EllipsisPopover>
                         </div>
                       )
