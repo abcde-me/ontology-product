@@ -3,6 +3,7 @@ import { useParams, useHistory, Prompt } from 'react-router-dom';
 import styles from './style.module.css';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import EllipsisPopover from '../ellipsis-popover-com';
+import { useLocation } from 'react-router-dom';
 import {
   Typography,
   Button,
@@ -136,6 +137,8 @@ const generateArcoColumns = (
           <div style={{ width: cellWidth }}>
             {/* {header === 'name' ? ( */}
             <EllipsisPopover
+              preferTypography
+              isEdit={false}
               value={value}
               style={{
                 // width:'30%',
@@ -488,6 +491,7 @@ const DatasetDetail: React.FC = () => {
   const [divWidth, setDivWidth] = React.useState<number>(0);
 
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
+  const locatio = useLocation();
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -547,28 +551,22 @@ const DatasetDetail: React.FC = () => {
       return true; // 允许跳转y
     });
 
-    window.addEventListener('beforeunload', (event) => {
-      // 取消事件（标准写法）
-      event.preventDefault();
-      // Chrome 等浏览器需要设置 returnValue 属性
-      event.returnValue = '';
-      // 返回提示信息（现代浏览器可能忽略，但仍会显示确认对话框）
-
-      return '确定要离开吗？未保存的更改可能会丢失。';
-    });
-
-    // 或者直接赋值的方式
-    window.onbeforeunload = (event) => {
+    const handleBeforeUnload = (e) => {
       if (updateStatus) {
-        event.preventDefault();
-        event.returnValue = '';
-        return '确认消息';
-      } else {
+        // 状态为 true 时，阻止默认行为并显示确认对话框
+        e.preventDefault();
+        e.returnValue = ''; // Chrome 需要设置 returnValue
+        return '确认要离开吗？未保存的更改可能会丢失。';
       }
+      // 状态为 false 时，不返回任何值，允许直接刷新
+      return undefined;
     };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       unblock();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [history, updateStatus, isModalVisible]);
 
@@ -1278,8 +1276,10 @@ const DatasetDetail: React.FC = () => {
                           }}
                         >
                           <EllipsisPopover
+                            preferTypography
                             value={datasetDetail.description || '-'}
                             isEdit={false}
+                            className="dataset-detail-description"
                           ></EllipsisPopover>
                         </div>
                       )
