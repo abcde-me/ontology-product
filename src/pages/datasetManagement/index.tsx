@@ -185,13 +185,15 @@ const columns = (
               content={tag_names.map((tag, index) => (
                 <Tag
                   key={index}
+                  className={styles.tagGreen}
                   style={{
-                    background: '#E2E8F0',
-                    color: '#0F172A',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    height: '18px',
-                    alignItems: 'center'
+                    // background: '#E2E8F0',
+                    // color: '#0F172A',
+                    margin: '0 2px'
+                    // borderRadius: '16px',
+                    // fontSize: '12px',
+                    // height: '18px',
+                    // alignItems: 'center'
                   }}
                 >
                   {tag}
@@ -503,7 +505,10 @@ const DatasetManagement: React.FC = () => {
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
 
-  const childRef = useRef<{ resetForm: () => void } | null>(null);
+  const childRef = useRef<{
+    resetForm: () => void;
+    setcreateTagDisabled: () => void;
+  } | null>(null);
 
   // 监听排序状态变化
   React.useEffect(() => {
@@ -585,6 +590,7 @@ const DatasetManagement: React.FC = () => {
 
       if (createDatasetRes.status !== 200) {
         Message.error('数据集创建失败！');
+        childRef.current?.setcreateTagDisabled();
         return;
       }
 
@@ -608,8 +614,10 @@ const DatasetManagement: React.FC = () => {
       }
 
       childRef.current?.resetForm();
+      childRef.current?.setcreateTagDisabled();
       Message.success('数据集创建成功！');
     } catch {
+      childRef.current?.setcreateTagDisabled();
       Message.error('数据集创建失败！');
     }
   };

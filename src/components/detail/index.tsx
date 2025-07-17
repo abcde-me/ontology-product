@@ -51,7 +51,6 @@ import {
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
-import noDataElement from '../no-data';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -544,10 +543,32 @@ const DatasetDetail: React.FC = () => {
         });
         return false; // 先阻止默认跳转
       }
-      return true; // 允许跳转
+      return true; // 允许跳转y
     });
 
-    return () => unblock(); // 组件卸载时清除拦截器
+    window.addEventListener('beforeunload', (event) => {
+      // 取消事件（标准写法）
+      event.preventDefault();
+      // Chrome 等浏览器需要设置 returnValue 属性
+      event.returnValue = '';
+      // 返回提示信息（现代浏览器可能忽略，但仍会显示确认对话框）
+
+      return '确定要离开吗？未保存的更改可能会丢失。';
+    });
+
+    // 或者直接赋值的方式
+    window.onbeforeunload = (event) => {
+      if (updateStatus) {
+        event.preventDefault();
+        event.returnValue = '';
+        return '确认消息';
+      } else {
+      }
+    };
+
+    return () => {
+      unblock();
+    };
   }, [history, updateStatus, isModalVisible]);
 
   React.useEffect(() => {
@@ -1474,7 +1495,7 @@ const DatasetDetail: React.FC = () => {
                     <Table
                       columns={contentColumns}
                       data={contentData}
-                      noDataElement={noDataElement({ description: '暂无数据' })}
+                      noDataElement={<NoDataEmpty />}
                       pagination={false}
                       scroll={{ x: 'max-content' }}
                       border={false}
