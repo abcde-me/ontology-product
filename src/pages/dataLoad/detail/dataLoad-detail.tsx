@@ -280,7 +280,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
               >
                 载入位置：
               </div>
@@ -309,7 +309,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
               >
                 创建人：
               </div>
@@ -325,7 +325,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
               >
                 创建时间：
               </div>
@@ -341,7 +341,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '80px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
               >
                 更新时间：
               </div>
@@ -362,7 +362,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '90px' }}
               >
                 数据源类型：
               </div>
@@ -378,7 +378,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '90px' }}
               >
                 连接器名称：
               </div>
@@ -406,7 +406,7 @@ const DataLoadDetail = () => {
               }}
             >
               <div
-                style={{ fontWeight: 'bold', fontSize: '15px', width: '90px' }}
+                style={{ fontWeight: '500', fontSize: '14px', width: '90px' }}
               >
                 载入形式：
               </div>
@@ -437,8 +437,8 @@ const DataLoadDetail = () => {
               >
                 <div
                   style={{
-                    fontWeight: 'bold',
-                    fontSize: '15px',
+                    fontWeight: '500',
+                    fontSize: '14px',
                     width: '90px'
                   }}
                 >
@@ -457,7 +457,7 @@ const DataLoadDetail = () => {
         </div>
         <div
           style={{
-            margin: '15px 0px 15px 20px',
+            margin: '10px 0px 15px 20px',
             fontSize: '17px',
             fontWeight: '600'
           }}
@@ -473,6 +473,7 @@ const DataLoadDetail = () => {
           }}
         >
           <InputSearch
+            allowClear
             placeholder="搜索运行ID"
             style={{ width: 220 }}
             onPressEnter={() => {

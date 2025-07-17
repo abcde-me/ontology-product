@@ -166,11 +166,17 @@ const AccessDetail = () => {
               <div>总文件</div>
               <div className="fontSize">{totalNum}</div>
             </div>
-            <div className="task-right-item" style={{ color: 'green' }}>
+            <div
+              className="task-right-item"
+              style={{ color: 'rgb(16,185,129 )' }}
+            >
               <div>成功</div>
               <div className="fontSize">{arressDetail.success_files}</div>
             </div>
-            <div className="task-right-item" style={{ color: 'red' }}>
+            <div
+              className="task-right-item"
+              style={{ color: 'rgb(220,38,38)' }}
+            >
               <div>失败</div>
               <div className="fontSize">{arressDetail.failed_files}</div>
             </div>

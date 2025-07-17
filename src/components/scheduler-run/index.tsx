@@ -64,7 +64,7 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
     return {
       cycle: frequencyData,
       date:
-        options.date === 'L' ? options.date : (options.date?.split(',') ?? []),
+        options.date === 'L' ? options.date : options.date?.split(',') ?? [],
       time: hour && minute ? `${hour}:${minute}` : ''
     };
   } else if (frequencyData === CycleValues.PER_WEEK) {
@@ -198,6 +198,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
     return (
       <Form
+        className={'schedulerForm'}
         form={form}
         initialValues={initialValues}
         onChange={handleValuesChange}

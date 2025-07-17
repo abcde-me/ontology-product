@@ -219,7 +219,11 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 noStyle
                 triggerPropName="checked"
               >
-                <Switch onChange={handleDocChange} />
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  onChange={handleDocChange}
+                />
               </FormItem>
               <PdfIcon className="size-[16px]" />
               <span className="text-[14px]/[22px] font-semibold">文档</span>
@@ -242,7 +246,11 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 noStyle
                 triggerPropName="checked"
               >
-                <Switch onChange={handleImageChange} />
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  onChange={handleImageChange}
+                />
               </FormItem>
               <ImageIcon className="size-[16px]" />
               <span className="text-[14px]/[22px] font-semibold">图片</span>
@@ -265,7 +273,11 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 noStyle
                 triggerPropName="checked"
               >
-                <Switch onChange={handleAudioChange} />
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  onChange={handleAudioChange}
+                />
               </FormItem>
               <AudioIcon className="size-[16px]" />
               <span className="text-[14px]/[22px] font-semibold">音频</span>
@@ -288,7 +300,11 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 noStyle
                 triggerPropName="checked"
               >
-                <Switch onChange={handleVideoChange} />
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  onChange={handleVideoChange}
+                />
               </FormItem>
               <VideoIcon className="size-[16px]" />
               <span className="text-[14px]/[22px] font-semibold">视频</span>

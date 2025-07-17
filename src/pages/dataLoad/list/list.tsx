@@ -459,7 +459,7 @@ export default function DataLoad() {
         margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        minHeight: '94vh'
+        height: 'calc(100% - 30px)'
       }}
     >
       <h1
@@ -479,6 +479,7 @@ export default function DataLoad() {
         }}
       >
         <InputSearch
+          allowClear
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
           onPressEnter={handlePressEnter}

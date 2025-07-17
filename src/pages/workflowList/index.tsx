@@ -382,6 +382,7 @@ export default function WorkflowList() {
           placeholder="输入工作流名称搜索"
           style={{ width: 230 }}
           value={searchValue}
+          allowClear
           onChange={(value) => {
             setSearchValue(value);
           }}
