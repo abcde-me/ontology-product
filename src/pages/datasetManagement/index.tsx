@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import './index.css';
 import {
   Typography,
   Input,
@@ -36,17 +37,19 @@ import {
   datasetVersionRebuild,
   getTagList
 } from '@/api/datasetManagement';
+import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
-import { NameCell } from './namecell';
 import {
   PopupsFormFrom,
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
+import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
+import { color } from 'echarts';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -82,11 +85,11 @@ export interface Dataset {
   src_model: string;
   latest_file_path: string;
   status:
-  | 'creating'
-  | 'create_failed'
-  | 'normal'
-  | 'version_updating'
-  | 'version_update_failed';
+    | 'creating'
+    | 'create_failed'
+    | 'normal'
+    | 'version_updating'
+    | 'version_update_failed';
 }
 
 // 状态显示配置
@@ -118,6 +121,10 @@ const getStatusIcon = (status: string) => {
   );
 };
 
+const renderEmptyPlaceholder = (value: string | null) => {
+  return value === '' || value == null ? '-' : value;
+};
+
 const columns = (
   handleGoToDetail,
   handleDelete,
@@ -131,34 +138,46 @@ const columns = (
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
   handleRetry: (id: string | number, version_id: string) => void
 ) => [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      width: 200,
-      render: (name: string, record: Dataset) => {
-        return (
-          <NameCell
-            name={name}
-            record={record}
-            handleGoToDetail={handleGoToDetail}
-          />
-        );
-      }
-    },
-    {
-      title: '标签',
-      dataIndex: 'tag_names',
-      width: 120,
-      filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-      filteredValue: selectedTagFilters,
-      filterMultiple: true,
-      render: (tag_names: string[]) => (
+  {
+    title: '名称',
+    dataIndex: 'name',
+    width: 200,
+    className: 'hover-change workflow-name',
+    render: (name: string, record: Dataset) => {
+      if (!name) return '-';
+      return (
+        // <NameCell
+        //   name={name}
+        //   record={record}
+        //   handleGoToDetail={handleGoToDetail}
+        // />
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleGoToDetail(record.id);
+          }}
+        />
+      );
+    }
+  },
+  {
+    title: '标签',
+    dataIndex: 'tag_names',
+    width: 120,
+    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
+    filteredValue: selectedTagFilters,
+    filterMultiple: true,
+    render: (tag_names: string[]) => {
+      if (!tag_names || tag_names.length === 0) return '-';
+      return (
         <Space size="mini">
           {tag_names && tag_names.length > 0 && tag_names[0] && (
             <Tag className={styles.tagGreen}>
               {tag_names[0].length > 5
                 ? `${tag_names[0].substring(0, 5)}...`
-                : tag_names[0]}
+                : tag_names[0] || '-'}
             </Tag>
           )}
           {tag_names && tag_names.length > 1 && (
@@ -183,77 +202,20 @@ const columns = (
             </Tooltip>
           )}
         </Space>
-      )
-    },
-    {
-      title: '版本',
-      dataIndex: 'latest_version',
-      width: 120,
-      render: (latest_version: string) => {
-        return (
-          <div>
-            {/* <Tooltip content={latest_version}> */}
-            <div
-              style={{
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 2,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                wordBreak: 'break-all'
-              }}
-            >
-              {latest_version}
-            </div>
-            {/* </Tooltip> */}
-          </div>
-        );
+      );
+    }
+  },
+  {
+    title: '版本',
+    dataIndex: 'latest_version',
+    width: 120,
+    render: (latest_version: string) => {
+      if (!latest_version) {
+        return '-';
       }
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 180,
-      filterIcon: <IconFilter />,
-      filters: [
-        { text: '创建中', value: datasetStatus.creating },
-        { text: '创建失败', value: datasetStatus.create_failed },
-        { text: '正常', value: datasetStatus.normal },
-        { text: '版本更新中', value: datasetStatus.version_updating },
-        { text: '版本更新失败', value: datasetStatus.version_update_failed }
-      ],
-      filteredValue: selectedStatusFilters,
-      filterMultiple: true,
-      render: (status: string, record: Dataset) => {
-        const statusConfig = getStatusConfig(status);
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {status && getStatusIcon(status)}
-            <span>{statusConfig.text}</span>
-            {status === datasetStatus.version_update_failed ||
-              status === datasetStatus.create_failed ? (
-              <Tooltip mini content={record.error_reason || ''}>
-                <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
-              </Tooltip>
-            ) : null}
-            {status === datasetStatus.version_update_failed ? (
-              <span
-                className={styles.retryText}
-                onClick={() => handleRetry(record.id, record.latest_version)}
-              >
-                重试
-              </span>
-            ) : null}
-          </div>
-        );
-      }
-    },
-    {
-      title: '描述说明',
-      dataIndex: 'description',
-      width: 260,
-      render: (description: string) => {
-        return (
+      return (
+        <div>
+          {/* <Tooltip content={latest_version}> */}
           <div
             style={{
               display: '-webkit-box',
@@ -264,135 +226,222 @@ const columns = (
               wordBreak: 'break-all'
             }}
           >
-            {
-              description === null || description === undefined ? '-' : <Tooltip content={description}>{description}</Tooltip>
-            }
-
+            {latest_version}
           </div>
-        )
-      }
+          {/* </Tooltip> */}
+        </div>
+      );
+    }
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: 180,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: '创建中', value: datasetStatus.creating },
+      { text: '创建失败', value: datasetStatus.create_failed },
+      { text: '正常', value: datasetStatus.normal },
+      { text: '版本更新中', value: datasetStatus.version_updating },
+      { text: '版本更新失败', value: datasetStatus.version_update_failed }
+    ],
+    filteredValue: selectedStatusFilters,
+    filterMultiple: true,
+    render: (status: string, record: Dataset) => {
+      const statusConfig = getStatusConfig(status);
+      if (!status) return '-';
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {status && getStatusIcon(status)}
+          <span>{statusConfig.text}</span>
+          {status === datasetStatus.version_update_failed ||
+          status === datasetStatus.create_failed ? (
+            <Tooltip mini content={record.error_reason || ''}>
+              <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
+            </Tooltip>
+          ) : null}
+          {status === datasetStatus.version_update_failed ? (
+            <span
+              className={styles.retryText}
+              onClick={() => handleRetry(record.id, record.latest_version)}
+            >
+              重试
+            </span>
+          ) : null}
+        </div>
+      );
+    }
+  },
+  {
+    title: '描述说明',
+    dataIndex: 'description',
+    width: 260,
+    render: (description: string) => {
+      if (!description) return '-';
+      return (
+        // <div
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={description}>{description}</Tooltip>
+        // </div>
+        <EllipsisPopover
+          value={description}
+          preferTypography={true}
+          ellipsis={{
+            rows: 2,
+            showTooltip: {
+              hover: true,
+              click: false,
+              props: {
+                style: {
+                  maxWidth: 600,
+                  maxHeight: 400,
+                  overflow: 'auto'
+                }
+              }
+            }
+          }}
+        ></EllipsisPopover>
+      );
+    }
+  },
+  {
+    title: '生成模型',
+    dataIndex: 'src_model',
+    filterIcon: <IconFilter />,
+    width: 130,
+    filters: (() => {
+      const modelSet = new Set<string>();
+      datasetList?.forEach((dataset) => {
+        if (dataset.src_model) {
+          modelSet.add(dataset.src_model);
+        }
+      });
+      return Array.from(modelSet).map((model) => ({
+        text: model,
+        value: model
+      }));
+    })(),
+    onFilter: (value: string, record: Dataset) => {
+      return record.src_model === value;
     },
-    {
-      title: '生成模型',
-      dataIndex: 'src_model',
-      filterIcon: <IconFilter />,
-      width: 130,
-      filters: (() => {
-        const modelSet = new Set<string>();
-        datasetList?.forEach((dataset) => {
-          if (dataset.src_model) {
-            modelSet.add(dataset.src_model);
-          }
-        });
-        return Array.from(modelSet).map((model) => ({
-          text: model,
-          value: model
-        }));
-      })(),
-      onFilter: (value: string, record: Dataset) => {
-        return record.src_model === value;
-      },
-      render: (src_model: string) => (
+    render: (src_model: string) => {
+      if (!src_model) return '-';
+      return (
         <Tag
           className={styles.tagPurple}
           style={{
-            width: '130px', // 必须设置宽度（根据需求调整）
-            overflow: 'hidden', // 隐藏溢出内容
-            textOverflow: 'ellipsis', // 溢出显示省略号
-            whiteSpace: 'nowrap' // 强制文本不换行
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-all'
           }}
         >
           <Tooltip content={src_model}>{src_model}</Tooltip>
         </Tag>
-      )
-    },
-    {
-      title: '创建人',
-      dataIndex: 'creator_name',
-      width: 100,
-      filterIcon: <IconFilter />
-      // filters: (() => {
-      //   const creatorSet = new Set<string>();
-      //   datasetList?.forEach((dataset) => {
-      //     if (dataset.creator_name) {
-      //       creatorSet.add(dataset.creator_name);
-      //     }
-      //   });
-      //   return Array.from(creatorSet).map((creator) => ({
-      //     text: creator,
-      //     value: creator
-      //   }));
-      // })(),
-      // onFilter: (value: string, record: Dataset) => {
-      //   return record.creator_name === value;
-      // }
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      width: 180,
-      sorter: true, // 启用排序功能，但不提供排序函数
-      sortOrder:
-        sortField === 'created_at'
-          ? sortOrder === 'asc'
-            ? ('ascend' as const)
-            : sortOrder === 'desc'
-              ? ('descend' as const)
-              : undefined
-          : undefined,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (created_at: string) => formatDateTime(created_at)
-    },
-    {
-      title: '最近更新',
-      dataIndex: 'updated_at',
-      width: 180,
-      sorter: true, // 启用排序功能，但不提供排序函数
-      sortOrder:
-        sortField === 'updated_at'
-          ? sortOrder === 'asc'
-            ? ('ascend' as const)
-            : sortOrder === 'desc'
-              ? ('descend' as const)
-              : undefined
-          : undefined,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (updated_at: string) => formatDateTime(updated_at)
-    },
-    {
-      title: '操作',
-      dataIndex: 'op',
-      width: 104,
-      fixed: 'right' as const,
-      render: (_: unknown, record: Dataset) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {/* <Button
+      );
+    }
+  },
+  {
+    title: '创建人',
+    dataIndex: 'creator_name',
+    width: 100,
+    filterIcon: <IconFilter />,
+    render: (creator_name: string) => {
+      if (!creator_name) return '-';
+      return creator_name;
+    }
+    // filters: (() => {
+    //   const creatorSet = new Set<string>();
+    //   datasetList?.forEach((dataset) => {
+    //     if (dataset.creator_name) {
+    //       creatorSet.add(dataset.creator_name);
+    //     }
+    //   });
+    //   return Array.from(creatorSet).map((creator) => ({
+    //     text: creator,
+    //     value: creator
+    //   }));
+    // })(),
+    // onFilter: (value: string, record: Dataset) => {
+    //   return record.creator_name === value;
+    // }
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'created_at',
+    width: 180,
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'created_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (created_at: string) => formatDateTime(created_at)
+  },
+  {
+    title: '最近更新',
+    dataIndex: 'updated_at',
+    width: 180,
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'updated_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (updated_at: string) => formatDateTime(updated_at)
+  },
+  {
+    title: '操作',
+    dataIndex: 'op',
+    width: 104,
+    fixed: 'right' as const,
+    render: (_: unknown, record: Dataset) => (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
         </Button> */}
-          <Button
-            type="text"
-            className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-            style={{ padding: '0 8px 0 5px' }}
-            onClick={() => handleExport(record)}
-            disabled={record.status !== datasetStatus.normal}
-          >
-            导出
-          </Button>
-          <Button
-            type="text"
-            className={`${styles.actionButton} ${styles.delete}`}
-            style={{ padding: '0 5px 0 8px' }}
-            onClick={() => handleDelete(record)}
-          >
-            删除
-          </Button>
-        </div>
-      )
-    }
-  ];
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+          style={{ padding: '0 8px 0 5px' }}
+          onClick={() => handleExport(record)}
+          disabled={record.status !== datasetStatus.normal}
+        >
+          导出
+        </Button>
+        <Button
+          type="text"
+          className={`${styles.actionButton} ${styles.delete}`}
+          style={{ padding: '0 5px 0 8px' }}
+          onClick={() => handleDelete(record)}
+        >
+          删除
+        </Button>
+      </div>
+    )
+  }
+];
 
 export enum searchFieldType {
   name = 'name',
@@ -504,7 +553,7 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 提交表单数据,新建数据集
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = async (formData: any) => {
     console.log('新建数据集:', formData);
     const submitData = {
       name: formData.name,
@@ -514,53 +563,55 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-            path:
-              // formData.targetDataSource[0][0] +
-              '/dst' +
-              '/' +
-              formData.targetDataSource[0][1] +
-              '/volume/' +
-              formData.targetDataSource[1][0],
-            path_id: formData.targetDataSource[1][1]
-          }
+              path:
+                // formData.targetDataSource[0][0] +
+                '/dst' +
+                '/' +
+                formData.targetDataSource[0][1] +
+                '/volume/' +
+                formData.targetDataSource[1][0],
+              path_id: formData.targetDataSource[1][1]
+            }
           : {
-            connector_id: parseInt(formData.targetDataSource) || 0,
-            connector_files: formData.selectedFiles || []
-          }
+              connector_id: parseInt(formData.targetDataSource) || 0,
+              connector_files: formData.selectedFiles || []
+            }
     };
 
     console.log('提交数据:', submitData);
-    createDataset(submitData)
-      .then((res) => {
-        if (res.status === 200) {
-          // 刷新数据列表
-          fetchDatasetList();
-          closeModal();
-          //获取标签
-          getTagList()
-            .then((res) => {
-              if (res.data && Array.isArray(res.data)) {
-                setTagList(res.data);
-              } else {
-                console.error('标签列表数据格式错误:', res);
-                setTagList([]);
-              }
-            })
-            .catch((err) => {
-              console.error('获取标签列表失败:', err);
-              setTagList([]);
-              Message.error('获取标签列表失败');
-            });
 
-          childRef.current?.resetForm();
-          Message.success('数据集创建成功！');
-        } else {
-          Message.error(res.message || '数据集创建失败！');
-        }
-      })
-      .catch((err) => {
+    try {
+      const createDatasetRes = await createDataset(submitData);
+
+      if (createDatasetRes.status !== 200) {
         Message.error('数据集创建失败！');
-      });
+        return;
+      }
+
+      // 刷新数据列表
+      fetchDatasetList();
+      closeModal();
+
+      //获取标签
+      const tagListRes = await getTagList();
+
+      try {
+        if (tagListRes.data && Array.isArray(tagListRes.data)) {
+          setTagList(tagListRes.data);
+        } else {
+          console.error('标签列表数据格式错误:', tagListRes);
+          setTagList([]);
+        }
+      } catch {
+        setTagList([]);
+        Message.error('获取标签列表失败');
+      }
+
+      childRef.current?.resetForm();
+      Message.success('数据集创建成功！');
+    } catch {
+      Message.error('数据集创建失败！');
+    }
   };
 
   // 删除数据集的方法
@@ -917,7 +968,7 @@ const DatasetManagement: React.FC = () => {
           />
           <Input.Search
             allowClear
-            placeholder="输入 ID/数据内容 搜索"
+            placeholder="输入ID/数据内容搜索"
             style={{ width: 160, height: 32 }}
             value={search}
             onChange={(value) => setSearch(value)}
@@ -992,7 +1043,7 @@ const DatasetManagement: React.FC = () => {
         )}
         data={datasetList}
         rowSelection={rowSelection}
-        noDataElement={<NoDataEmpty />}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         pagination={{
           current: currentPage,
           total: total,

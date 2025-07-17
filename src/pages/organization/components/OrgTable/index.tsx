@@ -4,7 +4,7 @@ import { useTable } from '../../hooks/useTable';
 import { Table } from '@ccf2e/arco-material';
 import NoDataPng from '@/assets/noData.svg';
 import { useOrgEditor } from '../OrgProvider/Context';
-import NoDataEmpty from '@/components/NoDataEmpty';
+import noDataElement from '@/components/no-data';
 
 export default function OrgTable() {
   const org = useOrgEditor();
@@ -26,7 +26,7 @@ export default function OrgTable() {
       scroll={{
         x: 1200
       }}
-      noDataElement={<NoDataEmpty />}
+      noDataElement={noDataElement({ description: '暂无数据' })}
     />
   );
 }

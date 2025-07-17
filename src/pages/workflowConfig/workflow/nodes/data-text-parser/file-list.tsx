@@ -9,6 +9,7 @@ import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
 import { useUnmountedRef } from 'ahooks';
 import { formatFileSize } from '@/utils/format';
+import noDataElement from '@/components/no-data';
 
 type FileListProps = {
   catetoryId: number;
@@ -282,12 +283,7 @@ function FileList({
       }}
       data={filesData}
       rowKey="id"
-      noDataElement={
-        <div className="flex flex-col items-center justify-center">
-          <EmptyIcon className="size-[48px]"></EmptyIcon>
-          <span className="text-[#6E7B8D]">请先选择源数据目录</span>
-        </div>
-      }
+      noDataElement={noDataElement({ description: '暂无数据' })}
     />
   );
 }

@@ -8,7 +8,7 @@ import { Table } from '@arco-design/web-react';
 import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 // 导入无数据组件
 import NoData from '../no-data';
-// import noDataElement from '@/components/no-data';
+import noDataElement from '@/components/no-data';
 import NoDataEmpty from '@/components/NoDataEmpty';
 
 // 表格引用类型定义
@@ -209,7 +209,7 @@ const UnifiedTable = forwardRef(
         pagination={false}
         border={true}
         onRow={getRowProps}
-        noDataElement={<NoDataEmpty />}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         onChange={handleTableChange}
         {...restProps}
       />
