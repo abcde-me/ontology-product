@@ -62,8 +62,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     const targetNodes = getNodes().filter(
       (node: any) => node.data.type === nodeType
     );
-    if (config.enabled && config.format.length) {
-      const sourcePath = form.getFieldValue('data_path_id');
+    const sourcePath = form.getFieldValue('data_path_id');
+    if (sourcePath && config.enabled && config.format.length) {
       const formats = config.format
         .join('/')
         .split('/')
