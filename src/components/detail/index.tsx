@@ -1256,6 +1256,7 @@ const DatasetDetail: React.FC = () => {
                 columns={versionColumns}
                 data={versionHistory}
                 pagination={false}
+                noDataElement={noDataElement({ description: '暂无数据' })}
                 // scroll={{ x: 'max-content' }}
                 border={false}
               />
