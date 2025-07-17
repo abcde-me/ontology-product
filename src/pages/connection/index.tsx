@@ -382,7 +382,7 @@ export default function Connection() {
   return (
     <div
       style={{
-        minHeight: '94%',
+        minHeight: 'calc(100% - 30px)',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',

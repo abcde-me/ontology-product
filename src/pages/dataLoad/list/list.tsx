@@ -485,7 +485,7 @@ export default function DataLoad() {
         // margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        minHeight: '94vh'
+        minHeight: '100%'
       }}
     >
       <h1
