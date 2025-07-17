@@ -180,7 +180,19 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
             )
           }
         >
-          <Select placeholder="请选择源数据目录" onChange={handlePathChange}>
+          <Select
+            placeholder="请选择源数据目录"
+            showSearch
+            onChange={handlePathChange}
+            filterOption={(inputValue, option) =>
+              String(option.props.value)
+                .toLowerCase()
+                .indexOf(inputValue.toLowerCase()) >= 0 ||
+              option.props.children
+                .toLowerCase()
+                .indexOf(inputValue.toLowerCase()) >= 0
+            }
+          >
             {srcDirs.map((s) => (
               <Select.Option value={s.id} key={s.id}>
                 {`${s.parent_name} / ${s.name}`}
