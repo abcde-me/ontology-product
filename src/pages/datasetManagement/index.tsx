@@ -338,10 +338,12 @@ const columns = (
         <Tag
           className={styles.tagPurple}
           style={{
-            width: '130px', // 必须设置宽度（根据需求调整）
-            overflow: 'hidden', // 隐藏溢出内容
-            textOverflow: 'ellipsis', // 溢出显示省略号
-            whiteSpace: 'nowrap' // 强制文本不换行
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-all'
           }}
         >
           <Tooltip content={src_model}>{src_model}</Tooltip>
@@ -1041,7 +1043,7 @@ const DatasetManagement: React.FC = () => {
         )}
         data={datasetList}
         rowSelection={rowSelection}
-        noDataElement={<NoDataEmpty />}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         pagination={{
           current: currentPage,
           total: total,

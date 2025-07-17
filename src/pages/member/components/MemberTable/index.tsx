@@ -5,7 +5,7 @@ import { useTable } from '../../hooks/useTable';
 import { Table } from '@ccf2e/arco-material';
 import { useMemberEditor } from '../../components/MemberProvider/Context';
 import NoDataPng from '@/assets/noData.svg';
-import NoDataEmpty from '@/components/NoDataEmpty';
+import noDataElement from '@/components/no-data';
 
 export default function MemberTable() {
   const columns = useColumns();
@@ -17,7 +17,7 @@ export default function MemberTable() {
       scroll={{
         x: 1200
       }}
-      noDataElement={<NoDataEmpty />}
+      noDataElement={noDataElement({ description: '暂无数据' })}
     />
   );
 }
