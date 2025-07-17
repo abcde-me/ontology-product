@@ -126,7 +126,7 @@ const AccessDetail = () => {
           backgroundColor: 'white',
           display: 'flex',
           flexDirection: 'column',
-          margin: '10px 20px 10px 10px',
+          // margin: '10px 20px 10px 10px',
           borderRadius: '10px',
           minHeight: '86vh'
         }}
@@ -135,7 +135,8 @@ const AccessDetail = () => {
           style={{
             fontSize: '17px',
             fontWeight: '600',
-            margin: '15px 0px 0px 17px'
+            padding: '0px 20px',
+            margin: '15px 0px'
           }}
         >
           任务信息
@@ -163,7 +164,7 @@ const AccessDetail = () => {
                 运行时长：
               </Col>
               <Col span={20} style={{ fontSize: '14px' }}>
-                {arressDetail.during_time
+                {arressDetail.during_time >= 0
                   ? formatRunTime(arressDetail.during_time)
                   : ''}
               </Col>

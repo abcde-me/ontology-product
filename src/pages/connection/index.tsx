@@ -25,6 +25,7 @@ import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -47,11 +48,11 @@ enum ConnectorType {
 const STATUS_CONFIG = {
   [ConnectionStatus.CONNECTED]: {
     text: '已连接',
-    color: 'green'
+    color: '#059669'
   },
   [ConnectionStatus.DISCONNECTED]: {
     text: '已断开',
-    color: 'red'
+    color: '#DC2626'
   }
 };
 
@@ -428,6 +429,7 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="id"

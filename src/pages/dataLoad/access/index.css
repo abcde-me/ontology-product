@@ -3,9 +3,9 @@
 }
 .task-box {
   width: 100%;
-  margin: 10px auto;
+  margin: 0 auto;
   display: flex;
-  padding-left: 17px;
+  padding-left: 15px;
 }
 .task-left,
 .task-right {

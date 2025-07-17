@@ -1,7 +1,8 @@
 import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Prompt } from 'react-router-dom';
 import styles from './style.module.css';
 import NoDataEmpty from '@/components/NoDataEmpty';
+import EllipsisPopover from '../ellipsis-popover-com';
 import {
   Typography,
   Button,
@@ -33,6 +34,7 @@ import {
   IconExclamationCircleFill,
   IconLoading,
   IconInfoCircle
+  //  IconRefresh
 } from '@arco-design/web-react/icon';
 
 import { Breadcrumb } from '@arco-design/web-react';
@@ -70,6 +72,15 @@ interface DatasetDetail {
   updated_at: string;
 }
 
+const countWidth = (count: number) => {
+  const viewportWidth = window.innerWidth - 350;
+  if (count > 4) {
+    return '400px';
+  } else {
+    return `${viewportWidth / count}px`;
+  }
+};
+
 //headers:表头
 //handleEditContent:编辑内容
 //handleContinue:删除
@@ -94,13 +105,15 @@ const generateArcoColumns = (
 ) => {
   // 过滤掉唯一标识符字段，不在页面显示
   const displayHeaders = headers.filter((header) => header !== idName);
-
+  const columnWidth = countWidth(displayHeaders.length);
   const cols = displayHeaders.map((header) => ({
     title: header,
     dataIndex: header,
     key: header,
     ellipsis: true,
+    width: columnWidth,
     render: (value: any, record: any) => {
+      const cellWidth = columnWidth; // 设置默认宽度
       if (updateStatus && editingRowKey === record[idName]) {
         return (
           <Input.TextArea
@@ -119,18 +132,18 @@ const generateArcoColumns = (
         );
       } else {
         return (
-          <Tooltip content={record[header]}>
-            <div
+          <div style={{ width: cellWidth }}>
+            {/* {header === 'name' ? ( */}
+            <EllipsisPopover
+              value={value}
               style={{
-                width: '200px',
+                // width:'30%',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
               }}
-            >
-              {record[header]}
-            </div>
-          </Tooltip>
+            />
+          </div>
         );
       }
     }
@@ -353,7 +366,8 @@ const statusConfig = {
 const renderStatusTag = (
   status: string,
   errorReason?: string,
-  handleVersionRebuild?: () => void
+  handleVersionRebuild?: () => void,
+  handlerefresh?: () => void
 ) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -407,6 +421,37 @@ const renderStatusTag = (
     );
   }
 
+  if (status === 'version_updating') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {statusElement}
+        {/* <Tooltip content={errorReason || '发生错误'}> */}
+        <IconRefresh
+          style={{
+            color: '#007DFA',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        />
+        {/* </Tooltip> */}
+        <Button
+          type="text"
+          size="small"
+          style={{
+            color: '#165dff',
+            padding: '0 0px',
+            fontSize: '14px',
+            height: 'auto'
+          }}
+        >
+          <span style={{ color: '#007DFA' }} onClick={handlerefresh}>
+            刷新
+          </span>
+        </Button>
+      </div>
+    );
+  }
+
   return statusWithTooltip;
 };
 
@@ -438,6 +483,114 @@ const DatasetDetail: React.FC = () => {
 
   //历史数据
   const [versionHistory, setVersionHistory] = React.useState<any[]>([]);
+  const rightDescriptionsRef = React.useRef<HTMLDivElement>(null);
+  const [divWidth, setDivWidth] = React.useState<number>(0);
+
+  const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
+
+  React.useEffect(() => {
+    //@ts-expect-error
+    const unblock = history.block((location) => {
+      // 条件：正在编辑且要跳转的路由不同
+      if (updateStatus && !isModalVisible) {
+        setIsModalVisible(true); // 标记弹窗已显示
+
+        // 调用 Arco Modal.confirm 静态方法
+        Modal.confirm({
+          title: (
+            <span
+              style={{
+                fontFamily: 'PingFang SC, sans-serif',
+                fontWeight: 500,
+                fontSize: 16,
+                height: 24,
+                display: 'inline-block'
+              }}
+            >
+              确定退出编辑？
+            </span>
+          ),
+          content: (
+            <div
+              style={{
+                fontFamily: 'PingFang SC, sans-serif',
+                fontWeight: 400,
+                fontSize: 14,
+                marginTop: '10px',
+                color: '#1D2129',
+                height: 22,
+                display: 'inline-block',
+                marginLeft: '28px' // 左移一点
+              }}
+            >
+              退出后，当前修改不会保存
+            </div>
+          ),
+          okText: '确认',
+          cancelText: '取消',
+          onOk: () => {
+            setUpdateStatus(false);
+            setIsModalVisible(false);
+            history.push(location.pathname); // 确认后执行跳转
+          },
+          onCancel: () => {
+            setIsModalVisible(false); // 取消后重置状态
+          },
+          //@ts-expect-error
+          onClose: () => {
+            setIsModalVisible(false); // 弹窗关闭时重置状态
+          }
+        });
+        return false; // 先阻止默认跳转
+      }
+      return true; // 允许跳转y
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+      // 取消事件（标准写法）
+      event.preventDefault();
+      // Chrome 等浏览器需要设置 returnValue 属性
+      event.returnValue = '';
+      // 返回提示信息（现代浏览器可能忽略，但仍会显示确认对话框）
+
+      return '确定要离开吗？未保存的更改可能会丢失。';
+    });
+
+    // 或者直接赋值的方式
+    window.onbeforeunload = (event) => {
+      if (updateStatus) {
+        event.preventDefault();
+        event.returnValue = '';
+        return '确认消息';
+      } else {
+      }
+    };
+
+    return () => {
+      unblock();
+    };
+  }, [history, updateStatus, isModalVisible]);
+
+  React.useEffect(() => {
+    // 初始获取元素宽度
+    const updateWidth = () => {
+      if (rightDescriptionsRef.current) {
+        console.log(rightDescriptionsRef.current.offsetWidth);
+        setDivWidth(rightDescriptionsRef.current.offsetWidth - 100);
+      }
+    };
+
+    // 初始调用一次
+    updateWidth();
+
+    // 监听窗口变化
+    window.addEventListener('resize', updateWidth);
+
+    // 组件卸载时移除监听
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
 
   // 返回按钮
   const handleBack = () => {
@@ -451,6 +604,57 @@ const DatasetDetail: React.FC = () => {
 
   // 打开编辑弹窗
   const handleEdit = () => {
+    if (updateStatus && !isModalVisible) {
+      setIsModalVisible(true); // 标记弹窗已显示
+
+      // 调用 Arco Modal.confirm 静态方法
+      Modal.confirm({
+        title: (
+          <span
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 500,
+              fontSize: 16,
+              height: 24,
+              display: 'inline-block'
+            }}
+          >
+            确定退出编辑？
+          </span>
+        ),
+        content: (
+          <div
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              marginTop: '10px',
+              color: '#1D2129',
+              height: 22,
+              display: 'inline-block',
+              marginLeft: '28px' // 左移一点
+            }}
+          >
+            退出后，当前修改不会保存
+          </div>
+        ),
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          setUpdateStatus(false);
+          setIsModalVisible(false);
+          setEditModalVisible(true);
+        },
+        onCancel: () => {
+          setIsModalVisible(false); // 取消后重置状态
+        },
+        //@ts-expect-error
+        onClose: () => {
+          setIsModalVisible(false); // 弹窗关闭时重置状态
+        }
+      });
+      return false; // 先阻止默认跳转
+    }
     setEditModalVisible(true);
   };
 
@@ -706,7 +910,7 @@ const DatasetDetail: React.FC = () => {
   };
 
   React.useEffect(() => {
-    fetchDatasetDetail();
+    fetchDatasetDetail(); //根据id获取数据集详情
   }, [id]);
 
   const fetchDatasetDetail = () => {
@@ -735,7 +939,7 @@ const DatasetDetail: React.FC = () => {
     }
   };
 
-  // 处理清空搜索，李帆标记，暂时不用后面要用
+  // 处理清空搜索，李帆标记，
   const handleClearSearch = () => {
     setSearchValue('');
     setActualSearchValue('');
@@ -749,6 +953,16 @@ const DatasetDetail: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handlerefresh = () => {
+    getDatasetDetailPage({ id: id })
+      .then((res) => {
+        setDatasetDetail(res.data);
+        Message.success('刷新成功');
+      })
+      .catch((err) => {
+        Message.success('刷新失败');
+      });
+  };
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
@@ -823,13 +1037,28 @@ const DatasetDetail: React.FC = () => {
 
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
-    datasetVersionRebuild({ id: id, version_id: datasetDetail.latest_version })
-      .then((res) => {})
+    datasetVersionRebuild({
+      id: Number(id),
+      version_id: datasetDetail.latest_version
+    })
+      .then((res) => {
+        if (res?.status === 200) {
+          Message.success('版本重新生成成功');
+        } else {
+          Message.success(res?.message ?? '版本重新生成失败');
+        }
+      })
       .catch((err) => {
         console.error('版本重新生成失败:', err);
+        Message.error('版本重新生成失败');
       });
   };
-
+  const getwidth = () => {
+    if (window.innerWidth) {
+      return `${(window.innerWidth - 400) / 2}px`;
+    }
+    // return `${(window.innerWidth - 400)/2}px`
+  };
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
@@ -910,7 +1139,8 @@ const DatasetDetail: React.FC = () => {
                           {renderStatusTag(
                             datasetDetail.status,
                             datasetDetail.error_reason,
-                            handleVersionRebuild
+                            handleVersionRebuild,
+                            handlerefresh
                           )}
                         </div>
                       )
@@ -933,10 +1163,12 @@ const DatasetDetail: React.FC = () => {
                                 style={{
                                   background: '#E2E8F0',
                                   color: '#0F172A',
-                                  borderRadius: '16px',
+                                  borderRadius: '4px',
                                   fontSize: '12px',
                                   height: '18px',
-                                  alignItems: 'center'
+                                  alignItems: 'center',
+                                  padding: '0 4px',
+                                  gap: '4px'
                                 }}
                               >
                                 {tag}
@@ -1009,7 +1241,7 @@ const DatasetDetail: React.FC = () => {
                 />
               </div>
 
-              <div>
+              <div ref={rightDescriptionsRef}>
                 <Descriptions
                   data={[
                     {
@@ -1040,18 +1272,14 @@ const DatasetDetail: React.FC = () => {
                       value: (
                         <div
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            width: getwidth()
                           }}
                         >
-                          {datasetDetail.description?.length > 14 ? (
-                            <Tooltip content={datasetDetail.description}>
-                              <span>{`${datasetDetail.description.substring(0, 14)}...`}</span>
-                            </Tooltip>
-                          ) : (
-                            <span>{datasetDetail.description || '-'}</span>
-                          )}
+                          <EllipsisPopover
+                            value={datasetDetail.description || '-'}
+                            isEdit={false}
+                          ></EllipsisPopover>
                         </div>
                       )
                     }
@@ -1077,11 +1305,63 @@ const DatasetDetail: React.FC = () => {
           className="custom-tabs"
           activeTab={activeTab}
           onChange={(e) => {
+            if (updateStatus && !isModalVisible) {
+              setIsModalVisible(true); // 标记弹窗已显示
+
+              // 调用 Arco Modal.confirm 静态方法
+              Modal.confirm({
+                title: (
+                  <span
+                    style={{
+                      fontFamily: 'PingFang SC, sans-serif',
+                      fontWeight: 500,
+                      fontSize: 16,
+                      height: 24,
+                      display: 'inline-block'
+                    }}
+                  >
+                    确定退出编辑？
+                  </span>
+                ),
+                content: (
+                  <div
+                    style={{
+                      fontFamily: 'PingFang SC, sans-serif',
+                      fontWeight: 400,
+                      fontSize: 14,
+                      marginTop: '10px',
+                      color: '#1D2129',
+                      height: 22,
+                      display: 'inline-block',
+                      marginLeft: '28px' // 左移一点
+                    }}
+                  >
+                    退出后，当前修改不会保存
+                  </div>
+                ),
+                okText: '确认',
+                cancelText: '取消',
+                onOk: () => {
+                  setUpdateStatus(false);
+                  setIsModalVisible(false);
+                  setActiveTab(e);
+                },
+                onCancel: () => {
+                  setIsModalVisible(false); // 取消后重置状态
+                },
+                //@ts-expect-error
+                onClose: () => {
+                  setIsModalVisible(false); // 弹窗关闭时重置状态
+                }
+              });
+              return false; // 先阻止默认跳转
+            }
+
             setActiveTab(e);
             // setCurrentPage(1);
           }}
         >
-          <TabPane key="content" title="内容数据">
+          <TabPane key="content" title="数据内容">
             {/* 搜索系统 */}
             <div
               className="search-section"
@@ -1099,6 +1379,7 @@ const DatasetDetail: React.FC = () => {
                 onPressEnter={handleSearch}
                 onClear={handleClearSearch}
                 className={'custom-input'}
+                disabled={editingRowKey !== null}
                 style={{
                   width: 300,
                   minWidth: 300,
@@ -1225,6 +1506,7 @@ const DatasetDetail: React.FC = () => {
                 {/* 分页控件 */}
                 <div className="pagination-wrapper">
                   <Pagination
+                    disabled={editingRowKey !== null}
                     style={{
                       float: 'right'
                     }}
@@ -1291,6 +1573,13 @@ const DatasetDetail: React.FC = () => {
           />
         )}
       </Modal>
+      {/* <Prompt
+        when={updateStatus}
+        message={(location) => {
+          console.log('尝试跳转到:', location.pathname);
+          return '表单尚未保存，确定要离开吗？';
+        }}
+      /> */}
     </div>
   );
 };

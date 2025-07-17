@@ -20,6 +20,7 @@ import './index.css';
 import classNames from 'classnames';
 import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -282,13 +283,13 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      sorter: (a, b) => { } // 排序
+      sorter: (a, b) => {} // 排序
     },
     {
       title: '最后运行时间',
       dataIndex: 'last_run_time',
       width: 240,
-      sorter: (a, b) => { } // 排序
+      sorter: (a, b) => {} // 排序
     },
     {
       title: '操作',
@@ -456,10 +457,10 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 10px 20px 10px',
+        // margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        height: 'calc(100% - 30px)'
+        minHeight: '94vh'
       }}
     >
       <h1
@@ -501,6 +502,7 @@ export default function DataLoad() {
         loading={loadloading}
         columns={columns}
         data={data}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="task_id"

@@ -23,7 +23,7 @@ export function useColumns() {
   const { orgStore } = org;
   const columns = [
     {
-      title: '成员',
+      title: '姓名/用户名',
       dataIndex: 'username',
       key: 'username',
       width: 200,

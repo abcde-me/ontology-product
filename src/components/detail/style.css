@@ -170,7 +170,7 @@
   height: 18px;
   background-color: #ecfdf5;
   color: #10b981;
-  /* padding: 2px 6px; */
+  padding: 0 4px;
   border-radius: 4px;
   font-weight: 400;
   font-size: 12px;
@@ -355,6 +355,35 @@
   border: 1px solid #438dfb;
 } */
 
-.arco-btn.arco-btn-size-default.arco-btn-icon-only {
+/* .arco-btn.arco-btn-size-default.arco-btn-icon-only {
   margin-right: 12px;
+}
+
+.table-cell-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.ellipsis-text {
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} */
+.table-cell-content {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 确保 EllipsisPopover 在表格中正确显示 */
+.dataset-detail .arco-table-td .ellipsis-popover-div {
+  width: 100%;
+}
+
+.dataset-detail .arco-table-td .ellipsis-text {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
 }
