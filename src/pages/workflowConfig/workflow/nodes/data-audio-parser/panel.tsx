@@ -110,7 +110,11 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
             ]}
           />
         </FormItem>
-        <FormItem label="语音活动检测（VAD）与切片设置：" field="vad_options">
+        <FormItem
+          label="语音活动检测（VAD）与切片设置："
+          field="vad_options"
+          disabled={true}
+        >
           <Checkbox.Group
             options={[
               { label: '启用语音活体检测', value: 'vad' },
