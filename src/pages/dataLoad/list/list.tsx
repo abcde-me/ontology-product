@@ -282,13 +282,13 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: (a, b) => { } // 排序
     },
     {
       title: '最后运行时间',
       dataIndex: 'last_run_time',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: (a, b) => { } // 排序
     },
     {
       title: '操作',
@@ -459,7 +459,7 @@ export default function DataLoad() {
         margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        minHeight: '94vh'
+        height: 'calc(100% - 30px)'
       }}
     >
       <h1
