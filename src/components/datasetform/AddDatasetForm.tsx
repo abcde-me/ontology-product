@@ -242,12 +242,14 @@ const DatasetForm = React.forwardRef<
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
     []
   );
+  //是否禁用新建标签·
+  const [iscreateTagDisabled, setIscreateTagDisabled] = useState(false);
   const [inputValue, setInputValue] = useState('');
   // 标签选项
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
-      // form.resetFields();
+      form.resetFields();
       form.setFieldValue('name', '');
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
@@ -256,6 +258,9 @@ const DatasetForm = React.forwardRef<
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      form.setFieldValue('dataSource', 'volume');
+      setIscreateTagDisabled(false);
+      // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
     };
     return {
@@ -399,6 +404,7 @@ const DatasetForm = React.forwardRef<
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
+        setIscreateTagDisabled(true);
         onSubmit(formData);
       })
       .catch((error) => {
@@ -790,7 +796,11 @@ const DatasetForm = React.forwardRef<
               }}
             >
               <Button onClick={onCancel}>取消</Button>
-              <Button type="primary" onClick={handleSubmit}>
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                disabled={iscreateTagDisabled}
+              >
                 确定
               </Button>
             </div>

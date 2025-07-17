@@ -24,6 +24,7 @@ import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import { OverflowTooltip } from './utils/textOverflow';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -126,20 +127,24 @@ export default function Connection() {
       getlist();
     }
   };
-  // 判断文字是否溢出
-  const txtOverflowHan = (txt) => {};
   // 连接器配置项
   const columns: any = [
     {
       title: '连接器名称',
       dataIndex: 'name',
-      width: 300,
+      width: 230,
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.name} position="tl" disabled={false}>
-            {item.name}
-          </Tooltip>
+          <EllipsisPopover
+            value={item.name}
+            isEdit={false}
+            // isLink
+          />
+          // <Tooltip content={item.name} position="tl" disabled={false}>
+          //   {item.name}
+          // </Tooltip>
+
           // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
@@ -200,9 +205,11 @@ export default function Connection() {
       ellipsis: true,
       render: (_, item) => {
         return (
-          <Tooltip content={item.creator} position="tl">
-            {item.creator}
-          </Tooltip>
+          <EllipsisPopover
+            value={item.creator}
+            isEdit={false}
+            // isLink
+          />
         );
       }
     },
@@ -245,9 +252,7 @@ export default function Connection() {
           <span
             className="hover"
             onClick={() => {
-              setDelId(record.id);
-              setDelTitle(record.title);
-              setDelVisible(true);
+              delModalHan(record.id);
             }}
           >
             删除
@@ -256,6 +261,28 @@ export default function Connection() {
       )
     }
   ];
+  // 点击删除显示弹框
+  const delModalHan = (id) => {
+    Modal.confirm({
+      title: <span>删除该连接器</span>,
+      content: (
+        <div
+          style={{
+            padding: '5px 28px 0px 23px',
+            fontSize: '14px',
+            fontWeight: '400'
+          }}
+        >
+          删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        DeleteMethod(id);
+      }
+    });
+  };
   // 点击详情的回调
   const editFormHandle = (obj) => {
     console.log(obj);
@@ -264,10 +291,9 @@ export default function Connection() {
   };
 
   // 点击删除按钮执行的方法
-  const DeleteMethod = async () => {
-    const res = await delconnectionList(delId);
+  const DeleteMethod = async (id) => {
+    const res = await delconnectionList(id);
     if (res.code == '' && res.status == 200) {
-      setDelVisible(false);
       Message.success({
         content: '删除成功'
       });
@@ -348,12 +374,6 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
-  // 删除弹框的默认值
-  const [delVisible, setDelVisible] = useState(false);
-  // 存放删除的id
-  const [delId, setDelId] = useState(null);
-  // 存放删除的名称
-  const [delTitle, setDelTitle] = useState(null);
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -388,7 +408,7 @@ export default function Connection() {
       >
         <Input.Search
           placeholder="输入关键词搜索"
-          style={{ width: 230 }}
+          style={{ width: 220 }}
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
@@ -407,7 +427,7 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        style={{ padding: '10px 0px' }}
+        style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="id"
         loading={tableLoding}
@@ -476,7 +496,7 @@ export default function Connection() {
                 console.log(editObject);
               }}
             >
-              取消{' '}
+              取消
             </Button>
             <Button
               type="primary"
@@ -498,29 +518,6 @@ export default function Connection() {
           editObj={editObject}
           editDisabled={editLoadingState}
         />
-      </Modal>
-      <Modal
-        title={
-          <div
-            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
-          >
-            <IconExclamationCircle
-              style={{ color: 'orange', fontSize: '20px' }}
-            />
-            删除该连接器
-          </div>
-        }
-        visible={delVisible}
-        onCancel={() => {
-          setDelVisible(false);
-        }}
-        onOk={() => {
-          DeleteMethod();
-        }}
-      >
-        <div style={{ fontSize: '14px' }}>
-          删除该连接器后，也会终止正在运行的数据载入任务(包括单次载入和周期性载入任务)，是否要继续操作?
-        </div>
       </Modal>
     </div>
   );

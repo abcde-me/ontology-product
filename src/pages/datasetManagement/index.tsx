@@ -136,6 +136,7 @@ const columns = (
     dataIndex: 'name',
     width: 200,
     render: (name: string, record: Dataset) => {
+      if (!name) return '-';
       return (
         <NameCell
           name={name}
@@ -152,44 +153,50 @@ const columns = (
     filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
     filteredValue: selectedTagFilters,
     filterMultiple: true,
-    render: (tag_names: string[]) => (
-      <Space size="mini">
-        {tag_names && tag_names.length > 0 && tag_names[0] && (
-          <Tag className={styles.tagGreen}>
-            {tag_names[0].length > 5
-              ? `${tag_names[0].substring(0, 5)}...`
-              : tag_names[0]}
-          </Tag>
-        )}
-        {tag_names && tag_names.length > 1 && (
-          <Tooltip
-            content={tag_names.map((tag, index) => (
-              <Tag
-                key={index}
-                style={{
-                  background: '#E2E8F0',
-                  color: '#0F172A',
-                  borderRadius: '16px',
-                  fontSize: '12px',
-                  height: '18px',
-                  alignItems: 'center'
-                }}
-              >
-                {tag}
-              </Tag>
-            ))}
-          >
-            <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
-          </Tooltip>
-        )}
-      </Space>
-    )
+    render: (tag_names: string[]) => {
+      if (!tag_names || tag_names.length === 0) return '-';
+      return (
+        <Space size="mini">
+          {tag_names && tag_names.length > 0 && tag_names[0] && (
+            <Tag className={styles.tagGreen}>
+              {tag_names[0].length > 5
+                ? `${tag_names[0].substring(0, 5)}...`
+                : tag_names[0] || '-'}
+            </Tag>
+          )}
+          {tag_names && tag_names.length > 1 && (
+            <Tooltip
+              content={tag_names.map((tag, index) => (
+                <Tag
+                  key={index}
+                  style={{
+                    background: '#E2E8F0',
+                    color: '#0F172A',
+                    borderRadius: '16px',
+                    fontSize: '12px',
+                    height: '18px',
+                    alignItems: 'center'
+                  }}
+                >
+                  {tag}
+                </Tag>
+              ))}
+            >
+              <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+            </Tooltip>
+          )}
+        </Space>
+      );
+    }
   },
   {
     title: '版本',
     dataIndex: 'latest_version',
     width: 120,
     render: (latest_version: string) => {
+      if (!latest_version) {
+        return '-';
+      }
       return (
         <div>
           {/* <Tooltip content={latest_version}> */}
@@ -226,6 +233,7 @@ const columns = (
     filterMultiple: true,
     render: (status: string, record: Dataset) => {
       const statusConfig = getStatusConfig(status);
+      if (!status) return '-';
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {status && getStatusIcon(status)}
@@ -252,20 +260,23 @@ const columns = (
     title: '描述说明',
     dataIndex: 'description',
     width: 260,
-    render: (description: string) => (
-      <div
-        style={{
-          display: '-webkit-box',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 2,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          wordBreak: 'break-all'
-        }}
-      >
-        <Tooltip content={description}>{description}</Tooltip>
-      </div>
-    )
+    render: (description: string) => {
+      if (!description) return '-';
+      return (
+        <div
+          style={{
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-all'
+          }}
+        >
+          <Tooltip content={description}>{description}</Tooltip>
+        </div>
+      );
+    }
   },
   {
     title: '生成模型',
@@ -287,25 +298,32 @@ const columns = (
     onFilter: (value: string, record: Dataset) => {
       return record.src_model === value;
     },
-    render: (src_model: string) => (
-      <Tag
-        className={styles.tagPurple}
-        style={{
-          width: '130px', // 必须设置宽度（根据需求调整）
-          overflow: 'hidden', // 隐藏溢出内容
-          textOverflow: 'ellipsis', // 溢出显示省略号
-          whiteSpace: 'nowrap' // 强制文本不换行
-        }}
-      >
-        <Tooltip content={src_model}>{src_model}</Tooltip>
-      </Tag>
-    )
+    render: (src_model: string) => {
+      if (!src_model) return '-';
+      return (
+        <Tag
+          className={styles.tagPurple}
+          style={{
+            width: '130px', // 必须设置宽度（根据需求调整）
+            overflow: 'hidden', // 隐藏溢出内容
+            textOverflow: 'ellipsis', // 溢出显示省略号
+            whiteSpace: 'nowrap' // 强制文本不换行
+          }}
+        >
+          <Tooltip content={src_model}>{src_model}</Tooltip>
+        </Tag>
+      );
+    }
   },
   {
     title: '创建人',
     dataIndex: 'creator_name',
     width: 100,
-    filterIcon: <IconFilter />
+    filterIcon: <IconFilter />,
+    render: (creator_name: string) => {
+      if (!creator_name) return '-';
+      return creator_name;
+    }
     // filters: (() => {
     //   const creatorSet = new Set<string>();
     //   datasetList?.forEach((dataset) => {
@@ -550,7 +568,7 @@ const DatasetManagement: React.FC = () => {
           childRef.current?.resetForm();
           Message.success('数据集创建成功！');
         } else {
-          Message.error(res.message || '数据集创建失败！');
+          Message.error('数据集创建失败！');
         }
       })
       .catch((err) => {

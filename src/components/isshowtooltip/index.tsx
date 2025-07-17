@@ -2,9 +2,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Tooltip } from '@arco-design/web-react';
 
 interface TooltipOnOverflowProps {
-  text: String;
+  /** 要显示的文本内容 */
+  content: string;
+  /** 容器宽度，可以是数字（px）或字符串（如 '100%', '200px' 等） */
+  width?: number | string;
+  /** 自定义样式 */
   style?: React.CSSProperties;
+  /** 自定义类名 */
   className?: string;
+  /** Tooltip 位置 */
   tooltipPosition?:
     | 'top'
     | 'tl'
@@ -18,15 +24,17 @@ interface TooltipOnOverflowProps {
     | 'right'
     | 'rt'
     | 'rb';
-  /** 是否为多行省略模式 */
+  /** 是否启用多行模式 */
   multiline?: boolean;
-  /** 多行省略时的行数 */
+  /** 多行模式下显示的行数 */
   lineClamp?: number;
+  /** Tooltip 自定义样式 */
   tooltipStyle?: React.CSSProperties;
 }
 
 const TooltipOnOverflow: React.FC<TooltipOnOverflowProps> = ({
-  text,
+  content,
+  width,
   style,
   className,
   tooltipPosition = 'top',
@@ -35,45 +43,44 @@ const TooltipOnOverflow: React.FC<TooltipOnOverflowProps> = ({
   tooltipStyle
 }) => {
   const textRef = useRef<HTMLDivElement>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
 
   useEffect(() => {
-    const checkTextOverflow = () => {
+    const checkOverflow = () => {
       if (textRef.current) {
         const element = textRef.current;
-
-        // 检测是否有文本溢出
-        const isOverflowing = multiline
+        // 根据模式检查溢出
+        const hasOverflow = multiline
           ? element.scrollHeight > element.clientHeight
           : element.scrollWidth > element.clientWidth;
-
-        setShowTooltip(isOverflowing);
+        setIsOverflowing(hasOverflow);
       }
     };
 
-    // 延迟执行，确保DOM已经渲染完成
-    const timer = setTimeout(checkTextOverflow, 100);
+    // 延迟执行以确保 DOM 完全渲染
+    const timer = setTimeout(checkOverflow, 50);
 
-    // 监听窗口大小变化，重新检测
-    window.addEventListener('resize', checkTextOverflow);
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkOverflow);
 
     // 使用 ResizeObserver 监听元素尺寸变化
-    const resizeObserver = new ResizeObserver(() => {
-      checkTextOverflow();
-    });
-
-    if (textRef.current) {
+    let resizeObserver: ResizeObserver | null = null;
+    if (textRef.current && window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(checkOverflow);
       resizeObserver.observe(textRef.current);
     }
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('resize', checkTextOverflow);
-      resizeObserver.disconnect();
+      window.removeEventListener('resize', checkOverflow);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
     };
-  }, [text, multiline]);
+  }, [content, width, multiline]);
 
-  const baseStyle: React.CSSProperties = multiline
+  // 合并样式
+  const mergedStyle: React.CSSProperties = multiline
     ? {
         display: '-webkit-box',
         WebkitBoxOrient: 'vertical',
@@ -81,24 +88,26 @@ const TooltipOnOverflow: React.FC<TooltipOnOverflowProps> = ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         wordBreak: 'break-all',
+        ...(width !== undefined && { width }),
         ...style
       }
     : {
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        ...(width !== undefined && { width }),
         ...style
       };
 
   const textElement = (
-    <div ref={textRef} className={className} style={baseStyle}>
-      {text}
+    <div ref={textRef} className={className} style={mergedStyle}>
+      {content || '-'}
     </div>
   );
 
-  // 只有在文本被截断时才显示Tooltip
-  return showTooltip ? (
-    <Tooltip content={text} position={tooltipPosition} style={tooltipStyle}>
+  // 只在溢出时显示 Tooltip
+  return isOverflowing ? (
+    <Tooltip content={content} position={tooltipPosition} style={tooltipStyle}>
       {textElement}
     </Tooltip>
   ) : (

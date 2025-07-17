@@ -196,7 +196,7 @@ export const NodeSourceHandle = memo(
         onClick={handleHandleClick}
       >
         {!getNodesReadOnly() && (
-          <div className="absolute -top-1 left-1/2 hidden -translate-x-1/2 -translate-y-full rounded-[4px] border-[0.5px] border-components-panel-border bg-components-tooltip-bg p-1.5 shadow-lg group-hover/handle:block">
+          <div className="absolute -top-1 left-1/2 hidden -translate-x-1/2 -translate-y-full rounded-[4px] border-[0.5px] border-components-panel-border bg-components-tooltip-bg p-[12px] shadow-lg group-hover/handle:block">
             <div className="system-xs-regular text-text-tertiary">
               <div className=" mb-[8px] whitespace-nowrap">
                 <span className="system-xs-medium text-text-secondary">

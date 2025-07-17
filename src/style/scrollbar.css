@@ -1,0 +1,40 @@
+body.scroller-hidden,
+body.scroller-hidden * {
+  scrollbar-width: none;
+}
+
+body.scroller-hidden::-webkit-scrollbar,
+body.scroller-hidden *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+body.scroller-hover::-webkit-scrollbar,
+body.scroller-hover *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body.scroller-hover::-webkit-scrollbar-corner,
+body.scroller-hover *::-webkit-scrollbar-corner {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+body.scroller-hover:hover::-webkit-scrollbar-track-piece,
+body.scroller-hover *:hover::-webkit-scrollbar-track-piece {
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 6px;
+}
+
+body.scroller-hover:hover::-webkit-scrollbar-thumb,
+body.scroller-hover *:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-2);
+  border-radius: 6px;
+}
+
+body.scroller-hover:hover::-webkit-scrollbar-thumb:active,
+body.scroller-hover:hover::-webkit-scrollbar-thumb:hover,
+body.scroller-hover *:hover::-webkit-scrollbar-thumb:active,
+body.scroller-hover *:hover::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-1);
+}

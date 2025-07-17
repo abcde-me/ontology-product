@@ -53,7 +53,10 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
     if (!audio_model_id) {
       errorMessages = '需要选择模型';
     }
-    if (activity_mode === 2 && !activity_mode_num) {
+    if (
+      activity_mode === 2 &&
+      (!activity_mode_num || activity_mode_num === '0')
+    ) {
       errorMessages = '需要填写时长';
     }
     return {
