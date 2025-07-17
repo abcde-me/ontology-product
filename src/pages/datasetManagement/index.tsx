@@ -932,7 +932,7 @@ const DatasetManagement: React.FC = () => {
           />
           <Input.Search
             allowClear
-            placeholder="输入 ID/数据内容 搜索"
+            placeholder="输入ID/数据内容搜索"
             style={{ width: 160, height: 32 }}
             value={search}
             onChange={(value) => setSearch(value)}
