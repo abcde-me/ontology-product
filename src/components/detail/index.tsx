@@ -1016,10 +1016,20 @@ const DatasetDetail: React.FC = () => {
 
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
-    datasetVersionRebuild({ id: id, version_id: datasetDetail.latest_version })
-      .then((res) => {})
+    datasetVersionRebuild({
+      id: Number(id),
+      version_id: datasetDetail.latest_version
+    })
+      .then((res) => {
+        if (res?.status === 200) {
+          Message.success('版本重新生成成功');
+        } else {
+          Message.success(res?.message ?? '版本重新生成失败');
+        }
+      })
       .catch((err) => {
         console.error('版本重新生成失败:', err);
+        Message.error('版本重新生成失败');
       });
   };
   const getwidth = () => {

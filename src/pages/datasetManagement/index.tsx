@@ -672,7 +672,7 @@ const DatasetManagement: React.FC = () => {
   // 重试
   const handleRetry = async (id: number | string, version_id: string) => {
     const params = {
-      id,
+      id: Number(id),
       version_id
     };
     const res = await datasetVersionRebuild(params);
