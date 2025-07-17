@@ -20,6 +20,7 @@ import './index.css';
 import classNames from 'classnames';
 import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -501,6 +502,7 @@ export default function DataLoad() {
         loading={loadloading}
         columns={columns}
         data={data}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="task_id"

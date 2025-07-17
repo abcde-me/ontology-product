@@ -51,6 +51,7 @@ import {
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
+import noDataElement from '../no-data';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -1463,7 +1464,7 @@ const DatasetDetail: React.FC = () => {
                     <Table
                       columns={contentColumns}
                       data={contentData}
-                      noDataElement={<NoDataEmpty />}
+                      noDataElement={noDataElement({ description: '暂无数据' })}
                       pagination={false}
                       scroll={{ x: 'max-content' }}
                       border={false}

@@ -201,39 +201,39 @@
   padding:1px 8px;
   font-size:14px
 }
- .arco-input-tag .arco-input-tag-tag {
+.arco-input-tag .arco-input-tag-tag {
+  background-color: #e7ecf0;
+}
+.arco-input-tag.arco-input-tag-focus .arco-input-tag-tag{
     background-color: #e7ecf0;
-  }
-  .arco-input-tag.arco-input-tag-focus .arco-input-tag-tag{
-     background-color: #e7ecf0;
-  }
-  .arco-select-option-wrapper:hover{
-    background-color:#EEF6FF;
-    border-radius: 4px;
-  }
-  .arco-select-popup:hover .arco-select-option:hover{
-    background-color:#EEF6FF;
-  }
-  // 正常按钮的颜色
-  .arco-btn-primary:not(.arco-btn-disabled){
-    background-color:@color-bg-btn-normal;
-    color: white;
-  }
-  // 正常按钮划入的颜色
-  .arco-btn-primary:not(.arco-btn-disabled):hover{
-    background-color:@color-bg-btn-normal-hover;
-    color: @color-bg-btn-normal-hover;
-  }
-  // 线性按钮的颜色
-  .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading){
-    color:@color-bg-btn-line;
-    background-color:white;
-  }
-  // 线性按钮的划入颜色
-  .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover{
-    background-color:@color-bg-btn-line;
-    color: @color-bg-btn-line;
-  }
+}
+.arco-select-option-wrapper:hover{
+  background-color:#EEF6FF;
+  border-radius: 4px;
+}
+.arco-select-popup:hover .arco-select-option:hover{
+  background-color:#EEF6FF;
+}
+// 正常按钮的颜色
+.arco-btn-primary:not(.arco-btn-disabled){
+  background-color:@color-bg-btn-normal;
+  color: white;
+}
+// 正常按钮划入的颜色
+.arco-btn-primary:not(.arco-btn-disabled):hover{
+  background-color:@color-bg-btn-normal-hover;
+  color: @color-bg-btn-normal-hover;
+}
+// 线性按钮的颜色
+.datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading){
+  color:@color-bg-btn-line;
+  background-color:white;
+}
+// 线性按钮的划入颜色
+.datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(.arco-btn-disabled):not(.arco-btn-loading):hover{
+  background-color:@color-bg-btn-line;
+  color: @color-bg-btn-line;
+}
 
 /* 全局修改所有 placeholder */
 .arco-input::placeholder,
@@ -245,4 +245,30 @@
 /* 面包屑 */
 .arco-breadcrumb-item {
   font-weight: 500 !important;
+}
+
+
+.arco-table-content-inner,
+.data-catalog-left-box {
+  /* 始终为滚动条预留空间 */
+  scrollbar-gutter: stable;
+  background: transparent;
+}
+
+.arco-table-content-inner::-webkit-scrollbar,
+.data-catalog-left-box::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+
+.arco-table-content-inner::-webkit-scrollbar-thumb,
+.data-catalog-left-box::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.arco-table-content-inner:hover::-webkit-scrollbar-thumb,
+.data-catalog-left-box:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
 }
