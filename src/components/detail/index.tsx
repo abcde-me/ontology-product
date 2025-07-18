@@ -260,23 +260,23 @@ const versionColumns: any[] = [
       <Space>
         <Text>{version}</Text>
         {index === 0 && (
-          <span
+          <div
             style={{
               width: '56px',
               height: '18px',
               backgroundColor: '#ECFDF5',
               color: '#10b981',
-              borderRadius: '4px',
+              borderRadius: '2px',
               fontWeight: 400,
-              fontSize: '12px'
+              fontSize: '12px',
               // marginLeft: '8px',
-              // display: 'flex',
-              // alignItems: 'center',
-              // justifyContent: 'center'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
             最新版本
-          </span>
+          </div>
         )}
       </Space>
     )
@@ -1103,6 +1103,7 @@ const DatasetDetail: React.FC = () => {
                   type="text"
                   icon={<IconEdit />}
                   className="edit-btn"
+                  style={{ height: '100%' }}
                 >
                   编辑
                 </Button>
@@ -1158,7 +1159,7 @@ const DatasetDetail: React.FC = () => {
                                 style={{
                                   background: '#E2E8F0',
                                   color: '#0F172A',
-                                  borderRadius: '4px',
+                                  borderRadius: '2px',
                                   fontSize: '12px',
                                   height: '18px',
                                   alignItems: 'center',
@@ -1181,7 +1182,7 @@ const DatasetDetail: React.FC = () => {
                                         style={{
                                           background: '#E2E8F0',
                                           color: '#0F172A',
-                                          borderRadius: '16px',
+                                          borderRadius: '2px',
                                           fontSize: '12px',
                                           height: '18px',
                                           alignItems: 'center',
@@ -1198,7 +1199,7 @@ const DatasetDetail: React.FC = () => {
                                 style={{
                                   background: '#E2E8F0',
                                   color: '#0F172A',
-                                  borderRadius: '16px',
+                                  borderRadius: '2px',
                                   fontSize: '12px',
                                   height: '18px',
                                   alignItems: 'center',
