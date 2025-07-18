@@ -1062,13 +1062,13 @@ const DatasetDetail: React.FC = () => {
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
       <div className="breadcrumb-wrapper">
-        <Button
-          type="text"
-          icon={<IconArrowLeft style={{ color: '#000' }} />}
-          onClick={handleBack}
-          style={{ display: 'flex', alignItems: 'center' }}
+        <IconArrowLeft
+          style={{ cursor: 'pointer', fontSize: '14px' }}
+          onClick={() => {
+            handleBack();
+          }}
         />
-        <Breadcrumb style={{ fontSize: 18 }}>
+        <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
           <Breadcrumb.Item>
             <span
               // style={{ cursor: 'pointer', color: '#165dff' }}
@@ -1077,11 +1077,7 @@ const DatasetDetail: React.FC = () => {
               数据集管理
             </span>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <span style={{ fontWeight: '500', fontSize: '20px' }}>
-              数据集详情
-            </span>
-          </Breadcrumb.Item>
+          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
         </Breadcrumb>
       </div>
 
