@@ -30,25 +30,23 @@ const ModalDetail = (props) => {
     getdetailListHan();
   }, [props.detailId]);
   return (
-    <div
-      style={{
-        height: '553px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
+    <div style={{}}>
       {loading ? (
-        <div style={{ margin: '0 auto' }}>
+        <div
+          style={{
+            minHeight: '400px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingBottom: '32px'
+          }}
+        >
           <IconLoading style={{ color: '#165dff', fontSize: '30px' }} />
         </div>
       ) : (
         <div className="connector-detail">
           <div className="modal-overlay">
             <div className="modal">
-              <div className="modal-header">
-                <h2>连接器详情</h2>
-              </div>
               <div className="modal-content" style={{ fontSize: '14px' }}>
                 <section className="section">
                   <h3
@@ -85,7 +83,7 @@ const ModalDetail = (props) => {
                           backgroundColor:
                             DetailData?.status == 'connected'
                               ? '#059669'
-                              : DetailData?.status == 'DetailData?.status'
+                              : DetailData?.status == 'disconnected'
                                 ? '#DC2626'
                                 : '',
                           borderRadius: '50%',

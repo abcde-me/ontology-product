@@ -38,10 +38,11 @@ hr {
   white-space: nowrap;
 }
 .hr-border {
-  width: 100%;
-  border: 1px solid #cbd5e1;
+  border: 0.5px solid #cbd5e1;
+  margin: 24px 0px;
 }
 .connector-detail {
+  padding: 0px 0px 28px 0px;
   .modal {
     background-color: white;
     /* border-radius: 8px; */
@@ -56,7 +57,6 @@ hr {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 20px;
     font-weight: 500px;
   }
 
@@ -67,11 +67,11 @@ hr {
   }
 
   .modal-content {
-    padding-right: 10px;
+    width: 100%;
+    height: 100%;
   }
 
   .section {
-    margin-bottom: 16px;
   }
 
   .section h3 {

@@ -61,3 +61,6 @@
 /* .cascader-dropdown .arco-cascader-list-wrapper {
  
 } */
+tbody .load-name .ellipsis-text {
+  font-weight: 600;
+}

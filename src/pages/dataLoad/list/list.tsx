@@ -85,7 +85,7 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
-      className: 'hover-change',
+      className: 'hover-change load-name',
       width: 300,
       ellipsis: true,
       render: (_, text) => (
@@ -210,7 +210,7 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
-      className: 'hover-change',
+      className: 'hover-change load-name',
       ellipsis: true,
       width: 230,
       render: (_, item) => {

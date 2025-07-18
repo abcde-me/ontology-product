@@ -240,6 +240,7 @@ const DataLoadDetail = () => {
         </Breadcrumb>
       </div>
       <div
+        className="dataload-detail-method"
         style={{
           backgroundColor: 'white',
           display: 'flex',
@@ -408,12 +409,20 @@ const DataLoadDetail = () => {
               >
                 载入形式：
               </div>
-              <div style={{ fontSize: '14px' }}>
+              <div
+                style={{
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
                 {listDetail && listDetail.load_type == 'once'
                   ? '单次载入'
                   : '周期载入'}
                 {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
+                    className={'cronSwitch'}
+                    size="default"
                     defaultChecked={listDetail && listDetail.cron_enable}
                     checkedText="启用"
                     uncheckedText="停止"
@@ -497,9 +506,11 @@ const DataLoadDetail = () => {
         </div>
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'end'
+            width: '100%',
+            // display: 'flex',
+            // flexDirection: 'column',
+            // alignItems: 'end',
+            overflow: 'hidden'
           }}
         >
           <TableDetail
@@ -512,20 +523,24 @@ const DataLoadDetail = () => {
             name={listDetail?.name || ''}
             change={getChildrenTableChange}
           />
-          <Pagination
-            sizeOptions={[10, 20, 50, 100]}
-            showTotal
-            total={total}
-            showJumper
-            sizeCanChange
-            style={{ margin: '20px 30px' }}
-            onChange={handlePageChange}
-            onPageSizeChange={(pageSize) => {
-              setPageSize(pageSize);
-              setCurrent(1);
-            }}
-          />
         </div>
+        <Pagination
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={total}
+          showJumper
+          sizeCanChange
+          style={{
+            margin: '20px 30px',
+            display: 'flex',
+            justifyContent: 'end'
+          }}
+          onChange={handlePageChange}
+          onPageSizeChange={(pageSize) => {
+            setPageSize(pageSize);
+            setCurrent(1);
+          }}
+        />
         <Modal
           style={{ width: '600px' }}
           title="编辑数据载入任务"
