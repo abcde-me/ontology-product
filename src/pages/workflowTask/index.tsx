@@ -194,8 +194,8 @@ export default function WorkflowTask() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '8px',
+              height: '8px',
               backgroundColor:
                 record.status === TaskRunStatus.success
                   ? '#10B981'

@@ -64,8 +64,8 @@ export default function ParseNode(props: {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '8px',
+              height: '8px',
               backgroundColor:
                 record.status === FileStatus.success ? '#10B981' : '#EF4444',
               borderRadius: '50%',
