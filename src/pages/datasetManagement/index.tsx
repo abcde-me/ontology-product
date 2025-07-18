@@ -139,55 +139,45 @@ const columns = (
   handleRetry: (id: string | number, version_id: string) => void
 ) => [
   {
-    title: '名称',
+    title: '数据集名称',
     dataIndex: 'name',
     width: 200,
     className: 'hover-change workflow-name',
     rowClassName: 'hover-change',
+
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
-        // <NameCell
-        //   name={name}
-        //   record={record}
-        //   handleGoToDetail={handleGoToDetail}
-        // />
-        // <EllipsisPopover
-        //   value={renderEmptyPlaceholder(record.name)}
-        //   isEdit={false}
-        //   // className="ellipsis-line-2"
-        //   // ellipsis
-        //   preferTypography={true}
-        //   ellipsis={{
-        //     rows:2
-        //   }}
-        //   isLink
-        //   handleLink={() => {
-        //     handleGoToDetail(record.id);
-        //   }}
-        // />
-        <div
-          onClick={() => handleGoToDetail(record.id)}
-          style={{ cursor: 'pointer' }}
-        >
-          <EllipsisPopover
-            value={record.name}
-            isEdit={false}
-            preferTypography={true}
-            className="custom-typography-text"
-            ellipsis={{
-              rows: 2,
-              expandable: false,
-              showTooltip: {
-                type: 'popover',
-                props: {
-                  position: 'tl',
-                  style: { maxHeight: '400px', overflow: 'auto' }
-                }
-              }
-            }}
-          />
-        </div>
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            handleGoToDetail(record.id);
+          }}
+        />
+        // <div
+        //   onClick={() => handleGoToDetail(record.id)}
+        //   style={{ cursor: 'pointer' }}
+        // >
+        //   <EllipsisPopover
+        //     value={record.name}
+        //     isEdit={false}
+        //     preferTypography={true}
+        //     className="custom-typography-text"
+        //     ellipsis={{
+        //       rows: 2,
+        //       expandable: false,
+        //       showTooltip: {
+        //         type: 'popover',
+        //         props: {
+        //           position: 'tl',
+        //           style: { maxHeight: '400px', overflow: 'auto' }
+        //         }
+        //       }
+        //     }}
+        //   />
+        // </div>
       );
     }
   },
@@ -239,7 +229,7 @@ const columns = (
   {
     title: '版本',
     dataIndex: 'latest_version',
-    width: 120,
+    width: 190,
     render: (latest_version: string) => {
       if (!latest_version) {
         return '-';
@@ -456,7 +446,12 @@ const columns = (
         <Button
           type="text"
           className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-          style={{ padding: '0 8px 0 5px' }}
+          style={{
+            padding: '0 8px 0 5px',
+            height: '100%',
+            borderTop: 'none',
+            borderBottom: 'none'
+          }}
           onClick={() => handleExport(record)}
           disabled={record.status !== datasetStatus.normal}
         >
@@ -465,7 +460,12 @@ const columns = (
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.delete}`}
-          style={{ padding: '0 5px 0 8px' }}
+          style={{
+            padding: '0 5px 0 8px',
+            height: '100%',
+            borderTop: 'none',
+            borderBottom: 'none'
+          }}
           onClick={() => handleDelete(record)}
         >
           删除
@@ -592,7 +592,7 @@ const DatasetManagement: React.FC = () => {
     console.log('新建数据集:', String(formData.targetDataSource[0][0]));
     const basePath = String(formData.targetDataSource[0][0]);
     const formattedPath =
-      basePath.length > 1 && basePath.endsWith('/') ? basePath : `${basePath}/`;
+      basePath.length > 1 && basePath.endsWith('/') ? `${basePath}/` : basePath;
     const fullPath = `${formattedPath}dst/${formData.targetDataSource[0][1]}/volume/${formData.targetDataSource[1][0]}`;
     const submitData = {
       name: formData.name,
@@ -1064,6 +1064,7 @@ const DatasetManagement: React.FC = () => {
       <Table
         rowKey="id"
         className={styles.datasetTable}
+        rowHeight="47px"
         columns={columns(
           handleGoToDetail,
           handleDelete,

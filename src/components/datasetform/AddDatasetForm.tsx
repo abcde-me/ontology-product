@@ -323,10 +323,14 @@ const DatasetForm = React.forwardRef<
         const selectedItem = value[1]?.[0];
 
         const basePath = String(catalogpath[0][0]);
+        console.log(
+          '11223213123131',
+          basePath.length > 1 && basePath.endsWith('/')
+        );
         const formattedPath =
           basePath.length > 1 && basePath.endsWith('/')
-            ? basePath
-            : `${basePath}/`;
+            ? `${basePath}/`
+            : basePath;
         const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
         // const path = `${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
         console.log('二级目录路径:', path, selectedItem);
