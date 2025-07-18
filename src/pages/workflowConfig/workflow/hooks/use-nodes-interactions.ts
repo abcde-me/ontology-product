@@ -21,6 +21,7 @@ import { unionBy } from 'lodash-es';
 import type { ToolDefaultValue } from '../block-selector/types';
 import type { Edge, Node, OnNodeAdd } from '../types';
 import { BlockEnum } from '../types';
+import { MAX_NODES_NUM } from '../utils';
 import { useWorkflowStore } from '../store';
 import {
   CUSTOM_EDGE,
@@ -60,6 +61,7 @@ import {
   useWorkflowHistory
 } from './use-workflow-history';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
+import { Message } from '@arco-design/web-react';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -1558,6 +1560,19 @@ export const useNodesInteractions = () => {
   const handleNodesDuplicate = useCallback(
     (nodeId?: string) => {
       if (getNodesReadOnly()) return;
+
+      const { getNodes } = store.getState();
+      const targetNode = getNodes().find((node) => node.id === nodeId)!;
+      const count = getNodes().filter(
+        (node) => node.data.type === targetNode.data.type
+      ).length;
+      if (
+        count + 1 > MAX_NODES_NUM &&
+        ['text', 'pic', 'video', 'audio'].includes(targetNode.data.type)
+      ) {
+        Message.warning('该种类型节点最多允许添加' + MAX_NODES_NUM + '个');
+        return;
+      }
 
       handleNodesCopy(nodeId);
       handleNodesPaste();

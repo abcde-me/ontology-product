@@ -3,6 +3,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { OffsetOptions, Placement } from '@floating-ui/react';
 import type { BlockEnum, OnSelectBlock } from '../types';
+import { MAX_NODES_NUM } from '../utils';
 import Tabs from './tabs';
 import { TabsEnum } from './types';
 import {
@@ -56,7 +57,6 @@ const NodeSelector: FC<NodeSelectorProps> = ({
   const [localOpen, setLocalOpen] = useState(false);
   const store = useStoreApi();
   const open = openFromProps === undefined ? localOpen : openFromProps;
-  const MAX_NODES_NUM = 16;
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
