@@ -233,8 +233,11 @@ const DataLoadDetail = () => {
           }}
         />
         <Breadcrumb style={{ marginLeft: '21px', fontSize: '20px' }}>
-          <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
-            数据载入
+          <BreadcrumbItem
+            href="/tenant/compute/modaforge/dataLoad"
+            style={{ color: '#7F8C9F' }}
+          >
+            数据载入详情
           </BreadcrumbItem>
           <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
         </Breadcrumb>

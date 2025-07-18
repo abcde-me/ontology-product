@@ -78,8 +78,8 @@ const ModalDetail = (props) => {
                     >
                       <div
                         style={{
-                          width: '5px',
-                          height: '5px',
+                          width: '8px',
+                          height: '8px',
                           backgroundColor:
                             DetailData?.status == 'connected'
                               ? '#059669'
@@ -113,7 +113,14 @@ const ModalDetail = (props) => {
                     <span className="value">{DetailData?.updated_at} </span>
                   </div>
                 </section>
-                <hr className="hr-border" />
+                <div
+                  style={{
+                    margin: '24px 0px',
+                    width: '100%',
+                    height: '1px',
+                    background: '#CBD5E1'
+                  }}
+                ></div>
                 <section className="section">
                   <h3
                     style={{
