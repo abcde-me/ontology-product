@@ -8,12 +8,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.arco-select-popup .arco-select-option-selected {
+/* .formSelect.arco-select-popup .arco-select-option-selected {
   background-color: transparent;
-}
-.arco-input-tag .arco-input-tag-tag {
-  background-color: transparent;
-}
+} */
+
 .form-item-select-files.arco-form-item {
   margin-bottom: 0px;
 }

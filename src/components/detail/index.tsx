@@ -1071,7 +1071,7 @@ const DatasetDetail: React.FC = () => {
         <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
           <Breadcrumb.Item>
             <span
-              // style={{ cursor: 'pointer', color: '#165dff' }}
+              style={{ fontWeight: '500', fontSize: '20px' }}
               onClick={handleGoToDatasetList}
             >
               数据集管理
@@ -1491,7 +1491,7 @@ const DatasetDetail: React.FC = () => {
                   <>
                     <Table
                       columns={contentColumns}
-                      data={[]}
+                      data={contentData}
                       noDataElement={noDataElement({ description: '暂无数据' })}
                       pagination={false}
                       scroll={{ x: 'max-content' }}
