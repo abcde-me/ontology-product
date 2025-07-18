@@ -265,11 +265,15 @@ export default function Connection() {
   // 点击删除显示弹框
   const delModalHan = (id) => {
     Modal.confirm({
-      title: <span>删除该连接器</span>,
+      title: (
+        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+          确定删除该连接器吗？
+        </span>
+      ),
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 23px',
+            padding: '5px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
@@ -461,8 +465,11 @@ export default function Connection() {
       {/* 详情逻辑 */}
 
       <Modal
-        style={{ width: '760px', height: '553px' }}
+        style={{ width: '760px' }}
         visible={visible2}
+        title={
+          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接详情</div>
+        }
         footer={null}
         onCancel={() => {
           // 点击关闭隐藏弹框

@@ -23,7 +23,6 @@ const TableDetail = (props) => {
   const columns: any = [
     {
       title: '运行ID',
-      fixed: 'left',
       dataIndex: 'execution_id',
       width: 300,
       ellipsis: true,
@@ -226,7 +225,11 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
-          style={{ width: '100%', padding: '1px 10px 0px 0px' }}
+          style={{
+            width: '100%',
+            padding: '1px 10px 0px 0px'
+          }}
+          scroll={{ x: true }}
           rowKey="seatunnel_job_id"
           loading={props.loading}
           onChange={(pagination, filters, sorter) => {

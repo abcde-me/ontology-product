@@ -57,3 +57,21 @@
   max-height: calc(1em * 2 * 1.4); /* 1em(字体大小) * 2行 * 行高(默认约1.4) */
   line-height: 1.4; /* 建议设置明确的行高 */
 }
+.cronSwitch {
+  width: 56px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 22px;
+  font-size: 12px;
+  .arco-switch-dot {
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    right: 10px;
+  }
+}
+.dataload-detail-method {
+  .arco-switch-checked .arco-switch-dot {
+    left: calc(100% - 12px - 7px);
+  }
+}
