@@ -273,7 +273,24 @@ const columns = (
       if (!status) return '-';
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {status && getStatusIcon(status)}
+          {/* {status && getStatusIcon(status)} */}
+          <div
+            style={{
+              width: '8px',
+              height: '8px',
+              backgroundColor:
+                status === 'normal'
+                  ? '#10B981'
+                  : status === 'create_failed' ||
+                      status === 'version_update_failed'
+                    ? '#EF4444'
+                    : status === 'version_updating' || status === 'creating'
+                      ? '#007DFA'
+                      : '#CBD5E1',
+              borderRadius: '50%',
+              marginRight: '5px'
+            }}
+          ></div>
           <span>{statusConfig.text}</span>
           {status === datasetStatus.version_update_failed ||
           status === datasetStatus.create_failed ? (
@@ -316,7 +333,7 @@ const columns = (
           value={description}
           preferTypography={true}
           ellipsis={{
-            rows: 2,
+            rows: 1,
             showTooltip: {
               hover: true,
               click: false,

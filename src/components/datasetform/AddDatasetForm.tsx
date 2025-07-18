@@ -513,9 +513,29 @@ const DatasetForm = React.forwardRef<
                     // 从当前表单值获取完整的标签列表
                     const allTags = form.getFieldValue('tags') || [];
                     const remainingTags = allTags.slice(10);
-                    const remainingLabels = remainingTags.join(', ');
+                    // const remainingLabels = remainingTags.join(', ');
                     return (
-                      <Tooltip content={`剩余标签: ${remainingLabels}`}>
+                      <Tooltip
+                        content={remainingTags.map((item, i) => {
+                          return (
+                            <Tag
+                              key={i}
+                              style={{
+                                height: '24px',
+                                background: '#E7ECF0',
+                                color: '#0F172A',
+                                borderRadius: '2px',
+                                fontSize: '12px',
+                                // height: '18px',
+                                alignItems: 'center',
+                                margin: '0 2px'
+                              }}
+                            >
+                              {item}
+                            </Tag>
+                          );
+                        })}
+                      >
                         <span>+{invisibleTagCount}</span>
                       </Tooltip>
                     );
