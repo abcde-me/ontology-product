@@ -48,11 +48,11 @@ enum ConnectorType {
 const STATUS_CONFIG = {
   [ConnectionStatus.CONNECTED]: {
     text: '已连接',
-    color: '#059669'
+    color: '#10B981'
   },
   [ConnectionStatus.DISCONNECTED]: {
     text: '已断开',
-    color: '#DC2626'
+    color: '#EF4444'
   }
 };
 
@@ -162,8 +162,8 @@ export default function Connection() {
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div
               style={{
-                width: '5px',
-                height: '5px',
+                width: '8px',
+                height: '8px',
                 backgroundColor: statusConfig.color,
                 borderRadius: '50%',
                 marginRight: '5px'

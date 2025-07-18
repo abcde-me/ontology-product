@@ -52,7 +52,7 @@ const AccessDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '16px' }}
+          style={{ cursor: 'pointer', fontSize: '14px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
@@ -64,9 +64,12 @@ const AccessDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Breadcrumb style={{ marginLeft: '28px', fontSize: '18px' }}>
-            <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
-              数据载入
+          <Breadcrumb style={{ marginLeft: '28px', fontSize: '20px' }}>
+            <BreadcrumbItem
+              href="/tenant/compute/modaforge/dataLoad"
+              style={{ color: '#7F8C9F' }}
+            >
+              数据载入详情
             </BreadcrumbItem>
             <BreadcrumbItem
               onClick={() => {
