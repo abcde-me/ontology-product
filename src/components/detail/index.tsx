@@ -1067,10 +1067,10 @@ const DatasetDetail: React.FC = () => {
           onClick={handleBack}
           style={{ display: 'flex', alignItems: 'center' }}
         />
-        <Breadcrumb style={{ fontSize: 18 }}>
+        <Breadcrumb style={{ fontSize: '20px' }}>
           <Breadcrumb.Item>
             <span
-              // style={{ cursor: 'pointer', color: '#165dff' }}
+              style={{ fontWeight: '500', fontSize: '20px' }}
               onClick={handleGoToDatasetList}
             >
               数据集管理

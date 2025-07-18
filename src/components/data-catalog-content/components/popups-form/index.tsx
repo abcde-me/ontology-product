@@ -133,7 +133,7 @@ const FormComponent: React.FC<FormProps> = ({
     } catch (e) {
       // 处理验证失败或导出失败的情况
       console.error('导出失败:', e);
-      Message.error('导出失败，请稍后重试');
+      // Message.error('导出失败，请稍后重试');
     }
   };
   const handleCancel = () => {

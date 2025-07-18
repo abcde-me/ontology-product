@@ -143,6 +143,7 @@ const columns = (
     dataIndex: 'name',
     width: 200,
     className: 'hover-change workflow-name',
+    rowClassName: 'hover-change',
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
@@ -151,14 +152,42 @@ const columns = (
         //   record={record}
         //   handleGoToDetail={handleGoToDetail}
         // />
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.name)}
-          isEdit={false}
-          isLink
-          handleLink={() => {
-            handleGoToDetail(record.id);
-          }}
-        />
+        // <EllipsisPopover
+        //   value={renderEmptyPlaceholder(record.name)}
+        //   isEdit={false}
+        //   // className="ellipsis-line-2"
+        //   // ellipsis
+        //   preferTypography={true}
+        //   ellipsis={{
+        //     rows:2
+        //   }}
+        //   isLink
+        //   handleLink={() => {
+        //     handleGoToDetail(record.id);
+        //   }}
+        // />
+        <div
+          onClick={() => handleGoToDetail(record.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          <EllipsisPopover
+            value={record.name}
+            isEdit={false}
+            preferTypography={true}
+            className="custom-typography-text"
+            ellipsis={{
+              rows: 2,
+              expandable: false,
+              showTooltip: {
+                type: 'popover',
+                props: {
+                  position: 'tl',
+                  style: { maxHeight: '400px', overflow: 'auto' }
+                }
+              }
+            }}
+          />
+        </div>
       );
     }
   },
@@ -337,19 +366,20 @@ const columns = (
     render: (src_model: string) => {
       if (!src_model) return '-';
       return (
-        <Tag
-          className={styles.tagPurple}
-          style={{
-            display: '-webkit-box',
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-all'
-          }}
-        >
-          <Tooltip content={src_model}>{src_model}</Tooltip>
-        </Tag>
+        // <Tag
+        //   className={styles.tagPurple}
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={src_model}>{src_model}</Tooltip>
+        // </Tag>
+        <EllipsisPopover value={src_model}></EllipsisPopover>
       );
     }
   },
@@ -360,7 +390,7 @@ const columns = (
     filterIcon: <IconFilter />,
     render: (creator_name: string) => {
       if (!creator_name) return '-';
-      return creator_name;
+      return <EllipsisPopover value={creator_name}></EllipsisPopover>;
     }
     // filters: (() => {
     //   const creatorSet = new Set<string>();
@@ -559,7 +589,7 @@ const DatasetManagement: React.FC = () => {
 
   // 提交表单数据,新建数据集
   const handleSubmit = async (formData: any) => {
-    console.log('新建数据集:', formData);
+    console.log('新建数据集:', String(formData.targetDataSource[0][0]));
     const submitData = {
       name: formData.name,
       description: formData.description,
@@ -569,9 +599,9 @@ const DatasetManagement: React.FC = () => {
         formData.dataSource === 'volume'
           ? {
               path:
-                // formData.targetDataSource[0][0] +
-                '/dst' +
                 '/' +
+                String(formData.targetDataSource[0][0]) +
+                '/dst/' +
                 formData.targetDataSource[0][1] +
                 '/volume/' +
                 formData.targetDataSource[1][0],
