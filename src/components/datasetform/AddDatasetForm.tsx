@@ -67,6 +67,7 @@ const FormItem = Form.Item;
 
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
+  console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
     // label: (
     //   <Tooltip content={catalog.name}>
@@ -320,7 +321,14 @@ const DatasetForm = React.forwardRef<
         const catalogpath = value[0][0];
         const catalogId = value[0][1];
         const selectedItem = value[1]?.[0];
-        const path = `${catalogpath}dst/${catalogId}/volume/${selectedItem}`;
+
+        const basePath = String(catalogpath[0][0]);
+        const formattedPath =
+          basePath.length > 1 && basePath.endsWith('/')
+            ? basePath
+            : `${basePath}/`;
+        const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
+        // const path = `${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
         console.log('二级目录路径:', path, selectedItem);
         if (selectedItem == undefined) {
           setPreviewColumns([]);
@@ -410,9 +418,8 @@ const DatasetForm = React.forwardRef<
         // setIscreateTagDisabled(true);
 
         setCanSubmit(false);
-
+        console.log('111111111111111111111111', formData);
         await onSubmit(formData);
-        console.log('111111111111111111111111');
 
         setCanSubmit(true);
       })
@@ -436,11 +443,13 @@ const DatasetForm = React.forwardRef<
       // unmountOnExit={true}
     >
       <div
-        style={{
-          // maxHeight: '600px',
-          // overflowY: 'auto',
-          paddingRight: '8px'
-        }}
+        style={
+          {
+            // maxHeight: '600px',
+            // overflowY: 'auto',
+            // paddingRight: '8px'
+          }
+        }
       >
         <Form
           form={form}
@@ -449,9 +458,10 @@ const DatasetForm = React.forwardRef<
           wrapperCol={{ span: 21 }}
           layout="horizontal"
           labelAlign="right"
+          colon={true}
         >
           <Form.Item
-            label="数据集名称:"
+            label="数据集名称"
             field="name"
             rules={[
               {
@@ -482,7 +492,7 @@ const DatasetForm = React.forwardRef<
           </Form.Item>
           <div className="formSelect">
             <FormItem
-              label="标签:"
+              label="标签"
               field="tags"
               rules={[{ required: false, message: '请选择至少一个标签' }]}
             >
@@ -511,7 +521,7 @@ const DatasetForm = React.forwardRef<
             </FormItem>
           </div>
           <FormItem
-            label="描述说明:"
+            label="描述说明"
             field="description"
             rules={[{ required: false, message: '请输入描述信息' }]}
             // extra={
@@ -531,7 +541,7 @@ const DatasetForm = React.forwardRef<
             />
           </FormItem>
           <FormItem
-            label="数据来源:"
+            label="数据来源"
             field="dataSource"
             rules={[{ required: true, message: '请选择数据来源' }]}
             initialValue="volume"
@@ -560,7 +570,7 @@ const DatasetForm = React.forwardRef<
               }}
             >
               <FormItem
-                label="选择目标数据目录卷/卷:"
+                label="选择目标数据目录/卷"
                 field="targetDataSource"
                 rules={[{ required: true, message: '请选择目标数据目录卷' }]}
                 labelCol={{ span: 5 }}
@@ -639,7 +649,7 @@ const DatasetForm = React.forwardRef<
               }}
             >
               <FormItem
-                label="选择连接器:"
+                label="选择连接器"
                 field="connector"
                 rules={[{ required: true, message: '请选择连接器' }]}
                 labelCol={{ span: 4 }}
@@ -655,7 +665,7 @@ const DatasetForm = React.forwardRef<
               </FormItem>
 
               <FormItem
-                label="选择数据文件:"
+                label="选择数据文件"
                 field="selectedFiles"
                 rules={[{ required: true, message: '请选择至少一个文件' }]}
                 labelCol={{ span: 4 }}

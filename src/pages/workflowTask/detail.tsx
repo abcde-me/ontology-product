@@ -523,10 +523,10 @@ export default function WorkflowTaskDetail() {
     <div className="workflow-task-detail">
       <div className="head-breadcrumb-box">
         <IconArrowLeft
-          style={{ cursor: 'pointer', width: 18, height: 18 }}
+          style={{ cursor: 'pointer', fontSize: '14px' }}
           onClick={() => history.goBack()}
         />
-        <Breadcrumb style={{ fontSize: 20, marginLeft: '10px' }}>
+        <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
           <BreadcrumbItem
             onClick={() =>
               history.push('/tenant/compute/modaforge/workflowTask')

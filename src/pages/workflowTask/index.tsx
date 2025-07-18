@@ -194,8 +194,8 @@ export default function WorkflowTask() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '8px',
+              height: '8px',
               backgroundColor:
                 record.status === TaskRunStatus.success
                   ? '#10B981'
@@ -358,7 +358,8 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            style={{ width: 100, borderRight: 0 }}
+            className="task-select"
+            style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}
