@@ -227,21 +227,16 @@ const DataLoadDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '16px' }}
+          style={{ cursor: 'pointer', fontSize: '14px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
         />
-        <Breadcrumb style={{ marginLeft: '28px', fontSize: '18px' }}>
-          <BreadcrumbItem
-            href="/tenant/compute/modaforge/dataLoad"
-            style={{ fontSize: '18px' }}
-          >
+        <Breadcrumb style={{ marginLeft: '21px', fontSize: '20px' }}>
+          <BreadcrumbItem href="/tenant/compute/modaforge/dataLoad">
             数据载入
           </BreadcrumbItem>
-          <BreadcrumbItem style={{ fontSize: '20px' }}>
-            {listDetail?.name}
-          </BreadcrumbItem>
+          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
