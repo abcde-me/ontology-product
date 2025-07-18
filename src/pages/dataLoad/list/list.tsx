@@ -437,13 +437,13 @@ export default function DataLoad() {
     Modal.confirm({
       title: (
         <span style={{ fontSize: '16px', fontWeight: '500' }}>
-          删除该数据载入任务
+          确认删除该数据载入任务吗?
         </span>
       ),
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 23px',
+            padding: '5px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
