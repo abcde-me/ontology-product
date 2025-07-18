@@ -28,7 +28,7 @@ const Node: FC<NodeProps<EndNodeType>> = ({ id, data }) => {
         );
       }
     });
-  }, [targetPathName]);
+  }, [target_path_name, target_path_id, targetPathName]);
   return (
     <div className={`wk-node-content end-node-content`}>
       <div className="end-node-content-item">

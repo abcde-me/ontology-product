@@ -5,7 +5,7 @@
   margin: 10px;
   padding: 20px;
   border-radius: 10px;
-  min-height: 97%;
+  min-height: calc(100% - 30px);
 
   .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;

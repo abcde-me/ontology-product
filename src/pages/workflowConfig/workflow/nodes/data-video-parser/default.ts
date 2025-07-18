@@ -12,9 +12,9 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
   defaultValue: {
     files: [],
     selected_files_num: -1,
-    is_poly_orbit: 0,
+    is_poly_orbit: 2,
     is_denoise: 0,
-    audio_options: [],
+    audio_options: ['orbit'],
     vad_enabled: 1,
     activity_mode: 1,
     activity_mode_num: '',

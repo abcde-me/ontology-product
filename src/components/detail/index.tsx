@@ -52,6 +52,7 @@ import {
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
+import noDataElement from '@/components/no-data';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -1061,13 +1062,13 @@ const DatasetDetail: React.FC = () => {
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
       <div className="breadcrumb-wrapper">
-        <Button
-          type="text"
-          icon={<IconArrowLeft style={{ color: '#000' }} />}
-          onClick={handleBack}
-          style={{ display: 'flex', alignItems: 'center' }}
+        <IconArrowLeft
+          style={{ cursor: 'pointer', fontSize: '14px' }}
+          onClick={() => {
+            handleBack();
+          }}
         />
-        <Breadcrumb style={{ fontSize: '20px' }}>
+        <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
           <Breadcrumb.Item>
             <span
               style={{ fontWeight: '500', fontSize: '20px' }}
@@ -1076,11 +1077,7 @@ const DatasetDetail: React.FC = () => {
               数据集管理
             </span>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <span style={{ fontWeight: '500', fontSize: '20px' }}>
-              数据集详情
-            </span>
-          </Breadcrumb.Item>
+          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
         </Breadcrumb>
       </div>
 
@@ -1494,8 +1491,8 @@ const DatasetDetail: React.FC = () => {
                   <>
                     <Table
                       columns={contentColumns}
-                      data={contentData}
-                      noDataElement={<NoDataEmpty />}
+                      data={[]}
+                      noDataElement={noDataElement({ description: '暂无数据' })}
                       pagination={false}
                       scroll={{ x: 'max-content' }}
                       border={false}
@@ -1527,7 +1524,7 @@ const DatasetDetail: React.FC = () => {
                 </div>
               </>
             ) : (
-              <NoDataEmpty />
+              noDataElement({ description: '暂无数据' })
             )}
           </TabPane>
 
@@ -1537,6 +1534,7 @@ const DatasetDetail: React.FC = () => {
                 columns={versionColumns}
                 data={versionHistory}
                 pagination={false}
+                noDataElement={noDataElement({ description: '暂无数据' })}
                 // scroll={{ x: 'max-content' }}
                 border={false}
               />

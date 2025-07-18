@@ -21,6 +21,7 @@ import classNames from 'classnames';
 import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -319,9 +320,7 @@ export default function DataLoad() {
             <span
               className={Styles.hoverStyle}
               onClick={() => {
-                setDelVisible(true);
-                setDelId(item.task_id);
-                setDelTitle(item.name);
+                deleteLoad(item.task_id, item.name);
               }}
             >
               删除
@@ -432,10 +431,36 @@ export default function DataLoad() {
   };
   // 删除的弹框
   const [delVisible, setDelVisible] = useState(false);
+
   // 删除列表的方法
-  const deleteLoadHan = async () => {
+  const deleteLoad = (id, title) => {
+    Modal.confirm({
+      title: (
+        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+          删除该数据载入任务
+        </span>
+      ),
+      content: (
+        <div
+          style={{
+            padding: '5px 28px 0px 23px',
+            fontSize: '14px',
+            fontWeight: '400'
+          }}
+        >
+          删除该数据载入任务,{title},是否继续操作
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        deleteLoadHan(id);
+      }
+    });
+  };
+  const deleteLoadHan = async (id) => {
     try {
-      const res = await delLoad(delId);
+      const res = await delLoad(id);
       if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
         setDelVisible(false);
@@ -460,7 +485,7 @@ export default function DataLoad() {
         // margin: '10px 10px 20px 10px',
         padding: '20px',
         borderRadius: '10px',
-        minHeight: '94vh'
+        minHeight: '100%'
       }}
     >
       <h1
@@ -551,7 +576,7 @@ export default function DataLoad() {
         path="/tenant/compute/modaforge/dataLoad/detail"
         component={React.lazy(async () => import('../detail/dataLoad-detail'))}
       /> */}
-      <Modal
+      {/* <Modal
         title={
           <div
             style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
@@ -573,7 +598,7 @@ export default function DataLoad() {
         <div style={{ fontSize: '14px' }}>
           删除该数据载入任务，{delTitle}，是否要继续操作?
         </div>
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
