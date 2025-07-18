@@ -1079,3 +1079,5 @@ export const hasRetryNode = (nodeType?: BlockEnum) => {
     nodeType === BlockEnum.Code
   );
 };
+
+export const MAX_NODES_NUM = 16;
