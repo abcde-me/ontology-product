@@ -1491,7 +1491,7 @@ const DatasetDetail: React.FC = () => {
                   <>
                     <Table
                       columns={contentColumns}
-                      data={[]}
+                      data={contentData}
                       noDataElement={noDataElement({ description: '暂无数据' })}
                       pagination={false}
                       scroll={{ x: 'max-content' }}

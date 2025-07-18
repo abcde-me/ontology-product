@@ -321,7 +321,14 @@ const DatasetForm = React.forwardRef<
         const catalogpath = value[0][0];
         const catalogId = value[0][1];
         const selectedItem = value[1]?.[0];
-        const path = `/${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
+
+        const basePath = String(catalogpath[0][0]);
+        const formattedPath =
+          basePath.length > 1 && basePath.endsWith('/')
+            ? basePath
+            : `${basePath}/`;
+        const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
+        // const path = `${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
         console.log('二级目录路径:', path, selectedItem);
         if (selectedItem == undefined) {
           setPreviewColumns([]);

@@ -590,6 +590,10 @@ const DatasetManagement: React.FC = () => {
   // 提交表单数据,新建数据集
   const handleSubmit = async (formData: any) => {
     console.log('新建数据集:', String(formData.targetDataSource[0][0]));
+    const basePath = String(formData.targetDataSource[0][0]);
+    const formattedPath =
+      basePath.length > 1 && basePath.endsWith('/') ? basePath : `${basePath}/`;
+    const fullPath = `${formattedPath}dst/${formData.targetDataSource[0][1]}/volume/${formData.targetDataSource[1][0]}`;
     const submitData = {
       name: formData.name,
       description: formData.description,
@@ -598,13 +602,7 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-              path:
-                '/' +
-                String(formData.targetDataSource[0][0]) +
-                '/dst/' +
-                formData.targetDataSource[0][1] +
-                '/volume/' +
-                formData.targetDataSource[1][0],
+              path: fullPath,
               path_id: formData.targetDataSource[1][1]
             }
           : {
