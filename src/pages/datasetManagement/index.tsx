@@ -1064,7 +1064,7 @@ const DatasetManagement: React.FC = () => {
       <Table
         rowKey="id"
         className={styles.datasetTable}
-        rowHeight="47px"
+        // rowHeight="47px"
         columns={columns(
           handleGoToDetail,
           handleDelete,
