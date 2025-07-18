@@ -358,7 +358,8 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            style={{ width: 100, borderRight: 0 }}
+            className="task-select"
+            style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}

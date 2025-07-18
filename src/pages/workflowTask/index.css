@@ -44,4 +44,8 @@
   .arco-input-inner-wrapper {
     border-radius: 0 4px 4px 0;
   }
+
+  .task-select .arco-select-view {
+    border-right: 0;
+  }
 }
