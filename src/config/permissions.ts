@@ -62,7 +62,17 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {} as const;
 export const WORKFLOW_TASK_PERMISSIONS = {} as const;
 
 // 数据目录相关权限
-export const DATA_CATALOG_PERMISSIONS = {} as const;
+export const DATA_CATALOG_PERMISSIONS = {
+  CAN_CREATE_CATALOG: 'directory:can_create_catalog',
+  CAN_CREATE_VOLUME: 'directory:can_create_volume',
+  CAN_DELETE_DIRS: 'directory:can_delete_dirs',
+  CAN_UPDATE_DIRS: 'directory:can_update_dirs',
+  CAN_DELETE_BATCH: 'source_dir:can_delete_batch',
+  CAN_DELETE_DST_FILE: 'directory:can_delete_dst_file',
+  CAN_SEARCH: 'connectors:can_search',
+  CAN_SEARCH_DIR: 'source_dir:can_search',
+  CAN_DELETE: 'source_dir:can_delete'
+} as const;
 
 // 数据集管理权限
 export const DATA_MANAGEMENT_PERMISSIONS = {} as const;

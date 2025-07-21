@@ -65,13 +65,13 @@
   padding: 24px;
   gap: 20px;
 }
-.custom-tabs.arco-tabs-header-nav-line .arco-tabs-header-title {
-  margin: 0 20px;
+.custom-tabs .arco-tabs-header-nav-line .arco-tabs-header-title {
+  margin: 0 0 0 32px;
   padding: 0;
 }
-.basic-info-card .arco-typography {
+/* .basic-info-card .arco-typography {
   margin-bottom: 16px;
-}
+} */
 
 /* 基本信息与标签页之间的分割效果 */
 .basic-info-card .arco-tabs {
@@ -120,7 +120,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* margin-bottom: 16px; */
+  margin-bottom: 12px;
 }
 
 .basic-info-header h4 {
@@ -133,7 +133,7 @@
 .basic-info-header .edit-btn {
   color: #165dff;
   font-size: 14px;
-  padding: 4px 8px;
+  /* padding: 4px 8px; */
 }
 
 /* .basic-info-header .edit-btn:not(:disabled):hover {

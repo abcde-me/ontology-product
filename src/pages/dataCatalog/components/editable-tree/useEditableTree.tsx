@@ -21,6 +21,8 @@ import {
   renameCatalog
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
+import { PermissionGuard } from '@/components/PermissionGuard';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import styles from '../../modal.module.css';
 
 export function useEditableTree({ catalogTreeStore }) {
@@ -296,6 +298,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const renderExtra = (node: NodeProps) => {
+    console.log(node, 'top-----');
     const { dataRef } = node;
     return (
       !dataRef?.showInput && (
@@ -303,45 +306,51 @@ export function useEditableTree({ catalogTreeStore }) {
           {['volume', 'db', CatalogTypeEnum.db].every(
             (key) => dataRef?.type !== key
           ) && (
-            <>
-              <Tooltip color="white" content="重命名">
-                <IconEdit
-                  className={
-                    'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                  }
-                  onClick={() => handleEdit(node)}
-                />
-              </Tooltip>
-              <Tooltip color="white" content="删除">
-                <IconDelete
-                  onClick={() => {
-                    Modal.confirm({
-                      title: '确认删除目录?',
-                      content: '删除后，该目录下所有内容将被删除，不可恢复',
-                      async onOk() {
-                        try {
-                          await handleDelete(node);
-                        } catch (apiError: any) {
-                          Message.error(
-                            '删除失败: ' + (apiError.message || '请稍后重试')
-                          );
-                        }
-                      },
-                      className: styles['modalWrapper']
-                    });
-                  }}
-                  className="hover:text-[rgb(var(--primary-6))]"
-                />
-              </Tooltip>
-            </>
-          )}
+              <>
+                <PermissionGuard permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}>
+                  <Tooltip color="white" content="重命名">
+                    <IconEdit
+                      className={
+                        'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                      }
+                      onClick={() => handleEdit(node)}
+                    />
+                  </Tooltip>
+                </PermissionGuard>
+                <PermissionGuard permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}>
+                  <Tooltip color="white" content="删除">
+                    <IconDelete
+                      onClick={() => {
+                        Modal.confirm({
+                          title: '确认删除目录?',
+                          content: '删除后，该目录下所有内容将被删除，不可恢复',
+                          async onOk() {
+                            try {
+                              await handleDelete(node);
+                            } catch (apiError: any) {
+                              Message.error(
+                                '删除失败: ' + (apiError.message || '请稍后重试')
+                              );
+                            }
+                          },
+                          className: styles['modalWrapper']
+                        });
+                      }}
+                      className="hover:text-[rgb(var(--primary-6))]"
+                    />
+                  </Tooltip>
+                </PermissionGuard>
+              </>
+            )}
           {dataRef?.type === 'volume' && (
-            <Tooltip color="white" content="新建">
-              <IconPlus
-                className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                onClick={() => addSubVolume(node)}
-              />
-            </Tooltip>
+            <PermissionGuard permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}>
+              <Tooltip color="white" content="新建">
+                <IconPlus
+                  className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+                  onClick={() => addSubVolume(node)}
+                />
+              </Tooltip>
+            </PermissionGuard>
           )}
         </div>
       )
