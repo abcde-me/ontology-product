@@ -17,13 +17,9 @@ import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
-import classNames from 'classnames';
-import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { useHasPermission } from '@/hooks';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -84,8 +80,6 @@ const TYPE_CONFIG = {
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
-  // 是否可以跳转详情的权限
-  const dataloadDetail = useHasPermission('dataloader:can_get');
   const columns = [
     {
       title: '载入任务名称',
@@ -99,21 +93,9 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            {
-              dataloadDetail && gotoDetail(text.task_id);
-            }
+            gotoDetail(text.task_id);
           }}
         />
-        // <Tooltip content={text.name} position="tl">
-        //   <span
-        //     className="txt"
-        //     onClick={() => {
-        //       gotoDetail(text.task_id);
-        //     }}
-        //   >
-        //     {text.name}
-        //   </span>
-        // </Tooltip>
       )
     },
     {
@@ -255,23 +237,6 @@ export default function DataLoad() {
               '-'
             )}
           </div>
-
-          // <Popover position="tl" content={item.data_path_name}>
-          //   {item.data_path_name !== '' ? (
-          //     <span
-          //       // className="jump-a"
-          //       onClick={() => {
-          //         history.push(
-          //           `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-          //         );
-          //       }}
-          //     >
-          //       <span className="txt">{item.data_path_name}</span>
-          //     </span>
-          //   ) : (
-          //     <span>-</span>
-          //   )}
-          // </Popover>
         );
       }
     },
@@ -315,39 +280,22 @@ export default function DataLoad() {
               justifyContent: 'space-around'
             }}
           >
-            {dataloadDetail && (
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  gotoDetail(item.task_id);
-                }}
-              >
-                详情
-              </span>
-            )}
-            {/* <PermissionWrapper permission="dataloader:can_get">
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  gotoDetail(item.task_id);
-                }}
-              >
-                详情
-              </span>
-            </PermissionWrapper> */}
-            <PermissionWrapper
-              permission="dataloader:can_delete"
-              disableWhenNoPermission
+            <span
+              className={Styles.hoverStyle}
+              onClick={() => {
+                gotoDetail(item.task_id);
+              }}
             >
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  deleteLoad(item.task_id, item.name);
-                }}
-              >
-                删除
-              </span>
-            </PermissionWrapper>
+              详情
+            </span>
+            <span
+              className={Styles.hoverStyle}
+              onClick={() => {
+                deleteLoad(item.task_id, item.name);
+              }}
+            >
+              删除
+            </span>
           </div>
         );
       }
@@ -387,10 +335,6 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
-  // 存放删除的id
-  const [delId, setDelId] = useState(null);
-  // 存放删除的名称
-  const [delTitle, setDelTitle] = useState(null);
   const [loadSiftObject, setLoadSiftObject] = useState({});
   // 跳转到详情页面
   const gotoDetail = (task_id: number) => {
@@ -452,9 +396,6 @@ export default function DataLoad() {
   const handlePressEnter = () => {
     getdataLoadList();
   };
-  // 删除的弹框
-  const [delVisible, setDelVisible] = useState(false);
-
   // 删除列表的方法
   const deleteLoad = (id, title) => {
     Modal.confirm({
@@ -486,7 +427,6 @@ export default function DataLoad() {
       const res = await delLoad(id);
       if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
-        setDelVisible(false);
         getdataLoadList();
       } else {
         Message.error(res.message);
@@ -591,7 +531,6 @@ export default function DataLoad() {
         autoFocus={false}
         focusLock={true}
         footer={null}
-        // maskClosable={false}
         unmountOnExit={true}
       >
         <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />

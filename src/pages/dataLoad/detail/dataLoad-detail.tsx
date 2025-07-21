@@ -26,7 +26,6 @@ import {
 } from '@/api/loadApi';
 import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import { PermissionWrapper } from '@/components/PermissionGuard';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -256,22 +255,20 @@ const DataLoadDetail = () => {
       >
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
-          <PermissionWrapper permission="connectors:can_update">
-            <div
-              style={{
-                color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
-                pointerEvents: runningFlag ? 'none' : undefined,
-                cursor: runningFlag ? '' : 'pointer',
-                fontSize: '14px'
-              }}
-              onClick={() => {
-                setEditVisible(true);
-                console.log(listDetail?.run_config?.cycle_text);
-              }}
-            >
-              <IconEdit /> 编辑
-            </div>
-          </PermissionWrapper>
+          <div
+            style={{
+              color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
+              pointerEvents: runningFlag ? 'none' : undefined,
+              cursor: runningFlag ? '' : 'pointer',
+              fontSize: '14px'
+            }}
+            onClick={() => {
+              setEditVisible(true);
+              console.log(listDetail?.run_config?.cycle_text);
+            }}
+          >
+            <IconEdit /> 编辑
+          </div>
         </div>
         <div className="info-container">
           <div className="info-column">

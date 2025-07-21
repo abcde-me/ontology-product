@@ -23,10 +23,8 @@ import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
-import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import { useHasPermission, useUserInfoStore } from '@/store/userInfoStore';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -71,8 +69,6 @@ export default function Connection() {
   const [editObject, setEditObject] = React.useState<ConnectionType>({});
   // 编辑表单实例
   const [EditForm] = Form.useForm();
-  // 显示详情页面的实例子组件实例
-  const childRef = useRef(null);
   // 添加编辑弹框的实例
   const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
   // 编辑按钮的状态
@@ -87,16 +83,6 @@ export default function Connection() {
   const [searchValue, setSearchValue] = useState(
     connectionId ? connectionId : ''
   );
-  const userInfo = useUserInfoStore();
-  // 创建连接器的权限
-  const connectionAdd = useHasPermission('connectors:can_create');
-  // 编辑连接器的权限
-  const connectionEdit = useHasPermission('connectors:can_update');
-  // 删除连接器的权限
-  const connectionDelete = useHasPermission('connectors:can_delete');
-  // 连接器详情的权限`
-  const connectionDetail = useHasPermission('connectors:can_get');
-  console.log(userInfo.userInfo?.perms);
   // 连接器筛选的默认值
   const [siftValue, setSiftValue] = useState({});
   const [ConnectionData, setConnectionData] = useState([]);
@@ -153,11 +139,6 @@ export default function Connection() {
             isEdit={false}
             // isLink
           />
-          // <Tooltip content={item.name} position="tl" disabled={false}>
-          //   {item.name}
-          // </Tooltip>
-
-          // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
     },
@@ -245,36 +226,32 @@ export default function Connection() {
       fixed: 'right',
       render: (_, record) => (
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          {connectionDetail && (
-            <span
-              className="hover"
-              onClick={() => {
-                viewDetailHan(record.id);
-              }}
-            >
-              详情
-            </span>
-          )}
-          {connectionEdit && (
-            <span
-              className="hover"
-              onClick={() => {
-                editFormHandle(record);
-              }}
-            >
-              编辑
-            </span>
-          )}
-          {connectionDelete && (
-            <span
-              className="hover"
-              onClick={() => {
-                delModalHan(record.id);
-              }}
-            >
-              删除
-            </span>
-          )}
+          <span
+            className="hover"
+            onClick={() => {
+              viewDetailHan(record.id);
+            }}
+          >
+            详情
+          </span>
+
+          <span
+            className="hover"
+            onClick={() => {
+              editFormHandle(record);
+            }}
+          >
+            编辑
+          </span>
+
+          <span
+            className="hover"
+            onClick={() => {
+              delModalHan(record.id);
+            }}
+          >
+            删除
+          </span>
         </div>
       )
     }
@@ -436,17 +413,15 @@ export default function Connection() {
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
         />
-        {connectionAdd && (
-          <Button
-            type="primary"
-            icon={<IconPlus />}
-            onClick={() => {
-              childAddAndSetModalHan();
-            }}
-          >
-            创建连接器
-          </Button>
-        )}
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => {
+            childAddAndSetModalHan();
+          }}
+        >
+          创建连接器
+        </Button>
       </div>
       <Table
         border={false}
