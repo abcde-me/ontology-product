@@ -481,7 +481,7 @@ const handleDelete = (
             file_ids: ids,
             path_id: selectedKey
           });
-          if (res.code == 0) {
+          if (res.status === 200) {
             Message.success('删除成功');
             const event = new CustomEvent('resetPageToFirst', {
               detail: { tableType }
@@ -492,12 +492,12 @@ const handleDelete = (
               refreshData();
             }, 200);
           } else {
-            Message.error('删除失败，请稍后重试');
+            Message.error(res?.message ?? '删除失败，请稍后重试');
             return;
           }
         } else {
           const res = await deleteSourceFile(data.id);
-          if (res.code == 0) {
+          if (res.status === 200) {
             Message.success('删除成功');
             const event = new CustomEvent('resetPageToFirst', {
               detail: { tableType }
@@ -508,7 +508,7 @@ const handleDelete = (
               refreshData();
             }, 200);
           } else {
-            Message.error('删除失败，请稍后重试');
+            Message.error(res?.message ?? '删除失败，请稍后重试');
             return;
           }
         }

@@ -332,11 +332,11 @@ export default function Eltable() {
                 file_ids: ids,
                 path_id: selectedKey
               });
-              if (res.code == '') {
+              if (res.status === 200) {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               } else {
-                Message.error('删除失败，请稍后重试');
+                Message.error(res?.message ?? '删除失败，请稍后重试');
               }
             }
           } else {
@@ -348,11 +348,11 @@ export default function Eltable() {
               const res = await deleteSourceFileBatch({
                 ids: ids
               });
-              if (res.code == '') {
+              if (res.status === 200) {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               } else {
-                Message.error('删除失败，请稍后重试');
+                Message.error(res?.message ?? '删除失败，请稍后重试');
               }
             }
           }
