@@ -29,7 +29,6 @@ import {
   getTagList
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
-import { color } from 'echarts';
 
 const { Text } = Typography;
 

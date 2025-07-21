@@ -1,5 +1,4 @@
 import UAPI from '@/api';
-import { number } from 'echarts';
 // 数据集管理相关接口
 
 // 类型定义
@@ -200,7 +199,7 @@ export async function deleteDataset(params: any) {
 
 //批量删除数据集
 export async function batchDeleteDataset(params: BatchDeleteDatasetParams) {
-  return UAPI.RES.batchDeleteDatasetApi({}).delete(params).inRegion().do();
+  return UAPI.RES.batchDeleteDatasetApi({}).post(params).inRegion().do();
 }
 
 //版本重新生成
