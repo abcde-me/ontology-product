@@ -646,6 +646,8 @@ const DatasetForm = React.forwardRef<
               {previewData ? (
                 <div className={styles.previewContainer}>
                   <Table
+                    // style={{border:null}}
+                    border={false}
                     className={styles.previewTable}
                     columns={previewColumns}
                     data={previewData}

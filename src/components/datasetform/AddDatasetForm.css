@@ -15,3 +15,6 @@
 .form-item-select-files.arco-form-item {
   margin-bottom: 0px;
 }
+.arco-table-tr > th {
+  background-color: #f5f9ff;
+}

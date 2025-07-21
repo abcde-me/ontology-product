@@ -659,7 +659,7 @@ const DatasetManagement: React.FC = () => {
       const createDatasetRes = await createDataset(submitData);
 
       if (createDatasetRes.status !== 200) {
-        Message.error('数据集创建失败！');
+        Message.error(createDatasetRes.message || '数据集创建失败！');
         childRef.current?.setcreateTagDisabled();
         return;
       }
