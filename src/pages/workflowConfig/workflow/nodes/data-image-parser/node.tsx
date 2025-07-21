@@ -57,7 +57,7 @@ const Node: FC<NodeProps<ImageParserNodeType>> = (props) => {
           )} */}
           {(selected_files_num <= 0 || selected_files_num === undefined) && (
             <div className="output-var-item">
-              <span className="extra-info">未配置</span>
+              <span className="extra-info !font-semibold">未配置</span>
             </div>
           )}
         </div>
