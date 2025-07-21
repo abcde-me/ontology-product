@@ -396,6 +396,7 @@ export default function WorkflowList() {
             getList();
           }}
           onClear={() => {
+            setCurrent(1);
             setSearchValue('');
             setIsClickClear(true);
           }}
