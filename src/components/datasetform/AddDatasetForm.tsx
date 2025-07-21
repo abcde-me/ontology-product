@@ -29,6 +29,7 @@ import {
   getTagList
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
+import { color } from 'echarts';
 
 const { Text } = Typography;
 
@@ -55,6 +56,7 @@ interface ConnectorFile {
   size: number;
   last_modified: string;
   type: string;
+  sub_path: string;
 }
 
 interface DatasetFormProps {
@@ -127,6 +129,17 @@ function highlight(text, keyword) {
   );
 }
 
+function ItemPathDisplay(item) {
+  // 如果 sub_path 为空，显示短横线
+  if (item === '') return <span>-</span>;
+
+  // 如果长度小于等于 5，显示完整内容，否则截取前五个字符加省略号
+  const displayPath =
+    item.length <= 5 ? item.sub_path : `${item.substring(0, 5)}...`;
+
+  return <span style={{ color: '#334155' }}>{displayPath}</span>;
+}
+
 //连接器列表转换为select选项 函数
 function convertToSelectOptions(connectorList) {
   return connectorList.map((connector) => ({
@@ -163,7 +176,12 @@ const tagOptions = [
 function formatDateTime(isoString) {
   const date = new Date(isoString);
   const pad = (n) => n.toString().padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  return (
+    <span>
+      {date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} $
+      {pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}
+    </span>
+  );
 }
 
 //标签列表转换为select选项
@@ -319,22 +337,17 @@ const DatasetForm = React.forwardRef<
       // 判断是一级目录还是二级目录
       if (Array.isArray(value) && Array.isArray(value[0])) {
         // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
+
         const catalogpath = value[0][0];
         const catalogId = value[0][1];
         const selectedItem = value[1]?.[0];
-
+        console.log(11111111, value);
         const basePath = String(catalogpath[0][0]);
-        console.log(
-          '11223213123131',
-          basePath.length > 1 && basePath.endsWith('/')
-        );
         const formattedPath =
           basePath.length > 1 && basePath.endsWith('/')
             ? `${basePath}/`
             : basePath;
         const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
-        // const path = `${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
-        console.log('二级目录路径:', path, selectedItem);
         if (selectedItem == undefined) {
           setPreviewColumns([]);
           Message.warning('请选择二级目录！');
@@ -825,8 +838,15 @@ const DatasetForm = React.forwardRef<
                             }}
                           >
                             <div>{highlight(item.name, inputValue)}</div>
-                            <div style={{ color: '#86909c' }}>
-                              修改时间：{formatDateTime(item.last_modified)}
+                            <div style={{ color: '#6E7B8D', fontSize: '14px' }}>
+                              <Space size={12}>
+                                <span>
+                                  所属文件：{ItemPathDisplay(item.sub_path)}
+                                </span>
+                                <span>
+                                  修改时间：{formatDateTime(item.last_modified)}
+                                </span>
+                              </Space>
                             </div>
                           </div>
                         </Option>

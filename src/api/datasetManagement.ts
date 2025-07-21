@@ -200,7 +200,7 @@ export async function deleteDataset(params: any) {
 
 //批量删除数据集
 export async function batchDeleteDataset(params: BatchDeleteDatasetParams) {
-  return UAPI.RES.batchDeleteDatasetApi({}).post(params).inRegion().do();
+  return UAPI.RES.batchDeleteDatasetApi({}).delete(params).inRegion().do();
 }
 
 //版本重新生成
