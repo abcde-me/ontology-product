@@ -23,6 +23,7 @@ import {
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
 import { Dataset } from '@/pages/datasetManagement';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -341,7 +342,6 @@ export default function Eltable() {
             }
           } else {
             const fileIds = selectedRows.map((item: { id: number }) => item.id);
-            console.log(fileIds);
 
             ids.push(...fileIds);
             if (selectedRows.length > 0) {
@@ -475,7 +475,25 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content="请先选择文件" className="narrow-popover">
+        <PermissionWrapper>
+          <Popover content="请先选择文件" className="narrow-popover">
+            <Button
+              icon={<IconDelete />}
+              type="outline"
+              style={{
+                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              }}
+              disabled={!hasSelectedRows}
+              onClick={handleDeleteMany}
+            >
+              批量删除
+            </Button>
+          </Popover>
+        </PermissionWrapper>
+      ) : (
+        <PermissionWrapper>
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -489,26 +507,32 @@ export default function Eltable() {
           >
             批量删除
           </Button>
-        </Popover>
-      ) : (
-        <Button
-          icon={<IconDelete />}
-          type="outline"
-          style={{
-            color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-            cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
-          }}
-          disabled={!hasSelectedRows}
-          onClick={handleDeleteMany}
-        >
-          批量删除
-        </Button>
+        </PermissionWrapper>
       )}
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content="请先选择文件" className="narrow-popover">
+        <PermissionWrapper permission={["user:can_view", "user:can_edit"]} >
+          <Popover content="请先选择文件" className="narrow-popover">
+            <Button
+              icon={<IconDownload />}
+              type="outline"
+              style={{
+                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              }}
+              disabled={!hasSelectedRows}
+              onClick={() => {
+                handleExport();
+              }}
+            >
+              批量导出
+            </Button>
+          </Popover>
+        </PermissionWrapper>
+      ) : (
+        <PermissionWrapper permission="connectors:can_search">
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -524,23 +548,7 @@ export default function Eltable() {
           >
             批量导出
           </Button>
-        </Popover>
-      ) : (
-        <Button
-          icon={<IconDownload />}
-          type="outline"
-          style={{
-            color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-            cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
-          }}
-          disabled={!hasSelectedRows}
-          onClick={() => {
-            handleExport();
-          }}
-        >
-          批量导出
-        </Button>
+        </PermissionWrapper>
       )}
     </Space>
   );
@@ -617,7 +625,7 @@ export default function Eltable() {
           selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
         }
         selectedPath={selectedPath}
-        onExportSuccess={() => {}}
+        onExportSuccess={() => { }}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>
