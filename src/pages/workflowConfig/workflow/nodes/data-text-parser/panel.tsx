@@ -138,7 +138,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
         >
           <Checkbox.Group
             options={[
-              { label: '替换表达和特殊符号', value: 1 },
+              { label: '替换标点和特殊符号', value: 1 },
               { label: '删除有效URL和电子邮箱地址', value: 2 }
             ]}
           />
