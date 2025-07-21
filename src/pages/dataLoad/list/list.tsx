@@ -140,8 +140,8 @@ export default function DataLoad() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '8px',
+              height: '8px',
               background:
                 item.status == RunState.FAILED
                   ? RunStateType[RunState.FAILED].color
@@ -210,7 +210,7 @@ export default function DataLoad() {
     },
     {
       title: '连接器名称',
-      className: 'hover-change load-name',
+      className: 'hover-change',
       ellipsis: true,
       width: 230,
       render: (_, item) => {
@@ -437,13 +437,13 @@ export default function DataLoad() {
     Modal.confirm({
       title: (
         <span style={{ fontSize: '16px', fontWeight: '500' }}>
-          删除该数据载入任务
+          确认删除该数据载入任务吗?
         </span>
       ),
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 23px',
+            padding: '5px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}

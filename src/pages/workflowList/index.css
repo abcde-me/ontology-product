@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   margin: 10px;
-  padding: 20px;
+  padding: 20px 18px 20px 20px;
   border-radius: 10px;
   min-height: calc(100% - 30px);
 
@@ -80,7 +80,7 @@
   font-size: 14px;
   color: #1d2129;
   height: 22px;
-  margin: 10px 0 0 25px;
+  margin: 10px 0 0 28px;
 }
 
 .arco-modal-footer .arco-btn-secondary:focus {
