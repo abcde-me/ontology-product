@@ -388,6 +388,7 @@ export default function WorkflowTask() {
             }}
             onPressEnter={() => getList()}
             onClear={() => {
+              setCurrent(1);
               setSearchValue('');
               setIsClickClear(true);
             }}
