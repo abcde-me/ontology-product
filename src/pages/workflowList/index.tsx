@@ -167,7 +167,7 @@ export default function WorkflowList() {
       getList();
     } else {
       Message.error({
-        content: res.message || '删除失败，请稍后重试'
+        content: res?.message ?? '删除失败，请稍后重试'
       });
     }
   };
