@@ -48,7 +48,12 @@ export const DATA_LOAD_PERMISSIONS = {
 } as const;
 
 // 工作流列表权限
-export const WORKFLOW_LIST_PERMISSIONS = {} as const;
+export const WORKFLOW_LIST_PERMISSIONS = {
+  CAN_CREATE: 'workflow:can_create',
+  CAN_GET: 'workflow:can_get',
+  CAN_COPY: 'workflow:can_copy',
+  CAN_DELETE: 'workflow:can_delete'
+} as const;
 
 // 工作流详情权限
 export const WORKFLOW_DETAIL_PERMISSIONS = {} as const;
