@@ -41,6 +41,8 @@ export default function WorkflowList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 区分是否点击按钮清空搜索框
+  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     run_cycle: '',
@@ -51,6 +53,14 @@ export default function WorkflowList() {
   useEffect(() => {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
+
+  // 清空搜索框
+  useEffect(() => {
+    if (isClickClear && searchValue === '') {
+      getList();
+      setIsClickClear(false);
+    }
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -384,6 +394,11 @@ export default function WorkflowList() {
           }}
           onPressEnter={() => {
             getList();
+          }}
+          onClear={() => {
+            setCurrent(1);
+            setSearchValue('');
+            setIsClickClear(true);
           }}
         />
         <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>

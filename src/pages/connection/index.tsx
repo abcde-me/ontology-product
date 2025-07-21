@@ -23,7 +23,6 @@ import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
-import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 interface ChildComponentMethods {
@@ -70,8 +69,6 @@ export default function Connection() {
   const [editObject, setEditObject] = React.useState<ConnectionType>({});
   // 编辑表单实例
   const [EditForm] = Form.useForm();
-  // 显示详情页面的实例子组件实例
-  const childRef = useRef(null);
   // 添加编辑弹框的实例
   const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
   // 编辑按钮的状态
@@ -142,11 +139,6 @@ export default function Connection() {
             isEdit={false}
             // isLink
           />
-          // <Tooltip content={item.name} position="tl" disabled={false}>
-          //   {item.name}
-          // </Tooltip>
-
-          // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
     },
@@ -233,7 +225,7 @@ export default function Connection() {
       width: 130,
       fixed: 'right',
       render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
           <span
             className="hover"
             onClick={() => {
@@ -242,6 +234,7 @@ export default function Connection() {
           >
             详情
           </span>
+
           <span
             className="hover"
             onClick={() => {
@@ -250,6 +243,7 @@ export default function Connection() {
           >
             编辑
           </span>
+
           <span
             className="hover"
             onClick={() => {
@@ -273,7 +267,7 @@ export default function Connection() {
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 28px',
+            padding: '10px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
