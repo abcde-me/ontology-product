@@ -629,7 +629,7 @@ const DatasetManagement: React.FC = () => {
     let formattedPath;
     let fullPath;
     if (formData.dataSource === 'volume') {
-      const basePath = String(formData.targetDataSource[0][0]);
+      const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
       formattedPath =
         basePath.length > 1 && basePath.endsWith('/')
           ? `${basePath}/`
