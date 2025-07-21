@@ -54,11 +54,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   }, []);
 
   useEffect(() => {
-    if (inputs?.prompt !== prompt_text) {
-      form.setFieldValue('prompt', inputs?.prompt);
-    } else {
-      form.setFieldValue('prompt', prompt_text);
-    }
+    form.setFieldValue('prompt', inputs?.prompt ?? prompt_text);
     form.setFieldValue('sample_data', sample_data_text);
   }, [app_scenarios_name]);
   return (
