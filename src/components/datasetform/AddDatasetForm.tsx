@@ -294,6 +294,7 @@ const DatasetForm = React.forwardRef<
 
   // 处理数据来源变化
   const handleDataSourceChange = (value: 'volume' | 'connector') => {
+    form.setFieldValue('targetDataSource', undefined);
     setDataSource(value);
     form.setFieldValue('dataSource', value);
     setShowFileSelection(false); //不显示文件选择
@@ -412,6 +413,7 @@ const DatasetForm = React.forwardRef<
     form
       .validate()
       .then(async (values) => {
+        console.log('表单验证成功:', values);
         const formData: Dataset = {
           ...values,
           dataSource,
