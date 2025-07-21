@@ -192,7 +192,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="描述说明" field="description">
           <Input.TextArea
-            placeholder="请输入导出文件的路径说明"
+            placeholder="这里输入对数据集的描述和说明信息"
             rows={2}
             maxLength={500}
             showWordLimit
