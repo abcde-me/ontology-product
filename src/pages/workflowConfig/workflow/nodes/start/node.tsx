@@ -78,7 +78,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
           )}
           {!data_path_name && (
             <div className="input-var-item">
-              <span className="extra-info">未配置</span>
+              <span className="extra-info !font-semibold">未配置</span>
             </div>
           )}
         </div>
@@ -102,7 +102,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
           )}
           {!hasFileTypes && (
             <div className="input-var-item">
-              <span className="extra-info">未配置</span>
+              <span className="extra-info !font-semibold">未配置</span>
             </div>
           )}
         </div>
