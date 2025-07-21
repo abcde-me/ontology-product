@@ -19,7 +19,6 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import { PermissionWrapper } from '@/components/PermissionGuard';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -87,7 +86,6 @@ export default function DataLoad() {
       width: 300,
       ellipsis: true,
       render: (_, text) => (
-        //  <OverflowTooltip  width={300} children={text.name}  styles={'txt'}/>
         <EllipsisPopoverCom
           value={text.name}
           isEdit={false}
@@ -271,9 +269,6 @@ export default function DataLoad() {
         return (
           <div
             className={Styles.hoverStyle}
-            onClick={() => {
-              // 跳转到详情页
-            }}
             style={{
               width: '100%',
               display: 'flex',
@@ -445,7 +440,6 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        // margin: '10px 10px 20px 10px',
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
         minHeight: '100%'
@@ -476,17 +470,15 @@ export default function DataLoad() {
             setSearchValue(value);
           }}
         />
-        <PermissionWrapper permission="dataloader:can_create">
-          <Button
-            type="primary"
-            icon={<IconPlus />}
-            onClick={() => {
-              setVisible(true);
-            }}
-          >
-            创建数据载入任务
-          </Button>
-        </PermissionWrapper>
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => {
+            setVisible(true);
+          }}
+        >
+          创建数据载入任务
+        </Button>
       </div>
       <Table
         loading={loadloading}
