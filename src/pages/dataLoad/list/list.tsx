@@ -395,7 +395,7 @@ export default function DataLoad() {
   const deleteLoad = (id, title) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确认删除该数据载入任务吗?
         </span>
       ),
@@ -428,6 +428,26 @@ export default function DataLoad() {
       }
     } catch {
       console.error('网络错误');
+    }
+  };
+  const clearHan = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoadList({
+        page: 1,
+        page_size: pageSize,
+        name: '',
+        ...loadSiftObject
+      });
+      if (res.message == 'ok') {
+        console.log(res.data.items);
+        setData(res.data.items);
+        setLoadTotal(res.data.total);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -463,6 +483,7 @@ export default function DataLoad() {
       >
         <InputSearch
           allowClear
+          onClear={clearHan}
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
           onPressEnter={handlePressEnter}
