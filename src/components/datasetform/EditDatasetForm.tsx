@@ -203,9 +203,6 @@ const EditDatasetForm: React.FC<Props> = ({
               console.log('description changed:', value);
             }}
           />
-          <span style={{ color: '#999', fontSize: 12, marginLeft: 8 }}>
-            指定导出文件的保存路径目录
-          </span>
         </FormItem>
       </Form>
 
