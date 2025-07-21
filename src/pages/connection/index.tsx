@@ -137,7 +137,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.name}
             isEdit={false}
-            // isLink
+          // isLink
           />
         );
       }
@@ -201,7 +201,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.creator}
             isEdit={false}
-            // isLink
+          // isLink
           />
         );
       }
@@ -409,7 +409,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px',
+        margin: '20px',
         padding: '20px',
         borderRadius: '10px'
       }}
