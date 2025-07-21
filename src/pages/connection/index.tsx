@@ -260,7 +260,7 @@ export default function Connection() {
   const delModalHan = (id) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确定删除该连接器吗？
         </span>
       ),
@@ -373,6 +373,31 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+  const clearHan = async () => {
+    try {
+      setTableLoding(true); // 请求开始时设置为 true
+      const res = await getConnectionList({
+        page: 1,
+        page_size: pagination.pageSize,
+        name: '',
+        ...siftValue
+      });
+
+      if (res.status !== 200) {
+        return;
+      }
+
+      setConnectionData(res.data.items);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.total
+      }));
+    } catch (error) {
+      console.error('获取连接器列表失败:', error);
+    } finally {
+      setTableLoding(false); // 无论请求成功与否，最后都设置为 false
+    }
+  };
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -412,6 +437,9 @@ export default function Connection() {
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
+          onClear={() => {
+            clearHan();
+          }}
         />
         <Button
           type="primary"

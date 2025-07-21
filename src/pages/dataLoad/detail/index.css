@@ -2,14 +2,14 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 0px 20px;
+  padding: 0px 24px;
   margin: 15px 0px;
 }
 .arco-table-tr > th {
   background-color: rgb(245, 249, 255) !important;
 }
 .info-container {
-  width: 98%;
+  width: 96.5%;
   display: flex;
   background-color: rgb(248, 250, 253); /* 背景颜色 */
   padding: 15px;
