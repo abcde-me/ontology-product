@@ -26,6 +26,7 @@ import { useParams } from '@/utils/url';
 import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import { useHasPermission, useUserInfoStore } from '@/store/userInfoStore';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -86,6 +87,16 @@ export default function Connection() {
   const [searchValue, setSearchValue] = useState(
     connectionId ? connectionId : ''
   );
+  const userInfo = useUserInfoStore();
+  // 创建连接器的权限
+  const connectionAdd = useHasPermission('connectors:can_create');
+  // 编辑连接器的权限
+  const connectionEdit = useHasPermission('connectors:can_update');
+  // 删除连接器的权限
+  const connectionDelete = useHasPermission('connectors:can_delete');
+  // 连接器详情的权限`
+  const connectionDetail = useHasPermission('connectors:can_get');
+  console.log(userInfo.userInfo?.perms);
   // 连接器筛选的默认值
   const [siftValue, setSiftValue] = useState({});
   const [ConnectionData, setConnectionData] = useState([]);
@@ -233,31 +244,37 @@ export default function Connection() {
       width: 130,
       fixed: 'right',
       render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span
-            className="hover"
-            onClick={() => {
-              viewDetailHan(record.id);
-            }}
-          >
-            详情
-          </span>
-          <span
-            className="hover"
-            onClick={() => {
-              editFormHandle(record);
-            }}
-          >
-            编辑
-          </span>
-          <span
-            className="hover"
-            onClick={() => {
-              delModalHan(record.id);
-            }}
-          >
-            删除
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+          {connectionDetail && (
+            <span
+              className="hover"
+              onClick={() => {
+                viewDetailHan(record.id);
+              }}
+            >
+              详情
+            </span>
+          )}
+          {connectionEdit && (
+            <span
+              className="hover"
+              onClick={() => {
+                editFormHandle(record);
+              }}
+            >
+              编辑
+            </span>
+          )}
+          {connectionDelete && (
+            <span
+              className="hover"
+              onClick={() => {
+                delModalHan(record.id);
+              }}
+            >
+              删除
+            </span>
+          )}
         </div>
       )
     }
@@ -273,7 +290,7 @@ export default function Connection() {
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 28px',
+            padding: '10px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
@@ -419,15 +436,17 @@ export default function Connection() {
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            childAddAndSetModalHan();
-          }}
-        >
-          创建连接器
-        </Button>
+        {connectionAdd && (
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              childAddAndSetModalHan();
+            }}
+          >
+            创建连接器
+          </Button>
+        )}
       </div>
       <Table
         border={false}

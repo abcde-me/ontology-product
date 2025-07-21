@@ -22,6 +22,8 @@ import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useHasPermission } from '@/hooks';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -82,6 +84,8 @@ const TYPE_CONFIG = {
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
+  // 是否可以跳转详情的权限
+  const dataloadDetail = useHasPermission('dataloader:can_get');
   const columns = [
     {
       title: '载入任务名称',
@@ -95,7 +99,9 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            gotoDetail(text.task_id);
+            {
+              dataloadDetail && gotoDetail(text.task_id);
+            }
           }}
         />
         // <Tooltip content={text.name} position="tl">
@@ -309,22 +315,39 @@ export default function DataLoad() {
               justifyContent: 'space-around'
             }}
           >
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                gotoDetail(item.task_id);
-              }}
+            {dataloadDetail && (
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  gotoDetail(item.task_id);
+                }}
+              >
+                详情
+              </span>
+            )}
+            {/* <PermissionWrapper permission="dataloader:can_get">
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  gotoDetail(item.task_id);
+                }}
+              >
+                详情
+              </span>
+            </PermissionWrapper> */}
+            <PermissionWrapper
+              permission="dataloader:can_delete"
+              disableWhenNoPermission
             >
-              详情
-            </span>
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                deleteLoad(item.task_id, item.name);
-              }}
-            >
-              删除
-            </span>
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  deleteLoad(item.task_id, item.name);
+                }}
+              >
+                删除
+              </span>
+            </PermissionWrapper>
           </div>
         );
       }
@@ -443,7 +466,7 @@ export default function DataLoad() {
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 28px',
+            padding: '10px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
@@ -483,7 +506,7 @@ export default function DataLoad() {
         display: 'flex',
         flexDirection: 'column',
         // margin: '10px 10px 20px 10px',
-        padding: '20px',
+        padding: '20px 21px 20px 20px',
         borderRadius: '10px',
         minHeight: '100%'
       }}
@@ -513,15 +536,17 @@ export default function DataLoad() {
             setSearchValue(value);
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            setVisible(true);
-          }}
-        >
-          创建数据载入任务
-        </Button>
+        <PermissionWrapper permission="dataloader:can_create">
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              setVisible(true);
+            }}
+          >
+            创建数据载入任务
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         loading={loadloading}
@@ -571,34 +596,6 @@ export default function DataLoad() {
       >
         <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
       </Modal>
-      {/* <Route
-        key="/tenant/compute/modaforge/dataLoad/detail"
-        path="/tenant/compute/modaforge/dataLoad/detail"
-        component={React.lazy(async () => import('../detail/dataLoad-detail'))}
-      /> */}
-      {/* <Modal
-        title={
-          <div
-            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
-          >
-            <IconExclamationCircle
-              style={{ color: 'orange', fontSize: '20px' }}
-            />
-            删除该载入任务
-          </div>
-        }
-        visible={delVisible}
-        onCancel={() => {
-          setDelVisible(false);
-        }}
-        onOk={() => {
-          deleteLoadHan();
-        }}
-      >
-        <div style={{ fontSize: '14px' }}>
-          删除该数据载入任务，{delTitle}，是否要继续操作?
-        </div>
-      </Modal> */}
     </div>
   );
 }
