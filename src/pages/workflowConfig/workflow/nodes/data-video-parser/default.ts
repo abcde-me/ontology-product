@@ -49,7 +49,7 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
     if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个视频文件';
     }
-    if (selected_files_num > 4096) {
+    if (selected_files_num > 10) {
       errorMessages = '最多选择4096个视频文件';
     }
     if (!audio_model_id) {
