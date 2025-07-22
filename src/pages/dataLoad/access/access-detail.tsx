@@ -72,7 +72,6 @@ const AccessDetail = () => {
               数据载入详情
             </BreadcrumbItem>
             <BreadcrumbItem
-              style={{ marginBottom: '5px' }}
               onClick={() => {
                 history.back();
               }}
@@ -80,7 +79,7 @@ const AccessDetail = () => {
             >
               {name}
             </BreadcrumbItem>
-            <BreadcrumbItem style={{ fontSize: '20px', marginBottom: '5px' }}>
+            <BreadcrumbItem>
               {arressDetail.execution_name}
               {!loading && '运行记录'}
             </BreadcrumbItem>

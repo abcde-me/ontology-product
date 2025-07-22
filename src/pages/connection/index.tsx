@@ -137,7 +137,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.name}
             isEdit={false}
-          // isLink
+            // isLink
           />
         );
       }
@@ -201,7 +201,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.creator}
             isEdit={false}
-          // isLink
+            // isLink
           />
         );
       }
@@ -490,7 +490,7 @@ export default function Connection() {
         style={{ width: '760px' }}
         visible={visible2}
         title={
-          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接详情</div>
+          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接器详情</div>
         }
         footer={null}
         onCancel={() => {

@@ -257,9 +257,7 @@ const DataLoadDetail = () => {
           >
             数据载入详情
           </BreadcrumbItem>
-          <BreadcrumbItem style={{ marginBottom: '5px' }}>
-            {listDetail?.name}
-          </BreadcrumbItem>
+          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
