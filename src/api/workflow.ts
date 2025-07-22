@@ -3,7 +3,8 @@ import {
   CreateWorkflowRes,
   WorkflowDetailRes,
   WorkflowOperationParams,
-  WorkflowOperation
+  WorkflowOperation,
+  WorkflowDetailParams
 } from '@/types/workflowApi';
 import UAPI from '@/api';
 
@@ -27,9 +28,13 @@ export async function editWorkflow(
 
 // 获取工作流详情
 export async function getWorkflowDetail(
-  workflow_uuid: string | number
+  workflow_uuid: string | number,
+  params: WorkflowDetailParams
 ): Promise<ApiRes<WorkflowDetailRes>> {
-  return await UAPI.RES.workflowDetail({ workflow_uuid }).get().inRegion().do();
+  return await UAPI.RES.workflowDetail({ workflow_uuid })
+    .get(params)
+    .inRegion()
+    .do();
 }
 
 // 工作流操作（上下线、运行）
