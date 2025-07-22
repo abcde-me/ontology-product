@@ -415,15 +415,9 @@ export default function WorkflowList() {
             setIsClickClear(true);
           }}
         />
-        <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_CREATE}>
-          <Button
-            type="primary"
-            onClick={handleCreateWorkflow}
-            loading={loading}
-          >
-            创建工作流
-          </Button>
-        </PermissionWrapper>
+        <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>
+          创建工作流
+        </Button>
       </div>
       <Table
         border={false}

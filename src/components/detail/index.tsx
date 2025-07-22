@@ -50,6 +50,9 @@ import {
   datasetVersionRebuild
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionGuard } from '@/components/PermissionGuard';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
@@ -72,10 +75,11 @@ interface DatasetDetail {
   creator_name: string;
   created_at: string;
   updated_at: string;
+  perms: string[];
 }
 
 const countWidth = (count: number) => {
-  const viewportWidth = window.innerWidth - 350;
+  const viewportWidth = window.innerWidth - 360;
   if (count > 4) {
     return '400px';
   } else {
@@ -103,7 +107,8 @@ const generateArcoColumns = (
   handleInlineEditSubmit,
   handleInlineEditCancel,
   idName,
-  updateStatus
+  updateStatus,
+  datasetDetail
 ) => {
   // 过滤掉唯一标识符字段，不在页面显示
   const displayHeaders = headers.filter((header) => header !== idName);
@@ -165,6 +170,7 @@ const generateArcoColumns = (
       fixed: 'right',
       headerClassName: 'custom-table-header-action', // 自定义表头样式
       render: (_, record) => {
+        const perms = record.perms;
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
           return (
@@ -192,7 +198,7 @@ const generateArcoColumns = (
         // 正常模式：显示编辑和删除按钮
         const isOtherRowEditing =
           editingRowKey !== null && editingRowKey !== record[idName];
-
+        console.log(11111, datasetDetail);
         return (
           // <Space>
           <div>
@@ -920,6 +926,7 @@ const DatasetDetail: React.FC = () => {
     if (id) {
       getDatasetDetailPage({ id: id })
         .then((res) => {
+          console.log(1111111, res);
           setDatasetDetail(res.data);
         })
         .catch((err) => {
@@ -960,6 +967,7 @@ const DatasetDetail: React.FC = () => {
     getDatasetDetailPage({ id: id })
       .then((res) => {
         setDatasetDetail(res.data);
+        console.log(1111111, res);
         Message.success('刷新成功');
       })
       .catch((err) => {
@@ -1008,7 +1016,8 @@ const DatasetDetail: React.FC = () => {
           handleInlineEditSubmit,
           handleInlineEditCancel,
           idName,
-          updateStatus
+          updateStatus,
+          datasetDetail
         )
       );
     }
@@ -1093,25 +1102,30 @@ const DatasetDetail: React.FC = () => {
             {/* 标题区域 */}
             <div className="basic-info-header">
               <Title heading={4}>基本信息</Title>
-              <Tooltip
-                content={
-                  !datasetDetail || datasetDetail.status !== 'normal'
-                    ? '当前状态下不能进行编辑'
-                    : ''
-                }
-              >
-                <Button
-                  // type="primary"
-                  disabled={!datasetDetail || datasetDetail.status !== 'normal'}
-                  onClick={handleEdit}
-                  type="text"
-                  icon={<IconEdit />}
-                  className="edit-btn"
-                  style={{ height: '100%' }}
+              {datasetDetail?.perms?.includes(
+                DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
+              ) && (
+                <Tooltip
+                  content={
+                    !datasetDetail || datasetDetail.status !== 'normal'
+                      ? '当前状态下不能进行编辑'
+                      : ''
+                  }
                 >
-                  编辑
-                </Button>
-              </Tooltip>
+                  <Button
+                    disabled={
+                      !datasetDetail || datasetDetail.status !== 'normal'
+                    }
+                    onClick={handleEdit}
+                    type="text"
+                    icon={<IconEdit />}
+                    className="edit-btn"
+                    style={{ height: '100%' }}
+                  >
+                    编辑
+                  </Button>
+                </Tooltip>
+              )}
             </div>
 
             {/* 内容区域 */}
@@ -1472,18 +1486,22 @@ const DatasetDetail: React.FC = () => {
                           : ''
                       }
                     >
-                      <Button
-                        // type="primary"
-                        disabled={
-                          !datasetDetail || datasetDetail.status !== 'normal'
-                        }
-                        onClick={() => setUpdateStatus(true)}
-                        type="text"
-                        icon={<IconEdit />}
-                        className="edit-btn"
-                      >
-                        编辑
-                      </Button>
+                      {datasetDetail?.perms?.includes(
+                        DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
+                      ) && (
+                        <Button
+                          // type="primary"
+                          disabled={
+                            !datasetDetail || datasetDetail.status !== 'normal'
+                          }
+                          onClick={() => setUpdateStatus(true)}
+                          type="text"
+                          icon={<IconEdit />}
+                          className="edit-btn"
+                        >
+                          编辑
+                        </Button>
+                      )}
                     </Tooltip>
                   )}
                 </>
