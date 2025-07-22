@@ -26,6 +26,8 @@ import { useParams } from '@/utils/url';
 import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -233,31 +235,37 @@ export default function Connection() {
       width: 130,
       fixed: 'right',
       render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span
-            className="hover"
-            onClick={() => {
-              viewDetailHan(record.id);
-            }}
-          >
-            详情
-          </span>
-          <span
-            className="hover"
-            onClick={() => {
-              editFormHandle(record);
-            }}
-          >
-            编辑
-          </span>
-          <span
-            className="hover"
-            onClick={() => {
-              delModalHan(record.id);
-            }}
-          >
-            删除
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_GET) && (
+            <span
+              className="hover"
+              onClick={() => {
+                viewDetailHan(record.id);
+              }}
+            >
+              详情
+            </span>
+          )}
+          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE) && (
+            <span
+              className="hover"
+              onClick={() => {
+                editFormHandle(record);
+              }}
+            >
+              编辑
+            </span>
+          )}
+          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE) && (
+            <span
+              className="hover"
+              onClick={() => {
+                delModalHan(record.id);
+              }}
+            >
+              删除
+            </span>
+          )}
         </div>
       )
     }
@@ -379,6 +387,7 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -419,15 +428,17 @@ export default function Connection() {
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            childAddAndSetModalHan();
-          }}
-        >
-          创建连接器
-        </Button>
+        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              childAddAndSetModalHan();
+            }}
+          >
+            创建连接器
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}

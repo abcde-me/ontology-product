@@ -38,13 +38,18 @@ export const ORGANIZATION_PERMISSIONS = {
 
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
-  CAN_CREATE: '',
-  CAN_DELETE: ''
+  CAN_CREATE: 'connectors:can_create',
+  CAN_DELETE: 'connectors:can_delete',
+  CAN_UPDATE: 'connectors:can_update',
+  CAN_GET: 'connectors:can_get'
 } as const;
 
 // 数据载入相关权限
 export const DATA_LOAD_PERMISSIONS = {
-  CAN_CREATE: ''
+  CAN_CREATE: 'dataloader:can_create',
+  CAN_DETELE: 'dataloader:can_delete',
+  CAN_UPDATE: 'dataloader:can_update',
+  CAN_GET: 'dataloader:can_get'
 } as const;
 
 // 工作流列表权限
