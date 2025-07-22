@@ -15,6 +15,7 @@ import {
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 图标组件定义
@@ -213,47 +214,73 @@ const renderActionColumn = (
   selectedFullPath,
   handAllReset,
   resetPage
-) => (
-  <div style={{ display: 'flex', gap: 8 }}>
-    <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS.CAN_SEARCH]}>
-      <span
-        style={{
-          color: '#165DFF',
-          display: 'inline-block',
-          width: '100%',
-          textAlign: 'center',
-          cursor: 'pointer'
-        }}
-        onClick={() => handleDownload(record, setVisible, selectedFullPath)}
-      >
-        导出
-      </span>
-    </PermissionGuard>
-    <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS.CAN_DELETE]}>
-      <span
-        style={{
-          color: '#165DFF',
-          display: 'inline-block',
-          width: '100%',
-          textAlign: 'center',
-          cursor: 'pointer'
-        }}
-        onClick={() =>
-          handleDelete(
-            record,
-            refreshData,
-            selectedKey,
-            tableType,
-            handAllReset,
-            resetPage
-          )
-        }
-      >
-        删除
-      </span>
-    </PermissionGuard>
-  </div>
-);
+) => {
+  const params = record?.params || [];
+  const config: {
+    label: string;
+    onClick: () => void;
+  }[] = [];
+  if (params.includes([DATA_CATALOG_PERMISSIONS?.CAN_SEARCH_DIR, DATA_CATALOG_PERMISSIONS?.CAN_EXPORT_LIST_FILE])) {
+    config.push({
+      label: '导出',
+      onClick: () => handleDownload(record, setVisible, selectedFullPath),
+    })
+  }
+  if (params.includes([DATA_CATALOG_PERMISSIONS?.CAN_DELETE, DATA_CATALOG_PERMISSIONS?.CAN_DELETE_LIST_FILE])) {
+    config.push({
+      label: '删除',
+      onClick: () => handleDelete(record, refreshData, selectedKey, tableType, handAllReset, resetPage),
+    })
+  }
+  return <OperationColumn
+    row={record}
+    index={0}
+    config={config}
+    extendFont="更多"
+  />
+  // (
+  //   <div style={{ display: 'flex', gap: 8 }}>
+  //     {console.log(record, 'top ------ 数据目录')}
+  //     <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS?.[record?.params]]}>
+  //       <span
+  //         style={{
+  //           color: '#165DFF',
+  //           display: 'inline-block',
+  //           width: '100%',
+  //           textAlign: 'center',
+  //           cursor: 'pointer'
+  //         }}
+  //         onClick={() => handleDownload(record, setVisible, selectedFullPath)}
+  //       >
+  //         导出
+  //       </span>
+  //     </PermissionGuard>
+  //     <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS?.[record?.params]]}>
+  //       <span
+  //         style={{
+  //           color: '#165DFF',
+  //           display: 'inline-block',
+  //           width: '100%',
+  //           textAlign: 'center',
+  //           cursor: 'pointer'
+  //         }}
+  //         onClick={() =>
+  //           handleDelete(
+  //             record,
+  //             refreshData,
+  //             selectedKey,
+  //             tableType,
+  //             handAllReset,
+  //             resetPage
+  //           )
+  //         }
+  //       >
+  //         删除
+  //       </span>
+  //     </PermissionGuard>
+  //   </div>
+  // )
+};
 
 // 统一的列配置生成函数
 export const getUnifiedColumns = (
