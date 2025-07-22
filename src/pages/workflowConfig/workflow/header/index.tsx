@@ -98,6 +98,7 @@ const Header: FC = () => {
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef<RefInputType>(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
+  const workflowVersion = useParams('workflow_version');
   const { handleNodeSelect } = useNodesInteractions();
 
   const { setWorkflowDetail } = useTaskStore(
@@ -107,7 +108,9 @@ const Header: FC = () => {
   );
 
   const updateWorkFlowStatus = async () => {
-    const workflowDetailRes = await getWorkflowDetail(workflowUuid);
+    const workflowDetailRes = await getWorkflowDetail(workflowUuid, {
+      workflow_version: workflowVersion
+    });
 
     if (workflowDetailRes?.data) {
       setWorkflowDetail(workflowDetailRes.data);

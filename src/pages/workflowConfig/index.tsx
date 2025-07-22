@@ -19,12 +19,15 @@ function WorkflowConfig({ setHeight }) {
   );
   const [loading, setLoading] = useState(true);
   const appId = useParams('workflow_uuid');
+  const workflowVersion = useParams('workflow_version');
   const history = useHistory();
 
   useEffect(() => {
     const init = async () => {
       if (appId) {
-        const workflowDetailRes = await getWorkflowDetail(appId);
+        const workflowDetailRes = await getWorkflowDetail(appId, {
+          workflow_version: workflowVersion
+        });
 
         if (workflowDetailRes?.data) {
           setWorkflowDetail(workflowDetailRes.data);
