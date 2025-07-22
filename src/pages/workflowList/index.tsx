@@ -107,8 +107,7 @@ export default function WorkflowList() {
   ) => {
     window.open(
       `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`,
-      '_blank',
-      'noopener,noreferrer'
+      '_blank'
     );
   };
 
@@ -121,8 +120,7 @@ export default function WorkflowList() {
       });
       window.open(
         `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`,
-        '_blank',
-        'noopener,noreferrer'
+        '_blank'
       );
       getList();
     } else {
