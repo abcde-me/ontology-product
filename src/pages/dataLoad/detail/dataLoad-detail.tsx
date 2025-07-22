@@ -157,18 +157,17 @@ const DataLoadDetail = () => {
           Message.error('任务停止失败');
         }
       }
-
       setTotal(res.data.total);
       setDetailList(res.data.items);
+      const boo = detailList?.findIndex(
+        (item) => item.status == 'succeed' || item.status == 'stopping'
+      );
+      setRunningFlag(boo == -1 ? false : true);
     } catch (err) {
       console.error(err);
     } finally {
       setDetailListLoading(false);
     }
-    const boo = detailList?.findIndex(
-      (item) => item.status == 'running' || item.status === 'stopping'
-    );
-    setRunningFlag(boo == -1 ? false : true);
   };
   // 启停任务
   const startAndStoponchange = async (val) => {
@@ -206,6 +205,25 @@ const DataLoadDetail = () => {
     getdirectorylist();
     getTask_idHan();
   }, []);
+
+  const clearHan = async () => {
+    try {
+      setDetailListLoading(true);
+      const res = await getLoadRecordList({
+        task_id: Number(loadId),
+        page: 1,
+        page_size: pageSize,
+        execution_id: '',
+        ...directoryObj
+      });
+      setTotal(res.data.total);
+      setDetailList(res.data.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailListLoading(false);
+    }
+  };
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
@@ -227,12 +245,12 @@ const DataLoadDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
+          style={{ cursor: 'pointer', fontSize: '14px', marginTop: '2px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
         />
-        <Breadcrumb style={{ marginLeft: '21px', fontSize: '20px' }}>
+        <Breadcrumb style={{ marginLeft: '20px', fontSize: '20px' }}>
           <BreadcrumbItem
             href="/tenant/compute/modaforge/dataLoad"
             style={{ color: '#7F8C9F' }}
@@ -470,7 +488,7 @@ const DataLoadDetail = () => {
         </div>
         <div
           style={{
-            margin: '15px 0px 15px 20px',
+            margin: '15px 0px 15px 24px',
             fontSize: '17px',
             fontWeight: '600'
           }}
@@ -482,10 +500,11 @@ const DataLoadDetail = () => {
             display: 'flex',
             justifyContent: 'space-between',
             width: '100%',
-            padding: '0px 15px'
+            padding: '0px 20px 0px 24px'
           }}
         >
           <InputSearch
+            onClear={clearHan}
             allowClear
             placeholder="搜索运行ID"
             style={{ width: 220 }}
@@ -510,9 +529,6 @@ const DataLoadDetail = () => {
         <div
           style={{
             width: '100%',
-            // display: 'flex',
-            // flexDirection: 'column',
-            // alignItems: 'end',
             overflow: 'hidden'
           }}
         >

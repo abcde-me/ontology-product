@@ -14,6 +14,10 @@ export enum IsOnline {
   online = 1
 }
 
+export interface WorkflowDetailParams {
+  workflow_version: string | null;
+}
+
 /** 获取工作流详情 */
 export interface WorkflowDetailRes {
   /** 海豚调度生成的id */

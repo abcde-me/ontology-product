@@ -137,7 +137,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.name}
             isEdit={false}
-          // isLink
+            // isLink
           />
         );
       }
@@ -201,7 +201,7 @@ export default function Connection() {
           <EllipsisPopover
             value={item.creator}
             isEdit={false}
-          // isLink
+            // isLink
           />
         );
       }
@@ -260,7 +260,7 @@ export default function Connection() {
   const delModalHan = (id) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确定删除该连接器吗？
         </span>
       ),
@@ -373,6 +373,31 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+  const clearHan = async () => {
+    try {
+      setTableLoding(true); // 请求开始时设置为 true
+      const res = await getConnectionList({
+        page: 1,
+        page_size: pagination.pageSize,
+        name: '',
+        ...siftValue
+      });
+
+      if (res.status !== 200) {
+        return;
+      }
+
+      setConnectionData(res.data.items);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.total
+      }));
+    } catch (error) {
+      console.error('获取连接器列表失败:', error);
+    } finally {
+      setTableLoding(false); // 无论请求成功与否，最后都设置为 false
+    }
+  };
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -384,7 +409,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px',
+        margin: '20px 20px 20px 0',
         padding: '20px',
         borderRadius: '10px'
       }}
@@ -412,6 +437,9 @@ export default function Connection() {
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
+          onClear={() => {
+            clearHan();
+          }}
         />
         <Button
           type="primary"
@@ -462,7 +490,7 @@ export default function Connection() {
         style={{ width: '760px' }}
         visible={visible2}
         title={
-          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接详情</div>
+          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接器详情</div>
         }
         footer={null}
         onCancel={() => {

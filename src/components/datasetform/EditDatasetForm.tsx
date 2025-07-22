@@ -192,7 +192,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="描述说明" field="description">
           <Input.TextArea
-            placeholder="这里输入对数据集的描述和说明信息"
+            placeholder="请输入描述说明"
             rows={2}
             maxLength={500}
             showWordLimit
@@ -200,7 +200,6 @@ const EditDatasetForm: React.FC<Props> = ({
             style={{ marginLeft: '8px' }}
             onChange={(value) => {
               handleDescriptionChange(value);
-              console.log('description changed:', value);
             }}
           />
         </FormItem>
