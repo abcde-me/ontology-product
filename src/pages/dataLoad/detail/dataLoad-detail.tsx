@@ -89,6 +89,7 @@ const DataLoadDetail = () => {
       const res = await getLoad(loadId);
       console.log(res.data);
       setListDetail(res.data);
+      setPerms(res.data.perms);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -107,6 +108,8 @@ const DataLoadDetail = () => {
     }
   };
   const [directoryObj, setDirectoryObj] = useState({});
+  // 详情页面所有权限
+  const [perms, setPerms] = useState<any>([]);
   // 获取子级表格改变的状态
   const getChildrenTableChange = (val) => {
     setDirectoryObj(val);
@@ -235,6 +238,7 @@ const DataLoadDetail = () => {
       setRunningFlag(hasRunningTask);
     }
   }, [detailList]);
+
   return (
     <div>
       <div
@@ -276,7 +280,8 @@ const DataLoadDetail = () => {
       >
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
-          {listDetail?.perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
+
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
             <div
               style={{
                 color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
