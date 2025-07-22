@@ -17,13 +17,12 @@ import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
-import classNames from 'classnames';
-import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -91,7 +90,6 @@ export default function DataLoad() {
       width: 300,
       ellipsis: true,
       render: (_, text) => (
-        //  <OverflowTooltip  width={300} children={text.name}  styles={'txt'}/>
         <EllipsisPopoverCom
           value={text.name}
           isEdit={false}
@@ -101,16 +99,6 @@ export default function DataLoad() {
               gotoDetail(text.task_id);
           }}
         />
-        // <Tooltip content={text.name} position="tl">
-        //   <span
-        //     className="txt"
-        //     onClick={() => {
-        //       gotoDetail(text.task_id);
-        //     }}
-        //   >
-        //     {text.name}
-        //   </span>
-        // </Tooltip>
       )
     },
     {
@@ -252,23 +240,6 @@ export default function DataLoad() {
               '-'
             )}
           </div>
-
-          // <Popover position="tl" content={item.data_path_name}>
-          //   {item.data_path_name !== '' ? (
-          //     <span
-          //       // className="jump-a"
-          //       onClick={() => {
-          //         history.push(
-          //           `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-          //         );
-          //       }}
-          //     >
-          //       <span className="txt">{item.data_path_name}</span>
-          //     </span>
-          //   ) : (
-          //     <span>-</span>
-          //   )}
-          // </Popover>
         );
       }
     },
@@ -300,36 +271,31 @@ export default function DataLoad() {
       fixed: 'right',
       width: 105,
       render: (_, item) => {
+        const perms = item?.perms || [];
+        const config = [] as any;
+        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
+          config.push({
+            label: '详情',
+            onClick: () => {
+              gotoDetail(item.task_id);
+            }
+          });
+        }
+        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
+          config.push({
+            label: '删除',
+            onClick: () => {
+              deleteLoad(item.task_id, item.name);
+            }
+          });
+        }
         return (
-          <div
-            className={Styles.hoverStyle}
-            style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-around'
-            }}
-          >
-            {item.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) && (
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  gotoDetail(item.task_id);
-                }}
-              >
-                详情
-              </span>
-            )}
-            {item.perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE) && (
-              <span
-                className={Styles.hoverStyle}
-                onClick={() => {
-                  deleteLoad(item.task_id, item.name);
-                }}
-              >
-                删除
-              </span>
-            )}
-          </div>
+          <OperationColumn
+            row={item}
+            config={config}
+            index={0}
+            extendFont="操作"
+          />
         );
       }
     }
@@ -368,10 +334,6 @@ export default function DataLoad() {
   const hideEditModal = () => {
     setVisible(false);
   };
-  // 存放删除的id
-  const [delId, setDelId] = useState(null);
-  // 存放删除的名称
-  const [delTitle, setDelTitle] = useState(null);
   const [loadSiftObject, setLoadSiftObject] = useState({});
   // 跳转到详情页面
   const gotoDetail = (task_id: number) => {
@@ -433,21 +395,18 @@ export default function DataLoad() {
   const handlePressEnter = () => {
     getdataLoadList();
   };
-  // 删除的弹框
-  const [delVisible, setDelVisible] = useState(false);
-
   // 删除列表的方法
   const deleteLoad = (id, title) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确认删除该数据载入任务吗?
         </span>
       ),
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 28px',
+            padding: '10px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
@@ -467,13 +426,32 @@ export default function DataLoad() {
       const res = await delLoad(id);
       if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
-        setDelVisible(false);
         getdataLoadList();
       } else {
         Message.error(res.message);
       }
     } catch {
       console.error('网络错误');
+    }
+  };
+  const clearHan = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoadList({
+        page: 1,
+        page_size: pageSize,
+        name: '',
+        ...loadSiftObject
+      });
+      if (res.message == 'ok') {
+        console.log(res.data.items);
+        setData(res.data.items);
+        setLoadTotal(res.data.total);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -486,8 +464,7 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        // margin: '10px 10px 20px 10px',
-        padding: '20px',
+        padding: '20px 21px 20px 20px',
         borderRadius: '10px',
         minHeight: '100%'
       }}
@@ -510,6 +487,7 @@ export default function DataLoad() {
       >
         <InputSearch
           allowClear
+          onClear={clearHan}
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
           onPressEnter={handlePressEnter}
@@ -572,39 +550,10 @@ export default function DataLoad() {
         autoFocus={false}
         focusLock={true}
         footer={null}
-        // maskClosable={false}
         unmountOnExit={true}
       >
         <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
       </Modal>
-      {/* <Route
-        key="/tenant/compute/modaforge/dataLoad/detail"
-        path="/tenant/compute/modaforge/dataLoad/detail"
-        component={React.lazy(async () => import('../detail/dataLoad-detail'))}
-      /> */}
-      {/* <Modal
-        title={
-          <div
-            style={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
-          >
-            <IconExclamationCircle
-              style={{ color: 'orange', fontSize: '20px' }}
-            />
-            删除该载入任务
-          </div>
-        }
-        visible={delVisible}
-        onCancel={() => {
-          setDelVisible(false);
-        }}
-        onOk={() => {
-          deleteLoadHan();
-        }}
-      >
-        <div style={{ fontSize: '14px' }}>
-          删除该数据载入任务，{delTitle}，是否要继续操作?
-        </div>
-      </Modal> */}
     </div>
   );
 }

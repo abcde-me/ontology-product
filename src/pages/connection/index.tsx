@@ -23,11 +23,11 @@ import Edit from './edit';
 import { ConnectionType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
-import { OverflowTooltip } from './utils/textOverflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { CONNECTION_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -72,8 +72,6 @@ export default function Connection() {
   const [editObject, setEditObject] = React.useState<ConnectionType>({});
   // 编辑表单实例
   const [EditForm] = Form.useForm();
-  // 显示详情页面的实例子组件实例
-  const childRef = useRef(null);
   // 添加编辑弹框的实例
   const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
   // 编辑按钮的状态
@@ -144,11 +142,6 @@ export default function Connection() {
             isEdit={false}
             // isLink
           />
-          // <Tooltip content={item.name} position="tl" disabled={false}>
-          //   {item.name}
-          // </Tooltip>
-
-          // <OverflowTooltip width={230} children={item.name}  styles=''/>
         );
       }
     },
@@ -234,54 +227,50 @@ export default function Connection() {
       title: '操作',
       width: 130,
       fixed: 'right',
-      render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_GET) && (
-            <span
-              className="hover"
-              onClick={() => {
-                viewDetailHan(record.id);
-              }}
-            >
-              详情
-            </span>
-          )}
-          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE) && (
-            <span
-              className="hover"
-              onClick={() => {
-                editFormHandle(record);
-              }}
-            >
-              编辑
-            </span>
-          )}
-          {record.perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE) && (
-            <span
-              className="hover"
-              onClick={() => {
-                delModalHan(record.id);
-              }}
-            >
-              删除
-            </span>
-          )}
-        </div>
-      )
+      render: (_, record) => {
+        const perms = record?.perms || [];
+        const config = [] as any;
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
+          config.push({
+            label: '详情',
+            onClick: () => viewDetailHan(record.id)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
+          config.push({
+            label: '编辑',
+            onClick: () => editFormHandle(record)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
+          config.push({
+            label: '删除',
+            onClick: () => delModalHan(record.id)
+          });
+        }
+        return (
+          <OperationColumn
+            row={record}
+            config={config}
+            index={0}
+            extendFont="操作"
+          />
+        );
+      }
     }
   ];
   // 点击删除显示弹框
   const delModalHan = (id) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确定删除该连接器吗？
         </span>
       ),
       content: (
         <div
           style={{
-            padding: '5px 28px 0px 28px',
+            padding: '10px 28px 0px 28px',
             fontSize: '14px',
             fontWeight: '400'
           }}
@@ -387,7 +376,31 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+  const clearHan = async () => {
+    try {
+      setTableLoding(true); // 请求开始时设置为 true
+      const res = await getConnectionList({
+        page: 1,
+        page_size: pagination.pageSize,
+        name: '',
+        ...siftValue
+      });
 
+      if (res.status !== 200) {
+        return;
+      }
+
+      setConnectionData(res.data.items);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.total
+      }));
+    } catch (error) {
+      console.error('获取连接器列表失败:', error);
+    } finally {
+      setTableLoding(false); // 无论请求成功与否，最后都设置为 false
+    }
+  };
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -399,7 +412,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px',
+        margin: '20px',
         padding: '20px',
         borderRadius: '10px'
       }}
@@ -427,6 +440,9 @@ export default function Connection() {
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
+          onClear={() => {
+            clearHan();
+          }}
         />
         <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
           <Button

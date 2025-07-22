@@ -144,16 +144,26 @@ const columns = (
     width: 200,
     className: 'hover-change workflow-name',
     rowClassName: 'hover-change',
-
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
         <EllipsisPopover
+          className={
+            record.status === datasetStatus.normal ||
+            record.status === datasetStatus.version_updating ||
+            record.status === datasetStatus.version_update_failed
+              ? 'dataset-hover'
+              : ''
+          }
           value={renderEmptyPlaceholder(record.name)}
           isEdit={false}
           isLink
           handleLink={() => {
-            handleGoToDetail(record.id);
+            record.status === datasetStatus.normal ||
+            record.status === datasetStatus.version_updating ||
+            record.status === datasetStatus.version_update_failed
+              ? handleGoToDetail(record.id)
+              : '';
           }}
         />
         // <div
@@ -194,9 +204,13 @@ const columns = (
         <Space size="mini">
           {tag_names && tag_names.length > 0 && tag_names[0] && (
             <Tag className={styles.tagGreen}>
-              {tag_names[0].length > 5
-                ? `${tag_names[0].substring(0, 5)}...`
-                : tag_names[0] || '-'}
+              {tag_names[0].length > 5 ? (
+                <Tooltip content={tag_names[0]}>
+                  {tag_names[0].substring(0, 5)}...
+                </Tooltip>
+              ) : (
+                tag_names[0] || '-'
+              )}
             </Tag>
           )}
           {tag_names && tag_names.length > 1 && (
@@ -460,30 +474,35 @@ const columns = (
         >
           编辑
         </Button> */}
+        {/* <Button
+            type='text'
+          >
+            详情
+          </Button> */}
         <Button
           type="text"
           className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+          onClick={() => handleExport(record)}
+          disabled={record.status !== datasetStatus.normal}
           style={{
             padding: '0 8px 0 5px',
             height: '100%',
             borderTop: 'none',
             borderBottom: 'none'
           }}
-          onClick={() => handleExport(record)}
-          disabled={record.status !== datasetStatus.normal}
         >
           导出
         </Button>
         <Button
           type="text"
           className={`${styles.actionButton} ${styles.delete}`}
+          onClick={() => handleDelete(record)}
           style={{
-            padding: '0 5px 0 8px',
+            padding: '0 8px 0 5px',
             height: '100%',
             borderTop: 'none',
             borderBottom: 'none'
           }}
-          onClick={() => handleDelete(record)}
         >
           删除
         </Button>
@@ -606,11 +625,17 @@ const DatasetManagement: React.FC = () => {
 
   // 提交表单数据,新建数据集
   const handleSubmit = async (formData: any) => {
-    console.log('新建数据集:', String(formData.targetDataSource[0][0]));
-    const basePath = String(formData.targetDataSource[0][0]);
-    const formattedPath =
-      basePath.length > 1 && basePath.endsWith('/') ? `${basePath}/` : basePath;
-    const fullPath = `${formattedPath}dst/${formData.targetDataSource[0][1]}/volume/${formData.targetDataSource[1][0]}`;
+    // console.log('新建数据集:', String(formData.targetDataSource[0][0]));
+    let formattedPath;
+    let fullPath;
+    if (formData.dataSource === 'volume') {
+      const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
+      formattedPath =
+        basePath.length > 1 && basePath.endsWith('/')
+          ? `${basePath}/`
+          : basePath;
+      fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
+    }
     const submitData = {
       name: formData.name,
       description: formData.description,
@@ -620,11 +645,11 @@ const DatasetManagement: React.FC = () => {
         formData.dataSource === 'volume'
           ? {
               path: fullPath,
-              path_id: formData.targetDataSource[1][1]
+              path_id: formData.targetDataSource?.[1]?.[1] ?? ''
             }
           : {
-              connector_id: parseInt(formData.targetDataSource) || 0,
-              connector_files: formData.selectedFiles || []
+              connector_id: parseInt(formData?.targetDataSource) || 0,
+              connector_files: formData?.selectedFiles || []
             }
     };
 
@@ -634,7 +659,7 @@ const DatasetManagement: React.FC = () => {
       const createDatasetRes = await createDataset(submitData);
 
       if (createDatasetRes.status !== 200) {
-        Message.error('数据集创建失败！');
+        Message.error(createDatasetRes.message || '数据集创建失败！');
         childRef.current?.setcreateTagDisabled();
         return;
       }
@@ -978,7 +1003,7 @@ const DatasetManagement: React.FC = () => {
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 10px 0px',
+        margin: '20px 20px 10px 0px',
         borderRadius: '10px',
         padding: '20px'
       }}
