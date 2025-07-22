@@ -23,8 +23,6 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 
 const InputSearch = Input.Search;
 
@@ -339,43 +337,37 @@ export default function WorkflowList() {
       width: 160,
       render: (_, record) => (
         <div style={{ display: 'flex' }}>
-          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_GET}>
+          <span
+            className="operate-text"
+            onClick={() => {
+              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+            }}
+          >
+            详情
+          </span>
+          <span
+            className="operate-text"
+            onClick={() => {
+              handleCloneWorkflow(record.workflow_uuid);
+            }}
+          >
+            复制
+          </span>
+          <Popover
+            trigger="hover"
+            content="请先下线工作流"
+            position="top"
+            disabled={!record.is_online}
+          >
             <span
-              className="operate-text"
-              onClick={() => {
-                viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-              }}
+              className={record.is_online ? 'disabled-text' : 'operate-text'}
+              onClick={() =>
+                handleDelete(record.workflow_uuid, record.workflow_version)
+              }
             >
-              详情
+              删除
             </span>
-          </PermissionWrapper>
-          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}>
-            <span
-              className="operate-text"
-              onClick={() => {
-                handleCloneWorkflow(record.workflow_uuid);
-              }}
-            >
-              复制
-            </span>
-          </PermissionWrapper>
-          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}>
-            <Popover
-              trigger="hover"
-              content="请先下线工作流"
-              position="top"
-              disabled={!record.is_online}
-            >
-              <span
-                className={record.is_online ? 'disabled-text' : 'operate-text'}
-                onClick={() =>
-                  handleDelete(record.workflow_uuid, record.workflow_version)
-                }
-              >
-                删除
-              </span>
-            </Popover>
-          </PermissionWrapper>
+          </Popover>
         </div>
       )
     }
@@ -409,15 +401,9 @@ export default function WorkflowList() {
             setIsClickClear(true);
           }}
         />
-        <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_CREATE}>
-          <Button
-            type="primary"
-            onClick={handleCreateWorkflow}
-            loading={loading}
-          >
-            创建工作流
-          </Button>
-        </PermissionWrapper>
+        <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>
+          创建工作流
+        </Button>
       </div>
       <Table
         border={false}

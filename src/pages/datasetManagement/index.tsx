@@ -43,6 +43,9 @@ import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionGuard } from '@/components/PermissionGuard';
 import {
   PopupsFormFrom,
   SourceDataItem,
@@ -313,12 +316,16 @@ const columns = (
             </Tooltip>
           ) : null}
           {status === datasetStatus.version_update_failed ? (
-            <span
-              className={styles.retryText}
-              onClick={() => handleRetry(record.id, record.latest_version)}
+            <PermissionGuard
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
-              重试
-            </span>
+              <span
+                className={styles.retryText}
+                onClick={() => handleRetry(record.id, record.latest_version)}
+              >
+                重试
+              </span>
+            </PermissionGuard>
           ) : null}
         </div>
       );
@@ -479,33 +486,37 @@ const columns = (
           >
             详情
           </Button> */}
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-          onClick={() => handleExport(record)}
-          disabled={record.status !== datasetStatus.normal}
-          style={{
-            padding: '0 8px 0 5px',
-            height: '100%',
-            borderTop: 'none',
-            borderBottom: 'none'
-          }}
-        >
-          导出
-        </Button>
-        <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.delete}`}
-          onClick={() => handleDelete(record)}
-          style={{
-            padding: '0 8px 0 5px',
-            height: '100%',
-            borderTop: 'none',
-            borderBottom: 'none'
-          }}
-        >
-          删除
-        </Button>
+        <PermissionGuard permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}>
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+            onClick={() => handleExport(record)}
+            disabled={record.status !== datasetStatus.normal}
+            style={{
+              padding: '0 8px 0 5px',
+              height: '100%',
+              borderTop: 'none',
+              borderBottom: 'none'
+            }}
+          >
+            导出
+          </Button>
+        </PermissionGuard>
+        <PermissionGuard permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}>
+          <Button
+            type="text"
+            className={`${styles.actionButton} ${styles.delete}`}
+            onClick={() => handleDelete(record)}
+            style={{
+              padding: '0 8px 0 5px',
+              height: '100%',
+              borderTop: 'none',
+              borderBottom: 'none'
+            }}
+          >
+            删除
+          </Button>
+        </PermissionGuard>
       </div>
     )
   }
@@ -626,16 +637,16 @@ const DatasetManagement: React.FC = () => {
   // 提交表单数据,新建数据集
   const handleSubmit = async (formData: any) => {
     // console.log('新建数据集:', String(formData.targetDataSource[0][0]));
-    let formattedPath;
-    let fullPath;
-    if (formData.dataSource === 'volume') {
-      const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
-      formattedPath =
-        basePath.length > 1 && basePath.endsWith('/')
-          ? `${basePath}/`
-          : basePath;
-      fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
-    }
+    // let formattedPath;
+    // let fullPath;
+    // if (formData.dataSource === 'volume') {
+    //   const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
+    //   formattedPath =
+    //     basePath.length > 1 && basePath.endsWith('/')
+    //       ? `${basePath}/`
+    //       : basePath;
+    //   fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
+    // }
     const submitData = {
       name: formData.name,
       description: formData.description,
@@ -644,12 +655,12 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-              path: fullPath,
+              // path: fullPath,
               path_id: formData.targetDataSource?.[1]?.[1] ?? ''
             }
           : {
               connector_id: parseInt(formData?.targetDataSource) || 0,
-              connector_files: formData?.selectedFiles || []
+              connector_file_ids: formData?.selectedFiles || []
             }
     };
 
@@ -1069,37 +1080,53 @@ const DatasetManagement: React.FC = () => {
           />
         </Input.Group>
         <div className={styles.actionButtons}>
-          <Tooltip
-            content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-            disabled={selectedRowKeys.length > 0}
-            style={{ fontSize: '14px' }}
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE_BATCH}
+          >
+            <Tooltip
+              content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+              disabled={selectedRowKeys.length > 0}
+              style={{ fontSize: '14px' }}
+            >
+              <Button
+                icon={<IconDelete />}
+                className={styles.batchDeleteBtn}
+                disabled={selectedRowKeys.length === 0}
+                onClick={handleBatchDelete}
+                type="secondary"
+              >
+                批量删除
+              </Button>
+            </Tooltip>
+          </PermissionWrapper>
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH_BATCH}
+          >
+            <Tooltip
+              content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+              disabled={selectedRowKeys.length > 0}
+            >
+              <Button
+                icon={<IconDownload />}
+                className={styles.batchExportBtn}
+                disabled={selectedRowKeys.length === 0}
+                onClick={handleBatchExport}
+              >
+                批量导出
+              </Button>
+            </Tooltip>
+          </PermissionWrapper>
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
           >
             <Button
-              icon={<IconDelete />}
-              className={styles.batchDeleteBtn}
-              disabled={selectedRowKeys.length === 0}
-              onClick={handleBatchDelete}
-              type="secondary"
+              type="primary"
+              icon={<IconPlus />}
+              onClick={openCreateModal}
             >
-              批量删除
+              新建数据集
             </Button>
-          </Tooltip>
-          <Tooltip
-            content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-            disabled={selectedRowKeys.length > 0}
-          >
-            <Button
-              icon={<IconDownload />}
-              className={styles.batchExportBtn}
-              disabled={selectedRowKeys.length === 0}
-              onClick={handleBatchExport}
-            >
-              批量导出
-            </Button>
-          </Tooltip>
-          <Button type="primary" icon={<IconPlus />} onClick={openCreateModal}>
-            新建数据集
-          </Button>
+          </PermissionWrapper>
         </div>
       </div>
 

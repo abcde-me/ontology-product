@@ -28,7 +28,7 @@ import {
   getConnectorFileList,
   getTagList
 } from '@/api/datasetManagement';
-import { debounce } from 'lodash-es';
+import { debounce, get } from 'lodash-es';
 
 const { Text } = Typography;
 
@@ -128,7 +128,7 @@ function highlight(text, keyword) {
   );
 }
 
-function ItemPathDisplay(item) {
+function itemPathDisplay(item) {
   // 如果 sub_path 为空，显示短横线
   if (item === '') return <span>-</span>;
 
@@ -337,22 +337,22 @@ const DatasetForm = React.forwardRef<
       if (Array.isArray(value) && Array.isArray(value[0])) {
         // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
 
-        const catalogpath = value[0][0];
-        const catalogId = value[0][1];
-        const selectedItem = value[1]?.[0];
-        console.log(11111111, value);
-        const basePath = String(catalogpath[0][0]);
-        const formattedPath =
-          basePath.length > 1 && basePath.endsWith('/')
-            ? `${basePath}/`
-            : basePath;
-        const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
+        // const catalogpath = value?.[0]?.[0];
+        // const catalogId = value?.[0]?.[1];
+        const selectedItem = value?.[1]?.[0];
+        // const basePath = String(catalogpath?.[0]?.[0]??'');
+        // const formattedPath =
+        //   basePath.length > 1 && basePath.endsWith('/')
+        //     ? `${basePath}/`
+        //     : basePath;
+        // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
         if (selectedItem == undefined) {
           setPreviewColumns([]);
           Message.warning('请选择二级目录！');
           return;
         }
-        getVolumePreviewData(path);
+        // getVolumePreviewData(path);
+        getVolumePreviewData(value?.[1]?.[1]);
       } else if (Array.isArray(value) && value.length === 2) {
         return;
       }
@@ -840,7 +840,7 @@ const DatasetForm = React.forwardRef<
                             <div style={{ color: '#6E7B8D', fontSize: '14px' }}>
                               <Space size={12}>
                                 <span>
-                                  所属文件：{ItemPathDisplay(item.sub_path)}
+                                  所属文件：{itemPathDisplay(item.sub_path)}
                                 </span>
                                 <span>
                                   修改时间：{formatDateTime(item.last_modified)}

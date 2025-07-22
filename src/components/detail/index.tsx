@@ -50,6 +50,9 @@ import {
   datasetVersionRebuild
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionGuard } from '@/components/PermissionGuard';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
@@ -1100,17 +1103,23 @@ const DatasetDetail: React.FC = () => {
                     : ''
                 }
               >
-                <Button
-                  // type="primary"
-                  disabled={!datasetDetail || datasetDetail.status !== 'normal'}
-                  onClick={handleEdit}
-                  type="text"
-                  icon={<IconEdit />}
-                  className="edit-btn"
-                  style={{ height: '100%' }}
+                <PermissionGuard
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE}
                 >
-                  编辑
-                </Button>
+                  <Button
+                    // type="primary"
+                    disabled={
+                      !datasetDetail || datasetDetail.status !== 'normal'
+                    }
+                    onClick={handleEdit}
+                    type="text"
+                    icon={<IconEdit />}
+                    className="edit-btn"
+                    style={{ height: '100%' }}
+                  >
+                    编辑
+                  </Button>
+                </PermissionGuard>
               </Tooltip>
             </div>
 
@@ -1465,26 +1474,32 @@ const DatasetDetail: React.FC = () => {
                       </Tooltip>
                     </Space>
                   ) : (
-                    <Tooltip
-                      content={
-                        !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
+                    <PermissionGuard
+                      permission={
+                        DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
                       }
                     >
-                      <Button
-                        // type="primary"
-                        disabled={
+                      <Tooltip
+                        content={
                           !datasetDetail || datasetDetail.status !== 'normal'
+                            ? '当前状态下不能进行编辑'
+                            : ''
                         }
-                        onClick={() => setUpdateStatus(true)}
-                        type="text"
-                        icon={<IconEdit />}
-                        className="edit-btn"
                       >
-                        编辑
-                      </Button>
-                    </Tooltip>
+                        <Button
+                          // type="primary"
+                          disabled={
+                            !datasetDetail || datasetDetail.status !== 'normal'
+                          }
+                          onClick={() => setUpdateStatus(true)}
+                          type="text"
+                          icon={<IconEdit />}
+                          className="edit-btn"
+                        >
+                          编辑
+                        </Button>
+                      </Tooltip>
+                    </PermissionGuard>
                   )}
                 </>
               ) : null}
