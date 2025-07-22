@@ -33,7 +33,7 @@ function WorkflowConfig({ setHeight }) {
           setWorkflowDetail(workflowDetailRes.data);
           setLoading(false);
         } else {
-          Message.error('获取工作流失败');
+          Message.error(workflowDetailRes?.message ?? '获取工作流失败');
         }
       } else {
         const workflowInfo = await createWorkflow({
@@ -47,7 +47,7 @@ function WorkflowConfig({ setHeight }) {
             `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );
         } else {
-          Message.error('创建工作流失败');
+          Message.error(workflowInfo?.message ?? '创建工作流失败');
         }
       }
     };

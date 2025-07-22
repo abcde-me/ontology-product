@@ -5,25 +5,16 @@ import React, {
   forwardRef,
   useImperativeHandle
 } from 'react';
-import useStore from '@/pages/dataCatalog/store';
-import {
-  Tree,
-  Typography,
-  Button,
-  Message,
-  Modal
-} from '@arco-design/web-react';
-import { IconFolder } from '@arco-design/web-react/icon';
+import { Typography } from '@arco-design/web-react';
 import {
   getTargetDataFileList,
-  getDataCatalogList,
   getSourceDataFileList
 } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable, { UnifiedTableRef } from './unified-table';
 import Pages from './components/pages';
 import FormComponent from './components/popups-form';
-import { getUnifiedColumns } from './unified-columns';
+import { getUnifiedColumns, getSourceFileTypeList } from './unified-columns';
 import './index.scss';
 import { PopupsFormFrom } from './components/popups-form/types';
 
@@ -120,6 +111,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     React.Key[]
   >([]);
   const [crossPageSelectedRows, setCrossPageSelectedRows] = useState<any[]>([]);
+  const [sourceFileTypeFilters, setSourceFileTypeFilters] = useState<string[]>(
+    []
+  );
 
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
@@ -378,6 +372,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const resetPage = () => {
     setCurrentPage(1);
   };
+
   // 合并的useEffect处理所有数据获取逻辑
   useEffect(() => {
     // 首次渲染标记
@@ -456,6 +451,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
 
+  useEffect(() => {
+    getSourceFileTypeList({
+      id: selectedKey
+    }).then((result) => {
+      setSourceFileTypeFilters(result);
+    });
+  }, [selectedKey]);
+
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
     return getUnifiedColumns(
@@ -468,7 +471,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       selectedFullPath,
       undefined,
       handAllReset,
-      resetPage
+      resetPage,
+      sourceFileTypeFilters
     );
   }, [
     tableType,
@@ -477,7 +481,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedKey,
     selectedFullPath,
     handAllReset,
-    resetPage
+    resetPage,
+    sourceFileTypeFilters
   ]);
 
   // 处理带有hoveredRowId的列配置

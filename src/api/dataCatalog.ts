@@ -87,6 +87,10 @@ interface TargetDataFileQueryParams {
   sort_order?: string;
 }
 
+interface SourceFileTypeList {
+  id: string;
+}
+
 // 定义删除目标文件的参数接口
 interface TargetFileDeleteParams {
   file_ids: Array<number | string>;
@@ -134,8 +138,13 @@ export async function getTargetFileTypeList() {
   return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
 }
 //查询源数据文件类型列表
-export async function getSourceFileTypeList() {
-  return await UAPI.RES.sourceFileTypeListApi({}).get().inRegion().do();
+export async function getSourceFileTypeList(params) {
+  return await UAPI.RES.sourceFileTypeListApi({
+    file_id: params.id
+  })
+    .get()
+    .inRegion()
+    .do();
 }
 
 //删除目标文件

@@ -1,5 +1,4 @@
 import UAPI from '@/api';
-import { number } from 'echarts';
 // 数据集管理相关接口
 
 // 类型定义
