@@ -48,6 +48,7 @@ import { IsOnline } from '@/types/workflowApi';
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
 import { useLocation } from 'react-router-dom';
 import { useParams } from '@/utils/url';
+import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
 
 export const useIsChatMode = () => {
   const appDetail = useTaskStore((s) => s.workflowDetail);
@@ -712,6 +713,7 @@ export const useNodesReadOnly = () => {
   const isRestoring = useStore((s) => s.isRestoring);
   const currentUrl = window.location.pathname;
   const appDetail = useTaskStore((s) => s.workflowDetail);
+  const workflowPerms = appDetail?.perms ?? [];
   // url上携带版本，不支持工作流编辑，主要场景：作业详情跳转到工作流详情
   const workflowVersion = useParams('workflow_version');
 
@@ -725,7 +727,8 @@ export const useNodesReadOnly = () => {
       historyWorkflowData ||
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
-      !!workflowVersion
+      !!workflowVersion ||
+      !workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE_DAG)
     );
   }, [workflowStore, appDetail]);
 
@@ -736,7 +739,8 @@ export const useNodesReadOnly = () => {
       historyWorkflowData ||
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
-      !!workflowVersion
+      !!workflowVersion ||
+      !workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE_DAG)
     ),
     getNodesReadOnly
   };
