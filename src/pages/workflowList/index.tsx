@@ -25,7 +25,6 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { OperationColumn } from '@ccf2e/arco-material';
 
 const InputSearch = Input.Search;
 
@@ -337,7 +336,7 @@ export default function WorkflowList() {
       fixed: 'right',
       width: 160,
       render: (_, record) => {
-        const perms = record.list_api_user_perms || [];
+        const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
             {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && (

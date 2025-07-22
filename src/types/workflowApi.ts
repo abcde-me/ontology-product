@@ -51,6 +51,8 @@ export interface WorkflowDetailRes {
   user_name: string;
   /** 定时运行 */
   cycle_text?: CycleText;
+  /** 权限列表 */
+  perms: string[];
 }
 
 export enum WorkflowOperation {
