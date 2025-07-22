@@ -26,6 +26,7 @@ import {
 } from '@/api/loadApi';
 import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -88,6 +89,7 @@ const DataLoadDetail = () => {
       const res = await getLoad(loadId);
       console.log(res.data);
       setListDetail(res.data);
+      setPerms(res.data.perms);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -106,6 +108,8 @@ const DataLoadDetail = () => {
     }
   };
   const [directoryObj, setDirectoryObj] = useState({});
+  // 详情页面所有权限
+  const [perms, setPerms] = useState<any>([]);
   // 获取子级表格改变的状态
   const getChildrenTableChange = (val) => {
     setDirectoryObj(val);
@@ -157,18 +161,17 @@ const DataLoadDetail = () => {
           Message.error('任务停止失败');
         }
       }
-
       setTotal(res.data.total);
       setDetailList(res.data.items);
+      const boo = detailList?.findIndex(
+        (item) => item.status == 'succeed' || item.status == 'stopping'
+      );
+      setRunningFlag(boo == -1 ? false : true);
     } catch (err) {
       console.error(err);
     } finally {
       setDetailListLoading(false);
     }
-    const boo = detailList?.findIndex(
-      (item) => item.status == 'running' || item.status === 'stopping'
-    );
-    setRunningFlag(boo == -1 ? false : true);
   };
   // 启停任务
   const startAndStoponchange = async (val) => {
@@ -206,6 +209,25 @@ const DataLoadDetail = () => {
     getdirectorylist();
     getTask_idHan();
   }, []);
+
+  const clearHan = async () => {
+    try {
+      setDetailListLoading(true);
+      const res = await getLoadRecordList({
+        task_id: Number(loadId),
+        page: 1,
+        page_size: pageSize,
+        execution_id: '',
+        ...directoryObj
+      });
+      setTotal(res.data.total);
+      setDetailList(res.data.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailListLoading(false);
+    }
+  };
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
@@ -216,6 +238,7 @@ const DataLoadDetail = () => {
       setRunningFlag(hasRunningTask);
     }
   }, [detailList]);
+
   return (
     <div>
       <div
@@ -227,19 +250,21 @@ const DataLoadDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
+          style={{ cursor: 'pointer', fontSize: '14px', marginTop: '2px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
         />
-        <Breadcrumb style={{ marginLeft: '21px', fontSize: '20px' }}>
+        <Breadcrumb style={{ marginLeft: '20px', fontSize: '20px' }}>
           <BreadcrumbItem
             href="/tenant/compute/modaforge/dataLoad"
             style={{ color: '#7F8C9F' }}
           >
             数据载入详情
           </BreadcrumbItem>
-          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
+          <BreadcrumbItem style={{ marginBottom: '5px' }}>
+            {listDetail?.name}
+          </BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div
@@ -255,20 +280,23 @@ const DataLoadDetail = () => {
       >
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
-          <div
-            style={{
-              color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
-              pointerEvents: runningFlag ? 'none' : undefined,
-              cursor: runningFlag ? '' : 'pointer',
-              fontSize: '14px'
-            }}
-            onClick={() => {
-              setEditVisible(true);
-              console.log(listDetail?.run_config?.cycle_text);
-            }}
-          >
-            <IconEdit /> 编辑
-          </div>
+
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
+            <div
+              style={{
+                color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
+                pointerEvents: runningFlag ? 'none' : undefined,
+                cursor: runningFlag ? '' : 'pointer',
+                fontSize: '14px'
+              }}
+              onClick={() => {
+                setEditVisible(true);
+                console.log(listDetail?.run_config?.cycle_text);
+              }}
+            >
+              <IconEdit /> 编辑
+            </div>
+          )}
         </div>
         <div className="info-container">
           <div className="info-column">
@@ -470,7 +498,7 @@ const DataLoadDetail = () => {
         </div>
         <div
           style={{
-            margin: '15px 0px 15px 20px',
+            margin: '15px 0px 15px 24px',
             fontSize: '17px',
             fontWeight: '600'
           }}
@@ -482,10 +510,11 @@ const DataLoadDetail = () => {
             display: 'flex',
             justifyContent: 'space-between',
             width: '100%',
-            padding: '0px 15px'
+            padding: '0px 20px 0px 24px'
           }}
         >
           <InputSearch
+            onClear={clearHan}
             allowClear
             placeholder="搜索运行ID"
             style={{ width: 220 }}
@@ -510,9 +539,6 @@ const DataLoadDetail = () => {
         <div
           style={{
             width: '100%',
-            // display: 'flex',
-            // flexDirection: 'column',
-            // alignItems: 'end',
             overflow: 'hidden'
           }}
         >

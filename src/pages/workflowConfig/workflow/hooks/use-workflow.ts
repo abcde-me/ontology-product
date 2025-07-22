@@ -47,6 +47,7 @@ import { IsOnline } from '@/types/workflowApi';
 // import workflowsPublish from '@/pages/workflowConfig/mockData/workflowsPublish.json'
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
 import { useLocation } from 'react-router-dom';
+import { useParams } from '@/utils/url';
 
 export const useIsChatMode = () => {
   const appDetail = useTaskStore((s) => s.workflowDetail);
@@ -711,6 +712,8 @@ export const useNodesReadOnly = () => {
   const isRestoring = useStore((s) => s.isRestoring);
   const currentUrl = window.location.pathname;
   const appDetail = useTaskStore((s) => s.workflowDetail);
+  // url上携带版本，不支持工作流编辑，主要场景：作业详情跳转到工作流详情
+  const workflowVersion = useParams('workflow_version');
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -721,7 +724,8 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      appDetail?.is_online === IsOnline.online
+      appDetail?.is_online === IsOnline.online ||
+      !!workflowVersion
     );
   }, [workflowStore, appDetail]);
 
@@ -731,7 +735,8 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      appDetail?.is_online === IsOnline.online
+      appDetail?.is_online === IsOnline.online ||
+      !!workflowVersion
     ),
     getNodesReadOnly
   };

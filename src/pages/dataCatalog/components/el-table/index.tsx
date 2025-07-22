@@ -24,6 +24,7 @@ import {
 } from '@/components/data-catalog-content/components/popups-form/types';
 import { Dataset } from '@/pages/datasetManagement';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -333,11 +334,11 @@ export default function Eltable() {
                 file_ids: ids,
                 path_id: selectedKey
               });
-              if (res.code == '') {
+              if (res.status === 200) {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               } else {
-                Message.error('删除失败，请稍后重试');
+                Message.error(res?.message ?? '删除失败，请稍后重试');
               }
             }
           } else {
@@ -348,11 +349,11 @@ export default function Eltable() {
               const res = await deleteSourceFileBatch({
                 ids: ids
               });
-              if (res.code == '') {
+              if (res.status === 200) {
                 Message.success('删除成功');
                 clearAllSelectionsAndCache();
               } else {
-                Message.error('删除失败，请稍后重试');
+                Message.error(res?.message ?? '删除失败，请稍后重试');
               }
             }
           }
@@ -475,7 +476,12 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <PermissionWrapper>
+        <PermissionWrapper
+          anyPermission={[
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_BATCH,
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_DST_FILE
+          ]}
+        >
           <Popover content="请先选择文件" className="narrow-popover">
             <Button
               icon={<IconDelete />}
@@ -493,7 +499,12 @@ export default function Eltable() {
           </Popover>
         </PermissionWrapper>
       ) : (
-        <PermissionWrapper>
+        <PermissionWrapper
+          anyPermission={[
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_BATCH,
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_DST_FILE
+          ]}
+        >
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -512,7 +523,7 @@ export default function Eltable() {
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <PermissionWrapper permission={["user:can_view", "user:can_edit"]} >
+        <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
           <Popover content="请先选择文件" className="narrow-popover">
             <Button
               icon={<IconDownload />}
@@ -532,7 +543,7 @@ export default function Eltable() {
           </Popover>
         </PermissionWrapper>
       ) : (
-        <PermissionWrapper permission="connectors:can_search">
+        <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -625,7 +636,7 @@ export default function Eltable() {
           selectedRows as Array<SourceDataItem & TargetDataItem & Dataset>
         }
         selectedPath={selectedPath}
-        onExportSuccess={() => { }}
+        onExportSuccess={() => {}}
         resetSelectedData={clearAllSelectionsAndCache}
       />
     </div>

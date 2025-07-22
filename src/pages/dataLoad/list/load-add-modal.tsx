@@ -15,6 +15,7 @@ import { addLoad, getDirectoryList } from '@/api/loadApi';
 import { getConnectionList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -196,7 +197,22 @@ const LoadAddModal = (props: propsType) => {
   useEffect(() => {
     getdirectoryDataList();
     getConnector_name_type();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
+
+  // 创建 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(() => {
+    const items = document.querySelectorAll('.arco-cascader-list-item');
+    items.forEach((item) => item.removeAttribute('title'));
+  });
+
+  // 开始监听整个文档
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
   // 自定义下拉框搜索的逻辑
 
   return (
@@ -215,7 +231,7 @@ const LoadAddModal = (props: propsType) => {
           labelAlign="right"
           required
           extra={
-            <div style={{ color: '#6E7B8D', fontSize: 12 }}>
+            <div className="text-prompt">
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议: 连接器connector_1</div>
             </div>
@@ -318,6 +334,9 @@ const LoadAddModal = (props: propsType) => {
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
             options={directoryData}
+            renderOption={(item) => {
+              return <EllipsisPopoverCom value={item.label} />;
+            }}
             showSearch={{ retainInputValueWhileSelect: false }}
             dropdownMenuClassName="cascader-dropdown"
           />

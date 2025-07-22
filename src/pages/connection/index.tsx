@@ -25,6 +25,9 @@ import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { CONNECTION_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -224,43 +227,43 @@ export default function Connection() {
       title: '操作',
       width: 130,
       fixed: 'right',
-      render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          <span
-            className="hover"
-            onClick={() => {
-              viewDetailHan(record.id);
-            }}
-          >
-            详情
-          </span>
-
-          <span
-            className="hover"
-            onClick={() => {
-              editFormHandle(record);
-            }}
-          >
-            编辑
-          </span>
-
-          <span
-            className="hover"
-            onClick={() => {
-              delModalHan(record.id);
-            }}
-          >
-            删除
-          </span>
-        </div>
-      )
+      render: (_, record) => {
+        const perms = record?.perms || [];
+        const config = [] as any;
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
+          config.push({
+            label: '详情',
+            onClick: () => viewDetailHan(record.id)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
+          config.push({
+            label: '编辑',
+            onClick: () => editFormHandle(record)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
+          config.push({
+            label: '删除',
+            onClick: () => delModalHan(record.id)
+          });
+        }
+        return (
+          <OperationColumn
+            row={record}
+            config={config}
+            index={0}
+            extendFont="操作"
+          />
+        );
+      }
     }
   ];
   // 点击删除显示弹框
   const delModalHan = (id) => {
     Modal.confirm({
       title: (
-        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+        <span style={{ fontSize: '16px', fontWeight: '600' }}>
           确定删除该连接器吗？
         </span>
       ),
@@ -373,6 +376,31 @@ export default function Connection() {
       setTableLoding(false); // 无论请求成功与否，最后都设置为 false
     }
   };
+  const clearHan = async () => {
+    try {
+      setTableLoding(true); // 请求开始时设置为 true
+      const res = await getConnectionList({
+        page: 1,
+        page_size: pagination.pageSize,
+        name: '',
+        ...siftValue
+      });
+
+      if (res.status !== 200) {
+        return;
+      }
+
+      setConnectionData(res.data.items);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.total
+      }));
+    } catch (error) {
+      console.error('获取连接器列表失败:', error);
+    } finally {
+      setTableLoding(false); // 无论请求成功与否，最后都设置为 false
+    }
+  };
   // 页面挂载和更新时获取连接器列表
   useEffect(() => {
     getlist();
@@ -384,7 +412,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px',
+        margin: '20px',
         padding: '20px',
         borderRadius: '10px'
       }}
@@ -412,16 +440,21 @@ export default function Connection() {
           onPressEnter={handlePressEnter}
           defaultValue={searchValue}
           onChange={(value) => setSearchValue(value)}
-        />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            childAddAndSetModalHan();
+          onClear={() => {
+            clearHan();
           }}
-        >
-          创建连接器
-        </Button>
+        />
+        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              childAddAndSetModalHan();
+            }}
+          >
+            创建连接器
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}

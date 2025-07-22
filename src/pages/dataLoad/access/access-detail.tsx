@@ -52,7 +52,7 @@ const AccessDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
+          style={{ cursor: 'pointer', fontSize: '14px', marginTop: '2px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
@@ -64,7 +64,7 @@ const AccessDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Breadcrumb style={{ marginLeft: '28px', fontSize: '20px' }}>
+          <Breadcrumb style={{ marginLeft: '20px', fontSize: '20px' }}>
             <BreadcrumbItem
               href="/tenant/compute/modaforge/dataLoad"
               style={{ color: '#7F8C9F' }}
@@ -72,6 +72,7 @@ const AccessDetail = () => {
               数据载入详情
             </BreadcrumbItem>
             <BreadcrumbItem
+              style={{ marginBottom: '5px' }}
               onClick={() => {
                 history.back();
               }}
@@ -79,7 +80,7 @@ const AccessDetail = () => {
             >
               {name}
             </BreadcrumbItem>
-            <BreadcrumbItem style={{ fontSize: '20px' }}>
+            <BreadcrumbItem style={{ fontSize: '20px', marginBottom: '5px' }}>
               {arressDetail.execution_name}
               {!loading && '运行记录'}
             </BreadcrumbItem>
@@ -138,7 +139,7 @@ const AccessDetail = () => {
           style={{
             fontSize: '17px',
             fontWeight: '600',
-            padding: '0px 20px',
+            padding: '0px 24px',
             margin: '15px 0px'
           }}
         >
@@ -198,7 +199,7 @@ const AccessDetail = () => {
           style={{
             fontSize: '17px',
             fontWeight: '600',
-            margin: '15px 0px 15px 17px'
+            margin: '15px 0px 15px 24px'
           }}
         >
           文件详情

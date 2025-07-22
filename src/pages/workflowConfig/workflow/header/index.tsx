@@ -100,6 +100,8 @@ const Header: FC = () => {
   const workflowUuid = useParams('workflow_uuid') ?? '';
   const workflowVersion = useParams('workflow_version');
   const { handleNodeSelect } = useNodesInteractions();
+  // url上携带版本，隐藏上下线、运行、工作流名称编辑操作，主要场景：作业详情跳转到工作流详情
+  const headerOperationDisplay = !workflowVersion;
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -307,28 +309,34 @@ const Header: FC = () => {
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              <Popover trigger="hover" content="编辑">
-                <div className="eidt-icon" onClick={handleEdit}></div>
-              </Popover>
+              {headerOperationDisplay && (
+                <Popover trigger="hover" content="编辑">
+                  <div className="eidt-icon" onClick={handleEdit}></div>
+                </Popover>
+              )}
             </div>
           )}
           <EditingTitle />
         </div>
       </div>
-      <div className="right-part">
-        <TaskOperation
-          {...{
-            workflowStatus: appDetail?.is_online ?? IsOnline.offline,
-            cycleText,
-            onOperate
-          }}
-        />
-      </div>
-      <SuccessModal
-        visible={showRuningModal}
-        onClose={() => setShowRuningModal(false)}
-        params={workflowOperationRes}
-      />
+      {headerOperationDisplay && (
+        <>
+          <div className="right-part">
+            <TaskOperation
+              {...{
+                workflowStatus: appDetail?.is_online ?? IsOnline.offline,
+                cycleText,
+                onOperate
+              }}
+            />
+          </div>
+          <SuccessModal
+            visible={showRuningModal}
+            onClose={() => setShowRuningModal(false)}
+            params={workflowOperationRes}
+          />
+        </>
+      )}
     </div>
   );
 };

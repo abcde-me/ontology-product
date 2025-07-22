@@ -38,13 +38,18 @@ export const ORGANIZATION_PERMISSIONS = {
 
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
-  CAN_CREATE: '',
-  CAN_DELETE: ''
+  CAN_CREATE: 'connectors:can_create',
+  CAN_DELETE: 'connectors:can_delete',
+  CAN_UPDATE: 'connectors:can_update',
+  CAN_GET: 'connectors:can_get'
 } as const;
 
 // 数据载入相关权限
 export const DATA_LOAD_PERMISSIONS = {
-  CAN_CREATE: ''
+  CAN_CREATE: 'dataloader:can_create',
+  CAN_DETELE: 'dataloader:can_delete',
+  CAN_UPDATE: 'dataloader:can_update',
+  CAN_GET: 'dataloader:can_get'
 } as const;
 
 // 工作流列表权限
@@ -63,15 +68,17 @@ export const WORKFLOW_TASK_PERMISSIONS = {} as const;
 
 // 数据目录相关权限
 export const DATA_CATALOG_PERMISSIONS = {
-  CAN_CREATE_CATALOG: 'directory:can_create_catalog',
-  CAN_CREATE_VOLUME: 'directory:can_create_volume',
-  CAN_DELETE_DIRS: 'directory:can_delete_dirs',
-  CAN_UPDATE_DIRS: 'directory:can_update_dirs',
-  CAN_DELETE_BATCH: 'source_dir:can_delete_batch',
-  CAN_DELETE_DST_FILE: 'directory:can_delete_dst_file',
-  CAN_SEARCH: 'connectors:can_search',
-  CAN_SEARCH_DIR: 'source_dir:can_search',
-  CAN_DELETE: 'source_dir:can_delete'
+  CAN_CREATE_CATALOG: 'directory:can_create_catalog', // 新建树
+  CAN_CREATE_VOLUME: 'directory:can_create_volume', // 新建数据集
+  CAN_DELETE_DIRS: 'directory:can_delete_dirs', // 删除树
+  CAN_UPDATE_DIRS: 'directory:can_update_dirs', // 更新树
+  CAN_DELETE_BATCH: 'source_dir:can_delete_batch', // 源目录文件批量删除
+  CAN_DELETE_DST_FILE: 'directory:can_delete_dst_file', // 目标目录文件删除
+  CAN_SEARCH: 'connectors:can_search', // 批量导出
+  CAN_SEARCH_DIR: 'dst_file:can_export', // 导出 - 源目录
+  CAN_DELETE: 'dst_file:can_delete', //  删除 - 源目录
+  CAN_EXPORT_LIST_FILE: 'source_dir:can_export', // 导出 - 目标目录文件
+  CAN_DELETE_LIST_FILE: 'source_dir:can_delete' // 删除 - 目标目录文件
 } as const;
 
 // 数据集管理权限
