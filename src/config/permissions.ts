@@ -61,7 +61,11 @@ export const WORKFLOW_LIST_PERMISSIONS = {
 } as const;
 
 // 工作流详情权限
-export const WORKFLOW_DETAIL_PERMISSIONS = {} as const;
+export const WORKFLOW_DETAIL_PERMISSIONS = {
+  CAN_UPDATE_DAG: 'workflow:can_update_dag', // 编辑保存画布
+  CAN_OPERATION: 'workflow:can_operation', // 工作流操作（上下线、运行）
+  CAN_UPDATE: 'workflow:can_update' // 工作流名称修改
+} as const;
 
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {} as const;
