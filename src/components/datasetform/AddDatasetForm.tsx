@@ -401,7 +401,7 @@ const DatasetForm = React.forwardRef<
   const getVolumePreviewData = (volumeId: string) => {
     setTableLoading(true);
     // 这里应该调用真实的API
-    getCatalogPreview({ path: volumeId })
+    getCatalogPreview({ path_id: volumeId })
       .then((res) => {
         if (res.status !== 200) {
           Message.error(res.message);

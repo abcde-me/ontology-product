@@ -87,6 +87,7 @@ export interface Dataset {
   tag_names?: string[];
   src_model: string;
   latest_file_path: string;
+  perms: string[];
   status:
     | 'creating'
     | 'create_failed'
@@ -225,7 +226,7 @@ const columns = (
                   style={{
                     // background: '#E2E8F0',
                     // color: '#0F172A',
-                    margin: '0 2px'
+                    margin: '2px 2px'
                     // borderRadius: '16px',
                     // fontSize: '12px',
                     // height: '18px',
@@ -286,6 +287,7 @@ const columns = (
     filteredValue: selectedStatusFilters,
     filterMultiple: true,
     render: (status: string, record: Dataset) => {
+      const perms = record.perms;
       const statusConfig = getStatusConfig(status);
       if (!status) return '-';
       return (
@@ -315,18 +317,15 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {status === datasetStatus.version_update_failed ? (
-            <PermissionGuard
-              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
-            >
+          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) &&
+            (status === datasetStatus.version_update_failed ? (
               <span
                 className={styles.retryText}
                 onClick={() => handleRetry(record.id, record.latest_version)}
               >
                 重试
               </span>
-            </PermissionGuard>
-          ) : null}
+            ) : null)}
         </div>
       );
     }
@@ -473,52 +472,55 @@ const columns = (
     dataIndex: 'op',
     width: 104,
     fixed: 'right' as const,
-    render: (_: unknown, record: Dataset) => (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {/* <Button
+    render: (_: unknown, record: Dataset) => {
+      const perms = record.perms;
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
         </Button> */}
-        {/* <Button
+          {/* <Button
             type='text'
           >
             详情
           </Button> */}
-        <PermissionGuard permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}>
-          <Button
-            type="text"
-            className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-            onClick={() => handleExport(record)}
-            disabled={record.status !== datasetStatus.normal}
-            style={{
-              padding: '0 8px 0 5px',
-              height: '100%',
-              borderTop: 'none',
-              borderBottom: 'none'
-            }}
-          >
-            导出
-          </Button>
-        </PermissionGuard>
-        <PermissionGuard permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}>
-          <Button
-            type="text"
-            className={`${styles.actionButton} ${styles.delete}`}
-            onClick={() => handleDelete(record)}
-            style={{
-              padding: '0 8px 0 5px',
-              height: '100%',
-              borderTop: 'none',
-              borderBottom: 'none'
-            }}
-          >
-            删除
-          </Button>
-        </PermissionGuard>
-      </div>
-    )
+          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) && (
+            <Button
+              type="text"
+              className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+              onClick={() => handleExport(record)}
+              disabled={record.status !== datasetStatus.normal}
+              style={{
+                padding: '0 8px 0 5px',
+                height: '100%',
+                borderTop: 'none',
+                borderBottom: 'none'
+              }}
+            >
+              导出
+            </Button>
+          )}
+          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+            <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.delete}`}
+              onClick={() => handleDelete(record)}
+              style={{
+                padding: '0 8px 0 5px',
+                height: '100%',
+                borderTop: 'none',
+                borderBottom: 'none'
+              }}
+            >
+              删除
+            </Button>
+          )}
+        </div>
+      );
+    }
   }
 ];
 
@@ -1057,7 +1059,7 @@ const DatasetManagement: React.FC = () => {
           />
           <Input.Search
             allowClear
-            placeholder="输入ID/数据内容搜索"
+            placeholder="输入关键字搜索"
             style={{ width: 160, height: 32 }}
             value={search}
             onChange={(value) => setSearch(value)}
