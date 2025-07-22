@@ -137,7 +137,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
           label="音频解析模型："
           field="audio_model_id"
           labelAlign="left"
-          extra="指定音频解析的模型。"
+          extra="指定音频解析的模型。系统仅支持对于普通话和英语信息进行解析，对于各种中国方言和其他外语暂时不支持。"
         >
           <Select>
             {audioModels.map((option) => (
