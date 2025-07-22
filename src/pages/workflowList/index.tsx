@@ -25,7 +25,6 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { OperationColumn } from '@ccf2e/arco-material';
 
 const InputSearch = Input.Search;
 
