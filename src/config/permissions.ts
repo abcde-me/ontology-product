@@ -61,11 +61,7 @@ export const WORKFLOW_LIST_PERMISSIONS = {
 } as const;
 
 // 工作流详情权限
-export const WORKFLOW_DETAIL_PERMISSIONS = {
-  CAN_UPDATE_DAG: 'workflow:can_update_dag', // 编辑保存画布
-  CAN_OPERATION: 'workflow:can_operation', // 工作流操作（上下线、运行）
-  CAN_UPDATE: 'workflow:can_update' // 工作流名称修改
-} as const;
+export const WORKFLOW_DETAIL_PERMISSIONS = {} as const;
 
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {} as const;
@@ -76,6 +72,8 @@ export const DATA_CATALOG_PERMISSIONS = {
   CAN_CREATE_VOLUME: 'directory:can_create_volume', // 新建数据集
   CAN_DELETE_DIRS: 'directory:can_delete_dirs', // 删除树
   CAN_UPDATE_DIRS: 'directory:can_update_dirs', // 更新树
+  CAN_DELETE_BATCH: 'source_dir:can_delete_batch', // 源目录文件批量删除
+  CAN_DELETE_DST_FILE: 'directory:can_delete_dst_file', // 目标目录文件删除
   CAN_SEARCH: 'connectors:can_search', // 批量导出
   CAN_SEARCH_DIR: 'source_dir:can_export', // 导出 - 源目录
   CAN_DELETE: 'source_dir:can_delete', //  删除 - 源目录
