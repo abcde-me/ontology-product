@@ -247,7 +247,7 @@ const Workflow: FC<WorkflowProps> = memo(
       }
     });
 
-    useShortcuts();
+    // useShortcuts();
 
     const store = useStoreApi();
     if (process.env.NODE_ENV === 'development') {
