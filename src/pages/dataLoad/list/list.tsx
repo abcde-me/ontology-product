@@ -22,6 +22,8 @@ import { OverflowTooltip } from '@/pages/connection/utils/textOverflow';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -513,15 +515,17 @@ export default function DataLoad() {
             setSearchValue(value);
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            setVisible(true);
-          }}
-        >
-          创建数据载入任务
-        </Button>
+        <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              setVisible(true);
+            }}
+          >
+            创建数据载入任务
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         loading={loadloading}
