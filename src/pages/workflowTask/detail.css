@@ -116,6 +116,7 @@
     .arco-tabs-header-nav-line.arco-tabs-header-nav-vertical
       .arco-tabs-header-title {
       padding: 0 26px 0 0;
+      margin: 0 0 12px 0;
     }
   }
 }
