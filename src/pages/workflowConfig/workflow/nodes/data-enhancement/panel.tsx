@@ -31,10 +31,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const unmountedRef = useUnmountedRef();
   const [modelList, setModelList] = useState<any[]>([]);
   const app_scenarios_name = Form.useWatch('app_scenarios_name', form);
+  const prompt_checkbox = Form.useWatch('prompt_checkbox', form);
+  console.log(app_scenarios_name, 'top -app_scenarios_name');
   const prompt_text = TextPlan[app_scenarios_name]?.prompt;
   const sample_data_text = TextPlan[app_scenarios_name]?.data;
   useEffect(() => {
-    setCustomPromptChecked(inputs?.prompt?.length > 0 ? true : false);
     getModelList().then((res) => {
       if (unmountedRef.current) return;
       const ModelLs =
@@ -53,10 +54,19 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     });
   }, []);
 
-  useEffect(() => {
-    form.setFieldValue('prompt', inputs?.prompt ?? prompt_text);
-    form.setFieldValue('sample_data', sample_data_text);
-  }, [app_scenarios_name]);
+  // useEffect(() => {
+  //   console.log(inputs?.prompt, 'top - pppp', inputs?.app_scenarios_name, form.getFieldValue('app_scenarios_name'));
+  //   if (inputs?.app_scenarios_name === form.getFieldValue('app_scenarios_name')) {
+  //     form.setFieldValue('prompt_checkbox', inputs?.is_prompt === 1 ? true : false);
+  //     form.setFieldValue('prompt', inputs?.prompt ?? prompt_text);
+  //     console.log('object', 111, inputs?.prompt, prompt_text);
+  //   } else {
+  //     console.log('object', 2222);
+  //     form.setFieldValue('prompt_checkbox', false);
+  //     form.setFieldValue('prompt', prompt_text);
+  //   }
+  //   form.setFieldValue('sample_data', sample_data_text);
+  // }, [app_scenarios_name]);
   return (
     <div className="wk-node-panel-content code-panel-content data-enhancement-panel mt-[16px]">
       <Form
@@ -67,6 +77,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           ...data,
+          prompt_checkbox: inputs?.is_prompt === 1 ? true : false,
           app_scenarios_name: inputs?.app_scenarios_name ?? 'tongyong',
           enha_modle_id: inputs?.enha_modle_id,
           enhanced_proportion: inputs?.enhanced_proportion ?? 0.7,
@@ -217,14 +228,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           />
         </FormItem>
         <FormItem field="prompt_checkbox" label={null}>
-          <Checkbox
-            checked={customPromptChecked} // 绑定选中状态
-            onChange={(checked) => setCustomPromptChecked(checked)} // 处理选中状态变化
-          >
+          <Checkbox>
             自定义提示词
           </Checkbox>
         </FormItem>
-        {customPromptChecked && (
+        {prompt_checkbox && (
           <FormItem field="prompt" label={null}>
             <TextArea
               style={{ minHeight: 64, minWidth: 350 }}

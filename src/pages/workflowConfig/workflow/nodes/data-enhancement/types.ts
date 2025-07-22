@@ -28,6 +28,7 @@ export type CodeNodeType = CommonNodeType & {
   similarity_threshold: number; // 相似度阈值
   sample_num: number; // 指令生成依赖样本数
   prompt: string;
+  is_prompt: number;
   prompt_checkbox: boolean;
   enhanced_proportion: number; // 任务描述增强占比
   modelList: Array<any>;
