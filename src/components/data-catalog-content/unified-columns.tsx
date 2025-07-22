@@ -13,6 +13,8 @@ import {
   getSourceFileTypeList
 } from '@/api/dataCatalog';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { PermissionGuard } from '@/components/PermissionGuard';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 图标组件定义
@@ -213,39 +215,43 @@ const renderActionColumn = (
   resetPage
 ) => (
   <div style={{ display: 'flex', gap: 8 }}>
-    <span
-      style={{
-        color: '#165DFF',
-        display: 'inline-block',
-        width: '100%',
-        textAlign: 'center',
-        cursor: 'pointer'
-      }}
-      onClick={() => handleDownload(record, setVisible, selectedFullPath)}
-    >
-      导出
-    </span>
-    <span
-      style={{
-        color: '#165DFF',
-        display: 'inline-block',
-        width: '100%',
-        textAlign: 'center',
-        cursor: 'pointer'
-      }}
-      onClick={() =>
-        handleDelete(
-          record,
-          refreshData,
-          selectedKey,
-          tableType,
-          handAllReset,
-          resetPage
-        )
-      }
-    >
-      删除
-    </span>
+    <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS.CAN_SEARCH]}>
+      <span
+        style={{
+          color: '#165DFF',
+          display: 'inline-block',
+          width: '100%',
+          textAlign: 'center',
+          cursor: 'pointer'
+        }}
+        onClick={() => handleDownload(record, setVisible, selectedFullPath)}
+      >
+        导出
+      </span>
+    </PermissionGuard>
+    <PermissionGuard permission={[DATA_CATALOG_PERMISSIONS.CAN_DELETE]}>
+      <span
+        style={{
+          color: '#165DFF',
+          display: 'inline-block',
+          width: '100%',
+          textAlign: 'center',
+          cursor: 'pointer'
+        }}
+        onClick={() =>
+          handleDelete(
+            record,
+            refreshData,
+            selectedKey,
+            tableType,
+            handAllReset,
+            resetPage
+          )
+        }
+      >
+        删除
+      </span>
+    </PermissionGuard>
   </div>
 );
 
@@ -255,7 +261,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => {}, // 添加刷新数据的回调函数
+  refreshData = () => { }, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
