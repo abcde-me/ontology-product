@@ -301,9 +301,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
-    console.log(dataRef, 'top----- 树 tree', dataRef?.perms);
-    const fruits = [DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG, DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME, DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS, DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS];
-    const hasSensitivePermission = fruits.some(op => dataRef?.perms?.includes(op));
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>

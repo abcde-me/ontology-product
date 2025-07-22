@@ -198,20 +198,17 @@ const renderActionColumn = (
   resetPage
 ) => {
   const params = record?.perms || [];
-  const fruits = [DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR, DATA_CATALOG_PERMISSIONS.CAN_DELETE, DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE, DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE];
-  const hasSensitivePermission = fruits.some(op => params.includes(op));
-  console.log(params, 'params', record, hasSensitivePermission);
   const config: {
     label: string;
     onClick: () => void;
   }[] = [];
-  if (hasSensitivePermission) {
+  if (params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) || params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)) {
     config.push({
       label: '导出',
       onClick: () => handleDownload(record, setVisible, selectedFullPath)
     });
   }
-  if (hasSensitivePermission) {
+  if (params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) || params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)) {
     config.push({
       label: '删除',
       onClick: () =>
