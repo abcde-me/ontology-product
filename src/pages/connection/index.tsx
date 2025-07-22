@@ -409,7 +409,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px',
+        margin: '20px 20px 20px 0',
         padding: '20px',
         borderRadius: '10px'
       }}
