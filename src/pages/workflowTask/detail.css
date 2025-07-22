@@ -86,6 +86,23 @@
       line-height: 22px;
       vertical-align: middle;
       margin: 0 0 5px 0;
+      position: relative;
+      display: inline-flex;
+      cursor: pointer;
+
+      &::after {
+        content: '';
+        display: block;
+        height: 16px;
+        width: 16px;
+        background-image: url(../../assets/workflow-task-jiantou.svg);
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
     }
   }
 
