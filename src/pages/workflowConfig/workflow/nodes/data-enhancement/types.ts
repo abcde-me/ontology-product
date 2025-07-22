@@ -24,29 +24,10 @@ export type CodeNodeType = CommonNodeType & {
   code: string;
   outputs: OutputVar;
   enha_modle_id: number;
-  generate_sample_num: number; // 生成样本数
-  similarity_threshold: number; // 相似度阈值
-  sample_num: number; // 指令生成依赖样本数
-  prompt: string;
-  is_prompt: number;
   prompt_checkbox: boolean;
-  enhanced_proportion: number; // 任务描述增强占比
   modelList: Array<any>;
-  sample_data: string;
-  app_scenarios_name: string;
   customPromptChecked: boolean;
-  app_scenarios: {
-    name: string;
-    type: string;
-    option: {
-      sample_num: number;
-      similarity_threshold: number;
-      generate_sample_num: number;
-      enhanced_proportion: number;
-      prompt: string;
-      sample_data: string;
-    };
-  };
+  app_scenarios: AppScenario;
 };
 
 export type CodeDependency = any;
@@ -65,32 +46,35 @@ export type TextProcessingRules = {
   removeValidUrlsAndEmails: boolean;
 };
 
+export interface AppScenario {
+  name: string;
+  type?: string;
+  option: {
+    /** 自定义提示词开关 */
+    is_prompt: number;
+    /** 指令生成依赖样本数 */
+    sample_num: number;
+    /** 相似度阈值 */
+    similarity_threshold: number;
+    /** 生成样本数 */
+    generate_sample_num: number;
+    /** 任务描述增强占比 */
+    enhanced_proportion: number;
+    /** 自定义提示词 */
+    prompt: string;
+    /** 数据示例 */
+    sample_data: string;
+  };
+}
+
 export type EnhancementNodeType = {
   source_path: []; // '源文件路径'; // 待定是否多个目录 【】
-  target_path: string; ///'目标文件路径';
+  target_path: string; // '目标文件路径';
   type: 'enhancement'; // start、text、pic、audio、video、cleaning、enhancement、end
   title: '数据增强节点';
-  app_scenarios: {
-    name: string;
-    type: string;
-    option: {
-      sample_num: number;
-      similarity_threshold: number;
-      generate_sample_num: number;
-      enhanced_proportion: number;
-      prompt: string;
-      sample_data: string;
-    };
-  }; // '应用场景'; // 按通用（0）、文本分类（1）、文本提取（2）、文本生成（3）、多轮问答（4）
-  sample_data: string; // 示例数据;
-  prompt: string; // '提示词';
+  app_scenarios: AppScenario;
   enha_modle_id: number; //'数据增强模型名称';
-  generate_sample_num: number; // 生成样本数
-  similarity_threshold: number; // 相似度阈值
-  sample_num: number; // 指令生成依赖样本数
   prompt_checkbox: boolean; // 提示词 开关
   modelList: Array<any>;
-  enhanced_proportion: number; // 任务描述占比值
-  app_scenarios_name: string; // 场景
   customPromptChecked: boolean;
 };
