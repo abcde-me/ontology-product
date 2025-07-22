@@ -97,7 +97,8 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            gotoDetail(text.task_id);
+            text.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) &&
+              gotoDetail(text.task_id);
           }}
         />
         // <Tooltip content={text.name} position="tl">
@@ -302,31 +303,32 @@ export default function DataLoad() {
         return (
           <div
             className={Styles.hoverStyle}
-            onClick={() => {
-              // 跳转到详情页
-            }}
             style={{
               width: '100%',
               display: 'flex',
               justifyContent: 'space-around'
             }}
           >
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                gotoDetail(item.task_id);
-              }}
-            >
-              详情
-            </span>
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                deleteLoad(item.task_id, item.name);
-              }}
-            >
-              删除
-            </span>
+            {item.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) && (
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  gotoDetail(item.task_id);
+                }}
+              >
+                详情
+              </span>
+            )}
+            {item.perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE) && (
+              <span
+                className={Styles.hoverStyle}
+                onClick={() => {
+                  deleteLoad(item.task_id, item.name);
+                }}
+              >
+                删除
+              </span>
+            )}
           </div>
         );
       }
