@@ -129,6 +129,9 @@ export default function WorkflowTaskDetail() {
     sort: '',
     sort_by: ''
   });
+  const workflowUuid = useParams('workflow_uuid');
+  const workflowVersion = useParams('workflow_version');
+  const workflowId = useParams('ds_workflow_id');
 
   // 初始化详情基本数据
   useEffect(() => {
@@ -291,7 +294,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.time_size === ''
                   ? '-'
-                  : taskDetailData?.time_size ?? '-'}
+                  : (taskDetailData?.time_size ?? '-')}
               </span>
             </div>
           </div>
@@ -301,7 +304,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.start_time === ''
                   ? '-'
-                  : taskDetailData?.start_time ?? '-'}
+                  : (taskDetailData?.start_time ?? '-')}
               </span>
             </div>
           </div>
@@ -311,7 +314,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.end_time === ''
                   ? '-'
-                  : taskDetailData?.end_time ?? '-'}
+                  : (taskDetailData?.end_time ?? '-')}
               </span>
             </div>
           </div>
@@ -519,6 +522,13 @@ export default function WorkflowTaskDetail() {
     }
   };
 
+  const handleClickWorkflow = () => {
+    window.open(
+      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`,
+      '_blank'
+    );
+  };
+
   return (
     <div className="workflow-task-detail">
       <div className="head-breadcrumb-box">
@@ -542,7 +552,9 @@ export default function WorkflowTaskDetail() {
       {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
-        <div className="workflow-name">{workflowName}</div>
+        <div className="workflow-name" onClick={handleClickWorkflow}>
+          {workflowName}
+        </div>
         <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}

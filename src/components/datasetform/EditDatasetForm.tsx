@@ -192,7 +192,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="描述说明" field="description">
           <Input.TextArea
-            placeholder="请输入导出文件的路径说明"
+            placeholder="请输入描述说明"
             rows={2}
             maxLength={500}
             showWordLimit
@@ -200,12 +200,8 @@ const EditDatasetForm: React.FC<Props> = ({
             style={{ marginLeft: '8px' }}
             onChange={(value) => {
               handleDescriptionChange(value);
-              console.log('description changed:', value);
             }}
           />
-          <span style={{ color: '#999', fontSize: 12, marginLeft: 8 }}>
-            指定导出文件的保存路径目录
-          </span>
         </FormItem>
       </Form>
 

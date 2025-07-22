@@ -4,6 +4,7 @@ import {
   Form,
   Input,
   Message,
+  Popover,
   Radio,
   Select
 } from '@arco-design/web-react';
@@ -13,6 +14,8 @@ import SchedulerRun from '../../../components/scheduler-run';
 import { editLoad, getDirectoryList } from '@/api/loadApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
+import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 // 定义目录数据类型
 interface DirectoryItem {
@@ -71,7 +74,7 @@ const Edit = (props) => {
   const [obj, setObj] = useState(props.cron);
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
-  const [directoryData, setDirectoryData] = useState([]);
+  const [directoryData, setDirectoryData] = useState([]) as any;
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
@@ -114,7 +117,22 @@ const Edit = (props) => {
   }, [props.detailData?.data_path_id, directoryData]);
   useEffect(() => {
     getdirectoryDataList();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
+
+  // 创建 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(() => {
+    const items = document.querySelectorAll('.arco-cascader-list-item');
+    items.forEach((item) => item.removeAttribute('title'));
+  });
+
+  // 开始监听整个文档
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -214,7 +232,7 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           extra={
-            <div style={{ color: '#666', fontSize: 12 }}>
+            <div style={{ color: '#6E7B8D', fontSize: 12 }}>
               <div>支持中文，英文，数字，下划线</div>
               <div>名称建议: 连接器connector_1</div>
             </div>
@@ -307,6 +325,10 @@ const Edit = (props) => {
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
             options={directoryData}
+            renderOption={(node, level) => {
+              console.log(node, level);
+              return <EllipsisPopoverCom value={node.label} />;
+            }}
             showSearch={{ retainInputValueWhileSelect: false }}
             dropdownMenuClassName="cascader-dropdown"
             onChange={(value) => {

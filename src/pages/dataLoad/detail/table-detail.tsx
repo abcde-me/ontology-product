@@ -189,6 +189,9 @@ const TableDetail = (props) => {
       });
       if (res.code == '' && res.status == 200) {
         Message.success('操作成功');
+        setTimeout(() => {
+          props.TimedStops();
+        }, 20000);
       } else {
         Message.error(res.message);
       }
@@ -197,9 +200,6 @@ const TableDetail = (props) => {
     } catch (error) {
       console.log(error);
     } finally {
-      setTimeout(() => {
-        props.TimedStops();
-      }, 20000);
     }
     // 请求接口
   };
@@ -214,7 +214,7 @@ const TableDetail = (props) => {
     <div>
       <div
         style={{
-          margin: '15px 0px 15px 15px',
+          margin: '15px 0px 15px 17px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'end'
@@ -227,7 +227,7 @@ const TableDetail = (props) => {
           pagination={false}
           style={{
             width: '100%',
-            padding: '1px 10px 0px 0px'
+            padding: '1px 15px 0px 7px'
           }}
           scroll={{ x: true }}
           rowKey="seatunnel_job_id"
@@ -266,7 +266,15 @@ const TableDetail = (props) => {
             >
               !
             </div>
-            <div style={{ fontSize: '15px', marginLeft: '10px' }}>停止运行</div>
+            <div
+              style={{
+                fontSize: '16px',
+                marginLeft: '10px',
+                fontWeight: '600'
+              }}
+            >
+              停止运行
+            </div>
           </div>
           <div style={{ padding: '0px 30px', fontSize: '14px' }}>
             该操作会停止当前数据载入运行任务，停止后将无法恢复运行，是否要继续当前操作?

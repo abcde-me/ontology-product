@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} from 'react';
 import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
@@ -10,7 +16,7 @@ import {
   deleteTargetFile,
   deleteSourceFile,
   getTargetFileTypeList,
-  getSourceFileTypeList
+  getSourceFileTypeList as getSourceFileTypeListApi
 } from '@/api/dataCatalog';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PermissionGuard } from '@/components/PermissionGuard';
@@ -25,11 +31,6 @@ const TXTIcon = ({ size = 16 }) => <TxtIcon width={size} height={size} />;
 
 // 默认文件类型筛选器
 let fileTypeFilters = [
-  { text: 'pdf', value: 'pdf' },
-  { text: 'txt', value: 'txt' },
-  { text: 'doc', value: 'doc' }
-];
-let SourcefileTypeFilters = [
   { text: 'pdf', value: 'pdf' },
   { text: 'txt', value: 'txt' },
   { text: 'doc', value: 'doc' }
@@ -67,7 +68,6 @@ const formatFileSize = (size: number): string => {
 const getFileTypeList = async () => {
   try {
     const res = await getTargetFileTypeList();
-    console.log('目标数据文件类型列表', res.data.dst_file_type);
     if (
       res &&
       res.data &&
@@ -87,30 +87,12 @@ const getFileTypeList = async () => {
     return [];
   }
 };
-const getFileTypeLists = async () => {
-  try {
-    const res = await getSourceFileTypeList();
-    console.log('源数据文件类型列表66666666666666', res.data);
-    if (res && res.data) {
-      SourcefileTypeFilters = res.data
-        .filter((type) => type)
-        .map((type) => ({
-          text: type,
-          value: type
-        }));
-    }
-    return res;
-  } catch (error) {
-    console.error('获取文件类型列表失败:', error);
-    return [];
-  }
-};
 
 // 初始化文件类型筛选器
 (async () => {
   try {
     await getFileTypeList();
-    await getFileTypeLists();
+    // await getFileTypeLists();
   } catch (error) {
     console.error('初始化文件类型筛选器失败:', error);
   }
@@ -139,30 +121,30 @@ export const useFileTypeFilters = () => {
   }, []);
   return filters;
 };
-export const useSourceFileTypeFilters = () => {
-  const [sourceFilters, setSourceFilters] = useState(SourcefileTypeFilters);
-  useEffect(() => {
-    const fetchFileTypes = async () => {
-      try {
-        const fileTypes = await getFileTypeLists();
-        if (fileTypes && Array.isArray(fileTypes)) {
-          const newFilters = fileTypes
-            .filter((type) => type)
-            .map((type) => ({
-              text: type,
-              value: type
-            }));
-          setSourceFilters(newFilters);
-        }
-      } catch (error) {
-        console.error('获取文件类型列表失败:', error);
-      }
-    };
+// export const useSourceFileTypeFilters = () => {
+//   const [sourceFilters, setSourceFilters] = useState(SourcefileTypeFilters);
+//   useEffect(() => {
+//     const fetchFileTypes = async () => {
+//       try {
+//         const fileTypes = await getFileTypeLists();
+//         if (fileTypes && Array.isArray(fileTypes)) {
+//           const newFilters = fileTypes
+//             .filter((type) => type)
+//             .map((type) => ({
+//               text: type,
+//               value: type
+//             }));
+//           setSourceFilters(newFilters);
+//         }
+//       } catch (error) {
+//         console.error('获取文件类型列表失败:', error);
+//       }
+//     };
 
-    fetchFileTypes();
-  }, []);
-  return sourceFilters;
-};
+//     fetchFileTypes();
+//   }, []);
+//   return sourceFilters;
+// };
 
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
 const WorkflowIdCell = ({ record, showIcon }) => {
@@ -220,24 +202,39 @@ const renderActionColumn = (
     label: string;
     onClick: () => void;
   }[] = [];
-  if (params.includes([DATA_CATALOG_PERMISSIONS?.CAN_SEARCH_DIR, DATA_CATALOG_PERMISSIONS?.CAN_EXPORT_LIST_FILE])) {
+  if (
+    params.includes([
+      DATA_CATALOG_PERMISSIONS?.CAN_SEARCH_DIR,
+      DATA_CATALOG_PERMISSIONS?.CAN_EXPORT_LIST_FILE
+    ])
+  ) {
     config.push({
       label: '导出',
-      onClick: () => handleDownload(record, setVisible, selectedFullPath),
-    })
+      onClick: () => handleDownload(record, setVisible, selectedFullPath)
+    });
   }
-  if (params.includes([DATA_CATALOG_PERMISSIONS?.CAN_DELETE, DATA_CATALOG_PERMISSIONS?.CAN_DELETE_LIST_FILE])) {
+  if (
+    params.includes([
+      DATA_CATALOG_PERMISSIONS?.CAN_DELETE,
+      DATA_CATALOG_PERMISSIONS?.CAN_DELETE_LIST_FILE
+    ])
+  ) {
     config.push({
       label: '删除',
-      onClick: () => handleDelete(record, refreshData, selectedKey, tableType, handAllReset, resetPage),
-    })
+      onClick: () =>
+        handleDelete(
+          record,
+          refreshData,
+          selectedKey,
+          tableType,
+          handAllReset,
+          resetPage
+        )
+    });
   }
-  return <OperationColumn
-    row={record}
-    index={0}
-    config={config}
-    extendFont="更多"
-  />
+  return (
+    <OperationColumn row={record} index={0} config={config} extendFont="更多" />
+  );
   // (
   //   <div style={{ display: 'flex', gap: 8 }}>
   //     {console.log(record, 'top ------ 数据目录')}
@@ -282,13 +279,37 @@ const renderActionColumn = (
   // )
 };
 
+export const getSourceFileTypeList = async (params) => {
+  if (!params?.id) {
+    return [];
+  }
+
+  try {
+    const res = await getSourceFileTypeListApi(params);
+
+    if (res.status !== 200 || !Array.isArray(res.data)) {
+      return [];
+    }
+
+    return res.data
+      .filter((type) => type)
+      .map((type) => ({
+        text: type,
+        value: type
+      }));
+  } catch (error) {
+    console.error('获取文件类型列表失败:', error);
+    return [];
+  }
+};
+
 // 统一的列配置生成函数
 export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -298,7 +319,7 @@ export const getUnifiedColumns = (
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
-  const sourceFilters = sourceFileTypeFilters || SourcefileTypeFilters;
+
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
     return [
@@ -323,7 +344,7 @@ export const getUnifiedColumns = (
         title: '文件类型',
         dataIndex: 'file_type',
         width: 120,
-        filters: sourceFilters,
+        filters: sourceFileTypeFilters,
         render: (_, record) => (
           <div
             style={{
@@ -508,7 +529,7 @@ const handleDelete = (
             file_ids: ids,
             path_id: selectedKey
           });
-          if (res.code == 0) {
+          if (res.status === 200) {
             Message.success('删除成功');
             const event = new CustomEvent('resetPageToFirst', {
               detail: { tableType }
@@ -519,12 +540,12 @@ const handleDelete = (
               refreshData();
             }, 200);
           } else {
-            Message.error('删除失败，请稍后重试');
+            Message.error(res?.message ?? '删除失败，请稍后重试');
             return;
           }
         } else {
           const res = await deleteSourceFile(data.id);
-          if (res.code == 0) {
+          if (res.status === 200) {
             Message.success('删除成功');
             const event = new CustomEvent('resetPageToFirst', {
               detail: { tableType }
@@ -535,7 +556,7 @@ const handleDelete = (
               refreshData();
             }, 200);
           } else {
-            Message.error('删除失败，请稍后重试');
+            Message.error(res?.message ?? '删除失败，请稍后重试');
             return;
           }
         }

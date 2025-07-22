@@ -43,6 +43,8 @@ export default function WorkflowList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 区分是否点击按钮清空搜索框
+  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     run_cycle: '',
@@ -53,6 +55,14 @@ export default function WorkflowList() {
   useEffect(() => {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
+
+  // 清空搜索框
+  useEffect(() => {
+    if (isClickClear && searchValue === '') {
+      getList();
+      setIsClickClear(false);
+    }
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -99,8 +109,7 @@ export default function WorkflowList() {
   ) => {
     window.open(
       `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`,
-      '_blank',
-      'noopener,noreferrer'
+      '_blank'
     );
   };
 
@@ -113,8 +122,7 @@ export default function WorkflowList() {
       });
       window.open(
         `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`,
-        '_blank',
-        'noopener,noreferrer'
+        '_blank'
       );
       getList();
     } else {
@@ -159,7 +167,7 @@ export default function WorkflowList() {
       getList();
     } else {
       Message.error({
-        content: res.message || '删除失败，请稍后重试'
+        content: res?.message ?? '删除失败，请稍后重试'
       });
     }
   };
@@ -400,6 +408,11 @@ export default function WorkflowList() {
           }}
           onPressEnter={() => {
             getList();
+          }}
+          onClear={() => {
+            setCurrent(1);
+            setSearchValue('');
+            setIsClickClear(true);
           }}
         />
         <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_CREATE}>

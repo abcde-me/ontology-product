@@ -64,3 +64,7 @@
 tbody .load-name .ellipsis-text {
   font-weight: 600;
 }
+.text-prompt {
+  color: #6e7b8d;
+  font-size: 12px;
+}
