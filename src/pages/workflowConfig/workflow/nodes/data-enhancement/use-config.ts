@@ -51,7 +51,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             similarity_threshold: payload?.similarity_threshold,
             generate_sample_num: payload?.generate_sample_num,
             enhanced_proportion: payload?.enhanced_proportion,
-            prompt: payload.prompt_checkbox ? payload.prompt : '',
+            is_prompt: payload.prompt_checkbox ? 1 : 0,
+            prompt: payload.prompt,
             sample_data: payload?.sample_data
           }
         };
