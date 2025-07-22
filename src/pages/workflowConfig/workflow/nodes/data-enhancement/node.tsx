@@ -11,17 +11,15 @@ import useConfig from './use-config';
 import './data-enhancement.scss';
 
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
+  const { app_scenarios, enha_modle_id, modelList, prompt_checkbox } =
+    props.data;
   const {
-    app_scenarios_name,
-    enha_modle_id,
     enhanced_proportion,
     sample_num,
     similarity_threshold,
-    generate_sample_num,
-    prompt,
-    modelList,
-    prompt_checkbox
-  } = props.data;
+    generate_sample_num
+  } = app_scenarios?.option ?? {};
+  const app_scenarios_name = app_scenarios?.name ?? '';
   const store = useStoreApi();
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,
@@ -50,7 +48,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         fields.enha_modle_id = model_emb_model_id;
       }
       if (!app_scenarios_name) {
-        fields.app_scenarios_name = 'tongyong';
+        fields.app_scenarios = {};
+        fields.app_scenarios.name = 'tongyong';
       }
       handleModelChange(fields);
       setBoostPageData(modelList);
