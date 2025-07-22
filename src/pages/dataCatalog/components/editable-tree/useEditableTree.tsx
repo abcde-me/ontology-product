@@ -300,7 +300,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const renderExtra = (node: NodeProps) => {
-    console.log(node, 'top-----');
+    console.log(node, 'top----- 树 tree');
     const { dataRef } = node;
     return (
       !dataRef?.showInput && (
@@ -310,7 +310,9 @@ export function useEditableTree({ catalogTreeStore }) {
           ) && (
             <>
               <PermissionGuard
-                permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                permission={
+                  DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_UPDATE_DIRS]
+                }
               >
                 <Tooltip color="white" content="重命名">
                   <IconEdit
@@ -322,7 +324,9 @@ export function useEditableTree({ catalogTreeStore }) {
                 </Tooltip>
               </PermissionGuard>
               <PermissionGuard
-                permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}
+                permission={
+                  DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_DELETE_DIRS]
+                }
               >
                 <Tooltip color="white" content="删除">
                   <IconDelete
@@ -350,7 +354,9 @@ export function useEditableTree({ catalogTreeStore }) {
           )}
           {dataRef?.type === 'volume' && (
             <PermissionGuard
-              permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
+              permission={
+                DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_CREATE_VOLUME]
+              }
             >
               <Tooltip color="white" content="新建">
                 <IconPlus
