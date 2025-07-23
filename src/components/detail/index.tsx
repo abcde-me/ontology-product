@@ -379,6 +379,7 @@ const statusConfig = {
 // 渲染状态标签
 const renderStatusTag = (
   status: string,
+  perms?: string[],
   errorReason?: string,
   handleVersionRebuild?: () => void,
   handlerefresh?: () => void
@@ -417,20 +418,24 @@ const renderStatusTag = (
             }}
           />
         </Tooltip>
-        <Button
-          type="text"
-          size="small"
-          style={{
-            color: '#165dff',
-            padding: '0 4px',
-            fontSize: '14px',
-            height: 'auto'
-          }}
-        >
-          <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
-            重试
-          </span>
-        </Button>
+        {perms?.includes(
+          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
+        ) && (
+          <Button
+            type="text"
+            size="small"
+            style={{
+              color: '#165dff',
+              padding: '0 4px',
+              fontSize: '14px',
+              height: 'auto'
+            }}
+          >
+            <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
+              重试
+            </span>
+          </Button>
+        )}
       </div>
     );
   }
@@ -1225,6 +1230,7 @@ const DatasetDetail: React.FC = () => {
                           )}
                           {renderStatusTag(
                             datasetDetail.status,
+                            datasetDetail.perms,
                             datasetDetail.error_reason,
                             handleVersionRebuild,
                             handlerefresh

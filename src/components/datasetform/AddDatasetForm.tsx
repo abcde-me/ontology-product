@@ -84,7 +84,7 @@ function convertToCascaderOptions(dataSourceData) {
     //     </div>
     //   </Tooltip>
     // ),
-    label: catalog.name,
+    label: '11111',
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume

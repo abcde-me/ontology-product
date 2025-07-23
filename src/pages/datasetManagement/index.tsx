@@ -317,7 +317,9 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) &&
+          {perms?.includes(
+            DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
+          ) &&
             (status === datasetStatus.version_update_failed ? (
               <span
                 className={styles.retryText}
