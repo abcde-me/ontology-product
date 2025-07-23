@@ -45,7 +45,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           prompt:
             app_scenarios_option?.prompt ??
             TextPlan[app_scenarios_type]?.prompt,
-          sample_data: app_scenarios_option?.sample_data ?? ''
+          sample_data:
+            app_scenarios_option?.sample_data ??
+            TextPlan[app_scenarios_type]?.data
         }
       },
       prompt_checkbox: app_scenarios_option?.is_prompt === 1 ? true : false,
@@ -62,6 +64,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     form.setFieldValue('app_scenarios.type', value);
     form.setFieldValue('prompt_checkbox', false);
     form.setFieldValue('app_scenarios.option.prompt', TextPlan[value]?.prompt);
+    form.setFieldValue(
+      'app_scenarios.option.sample_data',
+      TextPlan[value]?.data
+    );
   };
 
   useEffect(() => {

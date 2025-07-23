@@ -25,7 +25,7 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
         enhanced_proportion: 0.7,
         is_prompt: 0,
         prompt: TextPlan['tongyong'].prompt,
-        sample_data: ''
+        sample_data: TextPlan['tongyong'].data
       }
     }
   },
