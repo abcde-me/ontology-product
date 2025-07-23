@@ -61,8 +61,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
           if (payload.enha_modle_id) {
             draft.enha_modle_id = payload.enha_modle_id;
           }
-          if (payload?.app_scenarios?.name) {
-            draft.app_scenarios.name = payload.app_scenarios.name;
+          if (payload?.app_scenarios) {
+            draft.app_scenarios = payload?.app_scenarios;
           }
         }
       );
