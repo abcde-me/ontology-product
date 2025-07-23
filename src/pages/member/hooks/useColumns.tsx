@@ -70,7 +70,8 @@ export function useColumns() {
               height: '24px',
               borderRadius: '4px',
               backgroundColor: '#DBF4EE',
-              color: '#0AB58D'
+              color: '#0AB58D',
+              padding: '0 11px 0 8px',
             }}
             icon={<IconCheckCircleFill />} color="green">
             启用
@@ -82,7 +83,8 @@ export function useColumns() {
               height: '24px',
               borderRadius: '4px',
               backgroundColor: '#FFECE5',
-              color: '#EF4D29'
+              color: '#EF4D29',
+              padding: '0 11px 0 8px',
             }}
             icon={<IconCloseCircleFill />} color="orange">
             停用
