@@ -49,7 +49,9 @@ export const DATA_LOAD_PERMISSIONS = {
   CAN_CREATE: 'dataloader:can_create',
   CAN_DETELE: 'dataloader:can_delete',
   CAN_UPDATE: 'dataloader:can_update',
-  CAN_GET: 'dataloader:can_get'
+  CAN_GET: 'dataloader:can_get',
+  CAN_START: 'dataloader:can_start',
+  CAN_STOP: 'dataloader:can_stop'
 } as const;
 
 // 工作流列表权限

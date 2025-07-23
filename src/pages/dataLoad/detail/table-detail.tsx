@@ -8,6 +8,7 @@ import { stopeLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -70,20 +71,21 @@ const TableDetail = (props) => {
               RunStateType[RunState.STOPPED].text}
             {item.status === 'stopping' && '停止中'}
           </div>
-          {item.status == 'running' && (
-            <span
-              style={{
-                color: 'rgb(0, 125, 250)',
-                marginLeft: '7px',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                stopTaskHan(item.execution_id);
-              }}
-            >
-              停止
-            </span>
-          )}
+          {item.status == 'running' &&
+            props.permission.includes(DATA_LOAD_PERMISSIONS.CAN_STOP) && (
+              <span
+                style={{
+                  color: 'rgb(0, 125, 250)',
+                  marginLeft: '7px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => {
+                  stopTaskHan(item.execution_id);
+                }}
+              >
+                停止
+              </span>
+            )}
         </div>
       ),
       filters: [
@@ -210,7 +212,7 @@ const TableDetail = (props) => {
   };
   useEffect(() => {
     setData(props.datalist);
-  }, [props.datalist]);
+  }, [props.datalist, props.permission]);
   return (
     <div>
       <div
