@@ -565,6 +565,22 @@ export const useWorkflowInit = () => {
         });
       } else {
         const res = result.data;
+        if (appDetail?.is_online !== IsOnline.online && !isShowChatMode) {
+          // 每次刷新或者重新打开页面，不是上线模式则重置用户反选的文件
+          result?.data?.graph?.nodes
+            ?.filter((n) =>
+              [
+                BlockEnum.Text,
+                BlockEnum.Pic,
+                BlockEnum.Video,
+                BlockEnum.Audio
+              ].includes(n.data.type)
+            )
+            .forEach((node) => {
+              node.data.files = [];
+              node.data.selected_files_num = 0;
+            });
+        }
         const setRes = result?.data?.graph?.nodes?.map((node, index) => {
           return {
             ...node,

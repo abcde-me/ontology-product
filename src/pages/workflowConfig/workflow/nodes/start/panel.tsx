@@ -37,8 +37,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
   const [form] = Form.useForm();
-  const store = useStoreApi();
-  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  // const store = useStoreApi();
+  // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
   const history = useHistory();
 
   const docParams = Form.useWatch('data_category[0]', form);
@@ -46,7 +46,10 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const audioParams = Form.useWatch('data_category[2]', form);
   const videoParams = Form.useWatch('data_category[3]', form);
 
-  const { readOnly, inputs, updateInputs } = useConfig(id, data);
+  const { readOnly, inputs, updateInputs, doFileConfigChange } = useConfig(
+    id,
+    data
+  );
 
   const gotoData = () => {
     history.push(`/tenant/compute/modaforge/dataCatalog`);
@@ -57,49 +60,49 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     updateInputs({ ...values, data_path_name: name });
   };
 
-  const doFileConfigChange = (nodeType: BlockEnum, config: any) => {
-    const { getNodes } = store.getState();
-    const targetNodes = getNodes().filter(
-      (node: any) => node.data.type === nodeType
-    );
-    const sourcePath = form.getFieldValue('data_path_id');
-    if (sourcePath && config.enabled && config.format.length) {
-      const formats = config.format
-        .join('/')
-        .split('/')
-        .map((f) => f.toLowerCase());
-      console.log('sourcePath', sourcePath, formats);
-      getLoadTaskFiles({
-        data_path_id: sourcePath,
-        file_type: formats,
-        file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
-        page_size: 1,
-        page: 1
-      }).then((res: any) => {
-        targetNodes.forEach((n: any) => {
-          handleNodeDataUpdateWithSyncDraft({
-            id: n.id,
-            data: {
-              ...n.data,
-              selected_files_num: res.data?.total || 0,
-              files: []
-            }
-          });
-        });
-      });
-    } else {
-      targetNodes.forEach((n: any) => {
-        handleNodeDataUpdateWithSyncDraft({
-          id: n.id,
-          data: {
-            ...n.data,
-            selected_files_num: 0,
-            files: []
-          }
-        });
-      });
-    }
-  };
+  // const doFileConfigChange = (nodeType: BlockEnum, config: any) => {
+  //   const { getNodes } = store.getState();
+  //   const targetNodes = getNodes().filter(
+  //     (node: any) => node.data.type === nodeType
+  //   );
+  //   const sourcePath = form.getFieldValue('data_path_id');
+  //   if (sourcePath && config.enabled && config.format.length) {
+  //     const formats = config.format
+  //       .join('/')
+  //       .split('/')
+  //       .map((f) => f.toLowerCase());
+  //     console.log('sourcePath', sourcePath, formats);
+  //     getLoadTaskFiles({
+  //       data_path_id: sourcePath,
+  //       file_type: formats,
+  //       file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+  //       page_size: 1,
+  //       page: 1
+  //     }).then((res: any) => {
+  //       targetNodes.forEach((n: any) => {
+  //         handleNodeDataUpdateWithSyncDraft({
+  //           id: n.id,
+  //           data: {
+  //             ...n.data,
+  //             selected_files_num: res.data?.total || 0,
+  //             files: []
+  //           }
+  //         });
+  //       });
+  //     });
+  //   } else {
+  //     targetNodes.forEach((n: any) => {
+  //       handleNodeDataUpdateWithSyncDraft({
+  //         id: n.id,
+  //         data: {
+  //           ...n.data,
+  //           selected_files_num: 0,
+  //           files: []
+  //         }
+  //       });
+  //     });
+  //   }
+  // };
 
   const handlePathChange = () => {
     handleDocChange();
@@ -109,19 +112,35 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   };
   const handleDocChange = () => {
     const docConfig = form.getFieldValue('data_category[0]');
-    doFileConfigChange(BlockEnum.Text, docConfig);
+    doFileConfigChange(
+      BlockEnum.Text,
+      form.getFieldValue('data_path_id'),
+      docConfig
+    );
   };
   const handleImageChange = () => {
     const imageConfig = form.getFieldValue('data_category[1]');
-    doFileConfigChange(BlockEnum.Pic, imageConfig);
+    doFileConfigChange(
+      BlockEnum.Pic,
+      form.getFieldValue('data_path_id'),
+      imageConfig
+    );
   };
   const handleAudioChange = () => {
     const audioConfig = form.getFieldValue('data_category[2]');
-    doFileConfigChange(BlockEnum.Audio, audioConfig);
+    doFileConfigChange(
+      BlockEnum.Audio,
+      form.getFieldValue('data_path_id'),
+      audioConfig
+    );
   };
   const handleVideoChange = () => {
     const videoConfig = form.getFieldValue('data_category[3]');
-    doFileConfigChange(BlockEnum.Video, videoConfig);
+    doFileConfigChange(
+      BlockEnum.Video,
+      form.getFieldValue('data_path_id'),
+      videoConfig
+    );
   };
 
   useEffect(() => {
@@ -137,6 +156,10 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       });
       setSrcDirs(dirs);
     });
+
+    // if (inputs.data_path_id) {
+    //   handlePathChange()
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

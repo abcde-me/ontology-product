@@ -6,7 +6,7 @@ import { BlockEnum } from '../types';
 import { useWorkflowUpdate } from '../hooks';
 import { useNodesReadOnly } from './use-workflow';
 import { createWorkflowDraft } from '@/api/workflowV2';
-import { PrefixV2 } from '@/api/endpoints';
+import { PrefixV2, PrefixAimdp } from '@/api/endpoints';
 import { updateQueryParams, useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 
@@ -21,7 +21,9 @@ export const useNodesSyncDraft = () => {
     (s) => s.debouncedSyncWorkflowDraft
   );
 
-  const appId = useParams('id');
+  const appId = useParams('workflow_uuid');
+  const dsAppId = useParams('ds_workflow_id');
+  const workflowVersion = useParams('workflow_version');
 
   const getPostParams = useCallback(() => {
     const { getNodes, edges, transform } = store.getState();
@@ -94,11 +96,12 @@ export const useNodesSyncDraft = () => {
     const postParams = getPostParams();
     if (postParams) {
       navigator.sendBeacon(
-        `${PrefixV2}/apps/${appId}/workflows/draft`,
-        JSON.stringify(postParams.params)
+        `${PrefixAimdp}/workflow/draft/${appId}/${dsAppId}${workflowVersion ? '/' + workflowVersion : ''}`,
+        JSON.stringify({ ...postParams.params, version: 'draft' })
+        // new Blob([JSON.stringify({...postParams.params, version: "draft"})], {type: 'application/json'})
       );
     }
-  }, [getPostParams, appId, getNodesReadOnly]);
+  }, [getPostParams, appId, dsAppId, workflowVersion, getNodesReadOnly]);
 
   const doSyncWorkflowDraft = useCallback(
     async (
