@@ -71,21 +71,21 @@ const FormItem = Form.Item;
 function convertToCascaderOptions(dataSourceData) {
   console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
-    // label: (
-    //   <Tooltip content={catalog.name}>
-    //     <div
-    //       style={{
-    //         width: '200px',
-    //         whiteSpace: 'nowrap',
-    //         overflow: 'hidden',
-    //         textOverflow: 'ellipsis'
-    //       }}
-    //     >
-    //       {catalog.name}
-    //     </div>
-    //   </Tooltip>
-    // ),
-    label: '11111',
+    label: (
+      <Tooltip content={catalog.name}>
+        <div
+          style={{
+            width: '200px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {catalog.name}
+        </div>
+      </Tooltip>
+    ),
+    // label: '11111',
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
