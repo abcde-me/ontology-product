@@ -13,7 +13,6 @@ import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
-import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { IconClockCircle } from '@arco-design/web-react/icon';
 
 const InputSearch = Input.Search;
 
@@ -246,7 +246,7 @@ export default function WorkflowList() {
           </div>
         ) : (
           <div className="publish-part not-published">
-            <Clock1Icon className="mr-[6px] size-[16px]" />
+            <IconClockCircle className="mr-[6px] size-[16px]" />
             <span>未上线</span>
           </div>
         ),
