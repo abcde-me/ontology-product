@@ -191,8 +191,6 @@ export async function deleteSourceFileBatch(params: any) {
     .do();
 }
 
-/////////////////////////////////////////////////////////////////
-
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
   return await UAPI.RES.catalogPreviewApi({}).get(param).inRegion().do();

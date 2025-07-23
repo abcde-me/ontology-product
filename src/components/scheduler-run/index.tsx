@@ -64,7 +64,7 @@ const getInitialValues = (frequencyData: CycleValues, options: CycleText) => {
     return {
       cycle: frequencyData,
       date:
-        options.date === 'L' ? options.date : options.date?.split(',') ?? [],
+        options.date === 'L' ? options.date : (options.date?.split(',') ?? []),
       time: hour && minute ? `${hour}:${minute}` : ''
     };
   } else if (frequencyData === CycleValues.PER_WEEK) {
@@ -220,7 +220,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                   field="cycle"
                   style={{ flex: 1, marginBottom: 0 }}
                   rules={[{ required: true, message: '请选择频率' }]}
-                  validateTrigger={['onBlur', 'onChange']}
+                  validateTrigger={['onChange']}
                 >
                   <Select
                     placeholder="频率"
@@ -251,7 +251,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                       alignItems: 'center'
                     }}
                     rules={[{ required: true, message: '请选择时间' }]}
-                    validateTrigger={['onBlur', 'onChange']}
+                    validateTrigger={['onChange']}
                   >
                     <Select
                       mode="multiple"
@@ -278,7 +278,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                       alignItems: 'center'
                     }}
                     rules={[{ required: true, message: '请选择时间' }]}
-                    validateTrigger={['onBlur', 'onChange']}
+                    validateTrigger={['onChange']}
                   >
                     <Select
                       mode={
@@ -368,7 +368,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             rules={[{ required: true, message: '请选择时间' }]}
-            validateTrigger={['onBlur', 'onChange']}
+            validateTrigger={['onChange']}
           >
             <TimePicker style={{ width: '100%' }} format="HH:mm" size="large" />
           </Form.Item>

@@ -61,7 +61,11 @@ export const WORKFLOW_LIST_PERMISSIONS = {
 } as const;
 
 // 工作流详情权限
-export const WORKFLOW_DETAIL_PERMISSIONS = {} as const;
+export const WORKFLOW_DETAIL_PERMISSIONS = {
+  CAN_UPDATE_DAG: 'workflow:can_update_dag', // 编辑保存画布
+  CAN_OPERATION: 'workflow:can_operation', // 工作流操作（上下线、运行）
+  CAN_UPDATE: 'workflow:can_update' // 工作流名称修改
+} as const;
 
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {} as const;
@@ -82,7 +86,16 @@ export const DATA_CATALOG_PERMISSIONS = {
 } as const;
 
 // 数据集管理权限
-export const DATA_MANAGEMENT_PERMISSIONS = {} as const;
+export const DATA_MANAGEMENT_PERMISSIONS = {
+  CAN_CREATE: 'datasets:can_create', //创建数据集
+  CAN_SEARCH_BATCH: 'connectors:can_search', //批量导出
+  CAN_DELETE_BATCH: 'datasets:can_delete_batch', //批量删除
+  CAN_SEARCH: 'datasets:can_search', //导出
+  CAN_DELETE: 'datasets:can_delete', //删除
+  CAN_UPDATE_VERSION_RETRY: 'datasets:can_update_version_retry', //重试
+  CAN_UPDATE: 'datasets:can_update', //编辑
+  CAN_UPDATE_VERSION_DATA: 'datasets:can_update_version_data' //编辑数据内容
+} as const;
 
 // 聚合所有权限
 export const ALL_PERMISSIONS = {

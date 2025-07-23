@@ -412,7 +412,7 @@ export default function Connection() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px',
+        margin: '20px 20px 20px 0',
         padding: '20px',
         borderRadius: '10px'
       }}
@@ -495,7 +495,7 @@ export default function Connection() {
         style={{ width: '760px' }}
         visible={visible2}
         title={
-          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接详情</div>
+          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接器详情</div>
         }
         footer={null}
         onCancel={() => {

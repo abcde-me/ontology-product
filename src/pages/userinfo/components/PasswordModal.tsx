@@ -32,7 +32,7 @@ export const PasswordModal = ({
       >
         <Form ref={formRef}>
           <Form.Item
-            label="旧密码"
+            label="旧密码:"
             field="old_password"
             rules={[{ required: true, message: '请输入旧密码' }]}
             style={{ marginBottom: 16 }}
@@ -40,7 +40,7 @@ export const PasswordModal = ({
             <Input.Password placeholder="请输入旧密码" />
           </Form.Item>
           <Form.Item
-            label="新密码"
+            label="新密码:"
             field="password"
             rules={[
               { required: true, message: '请输入新密码' },
@@ -73,7 +73,7 @@ export const PasswordModal = ({
             密码需要包含8-24位字符，混合大写字母、小写字母、数字和符号（如!@#），且不含个人信息
           </div>
           <Form.Item
-            label="重复新密码"
+            label="重复新密码:"
             field="confirmPassword"
             rules={[
               { required: true, message: '请重复新密码' },

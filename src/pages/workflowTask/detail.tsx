@@ -294,7 +294,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.time_size === ''
                   ? '-'
-                  : (taskDetailData?.time_size ?? '-')}
+                  : taskDetailData?.time_size ?? '-'}
               </span>
             </div>
           </div>
@@ -304,7 +304,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.start_time === ''
                   ? '-'
-                  : (taskDetailData?.start_time ?? '-')}
+                  : taskDetailData?.start_time ?? '-'}
               </span>
             </div>
           </div>
@@ -314,7 +314,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.end_time === ''
                   ? '-'
-                  : (taskDetailData?.end_time ?? '-')}
+                  : taskDetailData?.end_time ?? '-'}
               </span>
             </div>
           </div>
