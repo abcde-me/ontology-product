@@ -88,7 +88,7 @@ export const DATA_CATALOG_PERMISSIONS = {
 // 数据集管理权限
 export const DATA_MANAGEMENT_PERMISSIONS = {
   CAN_CREATE: 'datasets:can_create', //创建数据集
-  CAN_SEARCH_BATCH: 'connectors:can_search', //批量导出
+  CAN_SEARCH_BATCH: 'connectors:can_output', //批量导出
   CAN_DELETE_BATCH: 'datasets:can_delete_batch', //批量删除
   CAN_SEARCH: 'datasets:can_search', //导出
   CAN_DELETE: 'datasets:can_delete', //删除

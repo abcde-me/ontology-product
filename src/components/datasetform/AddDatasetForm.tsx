@@ -420,6 +420,11 @@ const DatasetForm = React.forwardRef<
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
+  const mapselectFiles = (files: any[]) => {
+    return files.map((item) => {
+      return Number(item.split('/').shift());
+    });
+  };
   //提交数据
   const handleSubmit = debounce(() => {
     form
@@ -429,7 +434,10 @@ const DatasetForm = React.forwardRef<
         const formData: Dataset = {
           ...values,
           dataSource,
-          selectedFiles: dataSource === 'connector' ? selectedFiles : undefined, //如果数据源是连接器，则设置选择文件
+          selectedFiles:
+            dataSource === 'connector'
+              ? mapselectFiles(selectedFiles)
+              : undefined, //如果数据源是连接器，则设置选择文件
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
@@ -826,7 +834,10 @@ const DatasetForm = React.forwardRef<
                       }}
                     >
                       {connectorFileInformation.map((item, index) => (
-                        <Option key={index} value={item.path + '/' + item.name}>
+                        <Option
+                          key={index}
+                          value={item.file_id + '/' + item.name}
+                        >
                           <div
                             style={{
                               fontFamily: 'Arial, sans-serif',
