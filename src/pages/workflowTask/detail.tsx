@@ -108,6 +108,8 @@ export default function WorkflowTaskDetail() {
   const [activeNode, setActiveNode] = useState('');
   // 初始化当前节点是否是解析节点
   const [isParseNode, setIsParseNode] = useState(false);
+  // 初始化是否切换了tab
+  const [isChangeTab, setIsChangeTab] = useState(false);
   // 初始化数据清洗节点及数据增强节点数据
   const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({
     raw_data_num: 0,
@@ -143,7 +145,7 @@ export default function WorkflowTaskDetail() {
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
     if (taskId && activeNode) getNodeDetail();
-  }, [activeNode, sortValue]);
+  }, [activeNode && isChangeTab, sortValue]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
@@ -391,6 +393,7 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
+    setIsChangeTab(!isChangeTab);
   };
 
   // 获取节点详情
