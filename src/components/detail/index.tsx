@@ -379,10 +379,10 @@ const statusConfig = {
 // 渲染状态标签
 const renderStatusTag = (
   status: string,
-  perms?: string[],
   errorReason?: string,
   handleVersionRebuild?: () => void,
-  handlerefresh?: () => void
+  handlerefresh?: () => void,
+  perms?: string[]
 ) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -499,9 +499,7 @@ const DatasetDetail: React.FC = () => {
   const [editingData, setEditingData] = React.useState<any>({}); //当前编辑数据
   const [changedRows, setChangedRows] = React.useState<string[]>([]); // 记录修改过的数据
   const [deletedRows, setDeletedRows] = React.useState<string[]>([]); // 记录删除的数据
-  const [modifiedData, setModifiedData] = React.useState<Record<string, any>>(
-    {}
-  );
+
   //历史数据
   const [versionHistory, setVersionHistory] = React.useState<any[]>([]);
   const rightDescriptionsRef = React.useRef<HTMLDivElement>(null);
@@ -552,11 +550,6 @@ const DatasetDetail: React.FC = () => {
           cancelText: '取消',
           onOk: () => {
             setUpdateStatus(false);
-            setEditingRowKey(null);
-            setEditingData({});
-            setChangedRows([]);
-            setDeletedRows([]);
-            setModifiedData({});
             setIsModalVisible(false);
             history.push(location.pathname); // 确认后执行跳转
           },
@@ -663,11 +656,6 @@ const DatasetDetail: React.FC = () => {
         cancelText: '取消',
         onOk: () => {
           setUpdateStatus(false);
-          setEditingRowKey(null);
-          setEditingData({});
-          setChangedRows([]);
-          setDeletedRows([]);
-          setModifiedData({});
           setIsModalVisible(false);
           setEditModalVisible(true);
         },
@@ -770,12 +758,6 @@ const DatasetDetail: React.FC = () => {
       });
 
       setDeletedRows((prev) => [...prev, recordId]);
-      setChangedRows((prev) => prev.filter((id) => id !== recordId));
-      setModifiedData((prev) => {
-        const newModifiedData = { ...prev };
-        delete newModifiedData[recordId];
-        return newModifiedData;
-      });
       Message.success(`数据已删除`);
     },
     [updateStatus, editingRowKey, idName]
@@ -809,10 +791,11 @@ const DatasetDetail: React.FC = () => {
       return;
     }
 
-    const modifiedRecord = { ...editingData }; // 修改后的完整记录
     const newData = contentData.map((item: any) => {
       if (item[idName] === editingRowKey) {
-        return modifiedRecord; // 直接使用编辑的数据替换整个记录
+        return {
+          ...editingData // 直接使用编辑的数据替换整个记录
+        };
       }
       return item;
     });
@@ -820,11 +803,6 @@ const DatasetDetail: React.FC = () => {
 
     // 记录修改的数据
     const currentRecordId = editingRowKey!.toString();
-
-    setModifiedData((prev) => ({
-      ...prev,
-      [currentRecordId]: modifiedRecord
-    }));
 
     if (!changedRows.includes(currentRecordId)) {
       const newChangedRows = [...changedRows, currentRecordId];
@@ -873,10 +851,9 @@ const DatasetDetail: React.FC = () => {
 
     // 处理修改的数据
     changedRows.forEach((recordId) => {
-      // const modifiedRow = contentData.find((item) => {
-      //   return item[idName] === Number(recordId);
-      // });
-      const modifiedRow = modifiedData[recordId];
+      const modifiedRow = contentData.find((item) => {
+        return item[idName] === Number(recordId);
+      });
       if (modifiedRow) {
         // 找到对应的备份数据
         const backupRow = contentDatabackup.find((item) => {
@@ -931,7 +908,6 @@ const DatasetDetail: React.FC = () => {
           // 清空修改记录
           setChangedRows([]);
           setDeletedRows([]);
-          setModifiedData({});
           setEditingRowKey(null);
           setEditingData({});
           setUpdateStatus(false); // 退出编辑状态
@@ -1004,7 +980,7 @@ const DatasetDetail: React.FC = () => {
       });
   };
   // 封装获取数据集内容的通用方法
-  const fetchDatasetContents = React.useCallback(() => {
+  const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
     const params: any = {
@@ -1018,67 +994,18 @@ const DatasetDetail: React.FC = () => {
     return getDatasetContents(params)
       .then((res) => {
         if (res.data) {
-          let resultData = res.data.list || [];
-          console.log('resultData', resultData);
-          // 如果在编辑模式下，需要应用用户的修改
-          if (updateStatus) {
-            // 1. 先从结果中移除已删除的数据
-            if (deletedRows.length > 0) {
-              console.log('deletedRows', deletedRows);
-              resultData = resultData.filter(
-                (item) => !deletedRows.includes(item[res.data.id_name])
-              );
-            }
-
-            // 2. 应用已修改的数据
-            if (changedRows.length > 0) {
-              resultData = resultData.map((item) => {
-                const itemId = item[res.data.id_name]?.toString();
-                if (changedRows.includes(itemId) && modifiedData[itemId]) {
-                  // 使用存储的修改数据
-                  return modifiedData[itemId];
-                }
-                return item;
-              });
-            }
-
-            // 更新总数（减去删除的数据数量）
-            const adjustedTotal = Math.max(
-              0,
-              (res.data.total || 0) - deletedRows.length
-            );
-            setTotal(adjustedTotal);
-          } else {
-            setTotal(res.data.total || 0);
-          }
-
-          setContentData(resultData);
+          setContentData(res.data.list || []);
           setContentColumnslist(res.data.field_names || []);
           setIdName(res.data.id_name || '');
-
-          // 只在非编辑模式下更新备份数据，编辑模式下保持原有备份
-          if (!updateStatus) {
-            setContentDatabackup(resultData);
-          }
+          setTotal(res.data.total || 0);
+          setContentDatabackup(res.data.list || []);
         }
       })
       .catch((err) => {
         console.error('获取数据集内容失败:', err);
         Message.error('加载数据失败');
       });
-  }, [
-    datasetDetail,
-    id,
-    currentPage,
-    pageSize,
-    actualSearchValue,
-    updateStatus,
-    deletedRows,
-    changedRows,
-    modifiedData,
-    idName,
-    contentDatabackup
-  ]);
+  };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
   React.useEffect(() => {
@@ -1230,10 +1157,10 @@ const DatasetDetail: React.FC = () => {
                           )}
                           {renderStatusTag(
                             datasetDetail.status,
-                            datasetDetail.perms,
                             datasetDetail.error_reason,
                             handleVersionRebuild,
-                            handlerefresh
+                            handlerefresh,
+                            datasetDetail?.perms
                           )}
                         </div>
                       )
@@ -1438,11 +1365,6 @@ const DatasetDetail: React.FC = () => {
                 cancelText: '取消',
                 onOk: () => {
                   setUpdateStatus(false);
-                  setEditingRowKey(null);
-                  setEditingData({});
-                  setChangedRows([]);
-                  setDeletedRows([]);
-                  setModifiedData({});
                   setIsModalVisible(false);
                   setActiveTab(e);
                 },
@@ -1509,7 +1431,6 @@ const DatasetDetail: React.FC = () => {
                             setEditingData({});
                             setChangedRows([]);
                             setDeletedRows([]);
-                            setModifiedData({});
                             setContentData(contentDatabackup);
                             setUpdateStatus(false);
                           } else {
@@ -1535,7 +1456,6 @@ const DatasetDetail: React.FC = () => {
                                 setEditingData({});
                                 setChangedRows([]);
                                 setDeletedRows([]);
-                                setModifiedData({});
                                 setContentData(contentDatabackup);
                                 setUpdateStatus(false);
                               },

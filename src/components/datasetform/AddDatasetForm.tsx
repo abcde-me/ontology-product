@@ -56,6 +56,7 @@ interface ConnectorFile {
   last_modified: string;
   type: string;
   sub_path: string;
+  file_id: string;
 }
 
 interface DatasetFormProps {
