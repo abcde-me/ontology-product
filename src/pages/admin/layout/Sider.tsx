@@ -196,13 +196,6 @@ const filterMenusByPermissions = (
       }
 
       // 如果菜单需要权限且用户没有该权限，则过滤掉
-      // @ts-expect-error
-      console.log(
-        'menu.permission',
-        menu.permission,
-        userPermissions.includes(menu.permission)
-      );
-      // console.log('menu.permission', userPermissions.includes(menu.permission));
       if (menu.permission && !userPermissions.includes(menu.permission)) {
         return null;
       }
