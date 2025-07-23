@@ -317,7 +317,9 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) &&
+          {perms?.includes(
+            DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
+          ) &&
             (status === datasetStatus.version_update_failed ? (
               <span
                 className={styles.retryText}
@@ -487,7 +489,7 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) && (
+          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) && (
             <Button
               type="text"
               className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
@@ -503,7 +505,7 @@ const columns = (
               导出
             </Button>
           )}
-          {perms.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
             <Button
               type="text"
               className={`${styles.actionButton} ${styles.delete}`}

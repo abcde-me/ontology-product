@@ -56,6 +56,7 @@ interface ConnectorFile {
   last_modified: string;
   type: string;
   sub_path: string;
+  file_id: string;
 }
 
 interface DatasetFormProps {
@@ -70,21 +71,21 @@ const FormItem = Form.Item;
 function convertToCascaderOptions(dataSourceData) {
   console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
-    // label: (
-    //   <Tooltip content={catalog.name}>
-    //     <div
-    //       style={{
-    //         width: '200px',
-    //         whiteSpace: 'nowrap',
-    //         overflow: 'hidden',
-    //         textOverflow: 'ellipsis'
-    //       }}
-    //     >
-    //       {catalog.name}
-    //     </div>
-    //   </Tooltip>
-    // ),
-    label: catalog.name,
+    label: (
+      <Tooltip content={catalog.name}>
+        <div
+          style={{
+            width: '200px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {catalog.name}
+        </div>
+      </Tooltip>
+    ),
+    // label: '11111',
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
@@ -420,6 +421,11 @@ const DatasetForm = React.forwardRef<
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
+  const mapselectFiles = (files: any[]) => {
+    return files.map((item) => {
+      return Number(item.split('/').shift());
+    });
+  };
   //提交数据
   const handleSubmit = debounce(() => {
     form
@@ -429,7 +435,10 @@ const DatasetForm = React.forwardRef<
         const formData: Dataset = {
           ...values,
           dataSource,
-          selectedFiles: dataSource === 'connector' ? selectedFiles : undefined, //如果数据源是连接器，则设置选择文件
+          selectedFiles:
+            dataSource === 'connector'
+              ? mapselectFiles(selectedFiles)
+              : undefined, //如果数据源是连接器，则设置选择文件
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
@@ -826,7 +835,10 @@ const DatasetForm = React.forwardRef<
                       }}
                     >
                       {connectorFileInformation.map((item, index) => (
-                        <Option key={index} value={item.path + '/' + item.name}>
+                        <Option
+                          key={index}
+                          value={item.file_id + '/' + item.name}
+                        >
                           <div
                             style={{
                               fontFamily: 'Arial, sans-serif',

@@ -381,7 +381,8 @@ const renderStatusTag = (
   status: string,
   errorReason?: string,
   handleVersionRebuild?: () => void,
-  handlerefresh?: () => void
+  handlerefresh?: () => void,
+  perms?: string[]
 ) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -417,20 +418,24 @@ const renderStatusTag = (
             }}
           />
         </Tooltip>
-        <Button
-          type="text"
-          size="small"
-          style={{
-            color: '#165dff',
-            padding: '0 4px',
-            fontSize: '14px',
-            height: 'auto'
-          }}
-        >
-          <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
-            重试
-          </span>
-        </Button>
+        {perms?.includes(
+          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
+        ) && (
+          <Button
+            type="text"
+            size="small"
+            style={{
+              color: '#165dff',
+              padding: '0 4px',
+              fontSize: '14px',
+              height: 'auto'
+            }}
+          >
+            <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
+              重试
+            </span>
+          </Button>
+        )}
       </div>
     );
   }
@@ -1026,9 +1031,9 @@ const DatasetDetail: React.FC = () => {
   // 初始化数据 - 只在组件挂载和搜索/分页时执行
   React.useEffect(() => {
     // 如果处于编辑状态，不要重新获取数据（避免覆盖本地修改）
-    if (updateStatus) {
-      return;
-    }
+    // if (updateStatus) {
+    //   return;
+    // }
 
     // 查询数据集数据内容
     fetchDatasetContents();
@@ -1154,7 +1159,8 @@ const DatasetDetail: React.FC = () => {
                             datasetDetail.status,
                             datasetDetail.error_reason,
                             handleVersionRebuild,
-                            handlerefresh
+                            handlerefresh,
+                            datasetDetail?.perms
                           )}
                         </div>
                       )
