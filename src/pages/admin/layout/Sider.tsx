@@ -31,6 +31,7 @@ import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
 import './sider.css';
+import { useUserInfo } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -46,6 +47,7 @@ type MenuModel = {
   children?: MenuModel[];
   className?: string;
   type?: string;
+  permission?: string; // 添加权限字段
 };
 const customHeader = {
   '/tenant/compute/modaforge/appConfig': () =>
@@ -69,7 +71,8 @@ const menus: MenuModel[] = [
           <Connection className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'connection',
-        path: '/tenant/compute/modaforge/connection'
+        path: '/tenant/compute/modaforge/connection',
+        permission: 'connectors:can_search'
       },
       {
         title: '数据载入',
@@ -77,7 +80,8 @@ const menus: MenuModel[] = [
           <DataLoad className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/dataLoad',
-        key: 'dataLoad'
+        key: 'dataLoad',
+        permission: 'dataloader:can_search'
       }
     ]
   },
@@ -92,7 +96,8 @@ const menus: MenuModel[] = [
           <WorkflowList className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'workflowList',
-        path: '/tenant/compute/modaforge/workflowList'
+        path: '/tenant/compute/modaforge/workflowList',
+        permission: 'workflow:can_search'
       },
       {
         title: '作业',
@@ -100,7 +105,8 @@ const menus: MenuModel[] = [
           <WorkflowTask className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'workflowTask',
-        path: '/tenant/compute/modaforge/workflowTask'
+        path: '/tenant/compute/modaforge/workflowTask',
+        permission: 'workflowInstance:can_search'
       }
     ]
   },
@@ -115,7 +121,8 @@ const menus: MenuModel[] = [
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'dataCatalog',
-        path: '/tenant/compute/modaforge/dataCatalog'
+        path: '/tenant/compute/modaforge/dataCatalog',
+        permission: 'directory:can_search_dirs'
       },
       {
         title: '数据集管理',
@@ -123,7 +130,8 @@ const menus: MenuModel[] = [
           <DatasetManagement className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'datasetManagement',
-        path: '/tenant/compute/modaforge/datasetManagement'
+        path: '/tenant/compute/modaforge/datasetManagement',
+        permission: 'datasets:can_search'
       }
     ]
   },
@@ -138,7 +146,8 @@ const menus: MenuModel[] = [
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'orgMgmt',
-        path: '/tenant/compute/modaforge/organization'
+        path: '/tenant/compute/modaforge/organization',
+        permission: 'organizations:can_search'
       },
       {
         title: '用户管理',
@@ -146,7 +155,8 @@ const menus: MenuModel[] = [
           <MemberMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/member',
-        key: 'userMgmt'
+        key: 'userMgmt',
+        permission: 'users:can_search'
       }
       // {
       //   title: 'API-KEY',
@@ -159,6 +169,48 @@ const menus: MenuModel[] = [
     ]
   }
 ];
+
+// 权限过滤函数
+const filterMenusByPermissions = (
+  menus: MenuModel[],
+  userPermissions: string[] = []
+): MenuModel[] => {
+  return menus
+    .map((menu) => {
+      // 如果是分组菜单，递归过滤子菜单
+      if (menu.children && menu.children.length > 0) {
+        const filteredChildren = filterMenusByPermissions(
+          menu.children,
+          userPermissions
+        );
+
+        // 如果过滤后没有子菜单，则不显示该分组
+        if (filteredChildren.length === 0) {
+          return null;
+        }
+
+        return {
+          ...menu,
+          children: filteredChildren
+        };
+      }
+
+      // 如果菜单需要权限且用户没有该权限，则过滤掉
+      // @ts-expect-error
+      console.log(
+        'menu.permission',
+        menu.permission,
+        userPermissions.includes(menu.permission)
+      );
+      // console.log('menu.permission', userPermissions.includes(menu.permission));
+      if (menu.permission && !userPermissions.includes(menu.permission)) {
+        return null;
+      }
+
+      return menu;
+    })
+    .filter(Boolean) as MenuModel[]; // 移除 null 值
+};
 
 const knowledgeDetailMenus: MenuModel[] = [
   {
@@ -202,9 +254,18 @@ const knowledgeDetailSidebarPaths = [
 ];
 
 function LayoutWithSider(props: { children }) {
+  // 从全局 store 获取用户信息
+  const userInfo = useUserInfo();
+
+  // 根据用户权限过滤菜单
+  const filteredMenus = useMemo(() => {
+    const userPermissions = userInfo?.perms || [];
+    return filterMenusByPermissions(menus, userPermissions);
+  }, [userInfo?.perms]);
+
   const { children } = props;
   const [collapsed, setCollapsed] = useState(false);
-  const [showMenus, setShowMenus] = useState(menus);
+  const [showMenus, setShowMenus] = useState(filteredMenus);
   const [showCreateModel, setShowCreateModel] = useState(false);
 
   const handleCollapsed = () => {
@@ -299,9 +360,9 @@ function LayoutWithSider(props: { children }) {
     if (knowledgeDetailSidebar) {
       setShowMenus(knowledgeDetailMenus);
     } else {
-      setShowMenus(menus);
+      setShowMenus(filteredMenus);
     }
-  }, [knowledgeDetailSidebar]);
+  }, [knowledgeDetailSidebar, filteredMenus]);
 
   const actives = useMemo(() => {
     const findMatch = (menus: MenuModel[]): string[] | null => {
