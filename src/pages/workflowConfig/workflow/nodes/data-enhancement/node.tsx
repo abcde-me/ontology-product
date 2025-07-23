@@ -20,7 +20,6 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     generate_sample_num
   } = app_scenarios?.option ?? {};
   const app_scenarios_type = app_scenarios?.type ?? '';
-  console.log('这里是nodenodenode', app_scenarios, app_scenarios.type);
   const store = useStoreApi();
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,

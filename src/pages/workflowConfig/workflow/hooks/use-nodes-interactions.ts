@@ -1568,7 +1568,12 @@ export const useNodesInteractions = () => {
       ).length;
       if (
         count + 1 > MAX_NODES_NUM &&
-        ['text', 'pic', 'video', 'audio'].includes(targetNode.data.type)
+        [
+          BlockEnum.Text,
+          BlockEnum.Pic,
+          BlockEnum.Video,
+          BlockEnum.Audio
+        ].includes(targetNode.data.type)
       ) {
         Message.warning('该种类型节点最多允许添加' + MAX_NODES_NUM + '个');
         return;
