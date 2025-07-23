@@ -4,6 +4,7 @@ import { useBoolean } from 'ahooks';
 import type { StartNodeType } from './types';
 import { ChangeType } from '@/pages/workflowConfig/workflow/types';
 import type {
+  BlockEnum,
   InputVar,
   MoreInfo,
   ValueSelector
@@ -15,9 +16,14 @@ import {
   useWorkflow
 } from '@/pages/workflowConfig/workflow/hooks';
 import StartNodeDefault from './default';
+import { useStoreApi } from 'reactflow';
+import { getLoadTaskFiles } from '@/api/loadApi';
+import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 
 const useConfig = (id: string, payload: StartNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  const store = useStoreApi();
 
   const defaultConfig = StartNodeDefault.defaultValue;
   const { inputs, setInputs } = useNodeCrud<StartNodeType>(id, payload);
@@ -55,10 +61,62 @@ const useConfig = (id: string, payload: StartNodeType) => {
     [inputs, setInputs]
   );
 
+  const doFileConfigChange = (
+    nodeType: BlockEnum,
+    dataPathId: string | number,
+    config: any
+  ) => {
+    const { getNodes } = store.getState();
+    const targetNodes = getNodes().filter(
+      (node: any) => node.data.type === nodeType
+    );
+
+    if (!targetNodes.length) return;
+
+    const sourcePath = dataPathId;
+    if (sourcePath && config.enabled && config.format.length) {
+      const formats = config.format
+        .join('/')
+        .split('/')
+        .map((f) => f.toLowerCase());
+      // console.log('sourcePath', targetNodes, sourcePath, formats);
+      getLoadTaskFiles({
+        data_path_id: sourcePath,
+        file_type: formats,
+        file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+        page_size: 1,
+        page: 1
+      }).then((res: any) => {
+        targetNodes.forEach((n: any) => {
+          handleNodeDataUpdateWithSyncDraft({
+            id: n.id,
+            data: {
+              ...n.data,
+              selected_files_num: res.data?.total || 0,
+              files: []
+            }
+          });
+        });
+      });
+    } else {
+      targetNodes.forEach((n: any) => {
+        handleNodeDataUpdateWithSyncDraft({
+          id: n.id,
+          data: {
+            ...n.data,
+            selected_files_num: 0,
+            files: []
+          }
+        });
+      });
+    }
+  };
+
   return {
     readOnly,
     updateInputs,
     updatePathName,
+    doFileConfigChange,
     inputs
   };
 };
