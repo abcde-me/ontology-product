@@ -29,15 +29,12 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const getInitialValues = () => {
     const app_scenarios = inputs?.app_scenarios ?? {};
     const app_scenarios_option = app_scenarios?.option ?? {};
-    console.log(
-      'getInitialValuesgetInitialValues',
-      app_scenarios_option?.is_prompt
-    );
 
     return {
       ...data,
       app_scenarios: {
-        name: app_scenarios?.name ?? 'tongyong',
+        name: app_scenarios?.name ?? '通用',
+        type: app_scenarios?.type ?? 'tongyong',
         option: {
           sample_num: app_scenarios_option?.sample_num ?? 10,
           similarity_threshold:
@@ -47,7 +44,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           is_prompt: app_scenarios_option?.enhanced_proportion ?? 0,
           prompt:
             app_scenarios_option?.prompt ??
-            TextPlan[app_scenarios_name]?.prompt,
+            TextPlan[app_scenarios_type]?.prompt,
           sample_data: app_scenarios_option?.sample_data ?? ''
         }
       },
@@ -58,10 +55,11 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
 
   const unmountedRef = useUnmountedRef();
   const [modelList, setModelList] = useState<any[]>([]);
-  const app_scenarios_name = Form.useWatch('app_scenarios.name', form);
+  const app_scenarios_type = Form.useWatch('app_scenarios.type', form);
   const prompt_checkbox = Form.useWatch('prompt_checkbox', form);
 
   const handleSelectChange = (value) => {
+    form.setFieldValue('app_scenarios.type', value);
     form.setFieldValue('prompt_checkbox', false);
     form.setFieldValue('app_scenarios.option.prompt', TextPlan[value]?.prompt);
   };
@@ -143,8 +141,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </FormItem>
         </div>
         <div className="content-box">
-          {(app_scenarios_name === 'tongyong' ||
-            app_scenarios_name === 'duolong') && (
+          {(app_scenarios_type === 'tongyong' ||
+            app_scenarios_type === 'duolong') && (
             <>
               <FormItem
                 label="指令生成依赖样本数:"
@@ -165,8 +163,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </FormItem>
             </>
           )}
-          {(app_scenarios_name === 'fenlei' ||
-            app_scenarios_name === 'shengcheng') && (
+          {(app_scenarios_type === 'fenlei' ||
+            app_scenarios_type === 'shengcheng') && (
             <>
               <FormItem
                 label="任务描述增强占比:"
