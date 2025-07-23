@@ -226,7 +226,7 @@ const columns = (
                   style={{
                     // background: '#E2E8F0',
                     // color: '#0F172A',
-                    margin: '2px 2px'
+                    margin: '0 2px'
                     // borderRadius: '16px',
                     // fontSize: '12px',
                     // height: '18px',
@@ -1016,7 +1016,7 @@ const DatasetManagement: React.FC = () => {
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px 20px 10px 0px',
+        margin: '20px 20px 20px 0px',
         borderRadius: '10px',
         padding: '20px'
       }}

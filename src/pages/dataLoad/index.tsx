@@ -12,7 +12,7 @@ export default function DataLoad() {
         height: 'calc(100% - 30px)',
         // backgroundColor: '#fff',
         borderRadius: '10px',
-        margin: '20px'
+        margin: '20px 20px 20px 0'
       }}
     >
       <Switch>

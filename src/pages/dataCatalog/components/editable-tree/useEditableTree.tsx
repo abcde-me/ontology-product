@@ -298,37 +298,28 @@ export function useEditableTree({ catalogTreeStore }) {
 
     await updateFn();
   };
-
+  let perms: string[] = []
   const renderExtra = (node: NodeProps) => {
-    console.log(node, 'top----- 树 tree');
     const { dataRef } = node;
+
+    perms = dataRef?.perms ? dataRef.perms : perms
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
           {['volume', 'db', CatalogTypeEnum.db].every(
             (key) => dataRef?.type !== key
           ) && (
-            <>
-              <PermissionGuard
-                permission={
-                  DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_UPDATE_DIRS]
-                }
-              >
-                <Tooltip color="white" content="重命名">
+              <>
+
+                {dataRef?.perms?.includes(DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS) && <Tooltip color="white" content="重命名">
                   <IconEdit
                     className={
                       'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
                     }
                     onClick={() => handleEdit(node)}
                   />
-                </Tooltip>
-              </PermissionGuard>
-              <PermissionGuard
-                permission={
-                  DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_DELETE_DIRS]
-                }
-              >
-                <Tooltip color="white" content="删除">
+                </Tooltip>}
+                {dataRef?.perms?.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS) && <Tooltip color="white" content="删除">
                   <IconDelete
                     onClick={() => {
                       Modal.confirm({
@@ -348,23 +339,16 @@ export function useEditableTree({ catalogTreeStore }) {
                     }}
                     className="hover:text-[rgb(var(--primary-6))]"
                   />
-                </Tooltip>
-              </PermissionGuard>
-            </>
-          )}
-          {dataRef?.type === 'volume' && (
-            <PermissionGuard
-              permission={
-                DATA_CATALOG_PERMISSIONS?.[dataRef?.params?.CAN_CREATE_VOLUME]
-              }
-            >
-              <Tooltip color="white" content="新建">
-                <IconPlus
-                  className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => addSubVolume(node)}
-                />
-              </Tooltip>
-            </PermissionGuard>
+                </Tooltip>}
+              </>
+            )}
+          {dataRef?.type === 'volume' && perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+            <Tooltip color="white" content="新建">
+              <IconPlus
+                className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+                onClick={() => addSubVolume(node)}
+              />
+            </Tooltip>
           )}
         </div>
       )
