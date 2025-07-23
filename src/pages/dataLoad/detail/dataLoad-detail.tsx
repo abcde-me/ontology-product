@@ -86,7 +86,6 @@ const DataLoadDetail = () => {
   const getTask_idHan = async () => {
     try {
       const res = await getLoad(loadId);
-      console.log(res.data);
       setListDetail(res.data);
     } catch (error) {
       console.error('Error:', error);
@@ -264,11 +263,11 @@ const DataLoadDetail = () => {
           >
             数据载入详情
           </BreadcrumbItem>
-          <div style={{ maxWidth: '300px' }}>
-            <BreadcrumbItem>
+          <BreadcrumbItem>
+            <div style={{ maxWidth: '300px' }}>
               <EllipsisPopoverCom value={listDetail?.name}></EllipsisPopoverCom>
-            </BreadcrumbItem>
-          </div>
+            </div>
+          </BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div

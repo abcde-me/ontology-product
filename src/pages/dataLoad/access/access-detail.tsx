@@ -79,23 +79,26 @@ const AccessDetail = () => {
             >
               数据载入详情
             </BreadcrumbItem>
-            <div style={{ maxWidth: '300px', color: ' rgb(127, 140, 159)' }}>
-              <BreadcrumbItem
-                onClick={() => {
-                  history.back();
-                }}
-                className="bread-style"
-              >
+            <BreadcrumbItem
+              onClick={() => {
+                history.back();
+              }}
+              className="bread-style"
+            >
+              <div style={{ maxWidth: '300px', color: ' rgb(127, 140, 159)' }}>
                 <EllipsisPopoverCom value={name}></EllipsisPopoverCom>
-              </BreadcrumbItem>
-            </div>
-            <div style={{ maxWidth: '300px' }}>
-              <EllipsisPopoverCom
-                value={!loading && arressDetail.execution_name + '运行记录'}
-              >
-                <BreadcrumbItem></BreadcrumbItem>
-              </EllipsisPopoverCom>
-            </div>
+              </div>
+            </BreadcrumbItem>
+
+            <BreadcrumbItem>
+              <div style={{ maxWidth: '300px' }}>
+                <EllipsisPopoverCom
+                  value={!loading && arressDetail.execution_name + '运行记录'}
+                >
+                  {' '}
+                </EllipsisPopoverCom>
+              </div>
+            </BreadcrumbItem>
           </Breadcrumb>
           <div
             style={{
