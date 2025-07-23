@@ -298,9 +298,11 @@ export function useEditableTree({ catalogTreeStore }) {
 
     await updateFn();
   };
-
+  let perms: string[] = []
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
+
+    perms = dataRef?.perms ? dataRef.perms : perms
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
@@ -340,7 +342,7 @@ export function useEditableTree({ catalogTreeStore }) {
                 </Tooltip>}
               </>
             )}
-          {dataRef?.type === 'volume' && dataRef?.perms?.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+          {dataRef?.type === 'volume' && perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
             <Tooltip color="white" content="新建">
               <IconPlus
                 className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"

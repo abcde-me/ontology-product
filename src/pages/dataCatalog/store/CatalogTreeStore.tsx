@@ -183,7 +183,6 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
-
       if (catalog.children) {
         Object.entries(catalog.children).forEach(([type, arr]) => {
           const volumeKey = `${catalog.id}-${type}`;
@@ -200,7 +199,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                   key: String(item.id), // 转换为字符串
                   parent_id: catalog.id,
                   isLastLeaf: true,
-                  fullPath: `${item.base_dir}${activeKey}/${catalog.name}/volume/${item.name}`
+                  fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/volume/${item.name}`
                 };
               }) || []
           };
