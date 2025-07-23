@@ -250,14 +250,25 @@ const DataLoadDetail = () => {
             OneLevelUpHan();
           }}
         />
-        <Breadcrumb style={{ marginLeft: '20px', fontSize: '20px' }}>
+        <Breadcrumb
+          style={{
+            marginLeft: '20px',
+            fontSize: '20px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
           <BreadcrumbItem
             href="/tenant/compute/modaforge/dataLoad"
             style={{ color: '#7F8C9F' }}
           >
             数据载入详情
           </BreadcrumbItem>
-          <BreadcrumbItem>{listDetail?.name}</BreadcrumbItem>
+          <div style={{ maxWidth: '300px' }}>
+            <BreadcrumbItem>
+              <EllipsisPopoverCom value={listDetail?.name}></EllipsisPopoverCom>
+            </BreadcrumbItem>
+          </div>
         </Breadcrumb>
       </div>
       <div
