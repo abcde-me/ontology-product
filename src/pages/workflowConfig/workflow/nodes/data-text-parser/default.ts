@@ -45,7 +45,7 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个文本文件';
     }
-    if (selected_files_num > 10) {
+    if (selected_files_num > 65536) {
       errorMessages = '最多选择65536个文本文件';
     }
     if (!text_emb_model_id) {
