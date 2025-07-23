@@ -102,6 +102,16 @@ export function useColumns() {
         return text || '-';
       }
     },
+    // 职位
+    {
+      title: '职位',
+      dataIndex: 'position',
+      key: 'position',
+      width: 150,
+      render: (text: string) => {
+        return text || '-';
+      }
+    },
     // 描述
     {
       title: '备注',

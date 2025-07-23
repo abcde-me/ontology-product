@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useWorkflow } from '../hooks';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
 import useTimestamp from '@/pages/workflowConfig/hooks/use-timestamp';
-import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { IsOnline } from '@/types/workflowApi';
+import { IconClockCircle } from '@arco-design/web-react/icon';
 
 const EditingTitle = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -31,7 +31,7 @@ const EditingTitle = () => {
         {workflowDetail?.is_online === IsOnline.online ? (
           <Success11Icon className="mr-[6px] size-[16px]" />
         ) : (
-          <Clock1Icon className="mr-[6px] size-[16px]" />
+          <IconClockCircle className="mr-[6px] size-[16px]" />
         )}
         {workflowDetail?.is_online === IsOnline.online ? '已上线' : '未上线'}
       </div>
