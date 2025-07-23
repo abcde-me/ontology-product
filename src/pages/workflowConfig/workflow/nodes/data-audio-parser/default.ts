@@ -47,7 +47,7 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
     if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个音频文件';
     }
-    if (selected_files_num > 10) {
+    if (selected_files_num > 4096) {
       errorMessages = '最多选择4096个音频文件';
     }
     if (!audio_model_id) {
