@@ -7,6 +7,7 @@ import { ExecutionHistory } from '../type';
 import { stopeLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -225,6 +226,7 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
+          noDataElement={noDataElement({ description: '暂无数据' })}
           style={{
             width: '100%',
             padding: '1px 15px 0px 7px'

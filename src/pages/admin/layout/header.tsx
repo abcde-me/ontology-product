@@ -54,23 +54,27 @@ export default function Header({
   );
 
   const goHelp = () => {
-    const url = `${PrefixV2}/files/browser/api-demo`;
-    axios
-      .get(url, {
-        responseType: 'arraybuffer',
-        // @ts-ignore
-        headers: { ...getToken() }
-      })
-      .then((res) => {
-        // 转换pdf
-        try {
-          const blob = new Blob([res.data], { type: 'application/pdf' });
-          const docURL = URL.createObjectURL(blob);
-          window.open(docURL, '_blank');
-        } catch {
-          // Message.error('无法加载PDF文件，请检查文件结构或文件完整性');
-        }
-      });
+    window.open(
+      'https://icnwct5pskej.feishu.cn/docx/S2o6dLcfxoA6TKxA1Dsc55J6nhe?from=from_copylink',
+      '_blank'
+    );
+    // const url = `${PrefixV2}/files/browser/api-demo`;
+    // axios
+    //   .get(url, {
+    //     responseType: 'arraybuffer',
+    //     // @ts-ignore
+    //     headers: { ...getToken() }
+    //   })
+    //   .then((res) => {
+    //     // 转换pdf
+    //     try {
+    //       const blob = new Blob([res.data], { type: 'application/pdf' });
+    //       const docURL = URL.createObjectURL(blob);
+    //       window.open(docURL, '_blank');
+    //     } catch {
+    //       // Message.error('无法加载PDF文件，请检查文件结构或文件完整性');
+    //     }
+    //   });
   };
 
   return (
@@ -89,7 +93,7 @@ export default function Header({
         </div>
       </a>
       <div className="flex items-center gap-x-[16px]">
-        <Tooltip content="下载帮助文档">
+        <Tooltip content="查看用户手册">
           <Link
             href="#"
             icon={

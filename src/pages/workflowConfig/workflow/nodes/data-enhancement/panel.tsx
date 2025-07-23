@@ -21,6 +21,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const FormItem = Form.Item;
   const Option = Select.Option;
   const TextArea = Input.TextArea;
+  const appScenarios: { [key: string]: string } = {
+    tongyong: '通用',
+    fenlei: '文本分类',
+    tiqu: '文本提取',
+    shengcheng: '文本生成',
+    duolong: '多轮回答'
+  };
 
   const { inputs, onValuesChange, readOnly, setBoostPageData } = useConfig(
     id,
@@ -45,7 +52,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           prompt:
             app_scenarios_option?.prompt ??
             TextPlan[app_scenarios_type]?.prompt,
-          sample_data: app_scenarios_option?.sample_data ?? ''
+          sample_data:
+            app_scenarios_option?.sample_data ??
+            TextPlan[app_scenarios_type]?.data
         }
       },
       prompt_checkbox: app_scenarios_option?.is_prompt === 1 ? true : false,
@@ -59,9 +68,13 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const prompt_checkbox = Form.useWatch('prompt_checkbox', form);
 
   const handleSelectChange = (value) => {
-    form.setFieldValue('app_scenarios.type', value);
+    form.setFieldValue('app_scenarios.name', appScenarios[value]);
     form.setFieldValue('prompt_checkbox', false);
     form.setFieldValue('app_scenarios.option.prompt', TextPlan[value]?.prompt);
+    form.setFieldValue(
+      'app_scenarios.option.sample_data',
+      TextPlan[value]?.data
+    );
   };
 
   useEffect(() => {
@@ -111,7 +124,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           <FormItem
             layout="horizontal"
             label={null}
-            field="app_scenarios.name"
+            field="app_scenarios.type"
             labelAlign="left"
             required
             style={{ margin: 0 }}

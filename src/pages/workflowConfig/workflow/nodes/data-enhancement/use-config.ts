@@ -22,14 +22,6 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     inputRef.current = inputs;
   }, [inputs]);
 
-  const appScenarios: { [key: string]: string } = {
-    tongyong: '通用',
-    fenlei: '文本分类',
-    tiqu: '文本提取',
-    shengcheng: '文本生成',
-    duolong: '多轮回答'
-  };
-
   const onValuesChange = useCallback(
     (payload: EnhancementNodeType) => {
       console.log('让我看看什么时候这里的值变化了～');
@@ -39,7 +31,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.enha_modle_id = payload.enha_modle_id;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.app_scenarios = {
-          name: appScenarios[payload?.app_scenarios?.name],
+          name: payload?.app_scenarios?.name,
           type: payload?.app_scenarios?.type,
           option: {
             sample_num: payload?.app_scenarios?.option?.sample_num,
