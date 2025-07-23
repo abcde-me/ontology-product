@@ -2,7 +2,8 @@ import type { FC, MouseEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { OffsetOptions, Placement } from '@floating-ui/react';
-import type { BlockEnum, OnSelectBlock } from '../types';
+import type { OnSelectBlock } from '../types';
+import { BlockEnum } from '../types';
 import { MAX_NODES_NUM } from '../utils';
 import Tabs from './tabs';
 import { TabsEnum } from './types';
@@ -82,7 +83,12 @@ const NodeSelector: FC<NodeSelectorProps> = ({
       const count = getNodes().filter((node) => node.data.type === type).length;
       if (
         count + 1 > MAX_NODES_NUM &&
-        ['text', 'pic', 'video', 'audio'].includes(type)
+        [
+          BlockEnum.Text,
+          BlockEnum.Pic,
+          BlockEnum.Video,
+          BlockEnum.Audio
+        ].includes(type)
       ) {
         Message.warning('该种类型节点最多允许添加' + MAX_NODES_NUM + '个');
         return;

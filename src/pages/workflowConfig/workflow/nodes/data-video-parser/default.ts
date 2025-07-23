@@ -45,7 +45,6 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
       activity_mode,
       activity_mode_num
     } = payload;
-    console.log('activity_mode', activity_mode_num);
     if (selected_files_num <= 0 || selected_files_num === undefined) {
       errorMessages = '需要选择至少一个视频文件';
     }
