@@ -242,11 +242,7 @@ export default function DataLoad() {
       title: '创建人',
       width: 130,
       render: (_, item) => {
-        return (
-          <Popover position="tl" content={item.createor}>
-            {item.createor}
-          </Popover>
-        );
+        return <EllipsisPopoverCom value={item.createor} />;
       }
     },
     {

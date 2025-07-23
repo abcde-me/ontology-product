@@ -79,7 +79,7 @@ const AccessDetail = () => {
             >
               数据载入详情
             </BreadcrumbItem>
-            <div style={{ maxWidth: '300px' }}>
+            <div style={{ maxWidth: '300px', color: ' rgb(127, 140, 159)' }}>
               <BreadcrumbItem
                 onClick={() => {
                   history.back();
@@ -91,12 +91,9 @@ const AccessDetail = () => {
             </div>
             <div style={{ maxWidth: '300px' }}>
               <EllipsisPopoverCom
-                value={arressDetail.execution_name + '运行记录'}
+                value={!loading && arressDetail.execution_name + '运行记录'}
               >
-                <BreadcrumbItem>
-                  {arressDetail.execution_name}
-                  {!loading && '运行记录'}
-                </BreadcrumbItem>
+                <BreadcrumbItem></BreadcrumbItem>
               </EllipsisPopoverCom>
             </div>
           </Breadcrumb>
@@ -111,8 +108,8 @@ const AccessDetail = () => {
           >
             <div
               style={{
-                width: '7px',
-                height: '7px',
+                width: '8px',
+                height: '8px',
                 background:
                   arressDetail.status == RunState.STOPPED
                     ? RunStateType[RunState.STOPPED].color
