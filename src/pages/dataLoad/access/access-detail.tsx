@@ -8,6 +8,7 @@ import { getLoadRecord } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -64,25 +65,40 @@ const AccessDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Breadcrumb style={{ marginLeft: '20px', fontSize: '20px' }}>
+          <Breadcrumb
+            style={{
+              marginLeft: '20px',
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
             <BreadcrumbItem
               href="/tenant/compute/modaforge/dataLoad"
               style={{ color: '#7F8C9F' }}
             >
               数据载入详情
             </BreadcrumbItem>
-            <BreadcrumbItem
-              onClick={() => {
-                history.back();
-              }}
-              className="bread-style"
-            >
-              {name}
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              {arressDetail.execution_name}
-              {!loading && '运行记录'}
-            </BreadcrumbItem>
+            <div style={{ maxWidth: '300px' }}>
+              <BreadcrumbItem
+                onClick={() => {
+                  history.back();
+                }}
+                className="bread-style"
+              >
+                <EllipsisPopoverCom value={name}></EllipsisPopoverCom>
+              </BreadcrumbItem>
+            </div>
+            <div style={{ maxWidth: '300px' }}>
+              <EllipsisPopoverCom
+                value={arressDetail.execution_name + '运行记录'}
+              >
+                <BreadcrumbItem>
+                  {arressDetail.execution_name}
+                  {!loading && '运行记录'}
+                </BreadcrumbItem>
+              </EllipsisPopoverCom>
+            </div>
           </Breadcrumb>
           <div
             style={{

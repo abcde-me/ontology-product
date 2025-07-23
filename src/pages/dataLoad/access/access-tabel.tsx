@@ -12,6 +12,7 @@ import { RecordingType } from '../type';
 import './index.css';
 import { RunState } from '../list/list';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
@@ -215,6 +216,7 @@ const AccessTable = (props) => {
           data={data ?? []}
           style={{ padding: '15px 24px', width: '100%' }}
           border={false}
+          noDataElement={noDataElement({ description: '暂无数据' })}
           pagination={false}
           rowKey={(record) => record.id}
           loading={loading}
