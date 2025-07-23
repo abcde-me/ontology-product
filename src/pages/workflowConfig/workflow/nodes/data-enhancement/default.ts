@@ -16,7 +16,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     variables: [],
     outputs: {},
     app_scenarios: {
-      name: 'tongyong',
+      name: '通用',
+      type: 'tongyong',
       option: {
         sample_num: 10,
         similarity_threshold: 0.7,

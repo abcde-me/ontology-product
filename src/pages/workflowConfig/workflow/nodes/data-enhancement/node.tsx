@@ -19,7 +19,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     similarity_threshold,
     generate_sample_num
   } = app_scenarios?.option ?? {};
-  const app_scenarios_name = app_scenarios?.name ?? '';
+  const app_scenarios_type = app_scenarios?.type ?? '';
+  console.log('这里是nodenodenode', app_scenarios, app_scenarios.type);
   const store = useStoreApi();
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,
@@ -47,9 +48,10 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       if (!enha_modle_id) {
         fields.enha_modle_id = model_emb_model_id;
       }
-      if (!app_scenarios_name) {
+      if (!app_scenarios_type) {
         fields.app_scenarios = {};
-        fields.app_scenarios.name = 'tongyong';
+        fields.app_scenarios.name = '通用';
+        fields.app_scenarios.type = 'tongyong';
       }
       handleModelChange(fields);
       setBoostPageData(modelList);
@@ -61,9 +63,9 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
         <span className="txt">增强类型</span>
       </div>
       <div className="enhancement-content">
-        {app_scenarios_name && (
+        {app_scenarios_type && (
           <div className="enhancement-item">
-            场景：{appScenarios[app_scenarios_name]}
+            场景：{appScenarios[app_scenarios_type]}
           </div>
         )}
         {enha_modle_id && (
@@ -73,15 +75,15 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
               defaultModelName}
           </div>
         )}
-        {(app_scenarios_name === 'tongyong' ||
-          app_scenarios_name === 'duolong') &&
+        {(app_scenarios_type === 'tongyong' ||
+          app_scenarios_type === 'duolong') &&
           sample_num > 0 && (
             <Tooltip content={`指令生成依赖样本数: ${sample_num}`}>
               <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>
             </Tooltip>
           )}
-        {(app_scenarios_name === 'fenlei' ||
-          app_scenarios_name === 'shengcheng') &&
+        {(app_scenarios_type === 'fenlei' ||
+          app_scenarios_type === 'shengcheng') &&
           (enhanced_proportion || enhanced_proportion === 0) && (
             <Tooltip content={`任务描述增强占比: ${enhanced_proportion}`}>
               <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
