@@ -534,16 +534,18 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          <Button
-            type="primary"
-            icon={<IconPlus />}
-            disabled={runningFlag ? true : false}
-            onClick={() => {
-              runningHan();
-            }}
-          >
-            新建运行
-          </Button>
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) && (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={runningFlag ? true : false}
+              onClick={() => {
+                runningHan();
+              }}
+            >
+              新建运行
+            </Button>
+          )}
         </div>
         <div
           style={{
@@ -560,6 +562,7 @@ const DataLoadDetail = () => {
             loading={detailListLoading}
             name={listDetail?.name || ''}
             change={getChildrenTableChange}
+            permission={perms}
           />
         </div>
         <Pagination
