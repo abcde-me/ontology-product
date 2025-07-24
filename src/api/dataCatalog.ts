@@ -42,9 +42,6 @@ export async function addCatalog(data: any) {
 // 新建卷
 export async function addVolume(data: any) {
   const res = await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 // 删除数据卷
@@ -56,9 +53,6 @@ export async function deleteVolume(
     .delete(params)
     .inRegion()
     .do();
-  if (res.status !== 200) {
-    Message.error(res.message);
-  }
   return res;
 }
 // 重命名目录
@@ -67,9 +61,6 @@ export async function renameCatalog(id: string, params: any) {
     .put(params)
     .inRegion()
     .do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 
