@@ -29,7 +29,6 @@ import {
   getTagList
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
-
 const { Text } = Typography;
 
 interface Dataset {
@@ -55,6 +54,7 @@ interface ConnectorFile {
   size: number;
   last_modified: string;
   type: string;
+  sub_path: string;
 }
 
 interface DatasetFormProps {
@@ -69,40 +69,14 @@ const FormItem = Form.Item;
 function convertToCascaderOptions(dataSourceData) {
   console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
-    // label: (
-    //   <Tooltip content={catalog.name}>
-    //     <div
-    //       style={{
-    //         width: '200px',
-    //         whiteSpace: 'nowrap',
-    //         overflow: 'hidden',
-    //         textOverflow: 'ellipsis'
-    //       }}
-    //     >
-    //       {catalog.name}
-    //     </div>
-    //   </Tooltip>
-    // ),
-    label: catalog.name,
+    label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
+    // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            // label: (
-            //   <Tooltip content={volume.name}>
-            //     <div
-            //       style={{
-            //         width: '200px',
-            //         whiteSpace: 'nowrap',
-            //         overflow: 'hidden',
-            //         textOverflow: 'ellipsis'
-            //       }}
-            //     >
-            //       {volume.name}
-            //     </div>
-            //   </Tooltip>
-            // ),
-            label: volume.name,
+            label: <EllipsisPopover value={volume.name}></EllipsisPopover>,
+            // label: volume.name,
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -125,6 +99,17 @@ function highlight(text, keyword) {
       {text.slice(idx + keyword.length)}
     </>
   );
+}
+
+function ItemPathDisplay(item) {
+  // 如果 sub_path 为空，显示短横线
+  if (item === '') return <span>-</span>;
+
+  // 如果长度小于等于 5，显示完整内容，否则截取前五个字符加省略号
+  const displayPath =
+    item.length <= 5 ? item.sub_path : `${item.substring(0, 5)}...`;
+
+  return <span style={{ color: '#334155' }}>{displayPath}</span>;
 }
 
 //连接器列表转换为select选项 函数
@@ -163,7 +148,12 @@ const tagOptions = [
 function formatDateTime(isoString) {
   const date = new Date(isoString);
   const pad = (n) => n.toString().padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  return (
+    <span>
+      {date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} $
+      {pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}
+    </span>
+  );
 }
 
 //标签列表转换为select选项
@@ -267,6 +257,26 @@ const DatasetForm = React.forwardRef<
   });
 
   useEffect(() => {
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // 创建 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(() => {
+    const items = document.querySelectorAll('.arco-cascader-list-item');
+    const input = document.querySelectorAll('.arco-cascader-view');
+    items.forEach((item) => item.removeAttribute('title'));
+    input.forEach((item) => item.removeAttribute('title'));
+  });
+
+  // 开始监听整个文档
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  useEffect(() => {
     // 数据目录卷
     getCatalogList({ root_type: 2 }).then((res) => {
       setTargetDataSourceOptions(
@@ -319,22 +329,17 @@ const DatasetForm = React.forwardRef<
       // 判断是一级目录还是二级目录
       if (Array.isArray(value) && Array.isArray(value[0])) {
         // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
+
         const catalogpath = value[0][0];
         const catalogId = value[0][1];
         const selectedItem = value[1]?.[0];
-
+        console.log(11111111, value);
         const basePath = String(catalogpath[0][0]);
-        console.log(
-          '11223213123131',
-          basePath.length > 1 && basePath.endsWith('/')
-        );
         const formattedPath =
           basePath.length > 1 && basePath.endsWith('/')
             ? `${basePath}/`
             : basePath;
         const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
-        // const path = `${catalogpath}/dst/${catalogId}/volume/${selectedItem}`;
-        console.log('二级目录路径:', path, selectedItem);
         if (selectedItem == undefined) {
           setPreviewColumns([]);
           Message.warning('请选择二级目录！');
@@ -604,6 +609,15 @@ const DatasetForm = React.forwardRef<
               >
                 <Cascader
                   placeholder="请选择"
+                  //@ts-expect-error
+                  renderFormat={(labels, selectedOptions) => {
+                    const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
+                    return (
+                      <div>
+                        <EllipsisPopover value={value}></EllipsisPopover>
+                      </div>
+                    );
+                  }}
                   options={targetDataSourceOptions}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"
@@ -825,8 +839,15 @@ const DatasetForm = React.forwardRef<
                             }}
                           >
                             <div>{highlight(item.name, inputValue)}</div>
-                            <div style={{ color: '#86909c' }}>
-                              修改时间：{formatDateTime(item.last_modified)}
+                            <div style={{ color: '#6E7B8D', fontSize: '14px' }}>
+                              <Space size={12}>
+                                <span>
+                                  所属文件：{ItemPathDisplay(item.sub_path)}
+                                </span>
+                                <span>
+                                  修改时间：{formatDateTime(item.last_modified)}
+                                </span>
+                              </Space>
                             </div>
                           </div>
                         </Option>
