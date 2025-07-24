@@ -90,6 +90,10 @@
     background-color: var(--color-bg-5);
     font-weight: 400;
   }
+  :global(.tree-icon),
+  :global(.whitespace-nowrap) {
+    color: #007dfa;
+  }
 }
 
 .treeContainer
