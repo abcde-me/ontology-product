@@ -30,6 +30,7 @@ export function useEditableTree({ catalogTreeStore }) {
     inputRef,
     inputValue,
     treeData,
+    rawTreeData,
     expandedKeys,
     defaultName
   } = catalogTreeStore.useGetState([
@@ -38,6 +39,7 @@ export function useEditableTree({ catalogTreeStore }) {
     'inputRef',
     'inputValue',
     'treeData',
+    'rawTreeData',
     'expandedKeys',
     'defaultName'
   ]);
@@ -54,10 +56,10 @@ export function useEditableTree({ catalogTreeStore }) {
   }, []);
 
   const generateName = useCallback(
-    (data: TreeDataType[], typeText?: string) => {
+    (data: TreeDataType[], rawData: TreeDataType[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const set = new Set(data.map((item) => item.name));
-      let x = data.length + 1;
+      const set = new Set(rawData.map((item) => item.name));
+      let x = rawData.length + 1;
       let name = `${baseName}${x}`;
 
       while (set.has(name)) {
@@ -211,7 +213,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const onCatalogAdd = () => {
-    const name = generateName(treeData);
+    const name = generateName(treeData, rawTreeData ?? []);
     catalogTreeStore.setState({
       inputValue: name,
       defaultName: name,
@@ -225,6 +227,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef } = node;
     const name = generateName(
       dataRef?.children || [],
+      rawTreeData ?? [],
       subLeafKeys[dataRef?.type]
     );
     const cachTreeData = treeData.map((item: TreeDataType) => {
