@@ -137,53 +137,77 @@ const ModalDetail = (props) => {
                         <span className="label">Endpoint:</span>
                         <span className="value">
                           {DetailData?.config.endpoint}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.endpoint || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.endpoint}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.endpoint || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">AccessKey ID:</span>
                         <span className="value">
                           {DetailData?.config.access_key}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.access_key || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.access_key}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.access_key || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">AccessKey Secret:</span>
                         <span className="value">
                           {DetailData?.config.secret_key}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.secret_key || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.secret_key}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.secret_key || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">文件路径:</span>
                         <span className="value">
                           {DetailData.config.path}
-                          <IconCopy
-                            style={{ marginLeft: '10px' }}
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData.config.path || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.path}
+                          >
+                            <IconCopy
+                              style={{ marginLeft: '10px' }}
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData.config.path || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                     </div>
@@ -193,52 +217,76 @@ const ModalDetail = (props) => {
                         <span className="label">Host:</span>
                         <span className="value">
                           {DetailData?.config.host}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.host || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.host}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.host || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">port:</span>
                         <span className="value">
                           {DetailData?.config.port}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.port || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.port}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.port || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">user:</span>
                         <span className="value">
                           {DetailData?.config.user}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.user || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.user}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.user || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                       <div className="info-item">
                         <span className="label">文件路径:</span>
                         <span className="value">
                           {DetailData?.config.path}{' '}
-                          <IconCopy
-                            className="set-mouse"
-                            onClick={() => {
-                              copy(DetailData?.config.path || '');
-                              Message.success('复制成功');
-                            }}
-                          />
+                          <Tooltip
+                            position="tl"
+                            trigger="hover"
+                            content={DetailData?.config.path}
+                          >
+                            <IconCopy
+                              className="set-mouse"
+                              onClick={() => {
+                                copy(DetailData?.config.path || '');
+                                Message.success('复制成功');
+                              }}
+                            />
+                          </Tooltip>
                         </span>
                       </div>
                     </div>
