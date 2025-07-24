@@ -331,6 +331,7 @@ const LoadAddModal = (props: propsType) => {
           rules={[{ required: true, message: '请选择载入位置' }]}
         >
           <Cascader
+            expandTrigger="hover"
             placeholder="请输入载入位置"
             style={{ width: '100%' }}
             options={directoryData}
