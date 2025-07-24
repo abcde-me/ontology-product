@@ -71,14 +71,19 @@ export function useColumns() {
       key: 'status',
       render: (status: string) => {
         return status === 'active' ? (
-          <Tag style={{
-            width: '62px',
-            height: '24px',
-            borderRadius: '4px',
-            backgroundColor: '#DBF4EE',
-            color: '#0AB58D',
-            padding: '0 11px 0 8px',
-          }} size='medium' icon={<IconCheckCircleFill />} color="green">
+          <Tag
+            style={{
+              width: '62px',
+              height: '24px',
+              borderRadius: '4px',
+              backgroundColor: '#DBF4EE',
+              color: '#0AB58D',
+              padding: '0 11px 0 8px'
+            }}
+            size="medium"
+            icon={<IconCheckCircleFill />}
+            color="green"
+          >
             启用
           </Tag>
         ) : (
@@ -89,10 +94,12 @@ export function useColumns() {
               borderRadius: '4px',
               backgroundColor: '#FFECE5',
               color: '#EF4D29',
-              padding: '0 11px 0 8px',
-
+              padding: '0 11px 0 8px'
             }}
-            size='medium' icon={<IconCloseCircleFill />} color="orange">
+            size="medium"
+            icon={<IconCloseCircleFill />}
+            color="orange"
+          >
             停用
           </Tag>
         );
@@ -176,8 +183,30 @@ export function useColumns() {
             ],
             onClick: (row, index) => {
               Modal.confirm({
-                title: '确定要停用该用户吗?',
-                content: '停用后用户将无法登录系统。',
+                title: (
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 16,
+                      height: 24
+                    }}
+                  >
+                    确定要停用该用户吗?
+                  </span>
+                ),
+                content: (
+                  <div
+                    style={{
+                      fontWeight: 400,
+                      fontSize: 14,
+                      color: '#1d2129',
+                      height: 22,
+                      margin: '10px 0 0 28px'
+                    }}
+                  >
+                    停用后用户将无法登录系统。
+                  </div>
+                ),
                 async onOk() {
                   const res = await orgStore.pauseMember(row);
                   if (res.success) {
@@ -211,9 +240,27 @@ export function useColumns() {
               }
               Modal.confirm({
                 style: { width: '400px' },
-                title: '确定要删除该用户吗?',
+                title: (
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 16,
+                      height: 24
+                    }}
+                  >
+                    确定要删除该用户吗?
+                  </span>
+                ),
                 content: (
-                  <div className="pl-6">
+                  <div
+                    style={{
+                      fontWeight: 400,
+                      fontSize: 14,
+                      color: '#1d2129',
+                      height: 22,
+                      margin: '10px 0 0 28px'
+                    }}
+                  >
                     删除用户将无法撤销，用户将无法登录系统，用户创建的资源不会被移除。
                   </div>
                 ),

@@ -297,8 +297,8 @@ export default function WorkflowList() {
           isLink
           handleLink={() => {
             handleToDirectoryPath(
-              record.source_path_id,
-              record.parent_source_path_id,
+              record.target_path_id,
+              record.parent_target_path_id,
               2
             );
           }}
