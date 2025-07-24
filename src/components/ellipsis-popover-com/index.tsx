@@ -103,11 +103,7 @@ function EllipsisPopover(props: any, ref: any) {
             type: 'popover',
             props: {
               position: 'tl',
-              className: 'compute-aidp-popover',
-              style: {
-                maxHeight: '350px',
-                overflow: 'auto'
-              }
+              className: 'compute-aidp-popover'
             }
           },
           ...ellipsis
