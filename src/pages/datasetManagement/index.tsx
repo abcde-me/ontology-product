@@ -1003,7 +1003,7 @@ const DatasetManagement: React.FC = () => {
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
-        margin: '10px 20px 10px 0px',
+        margin: '20px 20px 20px 0px',
         borderRadius: '10px',
         padding: '20px'
       }}

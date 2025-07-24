@@ -12,6 +12,7 @@ import { RecordingType } from '../type';
 import './index.css';
 import { RunState } from '../list/list';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
@@ -170,15 +171,36 @@ const AccessTable = (props) => {
       setLoading(false);
     }
   };
+  const clearHan = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoadRecordLists({
+        page: 1,
+        page_size: pageSize,
+        execution_id: props.records_id,
+        file_name: '',
+        ...RecordingObject
+      });
+      if (res.code == '' && res.status == 200) {
+        setTotal(res.data.total);
+        setData(res.data.items);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     getRecordingList();
   }, [current, pageSize, RecordingObject]);
   return (
     <div>
       <InputSearch
+        onClear={clearHan}
         allowClear
         placeholder="搜索文件名"
-        style={{ width: 220, marginLeft: '17px' }}
+        style={{ width: 220, marginLeft: '24px' }}
         onPressEnter={(e) => {
           getRecordingList();
         }}
@@ -192,8 +214,9 @@ const AccessTable = (props) => {
         <Table
           columns={columns}
           data={data ?? []}
-          style={{ padding: '15px', width: '100%' }}
+          style={{ padding: '15px 24px', width: '100%' }}
           border={false}
+          noDataElement={noDataElement({ description: '暂无数据' })}
           pagination={false}
           rowKey={(record) => record.id}
           loading={loading}

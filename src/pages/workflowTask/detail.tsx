@@ -107,7 +107,9 @@ export default function WorkflowTaskDetail() {
   // 初始化当前选中的节点
   const [activeNode, setActiveNode] = useState('');
   // 初始化当前节点是否是解析节点
-  const [isParseNode, setIsParseNode] = useState(true);
+  const [isParseNode, setIsParseNode] = useState(false);
+  // 初始化是否切换了tab
+  const [isChangeTab, setIsChangeTab] = useState(false);
   // 初始化数据清洗节点及数据增强节点数据
   const [cleaningAugmentNodeData, setCleaningAugmentNodeData] = useState({
     raw_data_num: 0,
@@ -129,6 +131,9 @@ export default function WorkflowTaskDetail() {
     sort: '',
     sort_by: ''
   });
+  const workflowUuid = useParams('workflow_uuid');
+  const workflowVersion = useParams('workflow_version');
+  const workflowId = useParams('ds_workflow_id');
 
   // 初始化详情基本数据
   useEffect(() => {
@@ -140,7 +145,7 @@ export default function WorkflowTaskDetail() {
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
     if (taskId && activeNode) getNodeDetail();
-  }, [activeNode, sortValue]);
+  }, [activeNode && isChangeTab, sortValue]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
@@ -388,6 +393,7 @@ export default function WorkflowTaskDetail() {
       val === NodeType.audio;
     setIsParseNode(isParse);
     setActiveNode(val);
+    setIsChangeTab(!isChangeTab);
   };
 
   // 获取节点详情
@@ -519,6 +525,13 @@ export default function WorkflowTaskDetail() {
     }
   };
 
+  const handleClickWorkflow = () => {
+    window.open(
+      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`,
+      '_blank'
+    );
+  };
+
   return (
     <div className="workflow-task-detail">
       <div className="head-breadcrumb-box">
@@ -542,7 +555,9 @@ export default function WorkflowTaskDetail() {
       {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
       <div className="topology-diagram">
-        <div className="workflow-name">{workflowName}</div>
+        <div className="workflow-name" onClick={handleClickWorkflow}>
+          {workflowName}
+        </div>
         <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}

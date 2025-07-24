@@ -168,7 +168,8 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
-  sourceFileTypeListApi: PrefixAimdp + '/load_tasks/source_dir/file_types', //查询源数据文件类型列表
+  sourceFileTypeListApi:
+    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
   sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
   sourceDataFileDeleteApi:

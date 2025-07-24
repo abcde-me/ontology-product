@@ -55,11 +55,21 @@ export default function WorkflowTask() {
   });
   // 初始化搜索条件
   const [searchSelectValue, setSearchSelectValue] = useState('task_id');
+  // 区分是否点击按钮清空搜索框
+  const [isClickClear, setIsClickClear] = useState(false);
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
+
+  // 清空搜索框
+  useEffect(() => {
+    if (isClickClear && searchValue === '') {
+      getList();
+      setIsClickClear(false);
+    }
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -377,6 +387,11 @@ export default function WorkflowTask() {
               setSearchValue(value);
             }}
             onPressEnter={() => getList()}
+            onClear={() => {
+              setCurrent(1);
+              setSearchValue('');
+              setIsClickClear(true);
+            }}
           />
         </Input.Group>
       </div>

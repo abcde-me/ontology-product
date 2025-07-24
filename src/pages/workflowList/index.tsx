@@ -13,7 +13,6 @@ import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.css';
-import Clock1Icon from '@/pages/workflowConfig/styles/images/op-icons/clock1.svg';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { IconClockCircle } from '@arco-design/web-react/icon';
 
 const InputSearch = Input.Search;
 
@@ -41,6 +41,8 @@ export default function WorkflowList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 区分是否点击按钮清空搜索框
+  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     run_cycle: '',
@@ -51,6 +53,14 @@ export default function WorkflowList() {
   useEffect(() => {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
+
+  // 清空搜索框
+  useEffect(() => {
+    if (isClickClear && searchValue === '') {
+      getList();
+      setIsClickClear(false);
+    }
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -97,8 +107,7 @@ export default function WorkflowList() {
   ) => {
     window.open(
       `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`,
-      '_blank',
-      'noopener,noreferrer'
+      '_blank'
     );
   };
 
@@ -111,8 +120,7 @@ export default function WorkflowList() {
       });
       window.open(
         `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`,
-        '_blank',
-        'noopener,noreferrer'
+        '_blank'
       );
       getList();
     } else {
@@ -157,7 +165,7 @@ export default function WorkflowList() {
       getList();
     } else {
       Message.error({
-        content: res.message || '删除失败，请稍后重试'
+        content: res?.message ?? '删除失败，请稍后重试'
       });
     }
   };
@@ -238,7 +246,7 @@ export default function WorkflowList() {
           </div>
         ) : (
           <div className="publish-part not-published">
-            <Clock1Icon className="mr-[6px] size-[16px]" />
+            <IconClockCircle className="mr-[6px] size-[16px]" />
             <span>未上线</span>
           </div>
         ),
@@ -287,8 +295,8 @@ export default function WorkflowList() {
           isLink
           handleLink={() => {
             handleToDirectoryPath(
-              record.source_path_id,
-              record.parent_source_path_id,
+              record.target_path_id,
+              record.parent_target_path_id,
               2
             );
           }}
@@ -384,6 +392,11 @@ export default function WorkflowList() {
           }}
           onPressEnter={() => {
             getList();
+          }}
+          onClear={() => {
+            setCurrent(1);
+            setSearchValue('');
+            setIsClickClear(true);
           }}
         />
         <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>

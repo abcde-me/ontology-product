@@ -34,17 +34,11 @@ export async function getCatalogList(param: any = {}) {
 // 添加目录
 export async function addCatalog(data: any) {
   const res = await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 // 新建卷
 export async function addVolume(data: any) {
   const res = await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 // 删除数据卷
@@ -56,9 +50,6 @@ export async function deleteVolume(
     .delete(params)
     .inRegion()
     .do();
-  if (res.status !== 200) {
-    Message.error(res.message);
-  }
   return res;
 }
 // 重命名目录
@@ -67,9 +58,6 @@ export async function renameCatalog(id: string, params: any) {
     .put(params)
     .inRegion()
     .do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 
@@ -85,6 +73,10 @@ interface TargetDataFileQueryParams {
   file_type: Array<string>;
   sort_field?: string;
   sort_order?: string;
+}
+
+interface SourceFileTypeList {
+  id: string;
 }
 
 // 定义删除目标文件的参数接口
@@ -134,8 +126,13 @@ export async function getTargetFileTypeList() {
   return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
 }
 //查询源数据文件类型列表
-export async function getSourceFileTypeList() {
-  return await UAPI.RES.sourceFileTypeListApi({}).get().inRegion().do();
+export async function getSourceFileTypeList(params) {
+  return await UAPI.RES.sourceFileTypeListApi({
+    file_id: params.id
+  })
+    .get()
+    .inRegion()
+    .do();
 }
 
 //删除目标文件

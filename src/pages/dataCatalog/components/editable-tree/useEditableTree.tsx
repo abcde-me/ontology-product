@@ -30,6 +30,7 @@ export function useEditableTree({ catalogTreeStore }) {
     inputRef,
     inputValue,
     treeData,
+    rawTreeData,
     expandedKeys,
     defaultName
   } = catalogTreeStore.useGetState([
@@ -38,6 +39,7 @@ export function useEditableTree({ catalogTreeStore }) {
     'inputRef',
     'inputValue',
     'treeData',
+    'rawTreeData',
     'expandedKeys',
     'defaultName'
   ]);
@@ -54,10 +56,10 @@ export function useEditableTree({ catalogTreeStore }) {
   }, []);
 
   const generateName = useCallback(
-    (data: TreeDataType[], typeText?: string) => {
+    (data: TreeDataType[], rawData: TreeDataType[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const set = new Set(data.map((item) => item.name));
-      let x = data.length + 1;
+      const set = new Set(rawData.map((item) => item.name));
+      let x = rawData.length + 1;
       let name = `${baseName}${x}`;
 
       while (set.has(name)) {
@@ -193,6 +195,8 @@ export function useEditableTree({ catalogTreeStore }) {
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
       Message.success('删除成功!');
+    } else {
+      Message.error(res?.message ?? '删除失败，请稍后重试');
     }
 
     catalogTreeStore.setState({
@@ -209,7 +213,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const onCatalogAdd = () => {
-    const name = generateName(treeData);
+    const name = generateName(treeData, rawTreeData ?? []);
     catalogTreeStore.setState({
       inputValue: name,
       defaultName: name,
@@ -223,6 +227,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef } = node;
     const name = generateName(
       dataRef?.children || [],
+      rawTreeData ?? [],
       subLeafKeys[dataRef?.type]
     );
     const cachTreeData = treeData.map((item: TreeDataType) => {
@@ -269,6 +274,11 @@ export function useEditableTree({ catalogTreeStore }) {
       switch (dataRef?.type) {
         case CatalogTypeEnum.catalog:
           res = await addCatalog({ name: fileName, root_type: root_type });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新增目录失败');
+          }
+
           break;
         case CatalogTypeEnum.volume:
           res = await addVolume({
@@ -276,6 +286,11 @@ export function useEditableTree({ catalogTreeStore }) {
             parent_id: dataRef.parent_id,
             root_type: root_type
           });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建卷失败');
+          }
+
           break;
         default:
           break;
@@ -289,6 +304,10 @@ export function useEditableTree({ catalogTreeStore }) {
           type: dataRef?.type,
           parent_id: dataRef?.parent_id
         });
+
+        if (res.status !== 200) {
+          Message.error(res?.message ?? '重命名目录失败');
+        }
       }
     }
 

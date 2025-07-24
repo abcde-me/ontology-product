@@ -5,6 +5,7 @@ import {
   ALL_CHAT_AVAILABLE_BLOCKS,
   ALL_COMPLETION_AVAILABLE_BLOCKS
 } from '@/pages/workflowConfig/workflow/blocks';
+import TextPlan from './textDefault';
 
 const i18nPrefix = 'workflow.errorMsg';
 
@@ -13,7 +14,20 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     code: '',
     code_language: CodeLanguage.python3,
     variables: [],
-    outputs: {}
+    outputs: {},
+    app_scenarios: {
+      name: '通用',
+      type: 'tongyong',
+      option: {
+        sample_num: 10,
+        similarity_threshold: 0.7,
+        generate_sample_num: 100,
+        enhanced_proportion: 0.7,
+        is_prompt: 0,
+        prompt: TextPlan['tongyong'].prompt,
+        sample_data: TextPlan['tongyong'].data
+      }
+    }
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -31,16 +45,14 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
   },
   checkValid(payload: CodeNodeType, t: any) {
     let errorMessages = '';
+    const { enha_modle_id, app_scenarios, modelList } = payload;
     const {
-      app_scenarios_name,
-      enha_modle_id,
       enhanced_proportion,
       sample_num,
       similarity_threshold,
-      generate_sample_num,
-      modelList
-    } = payload;
-    if (!app_scenarios_name) {
+      generate_sample_num
+    } = app_scenarios?.option ?? {};
+    if (!app_scenarios?.name) {
       errorMessages = '场景未选择';
     }
     if (!enha_modle_id) {

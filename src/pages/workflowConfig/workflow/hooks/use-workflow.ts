@@ -47,6 +47,7 @@ import { IsOnline } from '@/types/workflowApi';
 // import workflowsPublish from '@/pages/workflowConfig/mockData/workflowsPublish.json'
 // import workflowDraft from '@/pages/workflowConfig/mockData/workflowDraft.json'
 import { useLocation } from 'react-router-dom';
+import { useParams } from '@/utils/url';
 
 export const useIsChatMode = () => {
   const appDetail = useTaskStore((s) => s.workflowDetail);
@@ -564,6 +565,22 @@ export const useWorkflowInit = () => {
         });
       } else {
         const res = result.data;
+        if (appDetail?.is_online !== IsOnline.online && !isShowChatMode) {
+          // 每次刷新或者重新打开页面，不是上线模式则重置用户反选的文件
+          result?.data?.graph?.nodes
+            ?.filter((n) =>
+              [
+                BlockEnum.Text,
+                BlockEnum.Pic,
+                BlockEnum.Video,
+                BlockEnum.Audio
+              ].includes(n.data.type)
+            )
+            .forEach((node) => {
+              node.data.files = [];
+              node.data.selected_files_num = 0;
+            });
+        }
         const setRes = result?.data?.graph?.nodes?.map((node, index) => {
           return {
             ...node,
@@ -711,6 +728,8 @@ export const useNodesReadOnly = () => {
   const isRestoring = useStore((s) => s.isRestoring);
   const currentUrl = window.location.pathname;
   const appDetail = useTaskStore((s) => s.workflowDetail);
+  // url上携带版本，不支持工作流编辑，主要场景：作业详情跳转到工作流详情
+  const workflowVersion = useParams('workflow_version');
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -721,7 +740,8 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      appDetail?.is_online === IsOnline.online
+      appDetail?.is_online === IsOnline.online ||
+      !!workflowVersion
     );
   }, [workflowStore, appDetail]);
 
@@ -731,7 +751,8 @@ export const useNodesReadOnly = () => {
       currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
       historyWorkflowData ||
       isRestoring ||
-      appDetail?.is_online === IsOnline.online
+      appDetail?.is_online === IsOnline.online ||
+      !!workflowVersion
     ),
     getNodesReadOnly
   };

@@ -12,14 +12,17 @@ import { getCatalogList } from '@/api/dataCatalog';
 import useConfig from './use-config';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { useStoreApi } from 'reactflow';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
+import { IsOnline } from '@/types/workflowApi';
 
 const i18nPrefix = 'workflow.nodes.start';
 
 const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const { data_path_name, data_category, data_path_id } = data;
-  const { updatePathName } = useConfig(id, data);
+  const { updatePathName, doFileConfigChange } = useConfig(id, data);
   const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  const appDetail = useTaskStore((state) => state.workflowDetail);
   const store = useStoreApi();
 
   const hasFileTypes =
@@ -61,6 +64,14 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
         });
       }
     });
+
+    // 如果非上线模式，已经选择了数据源，第一次加载设置文件数量为全选
+    if (data_path_id && appDetail?.is_online !== IsOnline.online) {
+      doFileConfigChange(BlockEnum.Text, data_path_id, data_category?.[0]);
+      doFileConfigChange(BlockEnum.Pic, data_path_id, data_category?.[1]);
+      doFileConfigChange(BlockEnum.Audio, data_path_id, data_category?.[2]);
+      doFileConfigChange(BlockEnum.Video, data_path_id, data_category?.[3]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -78,7 +89,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
           )}
           {!data_path_name && (
             <div className="input-var-item">
-              <span className="extra-info">未配置</span>
+              <span className="extra-info !font-semibold">未配置</span>
             </div>
           )}
         </div>
@@ -102,7 +113,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
           )}
           {!hasFileTypes && (
             <div className="input-var-item">
-              <span className="extra-info">未配置</span>
+              <span className="extra-info !font-semibold">未配置</span>
             </div>
           )}
         </div>

@@ -8,6 +8,7 @@ import { getLoadRecord } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -52,7 +53,7 @@ const AccessDetail = () => {
         }}
       >
         <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
+          style={{ cursor: 'pointer', fontSize: '14px', marginTop: '2px' }}
           onClick={() => {
             OneLevelUpHan();
           }}
@@ -64,7 +65,14 @@ const AccessDetail = () => {
             alignItems: 'center'
           }}
         >
-          <Breadcrumb style={{ marginLeft: '28px', fontSize: '20px' }}>
+          <Breadcrumb
+            style={{
+              marginLeft: '20px',
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
             <BreadcrumbItem
               href="/tenant/compute/modaforge/dataLoad"
               style={{ color: '#7F8C9F' }}
@@ -77,11 +85,19 @@ const AccessDetail = () => {
               }}
               className="bread-style"
             >
-              {name}
+              <div style={{ maxWidth: '300px', color: ' rgb(127, 140, 159)' }}>
+                <EllipsisPopoverCom value={name}></EllipsisPopoverCom>
+              </div>
             </BreadcrumbItem>
-            <BreadcrumbItem style={{ fontSize: '20px' }}>
-              {arressDetail.execution_name}
-              {!loading && '运行记录'}
+
+            <BreadcrumbItem>
+              <div style={{ maxWidth: '300px' }}>
+                <EllipsisPopoverCom
+                  value={!loading && arressDetail.execution_name + '运行记录'}
+                >
+                  {' '}
+                </EllipsisPopoverCom>
+              </div>
             </BreadcrumbItem>
           </Breadcrumb>
           <div
@@ -95,8 +111,8 @@ const AccessDetail = () => {
           >
             <div
               style={{
-                width: '7px',
-                height: '7px',
+                width: '8px',
+                height: '8px',
                 background:
                   arressDetail.status == RunState.STOPPED
                     ? RunStateType[RunState.STOPPED].color
@@ -138,7 +154,7 @@ const AccessDetail = () => {
           style={{
             fontSize: '17px',
             fontWeight: '600',
-            padding: '0px 20px',
+            padding: '0px 24px',
             margin: '15px 0px'
           }}
         >
@@ -198,7 +214,7 @@ const AccessDetail = () => {
           style={{
             fontSize: '17px',
             fontWeight: '600',
-            margin: '15px 0px 15px 17px'
+            margin: '15px 0px 15px 24px'
           }}
         >
           文件详情

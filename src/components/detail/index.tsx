@@ -140,6 +140,10 @@ const generateArcoColumns = (
               preferTypography
               isEdit={false}
               value={value}
+              ellipsis={{
+                rows: 1,
+                cssEllipsis: true
+              }}
               style={{
                 // width:'30%',
                 whiteSpace: 'nowrap',
