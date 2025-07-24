@@ -177,7 +177,7 @@ export async function deleteSourceFile(id: string) {
 //批量删除源数据文件
 export async function deleteSourceFileBatch(params: any) {
   return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
-    .post(params)
+    .delete(params)
     .inRegion()
     .do();
 }
