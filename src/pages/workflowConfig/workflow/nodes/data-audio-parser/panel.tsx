@@ -62,7 +62,7 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
       }
     });
   }, []);
-
+  console.log('audio.....', inputs);
   return (
     <div className="wk-node-panel-content audio-parser-panel-content mt-[16px]">
       <Form
