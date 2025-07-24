@@ -273,6 +273,11 @@ export function useEditableTree({ catalogTreeStore }) {
       switch (dataRef?.type) {
         case CatalogTypeEnum.catalog:
           res = await addCatalog({ name: fileName, root_type: root_type });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新增目录失败');
+          }
+
           break;
         case CatalogTypeEnum.volume:
           res = await addVolume({
@@ -280,6 +285,11 @@ export function useEditableTree({ catalogTreeStore }) {
             parent_id: dataRef.parent_id,
             root_type: root_type
           });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建卷失败');
+          }
+
           break;
         default:
           break;
@@ -293,6 +303,10 @@ export function useEditableTree({ catalogTreeStore }) {
           type: dataRef?.type,
           parent_id: dataRef?.parent_id
         });
+
+        if (res.status !== 200) {
+          Message.error(res?.message ?? '重命名目录失败');
+        }
       }
     }
 

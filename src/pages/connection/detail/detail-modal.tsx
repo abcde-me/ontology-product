@@ -102,7 +102,7 @@ const ModalDetail = (props) => {
                   </div>
                   <div className="info-item">
                     <span className="label">创建人:</span>
-                    <span className="value">默认</span>
+                    <span className="value">{DetailData?.creator}</span>
                   </div>
                   <div className="info-item">
                     <span className="label">创建时间:</span>

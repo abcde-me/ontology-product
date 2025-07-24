@@ -71,11 +71,28 @@ export function useColumns() {
       key: 'status',
       render: (status: string) => {
         return status === 'active' ? (
-          <Tag icon={<IconCheckCircleFill />} color="green">
+          <Tag style={{
+            width: '62px',
+            height: '24px',
+            borderRadius: '4px',
+            backgroundColor: '#DBF4EE',
+            color: '#0AB58D',
+            padding: '0 11px 0 8px',
+          }} size='medium' icon={<IconCheckCircleFill />} color="green">
             启用
           </Tag>
         ) : (
-          <Tag icon={<IconCloseCircleFill />} color="orange">
+          <Tag
+            style={{
+              width: '62px',
+              height: '24px',
+              borderRadius: '4px',
+              backgroundColor: '#FFECE5',
+              color: '#EF4D29',
+              padding: '0 11px 0 8px',
+
+            }}
+            size='medium' icon={<IconCloseCircleFill />} color="orange">
             停用
           </Tag>
         );
