@@ -71,8 +71,7 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {
 
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {
-  CAN_UPDATE: 'workflow:can_update',
-  CAN_STOP: 'workflow:can_stop'
+  CAN_UPDATE: 'workflow:can_update'
 } as const;
 
 // 数据目录相关权限

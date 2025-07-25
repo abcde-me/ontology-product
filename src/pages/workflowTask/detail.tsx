@@ -274,7 +274,7 @@ export default function WorkflowTaskDetail() {
                 <span className="item-content">运行中</span>
                 {taskDetailData.perms &&
                   taskDetailData.perms.includes(
-                    WORKFLOW_TASK_PERMISSIONS.CAN_STOP
+                    WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE
                   ) && (
                     <Popconfirm
                       focusLock
