@@ -29,6 +29,7 @@ import {
 } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
 import Workflow from '../workflowConfig/index';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -84,6 +85,7 @@ interface TaskDetailObject {
   start_time?: string;
   end_time?: string;
   error_msg?: string;
+  perms?: string[];
 }
 
 // 定义nodeData值的类型
@@ -243,16 +245,21 @@ export default function WorkflowTaskDetail() {
                   }}
                 />
                 <span className="item-content">运行失败</span>
-                <Popconfirm
-                  focusLock
-                  title="确定重新运行吗？"
-                  content="已处理数据将被覆盖"
-                  onOk={() => {
-                    handleRetryWorkflow(taskId!);
-                  }}
-                >
-                  <span className="operate-text">重试</span>
-                </Popconfirm>
+                {taskDetailData.perms &&
+                  taskDetailData.perms.includes(
+                    WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE
+                  ) && (
+                    <Popconfirm
+                      focusLock
+                      title="确定重新运行吗？"
+                      content="已处理数据将被覆盖"
+                      onOk={() => {
+                        handleRetryWorkflow(taskId!);
+                      }}
+                    >
+                      <span className="operate-text">重试</span>
+                    </Popconfirm>
+                  )}
               </div>
             ) : taskDetailData.run_status === TaskRunStatus.running ? (
               <div className="item-content-box">
@@ -265,16 +272,21 @@ export default function WorkflowTaskDetail() {
                   }}
                 />
                 <span className="item-content">运行中</span>
-                <Popconfirm
-                  focusLock
-                  title="确定停止吗？"
-                  content="未处理完的数据将停止处理"
-                  onOk={() => {
-                    handleStopWorkflow(taskId!);
-                  }}
-                >
-                  <span className="operate-text">停止</span>
-                </Popconfirm>
+                {taskDetailData.perms &&
+                  taskDetailData.perms.includes(
+                    WORKFLOW_TASK_PERMISSIONS.CAN_STOP
+                  ) && (
+                    <Popconfirm
+                      focusLock
+                      title="确定停止吗？"
+                      content="未处理完的数据将停止处理"
+                      onOk={() => {
+                        handleStopWorkflow(taskId!);
+                      }}
+                    >
+                      <span className="operate-text">停止</span>
+                    </Popconfirm>
+                  )}
               </div>
             ) : (
               <div className="item-content-box">
