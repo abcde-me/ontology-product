@@ -393,12 +393,14 @@ const DatasetForm = React.forwardRef<
   const stringifyFirstLevelValues = (obj) => {
     return obj.map((item) => {
       const newobj = {};
-      for (const key in item) {
-        if (typeof item[key] === 'string') {
-          newobj[key] = item[key];
-        }
+      for (const key of item) {
         try {
-          newobj[key] = JSON.stringify(item[key]);
+          if (typeof item[key] !== 'string') {
+            newobj[key] = JSON.stringify(item[key]);
+            continue;
+          } else {
+            newobj[key] = item[key];
+          }
         } catch {
           newobj[key] = '';
         }
