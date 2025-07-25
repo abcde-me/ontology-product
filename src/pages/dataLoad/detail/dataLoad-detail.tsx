@@ -292,7 +292,7 @@ const DataLoadDetail = () => {
           {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
             <div
               style={{
-                color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
+                color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
                 pointerEvents: runningFlag ? 'none' : undefined,
                 cursor: runningFlag ? '' : 'pointer',
                 fontSize: '14px'

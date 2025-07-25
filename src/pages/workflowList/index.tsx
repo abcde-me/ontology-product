@@ -208,16 +208,20 @@ export default function WorkflowList() {
       width: 300,
       ellipsis: true,
       className: 'hover-change workflow-name',
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.workflow_name)}
-          isEdit={false}
-          isLink
-          handleLink={() => {
-            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-          }}
-        />
-      )
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+          <EllipsisPopover
+            value={record.workflow_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+            }}
+          />
+        ) : (
+          <span>-</span>
+        );
+      }
     },
     {
       title: '运行方式',
@@ -269,20 +273,24 @@ export default function WorkflowList() {
       width: 280,
       ellipsis: true,
       className: 'hover-change',
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.source_path)}
-          isEdit={false}
-          isLink
-          handleLink={() => {
-            handleToDirectoryPath(
-              record.source_path_id,
-              record.parent_source_path_id,
-              1
-            );
-          }}
-        />
-      )
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
+          <EllipsisPopover
+            value={record.source_path}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToDirectoryPath(
+                record.source_path_id,
+                record.parent_source_path_id,
+                1
+              );
+            }}
+          />
+        ) : (
+          <span>-</span>
+        );
+      }
     },
     {
       title: '目标数据目录',
@@ -290,20 +298,24 @@ export default function WorkflowList() {
       width: 280,
       ellipsis: true,
       className: 'hover-change',
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.target_path)}
-          isEdit={false}
-          isLink
-          handleLink={() => {
-            handleToDirectoryPath(
-              record.target_path_id,
-              record.parent_target_path_id,
-              2
-            );
-          }}
-        />
-      )
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.target_path) !== '-' ? (
+          <EllipsisPopover
+            value={record.target_path}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToDirectoryPath(
+                record.target_path_id,
+                record.parent_target_path_id,
+                2
+              );
+            }}
+          />
+        ) : (
+          <span>-</span>
+        );
+      }
     },
     {
       title: '创建人',

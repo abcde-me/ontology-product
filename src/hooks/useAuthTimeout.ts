@@ -220,7 +220,7 @@ const useAuthTimeout = (options: {
       localStorage.removeItem(LOGOUT_EVENT_KEY);
 
       // 使用replace而不是href，避免浏览器历史记录问题
-      window.location.replace('/tenant/compute/appforge/login');
+      window.location.replace('/tenant/compute/modaforge/login');
     } catch (error) {
       // console.error('【验证】登出操作失败:', error);
       isLoggingOutRef.current = false;
