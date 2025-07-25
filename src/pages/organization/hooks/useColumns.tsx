@@ -77,7 +77,6 @@ export function useColumns() {
             borderRadius: '4px',
             backgroundColor: '#DBF4EE',
             color: '#0AB58D',
-            padding: '0 11px 0 8px',
           }} size='medium' icon={<IconCheckCircleFill />} color="green">
             启用
           </Tag>
@@ -89,8 +88,6 @@ export function useColumns() {
               borderRadius: '4px',
               backgroundColor: '#FFECE5',
               color: '#EF4D29',
-              padding: '0 11px 0 8px',
-
             }}
             size='medium' icon={<IconCloseCircleFill />} color="orange">
             停用

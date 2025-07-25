@@ -16,10 +16,14 @@ export type IOtherOptions = {
 
 export const getToken = () => {
   const consolePluginToken = localStorage.getItem('console_token');
-  const loginToken = getLocalStorage<string>('loginToken');
-  const token = consolePluginToken ? `Bearer ${localStorage.getItem('console_token')}` : (loginToken ? `${loginToken.replace(/['"]/g, '').trim()}` : '')
-  return token ? { authorization: token } : {}
-}
+  const loginToken = localStorage.getItem('loginToken');
+  const token = consolePluginToken
+    ? `Bearer ${localStorage.getItem('console_token')}`
+    : loginToken
+      ? `${loginToken.replace(/['"]/g, '').trim()}`
+      : '';
+  return token ? { authorization: token } : {};
+};
 
 async function baseRequest(
   url,

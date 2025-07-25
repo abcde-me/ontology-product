@@ -1,4 +1,4 @@
-.arco-table-tr > th {
+.arco-table-tr>th {
   // background-color: rgb(245, 249, 255);
 }
 
@@ -72,7 +72,12 @@
     background-size: cover;
   }
 
-  .jump-workflow:hover + .jump-workflow-icon {
+  .jump-workflow:hover+.jump-workflow-icon {
     background-image: url(../../assets/jump-hover.svg);
   }
+}
+
+.arco-table-body {
+  min-height: 100% !important;
+  background-color: #fff;
 }

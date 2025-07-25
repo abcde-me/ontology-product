@@ -285,7 +285,7 @@ const DataLoadDetail = () => {
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
           <div
             style={{
-              color: runningFlag ? '#ccc' : 'rgb(0, 125, 250)',
+              color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
               pointerEvents: runningFlag ? 'none' : undefined,
               cursor: runningFlag ? '' : 'pointer',
               fontSize: '14px'
