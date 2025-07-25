@@ -385,7 +385,7 @@ for (const key in modaForgeResEndpoints) {
 }
 UAPI_CONFIG.addRequestInterceptor((config) => {
   // 严格校验逻辑
-  const rawToken = getLocalStorage<string>('loginToken');
+  const rawToken = localStorage.getItem('loginToken');
   // console.log('cleanToken', rawToken);
 
   // 1. 类型检查
