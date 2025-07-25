@@ -46,12 +46,12 @@ import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
+import { isInFrame } from './utils/env';
 
 initI18n();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
-console.log('李帆测试，111', flattenRoutes);
 const hiddenTopBarRoutes = [
   '/login',
   '/tenant/compute/modaforge/login',
@@ -74,7 +74,8 @@ function App() {
   const hidden = useMemo(
     () =>
       (location?.pathname && hiddenTopBarRoutes.includes(location?.pathname)) ||
-      localLayout?.hideTopBar,
+      localLayout?.hideTopBar ||
+      isInFrame,
     [localLayout?.hideTopBar, location?.pathname]
   );
 

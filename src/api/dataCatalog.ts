@@ -34,9 +34,6 @@ export async function getCatalogList(param: any = {}) {
 // 添加目录
 export async function addCatalog(data: any) {
   const res = await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();
-  if (res.status !== 200) {
-    Message.warning(res.message);
-  }
   return res;
 }
 // 新建卷
