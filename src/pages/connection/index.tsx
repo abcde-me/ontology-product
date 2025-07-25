@@ -495,7 +495,7 @@ export default function Connection() {
         style={{ width: '760px' }}
         visible={visible2}
         title={
-          <div style={{ fontSize: '186x', fontWeight: '500' }}>连接器详情</div>
+          <div style={{ fontSize: '16px', fontWeight: '500' }}>连接器详情</div>
         }
         footer={null}
         onCancel={() => {
@@ -508,7 +508,9 @@ export default function Connection() {
       <Add ref={addandsetchildRef} getListHan={getlist} />
       <Modal
         style={{ width: '700px' }}
-        title={'编辑连接器'}
+        title={
+          <div style={{ fontWeight: '500', fontSize: '16px' }}>编辑连接器</div>
+        }
         visible={editVisible}
         autoFocus={false}
         focusLock={false}
