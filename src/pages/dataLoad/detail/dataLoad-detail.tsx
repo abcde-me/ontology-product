@@ -236,6 +236,7 @@ const DataLoadDetail = () => {
   return (
     <div>
       <div
+        className="crumbs"
         style={{
           margin: '14px 0px',
           fontSize: '20px',

@@ -75,3 +75,8 @@
     left: calc(100% - 12px - 7px);
   }
 }
+.crumbs {
+  .ellipsis-text {
+    overflow: visible;
+  }
+}
