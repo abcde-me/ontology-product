@@ -394,6 +394,9 @@ const DatasetForm = React.forwardRef<
     return obj.map((item) => {
       const newobj = {};
       for (const key in item) {
+        if (typeof item[key] === 'string') {
+          return item;
+        }
         newobj[key] = JSON.stringify(item[key]);
       }
       return newobj;
@@ -412,7 +415,14 @@ const DatasetForm = React.forwardRef<
           setPreviewColumns([]);
           return;
         }
-        setPreviewData(stringifyFirstLevelValues(res.data.list || [])); //这里的数据不能直接赋值，需要处理一下
+        try {
+          setPreviewData(stringifyFirstLevelValues(res.data.list || [])); //这里的数据不能直接赋值，需要处理一下
+        } catch (error) {
+          Message.error('数据格式错误');
+          setPreviewData(null);
+          return;
+        }
+
         console.log('previewData', res.data.list);
         setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
       })
