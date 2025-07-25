@@ -47,3 +47,8 @@
   color: black !important;
   cursor: pointer;
 }
+.crumbs {
+  .ellipsis-text {
+    overflow: visible;
+  }
+}

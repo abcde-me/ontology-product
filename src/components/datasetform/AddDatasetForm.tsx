@@ -391,6 +391,25 @@ const DatasetForm = React.forwardRef<
       });
   }; //查询指定连接器加载成功的文件信息
 
+  const stringifyFirstLevelValues = (obj) => {
+    return obj.map((item) => {
+      const newobj = {};
+      for (const key of item) {
+        try {
+          if (typeof item[key] !== 'string') {
+            newobj[key] = JSON.stringify(item[key]);
+            continue;
+          } else {
+            newobj[key] = item[key];
+          }
+        } catch {
+          newobj[key] = '';
+        }
+      }
+      return newobj;
+    });
+  };
+
   // 获取数据目录卷预览数据的方法
   const getVolumePreviewData = (volumeId: string) => {
     setTableLoading(true);
@@ -403,7 +422,8 @@ const DatasetForm = React.forwardRef<
           setPreviewColumns([]);
           return;
         }
-        setPreviewData(res.data.list || []); //这里的数据不能直接赋值，需要处理一下
+        setPreviewData(stringifyFirstLevelValues(res.data.list || [])); //这里的数据不能直接赋值，需要处理一下
+        console.log('previewData', res.data.list);
         setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
       })
       .finally(() => {

@@ -247,7 +247,7 @@ const columns = (
   {
     title: '版本',
     dataIndex: 'latest_version',
-    width: 190,
+    width: 195,
     render: (latest_version: string) => {
       if (!latest_version) {
         return '-';
@@ -257,12 +257,7 @@ const columns = (
           {/* <Tooltip content={latest_version}> */}
           <div
             style={{
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              wordBreak: 'break-all'
+              whiteSpace: 'nowrap'
             }}
           >
             {latest_version}

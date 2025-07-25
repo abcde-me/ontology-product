@@ -103,7 +103,9 @@ const add = forwardRef((props: any, ref) => {
     <div>
       <Modal
         style={{ width: '760px' }}
-        title={'创建连接器'}
+        title={
+          <div style={{ fontWeight: '500', fontSize: '16px' }}>创建连接器</div>
+        }
         visible={visible}
         autoFocus={false}
         focusLock={false}
@@ -140,7 +142,7 @@ const add = forwardRef((props: any, ref) => {
                 fontWeight: '400'
               }}
             >
-              {'测试并创建'}
+              {'测试并保存'}
             </Button>
           </div>
         }
