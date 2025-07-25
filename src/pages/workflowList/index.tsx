@@ -320,7 +320,7 @@ export default function WorkflowList() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 150,
+      width: 160,
       render: (_, record) => (
         <span>
           {record.create_time == '' || record.create_time == null
@@ -415,9 +415,16 @@ export default function WorkflowList() {
             setIsClickClear(true);
           }}
         />
-        <Button type="primary" onClick={handleCreateWorkflow} loading={loading}>
-          创建工作流
-        </Button>
+
+        <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            onClick={handleCreateWorkflow}
+            loading={loading}
+          >
+            创建工作流
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}
@@ -427,6 +434,7 @@ export default function WorkflowList() {
         noDataElement={noDataElement({
           description: '暂无工作流',
           btnText: '创建工作流',
+          perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"
