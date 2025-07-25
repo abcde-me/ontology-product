@@ -252,14 +252,14 @@ const columns = (
         <div>
           {/* <Tooltip content={latest_version}> */}
           <div
-            style={{
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              wordBreak: 'break-all'
-            }}
+          //   style={{
+          //     display: '-webkit-box',
+          //     WebkitBoxOrient: 'vertical',
+          //     WebkitLineClamp: 2,
+          //     overflow: 'hidden',
+          //     textOverflow: 'ellipsis',
+          //     wordBreak: 'break-all'
+          //   }}
           >
             {latest_version}
           </div>
