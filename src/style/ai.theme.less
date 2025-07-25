@@ -32,6 +32,7 @@
 .arco-btn-size-default {
   font-size: @font-size-body-3;
 }
+
 .arco-btn-text {
   font-weight: @font-weight-400;
 }
@@ -40,12 +41,15 @@
 .arco-table thead .arco-table-tr {
   height: 40px;
 }
+
 .arco-table-th {
   font-weight: @font-weight-600;
 }
+
 .arco-table .arco-table-th-item {
   font-size: @font-size-body-3;
 }
+
 .arco-table-td {
   font-size: @font-size-body-3;
   padding: 12px;
@@ -57,10 +61,12 @@
   color: var(--color-text-2);
   font-weight: @font-weight-600;
 }
+
 .arco-pagination-item-active {
   color: rgb(var(--primary-6));
   background-color: rgb(var(--primary-1));
 }
+
 .arco-pagination-total-text {
   color: var(--color-text-1);
 }
@@ -70,15 +76,19 @@
 .arco-tree-node:hover {
   background-color: var(--color-bg-3);
 }
+
 .arco-tree-node-title {
   font-size: @font-size-body-3;
 }
+
 .arco-tree-node-title:hover {
   background-color: var(--color-bg-3);
 }
+
 .arco-tree-node.arco-tree-node-selected {
   background-color: var(--color-bg-3);
 }
+
 .arco-tree-node-selected .arco-tree-node-title,
 .arco-tree-node-selected .arco-tree-node-title:hover {
   font-size: @font-size-body-3;
@@ -86,7 +96,7 @@
 }
 
 /******** form ********/
-.arco-form .arco-form-item > .arco-form-label-item {
+.arco-form .arco-form-item>.arco-form-label-item {
   padding-right: @size-4;
 }
 
@@ -455,12 +465,12 @@
 }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+.arco-radio-button.arco-radio-checked+.arco-radio-button::before {
   opacity: 1;
 }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+.arco-radio-button.arco-radio-checked+.arco-radio-button::before {
   opacity: 1;
 }
 
@@ -538,8 +548,7 @@
     display: inline-block;
   }
 
-  .ai-node-title-inner {
-  }
+  .ai-node-title-inner {}
 
   .ai-node-value {
     position: absolute;
@@ -614,16 +623,17 @@
   font-weight: 500;
   line-height: 28px;
 }
+
 .ai-page-title.px {
   padding-inline: @spacing-9;
 }
 
-.ai-page-subtitle {
-}
+.ai-page-subtitle {}
 
 /******** Popover 弹窗箭头去除 className="no-arrow-popover" ********/
 
 .no-arrow-popover {
+
   .arco-trigger-arrow,
   .arco-popover-arrow {
     display: none;
@@ -632,4 +642,12 @@
 
 .ai-layout {
   min-width: 1280px;
+}
+
+/** Popover */
+.arco-popover {
+  .arco-popover-content {
+    max-height: 350px;
+    overflow-y: auto;
+  }
 }

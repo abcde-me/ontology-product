@@ -32,6 +32,7 @@ export function useEditableTree({ catalogTreeStore }) {
     inputRef,
     inputValue,
     treeData,
+    rawTreeData,
     expandedKeys,
     defaultName
   } = catalogTreeStore.useGetState([
@@ -40,6 +41,7 @@ export function useEditableTree({ catalogTreeStore }) {
     'inputRef',
     'inputValue',
     'treeData',
+    'rawTreeData',
     'expandedKeys',
     'defaultName'
   ]);
@@ -213,7 +215,7 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   const onCatalogAdd = () => {
-    const name = generateName(treeData);
+    const name = generateName(rawTreeData ?? []);
     catalogTreeStore.setState({
       inputValue: name,
       defaultName: name,
@@ -226,7 +228,7 @@ export function useEditableTree({ catalogTreeStore }) {
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
     const name = generateName(
-      dataRef?.children || [],
+      dataRef?.children ?? [],
       subLeafKeys[dataRef?.type]
     );
     const cachTreeData = treeData.map((item: TreeDataType) => {
@@ -312,28 +314,34 @@ export function useEditableTree({ catalogTreeStore }) {
 
     await updateFn();
   };
-  let perms: string[] = []
+  let perms: string[] = [];
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
 
-    perms = dataRef?.perms ? dataRef.perms : perms
+    perms = dataRef?.perms ? dataRef.perms : perms;
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
           {['volume', 'db', CatalogTypeEnum.db].every(
             (key) => dataRef?.type !== key
           ) && (
-              <>
-
-                {dataRef?.perms?.includes(DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS) && <Tooltip color="white" content="重命名">
+            <>
+              {dataRef?.perms?.includes(
+                DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
+              ) && (
+                <Tooltip color="white" content="重命名">
                   <IconEdit
                     className={
                       'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
                     }
                     onClick={() => handleEdit(node)}
                   />
-                </Tooltip>}
-                {dataRef?.perms?.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS) && <Tooltip color="white" content="删除">
+                </Tooltip>
+              )}
+              {dataRef?.perms?.includes(
+                DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
+              ) && (
+                <Tooltip color="white" content="删除">
                   <IconDelete
                     onClick={() => {
                       Modal.confirm({
@@ -353,17 +361,19 @@ export function useEditableTree({ catalogTreeStore }) {
                     }}
                     className="hover:text-[rgb(var(--primary-6))]"
                   />
-                </Tooltip>}
-              </>
-            )}
-          {dataRef?.type === 'volume' && perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
-            <Tooltip color="white" content="新建">
-              <IconPlus
-                className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                onClick={() => addSubVolume(node)}
-              />
-            </Tooltip>
+                </Tooltip>
+              )}
+            </>
           )}
+          {dataRef?.type === 'volume' &&
+            perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+              <Tooltip color="white" content="新建">
+                <IconPlus
+                  className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+                  onClick={() => addSubVolume(node)}
+                />
+              </Tooltip>
+            )}
         </div>
       )
     );

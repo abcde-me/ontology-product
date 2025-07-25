@@ -28,8 +28,7 @@ import {
   getConnectorFileList,
   getTagList
 } from '@/api/datasetManagement';
-import { debounce, get } from 'lodash-es';
-
+import { debounce } from 'lodash-es';
 const { Text } = Typography;
 
 interface Dataset {
@@ -71,40 +70,14 @@ const FormItem = Form.Item;
 function convertToCascaderOptions(dataSourceData) {
   console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
-    label: (
-      <Tooltip content={catalog.name}>
-        <div
-          style={{
-            width: '200px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          {catalog.name}
-        </div>
-      </Tooltip>
-    ),
-    // label: '11111',
+    label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
+    // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            // label: (
-            //   <Tooltip content={volume.name}>
-            //     <div
-            //       style={{
-            //         width: '200px',
-            //         whiteSpace: 'nowrap',
-            //         overflow: 'hidden',
-            //         textOverflow: 'ellipsis'
-            //       }}
-            //     >
-            //       {volume.name}
-            //     </div>
-            //   </Tooltip>
-            // ),
-            label: volume.name,
+            label: <EllipsisPopover value={volume.name}></EllipsisPopover>,
+            // label: volume.name,
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -282,6 +255,26 @@ const DatasetForm = React.forwardRef<
       resetForm,
       setcreateTagDisabled
     };
+  });
+
+  useEffect(() => {
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // 创建 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(() => {
+    const items = document.querySelectorAll('.arco-cascader-list-item');
+    const input = document.querySelectorAll('.arco-cascader-view');
+    items.forEach((item) => item.removeAttribute('title'));
+    input.forEach((item) => item.removeAttribute('title'));
+  });
+
+  // 开始监听整个文档
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
   });
 
   useEffect(() => {
@@ -625,6 +618,15 @@ const DatasetForm = React.forwardRef<
               >
                 <Cascader
                   placeholder="请选择"
+                  //@ts-expect-error
+                  renderFormat={(labels, selectedOptions) => {
+                    const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
+                    return (
+                      <div>
+                        <EllipsisPopover value={value}></EllipsisPopover>
+                      </div>
+                    );
+                  }}
                   options={targetDataSourceOptions}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"

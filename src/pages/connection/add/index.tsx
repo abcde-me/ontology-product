@@ -99,7 +99,6 @@ const add = forwardRef((props: any, ref) => {
     setStorageType('s3');
   };
   // 输入框onchange的正则校验
-  const [values, setValues] = useState('');
   return (
     <div>
       <Modal

@@ -993,6 +993,10 @@ const DatasetDetail: React.FC = () => {
 
     return getDatasetContents(params)
       .then((res) => {
+        if (res.status !== 200) {
+          Message.error('获取内容数据失败');
+          return;
+        }
         if (res.data) {
           setContentData(res.data.list || []);
           setContentColumnslist(res.data.field_names || []);
@@ -1466,7 +1470,7 @@ const DatasetDetail: React.FC = () => {
                           }
                         }}
                       >
-                        取消本轮编辑
+                        取消本页编辑
                       </Button>
                       <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
                         <Button
