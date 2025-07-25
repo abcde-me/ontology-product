@@ -318,7 +318,7 @@ export default function WorkflowList() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 150,
+      width: 160,
       render: (_, record) => (
         <span>
           {record.create_time == '' || record.create_time == null
