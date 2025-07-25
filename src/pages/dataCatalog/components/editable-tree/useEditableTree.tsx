@@ -227,7 +227,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const { dataRef } = node;
     const name = generateName(
       dataRef?.children || [],
-      rawTreeData ?? [],
+      dataRef?.children ?? [],
       subLeafKeys[dataRef?.type]
     );
     const cachTreeData = treeData.map((item: TreeDataType) => {
