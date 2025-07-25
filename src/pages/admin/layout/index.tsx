@@ -36,12 +36,11 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   // 路由数组
   const flattenRoutes = getFlatRoutes(routes);
 
-  // 快速验证版本：
-  // 1. 用户操作时token续约（token有效期1分钟）
-  // 2. 用户不操作1分钟后自动登出
+  // 身份验证超时管理：
+  // 开发环境：token有效期1分钟，剩余30秒时续约
+  // 生产环境：token有效期60分钟，剩余30分钟时续约
   useAuthTimeout({
-    logoutTimeout: 60, // 1分钟无操作自动登出
-    renewBeforeExpire: 1, // 在过期前30秒续约
+    renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
     renewEndpoint: '/api/auth/v1/renew'
   });
 
