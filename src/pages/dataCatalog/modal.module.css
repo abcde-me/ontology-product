@@ -42,3 +42,7 @@
 .tableWrapper :global(.arco-table-td) {
   padding: 16px !important;
 }
+
+.tableWrapper :global(.arco-table-content-inner) {
+  overflow-y: scroll !important;
+}
