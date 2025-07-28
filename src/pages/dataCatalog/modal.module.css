@@ -43,6 +43,7 @@
   padding: 16px !important;
 }
 
-.tableWrapper :global(.arco-table-content-inner) {
-  overflow-y: scroll !important;
+.tableWrapper :global(.arco-table-body) {
+  min-height: calc(100% - 40px) !important;
+  background-color: #fff;
 }

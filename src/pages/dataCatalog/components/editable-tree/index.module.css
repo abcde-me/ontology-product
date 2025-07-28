@@ -64,7 +64,7 @@
 
   &:not(:has(.no-operation)) {
     :global(.last-leaf-text) {
-      width: 90px;
+      width: 80px;
       transition: width 0.2s ease;
     }
   }

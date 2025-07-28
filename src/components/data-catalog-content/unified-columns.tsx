@@ -277,7 +277,7 @@ export const getUnifiedColumns = (
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50
+        width: 80
       },
       {
         title: '文件名',
@@ -372,7 +372,7 @@ export const getUnifiedColumns = (
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50
+        width: 80
       },
       {
         title: '数据内容',
