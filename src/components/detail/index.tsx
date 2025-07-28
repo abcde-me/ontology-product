@@ -1405,7 +1405,7 @@ const DatasetDetail: React.FC = () => {
                 onPressEnter={handleSearch}
                 onClear={handleClearSearch}
                 className={'custom-input'}
-                disabled={editingRowKey !== null}
+                disabled={updateStatus}
                 style={{
                   width: 300,
                   minWidth: 300,
@@ -1536,7 +1536,7 @@ const DatasetDetail: React.FC = () => {
                 {/* 分页控件 */}
                 <div className="pagination-wrapper">
                   <Pagination
-                    disabled={editingRowKey !== null}
+                    disabled={updateStatus}
                     style={{
                       float: 'right'
                     }}

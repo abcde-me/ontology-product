@@ -10,6 +10,7 @@ import type { TableProps, ColumnProps } from '@arco-design/web-react/es/Table';
 import NoData from '../no-data';
 import noDataElement from '@/components/no-data';
 import NoDataEmpty from '@/components/NoDataEmpty';
+import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 表格引用类型定义
 export interface UnifiedTableRef {
@@ -211,6 +212,7 @@ const UnifiedTable = forwardRef(
         onRow={getRowProps}
         noDataElement={noDataElement({ description: '暂无数据' })}
         onChange={handleTableChange}
+        className={styles['tableWrapper']}
         {...restProps}
       />
     );

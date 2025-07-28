@@ -39,10 +39,12 @@ export default function EditableTree() {
           value={searchValue}
           onChange={onSearchChange}
           maxLength={255}
-          allowClear={false}
+          allowClear
           style={{ height: '32px', width: '130px' }}
         />
-        <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG}>
+        <PermissionWrapper
+          permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG}
+        >
           <div
             className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
             onClick={onCatalogAdd}

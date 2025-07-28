@@ -202,13 +202,19 @@ const renderActionColumn = (
     label: string;
     onClick: () => void;
   }[] = [];
-  if (params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) || params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)) {
+  if (
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) ||
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)
+  ) {
     config.push({
       label: '导出',
       onClick: () => handleDownload(record, setVisible, selectedFullPath)
     });
   }
-  if (params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) || params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)) {
+  if (
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) ||
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)
+  ) {
     config.push({
       label: '删除',
       onClick: () =>
@@ -257,7 +263,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -346,7 +352,7 @@ export const getUnifiedColumns = (
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
-        width: 112,
+        width: 104,
         render: (_, record) =>
           renderActionColumn(
             _,
