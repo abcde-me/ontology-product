@@ -178,7 +178,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 130,
+      width: 140,
       dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [

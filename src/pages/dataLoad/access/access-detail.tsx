@@ -96,7 +96,7 @@ const AccessDetail = () => {
                 <EllipsisPopoverCom
                   value={!loading && arressDetail.execution_name + '运行记录'}
                 >
-                  {' '}
+                  {!loading && arressDetail.execution_name + '运行记录'}
                 </EllipsisPopoverCom>
               </div>
             </BreadcrumbItem>
