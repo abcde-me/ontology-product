@@ -29,6 +29,7 @@ import {
 } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
 import Workflow from '../workflowConfig/index';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -336,21 +337,34 @@ export default function WorkflowTaskDetail() {
   };
 
   // 获取子组件的分页数据
-  const handleChildData = (current: number, pageSize: number) => {
+  const handleChildData = (
+    current: number,
+    pageSize: number,
+    value: {
+      sorter: SorterInfo;
+      filters: Partial<Record<string | number | symbol, string[]>>;
+    }
+  ) => {
     setPagination((prev) => ({
       ...prev,
       current,
       pageSize
     }));
-    getNodeDetail(current, pageSize);
+    handleChildSortData(value.sorter, value.filters, false);
   };
 
   // 获取子节点的筛选条件数据
-  const handleChildSortData = (pagination, sorter, filters) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: 1
-    }));
+  const handleChildSortData = (
+    sorter: SorterInfo,
+    filters: Partial<Record<string | number | symbol, string[]>>,
+    isSetPage = true
+  ) => {
+    if (isSetPage) {
+      setPagination((prev) => ({
+        ...prev,
+        current: 1
+      }));
+    }
     const sortdata = {
       status: filters.status === undefined ? '' : filters.status.join(','),
       file_type:
@@ -387,15 +401,15 @@ export default function WorkflowTaskDetail() {
   };
 
   // 获取节点详情
-  const getNodeDetail = async (current?: number, pageSize?: number) => {
+  const getNodeDetail = async () => {
     if (!taskId) return;
     const params = {
       id: taskId,
       node_code: activeNode,
       task_type: activeNodeType,
       search_key: '',
-      page: current || pagination.current,
-      page_size: pageSize || pagination.pageSize,
+      page: pagination.current,
+      page_size: pagination.pageSize,
       ...sortValue
     };
     const res = await getTaskDetailNode(params);
