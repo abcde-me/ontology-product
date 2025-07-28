@@ -53,6 +53,7 @@ import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
+import { render } from '@headlessui/react/dist/utils/render';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -251,7 +252,11 @@ const formatDate = (dateString: string) => {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return (
+    <div style={{ whiteSpace: 'nowrap' }}>
+      {year}-{month}-{day} {hours}:{minutes}:{seconds}
+    </div>
+  );
 };
 
 // 版本历史表格列定义
@@ -262,7 +267,7 @@ const versionColumns: any[] = [
     width: 260,
     render: (version: string, record: any, index: number) => (
       <Space>
-        <Text>{version}</Text>
+        <Text style={{ whiteSpace: 'nowrap' }}>{version}</Text>
         {index === 0 && (
           <div
             style={{
@@ -301,7 +306,7 @@ const versionColumns: any[] = [
         2: '用户手动修改',
         3: '工作流修改'
       };
-      return typeMap[type] || '-';
+      return <div style={{ whiteSpace: 'nowrap' }}>{typeMap[type] || '-'}</div>;
     }
   },
   {
@@ -320,7 +325,10 @@ const versionColumns: any[] = [
   {
     title: '更变记录',
     width: 470,
-    dataIndex: 'description'
+    dataIndex: 'description',
+    render: (description: string) => {
+      return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
+    }
   }
 ];
 
@@ -1544,7 +1552,7 @@ const DatasetDetail: React.FC = () => {
                 data={versionHistory}
                 pagination={false}
                 noDataElement={noDataElement({ description: '暂无数据' })}
-                // scroll={{ x: 'max-content' }}
+                scroll={{ x: 'max-content' }}
                 border={false}
               />
             ) : (
