@@ -1,11 +1,7 @@
 import { login } from '@/api/user';
 import LoginBgPng from '@/assets/LOGINbg.png';
 import LogoPng from '@/assets/logo.png';
-import {
-  setLocalStorage,
-  removeLocalStorage,
-  getLocalStorage
-} from '@/utils/storage';
+import { setLoginToken, removeLoginToken, getLoginToken } from '@/utils/env';
 import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -50,10 +46,10 @@ const LoginCard = () => {
         //   const expTime = getTokenExpiration(testToken);
         //   console.log('过期时间:', expTime ? new Date(expTime).toLocaleString() : '解析失败');
         // });
-        if (getLocalStorage('loginToken')) {
-          removeLocalStorage('loginToken');
+        if (getLoginToken()) {
+          removeLoginToken();
         }
-        setLocalStorage('loginToken', res.data.token);
+        setLoginToken(res.data.token);
         localStorage.removeItem('cascader');
         // 重定向到之前的页面或默认页面
         const redirectPath = getRedirectPath();

@@ -10,7 +10,7 @@ import {
   ResourceEndpointsV2,
   ModaForgeResourceEndpoints
 } from './endpoints';
-import { getLocalStorage } from '@/utils/storage';
+import { getLoginToken, removeLoginToken } from '@/utils/env';
 
 const uapiAxios: AxiosInstance = axios.create(); // 创建一个独立的axios实例
 
@@ -385,7 +385,7 @@ for (const key in modaForgeResEndpoints) {
 }
 UAPI_CONFIG.addRequestInterceptor((config) => {
   // 严格校验逻辑
-  const rawToken = localStorage.getItem('loginToken');
+  const rawToken = getLoginToken();
   // console.log('cleanToken', rawToken);
 
   // 1. 类型检查
@@ -414,7 +414,7 @@ UAPI_CONFIG.addRequestInterceptor((config) => {
     };
   } else {
     console.error('检测到无效令牌，已清除:', cleanToken);
-    localStorage.removeItem('loginToken');
+    removeLoginToken();
   }
 
   return config;

@@ -2,6 +2,12 @@
 import { useEffect, useRef } from 'react';
 import { getTokenExpiration, isValidToken } from '../utils/authUtils';
 import { renew } from '@/api/user';
+import {
+  logout,
+  getLoginToken,
+  setLoginToken,
+  removeLoginToken
+} from '@/utils/env';
 
 const useAuthTimeout = (options: {
   renewBeforeExpire: number; // 分钟 - token过期前多久开始续约（仅在用户有活动时）
@@ -32,7 +38,7 @@ const useAuthTimeout = (options: {
   };
 
   const getTokenRemainingTime = (): number => {
-    const rawToken = localStorage.getItem('loginToken');
+    const rawToken = getLoginToken();
     if (!rawToken || !isValidToken(rawToken)) {
       return 0;
     }
@@ -71,13 +77,17 @@ const useAuthTimeout = (options: {
       const remainingMinutes = Math.floor(remainingTime / (60 * 1000));
       const remainingSeconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
 
-      // console.log(`【验证】Token状态检查: 剩余时间 ${remainingMinutes}分${remainingSeconds}秒`);
+      console.log(
+        `【验证】Token状态检查: 剩余时间 ${remainingMinutes}分${remainingSeconds}秒`
+      );
 
       // 检查是否需要续约
       const renewThreshold = options.renewBeforeExpire * 60 * 1000;
       const shouldRenew = remainingTime < renewThreshold;
 
-      // console.log(`【调试】续约检查: 剩余时间=${remainingTime}ms, 续约阈值=${renewThreshold}ms, 需要续约=${shouldRenew}`);
+      console.log(
+        `【调试】续约检查: 剩余时间=${remainingTime}ms, 续约阈值=${renewThreshold}ms, 需要续约=${shouldRenew}`
+      );
 
       if (shouldRenew) {
         // 检查用户在当前token生命周期内是否有活动
@@ -86,7 +96,7 @@ const useAuthTimeout = (options: {
         const inactiveTime = now - lastActivity;
 
         // 动态计算token的实际有效期
-        const rawToken = localStorage.getItem('loginToken');
+        const rawToken = getLoginToken();
         if (!rawToken) {
           // console.log('【验证】无法获取token，跳过续约');
           return;
@@ -150,7 +160,7 @@ const useAuthTimeout = (options: {
       return;
     }
 
-    const rawToken = localStorage.getItem('loginToken');
+    const rawToken = getLoginToken();
     if (!rawToken || !isValidToken(rawToken)) {
       return;
     }
@@ -174,7 +184,7 @@ const useAuthTimeout = (options: {
 
       const newToken = response.data.renewToken;
 
-      localStorage.setItem('loginToken', newToken);
+      setLoginToken(newToken);
 
       // 获取新 token 的过期时间
       const newExpTime = getTokenExpiration(newToken);
@@ -212,7 +222,7 @@ const useAuthTimeout = (options: {
       isLoggingOutRef.current = true;
       // console.log('【验证】执行自动登出操作');
       cleanup();
-      localStorage.removeItem('loginToken');
+      removeLoginToken();
       localStorage.removeItem(LAST_ACTIVITY_KEY);
 
       // 通知其他标签页登出
@@ -220,7 +230,8 @@ const useAuthTimeout = (options: {
       localStorage.removeItem(LOGOUT_EVENT_KEY);
 
       // 使用replace而不是href，避免浏览器历史记录问题
-      window.location.replace('/tenant/compute/modaforge/login');
+      // window.location.replace('/tenant/compute/modaforge/login');
+      logout();
     } catch (error) {
       // console.error('【验证】登出操作失败:', error);
       isLoggingOutRef.current = false;
@@ -234,7 +245,7 @@ const useAuthTimeout = (options: {
 
   useEffect(() => {
     // 检查当前token的过期时间
-    const rawToken = localStorage.getItem('loginToken');
+    const rawToken = getLoginToken();
     if (rawToken && isValidToken(rawToken)) {
       const expTime = getTokenExpiration(rawToken);
       if (expTime) {

@@ -171,6 +171,9 @@ export default function OrgTree() {
     }
   }, [currentOrg, hasInitialized]);
 
+  const onClear = () => {
+    setTreeData(orgData);
+  };
   return (
     <div>
       <PreDelModal />
@@ -182,6 +185,8 @@ export default function OrgTree() {
             maxWidth: 240
           }}
           onChange={setInputValue}
+          allowClear
+          onClear={onClear}
           placeholder="搜索组织名称"
         />
         <div className="border-primary-light-4 flex h-[32px] w-[36px] cursor-pointer items-center justify-center rounded-[6px] border">
@@ -255,8 +260,8 @@ export default function OrgTree() {
             const operationButtonSpace = 60; // 减少操作按钮预留空间，确保按钮能正常显示
             const dynamicMaxWidth = Math.max(
               baseWidth -
-                (nodeLevel - 1) * indentPerLevel -
-                operationButtonSpace,
+              (nodeLevel - 1) * indentPerLevel -
+              operationButtonSpace,
               80 // 增加最小宽度
             );
 
