@@ -8,6 +8,7 @@ export async function getTaskDetail(task_id: string) {
 // 作业详情节点
 export async function getTaskDetailNode(params: {
   id: string;
+  node_code: string;
   task_type: string;
   search_key?: string;
   page?: number;
