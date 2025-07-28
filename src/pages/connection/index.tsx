@@ -178,7 +178,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 130,
+      width: 140,
       dataIndex: 'type',
       render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
       filters: [
@@ -209,13 +209,13 @@ export default function Connection() {
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      width: 170,
+      width: 180,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
-      width: 170,
+      width: 180,
       dataIndex: 'updated_at',
       render: (_, item) => <div className="fontMM">{item.updated_at}</div>,
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at)
