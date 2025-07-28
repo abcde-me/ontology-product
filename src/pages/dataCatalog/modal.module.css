@@ -38,3 +38,7 @@
 .modalWrapper :global(.arco-modal-footer) {
   margin-top: 16px;
 }
+
+.tableWrapper :global(.arco-table-td) {
+  padding: 16px !important;
+}

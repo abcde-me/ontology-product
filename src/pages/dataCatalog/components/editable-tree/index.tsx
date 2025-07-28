@@ -37,7 +37,7 @@ export default function EditableTree() {
           value={searchValue}
           onChange={onSearchChange}
           maxLength={255}
-          allowClear={false}
+          allowClear
           style={{ height: '32px', width: '130px' }}
         />
         <div
