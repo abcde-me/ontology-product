@@ -1,4 +1,5 @@
 import { useLogoInfo } from '@/utils/swr';
+import { logout, removeLoginToken } from '@/utils/env';
 import { Dropdown, Menu, Tooltip, Link } from '@arco-design/web-react';
 import React, { type CSSProperties, useCallback } from 'react';
 import HeaderLogo from '@/assets/header-logo.png';
@@ -25,23 +26,21 @@ export default function Header({
   console.log('userInfo', userInfo);
   const { clearUserInfo } = useUserInfoStore();
 
-  const logout = useCallback(() => {
-    // 清除本地存储的 token
-    localStorage.removeItem('loginToken');
-    localStorage.removeItem('console_token');
+  const logoutAction = useCallback(() => {
+    removeLoginToken();
 
     // 清除全局用户信息
     clearUserInfo();
 
     // 跳转到登录页面
-    pushPath('/tenant/compute/modaforge/login');
+    logout();
   }, [pushPath, clearUserInfo]);
 
   const onClickUserDropdown = useCallback(
     (action) => {
       switch (action) {
         case 'logout':
-          logout();
+          logoutAction();
           break;
         case 'account':
           pushPath('/tenant/compute/modaforge/userinfo');
