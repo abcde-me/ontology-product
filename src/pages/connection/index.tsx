@@ -465,7 +465,7 @@ export default function Connection() {
         }}
       />
       {/* 分页 */}
-      {ConnectionData.length > 0 && (
+      {ConnectionData && ConnectionData.length > 0 && (
         <Pagination
           current={pagination.current}
           pageSize={pagination.pageSize}
