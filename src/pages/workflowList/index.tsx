@@ -203,7 +203,7 @@ export default function WorkflowList() {
     {
       title: '工作流名称',
       dataIndex: 'workflow_name',
-      width: 300,
+      width: 280,
       ellipsis: true,
       className: 'hover-change workflow-name',
       render: (_, record) => {

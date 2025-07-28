@@ -88,8 +88,10 @@ interface TaskDetailObject {
 
 // 定义nodeData值的类型
 interface nodeDataObject {
+  task_name: string;
   task_type: string;
   status: number | string;
+  node_code: string;
 }
 
 export default function WorkflowTaskDetail() {
@@ -106,6 +108,8 @@ export default function WorkflowTaskDetail() {
   const [parseNodeData, setParseNodeData] = useState({});
   // 初始化当前选中的节点
   const [activeNode, setActiveNode] = useState('');
+  // 初始化当前选中的节点类型
+  const [activeNodeType, setActiveNodeType] = useState('');
   // 初始化当前节点是否是解析节点
   const [isParseNode, setIsParseNode] = useState(false);
   // 初始化是否切换了tab
@@ -160,7 +164,7 @@ export default function WorkflowTaskDetail() {
         )
           return;
         setWorkflowName(res.data.workflow_name);
-        setActiveNode(res.data.result_info.task_type);
+        setActiveNode(res.data.result_info.node_code);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
@@ -330,24 +334,6 @@ export default function WorkflowTaskDetail() {
     );
   };
 
-  // 获取节点name
-  const getNodeName = (type: string) => {
-    switch (type) {
-      case NodeType.text:
-        return NodeTypeName.text;
-      case NodeType.pic:
-        return NodeTypeName.pic;
-      case NodeType.audio:
-        return NodeTypeName.audio;
-      case NodeType.video:
-        return NodeTypeName.video;
-      case NodeType.cleaning:
-        return NodeTypeName.cleaning;
-      case NodeType.enhancement:
-        return NodeTypeName.enhancement;
-    }
-  };
-
   // 获取子组件的分页数据
   const handleChildData = (current: number, pageSize: number) => {
     setPagination((prev) => ({
@@ -386,11 +372,14 @@ export default function WorkflowTaskDetail() {
 
   // 切换节点tab
   const handleChangeTab = (val: string) => {
+    const type =
+      nodeData.find((item) => item.node_code === val)?.task_type ?? '';
     const isParse =
-      val === NodeType.text ||
-      val === NodeType.pic ||
-      val === NodeType.video ||
-      val === NodeType.audio;
+      type === NodeType.text ||
+      type === NodeType.pic ||
+      type === NodeType.video ||
+      type === NodeType.audio;
+    setActiveNodeType(type);
     setIsParseNode(isParse);
     setActiveNode(val);
     setIsChangeTab(!isChangeTab);
@@ -401,7 +390,8 @@ export default function WorkflowTaskDetail() {
     if (!taskId) return;
     const params = {
       id: taskId,
-      task_type: activeNode,
+      node_code: activeNode,
+      task_type: activeNodeType,
       search_key: '',
       page: current || pagination.current,
       page_size: pageSize || pagination.pageSize,
@@ -426,14 +416,14 @@ export default function WorkflowTaskDetail() {
         <Tabs
           key="card"
           tabPosition={'left'}
-          onChange={(task_type) => handleChangeTab(task_type)}
-          defaultActiveTab={activeNode || nodeData[0]?.task_type}
+          onChange={(node_code) => handleChangeTab(node_code)}
+          defaultActiveTab={activeNode || nodeData[0]?.node_code}
           activeTab={activeNode}
         >
           {nodeData.map((item) => {
             return (
               <TabPane
-                key={item.task_type}
+                key={item.node_code}
                 disabled={item.status === NodeRunStatus.wait}
                 title={
                   <span>
@@ -451,7 +441,7 @@ export default function WorkflowTaskDetail() {
                         style={{ marginRight: 8, width: 14, height: 14 }}
                       />
                     )}
-                    {getNodeName(item.task_type)}
+                    {item.task_name}
                   </span>
                 }
               >
