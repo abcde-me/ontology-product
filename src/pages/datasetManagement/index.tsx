@@ -222,7 +222,7 @@ const columns = (
                   style={{
                     // background: '#E2E8F0',
                     // color: '#0F172A',
-                    margin: '0 2px'
+                    margin: '2px 2px'
                     // borderRadius: '16px',
                     // fontSize: '12px',
                     // height: '18px',
