@@ -201,8 +201,7 @@ const renderActionColumn = (
         display: 'inline-block',
         textAlign: 'center',
         cursor: 'pointer',
-        marginRight: '8px',
-        marginLeft: '4px',
+        marginRight: '16px',
       }}
       onClick={() => handleDownload(record, setVisible, selectedFullPath)}
     >
@@ -350,7 +349,7 @@ export const getUnifiedColumns = (
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
-        width: 112,
+        width: 104,
         render: (_, record) =>
           renderActionColumn(
             _,
