@@ -110,7 +110,7 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
                         {node.unConnected && (
                           <div className="warnings-item rounded-b-[4px]">
                             <div className="flex !text-[14px] text-xs leading-[18px] text-[#1E293B]">
-                              <Warning1Icon className="mr-2 size-[16px] text-[#F79009]" />
+                              <Warning1Icon className="mr-2 size-[13px] text-[#F79009]" />
                               {t('workflow.common.needConnectTip')}
                             </div>
                           </div>
