@@ -53,7 +53,6 @@ import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
-import { render } from '@headlessui/react/dist/utils/render';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 

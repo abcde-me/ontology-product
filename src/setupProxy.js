@@ -33,7 +33,7 @@ module.exports = function (app) {
     app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({
-        target: 'http://10.1.4.73:30183/api/aimdp/v1',
+        target: 'http://10.56.56.6:30183/api/aimdp/v1',
         changeOrigin: true,
         secure: false,
         logger: console,
