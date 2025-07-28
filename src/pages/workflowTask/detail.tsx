@@ -165,6 +165,7 @@ export default function WorkflowTaskDetail() {
           return;
         setWorkflowName(res.data.workflow_name);
         setActiveNode(res.data.result_info.node_code);
+        setActiveNodeType(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
