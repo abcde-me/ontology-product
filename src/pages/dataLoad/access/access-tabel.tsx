@@ -224,21 +224,23 @@ const AccessTable = (props) => {
             RecordingChange(filters, sorter);
           }}
         />
-        <Pagination
-          sizeOptions={[10, 20, 50, 100]}
-          showTotal
-          total={total}
-          showJumper
-          sizeCanChange
-          style={{ margin: '20px 30px' }}
-          onChange={(val) => {
-            handlePageChange(val);
-          }}
-          onPageSizeChange={(pageSize) => {
-            setPageSize(pageSize);
-            setCurrent(1);
-          }}
-        />
+        {data && data.length > 0 && (
+          <Pagination
+            sizeOptions={[10, 20, 50, 100]}
+            showTotal
+            total={total}
+            showJumper
+            sizeCanChange
+            style={{ margin: '20px 30px' }}
+            onChange={(val) => {
+              handlePageChange(val);
+            }}
+            onPageSizeChange={(pageSize) => {
+              setPageSize(pageSize);
+              setCurrent(1);
+            }}
+          />
+        )}
       </div>
     </div>
   );
