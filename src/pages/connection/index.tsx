@@ -465,27 +465,28 @@ export default function Connection() {
         }}
       />
       {/* 分页 */}
-      <Pagination
-        current={pagination.current}
-        pageSize={pagination.pageSize}
-        onPageSizeChange={(pageSize) => {
-          setPagination((prev) => ({
-            ...prev,
-            pageSize,
-            current: 1
-          }));
-        }}
-        onChange={handlePageChange}
-        sizeOptions={[10, 20, 50, 100]}
-        showTotal
-        total={pagination.total}
-        showJumper
-        sizeCanChange
-        style={{ marginBottom: '20px' }}
-      />
+      {ConnectionData.length > 0 && (
+        <Pagination
+          current={pagination.current}
+          pageSize={pagination.pageSize}
+          onPageSizeChange={(pageSize) => {
+            setPagination((prev) => ({
+              ...prev,
+              pageSize,
+              current: 1
+            }));
+          }}
+          onChange={handlePageChange}
+          sizeOptions={[10, 20, 50, 100]}
+          showTotal
+          total={pagination.total}
+          showJumper
+          sizeCanChange
+          style={{ marginBottom: '20px' }}
+        />
+      )}
 
       {/* 详情逻辑 */}
-
       <Modal
         style={{ width: '760px' }}
         visible={visible2}
