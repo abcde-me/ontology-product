@@ -1,5 +1,6 @@
 import { Message } from '@arco-design/web-react';
 import { downloadFileById } from '@/api/dataCatalog';
+import { getLoginToken } from '@/utils/env';
 
 /**
  * 通用下载方法
@@ -7,8 +8,8 @@ import { downloadFileById } from '@/api/dataCatalog';
  * @param fileName 自定义文件名（可选）
  */
 export const downloadFile = async (id: string, fileName?: string) => {
-//   在下载前检查token
-  const token = localStorage.getItem('loginToken');
+  //   在下载前检查token
+  const token = getLoginToken();
   if (!token) {
     Message.error('请先登录');
     // 跳转到登录页
@@ -39,7 +40,9 @@ export const downloadFile = async (id: string, fileName?: string) => {
     // 从响应头获取文件名（如果有）
     const contentDisposition = response.headers?.['content-disposition'];
     if (contentDisposition && !fileName) {
-      const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      const match = contentDisposition.match(
+        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+      );
       if (match && match[1]) {
         downloadFileName = match[1].replace(/['"]/g, '');
       }

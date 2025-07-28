@@ -1,5 +1,5 @@
 import UAPI_CONFIG from './uapi';
-import { isSingleApp } from '@/utils/env';
+import { logout, isSingleApp } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
 
 const isNil = (o) => o === undefined || o === null;
@@ -39,11 +39,7 @@ UAPI_CONFIG.addResponseInterceptor(
     const res = response.data;
 
     if (response.status == 401) {
-      if (isSingleApp) {
-        window.location.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
-      } else {
-        window.location.href = `${res.data.content}?redirect_uri=${encodeURIComponent(window.location.href)}`;
-      }
+      logout(res.data.content);
     } else if (response.status >= 200 && response.status <= 299) {
       // 兼容没有code和message的接口
       if (
@@ -124,11 +120,7 @@ UAPI_CONFIG.addResponseInterceptor(
     }
     if (code) {
       if (code === 401 || code === 402) {
-        if (isSingleApp) {
-          window.location.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
-        } else {
-          window.location.href = `${error.response.data.data.content}?redirect_uri=${encodeURIComponent(window.location.href)}`;
-        }
+        logout(error.response.data.data.content);
       } else if (code === 403) {
         // 临时在这里全局加一下，实际需要按业务捕获
         Message.error(
