@@ -451,6 +451,10 @@ export const getUnifiedColumns = (
 // 处理导出操作
 const handleDownload = (record, setVisible, selectedFullPath) => {
   console.log('导出', record);
+  // 如果record有full_path属性，优先使用它，否则使用selectedFullPath
+  const filePath = record.full_path || selectedFullPath;
+  const downloadData = { ...record, filePath };
+  setVisible(true, downloadData);
 };
 
 // 处理删除操作
