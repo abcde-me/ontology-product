@@ -514,7 +514,7 @@ export default function DataLoad() {
         }}
       />
       <div className={Styles.arcoPagination}>
-        {data.length > 0 && (
+        {data && data.length > 0 && (
           <Pagination
             current={current}
             pageSize={pageSize}
