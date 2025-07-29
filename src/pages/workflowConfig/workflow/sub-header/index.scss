@@ -32,6 +32,18 @@
       line-height: 18px;
       font-weight: 600;
     }
+    .add-node-btn-disable {
+      color: #94a3b8;
+      border-color: #94a3b8;
+    }
+    .add-node-btn-normal {
+      color: #007dfa;
+      border-color: #007dfa;
+    }
+    .add-node-btn-normal:hover {
+      color: rgba(67, 141, 251, 1);
+      border-color: rgba(67, 141, 251, 1);
+    }
     .zoom-in-out-tools {
       .zoom-txt {
         font-family: PingFangSC-Medium;

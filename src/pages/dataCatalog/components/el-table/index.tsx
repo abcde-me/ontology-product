@@ -494,10 +494,11 @@ export default function Eltable() {
         <Button
           icon={<IconDelete />}
           type="outline"
+          className={`${hasSelectedRows ? 'batch-delete' : ''}`}
           style={{
-            color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+            color: hasSelectedRows ? '#007DFA' : '#94A3B8',
             cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+            borderColor: hasSelectedRows ? '#007DFA' : '#94A3B8'
           }}
           disabled={!hasSelectedRows}
           onClick={handleDeleteMany}
@@ -530,10 +531,11 @@ export default function Eltable() {
           icon={<IconDownload />}
           type="outline"
           style={{
-            color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+            color: hasSelectedRows ? '#007DFA' : '#94A3B8',
             cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+            borderColor: hasSelectedRows ? '#007DFA' : '#94A3B8'
           }}
+          className={`${hasSelectedRows ? 'batch-export' : ''}`}
           disabled={!hasSelectedRows}
           onClick={() => {
             handleExport();

@@ -35,6 +35,21 @@
   font-weight: 600;
 }
 
+.app-workflow-page .app-workflow-page-sub-header .add-node-btn-disable {
+  color: #94a3b8;
+  border-color: #94a3b8;
+}
+
+.app-workflow-page .app-workflow-page-sub-header .add-node-btn-normal {
+  color: #007dfa;
+  border-color: #007dfa;
+}
+
+.app-workflow-page .app-workflow-page-sub-header .add-node-btn-normal:hover {
+  color: #438dfb;
+  border-color: #438dfb;
+}
+
 .app-workflow-page .app-workflow-page-sub-header .zoom-in-out-tools .zoom-txt {
   font-family: PingFangSC-Medium;
   font-size: 12px;
