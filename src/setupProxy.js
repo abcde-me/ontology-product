@@ -4,28 +4,38 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 module.exports = function (app) {
   if (process.env.SINGLE_APP === 'true') {
-    app.use(
-      ['/api/aiap/v1'],
-      createProxyMiddleware({
-        target: 'http://10.252.26.5:30925/api/aiap/v1',
-        changeOrigin: true,
-        secure: false
-        // logger: console,
-        // pathRewrite: {
-        //   '^/api/appforge/v1': ''
-        // }
-      })
-    );
+    app.options('*', (req, res) => {
+      res.header('Access-Control-Allow-Origin', req.headers.origin);
+      res.header('Access-Control-Allow-Credentials', true);
+      res.header(
+        'Access-Control-Allow-Methods',
+        'GET,HEAD,PUT,PATCH,POST,DELETE'
+      );
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization'
+      ); // Allowed headers
+      res.sendStatus(200);
+    });
     app.use(
       ['/api/auth/v1'],
       createProxyMiddleware({
-        target: 'http://10.1.4.73:30501/api/auth/v1',
+        target: 'http://10.56.56.6:30501/api/auth/v1',
         changeOrigin: true,
         secure: false,
         logger: console,
         on: {
           proxyReq: (proxyReq, req, res) => {
-            proxyReq.removeHeader('origin');
+            // proxyReq.removeHeader('origin');
+          },
+          proxyRes: (proxyRes, req, res) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] =
+              req.headers.origin;
+            proxyRes.headers['Access-Control-Allow-Credentials'] = true;
+            proxyRes.headers['Access-Control-Allow-Methods'] =
+              'GET, POST, PUT, DELETE, OPTIONS';
+            proxyRes.headers['Access-Control-Allow-Headers'] =
+              'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization';
           }
         }
       })
@@ -33,17 +43,25 @@ module.exports = function (app) {
     app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({
-        target: 'http://10.1.4.73:30501/api/aimdp/v1',
+        target: 'http://10.56.56.6:30501/api/aimdp/v1',
         changeOrigin: true,
         secure: false,
         logger: console,
         on: {
           proxyReq: (proxyReq, req, res) => {
-            proxyReq.removeHeader('origin');
+            // proxyReq.removeHeader('origin');
+          },
+          proxyRes: (proxyRes, req, res) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] =
+              req.headers.origin;
+            proxyRes.headers['Access-Control-Allow-Credentials'] = true;
+            proxyRes.headers['Access-Control-Allow-Methods'] =
+              'GET, POST, PUT, DELETE, OPTIONS';
+            proxyRes.headers['Access-Control-Allow-Headers'] =
+              'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization';
           }
         }
       })
     );
   }
 };
-//    "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
