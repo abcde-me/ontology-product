@@ -70,8 +70,11 @@ const AddBlock = ({ renderTrigger, offset }: AddBlockProps) => {
       return (
         <TipPopup title={t('workflow.common.addBlock')}>
           <div
-            className={`add-node-btn ${nodesReadOnly ? 'cursor-not-allowed' : ''}`}
-            style={{ opacity: nodesReadOnly ? 0.5 : 1 }}
+            className={`add-node-btn ${nodesReadOnly ? 'cursor-not-allowed' : ''} `}
+            style={{
+              color: nodesReadOnly ? '#94A3B8' : '#007DFA',
+              borderColor: nodesReadOnly ? '#94A3B8' : '#007DFA'
+            }}
           >
             <RiAddCircleFill className="h-4 w-4" />
             <span>节点</span>

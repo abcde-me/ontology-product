@@ -77,6 +77,6 @@
 }
 .crumbs {
   .ellipsis-text {
-    overflow: visible;
+    height: 22px;
   }
 }

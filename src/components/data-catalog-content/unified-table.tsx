@@ -201,7 +201,8 @@ const UnifiedTable = forwardRef(
       <Table<RecordType>
         columns={columns}
         scroll={{
-          x: Math.max(totalWidth + 100, 1300)
+          x: Math.max(totalWidth + 100, 1300),
+          y: 40
         }}
         style={{ height: '100%', maxHeight: 'calc(100% - 40px)' }}
         rowSelection={rowSelection}

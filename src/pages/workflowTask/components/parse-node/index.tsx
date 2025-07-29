@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './index.css';
 import { Pagination, PaginationProps, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -18,14 +18,20 @@ enum FileStatus {
 export default function ParseNode(props: {
   dataSource;
   loading: boolean;
-  onSendData: (page: number, pageSize: number) => void;
+  onSendData: (
+    page: number,
+    pageSize: number,
+    value: {
+      sorter: SorterInfo;
+      filters: Partial<Record<string | number | symbol, string[]>>;
+    }
+  ) => void;
   pagination: {
     current: number;
     pageSize: number;
     total: number;
   };
   onSortData: (
-    pagination: PaginationProps,
     sort: SorterInfo,
     sort_by: Partial<Record<string | number | symbol, string[]>>
   ) => void;
@@ -36,9 +42,15 @@ export default function ParseNode(props: {
   // 使用防抖控制onSendData
   const changeRef = useRef(debounce(onSendData, 100));
 
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = useState({
+    sorter: {},
+    filters: {}
+  });
+
   // 分页change事件
   const handlePageChange = (page: number, pageSize?: number) => {
-    changeRef.current(page, pageSize || pagination.pageSize);
+    changeRef.current(page, pageSize || pagination.pageSize, sortValue);
   };
 
   // 组件销毁时取消防抖
@@ -197,7 +209,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.total === 0
               ? '--'
-              : dataSource?.total ?? '--'}
+              : (dataSource?.total ?? '--')}
           </span>
         </div>
         <div className="item-box">
@@ -205,7 +217,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.success_total === 0
               ? '--'
-              : dataSource?.success_total ?? '--'}
+              : (dataSource?.success_total ?? '--')}
           </span>
         </div>
         <div className="item-box">
@@ -213,7 +225,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.fail_total === 0
               ? '--'
-              : dataSource?.fail_total ?? '--'}
+              : (dataSource?.fail_total ?? '--')}
           </span>
         </div>
       </div>
@@ -225,9 +237,13 @@ export default function ParseNode(props: {
         noDataElement={noDataElement({ description: '暂无数据' })}
         rowKey="id"
         style={{ margin: '10px 0' }}
-        onChange={(pagination, sorter, filters) =>
-          onSortData(pagination, sorter, filters)
-        }
+        onChange={(pagination, sorter, filters) => {
+          setSortValue({
+            sorter,
+            filters
+          });
+          onSortData(sorter, filters);
+        }}
       />
       {/* 分页 */}
       {dataSource.file && dataSource.file.length > 0 && (

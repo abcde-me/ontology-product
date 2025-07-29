@@ -42,3 +42,8 @@
 .tableWrapper :global(.arco-table-td) {
   padding: 16px !important;
 }
+
+.tableWrapper :global(.arco-table-body) {
+  min-height: calc(100% - 40px) !important;
+  background-color: #fff;
+}

@@ -520,22 +520,24 @@ export default function DataLoad() {
         }}
       />
       <div className={Styles.arcoPagination}>
-        <Pagination
-          current={current}
-          pageSize={pageSize}
-          onPageSizeChange={(pageSize) => {
-            setPageSize(pageSize);
-            setCurrent(1);
-          }}
-          defaultCurrent={10}
-          onChange={handlePageChange}
-          sizeOptions={[10, 20, 50, 100]}
-          showTotal
-          total={loadTotal}
-          showJumper
-          sizeCanChange
-          style={{ marginBottom: '20px' }}
-        />
+        {data && data.length > 0 && (
+          <Pagination
+            current={current}
+            pageSize={pageSize}
+            onPageSizeChange={(pageSize) => {
+              setPageSize(pageSize);
+              setCurrent(1);
+            }}
+            defaultCurrent={10}
+            onChange={handlePageChange}
+            sizeOptions={[10, 20, 50, 100]}
+            showTotal
+            total={loadTotal}
+            showJumper
+            sizeCanChange
+            style={{ marginBottom: '20px' }}
+          />
+        )}
       </div>
       <Modal
         style={{ width: '600px' }}

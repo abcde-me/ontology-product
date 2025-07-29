@@ -307,11 +307,25 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="目录路径："
-                  rules={[{ required: true, message: '请输入目录路径' }]}
+                  required
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   field="path"
+                  rules={[
+                    {
+                      validator: (value, cb) => {
+                        if (!value || value.trim() === '') {
+                          return cb('请输入目录路径');
+                        }
+                        const regex = /^\/.*/;
+                        if (!regex.test(value)) {
+                          return cb('输入的路径需要以/开头');
+                        }
+                        return cb();
+                      }
+                    }
+                  ]}
                 >
                   <Input placeholder="请输入HDFS日录路径，如/user/data" />
                 </FormItem>

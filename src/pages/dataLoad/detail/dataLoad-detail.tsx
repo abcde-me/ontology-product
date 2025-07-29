@@ -565,23 +565,25 @@ const DataLoadDetail = () => {
             permission={perms}
           />
         </div>
-        <Pagination
-          sizeOptions={[10, 20, 50, 100]}
-          showTotal
-          total={total}
-          showJumper
-          sizeCanChange
-          style={{
-            margin: '20px 30px',
-            display: 'flex',
-            justifyContent: 'end'
-          }}
-          onChange={handlePageChange}
-          onPageSizeChange={(pageSize) => {
-            setPageSize(pageSize);
-            setCurrent(1);
-          }}
-        />
+        {detailList && detailList.length > 0 && (
+          <Pagination
+            sizeOptions={[10, 20, 50, 100]}
+            showTotal
+            total={total}
+            showJumper
+            sizeCanChange
+            style={{
+              margin: '20px 30px',
+              display: 'flex',
+              justifyContent: 'end'
+            }}
+            onChange={handlePageChange}
+            onPageSizeChange={(pageSize) => {
+              setPageSize(pageSize);
+              setCurrent(1);
+            }}
+          />
+        )}
         <Modal
           style={{ width: '600px' }}
           title="编辑数据载入任务"

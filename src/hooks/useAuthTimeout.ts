@@ -77,17 +77,9 @@ const useAuthTimeout = (options: {
       const remainingMinutes = Math.floor(remainingTime / (60 * 1000));
       const remainingSeconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
 
-      console.log(
-        `【验证】Token状态检查: 剩余时间 ${remainingMinutes}分${remainingSeconds}秒`
-      );
-
       // 检查是否需要续约
       const renewThreshold = options.renewBeforeExpire * 60 * 1000;
       const shouldRenew = remainingTime < renewThreshold;
-
-      console.log(
-        `【调试】续约检查: 剩余时间=${remainingTime}ms, 续约阈值=${renewThreshold}ms, 需要续约=${shouldRenew}`
-      );
 
       if (shouldRenew) {
         // 检查用户在当前token生命周期内是否有活动

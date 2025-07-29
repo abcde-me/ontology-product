@@ -30,6 +30,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import Workflow from '../workflowConfig/index';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -140,11 +141,11 @@ export default function WorkflowTaskDetail() {
   const workflowUuid = useParams('workflow_uuid');
   const workflowVersion = useParams('workflow_version');
   const workflowId = useParams('ds_workflow_id');
-
+  let intervalDetailData: string | number | NodeJS.Timeout | undefined;
   // 初始化详情基本数据
   useEffect(() => {
     if (taskId) getDetailData(true);
-    const intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
+    intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
     return () => clearInterval(intervalDetailData); // 组件卸载时清理
   }, [taskId]);
 
@@ -159,6 +160,10 @@ export default function WorkflowTaskDetail() {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
+        // 当前状态不是运行中时清空定时器
+        if (res.data.base_info.run_status !== TaskRunStatus.running) {
+          clearInterval(intervalDetailData);
+        }
         // 运行中状态定时刷新防止节点数据重新渲染
         if (
           !isSetActiveNode &&
@@ -167,6 +172,7 @@ export default function WorkflowTaskDetail() {
           return;
         setWorkflowName(res.data.workflow_name);
         setActiveNode(res.data.result_info.node_code);
+        setActiveNodeType(res.data.result_info.task_type);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
@@ -312,7 +318,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.time_size === ''
                   ? '-'
-                  : taskDetailData?.time_size ?? '-'}
+                  : (taskDetailData?.time_size ?? '-')}
               </span>
             </div>
           </div>
@@ -322,7 +328,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.start_time === ''
                   ? '-'
-                  : taskDetailData?.start_time ?? '-'}
+                  : (taskDetailData?.start_time ?? '-')}
               </span>
             </div>
           </div>
@@ -332,7 +338,7 @@ export default function WorkflowTaskDetail() {
               <span className="item-content">
                 {taskDetailData?.end_time === ''
                   ? '-'
-                  : taskDetailData?.end_time ?? '-'}
+                  : (taskDetailData?.end_time ?? '-')}
               </span>
             </div>
           </div>
@@ -347,21 +353,34 @@ export default function WorkflowTaskDetail() {
   };
 
   // 获取子组件的分页数据
-  const handleChildData = (current: number, pageSize: number) => {
+  const handleChildData = (
+    current: number,
+    pageSize: number,
+    value: {
+      sorter: SorterInfo;
+      filters: Partial<Record<string | number | symbol, string[]>>;
+    }
+  ) => {
     setPagination((prev) => ({
       ...prev,
       current,
       pageSize
     }));
-    getNodeDetail(current, pageSize);
+    handleChildSortData(value.sorter, value.filters, false);
   };
 
   // 获取子节点的筛选条件数据
-  const handleChildSortData = (pagination, sorter, filters) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: 1
-    }));
+  const handleChildSortData = (
+    sorter: SorterInfo,
+    filters: Partial<Record<string | number | symbol, string[]>>,
+    isSetPage = true
+  ) => {
+    if (isSetPage) {
+      setPagination((prev) => ({
+        ...prev,
+        current: 1
+      }));
+    }
     const sortdata = {
       status: filters.status === undefined ? '' : filters.status.join(','),
       file_type:
@@ -398,15 +417,15 @@ export default function WorkflowTaskDetail() {
   };
 
   // 获取节点详情
-  const getNodeDetail = async (current?: number, pageSize?: number) => {
+  const getNodeDetail = async () => {
     if (!taskId) return;
     const params = {
       id: taskId,
       node_code: activeNode,
       task_type: activeNodeType,
       search_key: '',
-      page: current || pagination.current,
-      page_size: pageSize || pagination.pageSize,
+      page: pagination.current,
+      page_size: pagination.pageSize,
       ...sortValue
     };
     const res = await getTaskDetailNode(params);

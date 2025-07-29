@@ -280,7 +280,7 @@ export const getUnifiedColumns = (
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50
+        width: 80
       },
       {
         title: '文件名',
@@ -352,7 +352,7 @@ export const getUnifiedColumns = (
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
-        width: 104,
+        width: 88,
         render: (_, record) =>
           renderActionColumn(
             _,
@@ -375,7 +375,7 @@ export const getUnifiedColumns = (
       {
         title: 'ID',
         dataIndex: 'id',
-        width: 50
+        width: 80
       },
       {
         title: '数据内容',
@@ -431,7 +431,7 @@ export const getUnifiedColumns = (
         title: '操作',
         dataIndex: 'actions',
         fixed: 'right' as const,
-        width: 112,
+        width: 88,
         render: (_, record) =>
           renderActionColumn(
             _,
