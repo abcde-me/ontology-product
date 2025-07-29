@@ -139,11 +139,11 @@ export default function WorkflowTaskDetail() {
   const workflowUuid = useParams('workflow_uuid');
   const workflowVersion = useParams('workflow_version');
   const workflowId = useParams('ds_workflow_id');
-
+  let intervalDetailData: string | number | NodeJS.Timeout | undefined;
   // 初始化详情基本数据
   useEffect(() => {
     if (taskId) getDetailData(true);
-    const intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
+    intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
     return () => clearInterval(intervalDetailData); // 组件卸载时清理
   }, [taskId]);
 
@@ -158,6 +158,10 @@ export default function WorkflowTaskDetail() {
       const res = await getTaskDetail(taskId!);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
+        // 当前状态不是运行中时清空定时器
+        if (res.data.base_info.run_status !== TaskRunStatus.running) {
+          clearInterval(intervalDetailData);
+        }
         // 运行中状态定时刷新防止节点数据重新渲染
         if (
           !isSetActiveNode &&
