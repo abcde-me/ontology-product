@@ -143,6 +143,7 @@ const TableDetail = (props) => {
       fixed: 'right',
       render: (_, item) => (
         <span
+          className="isDisabled"
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(

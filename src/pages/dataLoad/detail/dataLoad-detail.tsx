@@ -285,6 +285,7 @@ const DataLoadDetail = () => {
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
           <div
+            className={runningFlag ? '' : 'isDisabled'}
             style={{
               color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
               pointerEvents: runningFlag ? 'none' : undefined,
@@ -487,8 +488,8 @@ const DataLoadDetail = () => {
                   <EllipsisPopoverCom
                     value={parseCron(
                       listDetail &&
-                        listDetail.run_config &&
-                        listDetail.run_config.cycle_text
+                      listDetail.run_config &&
+                      listDetail.run_config.cycle_text
                     )}
                     isEdit={false}
                   />
