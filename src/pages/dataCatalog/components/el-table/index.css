@@ -13,3 +13,11 @@
 .arco-table-border .arco-table-expand-fixed-row {
   border-left: 0;
 }
+.batch-delete:hover {
+  color: #438dfb !important;
+  border-color: #438dfb !important ;
+}
+.batch-export:hover {
+  color: #438dfb !important;
+  border-color: #438dfb !important ;
+}
