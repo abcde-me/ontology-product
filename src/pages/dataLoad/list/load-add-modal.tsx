@@ -282,8 +282,8 @@ const LoadAddModal = (props: propsType) => {
         >
           <Select
             placeholder="请选择连接器"
-            // showSearch
-            // filterOption={filterOption}
+            showSearch
+            filterOption={filterOption}
           >
             {connectName.map((option, index) => (
               <Option key={option.key} value={option.key}>
