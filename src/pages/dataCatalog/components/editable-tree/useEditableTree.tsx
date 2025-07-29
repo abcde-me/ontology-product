@@ -225,8 +225,11 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
+    const rawChildrenTreeData = rawTreeData.find(
+      (item: TreeDataType) => item.key === node?.pathParentKeys?.[0]
+    );
     const name = generateName(
-      dataRef?.children ?? [],
+      rawChildrenTreeData?.children?.[0]?.children ?? [],
       subLeafKeys[dataRef?.type]
     );
     const cachTreeData = treeData.map((item: TreeDataType) => {

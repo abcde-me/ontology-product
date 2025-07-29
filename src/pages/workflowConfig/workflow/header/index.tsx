@@ -297,7 +297,7 @@ const Header: FC = () => {
               ref={inputRef}
               value={workflowName}
               onChange={handleWorkflowNameChange}
-              onBlur={() => handleSave(workflowName)}
+              onBlur={() => handlePressEnter(workflowName)}
               onPressEnter={() => handlePressEnter(workflowName)}
             />
           ) : (
