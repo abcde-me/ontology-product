@@ -47,7 +47,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           similarity_threshold:
             app_scenarios_option?.similarity_threshold ?? 0.7,
           generate_sample_num: app_scenarios_option?.generate_sample_num ?? 100,
-          enhanced_proportion: app_scenarios_option?.enhanced_proportion ?? 0.7,
+          // enhanced_proportion: app_scenarios_option?.enhanced_proportion ?? 0.7,
           is_prompt: app_scenarios_option?.enhanced_proportion ?? 0,
           prompt:
             app_scenarios_option?.prompt ??
@@ -156,27 +156,28 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
         <div className="content-box">
           {(app_scenarios_type === 'tongyong' ||
             app_scenarios_type === 'duolong') && (
-            <>
-              <FormItem
-                label="指令生成依赖样本数:"
-                field="app_scenarios.option.sample_num"
-                layout="vertical"
-                extra="该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
+              <>
+                <FormItem
+                  label="指令生成依赖样本数:"
+                  field="app_scenarios.option.sample_num"
+                  layout="vertical"
+                  extra="该参数是指从进行生成前的数据集中选择进行生成的记录条数。它会作为context
                 部分，增加到prompt 中去。"
-                rules={[
-                  {
-                    type: 'number',
-                    min: 1,
-                    max: 10000,
-                    message: '指令生成依赖样本数范围1~10000'
-                  }
-                ]}
-              >
-                <InputNumber min={1} max={10000} placeholder="请输入指令" />
-              </FormItem>
-            </>
-          )}
-          {(app_scenarios_type === 'fenlei' ||
+                  rules={[
+                    {
+                      type: 'number',
+                      min: 1,
+                      max: 10000,
+                      message: '指令生成依赖样本数范围1~10000'
+                    }
+                  ]}
+                >
+                  <InputNumber min={1} max={10000} placeholder="请输入指令" />
+                </FormItem>
+              </>
+            )}
+          {/* 这期先不做 */}
+          {/* {(app_scenarios_type === 'fenlei' ||
             app_scenarios_type === 'shengcheng') && (
             <>
               <FormItem
@@ -202,7 +203,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 />
               </FormItem>
             </>
-          )}
+          )} */}
           <FormItem
             label="过滤相似度阈值:"
             field="app_scenarios.option.similarity_threshold"
