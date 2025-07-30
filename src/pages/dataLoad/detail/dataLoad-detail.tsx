@@ -292,6 +292,7 @@ const DataLoadDetail = () => {
 
           {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
             <div
+              className={runningFlag ? '' : 'isDisabled'}
               style={{
                 color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
                 pointerEvents: runningFlag ? 'none' : undefined,
@@ -495,8 +496,8 @@ const DataLoadDetail = () => {
                   <EllipsisPopoverCom
                     value={parseCron(
                       listDetail &&
-                        listDetail.run_config &&
-                        listDetail.run_config.cycle_text
+                      listDetail.run_config &&
+                      listDetail.run_config.cycle_text
                     )}
                     isEdit={false}
                   />
