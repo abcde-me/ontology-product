@@ -485,11 +485,9 @@ export default function Eltable() {
           <Popover content="请先选择文件" className="narrow-popover">
             <Button
               icon={<IconDelete />}
-              type="outline"
+              type="secondary"
               style={{
-                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed'
               }}
               disabled={!hasSelectedRows}
               onClick={handleDeleteMany}
@@ -507,11 +505,9 @@ export default function Eltable() {
         >
           <Button
             icon={<IconDelete />}
-            type="outline"
+            type="secondary"
             style={{
-              color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-              cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-              borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              cursor: hasSelectedRows ? 'pointer' : 'not-allowed'
             }}
             disabled={!hasSelectedRows}
             onClick={handleDeleteMany}
@@ -527,11 +523,9 @@ export default function Eltable() {
           <Popover content="请先选择文件" className="narrow-popover">
             <Button
               icon={<IconDownload />}
-              type="outline"
+              type="secondary"
               style={{
-                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed'
               }}
               disabled={!hasSelectedRows}
               onClick={() => {
@@ -546,11 +540,9 @@ export default function Eltable() {
         <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
           <Button
             icon={<IconDownload />}
-            type="outline"
+            type="secondary"
             style={{
-              color: hasSelectedRows ? '#2563EB' : '#94A3B8',
-              cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-              borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              cursor: hasSelectedRows ? 'pointer' : 'not-allowed'
             }}
             disabled={!hasSelectedRows}
             onClick={() => {
