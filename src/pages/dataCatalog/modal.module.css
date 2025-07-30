@@ -47,3 +47,6 @@
   min-height: calc(100% - 40px) !important;
   background-color: #fff;
 }
+.tableWrapper :global(.arco-table-content-inner) {
+  scrollbar-gutter: auto !important;
+}
