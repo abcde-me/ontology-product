@@ -86,7 +86,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedFullPath,
     selectedKey
   } = props;
-
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
   const [downloadData, setDownloadData] = useState(null); // 下载的数据
@@ -254,7 +253,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           searchConditionType === '数据内容' ? searchConditionKeyword : '',
         search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
         sort_field: 'generated_at',
-        sort_order: sortOrder || 'desc'
+        sort_order: sortOrder || 'desc',
+        path_id: Number(selectedKey)
         // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       };
 

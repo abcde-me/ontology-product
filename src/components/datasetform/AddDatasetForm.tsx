@@ -55,6 +55,7 @@ interface ConnectorFile {
   last_modified: string;
   type: string;
   sub_path: string;
+  file_id: string;
 }
 
 interface DatasetFormProps {
@@ -101,7 +102,7 @@ function highlight(text, keyword) {
   );
 }
 
-function ItemPathDisplay(item) {
+function itemPathDisplay(item) {
   // 如果 sub_path 为空，显示短横线
   if (item === '') return <span>-</span>;
 
@@ -330,22 +331,22 @@ const DatasetForm = React.forwardRef<
       if (Array.isArray(value) && Array.isArray(value[0])) {
         // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
 
-        const catalogpath = value[0][0];
-        const catalogId = value[0][1];
-        const selectedItem = value[1]?.[0];
-        console.log(11111111, value);
-        const basePath = String(catalogpath[0][0]);
-        const formattedPath =
-          basePath.length > 1 && basePath.endsWith('/')
-            ? `${basePath}/`
-            : basePath;
-        const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
+        // const catalogpath = value?.[0]?.[0];
+        // const catalogId = value?.[0]?.[1];
+        const selectedItem = value?.[1]?.[0];
+        // const basePath = String(catalogpath?.[0]?.[0]??'');
+        // const formattedPath =
+        //   basePath.length > 1 && basePath.endsWith('/')
+        //     ? `${basePath}/`
+        //     : basePath;
+        // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
         if (selectedItem == undefined) {
           setPreviewColumns([]);
           Message.warning('请选择二级目录！');
           return;
         }
-        getVolumePreviewData(path);
+        // getVolumePreviewData(path);
+        getVolumePreviewData(value?.[1]?.[1]);
       } else if (Array.isArray(value) && value.length === 2) {
         return;
       }
@@ -413,7 +414,7 @@ const DatasetForm = React.forwardRef<
   const getVolumePreviewData = (volumeId: string) => {
     setTableLoading(true);
     // 这里应该调用真实的API
-    getCatalogPreview({ path: volumeId })
+    getCatalogPreview({ path_id: volumeId })
       .then((res) => {
         if (res.status !== 200) {
           Message.error(res.message);
@@ -433,6 +434,11 @@ const DatasetForm = React.forwardRef<
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
+  const mapselectFiles = (files: any[]) => {
+    return files.map((item) => {
+      return Number(item.split('/').shift());
+    });
+  };
   //提交数据
   const handleSubmit = debounce(() => {
     form
@@ -442,7 +448,10 @@ const DatasetForm = React.forwardRef<
         const formData: Dataset = {
           ...values,
           dataSource,
-          selectedFiles: dataSource === 'connector' ? selectedFiles : undefined, //如果数据源是连接器，则设置选择文件
+          selectedFiles:
+            dataSource === 'connector'
+              ? mapselectFiles(selectedFiles)
+              : undefined, //如果数据源是连接器，则设置选择文件
           targetDataSource:
             dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
         };
@@ -848,7 +857,10 @@ const DatasetForm = React.forwardRef<
                       }}
                     >
                       {connectorFileInformation.map((item, index) => (
-                        <Option key={index} value={item.path + '/' + item.name}>
+                        <Option
+                          key={index}
+                          value={item.file_id + '/' + item.name}
+                        >
                           <div
                             style={{
                               fontFamily: 'Arial, sans-serif',
@@ -862,7 +874,7 @@ const DatasetForm = React.forwardRef<
                             <div style={{ color: '#6E7B8D', fontSize: '14px' }}>
                               <Space size={12}>
                                 <span>
-                                  所属文件：{ItemPathDisplay(item.sub_path)}
+                                  所属文件：{itemPathDisplay(item.sub_path)}
                                 </span>
                                 <span>
                                   修改时间：{formatDateTime(item.last_modified)}

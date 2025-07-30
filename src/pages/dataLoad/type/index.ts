@@ -70,6 +70,7 @@ export interface TaskInfo {
       week: string;
     };
   };
+  perms: string[];
 }
 
 // 执行历史记录列表类型

@@ -19,6 +19,10 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 export enum RunState {
   SUCCEED = 'succeed',
   FAILED = 'failed',
@@ -91,7 +95,8 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            gotoDetail(text.task_id);
+            text.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) &&
+              gotoDetail(text.task_id);
           }}
         />
       )
@@ -262,32 +267,31 @@ export default function DataLoad() {
       fixed: 'right',
       width: 105,
       render: (_, item) => {
+        const perms = item?.perms || [];
+        const config = [] as any;
+        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
+          config.push({
+            label: '详情',
+            onClick: () => {
+              gotoDetail(item.task_id);
+            }
+          });
+        }
+        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
+          config.push({
+            label: '删除',
+            onClick: () => {
+              deleteLoad(item.task_id, item.name);
+            }
+          });
+        }
         return (
-          <div
-            className={Styles.hoverStyle}
-            style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-around'
-            }}
-          >
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                gotoDetail(item.task_id);
-              }}
-            >
-              详情
-            </span>
-            <span
-              className={Styles.hoverStyle}
-              onClick={() => {
-                deleteLoad(item.task_id, item.name);
-              }}
-            >
-              删除
-            </span>
-          </div>
+          <OperationColumn
+            row={item}
+            config={config}
+            index={0}
+            extendFont="操作"
+          />
         );
       }
     }
@@ -487,15 +491,17 @@ export default function DataLoad() {
             setSearchValue(value);
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            setVisible(true);
-          }}
-        >
-          创建数据载入任务
-        </Button>
+        <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              setVisible(true);
+            }}
+          >
+            创建数据载入任务
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         loading={loadloading}

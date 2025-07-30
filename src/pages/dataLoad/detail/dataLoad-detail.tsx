@@ -26,6 +26,7 @@ import {
 } from '@/api/loadApi';
 import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -87,6 +88,7 @@ const DataLoadDetail = () => {
     try {
       const res = await getLoad(loadId);
       setListDetail(res.data);
+      setPerms(res.data.perms);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -105,6 +107,8 @@ const DataLoadDetail = () => {
     }
   };
   const [directoryObj, setDirectoryObj] = useState({});
+  // 详情页面所有权限
+  const [perms, setPerms] = useState<any>([]);
   // 获取子级表格改变的状态
   const getChildrenTableChange = (val) => {
     setDirectoryObj(val);
@@ -233,6 +237,7 @@ const DataLoadDetail = () => {
       setRunningFlag(hasRunningTask);
     }
   }, [detailList]);
+
   return (
     <div>
       <div
@@ -527,16 +532,18 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          <Button
-            type="primary"
-            icon={<IconPlus />}
-            disabled={runningFlag ? true : false}
-            onClick={() => {
-              runningHan();
-            }}
-          >
-            新建运行
-          </Button>
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) && (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={runningFlag ? true : false}
+              onClick={() => {
+                runningHan();
+              }}
+            >
+              新建运行
+            </Button>
+          )}
         </div>
         <div
           style={{
@@ -553,6 +560,7 @@ const DataLoadDetail = () => {
             loading={detailListLoading}
             name={listDetail?.name || ''}
             change={getChildrenTableChange}
+            permission={perms}
           />
         </div>
         {detailList && detailList.length > 0 && (

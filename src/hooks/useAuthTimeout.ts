@@ -77,12 +77,9 @@ const useAuthTimeout = (options: {
       const remainingMinutes = Math.floor(remainingTime / (60 * 1000));
       const remainingSeconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
 
-
-
       // 检查是否需要续约
       const renewThreshold = options.renewBeforeExpire * 60 * 1000;
       const shouldRenew = remainingTime < renewThreshold;
-
 
       if (shouldRenew) {
         // 检查用户在当前token生命周期内是否有活动

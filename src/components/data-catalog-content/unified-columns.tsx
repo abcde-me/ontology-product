@@ -19,6 +19,9 @@ import {
   getSourceFileTypeList as getSourceFileTypeListApi
 } from '@/api/dataCatalog';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { PermissionGuard } from '@/components/PermissionGuard';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
 
 // 图标组件定义
@@ -193,28 +196,28 @@ const renderActionColumn = (
   selectedFullPath,
   handAllReset,
   resetPage
-) => (
-  <div style={{ display: 'flex' }}>
-    <span
-      style={{
-        color: '#007DFA',
-        display: 'inline-block',
-        textAlign: 'center',
-        cursor: 'pointer',
-        marginRight: '16px',
-      }}
-      onClick={() => handleDownload(record, setVisible, selectedFullPath)}
-    >
-      导出
-    </span>
-    <span
-      style={{
-        color: '#007DFA',
-        display: 'inline-block',
-        textAlign: 'center',
-        cursor: 'pointer'
-      }}
-      onClick={() =>
+) => {
+  const params = record?.perms || [];
+  const config: {
+    label: string;
+    onClick: () => void;
+  }[] = [];
+  if (
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) ||
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)
+  ) {
+    config.push({
+      label: '导出',
+      onClick: () => handleDownload(record, setVisible, selectedFullPath)
+    });
+  }
+  if (
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) ||
+    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)
+  ) {
+    config.push({
+      label: '删除',
+      onClick: () =>
         handleDelete(
           record,
           refreshData,
@@ -223,12 +226,12 @@ const renderActionColumn = (
           handAllReset,
           resetPage
         )
-      }
-    >
-      删除
-    </span>
-  </div>
-);
+    });
+  }
+  return (
+    <OperationColumn row={record} index={0} config={config} extendFont="更多" />
+  );
+};
 
 export const getSourceFileTypeList = async (params) => {
   if (!params?.id) {
@@ -260,7 +263,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   hoveredRowId = null,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器

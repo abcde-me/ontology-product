@@ -4,6 +4,8 @@ import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from './index.module.css';
 
 const InputSearch = Input.Search;
@@ -40,13 +42,17 @@ export default function EditableTree() {
           allowClear
           style={{ height: '32px', width: '130px' }}
         />
-        <div
-          className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-          onClick={onCatalogAdd}
+        <PermissionWrapper
+          permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG}
         >
-          <IconPlus className="mr-2" />
-          新建
-        </div>
+          <div
+            className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
+            onClick={onCatalogAdd}
+          >
+            <IconPlus className="mr-2" />
+            新建
+          </div>
+        </PermissionWrapper>
       </div>
       {treeData && treeData.length ? (
         <Tree

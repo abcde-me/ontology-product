@@ -25,6 +25,9 @@ import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { CONNECTION_PERMISSIONS } from '@/config/permissions';
+import { OperationColumn } from '@ccf2e/arco-material';
 interface ChildComponentMethods {
   displayModalView: () => void; // 根据实际情况调整参数类型
   // 可以添加其他子组件暴露的方法...
@@ -224,36 +227,36 @@ export default function Connection() {
       title: '操作',
       width: 130,
       fixed: 'right',
-      render: (_, record) => (
-        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-          <span
-            className="hover"
-            onClick={() => {
-              viewDetailHan(record.id);
-            }}
-          >
-            详情
-          </span>
-
-          <span
-            className="hover"
-            onClick={() => {
-              editFormHandle(record);
-            }}
-          >
-            编辑
-          </span>
-
-          <span
-            className="hover"
-            onClick={() => {
-              delModalHan(record.id);
-            }}
-          >
-            删除
-          </span>
-        </div>
-      )
+      render: (_, record) => {
+        const perms = record?.perms || [];
+        const config = [] as any;
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
+          config.push({
+            label: '详情',
+            onClick: () => viewDetailHan(record.id)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
+          config.push({
+            label: '编辑',
+            onClick: () => editFormHandle(record)
+          });
+        }
+        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
+          config.push({
+            label: '删除',
+            onClick: () => delModalHan(record.id)
+          });
+        }
+        return (
+          <OperationColumn
+            row={record}
+            config={config}
+            index={0}
+            extendFont="操作"
+          />
+        );
+      }
     }
   ];
   // 点击删除显示弹框
@@ -441,15 +444,17 @@ export default function Connection() {
             clearHan();
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => {
-            childAddAndSetModalHan();
-          }}
-        >
-          创建连接器
-        </Button>
+        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => {
+              childAddAndSetModalHan();
+            }}
+          >
+            创建连接器
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}

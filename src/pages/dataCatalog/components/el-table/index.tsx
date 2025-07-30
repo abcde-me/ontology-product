@@ -23,6 +23,8 @@ import {
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
 import { Dataset } from '@/pages/datasetManagement';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
@@ -341,7 +343,6 @@ export default function Eltable() {
             }
           } else {
             const fileIds = selectedRows.map((item: { id: number }) => item.id);
-            console.log(fileIds);
 
             ids.push(...fileIds);
             if (selectedRows.length > 0) {
@@ -475,7 +476,35 @@ export default function Eltable() {
     <Space>
       {/* 批量删除按钮 */}
       {!hasSelectedRows ? (
-        <Popover content="请先选择文件" className="narrow-popover">
+        <PermissionWrapper
+          anyPermission={[
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_BATCH,
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_DST_FILE
+          ]}
+        >
+          <Popover content="请先选择文件" className="narrow-popover">
+            <Button
+              icon={<IconDelete />}
+              type="outline"
+              style={{
+                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              }}
+              disabled={!hasSelectedRows}
+              onClick={handleDeleteMany}
+            >
+              批量删除
+            </Button>
+          </Popover>
+        </PermissionWrapper>
+      ) : (
+        <PermissionWrapper
+          anyPermission={[
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_BATCH,
+            DATA_CATALOG_PERMISSIONS.CAN_DELETE_DST_FILE
+          ]}
+        >
           <Button
             icon={<IconDelete />}
             type="outline"
@@ -489,27 +518,32 @@ export default function Eltable() {
           >
             批量删除
           </Button>
-        </Popover>
-      ) : (
-        <Button
-          icon={<IconDelete />}
-          type="outline"
-          className={`${hasSelectedRows ? 'batch-delete' : ''}`}
-          style={{
-            color: hasSelectedRows ? '#007DFA' : '#94A3B8',
-            cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#007DFA' : '#94A3B8'
-          }}
-          disabled={!hasSelectedRows}
-          onClick={handleDeleteMany}
-        >
-          批量删除
-        </Button>
+        </PermissionWrapper>
       )}
 
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
-        <Popover content="请先选择文件" className="narrow-popover">
+        <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
+          <Popover content="请先选择文件" className="narrow-popover">
+            <Button
+              icon={<IconDownload />}
+              type="outline"
+              style={{
+                color: hasSelectedRows ? '#2563EB' : '#94A3B8',
+                cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
+                borderColor: hasSelectedRows ? '#2563EB' : '#94A3B8'
+              }}
+              disabled={!hasSelectedRows}
+              onClick={() => {
+                handleExport();
+              }}
+            >
+              批量导出
+            </Button>
+          </Popover>
+        </PermissionWrapper>
+      ) : (
+        <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
           <Button
             icon={<IconDownload />}
             type="outline"
@@ -525,24 +559,7 @@ export default function Eltable() {
           >
             批量导出
           </Button>
-        </Popover>
-      ) : (
-        <Button
-          icon={<IconDownload />}
-          type="outline"
-          style={{
-            color: hasSelectedRows ? '#007DFA' : '#94A3B8',
-            cursor: hasSelectedRows ? 'pointer' : 'not-allowed',
-            borderColor: hasSelectedRows ? '#007DFA' : '#94A3B8'
-          }}
-          className={`${hasSelectedRows ? 'batch-export' : ''}`}
-          disabled={!hasSelectedRows}
-          onClick={() => {
-            handleExport();
-          }}
-        >
-          批量导出
-        </Button>
+        </PermissionWrapper>
       )}
     </Space>
   );
