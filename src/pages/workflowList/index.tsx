@@ -23,6 +23,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconClockCircle } from '@arco-design/web-react/icon';
+import { openNewPage } from '@/utils/env';
 
 const InputSearch = Input.Search;
 
@@ -86,7 +87,7 @@ export default function WorkflowList() {
 
   // 创建工作流
   const handleCreateWorkflow = () => {
-    window.open('/tenant/compute/modaforge/workflowConfig', '_blank');
+    openNewPage('/tenant/compute/modaforge/workflowConfig');
   };
 
   // 跳转目录
@@ -105,9 +106,8 @@ export default function WorkflowList() {
     workflow_uuid: number | string,
     ds_workflow_id: number | string
   ) => {
-    window.open(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`,
-      '_blank'
+    openNewPage(
+      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
     );
   };
 
@@ -118,9 +118,8 @@ export default function WorkflowList() {
       Message.success({
         content: '复制成功'
       });
-      window.open(
-        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`,
-        '_blank'
+      openNewPage(
+        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
       );
       getList();
     } else {

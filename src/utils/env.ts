@@ -46,3 +46,10 @@ export const removeLoginToken = () => {
     removeLocalStorage('console_token');
   }
 };
+export const openNewPage = (page: string) => {
+  if (isWujie) {
+    (window as any).$wujie?.props?.openNewPage(page);
+  } else {
+    window.open(page, '_blank');
+  }
+};
