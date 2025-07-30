@@ -31,6 +31,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import Workflow from '../workflowConfig/index';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { openNewPage } from '@/utils/env';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -547,9 +548,8 @@ export default function WorkflowTaskDetail() {
   };
 
   const handleClickWorkflow = () => {
-    window.open(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`,
-      '_blank'
+    openNewPage(
+      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 
