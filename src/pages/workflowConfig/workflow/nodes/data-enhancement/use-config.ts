@@ -39,8 +39,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               payload?.app_scenarios?.option?.similarity_threshold,
             generate_sample_num:
               payload?.app_scenarios?.option?.generate_sample_num,
-            enhanced_proportion:
-              payload?.app_scenarios?.option?.enhanced_proportion,
+            // enhanced_proportion:
+            //   payload?.app_scenarios?.option?.enhanced_proportion,
             is_prompt: payload.prompt_checkbox ? 1 : 0,
             prompt: payload?.app_scenarios?.option?.prompt,
             sample_data: payload?.app_scenarios?.option?.sample_data

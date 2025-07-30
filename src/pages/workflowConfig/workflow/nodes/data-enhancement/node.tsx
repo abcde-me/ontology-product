@@ -81,13 +81,14 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
               <div className="enhancement-item">{`指令生成依赖样本数: ${sample_num}`}</div>
             </Tooltip>
           )}
-        {(app_scenarios_type === 'fenlei' ||
+        {/* 这期先不做 */}
+        {/* {(app_scenarios_type === 'fenlei' ||
           app_scenarios_type === 'shengcheng') &&
           (enhanced_proportion || enhanced_proportion === 0) && (
             <Tooltip content={`任务描述增强占比: ${enhanced_proportion}`}>
               <div className="enhancement-item">{`任务描述增强占比: ${enhanced_proportion}`}</div>
             </Tooltip>
-          )}
+          )} */}
         {(similarity_threshold || similarity_threshold === 0) && (
           <Tooltip content={`过滤相似度阈值: ${similarity_threshold}`}>
             <div className="enhancement-item">{`过滤相似度阈值: ${similarity_threshold}`}</div>
