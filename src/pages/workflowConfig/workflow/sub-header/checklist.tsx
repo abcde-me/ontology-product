@@ -18,7 +18,7 @@ import {
 } from '@/pages/workflowConfig/components/portal-to-follow-elem';
 import TipPopup from '@/pages/workflowConfig/workflow/operator/tip-popup';
 import ChecklistIcon from '@/pages/workflowConfig/styles/images/op-icons/checklist.svg';
-import Warning1Icon from '@/pages/workflowConfig/styles/images/op-icons/warning1.svg';
+import WarningIcon from '@/pages/workflowConfig/styles/images/op-icons/check-warning.svg';
 import EmptyIcon from '@/pages/workflowConfig/styles/images/op-icons/empty.svg';
 
 type WorkflowChecklistProps = {
@@ -109,16 +109,16 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
                       <div className="item-warnings border-t-[0.5px] border-t-black/2">
                         {node.unConnected && (
                           <div className="warnings-item rounded-b-[4px]">
-                            <div className="flex !text-[14px] text-xs leading-[18px] text-[#1E293B]">
-                              <Warning1Icon className="mr-2 size-[13px] text-[#F79009]" />
+                            <div className="warnings-item-content flex !text-[14px] text-xs leading-[16px] text-[#1E293B]">
+                              <WarningIcon className="mr-2 size-[16px] text-[#F79009]" />
                               {t('workflow.common.needConnectTip')}
                             </div>
                           </div>
                         )}
                         {node.errorMessage && (
                           <div className="warnings-item rounded-b-[4px]">
-                            <div className="flex !text-[14px] text-xs leading-[18px] text-[#1E293B]">
-                              <Warning1Icon className="mr-2 size-[16px] text-[#F79009]" />
+                            <div className="flex !text-[14px] text-xs leading-[16px] text-[#1E293B]">
+                              <WarningIcon className="mr-2 size-[16px] text-[#F79009]" />
                               {node.errorMessage}
                             </div>
                           </div>
