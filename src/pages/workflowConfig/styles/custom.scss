@@ -103,14 +103,14 @@
           align-items: center;
           justify-content: center;
 
-          >div {
+          > div {
             font-size: 14px;
             font-weight: normal;
             line-height: 22px;
             color: #1e293b;
           }
 
-          >div.active {
+          > div.active {
             color: #007dfa;
             font-weight: 600;
             border-color: #007dfa;
@@ -150,7 +150,7 @@
           }
 
           .cursor-row-resize {
-            >div {
+            > div {
               background-color: #969bb4;
               height: 4px;
             }
@@ -348,16 +348,14 @@
     }
 
     .wk-node-content {
-
       .input-section,
       .output-section {
         margin: 0 12px 12px 12px;
-        background: #F5F9FF;
+        background: #f5f9ff;
         // background-color: red;
         border-radius: 12px;
 
         &.collapsed {
-
           .input-header,
           .output-header {
             .icon {
@@ -692,7 +690,9 @@
     }
   }
 
-  .wk-node-panel-content-scroller-container:has(.wk-node-panel-content-wrapper .expanded-panel) {
+  .wk-node-panel-content-scroller-container:has(
+    .wk-node-panel-content-wrapper .expanded-panel
+  ) {
     overflow-y: hidden;
   }
 
@@ -1143,7 +1143,7 @@
 .custom-switch {
   border-radius: 20px;
 
-  &>span {
+  & > span {
     border-radius: 50% 50%;
   }
 }

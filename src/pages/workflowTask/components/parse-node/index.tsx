@@ -209,7 +209,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.total === 0
               ? '--'
-              : dataSource?.total ?? '--'}
+              : (dataSource?.total ?? '--')}
           </span>
         </div>
         <div className="item-box">
@@ -217,7 +217,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.success_total === 0
               ? '--'
-              : dataSource?.success_total ?? '--'}
+              : (dataSource?.success_total ?? '--')}
           </span>
         </div>
         <div className="item-box">
@@ -225,7 +225,7 @@ export default function ParseNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.fail_total === 0
               ? '--'
-              : dataSource?.fail_total ?? '--'}
+              : (dataSource?.fail_total ?? '--')}
           </span>
         </div>
       </div>

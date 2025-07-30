@@ -174,12 +174,10 @@ export async function deleteSourceFile(id: string) {
 //批量删除源数据文件
 export async function deleteSourceFileBatch(params: any) {
   return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
-    .post(params)
+    .delete(params)
     .inRegion()
     .do();
 }
-
-/////////////////////////////////////////////////////////////////
 
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
