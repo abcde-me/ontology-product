@@ -289,21 +289,24 @@ const DataLoadDetail = () => {
       >
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
-          <div
-            className={runningFlag ? '' : 'isDisabled'}
-            style={{
-              color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
-              pointerEvents: runningFlag ? 'none' : undefined,
-              cursor: runningFlag ? '' : 'pointer',
-              fontSize: '14px'
-            }}
-            onClick={() => {
-              setEditVisible(true);
-              console.log(listDetail?.run_config?.cycle_text);
-            }}
-          >
-            <IconEdit /> 编辑
-          </div>
+
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
+            <div
+              className={runningFlag ? '' : 'isDisabled'}
+              style={{
+                color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
+                pointerEvents: runningFlag ? 'none' : undefined,
+                cursor: runningFlag ? '' : 'pointer',
+                fontSize: '14px'
+              }}
+              onClick={() => {
+                setEditVisible(true);
+                console.log(listDetail?.run_config?.cycle_text);
+              }}
+            >
+              <IconEdit /> 编辑
+            </div>
+          )}
         </div>
         <div className="info-container">
           <div className="info-column">
