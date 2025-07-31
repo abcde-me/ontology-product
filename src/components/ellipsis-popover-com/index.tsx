@@ -4,7 +4,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import PopEditCom from '../PopEditCom';
 // import '../../style/common.less';
-import './index.css';
+import './index.scss';
 
 function EllipsisPopover(props: any, ref: any) {
   const { t } = useTranslation('plugin__console-plugin-aidp');

@@ -1,5 +1,5 @@
 import React from 'react';
-import './index.css';
+import './index.scss';
 
 export default function DataAugmentationNode(props: {
   dataSource: { raw_data_num: number; processed_data_num: number; log: string };
@@ -23,7 +23,7 @@ export default function DataAugmentationNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.raw_data_num === 0
               ? '--'
-              : dataSource?.raw_data_num ?? '--'}
+              : (dataSource?.raw_data_num ?? '--')}
           </span>
         </div>
         <div className="item-box">
@@ -31,7 +31,7 @@ export default function DataAugmentationNode(props: {
           <span className="item-content">
             {status === 0 && dataSource?.processed_data_num === 0
               ? '--'
-              : dataSource?.processed_data_num ?? '--'}
+              : (dataSource?.processed_data_num ?? '--')}
           </span>
         </div>
       </div>

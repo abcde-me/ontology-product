@@ -30,7 +30,7 @@ import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
-import './sider.css';
+import './sider.scss';
 import { useUserInfo } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;

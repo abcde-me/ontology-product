@@ -20,7 +20,7 @@ import { useHistory } from 'react-router';
 import ParseNode from './components/parse-node';
 import DataCleaningNode from './components/data-cleaning-node';
 import DataAugmentationNode from './components/data-augmentation-node';
-import './detail.css';
+import './detail.scss';
 import {
   getTaskDetail,
   getTaskDetailNode,
