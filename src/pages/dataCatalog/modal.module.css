@@ -50,3 +50,7 @@
 .tableWrapper :global(.arco-table-content-inner) {
   scrollbar-gutter: auto !important;
 }
+
+.tableWrapper :global(.arco-table-header) {
+  overflow-y: hidden !important;
+}
