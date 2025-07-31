@@ -52,5 +52,5 @@
 }
 
 .tableWrapper :global(.arco-table-header) {
-  overflow-y: hidden !important;
+  background-color: #f5f9ff;
 }
