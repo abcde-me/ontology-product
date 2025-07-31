@@ -136,4 +136,12 @@
       margin: 0 0 12px 0;
     }
   }
+
+  .arco-tabs-header-nav-line .arco-tabs-header-title-text {
+    width: 120px;
+  }
+
+  .ellipsis-popover-div {
+    width: 110px;
+  }
 }
