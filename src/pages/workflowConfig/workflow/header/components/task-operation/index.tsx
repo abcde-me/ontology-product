@@ -22,7 +22,7 @@ import CircleIcon from '@/assets/workflow-header-circle.svg';
 import CircleIconDisabled from '@/assets/workflow-header-circle-disabled.svg';
 import PlayIcon from '@/assets/workflow-header-play.svg';
 import PlayIconDisabled from '@/assets/workflow-header-play-disabled.svg';
-import './index.css';
+import './index.scss';
 import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
 
 dayjs.extend(relativeTime);

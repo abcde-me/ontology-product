@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './index.css';
+import './index.scss';
 import { Pagination, PaginationProps, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
