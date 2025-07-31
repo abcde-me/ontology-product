@@ -32,6 +32,7 @@ import Workflow from '../workflowConfig/index';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { openNewPage } from '@/utils/env';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -458,22 +459,24 @@ export default function WorkflowTaskDetail() {
                 key={item.node_code}
                 disabled={item.status === NodeRunStatus.wait}
                 title={
-                  <span>
-                    {item.status === NodeRunStatus.running ? (
-                      <IconLoading
-                        style={{ marginRight: 8, width: 14, height: 14 }}
-                      />
-                    ) : item.status === NodeRunStatus.completeSuccess ||
-                      item.status === NodeRunStatus.completeFail ? (
-                      <IconCheckCircle
-                        style={{ marginRight: 8, width: 14, height: 14 }}
-                      />
-                    ) : (
-                      <IconClockCircle
-                        style={{ marginRight: 8, width: 14, height: 14 }}
-                      />
-                    )}
-                    {item.task_name}
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <span>
+                      {item.status === NodeRunStatus.running ? (
+                        <IconLoading
+                          style={{ marginRight: 8, width: 14, height: 14 }}
+                        />
+                      ) : item.status === NodeRunStatus.completeSuccess ||
+                        item.status === NodeRunStatus.completeFail ? (
+                        <IconCheckCircle
+                          style={{ marginRight: 8, width: 14, height: 14 }}
+                        />
+                      ) : (
+                        <IconClockCircle
+                          style={{ marginRight: 8, width: 14, height: 14 }}
+                        />
+                      )}
+                    </span>
+                    <EllipsisPopover value={item.task_name} isEdit={false} />
                   </span>
                 }
               >
