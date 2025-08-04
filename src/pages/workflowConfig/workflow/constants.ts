@@ -282,6 +282,15 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailablePrevNodes: EnhancementDefault.getAvailablePrevNodes,
     getAvailableNextNodes: EnhancementDefault.getAvailableNextNodes,
     checkValid: EnhancementDefault.checkValid
+  },
+  [BlockEnum.Customize]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: EnhancementDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: EnhancementDefault.getAvailableNextNodes,
+    checkValid: EnhancementDefault.checkValid
   }
 };
 
@@ -464,6 +473,12 @@ export const NODES_INITIAL_DATA = {
   },
   [BlockEnum.Enhancement]: {
     type: BlockEnum.Enhancement,
+    title: '',
+    desc: '',
+    ...EnhancementDefault.defaultValue
+  },
+  [BlockEnum.Customize]: {
+    type: BlockEnum.Customize,
     title: '',
     desc: '',
     ...EnhancementDefault.defaultValue

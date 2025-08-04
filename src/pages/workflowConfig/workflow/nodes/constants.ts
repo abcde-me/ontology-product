@@ -49,6 +49,8 @@ import CleaningNode from './data-cleaning/node';
 import CleaningPanel from './data-cleaning/panel';
 import EnhancementNode from './data-enhancement/node';
 import EnhancementPanel from './data-enhancement/panel';
+import CustomizeNode from './data-customize/node';
+import CustomizePanel from './data-customize/panel';
 
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   // [BlockEnum.Answer]: AnswerNode,
@@ -76,7 +78,8 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Video]: VideoNode,
   [BlockEnum.Audio]: AudioNode,
   [BlockEnum.Enhancement]: EnhancementNode,
-  [BlockEnum.Cleaning]: CleaningNode
+  [BlockEnum.Cleaning]: CleaningNode,
+  [BlockEnum.Customize]: CustomizeNode
 };
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
@@ -105,7 +108,8 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Video]: VideoPanel,
   [BlockEnum.Audio]: AudioPanel,
   [BlockEnum.Cleaning]: CleaningPanel,
-  [BlockEnum.Enhancement]: EnhancementPanel
+  [BlockEnum.Enhancement]: EnhancementPanel,
+  [BlockEnum.Customize]: CustomizePanel
 };
 
 export const CUSTOM_NODE_TYPE = 'custom';

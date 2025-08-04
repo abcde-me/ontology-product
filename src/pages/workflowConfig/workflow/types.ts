@@ -50,7 +50,8 @@ export enum BlockEnum {
   Audio = 'audio',
   Video = 'video',
   Cleaning = 'cleaning',
-  Enhancement = 'enhancement'
+  Enhancement = 'enhancement',
+  Customize = 'customize'
 }
 
 export enum ControlMode {

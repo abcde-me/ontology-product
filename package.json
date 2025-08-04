@@ -48,6 +48,8 @@
     "@svgdotjs/svg.js": "^3.2.4",
     "@turf/turf": "^6.5.0",
     "@types/use-sync-external-store": "^0.0.6",
+    "@uiw/codemirror-extensions-langs": "^4.24.2",
+    "@uiw/react-codemirror": "^4.24.2",
     "ahooks": "^3.8.1",
     "axios": "^0.24.0",
     "bizcharts": "^4.1.11",
