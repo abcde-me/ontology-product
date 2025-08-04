@@ -120,7 +120,7 @@ UAPI_CONFIG.addResponseInterceptor(
     }
     if (code) {
       if (code === 401 || code === 402) {
-        logout(error.response.data.data.content);
+        logout(error.response.data?.data?.content);
       } else if (code === 403) {
         // 临时在这里全局加一下，实际需要按业务捕获
         Message.error(
