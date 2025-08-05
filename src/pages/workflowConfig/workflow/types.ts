@@ -102,6 +102,7 @@ export type CommonNodeType<T = {}> = {
   error_strategy?: ErrorHandleTypeEnum;
   retry_config?: WorkflowRetryConfig;
   default_value?: DefaultValueForm[];
+  customize_code?: string;
 } & T &
   Partial<
     Pick<

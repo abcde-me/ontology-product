@@ -3,10 +3,11 @@ import { Form } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/legacy-modes/mode/python';
+import useConfig from './use-config';
 
 const FormItem = Form.Item;
 
-const Panel = ({ data }) => {
+const Panel = ({ id, data }) => {
   const [form] = Form.useForm();
 
   const [value, setValue] = React.useState("console.log('hello world!');");
@@ -15,27 +16,28 @@ const Panel = ({ data }) => {
     setValue(val);
   }, []);
 
+  const { readOnly, inputs, handleValueChange } = useConfig(id, data);
+
   return (
-    <div className="wk-node-panel-content text-parser-panel-content mt-[16px]">
+    <div className="wk-node-panel-content mt-[16px]">
       <Form
         form={form}
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          ...data
+          ...inputs
         }}
         layout="vertical"
         onValuesChange={(_, v: any) => {
-          console.log('text parser valuechange', _, v);
+          handleValueChange(v);
         }}
       >
         <FormItem
-          label="分段方式："
-          field="text_slice_rule"
+          label="python脚本"
+          field="customize_code"
           labelAlign="left"
           required
-          extra="选择切分文本的方式，目前支持按照字符、句子和段落。"
         >
           <CodeMirror
             value={value}

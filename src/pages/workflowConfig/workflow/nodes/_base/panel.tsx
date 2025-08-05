@@ -36,6 +36,7 @@ import {
 import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
+import { Button } from '@arco-design/web-react';
 
 type BasePanelProps = {
   children: ReactElement;
@@ -97,6 +98,12 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
     },
     [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory]
   );
+  const handleCustomizeRun = () => {
+    const params = {
+      id: id,
+      customize_code: data.customize_code
+    };
+  };
 
   return (
     <div
@@ -134,6 +141,11 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               onBlur={handleTitleBlur}
               className="title-input"
             />
+            {data.type === 'customize' && (
+              <Button type="primary" onClick={handleCustomizeRun}>
+                运行
+              </Button>
+            )}
             <div className="flex shrink-0 items-center text-gray-500">
               {/* {
                 canRunBySingle(data.type) && !nodesReadOnly && (
