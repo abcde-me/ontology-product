@@ -144,7 +144,20 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/datasetManagement',
     component: React.lazy(async () => import('../../datasetManagement')),
     children: []
-  }
+  },
+  // 数据标注
+  {
+    name: 'requirement',
+    key: '/tenant/compute/modaforge/requirement',
+    component: React.lazy(async () => import('../../requirement')),
+    children: [
+      {
+        name: 'requirementDetail',
+        key: '/tenant/compute/modaforge/requirementDetail',
+        component: React.lazy(async () => import('../../requirement/detail'))
+      }
+    ]
+  },
 ];
 
 // 获取平铺的路由数组

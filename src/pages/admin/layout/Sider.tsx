@@ -167,6 +167,40 @@ const menus: MenuModel[] = [
       //   key: 'apiKey'
       // }
     ]
+  },
+  {
+    type: 'itemGroup',
+    title: '数据标注',
+    key: 'labelMgmt',
+    children: [
+      {
+        title: '需求',
+        icon: (
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'requirement',
+        path: '/tenant/compute/modaforge/requirement',
+        permission: 'organizations:can_search'
+      },
+      {
+        title: '标注',
+        icon: (
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'annotation',
+        path: '/tenant/compute/modaforge/annotation',
+        permission: 'organizations:can_search'
+      },
+      {
+        title: '审核',
+        icon: (
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'review',
+        path: '/tenant/compute/modaforge/review',
+        permission: 'organizations:can_search'
+      },
+    ]
   }
 ];
 

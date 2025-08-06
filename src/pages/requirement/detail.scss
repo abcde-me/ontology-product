@@ -1,0 +1,56 @@
+.requirement-detail {
+    padding: 10px;
+
+    .arco-breadcrumb-item>.arco-icon {
+        color: #000000;
+        cursor: pointer;
+    }
+
+    .head-breadcrumb-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .breadcrumb-text:hover {
+            cursor: pointer;
+            color: #000000;
+        }
+    }
+
+    .detail-content {
+        background-color: #fff;
+        border-radius: 15px;
+        padding: 16px;
+        margin-top: 16px;
+    }
+
+    .annotation-title {
+        width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .annotation-radio-group {
+        width: 850px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .arco-radio-mask-wrapper {
+        margin-top: 5px !important;
+    }
+
+    .annotation-radio {
+        display: flex;
+    }
+
+    .basic-tabs {
+        width: 850px;
+    }
+
+    .tool-hr {
+        border-bottom: 1px solid #ccc;
+        width: 100%;
+    }
+}

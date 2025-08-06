@@ -47,7 +47,11 @@
         "/tenant/compute/appforge/workflowConfig",
         "/tenant/compute/appforge/workflowPublic",
         "/tenant/compute/modaforge/dataCatalog",
-        "/tenant/compute/modaforge/datasetManagement"
+        "/tenant/compute/modaforge/datasetManagement",
+        "/tenant/compute/modaforge/requirement",
+        "/tenant/compute/modaforge/requirement/detail",
+        "/tenant/compute/modaforge/annotation",
+        "/tenant/compute/modaforge/review"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"
