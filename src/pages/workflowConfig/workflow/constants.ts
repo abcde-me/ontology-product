@@ -27,6 +27,7 @@ import AudioParserDefault from './nodes/data-audio-parser/default';
 import VideoParserDefault from './nodes/data-video-parser/default';
 import CleaningDefault from './nodes/data-cleaning/default';
 import EnhancementDefault from './nodes/data-enhancement/default';
+import CustomizeDefault from './nodes/data-customize/default';
 
 type NodesExtraData = {
   author: string;
@@ -288,9 +289,9 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     about: '',
     availablePrevNodes: [],
     availableNextNodes: [],
-    getAvailablePrevNodes: EnhancementDefault.getAvailablePrevNodes,
-    getAvailableNextNodes: EnhancementDefault.getAvailableNextNodes,
-    checkValid: EnhancementDefault.checkValid
+    getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
+    checkValid: CustomizeDefault.checkValid
   }
 };
 
@@ -481,7 +482,7 @@ export const NODES_INITIAL_DATA = {
     type: BlockEnum.Customize,
     title: '',
     desc: '',
-    ...EnhancementDefault.defaultValue
+    ...CustomizeDefault.defaultValue
   }
 };
 export const MAX_ITERATION_PARALLEL_NUM = 10;

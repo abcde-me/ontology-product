@@ -101,12 +101,23 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
     [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory]
   );
   const handleCustomizeRun = () => {
+    const { edges, getNodes } = store.getState();
+    const nodes = getNodes();
     const params = {
-      id: id,
-      script_content: data.script_content
+      graph: {
+        edges,
+        nodes
+      },
+      bench_node: {
+        id: id,
+        data: {
+          type: data.type,
+          title: data.title,
+          script_content: data.script_content
+        }
+      }
     };
-    const { edges } = store.getState();
-    console.log(edges, data, id, 'ssssssssssssssssssssssssssss');
+    console.log(data, 'ssssssssssssssssssssssssssss');
   };
 
   return (
@@ -145,7 +156,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               onBlur={handleTitleBlur}
               className="title-input"
             />
-            {data.type === 'customize' && (
+            {data.type === 'scripting' && (
               <Button type="primary" onClick={handleCustomizeRun}>
                 运行
               </Button>

@@ -51,7 +51,7 @@ export enum BlockEnum {
   Video = 'video',
   Cleaning = 'cleaning',
   Enhancement = 'enhancement',
-  Customize = 'customize'
+  Customize = 'scripting'
 }
 
 export enum ControlMode {

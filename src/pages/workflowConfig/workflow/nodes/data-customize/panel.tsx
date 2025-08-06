@@ -13,7 +13,7 @@ const Panel = ({ id, data }) => {
   const [value, setValue] = React.useState("console.log('hello world!');");
   const onChange = React.useCallback((val, viewUpdate) => {
     console.log('val:', JSON.stringify(val));
-    setValue(val);
+    setValue(JSON.stringify(val));
   }, []);
 
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);

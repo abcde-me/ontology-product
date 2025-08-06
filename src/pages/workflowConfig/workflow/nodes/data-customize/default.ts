@@ -27,8 +27,12 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
     return nodes;
   },
   checkValid(payload: CustomNodeType, t: any) {
-    const errorMessages = '';
+    let errorMessages = '';
     const { script_content } = payload;
+
+    if (!script_content) {
+      errorMessages = '请输入自定义脚本';
+    }
     return {
       isValid: !errorMessages,
       errorMessage: errorMessages
