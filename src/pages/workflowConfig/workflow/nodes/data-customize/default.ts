@@ -10,7 +10,7 @@ const i18nPrefix = 'workflow.errorMsg';
 
 const nodeDefault: NodeDefault<CustomNodeType> = {
   defaultValue: {
-    customize_code: ''
+    script_content: ''
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -28,7 +28,7 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
   },
   checkValid(payload: CustomNodeType, t: any) {
     const errorMessages = '';
-    const { customize_code } = payload;
+    const { script_content } = payload;
     return {
       isValid: !errorMessages,
       errorMessage: errorMessages

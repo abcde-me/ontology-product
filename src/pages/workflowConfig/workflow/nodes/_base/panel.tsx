@@ -37,12 +37,14 @@ import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
 import { Button } from '@arco-design/web-react';
+import { useStoreApi } from 'reactflow';
 
 type BasePanelProps = {
   children: ReactElement;
 } & Node;
 
 const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
+  const store = useStoreApi();
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const { showMessageLogModal } = useTaskStore(
     useShallow((state) => ({
@@ -101,8 +103,10 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
   const handleCustomizeRun = () => {
     const params = {
       id: id,
-      customize_code: data.customize_code
+      script_content: data.script_content
     };
+    const { edges } = store.getState();
+    console.log(edges, data, id, 'ssssssssssssssssssssssssssss');
   };
 
   return (

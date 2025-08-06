@@ -12,5 +12,5 @@ export type OutputVar = Record<
 >;
 
 export type CustomNodeType = CommonNodeType & {
-  customize_code: string;
+  script_content: string;
 };

@@ -21,7 +21,7 @@ const useConfig = (id: string, payload: CustomNodeType) => {
 
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
-    if (isReady && inputs.customize_code === undefined) {
+    if (isReady && inputs.script_content === undefined) {
       setInputs({
         ...inputs,
         ...defaultConfig
@@ -32,7 +32,7 @@ const useConfig = (id: string, payload: CustomNodeType) => {
   const handleValueChange = useCallback(
     (value: CustomNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
-        draft.customize_code = value.customize_code;
+        draft.script_content = value.script_content;
       });
       setInputs(newInputs);
     },

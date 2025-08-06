@@ -12,7 +12,7 @@ const Panel = ({ id, data }) => {
 
   const [value, setValue] = React.useState("console.log('hello world!');");
   const onChange = React.useCallback((val, viewUpdate) => {
-    console.log('val:', val);
+    console.log('val:', JSON.stringify(val));
     setValue(val);
   }, []);
 
@@ -35,7 +35,7 @@ const Panel = ({ id, data }) => {
       >
         <FormItem
           label="python脚本"
-          field="customize_code"
+          field="script_content"
           labelAlign="left"
           required
         >
