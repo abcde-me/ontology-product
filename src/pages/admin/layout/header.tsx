@@ -49,7 +49,7 @@ export default function Header({
           break;
       }
     },
-    [logout, pushPath]
+    [logoutAction, pushPath]
   );
 
   const goHelp = () => {
