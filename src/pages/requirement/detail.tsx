@@ -20,6 +20,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
 import './detail.scss';
+import { set } from 'lodash';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -40,8 +41,11 @@ export default function RequirementDetail() {
     const history = useHistory();
     const userInfo = useUserInfo();
     const [selectedRadio, setSelectedRadio] = useState('');
+    const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
     // 初始化当前步骤位置
     const [StepCurrent, setStepCurrent] = useState(1);
+    // 数据集 - 选中数据内容
+    const [selectedData, setSelectedData] = useState([]);
     // 初始化详情数据
     const [taskDetailData, setTaskDetailData] = useState<any>({});
     // 初始化当前选中的节点类型
@@ -71,6 +75,7 @@ export default function RequirementDetail() {
 
     // 获取详情数据
     const getDetailData = () => { };
+
     // 标注数据内容
     const annotationData = () => {
         const testData = Mock.mock({
@@ -117,6 +122,16 @@ export default function RequirementDetail() {
             </RadioGroup>
         )
     }
+    // 标注工具-文本内容
+    const annotationTextTool = () => {
+        return (
+            <div className='annotation-text-tool'>
+                <RadioGroup value={selectedRadio} onChange={(v) => { setSelectedRadio(v) }} style={{ marginBottom: 20 }}>
+                    <Radio>文本标注</Radio>
+                </RadioGroup>
+            </div>
+        )
+    }
     const name = Form.useWatch('name', form);
     const info = Form.useWatch('info', form);
     const annotationScene = Form.useWatch('annotationScene', form);
@@ -149,41 +164,47 @@ export default function RequirementDetail() {
                     </FormItem>
                     <FormItem
                         label="标注工具"
-                        field="annotationTool"
-                        rules={[
-                            {
-                                required: true,
-                                validator: (value, callback) => {
-                                    if (!selectedRadio) {
-                                        callback('请选择标注工具');
-                                    } else {
-                                        callback();
-                                    }
-                                }
-                            }
-                        ]}
+                        required
+                        className="annotation-tool"
+                    // rules={[
+                    //     {
+                    //         required: true,
+                    //         validator: (value, callback) => {
+                    //             console.log('object', selectedRadio);
+                    //             if (!selectedRadio) {
+                    //                 callback('请选择标注工具');
+                    //             } else {
+                    //                 callback();
+                    //             }
+                    //         }
+                    //     }
+                    // ]}
                     >
+                        {isShowErrorInfo && <span className='error-info-text'>请选择标注工具</span>}
                         <Tabs type={'capsule'}
                             style={{
                                 overflow: 'unset'
                             }}
-                            className="basic-tabs">
+                            className="basic-tabs"
+                            onChange={() => { setSelectedRadio('') }}
+                        >
                             <TabPane key='1' title='图片'>
                                 <Typography.Paragraph style={TabsStyle}>{annotationData()}</Typography.Paragraph>
                             </TabPane>
                             <TabPane key='2' title='文本'>
-                                <Typography.Paragraph style={TabsStyle}>{annotationData()}</Typography.Paragraph>
+                                <Typography.Paragraph style={TabsStyle}>{annotationTextTool()}</Typography.Paragraph>
                             </TabPane>
                             <TabPane key='3' title='音频'>
-                                <Typography.Paragraph style={TabsStyle}>{annotationData()}</Typography.Paragraph>
+                                <Typography.Paragraph style={TabsStyle}>{ }</Typography.Paragraph>
                             </TabPane>
                             <TabPane key='4' title='视频'>
-                                <Typography.Paragraph style={TabsStyle}>{annotationData()}</Typography.Paragraph>
+                                <Typography.Paragraph style={TabsStyle}>{ }</Typography.Paragraph>
                             </TabPane>
                         </Tabs>
-                    </FormItem>
-                    <FormItem label="标注数据" >
 
+                    </FormItem>
+                    <FormItem label="数据集" required extra={`已选数据量：${selectedData.length}`}>
+                        <Button onClick={() => { }}>选择</Button>
                     </FormItem>
                 </Form>
             </div>
@@ -314,14 +335,26 @@ export default function RequirementDetail() {
             return true
         }
     }
+    useEffect(() => {
+        if (selectedRadio !== '') {
+            setIsShowErrorInfo(false)
+        }
+    }, [selectedRadio])
     const stepNext = () => {
         form.validate()
             .then(() => {
                 // 验证通过，切换到下一步
+                if (selectedRadio === '') {
+                    setIsShowErrorInfo(true);
+                    return;
+                }
                 setStepCurrent(StepCurrent + 1);
             })
             .catch((errorInfo) => {
-                console.log('表单验证失败', errorInfo);
+                if (selectedRadio === '') {
+                    setIsShowErrorInfo(true);
+                    return;
+                }
             });
     }
     return (

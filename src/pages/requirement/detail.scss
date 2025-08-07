@@ -53,4 +53,21 @@
         border-bottom: 1px solid #ccc;
         width: 100%;
     }
+
+    .annotation-tool {
+        position: relative;
+    }
+
+    .annotation-text-tool {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .error-info-text {
+        color: #ef4444;
+        font-size: 12px;
+        position: absolute;
+        top: 40px;
+        z-index: 10;
+    }
 }
