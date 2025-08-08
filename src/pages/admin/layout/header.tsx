@@ -49,12 +49,12 @@ export default function Header({
           break;
       }
     },
-    [logout, pushPath]
+    [logoutAction, pushPath]
   );
 
   const goHelp = () => {
     window.open(
-      'https://icnwct5pskej.feishu.cn/docx/S2o6dLcfxoA6TKxA1Dsc55J6nhe?from=from_copylink',
+      '../../../../assets/多模态数据治理平台 - 用户手册.pdf',
       '_blank'
     );
     // const url = `${PrefixV2}/files/browser/api-demo`;
