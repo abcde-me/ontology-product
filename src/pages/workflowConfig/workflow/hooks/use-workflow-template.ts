@@ -67,34 +67,12 @@ export const useWorkflowTemplate = () => {
       y: START_INITIAL_POSITION.y
     }
   });
-  const { newNode: customizeNode } = generateNewNode({
-    id: `${Number(startNode.id) + 8}`,
-    data: nodesInitialData.scripting,
-    position: {
-      x: START_INITIAL_POSITION.x + 32 * 2 + 270 * 5,
-      y: START_INITIAL_POSITION.y
-    }
-  });
 
   const startToTextEdge = {
     id: `${startNode.id}-${textNode.id}`,
     source: startNode.id,
     sourceHandle: 'source',
     target: textNode.id,
-    targetHandle: 'target'
-  };
-  const startToCustomizeEdge = {
-    id: `${startNode.id}-${customizeNode.id}`,
-    source: startNode.id,
-    sourceHandle: 'source',
-    target: customizeNode.id,
-    targetHandle: 'target'
-  };
-  const customizeToEndEdge = {
-    id: `${customizeNode.id}-${endNode.id}`,
-    source: customizeNode.id,
-    sourceHandle: 'source',
-    target: endNode.id,
     targetHandle: 'target'
   };
   const startToPicEdge = {
@@ -216,8 +194,7 @@ export const useWorkflowTemplate = () => {
         videoNode,
         cleaningNode,
         enhancementNode,
-        endNode,
-        customizeNode
+        endNode
       ],
       edges: [
         startToTextEdge,
@@ -229,9 +206,7 @@ export const useWorkflowTemplate = () => {
         audioToCleaningEdge,
         videoToCleaningEdge,
         cleaningToEnhancementEdge,
-        enhancementToEndEdge,
-        startToCustomizeEdge,
-        customizeToEndEdge
+        enhancementToEndEdge
       ]
     };
   }
