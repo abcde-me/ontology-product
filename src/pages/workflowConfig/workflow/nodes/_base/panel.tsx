@@ -36,15 +36,12 @@ import {
 import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
-import { Button } from '@arco-design/web-react';
-import { useStoreApi } from 'reactflow';
 
 type BasePanelProps = {
   children: ReactElement;
 } & Node;
 
 const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
-  const store = useStoreApi();
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const { showMessageLogModal } = useTaskStore(
     useShallow((state) => ({
@@ -100,25 +97,6 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
     },
     [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory]
   );
-  const handleCustomizeRun = () => {
-    const { edges, getNodes } = store.getState();
-    const nodes = getNodes();
-    const params = {
-      graph: {
-        edges,
-        nodes
-      },
-      bench_node: {
-        id: id,
-        data: {
-          type: data.type,
-          title: data.title,
-          script_content: data.script_content
-        }
-      }
-    };
-    console.log(data, 'ssssssssssssssssssssssssssss');
-  };
 
   return (
     <div
@@ -156,11 +134,6 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               onBlur={handleTitleBlur}
               className="title-input"
             />
-            {data.type === 'scripting' && (
-              <Button type="primary" onClick={handleCustomizeRun}>
-                运行
-              </Button>
-            )}
             <div className="flex shrink-0 items-center text-gray-500">
               {/* {
                 canRunBySingle(data.type) && !nodesReadOnly && (
@@ -200,7 +173,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
           <div className="mx-[16px] border-b-[0.5px] border-[#E8E9EB]"></div>
         </div>
         <div className="wk-node-panel-content-wrapper">
-          {cloneElement(children, { id, data })}
+          {cloneElement(children, { id, data, parentRef: containerRef })}
         </div>
         {/* <Split />
         {
