@@ -367,9 +367,6 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
 
   // 处理树节点选择事件
   const handleSelect = (selectedKeys, nodeData) => {
-    console.log('选中节点', selectedKeys);
-    console.log('选中节点信息', nodeData.node);
-
     // 获取当前选中节点的详细信息
     if (nodeData.node) {
       const currentNode = nodeData.node;
