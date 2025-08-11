@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Form } from '@arco-design/web-react';
+import { Button, Form, Modal } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/legacy-modes/mode/python';
 import { useStoreApi } from 'reactflow';
 import useConfig from './use-config';
-import { IconCaretRight, IconExpand } from '@arco-design/web-react/icon';
+import {
+  IconCaretRight,
+  IconExpand,
+  IconShrink
+} from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
 import './panel.scss';
 
@@ -16,8 +20,12 @@ const Panel = ({ id, data, parentRef }) => {
   const [form] = Form.useForm();
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
-  const stickyRef = useRef<HTMLDivElement>(null); // 明确指定为HTMLDivElement类型
+  const [isModalSticky, setModalSticky] = useState(false);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const stickyModalRef = useRef<HTMLDivElement>(null);
+  const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
   const [value, setValue] = useState('');
+  const [visible, setVisible] = useState(false);
   const [placeholderValue, setPlaceholderValue] = useState(
     `# 平台内置SDK，用于节点间数据交互
 import platform_sdk as pf\n
@@ -65,6 +73,21 @@ except Exception as e:
     setSticky(isSticking);
   };
 
+  // 计算距离的核心函数
+  const calculateDistanceModal = () => {
+    if (!modalElement || !stickyModalRef.current) return;
+    // 获取父容器和子元素相对于视口的位置信息
+    const parentRect = modalElement.getBoundingClientRect();
+    const childRect = stickyModalRef.current.getBoundingClientRect();
+    const stickyTop = parseInt(
+      window.getComputedStyle(stickyModalRef.current).top
+    );
+    // 子元素顶部距离父容器顶部的距离 = 子元素视口顶部 - 父容器视口顶部
+    const distance = childRect.top - parentRect.top;
+    const isSticking = distance <= stickyTop;
+    setModalSticky(isSticking);
+  };
+
   useEffect(() => {
     const parent = parentRef.current;
     if (!parent) return;
@@ -80,11 +103,32 @@ except Exception as e:
     // 添加事件监听
     parent.addEventListener('scroll', handleParentScroll);
 
+    // 初始化计算一次
+    calculateDistanceModal();
+
     // 组件卸载时清理事件监听
     return () => {
       parent.removeEventListener('scroll', handleParentScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (!modalElement) return;
+    calculateDistanceModal();
+
+    // 监听父容器的滚动事件（核心：仅父容器滚动时触发）
+    const handleModalScroll = () => {
+      calculateDistanceModal();
+    };
+
+    // 添加事件监听
+    modalElement.addEventListener('scroll', handleModalScroll);
+
+    // 组件卸载时清理事件监听
+    return () => {
+      modalElement.removeEventListener('scroll', handleModalScroll);
+    };
+  }, [modalElement]);
 
   const myTheme = createTheme({
     theme: 'light',
@@ -155,9 +199,12 @@ except Exception as e:
               >
                 测试运行
               </Button>
-              <IconExpand className="full-screen-icon" />
+              <IconExpand
+                className="full-screen-icon"
+                onClick={() => setVisible(true)}
+              />
             </div>
-            <div className="px-[12px]">
+            <div className="mt-[2px] px-[12px]">
               <CodeMirror
                 value={value}
                 minHeight="420px"
@@ -174,6 +221,53 @@ except Exception as e:
           </div>
         </FormItem>
       </Form>
+      <Modal
+        className="wk-data-customize-panel-modal w-full py-[20px]"
+        visible={visible}
+        footer={null}
+        closeIcon={null}
+        afterOpen={() => {
+          // 使用状态保存DOM引用
+          const modalDom = document.querySelector(
+            '.arco-modal-wrapper'
+          ) as HTMLDivElement;
+          setModalElement(modalDom);
+          console.log(modalDom, 'aaaadddd');
+        }}
+      >
+        <div className="editor-container">
+          <div
+            ref={stickyModalRef}
+            className={`sticky top-[0px] z-10 flex h-[52px] items-center justify-between bg-white px-[12px] py-[10px] ${isModalSticky ? 'is-sticky' : ''}`}
+          >
+            <Button
+              type="primary"
+              onClick={handleCustomizeRun}
+              icon={<IconCaretRight />}
+            >
+              测试运行
+            </Button>
+            <IconShrink
+              className="full-screen-icon"
+              onClick={() => setVisible(false)}
+            />
+          </div>
+          <div className="mt-[2px] px-[12px]">
+            <CodeMirror
+              value={value}
+              minHeight="calc(100vh - 90px)"
+              theme={myTheme}
+              placeholder={placeholderValue}
+              extensions={[StreamLanguage.define(python)]}
+              onChange={onChange}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: false
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

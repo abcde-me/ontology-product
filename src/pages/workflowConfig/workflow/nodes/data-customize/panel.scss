@@ -1,5 +1,18 @@
 .wk-data-customize-panel-content {
   min-height: calc(100% - 150px);
+}
+
+.editor-container {
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+
+  .is-sticky {
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+    z-index: 1000;
+  }
 
   .cm-content {
     font-weight: 400;
@@ -13,21 +26,8 @@
   }
 
   .cm-focused {
-    outline: none;
-  }
-
-  .editor-container {
-    transition: all 0.3s ease;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    // padding: 10px 12px;
-
-    .is-sticky {
-      box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
-      border-bottom: 1px solid #e0e0e0;
-      background: #fff;
-      z-index: 1000;
-    }
+    outline: 1px solid var(--primary-primary-6, #007dfa);
+    background: var(--background-color-bg-3, #f5f9ff);
   }
 
   .editor-container.focused {
@@ -44,5 +44,15 @@
 
   .full-screen-icon:hover {
     color: #007dfa;
+  }
+
+  .cm-activeLine {
+    background-color: unset;
+  }
+
+  .cm-gutters {
+    border: unset;
+    padding-top: 3px;
+    background-color: unset;
   }
 }
