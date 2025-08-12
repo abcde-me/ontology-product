@@ -1,34 +1,22 @@
 import React, { useRef } from 'react';
 import { Button, Space, Typography } from '@arco-design/web-react';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import { bbedit } from '@uiw/codemirror-theme-bbedit';
 import { sql } from '@codemirror/lang-sql';
 import { format } from 'sql-formatter';
-import { lintGutter, linter } from '@codemirror/lint';
+import { lintGutter } from '@codemirror/lint';
+import { createSqlLinter } from './sqlLinter';
 
-const sqlLinter = linter((view) => {
-  const diagnostics: any[] = [];
-  const fullCode = view.state.doc.toString();
-  const lines = fullCode.split('\n');
-
-  // 检查整个代码块的最后一个非空行是否以分号结尾
-  const lastLine = lines[lines.length - 1].trim();
-  if (lastLine.length > 0 && !lastLine.endsWith(';')) {
-    diagnostics.push({
-      from: view.state.doc.line(lines.length).from + lastLine.length,
-      to: view.state.doc.line(lines.length).to,
-      message: 'SQL语句可能缺少分号',
-      severity: 'warning'
-    });
-  }
-
-  return diagnostics;
+const sqlLinter = createSqlLinter({
+  checkPerformance: false,
+  checkInjection: false
 });
 
 export default function SqlEditor() {
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
   const [value, setValue] = React.useState(
-    `SELECT * FROM users WHERE name = 'Alice'`
+    `SELECT * FROM users WHERE name = 'Alice';`
   );
 
   const onChange = (val, viewUpdate) => {
@@ -83,6 +71,7 @@ export default function SqlEditor() {
         ref={editorRef}
         value={value}
         height="200px"
+        theme={bbedit}
         extensions={[sql({ upperCaseKeywords: true }), sqlLinter, lintGutter()]}
         onChange={onChange}
       />

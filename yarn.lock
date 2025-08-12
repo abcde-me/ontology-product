@@ -5085,6 +5085,22 @@
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.0.0"
 
+"@uiw/codemirror-theme-bbedit@^4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-theme-bbedit/download/@uiw/codemirror-theme-bbedit-4.24.2.tgz#61858b0e329cc4c6a72ac656e05dc2ea2cc9a4f0"
+  integrity sha1-YYWLDjKcxManKsZW4F3C6izJpPA=
+  dependencies:
+    "@uiw/codemirror-themes" "4.24.2"
+
+"@uiw/codemirror-themes@4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
+  integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
 "@uiw/react-codemirror@^4.23.1":
   version "4.23.1"
   resolved "http://npm.cestc.cn/@uiw/react-codemirror/download/@uiw/react-codemirror-4.23.1.tgz#0d5fe610ce1c282f4097367ff2dda8dca9a3f7fd"
