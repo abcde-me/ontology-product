@@ -73,6 +73,13 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../workflowList')),
     children: []
   },
+  // Notebook
+  {
+    name: 'notebook',
+    key: '/tenant/compute/modaforge/notebook',
+    component: React.lazy(async () => import('../../notebook')),
+    children: []
+  },
   // 创建工作流
   {
     name: 'workflowConfig',
