@@ -70,6 +70,7 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
+  [BlockEnum.Customize]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.End]: 'bg-util-colors-warning-warning-500'
 
   // TODO：待删除
