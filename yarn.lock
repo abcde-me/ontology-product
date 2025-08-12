@@ -1390,6 +1390,11 @@
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
   integrity sha1-7EBwoE12uujduxB3C6VXFKQXt8Y=
 
+"@babel/runtime@^7.18.6":
+  version "7.28.2"
+  resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.28.2.tgz#2ae5a9d51cc583bd1f5673b3bb70d6d819682473"
+  integrity sha1-KuWp1RzFg70fVnOzu3DW2BloJHM=
+
 "@babel/template@^7.27.1", "@babel/template@^7.27.2", "@babel/template@^7.3.3":
   version "7.27.2"
   resolved "http://npm.cestc.cn/@babel/template/download/@babel/template-7.27.2.tgz#fa78ceed3c4e7b63ebf6cb39e5852fca45f6809d"
@@ -1469,6 +1474,95 @@
   version "11.0.3"
   resolved "http://npm.cestc.cn/@chevrotain/utils/download/@chevrotain/utils-11.0.3.tgz#e39999307b102cff3645ec4f5b3665f5297a2224"
   integrity sha1-45mZMHsQLP82RexPWzZl9Sl6IiQ=
+
+"@codemirror/autocomplete@^6.0.0":
+  version "6.18.6"
+  resolved "http://npm.cestc.cn/@codemirror/autocomplete/download/@codemirror/autocomplete-6.18.6.tgz#de26e864a1ec8192a1b241eb86addbb612964ddb"
+  integrity sha1-3iboZKHsgZKhskHrhq3bthKWTds=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/common" "^1.0.0"
+
+"@codemirror/commands@^6.0.0", "@codemirror/commands@^6.1.0":
+  version "6.8.1"
+  resolved "http://npm.cestc.cn/@codemirror/commands/download/@codemirror/commands-6.8.1.tgz#639f5559d2f33f2582a2429c58cb0c1b925c7a30"
+  integrity sha1-Y59VWdLzPyWCokKcWMsMG5JcejA=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.4.0"
+    "@codemirror/view" "^6.27.0"
+    "@lezer/common" "^1.1.0"
+
+"@codemirror/lang-sql@^6.9.1":
+  version "6.9.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-sql/download/@codemirror/lang-sql-6.9.1.tgz#9eb9f7203afef6f0f344dbaf306c8a2c6279001d"
+  integrity sha1-nrn3IDr+9vDzRNuvMGyKLGJ5AB0=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@codemirror/language@^6.0.0":
+  version "6.11.2"
+  resolved "http://npm.cestc.cn/@codemirror/language/download/@codemirror/language-6.11.2.tgz#90d2d094cfbd14263bc5354ebd2445ee4e81bdc3"
+  integrity sha1-kNLQlM+9FCY7xTVOvSRF7k6BvcM=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.23.0"
+    "@lezer/common" "^1.1.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+    style-mod "^4.0.0"
+
+"@codemirror/lint@^6.0.0", "@codemirror/lint@^6.8.5":
+  version "6.8.5"
+  resolved "http://npm.cestc.cn/@codemirror/lint/download/@codemirror/lint-6.8.5.tgz#9edaa808e764e28e07665b015951934c8ec3a418"
+  integrity sha1-ntqoCOdk4o4HZlsBWVGTTI7DpBg=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.35.0"
+    crelt "^1.0.5"
+
+"@codemirror/search@^6.0.0":
+  version "6.5.11"
+  resolved "http://npm.cestc.cn/@codemirror/search/download/@codemirror/search-6.5.11.tgz#a324ffee36e032b7f67aa31c4fb9f3e6f9f3ed63"
+  integrity sha1-oyT/7jbgMrf2eqMcT7nz5vnz7WM=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    crelt "^1.0.5"
+
+"@codemirror/state@^6.0.0", "@codemirror/state@^6.1.1", "@codemirror/state@^6.4.0", "@codemirror/state@^6.5.0":
+  version "6.5.2"
+  resolved "http://npm.cestc.cn/@codemirror/state/download/@codemirror/state-6.5.2.tgz#8eca3a64212a83367dc85475b7d78d5c9b7076c6"
+  integrity sha1-jso6ZCEqgzZ9yFR1t9eNXJtwdsY=
+  dependencies:
+    "@marijn/find-cluster-break" "^1.0.0"
+
+"@codemirror/theme-one-dark@^6.0.0":
+  version "6.1.3"
+  resolved "http://npm.cestc.cn/@codemirror/theme-one-dark/download/@codemirror/theme-one-dark-6.1.3.tgz#1dbb73f6e73c53c12ad2aed9f48c263c4e63ea37"
+  integrity sha1-Hbtz9uc8U8Eq0q7Z9IwmPE5j6jc=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/highlight" "^1.0.0"
+
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.27.0", "@codemirror/view@^6.35.0":
+  version "6.38.1"
+  resolved "http://npm.cestc.cn/@codemirror/view/download/@codemirror/view-6.38.1.tgz#74214434351719ec0710431363a85f7a01e80a73"
+  integrity sha1-dCFENDUXGewHEEMTY6hfegHoCnM=
+  dependencies:
+    "@codemirror/state" "^6.5.0"
+    crelt "^1.0.6"
+    style-mod "^4.1.0"
+    w3c-keyname "^2.2.4"
 
 "@colors/colors@1.5.0":
   version "1.5.0"
@@ -2361,6 +2455,25 @@
     "@lexical/selection" "0.18.0"
     lexical "0.18.0"
 
+"@lezer/common@^1.0.0", "@lezer/common@^1.1.0", "@lezer/common@^1.2.0":
+  version "1.2.3"
+  resolved "http://npm.cestc.cn/@lezer/common/download/@lezer/common-1.2.3.tgz#138fcddab157d83da557554851017c6c1e5667fd"
+  integrity sha1-E4/N2rFX2D2lV1VIUQF8bB5WZ/0=
+
+"@lezer/highlight@^1.0.0":
+  version "1.2.1"
+  resolved "http://npm.cestc.cn/@lezer/highlight/download/@lezer/highlight-1.2.1.tgz#596fa8f9aeb58a608be0a563e960c373cbf23f8b"
+  integrity sha1-WW+o+a61imCL4KVj6WDDc8vyP4s=
+  dependencies:
+    "@lezer/common" "^1.0.0"
+
+"@lezer/lr@^1.0.0":
+  version "1.4.2"
+  resolved "http://npm.cestc.cn/@lezer/lr/download/@lezer/lr-1.4.2.tgz#931ea3dea8e9de84e90781001dae30dea9ff1727"
+  integrity sha1-kx6j3qjp3oTpB4EAHa4w3qn/Fyc=
+  dependencies:
+    "@lezer/common" "^1.0.0"
+
 "@ljharb/resumer@~0.0.1":
   version "0.0.1"
   resolved "http://npm.cestc.cn/@ljharb/resumer/download/@ljharb/resumer-0.0.1.tgz#8a940a9192dd31f6a1df17564bbd26dc6ad3e68d"
@@ -2398,6 +2511,11 @@
     rimraf "^3.0.2"
     semver "^7.3.5"
     tar "^6.1.11"
+
+"@marijn/find-cluster-break@^1.0.0":
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/@marijn/find-cluster-break/download/@marijn/find-cluster-break-1.0.2.tgz#775374306116d51c0c500b8c4face0f9a04752d8"
+  integrity sha1-d1N0MGEW1RwMUAuMT6zg+aBHUtg=
 
 "@mermaid-js/parser@^0.3.0":
   version "0.3.0"
@@ -4954,6 +5072,47 @@
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
 
+"@uiw/codemirror-extensions-basic-setup@4.23.1":
+  version "4.23.1"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-extensions-basic-setup/download/@uiw/codemirror-extensions-basic-setup-4.23.1.tgz#a532f367f3420791c9a1b4cc076f839d2bef4e47"
+  integrity sha1-pTLzZ/NCB5HJobTMB2+DnSvvTkc=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/commands" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/lint" "^6.0.0"
+    "@codemirror/search" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
+"@uiw/codemirror-theme-bbedit@^4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-theme-bbedit/download/@uiw/codemirror-theme-bbedit-4.24.2.tgz#61858b0e329cc4c6a72ac656e05dc2ea2cc9a4f0"
+  integrity sha1-YYWLDjKcxManKsZW4F3C6izJpPA=
+  dependencies:
+    "@uiw/codemirror-themes" "4.24.2"
+
+"@uiw/codemirror-themes@4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
+  integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
+"@uiw/react-codemirror@^4.23.1":
+  version "4.23.1"
+  resolved "http://npm.cestc.cn/@uiw/react-codemirror/download/@uiw/react-codemirror-4.23.1.tgz#0d5fe610ce1c282f4097367ff2dda8dca9a3f7fd"
+  integrity sha1-DV/mEM4cKC9AlzZ/8t2o3Kmj9/0=
+  dependencies:
+    "@babel/runtime" "^7.18.6"
+    "@codemirror/commands" "^6.1.0"
+    "@codemirror/state" "^6.1.1"
+    "@codemirror/theme-one-dark" "^6.0.0"
+    "@uiw/codemirror-extensions-basic-setup" "4.23.1"
+    codemirror "^6.0.0"
+
 "@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.2.0":
   version "1.3.0"
   resolved "http://npm.cestc.cn/@ungap/structured-clone/download/@ungap/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
@@ -7279,6 +7438,19 @@ code-point-at@^1.0.0:
   resolved "http://npm.cestc.cn/code-point-at/download/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
+codemirror@^6.0.0:
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/codemirror/download/codemirror-6.0.2.tgz#4d3fea1ad60b6753f97ca835f2f48c6936a8946e"
+  integrity sha1-TT/qGtYLZ1P5fKg18vSMaTaolG4=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/commands" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/lint" "^6.0.0"
+    "@codemirror/search" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
 coffeeify@^3.0.1:
   version "3.0.1"
   resolved "http://npm.cestc.cn/coffeeify/download/coffeeify-3.0.1.tgz#5e2753000c50bd24c693115f33864248dd11136c"
@@ -7407,7 +7579,7 @@ commander@*, commander@~9.4.1:
   resolved "http://npm.cestc.cn/commander/download/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
   integrity sha1-0d2PLOb6+TFHKVwN8Tx8IRQc+90=
 
-commander@2, commander@^2.20.0, commander@^2.9.0:
+commander@2, commander@^2.19.0, commander@^2.20.0, commander@^2.9.0:
   version "2.20.3"
   resolved "http://npm.cestc.cn/commander/download/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha1-/UhehMA+tIgcIHIrpIA16FMa6zM=
@@ -7803,6 +7975,11 @@ create-require@^1.1.0:
   version "1.1.1"
   resolved "http://npm.cestc.cn/create-require/download/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha1-wdfo8eX2z8n/ZfnNNS03NIdWwzM=
+
+crelt@^1.0.5, crelt@^1.0.6:
+  version "1.0.6"
+  resolved "http://npm.cestc.cn/crelt/download/crelt-1.0.6.tgz#7cc898ea74e190fb6ef9dae57f8f81cf7302df72"
+  integrity sha1-fMiY6nThkPtu+drlf4+Bz3MC33I=
 
 cross-env@^7.0.3:
   version "7.0.3"
@@ -9073,6 +9250,11 @@ dir-glob@^3.0.1:
   integrity sha1-Vtv3PZkqSpO6FYT0U0Bj/S5BcX8=
   dependencies:
     path-type "^4.0.0"
+
+discontinuous-range@1.0.0:
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/discontinuous-range/download/discontinuous-range-1.0.0.tgz#e38331f0844bba49b9a9cb71c771585aab1bc65a"
+  integrity sha1-44Mx8IRLukm5qctxx3FYWqsbxlo=
 
 dlv@^1.1.3:
   version "1.1.3"
@@ -10996,6 +11178,11 @@ get-proto@^1.0.0, get-proto@^1.0.1:
   dependencies:
     dunder-proto "^1.0.1"
     es-object-atoms "^1.0.0"
+
+get-stdin@=8.0.0:
+  version "8.0.0"
+  resolved "http://npm.cestc.cn/get-stdin/download/get-stdin-8.0.0.tgz#cbad6a73feb75f6eeb22ba9e01f89aa28aa97a53"
+  integrity sha1-y61qc/63X27rIrqeAfiaooqpelM=
 
 get-stdin@^4.0.1:
   version "4.0.1"
@@ -15565,6 +15752,11 @@ monaco-editor@^0.46.0:
   resolved "http://npm.cestc.cn/monaco-editor/download/monaco-editor-0.46.0.tgz#013e453fd2408997e4fe0bf67b36a80a24bc7bcc"
   integrity sha1-AT5FP9JAiZfk/gv2ezaoCiS8e8w=
 
+moo@^0.5.0:
+  version "0.5.2"
+  resolved "http://npm.cestc.cn/moo/download/moo-0.5.2.tgz#f9fe82473bc7c184b0d32e2215d3f6e67278733c"
+  integrity sha1-+f6CRzvHwYSw0y4iFdP25nJ4czw=
+
 mri@^1.2.0:
   version "1.2.0"
   resolved "http://npm.cestc.cn/mri/download/mri-1.2.0.tgz#6721480fec2a11a4889861115a48b6cbe7cc8f0b"
@@ -15633,6 +15825,16 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "http://npm.cestc.cn/natural-compare/download/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
+
+nearley@^2.20.1:
+  version "2.20.1"
+  resolved "http://npm.cestc.cn/nearley/download/nearley-2.20.1.tgz#246cd33eff0d012faf197ff6774d7ac78acdd474"
+  integrity sha1-JGzTPv8NAS+vGX/2d016x4rN1HQ=
+  dependencies:
+    commander "^2.19.0"
+    moo "^0.5.0"
+    railroad-diagrams "^1.0.0"
+    randexp "0.4.6"
 
 needle@^3.1.0:
   version "3.3.1"
@@ -17816,10 +18018,23 @@ raf@^3.4.1:
   dependencies:
     performance-now "^2.1.0"
 
+railroad-diagrams@^1.0.0:
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/railroad-diagrams/download/railroad-diagrams-1.0.0.tgz#eb7e6267548ddedfb899c1b90e57374559cddb7e"
+  integrity sha1-635iZ1SN3t+4mcG5Dlc3RVnN234=
+
 ramda@~0.26.1:
   version "0.26.1"
   resolved "http://npm.cestc.cn/ramda/download/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha1-jUE1HrgRHFU1Nhf8O7/62OTTXQY=
+
+randexp@0.4.6:
+  version "0.4.6"
+  resolved "http://npm.cestc.cn/randexp/download/randexp-0.4.6.tgz#e986ad5e5e31dae13ddd6f7b3019aa7c87f60ca3"
+  integrity sha1-6YatXl4x2uE93W97MBmqfIf2DKM=
+  dependencies:
+    discontinuous-range "1.0.0"
+    ret "~0.1.10"
 
 randomatic@^3.0.0:
   version "3.1.1"
@@ -19822,6 +20037,15 @@ sprintf-js@~1.0.2:
   resolved "http://npm.cestc.cn/sprintf-js/download/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
+sql-formatter@^15.4.0:
+  version "15.4.0"
+  resolved "http://npm.cestc.cn/sql-formatter/download/sql-formatter-15.4.0.tgz#b4236760f96132ee786e0acb58bc5a740f11f1b9"
+  integrity sha1-tCNnYPlhMu54bgrLWLxadA8R8bk=
+  dependencies:
+    argparse "^2.0.1"
+    get-stdin "=8.0.0"
+    nearley "^2.20.1"
+
 sshpk@^1.14.1:
   version "1.18.0"
   resolved "http://npm.cestc.cn/sshpk/download/sshpk-1.18.0.tgz#1663e55cddf4d688b86a46b77f0d5fe363aba028"
@@ -20301,6 +20525,11 @@ style-loader@^3.3.1:
   version "3.3.4"
   resolved "http://npm.cestc.cn/style-loader/download/style-loader-3.3.4.tgz#f30f786c36db03a45cbd55b6a70d930c479090e7"
   integrity sha1-8w94bDbbA6RcvVW2pw2TDEeQkOc=
+
+style-mod@^4.0.0, style-mod@^4.1.0:
+  version "4.1.2"
+  resolved "http://npm.cestc.cn/style-mod/download/style-mod-4.1.2.tgz#ca238a1ad4786520f7515a8539d5a63691d7bf67"
+  integrity sha1-yiOKGtR4ZSD3UVqFOdWmNpHXv2c=
 
 style-search@^0.1.0:
   version "0.1.0"
@@ -22048,6 +22277,11 @@ w3c-hr-time@^1.0.2:
   integrity sha1-ConN9cwVgi35w2BUNnaWPgzDCM0=
   dependencies:
     browser-process-hrtime "^1.0.0"
+
+w3c-keyname@^2.2.4:
+  version "2.2.8"
+  resolved "http://npm.cestc.cn/w3c-keyname/download/w3c-keyname-2.2.8.tgz#7b17c8c6883d4e8b86ac8aba79d39e880f8869c5"
+  integrity sha1-exfIxog9TouGrIq6edOeiA+IacU=
 
 w3c-xmlserializer@^2.0.0:
   version "2.0.0"
