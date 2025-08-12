@@ -24,40 +24,39 @@ const Panel = ({ id, data, parentRef }) => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const stickyModalRef = useRef<HTMLDivElement>(null);
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
   const [placeholderValue, setPlaceholderValue] = useState(
-    `# 平台内置SDK，用于节点间数据交互
-import platform_sdk as pf\n
+    `import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-  try:
-    # 1. 获取上游节点的输入数据
-    # 如果只有一个上游输入，可直接使用 get_input() 获取数据对象
-    # 平台会自动处理反序列化，用户拿到的是可直接操作的变量
-  input_data = pf.get_input()
+# 设置随机种子
+np.random.seed(0)
 
-    # 2. 在此编写您的核心处理逻辑
-    # ----------------------------------
-    # 示例：假设输入为xarray.Dataset
-  processed_data = input_data.copy() # 创建副本以进行修改
-  processed_data['temperature'] = processed_data['temperature'] + 273.15 # 摄氏度转开尔文
-  processed_data.attrs['history'] = 'Converted temperature to Kelvin.'
-  print("数据处理完成：已将温度单位转换为开尔文。")
-    # ----------------------------------
+# 创建一个模拟 30 天的销售额数据
+df = pd.DataFrame({
+    'day': range(1, 31),
+    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-    # 3. 设置当前节点的输出，供下游节点使用
-    # format参数指定了当此节点为最终节点时，在“目标数据目录”中保存的格式
-  pf.set_output(processed_data, format = 'netcdf')
+# 设置随机种子
+np.random.seed(0)
 
-except Exception as e:
-    # 打印错误信息，平台会自动捕获并标记节点失败
-  print(f"节点执行失败: {e}")
-    raise`
+# 创建一个模拟 30 天的销售额数据
+df = pd.DataFrame({
+    'day': range(1, 31),
+    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)`
   );
 
   const onChange = useCallback((val, viewUpdate) => {
-    console.log('val:', JSON.stringify(val));
     setValue(val);
+    handleValueChange({
+      ...inputs,
+      script_content: val
+    });
   }, []);
 
   // 计算距离的核心函数
@@ -177,9 +176,6 @@ except Exception as e:
           ...inputs
         }}
         layout="vertical"
-        onValuesChange={(_, v: any) => {
-          handleValueChange(v);
-        }}
       >
         <FormItem
           label="Python脚本:"
@@ -207,7 +203,6 @@ except Exception as e:
             <div className="mt-[2px] px-[12px]">
               <CodeMirror
                 value={value}
-                minHeight="420px"
                 theme={myTheme}
                 placeholder={placeholderValue}
                 extensions={[StreamLanguage.define(python)]}
@@ -222,50 +217,31 @@ except Exception as e:
         </FormItem>
       </Form>
       <Modal
-        className="wk-data-customize-panel-modal w-full py-[20px]"
+        className="wk-data-customize-panel-modal"
+        title="Python脚本"
         visible={visible}
         footer={null}
-        closeIcon={null}
-        afterOpen={() => {
-          // 使用状态保存DOM引用
-          const modalDom = document.querySelector(
-            '.arco-modal-wrapper'
-          ) as HTMLDivElement;
-          setModalElement(modalDom);
-          console.log(modalDom, 'aaaadddd');
-        }}
+        mask={false}
+        maskClosable={false}
+        closeIcon={
+          <IconShrink
+            className="full-screen-icon"
+            onClick={() => setVisible(false)}
+          />
+        }
       >
         <div className="editor-container">
-          <div
-            ref={stickyModalRef}
-            className={`sticky top-[0px] z-10 flex h-[52px] items-center justify-between bg-white px-[12px] py-[10px] ${isModalSticky ? 'is-sticky' : ''}`}
-          >
-            <Button
-              type="primary"
-              onClick={handleCustomizeRun}
-              icon={<IconCaretRight />}
-            >
-              测试运行
-            </Button>
-            <IconShrink
-              className="full-screen-icon"
-              onClick={() => setVisible(false)}
-            />
-          </div>
-          <div className="mt-[2px] px-[12px]">
-            <CodeMirror
-              value={value}
-              minHeight="calc(100vh - 90px)"
-              theme={myTheme}
-              placeholder={placeholderValue}
-              extensions={[StreamLanguage.define(python)]}
-              onChange={onChange}
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: false
-              }}
-            />
-          </div>
+          <CodeMirror
+            value={value}
+            theme={myTheme}
+            placeholder={placeholderValue}
+            extensions={[StreamLanguage.define(python)]}
+            onChange={onChange}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false
+            }}
+          />
         </div>
       </Modal>
     </div>

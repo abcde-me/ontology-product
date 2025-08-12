@@ -3,7 +3,9 @@ import React from 'react';
 import { TextParserNodeType } from '../data-text-parser/types';
 import { NodeProps } from 'reactflow';
 
-const Node: FC<NodeProps<TextParserNodeType>> = () => {
+const Node: FC<NodeProps<TextParserNodeType>> = (props) => {
+  console.log('props:', props);
+
   return (
     <div className={`wk-node-content`}>
       <div className={`output-section`}>
@@ -12,7 +14,9 @@ const Node: FC<NodeProps<TextParserNodeType>> = () => {
         </div>
         <div className="output-list">
           <div className="output-var-item">
-            <span className="extra-info !font-semibold">未配置</span>
+            <span className="extra-info !font-semibold">
+              {props.data?.script_content ? '已配置' : '未配置'}
+            </span>
           </div>
         </div>
       </div>
