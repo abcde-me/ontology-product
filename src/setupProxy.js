@@ -20,7 +20,10 @@ module.exports = function (app) {
     app.use(
       ['/api/auth/v1'],
       createProxyMiddleware({
-        target: 'http://10.56.56.6:30501/api/auth/v1',
+        // 蜂巢工区可以不通过VPN访问
+        // target: 'http://10.56.56.6:30084/api/auth/v1',
+        // 需要通过VPN访问
+        target: 'http://10.1.4.73:30084/api/auth/v1',
         changeOrigin: true,
         secure: false,
         logger: console,
@@ -43,7 +46,10 @@ module.exports = function (app) {
     app.use(
       ['/api/aimdp/v1'],
       createProxyMiddleware({
-        target: 'http://10.56.56.6:30501/api/aimdp/v1',
+        // 蜂巢工区可以不通过VPN访问
+        // target: 'http://10.56.56.6:30084/api/auth/v1',
+        // 需要通过VPN访问
+        target: 'http://10.1.4.73:30183/api/aimdp/v1',
         changeOrigin: true,
         secure: false,
         logger: console,
