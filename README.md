@@ -25,7 +25,6 @@ release-1.0 (受保护) - 生产环境代码
 develop (受保护) - 测试环境代码  
 feat-8.30 (受保护) - 8.30版本开发代码  
 feat-9.30 (受保护) - 9.30版本开发代码  
-│
 ├── feature-\*\* - 功能开发分支  
 ├── bugfix-\*\* - 非紧急缺陷修复  
 └── hotfix-\*\* - 生产紧急修复
@@ -58,11 +57,15 @@ git checkout -b hotfix-short-desc develop
 
 #### 1. 开发环境发布（develop分支）
 
--[开发环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955146558538309634&buildNo=1) -触发条件❗：代码合并到 develop 分支时，自动触发流水线 -[开发环境地址](http://10.1.4.73:31501/tenant/compute/modaforge/login)
+-[开发环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955146558538309634&buildNo=1)  
+-❗触发条件：代码合并到 develop 分支时，自动触发流水线  
+-[开发环境地址](http://10.1.4.73:31501/tenant/compute/modaforge/login)
 
 #### 1. 线上环境发布（release-1.0分支）
 
--地址[线上环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955145494502100993&buildNo=1) -触发条件❗：代码合并到 release-1.0 分支时，手动触发流水线 -[线上环境地址](http://10.1.4.73:30501/tenant/compute/modaforge/login)
+-[线上环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955145494502100993&buildNo=1)  
+-❗触发条件：代码合并到 release-1.0 分支时，手动触发流水线  
+-[线上环境地址](http://10.1.4.73:30501/tenant/compute/modaforge/login)
 
 ### 🔍 代码提交规范
 
