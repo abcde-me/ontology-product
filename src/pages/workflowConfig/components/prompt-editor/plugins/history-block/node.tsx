@@ -1,42 +1,45 @@
-import type { LexicalNode, NodeKey, SerializedLexicalNode } from 'lexical'
-import { DecoratorNode } from 'lexical'
-import HistoryBlockComponent from './component'
-import type { RoleName } from './index'
-import React from 'react'
+import type { LexicalNode, NodeKey, SerializedLexicalNode } from 'lexical';
+import { DecoratorNode } from 'lexical';
+import HistoryBlockComponent from './component';
+import type { RoleName } from './index';
+import React from 'react';
 
-export type SerializedNode = SerializedLexicalNode & { roleName: RoleName; onEditRole: () => void }
+export type SerializedNode = SerializedLexicalNode & {
+  roleName: RoleName;
+  onEditRole: () => void;
+};
 
 export class HistoryBlockNode extends DecoratorNode<JSX.Element> {
-  __roleName: RoleName
-  __onEditRole: () => void
+  __roleName: RoleName;
+  __onEditRole: () => void;
 
   static getType(): string {
-    return 'history-block'
+    return 'history-block';
   }
 
   static clone(node: HistoryBlockNode): HistoryBlockNode {
-    return new HistoryBlockNode(node.__roleName, node.__onEditRole)
+    return new HistoryBlockNode(node.__roleName, node.__onEditRole);
   }
 
   constructor(roleName: RoleName, onEditRole: () => void, key?: NodeKey) {
-    super(key)
+    super(key);
 
-    this.__roleName = roleName
-    this.__onEditRole = onEditRole
+    this.__roleName = roleName;
+    this.__onEditRole = onEditRole;
   }
 
   isInline(): boolean {
-    return true
+    return true;
   }
 
   createDOM(): HTMLElement {
-    const div = document.createElement('div')
-    div.classList.add('inline-flex', 'items-center', 'align-middle')
-    return div
+    const div = document.createElement('div');
+    div.classList.add('inline-flex', 'items-center', 'align-middle');
+    return div;
   }
 
   updateDOM(): false {
-    return false
+    return false;
   }
 
   decorate(): JSX.Element {
@@ -46,25 +49,28 @@ export class HistoryBlockNode extends DecoratorNode<JSX.Element> {
         roleName={this.getRoleName()}
         onEditRole={this.getOnEditRole()}
       />
-    )
+    );
   }
 
   getRoleName(): RoleName {
-    const self = this.getLatest()
+    const self = this.getLatest();
 
-    return self.__roleName
+    return self.__roleName;
   }
 
-  getOnEditRole(): () => void {
-    const self = this.getLatest()
+  getOnEditRole() {
+    const self = this.getLatest();
 
-    return self.__onEditRole
+    return self.__onEditRole;
   }
 
   static importJSON(serializedNode: SerializedNode): HistoryBlockNode {
-    const node = $createHistoryBlockNode(serializedNode.roleName, serializedNode.onEditRole)
+    const node = $createHistoryBlockNode(
+      serializedNode.roleName,
+      serializedNode.onEditRole
+    );
 
-    return node
+    return node;
   }
 
   exportJSON(): SerializedNode {
@@ -72,20 +78,23 @@ export class HistoryBlockNode extends DecoratorNode<JSX.Element> {
       type: 'history-block',
       version: 1,
       roleName: this.getRoleName(),
-      onEditRole: this.getOnEditRole,
-    }
+      onEditRole: this.getOnEditRole
+    };
   }
 
   getTextContent(): string {
-    return '{{#histories#}}'
+    return '{{#histories#}}';
   }
 }
-export function $createHistoryBlockNode(roleName: RoleName, onEditRole: () => void): HistoryBlockNode {
-  return new HistoryBlockNode(roleName, onEditRole)
+export function $createHistoryBlockNode(
+  roleName: RoleName,
+  onEditRole: () => void
+): HistoryBlockNode {
+  return new HistoryBlockNode(roleName, onEditRole);
 }
 
 export function $isHistoryBlockNode(
-  node: HistoryBlockNode | LexicalNode | null | undefined,
+  node: HistoryBlockNode | LexicalNode | null | undefined
 ): node is HistoryBlockNode {
-  return node instanceof HistoryBlockNode
+  return node instanceof HistoryBlockNode;
 }

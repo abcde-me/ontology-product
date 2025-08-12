@@ -1,0 +1,74 @@
+.data-enhancement-node {
+  margin: 0 12px 12px 12px;
+  background: #f5f9ff;
+  // background-color: red;
+  border-radius: 12px;
+  padding: 0 8px 8px 8px;
+
+  .input-header {
+    padding-top: 8px;
+
+    .txt {
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 18px;
+      color: #1e293b;
+      margin: 0 8px 4px 0;
+      display: block;
+    }
+  }
+
+  .enhancement-content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .enhancement-item {
+    background-color: #e2e8f0;
+    padding: 0 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-radius: 5px;
+    width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    font-size: 12px;
+    color: #0f172a;
+    line-height: 18px;
+  }
+
+  .arco-form-inline .arco-form-item {
+    width: auto;
+    margin: 0;
+  }
+
+  .arco-form-label-item > label {
+    display: flex !important;
+  }
+}
+
+.data-enhancement-panel {
+  .content-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 16px 16px 0 16px;
+    margin-top: 24px;
+
+    .arco-form-label-item {
+      height: 26px;
+    }
+  }
+
+  .arco-form-label-item > label {
+    display: flex;
+  }
+}
+
+.content-tips-text {
+  color: #6e7b8d;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 12px;
+}

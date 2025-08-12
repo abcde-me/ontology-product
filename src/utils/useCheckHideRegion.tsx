@@ -15,6 +15,8 @@ function useCheckHideRegion() {
     const parts = fullPathname.split('/');
     const moduleId = parts[parts.indexOf('console') + 1];
     const showRegionPathList = showRegionPath.map((item) => {
+      // TODO: ts错误
+      // @ts-expect-error
       return item.replace(':module', moduleId);
     });
     if (
@@ -23,12 +25,12 @@ function useCheckHideRegion() {
     ) {
       dispatch({
         type: 'update-visibleAreaSelect',
-        payload: { visibleAreaSelect: true },
+        payload: { visibleAreaSelect: true }
       });
     } else {
       dispatch({
         type: 'update-visibleAreaSelect',
-        payload: { visibleAreaSelect: false },
+        payload: { visibleAreaSelect: false }
       });
     }
     const hideRegionPathList = hideRegionPath.map((item) => {
@@ -40,7 +42,7 @@ function useCheckHideRegion() {
     ) {
       dispatch({
         type: 'update-visibleAreaSelect',
-        payload: { visibleAreaSelect: false },
+        payload: { visibleAreaSelect: false }
       });
     }
 

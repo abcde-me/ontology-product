@@ -1,0 +1,85 @@
+.box {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 24px;
+  margin: 15px 0px;
+}
+.arco-table-tr > th {
+  background-color: rgb(245, 249, 255) !important;
+}
+.info-container {
+  width: 96.5%;
+  display: flex;
+  background-color: rgb(248, 250, 253); /* 背景颜色 */
+  padding: 15px;
+  border-radius: 10px;
+  margin: 0 auto;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: 100%;
+  justify-content: space-between !important;
+}
+
+.info-item {
+  /* margin-bottom: 13px; */
+  align-items: center;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.toggle-enabled {
+  color: #1890ff; /* 启用状态的颜色 */
+  background-color: #e6f7ff; /* 背景颜色 */
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 5px;
+}
+.arco-row-align-start {
+  align-items: 'center';
+}
+.ellipsis-two-lines-cron {
+  max-width: 500px;
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* 限制显示的行数 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 可选：确保容器有明确的高度或宽度 */
+  max-height: calc(1em * 2 * 1.4); /* 1em(字体大小) * 2行 * 行高(默认约1.4) */
+  line-height: 1.4; /* 建议设置明确的行高 */
+}
+.cronSwitch {
+  width: 56px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 22px;
+  font-size: 12px;
+  .arco-switch-dot {
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    right: 10px;
+  }
+}
+.dataload-detail-method {
+  .arco-switch-checked .arco-switch-dot {
+    left: calc(100% - 12px - 7px);
+  }
+}
+.crumbs {
+  .ellipsis-text {
+    height: 22px;
+  }
+}
+.isDisabled:hover {
+  color: #438dfb !important;
+}

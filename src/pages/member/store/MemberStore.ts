@@ -6,7 +6,8 @@ import {
   getRoleData,
   getUsers,
   banUser,
-  updateUser
+  updateUser,
+  searchMemberUsers
 } from '@/api/user';
 import { Model } from '@/models';
 import type { DataSet } from '@/pages/workflowConfig/models/datasets';
@@ -22,6 +23,9 @@ interface InfoStoreState {
   // 组织树数据
   orgData?: any[]; // 组织树数据
   roleData: any[]; // 角色
+  // 当前搜索参数
+  searchParams: Record<string, any>;
+  preDeleteVisible: boolean;
 }
 
 export class MemberStore extends Model<InfoStoreState> {
@@ -34,13 +38,21 @@ export class MemberStore extends Model<InfoStoreState> {
         visible: false,
         currentMember: null,
         orgData: [],
-        roleData: []
+        roleData: [],
+        searchParams: {},
+        preDeleteVisible: false
       }
     });
   }
 
+  setPreDeleteVisible = (visible: boolean) => {
+    this.setState({
+      preDeleteVisible: visible
+    });
+  };
+
   // 设置当前编辑的成员
-  setCurrentMember = (member: DataSet) => {
+  setCurrentMember = (member: DataSet | null) => {
     this.setState({
       currentMember: member
     });
@@ -51,21 +63,20 @@ export class MemberStore extends Model<InfoStoreState> {
     if (res.success) {
       this.fetchData();
     }
+    return res;
   }
   // 停用成员
-  async pauseMember(params:any) {
-    const {
-      id,
-      status
-    } = params;
+  async pauseMember(params: any) {
+    const { id, status } = params;
     const newParams = {
       id,
       ban: status === 'active' ? true : false
-    }
+    };
     const res = await banUser(newParams);
     if (res.success) {
       this.fetchData();
     }
+    return res;
   }
   // 添加成员
   async addMember(data: any) {
@@ -74,6 +85,7 @@ export class MemberStore extends Model<InfoStoreState> {
       this.fetchData();
       this.setVisible(false); // 关闭弹窗
     }
+    return res;
   }
   // 修改成员
   async updateMember(data: any) {
@@ -82,6 +94,7 @@ export class MemberStore extends Model<InfoStoreState> {
       this.fetchData();
       this.setVisible(false); // 关闭弹窗
     }
+    return res;
   }
   // 设置表格数据
   setList = (list: DataSet[]) => {
@@ -96,33 +109,26 @@ export class MemberStore extends Model<InfoStoreState> {
     });
   };
 
+  // 设置搜索参数
+  setSearchParams = (params: Record<string, any>) => {
+    this.setState({
+      searchParams: params
+    });
+  };
+
   // 请求数据
-  fetchData(options?: {
-    showLoading?: boolean;
-    page?: number;
-    limit?: number;
-    name?: string;
-    // 其他搜索参数
-    [key: string]: any;
-  }) {
-    const {
-      showLoading = true,
-      page = 1,
-      limit = 10,
-      name,
-      ...otherParams
-    } = options || {};
+  fetchData(options?: { showLoading?: boolean; page?: number; size?: number }) {
+    const { showLoading = true, page = 1, size = 10 } = options || {};
 
     return this.asyncManager('fetchData', {
       showLoading
     }).exec(async () => {
       try {
-        // 合并所有参数
-        const params = {
+        // 合并所有参数：分页参数 + 当前保存的搜索参数
+        const params: any = {
           page,
-          limit,
-          name,
-          ...otherParams
+          size,
+          ...this.state.searchParams
         };
 
         // 处理数组参数，转换为逗号分隔的字符串
@@ -135,9 +141,13 @@ export class MemberStore extends Model<InfoStoreState> {
           })
         );
 
-        const response = await getUsers(processedParams);
+        const response = await searchMemberUsers(processedParams);
 
         this.setList(response.data?.data || []);
+        // 同时更新 store 中的 total
+        this.setState({
+          total: response.data?.total || 0
+        });
         return {
           list: response.data?.data || [],
           total: response.data?.total || 0

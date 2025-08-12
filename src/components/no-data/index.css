@@ -1,0 +1,18 @@
+.no-data-container .arco-empty-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .arco-empty-image,
+  img {
+    height: 128px !important;
+  }
+
+  .description-text {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: 0%;
+    color: #0f172a;
+  }
+}

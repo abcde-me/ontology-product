@@ -21,13 +21,13 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
   const [appType, setAppType] = useState('agent');
 
   const appNameLabel = useMemo(() => {
-    return appType === 'agent' ? '智能体名称' : '工作流名称'
-  }, [appType])
+    return appType === 'agent' ? '智能体名称' : '工作流名称';
+  }, [appType]);
   const appDescLabel = useMemo(() => {
-    return appType === 'agent' ? '智能体功能介绍' : '工作流功能介绍'
-  }, [appType])
+    return appType === 'agent' ? '智能体功能介绍' : '工作流功能介绍';
+  }, [appType]);
 
-  const confirmAction = async () => {
+  const confirmAction = () => {
     form
       .validate()
       .then(async () => {
@@ -53,7 +53,7 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
     <Modal
       title="创建应用"
       visible={visible}
-      style={{width: '720px'}}
+      style={{ width: '720px' }}
       className="bold-form-label"
       okButtonProps={{
         loading: loading
@@ -66,11 +66,17 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
       }}
     >
       <div className="app-type">
-        <div className={`agent ${appType === 'agent' ? 'active' : ''}`} onClick={() => setAppType('agent')}>
+        <div
+          className={`agent ${appType === 'agent' ? 'active' : ''}`}
+          onClick={() => setAppType('agent')}
+        >
           <AgentIcon />
           <span>智能体应用</span>
         </div>
-        <div className={`workflow ${appType === 'workflow' ? 'active' : ''}`} onClick={() => setAppType('workflow')}>
+        <div
+          className={`workflow ${appType === 'workflow' ? 'active' : ''}`}
+          onClick={() => setAppType('workflow')}
+        >
           <WorkflowIcon />
           <span>工作流应用</span>
         </div>
@@ -93,37 +99,40 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
             }
           ]}
         >
-          <Input placeholder={"请输入" + appNameLabel} maxLength={50} showWordLimit />
+          <Input
+            placeholder={'请输入' + appNameLabel}
+            maxLength={50}
+            showWordLimit
+          />
         </Form.Item>
-        <Form.Item
-          field="desc"
-          label={appDescLabel}
-        >
-          <Input.TextArea placeholder={"请输入" + appDescLabel} style={{ minHeight: 60 }} maxLength={255} showWordLimit />
+        <Form.Item field="desc" label={appDescLabel}>
+          <Input.TextArea
+            placeholder={'请输入' + appDescLabel}
+            style={{ minHeight: 60 }}
+            maxLength={255}
+            showWordLimit
+          />
         </Form.Item>
-        <Form.Item
-          field="icon"
-          label="图标"
-        >
+        <Form.Item field="icon" label="图标">
           <Trigger
-            position='right'
-            style={{ marginLeft: '14px'}}
-            trigger='hover'
+            position="right"
+            style={{ marginLeft: '14px' }}
+            trigger="hover"
             popup={() => (
               <div className="create-space-icon-menu">
                 <div className="icon-menu-item">
-                  <AIIcon className='size=[16px] text-[#334155]'/>
-                  <span className='txt'>智能生成图标</span>
+                  <AIIcon className="size=[16px] text-[#334155]" />
+                  <span className="txt">智能生成图标</span>
                 </div>
                 <div className="icon-menu-separator" />
                 <div className="icon-menu-item">
-                  <IconUpload className='size=[16px] text-[#334155]'/>
+                  <IconUpload className="size=[16px] text-[#334155]" />
                   <span
-                    className='txt'
+                    className="txt"
                     onClick={() => {
                       const input = document.createElement('input');
                       input.type = 'file';
-                      input.accept=".svg,.png,.jpg,.jpeg"
+                      input.accept = '.svg,.png,.jpg,.jpeg';
                       input.click();
                       input.onchange = () => {
                         // const modal = Modal.info({
@@ -147,12 +156,14 @@ export const CreateAppModal: React.FC<CommonModalProps> = (props) => {
                         //   });
                       };
                     }}
-                  >上传图标</span>
+                  >
+                    上传图标
+                  </span>
                 </div>
               </div>
             )}
           >
-            <AgentIcon className='size-[96px] cursor-pointer' />
+            <AgentIcon className="size-[96px] cursor-pointer" />
           </Trigger>
         </Form.Item>
       </Form>

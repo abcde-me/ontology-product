@@ -24,20 +24,20 @@ const Features = () => {
 
   const startNode = nodes.find(node => node.data.type === 'start')
   const { id, data } = startNode as Node<StartNodeType>
-  const { handleAddVariable } = useConfig(id, data)
+  // const { handleAddVariable } = useConfig(id, data)
 
-  const handleAddOpeningStatementVariable = (variables: PromptVariable[]) => {
-    const newVariable = variables[0]
-    const startNodeVariable: InputVar = {
-      variable: newVariable.key,
-      label: newVariable.name,
-      type: InputVarType.textInput,
-      max_length: newVariable.max_length,
-      required: newVariable.required || false,
-      options: [],
-    }
-    handleAddVariable(startNodeVariable)
-  }
+  // const handleAddOpeningStatementVariable = (variables: PromptVariable[]) => {
+  //   const newVariable = variables[0]
+  //   const startNodeVariable: InputVar = {
+  //     variable: newVariable.key,
+  //     label: newVariable.name,
+  //     type: InputVarType.textInput,
+  //     max_length: newVariable.max_length,
+  //     required: newVariable.required || false,
+  //     options: [],
+  //   }
+  //   handleAddVariable(startNodeVariable)
+  // }
 
   const handleFeaturesChange = useCallback(() => {
     handleSyncWorkflowDraft()

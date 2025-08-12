@@ -1,12 +1,10 @@
-# console-plugin-appforge
+# modaforge-front
 
-AppForge（用于构建适用于特定用途或业务场景的定制化模型的智能平台）产品前端框架
-
-# CCXD Pro
+ModaForge 多模态数据治理平台前端框架
 
 ## 开发规范
 
-[开发SOP](./docs/DEV.md)
+[开发规范](./docs/DEV.md)
 
 ## 运行方式
 

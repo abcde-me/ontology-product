@@ -28,8 +28,8 @@ export type ThoughtItem = {
   position: number;
   files?: string[];
   message_files?: VisionFile[];
-  thinkStart?: Date
-  thinkEnd?: Date
+  thinkStart?: Date;
+  thinkEnd?: Date;
 };
 
 export type CitationItem = {
@@ -948,3 +948,41 @@ export type ToolCredential = {
 };
 
 export type FormValue = Record<string, any>;
+
+export enum FileType {
+  doc = 'doc',
+  docx = 'docx',
+  word = 'word',
+  jpg = 'jpg',
+  png = 'png',
+  jpeg = 'jpeg',
+  m4a = 'm4a',
+  mp4 = 'mp4',
+  pdf = 'pdf',
+  ppt = 'ppt',
+  pptx = 'pptx',
+  text = 'text',
+  txt = 'txt',
+  wav = 'wav',
+  exe = 'exe',
+  bucket = 'bucket',
+  dmg = 'dmg',
+  torrent = 'torrent',
+  apk = 'apk',
+  rar = 'rar',
+  epub = 'epub',
+  json = 'json',
+  jsonl = 'jsonl',
+  markdown = 'markdown',
+  md = 'md',
+  mp3 = 'mp3',
+  flv = 'flv',
+  ogg = 'ogg',
+  aac = 'aac',
+  webm = 'webm',
+  mov = 'mov',
+  mkv = 'mkv',
+  avi = 'avi',
+  wmv = 'wmv',
+  flac = 'flac'
+}

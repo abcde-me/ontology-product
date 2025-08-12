@@ -10,7 +10,7 @@ export default function Bread() {
       if (location.pathname.includes(path)) return true;
       return false;
     });
-    return pathMap[path] || [];
+    return pathMap[path ?? ''] || [];
   }, [location.pathname]);
   if (breads.length === 0) return null;
   return (

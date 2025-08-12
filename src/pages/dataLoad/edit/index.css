@@ -1,0 +1,25 @@
+.arco-timepicker-container {
+  width: 430px !important;
+}
+.arco-timepicker-list {
+  width: 50% !important;
+}
+.arco-select-popup .arco-select-option-selected {
+  background-color: white;
+}
+
+.cascader-dropdown .arco-cascader-list-item-label,
+.cascader-dropdown .arco-cascader-list-search-item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cascader-dropdown .arco-cascader-list-wrapper {
+  width: 212px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arco-cascader-list-item[title]::after {
+  display: none !important;
+}

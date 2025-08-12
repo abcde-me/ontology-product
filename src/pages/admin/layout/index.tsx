@@ -2,6 +2,7 @@ import useAuthTimeout from '@/hooks/useAuthTimeout';
 import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
+import '@/style/scrollbar.css';
 import useCheckHideRegion from '@/utils/useCheckHideRegion';
 import { Layout } from '@arco-design/web-react';
 import * as React from 'react';
@@ -13,6 +14,7 @@ import { SWRConfig } from 'swr';
 import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
 import { withSider } from './Sider';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 type LayoutPageProps = {
   history: any;
@@ -28,17 +30,27 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   useCheckHideRegion();
   const dispatch = useDispatch();
 
+  // 用户信息 store
+  const { fetchUserInfo, isInitialized } = useUserInfoStore();
+
   // 路由数组
   const flattenRoutes = getFlatRoutes(routes);
 
-  // 快速验证版本：
-  // 1. 用户操作时token续约（token有效期1分钟）
-  // 2. 用户不操作1分钟后自动登出
+  // 身份验证超时管理：
+  // 开发环境：token有效期1分钟，剩余30秒时续约
+  // 生产环境：token有效期60分钟，剩余30分钟时续约
   useAuthTimeout({
-    logoutTimeout: 60, // 1分钟无操作自动登出
-    renewBeforeExpire: 1, // 在过期前30秒续约
+    renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
     renewEndpoint: '/api/auth/v1/renew'
   });
+
+  // 获取用户信息 - 在 layout 初始化时调用
+  React.useEffect(() => {
+    // 只在未初始化时获取用户信息，避免重复请求
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
 
   // 入口文件的useEffect方法
   React.useEffect(() => {

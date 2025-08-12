@@ -1,86 +1,84 @@
-import type { FC } from 'react'
-import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useClickAway } from 'ahooks'
-import {
-  RiAddLine,
-  RiArrowDownSLine,
-} from '@remixicon/react'
-import Toast from '@/pages/workflowConfig/components/toast'
-import examples from './examples'
-import Button from '@/pages/workflowConfig/components/button'
-import Input from '@/pages/workflowConfig/components/input'
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useClickAway } from 'ahooks';
+import { RiAddLine, RiArrowDownSLine } from '@remixicon/react';
+import Toast from '@/pages/workflowConfig/components/toast';
+import examples from './examples';
+import Button from '@/pages/workflowConfig/components/button';
+import Input from '@/pages/workflowConfig/components/input';
 // import { importSchemaFromURL } from '@/service/tools'
 
 type Props = {
-  onChange: (value: string) => void
-}
+  onChange: (value: string) => void;
+};
 
-const GetSchema: FC<Props> = ({
-  onChange,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const [showImportFromUrl, setShowImportFromUrl] = useState(false)
-  const [importUrl, setImportUrl] = useState('')
-  const [isParsing, setIsParsing] = useState(false)
-  const handleImportFromUrl = async () => {
+const GetSchema: FC<Props> = ({ onChange }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const [showImportFromUrl, setShowImportFromUrl] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+  const handleImportFromUrl = () => {
     if (!importUrl.startsWith('http://') && !importUrl.startsWith('https://')) {
       Toast.notify({
         type: 'error',
-        message: t('tools.createTool.urlError'),
-      })
-      return
+        message: t('tools.createTool.urlError')
+      });
+      return;
     }
-    setIsParsing(true)
+    setIsParsing(true);
     try {
       // const { schema } = await importSchemaFromURL(importUrl) as any
-      console.warn('API NOT IMPLEMENTED', 'importSchemaFromURL')
-      const schema = '{}'
-      setImportUrl('')
-      onChange(schema)
+      console.warn('API NOT IMPLEMENTED', 'importSchemaFromURL');
+      const schema = '{}';
+      setImportUrl('');
+      onChange(schema);
+    } finally {
+      setIsParsing(false);
+      setShowImportFromUrl(false);
     }
-    finally {
-      setIsParsing(false)
-      setShowImportFromUrl(false)
-    }
-  }
+  };
 
-  const importURLRef = React.useRef(null)
+  const importURLRef = React.useRef(null);
   useClickAway(() => {
-    setShowImportFromUrl(false)
-  }, importURLRef)
+    setShowImportFromUrl(false);
+  }, importURLRef);
 
-  const [showExamples, setShowExamples] = useState(false)
-  const showExamplesRef = React.useRef(null)
+  const [showExamples, setShowExamples] = useState(false);
+  const showExamplesRef = React.useRef(null);
   useClickAway(() => {
-    setShowExamples(false)
-  }, showExamplesRef)
+    setShowExamples(false);
+  }, showExamplesRef);
 
   return (
-    <div className='flex space-x-1 justify-end relative w-[224px]'>
+    <div className="relative flex w-[224px] justify-end space-x-1">
       <div ref={importURLRef}>
         <Button
-          size='small'
-          className='space-x-1 '
-          onClick={() => { setShowImportFromUrl(!showImportFromUrl) }}
+          size="small"
+          className="space-x-1 "
+          onClick={() => {
+            setShowImportFromUrl(!showImportFromUrl);
+          }}
         >
-          <RiAddLine className='w-3 h-3' />
-          <div className='system-xs-medium text-text-secondary'>{t('tools.createTool.importFromUrl')}</div>
+          <RiAddLine className="h-3 w-3" />
+          <div className="system-xs-medium text-text-secondary">
+            {t('tools.createTool.importFromUrl')}
+          </div>
         </Button>
         {showImportFromUrl && (
-          <div className=' absolute left-[-35px] top-[26px] p-2 rounded-[4px] border border-components-panel-border bg-components-panel-bg shadow-lg'>
-            <div className='relative'>
+          <div className=" absolute left-[-35px] top-[26px] rounded-[4px] border border-components-panel-border bg-components-panel-bg p-2 shadow-lg">
+            <div className="relative">
               <Input
-                type='text'
-                className='w-[244px]'
-                placeholder={t('tools.createTool.importFromUrlPlaceHolder')!}
+                type="text"
+                className="w-[244px]"
+                placeholder={t('tools.createTool.importFromUrlPlaceHolder')}
                 value={importUrl}
-                onChange={e => setImportUrl(e.target.value)}
+                onChange={(e) => setImportUrl(e.target.value)}
               />
               <Button
-                className='absolute top-1 right-1'
-                size='small'
-                variant='primary'
+                className="absolute right-1 top-1"
+                size="small"
+                variant="primary"
                 disabled={!importUrl}
                 onClick={handleImportFromUrl}
                 loading={isParsing}
@@ -91,34 +89,37 @@ const GetSchema: FC<Props> = ({
           </div>
         )}
       </div>
-      <div className='relative -mt-0.5' ref={showExamplesRef}>
+      <div className="relative -mt-0.5" ref={showExamplesRef}>
         <Button
-          size='small'
-          className='space-x-1'
-          onClick={() => { setShowExamples(!showExamples) }}
+          size="small"
+          className="space-x-1"
+          onClick={() => {
+            setShowExamples(!showExamples);
+          }}
         >
-          <div className='system-xs-medium text-text-secondary'>{t('tools.createTool.examples')}</div>
-          <RiArrowDownSLine className='w-3 h-3' />
+          <div className="system-xs-medium text-text-secondary">
+            {t('tools.createTool.examples')}
+          </div>
+          <RiArrowDownSLine className="h-3 w-3" />
         </Button>
         {showExamples && (
-          <div className='absolute top-7 right-0 p-1 rounded-lg bg-components-panel-bg shadow-sm'>
-            {examples.map(item => (
+          <div className="absolute right-0 top-7 rounded-lg bg-components-panel-bg p-1 shadow-sm">
+            {examples.map((item) => (
               <div
                 key={item.key}
                 onClick={() => {
-                  onChange(item.content)
-                  setShowExamples(false)
+                  onChange(item.content);
+                  setShowExamples(false);
                 }}
-                className='px-3 py-1.5 rounded-lg hover:bg-components-panel-on-panel-item-bg-hover leading-5 system-sm-regular text-text-secondary cursor-pointer whitespace-nowrap'
+                className="system-sm-regular cursor-pointer whitespace-nowrap rounded-lg px-3 py-1.5 leading-5 text-text-secondary hover:bg-components-panel-on-panel-item-bg-hover"
               >
                 {t(`tools.createTool.exampleOptions.${item.key}`)}
               </div>
             ))}
           </div>
         )}
-
       </div>
     </div>
-  )
-}
-export default React.memo(GetSchema)
+  );
+};
+export default React.memo(GetSchema);

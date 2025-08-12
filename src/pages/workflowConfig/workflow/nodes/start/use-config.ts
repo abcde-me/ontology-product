@@ -1,83 +1,124 @@
-import { useCallback, useState } from 'react'
-import produce from 'immer'
-import { useBoolean } from 'ahooks'
-import type { StartNodeType } from './types'
-import { ChangeType } from '@/pages/workflowConfig/workflow/types'
-import type { InputVar, MoreInfo, ValueSelector } from '@/pages/workflowConfig/workflow/types'
-import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud'
+import { useCallback, useEffect, useState } from 'react';
+import produce from 'immer';
+import { useBoolean } from 'ahooks';
+import type { StartNodeType } from './types';
+import { ChangeType } from '@/pages/workflowConfig/workflow/types';
+import type {
+  BlockEnum,
+  InputVar,
+  MoreInfo,
+  ValueSelector
+} from '@/pages/workflowConfig/workflow/types';
+import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
 import {
   useIsChatMode,
   useNodesReadOnly,
-  useWorkflow,
-} from '@/pages/workflowConfig/workflow/hooks'
+  useWorkflow
+} from '@/pages/workflowConfig/workflow/hooks';
+import StartNodeDefault from './default';
+import { useStoreApi } from 'reactflow';
+import { getLoadTaskFiles } from '@/api/loadApi';
+import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 
 const useConfig = (id: string, payload: StartNodeType) => {
-  const { nodesReadOnly: readOnly } = useNodesReadOnly()
-  const { handleOutVarRenameChange, isVarUsedInNodes, removeUsedVarInNodes } = useWorkflow()
-  const isChatMode = useIsChatMode()
+  const { nodesReadOnly: readOnly } = useNodesReadOnly();
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
+  const store = useStoreApi();
 
-  const { inputs, setInputs } = useNodeCrud<StartNodeType>(id, payload)
+  const defaultConfig = StartNodeDefault.defaultValue;
+  const { inputs, setInputs } = useNodeCrud<StartNodeType>(id, payload);
 
-  const [isShowAddVarModal, {
-    setTrue: showAddVarModal,
-    setFalse: hideAddVarModal,
-  }] = useBoolean(false)
-
-  const [isShowRemoveVarConfirm, {
-    setTrue: showRemoveVarConfirm,
-    setFalse: hideRemoveVarConfirm,
-  }] = useBoolean(false)
-  const [removedVar, setRemovedVar] = useState<ValueSelector>([])
-  const [removedIndex, setRemoveIndex] = useState(0)
-  const handleVarListChange = useCallback((newList: InputVar[], moreInfo?: { index: number; payload: MoreInfo }) => {
-    if (moreInfo?.payload?.type === ChangeType.remove) {
-      if (isVarUsedInNodes([id, moreInfo?.payload?.payload?.beforeKey || ''])) {
-        showRemoveVarConfirm()
-        setRemovedVar([id, moreInfo?.payload?.payload?.beforeKey || ''])
-        setRemoveIndex(moreInfo?.index as number)
-        return
-      }
+  useEffect(() => {
+    const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
+    if (isReady) {
+      setInputs({
+        ...defaultConfig,
+        ...inputs
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultConfig]);
 
-    const newInputs = produce(inputs, (draft: any) => {
-      draft.variables = newList
-    })
-    setInputs(newInputs)
-    if (moreInfo?.payload?.type === ChangeType.changeVarName) {
-      const changedVar = newList[moreInfo.index]
-      handleOutVarRenameChange(id, [id, inputs.variables[moreInfo.index].variable], [id, changedVar.variable])
+  const updateInputs = useCallback(
+    (payload: StartNodeType) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.data_path_id = payload.data_path_id;
+        draft.data_path_name = payload.data_path_name;
+        draft.data_category = payload.data_category;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
+
+  const updatePathName = useCallback(
+    (name: string) => {
+      const newInputs = produce(inputs, (draft: any) => {
+        draft.data_path_name = name;
+      });
+      setInputs(newInputs);
+    },
+    [inputs, setInputs]
+  );
+
+  const doFileConfigChange = (
+    nodeType: BlockEnum,
+    dataPathId: string | number,
+    config: any
+  ) => {
+    const { getNodes } = store.getState();
+    const targetNodes = getNodes().filter(
+      (node: any) => node.data.type === nodeType
+    );
+
+    if (!targetNodes.length) return;
+
+    const sourcePath = dataPathId;
+    if (sourcePath && config.enabled && config.format.length) {
+      const formats = config.format
+        .join('/')
+        .split('/')
+        .map((f) => f.toLowerCase());
+      // console.log('sourcePath', targetNodes, sourcePath, formats);
+      getLoadTaskFiles({
+        data_path_id: sourcePath,
+        file_type: formats,
+        file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+        page_size: 1,
+        page: 1
+      }).then((res: any) => {
+        targetNodes.forEach((n: any) => {
+          handleNodeDataUpdateWithSyncDraft({
+            id: n.id,
+            data: {
+              ...n.data,
+              selected_files_num: res.data?.total || 0,
+              files: []
+            }
+          });
+        });
+      });
+    } else {
+      targetNodes.forEach((n: any) => {
+        handleNodeDataUpdateWithSyncDraft({
+          id: n.id,
+          data: {
+            ...n.data,
+            selected_files_num: 0,
+            files: []
+          }
+        });
+      });
     }
-  }, [handleOutVarRenameChange, id, inputs, isVarUsedInNodes, setInputs, showRemoveVarConfirm])
+  };
 
-  const removeVarInNode = useCallback(() => {
-    const newInputs = produce(inputs, (draft) => {
-      draft.variables.splice(removedIndex, 1)
-    })
-    setInputs(newInputs)
-    removeUsedVarInNodes(removedVar)
-    hideRemoveVarConfirm()
-  }, [hideRemoveVarConfirm, inputs, removeUsedVarInNodes, removedIndex, removedVar, setInputs])
-
-  const handleAddVariable = useCallback((payload: InputVar) => {
-    const newInputs = produce(inputs, (draft: StartNodeType) => {
-      draft.variables.push(payload)
-    })
-    setInputs(newInputs)
-  }, [inputs, setInputs])
   return {
     readOnly,
-    isChatMode,
-    inputs,
-    isShowAddVarModal,
-    showAddVarModal,
-    hideAddVarModal,
-    handleVarListChange,
-    handleAddVariable,
-    isShowRemoveVarConfirm,
-    hideRemoveVarConfirm,
-    onRemoveVarConfirm: removeVarInNode,
-    isVarUsedInNodes,
-  }
-}
+    updateInputs,
+    updatePathName,
+    doFileConfigChange,
+    inputs
+  };
+};
 
-export default useConfig
+export default useConfig;

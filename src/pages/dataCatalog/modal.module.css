@@ -1,0 +1,56 @@
+/* CSS Modules class for modal wrapper */
+.modalWrapper {
+  position: relative;
+}
+
+/* Global styles for Arco Modal components when using modalWrapper class */
+.modalWrapper :global(.arco-modal) {
+  padding: 20px 28px;
+}
+
+.modalWrapper :global(.arco-modal-header) {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.modalWrapper :global(.arco-modal-header .arco-modal-title span) {
+  display: flex;
+  align-items: center;
+}
+
+.modalWrapper
+  :global(
+    .arco-modal-header
+      .arco-modal-title
+      .arco-icon.arco-icon-exclamation-circle-fill
+  ) {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.modalWrapper :global(.arco-modal-content) {
+  padding-left: 28px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.modalWrapper :global(.arco-modal-footer) {
+  margin-top: 16px;
+}
+
+.tableWrapper :global(.arco-table-td) {
+  padding: 16px !important;
+}
+
+.tableWrapper :global(.arco-table-body) {
+  min-height: calc(100% - 40px) !important;
+  background-color: #fff;
+}
+.tableWrapper :global(.arco-table-content-inner) {
+  scrollbar-gutter: auto !important;
+}
+
+.tableWrapper :global(.arco-table-header) {
+  background-color: #f5f9ff;
+}

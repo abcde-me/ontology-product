@@ -11,10 +11,12 @@
   "extends": [
     "prettier",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended"
   ],
   "parserOptions": {
+    "project": "./tsconfig.json",
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
       "jsx": true
@@ -30,25 +32,31 @@
   "rules": {
     "react/display-name": 0,
     "react/prop-types": 0,
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/no-explicit-any": "off", // 是否使用 any 类型
+    "@typescript-eslint/no-unused-vars": "off", // 检查未使用的变量
     "@typescript-eslint/no-unused-expressions": "off",
-    "react-hooks/exhaustive-deps": [
-      "warn",
+    "react-hooks/exhaustive-deps": "off", // 检查 useEffect/useMemo/useCallback 的依赖项是否完整
+    "@typescript-eslint/ban-types": "off", // 是否使用某些类型(如 {}, object 等)
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-misused-promises": "off",
+    "@typescript-eslint/unbound-method": "off",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
       {
-        "enableDangerousAutofixThisMayCauseInfiniteLoops": true
+        "ts-nocheck": false,
+        "ts-ignore": false,
+        "ts-expect-error": false
       }
     ],
-    "@typescript-eslint/ban-types": "off",
-    "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/no-non-null-assertion": ["off"],
-    "@typescript-eslint/ban-ts-comment": [
-            "error",
-            {
-                "ts-nocheck": false,
-                "ts-ignore": false,
-                "ts-expect-error": false
-            }
-        ]
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/no-floating-promises": "off"
   }
 }

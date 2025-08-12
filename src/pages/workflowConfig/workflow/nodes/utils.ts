@@ -1,30 +1,45 @@
 import type {
   NodeOutPutVar,
-  ValueSelector,
-} from '@/pages/workflowConfig/workflow/types'
-import { InputVarType } from '@/pages/workflowConfig/workflow/types'
+  ValueSelector
+} from '@/pages/workflowConfig/workflow/types';
+import { InputVarType } from '@/pages/workflowConfig/workflow/types';
 
-export const findVariableWhenOnLLMVision = (valueSelector: ValueSelector, availableVars: NodeOutPutVar[]) => {
+export const findVariableWhenOnLLMVision = (
+  valueSelector: ValueSelector,
+  availableVars: NodeOutPutVar[]
+) => {
   const currentVariableNode = availableVars.find((availableVar) => {
-    if (valueSelector[0] === 'sys' && availableVar.isStartNode)
-      return true
+    if (valueSelector[0] === 'sys' && availableVar.isStartNode) return true;
 
-    return valueSelector[0] === availableVar.nodeId
-  })
+    return valueSelector[0] === availableVar.nodeId;
+  });
   const currentVariable = currentVariableNode?.vars.find((variable) => {
-    if (valueSelector[0] === 'sys' && variable.variable === `sys.${valueSelector[1]}`)
-      return true
-    return variable.variable === valueSelector[1]
-  })
+    if (
+      valueSelector[0] === 'sys' &&
+      variable.variable === `sys.${valueSelector[1]}`
+    )
+      return true;
+    return variable.variable === valueSelector[1];
+  });
 
-  let formType = ''
+  let formType = '';
   if (currentVariable?.type === 'array[file]')
-    formType = InputVarType.multiFiles
-  if (currentVariable?.type === 'file')
-    formType = InputVarType.singleFile
+    formType = InputVarType.multiFiles;
+  if (currentVariable?.type === 'file') formType = InputVarType.singleFile;
 
-  return currentVariable && {
-    ...currentVariable,
-    formType,
-  }
-}
+  return (
+    currentVariable && {
+      ...currentVariable,
+      formType
+    }
+  );
+};
+
+export const findVariableNameById = (
+  id: string | number,
+  dataSource: Array<any>,
+  name: any
+) => {
+  const variable = dataSource?.find((item: any) => item?.id === id);
+  return variable?.[name];
+};

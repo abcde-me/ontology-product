@@ -1,10 +1,10 @@
 // 递归查找节点路径的标题
 export function getNodePathTitles(treeData, targetKey) {
-  const path = [];
+  const path: string[] = [];
 
   function traverse(nodes) {
     for (const node of nodes) {
-      path.push(node.title); // 将当前节点加入路径
+      path.push(node?.title ?? ''); // 将当前节点加入路径
       if (node.key === targetKey) {
         return true; // 找到目标，停止搜索
       }
@@ -21,16 +21,18 @@ export function getNodePathTitles(treeData, targetKey) {
 }
 
 export function findParentByKeyIterative(tree, targetKey) {
-  const stack = [...tree.map(node => ({ node, parent: null }))];
-  
+  const stack = [...tree.map((node) => ({ node, parent: null }))];
+
   while (stack.length) {
     const { node, parent } = stack.pop();
     if (node.key === targetKey) return parent;
     if (node.children) {
-      stack.push(...node.children.map(child => ({
-        node: child,
-        parent: node
-      })));
+      stack.push(
+        ...node.children.map((child) => ({
+          node: child,
+          parent: node
+        }))
+      );
     }
   }
   return null;
@@ -46,17 +48,19 @@ export function getParentNodePathTitles(treeData, targetKey) {
 }
 
 export function addDisabledField(nodes) {
-  return nodes.map(node => {
+  return nodes.map((node) => {
     // 检查当前节点perms是否包含任意目标权限
-    const hasValidPerm = node.perms &&
+    const hasValidPerm =
+      node.perms &&
       (node.perms.includes('can_create') ||
-       node.perms.includes('can_update') ||
-       node.perms.includes('can_delete'));
+        node.perms.includes('can_update') ||
+        node.perms.includes('can_delete'));
 
     // 创建新节点（保留原有属性）
     const newNode = {
       ...node,
-      disabled: !hasValidPerm  // 包含任意权限则启用，否则禁用
+      disabled: !hasValidPerm, // 包含任意权限则启用，否则禁用
+      key: node.key || node.id // 确保有 key 字段，优先使用 key，否则使用 id
     };
 
     // 递归处理子节点

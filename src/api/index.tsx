@@ -1,5 +1,5 @@
 import UAPI_CONFIG from './uapi';
-import { isSingleApp } from '@/utils/env';
+import { logout, isSingleApp } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
 
 const isNil = (o) => o === undefined || o === null;
@@ -16,13 +16,14 @@ UAPI_CONFIG.setDefaultConfig({
  */
 UAPI_CONFIG.addRequestInterceptor(
   (config) => {
-    const consolePluginToken = localStorage.getItem('console_token')
+    const consolePluginToken = localStorage.getItem('console_token');
+    // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
-    if (!config.headers['x-auth-validate'])
+    if (config.headers && !config.headers?.['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
-    if (consolePluginToken)
+    if (consolePluginToken && config.headers)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
-    config.headers['Content-Type'] = 'application/json';
+    config.headers && (config.headers['Content-Type'] = 'application/json');
     return config;
   },
   (error) => {
@@ -38,11 +39,7 @@ UAPI_CONFIG.addResponseInterceptor(
     const res = response.data;
 
     if (response.status == 401) {
-      if (isSingleApp) {
-        window.location.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
-      } else {
-        window.location.href = `${res.data.content}?redirect_uri=${encodeURIComponent(window.location.href)}`;
-      }
+      logout(res.data.content);
     } else if (response.status >= 200 && response.status <= 299) {
       // 兼容没有code和message的接口
       if (
@@ -77,7 +74,8 @@ UAPI_CONFIG.addResponseInterceptor(
         'SUCCESS',
         'success',
         200,
-        'AIAP.DraftWorkflowNotFound'
+        'AIAP.DraftWorkflowNotFound',
+        'AIMDP.WorkflowDraftNotFound'
       ];
       if (
         successCode.includes(res.code) ||
@@ -94,7 +92,8 @@ UAPI_CONFIG.addResponseInterceptor(
           Message.error(errorMsg);
           console.error(errorMsg);
         }
-        return Promise.reject(errorMsg);
+        // return Promise.reject(errorMsg);
+        return Promise.resolve(errorMsg);
       }
     }
   },
@@ -121,11 +120,7 @@ UAPI_CONFIG.addResponseInterceptor(
     }
     if (code) {
       if (code === 401 || code === 402) {
-        if (isSingleApp) {
-          window.location.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
-        } else {
-          window.location.href = `${error.response.data.data.content}?redirect_uri=${encodeURIComponent(window.location.href)}`;
-        }
+        logout(error.response.data?.data?.content);
       } else if (code === 403) {
         // 临时在这里全局加一下，实际需要按业务捕获
         Message.error(
@@ -135,7 +130,8 @@ UAPI_CONFIG.addResponseInterceptor(
         console.log('code 500: ', code);
         const errorMsg = error.response.data.message || error.message;
         errorMsg && Message.error(errorMsg) && console.error(errorMsg);
-        return Promise.reject(error);
+        return Promise.resolve(error);
+        // return Promise.reject(error);
       }
     } else if (!(code === 0 && error?.message === 'canceled')) {
       Message.error({
@@ -143,7 +139,8 @@ UAPI_CONFIG.addResponseInterceptor(
         duration: 5000
       });
     }
-    return Promise.reject(error);
+    return Promise.resolve(error);
+    // return Promise.reject(error);
   }
 );
 

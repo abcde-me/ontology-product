@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { getLocalStorage } from '@/utils/storage';
+import { getLoginToken } from '@/utils/env';
 
 async function handleError(res) {
   try {
@@ -16,10 +16,14 @@ export type IOtherOptions = {
 
 export const getToken = () => {
   const consolePluginToken = localStorage.getItem('console_token');
-  const loginToken = getLocalStorage<string>('loginToken');
-  const token = consolePluginToken ? `Bearer ${localStorage.getItem('console_token')}` : (loginToken ? `${loginToken.replace(/['"]/g, '').trim()}` : '')
-  return token ? { authorization: token } : {}
-}
+  const loginToken = getLoginToken();
+  const token = consolePluginToken
+    ? `Bearer ${localStorage.getItem('console_token')}`
+    : loginToken
+      ? `${loginToken.replace(/['"]/g, '').trim()}`
+      : '';
+  return token ? { authorization: token } : {};
+};
 
 async function baseRequest(
   url,

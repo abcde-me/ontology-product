@@ -1,0 +1,23 @@
+.narrow-popover .arco-popover-content {
+  min-width: 110px !important;
+}
+.arco-spin,
+.arco-spin-children,
+.data-catalog-content,
+.arco-table-container,
+.arco-table-content-scroll,
+.arco-table-content-inner {
+  height: 100%;
+}
+
+.arco-table-border .arco-table-expand-fixed-row {
+  border-left: 0;
+}
+.batch-delete:hover {
+  color: #438dfb !important;
+  border-color: #438dfb !important ;
+}
+.batch-export:hover {
+  color: #438dfb !important;
+  border-color: #438dfb !important ;
+}

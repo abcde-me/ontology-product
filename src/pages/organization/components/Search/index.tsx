@@ -11,9 +11,26 @@ export default function Search() {
   const { orgStore } = org;
 
   const { run: handleSearch } = useDebounceFn(
-    (type: string, value: string) => {
+    (type: string, value: string | undefined) => {
+      // 更新特定的搜索条件
+      const newSearchParams = { ...orgStore.state.searchParams };
+
+      if (value === undefined || value === null || value === '') {
+        // 如果值为空，删除该搜索条件
+        delete newSearchParams[type];
+      } else {
+        // 如果值不为空，设置该搜索条件
+        newSearchParams[type] = value;
+      }
+
+      // 先更新 store 中的搜索参数
+      orgStore.setSearchParams(newSearchParams);
+
+      // 直接传递搜索参数给 fetchData，避免时序问题
       orgStore.fetchData({
-        [`${type}`]: value
+        page: 1,
+        size: 10,
+        searchParams: newSearchParams
       });
     },
     {

@@ -29,8 +29,8 @@
         "/tenant/compute/appforge/member",
         "/tenant/compute/appforge/plugins",
         "/tenant/compute/appforge/plugin/detail",
-        "/tenant/compute/appforge/login",
-        "/tenant/compute/appforge/userinfo",
+        "/tenant/compute/modaforge/login",
+        "/tenant/compute/modaforge/userinfo",
         "/tenant/compute/appforge/apiKey",
         "/tenant/compute/appforge/toolList",
         "/tenant/compute/appforge/toolCreate",
@@ -45,7 +45,9 @@
         "/tenant/compute/appforge/prompt",
         "/tenant/compute/appforge/workflowList",
         "/tenant/compute/appforge/workflowConfig",
-        "/tenant/compute/appforge/workflowPublic"
+        "/tenant/compute/appforge/workflowPublic",
+        "/tenant/compute/modaforge/dataCatalog",
+        "/tenant/compute/modaforge/datasetManagement"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"
@@ -66,8 +68,8 @@
         "/tenant/compute/appforge/workflowPublic",
         "/tenant/compute/appforge/agentCreate",
         "/tenant/compute/appforge/agentPage",
-        "/tenant/compute/appforge/login",
-        "/tenant/compute/appforge/userinfo"
+        "/tenant/compute/modaforge/login",
+        "/tenant/compute/modaforge/userinfo"
       ]
     }
   },

@@ -4,6 +4,7 @@ export function getNodePathTitles(treeData, targetKey) {
 
   function traverse(nodes) {
     for (const node of nodes) {
+      // @ts-expect-error
       path.push(node.title); // 将当前节点加入路径
       if (node.key === targetKey) {
         return true; // 找到目标，停止搜索

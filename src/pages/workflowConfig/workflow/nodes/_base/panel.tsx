@@ -1,30 +1,20 @@
-import type {
-  FC,
-  ReactElement,
-} from 'react'
-import React, {
-  cloneElement,
-  memo,
-  useCallback,
-} from 'react'
-import {
-  RiCloseLine,
-  RiPlayLargeLine,
-} from '@remixicon/react'
-import { useShallow } from 'zustand/react/shallow'
-import { useTranslation } from 'react-i18next'
+import type { FC, ReactElement } from 'react';
+import React, { cloneElement, memo, useCallback } from 'react';
+import { RiCloseLine, RiPlayLargeLine } from '@remixicon/react';
+import { useShallow } from 'zustand/react/shallow';
+import { useTranslation } from 'react-i18next';
 // import NextStep from './components/next-step'
 // import PanelOperator from './components/panel-operator'
 // import HelpLink from './components/help-link'
 import {
   DescriptionInput,
-  TitleInput,
-} from './components/title-description-input'
+  TitleInput
+} from './components/title-description-input';
 // import ErrorHandleOnPanel from './components/error-handle/error-handle-on-panel'
 // import RetryOnPanel from './components/retry/retry-on-panel'
-import { useResizePanel } from './hooks/use-resize-panel'
-import cn from '@/pages/workflowConfig/utils/classnames'
-import BlockIcon from '@/pages/workflowConfig/workflow/block-icon'
+import { useResizePanel } from './hooks/use-resize-panel';
+import cn from '@/pages/workflowConfig/utils/classnames';
+import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 // import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split'
 import {
   WorkflowHistoryEvent,
@@ -35,78 +25,87 @@ import {
   useNodesSyncDraft,
   useToolIcon,
   useWorkflow,
-  useWorkflowHistory,
-} from '@/pages/workflowConfig/workflow/hooks'
+  useWorkflowHistory
+} from '@/pages/workflowConfig/workflow/hooks';
 // import {
 //   canRunBySingle,
 //   hasErrorHandleNode,
 //   hasRetryNode,
 // } from '@/pages/workflowConfig/workflow/utils'
 // import Tooltip from '@/pages/workflowConfig/components/tooltip'
-import type { Node } from '@/pages/workflowConfig/workflow/types'
-import { useStore as useAppStore } from '@/pages/workflowConfig/app/store'
-import { useStore } from '@/pages/workflowConfig/workflow/store'
+import type { Node } from '@/pages/workflowConfig/workflow/types';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
+import { useStore } from '@/pages/workflowConfig/workflow/store';
 
 type BasePanelProps = {
-  children: ReactElement
-} & Node
+  children: ReactElement;
+} & Node;
 
-const BasePanel: FC<BasePanelProps> = ({
-  id,
-  data,
-  children,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const { showMessageLogModal } = useAppStore(useShallow(state => ({
-    showMessageLogModal: state.showMessageLogModal,
-  })))
-  const showSingleRunPanel = useStore(s => s.showSingleRunPanel)
-  const panelWidth = localStorage.getItem('workflow-node-panel-width') ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!) : 400
-  const {
-    setPanelWidth,
-  } = useWorkflow()
-  const { handleNodeSelect } = useNodesInteractions()
-  const { handleSyncWorkflowDraft } = useNodesSyncDraft()
-  const { nodesReadOnly } = useNodesReadOnly()
-  const { availableNextBlocks } = useAvailableBlocks(data.type, data.isInIteration, data.isInLoop)
-  const toolIcon = useToolIcon(data)
+const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { showMessageLogModal } = useTaskStore(
+    useShallow((state) => ({
+      showMessageLogModal: state.showMessageLogModal
+    }))
+  );
+  const showSingleRunPanel = useStore((s) => s.showSingleRunPanel);
+  const panelWidth = localStorage.getItem('workflow-node-panel-width')
+    ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!)
+    : 600;
+  const { setPanelWidth } = useWorkflow();
+  const { handleNodeSelect } = useNodesInteractions();
+  const { handleSyncWorkflowDraft } = useNodesSyncDraft();
+  const { nodesReadOnly } = useNodesReadOnly();
+  const { availableNextBlocks } = useAvailableBlocks(
+    data.type,
+    data.isInIteration,
+    data.isInLoop
+  );
+  const toolIcon = useToolIcon(data);
 
-  const handleResize = useCallback((width: number) => {
-    setPanelWidth(width)
-  }, [setPanelWidth])
+  const handleResize = useCallback(
+    (width: number) => {
+      setPanelWidth(width);
+    },
+    [setPanelWidth]
+  );
 
-  const {
-    triggerRef,
-    containerRef,
-  } = useResizePanel({
+  const { triggerRef, containerRef } = useResizePanel({
     direction: 'horizontal',
     triggerDirection: 'left',
     minWidth: 420,
     maxWidth: 720,
-    onResize: handleResize,
-  })
+    onResize: handleResize
+  });
 
-  const { saveStateToHistory } = useWorkflowHistory()
+  const { saveStateToHistory } = useWorkflowHistory();
 
-  const {
-    handleNodeDataUpdate,
-    handleNodeDataUpdateWithSyncDraft,
-  } = useNodeDataUpdate()
+  const { handleNodeDataUpdate, handleNodeDataUpdateWithSyncDraft } =
+    useNodeDataUpdate();
 
-  const handleTitleBlur = useCallback((title: string) => {
-    handleNodeDataUpdateWithSyncDraft({ id, data: { title } })
-    saveStateToHistory(WorkflowHistoryEvent.NodeTitleChange)
-  }, [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory])
-  const handleDescriptionChange = useCallback((desc: string) => {
-    handleNodeDataUpdateWithSyncDraft({ id, data: { desc } })
-    saveStateToHistory(WorkflowHistoryEvent.NodeDescriptionChange)
-  }, [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory])
+  const handleTitleBlur = useCallback(
+    (title: string) => {
+      handleNodeDataUpdateWithSyncDraft({ id, data: { title } });
+      saveStateToHistory(WorkflowHistoryEvent.NodeTitleChange);
+    },
+    [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory]
+  );
+  const handleDescriptionChange = useCallback(
+    (desc: string) => {
+      handleNodeDataUpdateWithSyncDraft({ id, data: { desc } });
+      saveStateToHistory(WorkflowHistoryEvent.NodeDescriptionChange);
+    },
+    [handleNodeDataUpdateWithSyncDraft, id, saveStateToHistory]
+  );
 
   return (
-    <div className={cn(
-      'relative mr-0 h-full wk-node-config-panel-wrapper',
-      showMessageLogModal && '!absolute !mr-0 w-[384px] overflow-hidden -top-[5px] right-[416px] z-0 shadow-lg border-[0.5px] border-components-panel-border rounded-2xl transition-all',
-    )}>
+    <div
+      className={cn(
+        'wk-node-config-panel-wrapper relative mr-0 h-full',
+        showMessageLogModal &&
+          '!absolute -top-[5px] right-[416px] z-0 !mr-0 w-[384px] overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border shadow-lg transition-all'
+      )}
+    >
       {/* <div
         ref={triggerRef}
         className='expand-dragger absolute top-1/2 -translate-y-1/2 -left-1 w-3 h-6 cursor-col-resize resize-x'>
@@ -114,25 +113,28 @@ const BasePanel: FC<BasePanelProps> = ({
       </div> */}
       <div
         ref={containerRef}
-        className={cn('wk-node-panel-content-scroller-container h-full bg-components-panel-bg shadow-lg border-components-panel-border rounded-[12px]', showSingleRunPanel ? 'overflow-hidden' : 'overflow-y-auto')}
+        className={cn(
+          'wk-node-panel-content-scroller-container h-full rounded-[12px] border-components-panel-border bg-components-panel-bg shadow-lg',
+          showSingleRunPanel ? 'overflow-hidden' : 'overflow-y-auto'
+        )}
         style={{
-          width: `${panelWidth}px`,
+          width: `${panelWidth}px`
         }}
       >
-        <div className='sticky top-0 bg-components-panel-bg z-10'>
-          <div className='flex items-center px-[16px] pt-[20px] pb-[8px] title-wrapper'>
+        <div className="sticky top-0 z-10 bg-components-panel-bg">
+          <div className="title-wrapper flex items-center px-[16px] pb-[8px] pt-[20px]">
             <BlockIcon
-              className='shrink-0 mr-[12px] size-[20px]'
+              className="mr-[8px] size-[20px] shrink-0"
               type={data.type}
               toolIcon={toolIcon}
-              size='md'
+              size="md"
             />
             <TitleInput
               value={data.title || ''}
               onBlur={handleTitleBlur}
               className="title-input"
             />
-            <div className='shrink-0 flex items-center text-gray-500'>
+            <div className="flex shrink-0 items-center text-gray-500">
               {/* {
                 canRunBySingle(data.type) && !nodesReadOnly && (
                   <Tooltip
@@ -155,22 +157,22 @@ const BasePanel: FC<BasePanelProps> = ({
               <PanelOperator id={id} data={data} showHelpLink={false} />
               <div className='mx-3 w-[1px] h-3.5 bg-divider-regular' /> */}
               <div
-                className='flex items-center justify-center w-6 h-6 cursor-pointer'
+                className="flex h-6 w-6 cursor-pointer items-center justify-center"
                 onClick={() => handleNodeSelect(id, true)}
               >
-                <RiCloseLine className='w-[16px] h-[16px]' />
+                <RiCloseLine className="h-[16px] w-[16px]" />
               </div>
             </div>
           </div>
-          <div className='p-2 px-[16px] '>
+          <div className="p-2 px-[16px] ">
             <DescriptionInput
               value={data.desc || ''}
               onChange={handleDescriptionChange}
             />
           </div>
-          <div className='mx-[16px] border-b-[0.5px] border-[#E8E9EB]'></div>
+          <div className="mx-[16px] border-b-[0.5px] border-[#E8E9EB]"></div>
         </div>
-        <div className='wk-node-panel-content-wrapper'>
+        <div className="wk-node-panel-content-wrapper">
           {cloneElement(children, { id, data })}
         </div>
         {/* <Split />
@@ -205,7 +207,7 @@ const BasePanel: FC<BasePanelProps> = ({
         } */}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default memo(BasePanel)
+export default memo(BasePanel);

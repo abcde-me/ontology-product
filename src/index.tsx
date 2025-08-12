@@ -5,7 +5,8 @@ import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
 import '@ccf2e/arco-material';
 import './index.css';
-
+import './style/ai.theme.less';
+import './style/theme.less';
 import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -45,6 +46,7 @@ import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
+import { isInFrame } from './utils/env';
 
 initI18n();
 
@@ -72,7 +74,8 @@ function App() {
   const hidden = useMemo(
     () =>
       (location?.pathname && hiddenTopBarRoutes.includes(location?.pathname)) ||
-      localLayout?.hideTopBar,
+      localLayout?.hideTopBar ||
+      isInFrame,
     [localLayout?.hideTopBar, location?.pathname]
   );
 
@@ -100,7 +103,7 @@ function App() {
             );
           })}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
-          <Redirect from="/" to="/tenant/compute/modaforge/home" exact />
+          <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
           <Route key="*" path="*" component={Page404} />
         </Switch>
       </Layout.Content>
@@ -150,15 +153,54 @@ function Index() {
   );
 }
 
-ReactDOM.render(
-  <Suspense
-    fallback={
-      <div className="flex h-screen w-screen items-center justify-center">
-        <Spin block />
-      </div>
-    }
-  >
-    <Index />
-  </Suspense>,
-  document.getElementById('root')
-);
+// 创建根元素的函数
+const render = (Component) => {
+  ReactDOM.render(
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-screen items-center justify-center">
+          <Spin block />
+        </div>
+      }
+    >
+      <Component />
+    </Suspense>,
+    document.getElementById('root')
+  );
+};
+
+// 初始渲染
+render(Index);
+
+// 只在开发环境下启用 HMR
+// @ts-expect-error
+if (process.env.NODE_ENV === 'development' && module.hot) {
+  // @ts-expect-error
+  module.hot.accept('./pages/admin/layout', () => {
+    console.log('11111111111');
+    // 当 App 组件或其依赖发生变化时，重新渲染
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const NextApp = require('./pages/admin/layout').default;
+    render(Index);
+  });
+
+  // @ts-expect-error
+  module.hot.accept('./pages/login', () => {
+    console.log('22222222');
+    // 当 Login 组件发生变化时，重新渲染
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const NextLogin = require('./pages/login').default;
+    render(Index);
+  });
+
+  // @ts-expect-error
+  module.hot.accept('./pages/errorPages', () => {
+    console.log('333333');
+    // 当错误页面组件发生变化时，重新渲染
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const NextPage404 = require('./pages/errorPages').default;
+    render(Index);
+  });
+
+  // 可以继续添加其他需要热更新的组件
+}

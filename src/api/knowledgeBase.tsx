@@ -66,20 +66,28 @@ export async function hitTesting(knowledgeId, params, abortController) {
   const config = abortController
     ? { signal: abortController.signal, timeout: TIMEOUT }
     : { timeout: TIMEOUT };
-  return UAPI.RES.knowledgeIdAction({ knowledgeId, action: 'hit-testing' })
-    .post(params)
-    .withConfig(config)
-    .inRegion()
-    .do();
+  return (
+    UAPI.RES.knowledgeIdAction({ knowledgeId, action: 'hit-testing' })
+      .post(params)
+      // TODO: ts错误
+      // @ts-expect-error
+      .withConfig(config)
+      .inRegion()
+      .do()
+  );
 }
 
 /**查询命中纪录 */
 export async function fetchTestingRecords(knowledgeId, params) {
-  return UAPI.RES.knowledgeIdAction({ knowledgeId, action: 'queries' })
-    .get(params)
-    .withConfig({ timeout: null })
-    .inRegion()
-    .do();
+  return (
+    UAPI.RES.knowledgeIdAction({ knowledgeId, action: 'queries' })
+      .get(params)
+      // TODO: ts错误
+      // @ts-expect-error
+      .withConfig({ timeout: null })
+      .inRegion()
+      .do()
+  );
 }
 
 /**知识库详情 */

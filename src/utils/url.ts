@@ -10,3 +10,30 @@ export function goParams(history, params: Record<string, string>) {
   });
   history.push(history.location.pathname + '?' + origin.toString());
 }
+
+export const getQueryParams = (history, paramName) => {
+  const searchParams = new URLSearchParams(history.location.search);
+
+  return searchParams.get(paramName);
+};
+
+export const updateQueryParams = (history, newParams) => {
+  // 获取当前路径和查询参数
+  const currentPath = history.location.pathname;
+  const currentSearch = new URLSearchParams(history.location.search);
+
+  // 更新查询参数
+  Object.entries(newParams).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      currentSearch.delete(key);
+    } else {
+      currentSearch.set(key, value as string);
+    }
+  });
+
+  // 推入新的历史记录
+  history.push({
+    pathname: currentPath,
+    search: currentSearch.toString()
+  });
+};

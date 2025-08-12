@@ -9,7 +9,8 @@ import {
   getRoleData,
   getUsers,
   updateOrganizationg,
-  updateUser
+  updateUser,
+  preDelOrg
 } from '@/api/user';
 import { Model } from '@/models';
 import { addDisabledField } from '../utils';
@@ -35,13 +36,21 @@ interface InfoStoreState {
   treeSearchKey: string;
   // 当前hover的组织
   hoveredOrg?: any;
-  
+  // 组织数据是否已初始化
+  orgDataInitialized: boolean;
+  // 删除前判断visible
+  preDeleteVisible: boolean;
+  // 删除用户前判断visible
+  preDeleteUserVisible: boolean;
+  // 当前搜索参数
+  searchParams: Record<string, any>;
 }
 
 export class OrgStore extends Model<InfoStoreState> {
   constructor(public org: OrgEditor) {
     super({
       state: {
+        preDeleteVisible: false,
         list: [],
         loading: false,
         total: 0,
@@ -56,17 +65,46 @@ export class OrgStore extends Model<InfoStoreState> {
         parentOrgModalVisible: false,
         hoveredOrg: {
           _key: ''
-        } // 当前hover的组织
-      },
-    
+        }, // 当前hover的组织
+        orgDataInitialized: false, // 组织数据是否已初始化
+        preDeleteUserVisible: false,
+        searchParams: {}
+      }
     });
+  }
+
+  setPreDeleteUserVisible = (visible: boolean) => {
+    this.setState({
+      preDeleteUserVisible: visible
+    });
+  };
+
+  setPreDeleteVisible = (visible: boolean) => {
+    this.setState({
+      preDeleteVisible: visible
+    });
+  };
+
+  // 设置搜索参数
+  setSearchParams = (params: Record<string, any>) => {
+    this.setState({
+      searchParams: params
+    });
+  };
+
+  async preDelOrgOperate() {
+    const res = await preDelOrg({
+      orgId: this.state.hoveredOrg.id
+    });
+
+    return res;
   }
 
   setParentOrgModalVisible = (visible: boolean) => {
     this.setState({
       parentOrgModalVisible: visible
     });
-  }
+  };
   // 设置当前hover的组织
   setHoveredOrg = (org: any) => {
     this.setState({
@@ -99,7 +137,7 @@ export class OrgStore extends Model<InfoStoreState> {
     });
   };
   // 设置当前编辑的成员
-  setCurrentMember = (member: DataSet) => {
+  setCurrentMember = (member: DataSet | null) => {
     this.setState({
       currentMember: member
     });
@@ -110,6 +148,7 @@ export class OrgStore extends Model<InfoStoreState> {
     if (res.success) {
       this.fetchData();
     }
+    return res;
   }
   // 停用成员
   async pauseMember(params: any) {
@@ -122,14 +161,19 @@ export class OrgStore extends Model<InfoStoreState> {
     if (res.success) {
       this.fetchData();
     }
+    return res;
   }
   // 添加成员
   async addMember(data: any) {
     const res = await createUser(data);
     if (res.success) {
-      this.fetchData();
+      this.fetchData({
+        page: 1,
+        size: 10
+      });
       this.setVisible(false); // 关闭添加成员弹窗
     }
+    return res;
   }
   // 修改成员
   async updateMember(data: any) {
@@ -143,11 +187,12 @@ export class OrgStore extends Model<InfoStoreState> {
   async createOrg(data: any) {
     const res = await createOrganization(data);
     if (res.success) {
-     await this.fetchOrgData();
+      await this.fetchOrgData();
       this.fetchData();
       this.setParentOrgModalVisible(false);
       this.setOrgModalVisible(false);
     }
+    return res;
   }
   // 修改部门
   async updateOrg(data: any) {
@@ -157,14 +202,15 @@ export class OrgStore extends Model<InfoStoreState> {
       this.fetchData();
       this.setEditOrgModalVisible(false);
     }
+    return res;
   }
   // 删除部门
   async deleteOrg(id: string) {
     const res = await deleteOrganization(id);
     if (res.success) {
       await this.fetchOrgData();
-      this.fetchData();
     }
+    return res;
   }
   // 设置当前编辑的成员
   setList = (list: DataSet[]) => {
@@ -183,33 +229,32 @@ export class OrgStore extends Model<InfoStoreState> {
   fetchData(options?: {
     showLoading?: boolean;
     page?: number;
-    limit?: number;
-    organization_id?: string | number;
-    name?: string;
-    // 其他搜索参数
-    [key: string]: any;
+    size?: number;
+    searchParams?: Record<string, any>;
   }) {
     const {
       showLoading = true,
       page = 1,
-      limit = 10,
-      organization_id = 1,
-      name,
-      ...otherParams
+      size = 10,
+      searchParams: overrideSearchParams
     } = options || {};
 
     return this.asyncManager('fetchData', {
       showLoading
     }).exec(async () => {
       try {
-        // 合并所有参数
-        const params = {
+        // 合并所有参数：分页参数 + 当前保存的搜索参数 + 传入的搜索参数
+        const params: any = {
           page,
-          limit,
-          organization_id,
-          name,
-          ...otherParams
+          size,
+          ...this.state.searchParams,
+          ...(overrideSearchParams || {})
         };
+
+        // 如果 searchParams 中没有 organization_id，使用当前选中的组织
+        if (!params.organization_id && this.state.currentOrg?.id) {
+          params.organization_id = this.state.currentOrg.id;
+        }
 
         // 处理数组参数，转换为逗号分隔的字符串
         const processedParams = Object.fromEntries(
@@ -224,6 +269,10 @@ export class OrgStore extends Model<InfoStoreState> {
         const response = await getUsers(processedParams);
 
         this.setList(response.data?.data || []);
+        // 同时更新 store 中的 total
+        this.setState({
+          total: response.data?.total || 0
+        });
         return {
           list: response.data?.data || [],
           total: response.data?.total || 0
@@ -244,6 +293,27 @@ export class OrgStore extends Model<InfoStoreState> {
     });
   };
 
+  // 根据level字段过滤组织树，最多展示7级
+  private filterOrgDataByLevel(data: any[], maxLevel = 7): any[] {
+    const filterByLevel = (nodes: any[]): any[] => {
+      return nodes
+        .filter((node) => node.level <= maxLevel) // 过滤掉超过最大级别的节点
+        .map((node) => {
+          const filteredNode = { ...node };
+
+          // 如果有子节点，递归过滤子节点
+          if (node.children && node.children.length > 0) {
+            const filteredChildren = filterByLevel(node.children);
+            filteredNode.children = filteredChildren;
+          }
+
+          return filteredNode;
+        });
+    };
+
+    return filterByLevel(data);
+  }
+
   // 获取组织树
   fetchOrgData(options?: { showLoading?: boolean }) {
     const { showLoading = true } = options || {};
@@ -253,11 +323,16 @@ export class OrgStore extends Model<InfoStoreState> {
     }).exec(async () => {
       try {
         const response = await getOrganizationTree();
-        this.setCurrentOrg({
-          currentOrg: response.data[0]
-        })
+
+        let processedOrgData = addDisabledField(response.data) || [];
+
+        // 根据level字段过滤，最多展示7级
+        processedOrgData = this.filterOrgDataByLevel(processedOrgData, 7);
+
+        // 移除自动设置第一个组织的逻辑，让 OrgTree 组件控制初始化
+        this.setTreeData(processedOrgData);
         return {
-          orgData: addDisabledField(response.data) || [],
+          orgData: processedOrgData
         };
       } catch (error) {
         console.error('Failed to fetch data:', error);

@@ -1,63 +1,78 @@
-import type { FC } from 'react'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import useConfig from './use-config'
-import type { EndNodeType } from './types'
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list'
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field'
-import AddButton from '@/pages/workflowConfig/components/button/add-button'
-import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types'
-import { IconPlus } from '@arco-design/web-react/icon'
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import useConfig from './use-config';
+import type { EndNodeType } from './types';
+import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import { Form, Select } from '@arco-design/web-react';
+import { getWorkflowTargetPath } from '@/api/workflow';
+import './end.scss';
 
-const i18nPrefix = 'workflow.nodes.end'
+const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
+  const { readOnly, inputs, onValuesChange } = useConfig(id, data);
+  const [form] = Form.useForm();
+  const FormItem = Form.Item;
+  const Option = Select.Option;
 
-const Panel: FC<NodePanelProps<EndNodeType>> = ({
-  id,
-  data,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const [dataSource, setDataSource]: Array<any> = useState([]);
 
-  const {
-    readOnly,
-    inputs,
-    handleVarListChange,
-    handleAddVariable,
-  } = useConfig(id, data)
-
-  const outputs = inputs.outputs
+  useEffect(() => {
+    getWorkflowTargetPath(2, '').then(res => {
+      const dirsArr: Record<string, any>[] = [];
+      res.data.dst.forEach((catalog) => {
+        // 重置name结构
+        const restData = catalog.children?.volume.map(item => {
+          return {
+            ...item,
+            parent_name: catalog.name
+          }
+        })
+        dirsArr.push(...(restData || []));
+      });
+      setDataSource(dirsArr);
+    });
+  }, []);
+  console.log(dataSource, 'dataSource===');
   return (
-    // <div className='mt-2'>
-    //   <div className='px-4 pb-4 space-y-4'>
-
-    //     <Field
-    //       title={t(`${i18nPrefix}.output.variable`)}
-    //       operations={
-    //         !readOnly ? <AddButton onClick={handleAddVariable} /> : undefined
-    //       }
-    //     >
-    //       <VarList
-    //         nodeId={id}
-    //         readonly={readOnly}
-    //         list={outputs}
-    //         onChange={handleVarListChange}
-    //       />
-    //     </Field>
-    //   </div>
-    // </div>
-    <div className='mt-[16px] wk-node-panel-content end-panel-content'>
-      <div className='mb-[16px] title-txt'>输出变量</div>
-      <VarList
-        nodeId={id}
-        readonly={readOnly}
-        list={outputs}
-        onChange={handleVarListChange}
-      />
-      {!readOnly && <div className='add-btn w-full mt-[16px]' onClick={handleAddVariable}>
-          <IconPlus className='size-[14px] mr-[4px] text-[#979797]'/>添加
-        </div>
-      }
+    <div className="wk-node-panel-content end-panel-content mt-[16px]">
+      <Form
+        layout="vertical"
+        form={form}
+        autoComplete="off"
+        labelCol={{ span: 0 }}
+        disabled={readOnly}
+        wrapperCol={{ span: 24 }}
+        onValuesChange={(_, v: any) => { onValuesChange(v, dataSource) }}
+        initialValues={{
+          target_path_id: inputs?.target_path_id
+        }}
+      >
+        <FormItem
+          label="目标数据目录"
+          field="target_path_id"
+          rules={[{ required: true, message: '目标数据目录不可为空' }]}
+          style={{ margin: 0 }}
+          extra="选择工作流处理后数据的目标数据"
+        >
+          <Select
+            placeholder="请输入或选择目标数据目录"
+            style={{ width: '100%' }}
+            allowClear
+            showSearch
+            filterOption={(inputValue, option) => {
+              return option?.props?.children?.includes(inputValue)
+            }}
+          >
+            {dataSource.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {`${option.parent_name}/${option.name}`}
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+      </Form>
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(Panel)
+export default React.memo(Panel);

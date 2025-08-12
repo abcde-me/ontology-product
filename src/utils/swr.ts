@@ -48,9 +48,13 @@ export function useToolsList(
   providerType: CollectionType
 ) {
   const res1 = useBuiltInToolsList(
+    // TODO: ts错误
+    // @ts-expect-error
     providerType === CollectionType.builtIn ? providerName : null
   );
   const res2 = useCustomToolsList(
+    // TODO: ts错误
+    // @ts-expect-error
     providerType === CollectionType.custom ? providerName : null
   );
   return providerType === CollectionType.builtIn ? res1 : res2;
@@ -164,7 +168,7 @@ export type LogoInfo = {
   logoUrl: string;
 };
 export function useLogoInfo() {
-  return { data: {} as LogoInfo }
+  return { data: {} as LogoInfo };
   // const res = useSWR<LogoInfo>('/logoinfo', () => {
   //   return getLogoInfo().then((res) => {
   //     return res.data;

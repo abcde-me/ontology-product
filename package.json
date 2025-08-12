@@ -6,12 +6,13 @@
   "scripts": {
     "clean": "rimraf dist build",
     "start": "yarn clean && node --max-old-space-size=4096 ./scripts/start",
-    "dev": "cross-env PORT=9001 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
+    "dev": "cross-env PORT=9060 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
     "build": "yarn clean && cross-env NODE_ENV=production GENERATE_SOURCEMAP=false node ./scripts/build",
-    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
+    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --cache",
+    "eslint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache --fix",
     "stylelint": "stylelint \"src/**/*.less\" \"src/**/*.scss\" \"src/**/*.css\" --fix --cache",
     "test": "LANG=en_US.UTF-8 jest",
-    "pre-commit": "pretty-quick --staged && yarn run eslint && yarn run stylelint",
+    "pre-commit": "lint-staged",
     "prepare": "husky install",
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'",
@@ -118,6 +119,7 @@
     "@arco-themes/react-arco-pro": "^0.0.7",
     "@arco-themes/react-ocean-design": "^0.0.56",
     "@babel/core": "^7.16.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@cypress/webpack-preprocessor": "^5.5.0",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.6",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
@@ -176,7 +178,7 @@
     "html-webpack-plugin": "^5.5.0",
     "http-proxy-middleware": "^3.0.2",
     "http-server": "^14.1.0",
-    "husky": "^7.0.2",
+    "husky": "^9.1.4",
     "i18next": "^19.8.3",
     "i18next-browser-languagedetector": "^6.0.1",
     "i18next-conv": "^10.1.0",
@@ -189,6 +191,7 @@
     "jest-watch-typeahead": "^1.0.0",
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
+    "lint-staged": "^15.2.10",
     "mini-css-extract-plugin": "^2.6.1",
     "mocha-junit-reporter": "^1.23.3",
     "mochawesome": "^6.1.1",
@@ -321,5 +324,14 @@
   },
   "resolutions": {
     "mockjs/commander": "~9.4.1"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings 0 --cache --ext .ts,.tsx,.js,.jsx",
+      "prettier --write"
+    ],
+    "src/**/*.{json,md,html,css,scss}": [
+      "prettier --write"
+    ]
   }
 }

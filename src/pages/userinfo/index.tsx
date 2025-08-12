@@ -1,12 +1,12 @@
-import React from 'react'
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import { Form, Button, Space, Avatar, Message } from '@arco-design/web-react';
+import { Button, Space, Avatar, Message } from '@arco-design/web-react';
 import type { FormInstance } from '@arco-design/web-react/es/Form';
-import { updatePassword,updateUser, getMe } from '@/api/user'
+import { updatePassword, updateUser, getRoleData } from '@/api/user';
 import dayjs from 'dayjs';
 import { UserEditModal } from './components/UserEditModal';
 import { PasswordModal } from './components/PasswordModal';
-import { use } from 'echarts';
+import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 
 const formatPhoneNumber = (phone: string): string => {
   if (!phone || phone.length !== 11) return phone;
@@ -16,97 +16,105 @@ const formatPhoneNumber = (phone: string): string => {
 export default function HomePage() {
   const [editVisible, setEditVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [userInfo, setUserInfo] = useState({
-    account: '',
-    username: '',
-    phone: '',
-    created_at: '',
-    organization: '',
-    role: ''
-  })
   const form = useRef<FormInstance>(null);
   const passwordForm = useRef<FormInstance>(null);
+  const [roleMap, setRoleMap] = useState<Record<string, string>>({});
 
-  // 获取信息的函数
-  function getMeInfo() {
-    getMe().then(res => {
-      if (res.success) {
-        setUserInfo(res.data);
-        form.current?.setFieldsValue(res.data);
-      }
-    })
-  }
+  // 从全局 store 获取用户信息
+  const userInfo = useUserInfo();
 
+  const { updateUserInfo } = useUserInfoStore();
 
   useEffect(() => {
-    getMeInfo()
-  },[])
-  console.log('userInfo', userInfo)
+    // 获取角色数据并打印
+    getRoleData().then((res) => {
+      console.log('getRoleData 返回内容:', res);
+      const map: Record<string, string> = {};
+      if (res?.data && Array.isArray(res.data)) {
+        res.data.forEach((item: any) => {
+          map[item.code] = item.name;
+        });
+      }
+      setRoleMap(map);
+    });
+  }, []);
+
+  // 当用户信息更新时，同步到表单
+  useEffect(() => {
+    if (userInfo) {
+      form.current?.setFieldsValue(userInfo);
+    }
+  }, [userInfo]);
+  console.log('userInfo', userInfo);
   return (
-      <div className="flex justify-center min-h-screen bg-gray-50 py-8">
+    <div className="flex min-h-screen justify-center bg-gray-50 py-12">
       <div className="w-full max-w-2xl px-4">
-        <p className="text-black text-xl mb-6">我的账号</p>
+        <p className="mb-6 text-[20px] font-[500] text-black">我的账号</p>
 
         {/* 用户信息卡片 */}
-        <div className=" my-5 p-5 bg-white rounded-lg shadow-md">
-          <div className="flex justify-between items-start">
+        <div className=" my-5 rounded-lg bg-white p-5 shadow-md">
+          <div className="flex items-start justify-between">
             <div className="flex items-start">
-              <Avatar size={64} className="bg-blue-600">
-                {
-                  userInfo?.username[0]?.toLocaleUpperCase()
-                }
+              <Avatar size={64} className="ai-avatar">
+                {userInfo?.username?.[0]?.toLocaleUpperCase()}
               </Avatar>
               <div className="ml-5">
-                <div className="text-lg font-bold mb-2">{userInfo?.account}</div>
-                <div className="text-gray-600 text-sm mb-3">{userInfo?.username}</div>
-                <div className="text-gray-600 text-sm mb-2">
-                  <span className="inline-block w-16 font-bold text-black">手机号</span>
-                  {formatPhoneNumber(userInfo?.phone)}
+                <div className="mb-2 text-[20px] font-bold">
+                  {userInfo?.username}
                 </div>
-                <div className="text-gray-600 text-sm">
-                  <span className="inline-block w-16 font-bold text-black">注册时间</span>
-                  {dayjs(userInfo?.created_at).format('YYYY-MM-DD HH:mm:ss')}
+                <div className="mb-3 text-[16px] text-gray-600">
+                  {userInfo?.account}
+                </div>
+                <div className="mb-2 text-[16px] text-gray-600">
+                  <span className="inline-block w-16 font-[500]">手机号</span>
+                  <span className="ml-3">
+                    {formatPhoneNumber(userInfo?.phone || '')}
+                  </span>
+                </div>
+                <div className="text-[16px] text-gray-600">
+                  <span className="inline-block w-16 text-[16px] font-[500]">
+                    注册时间
+                  </span>
+                  <span className="ml-3">
+                    {dayjs(userInfo?.created_at).format('YYYY-MM-DD HH:mm:ss')}
+                  </span>
                 </div>
               </div>
             </div>
-            <Space size='large'>
-              <Button 
-                onClick={() => setEditVisible(true)}
-              >
-                编辑
-              </Button>
+            <Space size="large">
+              <Button onClick={() => setEditVisible(true)}>编辑</Button>
             </Space>
           </div>
         </div>
-        
+
         {/* 密码卡片 */}
-        <div className="my-5 p-5 bg-white rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-base font-bold">登录密码</div>
-            <Space size='large'>
-              <Button 
-                onClick={() => setPasswordVisible(true)}
-              >
-                修改密码
-              </Button>
+        <div className="my-5 rounded-lg bg-white p-5 shadow-md">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-[14px] font-[500]">登录密码</div>
+            <Space size="large">
+              <Button onClick={() => setPasswordVisible(true)}>修改密码</Button>
             </Space>
           </div>
-          <div>
+          <div className="text-[16px]">
             <span className="inline-block w-12">密码</span>
-            <span className="ml-4 text-gray-600">*************</span>
+            <span className="ml-3 text-gray-600">*************</span>
           </div>
         </div>
-        
+
         {/* 部门信息卡片 */}
-        <div className=" my-5 p-5 bg-white rounded-lg shadow-md">
-          <div className="text-base font-bold mb-4">部门信息</div>
-          <div className="mb-3">
-            <span className="inline-block w-12">部门</span>
-            <span className="ml-4 text-gray-600">{userInfo?.organization}</span>
+        <div className=" my-5 rounded-lg bg-white p-5 shadow-md">
+          <div className="mb-4 text-[14px] font-[500]">部门信息</div>
+          <div className="mb-3 text-[16px]">
+            <span className="inline-block w-12 font-[500]">部门</span>
+            <span className="ml-4 text-gray-600">
+              {userInfo?.organization_full}
+            </span>
           </div>
-          <div>
-            <span className="inline-block w-12">角色</span>
-            <span className="ml-4 text-gray-600">{userInfo?.role}</span>
+          <div className="text-[16px]">
+            <span className="inline-block w-12 font-[500]">角色</span>
+            <span className="ml-4 text-gray-600">
+              {(userInfo?.role && roleMap[userInfo.role]) || userInfo?.role}
+            </span>
           </div>
         </div>
       </div>
@@ -116,17 +124,22 @@ export default function HomePage() {
         visible={editVisible}
         onOk={async (values) => {
           // console.log('接收到的用户信息:', values);
-          const res = await updateUser(values)
-          if(res.success){
+          const res = await updateUser(values);
+          if (res.success) {
             // 重置表单
             Message.success('修改成功');
-            getMeInfo()
+            // 更新全局 store 中的用户信息
+            updateUserInfo(values);
           }
           setEditVisible(false);
         }}
         onCancel={() => setEditVisible(false)}
         formRef={form}
-        initialValues={userInfo}
+        initialValues={{
+          account: userInfo?.account || '',
+          phone: userInfo?.phone || '',
+          username: userInfo?.username || ''
+        }}
       />
 
       <PasswordModal
@@ -134,15 +147,18 @@ export default function HomePage() {
         onOk={async (values) => {
           // console.log('接收到的密码信息:', values);
           const res = await updatePassword(values);
-          console.log('res', res)
-          if(res.success){
+          console.log('res', res);
+          if (res.success) {
             // 重置表单
             passwordForm.current?.resetFields();
             Message.success('修改成功');
           }
           setPasswordVisible(false);
         }}
-        onCancel={() => setPasswordVisible(false)}
+        onCancel={() => {
+          passwordForm.current?.resetFields();
+          setPasswordVisible(false);
+        }}
         formRef={passwordForm}
       />
     </div>

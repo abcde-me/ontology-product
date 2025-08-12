@@ -22,7 +22,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { CreateSpaceModal } from '@/pages/systemMgmt/createSpaceModal';
 import { getFlatRoutes, routes } from '../route';
-import './sider.css';
+import Connection from '@/assets/sider/connection.svg';
+import DataLoad from '@/assets/sider/data-load.svg';
+import DataCatalog from '@/assets/sider/data-catalog.svg';
+import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import WorkflowList from '@/assets/sider/workflow-list.svg';
+import WorkflowTask from '@/assets/sider/workflow-task.svg';
+import OrganMenu from '@/assets/sider/organmenu.svg';
+import MemberMenu from '@/assets/sider/membermenu.svg';
+import './sider.scss';
+import { useUserInfo } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -38,6 +47,7 @@ type MenuModel = {
   children?: MenuModel[];
   className?: string;
   type?: string;
+  permission?: string; // 添加权限字段
 };
 const customHeader = {
   '/tenant/compute/modaforge/appConfig': () =>
@@ -58,18 +68,70 @@ const menus: MenuModel[] = [
       {
         title: '连接器',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <Connection className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'connection',
-        path: '/tenant/compute/modaforge/connection'
+        path: '/tenant/compute/modaforge/connection',
+        permission: 'connectors:can_search'
       },
       {
         title: '数据载入',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <DataLoad className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/dataLoad',
-        key: 'dataLoad'
+        key: 'dataLoad',
+        permission: 'dataloader:can_search'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '数据处理',
+    key: 'DataDeal',
+    children: [
+      {
+        title: '工作流',
+        icon: (
+          <WorkflowList className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'workflowList',
+        path: '/tenant/compute/modaforge/workflowList',
+        permission: 'workflow:can_search'
+      },
+      {
+        title: '作业',
+        icon: (
+          <WorkflowTask className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'workflowTask',
+        path: '/tenant/compute/modaforge/workflowTask',
+        permission: 'workflowInstance:can_search'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '数据管理',
+    key: 'DataManagement',
+    children: [
+      {
+        title: '数据目录',
+        icon: (
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'dataCatalog',
+        path: '/tenant/compute/modaforge/dataCatalog',
+        permission: 'directory:can_search_dirs'
+      },
+      {
+        title: '数据集管理',
+        icon: (
+          <DatasetManagement className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'datasetManagement',
+        path: '/tenant/compute/modaforge/datasetManagement',
+        permission: 'datasets:can_search'
       }
     ]
   },
@@ -81,30 +143,67 @@ const menus: MenuModel[] = [
       {
         title: '组织管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'orgMgmt',
-        path: '/tenant/compute/modaforge/organization'
+        path: '/tenant/compute/modaforge/organization',
+        permission: 'organizations:can_search'
       },
       {
         title: '用户管理',
         icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+          <MemberMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         path: '/tenant/compute/modaforge/member',
-        key: 'userMgmt'
-      },
-      {
-        title: 'API-KEY',
-        icon: (
-          <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
-        ),
-        path: '/tenant/compute/modaforge/apiKey',
-        key: 'apiKey'
+        key: 'userMgmt',
+        permission: 'users:can_search'
       }
+      // {
+      //   title: 'API-KEY',
+      //   icon: (
+      //     <IconApps className="modaforge-sider-icon mr-[12px] flex-none text-[22px]" />
+      //   ),
+      //   path: '/tenant/compute/modaforge/apiKey',
+      //   key: 'apiKey'
+      // }
     ]
   }
 ];
+
+// 权限过滤函数
+const filterMenusByPermissions = (
+  menus: MenuModel[],
+  userPermissions: string[] = []
+): MenuModel[] => {
+  return menus
+    .map((menu) => {
+      // 如果是分组菜单，递归过滤子菜单
+      if (menu.children && menu.children.length > 0) {
+        const filteredChildren = filterMenusByPermissions(
+          menu.children,
+          userPermissions
+        );
+
+        // 如果过滤后没有子菜单，则不显示该分组
+        if (filteredChildren.length === 0) {
+          return null;
+        }
+
+        return {
+          ...menu,
+          children: filteredChildren
+        };
+      }
+
+      // 如果菜单需要权限且用户没有该权限，则过滤掉
+      if (menu.permission && !userPermissions.includes(menu.permission)) {
+        return null;
+      }
+
+      return menu;
+    })
+    .filter(Boolean) as MenuModel[]; // 移除 null 值
+};
 
 const knowledgeDetailMenus: MenuModel[] = [
   {
@@ -148,9 +247,18 @@ const knowledgeDetailSidebarPaths = [
 ];
 
 function LayoutWithSider(props: { children }) {
+  // 从全局 store 获取用户信息
+  const userInfo = useUserInfo();
+
+  // 根据用户权限过滤菜单
+  const filteredMenus = useMemo(() => {
+    const userPermissions = userInfo?.perms || [];
+    return filterMenusByPermissions(menus, userPermissions);
+  }, [userInfo?.perms]);
+
   const { children } = props;
   const [collapsed, setCollapsed] = useState(false);
-  const [showMenus, setShowMenus] = useState(menus);
+  const [showMenus, setShowMenus] = useState(filteredMenus);
   const [showCreateModel, setShowCreateModel] = useState(false);
 
   const handleCollapsed = () => {
@@ -193,7 +301,7 @@ function LayoutWithSider(props: { children }) {
         return (
           <MenuItem
             key={item.key}
-            onClick={() => clickMenu(item.path)}
+            onClick={() => clickMenu(item?.path ?? '')}
             className="flex items-center"
           >
             {item.icon}
@@ -245,20 +353,20 @@ function LayoutWithSider(props: { children }) {
     if (knowledgeDetailSidebar) {
       setShowMenus(knowledgeDetailMenus);
     } else {
-      setShowMenus(menus);
+      setShowMenus(filteredMenus);
     }
-  }, [knowledgeDetailSidebar]);
+  }, [knowledgeDetailSidebar, filteredMenus]);
 
   const actives = useMemo(() => {
-    const findMatch = (menus: MenuModel[]): string[] => {
+    const findMatch = (menus: MenuModel[]): string[] | null => {
       for (const menu of menus) {
-        if (menu.children?.length > 0) {
+        if (menu.children?.length && menu.children?.length > 0) {
           const key = findMatch(menu.children);
           if (key) return [...key, menu.key];
         } else {
           const activePaths = menu.activePaths || [menu.path];
           const path = activePaths.find((path) =>
-            location.pathname.startsWith(path)
+            location.pathname.startsWith(path ?? '')
           );
           if (path) return [menu.key];
         }
@@ -289,56 +397,6 @@ function LayoutWithSider(props: { children }) {
     setCollapsed(collapse);
   }, [location.pathname]);
 
-  const renderUserSpaceMenu = () => {
-    return (
-      <div className="user-space-menu">
-        <Input.Search
-          className="mb-[8px]"
-          placeholder="输入空间名称"
-          onChange={(val) => console.log(val)}
-        />
-        <div className="recent-txt">最近使用</div>
-        <div className="recent-spaces space-list">
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <Popover position="top" content={<span>成员与设置</span>}>
-              <IconSettings className="setting-icon" />
-            </Popover>
-          </div>
-        </div>
-        <div className="user-spaces space-list">
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <IconSettings className="setting-icon" />
-          </div>
-          <div className="space-item">
-            <span>
-              <SpaceIcon1 className="space-icon" />
-              <span className="space-title">XXX的团队</span>
-            </span>
-            <IconSettings className="setting-icon" />
-          </div>
-        </div>
-        <div className="space-actions">
-          <div className="space-btn" onClick={() => setShowCreateModel(true)}>
-            <IconPlus />
-            新增空间
-          </div>
-          <div className="space-btn">
-            <IconSettings />
-            空间管理
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex-none">{CustomHeader && <CustomHeader />}</div>
@@ -347,23 +405,11 @@ function LayoutWithSider(props: { children }) {
           <Sider
             collapsed={collapsed}
             onCollapse={handleCollapsed}
-            collapsible
-            trigger={
-              collapsed ? (
-                <IconMenuUnfold className="modaforge-icon-clickable" />
-              ) : (
-                <IconMenuFold className="modaforge-icon-clickable" />
-              )
-            }
-            breakpoint="xl"
             className={cn(
               'modaforge-sider bg-transparent shadow-none',
               collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
             )}
           >
-            {/* <div className="mb-[18px] mt-[26px] pl-[20px] text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-              {collapsed ? '' : '多模态治理平台'}
-            </div> */}
             {knowledgeDetailSidebar &&
               (collapsed ? (
                 <div

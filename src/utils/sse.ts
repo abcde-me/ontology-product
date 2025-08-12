@@ -6,7 +6,7 @@ import type {
 } from './type';
 import type { VisionFile } from './type';
 import { Message } from '@arco-design/web-react';
-import { getToken } from '@/utils/request'
+import { getToken } from '@/utils/request';
 
 const ContentType = {
   json: 'application/json',
@@ -20,6 +20,8 @@ const baseOptions = {
   method: 'GET',
   mode: 'cors',
   credentials: 'include', // always send cookies、HTTP Basic authentication.
+  // TODO: ts错误
+  // @ts-expect-error
   headers: new Headers({
     'Content-Type': ContentType.json,
     ...getToken()

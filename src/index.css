@@ -38,11 +38,18 @@ ul li {
   padding: 0px 20px;
   box-sizing: border-box;
   height: 50px;
-  background-position: 50px -40px, right center, left, left;
-  background-size: 376px 120px, 90px 60px, 100%, 100%;
+  background-position:
+    50px -40px,
+    right center,
+    left,
+    left;
+  background-size:
+    376px 120px,
+    90px 60px,
+    100%,
+    100%;
   background-repeat: no-repeat;
-  background-image: url(./assets/bg-l.png),
-    url(./assets/bg-r.png),
+  background-image: url(./assets/bg-l.png), url(./assets/bg-r.png),
     linear-gradient(268deg, #42b6ff -2%, #2761f3 59%, #304cd8 95%),
     linear-gradient(95deg, #407aff 17%, #1c5ff6 43%);
 
@@ -55,7 +62,7 @@ ul li {
   }
 
   .app-name {
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 16px;
   }
 }
@@ -66,4 +73,8 @@ ul li {
 }
 .user-info-popup .arco-dropdown-menu {
   border: none;
+}
+.arco-form-label-item > label {
+  font-size: 14px;
+  white-space: nowrap;
 }

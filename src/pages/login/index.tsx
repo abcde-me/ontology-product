@@ -1,36 +1,64 @@
 import { login } from '@/api/user';
 import LoginBgPng from '@/assets/LOGINbg.png';
 import LogoPng from '@/assets/logo.png';
-import { setLocalStorage, removeLocalStorage, getLocalStorage } from '@/utils/storage';
-import { Button, Card, Form, Input } from '@arco-design/web-react';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { setLoginToken, removeLoginToken, getLoginToken } from '@/utils/env';
+import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
+import React, { useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const LoginCard = () => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const location = useLocation();
+
+  // 获取重定向URL
+  const getRedirectPath = () => {
+    const params = new URLSearchParams(location.search);
+    const redirectUri = params.get('redirect_uri');
+    if (redirectUri) {
+      try {
+        const url = new URL(redirectUri);
+        // 只返回路径部分，不包括域名
+        return url.pathname + url.search + url.hash;
+      } catch (e) {
+        console.error('Invalid redirect URL:', e);
+      }
+    }
+    // 默认重定向到应用商店页面
+    return '/tenant/compute/modaforge/connection';
+  };
 
   const handleSubmit = async (values: any) => {
-    console.log(values);
-    const res = await login(values);
-    console.log('登录结果', res);
-    if (res.success) {
-      // 测试解析后端返回的实际 token
-      const testToken = res.data.token;
-      console.log('解析后端返回的实际 token:');
-      
-      // // 导入解析工具
-      // import('@/utils/authUtils').then(({ getTokenExpiration, isValidToken }) => {
-      //   console.log('Token 有效性:', isValidToken(testToken));
-      //   const expTime = getTokenExpiration(testToken);
-      //   console.log('过期时间:', expTime ? new Date(expTime).toLocaleString() : '解析失败');
-      // });
-      if(getLocalStorage('loginToken')){
-         removeLocalStorage('loginToken')
+    try {
+      setLoading(true);
+      console.log(values);
+      const res = await login(values);
+      console.log('登录结果', res);
+      if (res.success) {
+        // 测试解析后端返回的实际 token
+        const testToken = res.data.token;
+        console.log('解析后端返回的实际 token:');
+
+        // // 导入解析工具
+        // import('@/utils/authUtils').then(({ getTokenExpiration, isValidToken }) => {
+        //   console.log('Token 有效性:', isValidToken(testToken));
+        //   const expTime = getTokenExpiration(testToken);
+        //   console.log('过期时间:', expTime ? new Date(expTime).toLocaleString() : '解析失败');
+        // });
+        if (getLoginToken()) {
+          removeLoginToken();
+        }
+        setLoginToken(res.data.token);
+        localStorage.removeItem('cascader');
+        // 重定向到之前的页面或默认页面
+        const redirectPath = getRedirectPath();
+        history.push(redirectPath);
       }
-      setLocalStorage('loginToken', res.data.token);
-      // TODO: 跳转到哪里
-      history.push('/tenant/compute/appforge/member');
+    } catch (error) {
+      console.error('登录失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,23 +76,12 @@ const LoginCard = () => {
         bordered={false}
         style={{
           borderRadius: '12px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          padding: '20px 2px'
         }}
       >
         {/* Logo 和标题部分 */}
-        <div className="mb-8 flex w-full max-w-md flex-col items-center">
-          <div className="flex w-full flex-row items-center justify-between">
-            <div className="flex items-center">
-              <img
-                src={LogoPng}
-                alt="Logo"
-                className="mr-6 w-48 object-contain"
-              />
-              <div className="mx-4 h-6 w-px bg-gray-400" />
-            </div>
-            <div className="text-xl font-bold text-gray-800">AppForge</div>
-          </div>
-        </div>
+        <Header />
 
         {/* 表单部分 */}
         <Form
@@ -74,7 +91,11 @@ const LoginCard = () => {
           onSubmit={handleSubmit}
         >
           <Form.Item
-            label={<div className="text-bold text-gray-800">账号</div>}
+            label={
+              <div className="max-w-30 text-[14px] font-bold text-gray-800">
+                用户名
+              </div>
+            }
             field="account"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
@@ -82,7 +103,9 @@ const LoginCard = () => {
           </Form.Item>
 
           <Form.Item
-            label={<div className="text-bold text-gray-800">密码</div>}
+            label={
+              <div className="text-[14px] font-bold text-gray-800">密码</div>
+            }
             field="password"
             rules={[{ required: true, message: '请输入密码' }]}
           >
@@ -90,8 +113,15 @@ const LoginCard = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" long htmlType="submit" className="mt-4">
-              登录
+            <Button
+              type="primary"
+              long
+              htmlType="submit"
+              className="mt-4"
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? '登录中...' : '登录'}
             </Button>
           </Form.Item>
         </Form>
@@ -101,3 +131,17 @@ const LoginCard = () => {
 };
 
 export default LoginCard;
+
+function Header() {
+  return (
+    <div className="flex justify-center">
+      <Space className="mb-8">
+        <img className="w-48 object-contain" src={LogoPng} />
+        <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
+        <div className="text-xl font-bold text-gray-800">
+          多模态数据治理平台
+        </div>
+      </Space>
+    </div>
+  );
+}

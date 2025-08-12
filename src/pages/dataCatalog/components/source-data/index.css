@@ -1,0 +1,17 @@
+.my-tree-title {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+/* 悬浮时高亮 */
+.arco-tree-node:hover .my-tree-title {
+  background: #e8f3ff;
+}
+
+/* 选中时高亮 */
+.arco-tree-node-selected .my-tree-title {
+  background: #2563eb;
+  color: #fff;
+}
