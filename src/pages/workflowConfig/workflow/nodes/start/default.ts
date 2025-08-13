@@ -34,6 +34,12 @@ const nodeDefault: NodeDefault<StartNodeType> = {
         category: '视频',
         enabled: true,
         format: ['MP4', 'MOV', 'MKV']
+      },
+      {
+        id: 5,
+        category: '自定义',
+        enabled: true,
+        format: []
       }
     ]
   },

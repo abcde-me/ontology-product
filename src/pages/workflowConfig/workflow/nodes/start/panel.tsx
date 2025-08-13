@@ -15,7 +15,10 @@ import {
   Select,
   Checkbox,
   Switch,
-  Cascader
+  Cascader,
+  Button,
+  Tag,
+  AutoComplete
 } from '@arco-design/web-react';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, debounce } from 'lodash-es';
@@ -23,12 +26,14 @@ import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
+import CustomizeIcon from '@/assets/file/customize-icon.svg';
 import StartNodeDefault, { FileOptions } from './default';
 import { useStoreApi } from 'reactflow';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getLoadTaskFiles } from '@/api/loadApi';
 import { useHistory } from 'react-router-dom';
+import { IconPlus } from '@arco-design/web-react/icon';
 
 const FormItem = Form.Item;
 const i18nPrefix = 'workflow.nodes.start';
@@ -36,15 +41,22 @@ const i18nPrefix = 'workflow.nodes.start';
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
+  const [customizeFormat, setCustomizeFormat] = useState<string[]>(
+    data?.data_category?.[4]?.format || []
+  );
+  const [customizeInputValue, setCustomizeInputValue] = useState('');
+  const [customizeOptions, setCustomizeOptions] = useState<string[]>([]);
   const [form] = Form.useForm();
   // const store = useStoreApi();
   // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
   const history = useHistory();
+  const { Option } = AutoComplete;
 
   const docParams = Form.useWatch('data_category[0]', form);
   const imageParams = Form.useWatch('data_category[1]', form);
   const audioParams = Form.useWatch('data_category[2]', form);
   const videoParams = Form.useWatch('data_category[3]', form);
+  const customizeParams = Form.useWatch('data_category[4]', form);
 
   const { readOnly, inputs, updateInputs, doFileConfigChange } = useConfig(
     id,
@@ -57,6 +69,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
 
   const handleChanged = (values: any) => {
     const name = srcDirs.find((s) => s.id === values.data_path_id)?.name;
+    console.log(values, 'valuesvaluesvalues');
+
     updateInputs({ ...values, data_path_name: name });
   };
 
@@ -109,6 +123,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     handleImageChange();
     handleAudioChange();
     handleVideoChange();
+    handleCustomizeChange(false);
   };
   const handleDocChange = () => {
     const docConfig = form.getFieldValue('data_category[0]');
@@ -140,6 +155,57 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       BlockEnum.Video,
       form.getFieldValue('data_path_id'),
       videoConfig
+    );
+  };
+
+  const handleCustomizeSwitch = () => {
+    const customizeConfig = form.getFieldValue('data_category[4]');
+    doFileConfigChange(
+      BlockEnum.Customize,
+      form.getFieldValue('data_path_id'),
+      customizeConfig
+    );
+  };
+  const handleCustomizeChange = (isClose: boolean, index?: number) => {
+    if (!customizeInputValue) {
+      if (!isClose) {
+        return;
+      }
+    }
+    const customizeConfig = form.getFieldValue('data_category[4]');
+    const newFormat = isClose
+      ? customizeFormat.filter((_, i) => i !== index)
+      : [...customizeFormat, customizeInputValue];
+    setCustomizeFormat(newFormat);
+    setCustomizeInputValue('');
+    const updatedConfig = {
+      ...customizeConfig,
+      format: newFormat
+    };
+    form.setFieldValue('data_category[4]', updatedConfig);
+    handleChanged({
+      ...data,
+      data_category: [
+        docParams,
+        imageParams,
+        audioParams,
+        videoParams,
+        updatedConfig
+      ]
+    });
+    console.log(updatedConfig, index, 'updatedConfig');
+    doFileConfigChange(
+      BlockEnum.Customize,
+      form.getFieldValue('data_path_id'),
+      updatedConfig
+    );
+  };
+
+  const handleSearch = (inputValue) => {
+    setCustomizeOptions(
+      inputValue
+        ? new Array(5).fill(null).map((_, index) => `${inputValue}_${index}`)
+        : []
     );
   };
 
@@ -238,7 +304,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                   (docParams.enabled && docParams.types.length) ||
                   (imageParams.enabled && imageParams.types.length) ||
                   (audioParams.enabled && audioParams.types.length) ||
-                  (videoParams.enabled && videoParams.types.length)
+                  (videoParams.enabled && videoParams.types.length) ||
+                  (customizeParams.enabled && customizeParams.types.length)
                 ) {
                   return cb();
                 }
@@ -354,6 +421,71 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 onChange={handleVideoChange}
               />
             </FormItem>
+          </div>
+          <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
+            <div className="flex h-[22px] items-center gap-x-[8px]">
+              <FormItem
+                field="data_category[4].enabled"
+                noStyle
+                triggerPropName="checked"
+              >
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  onChange={handleCustomizeSwitch}
+                />
+              </FormItem>
+              <CustomizeIcon className="size-[16px]" />
+              <span className="text-[14px]/[22px] font-semibold">自定义</span>
+            </div>
+            {customizeParams?.enabled && !readOnly && (
+              <div>
+                <div className="flex">
+                  <AutoComplete
+                    className="w-[422px]"
+                    placeholder="请输入文件类型"
+                    value={customizeInputValue}
+                    onChange={(v) => setCustomizeInputValue(v)}
+                    onSearch={handleSearch}
+                  >
+                    {customizeOptions.map((option) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
+                  </AutoComplete>
+                  <Button
+                    className="ml-[12px]"
+                    style={{
+                      borderColor: '#007DFA',
+                      color: '#007DFA'
+                    }}
+                    type="outline"
+                    icon={<IconPlus />}
+                    onClick={() => handleCustomizeChange(false)}
+                  >
+                    添加
+                  </Button>
+                </div>
+                {customizeFormat.length > 0 && (
+                  <div className="mt-[15px] flex">
+                    <span className="line-h-[20px] w-[36px]">已选：</span>
+                    <div>
+                      {customizeFormat.map((item, index) => (
+                        <Tag
+                          className="mx-[8px] bg-[#E7ECF0]"
+                          closable
+                          key={index}
+                          onClose={() => handleCustomizeChange(true, index)}
+                        >
+                          {item}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </FormItem>
       </Form>
