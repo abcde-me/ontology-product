@@ -29,7 +29,8 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
     (data_category?.[0]?.enabled && data_category?.[0]?.format.length > 0) ||
     (data_category?.[1]?.enabled && data_category?.[1]?.format.length > 0) ||
     (data_category?.[2]?.enabled && data_category?.[2]?.format.length > 0) ||
-    (data_category?.[3]?.enabled && data_category?.[3]?.format.length > 0);
+    (data_category?.[3]?.enabled && data_category?.[3]?.format.length > 0) ||
+    (data_category?.[4]?.enabled && data_category?.[4]?.format.length > 0);
 
   useEffect(() => {
     getCatalogList({ root_type: 1 }).then((res) => {
@@ -71,6 +72,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
       doFileConfigChange(BlockEnum.Pic, data_path_id, data_category?.[1]);
       doFileConfigChange(BlockEnum.Audio, data_path_id, data_category?.[2]);
       doFileConfigChange(BlockEnum.Video, data_path_id, data_category?.[3]);
+      doFileConfigChange(BlockEnum.Customize, data_path_id, data_category?.[4]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -109,6 +111,8 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
                 data_category?.[2]?.format.length > 0 && <div>音频</div>}
               {data_category?.[3]?.enabled &&
                 data_category?.[3]?.format.length > 0 && <div>视频</div>}
+              {data_category?.[4]?.enabled &&
+                data_category?.[4]?.format?.length > 0 && <div>自定义</div>}
             </div>
           )}
           {!hasFileTypes && (
