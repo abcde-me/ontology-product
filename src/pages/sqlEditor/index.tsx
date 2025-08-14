@@ -1,6 +1,5 @@
 import React from 'react';
-import { Tabs, Typography } from '@arco-design/web-react';
-import SqlEditor from './components/SqlEdior';
+import { Tabs } from '@arco-design/web-react';
 import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 import { IconCode, IconList } from '@arco-design/web-react/icon';
 import DataFrames from './components/DataFrames';
@@ -9,15 +8,7 @@ import Scripts from './components/Scripts';
 import SqlWorkspace from './components/SqlWorkspace';
 import './index.less';
 
-import { useSqlIndexStore, SqlIndexStore } from './store';
-
 export default function SqlEditorIndex() {
-  const dataframesList = useSqlIndexStore(
-    (state: SqlIndexStore) => state.dataframesList
-  );
-
-  console.log('dataframesList', dataframesList);
-
   return (
     <div className="flex h-full overflow-hidden bg-white">
       <div className="shrik-0 w-[300px] border-r">

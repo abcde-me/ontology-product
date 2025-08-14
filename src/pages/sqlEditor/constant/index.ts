@@ -3,32 +3,41 @@ export const SQL_EDITOR_HEIGHT = '300px';
 export const DATAFRAMES_LIST = [
   {
     id: 'root_001',
-    name: '生产环境',
+    name: '管理机器人项目',
     type: 'folder',
     children: [
       {
         id: 'ds_001',
-        name: '用户数据库',
+        name: '销售管理平台',
         type: 'database',
-        icon: 'database',
         children: [
           {
             id: 'schema_001',
-            name: 'public',
+            name: 'custom',
             type: 'schema',
             children: [
               {
                 id: 'tbl_001',
                 name: 'users',
                 type: 'table',
-                icon: 'table',
-                comment: '用户信息表'
+                comment: '用户信息表',
+                children: [
+                  {
+                    id: 'tbl_001_001',
+                    name: '字段1',
+                    type: 'field'
+                  },
+                  {
+                    id: 'tbl_001_002',
+                    name: '字段2',
+                    type: 'field'
+                  }
+                ]
               },
               {
                 id: 'tbl_002',
                 name: 'orders',
                 type: 'table',
-                icon: 'table',
                 comment: '订单表'
               }
             ]
@@ -37,20 +46,18 @@ export const DATAFRAMES_LIST = [
       },
       {
         id: 'ds_002',
-        name: '订单数据库',
+        name: '经营报表系统',
         type: 'database',
-        icon: 'database',
         children: [
           {
             id: 'schema_002',
-            name: 'public',
+            name: 'custom',
             type: 'schema',
             children: [
               {
                 id: 'tbl_003',
                 name: 'products',
                 type: 'table',
-                icon: 'table',
                 comment: '产品表'
               }
             ]
@@ -68,7 +75,6 @@ export const DATAFRAMES_LIST = [
         id: 'ds_test_001',
         name: '测试数据库',
         type: 'database',
-        icon: 'database',
         children: []
       }
     ]
