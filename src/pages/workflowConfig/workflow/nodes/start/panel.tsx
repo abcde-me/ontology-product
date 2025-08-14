@@ -45,7 +45,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     data?.data_category?.[4]?.format || []
   );
   const [customizeInputValue, setCustomizeInputValue] = useState('');
-  const [customizeOptions, setCustomizeOptions] = useState<string[]>([]);
   const [form] = Form.useForm();
   // const store = useStoreApi();
   // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
@@ -198,14 +197,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       BlockEnum.Customize,
       form.getFieldValue('data_path_id'),
       updatedConfig
-    );
-  };
-
-  const handleSearch = (inputValue) => {
-    setCustomizeOptions(
-      inputValue
-        ? new Array(5).fill(null).map((_, index) => `${inputValue}_${index}`)
-        : []
     );
   };
 
@@ -444,16 +435,10 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                   <AutoComplete
                     className="w-[422px]"
                     placeholder="请输入文件类型"
+                    data={customizeFormat}
                     value={customizeInputValue}
                     onChange={(v) => setCustomizeInputValue(v)}
-                    onSearch={handleSearch}
-                  >
-                    {customizeOptions.map((option) => (
-                      <Option key={option} value={option}>
-                        {option}
-                      </Option>
-                    ))}
-                  </AutoComplete>
+                  />
                   <Button
                     className="ml-[12px]"
                     style={{

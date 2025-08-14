@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Form, Modal } from '@arco-design/web-react';
+import { Button, Form, Modal, Spin } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/legacy-modes/mode/python';
@@ -8,6 +8,7 @@ import useConfig from './use-config';
 import {
   IconCaretRight,
   IconExpand,
+  IconRecordStop,
   IconShrink
 } from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
@@ -21,6 +22,8 @@ const Panel = ({ id, data, parentRef }) => {
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
   const [isModalSticky, setModalSticky] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [runningTime, setRunningTime] = useState(0);
   const stickyRef = useRef<HTMLDivElement>(null);
   const stickyModalRef = useRef<HTMLDivElement>(null);
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
@@ -129,6 +132,17 @@ df = pd.DataFrame({
     };
   }, [modalElement]);
 
+  // 运行时间
+  useEffect(() => {
+    if (!isRunning) return;
+    const timer = setInterval(() => {
+      setRunningTime((prev) => prev + 1);
+    }, 1000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [isRunning]);
+
   const myTheme = createTheme({
     theme: 'light',
     settings: {
@@ -146,6 +160,8 @@ df = pd.DataFrame({
   });
 
   const handleCustomizeRun = () => {
+    setIsRunning(!isRunning);
+    setRunningTime(0);
     const { edges, getNodes } = store.getState();
     const nodes = getNodes();
     const params = {
@@ -183,30 +199,53 @@ df = pd.DataFrame({
           labelAlign="left"
           required
         >
-          <div className="editor-container">
+          <div
+            className={`editor-container ${isRunning ? 'bg-[#F8FAFD]' : 'bg-white'}`}
+          >
             <div
               ref={stickyRef}
-              className={`sticky top-[101px] z-10 flex h-[52px] items-center justify-between bg-white px-[12px] py-[10px] ${isSticky ? 'is-sticky' : ''}`}
+              className={`sticky top-[101px] z-10 flex h-[52px] items-center justify-between px-[12px] py-[10px] ${isSticky ? 'is-sticky' : ''}`}
             >
-              <Button
-                type="primary"
-                onClick={handleCustomizeRun}
-                icon={<IconCaretRight />}
-              >
-                测试运行
-              </Button>
+              <div className="flex items-center">
+                <Button
+                  type={isRunning ? 'outline' : 'primary'}
+                  style={
+                    isRunning
+                      ? {
+                          borderColor: '#007DFA',
+                          color: '#007DFA'
+                        }
+                      : {}
+                  }
+                  onClick={handleCustomizeRun}
+                  disabled={!value}
+                  icon={isRunning ? <IconRecordStop /> : <IconCaretRight />}
+                >
+                  {isRunning ? '终止运行' : '测试运行'}
+                </Button>
+                {isRunning ? (
+                  <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
+                    <span>运行中</span>
+                    <Spin size={14} className="ml-[4px]" />
+                    <span className="ml-[8px]">{runningTime}s</span>
+                  </div>
+                ) : null}
+              </div>
               <IconExpand
-                className="full-screen-icon"
+                className={`full-screen-icon ${isRunning ? 'pointer-events-none' : ''}`}
                 onClick={() => setVisible(true)}
               />
             </div>
-            <div className="mt-[2px] px-[12px]">
+            <div
+              className={`mt-[2px] px-[12px] ${isRunning ? 'running-code-mirror' : ''}`}
+            >
               <CodeMirror
                 value={value}
                 theme={myTheme}
                 placeholder={placeholderValue}
                 extensions={[StreamLanguage.define(python)]}
                 onChange={onChange}
+                readOnly={isRunning}
                 basicSetup={{
                   lineNumbers: true,
                   highlightActiveLineGutter: false
