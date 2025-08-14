@@ -115,28 +115,28 @@ const NotebookMainContent: React.FC = () => {
   return (
     <div className="notebook-main-content">
       {/* 头部标签页区域 */}
-      <div className="main-header">
-        <Tabs
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          className="notebook-tabs"
-          type="card"
-          showAddButton
-          onAddTab={handleAddTab}
-          onDeleteTab={handleCloseTab}
-          editable
-        >
-          {notebookTabs.map((tab) => (
-            <TabPane
-              key={tab.key}
-              title={tab.title}
-              closable={notebookTabs.length > 1}
-            >
-              {/* 标签页内容为空，实际内容在工作区 */}
-            </TabPane>
-          ))}
-        </Tabs>
-      </div>
+      {/* <div className="main-header"> */}
+      <Tabs
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        className="notebook-tabs"
+        type="card"
+        showAddButton
+        onAddTab={handleAddTab}
+        onDeleteTab={handleCloseTab}
+        editable
+      >
+        {notebookTabs.map((tab) => (
+          <TabPane
+            key={tab.key}
+            title={tab.title}
+            closable={notebookTabs.length > 1}
+          >
+            {/* 标签页内容为空，实际内容在工作区 */}
+          </TabPane>
+        ))}
+      </Tabs>
+      {/* </div> */}
 
       {/* 工作区 */}
       <div className="main-workspace">
