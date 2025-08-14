@@ -149,16 +149,29 @@ export const SQL_EDITOR_TABS = [
   {
     title: 'SQL脚本名称1',
     key: '1',
+    status: 'done',
+    error: null,
     content: "SELECT * FROM users WHERE name = 'SQL脚本名称1';"
   },
   {
     title: 'SQL脚本名称2',
     key: '2',
+    status: 'process',
+    error: null,
     content: "SELECT * FROM users WHERE name = 'SQL脚本名称2';"
   },
   {
     title: 'SQL脚本名称3',
     key: '3',
+    status: 'done',
+    error: { msg: 'SQL脚本语法错误' },
     content: "SELECT * FROM users WHERE name = 'SQL脚本名称3';"
+  },
+  {
+    title: 'SQL脚本名称4',
+    key: '4',
+    status: 'init',
+    error: null,
+    content: ''
   }
 ];

@@ -6,8 +6,15 @@ import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
 import { createSqlLinter } from '../utils/sqlLinterUtil';
 import { FullscreenContainer } from '../components/Fullscreen';
-import { Button, Space, Typography } from '@arco-design/web-react';
+import { Button, Link, Space, Typography } from '@arco-design/web-react';
 import { SQL_EDITOR_HEIGHT } from '../constant';
+
+/**
+ * TODO:
+ * 当前坐标位置，插入表
+ * 当前坐标位置，插入字段
+ * Sparksql 方言语法解析
+ */
 
 const sqlLinter = createSqlLinter({
   checkPerformance: false,
@@ -67,21 +74,25 @@ function SqlEditor(props: SqlEditorProps) {
         {({ isFullscreen, toggleFullscreen }) => {
           return (
             <div className="flex h-full flex-col overflow-hidden">
-              <div className="shrik-0 flex items-center justify-between">
-                <Typography.Title heading={6}>SparkSql</Typography.Title>
-                <Space className="">
-                  <Button type="text" onClick={handleRunCode}>
-                    立即执行
-                  </Button>
-                  <Button type="text" onClick={handleRunSelectedCode}>
-                    运行选中代码
-                  </Button>
-                  <Button type="text" onClick={handleFormatCode}>
-                    格式化
-                  </Button>
-                  <Button type="text" onClick={toggleFullscreen}>
-                    {isFullscreen ? '退出全屏' : '全屏'}
-                  </Button>
+              <div className="shrik-0 flex items-center justify-between bg-blue-50 px-[12px]">
+                <span className="text-[16px] font-[600] leading-[40px] text-[rgb(var(--blue-6))]">
+                  SparkSql
+                </span>
+                <Space size={10}>
+                  <Link href="#" onClick={handleRunCode}>
+                    <span className="font-[600]">立即执行</span>
+                  </Link>
+                  <Link href="#" onClick={handleRunCode}>
+                    <span className="font-[600]">保存SQL脚本</span>
+                  </Link>
+                  <Link href="#" onClick={handleFormatCode}>
+                    <span className="font-[600]">格式化</span>
+                  </Link>
+                  <Link href="#" onClick={toggleFullscreen}>
+                    <span className="font-[600]">
+                      {isFullscreen ? '退出全屏' : '全屏'}
+                    </span>
+                  </Link>
                 </Space>
               </div>
 

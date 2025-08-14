@@ -1,4 +1,4 @@
-import { Tabs } from '@arco-design/web-react';
+import { Alert, Space, Spin, Tabs } from '@arco-design/web-react';
 import React, { FC, useState } from 'react';
 import { SQL_EDITOR_TABS } from '../constant';
 import SqlEditor from './SqlEdior';
@@ -30,7 +30,32 @@ const SqlWorkspace: FC = () => {
               <SqlEditor initialState={x.content} />
             </div>
             <div className="flex-1 overflow-auto">
-              <SqlResult initialState={x.content} />
+              {x.status === 'process' && (
+                <Alert
+                  className="my-alert"
+                  type="info"
+                  title="操作提示"
+                  content={
+                    <Space>
+                      <span>数据处理中，请稍后...</span>
+                      <Spin dot />
+                    </Space>
+                  }
+                />
+              )}
+
+              {x.error && (
+                <Alert
+                  className="my-alert"
+                  type="error"
+                  title="错误提示"
+                  content={<span>{x.error.msg}</span>}
+                />
+              )}
+
+              {x.status === 'done' && x.error === null && (
+                <SqlResult initialState={x.content} />
+              )}
             </div>
           </div>
         </TabPane>
