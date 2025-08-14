@@ -7,18 +7,23 @@ import { lintGutter } from '@codemirror/lint';
 import { createSqlLinter } from '../utils/sqlLinterUtil';
 import { FullscreenContainer } from '../components/Fullscreen';
 import { Button, Space, Typography } from '@arco-design/web-react';
+import { SQL_EDITOR_HEIGHT } from '../constant';
 
 const sqlLinter = createSqlLinter({
   checkPerformance: false,
   checkInjection: false
 });
 
-function SqlEditor() {
+interface SqlEditorProps {
+  initialState?: string;
+}
+
+function SqlEditor(props: SqlEditorProps) {
+  const { initialState } = props;
+
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
-  const [value, setValue] = React.useState(
-    `SELECT * FROM users WHERE name = 'Alice';`
-  );
+  const [value, setValue] = React.useState(initialState);
 
   const [selectedCode, setSelectedCode] = useState('');
 
@@ -55,13 +60,14 @@ function SqlEditor() {
   return (
     <>
       <FullscreenContainer
+        className="h-full"
         onEnter={() => console.log('进入全屏')}
         onExit={() => console.log('退出全屏')}
       >
         {({ isFullscreen, toggleFullscreen }) => {
           return (
-            <>
-              <div className="flex items-center justify-between">
+            <div className="flex h-full flex-col overflow-hidden">
+              <div className="shrik-0 flex items-center justify-between">
                 <Typography.Title heading={6}>SparkSql</Typography.Title>
                 <Space className="">
                   <Button type="text" onClick={handleRunCode}>
@@ -79,11 +85,16 @@ function SqlEditor() {
                 </Space>
               </div>
 
-              <div style={editorContainerStyles}>
+              <div
+                className="flex-1 overflow-auto"
+                style={editorContainerStyles}
+              >
                 <CodeMirror
                   ref={editorRef}
                   value={value}
-                  height={isFullscreen ? 'calc(100vh - 100px)' : '200px'}
+                  height={
+                    isFullscreen ? 'calc(100vh - 100px)' : SQL_EDITOR_HEIGHT
+                  }
                   theme={bbedit}
                   extensions={[
                     sql({ upperCaseKeywords: true }),
@@ -93,7 +104,7 @@ function SqlEditor() {
                   onChange={onChange}
                 />
               </div>
-            </>
+            </div>
           );
         }}
       </FullscreenContainer>
