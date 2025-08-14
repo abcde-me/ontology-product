@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DATAFRAMES_LIST } from '../constant';
+import { DATAFRAMES_LIST, DATASETS_LIST } from '../constant';
 
 export interface SqlIndexStore {
   dataframesList: any[];
@@ -8,5 +8,5 @@ export interface SqlIndexStore {
 
 export const useSqlIndexStore = create<SqlIndexStore>((set) => ({
   dataframesList: DATAFRAMES_LIST,
-  datesetsList: []
+  datesetsList: DATASETS_LIST
 }));

@@ -81,7 +81,44 @@ export const DATAFRAMES_LIST = [
   }
 ];
 
-export const DATASETS_LIST = [{}];
+export const DATASETS_LIST = [
+  {
+    id: 'tbl_001',
+    name: 'users',
+    type: 'table',
+    comment: '用户信息表',
+    children: [
+      {
+        id: 'tbl_001_001',
+        name: '字段1',
+        type: 'field'
+      },
+      {
+        id: 'tbl_001_002',
+        name: '字段2',
+        type: 'field'
+      }
+    ]
+  },
+  {
+    id: 'tbl_002',
+    name: 'products',
+    type: 'table',
+    comment: '产品表',
+    children: [
+      {
+        id: 'tbl_002_001',
+        name: '字段1',
+        type: 'field'
+      },
+      {
+        id: 'tbl_002_002',
+        name: '字段2',
+        type: 'field'
+      }
+    ]
+  }
+];
 
 export const SQL_EDITOR_TABS = [
   {
