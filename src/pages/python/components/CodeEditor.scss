@@ -1,0 +1,35 @@
+.code-editor-wrapper {
+  .cm-editor {
+    border-radius: 0;
+    border: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+
+    .cm-scroller {
+      font-family: inherit;
+    }
+
+    .cm-content {
+      padding: 16px;
+    }
+
+    .cm-line {
+      padding: 0;
+    }
+
+    .cm-gutters {
+      background-color: #f8f9fa;
+      border-right: 1px solid #e9ecef;
+      color: #6c757d;
+    }
+
+    .cm-activeLineGutter {
+      background-color: #e3f2fd;
+    }
+
+    .cm-activeLine {
+      background-color: #f8f9fa;
+    }
+  }
+}

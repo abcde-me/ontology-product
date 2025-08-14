@@ -120,8 +120,8 @@ const menus: MenuModel[] = [
         icon: (
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
-        key: 'notebook',
-        path: '/tenant/compute/modaforge/notebook'
+        key: 'python',
+        path: '/tenant/compute/modaforge/python'
       }
     ]
   },

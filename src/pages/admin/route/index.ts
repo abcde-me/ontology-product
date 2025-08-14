@@ -75,9 +75,9 @@ export const routes: IRoute[] = [
   },
   // Notebook
   {
-    name: 'notebook',
-    key: '/tenant/compute/modaforge/notebook',
-    component: React.lazy(async () => import('../../notebook')),
+    name: 'python',
+    key: '/tenant/compute/modaforge/python',
+    component: React.lazy(async () => import('../../python')),
     children: []
   },
   // 创建工作流
