@@ -120,6 +120,31 @@ export const DATASETS_LIST = [
   }
 ];
 
+export const SCRIPTS_LIST = [
+  {
+    id: '1',
+    name: '全部',
+    type: 'all',
+    children: [
+      {
+        id: '1_1',
+        name: 'SQL脚本名称1',
+        type: 'script'
+      },
+      {
+        id: '1_2',
+        name: 'SQL脚本名称2',
+        type: 'script'
+      },
+      {
+        id: '1_3',
+        name: 'SQL脚本名称3',
+        type: 'script'
+      }
+    ]
+  }
+];
+
 export const SQL_EDITOR_TABS = [
   {
     title: 'SQL脚本名称1',

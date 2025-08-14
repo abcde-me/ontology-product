@@ -29,7 +29,7 @@ export default function SqlEditorIndex() {
 
           <TabPane key="script" title={<IconCode className="text-[26px]" />}>
             <div className="flex h-full flex-col overflow-hidden">
-              <TabPaneHeader title="脚本目录" />
+              <TabPaneHeader title="SQL 脚本列表" />
               <div className="flex-1 overflow-auto">
                 {/* 脚本列表 */}
                 <Scripts />
