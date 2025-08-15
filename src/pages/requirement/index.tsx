@@ -103,47 +103,15 @@ export default function Requirement() {
     )
   };
 
-  // // 跳转目录
-  // const handleToDirectoryPath = (
-  //   id: string,
-  //   parent_id: string,
-  //   root_type: string | number
-  // ) => {
-  //   history.push(
-  //     `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-  //   );
-  // };
-
   // 查看详情
   const viewDetailWorkflow = (
     id: number | string,
   ) => {
     history.push(
-      `/tenant/compute/modaforge/requirementDetail?id=${id}`
+      `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
     )
   };
 
-  // 点击删除操作弹窗
-  const handleDelete = (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    Modal.confirm({
-      title: (
-        <span className="workflow-list-modal-title">确认删除工作流吗？</span>
-      ),
-      content: (
-        <div className="workflow-list-modal-content">
-          删除该工作流后，工作流中的内容将全部清除。
-        </div>
-      ),
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => {
-        handleDeleteWorkflow(workflow_uuid, workflow_version);
-      }
-    });
-  };
 
   // 删除工作流
   const handleDeleteWorkflow = async (
@@ -270,18 +238,6 @@ export default function Requirement() {
       )
     },
     {
-      title: '创建人',
-      dataIndex: 'user_name',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
       title: '创建时间',
       dataIndex: 'create_time',
       width: 160,
@@ -295,6 +251,18 @@ export default function Requirement() {
       sorter: true
     },
     {
+      title: '创建人',
+      dataIndex: 'user_name',
+      width: 100,
+      ellipsis: true,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.user_name)}
+          isEdit={false}
+        />
+      )
+    },
+    {
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
@@ -303,37 +271,18 @@ export default function Requirement() {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
-            {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && (
-              <span
-                className="operate-text"
-                onClick={() => {
-                  viewDetailWorkflow(
-                    record.id,
-                  );
-                }}
-              >
-                详情
-              </span>
-            )}
-            {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_DELETE) && (
-              <Popover
-                trigger="hover"
-                content="请先下线工作流"
-                position="top"
-                disabled={!record.is_online}
-              >
-                <span
-                  className={
-                    record.is_online ? 'disabled-text' : 'operate-text'
-                  }
-                  onClick={() =>
-                    handleDelete(record.workflow_uuid, record.workflow_version)
-                  }
-                >
-                  删除
-                </span>
-              </Popover>
-            )}
+            {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
+            <span
+              className="operate-text"
+              onClick={() => {
+                viewDetailWorkflow(
+                  record.id,
+                );
+              }}
+            >
+              详情
+            </span>
+            {/* )} */}
           </div>
         );
       }

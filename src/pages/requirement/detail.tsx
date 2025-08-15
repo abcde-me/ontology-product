@@ -22,7 +22,8 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
 import { DataSourceModal } from '@/pages/requirement/detailModal';
-import JobConfiguration from './job-configuration'
+import JobConfiguration from './job-configuration';
+import ToolAnnotationConfig from './tool-annotation-config';
 import './detail.scss';
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -47,8 +48,9 @@ export default function RequirementDetail() {
     const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
     const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [jobTableContent, setJobTableContent]: any = useState([]);
     // 初始化当前步骤位置
-    const [StepCurrent, setStepCurrent] = useState(1);
+    const [StepCurrent, setStepCurrent] = useState(2);
     // 数据集 - 选中数据内容
     const [selectedData, setSelectedData]: any = useState([]);
     // 初始化详情数据
@@ -104,6 +106,7 @@ export default function RequirementDetail() {
             <RadioGroup
                 className='annotation-radio-group'
                 {...form.getFieldValue('annotationTool')}
+                disabled={type === 'detail'}
                 value={selectedRadio} onChange={(v) => { setSelectedRadio(v) }} style={{ marginBottom: 20 }}>
                 {testData?.list.map((item) => {
                     return (
@@ -234,6 +237,7 @@ export default function RequirementDetail() {
             <div className='basic-configuration'>
                 <Form
                     form={form}
+                    disabled={type === 'detail'}
                     initialValues={{ name: 'admin' }}
                     onValuesChange={(v, vs) => {
                         console.log(v, vs);
@@ -265,16 +269,16 @@ export default function RequirementDetail() {
                             className="basic-tabs"
                             onChange={() => { setSelectedRadio('') }}
                         >
-                            <TabPane key='1' title='图片'>
+                            <TabPane disabled={type === 'detail'} key='1' title='图片'>
                                 <Typography.Paragraph style={TabsStyle}>{annotationData()}</Typography.Paragraph>
                             </TabPane>
-                            <TabPane key='2' title='文本'>
+                            <TabPane disabled={type === 'detail'} key='2' title='文本'>
                                 <Typography.Paragraph style={TabsStyle}>{annotationTextTool()}</Typography.Paragraph>
                             </TabPane>
-                            <TabPane key='3' title='音频'>
+                            <TabPane disabled={type === 'detail'} key='3' title='音频'>
                                 <Typography.Paragraph style={TabsStyle}>{ }</Typography.Paragraph>
                             </TabPane>
-                            <TabPane key='4' title='视频'>
+                            <TabPane disabled={type === 'detail'} key='4' title='视频'>
                                 <Typography.Paragraph style={TabsStyle}>{ }</Typography.Paragraph>
                             </TabPane>
                         </Tabs>
@@ -313,6 +317,7 @@ export default function RequirementDetail() {
         return (
             <div className='tool-configuration'>
                 <Form
+                    disabled={type === 'detail'}
                     form={form}
                     style={{ width: 600 }}
                     autoComplete='off'
@@ -340,6 +345,12 @@ export default function RequirementDetail() {
         }
     }, [selectedRadio, selectedData])
     const stepNext = () => {
+        // 新增：当type为detail时直接跳转，跳过验证
+        if (type === 'detail') {
+            setStepCurrent(StepCurrent + 1);
+            return;
+        }
+
         form.validate()
             .then(() => {
                 console.log('object222');
@@ -352,6 +363,12 @@ export default function RequirementDetail() {
                     setIsShowErrorInfo(true);
                     return;
                 }
+
+                // 新增：发布前检查作业表格内容
+                if (StepCurrent >= 3 && jobTableContent.length <= 0) {
+                    return '请先添加作业配置内容';
+                }
+
                 setStepCurrent(StepCurrent + 1);
             })
             .catch((errorInfo) => {
@@ -365,6 +382,11 @@ export default function RequirementDetail() {
                 }
             });
     }
+    // 2. 在detail.tsx中定义获取表格内容的方法
+    const getJobTableContent = (content: Array<{ key: string, name: string, taskCount: number, type: 'dept' | 'person' }>) => {
+        setJobTableContent(content);
+        // 这里可以添加对表格内容的验证或其他处理
+    };
     return (
         <div className='requirement-detail'>
             <div className="head-breadcrumb-box">
@@ -407,7 +429,8 @@ export default function RequirementDetail() {
                         取消
                     </Button>
                     <Button
-                        // disabled={StepCurrent >= 3}
+                        // 修改：添加发布按钮禁用状态
+                        disabled={StepCurrent >= 3 && jobTableContent.length <= 0}
                         onClick={() => { stepNext() }}
                         style={{ marginLeft: 20, paddingRight: 8 }}
                         type='primary'
@@ -429,11 +452,11 @@ export default function RequirementDetail() {
                 }
                 {/* 工具配置部分 */}
                 {
-                    StepCurrent === 2 && ToolConfiguration()
+                    StepCurrent === 2 && <ToolAnnotationConfig />
                 }
                 {/* 作业配置部分 */}
                 {
-                    StepCurrent === 3 && <JobConfiguration />
+                    StepCurrent === 3 && <JobConfiguration getJobTableContent={getJobTableContent} />
                 }
             </div>
         </div>

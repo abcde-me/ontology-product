@@ -3,8 +3,13 @@ import { Table, Button, Input, Modal, Space, Typography, Tag } from '@arco-desig
 
 const { Title } = Typography;
 
-// 作业配置组件
-const JobConfiguration: React.FC = () => {
+// 添加props接口定义
+interface JobConfigurationProps {
+    getJobTableContent: (content: Array<{ key: string, name: string, taskCount: number, type: 'dept' | 'person' }>) => void;
+}
+
+// 接收getJobTableContent方法作为props
+const JobConfiguration: React.FC<JobConfigurationProps> = ({ getJobTableContent }) => {
     // 状态管理
     const [deptModalVisible, setDeptModalVisible] = useState(false);
     const [personModalVisible, setPersonModalVisible] = useState(false);
@@ -183,6 +188,11 @@ const JobConfiguration: React.FC = () => {
 
         return filteredData;
     };
+    // 新增：获取表格内容
+    useEffect(() => {
+        // 调用父组件传递的方法，将表格内容传递出去
+        getJobTableContent(selectedItems);
+    }, [selectedItems, getJobTableContent]);
 
     return (
         <div className="job-configuration-container" style={{ padding: '20px' }}>
@@ -312,5 +322,6 @@ const JobConfiguration: React.FC = () => {
         </div>
     );
 };
+
 
 export default JobConfiguration;
