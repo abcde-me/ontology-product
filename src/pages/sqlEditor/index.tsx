@@ -11,7 +11,7 @@ import './index.less';
 export default function SqlEditorIndex() {
   return (
     <div className="flex h-full overflow-hidden bg-white">
-      <div className="shrik-0 w-[300px] border-r">
+      <div className="w-[300px] shrink-0 border-r">
         <Tabs tabPosition="left" className="my-vertical-tabs h-full">
           <TabPane key="data" title={<IconList className="text-[26px]" />}>
             <div className="flex h-full flex-col overflow-hidden">

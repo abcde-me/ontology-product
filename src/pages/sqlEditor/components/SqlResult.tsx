@@ -55,7 +55,7 @@ const SqlResult: FC<SqlResultProps> = (props) => {
       {({ isFullscreen, toggleFullscreen }) => {
         return (
           <div className="flex h-full flex-col overflow-hidden">
-            <div className="shrik-0 flex items-center justify-between bg-blue-50 px-[12px]">
+            <div className="flex shrink-0 items-center justify-between bg-blue-50 px-[12px]">
               <span className="text-[16px] font-[600] leading-[40px] text-[rgb(var(--blue-6))]">
                 查询结果
               </span>
