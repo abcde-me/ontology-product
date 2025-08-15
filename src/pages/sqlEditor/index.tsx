@@ -6,7 +6,7 @@ import DataFrames from './components/DataFrames';
 import Datasets from './components/Datasets';
 import Scripts from './components/Scripts';
 import SqlWorkspace from './components/SqlWorkspace';
-import './index.less';
+import './index.scss';
 
 export default function SqlEditorIndex() {
   return (
