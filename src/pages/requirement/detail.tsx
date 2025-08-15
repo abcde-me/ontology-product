@@ -4,8 +4,10 @@ import {
     Button,
     Form,
     Input,
+    Popover,
     Radio,
     Steps,
+    Table,
     Tabs,
     Typography,
 } from '@arco-design/web-react';
@@ -19,8 +21,9 @@ import {
 } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
+import { DataSourceModal } from '@/pages/requirement/detailModal';
+import JobConfiguration from './job-configuration'
 import './detail.scss';
-import { set } from 'lodash';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -42,10 +45,12 @@ export default function RequirementDetail() {
     const userInfo = useUserInfo();
     const [selectedRadio, setSelectedRadio] = useState('');
     const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
+    const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
     // 初始化当前步骤位置
     const [StepCurrent, setStepCurrent] = useState(1);
     // 数据集 - 选中数据内容
-    const [selectedData, setSelectedData] = useState([]);
+    const [selectedData, setSelectedData]: any = useState([]);
     // 初始化详情数据
     const [taskDetailData, setTaskDetailData] = useState<any>({});
     // 初始化当前选中的节点类型
@@ -136,49 +141,121 @@ export default function RequirementDetail() {
     const info = Form.useWatch('info', form);
     const annotationScene = Form.useWatch('annotationScene', form);
     const a = Form.useWatch('a', form);
+    const handleChildData = (data: any) => {
+        console.log('object', data);
+        setSelectedData(data);
+    };
+    //格式化时间函数
+    const formatDateTime = (dateTimeString: string): string => {
+        try {
+            const date = new Date(dateTimeString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        } catch (error) {
+            return dateTimeString; // 如果格式化失败，返回原字符串
+        }
+    };
+    // 添加移除数据函数
+    const handleRemove = (id: number) => {
+        setSelectedData(prevData => prevData.filter(item => item.id !== id));
+    };
+
+    // table -- 
+    const columns = [
+        {
+            title: '目录名称',
+            dataIndex: 'file_name',
+            ellipsis: true,
+            width: 200,
+            render: (_, record) => (
+                // 产品需求：文件名提示常驻
+                <Popover content={record.file_sub_path}>
+                    <span>{record.file_name}</span>
+                </Popover>
+            )
+        },
+        {
+            title: '载入开始时间',
+            dataIndex: 'task_load_start_time',
+            width: 180,
+            sorter: true,
+
+            // sortOrder: 'ascend',
+            // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+            sortDirections: ['ascend' as const, 'descend' as const],
+            render: (_, record) => formatDateTime(record.task_load_start_time)
+        },
+        {
+            title: '载入结束时间',
+            dataIndex: 'task_load_end_time',
+            width: 180,
+            sorter: true,
+            sortDirections: ['ascend' as const, 'descend' as const],
+            render: (_, record) => formatDateTime(record.task_load_start_time)
+        },
+        {
+            title: '数据量',
+            dataIndex: 'data_size',
+            ellipsis: true,
+            width: 100
+        },
+        {
+            title: '创建人',
+            dataIndex: 'upload_user',
+            ellipsis: true,
+            width: 100
+        },
+        {
+            title: '运行ID',
+            dataIndex: 'task_id',
+            width: 180,
+        },
+        {
+            title: '操作',
+            dataIndex: 'actions',
+            fixed: 'right' as const,
+            width: 88,
+            render: (_, record) => {
+                return (
+                    <div onClick={() => handleRemove(record.id)} style={{ cursor: 'pointer', color: '#f5222d' }}>移除</div>
+                )
+            }
+        }
+    ];
     // 基础配置内容
     const basicConfiguration = () => {
         return (
             <div className='basic-configuration'>
                 <Form
                     form={form}
-                    style={{ width: 600 }}
                     initialValues={{ name: 'admin' }}
-                    autoComplete='off'
                     onValuesChange={(v, vs) => {
                         console.log(v, vs);
                     }}
-                    onSubmit={(v) => {
-                        console.log(v);
+                    labelCol={{
+                        span: 2
                     }}
                 >
                     <FormItem label='需求名称' field='name' rules={[{ required: true, message: '请输入需求名称', max: 50 }]}>
-                        <Input placeholder='请输入需求名称' />
+                        <Input placeholder='请输入需求名称' style={{ width: 643 }} />
                     </FormItem>
                     <FormItem
                         label='描述'
                         field='info'
                         rules={[{ required: true, message: '请输入描述内容', max: 200 }]}
                     >
-                        <Input placeholder='' />
+                        <Input placeholder='请输入描述内容' style={{ width: 643 }} />
                     </FormItem>
                     <FormItem
                         label="标注工具"
                         required
                         className="annotation-tool"
-                    // rules={[
-                    //     {
-                    //         required: true,
-                    //         validator: (value, callback) => {
-                    //             console.log('object', selectedRadio);
-                    //             if (!selectedRadio) {
-                    //                 callback('请选择标注工具');
-                    //             } else {
-                    //                 callback();
-                    //             }
-                    //         }
-                    //     }
-                    // ]}
                     >
                         {isShowErrorInfo && <span className='error-info-text'>请选择标注工具</span>}
                         <Tabs type={'capsule'}
@@ -203,10 +280,31 @@ export default function RequirementDetail() {
                         </Tabs>
 
                     </FormItem>
-                    <FormItem label="数据集" required extra={`已选数据量：${selectedData.length}`}>
-                        <Button onClick={() => { }}>选择</Button>
+                    <FormItem
+                        field="dataset"
+                        label="数据集"
+                        required
+                        extra={`已选数据量：${selectedData.length}`}>
+                        <Button type='primary' onClick={() => { setModalVisible(true) }}>选择</Button>
+                        {selectedData?.length <= 0 && isShowDataErrorInfo && <div className='data-error-info error-info-text'>请选择数据集合</div>}
                     </FormItem>
+                    <div className='table-container'>
+                        <Table
+                            style={{
+                                width: 1000
+                            }}
+                            rowKey='id'
+                            columns={columns}
+                            data={selectedData}
+                        />
+                    </div>
                 </Form>
+                <DataSourceModal
+                    visible={modalVisible}
+                    onClose={() => { setModalVisible(false) }}
+                    title='数据集合'
+                    getChildTableSelectData={handleChildData}
+                />
             </div>
         );
     };
@@ -229,121 +327,27 @@ export default function RequirementDetail() {
                             <Radio value='graphic'>图形标注</Radio>
                         </RadioGroup>
                     </FormItem>
-                    <div className='tool-hr' />
-                    {/* 工具类型选择 */}
-                    <FormItem
-                        label='工具类型'
-                        field='tool_type'
-                        rules={[{ required: true, message: '请选择工具类型' }]}
-                    >
-                        <RadioGroup>
-                            <Radio value='manual'>手动标注工具</Radio>
-                            <Radio value='semi_auto'>半自动标注工具</Radio>
-                            <Radio value='auto'>自动标注工具</Radio>
-                        </RadioGroup>
-                    </FormItem>
-
-                    {/* 工具参数配置 */}
-                    <FormItem
-                        label='工具参数'
-                        field='tool_params'
-                        rules={[{ required: true, message: '请配置工具参数' }]}
-                    >
-                        <Input.TextArea rows={4} placeholder='请输入工具运行参数，多个参数用逗号分隔' />
-                    </FormItem>
-
-                    {/* 精度设置 */}
-                    <FormItem
-                        label='标注精度'
-                        field='accuracy'
-                        rules={[{ required: true, message: '请选择标注精度' }]}
-                    >
-                        <RadioGroup>
-                            <Radio value='high'>高精度 ( slower )</Radio>
-                            <Radio value='medium'>中等精度 ( balanced )</Radio>
-                            <Radio value='low'>快速模式 ( faster )</Radio>
-                        </RadioGroup>
-                    </FormItem>
-
-                    {/* 高级选项 */}
-                    <FormItem label='高级配置' field='advanced_settings'>
-                        <Input placeholder='请输入高级配置选项' />
-                    </FormItem>
                 </Form>
             </div>
         );
     };
-    // 作业配置
-    const JobConfiguration = () => {
-        return (
-            <div className='job-configuration'>
-                <Form
-                    form={form}
-                    style={{ width: 600 }}
-                    autoComplete='off'
-                >
-                    <div className='job-title'>
-                        任务配置
-                    </div>
-                    <FormItem
-                        label='是否审核'
-                        field=''
-                        rules={[{ required: true, message: '请输入作业名称' }]}
-                    >
-                        <RadioGroup defaultValue='a' style={{ marginBottom: 20 }}>
-                            <Radio value={1}>是</Radio>
-                            <Radio value={0}>否</Radio>
-                        </RadioGroup>
-                    </FormItem>
-                    <FormItem
-                        label='审核改题'
-                        field=''
-                        rules={[{ required: true, message: '请输入作业名称' }]}
-                    >
-                        <RadioGroup defaultValue='a' style={{ marginBottom: 20 }}>
-                            <Radio value={1}>允许</Radio>
-                            <Radio value={0}>禁止</Radio>
-                        </RadioGroup>
-                    </FormItem>
-                    <div className='job-title'>
-                        任务分配
-                    </div>
-                    <FormItem
-                        label='分配方式'
-                        field=''
-                        rules={[{ required: true, message: '请输入作业名称' }]}
-                    >
-                        <RadioGroup defaultValue='a' style={{ marginBottom: 20 }}>
-                            <Radio value={1}>均分</Radio>
-                        </RadioGroup>
-                    </FormItem>
-                    <FormItem
-                        label='分配任务'
-                        field='job_name'
-                        rules={[{ required: true, message: '请输入作业名称' }]}
-                    >
-                        <div>任务总数:{300}, 未分配:{0}</div>
-                        <Input placeholder='请输入作业名称' />
-                    </FormItem>
-                </Form>
-            </div>
-        );
-    };
-    // 获取基础配置中的内容，判断是否都有值
-    const getBasicContentValue = () => {
-        if (name !== '' || name !== undefined || name !== null) {
-            return true
-        }
-    }
     useEffect(() => {
         if (selectedRadio !== '') {
-            setIsShowErrorInfo(false)
+            setIsShowErrorInfo(false);
         }
-    }, [selectedRadio])
+        if (selectedData?.length > 0) {
+            setIsShowDataErrorInfo(false);
+        }
+    }, [selectedRadio, selectedData])
     const stepNext = () => {
         form.validate()
             .then(() => {
+                console.log('object222');
                 // 验证通过，切换到下一步
+                if (selectedData?.length <= 0) {
+                    setIsShowDataErrorInfo(true);
+                    return;
+                }
                 if (selectedRadio === '') {
                     setIsShowErrorInfo(true);
                     return;
@@ -351,6 +355,10 @@ export default function RequirementDetail() {
                 setStepCurrent(StepCurrent + 1);
             })
             .catch((errorInfo) => {
+                console.log('object111');
+                if (selectedData?.length <= 0) {
+                    setIsShowDataErrorInfo(true)
+                }
                 if (selectedRadio === '') {
                     setIsShowErrorInfo(true);
                     return;
@@ -404,7 +412,7 @@ export default function RequirementDetail() {
                         style={{ marginLeft: 20, paddingRight: 8 }}
                         type='primary'
                     >
-                        {StepCurrent >= 3 ? '完成' : '下一步'}
+                        {StepCurrent >= 3 ? '发布' : '下一步'}
                     </Button>
 
                 </div>
@@ -415,19 +423,19 @@ export default function RequirementDetail() {
                     <Step title='2、工具配置' />
                     <Step title='3、作业配置' />
                 </Steps>
+                {/* 基础配置部分 */}
+                {
+                    StepCurrent === 1 && basicConfiguration()
+                }
+                {/* 工具配置部分 */}
+                {
+                    StepCurrent === 2 && ToolConfiguration()
+                }
+                {/* 作业配置部分 */}
+                {
+                    StepCurrent === 3 && <JobConfiguration />
+                }
             </div>
-            {/* 基础配置部分 */}
-            {
-                StepCurrent === 1 && basicConfiguration()
-            }
-            {/* 工具配置部分 */}
-            {
-                StepCurrent === 2 && ToolConfiguration()
-            }
-            {/* 作业配置部分 */}
-            {
-                StepCurrent === 3 && JobConfiguration()
-            }
         </div>
     );
 }
