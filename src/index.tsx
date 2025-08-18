@@ -177,7 +177,6 @@ render(Index);
 if (process.env.NODE_ENV === 'development' && module.hot) {
   // @ts-expect-error
   module.hot.accept('./pages/admin/layout', () => {
-    console.log('11111111111');
     // 当 App 组件或其依赖发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextApp = require('./pages/admin/layout').default;
