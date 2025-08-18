@@ -40,6 +40,7 @@ const i18nPrefix = 'workflow.nodes.start';
 
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { data_category } = StartNodeDefault.defaultValue;
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
   const [customizeFormat, setCustomizeFormat] = useState<string[]>(
     data?.data_category?.[4]?.format || []
@@ -179,7 +180,9 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     setCustomizeInputValue('');
     const updatedConfig = {
       ...customizeConfig,
-      format: newFormat
+      format: newFormat,
+      id: (data_category && data_category[4]?.id) || 999,
+      category: (data_category && data_category[4]?.category) || '自定义'
     };
     form.setFieldValue('data_category[4]', updatedConfig);
     handleChanged({
