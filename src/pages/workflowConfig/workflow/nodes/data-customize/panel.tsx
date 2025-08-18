@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Form, Modal, Spin } from '@arco-design/web-react';
+import { Button, Collapse, Form, Modal, Spin } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/legacy-modes/mode/python';
@@ -19,13 +19,16 @@ const FormItem = Form.Item;
 const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
+  const CollapseItem = Collapse.Item;
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
   const [isModalSticky, setModalSticky] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [runningTime, setRunningTime] = useState(0);
+  const [resultData, setResultData] = useState('');
   const stickyRef = useRef<HTMLDivElement>(null);
   const stickyModalRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
@@ -136,12 +139,29 @@ df = pd.DataFrame({
   useEffect(() => {
     if (!isRunning) return;
     const timer = setInterval(() => {
-      setRunningTime((prev) => prev + 1);
+      setRunningTime((prev) => {
+        const newTime = prev + 1;
+        if (newTime >= 3) {
+          setIsRunning(false);
+          setResultData('运行结果出现，运行时间超过3秒');
+          clearInterval(timer);
+        }
+        return newTime;
+      });
     }, 1000);
     return () => {
       clearInterval(timer);
     };
   }, [isRunning]);
+
+  useEffect(() => {
+    if (resultData && resultRef.current) {
+      resultRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, [resultData]);
 
   const myTheme = createTheme({
     theme: 'light',
@@ -254,6 +274,20 @@ df = pd.DataFrame({
             </div>
           </div>
         </FormItem>
+        {resultData && (
+          <Collapse
+            defaultActiveKey="running_result"
+            style={{ maxWidth: 1180 }}
+          >
+            <CollapseItem
+              header="运行结果"
+              name="running_result"
+              ref={resultRef}
+            >
+              {resultData}
+            </CollapseItem>
+          </Collapse>
+        )}
       </Form>
       <Modal
         className="wk-data-customize-panel-modal"

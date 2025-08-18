@@ -21,7 +21,7 @@ import {
   AutoComplete
 } from '@arco-design/web-react';
 import { v4 as uuid4 } from 'uuid';
-import { cloneDeep, debounce } from 'lodash-es';
+import { cloneDeep, debounce, escapeRegExp } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
@@ -222,6 +222,26 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return <span>{text}</span>;
+    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+    const parts = text.split(regex);
+
+    return (
+      <span>
+        {parts.map((part, i) =>
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} style={{ color: '#007dfa' }}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="wk-node-panel-content start-panel-content mt-[24px]">
@@ -438,10 +458,15 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                   <AutoComplete
                     className="w-[422px]"
                     placeholder="请输入文件类型"
-                    data={customizeFormat}
                     value={customizeInputValue}
                     onChange={(v) => setCustomizeInputValue(v)}
-                  />
+                  >
+                    {customizeFormat.map((option) => (
+                      <Option key={option} value={option}>
+                        {highlightMatch(option, customizeInputValue)}
+                      </Option>
+                    ))}
+                  </AutoComplete>
                   <Button
                     className="ml-[12px]"
                     style={{
