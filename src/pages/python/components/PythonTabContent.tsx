@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Input, Button, Tree, Typography } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -7,6 +7,8 @@ import {
   IconFile
 } from '@arco-design/web-react/icon';
 import './NotebookTabContent.scss';
+import { getPythonList } from '@/api/python';
+import { PythonListItem } from '@/types/pythonApi';
 
 const { Title } = Typography;
 
@@ -21,9 +23,12 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
+const usePythonList = () => {
+  const pythonList = useState<PythonListItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
+  console.log('pythonListpythonList', pythonList);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -42,6 +47,41 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
   const handleTreeExpand = (keys: string[]) => {
     setExpandedKeys(keys);
   };
+
+  const formatPythonList = (rawData) => {
+    return rawData.map((item) => item);
+  };
+
+  const getRawPythonList = useCallback(async () => {
+    const rawPythonList = await getPythonList('', {});
+
+    if (rawPythonList.status === 200) {
+      pythonList.values = formatPythonList(rawPythonList.data.items);
+    }
+  }, []);
+
+  return {
+    searchValue,
+    handleSearch,
+    handleNew,
+    pythonList,
+    getRawPythonList,
+    expandedKeys,
+    handleTreeSelect,
+    handleTreeExpand
+  };
+};
+
+const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
+  const {
+    searchValue,
+    handleSearch,
+    handleNew,
+    pythonList,
+    expandedKeys,
+    handleTreeSelect,
+    handleTreeExpand
+  } = usePythonList();
 
   return (
     <div className="notebook-tab-content">
@@ -71,7 +111,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
 
       <div className="tab-tree">
         <Tree
-          treeData={[]}
+          treeData={pythonList}
           selectedKeys={[]}
           expandedKeys={expandedKeys}
           onSelect={handleTreeSelect}
