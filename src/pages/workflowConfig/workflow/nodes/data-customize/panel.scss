@@ -60,6 +60,16 @@
   .cm-scroller {
     min-height: calc(100vh - 315px) !important;
   }
+
+  .running-code-mirror {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.7;
+
+    .cm-scroller {
+      background-color: #f8fafd;
+    }
+  }
 }
 
 .wk-data-customize-panel-modal {

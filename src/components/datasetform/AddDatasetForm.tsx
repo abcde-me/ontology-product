@@ -37,6 +37,7 @@ interface Dataset {
   tags: string[];
   description: string;
   dataSource: 'volume' | 'connector';
+  storageType: 'jsonl' | 'file';
   targetDataSource?: string;
   selectedFiles?: string[];
 }
@@ -209,6 +210,7 @@ const DatasetForm = React.forwardRef<
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
+  const [storageType, setStorageType] = useState<'jsonl' | 'file'>('file');
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     null
   ); //选择的连接器ID
@@ -238,12 +240,14 @@ const DatasetForm = React.forwardRef<
       form.setFieldValue('name', '');
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
+      setStorageType('file'); //重置数据集类型
       setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
       form.setFieldValue('dataSource', 'volume');
+      form.setFieldValue('storageType', 'file');
       setIscreateTagDisabled(false);
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
@@ -318,6 +322,12 @@ const DatasetForm = React.forwardRef<
     // 清除表单字段
     form.setFieldValue('connector', undefined);
     form.setFieldValue('selectedFiles', []);
+  };
+
+  // 处理数据集类型变化
+  const handleStorageTypeChange = (value: 'jsonl' | 'file') => {
+    setStorageType(value);
+    form.setFieldValue('storageType', value);
   };
 
   // 处理目标数据源选择
@@ -613,6 +623,17 @@ const DatasetForm = React.forwardRef<
             >
               <Radio value="volume">数据目录卷</Radio>
               <Radio value="connector">连接器</Radio>
+            </Radio.Group>
+          </FormItem>
+          <FormItem
+            label="数据集类型"
+            field="storageType"
+            rules={[{ required: true, message: '请选择数据集类型' }]}
+            initialValue="file"
+          >
+            <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
+              <Radio value="file">文件</Radio>
+              <Radio value="jsonl">jsonl</Radio>
             </Radio.Group>
           </FormItem>
 

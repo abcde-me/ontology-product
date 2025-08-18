@@ -40,12 +40,12 @@ const i18nPrefix = 'workflow.nodes.start';
 
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { data_category } = StartNodeDefault.defaultValue;
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
   const [customizeFormat, setCustomizeFormat] = useState<string[]>(
     data?.data_category?.[4]?.format || []
   );
   const [customizeInputValue, setCustomizeInputValue] = useState('');
-  const [customizeOptions, setCustomizeOptions] = useState<string[]>([]);
   const [form] = Form.useForm();
   // const store = useStoreApi();
   // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
@@ -180,7 +180,9 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     setCustomizeInputValue('');
     const updatedConfig = {
       ...customizeConfig,
-      format: newFormat
+      format: newFormat,
+      id: (data_category && data_category[4]?.id) || 999,
+      category: (data_category && data_category[4]?.category) || '自定义'
     };
     form.setFieldValue('data_category[4]', updatedConfig);
     handleChanged({
@@ -198,14 +200,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
       BlockEnum.Customize,
       form.getFieldValue('data_path_id'),
       updatedConfig
-    );
-  };
-
-  const handleSearch = (inputValue) => {
-    setCustomizeOptions(
-      inputValue
-        ? new Array(5).fill(null).map((_, index) => `${inputValue}_${index}`)
-        : []
     );
   };
 
@@ -444,16 +438,10 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                   <AutoComplete
                     className="w-[422px]"
                     placeholder="请输入文件类型"
+                    data={customizeFormat}
                     value={customizeInputValue}
                     onChange={(v) => setCustomizeInputValue(v)}
-                    onSearch={handleSearch}
-                  >
-                    {customizeOptions.map((option) => (
-                      <Option key={option} value={option}>
-                        {option}
-                      </Option>
-                    ))}
-                  </AutoComplete>
+                  />
                   <Button
                     className="ml-[12px]"
                     style={{
