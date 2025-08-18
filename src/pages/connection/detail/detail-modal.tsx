@@ -211,7 +211,7 @@ const ModalDetail = (props) => {
                         </span>
                       </div>
                     </div>
-                  ) : (
+                  ) : DetailData?.type !== 'hdfs' ? (
                     <div>
                       <div className="info-item">
                         <span className="label">Host:</span>
@@ -290,6 +290,125 @@ const ModalDetail = (props) => {
                         </span>
                       </div>
                     </div>
+                  ) : (
+                    <>
+                      <div>
+                        <div className="info-item">
+                          <span className="label">所属系统:</span>
+                          <span className="value">
+                            {DetailData?.config.host}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.host}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.host || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">数据库类型:</span>
+                          <span className="value">
+                            {DetailData?.config.port}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.port}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.port || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">主机名:</span>
+                          <span className="value">
+                            {DetailData?.config.user}{' '}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.user}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.user || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">端口:</span>
+                          <span className="value">
+                            {DetailData?.config.path}{' '}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.path}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.path || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">数据库名:</span>
+                          <span className="value">
+                            {DetailData?.config.path}{' '}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.path}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.path || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">用户名:</span>
+                          <span className="value">
+                            {DetailData?.config.path}{' '}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.path}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.path || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </section>
               </div>

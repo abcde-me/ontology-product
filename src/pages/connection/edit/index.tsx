@@ -1,8 +1,18 @@
 import { validateName } from '@/utils/valiate';
-import { Button, Form, Input, Modal, Radio } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Radio,
+  Select
+} from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 // 表单
 const FormItem = Form.Item;
+const Option = Select.Option;
+const options = ['Mysql', 'Postgre'];
 // 单选
 const RadioGroup = Radio.Group;
 const Edit = (props: any) => {
@@ -88,6 +98,7 @@ const Edit = (props: any) => {
             >
               <Radio value="s3">对象存储</Radio>
               <Radio value="hdfs">HDFS</Radio>
+              <Radio value="db">数据库</Radio>
             </RadioGroup>
           </FormItem>
           <span
@@ -156,7 +167,7 @@ const Edit = (props: any) => {
                 <Input placeholder="请输入" />
               </FormItem>
             </div>
-          ) : (
+          ) : storageType == 'hdfs' ? (
             <div>
               <FormItem
                 label="Host："
@@ -232,6 +243,95 @@ const Edit = (props: any) => {
                 <Input placeholder="请输入" />
               </FormItem>
             </div>
+          ) : (
+            <>
+              <div>
+                <FormItem
+                  label="所属系统："
+                  field="db"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="数据库类型："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                >
+                  <Select
+                    placeholder="请选择数据库类型"
+                    onChange={(value) =>
+                      Message.info({
+                        content: `You select ${value}.`,
+                        showIcon: true
+                      })
+                    }
+                    disabled={true}
+                  >
+                    {options.map((option, index) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  label="主机名："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入主机名' }]}
+                >
+                  <Input placeholder="请输入，如localhost，10.2.2.1" />
+                </FormItem>
+                <FormItem
+                  label="端口："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入端口' }]}
+                >
+                  <Input placeholder="请输入，如3306" />
+                </FormItem>
+                <FormItem
+                  label="数据库名："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入数据库名' }]}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="用户名："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="密码："
+                  field="db_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入密码' }]}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+              </div>
+            </>
           )}
         </Form>
       </div>
