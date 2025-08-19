@@ -12,6 +12,7 @@ import {
   IconShrink
 } from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
+import { useRequest } from 'ahooks';
 import './panel.scss';
 
 const FormItem = Form.Item;
@@ -135,23 +136,34 @@ df = pd.DataFrame({
     };
   }, [modalElement]);
 
-  // 运行时间
+  const getRunningTime = () => {
+    if (!isRunning) return Promise.resolve();
+    return new Promise((resolve) => {
+      resolve(
+        setRunningTime((prev) => {
+          const newTime = prev + 1;
+          if (newTime >= 3) {
+            setIsRunning(false);
+            setResultData('运行结果出现，运行时间超过3秒');
+          }
+          return newTime;
+        })
+      );
+    });
+  };
+
+  const {
+    data: runningTimeData,
+    loading,
+    run,
+    cancel
+  } = useRequest(getRunningTime, {
+    pollingInterval: 1000,
+    pollingWhenHidden: false
+  });
+
   useEffect(() => {
-    if (!isRunning) return;
-    const timer = setInterval(() => {
-      setRunningTime((prev) => {
-        const newTime = prev + 1;
-        if (newTime >= 3) {
-          setIsRunning(false);
-          setResultData('运行结果出现，运行时间超过3秒');
-          clearInterval(timer);
-        }
-        return newTime;
-      });
-    }, 1000);
-    return () => {
-      clearInterval(timer);
-    };
+    isRunning ? run() : cancel();
   }, [isRunning]);
 
   useEffect(() => {
