@@ -1,0 +1,23 @@
+.directory-tree {
+  .arco-tree-node {
+    position: relative;
+  }
+
+  .directory-tree-extra {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease;
+  }
+
+  .arco-tree-node:hover .directory-tree-extra {
+    opacity: 1;
+    visibility: visible;
+  }
+}

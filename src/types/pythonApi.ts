@@ -11,13 +11,18 @@ export interface PythonListParams {
 }
 
 // 响应结构
+export enum PythonItemType {
+  Notebook = 'notebook',
+  Directory = 'directory'
+}
+
 export interface PythonListItem {
   /** 项目标识 */
   id: number;
   /** 名称（文件或文件夹） */
   name: string;
   /** 类型：notebook | directory */
-  type: 'notebook' | 'directory';
+  type: PythonItemType;
   /** 文件的父目录，根目录为 . */
   path: string;
   /** 创建时间，格式：YYYY-MM-DD HH:mm:ss */
@@ -29,6 +34,8 @@ export interface PythonListItem {
 export interface PythonListRes {
   /** 父目录名称 */
   path_name: string;
+  /** 父目录id */
+  path_id: number;
   /** 列表项 */
   items: PythonListItem[];
   /** 总数 */
@@ -38,3 +45,41 @@ export interface PythonListRes {
   /** 每页数量 */
   page_size: number;
 }
+
+// 创建请求/响应
+export interface CreatePythonItemReq {
+  /** 创建文件/文件夹的位置目录id，若为根目录置为0 */
+  path_id: number;
+  /** notebook - 文件；directory - 文件夹 */
+  type: PythonItemType;
+  /** 文件/文件夹名称 */
+  name: string;
+}
+
+export type CreatePythonItemRes = PythonListItem;
+
+// 重命名请求/响应
+export interface RenamePythonItemReq {
+  /** 文件id */
+  id: number;
+  /** 重命名后的名称 */
+  name: string;
+  /** 文件路径 */
+  path: string;
+  /** notebook - 文件；directory - 文件夹 */
+  type: PythonItemType;
+}
+
+export interface RenamePythonItemRes {
+  /** 文件id */
+  id: number;
+}
+
+export interface CopyPythonItemReq {
+  /** 被复制文件的id */
+  id: number;
+  /** 复制后的文件名称 */
+  name: string;
+}
+
+export type CopyPythonItemRes = PythonListItem;

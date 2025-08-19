@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Input, Button, Tree, Typography } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -6,9 +6,18 @@ import {
   IconFolder,
   IconFile
 } from '@arco-design/web-react/icon';
-import './NotebookTabContent.scss';
-import { getPythonList } from '@/api/python';
-import { PythonListItem } from '@/types/pythonApi';
+import {
+  getPythonList,
+  createPythonItem,
+  renamePythonItem,
+  deletePythonItem,
+  copyPythonItem
+} from '@/api/python';
+import { PythonItemType, PythonListItem } from '@/types/pythonApi';
+import './PythonTabContent.scss';
+import DirectoryTree, {
+  type TreeNodeItem
+} from '@/components/directory-tree/DirectoryTree';
 
 const { Title } = Typography;
 
@@ -24,7 +33,7 @@ interface TreeNode {
 }
 
 const usePythonList = () => {
-  const pythonList = useState<PythonListItem[]>([]);
+  const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
@@ -48,17 +57,31 @@ const usePythonList = () => {
     setExpandedKeys(keys);
   };
 
-  const formatPythonList = (rawData) => {
-    return rawData.map((item) => item);
+  const handleCreate = async (finalName: string, path_id: number, node) => {
+    const createRes = await createPythonItem({
+      path_id,
+      type: node?.dataRef?.type,
+      name: finalName
+    });
+
+    if (createRes.status === 200) {
+      return createRes.data;
+    }
+
+    return null;
   };
 
   const getRawPythonList = useCallback(async () => {
     const rawPythonList = await getPythonList('', {});
 
     if (rawPythonList.status === 200) {
-      pythonList.values = formatPythonList(rawPythonList.data.items);
+      setPythonList(rawPythonList.data.items);
     }
   }, []);
+
+  useEffect(() => {
+    getRawPythonList();
+  }, [getRawPythonList]);
 
   return {
     searchValue,
@@ -68,7 +91,8 @@ const usePythonList = () => {
     getRawPythonList,
     expandedKeys,
     handleTreeSelect,
-    handleTreeExpand
+    handleTreeExpand,
+    handleCreate
   };
 };
 
@@ -80,43 +104,43 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
     pythonList,
     expandedKeys,
     handleTreeSelect,
-    handleTreeExpand
+    handleTreeExpand,
+    handleCreate
   } = usePythonList();
 
   return (
     <div className="notebook-tab-content">
       <div className="tab-header">
-        <Title className="tab-title">Python文件</Title>
-      </div>
-
-      <div className="tab-search">
-        <div className="search-container">
-          <Input
-            placeholder="搜索当前文件夹"
-            value={searchValue}
-            onChange={handleSearch}
-            prefix={<IconSearch />}
-            style={{ flex: 1 }}
-          />
-          <Button
-            type="text"
-            icon={<IconPlus />}
-            onClick={handleNew}
-            size="small"
-          >
-            新建
-          </Button>
-        </div>
+        <Title className="tab-title">PySpark文件</Title>
       </div>
 
       <div className="tab-tree">
-        <Tree
-          treeData={pythonList}
-          selectedKeys={[]}
-          expandedKeys={expandedKeys}
-          onSelect={handleTreeSelect}
-          onExpand={handleTreeExpand}
-          showLine
+        <DirectoryTree
+          data={pythonList as TreeNodeItem[]}
+          onSelect={(keys) => handleTreeSelect(keys as unknown as string[])}
+          onCreate={handleCreate}
+          onRename={async () => {}}
+          onCopy={async () => {}}
+          onDelete={async () => {}}
+          onFolderClick={async (folderId) => {
+            // 这里调用API获取文件夹内容
+            console.log('进入文件夹:', folderId);
+            const res = await getPythonList(String(folderId), {
+              name: searchValue,
+              mode: 0,
+              page: 1,
+              page_size: 20
+            });
+            return res?.data?.items || [];
+          }}
+          onBackToParent={async (parentId) => {
+            // 这里调用API获取上级目录内容
+            console.log('返回上级目录:', parentId);
+            const res = await getPythonList(String(parentId || ''), {} as any);
+            return res?.data?.items || [];
+          }}
+          placeholder="搜索当前文件夹"
+          newButtonText="新建"
         />
       </div>
     </div>
