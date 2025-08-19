@@ -1,5 +1,17 @@
 .wk-data-customize-panel-content {
   min-height: calc(100% - 150px);
+
+  .arco-form-item {
+    margin-bottom: unset;
+  }
+
+  .arco-collapse {
+    border-top: unset;
+  }
+
+  .arco-collapse-item-content-box {
+    background-color: #f8fafd;
+  }
 }
 
 .editor-container {

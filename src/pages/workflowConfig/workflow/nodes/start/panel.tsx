@@ -18,10 +18,11 @@ import {
   Cascader,
   Button,
   Tag,
-  AutoComplete
+  AutoComplete,
+  Message
 } from '@arco-design/web-react';
 import { v4 as uuid4 } from 'uuid';
-import { cloneDeep, debounce } from 'lodash-es';
+import { cloneDeep, debounce, escapeRegExp } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
@@ -45,12 +46,15 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const [customizeFormat, setCustomizeFormat] = useState<string[]>(
     data?.data_category?.[4]?.format || []
   );
+  const [customizeOptions, setCustomizeOptions] = useState(
+    JSON.parse(localStorage.getItem('customizeOptions') || '[]')
+  );
   const [customizeInputValue, setCustomizeInputValue] = useState('');
   const [form] = Form.useForm();
   // const store = useStoreApi();
   // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
   const history = useHistory();
-  const { Option } = AutoComplete;
+  const { OptGroup, Option } = AutoComplete;
 
   const docParams = Form.useWatch('data_category[0]', form);
   const imageParams = Form.useWatch('data_category[1]', form);
@@ -69,8 +73,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
 
   const handleChanged = (values: any) => {
     const name = srcDirs.find((s) => s.id === values.data_path_id)?.name;
-    console.log(values, 'valuesvaluesvalues');
-
     updateInputs({ ...values, data_path_name: name });
   };
 
@@ -167,16 +169,33 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     );
   };
   const handleCustomizeChange = (isClose: boolean, index?: number) => {
-    if (!customizeInputValue) {
-      if (!isClose) {
-        return;
-      }
+    if (!customizeInputValue && !isClose) {
+      Message.error({
+        content: '文件类型不能为空！'
+      });
+      return;
+    }
+    if (customizeFormat.includes(customizeInputValue) && !isClose) {
+      Message.error({
+        content: '已存在当前类型文件！'
+      });
+      return;
     }
     const customizeConfig = form.getFieldValue('data_category[4]');
     const newFormat = isClose
       ? customizeFormat.filter((_, i) => i !== index)
       : [...customizeFormat, customizeInputValue];
+    const newCustomizeOptions = isClose
+      ? [...customizeOptions]
+      : [...customizeOptions, customizeInputValue];
     setCustomizeFormat(newFormat);
+    if (!isClose) {
+      localStorage.setItem(
+        'customizeOptions',
+        JSON.stringify(newCustomizeOptions)
+      );
+      setCustomizeOptions(newCustomizeOptions);
+    }
     setCustomizeInputValue('');
     const updatedConfig = {
       ...customizeConfig,
@@ -222,6 +241,26 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return <span>{text}</span>;
+    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+    const parts = text.split(regex);
+
+    return (
+      <span>
+        {parts.map((part, i) =>
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} style={{ color: '#007dfa' }}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="wk-node-panel-content start-panel-content mt-[24px]">
@@ -438,10 +477,17 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                   <AutoComplete
                     className="w-[422px]"
                     placeholder="请输入文件类型"
-                    data={customizeFormat}
                     value={customizeInputValue}
                     onChange={(v) => setCustomizeInputValue(v)}
-                  />
+                  >
+                    <OptGroup key="history_add" label="历史添加">
+                      {customizeOptions.map((option) => (
+                        <Option key={option} value={option}>
+                          {highlightMatch(option, customizeInputValue)}
+                        </Option>
+                      ))}
+                    </OptGroup>
+                  </AutoComplete>
                   <Button
                     className="ml-[12px]"
                     style={{
@@ -463,7 +509,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                         <Tag
                           className="mx-[8px] bg-[#E7ECF0]"
                           closable
-                          key={index}
+                          key={item}
                           onClose={() => handleCustomizeChange(true, index)}
                         >
                           {item}
