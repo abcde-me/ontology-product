@@ -62,9 +62,7 @@ const FormComponent: React.FC<FormProps> = ({
           downloadData.full_path + '/' + downloadData.extras.file_name
         );
       } else if (exportdataset?.latest_file_path) {
-        filesArray.push(
-          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
-        );
+        filesArray.push(exportdataset.latest_file_path);
       }
       if (!exportdataset && exportdatas && exportdatas?.length > 0) {
         if (exportdatas[0].data_path_id) {
@@ -77,9 +75,7 @@ const FormComponent: React.FC<FormProps> = ({
           });
         } else if (exportdatas[0].latest_file_path) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(
-              item.latest_file_path + '/' + item.latest_file_name
-            );
+            filesArray.push(item.latest_file_path);
           });
         }
       }

@@ -125,7 +125,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     handleImageChange();
     handleAudioChange();
     handleVideoChange();
-    handleCustomizeChange(false);
   };
   const handleDocChange = () => {
     const docConfig = form.getFieldValue('data_category[0]');

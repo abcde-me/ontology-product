@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Collapse, Form, Modal, Spin } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
-import { python } from '@codemirror/legacy-modes/mode/python';
+import { python } from '@codemirror/lang-python';
 import { useStoreApi } from 'reactflow';
 import useConfig from './use-config';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
 import { useRequest } from 'ahooks';
+import { getScriptingType } from '@/api/workflow';
 import './panel.scss';
 
 const FormItem = Form.Item;
@@ -57,6 +58,12 @@ df = pd.DataFrame({
     'day': range(1, 31),
     'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)`
   );
+
+  useEffect(() => {
+    getScriptingType().then((res) => {
+      console.log('res', res);
+    });
+  }, []);
 
   const onChange = useCallback((val, viewUpdate) => {
     setValue(val);
@@ -275,7 +282,7 @@ df = pd.DataFrame({
                 value={value}
                 theme={myTheme}
                 placeholder={placeholderValue}
-                extensions={[StreamLanguage.define(python)]}
+                extensions={[python()]}
                 onChange={onChange}
                 readOnly={isRunning}
                 basicSetup={{
@@ -320,7 +327,7 @@ df = pd.DataFrame({
             value={value}
             theme={myTheme}
             placeholder={placeholderValue}
-            extensions={[StreamLanguage.define(python)]}
+            extensions={[python()]}
             onChange={onChange}
             basicSetup={{
               lineNumbers: true,
