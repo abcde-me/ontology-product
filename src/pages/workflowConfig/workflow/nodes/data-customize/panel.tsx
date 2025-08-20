@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Collapse, Form, Modal, Spin } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/language';
+import { tags as t } from '@lezer/highlight';
 import { python } from '@codemirror/lang-python';
 import { useStoreApi } from 'reactflow';
 import useConfig from './use-config';
@@ -13,8 +13,9 @@ import {
 } from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
 import { useRequest } from 'ahooks';
-import { getScriptingType } from '@/api/workflow';
+import { getScriptingType, getScriptingEngine } from '@/api/workflow';
 import './panel.scss';
+import { get } from 'lodash';
 
 const FormItem = Form.Item;
 
@@ -61,7 +62,11 @@ df = pd.DataFrame({
 
   useEffect(() => {
     getScriptingType().then((res) => {
-      console.log('res', res);
+      if (res.data.script_types) {
+        getScriptingEngine(res.data.script_types[0].script_type).then((res) => {
+          console.log('res', res);
+        });
+      }
     });
   }, []);
 
@@ -195,7 +200,10 @@ df = pd.DataFrame({
       gutterBackground: '#fff',
       gutterForeground: '#8a919966'
     },
-    styles: []
+    styles: [
+      { tag: t.comment, color: '#6a737d', fontStyle: 'italic' },
+      { tag: t.keyword, color: '#9a42a7', fontWeight: 'bold' }
+    ]
   });
 
   const handleCustomizeRun = () => {
