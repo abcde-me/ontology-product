@@ -70,3 +70,25 @@ export async function getScriptingType() {
 export async function getScriptingEngine(script_type: string) {
   return await UAPI.RES.scriptingEngine({ script_type }).get().inRegion().do();
 }
+// 工作流-脚本模板
+export async function getScriptingTemplate(
+  workflow_uuid: string,
+  node_id: string
+) {
+  return await UAPI.RES.scriptingTemplate({ workflow_uuid, node_id })
+    .get()
+    .inRegion()
+    .do();
+}
+// 工作流-脚本运行
+export async function scriptingBench(
+  workflow_uuid: string,
+  session_id: string,
+  node_id: string,
+  params
+) {
+  return await UAPI.RES.scriptingBench({ workflow_uuid, session_id, node_id })
+    .put(params)
+    .inRegion()
+    .do();
+}

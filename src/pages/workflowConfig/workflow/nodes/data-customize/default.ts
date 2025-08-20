@@ -10,7 +10,9 @@ const i18nPrefix = 'workflow.errorMsg';
 
 const nodeDefault: NodeDefault<CustomNodeType> = {
   defaultValue: {
-    script_content: ''
+    script_content: '',
+    scripting_type: '',
+    engine_id: ''
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode

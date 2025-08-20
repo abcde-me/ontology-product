@@ -13,9 +13,15 @@ import {
 } from '@arco-design/web-react/icon';
 import { createTheme } from '@uiw/codemirror-themes';
 import { useRequest } from 'ahooks';
-import { getScriptingType, getScriptingEngine } from '@/api/workflow';
+import {
+  getScriptingType,
+  getScriptingEngine,
+  getScriptingTemplate,
+  scriptingBench
+} from '@/api/workflow';
 import './panel.scss';
-import { get } from 'lodash';
+import { useParams } from 'react-router';
+import Cookies from 'js-cookie';
 
 const FormItem = Form.Item;
 
@@ -23,51 +29,54 @@ const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
   const CollapseItem = Collapse.Item;
+  const { workflow_uuid } = useParams<{ workflow_uuid: string }>();
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
   const [isModalSticky, setModalSticky] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [runningTime, setRunningTime] = useState(0);
   const [resultData, setResultData] = useState('');
+  const [scriptingType, setScriptingType] = useState('');
+  const [scriptingEngine, setScriptingEngine] = useState('');
   const stickyRef = useRef<HTMLDivElement>(null);
   const stickyModalRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
-  const [placeholderValue, setPlaceholderValue] = useState(
-    `import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
-# 设置随机种子
-np.random.seed(0)
-
-# 创建一个模拟 30 天的销售额数据
-df = pd.DataFrame({
-    'day': range(1, 31),
-    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
-# 设置随机种子
-np.random.seed(0)
-
-# 创建一个模拟 30 天的销售额数据
-df = pd.DataFrame({
-    'day': range(1, 31),
-    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)`
-  );
+  const [placeholderValue, setPlaceholderValue] = useState('');
 
   useEffect(() => {
-    getScriptingType().then((res) => {
-      if (res.data.script_types) {
-        getScriptingEngine(res.data.script_types[0].script_type).then((res) => {
-          console.log('res', res);
-        });
+    const getScriptingInfo = async () => {
+      const typeRes = await getScriptingType();
+      if (typeRes.data.script_types) {
+        setScriptingType(typeRes.data.script_types[0].script_type);
+        const engineRes = await getScriptingEngine(
+          typeRes.data.script_types[0].script_type
+        );
+        if (engineRes.data.engines) {
+          setScriptingEngine(engineRes.data.engines[0].engine_id);
+          handleValueChange({
+            ...inputs,
+            scripting_type: typeRes.data.script_types[0].script_type,
+            engine_id: engineRes.data.engines[0].engine_id,
+            title: typeRes.data.script_types[0].title
+          });
+        }
       }
-    });
+      const templateRes = await getScriptingTemplate(workflow_uuid, id);
+      if (templateRes.data.script_template) {
+        setPlaceholderValue(templateRes.data.script_template);
+        if (value === '') {
+          setValue(templateRes.data.script_template);
+          handleValueChange({
+            ...inputs,
+            script_content: templateRes.data.script_template
+          });
+        }
+      }
+    };
+    getScriptingInfo();
   }, []);
 
   const onChange = useCallback((val, viewUpdate) => {
@@ -148,20 +157,26 @@ df = pd.DataFrame({
     };
   }, [modalElement]);
 
-  const getRunningTime = () => {
-    if (!isRunning) return Promise.resolve();
-    return new Promise((resolve) => {
-      resolve(
-        setRunningTime((prev) => {
-          const newTime = prev + 1;
-          if (newTime >= 3) {
-            setIsRunning(false);
-            setResultData('运行结果出现，运行时间超过3秒');
-          }
-          return newTime;
-        })
-      );
-    });
+  const getRunningTime = async () => {
+    if (!isRunning) return;
+
+    try {
+      setRunningTime((prev) => prev + 1);
+      if (runningTime >= 5) {
+        setIsRunning(false);
+        setResultData('运行时间超过5秒');
+        return;
+      }
+      const res = await runningResult();
+      if (res?.data) {
+        setIsRunning(false);
+        setResultData('运行结果出现，运行时间为：' + runningTime + '秒');
+        return;
+      }
+    } catch (error) {
+      setIsRunning(false);
+      setResultData('运行失败');
+    }
   };
 
   const {
@@ -209,8 +224,12 @@ df = pd.DataFrame({
   const handleCustomizeRun = () => {
     setIsRunning(!isRunning);
     setRunningTime(0);
+  };
+
+  const runningResult = async () => {
     const { edges, getNodes } = store.getState();
     const nodes = getNodes();
+    const session_id = Cookies.get('session_id') as string;
     const params = {
       graph: {
         edges,
@@ -221,11 +240,15 @@ df = pd.DataFrame({
         data: {
           type: data.type,
           title: data.title,
-          script_content: JSON.stringify(value)
+          script_content: JSON.stringify(value),
+          script_type: scriptingType,
+          engine_id: scriptingEngine
         }
       }
     };
-    console.log(params, 'ssssssssssssssssssssssssssss');
+    const res = await scriptingBench(workflow_uuid, session_id, id, params);
+
+    return res;
   };
 
   return (
