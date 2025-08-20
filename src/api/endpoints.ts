@@ -123,6 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
+export const PrefixLabelEngine = '/label-engine/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -355,7 +356,12 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
 
   // python开发
-  pythonListApi: PrefixAimdp + '/notebook/{id}/list'
+  pythonListApi: PrefixAimdp + '/notebook/{id}/list',
+
+  leGetTask: PrefixLabelEngine + '/getTask',
+  leGetLabels: PrefixLabelEngine + '/getLabels',
+  leSaveTask: PrefixLabelEngine + '/saveTask',
+  leGetTaskReuslt: PrefixLabelEngine + '/getTaskReuslt'
 };
 
 /**
