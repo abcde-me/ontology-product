@@ -61,3 +61,8 @@ export async function getWorkflowTargetPath(
     .inRegion()
     .do();
 }
+
+// 工作流-脚本类型
+export async function getScriptingType() {
+  return await UAPI.RES.scriptingType({}).get().inRegion().do();
+}

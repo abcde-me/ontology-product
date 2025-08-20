@@ -284,8 +284,8 @@ const columns = (
     render: (status: string, record: Dataset) => {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div>{getFileIcon(record.storage_type ?? 'jsonl')}</div>
-          <span className="ml-[4px]">{record.storage_type ?? 'jsonl'}</span>
+          <div>{getFileIcon(record.storage_type ?? '-')}</div>
+          <span className="ml-[4px]">{record.storage_type ?? '-'}</span>
         </div>
       );
     }

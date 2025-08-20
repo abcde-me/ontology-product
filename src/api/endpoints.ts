@@ -253,6 +253,8 @@ export const ModaForgeResourceEndpoints = {
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  // 工作流-脚本类型
+  scriptingType: PrefixAimdp + '/workflow/scripting/types',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
