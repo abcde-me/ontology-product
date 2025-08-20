@@ -1,10 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import {
   Button,
   Dropdown,
   Input,
   Menu,
   Message,
+  Modal,
   Tooltip,
   Tree
 } from '@arco-design/web-react';
@@ -23,15 +30,23 @@ import {
 } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
-import { PythonItemType, PythonListItem } from '@/types/pythonApi';
+import AddAfterIcon from '@/assets/python/add-after.svg';
+import {
+  CopyPythonItemRes,
+  CreatePythonItemRes,
+  PythonItemType,
+  PythonListItem,
+  RenamePythonItemRes
+} from '@/types/pythonApi';
+import EllipsisPopover from '../ellipsis-popover-com';
 import './DirectoryTree.scss';
 
 // 原始数据接口
-export interface TreeNodeItem extends PythonListItem {
-  children: TreeNodeItem[];
+export type TreeNodeItem = Partial<PythonListItem> & {
   showInput?: boolean;
   isAdd?: boolean;
-}
+  children?: TreeNodeItem[];
+};
 
 export interface DirectoryTreeProps {
   data: TreeNodeItem[];
@@ -46,19 +61,27 @@ export interface DirectoryTreeProps {
   ) => void;
   onCreate?: (
     finalName: string,
-    path_id: number,
     node?: NodeProps
-  ) => Promise<TreeDataType | void> | TreeDataType | void;
-  onRename?: (node: NodeProps, newName: string) => Promise<void> | void;
-  onCopy?: (node: NodeProps, newNode: TreeDataType) => Promise<void> | void;
-  onDelete?: (node: NodeProps) => Promise<void> | void;
+  ) => Promise<CreatePythonItemRes | null>;
+  onRename?: (
+    newName: string,
+    node: NodeProps
+  ) => Promise<RenamePythonItemRes | null>;
+  onCopy?: (
+    newName: string,
+    node: NodeProps
+  ) => Promise<CopyPythonItemRes | null>;
+  onDelete?: (node: NodeProps) => Promise<boolean>;
   onFolderClick?: (
-    folderId: string,
-    folderName: string
+    folderId: string
   ) => Promise<TreeDataType[]> | TreeDataType[];
   onBackToParent?: (
     parentId?: string
   ) => Promise<TreeDataType[]> | TreeDataType[];
+  onSearch?: (
+    path_id: string,
+    searchValue: string
+  ) => Promise<TreeNodeItem[]> | TreeNodeItem[];
   generateDefaultName?: (
     siblings: TreeDataType[],
     isFolder?: boolean
@@ -67,6 +90,17 @@ export interface DirectoryTreeProps {
   newButtonText?: string;
   // 数据格式化配置
   formatData?: (rawData: unknown[]) => TreeNodeItem[];
+  // URL状态同步相关
+  onUrlStateChange?: (state: {
+    folderId?: string;
+    fileId?: string;
+    searchValue?: string;
+  }) => void;
+  initialUrlState?: {
+    folderId?: string;
+    fileId?: string;
+    searchValue?: string;
+  };
 }
 
 // type InnerNode = TreeDataType & {
@@ -113,7 +147,9 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
     generateDefaultName = defaultNameGenerator,
     placeholder = '搜索当前文件夹',
     newButtonText = '新建',
-    formatData
+    formatData,
+    onUrlStateChange,
+    initialUrlState
   } = props;
 
   const [treeData, setTreeData] = useState<TreeNodeItem[]>(data);
@@ -128,6 +164,11 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
     Array<{ id: string; name: string }>
   >([]);
 
+  // 搜索相关状态
+  const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
+  const [searchResults, setSearchResults] = useState<TreeNodeItem[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+
   const inputRef = useRef<any>(null);
   const [inputValue, setInputValue] = useState<string>('');
   const [defaultName, setDefaultName] = useState<string>('');
@@ -139,6 +180,69 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
     }
     return inputData as TreeNodeItem[];
   };
+
+  // URL状态同步函数
+  const syncUrlState = useCallback(() => {
+    if (onUrlStateChange) {
+      onUrlStateChange({
+        folderId: currentFolderId || undefined,
+        fileId: selectedKeys.length > 0 ? selectedKeys[0] : undefined,
+        searchValue: searchValue || undefined
+      });
+    }
+  }, [onUrlStateChange, currentFolderId, selectedKeys, searchValue]);
+
+  // 当相关状态变化时同步到URL
+  useEffect(() => {
+    syncUrlState();
+  }, [syncUrlState]);
+
+  // 从URL初始化状态 - 只在组件挂载时执行一次
+  useEffect(() => {
+    if (initialUrlState && Object.keys(initialUrlState).length > 0) {
+      const hasChanges =
+        (initialUrlState.folderId &&
+          initialUrlState.folderId !== currentFolderId) ||
+        (initialUrlState.fileId &&
+          !selectedKeys.includes(initialUrlState.fileId)) ||
+        (initialUrlState.searchValue &&
+          initialUrlState.searchValue !== searchValue);
+
+      if (hasChanges) {
+        if (initialUrlState.folderId) {
+          setCurrentFolderId(initialUrlState.folderId);
+          // 如果有文件夹ID，需要加载该文件夹的内容
+          if (onFolderClick) {
+            const result = onFolderClick(initialUrlState.folderId);
+            if (result instanceof Promise) {
+              result
+                .then((newData) => {
+                  const formattedData = formatTreeData(newData as any[]);
+                  setTreeData(formattedData);
+                })
+                .catch((error) => {
+                  console.error('Failed to load folder from URL:', error);
+                });
+            } else {
+              // 直接返回数组的情况
+              const formattedData = formatTreeData(result as any[]);
+              setTreeData(formattedData);
+            }
+          }
+        }
+        if (initialUrlState.fileId) {
+          setSelectedKeys([initialUrlState.fileId]);
+        }
+        if (initialUrlState.searchValue) {
+          setSearchValue(initialUrlState.searchValue);
+          // 如果有搜索词，触发搜索
+          if (initialUrlState.searchValue.trim()) {
+            handleSearch(initialUrlState.searchValue);
+          }
+        }
+      }
+    }
+  }, []); // 只在组件挂载时执行一次
 
   useEffect(() => {
     const formattedData = formatTreeData(data);
@@ -162,19 +266,21 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
           : String(np._key ?? '');
         const folderName: string = meta?.name ?? String(np.title ?? '');
 
-        // 更新文件夹栈
-        const newStack = [
-          ...folderStack,
-          { id: currentFolderId, name: currentFolderName }
-        ];
-        setFolderStack(newStack);
+        // 更新文件夹栈 - 只有当当前不在根目录时才添加到栈中
+        if (currentFolderId && currentFolderName) {
+          const newStack = [
+            ...folderStack,
+            { id: currentFolderId, name: currentFolderName }
+          ];
+          setFolderStack(newStack);
+        }
 
         // 设置当前文件夹信息
         setCurrentFolderId(folderId);
         setCurrentFolderName(folderName);
 
         // 请求新数据
-        const newData = await onFolderClick(folderId, folderName);
+        const newData = await onFolderClick(folderId);
         const formattedData = formatTreeData(newData as any[]);
         setTreeData(formattedData);
 
@@ -189,6 +295,18 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
 
   // 处理返回上级目录
   const handleBackToParent = async () => {
+    // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
+    if (folderStack.length === 0 && currentFolderId && currentFolderName) {
+      setCurrentFolderId('');
+      setCurrentFolderName('');
+      // 恢复原始数据
+      const formattedData = formatTreeData(data);
+      setTreeData(formattedData);
+      setSelectedKeys([]);
+      setExpandedKeys([]);
+      return;
+    }
+
     if (folderStack.length === 0) return;
 
     try {
@@ -196,13 +314,23 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
       const newStack = folderStack.slice(0, -1);
 
       setFolderStack(newStack);
-      setCurrentFolderId(parentFolder.id);
-      setCurrentFolderName(parentFolder.name);
 
-      if (onBackToParent) {
-        const newData = await onBackToParent(parentFolder.id);
-        const formattedData = formatTreeData(newData as any[]);
+      // 如果返回的是根目录（id为空），则重置为根目录状态
+      if (!parentFolder.id || parentFolder.id === '') {
+        setCurrentFolderId('');
+        setCurrentFolderName('');
+        // 恢复原始数据
+        const formattedData = formatTreeData(data);
         setTreeData(formattedData);
+      } else {
+        setCurrentFolderId(parentFolder.id);
+        setCurrentFolderName(parentFolder.name);
+
+        if (onBackToParent) {
+          const newData = await onBackToParent(parentFolder.id);
+          const formattedData = formatTreeData(newData as any[]);
+          setTreeData(formattedData);
+        }
       }
 
       setSelectedKeys([]);
@@ -217,6 +345,53 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
       inputRef.current?.focus();
       inputRef.current?.dom?.select?.();
     }, 0);
+  };
+
+  // 处理搜索
+  const handleSearch = async (value: string) => {
+    if (!value.trim()) {
+      setIsSearchMode(false);
+      setSearchResults([]);
+      // 恢复原始树数据
+      const formattedData = formatTreeData(data);
+      setTreeData(formattedData);
+      return;
+    }
+
+    if (!props.onSearch) {
+      Message.error('搜索功能未实现');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await props.onSearch(currentFolderId, value);
+      setSearchResults(results);
+      setIsSearchMode(true);
+
+      // 将搜索结果转换为树形数据
+      const formattedResults = formatTreeData(results);
+      setTreeData(formattedResults);
+    } catch (error) {
+      Message.error('搜索失败');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // 处理搜索框回车
+  const handleSearchEnter = (value: string) => {
+    handleSearch(value);
+  };
+
+  // 处理搜索框清空
+  const handleSearchClear = () => {
+    setSearchValue('');
+    setIsSearchMode(false);
+    setSearchResults([]);
+    // 恢复原始树数据
+    const formattedData = formatTreeData(data);
+    setTreeData(formattedData);
   };
 
   const startRootCreate = (isFolder = true) => {
@@ -287,111 +462,122 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
 
     if (node.dataRef?.isAdd) {
       try {
-        const created = await onCreate?.(
-          finalName,
-          Number(currentFolderId),
-          node
-        );
+        const created = await onCreate?.(finalName, node);
 
         if (!created) {
           Message.error('创建失败');
           return;
         }
 
-        // 重新获取当前文件夹数据
-        const newData = await onFolderClick?.(
-          currentFolderId,
-          currentFolderName
-        );
-        const formattedData = formatTreeData(newData ?? []);
-        setTreeData(formattedData);
+        Message.success('创建成功');
       } catch (e) {
         Message.error('创建失败');
-        // setTreeData((prev) => removeNodeByKey(prev, node._key!));
       }
     } else {
       try {
-        await onRename?.(node, finalName);
-        // setTreeData((prev) => updateNodeTitle(prev, node._key!, finalName));
+        const rename = await onRename?.(finalName, node);
+
+        if (!rename) {
+          Message.error('重命名失败');
+          return;
+        }
+
+        Message.success('重命名成功');
       } catch (e) {
         Message.error('重命名失败');
-        // setTreeData((prev) => updateNodeTitle(prev, node._key!, defaultName));
       }
     }
+
     setInputValue('');
     setDefaultName('');
+    // 重新获取当前文件夹数据
+    const newData = await onFolderClick?.(currentFolderId);
+    const formattedData = formatTreeData(newData ?? []);
+    setTreeData(formattedData);
   };
 
   const handleCopy = async (node: NodeProps) => {
-    // const nodeData = (node as unknown as { dataRef?: NodeData }).dataRef;
-    // const title = String(node.title || nodeData?.dataRef?.name || '');
-    // const newNode: PannerNode = {
-    //     title: `${title} 副本`,
-    //     key: `copy-${Date.now()}`,
-    //     isLeaf: Boolean((node as unknown as NodeProps).isLeaf),
-    //     dataRef: { ...nodeData?.dataRef }
-    // };
-    // try {
-    //     await onCopy?.(node, newNode);
-    //     setTreeData((prev) => [newNode, ...prev]);
-    // } catch (e) {
-    //     Message.error('复制失败');
-    // }
+    try {
+      const copyRes = await onCopy?.(`${node.dataRef?.name}_副本`, node);
+
+      if (!copyRes) {
+        Message.error('复制失败');
+        return;
+      }
+
+      Message.success('复制成功');
+
+      const newData = await onFolderClick?.(currentFolderId);
+      const formattedData = formatTreeData(newData ?? []);
+      setTreeData(formattedData);
+    } catch (e) {
+      Message.error('复制失败');
+    }
   };
 
-  const handleDelete = async (node: NodeProps) => {
-    // try {
-    //     await onDelete?.(node);
-    //     setTreeData((prev) => removeNodeByKey(prev, node._key!));
-    // } catch (e) {
-    //     Message.error('删除失败');
-    // }
+  const handleDelete = (node: NodeProps) => {
+    const nodeName = node.dataRef?.name || '项目';
+    const nodeType =
+      node.dataRef?.type === PythonItemType.Directory ? '文件夹' : '文件';
+
+    Modal.confirm({
+      title: `确定删除${nodeType}?`,
+      content:
+        node.dataRef?.type === PythonItemType.Directory
+          ? `删除后，该文件夹下所有内容将被删除，不可恢复`
+          : `删除后，该文件不可恢复`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const deleteRes = await onDelete?.(node);
+
+          if (!deleteRes) {
+            Message.error('删除失败');
+            return;
+          }
+
+          Message.success('删除成功');
+
+          const newData = await onFolderClick?.(currentFolderId);
+          const formattedData = formatTreeData(newData ?? []);
+          setTreeData(formattedData);
+        } catch (e) {
+          Message.error('删除失败');
+        }
+      }
+    });
   };
-
-  // const filteredTreeData = useMemo(() => {
-  //     if (!searchValue) return treeData;
-
-  //     const match = (nodes: PannerNode[]): PannerNode[] => {
-  //         const result: InnerNode[] = [];
-  //         nodes.forEach((n) => {
-  //             const title = typeof n.title === 'string' ? n.title : '';
-  //             if (title.toLowerCase().includes(searchValue.toLowerCase())) {
-  //                 result.push({ ...n });
-  //             } else if (n.children) {
-  //                 const children = match(n.children as InnerNode[]);
-  //                 if (children.length) result.push({ ...n, children });
-  //             }
-  //         });
-  //         return result;
-  //     };
-  //     return match(treeData);
-  // }, [treeData, searchValue]);
 
   return (
-    <div>
-      {/* 导航栏 */}
-      {(currentFolderId || currentFolderName) && (
-        <div className="mb-2 flex items-center">
-          <div
-            className="mr-2 cursor-pointer text-[#2563EB] hover:text-[#165dff]"
+    <div className="directory-tree-container">
+      {/* 导航栏 - 当有当前文件夹名称时显示（包括从根目录进入的第一个文件夹） */}
+      {currentFolderName && (
+        <div className="directory-tree-nav flex items-center">
+          <AddAfterIcon
+            className="mr-2 h-4 w-4 cursor-pointer"
             onClick={handleBackToParent}
-          >
-            ← {currentFolderName}
-          </div>
+          />
+          <span className="text-[14px] font-[500] text-[#334155]">
+            {currentFolderName}
+          </span>
         </div>
       )}
 
-      <div className="mb-2 mt-[-8px] flex items-center justify-between">
+      <div className="directory-tree-header mb-2 flex items-center justify-between">
         <InputSearch
           placeholder={placeholder}
           value={searchValue}
           onChange={setSearchValue}
+          onSearch={handleSearchEnter}
+          onClear={handleSearchClear}
           allowClear
-          style={{ height: '32px', width: '130px' }}
+          loading={isSearching}
+          style={{ height: '32px' }}
         />
         <Dropdown
           trigger="click"
-          position="br"
+          position="bl"
           droplist={
             <Menu
               onClickMenuItem={(key) => {
@@ -413,104 +599,132 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
         </Dropdown>
       </div>
 
-      <Tree
-        className="directory-tree"
-        blockNode
-        treeData={treeData}
-        selectable
-        expandedKeys={expandedKeys}
-        selectedKeys={selectedKeys}
-        onExpand={setExpandedKeys}
-        onSelect={(keys, extra) => {
-          setSelectedKeys(keys);
-          onSelect?.(keys, extra);
+      {treeData.length === 0 ? (
+        <div className="directory-tree-empty">暂无数据</div>
+      ) : (
+        <Tree
+          className="directory-tree"
+          blockNode
+          treeData={treeData}
+          selectable
+          expandedKeys={expandedKeys}
+          selectedKeys={selectedKeys}
+          onExpand={setExpandedKeys}
+          onSelect={(keys, extra) => {
+            setSelectedKeys(keys);
+            onSelect?.(keys, extra);
 
-          // 如果是文件夹，触发下钻逻辑
-          if (extra.node && onFolderClick) {
-            handleFolderClick(extra.node);
-          }
-        }}
-        renderExtra={(node) => {
-          const isEditing = node.dataRef?.showInput;
-          if (isEditing) return null;
-          return (
-            <div className="directory-tree-extra">
-              <Tooltip color="white" content="重命名">
-                <IconEdit
-                  className="mr-2 hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => handleEdit(node)}
-                />
-              </Tooltip>
-              <Tooltip color="white" content="复制">
-                <IconCopy
-                  className="mr-2 hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => handleCopy(node as unknown as NodeProps)}
-                />
-              </Tooltip>
-              <Tooltip color="white" content="删除">
-                <IconDelete
-                  className="hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => handleDelete(node as unknown as NodeProps)}
-                />
-              </Tooltip>
-            </div>
-          );
-        }}
-        renderTitle={(props: NodeProps) => {
-          const isInput = Boolean(props?.dataRef?.showInput);
-          const isFolder = props?.dataRef?.type === PythonItemType.Directory;
+            const dataRef = extra?.node?.props?.dataRef ?? null;
 
-          // 根据节点类型选择图标
-          const icon = isFolder ? (
-            <FolderIcon className="mr-2 h-4 w-4" />
-          ) : (
-            <FileIcon className="mr-2 h-4 w-4" />
-          );
+            // 如果是文件夹并且非编辑态，触发下钻逻辑
+            if (
+              !dataRef?.showInput &&
+              dataRef?.type === PythonItemType.Directory &&
+              onFolderClick
+            ) {
+              handleFolderClick(extra.node);
+            }
+          }}
+          renderExtra={(node) => {
+            const isEditing = node.dataRef?.showInput;
 
-          if (isInput) {
+            if (isEditing) return null;
+
             return (
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={setInputValue}
-                onBlur={() => handleEditFinish(props)}
-                onPressEnter={() => handleEditFinish(props)}
-                maxLength={255}
-                className="h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]"
-              />
+              <div className="directory-tree-extra">
+                <Tooltip color="white" content="重命名">
+                  <IconEdit
+                    className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                    onClick={() => handleEdit(node)}
+                  />
+                </Tooltip>
+                {node.dataRef?.type !== PythonItemType.Directory && (
+                  <Tooltip color="white" content="复制">
+                    <IconCopy
+                      className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => handleCopy(node as unknown as NodeProps)}
+                    />
+                  </Tooltip>
+                )}
+                <Tooltip color="white" content="删除">
+                  <IconDelete
+                    className="hover:text-[rgb(var(--primary-6))]"
+                    onClick={() => handleDelete(node as unknown as NodeProps)}
+                  />
+                </Tooltip>
+              </div>
             );
-          }
+          }}
+          renderTitle={(props: NodeProps) => {
+            const isInput = Boolean(props?.dataRef?.showInput);
+            const isFolder = props?.dataRef?.type === PythonItemType.Directory;
 
-          const titleText = props.dataRef?.name;
-          let display: React.ReactNode = titleText;
-          if (searchValue && typeof titleText === 'string') {
-            const idx = titleText
-              .toLowerCase()
-              .indexOf(searchValue.toLowerCase());
-            if (idx !== -1) {
-              const pre = titleText.slice(0, idx);
-              const suf = titleText.slice(idx + searchValue.length);
-              display = (
-                <>
-                  {pre}
-                  <span className="text-[rgb(var(--primary-6))]">
-                    {searchValue}
-                  </span>
-                  {suf}
-                </>
+            // 根据节点类型选择图标
+            const icon = isFolder ? (
+              <FolderIcon className="mr-2 h-4 w-4" />
+            ) : (
+              <FileIcon className="mr-2 h-4 w-4" />
+            );
+
+            if (isInput) {
+              return (
+                <div className="flex items-center">
+                  {icon}
+                  <Input
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onBlur={() => handleEditFinish(props)}
+                    onPressEnter={() => handleEditFinish(props)}
+                    maxLength={255}
+                    className="h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]"
+                  />
+                </div>
               );
             }
-          }
-          return (
-            <div className="flex items-center overflow-hidden">
-              <span className="mr-2">{icon}</span>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                {display}
+
+            const titleText = props.dataRef?.name;
+            let display: React.ReactNode = titleText;
+            if (searchValue && typeof titleText === 'string') {
+              const idx = titleText
+                .toLowerCase()
+                .indexOf(searchValue.toLowerCase());
+              if (idx !== -1) {
+                const pre = titleText.slice(0, idx);
+                const suf = titleText.slice(idx + searchValue.length);
+                display = (
+                  <>
+                    {pre}
+                    <span className="text-[rgb(var(--primary-6))]">
+                      {searchValue}
+                    </span>
+                    {suf}
+                  </>
+                );
+              }
+            }
+            return (
+              <div className="flex items-center overflow-hidden">
+                {icon}
+                <div className="flex flex-1 flex-col overflow-hidden">
+                  <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                    {display}
+                  </div>
+                  {/* 只在搜索结果中显示路径 */}
+                  {isSearchMode && props.dataRef?.path && (
+                    <div className="search-result-path">
+                      <EllipsisPopover
+                        value={props.dataRef.path}
+                        className="text-gray-500"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -33,6 +33,7 @@ export async function getPythonList(
           name: '项目A',
           type: PythonItemType.Directory,
           path: '/',
+          path_id: 1001,
           created: now,
           last_modified: later
         },
@@ -41,6 +42,7 @@ export async function getPythonList(
           name: '数据集',
           type: PythonItemType.Directory,
           path: '/',
+          path_id: 1002,
           created: now,
           last_modified: later
         },
@@ -49,6 +51,7 @@ export async function getPythonList(
           name: '脚本1.py',
           type: PythonItemType.Notebook,
           path: '/',
+          path_id: 1002,
           created: now,
           last_modified: later
         }
@@ -62,6 +65,7 @@ export async function getPythonList(
           name: '子目录-代码',
           type: PythonItemType.Directory,
           path: '/项目A',
+          path_id: 1001,
           created: now,
           last_modified: later
         },
@@ -70,6 +74,7 @@ export async function getPythonList(
           name: 'main.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
+          path_id: 1001,
           created: now,
           last_modified: later
         },
@@ -78,6 +83,7 @@ export async function getPythonList(
           name: 'utils.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
+          path_id: 1001,
           created: now,
           last_modified: later
         }
@@ -91,6 +97,7 @@ export async function getPythonList(
           name: 'train.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
+          path_id: 1101,
           created: now,
           last_modified: later
         },
@@ -99,6 +106,7 @@ export async function getPythonList(
           name: 'eval.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
+          path_id: 1101,
           created: now,
           last_modified: later
         }
@@ -112,6 +120,7 @@ export async function getPythonList(
           name: '加载数据.ipynb',
           type: PythonItemType.Notebook,
           path: '/数据集',
+          path_id: 1002,
           created: now,
           last_modified: later
         }
@@ -162,6 +171,7 @@ export async function createPythonItem(
       name: '加载数据.ipynb',
       type: PythonItemType.Notebook,
       path: '/数据集',
+      path_id: 1002,
       created: now,
       last_modified: later
     }
@@ -222,6 +232,7 @@ export async function copyPythonItem(
     requestId: '1',
     data: {
       id: 2201,
+      path_id: 1002,
       name: '加载数据.ipynb',
       type: PythonItemType.Notebook,
       path: '/数据集',

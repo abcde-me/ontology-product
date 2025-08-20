@@ -25,6 +25,8 @@ export interface PythonListItem {
   type: PythonItemType;
   /** 文件的父目录，根目录为 . */
   path: string;
+  /** 文件的父目录id */
+  path_id: number;
   /** 创建时间，格式：YYYY-MM-DD HH:mm:ss */
   created: string;
   /** 更新时间，格式：YYYY-MM-DD HH:mm:ss */
