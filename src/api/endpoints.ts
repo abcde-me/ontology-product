@@ -257,6 +257,12 @@ export const ModaForgeResourceEndpoints = {
   scriptingType: PrefixAimdp + '/workflow/scripting/types',
   // 工作流-脚本执行器列表
   scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  // 工作流-脚本模板
+  scriptingTemplate:
+    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  // 工作流-脚本执行
+  scriptingBench:
+    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',

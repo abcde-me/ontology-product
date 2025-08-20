@@ -13,4 +13,6 @@ export type OutputVar = Record<
 
 export type CustomNodeType = CommonNodeType & {
   script_content: string;
+  scripting_type: string;
+  engine_id: string;
 };
