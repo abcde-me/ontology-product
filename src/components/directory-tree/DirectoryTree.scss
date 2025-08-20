@@ -1,0 +1,53 @@
+.directory-tree-container {
+  .arco-tree-node {
+    position: relative;
+  }
+
+  .directory-tree-nav {
+    margin-bottom: 11px;
+    padding-left: 5px;
+  }
+
+  .directory-tree-header {
+    .arco-btn-size-small {
+      padding: 0 0 0 12px;
+    }
+  }
+
+  .directory-tree-extra {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease;
+  }
+
+  .arco-tree-node:hover .directory-tree-extra {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .arco-tree-node-switcher {
+    width: 0;
+    margin-right: 0;
+  }
+
+  // 搜索结果路径样式
+  .search-result-path {
+    font-size: 12px;
+    color: #6e7b8d;
+    line-height: 18px;
+  }
+
+  // 空数据状态样式
+  .directory-tree-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+  }
+}
