@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Collapse, Form, Modal, Spin } from '@arco-design/web-react';
+import {
+  Button,
+  Collapse,
+  Form,
+  Message,
+  Modal,
+  Spin
+} from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { tags as t } from '@lezer/highlight';
 import { python } from '@codemirror/lang-python';
@@ -17,10 +24,11 @@ import {
   getScriptingType,
   getScriptingEngine,
   getScriptingTemplate,
-  scriptingBench
+  scriptingBench,
+  scriptingBenchResult
 } from '@/api/workflow';
 import './panel.scss';
-import { useParams } from 'react-router';
+import { useParams } from '@/utils/url';
 import Cookies from 'js-cookie';
 
 const FormItem = Form.Item;
@@ -29,7 +37,7 @@ const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
   const CollapseItem = Collapse.Item;
-  const { workflow_uuid } = useParams<{ workflow_uuid: string }>();
+  const workflow_uuid = useParams('workflow_uuid') as string;
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
   const [isModalSticky, setModalSticky] = useState(false);
@@ -45,6 +53,7 @@ const Panel = ({ id, data, parentRef }) => {
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
   const [placeholderValue, setPlaceholderValue] = useState('');
+  const [runningBenchId, setRunningBenchId] = useState('');
 
   useEffect(() => {
     const getScriptingInfo = async () => {
@@ -220,12 +229,18 @@ const Panel = ({ id, data, parentRef }) => {
     ]
   });
 
-  const handleCustomizeRun = () => {
-    setIsRunning(!isRunning);
-    setRunningTime(0);
+  const handleCustomizeRun = async () => {
+    const res = await runningStart();
+    if (res.data && res.code === '') {
+      setRunningBenchId(res.data.bench_job_id);
+      setIsRunning(!isRunning);
+      setRunningTime(0);
+    } else {
+      Message.error(res?.message ?? '运行失败');
+    }
   };
 
-  const runningResult = async () => {
+  const runningStart = async () => {
     const { edges, getNodes } = store.getState();
     const nodes = getNodes();
     const session_id = Cookies.get('session_id') as string;
@@ -245,6 +260,19 @@ const Panel = ({ id, data, parentRef }) => {
       }
     };
     const res = await scriptingBench(workflow_uuid, session_id, id, params);
+
+    return res;
+  };
+
+  const runningResult = async () => {
+    const session_id = Cookies.get('session_id') as string;
+    if (!runningBenchId) return;
+    const res = await scriptingBenchResult(
+      workflow_uuid,
+      session_id,
+      id,
+      runningBenchId
+    );
 
     return res;
   };

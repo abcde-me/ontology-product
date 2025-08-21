@@ -263,6 +263,10 @@ export const ModaForgeResourceEndpoints = {
   // 工作流-脚本执行
   scriptingBench:
     PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  // 工作流-脚本执行结果
+  scriptingBenchResult:
+    PrefixAimdp +
+    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
