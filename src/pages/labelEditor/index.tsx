@@ -5,7 +5,9 @@ import {
   getTask,
   getJobMeta,
   getJobAnnotations,
-  getJobLabels
+  getJobLabels,
+  saveJobAnnotations,
+  submitJobAnnotations
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 
@@ -60,7 +62,9 @@ function WorkflowConfig() {
           props={{
             getJobMeta,
             getJobAnnotations,
-            getJobLabels
+            getJobLabels,
+            saveJobAnnotations,
+            submitJobAnnotations
           }}
         ></WujieReact>
       )}
