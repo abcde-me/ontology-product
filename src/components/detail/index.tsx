@@ -76,6 +76,7 @@ interface DatasetDetail {
   created_at: string;
   updated_at: string;
   perms: string[];
+  storage_type: string;
 }
 
 const countWidth = (count: number) => {
@@ -428,21 +429,21 @@ const renderStatusTag = (
         {perms?.includes(
           DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
         ) && (
-            <Button
-              type="text"
-              size="small"
-              style={{
-                color: '#165dff',
-                padding: '0 4px',
-                fontSize: '14px',
-                height: 'auto'
-              }}
-            >
-              <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
-                重试
-              </span>
-            </Button>
-          )}
+          <Button
+            type="text"
+            size="small"
+            style={{
+              color: '#165dff',
+              padding: '0 4px',
+              fontSize: '14px',
+              height: 'auto'
+            }}
+          >
+            <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
+              重试
+            </span>
+          </Button>
+        )}
       </div>
     );
   }
@@ -1121,27 +1122,27 @@ const DatasetDetail: React.FC = () => {
               {datasetDetail?.perms?.includes(
                 DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
               ) && (
-                  <Tooltip
-                    content={
+                <Tooltip
+                  content={
+                    !datasetDetail || datasetDetail.status !== 'normal'
+                      ? '当前状态下不能进行编辑'
+                      : ''
+                  }
+                >
+                  <Button
+                    disabled={
                       !datasetDetail || datasetDetail.status !== 'normal'
-                        ? '当前状态下不能进行编辑'
-                        : ''
                     }
+                    onClick={handleEdit}
+                    type="text"
+                    icon={<IconEdit />}
+                    className="edit-btn"
+                    style={{ height: '100%' }}
                   >
-                    <Button
-                      disabled={
-                        !datasetDetail || datasetDetail.status !== 'normal'
-                      }
-                      onClick={handleEdit}
-                      type="text"
-                      icon={<IconEdit />}
-                      className="edit-btn"
-                      style={{ height: '100%' }}
-                    >
-                      编辑
-                    </Button>
-                  </Tooltip>
-                )}
+                    编辑
+                  </Button>
+                </Tooltip>
+              )}
             </div>
 
             {/* 内容区域 */}
@@ -1257,6 +1258,10 @@ const DatasetDetail: React.FC = () => {
                     {
                       label: '生成模型:',
                       value: datasetDetail.src_model || '-'
+                    },
+                    {
+                      label: '数据集类型:',
+                      value: datasetDetail.storage_type || '-'
                     }
                   ]}
                   column={1}
@@ -1506,19 +1511,19 @@ const DatasetDetail: React.FC = () => {
                       {datasetDetail?.perms?.includes(
                         DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
                       ) && (
-                          <Button
-                            // type="primary"
-                            disabled={
-                              !datasetDetail || datasetDetail.status !== 'normal'
-                            }
-                            onClick={() => setUpdateStatus(true)}
-                            type="text"
-                            icon={<IconEdit />}
-                            className="edit-btn"
-                          >
-                            编辑
-                          </Button>
-                        )}
+                        <Button
+                          // type="primary"
+                          disabled={
+                            !datasetDetail || datasetDetail.status !== 'normal'
+                          }
+                          onClick={() => setUpdateStatus(true)}
+                          type="text"
+                          icon={<IconEdit />}
+                          className="edit-btn"
+                        >
+                          编辑
+                        </Button>
+                      )}
                     </Tooltip>
                   )}
                 </>
