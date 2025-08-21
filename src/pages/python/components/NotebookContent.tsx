@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Tag } from '@arco-design/web-react';
 import {
   IconPlayArrow,
@@ -11,22 +11,27 @@ import './NotebookContent.scss';
 
 interface NotebookContentProps {
   fileName?: string;
-  initialContent?: string;
+  content: string;
 }
 
 const NotebookContent: React.FC<NotebookContentProps> = ({
   fileName = '我的第一个PySpark文件',
-  initialContent = '# 在这里编写您的代码\n'
+  content
 }) => {
-  const [content, setContent] = useState(initialContent);
+  const [editorContent, setEditorContent] = useState(content);
+
+  // 当content prop变化时，更新编辑器内容
+  useEffect(() => {
+    setEditorContent(content);
+  }, [content]);
 
   const handleContentChange = (value: string) => {
-    setContent(value || '');
+    setEditorContent(value || '');
   };
 
   const handleRunCode = () => {
     // 这里可以添加运行代码的逻辑
-    console.log('Running code:', content);
+    console.log('Running code:', editorContent);
   };
 
   const handleExportDataset = () => {
@@ -61,7 +66,7 @@ const NotebookContent: React.FC<NotebookContentProps> = ({
           height="100%"
           language="python"
           theme="vs"
-          value={content}
+          value={editorContent}
           onChange={handleContentChange}
           options={{
             selectOnLineNumbers: true,
@@ -78,10 +83,28 @@ const NotebookContent: React.FC<NotebookContentProps> = ({
             wordWrap: 'on',
             folding: true,
             showFoldingControls: 'always',
-            lineHeight: 20,
-            padding: {
-              top: 16,
-              bottom: 16
+            lineHeight: 24,
+            // 启用实时错误检查
+            quickSuggestions: true,
+            suggestOnTriggerCharacters: true,
+            // 启用参数提示
+            parameterHints: {
+              enabled: true
+            },
+            // 启用悬停提示
+            hover: {
+              enabled: true
+            },
+            // 启用自动缩进
+            autoIndent: 'full',
+            // 启用括号匹配
+            bracketPairColorization: {
+              enabled: true
+            },
+            // 启用指南线
+            guides: {
+              bracketPairs: true,
+              indentation: true
             }
           }}
         />

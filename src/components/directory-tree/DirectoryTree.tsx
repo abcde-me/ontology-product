@@ -90,7 +90,7 @@ export interface DirectoryTreeProps {
   placeholder?: string;
   newButtonText?: string;
   // 数据格式化配置
-  formatData?: (rawData: unknown[]) => TreeNodeItem[];
+  formatData?: (rawData: PythonListItem[]) => TreeNodeItem[];
   // URL状态同步相关
   onUrlStateChange?: (state: {
     folderId?: string;

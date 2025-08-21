@@ -260,53 +260,53 @@ export async function openPythonItem(
       execid: 1,
       running_status: 1,
       data: `# Python文件代码内容示例
-          import pandas as pd
-          import numpy as np
-          import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-          # 数据加载
-          def load_data():
-              """加载示例数据"""
-              data = pd.DataFrame({
-                  'x': np.random.randn(100),
-                  'y': np.random.randn(100)
-              })
-              return data
+# 数据加载
+def load_data():
+"""加载示例数据"""
+data = pd.DataFrame({
+    'x': np.random.randn(100),
+    'y': np.random.randn(100)
+})
+return data
 
-          # 数据处理
-          def process_data(df):
-              """处理数据"""
-              df['z'] = df['x'] + df['y']
-              return df
+# 数据处理
+def process_data(df):
+"""处理数据"""
+df['z'] = df['x'] + df['y']
+return df
 
-          # 数据可视化
-          def visualize_data(df):
-              """可视化数据"""
-              plt.figure(figsize=(10, 6))
-              plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
-              plt.colorbar(label='z value')
-              plt.xlabel('X values')
-              plt.ylabel('Y values')
-              plt.title('Data Visualization')
-              plt.show()
+# 数据可视化
+def visualize_data(df):
+"""可视化数据"""
+plt.figure(figsize=(10, 6))
+plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+plt.colorbar(label='z value')
+plt.xlabel('X values')
+plt.ylabel('Y values')
+plt.title('Data Visualization')
+plt.show()
 
-          # 主函数
-          if __name__ == "__main__":
-              # 加载数据
-              df = load_data()
-              print("数据加载完成，共", len(df), "行")
-              
-              # 处理数据
-              df = process_data(df)
-              print("数据处理完成")
-              
-              # 显示统计信息
-              print("\\n数据统计信息:")
-              print(df.describe())
-              
-              # 可视化数据
-              visualize_data(df)
-              print("数据可视化完成")`
+# 主函数
+if __name__ == "__main__":
+# 加载数据
+df = load_data()
+print("数据加载完成，共", len(df), "行")
+
+# 处理数据
+df = process_data(df)
+print("数据处理完成")
+
+# 显示统计信息
+print("\\n数据统计信息:")
+print(df.describe())
+
+# 可视化数据
+visualize_data(df)
+print("数据可视化完成")`
     }
   });
 }

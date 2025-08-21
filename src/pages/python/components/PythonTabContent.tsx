@@ -13,11 +13,13 @@ import DirectoryTree, {
   type TreeNodeItem
 } from '@/components/directory-tree/DirectoryTree';
 import { useUrlState } from '../hooks/useUrlState';
+import { PythonItemType } from '@/types/pythonApi';
 
 const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
+  onFileOpen?: (fileId: string) => void;
 }
 
 interface TreeNode {
@@ -121,6 +123,18 @@ const usePythonList = () => {
     }
   }, []);
 
+  // 数据格式化函数
+  const formatData = useCallback((data: unknown[]) => {
+    return (
+      data?.map((item: any) => {
+        return {
+          ...item,
+          key: String(item.id)
+        };
+      }) ?? []
+    );
+  }, []);
+
   useEffect(() => {
     getRawPythonList();
   }, [getRawPythonList]);
@@ -137,11 +151,14 @@ const usePythonList = () => {
     handleCreate,
     handleRename,
     handleCopy,
-    handleDelete
+    handleDelete,
+    formatData
   };
 };
 
-const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
+const PythonTabContent: React.FC<NotebookTabContentProps> = ({
+  onFileOpen
+}) => {
   const {
     searchValue,
     handleSearch,
@@ -153,11 +170,38 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
     handleCreate,
     handleRename,
     handleCopy,
-    handleDelete
+    handleDelete,
+    formatData
   } = usePythonList();
 
   // 使用URL状态hook
   const { urlState, updateUrlState } = useUrlState();
+
+  const handleFileSelect = (
+    selectedKeys: string[],
+    extra: {
+      selected: boolean;
+      selectedNodes: any[];
+      node: any;
+      e: Event;
+    }
+  ) => {
+    console.log('选中的节点:', selectedKeys, onFileOpen);
+
+    // 如果选中了文件，调用onFileOpen回调
+    if (selectedKeys.length > 0 && onFileOpen) {
+      const selectedKey = selectedKeys[0];
+      // 检查选中的是否是文件（不是文件夹）
+      const selectedItem = pythonList.find(
+        (item) => String(item.id) === selectedKey
+      );
+      console.log('selectedItem', pythonList, selectedItem);
+      if (selectedItem && selectedItem.type === PythonItemType.Notebook) {
+        console.log('透传文件id:', selectedKey);
+        onFileOpen(selectedKey);
+      }
+    }
+  };
 
   return (
     <div className="python-tab-content">
@@ -168,7 +212,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
       <div className="tab-tree">
         <DirectoryTree
           data={pythonList as TreeNodeItem[]}
-          onSelect={(keys) => handleTreeSelect(keys as unknown as string[])}
+          onSelect={handleFileSelect}
           onCreate={handleCreate}
           onRename={handleRename}
           onCopy={handleCopy}
@@ -187,6 +231,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
             return res?.data?.items || [];
           }}
           onSearch={handleSearch}
+          formatData={formatData}
           placeholder="搜索当前文件夹"
           newButtonText="新建"
           onUrlStateChange={updateUrlState}
