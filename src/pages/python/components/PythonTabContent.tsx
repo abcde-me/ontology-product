@@ -178,94 +178,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   // 使用URL状态hook
   const { urlState, updateUrlState } = useUrlState();
 
-  // 自动选中第一个文件或创建新文件
-  useEffect(() => {
-    const autoSelectOrCreateFile = async () => {
-      // 等待文件列表加载完成
-      if (pythonList.length > 0) {
-        // 查找第一个Python文件
-        const firstPythonFile = pythonList.find(
-          (item) => item.type === PythonItemType.Notebook
-        );
-
-        if (firstPythonFile && onFileOpen) {
-          console.log('自动选中第一个文件:', firstPythonFile.name);
-          onFileOpen(String(firstPythonFile.id));
-        }
-      } else {
-        // 如果没有文件，自动创建一个新的Python文件
-        try {
-          console.log('没有找到文件，自动创建新的Python文件');
-          const timestamp = new Date()
-            .toLocaleString('zh-CN', {
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })
-            .replace(/[/:]/g, '')
-            .replace(/\s/g, '_');
-          const newFile = await createPythonItem({
-            path_id: 0, // 根目录
-            type: PythonItemType.Notebook,
-            name: `新建文件_${timestamp}.py`
-          });
-
-          if (newFile.status === 200 && newFile.data && onFileOpen) {
-            console.log('自动创建新文件成功:', newFile.data.name);
-            // 刷新文件列表
-            await getRawPythonList();
-            // 自动打开新创建的文件
-            onFileOpen(String(newFile.data.id));
-          }
-        } catch (error) {
-          console.error('自动创建文件失败:', error);
-        }
-      }
-    };
-
-    // 延迟执行，确保组件完全加载
-    const timer = setTimeout(autoSelectOrCreateFile, 100);
-    return () => clearTimeout(timer);
-  }, [pythonList, onFileOpen, getRawPythonList]);
-
-  // 当文件列表为空且组件已加载时，尝试创建新文件
-  useEffect(() => {
-    if (pythonList.length === 0 && onFileOpen) {
-      const timer = setTimeout(async () => {
-        try {
-          console.log('文件列表为空，尝试创建新文件');
-          const timestamp = new Date()
-            .toLocaleString('zh-CN', {
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })
-            .replace(/[/:]/g, '')
-            .replace(/\s/g, '_');
-          const newFile = await createPythonItem({
-            path_id: 0, // 根目录
-            type: PythonItemType.Notebook,
-            name: `新建文件_${timestamp}.py`
-          });
-
-          if (newFile.status === 200 && newFile.data && onFileOpen) {
-            console.log('自动创建新文件成功:', newFile.data.name);
-            // 刷新文件列表
-            await getRawPythonList();
-            // 自动打开新创建的文件
-            onFileOpen(String(newFile.data.id));
-          }
-        } catch (error) {
-          console.error('自动创建文件失败:', error);
-        }
-      }, 500); // 等待500ms确保API调用完成
-
-      return () => clearTimeout(timer);
-    }
-  }, [pythonList.length, onFileOpen, getRawPythonList]);
-
   const handleFileSelect = (
     selectedKeys: string[],
     extra: {
@@ -325,6 +237,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
           newButtonText="新建"
           onUrlStateChange={updateUrlState}
           initialUrlState={urlState}
+          autoSelectOrCreate={true}
+          onAutoFileOpen={onFileOpen}
         />
       </div>
     </div>
