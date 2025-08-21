@@ -102,6 +102,9 @@ export interface DirectoryTreeProps {
     fileId?: string;
     searchValue?: string;
   };
+  // 自动选中文件或创建新文件相关
+  autoSelectOrCreate?: boolean;
+  onAutoFileOpen?: (fileId: string) => void;
 }
 
 const InputSearch = Input.Search;
@@ -135,7 +138,9 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
     newButtonText = '新建',
     formatData,
     onUrlStateChange,
-    initialUrlState
+    initialUrlState,
+    autoSelectOrCreate = false,
+    onAutoFileOpen
   } = props;
 
   const [treeData, setTreeData] = useState<TreeNodeItem[]>(data);
@@ -162,7 +167,9 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
   // 格式化数据
   const formatTreeData = (inputData: unknown[]): TreeNodeItem[] => {
     if (Array.isArray(inputData) && inputData.length > 0) {
-      return formatData ? formatData(inputData) : (inputData as TreeNodeItem[]);
+      return formatData
+        ? formatData(inputData as PythonListItem[])
+        : (inputData as TreeNodeItem[]);
     }
     return inputData as TreeNodeItem[];
   };
@@ -235,6 +242,40 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
     console.log('formattedData', formattedData);
     setTreeData(formattedData);
   }, [data, formatData]);
+
+  // 自动选中第一个文件或创建新文件
+  useEffect(() => {
+    if (!autoSelectOrCreate || !onAutoFileOpen) return;
+
+    const autoSelectOrCreateFile = () => {
+      // 等待文件列表加载完成
+      if (treeData.length > 0) {
+        // 查找第一个Python文件
+        const firstPythonFile = treeData.find(
+          (item) => item.type === PythonItemType.Notebook
+        );
+
+        if (firstPythonFile && firstPythonFile.id) {
+          console.log('自动选中第一个文件:', firstPythonFile.name);
+          onAutoFileOpen(String(firstPythonFile.id));
+          setSelectedKeys([String(firstPythonFile.id)]);
+          return;
+        }
+      }
+
+      // 如果没有文件，自动创建一个新的Python文件
+      try {
+        console.log('没有找到文件，自动创建新文件');
+        startRootCreate(false);
+      } catch (error) {
+        console.error('自动创建文件失败:', error);
+      }
+    };
+
+    // 延迟执行，确保组件完全加载
+    const timer = setTimeout(autoSelectOrCreateFile, 100);
+    return () => clearTimeout(timer);
+  }, [treeData, autoSelectOrCreate, onAutoFileOpen]);
 
   // 处理文件夹点击下钻
   const handleFolderClick = async (node: NodeInstance) => {
@@ -485,6 +526,18 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
         }
 
         Message.success('创建成功');
+
+        // 如果是自动创建的文件且是Python文件，调用回调打开文件
+        if (
+          autoSelectOrCreate &&
+          onAutoFileOpen &&
+          node.dataRef?.type === PythonItemType.Notebook &&
+          created?.id
+        ) {
+          console.log('自动创建文件成功，打开文件:', created.name);
+          onAutoFileOpen(String(created.id));
+          setSelectedKeys([String(created.id)]);
+        }
       } catch (e) {
         Message.error('创建失败');
       }
