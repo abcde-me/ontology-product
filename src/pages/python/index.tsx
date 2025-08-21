@@ -15,9 +15,14 @@ type TabKey = 'files' | 'tools' | 'data';
 
 const Notebook: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+  };
+
+  const handleFileOpen = (fileId: string) => {
+    setCurrentFileId(fileId);
   };
 
   return (
@@ -31,7 +36,7 @@ const Notebook: React.FC = () => {
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon></PythonIcon>}>
-            <PythonTabContent type="files" />
+            <PythonTabContent type="files" onFileOpen={handleFileOpen} />
           </TabPane>
           <TabPane key="data" title={<DataIcon></DataIcon>}>
             <NotebookTabContent type="data" />
@@ -42,7 +47,7 @@ const Notebook: React.FC = () => {
         </Tabs>
       </Sider>
       <Content className="notebook-content">
-        <NotebookMainContent />
+        <NotebookMainContent currentFileId={currentFileId} />
       </Content>
     </Layout>
   );

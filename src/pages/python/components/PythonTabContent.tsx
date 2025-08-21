@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Input, Button, Tree, Typography } from '@arco-design/web-react';
-import {
-  IconSearch,
-  IconPlus,
-  IconFolder,
-  IconFile
-} from '@arco-design/web-react/icon';
+import { Typography } from '@arco-design/web-react';
 import {
   getPythonList,
   createPythonItem,
@@ -13,17 +7,19 @@ import {
   deletePythonItem,
   copyPythonItem
 } from '@/api/python';
-import { PythonItemType, PythonListItem } from '@/types/pythonApi';
+import { PythonListItem } from '@/types/pythonApi';
 import './PythonTabContent.scss';
 import DirectoryTree, {
   type TreeNodeItem
 } from '@/components/directory-tree/DirectoryTree';
 import { useUrlState } from '../hooks/useUrlState';
+import { PythonItemType } from '@/types/pythonApi';
 
 const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
+  onFileOpen?: (fileId: string) => void;
 }
 
 interface TreeNode {
@@ -127,6 +123,18 @@ const usePythonList = () => {
     }
   }, []);
 
+  // 数据格式化函数
+  const formatData = useCallback((data: unknown[]) => {
+    return (
+      data?.map((item: any) => {
+        return {
+          ...item,
+          key: String(item.id)
+        };
+      }) ?? []
+    );
+  }, []);
+
   useEffect(() => {
     getRawPythonList();
   }, [getRawPythonList]);
@@ -143,11 +151,14 @@ const usePythonList = () => {
     handleCreate,
     handleRename,
     handleCopy,
-    handleDelete
+    handleDelete,
+    formatData
   };
 };
 
-const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
+const PythonTabContent: React.FC<NotebookTabContentProps> = ({
+  onFileOpen
+}) => {
   const {
     searchValue,
     handleSearch,
@@ -159,11 +170,127 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
     handleCreate,
     handleRename,
     handleCopy,
-    handleDelete
+    handleDelete,
+    formatData,
+    getRawPythonList
   } = usePythonList();
 
   // 使用URL状态hook
   const { urlState, updateUrlState } = useUrlState();
+
+  // 自动选中第一个文件或创建新文件
+  useEffect(() => {
+    const autoSelectOrCreateFile = async () => {
+      // 等待文件列表加载完成
+      if (pythonList.length > 0) {
+        // 查找第一个Python文件
+        const firstPythonFile = pythonList.find(
+          (item) => item.type === PythonItemType.Notebook
+        );
+
+        if (firstPythonFile && onFileOpen) {
+          console.log('自动选中第一个文件:', firstPythonFile.name);
+          onFileOpen(String(firstPythonFile.id));
+        }
+      } else {
+        // 如果没有文件，自动创建一个新的Python文件
+        try {
+          console.log('没有找到文件，自动创建新的Python文件');
+          const timestamp = new Date()
+            .toLocaleString('zh-CN', {
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+            .replace(/[/:]/g, '')
+            .replace(/\s/g, '_');
+          const newFile = await createPythonItem({
+            path_id: 0, // 根目录
+            type: PythonItemType.Notebook,
+            name: `新建文件_${timestamp}.py`
+          });
+
+          if (newFile.status === 200 && newFile.data && onFileOpen) {
+            console.log('自动创建新文件成功:', newFile.data.name);
+            // 刷新文件列表
+            await getRawPythonList();
+            // 自动打开新创建的文件
+            onFileOpen(String(newFile.data.id));
+          }
+        } catch (error) {
+          console.error('自动创建文件失败:', error);
+        }
+      }
+    };
+
+    // 延迟执行，确保组件完全加载
+    const timer = setTimeout(autoSelectOrCreateFile, 100);
+    return () => clearTimeout(timer);
+  }, [pythonList, onFileOpen, getRawPythonList]);
+
+  // 当文件列表为空且组件已加载时，尝试创建新文件
+  useEffect(() => {
+    if (pythonList.length === 0 && onFileOpen) {
+      const timer = setTimeout(async () => {
+        try {
+          console.log('文件列表为空，尝试创建新文件');
+          const timestamp = new Date()
+            .toLocaleString('zh-CN', {
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+            .replace(/[/:]/g, '')
+            .replace(/\s/g, '_');
+          const newFile = await createPythonItem({
+            path_id: 0, // 根目录
+            type: PythonItemType.Notebook,
+            name: `新建文件_${timestamp}.py`
+          });
+
+          if (newFile.status === 200 && newFile.data && onFileOpen) {
+            console.log('自动创建新文件成功:', newFile.data.name);
+            // 刷新文件列表
+            await getRawPythonList();
+            // 自动打开新创建的文件
+            onFileOpen(String(newFile.data.id));
+          }
+        } catch (error) {
+          console.error('自动创建文件失败:', error);
+        }
+      }, 500); // 等待500ms确保API调用完成
+
+      return () => clearTimeout(timer);
+    }
+  }, [pythonList.length, onFileOpen, getRawPythonList]);
+
+  const handleFileSelect = (
+    selectedKeys: string[],
+    extra: {
+      selected: boolean;
+      selectedNodes: any[];
+      node: any;
+      e: Event;
+    }
+  ) => {
+    console.log('选中的节点:', selectedKeys, onFileOpen);
+
+    // 如果选中了文件，调用onFileOpen回调
+    if (selectedKeys.length > 0 && onFileOpen) {
+      const selectedKey = selectedKeys[0];
+      // 检查选中的是否是文件（不是文件夹）
+      const selectedItem = pythonList.find(
+        (item) => String(item.id) === selectedKey
+      );
+      console.log('selectedItem', pythonList, selectedItem);
+      if (selectedItem && selectedItem.type === PythonItemType.Notebook) {
+        console.log('透传文件id:', selectedKey);
+        onFileOpen(selectedKey);
+      }
+    }
+  };
 
   return (
     <div className="python-tab-content">
@@ -174,14 +301,12 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
       <div className="tab-tree">
         <DirectoryTree
           data={pythonList as TreeNodeItem[]}
-          onSelect={(keys) => handleTreeSelect(keys as unknown as string[])}
+          onSelect={handleFileSelect}
           onCreate={handleCreate}
           onRename={handleRename}
           onCopy={handleCopy}
           onDelete={handleDelete}
           onFolderClick={async (folderId) => {
-            // 这里调用API获取文件夹内容
-            console.log('进入文件夹:', folderId);
             const res = await getPythonList(String(folderId), {
               name: searchValue,
               mode: 0,
@@ -191,12 +316,11 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
             return res?.data?.items || [];
           }}
           onBackToParent={async (parentId) => {
-            // 这里调用API获取上级目录内容
-            console.log('返回上级目录:', parentId);
             const res = await getPythonList(String(parentId || ''), {} as any);
             return res?.data?.items || [];
           }}
           onSearch={handleSearch}
+          formatData={formatData}
           placeholder="搜索当前文件夹"
           newButtonText="新建"
           onUrlStateChange={updateUrlState}

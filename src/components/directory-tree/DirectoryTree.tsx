@@ -39,6 +39,7 @@ import {
   RenamePythonItemRes
 } from '@/types/pythonApi';
 import EllipsisPopover from '../ellipsis-popover-com';
+import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
 
 // 原始数据接口
@@ -89,7 +90,7 @@ export interface DirectoryTreeProps {
   placeholder?: string;
   newButtonText?: string;
   // 数据格式化配置
-  formatData?: (rawData: unknown[]) => TreeNodeItem[];
+  formatData?: (rawData: PythonListItem[]) => TreeNodeItem[];
   // URL状态同步相关
   onUrlStateChange?: (state: {
     folderId?: string;
@@ -102,21 +103,6 @@ export interface DirectoryTreeProps {
     searchValue?: string;
   };
 }
-
-// type InnerNode = TreeDataType & {
-//     dataRef?: any;
-//     showInput?: boolean;
-//     isAdd?: boolean;
-// };
-
-// interface NodeMeta {
-//     id?: string | number;
-//     name?: string;
-//     type?: string;
-//     [key: string]: any;
-// }
-
-// type NodeData = InnerNode & { dataRef?: NodeMeta };
 
 const InputSearch = Input.Search;
 
@@ -290,6 +276,35 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
       } catch (error) {
         Message.error('进入文件夹失败');
       }
+    }
+  };
+
+  // 处理从多级路径导航跳转到指定文件夹
+  const handleNavigateToFolder = async (
+    folderId: string,
+    folderName: string,
+    newStack: Array<{ id: string; name: string }>
+  ) => {
+    try {
+      // 更新文件夹栈
+      setFolderStack(newStack);
+
+      // 设置当前文件夹
+      setCurrentFolderId(folderId);
+      setCurrentFolderName(folderName);
+
+      // 加载该文件夹内容
+      if (onFolderClick) {
+        const newData = await onFolderClick(folderId);
+        const formattedData = formatTreeData(newData as any[]);
+        setTreeData(formattedData);
+      }
+
+      // 重置选择状态
+      setSelectedKeys([]);
+      setExpandedKeys([]);
+    } catch (error) {
+      Message.error('跳转到文件夹失败');
     }
   };
 
@@ -558,9 +573,21 @@ export default function DirectoryTree(props: DirectoryTreeProps) {
             className="mr-2 h-4 w-4 cursor-pointer"
             onClick={handleBackToParent}
           />
-          <span className="text-[14px] font-[500] text-[#334155]">
-            {currentFolderName}
-          </span>
+
+          {/* 多级路径导航 */}
+          <MultiLevelPathNavigation
+            folderStack={folderStack}
+            currentFolderName={currentFolderName}
+            onFolderClick={onFolderClick}
+            onNavigateToFolder={handleNavigateToFolder}
+          />
+
+          {/* 如果没有多级路径，只显示当前目录名 */}
+          {folderStack.length === 0 && (
+            <span className="text-[14px] font-[500] text-[#334155]">
+              {currentFolderName}
+            </span>
+          )}
         </div>
       )}
 
