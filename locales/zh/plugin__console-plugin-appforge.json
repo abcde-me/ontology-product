@@ -2769,7 +2769,7 @@
   "workflow.blocksAbout.video":"视频解析节点会提取视频文件中的音频信息，并将提取的音频内容转录为文本。",
   "workflow.blocksAbout.cleaning":"数据清洗节点负责将解析节点处理后的信息进行各种数据清洗相关的操作，为后续的数据增强节点做准备。",
   "workflow.blocksAbout.enhancement":" 数据增强节点用于针对用户选择的AI应用场景（例如：模型微调、多轮问答、文本分类等），基于清洗后的数据产生高质量数据集。",
-  "workflow.blocksAbout.scripting":" 自定义节点用于用户自定义节点。",
+  "workflow.blocksAbout.scripting":" 自定义代码节点用于用户自定义代码。",
   "workflow.operator.zoomIn":"放大",
   "workflow.operator.zoomOut":"缩小",
   "workflow.operator.zoomTo50":"缩放到 50%",

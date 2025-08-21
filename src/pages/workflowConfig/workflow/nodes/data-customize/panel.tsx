@@ -59,8 +59,7 @@ const Panel = ({ id, data, parentRef }) => {
           handleValueChange({
             ...inputs,
             scripting_type: typeRes.data.script_types[0].script_type,
-            engine_id: engineRes.data.engines[0].engine_id,
-            title: typeRes.data.script_types[0].title
+            engine_id: engineRes.data.engines[0].engine_id
           });
         }
       }
@@ -239,7 +238,6 @@ const Panel = ({ id, data, parentRef }) => {
         id: id,
         data: {
           type: data.type,
-          title: data.title,
           script_content: JSON.stringify(value),
           script_type: scriptingType,
           engine_id: scriptingEngine

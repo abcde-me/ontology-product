@@ -124,7 +124,7 @@ export const BLOCKS: Block[] = [
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.Customize,
-    title: '自定义节点'
+    title: '自定义代码节点'
   },
   {
     classification: BlockClassificationEnum.Default,

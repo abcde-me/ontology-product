@@ -35,7 +35,6 @@ const useConfig = (id: string, payload: CustomNodeType) => {
         draft.script_content = value.script_content;
         draft.scripting_type = value.scripting_type;
         draft.engine_id = value.engine_id;
-        draft.title = value.title;
       });
       setInputs(newInputs);
     },
