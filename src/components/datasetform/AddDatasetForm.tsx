@@ -72,7 +72,6 @@ const FormItem = Form.Item;
 
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
-  console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
     label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
     // label: catalog.name,
@@ -241,6 +240,8 @@ const DatasetForm = React.forwardRef<
   const [targetData, setTargetData] = useState<string | (string | string[])[]>(
     []
   );
+  // 选择的文件ID
+  const [fileIds, setFileIds] = useState<string[]>([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -463,7 +464,6 @@ const DatasetForm = React.forwardRef<
       isInitialMount.current = false;
       return;
     }
-    console.log('targetData', targetData);
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
@@ -484,8 +484,7 @@ const DatasetForm = React.forwardRef<
             setPreviewColumns([]);
             return;
           }
-          setPreviewData(stringifyFirstLevelValues(res.data.list || [])); //这里的数据不能直接赋值，需要处理一下
-          console.log('previewData', res.data.list);
+          setPreviewData(stringifyFirstLevelValues(res.data.list || []));
           setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
         })
         .finally(() => {
@@ -533,12 +532,14 @@ const DatasetForm = React.forwardRef<
               ? mapselectFiles(selectedFiles)
               : undefined, //如果数据源是连接器，则设置选择文件
           targetDataSource:
-            dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
+            dataSource === 'volume'
+              ? values.targetDataSource
+              : values.connector, //数据目录卷用targetDataSource，连接器用connector
+          path_file_ids: fileIds
         };
         // setIscreateTagDisabled(true);
 
         setCanSubmit(false);
-        console.log('111111111111111111111111', formData);
         await onSubmit(formData);
 
         setCanSubmit(true);
@@ -849,7 +850,7 @@ const DatasetForm = React.forwardRef<
                     rowSelection={{
                       type: 'checkbox',
                       onChange: (selectedRowKeys, selectedRows) => {
-                        console.log(selectedRowKeys, selectedRows);
+                        setFileIds(selectedRowKeys as string[]);
                       }
                     }}
                   />

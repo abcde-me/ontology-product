@@ -20,7 +20,7 @@ import {
   scriptingBench
 } from '@/api/workflow';
 import './panel.scss';
-import { useParams } from 'react-router';
+import { useParams } from '@/utils/url';
 import Cookies from 'js-cookie';
 
 const FormItem = Form.Item;
@@ -29,7 +29,7 @@ const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
   const CollapseItem = Collapse.Item;
-  const { workflow_uuid } = useParams<{ workflow_uuid: string }>();
+  const workflow_uuid = useParams('workflow_uuid') as string;
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
   const [isModalSticky, setModalSticky] = useState(false);

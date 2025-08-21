@@ -689,7 +689,8 @@ const DatasetManagement: React.FC = () => {
         formData.dataSource === 'volume'
           ? {
               // path: fullPath,
-              path_id: formData.targetDataSource?.[1]?.[1] ?? ''
+              path_id: formData.targetDataSource?.[1]?.[1] ?? '',
+              path_file_ids: formData.path_file_ids || []
             }
           : {
               connector_id: parseInt(formData?.targetDataSource) || 0,
