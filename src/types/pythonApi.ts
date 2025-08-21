@@ -85,3 +85,13 @@ export interface CopyPythonItemReq {
 }
 
 export type CopyPythonItemRes = PythonListItem;
+
+// 打开Python项目响应结构
+export interface OpenPythonItemRes {
+  /** 任务执行id */
+  execid: number;
+  /** 运行状态：-1未运行 0失败 1成功 2运行中 */
+  running_status: -1 | 0 | 1 | 2;
+  /** Python文件代码内容 */
+  data: string;
+}

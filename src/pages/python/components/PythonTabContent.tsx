@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Input, Button, Tree, Typography } from '@arco-design/web-react';
-import {
-  IconSearch,
-  IconPlus,
-  IconFolder,
-  IconFile
-} from '@arco-design/web-react/icon';
+import { Typography } from '@arco-design/web-react';
 import {
   getPythonList,
   createPythonItem,
@@ -13,7 +7,7 @@ import {
   deletePythonItem,
   copyPythonItem
 } from '@/api/python';
-import { PythonItemType, PythonListItem } from '@/types/pythonApi';
+import { PythonListItem } from '@/types/pythonApi';
 import './PythonTabContent.scss';
 import DirectoryTree, {
   type TreeNodeItem
@@ -180,8 +174,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
           onCopy={handleCopy}
           onDelete={handleDelete}
           onFolderClick={async (folderId) => {
-            // 这里调用API获取文件夹内容
-            console.log('进入文件夹:', folderId);
             const res = await getPythonList(String(folderId), {
               name: searchValue,
               mode: 0,
@@ -191,8 +183,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = () => {
             return res?.data?.items || [];
           }}
           onBackToParent={async (parentId) => {
-            // 这里调用API获取上级目录内容
-            console.log('返回上级目录:', parentId);
             const res = await getPythonList(String(parentId || ''), {} as any);
             return res?.data?.items || [];
           }}

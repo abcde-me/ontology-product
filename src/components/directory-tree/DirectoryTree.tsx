@@ -104,21 +104,6 @@ export interface DirectoryTreeProps {
   };
 }
 
-// type InnerNode = TreeDataType & {
-//     dataRef?: any;
-//     showInput?: boolean;
-//     isAdd?: boolean;
-// };
-
-// interface NodeMeta {
-//     id?: string | number;
-//     name?: string;
-//     type?: string;
-//     [key: string]: any;
-// }
-
-// type NodeData = InnerNode & { dataRef?: NodeMeta };
-
 const InputSearch = Input.Search;
 
 function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
