@@ -92,3 +92,20 @@ export async function scriptingBench(
     .inRegion()
     .do();
 }
+// 工作流-脚本运行结果
+export async function scriptingBenchResult(
+  workflow_uuid: string,
+  session_id: string,
+  node_id: string,
+  bench_job_id: string
+) {
+  return await UAPI.RES.scriptingBenchResult({
+    workflow_uuid,
+    session_id,
+    node_id,
+    bench_job_id
+  })
+    .get()
+    .inRegion()
+    .do();
+}
