@@ -214,6 +214,17 @@ export async function datasetVersionRebuild(
   return UAPI.RES.datasetVersionRebuildApi({}).post(params).inRegion().do();
 }
 
+// 定义查询目标数据文件的参数接口
+interface TargetDataFileQueryParams {
+  page: number;
+  full_path: string;
+  limit: number;
+}
+//查询目标数据文件列表
+export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
+  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+}
+
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){
 //   return UAPI.RES.connectorListAPI({}).get(params).inRegion().do();
