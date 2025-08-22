@@ -61,7 +61,8 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/configurationpage',
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/workflowPublic',
-  '/tenant/compute/modaforge/agentCreate'
+  '/tenant/compute/modaforge/agentCreate',
+  '/tenant/compute/modaforge/labelEditor'
 ];
 
 function App() {
