@@ -160,6 +160,23 @@ function formatDateTime(isoString) {
   );
 }
 
+//格式化文件时间函数
+const formatFileDateTime = (dateTimeString: string): string => {
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    return dateTimeString; // 如果格式化失败，返回原字符串
+  }
+};
+
 //标签列表转换为select选项
 function convertTotagSelectOptions(data = []) {
   return data.map((item) => ({
@@ -575,7 +592,7 @@ const DatasetForm = React.forwardRef<
       title: '生成时间',
       dataIndex: 'generated_at',
       width: 180,
-      render: (_, record) => formatDateTime(record.generated_at)
+      render: (_, record) => formatFileDateTime(record.generated_at)
     },
     {
       title: '原文件类型',
