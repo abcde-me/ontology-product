@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Form, Input, Select, Button, Table, Tag, Modal, Space, Typography, Message, Card, Divider } from '@arco-design/web-react';
-import { IconPlus, IconMinus } from '@arco-design/web-react/icon';
+import { IconPlus, IconMinus, IconDelete } from '@arco-design/web-react/icon';
+import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -180,45 +182,13 @@ const ToolAnnotationConfig: React.FC = () => {
         }
     };
 
-    // 拖拽排序组件
-    const SortableItem = ({ id, children, onDragEnd }: { id: string; children: React.ReactNode; onDragEnd: (event) => void }) => {
-        const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-            id,
-            data: {
-                type: 'item',
-                id,
-            },
-        });
-
-        const style = {
-            transition,
-            cursor: 'grab',
-            padding: '8px',
-            marginBottom: '8px',
-            border: '1px solid #e8e8e8',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-        };
-
-        return (
-            <div
-                ref={setNodeRef}
-                style={style}
-                {...attributes}
-                {...listeners}
-            >
-                {children}
-            </div>
-        );
-    };
-
     return (
         <div className="tool-annotation-config" style={{ padding: '20px' }}>
             <Title >工具标注配置</Title>
             <Divider />
 
             {/* 文件分类配置 */}
-            <Card title="文件分类配置" style={{ marginBottom: '20px' }}>
+            {/* <Card title="文件分类配置" style={{ marginBottom: '20px' }}>
                 <div style={{ marginBottom: '20px' }}>
                     <Space size={16} align="center">
                         <Typography.Text style={{ width: '120px' }}>属性名称</Typography.Text>
@@ -243,12 +213,19 @@ const ToolAnnotationConfig: React.FC = () => {
                 <Button type="text" icon={<IconPlus />} onClick={handleAddFileClassificationItem}>
                     添加属性
                 </Button>
-            </Card>
+            </Card> */}
 
             {/* 图形标注配置 */}
             <Card title="图形标注配置" style={{ marginBottom: '20px' }}>
-                <Typography.Text type="secondary">可拖拽排序，点击"+"添加，点击"-"删除</Typography.Text>
-
+                {/* 图形标注项列表 */}
+                {/* 一个列表，循环渲染，每一个item可以拖拽排序 */}
+                {
+                    graphicAnnotations?.map((displayName, index: any) => {
+                        return (
+                            <>1</>
+                        )
+                    })
+                }
                 <Button type="primary" icon={<IconPlus />} onClick={handleAddGraphicAnnotationItem}>
                     新增标注项
                 </Button>
@@ -266,7 +243,7 @@ const ToolAnnotationConfig: React.FC = () => {
                         <FormItem label="属性组件名称">
                             <Input
                                 value={modalData.componentName}
-                                onChange={(e) => setModalData(prev => ({ ...prev, componentName: e.target.value }))}
+                                onChange={(e: any) => setModalData(prev => ({ ...prev, componentName: e.target.value }))}
                                 placeholder="请输入属性组件名称"
                             />
                         </FormItem>
@@ -311,7 +288,7 @@ const ToolAnnotationConfig: React.FC = () => {
                             </Select>
                             <Input
                                 value={item.displayName}
-                                onChange={(e) => {
+                                onChange={(e: any) => {
                                     const newItems = [...modalData.items];
                                     newItems[index].displayName = e.target.value;
                                     setModalData(prev => ({ ...prev, items: newItems }));
@@ -321,7 +298,7 @@ const ToolAnnotationConfig: React.FC = () => {
                             />
                             <Input
                                 value={item.storageName}
-                                onChange={(e) => {
+                                onChange={(e: any) => {
                                     const newItems = [...modalData.items];
                                     newItems[index].storageName = e.target.value;
                                     setModalData(prev => ({ ...prev, items: newItems }));
@@ -348,3 +325,110 @@ const ToolAnnotationConfig: React.FC = () => {
 };
 
 export default ToolAnnotationConfig;
+
+
+const SortableItem = ({ id, item, onDelete }: { id: string; item: any; onDelete: () => void }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging }
+        = useSortable({ id, data: { type: 'item', item } });
+
+    const style = {
+        transform: transform,
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        cursor: 'grab',
+        padding: '12px',
+        marginBottom: '8px',
+        backgroundColor: isDragging ? '#f0f5ff' : '#fff',
+        border: '1px solid #e5e6eb',
+        borderRadius: '4px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <div>{item.name}</div>
+            <Button
+                icon={<IconDelete />}
+                size="small"
+                type="text"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                }}
+            />
+        </div>
+    );
+};
+
+const DraggableList = () => {
+    const [items, setItems] = useState([
+        { id: '1', name: '列表项 1' },
+        { id: '2', name: '列表项 2' },
+        { id: '3', name: '列表项 3' }
+    ]);
+    const [activeItem, setActiveItem] = useState<any>(null);
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (active.id !== over?.id) {
+            setItems((prev) => {
+                const activeIndex = prev.findIndex(item => item.id === active.id);
+                const overIndex = prev.findIndex(item => item.id === over?.id);
+                const newItems = [...prev];
+                [newItems[activeIndex], newItems[overIndex]] = [newItems[overIndex], newItems[activeIndex]];
+                return newItems;
+            });
+        }
+        setActiveItem(null);
+    };
+
+    const handleDelete = (id: string) => {
+        setItems(items.filter(item => item.id !== id));
+    };
+
+    return (
+        <Card title="可拖拽排序列表">
+            <DndContext
+                collisionDetection={verticalListSortingStrategy}
+                onDragStart={(event) => setActiveItem(event.active.data.current?.item)}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext items={items.map(item => item.id)}>
+                    {items.map(item => (
+                        <SortableItem
+                            key={item.id}
+                            id={item.id}
+                            item={item}
+                            onDelete={() => handleDelete(item.id)}
+                        />
+                    ))}
+                </SortableContext>
+
+                <DragOverlay>
+                    {activeItem && (
+                        <div style={{
+                            width: '100%',
+                            padding: '12px',
+                            backgroundColor: '#fff',
+                            border: '1px solid #e5e6eb',
+                            borderRadius: '4px'
+                        }}>
+                            {activeItem.name}
+                        </div>
+                    )}
+                </DragOverlay>
+            </DndContext>
+        </Card>
+    );
+};
+
+// 在合适的位置使用DraggableList组件
+// return (
+//   <div>
+//     ...
+//     <DraggableList />
+//     ...
+//   </div>
+// );

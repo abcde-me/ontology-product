@@ -123,6 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
+export const PrefixAimdpEngine = 'label-engine/api/v1/requirements';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -352,7 +353,11 @@ export const ModaForgeResourceEndpoints = {
   // 查询个人载入记录列表
   getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
   // 查询任务单个执行记录详情
-  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}'
+  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+
+  // 数据标注接口
+  // 获取数据标注列表
+  getAnnotationListApi: PrefixAimdpEngine + '/list',
 };
 
 /**

@@ -14,7 +14,7 @@ const JobConfiguration: React.FC<JobConfigurationProps> = ({ getJobTableContent 
     const [deptModalVisible, setDeptModalVisible] = useState(false);
     const [personModalVisible, setPersonModalVisible] = useState(false);
     const [searchValue, setSearchValue] = useState('');
-    const [selectedItems, setSelectedItems] = useState<Array<{ key: string, name: string, taskCount: number, type: 'dept' | 'person' }>>([]);
+    const [selectedItems, setSelectedItems] = useState<any[]>([]);
     const [currentModalType, setCurrentModalType] = useState<'dept' | 'person' | null>(null);
 
     // 新增：复选框相关状态
@@ -62,7 +62,7 @@ const JobConfiguration: React.FC<JobConfigurationProps> = ({ getJobTableContent 
                     type="number"
                     min={0}
                     value={text}
-                    onChange={(e) => handleTaskCountChange(e, a.key)}
+                    onChange={(e: any, a: any) => handleTaskCountChange(e, a.key)}
                     style={{ width: 80 }}
                 />
             )
@@ -215,7 +215,6 @@ const JobConfiguration: React.FC<JobConfigurationProps> = ({ getJobTableContent 
                 data={selectedItems}
                 rowKey="key"
                 pagination={false}
-                locale={{ emptyText: '请从部门或个人中选择添加标注人员' }}
             />
 
             {/* 部门选择弹窗 */}

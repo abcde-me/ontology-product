@@ -13,7 +13,6 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import './index.scss';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
@@ -27,6 +26,8 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
+import { getAnnotationList } from '@/api/dataAnnotation';
+import './index.scss';
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -84,14 +85,28 @@ export default function Requirement() {
         page_size: pageSize, //每页个数
         ...sortValue
       };
+      // const data1 = {
+      //   page: current,
+      //   pageSize: pageSize,
+      //   filters: {
+      //     name: '1',
+      //     create_by: '1',
+      //   }
+      // }
+
+      // const res1 = await getAnnotationList(data1).then((res) => {
+      //   console.log('object', res);
+      // });
+      // console.log(res1, '-----top');
       const res = await getWorkflowList(params);
       if (res.status === 200 && res.data) {
         setWorkflowData(res.data.list);
         setCurrent(res.data.page_info?.page);
         setPageSize(res.data.page_info?.page_size);
         setTotal(res.data.page_info?.total);
+        setLoading(false);
       }
-    } finally {
+    } catch (error) {
       setLoading(false);
     }
   };
@@ -227,15 +242,49 @@ export default function Requirement() {
     },
     {
       title: '数据量',
-      dataIndex: 'user_name',
+      dataIndex: 'data_volume', // Changed from 'user_name' to unique dataIndex
       width: 100,
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
+          value={renderEmptyPlaceholder(record.data_volume)} // Updated to correct data field
           isEdit={false}
         />
       )
+    },
+    {
+      title: '状态',
+      dataIndex: 'is_online',
+      width: 100,
+      render: (_, record) =>
+        record.is_online ? (
+          <div className="publish-part published">
+            <span>标注完成</span>
+          </div>
+        ) : (
+          <div className="publish-part not-published">
+            <IconClockCircle className="mr-[6px] size-[16px]" />
+            <span>发布中</span>
+          </div>
+        ),
+      filters: [
+        {
+          text: '发布中',
+          value: 0
+        },
+        {
+          text: '已发布',
+          value: 1
+        },
+        {
+          text: '发布失败',
+          value: 1
+        },
+        {
+          text: '标注完成',
+          value: 1
+        }
+      ]
     },
     {
       title: '创建时间',
@@ -249,6 +298,19 @@ export default function Requirement() {
         </span>
       ),
       sorter: true
+    },
+    {
+      title: '创建人',
+      dataIndex: 'user_name',
+      key: `user_name+id`,
+      width: 100,
+      ellipsis: true,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.user_name)}
+          isEdit={false}
+        />
+      )
     },
     {
       title: '创建人',

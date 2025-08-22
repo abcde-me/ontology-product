@@ -25,7 +25,6 @@
     }
 
     .annotation-title {
-        width: 120px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -43,6 +42,8 @@
 
     .annotation-radio {
         display: flex;
+        border: 1px solid #ccc;
+        padding: 4px 6px;
     }
 
     .basic-tabs {
@@ -79,7 +80,59 @@
         margin-top: 16px;
 
         .table-container {
-            margin-left: 138px;
+            margin-left: 77px;
         }
+    }
+
+    .label-container-title {
+        display: flex;
+        margin-top: 20px;
+
+        .label-container-title-text {
+            margin-right: 10px;
+        }
+    }
+
+    .sortable-item {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .sortable-item-input {
+        width: 150px;
+        height: 30px;
+        margin-right: 10px;
+    }
+
+    .label-content {
+        width: 700px;
+        border: 1px solid #ccc;
+    }
+
+    .label-header-content {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .label-header-name {
+        margin-right: 10px;
+    }
+
+    .label-content-options {
+        padding: 10px;
+    }
+
+    .options-title {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .sortable-item {
+        margin-bottom: 10px;
     }
 }
