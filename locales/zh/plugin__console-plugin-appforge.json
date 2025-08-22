@@ -2724,7 +2724,7 @@
   "workflow.blocks.video":"视频解析",
   "workflow.blocks.cleaning":"数据清洗",
   "workflow.blocks.enhancement":"数据增强",
-  "workflow.blocks.scripting":"自定义",
+  "workflow.blocks.scripting":"自定义代码节点",
   "workflow.blocks.answer":"直接回复",
   "workflow.blocks.llm":"大模型",
   "workflow.blocks.knowledge-retrieval":"知识检索",

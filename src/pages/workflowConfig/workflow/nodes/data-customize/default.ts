@@ -12,7 +12,8 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
   defaultValue: {
     script_content: '',
     scripting_type: '',
-    engine_id: ''
+    engine_id: '',
+    desc: '执行自定义Python代码逻辑'
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode

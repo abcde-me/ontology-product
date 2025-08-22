@@ -989,7 +989,8 @@ const DatasetDetail: React.FC = () => {
   };
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
-    if (!datasetDetail || !id) return Promise.resolve();
+    if (!datasetDetail || !id || datasetDetail.storage_type === 'file')
+      return Promise.resolve();
 
     const params: any = {
       id: id,
@@ -1260,7 +1261,7 @@ const DatasetDetail: React.FC = () => {
                       value: datasetDetail.src_model || '-'
                     },
                     {
-                      label: '数据集类型:',
+                      label: '存储格式:',
                       value: datasetDetail.storage_type || '-'
                     }
                   ]}
