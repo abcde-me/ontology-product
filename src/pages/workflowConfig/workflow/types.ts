@@ -50,7 +50,8 @@ export enum BlockEnum {
   Audio = 'audio',
   Video = 'video',
   Cleaning = 'cleaning',
-  Enhancement = 'enhancement'
+  Enhancement = 'enhancement',
+  Customize = 'scripting'
 }
 
 export enum ControlMode {
@@ -101,6 +102,7 @@ export type CommonNodeType<T = {}> = {
   error_strategy?: ErrorHandleTypeEnum;
   retry_config?: WorkflowRetryConfig;
   default_value?: DefaultValueForm[];
+  script_content?: string;
 } & T &
   Partial<
     Pick<

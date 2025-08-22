@@ -59,11 +59,25 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // SQL开发
+  {
+    name: 'sqlEditor',
+    key: '/tenant/compute/modaforge/sqlEditor',
+    component: React.lazy(async () => import('../../sqlEditor')),
+    children: []
+  },
   // 工作流
   {
     name: 'workflowList',
     key: '/tenant/compute/modaforge/workflowList',
     component: React.lazy(async () => import('../../workflowList')),
+    children: []
+  },
+  // Notebook
+  {
+    name: 'python',
+    key: '/tenant/compute/modaforge/python',
+    component: React.lazy(async () => import('../../python')),
     children: []
   },
   // 创建工作流
