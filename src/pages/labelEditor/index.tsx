@@ -7,7 +7,8 @@ import {
   getImgJobAnnotations,
   getImgJobLabels,
   saveImgJobAnnotations,
-  submitImgJobAnnotations
+  submitImgJobAnnotations,
+  getImgJobOverview
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 
@@ -64,7 +65,8 @@ function WorkflowConfig() {
             getImgJobAnnotations,
             getImgJobLabels,
             saveImgJobAnnotations,
-            submitImgJobAnnotations
+            submitImgJobAnnotations,
+            getImgJobOverview
           }}
         ></WujieReact>
       )}

@@ -204,7 +204,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '单选属性',
             attribute_group_class: 1,
-            attribute_group_type: 1,
+            attribute_group_type: 2,
             label_info_attribute: [
               {
                 order_num: 1,
@@ -225,7 +225,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '多选属性',
             attribute_group_class: 2,
-            attribute_group_type: 1,
+            attribute_group_type: 2,
             label_info_attribute: [
               {
                 order_num: 1,
@@ -246,7 +246,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '输入框属性',
             attribute_group_class: 3,
-            attribute_group_type: 1,
+            attribute_group_type: 2,
             label_info_attribute: []
           }
         ]
@@ -255,6 +255,8 @@ export async function getLabels(requirementId: string) {
   };
   return Promise.resolve({ data: { data: res } });
 }
+
+// 下面为适配CVAT图片，视频标注API
 
 export async function saveImgJobAnnotations(
   taskId: string,
@@ -271,6 +273,48 @@ export async function submitImgJobAnnotations(
   handleImgAnnotationIds(params);
   await submitTask(taskId, params);
   return { data: params };
+}
+
+export async function getImgJobOverview(taskId: string) {
+  const searchParams = new URLSearchParams(location.search);
+  const overviewTpl = {
+    url: '',
+    id: +taskId,
+    task_id: +taskId,
+    project_id: +searchParams.get('rId')!,
+    assignee: {
+      url: '',
+      id: 1,
+      username: 'admin',
+      first_name: '',
+      last_name: ''
+    },
+    guide_id: null,
+    dimension: '2d',
+    bug_tracker: '',
+    status: 'annotation',
+    stage: 'annotation',
+    state: 'in progress',
+    mode: 'annotation',
+    frame_count: 1,
+    start_frame: 0,
+    stop_frame: 0,
+    data_chunk_size: 72,
+    data_compressed_chunk_type: 'imageset',
+    data_original_chunk_type: 'imageset',
+    created_date: toISOStringWithMicroseconds(new Date()),
+    updated_date: toISOStringWithMicroseconds(new Date()),
+    issues: {},
+    labels: {},
+    type: 'annotation',
+    organization: null,
+    target_storage: {},
+    source_storage: {},
+    assignee_updated_date: toISOStringWithMicroseconds(new Date()),
+    parent_job_id: null,
+    consensus_replicas: 0
+  };
+  return Promise.resolve({ data: overviewTpl });
 }
 
 export async function getImgJobAnnotations(taskId: string) {
@@ -342,6 +386,7 @@ export async function getImgJobLabels(requirementId?: string) {
               : 'text',
         mutable: false,
         name: attr.attribute_group_name,
+        isRequired: attr.attribute_group_type === 1,
         values:
           attr.attribute_group_class === 3
             ? ['']
