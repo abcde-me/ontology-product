@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Tabs } from '@arco-design/web-react';
+import { Typography, Tabs, Message } from '@arco-design/web-react';
 import NotebookWorkspace from './NotebookWorkspace';
-import { openPythonItem } from '@/api/python';
+import { openPythonItem, savePythonItem } from '@/api/python';
 import { OpenPythonItemRes } from '@/types/pythonApi';
 import './NotebookMainContent.scss';
+import { useThrottleFn } from 'ahooks';
 
 const TabPane = Tabs.TabPane;
 
@@ -164,7 +165,6 @@ const NotebookMainContent: React.FC<NotebookMainContentProps> = ({
   return (
     <div className="notebook-main-content">
       {/* 头部标签页区域 */}
-      {/* <div className="main-header"> */}
       <Tabs
         activeTab={activeTab}
         onChange={handleTabChange}
@@ -192,6 +192,7 @@ const NotebookMainContent: React.FC<NotebookMainContentProps> = ({
         <NotebookWorkspace
           content={activeTabData?.content || ''}
           fileName={activeTabData?.title || '未命名文件'}
+          currentFileId={currentFileId ?? ''}
         />
       </div>
     </div>

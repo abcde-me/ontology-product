@@ -10,7 +10,15 @@ import {
   RenamePythonItemRes,
   CopyPythonItemReq,
   CopyPythonItemRes,
-  OpenPythonItemRes
+  OpenPythonItemRes,
+  SavePythonItemReq,
+  SavePythonItemRes,
+  RunPythonItemRes,
+  GetRunResultReq,
+  GetRunResultRes,
+  RunningStatus,
+  GetRunLogReq,
+  GetRunLogRes
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -307,6 +315,90 @@ print(df.describe())
 # 可视化数据
 visualize_data(df)
 print("数据可视化完成")`
+    }
+  });
+}
+
+// 修改（保存）文件
+export async function savePythonItem(
+  id: string,
+  params: SavePythonItemReq
+): Promise<ApiRes<SavePythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonSaveApi({ id }).put(params).inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 2201,
+      last_modified: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 运行代码
+export async function runPythonItem(
+  id: string
+): Promise<ApiRes<RunPythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunApi({ id }).put(params).inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      execid: '1',
+      id: 2201
+    }
+  });
+}
+
+// 获取运行结果
+export async function getRunResult(
+  id: string,
+  params: GetRunResultReq
+): Promise<ApiRes<GetRunResultRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunResultApi({ execid }).get().inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      run_result: '运行成功',
+      run_status: RunningStatus.SUCCESS,
+      run_duration: 10,
+      run_end_time: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 获取日志
+export async function getRunLog(
+  id: string,
+  params: GetRunLogReq
+): Promise<ApiRes<GetRunLogRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunLogApi({ execid, size }).get().inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      log: '日志'
     }
   });
 }
