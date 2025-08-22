@@ -112,6 +112,21 @@ const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '数据开发',
+    key: 'DataDevelop',
+    children: [
+      {
+        title: 'Notebook开发',
+        icon: (
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'python',
+        path: '/tenant/compute/modaforge/python'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '数据管理',
     key: 'DataManagement',
     children: [

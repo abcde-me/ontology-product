@@ -183,29 +183,36 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
-      if (catalog.children) {
-        Object.entries(catalog.children).forEach(([type, arr]) => {
-          const volumeKey = `${catalog.id}-${type}`;
-          const subChildren = {
-            title: subLeafKeys[type],
-            key: volumeKey,
-            type: type,
-            parent_id: catalog.id,
-            children:
-              arr?.map((item) => {
-                return {
-                  ...item,
-                  title: item.name,
-                  key: String(item.id), // 转换为字符串
-                  parent_id: catalog.id,
-                  isLastLeaf: true,
-                  fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/volume/${item.name}`
-                };
-              }) || []
-          };
-          childrenArr.push(subChildren);
-        });
-      }
+
+      // 根据activeKey决定支持的类型：源数据支持volume和db，目标数据只支持volume
+      const supportedTypes =
+        activeKey === 'src' ? ['volume', 'db'] : ['volume'];
+
+      supportedTypes.forEach((type) => {
+        const typeKey = `${catalog.id}-${type}`;
+        // 获取该类型下的实际数据，如果没有则使用空数组
+        const typeData = catalog.children?.[type] || [];
+
+        const subChildren = {
+          title: subLeafKeys[type], // 显示"数据卷"或"数据库"
+          key: typeKey,
+          type: type,
+          parent_id: catalog.id,
+          children: typeData.map((item) => {
+            // 根据类型设置不同的路径格式
+            const pathType = type === 'volume' ? 'volume' : 'database';
+            return {
+              ...item,
+              title: item.name,
+              key: String(item.id), // 转换为字符串
+              parent_id: catalog.id,
+              isLastLeaf: true,
+              fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}`
+            };
+          })
+        };
+        childrenArr.push(subChildren);
+      });
 
       return {
         ...catalog,
