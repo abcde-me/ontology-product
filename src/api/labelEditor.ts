@@ -16,46 +16,6 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
   //   .do();
   return Promise.resolve();
 }
-export async function saveJobAnnotations(
-  taskId: string,
-  params: Record<string, any>
-) {
-  handleAnnotationIds(params);
-  await saveTask(taskId, params);
-  return { data: params };
-}
-export async function submitJobAnnotations(
-  taskId: string,
-  params: Record<string, any>
-) {
-  handleAnnotationIds(params);
-  await submitTask(taskId, params);
-  return { data: params };
-}
-
-function handleAnnotationIds(params: Record<string, any>) {
-  let counter = 1;
-  if (params.shapes && Array.isArray(params.shapes)) {
-    params.shapes.forEach((shape) => {
-      shape.id = counter++;
-    });
-  }
-  if (params.tags && Array.isArray(params.tags)) {
-    params.tags.forEach((tag) => {
-      tag.id = counter++;
-    });
-  }
-  if (params.tracks && Array.isArray(params.tracks)) {
-    params.tracks.forEach((track) => {
-      track.id = counter++;
-      if (track.shapes && Array.isArray(track.shapes)) {
-        track.shapes.forEach((shape) => {
-          shape.id = counter++;
-        });
-      }
-    });
-  }
-}
 
 export async function getTaskResult(taskId: string) {
   // return await UAPI.RES.leGetTaskReuslt({})
@@ -135,19 +95,13 @@ export async function getTaskResult(taskId: string) {
     }
   });
 }
-
-export async function getJobAnnotations(taskId: string) {
-  const result = await getTaskResult(taskId);
-  return Promise.resolve({ data: result.data.data.result });
-}
-
 export async function getTask(requirementId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
   // const { data: res } = await UAPI.RES.leGetTask({}).post({requerment_id: rId}).inRegion().do();
   const res = {
     task_id: 5,
-    item_path: 'https://dummyimage.com/600',
+    item_path: 'https://temp.im/600x600',
     item_type: 2,
     requerment_info: {
       name: '需求名称',
@@ -170,35 +124,6 @@ export async function getTask(requirementId?: string) {
     }
   };
   return Promise.resolve({ data: { data: res } });
-}
-
-export async function getJobMeta(requirementId?: string) {
-  const {
-    data: { data: res }
-  } = await getTask(requirementId);
-
-  const cvatData = {
-    chunks_updated_date: toISOStringWithMicroseconds(new Date()),
-    chunk_size: 72,
-    size: 1,
-    image_quality: 70,
-    start_frame: 0,
-    stop_frame: 0,
-    frame_filter: '',
-    frames: [
-      {
-        width: res.task_info.pic.width,
-        height: res.task_info.pic.height,
-        url: res.item_path,
-        name: res.task_info.pic.name,
-        related_files: 0,
-        has_related_context: false
-      }
-    ],
-    deleted_frames: [],
-    included_frames: null
-  };
-  return Promise.resolve({ data: cvatData });
 }
 
 export async function getLabels(requirementId: string) {
@@ -331,7 +256,58 @@ export async function getLabels(requirementId: string) {
   return Promise.resolve({ data: { data: res } });
 }
 
-export async function getJobLabels(requirementId?: string) {
+export async function saveImgJobAnnotations(
+  taskId: string,
+  params: Record<string, any>
+) {
+  handleImgAnnotationIds(params);
+  await saveTask(taskId, params);
+  return { data: params };
+}
+export async function submitImgJobAnnotations(
+  taskId: string,
+  params: Record<string, any>
+) {
+  handleImgAnnotationIds(params);
+  await submitTask(taskId, params);
+  return { data: params };
+}
+
+export async function getImgJobAnnotations(taskId: string) {
+  const result = await getTaskResult(taskId);
+  return Promise.resolve({ data: result.data.data.result });
+}
+
+export async function getImgJobMeta(requirementId?: string) {
+  const {
+    data: { data: res }
+  } = await getTask(requirementId);
+
+  const cvatData = {
+    chunks_updated_date: toISOStringWithMicroseconds(new Date()),
+    chunk_size: 72,
+    size: 1,
+    image_quality: 70,
+    start_frame: 0,
+    stop_frame: 0,
+    frame_filter: '',
+    frames: [
+      {
+        width: res.task_info.pic.width,
+        height: res.task_info.pic.height,
+        url: res.item_path,
+        name: res.task_info.pic.name,
+        related_files: 0,
+        has_related_context: false
+      }
+    ],
+    deleted_frames: [],
+    included_frames: null
+  };
+  return Promise.resolve({ data: cvatData });
+}
+
+export async function getImgJobLabels(requirementId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
   const {
@@ -382,4 +358,28 @@ export async function getJobLabels(requirementId?: string) {
   return Promise.resolve({
     data: { count: labels.length, next: null, previous: null, results: labels }
   });
+}
+
+function handleImgAnnotationIds(params: Record<string, any>) {
+  let counter = 1;
+  if (params.shapes && Array.isArray(params.shapes)) {
+    params.shapes.forEach((shape) => {
+      shape.id = counter++;
+    });
+  }
+  if (params.tags && Array.isArray(params.tags)) {
+    params.tags.forEach((tag) => {
+      tag.id = counter++;
+    });
+  }
+  if (params.tracks && Array.isArray(params.tracks)) {
+    params.tracks.forEach((track) => {
+      track.id = counter++;
+      if (track.shapes && Array.isArray(track.shapes)) {
+        track.shapes.forEach((shape) => {
+          shape.id = counter++;
+        });
+      }
+    });
+  }
 }

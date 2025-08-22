@@ -3,11 +3,11 @@ import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router-dom';
 import {
   getTask,
-  getJobMeta,
-  getJobAnnotations,
-  getJobLabels,
-  saveJobAnnotations,
-  submitJobAnnotations
+  getImgJobMeta,
+  getImgJobAnnotations,
+  getImgJobLabels,
+  saveImgJobAnnotations,
+  submitImgJobAnnotations
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 
@@ -60,11 +60,11 @@ function WorkflowConfig() {
           sync={true}
           alive={true}
           props={{
-            getJobMeta,
-            getJobAnnotations,
-            getJobLabels,
-            saveJobAnnotations,
-            submitJobAnnotations
+            getImgJobMeta,
+            getImgJobAnnotations,
+            getImgJobLabels,
+            saveImgJobAnnotations,
+            submitImgJobAnnotations
           }}
         ></WujieReact>
       )}
