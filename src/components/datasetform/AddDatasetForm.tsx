@@ -864,6 +864,7 @@ const DatasetForm = React.forwardRef<
                     rowKey="id"
                     columns={fileColumns}
                     data={previewFileData}
+                    pagination={false}
                     rowSelection={{
                       type: 'checkbox',
                       onChange: (selectedRowKeys, selectedRows) => {

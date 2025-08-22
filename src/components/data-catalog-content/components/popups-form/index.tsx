@@ -75,7 +75,9 @@ const FormComponent: React.FC<FormProps> = ({
           });
         } else if (exportdatas[0].latest_file_path) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.latest_file_path);
+            filesArray.push(
+              item.latest_file_path + '/' + item.latest_file_name
+            );
           });
         }
       }
