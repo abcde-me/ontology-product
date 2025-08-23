@@ -109,3 +109,21 @@ export async function scriptingBenchResult(
     .inRegion()
     .do();
 }
+
+// 工作流-脚本运行中止
+export async function scriptingBenchCancel(
+  workflow_uuid: string,
+  session_id: string,
+  node_id: string,
+  bench_job_id: string
+) {
+  return await UAPI.RES.scriptingBenchResult({
+    workflow_uuid,
+    session_id,
+    node_id,
+    bench_job_id
+  })
+    .delete()
+    .inRegion()
+    .do();
+}

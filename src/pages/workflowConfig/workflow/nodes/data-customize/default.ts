@@ -13,7 +13,8 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
     script_content: '',
     scripting_type: '',
     engine_id: '',
-    desc: '执行自定义Python代码逻辑'
+    desc: '执行自定义Python代码逻辑',
+    run_status: false
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -31,10 +32,14 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
   },
   checkValid(payload: CustomNodeType, t: any) {
     let errorMessages = '';
-    const { script_content } = payload;
+    const { script_content, run_status } = payload;
 
     if (!script_content) {
-      errorMessages = '请输入自定义脚本';
+      errorMessages = '代码不可为空';
+    }
+
+    if (!run_status) {
+      errorMessages = '代码运行失败';
     }
     return {
       isValid: !errorMessages,
