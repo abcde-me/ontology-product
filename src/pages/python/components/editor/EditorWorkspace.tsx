@@ -19,7 +19,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle
 } from '@codemirror/language';
-import './NotebookWorkspace.scss';
+import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { type SavePythonItemRes, RunningStatus } from '@/types/pythonApi';
 import RunIcon from '@/assets/python/run.svg';
@@ -36,7 +36,7 @@ import RunningInfoPanel, { ActiveKey } from './RunningInfoPanel';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
-  currentFileId: string;
+  currentFileId?: string; // 使currentFileId可选
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
@@ -85,8 +85,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   // 延时30s保存
   const handleSaveThrottled = useThrottleFn(
     async (content) => {
-      const res = await savePythonItem(currentFileId ?? '', {
-        id: Number(currentFileId) ?? 0,
+      // 如果没有currentFileId，则跳过保存
+      if (!currentFileId) {
+        return null;
+      }
+
+      const res = await savePythonItem(currentFileId, {
+        id: Number(currentFileId),
         data: content
       });
 
@@ -115,11 +120,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
       return;
     }
 
+    // 如果没有currentFileId，则跳过运行
+    if (!currentFileId) {
+      Message.error('请先保存文件');
+      return;
+    }
+
     setRunStatus(RunningStatus.RUNNING);
     setRunStartTime(new Date());
     setRunDuration(0);
 
-    const res = await runPythonItem(currentFileId ?? '');
+    const res = await runPythonItem(currentFileId);
 
     if (!res) {
       Message.error('运行失败');
@@ -128,35 +139,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     }
 
     setExecid(res.data.execid);
-
-    // try {
-    //   // 模拟代码运行
-    //   await new Promise((resolve, reject) => {
-    //     const startTime = Date.now();
-
-    //     // 随机模拟运行时间（2-8秒）
-    //     const runTime = Math.random() * 6000 + 200000;
-
-    //     setTimeout(() => {
-    //       const endTime = Date.now();
-    //       const duration = Math.round((endTime - startTime) / 1000);
-    //       setRunDuration(duration);
-
-    //       // 90%概率成功，10%概率失败
-    //       if (Math.random() > 0.1) {
-    //         setRunStatus(RunningStatus.SUCCESS);
-    //         Message.success(`代码运行成功！耗时 ${duration} 秒`);
-    //       } else {
-    //         setRunStatus(RunningStatus.FAILED);
-    //         Message.error('代码运行失败，请检查代码语法');
-    //       }
-    //     }, runTime);
-    //   });
-    // } catch (error) {
-    //   setRunStatus(RunningStatus.FAILED);
-    //   setRunDuration(0);
-    //   Message.error('代码运行出错');
-    // }
   };
 
   const handleStopRunCode = () => {
@@ -239,8 +221,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     });
 
   const handleActiveKeyChange = async (activeKey: string) => {
+    // 如果没有currentFileId，则跳过
+    if (!currentFileId) {
+      return;
+    }
+
     if (activeKey === ActiveKey.RESULT) {
-      const res = await getRunResult(currentFileId ?? '', {
+      const res = await getRunResult(currentFileId, {
         execid
       });
 
@@ -248,7 +235,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
         setRunResult(res.data.run_result);
       }
     } else if (activeKey === ActiveKey.LOG) {
-      const res = await getRunLog(currentFileId ?? '', {
+      const res = await getRunLog(currentFileId, {
         execid
       });
 
@@ -259,14 +246,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   };
 
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING || !execid) {
+    if (runStatus !== RunningStatus.RUNNING || !execid || !currentFileId) {
       return;
     }
 
     // 运行中时，轮询获取运行结果
     if (runStatus === RunningStatus.RUNNING) {
       cancelGetRunResultPolling();
-      getRunResultPolling(currentFileId ?? '', {
+      getRunResultPolling(currentFileId, {
         execid
       }).then((res) => {
         if (res?.status === 200 && res.data) {
@@ -277,7 +264,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
 
     // 非运行时，任务id存在时，手动获取运行结果
     if (runStatus !== RunningStatus.RUNNING && execid) {
-      getRunResult(currentFileId ?? '', {
+      getRunResult(currentFileId, {
         execid
       }).then((res) => {
         if (res?.status === 200 && res.data) {
@@ -285,7 +272,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
         }
       });
     }
-  }, [execid, runStatus]);
+  }, [execid, runStatus, currentFileId]);
 
   return (
     <div className="notebook-content">
