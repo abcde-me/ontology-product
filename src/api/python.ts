@@ -42,7 +42,7 @@ export async function getPythonList(
           name: '项目A',
           type: PythonItemType.Directory,
           path: '/',
-          path_id: 1001,
+          path_id: 1,
           created: now,
           last_modified: later
         },
@@ -51,16 +51,16 @@ export async function getPythonList(
           name: '数据集',
           type: PythonItemType.Directory,
           path: '/',
-          path_id: 1002,
+          path_id: 1,
           created: now,
           last_modified: later
         },
         {
-          id: 2001,
+          id: 1003,
           name: '脚本1.py',
           type: PythonItemType.Notebook,
           path: '/',
-          path_id: 1002,
+          path_id: 1,
           created: now,
           last_modified: later
         }
@@ -70,7 +70,7 @@ export async function getPythonList(
       path_name = '项目A';
       items = [
         {
-          id: 1101,
+          id: 10011,
           name: '子目录-代码',
           type: PythonItemType.Directory,
           path: '/项目A',
@@ -79,7 +79,7 @@ export async function getPythonList(
           last_modified: later
         },
         {
-          id: 2101,
+          id: 10012,
           name: 'main.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
@@ -88,7 +88,7 @@ export async function getPythonList(
           last_modified: later
         },
         {
-          id: 2102,
+          id: 10013,
           name: 'utils.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
@@ -98,24 +98,24 @@ export async function getPythonList(
         }
       ];
       break;
-    case '1101':
+    case '10011':
       path_name = '子目录-代码';
       items = [
         {
-          id: 3101,
+          id: 100111,
           name: 'train.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
-          path_id: 1101,
+          path_id: 10011,
           created: now,
           last_modified: later
         },
         {
-          id: 3102,
+          id: 100112,
           name: 'eval.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
-          path_id: 1101,
+          path_id: 10011,
           created: now,
           last_modified: later
         }
@@ -125,7 +125,7 @@ export async function getPythonList(
       path_name = '数据集';
       items = [
         {
-          id: 2201,
+          id: 10021,
           name: '加载数据.ipynb',
           type: PythonItemType.Notebook,
           path: '/数据集',

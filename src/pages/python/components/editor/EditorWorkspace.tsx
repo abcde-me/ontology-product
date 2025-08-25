@@ -36,7 +36,7 @@ import RunningInfoPanel, { ActiveKey } from './RunningInfoPanel';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
-  currentFileId: string;
+  currentFileId?: string; // 使currentFileId可选
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
@@ -85,8 +85,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   // 延时30s保存
   const handleSaveThrottled = useThrottleFn(
     async (content) => {
-      const res = await savePythonItem(currentFileId ?? '', {
-        id: Number(currentFileId) ?? 0,
+      // 如果没有currentFileId，则跳过保存
+      if (!currentFileId) {
+        return null;
+      }
+
+      const res = await savePythonItem(currentFileId, {
+        id: Number(currentFileId),
         data: content
       });
 
@@ -115,11 +120,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
       return;
     }
 
+    // 如果没有currentFileId，则跳过运行
+    if (!currentFileId) {
+      Message.error('请先保存文件');
+      return;
+    }
+
     setRunStatus(RunningStatus.RUNNING);
     setRunStartTime(new Date());
     setRunDuration(0);
 
-    const res = await runPythonItem(currentFileId ?? '');
+    const res = await runPythonItem(currentFileId);
 
     if (!res) {
       Message.error('运行失败');
@@ -210,8 +221,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     });
 
   const handleActiveKeyChange = async (activeKey: string) => {
+    // 如果没有currentFileId，则跳过
+    if (!currentFileId) {
+      return;
+    }
+
     if (activeKey === ActiveKey.RESULT) {
-      const res = await getRunResult(currentFileId ?? '', {
+      const res = await getRunResult(currentFileId, {
         execid
       });
 
@@ -219,7 +235,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
         setRunResult(res.data.run_result);
       }
     } else if (activeKey === ActiveKey.LOG) {
-      const res = await getRunLog(currentFileId ?? '', {
+      const res = await getRunLog(currentFileId, {
         execid
       });
 
@@ -230,14 +246,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   };
 
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING || !execid) {
+    if (runStatus !== RunningStatus.RUNNING || !execid || !currentFileId) {
       return;
     }
 
     // 运行中时，轮询获取运行结果
     if (runStatus === RunningStatus.RUNNING) {
       cancelGetRunResultPolling();
-      getRunResultPolling(currentFileId ?? '', {
+      getRunResultPolling(currentFileId, {
         execid
       }).then((res) => {
         if (res?.status === 200 && res.data) {
@@ -248,7 +264,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
 
     // 非运行时，任务id存在时，手动获取运行结果
     if (runStatus !== RunningStatus.RUNNING && execid) {
-      getRunResult(currentFileId ?? '', {
+      getRunResult(currentFileId, {
         execid
       }).then((res) => {
         if (res?.status === 200 && res.data) {
@@ -256,7 +272,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
         }
       });
     }
-  }, [execid, runStatus]);
+  }, [execid, runStatus, currentFileId]);
 
   return (
     <div className="notebook-content">

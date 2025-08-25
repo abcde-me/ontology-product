@@ -14,6 +14,7 @@ import DirectoryTree, {
 } from '@/components/directory-tree/DirectoryTree';
 import { useUrlState } from '../../hooks/useUrlState';
 import { PythonItemType } from '@/types/pythonApi';
+import { usePythonContext } from '../../context/PythonContext';
 
 const { Title } = Typography;
 
@@ -26,6 +27,7 @@ const usePythonList = () => {
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (path_id: string, searchValue: string) => {
     // 全局搜索功能
@@ -108,13 +110,23 @@ const usePythonList = () => {
     return false;
   };
 
-  const getRawPythonList = useCallback(async () => {
-    const rawPythonList = await getPythonList('', {});
+  // 修复：移除 useCallback，直接定义函数
+  const getRawPythonList = async () => {
+    if (isLoading) return; // 防止重复请求
 
-    if (rawPythonList.status === 200) {
-      setPythonList(rawPythonList.data.items);
+    setIsLoading(true);
+    try {
+      const rawPythonList = await getPythonList('', {});
+
+      if (rawPythonList.status === 200) {
+        setPythonList(rawPythonList.data.items);
+      }
+    } catch (error) {
+      console.error('获取Python列表失败:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
   // 数据格式化函数
   const formatData = useCallback((data: unknown[]) => {
@@ -122,15 +134,18 @@ const usePythonList = () => {
       data?.map((item: any) => {
         return {
           ...item,
-          key: String(item.id)
+          key: String(item.id),
+          // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
+          dataRef: item
         };
       }) ?? []
     );
   }, []);
 
+  // 修复：只在组件挂载时执行一次
   useEffect(() => {
     getRawPythonList();
-  }, [getRawPythonList]);
+  }, []); // 移除 getRawPythonList 依赖
 
   return {
     searchValue,
@@ -145,7 +160,8 @@ const usePythonList = () => {
     handleRename,
     handleCopy,
     handleDelete,
-    formatData
+    formatData,
+    isLoading
   };
 };
 
@@ -165,37 +181,75 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     handleCopy,
     handleDelete,
     formatData,
-    getRawPythonList
+    getRawPythonList,
+    isLoading
   } = usePythonList();
 
   // 使用URL状态hook
   const { urlState, updateUrlState } = useUrlState();
 
-  const handleFileSelect = (
-    selectedKeys: string[],
-    extra: {
-      selected: boolean;
-      selectedNodes: any[];
-      node: any;
-      e: Event;
-    }
-  ) => {
-    console.log('选中的节点:', selectedKeys, onFileOpen);
+  // 从Context获取当前打开的文件状态
+  const { state } = usePythonContext();
+  const hasOpenFiles = state.files.fileTabs.length > 0;
 
-    // 如果选中了文件，调用onFileOpen回调
-    if (selectedKeys.length > 0 && onFileOpen) {
-      const selectedKey = selectedKeys[0];
-      // 检查选中的是否是文件（不是文件夹）
-      const selectedItem = pythonList.find(
-        (item) => String(item.id) === selectedKey
-      );
-      console.log('selectedItem', pythonList, selectedItem);
-      if (selectedItem && selectedItem.type === PythonItemType.Notebook) {
-        console.log('透传文件id:', selectedKey);
-        onFileOpen(selectedKey);
+  const handleFileSelect = useCallback(
+    (
+      selectedKeys: string[],
+      extra: {
+        selected: boolean;
+        selectedNodes: any[];
+        node: any;
+        e: Event;
       }
-    }
-  };
+    ) => {
+      console.log('=== 文件选择调试信息 ===');
+      console.log('选中的节点:', selectedKeys);
+      console.log('onFileOpen 回调:', onFileOpen);
+      console.log('extra 对象:', extra);
+
+      // 如果选中了文件，调用onFileOpen回调
+      if (selectedKeys.length > 0 && onFileOpen) {
+        const selectedKey = selectedKeys[0];
+
+        // 从选中的节点中获取文件信息，而不是从pythonList中查找
+        const selectedNode = extra.selectedNodes[0];
+        const selectedItem = selectedNode?.props?.dataRef;
+
+        console.log('选中的文件项:', selectedItem);
+        console.log('文件类型:', selectedItem?.type);
+
+        // 修复：只要不是目录类型，就认为是文件，都应该能打开
+        if (selectedItem && selectedItem.type !== PythonItemType.Directory) {
+          console.log('✅ 准备打开文件，ID:', selectedKey);
+          onFileOpen(selectedKey);
+        } else {
+          console.log('❌ 文件类型不匹配或未找到文件项');
+        }
+      } else {
+        console.log('❌ 缺少选中键或onFileOpen回调');
+      }
+    },
+    [onFileOpen]
+  );
+
+  // 修复：使用 useCallback 包装 onFolderClick 和 onBackToParent
+  const handleFolderClick = useCallback(
+    async (folderId: string) => {
+      const res = await getPythonList(String(folderId), {
+        name: searchValue,
+        mode: 0,
+        page: 1,
+        page_size: 20
+      });
+      return res?.data?.items ?? [];
+    },
+    [searchValue]
+  );
+
+  const handleBackToParent = useCallback(async (parentId: string) => {
+    const res = await getPythonList(String(parentId || ''), {} as any);
+    return res?.data?.items || [];
+  }, []);
 
   return (
     <div className="python-tab-content">
@@ -211,26 +265,19 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
           onRename={handleRename}
           onCopy={handleCopy}
           onDelete={handleDelete}
-          onFolderClick={async (folderId) => {
-            const res = await getPythonList(String(folderId), {
-              name: searchValue,
-              mode: 0,
-              page: 1,
-              page_size: 20
-            });
-            return res?.data?.items ?? [];
-          }}
-          onBackToParent={async (parentId) => {
-            const res = await getPythonList(String(parentId || ''), {} as any);
-            return res?.data?.items || [];
-          }}
+          onFolderClick={(parentId?: string) =>
+            handleFolderClick(parentId ?? '')
+          }
+          onBackToParent={(parentId?: string) =>
+            handleBackToParent(parentId ?? '')
+          }
           onSearch={handleSearch}
           formatData={formatData}
           placeholder="搜索当前文件夹"
           newButtonText="新建"
           onUrlStateChange={updateUrlState}
           initialUrlState={urlState}
-          autoSelectOrCreate={true}
+          autoSelectOrCreate={!hasOpenFiles} // 只在没有文件打开时自动选择
           onAutoFileOpen={onFileOpen}
         />
       </div>
