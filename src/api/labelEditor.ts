@@ -48,7 +48,7 @@ export async function getTaskResult(taskId: string) {
             },
             {
               spec_id: 2,
-              value: 'opt1'
+              value: 'opt1,other|dddddd'
             },
             {
               spec_id: 3,
@@ -157,6 +157,12 @@ export async function getLabels(requirementId: string) {
                 attribute_name_cn: '选项2',
                 attribute_name_en: 'opt2',
                 input_type: 1
+              },
+              {
+                order_num: 3,
+                attribute_name_cn: '其他',
+                attribute_name_en: 'other',
+                input_type: 2
               }
             ]
           },
@@ -178,6 +184,12 @@ export async function getLabels(requirementId: string) {
                 attribute_name_cn: '选项2',
                 attribute_name_en: 'opt2',
                 input_type: 1
+              },
+              {
+                order_num: 3,
+                attribute_name_cn: '其他',
+                attribute_name_en: 'other',
+                input_type: 2
               }
             ]
           },
@@ -217,6 +229,12 @@ export async function getLabels(requirementId: string) {
                 attribute_name_cn: '选项2',
                 attribute_name_en: 'opt2',
                 input_type: 1
+              },
+              {
+                order_num: 3,
+                attribute_name_cn: '其他',
+                attribute_name_en: 'other',
+                input_type: 2
               }
             ]
           },
@@ -238,6 +256,12 @@ export async function getLabels(requirementId: string) {
                 attribute_name_cn: '选项2',
                 attribute_name_en: 'opt2',
                 input_type: 1
+              },
+              {
+                order_num: 3,
+                attribute_name_cn: '其他',
+                attribute_name_en: 'other',
+                input_type: 2
               }
             ]
           },
@@ -390,12 +414,8 @@ export async function getImgJobLabels(requirementId?: string) {
         values:
           attr.attribute_group_class === 3
             ? ['']
-            : attr.label_info_attribute
-                .filter((la) => la.input_type === 1)
-                .map((la) => la.attribute_name_cn),
-        keys: attr.label_info_attribute
-          .filter((la) => la.input_type === 1)
-          .map((la) => la.attribute_name_en)
+            : attr.label_info_attribute.map((la) => la.attribute_name_cn),
+        keys: attr.label_info_attribute.map((la) => la.attribute_name_en)
       });
     }
     labels.push(labelTpl);
