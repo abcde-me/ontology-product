@@ -38,6 +38,13 @@ import Cookies from 'js-cookie';
 
 const FormItem = Form.Item;
 
+enum RunningStatus {
+  Success = 'success',
+  Failed = 'failed',
+  Running = 'running',
+  Stopped = 'stopped'
+}
+
 const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
@@ -59,7 +66,7 @@ const Panel = ({ id, data, parentRef }) => {
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
   const [runningStatus, setRunningStatus] = useState('');
-  const [startTime, setStartTime] = useState(0);
+  const [startTime, setStartTime] = useState('');
   const [failMsg, setFailMsg] = useState('');
   const [placeholderValue, setPlaceholderValue] = useState('');
   const [runningBenchId, setRunningBenchId] = useState('');
@@ -188,10 +195,10 @@ const Panel = ({ id, data, parentRef }) => {
         setFailMsg(res?.data?.bench_error_log);
       }
       if (
-        res?.data?.bench_status === 'success' ||
-        res?.data?.bench_status === 'failed'
+        res?.data?.bench_status === RunningStatus.Success ||
+        res?.data?.bench_status === RunningStatus.Failed
       ) {
-        if (res?.data?.bench_status === 'success') {
+        if (res?.data?.bench_status === RunningStatus.Success) {
           handleValueChange({
             ...inputs,
             run_status: true
@@ -253,6 +260,16 @@ const Panel = ({ id, data, parentRef }) => {
     ]
   });
 
+  const formatDateTime = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   const handleCustomizeRun = async () => {
     const session_id = Cookies.get('session_id') as string;
     if (isRunning) {
@@ -263,7 +280,10 @@ const Panel = ({ id, data, parentRef }) => {
         runningBenchId
       );
       if (res.code === '') {
+        const endTime = new Date();
         setIsRunning(false);
+        setRunningStatus('stopped');
+        setStartTime(formatDateTime(endTime));
       } else {
         Message.error(res?.message ?? '运行失败');
       }
@@ -365,17 +385,22 @@ const Panel = ({ id, data, parentRef }) => {
                     <span className="ml-[8px]">{runningTime}s</span>
                   </div>
                 ) : (
-                  (runningStatus === 'failed' ||
-                    runningStatus === 'success') && (
+                  (runningStatus === RunningStatus.Failed ||
+                    runningStatus === RunningStatus.Success ||
+                    runningStatus === RunningStatus.Stopped) && (
                     <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
                       <span>
-                        {runningStatus === 'failed' ? '运行失败' : '运行成功'}
+                        {runningStatus === RunningStatus.Failed
+                          ? '运行失败'
+                          : runningStatus === RunningStatus.Success
+                            ? '运行成功'
+                            : '运行终止'}
                       </span>
-                      {runningStatus === 'failed' ? (
+                      {runningStatus === RunningStatus.Failed ? (
                         <IconCloseCircleFill className="ml-[4px] text-[#EF4444]" />
-                      ) : (
+                      ) : runningStatus === RunningStatus.Success ? (
                         <IconCheckCircleFill className="ml-[4px] text-[#10B981]" />
-                      )}
+                      ) : null}
                       <span className="ml-[8px]">{`${startTime} (${runningTime}s)`}</span>
                     </div>
                   )
