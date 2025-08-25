@@ -86,12 +86,71 @@ export interface CopyPythonItemReq {
 
 export type CopyPythonItemRes = PythonListItem;
 
+export enum RunningStatus {
+  /** 未运行 */
+  IDLE = -1,
+  /** 运行失败 */
+  FAILED = 0,
+  /** 运行成功 */
+  SUCCESS = 1,
+  /** 运行中 */
+  RUNNING = 2
+}
+
 // 打开Python项目响应结构
 export interface OpenPythonItemRes {
   /** 任务执行id */
   execid: number;
   /** 运行状态：-1未运行 0失败 1成功 2运行中 */
-  running_status: -1 | 0 | 1 | 2;
+  running_status: RunningStatus;
   /** Python文件代码内容 */
   data: string;
+}
+export interface SavePythonItemReq {
+  /** 文件id */
+  id: number;
+  /** Python文件代码内容 */
+  data: string;
+}
+
+export interface SavePythonItemRes {
+  /** 文件id */
+  id: number;
+  /** 最后修改时间 */
+  last_modified: string;
+}
+
+export interface RunPythonItemRes {
+  /** 任务执行id */
+  execid: string;
+  /** 文件id */
+  id: number;
+}
+
+export interface GetRunResultReq {
+  /** 任务执行id */
+  execid: string;
+}
+
+export interface GetRunResultRes {
+  /** 运行结果 */
+  run_result: string;
+  /** 运行状态：0失败 1成功 2运行中 -1未运行 */
+  run_status: RunningStatus;
+  /** 运行耗时（秒） */
+  run_duration: number;
+  /** 运行结束时间（格式：yyyy-MM-dd HH:mm） */
+  run_end_time: string;
+}
+
+export interface GetRunLogReq {
+  /** 任务执行id */
+  execid: string;
+  /** 日志大小 */
+  size?: number;
+}
+
+export interface GetRunLogRes {
+  /** 日志 */
+  log: string;
 }

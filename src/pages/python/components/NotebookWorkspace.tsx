@@ -9,7 +9,8 @@ import {
   IconInfoCircle,
   IconCheckCircle,
   IconCloseCircle,
-  IconLoading
+  IconLoading,
+  IconRefresh
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -20,35 +21,41 @@ import {
 } from '@codemirror/language';
 import './NotebookWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
-import timeFormatting from '@/utils/timeFormatting';
-import { useRafInterval } from 'ahooks';
+import { type SavePythonItemRes, RunningStatus } from '@/types/pythonApi';
+import RunIcon from '@/assets/python/run.svg';
+import StopIcon from '@/assets/python/stop-run.svg';
+import { useRequest, useThrottleFn } from 'ahooks';
+import {
+  runPythonItem,
+  getRunResult,
+  getRunLog,
+  savePythonItem
+} from '@/api/python';
+import RunningInfoPanel, { ActiveKey } from './RunningInfoPanel';
 
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
-  onContentChange?: (content: string) => void;
-}
-
-// 运行状态枚举
-enum RunStatus {
-  IDLE = 'idle',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  FAILED = 'failed'
+  currentFileId: string;
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   content,
   fileName,
-  onContentChange
+  currentFileId
 }) => {
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [editorContent, setEditorContent] = useState(content);
   const [placeholderValue, setPlaceholderValue] = useState('请输入代码...');
-  const [runStatus, setRunStatus] = useState<RunStatus>(RunStatus.IDLE);
+  const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
   const [runDuration, setRunDuration] = useState<number>(0);
-  const [lastAutoSave, setLastAutoSave] = useState<Date>(new Date());
+  const [lastAutoSave, setLastAutoSave] = useState<string>('');
+  const [execid, setExecid] = useState<string>('');
+  const [runLog, setRunLog] = useState<string>('');
+  const [runResult, setRunResult] = useState<string>('');
+  const [runResultLoading, setRunResultLoading] = useState(false);
+  const [runResultError, setRunResultError] = useState<Error | null>(null);
 
   const myTheme = createTheme({
     theme: 'light',
@@ -75,57 +82,85 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     }
   }, [content]);
 
-  // 使用 useRafInterval 进行自动保存，每30秒执行一次
-  useRafInterval(() => {
-    setLastAutoSave(new Date());
-    console.log('Auto saved at:', new Date().toLocaleString());
-  }, 30000);
+  // 延时30s保存
+  const handleSaveThrottled = useThrottleFn(
+    async (content) => {
+      const res = await savePythonItem(currentFileId ?? '', {
+        id: Number(currentFileId) ?? 0,
+        data: content
+      });
 
-  const handleContentChange = (value: string) => {
+      if (res?.status === 200) {
+        return res.data;
+      }
+
+      return null;
+    },
+    { wait: 3000 }
+  );
+
+  const handleContentChange = async (value: string) => {
     setEditorContent(value);
-    if (onContentChange) {
-      onContentChange(value);
+
+    const res = await handleSaveThrottled.run(value);
+    if (!res) {
+      Message.error('自动保存失败');
+      return;
     }
+    setLastAutoSave(res.last_modified);
   };
 
   const handleRunCode = async () => {
-    if (runStatus === RunStatus.RUNNING) {
-      Message.warning('代码正在运行中，请稍候...');
+    if (runStatus === RunningStatus.RUNNING) {
       return;
     }
 
-    setRunStatus(RunStatus.RUNNING);
+    setRunStatus(RunningStatus.RUNNING);
     setRunStartTime(new Date());
     setRunDuration(0);
 
-    try {
-      // 模拟代码运行
-      await new Promise((resolve, reject) => {
-        const startTime = Date.now();
+    const res = await runPythonItem(currentFileId ?? '');
 
-        // 随机模拟运行时间（2-8秒）
-        const runTime = Math.random() * 6000 + 2000;
-
-        setTimeout(() => {
-          const endTime = Date.now();
-          const duration = Math.round((endTime - startTime) / 1000);
-          setRunDuration(duration);
-
-          // 90%概率成功，10%概率失败
-          if (Math.random() > 0.1) {
-            setRunStatus(RunStatus.SUCCESS);
-            Message.success(`代码运行成功！耗时 ${duration} 秒`);
-          } else {
-            setRunStatus(RunStatus.FAILED);
-            Message.error('代码运行失败，请检查代码语法');
-          }
-        }, runTime);
-      });
-    } catch (error) {
-      setRunStatus(RunStatus.FAILED);
-      setRunDuration(0);
-      Message.error('代码运行出错');
+    if (!res) {
+      Message.error('运行失败');
+      setRunStatus(RunningStatus.IDLE);
+      return;
     }
+
+    setExecid(res.data.execid);
+
+    // try {
+    //   // 模拟代码运行
+    //   await new Promise((resolve, reject) => {
+    //     const startTime = Date.now();
+
+    //     // 随机模拟运行时间（2-8秒）
+    //     const runTime = Math.random() * 6000 + 200000;
+
+    //     setTimeout(() => {
+    //       const endTime = Date.now();
+    //       const duration = Math.round((endTime - startTime) / 1000);
+    //       setRunDuration(duration);
+
+    //       // 90%概率成功，10%概率失败
+    //       if (Math.random() > 0.1) {
+    //         setRunStatus(RunningStatus.SUCCESS);
+    //         Message.success(`代码运行成功！耗时 ${duration} 秒`);
+    //       } else {
+    //         setRunStatus(RunningStatus.FAILED);
+    //         Message.error('代码运行失败，请检查代码语法');
+    //       }
+    //     }, runTime);
+    //   });
+    // } catch (error) {
+    //   setRunStatus(RunningStatus.FAILED);
+    //   setRunDuration(0);
+    //   Message.error('代码运行出错');
+    // }
+  };
+
+  const handleStopRunCode = () => {
+    setRunStatus(RunningStatus.IDLE);
   };
 
   const handleExportDataset = () => {
@@ -142,7 +177,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
 
   const getRunStatusDisplay = () => {
     switch (runStatus) {
-      case RunStatus.RUNNING:
+      case RunningStatus.RUNNING:
         return (
           <div className="run-status running-status">
             <span className="mr-[4px]">运行中</span>
@@ -152,14 +187,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
             />
           </div>
         );
-      case RunStatus.SUCCESS:
+      case RunningStatus.SUCCESS:
         return (
           <div className="run-status success-status">
             <span className="mr-[4px]">运行成功</span>
             <IconCheckCircle style={{ color: '#10B981' }} />
           </div>
         );
-      case RunStatus.FAILED:
+      case RunningStatus.FAILED:
         return (
           <div className="run-status failed-status">
             <span className="mr-[4px]">运行失败</span>
@@ -172,7 +207,11 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
   };
 
   const getRunResultInfo = () => {
-    if (runStatus === RunStatus.SUCCESS && runStartTime && runDuration > 0) {
+    if (
+      runStatus === RunningStatus.SUCCESS &&
+      runStartTime &&
+      runDuration > 0
+    ) {
       const endTime = new Date(runStartTime.getTime() + runDuration * 1000);
       return (
         <div className="run-result-info">
@@ -193,28 +232,100 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     return null;
   };
 
+  // 轮询获取运行结果
+  const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
+    useRequest(getRunResult, {
+      pollingInterval: 3000
+    });
+
+  const handleActiveKeyChange = async (activeKey: string) => {
+    if (activeKey === ActiveKey.RESULT) {
+      const res = await getRunResult(currentFileId ?? '', {
+        execid
+      });
+
+      if (res?.status === 200 && res.data) {
+        setRunResult(res.data.run_result);
+      }
+    } else if (activeKey === ActiveKey.LOG) {
+      const res = await getRunLog(currentFileId ?? '', {
+        execid
+      });
+
+      if (res?.status === 200 && res.data) {
+        setRunLog(res.data.log);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (runStatus !== RunningStatus.RUNNING || !execid) {
+      return;
+    }
+
+    // 运行中时，轮询获取运行结果
+    if (runStatus === RunningStatus.RUNNING) {
+      cancelGetRunResultPolling();
+      getRunResultPolling(currentFileId ?? '', {
+        execid
+      }).then((res) => {
+        if (res?.status === 200 && res.data) {
+          setRunResult(res.data.run_result);
+        }
+      });
+    }
+
+    // 非运行时，任务id存在时，手动获取运行结果
+    if (runStatus !== RunningStatus.RUNNING && execid) {
+      getRunResult(currentFileId ?? '', {
+        execid
+      }).then((res) => {
+        if (res?.status === 200 && res.data) {
+          setRunResult(res.data.run_result);
+        }
+      });
+    }
+  }, [execid, runStatus]);
+
   return (
     <div className="notebook-content">
       {/* 顶部工具栏 */}
       <div className="notebook-toolbar">
         <div className="toolbar-left">
-          <Space size={8}>
+          <Space size={12}>
             <Button
               type="primary"
-              icon={<IconPlayArrow />}
-              onClick={handleRunCode}
-              loading={runStatus === RunStatus.RUNNING}
-              disabled={runStatus === RunStatus.RUNNING}
+              icon={
+                runStatus === RunningStatus.RUNNING ? (
+                  <StopIcon className="mr-[4px]" />
+                ) : (
+                  <RunIcon className="mr-[4px]" />
+                )
+              }
+              onClick={
+                runStatus === RunningStatus.RUNNING
+                  ? handleStopRunCode
+                  : handleRunCode
+              }
+              className={`h-[26px]${runStatus === RunningStatus.RUNNING || editorContent.trim() === '' ? ' btn-running' : ''}`}
             >
-              运行
+              {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
             </Button>
-            <Button icon={<IconUpload />} onClick={handleExportDataset}>
+            <Button
+              icon={<IconUpload />}
+              className="h-[26px]"
+              onClick={handleExportDataset}
+              disabled={
+                runStatus === RunningStatus.RUNNING ||
+                editorContent.trim() === ''
+              }
+            >
               导出数据集
             </Button>
             <Button
               type="text"
               onClick={handleExportList}
-              style={{ color: '#0F172A' }}
+              style={{ color: '#0F172A', padding: '0px' }}
             >
               导出列表
             </Button>
@@ -222,7 +333,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
               type="text"
               icon={<IconSettings />}
               onClick={handleCallOperator}
-              style={{ color: '#0F172A' }}
+              style={{ color: '#0F172A', padding: '0px' }}
             >
               调用算子
             </Button>
@@ -232,9 +343,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
           <Space size={8}>
             {getRunStatusDisplay()}
             {getRunResultInfo()}
-            <span className="auto-save-status">
-              自动保存：{timeFormatting(lastAutoSave)}
-            </span>
+            {lastAutoSave && (
+              <span className="auto-save-status">自动保存：{lastAutoSave}</span>
+            )}
           </Space>
         </div>
       </div>
@@ -252,13 +363,22 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
             syntaxHighlighting(defaultHighlightStyle)
           ]}
           onChange={handleContentChange}
-          readOnly={runStatus === RunStatus.RUNNING}
+          readOnly={runStatus === RunningStatus.RUNNING}
           basicSetup={{
             lineNumbers: true,
             highlightActiveLineGutter: false
           }}
         />
       </div>
+
+      {/* 运行信息面板 */}
+      <RunningInfoPanel
+        runResult={runResult}
+        runLog={runLog}
+        loading={runResultLoading}
+        error={runResultError}
+        onActiveKeyChange={handleActiveKeyChange}
+      />
     </div>
   );
 };
