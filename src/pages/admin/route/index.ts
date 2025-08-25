@@ -158,6 +158,13 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/datasetManagement',
     component: React.lazy(async () => import('../../datasetManagement')),
     children: []
+  },
+  // 标注工具页面
+  {
+    name: 'labelEditor',
+    key: '/tenant/compute/modaforge/labelEditor',
+    component: React.lazy(async () => import('../../labelEditor')),
+    children: []
   }
 ];
 

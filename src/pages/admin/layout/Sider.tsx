@@ -256,7 +256,8 @@ const hideSidebarPaths = [
   '/tenant/compute/modaforge/agentCreate',
   '/tenant/compute/modaforge/agentPage',
   '/tenant/compute/modaforge/login',
-  '/tenant/compute/modaforge/userinfo'
+  '/tenant/compute/modaforge/userinfo',
+  '/tenant/compute/modaforge/labelEditor'
 ];
 const collapseSidebarPaths = [
   '/tenant/compute/modaforge/appCreate',
