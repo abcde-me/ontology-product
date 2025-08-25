@@ -20,8 +20,43 @@
     .detail-content {
         background-color: #fff;
         border-radius: 15px;
-        padding: 16px;
+        padding-top: 24px;
+        padding-left: 36px;
         margin-top: 16px;
+    }
+
+    .basic-title {
+        font-family: PingFang SC;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        margin-left: -12px;
+        margin-bottom: 16px;
+    }
+
+    .tool-annotation-config {
+        padding-left: 36px;
+    }
+
+    .basic-configuration {
+        .table-container {
+            margin-left: 77px;
+        }
+    }
+
+    .data-content-set {
+        display: flex;
+        align-items: center;
+    }
+
+    .data-set-text {
+        font-family: PingFang SC;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px;
+        color: #6E7B8D;
+        margin-left: 8px;
+
     }
 
     .annotation-title {
@@ -76,13 +111,6 @@
         top: 60px;
     }
 
-    .basic-configuration {
-        margin-top: 16px;
-
-        .table-container {
-            margin-left: 77px;
-        }
-    }
 
     .label-container-title {
         display: flex;
@@ -134,5 +162,10 @@
 
     .sortable-item {
         margin-bottom: 10px;
+    }
+
+    .btn-content {
+        margin-top: 8px;
+        padding-bottom: 24px;
     }
 }

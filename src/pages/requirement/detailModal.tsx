@@ -1,23 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Button, Typography, Tabs, Tree, Form, Input, DatePicker, Table, Popover } from '@arco-design/web-react';
-import { useEdges } from 'reactflow';
-import { getDirectoryList } from '@/api/loadApi';
-import { A } from '@svgdotjs/svg.js';
+import { Modal, Button, Typography, Tabs, Tree, Form, Input, DatePicker, Table, Popover, Pagination, Message } from '@arco-design/web-react';
 import { getCatalogList, getSourceDataFileList, getSourceFileTypeList } from '@/api/dataCatalog';
-import Mock from 'mockjs';
 import { format } from 'date-fns';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { OperationColumn } from '@ccf2e/arco-material';
-
-import './dataSourceModal.scss';
-import { sort } from 'semver';
 import getFileIcon from '@/components/file-icon';
+import './dataSourceModal.scss';
+
 interface DataSourceModalProps {
     visible: boolean;
     onClose: () => void;
     title?: string;
     children?: React.ReactNode;
     getChildTableSelectData: (data: any) => void;
+    initialSelectedData?: any[]; // 添加初始选中数据参数
 }
 const TabPane = Tabs.TabPane;
 const style: React.CSSProperties = {
@@ -37,6 +33,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     onClose,
     title = '数据源',
     getChildTableSelectData,
+    initialSelectedData = [], // 接收初始数据
     children
 }) => {
     const FormItem = Form.Item;
@@ -48,7 +45,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
     const [searchValue, setSearchValue] = useState<string>('')
     const [sourceFileTypeFilters, setSourceFileTypeFilters] = useState();
-    const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
+    const [selectedRowsContent, setSelectedRowsContent] = useState<any[]>(initialSelectedData);
+    const [current, setCurrent] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(10);
+    // 在组件状态定义中添加
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const handleTabChange = (key: string) => {
         setActiveTab(key);
     };
@@ -120,9 +122,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 autoExpandParent={false}
                 treeData={treeData}
                 // checkStrictly={checkStrictly}
-                checkable
                 onSelect={(value) => {
-                    console.log(value, '----top');
+                    setCurrent(1);
+                    setPageSize(10);
                     setCheckedKeys(value);
                 }}
             />
@@ -271,25 +273,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     // 获取当前年份
     const currentYear = new Date().getFullYear();
 
-    // 生成当前年份的随机日期（格式：YYYY-MM-DD）
-    const generateCurrentYearDate = () => {
-        // 月份范围：1-12（注意Mock.js的月份是从1开始）
-        const month = Mock.Random.integer(1, 12)
-
-        // 根据月份确定最大天数（处理2月和大/小月）
-        const getMaxDay = (m) => {
-            if ([4, 6, 9, 11].includes(m)) return 30;
-            if (m === 2) return 28; // 简化处理，不考虑闰年
-            return 31;
-        };
-
-        const maxDay = getMaxDay(month);
-        const day = Mock.Random.integer(1, maxDay);
-
-        // 格式化月份和日期为两位数
-        const format = (num) => num.toString().padStart(2, '0');
-        return `${currentYear}-${format(month)}-${format(day)}`;
-    };
     const searchData = (searchValue) => {
         const loop = (data) => {
             const result: any = [];
@@ -322,8 +305,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     // 获取表格数据
     const getTableData = async () => {
         const sourceParams: any = {
-            page: 1,
-            page_size: 10,
+            page: current,
+            page_size: pageSize,
             file_name: '',
             data_path_id: Number(checkedKeys) // 优先使用选中ID 后期改成selectedKey
             // start: startTime, //后期改成startTime
@@ -331,14 +314,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
         };
         const res = await getSourceDataFileList(sourceParams);
-        console.log(res, 'top-----res');
         if (res.status === 200) {
-            setTableData(res?.data?.items)
+            setTableData(res?.data?.items);
+            setCurrent(res?.data?.page);
+            setPageSize(res?.data?.page_size);
+            setTotal(res?.data?.total);
         }
     };
     useEffect(() => {
         getTableData()
-    }, [checkedKeys, activeTab]);
+    }, [checkedKeys, activeTab, current, pageSize]);
     const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
     // 处理日期范围变化
     const handleDateChange = (value) => {
@@ -360,7 +345,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         }
     };
     const getTableSelectContent = () => {
-        getChildTableSelectData(selectedRowKeys);
+        getChildTableSelectData(selectedRowsContent);
         onClose()
     }
     return (
@@ -372,7 +357,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             escToExit={false}
             maskClosable={false}
             className='fullscreen-modal'
-            style={{ width: '90vw' }}
+            style={{ width: '90vw', overflowY: 'auto' }}
             footer={
                 <Button type='primary' onClick={() => { getTableSelectContent() }}>确定</Button>
             }
@@ -394,9 +379,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                                     <DatePicker.RangePicker onChange={handleDateChange} style={{ width: 350 }} />
                                 </FormItem>
                             </div>
-                            {/* <FormItem>
-                                <Button type='primary' onClick={() => { getTableSelectContent() }}>确定</Button>
-                            </FormItem> */}
                         </Form>
                     </div>
                     <Table
@@ -404,17 +386,54 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                         rowKey='id'
                         columns={columns}
                         data={tableData}
+                        pagination={false}
                         rowSelection={{
+                            selectedRowKeys: selectedRowKeys,
+                            preserveSelectedRowKeys: true,
                             onChange: (selectedRowKeys, selectedRows) => {
-                                console.log('onChange:', selectedRowKeys, selectedRows);
-                                setSelectedRowKeys(selectedRows);
+                                // 合并新旧选中数据并处理取消选中
+                                const mergedMap = new Map<string, any>();
+
+                                // 1. 保留仍处于选中状态的现有数据
+                                selectedRowsContent
+                                    .filter(item => selectedRowKeys.includes(item.id))
+                                    .forEach(item => mergedMap.set(item.id, item));
+
+                                // 2. 添加当前页新选中数据
+                                selectedRows.forEach(item => mergedMap.set(item.id, item));
+
+                                // 3. 更新状态
+                                const mergedRows = Array.from(mergedMap.values());
+                                if (mergedRows.length <= 200) {
+                                    setSelectedRowsContent(mergedRows);
+                                    setSelectedRowKeys(mergedRows.map(item => item.id));
+                                } else {
+                                    Message.error('选中的数量不能超过200条');
+                                }
                             },
-                            // onSelect: (selected, record, selectedRows) => {
-                            //     setSelectedRowKeys(selectedRowKeys);
-                            //     console.log('onSelect:', selected, record, selectedRows);
-                            // },
                         }}
                     />
+                    {tableData && tableData.length > 0 && (
+                        <Pagination
+                            current={current}
+                            pageSize={pageSize}
+                            onPageSizeChange={(pageSize) => {
+                                setPageSize(pageSize);
+                                setCurrent(1);
+                                // 保留选中状态，不重置selectedRowKeys
+                            }}
+                            onChange={(page) => {
+                                setCurrent(page);
+                                // 保留选中状态，不重置selectedRowKeys
+                            }}
+                            sizeOptions={[10, 20, 50, 100]}
+                            showTotal
+                            total={total}
+                            showJumper
+                            sizeCanChange
+                            style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+                        />
+                    )}
                 </div>
             </div>
         </Modal>

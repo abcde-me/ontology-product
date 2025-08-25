@@ -50,8 +50,7 @@
         "/tenant/compute/modaforge/datasetManagement",
         "/tenant/compute/modaforge/requirement",
         "/tenant/compute/modaforge/requirement/detail",
-        "/tenant/compute/modaforge/annotation",
-        "/tenant/compute/modaforge/review"
+        "/tenant/compute/modaforge/taskList"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"

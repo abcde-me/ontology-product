@@ -174,7 +174,7 @@ const menus: MenuModel[] = [
     key: 'labelMgmt',
     children: [
       {
-        title: '需求',
+        title: '需求管理',
         icon: (
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
@@ -183,21 +183,12 @@ const menus: MenuModel[] = [
         permission: 'organizations:can_search'
       },
       {
-        title: '标注',
+        title: '任务列表',
         icon: (
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
-        key: 'annotation',
-        path: '/tenant/compute/modaforge/annotation',
-        permission: 'organizations:can_search'
-      },
-      {
-        title: '审核',
-        icon: (
-          <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
-        ),
-        key: 'review',
-        path: '/tenant/compute/modaforge/review',
+        key: 'taskList',
+        path: '/tenant/compute/modaforge/taskList',
         permission: 'organizations:can_search'
       },
     ]

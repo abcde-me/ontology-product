@@ -145,7 +145,7 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../datasetManagement')),
     children: []
   },
-  // 数据标注
+  // 数据标注 - 需求管理
   {
     name: 'requirement',
     key: '/tenant/compute/modaforge/requirement',
@@ -157,6 +157,13 @@ export const routes: IRoute[] = [
         component: React.lazy(async () => import('../../requirement/detail'))
       }
     ]
+  },
+  // 数据标注 - 任务列表
+  {
+    name: 'taskList',
+    key: '/tenant/compute/modaforge/taskList',
+    component: React.lazy(async () => import('../../requirement/taskList')),
+    children: []
   },
 ];
 

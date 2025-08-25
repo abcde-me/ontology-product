@@ -24,7 +24,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { IconClockCircle } from '@arco-design/web-react/icon';
+import { IconClockCircle, IconPlus } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import { getAnnotationList } from '@/api/dataAnnotation';
 import './index.scss';
@@ -34,6 +34,7 @@ export default function Requirement() {
   const FormItem = Form.Item;
   const history = useHistory();
   const userInfo = useUserInfo();
+  const InputSearch = Input.Search;
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
@@ -100,7 +101,7 @@ export default function Requirement() {
       // console.log(res1, '-----top');
       const res = await getWorkflowList(params);
       if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
+        setWorkflowData(res.data.list1 || []);
         setCurrent(res.data.page_info?.page);
         setPageSize(res.data.page_info?.page_size);
         setTotal(res.data.page_info?.total);
@@ -177,13 +178,15 @@ export default function Requirement() {
   // table columns
   const columns: ColumnProps[] = [
     {
-      title: '需求ID',
-      dataIndex: 'id',
-      width: 80,
+      title: '需求名称',
+      dataIndex: 'workflow_name',
+      width: 280,
+      ellipsis: true,
+      className: 'hover-change workflow-name',
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.id) !== '-' ? (
+        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
           <EllipsisPopover
-            value={record.id}
+            value={record.workflow_name}
             isEdit={false}
             isLink
             handleLink={() => {
@@ -196,23 +199,21 @@ export default function Requirement() {
       }
     },
     {
-      title: '需求名称',
-      dataIndex: 'workflow_name',
-      width: 280,
-      ellipsis: true,
-      className: 'hover-change workflow-name',
+      title: '需求ID',
+      dataIndex: 'id',
+      width: 80,
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+        return renderEmptyPlaceholder(record.id) !== '-' ? (
           <EllipsisPopover
-            value={record.workflow_name}
+            value={record.id}
             isEdit={false}
-            isLink
           />
         ) : (
           <span>-</span>
         );
       }
     },
+
     {
       title: '类型',
       dataIndex: 'is_online',
@@ -231,11 +232,11 @@ export default function Requirement() {
         ),
       filters: [
         {
-          text: '未上线',
+          text: '图片',
           value: 0
         },
         {
-          text: '已上线',
+          text: '文本',
           value: 1
         }
       ]
@@ -280,10 +281,6 @@ export default function Requirement() {
           text: '发布失败',
           value: 1
         },
-        {
-          text: '标注完成',
-          value: 1
-        }
       ]
     },
     {
@@ -303,18 +300,6 @@ export default function Requirement() {
       title: '创建人',
       dataIndex: 'user_name',
       key: `user_name+id`,
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '创建人',
-      dataIndex: 'user_name',
       width: 100,
       ellipsis: true,
       render: (_, record) => (
@@ -368,36 +353,18 @@ export default function Requirement() {
             label='需求名称:'
             field='name'
           >
-            <Input
+            <InputSearch
               onClear={() => {
                 setCurrent(1);
                 setSearchValue('');
                 setIsClickClear(true);
               }}
+              onPressEnter={() => {
+                getList();
+              }}
               onChange={(val) => {
                 setSearchValue(val)
-              }} placeholder='请输入需求名称' allowClear />
-          </FormItem>
-          <FormItem
-            label='创建人:'
-            field='user_name'
-          >
-            <Input
-              onChange={(val) => {
-                setUserNameValue(val)
-              }}
-              onClear={() => {
-                setCurrent(1);
-                setUserNameValue('');
-                setIsClickClearUserName(true);
-              }} placeholder='请输入创建人' allowClear />
-          </FormItem>
-          <FormItem>
-            <Button type='primary' style={{ marginRight: 24 }} onClick={() => {
-              getList();
-            }}>
-              查询
-            </Button>
+              }} placeholder='请输入需求名称/创建人' allowClear />
           </FormItem>
         </Form>
         <PermissionWrapper>
@@ -406,7 +373,7 @@ export default function Requirement() {
             onClick={handleCreateWorkflow}
             loading={loading}
           >
-            新建
+            <IconPlus /> 创建需求
           </Button>
         </PermissionWrapper>
       </div>
@@ -417,8 +384,10 @@ export default function Requirement() {
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无需求',
-          btnText: '创建需求',
-          perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
+          btnText:
+            <><IconPlus /> 创建需求</>
+          ,
+          // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"
