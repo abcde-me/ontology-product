@@ -5,7 +5,7 @@ import { sql } from '@codemirror/lang-sql';
 import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
 import { createSqlLinter } from '../utils/sqlLinterUtil';
-import { FullscreenContainer } from '../components/Fullscreen';
+import { FullscreenContainer } from './Fullscreen';
 import { Button, Link, Space, Typography } from '@arco-design/web-react';
 import { SQL_EDITOR_HEIGHT } from '../constant';
 

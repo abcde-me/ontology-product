@@ -1,6 +1,6 @@
 import React, { FC, useRef } from 'react';
 import { Link, Space, Table, Button } from '@arco-design/web-react';
-import { FullscreenContainer } from '../components/Fullscreen';
+import { FullscreenContainer } from './Fullscreen';
 import { TableInstance } from '@arco-design/web-react/es/Table/table';
 
 const columns = [

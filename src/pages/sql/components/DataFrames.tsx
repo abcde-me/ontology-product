@@ -16,6 +16,8 @@ const DataFrames: FC<DataFramesProps> = (props) => {
     (state: SqlIndexStore) => state.dataframesList
   );
 
+  const loadDataFrames = useSqlIndexStore((state) => state.loadDataFrames);
+
   const [inputValue, setInputValue] = useState('');
   const [treeData, setTreeData] = useState<any | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);

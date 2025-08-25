@@ -4,8 +4,12 @@ import { Tree } from '@arco-design/web-react';
 import { IconFile } from '@arco-design/web-react/icon';
 
 const Datasets: FC = () => {
-  const datesetsList = useSqlIndexStore(
-    (state: SqlIndexStore) => state.datesetsList
+  const datasetsList = useSqlIndexStore(
+    (state: SqlIndexStore) => state.datasetsList
+  );
+
+  const loadDatasets = useSqlIndexStore(
+    (state: SqlIndexStore) => state.loadDatasets
   );
 
   const [treeData, setTreeData] = useState<any | null>(null);
@@ -13,11 +17,15 @@ const Datasets: FC = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   useEffect(() => {
-    const data = formatApiData(datesetsList);
+    // loadDatasets({ sort_order: 'asc' })
+  }, []);
+
+  useEffect(() => {
+    const data = formatApiData(datasetsList);
     setTreeData(data);
-    const keys = datesetsList.map((item: any) => item.id);
+    const keys = datasetsList.map((item: any) => item.id);
     setExpandedKeys(keys);
-  }, [datesetsList]);
+  }, [datasetsList]);
 
   return (
     <>
