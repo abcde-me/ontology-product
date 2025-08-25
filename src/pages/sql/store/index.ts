@@ -1,40 +1,50 @@
 import { create } from 'zustand';
 import { DATAFRAMES_LIST, DATASETS_LIST, SCRIPTS_LIST } from '../constant';
 import {
-  getCatalogList,
-  CatalogListParams,
-  CatalogListResponse,
+  // getCatalogList,
+  // CatalogListParams,
+  // CatalogListResponse,
   getDatasetList,
   DatasetListParams,
   DatasetListResponse
 } from '@/api/sql';
 
 export interface SqlIndexStore {
-  dataframesList: any[];
-  datasetsList: any[];
   scriptsList: any[];
-  loadDataFrames: (props: CatalogListParams) => Promise<void>;
-  loadDatasets: (props: DatasetListParams) => Promise<void>;
+  // dataframesList: any[];
+  // datasetsList: any[];
+  // dataFramesLoaded: boolean;
+  // loadDataFrames: (params?: CatalogListParams) => Promise<void>;
+  // loadDatasets: (props: DatasetListParams) => Promise<void>;
 }
 
-export const useSqlIndexStore = create<SqlIndexStore>((set) => ({
-  dataframesList: DATAFRAMES_LIST,
-  datasetsList: DATASETS_LIST,
-  scriptsList: SCRIPTS_LIST,
-  loadDataFrames: async (props: CatalogListParams) => {
-    const res: CatalogListResponse = await getCatalogList({
-      root_type: 0,
-      search: ''
-    });
+export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
+  scriptsList: SCRIPTS_LIST
+  // dataframesList: DATAFRAMES_LIST,
+  // datasetsList: DATASETS_LIST,
+  // dataFramesLoaded: false,
+  // loadDataFrames: async (params) => {
+  //   if (get().dataFramesLoaded) return;
 
-    console.log('loadDataFrames res:', res);
-  },
-  loadDatasets: async (props: DatasetListParams) => {
-    const res: DatasetListResponse = await getDatasetList({
-      sort_order: 'asc'
-    });
+  //   try {
+  //     const defaultParam: CatalogListParams = {
+  //       root_type: 1,
+  //       dir_type: 3,
+  //       search: ''
+  //     }
+  //     const res: CatalogListResponse = await getCatalogList({ ...defaultParam, ...params });
+  //     set({ dataFramesLoaded: true });
+  //     console.log('loadDataFrames res.data.src:', res.data.src);
+  //     set({ dataframesList: res.data.src || [] });
+  //   } catch (err) {
+  //   }
+  // },
+  // loadDatasets: async (props: DatasetListParams) => {
+  //   const res: DatasetListResponse = await getDatasetList({
+  //     sort_order: 'asc'
+  //   });
 
-    console.log('loadDataFrames res:', res);
-  },
-  loadScripts: async (props: any) => {}
+  //   console.log('loadDataFrames res:', res);
+  // },
+  // loadScripts: async (props: any) => { }
 }));

@@ -1,25 +1,55 @@
 import UAPI from '@/api';
 
-export interface CatalogListParams {
-  /** 获取目录类型，0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录 */
-  root_type: number;
-  /** 搜索关键字 TODO: 匹配字段？ */
-  search?: string;
-}
+// export interface CatalogListParams {
+//   /** 获取目录类型，0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录 */
+//   root_type: number;
+//   /** 文件夹类型，0: 获取全部，2: 仅获取卷，3：仅获取库，默认0 */
+//   dir_type?: number;
+//   /** 搜索关键字 TODO: 匹配字段？ */
+//   search?: string;
+// }
 
-export interface CatalogListResponse {
-  msg: string;
-  stat: number;
-  code: number;
-  data: {};
-}
+// export interface CatalogItem {
+//   /** id */
+//   id: string | number;
+//   /** 名称 */
+//   name: string;
+//   /** 父节点 */
+//   parent_id: string | number;
+//   /** 1: 元数据目录 2: 卷 3: 库 4: 表 */
+//   type: number;
+//   /** 子节点 */
+//   children: {
+//     volume?: CatalogItem[],
+//     db?: CatalogItem[],
+//     table?: CatalogItem[]
+//   }
+//   type_name: 'catalog' | 'volume' | 'db' | 'table';
+//   perms: string[];
+//   base_dir: string;
+// }
 
-/** 源数据目录 */
-export async function getCatalogList(
-  param: CatalogListParams
-): Promise<CatalogListResponse> {
-  return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
-}
+// export interface CatalogListResponse {
+//   msg: string;
+//   stat: number;
+//   code: number;
+//   data: {
+//     src: CatalogItem[],
+//   };
+// }
+
+// /** 源数据目录 */
+// export async function getCatalogList(
+//   param: CatalogListParams
+// ): Promise<CatalogListResponse> {
+//   const defaultParam: CatalogListParams = {
+//     root_type: 1,
+//     dir_type: 3,
+//     search: ''
+//   }
+//   const targetParam = { ...defaultParam, ...param }
+//   return await UAPI.RES.catalogListApi({}).get(targetParam).inRegion().do();
+// }
 
 export interface DatasetListParams {
   /** 排序方式：asc-正序、desc-倒序 */
