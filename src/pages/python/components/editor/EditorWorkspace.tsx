@@ -19,7 +19,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle
 } from '@codemirror/language';
-import './NotebookWorkspace.scss';
+import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { type SavePythonItemRes, RunningStatus } from '@/types/pythonApi';
 import RunIcon from '@/assets/python/run.svg';
@@ -128,35 +128,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
     }
 
     setExecid(res.data.execid);
-
-    // try {
-    //   // 模拟代码运行
-    //   await new Promise((resolve, reject) => {
-    //     const startTime = Date.now();
-
-    //     // 随机模拟运行时间（2-8秒）
-    //     const runTime = Math.random() * 6000 + 200000;
-
-    //     setTimeout(() => {
-    //       const endTime = Date.now();
-    //       const duration = Math.round((endTime - startTime) / 1000);
-    //       setRunDuration(duration);
-
-    //       // 90%概率成功，10%概率失败
-    //       if (Math.random() > 0.1) {
-    //         setRunStatus(RunningStatus.SUCCESS);
-    //         Message.success(`代码运行成功！耗时 ${duration} 秒`);
-    //       } else {
-    //         setRunStatus(RunningStatus.FAILED);
-    //         Message.error('代码运行失败，请检查代码语法');
-    //       }
-    //     }, runTime);
-    //   });
-    // } catch (error) {
-    //   setRunStatus(RunningStatus.FAILED);
-    //   setRunDuration(0);
-    //   Message.error('代码运行出错');
-    // }
   };
 
   const handleStopRunCode = () => {

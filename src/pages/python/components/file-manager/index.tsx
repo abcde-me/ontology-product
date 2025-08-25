@@ -8,11 +8,11 @@ import {
   copyPythonItem
 } from '@/api/python';
 import { PythonListItem } from '@/types/pythonApi';
-import './PythonTabContent.scss';
+import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem
 } from '@/components/directory-tree/DirectoryTree';
-import { useUrlState } from '../hooks/useUrlState';
+import { useUrlState } from '../../hooks/useUrlState';
 import { PythonItemType } from '@/types/pythonApi';
 
 const { Title } = Typography;
@@ -20,13 +20,6 @@ const { Title } = Typography;
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (fileId: string) => void;
-}
-
-interface TreeNode {
-  key: string;
-  title: string;
-  icon?: React.ReactNode;
-  children?: TreeNode[];
 }
 
 const usePythonList = () => {
@@ -225,7 +218,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
               page: 1,
               page_size: 20
             });
-            return res?.data?.items || [];
+            return res?.data?.items ?? [];
           }}
           onBackToParent={async (parentId) => {
             const res = await getPythonList(String(parentId || ''), {} as any);

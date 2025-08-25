@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Layout, Tabs } from '@arco-design/web-react';
-import NotebookTabContent from './components/NotebookTabContent';
-import PythonTabContent from './components/PythonTabContent';
-import NotebookMainContent from './components/NotebookMainContent';
+import FileManager from './components/file-manager';
+import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
@@ -36,18 +35,18 @@ const Notebook: React.FC = () => {
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon></PythonIcon>}>
-            <PythonTabContent type="files" onFileOpen={handleFileOpen} />
+            <FileManager type="files" onFileOpen={handleFileOpen} />
           </TabPane>
           <TabPane key="data" title={<DataIcon></DataIcon>}>
-            <NotebookTabContent type="data" />
+            {/* <NotebookTabContent type="data" /> */}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon></SuanziIcon>}>
-            <NotebookTabContent type="tools" />
+            {/* <NotebookTabContent type="tools" /> */}
           </TabPane>
         </Tabs>
       </Sider>
       <Content className="notebook-content">
-        <NotebookMainContent currentFileId={currentFileId} />
+        <EditorContent currentFileId={currentFileId} />
       </Content>
     </Layout>
   );

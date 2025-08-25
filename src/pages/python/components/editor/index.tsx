@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Tabs, Message } from '@arco-design/web-react';
-import NotebookWorkspace from './NotebookWorkspace';
-import { openPythonItem, savePythonItem } from '@/api/python';
+import { Tabs } from '@arco-design/web-react';
+import NotebookWorkspace from './EditorWorkspace';
+import { openPythonItem } from '@/api/python';
 import { OpenPythonItemRes } from '@/types/pythonApi';
-import './NotebookMainContent.scss';
-import { useThrottleFn } from 'ahooks';
+import './index.scss';
 
 const TabPane = Tabs.TabPane;
 
@@ -185,7 +184,6 @@ const NotebookMainContent: React.FC<NotebookMainContentProps> = ({
           </TabPane>
         ))}
       </Tabs>
-      {/* </div> */}
 
       {/* 工作区 */}
       <div className="main-workspace">
