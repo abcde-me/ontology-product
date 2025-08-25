@@ -392,7 +392,7 @@ const Panel = ({ id, data, parentRef }) => {
               <CodeMirror
                 value={value}
                 theme={myTheme}
-                placeholder={placeholderValue}
+                // placeholder={placeholderValue}
                 extensions={[python()]}
                 onChange={onChange}
                 readOnly={isRunning || readOnly}

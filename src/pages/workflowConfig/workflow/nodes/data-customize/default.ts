@@ -34,13 +34,14 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
     let errorMessages = '';
     const { script_content, run_status } = payload;
 
-    if (!script_content) {
-      errorMessages = '代码不可为空';
-    }
-
     if (!run_status) {
       errorMessages = '代码运行失败';
     }
+
+    if (script_content === '') {
+      errorMessages = '代码不可为空';
+    }
+
     return {
       isValid: !errorMessages,
       errorMessage: errorMessages
