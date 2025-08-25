@@ -5,7 +5,9 @@ import {
   Form,
   Message,
   Modal,
-  Spin
+  Spin,
+  Tabs,
+  Typography
 } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { tags as t } from '@lezer/highlight';
@@ -14,6 +16,8 @@ import { useStoreApi } from 'reactflow';
 import useConfig from './use-config';
 import {
   IconCaretRight,
+  IconCheckCircleFill,
+  IconCloseCircleFill,
   IconExpand,
   IconRecordStop,
   IconShrink
@@ -25,7 +29,8 @@ import {
   getScriptingEngine,
   getScriptingTemplate,
   scriptingBench,
-  scriptingBenchResult
+  scriptingBenchResult,
+  scriptingBenchCancel
 } from '@/api/workflow';
 import './panel.scss';
 import { useParams } from '@/utils/url';
@@ -37,6 +42,7 @@ const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
   const CollapseItem = Collapse.Item;
+  const TabPane = Tabs.TabPane;
   const workflow_uuid = useParams('workflow_uuid') as string;
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
@@ -52,6 +58,9 @@ const Panel = ({ id, data, parentRef }) => {
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
+  const [runningStatus, setRunningStatus] = useState('');
+  const [startTime, setStartTime] = useState(0);
+  const [failMsg, setFailMsg] = useState('');
   const [placeholderValue, setPlaceholderValue] = useState('');
   const [runningBenchId, setRunningBenchId] = useState('');
 
@@ -170,15 +179,30 @@ const Panel = ({ id, data, parentRef }) => {
 
     try {
       setRunningTime((prev) => prev + 1);
-      if (runningTime >= 5) {
-        setIsRunning(false);
-        setResultData('运行时间超过5秒');
-        return;
-      }
       const res = await runningResult();
-      if (res?.data) {
+      setRunningStatus(res?.data?.bench_status);
+      if (res?.data?.bench_log) {
+        setResultData(res?.data?.bench_log);
+      }
+      if (res?.data?.bench_error_log) {
+        setFailMsg(res?.data?.bench_error_log);
+      }
+      if (
+        res?.data?.bench_status === 'success' ||
+        res?.data?.bench_status === 'failed'
+      ) {
+        if (res?.data?.bench_status === 'success') {
+          handleValueChange({
+            ...inputs,
+            run_status: true
+          });
+        }
         setIsRunning(false);
-        setResultData('运行结果出现，运行时间为：' + runningTime + '秒');
+        setResultData(
+          res?.data?.bench_log ||
+            '运行结果出现，运行时间为：' + runningTime + '秒'
+        );
+        setStartTime(res?.data?.start_time);
         return;
       }
     } catch (error) {
@@ -202,10 +226,10 @@ const Panel = ({ id, data, parentRef }) => {
   }, [isRunning]);
 
   useEffect(() => {
-    if (resultData && resultRef.current) {
-      resultRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+    if (resultData && parentRef.current) {
+      parentRef.current.scrollTo({
+        top: parentRef.current.scrollHeight,
+        behavior: 'smooth'
       });
     }
   }, [resultData]);
@@ -230,13 +254,28 @@ const Panel = ({ id, data, parentRef }) => {
   });
 
   const handleCustomizeRun = async () => {
-    const res = await runningStart();
-    if (res.data && res.code === '') {
-      setRunningBenchId(res.data.bench_job_id);
-      setIsRunning(!isRunning);
-      setRunningTime(0);
+    const session_id = Cookies.get('session_id') as string;
+    if (isRunning) {
+      const res = await scriptingBenchCancel(
+        workflow_uuid,
+        session_id,
+        id,
+        runningBenchId
+      );
+      if (res.code === '') {
+        setIsRunning(false);
+      } else {
+        Message.error(res?.message ?? '运行失败');
+      }
     } else {
-      Message.error(res?.message ?? '运行失败');
+      const res = await runningStart();
+      if (res.data && res.code === '') {
+        setRunningBenchId(res.data.bench_job_id);
+        setIsRunning(true);
+        setRunningTime(0);
+      } else {
+        Message.error(res?.message ?? '运行失败');
+      }
     }
   };
 
@@ -253,7 +292,7 @@ const Panel = ({ id, data, parentRef }) => {
         id: id,
         data: {
           type: data.type,
-          script_content: JSON.stringify(value),
+          script_content: value,
           script_type: scriptingType,
           engine_id: scriptingEngine
         }
@@ -300,7 +339,7 @@ const Panel = ({ id, data, parentRef }) => {
           >
             <div
               ref={stickyRef}
-              className={`sticky top-[101px] z-10 flex h-[52px] items-center justify-between px-[12px] py-[10px] ${isSticky ? 'is-sticky' : ''}`}
+              className={`sticky top-[101px] flex h-[52px] items-center justify-between px-[12px] py-[10px] ${isSticky ? 'is-sticky' : ''}`}
             >
               <div className="flex items-center">
                 <Button
@@ -325,7 +364,22 @@ const Panel = ({ id, data, parentRef }) => {
                     <Spin size={14} className="ml-[4px]" />
                     <span className="ml-[8px]">{runningTime}s</span>
                   </div>
-                ) : null}
+                ) : (
+                  (runningStatus === 'failed' ||
+                    runningStatus === 'success') && (
+                    <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
+                      <span>
+                        {runningStatus === 'failed' ? '运行失败' : '运行成功'}
+                      </span>
+                      {runningStatus === 'failed' ? (
+                        <IconCloseCircleFill className="ml-[4px] text-[#EF4444]" />
+                      ) : (
+                        <IconCheckCircleFill className="ml-[4px] text-[#10B981]" />
+                      )}
+                      <span className="ml-[8px]">{`${startTime} (${runningTime}s)`}</span>
+                    </div>
+                  )
+                )}
               </div>
               <IconExpand
                 className={`full-screen-icon ${isRunning ? 'pointer-events-none' : ''}`}
@@ -333,7 +387,7 @@ const Panel = ({ id, data, parentRef }) => {
               />
             </div>
             <div
-              className={`mt-[2px] px-[12px] ${isRunning ? 'running-code-mirror' : ''}`}
+              className={`mt-[2px] px-[12px] ${isRunning || readOnly ? 'running-code-mirror' : ''}`}
             >
               <CodeMirror
                 value={value}
@@ -341,7 +395,7 @@ const Panel = ({ id, data, parentRef }) => {
                 placeholder={placeholderValue}
                 extensions={[python()]}
                 onChange={onChange}
-                readOnly={isRunning}
+                readOnly={isRunning || readOnly}
                 basicSetup={{
                   lineNumbers: true,
                   highlightActiveLineGutter: false
@@ -360,7 +414,49 @@ const Panel = ({ id, data, parentRef }) => {
               name="running_result"
               ref={resultRef}
             >
-              {resultData}
+              {runningStatus === 'failed' ? (
+                <Tabs defaultActiveTab="1">
+                  <TabPane key="1" title="结果">
+                    <Typography.Paragraph>
+                      <div
+                        style={{
+                          whiteSpace: 'pre-wrap',
+                          fontSize: '14px',
+                          lineHeight: '24px',
+                          color: '#1E293B'
+                        }}
+                      >
+                        {resultData}
+                      </div>
+                    </Typography.Paragraph>
+                  </TabPane>
+                  <TabPane key="2" title="报错">
+                    <Typography.Paragraph>
+                      <div
+                        style={{
+                          whiteSpace: 'pre-wrap',
+                          fontSize: '14px',
+                          lineHeight: '24px',
+                          color: '#1E293B'
+                        }}
+                      >
+                        {failMsg}
+                      </div>
+                    </Typography.Paragraph>
+                  </TabPane>
+                </Tabs>
+              ) : (
+                <div
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '14px',
+                    lineHeight: '24px',
+                    color: '#1E293B'
+                  }}
+                >
+                  {resultData}
+                </div>
+              )}
             </CollapseItem>
           </Collapse>
         )}
