@@ -31,7 +31,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     handleRename,
     handleCopy,
     handleDelete,
-    handleFileSelect,
+    // handleFileSelect,
     handleFolderClick,
     handleBackToParent,
     formatData
@@ -49,7 +49,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           data={pythonList as TreeNodeItem[]}
-          onSelect={handleFileSelect}
           onCreate={handleCreate}
           onRename={handleRename}
           onCopy={handleCopy}

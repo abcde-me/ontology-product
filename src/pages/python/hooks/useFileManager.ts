@@ -32,15 +32,6 @@ interface UseFileManagerReturn {
   handleRename: (finalName: string, node: any) => Promise<any>;
   handleCopy: (newName: string, node: any) => Promise<any>;
   handleDelete: (node: any) => Promise<boolean>;
-  handleFileSelect: (
-    selectedKeys: string[],
-    extra: {
-      selected: boolean;
-      selectedNodes: any[];
-      node: any;
-      e: Event;
-    }
-  ) => void;
   handleFolderClick: (folderId: string) => Promise<PythonListItem[]>;
   handleBackToParent: (parentId: string) => Promise<PythonListItem[]>;
 
@@ -150,6 +141,11 @@ export const useFileManager = (
             setTimeout(() => {
               onFileOpen(String(createRes.data.id), createRes.data.name);
             }, 100);
+          } else if (
+            createRes.data &&
+            createRes.data.type === PythonItemType.Directory
+          ) {
+            console.log('✅ 新建文件夹成功:', createRes.data.name);
           }
 
           return createRes.data;
@@ -252,47 +248,6 @@ export const useFileManager = (
     );
   }, []);
 
-  // 文件选择处理
-  const handleFileSelect = useCallback(
-    (
-      selectedKeys: string[],
-      extra: {
-        selected: boolean;
-        selectedNodes: any[];
-        node: any;
-        e: Event;
-      }
-    ) => {
-      console.log('=== 文件选择调试信息 ===');
-      console.log('选中的节点:', selectedKeys);
-      console.log('onFileOpen 回调:', onFileOpen);
-      console.log('extra 对象:', extra);
-
-      // 如果选中了文件，调用onFileOpen回调
-      if (selectedKeys.length > 0 && onFileOpen) {
-        const selectedKey = selectedKeys[0];
-
-        // 从选中的节点中获取文件信息，而不是从pythonList中查找
-        const selectedNode = extra.selectedNodes[0];
-        const selectedItem = selectedNode?.props?.dataRef;
-
-        console.log('选中的文件项:', selectedItem);
-        console.log('文件类型:', selectedItem?.type);
-
-        // 修复：只要不是目录类型，就认为是文件，都应该能打开
-        if (selectedItem && selectedItem.type !== PythonItemType.Directory) {
-          console.log('✅ 准备打开文件，ID:', selectedKey);
-          onFileOpen(selectedKey, selectedItem.name); // 修复：传递 fileName 参数
-        } else {
-          console.log('❌ 文件类型不匹配或未找到文件项');
-        }
-      } else {
-        console.log('❌ 缺少选中键或onFileOpen回调');
-      }
-    },
-    [onFileOpen]
-  );
-
   // 文件夹点击处理
   const handleFolderClick = useCallback(
     async (folderId: string) => {
@@ -346,7 +301,6 @@ export const useFileManager = (
     handleRename,
     handleCopy,
     handleDelete,
-    handleFileSelect,
     handleFolderClick,
     handleBackToParent,
 

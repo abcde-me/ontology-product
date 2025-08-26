@@ -36,36 +36,36 @@ export async function getPythonList(
   switch (String(id || '')) {
     case '':
       path_name = '';
-      // items = [
-      //   {
-      //     id: 1001,
-      //     name: '项目A',
-      //     type: PythonItemType.Directory,
-      //     path: '/',
-      //     path_id: 1,
-      //     created: now,
-      //     last_modified: later
-      //   },
-      //   {
-      //     id: 1002,
-      //     name: '数据集',
-      //     type: PythonItemType.Directory,
-      //     path: '/',
-      //     path_id: 1,
-      //     created: now,
-      //     last_modified: later
-      //   },
-      //   {
-      //     id: 1003,
-      //     name: '脚本1.py',
-      //     type: PythonItemType.Notebook,
-      //     path: '/',
-      //     path_id: 1,
-      //     created: now,
-      //     last_modified: later
-      //   }
-      // ];
-      items = [];
+      items = [
+        {
+          id: 1001,
+          name: '项目A',
+          type: PythonItemType.Directory,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 1002,
+          name: '数据集',
+          type: PythonItemType.Directory,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 1003,
+          name: '脚本1.py',
+          type: PythonItemType.Notebook,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        }
+      ];
+      // items = [];
       break;
     case '1001':
       path_name = '项目A';
