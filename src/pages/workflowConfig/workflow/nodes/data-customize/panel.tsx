@@ -5,6 +5,7 @@ import {
   Form,
   Message,
   Modal,
+  Popover,
   Spin,
   Tabs,
   Typography
@@ -413,10 +414,12 @@ const Panel = ({ id, data, parentRef }) => {
                   )
                 )}
               </div>
-              <IconExpand
-                className={`full-screen-icon ${isRunning ? 'pointer-events-none' : ''}`}
-                onClick={() => setVisible(true)}
-              />
+              <Popover content={<span>全屏</span>}>
+                <IconExpand
+                  className={`full-screen-icon ${isRunning ? 'pointer-events-none' : ''}`}
+                  onClick={() => setVisible(true)}
+                />
+              </Popover>
             </div>
             <div
               className={`mt-[2px] px-[12px] ${isRunning || readOnly ? 'running-code-mirror' : ''}`}
@@ -501,10 +504,12 @@ const Panel = ({ id, data, parentRef }) => {
         mask={false}
         maskClosable={false}
         closeIcon={
-          <IconShrink
-            className="full-screen-icon"
-            onClick={() => setVisible(false)}
-          />
+          <Popover position="bottom" content={<span>退出全屏</span>}>
+            <IconShrink
+              className="full-screen-icon"
+              onClick={() => setVisible(false)}
+            />
+          </Popover>
         }
       >
         <div className="editor-container">
