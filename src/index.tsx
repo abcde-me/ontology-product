@@ -141,7 +141,7 @@ function Index() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/modaforge">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
