@@ -277,7 +277,7 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: '文件', value: datasetStorageType.file }
+      { text: 'file', value: datasetStorageType.file }
     ],
     filteredValue: selectedStorageTypeFilters,
     filterMultiple: true,
