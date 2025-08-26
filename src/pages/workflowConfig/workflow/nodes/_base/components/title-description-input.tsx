@@ -99,6 +99,7 @@ export const DescriptionInput = memo(
         `}
           placeholder={t('workflow.common.addDescription') || ''}
           autoSize
+          maxLength={200}
         />
       </div>
     );
