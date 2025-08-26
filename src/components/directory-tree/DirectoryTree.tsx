@@ -58,6 +58,7 @@ export interface DirectoryTreeRef {
 
 export interface DirectoryTreeProps {
   data: TreeNodeItem[];
+  selectedKeys?: string[]; // 添加外部控制的选中状态
   onSelect?: (
     selectedKeys: string[],
     extra: {
@@ -120,6 +121,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
   function DirectoryTree(props, ref) {
     const {
       data,
+      selectedKeys: externalSelectedKeys,
       onSelect,
       onCreate,
       onRename,
@@ -147,6 +149,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     // 搜索相关状态
     const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
+
+    // 同步外部传入的选中状态
+    useEffect(() => {
+      if (externalSelectedKeys && externalSelectedKeys.length > 0) {
+        setSelectedKeys(externalSelectedKeys);
+      }
+    }, [externalSelectedKeys]);
     const [searchResults, setSearchResults] = useState<TreeNodeItem[]>([]);
     const [isSearching, setIsSearching] = useState<boolean>(false);
 

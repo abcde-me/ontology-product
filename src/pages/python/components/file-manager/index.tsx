@@ -23,6 +23,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   // 使用文件管理器hook
   const {
     pythonList,
+    selectedKeys,
     handleSearch,
     handleNew,
     handleTreeSelect,
@@ -49,6 +50,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           data={pythonList as TreeNodeItem[]}
+          selectedKeys={selectedKeys} // 传递选中状态
+          onSelect={handleTreeSelect} // 添加文件选择处理
           onCreate={handleCreate}
           onRename={handleRename}
           onCopy={handleCopy}

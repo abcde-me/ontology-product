@@ -19,6 +19,7 @@ interface UseFileManagerReturn {
   searchValue: string;
   expandedKeys: string[];
   isLoading: boolean;
+  selectedKeys: string[];
 
   // 操作函数
   handleSearch: (
@@ -50,6 +51,7 @@ export const useFileManager = (
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
 
   // 搜索功能
   const handleSearch = useCallback(
@@ -81,10 +83,32 @@ export const useFileManager = (
     // 这里可以添加新建逻辑
   }, []);
 
-  // 树选择处理
-  const handleTreeSelect = useCallback((selectedKeys: string[]) => {
-    console.log('选中的节点:', selectedKeys);
-  }, []);
+  // 树选择处理 - 处理文件点击，自动打开文件
+  const handleTreeSelect = useCallback(
+    (selectedKeys: string[], extra?: any) => {
+      console.log('选中的节点:', selectedKeys);
+
+      // 更新选中状态
+      setSelectedKeys(selectedKeys);
+
+      // 如果有选中节点且有额外信息，处理文件点击
+      if (selectedKeys.length > 0 && extra && onFileOpen) {
+        const dataRef = extra?.node?.props?.dataRef;
+
+        // 如果点击的是文件（不是文件夹），自动打开
+        if (dataRef && dataRef.type !== PythonItemType.Directory) {
+          console.log(
+            '📁 点击文件，自动打开:',
+            dataRef.name,
+            'ID:',
+            dataRef.id
+          );
+          onFileOpen(String(dataRef.id), dataRef.name);
+        }
+      }
+    },
+    [onFileOpen]
+  );
 
   // 树展开处理
   const handleTreeExpand = useCallback((keys: string[]) => {
@@ -101,6 +125,27 @@ export const useFileManager = (
 
       if (rawPythonList.status === 200) {
         setPythonList(rawPythonList.data.items);
+
+        // 列表加载完成后，自动打开第一个文件（如果存在且编辑器中无文件打开）
+        if (rawPythonList.data.items.length > 0 && onFileOpen) {
+          const firstFile = rawPythonList.data.items.find(
+            (item) => item.type !== PythonItemType.Directory
+          );
+          if (firstFile) {
+            console.log(
+              '🚀 初始化时自动打开第一个文件:',
+              firstFile.name,
+              'ID:',
+              firstFile.id
+            );
+            // 设置选中状态
+            setSelectedKeys([String(firstFile.id)]);
+            // 延迟一下打开文件，确保状态更新完成
+            setTimeout(() => {
+              onFileOpen(String(firstFile.id), firstFile.name);
+            }, 100);
+          }
+        }
       }
     } catch (error) {
       console.error('获取Python列表失败:', error);
@@ -108,7 +153,7 @@ export const useFileManager = (
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, [isLoading, onFileOpen]);
 
   // 创建文件/文件夹
   const handleCreate = useCallback(
@@ -137,6 +182,8 @@ export const useFileManager = (
               'ID:',
               createRes.data.id
             );
+            // 设置选中状态
+            setSelectedKeys([String(createRes.data.id)]);
             // 延迟一下打开文件，确保列表刷新完成
             setTimeout(() => {
               onFileOpen(String(createRes.data.id), createRes.data.name);
@@ -291,6 +338,7 @@ export const useFileManager = (
     searchValue,
     expandedKeys,
     isLoading,
+    selectedKeys,
 
     // 操作函数
     handleSearch,

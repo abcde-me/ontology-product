@@ -92,13 +92,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
               导出数据集
             </Button>
             <Button
-              icon={<IconUpload />}
-              onClick={handleExportList}
-              className="h-[26px]"
-            >
-              导出列表
-            </Button>
-            <Button
+              type="text"
               icon={<IconSettings />}
               onClick={handleCallOperator}
               className="h-[26px]"
@@ -141,6 +135,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = ({
       <RunningInfoPanel
         runResult={editorHook.runResult}
         runLog={editorHook.runLog}
+        runStatus={editorHook.runStatus}
       />
     </div>
   );

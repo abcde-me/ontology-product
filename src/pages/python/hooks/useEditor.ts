@@ -93,6 +93,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 运行代码
   const handleRunCode = useCallback(async () => {
+    console.log('runStatus', runStatus);
     if (runStatus === RunningStatus.RUNNING) {
       return;
     }
@@ -107,6 +108,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunDuration(0);
 
     try {
+      console.log('currentFileId', currentFileId);
       const res = await runPythonItem(currentFileId);
       if (res?.status === 200) {
         setExecid(res.data.execid);
