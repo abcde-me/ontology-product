@@ -14,13 +14,13 @@ import DirectoryTree, {
 } from '@/components/directory-tree/DirectoryTree';
 import { useUrlState } from '../../hooks/useUrlState';
 import { PythonItemType } from '@/types/pythonApi';
-import { usePythonContext } from '../../context/PythonContext';
 
 const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (fileId: string) => void;
+  hasOpenFiles?: boolean; // 新增：通过props传递是否有打开的文件
 }
 
 const usePythonList = () => {
@@ -166,7 +166,8 @@ const usePythonList = () => {
 };
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
-  onFileOpen
+  onFileOpen,
+  hasOpenFiles = false // 设置默认值
 }) => {
   const {
     searchValue,
@@ -187,10 +188,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
 
   // 使用URL状态hook
   const { urlState, updateUrlState } = useUrlState();
-
-  // 从Context获取当前打开的文件状态
-  const { state } = usePythonContext();
-  const hasOpenFiles = state.files.fileTabs.length > 0;
 
   const handleFileSelect = useCallback(
     (
