@@ -40,6 +40,12 @@
   margin: 20px 20px 20px 0;
   overflow: hidden;
 
+  .notebook-sider.arco-layout-sider {
+    transition: none;
+    box-shadow: none;
+    border-right: 1px solid #e2e8f0;
+  }
+
   .notebook-sider {
     .notebook-tabs {
       height: 100%;
