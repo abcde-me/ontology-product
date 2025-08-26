@@ -65,6 +65,7 @@ export async function getPythonList(
           last_modified: later
         }
       ];
+      // items = [];
       break;
     case '1001':
       path_name = '项目A';

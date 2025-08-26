@@ -1,211 +1,359 @@
-import { useCallback } from 'react';
-import { usePythonContext } from '../context/PythonContext';
+import { useState, useCallback, useEffect } from 'react';
+import { Message } from '@arco-design/web-react';
+import {
+  getPythonList,
+  createPythonItem,
+  renamePythonItem,
+  deletePythonItem,
+  copyPythonItem
+} from '@/api/python';
+import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
-/**
- * 文件管理Hook
- * 提供文件操作的基础逻辑，包括打开、关闭、保存等操作
- */
-export const useFileManager = () => {
-  const { state, openFile, closeFile, saveFile, addTab, removeTab, switchTab } =
-    usePythonContext();
+interface UseFileManagerOptions {
+  onFileOpen?: (fileId: string, fileName?: string) => void;
+}
 
-  // 获取当前文件信息
-  const currentFile = state.files.fileTabs.find(
-    (tab) => tab.fileId === state.files.currentFileId
-  );
+interface UseFileManagerReturn {
+  // 状态
+  pythonList: PythonListItem[];
+  searchValue: string;
+  expandedKeys: string[];
+  isLoading: boolean;
+  selectedKeys: string[];
 
-  // 获取当前活动标签页
-  const activeTab = state.files.fileTabs.find(
-    (tab) => tab.key === state.files.activeTab
-  );
+  // 操作函数
+  handleSearch: (
+    path_id: string,
+    searchValue: string
+  ) => Promise<PythonListItem[]>;
+  handleNew: () => void;
+  handleTreeSelect: (selectedKeys: string[]) => void;
+  handleTreeExpand: (keys: string[]) => void;
+  handleCreate: (finalName: string, node: any) => Promise<any>;
+  handleRename: (finalName: string, node: any) => Promise<any>;
+  handleCopy: (newName: string, node: any) => Promise<any>;
+  handleDelete: (node: any) => Promise<boolean>;
+  handleFolderClick: (folderId: string) => Promise<PythonListItem[]>;
+  handleBackToParent: (parentId: string) => Promise<PythonListItem[]>;
 
-  // 检查文件是否有未保存的更改
-  const hasUnsavedChanges = state.editor.isDirty;
+  // 工具函数
+  getRawPythonList: () => Promise<void>;
+  formatData: (data: unknown[]) => any[];
+}
 
-  // 检查是否可以关闭文件
-  const canCloseFile = useCallback(
-    (fileId: string) => {
-      const tab = state.files.fileTabs.find((t) => t.fileId === fileId);
-      if (!tab) return true;
+export const useFileManager = (
+  options: UseFileManagerOptions = {}
+): UseFileManagerReturn => {
+  const { onFileOpen } = options;
 
-      // 如果当前文件有未保存的更改，需要提示用户
-      if (fileId === state.files.currentFileId && hasUnsavedChanges) {
-        return false;
-      }
+  // 状态管理
+  const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
+  const [searchValue, setSearchValue] = useState('');
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
 
-      return true;
-    },
-    [state.files.fileTabs, state.files.currentFileId, hasUnsavedChanges]
-  );
+  // 搜索功能
+  const handleSearch = useCallback(
+    async (path_id: string, searchValue: string) => {
+      try {
+        const res = await getPythonList(path_id, {
+          name: searchValue,
+          mode: 0,
+          page: 1,
+          page_size: 100
+        });
 
-  // 安全关闭文件
-  const safeCloseFile = useCallback(
-    (fileId: string) => {
-      if (!canCloseFile(fileId)) {
-        // 这里可以触发一个确认对话框
-        // 暂时直接返回，不关闭
-        return false;
-      }
-
-      closeFile(fileId);
-      return true;
-    },
-    [canCloseFile, closeFile]
-  );
-
-  // 创建新标签页
-  const createNewTab = useCallback(
-    (title?: string) => {
-      const newTabKey = `new-${Date.now()}`;
-      const newTab = {
-        key: newTabKey,
-        title: title || `新建文件 ${state.files.fileTabs.length + 1}`,
-        content: '',
-        fileId: undefined,
-        lastModified: undefined
-      };
-
-      addTab(newTab);
-      return newTabKey;
-    },
-    [addTab, state.files.fileTabs.length]
-  );
-
-  // 重命名标签页
-  const renameTab = useCallback(
-    (key: string, newTitle: string) => {
-      const tab = state.files.fileTabs.find((t) => t.key === key);
-      if (tab) {
-        // 这里可以调用API重命名文件
-        // 暂时只更新本地状态
-        // TODO: 实现文件重命名API调用
+        if (res.status === 200) {
+          return res.data?.items ?? [];
+        }
+        return [];
+      } catch (error) {
+        console.error('搜索失败:', error);
+        Message.error('搜索失败');
+        return [];
       }
     },
-    [state.files.fileTabs]
+    []
   );
 
-  // 获取文件统计信息
-  const getFileStats = useCallback(() => {
-    return {
-      totalTabs: state.files.fileTabs.length,
-      openFiles: state.files.fileTabs.filter((tab) => tab.fileId).length,
-      newFiles: state.files.fileTabs.filter((tab) => !tab.fileId).length,
-      hasUnsavedChanges
-    };
-  }, [state.files.fileTabs, hasUnsavedChanges]);
+  // 新建功能
+  const handleNew = useCallback(() => {
+    console.log('新建');
+    // 这里可以添加新建逻辑
+  }, []);
 
-  // 批量操作
-  const closeAllTabs = useCallback(() => {
-    const tabsToClose = state.files.fileTabs.filter((tab) => {
-      if (tab.fileId) {
-        return canCloseFile(tab.fileId);
-      }
-      return true; // 新文件可以直接关闭
-    });
+  // 树选择处理 - 处理文件点击，自动打开文件
+  const handleTreeSelect = useCallback(
+    (selectedKeys: string[], extra?: any) => {
+      console.log('选中的节点:', selectedKeys);
 
-    for (const tab of tabsToClose) {
-      if (tab.fileId) {
-        safeCloseFile(tab.fileId);
-      }
-    }
+      // 更新选中状态
+      setSelectedKeys(selectedKeys);
 
-    // 关闭所有标签页后，创建一个新的空白标签页
-    if (state.files.fileTabs.length === 0) {
-      createNewTab();
-    }
-  }, [state.files.fileTabs, canCloseFile, safeCloseFile, createNewTab]);
+      // 如果有选中节点且有额外信息，处理文件点击
+      if (selectedKeys.length > 0 && extra && onFileOpen) {
+        const dataRef = extra?.node?.props?.dataRef;
 
-  const closeOtherTabs = useCallback(
-    (keepKey: string) => {
-      const tabsToClose = state.files.fileTabs.filter(
-        (tab) => tab.key !== keepKey
-      );
-
-      for (const tab of tabsToClose) {
-        if (tab.fileId) {
-          safeCloseFile(tab.fileId);
+        // 如果点击的是文件（不是文件夹），自动打开
+        if (dataRef && dataRef.type !== PythonItemType.Directory) {
+          console.log(
+            '📁 点击文件，自动打开:',
+            dataRef.name,
+            'ID:',
+            dataRef.id
+          );
+          onFileOpen(String(dataRef.id), dataRef.name);
         }
       }
     },
-    [state.files.fileTabs, safeCloseFile]
+    [onFileOpen]
   );
 
-  // 文件拖拽排序（预留接口）
-  const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
-    // TODO: 实现标签页拖拽排序
-    console.log('Reorder tabs:', { fromIndex, toIndex });
+  // 树展开处理
+  const handleTreeExpand = useCallback((keys: string[]) => {
+    setExpandedKeys(keys);
   }, []);
 
-  // 导出文件内容
-  const exportFile = useCallback(
-    (fileId: string, format: 'txt' | 'py' = 'py') => {
-      const tab = state.files.fileTabs.find((t) => t.fileId === fileId);
-      if (!tab) return;
+  // 获取原始Python列表
+  const getRawPythonList = useCallback(async () => {
+    if (isLoading) return; // 防止重复请求
 
-      const content = tab.content;
-      const fileName = `${tab.title}.${format}`;
+    setIsLoading(true);
+    try {
+      const rawPythonList = await getPythonList('', {});
 
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
+      if (rawPythonList.status === 200) {
+        setPythonList(rawPythonList.data.items);
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+        // 列表加载完成后，自动打开第一个文件（如果存在且编辑器中无文件打开）
+        if (rawPythonList.data.items.length > 0 && onFileOpen) {
+          const firstFile = rawPythonList.data.items.find(
+            (item) => item.type !== PythonItemType.Directory
+          );
+          if (firstFile) {
+            console.log(
+              '🚀 初始化时自动打开第一个文件:',
+              firstFile.name,
+              'ID:',
+              firstFile.id
+            );
+            // 设置选中状态
+            setSelectedKeys([String(firstFile.id)]);
+            // 延迟一下打开文件，确保状态更新完成
+            setTimeout(() => {
+              onFileOpen(String(firstFile.id), firstFile.name);
+            }, 100);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('获取Python列表失败:', error);
+      Message.error('获取文件列表失败');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, onFileOpen]);
+
+  // 创建文件/文件夹
+  const handleCreate = useCallback(
+    async (finalName: string, node: any) => {
+      try {
+        const createRes = await createPythonItem({
+          path_id: node?.dataRef?.path_id,
+          type: node?.dataRef?.type,
+          name: finalName
+        });
+
+        if (createRes.status === 200) {
+          Message.success('创建成功');
+          // 刷新列表
+          await getRawPythonList();
+
+          // 如果是创建的文件（不是文件夹），自动在编辑器中打开
+          if (
+            createRes.data &&
+            createRes.data.type !== PythonItemType.Directory &&
+            onFileOpen
+          ) {
+            console.log(
+              '✅ 新建文件成功，自动打开文件:',
+              createRes.data.name,
+              'ID:',
+              createRes.data.id
+            );
+            // 设置选中状态
+            setSelectedKeys([String(createRes.data.id)]);
+            // 延迟一下打开文件，确保列表刷新完成
+            setTimeout(() => {
+              onFileOpen(String(createRes.data.id), createRes.data.name);
+            }, 100);
+          } else if (
+            createRes.data &&
+            createRes.data.type === PythonItemType.Directory
+          ) {
+            console.log('✅ 新建文件夹成功:', createRes.data.name);
+          }
+
+          return createRes.data;
+        }
+        return null;
+      } catch (error) {
+        console.error('创建失败:', error);
+        Message.error('创建失败');
+        return null;
+      }
     },
-    [state.files.fileTabs]
+    [getRawPythonList, onFileOpen]
   );
 
-  // 导入文件内容
-  const importFile = useCallback(
-    (file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        const fileName = file.name.replace(/\.[^/.]+$/, ''); // 移除扩展名
+  // 重命名
+  const handleRename = useCallback(
+    async (finalName: string, node: any) => {
+      try {
+        const renameRes = await renamePythonItem(node?.dataRef?.id, {
+          id: node?.dataRef?.id,
+          name: finalName,
+          path: node?.dataRef?.path,
+          type: node?.dataRef?.type
+        });
 
-        const newTabKey = createNewTab(fileName);
-        // 更新标签页内容
-        // TODO: 通过Context更新标签页内容
-      };
-      reader.readAsText(file);
+        if (renameRes.status === 200) {
+          Message.success('重命名成功');
+          // 刷新列表
+          await getRawPythonList();
+          return renameRes.data;
+        }
+        return null;
+      } catch (error) {
+        console.error('重命名失败:', error);
+        Message.error('重命名失败');
+        return null;
+      }
     },
-    [createNewTab]
+    [getRawPythonList]
   );
+
+  // 复制
+  const handleCopy = useCallback(
+    async (newName: string, node: any) => {
+      try {
+        const copyRes = await copyPythonItem(node?.dataRef?.id, {
+          id: node?.dataRef?.id,
+          name: newName
+        });
+
+        if (copyRes.status === 200) {
+          Message.success('复制成功');
+          // 刷新列表
+          await getRawPythonList();
+          return copyRes.data;
+        }
+        return null;
+      } catch (error) {
+        console.error('复制失败:', error);
+        Message.error('复制失败');
+        return null;
+      }
+    },
+    [getRawPythonList]
+  );
+
+  // 删除
+  const handleDelete = useCallback(
+    async (node: any) => {
+      try {
+        const deleteRes = await deletePythonItem(node?.dataRef?.id);
+
+        if (deleteRes.status === 200) {
+          Message.success('删除成功');
+          // 刷新列表
+          await getRawPythonList();
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('删除失败:', error);
+        Message.error('删除失败');
+        return false;
+      }
+    },
+    [getRawPythonList]
+  );
+
+  // 数据格式化函数
+  const formatData = useCallback((data: unknown[]) => {
+    return (
+      data?.map((item: any) => {
+        return {
+          ...item,
+          key: String(item.id),
+          // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
+          dataRef: item
+        };
+      }) ?? []
+    );
+  }, []);
+
+  // 文件夹点击处理
+  const handleFolderClick = useCallback(
+    async (folderId: string) => {
+      try {
+        const res = await getPythonList(String(folderId), {
+          name: searchValue,
+          mode: 0,
+          page: 1,
+          page_size: 20
+        });
+        return res?.data?.items ?? [];
+      } catch (error) {
+        console.error('获取文件夹内容失败:', error);
+        Message.error('获取文件夹内容失败');
+        return [];
+      }
+    },
+    [searchValue]
+  );
+
+  // 返回父级处理
+  const handleBackToParent = useCallback(async (parentId: string) => {
+    try {
+      const res = await getPythonList(String(parentId || ''), {} as any);
+      return res?.data?.items || [];
+    } catch (error) {
+      console.error('返回父级失败:', error);
+      Message.error('返回父级失败');
+      return [];
+    }
+  }, []);
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    getRawPythonList();
+  }, []); // 只在组件挂载时执行一次
 
   return {
     // 状态
-    currentFile,
-    activeTab,
-    hasUnsavedChanges,
-    isLoading: state.files.isLoading,
-    error: state.files.error,
+    pythonList,
+    searchValue,
+    expandedKeys,
+    isLoading,
+    selectedKeys,
 
-    // 基础操作
-    openFile,
-    closeFile: safeCloseFile,
-    saveFile,
-    switchTab,
+    // 操作函数
+    handleSearch,
+    handleNew,
+    handleTreeSelect,
+    handleTreeExpand,
+    handleCreate,
+    handleRename,
+    handleCopy,
+    handleDelete,
+    handleFolderClick,
+    handleBackToParent,
 
-    // 标签页管理
-    createNewTab,
-    removeTab,
-    renameTab,
-    reorderTabs,
-
-    // 批量操作
-    closeAllTabs,
-    closeOtherTabs,
-
-    // 文件操作
-    exportFile,
-    importFile,
-
-    // 工具方法
-    canCloseFile,
-    getFileStats
+    // 工具函数
+    getRawPythonList,
+    formatData
   };
 };
