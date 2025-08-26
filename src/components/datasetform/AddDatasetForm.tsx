@@ -263,6 +263,8 @@ const DatasetForm = React.forwardRef<
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      setIsPreviewFile(false);
+      setPreviewFileData([]);
       form.setFieldValue('dataSource', 'volume');
       form.setFieldValue('storageType', 'file');
       setIscreateTagDisabled(false);
