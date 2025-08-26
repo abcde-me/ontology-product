@@ -256,7 +256,14 @@ const Panel = ({ id, data, parentRef }) => {
     },
     styles: [
       { tag: t.comment, color: '#6a737d', fontStyle: 'italic' },
-      { tag: t.keyword, color: '#9a42a7', fontWeight: 'bold' }
+      { tag: t.keyword, color: '#9a42a7', fontWeight: 'bold' },
+      { tag: t.definition(t.typeName), color: '#194a7b' },
+      { tag: t.typeName, color: '#194a7b' },
+      { tag: t.tagName, color: '#008a02' },
+      { tag: t.variableName, color: '#1a00db' },
+      { tag: t.string, color: '#047013' },
+      { tag: t.number, color: '#29a0aa' },
+      { tag: t.bool, color: '#2d2aee' }
     ]
   });
 

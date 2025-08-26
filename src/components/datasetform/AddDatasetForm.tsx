@@ -160,23 +160,6 @@ function formatDateTime(isoString) {
   );
 }
 
-//格式化文件时间函数
-const formatFileDateTime = (dateTimeString: string): string => {
-  try {
-    const date = new Date(dateTimeString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    return dateTimeString; // 如果格式化失败，返回原字符串
-  }
-};
-
 //标签列表转换为select选项
 function convertTotagSelectOptions(data = []) {
   return data.map((item) => ({
@@ -571,31 +554,25 @@ const DatasetForm = React.forwardRef<
 
   const fileColumns = [
     {
-      title: 'ID',
+      title: '文件ID',
       dataIndex: 'id',
       width: 80
     },
     {
-      title: '数据内容',
-      dataIndex: 'short_content',
+      title: '文件名',
+      dataIndex: 'file_name',
       ellipsis: true,
       width: 300,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.short_content}
+          value={record.extras?.file_name || '-'}
           isEdit={false}
           preferTypography
         />
       )
     },
     {
-      title: '生成时间',
-      dataIndex: 'generated_at',
-      width: 180,
-      render: (_, record) => formatFileDateTime(record.generated_at)
-    },
-    {
-      title: '原文件类型',
+      title: '文件类型',
       dataIndex: 'type', // 使用动态获取的文件类型筛选器
       width: 134,
       render: (_, record) => (
@@ -610,6 +587,12 @@ const DatasetForm = React.forwardRef<
           <span>{record.file_type}</span>
         </div>
       )
+    },
+    {
+      title: '文件大小',
+      dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
+      width: 134,
+      render: (_, record) => <span>{record.extras?.file_size || '-'}</span>
     }
   ];
 
