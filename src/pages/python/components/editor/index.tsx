@@ -1,101 +1,98 @@
-import React, { useState } from 'react';
-import { Tabs } from '@arco-design/web-react';
+import React from 'react';
+import { Tabs, Message } from '@arco-design/web-react';
 import NotebookWorkspace from './EditorWorkspace';
-import { RunningStatus } from '@/types/pythonApi';
+import NoData from '@/components/no-data';
 import './index.scss';
 
-const TabPane = Tabs.TabPane;
+const { TabPane } = Tabs;
 
-// 类型定义
-interface FileTab {
-  key: string;
-  title: string;
-  content: string;
-  fileId?: string;
-  lastModified?: string;
-}
-
-interface EditorState {
-  content: string;
-  isDirty: boolean;
-  lastSaved: string;
-  readOnly: boolean;
-  cursorPosition: {
-    line: number;
-    ch: number;
-  };
-}
-
-interface ExecutionState {
-  status: RunningStatus; // 修复：使用正确的RunningStatus类型
-  execId: string;
-  startTime: Date | null;
-  duration: number;
-  result: string;
-  log: string;
-  error: Error | null;
-}
-
-interface FileState {
-  currentFileId: string | null;
-  fileTabs: FileTab[];
-  activeTab: string;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-interface PythonState {
-  files: FileState;
-  editor: EditorState;
-  execution: ExecutionState;
-}
-
+// 简化的props接口
 interface EditorContentProps {
-  state: PythonState;
-  addTab: (tab: FileTab) => void;
-  removeTab: (key: string) => void;
-  switchTab: (key: string) => void;
-  updateContent: (content: string) => void;
-  setDirty: (dirty: boolean) => void;
-  setCursorPosition: (line: number, ch: number) => void;
-  runCode: (fileId: string) => Promise<void>;
-  stopExecution: () => void;
-  clearExecutionResult: () => void;
-  getExecutionResult: (fileId: string, execId: string) => Promise<void>;
-  getExecutionLog: (fileId: string, execId: string) => Promise<void>;
+  fileTabs: Array<{
+    key: string;
+    title: string;
+    content: string;
+    fileId?: string;
+  }>;
+  activeTab: string;
+  onTabChange: (key: string) => void;
+  onAddTab: (newFileInfo: any) => void;
+  onRemoveTab: (key: string) => void;
+  onCreate?: (finalName: string, node?: any) => Promise<any>; // 修改：改为 onCreate 以匹配父组件
 }
 
-const NotebookMainContent: React.FC<EditorContentProps> = ({
-  state,
-  addTab,
-  removeTab,
-  switchTab
+const EditorContent: React.FC<EditorContentProps> = ({
+  fileTabs,
+  activeTab,
+  onTabChange,
+  onAddTab,
+  onRemoveTab,
+  onCreate
 }) => {
-  const { fileTabs, activeTab } = state.files;
+  // 获取当前活动标签页
+  const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
 
   const handleTabChange = (key: string) => {
-    switchTab(key);
+    onTabChange(key);
   };
 
-  const handleAddTab = () => {
-    const newTabKey = `notebook-${Date.now()}`;
-    const newTab = {
-      key: newTabKey,
-      title: `新建笔记本 ${fileTabs.length + 1}`,
-      content: '',
-      fileId: undefined,
-      lastModified: undefined
-    };
+  // 创建 PySpark 文件（等同于 DirectoryTree 的新建功能）
+  const handleCreatePySpark = () => {
+    if (!onCreate) {
+      Message.error('创建功能未配置');
+      return;
+    }
 
-    addTab(newTab);
+    try {
+      // 调用父组件的创建逻辑
+      onCreate('', {}); // 传递空字符串和空对象作为默认参数
+    } catch (error) {
+      console.error('创建 PySpark 文件失败:', error);
+      Message.error('创建失败');
+    }
   };
 
   const handleCloseTab = (key: string) => {
-    removeTab(key);
+    onRemoveTab(key);
   };
 
-  // 获取当前活动标签页
-  const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
+  // 如果没有活动标签页，显示空状态
+  if (!activeTabData) {
+    return (
+      <div className="notebook-main-content">
+        {/* 头部标签页区域 - 即使没有内容也保留 */}
+        <Tabs
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          className="notebook-tabs"
+          type="card"
+          showAddButton
+          onAddTab={handleCreatePySpark}
+          onDeleteTab={handleCloseTab}
+          editable
+        >
+          {fileTabs.map((tab) => (
+            <TabPane
+              key={tab.key}
+              title={tab.title}
+              closable={fileTabs.length > 1}
+            >
+              {/* 标签页内容为空，实际内容在工作区 */}
+            </TabPane>
+          ))}
+        </Tabs>
+
+        {/* 无数据状态显示区域 */}
+        <div className="empty-content-area">
+          <NoData
+            description="暂无数据"
+            btnText="新建PySpark文件"
+            handleBtn={handleCreatePySpark}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="notebook-main-content">
@@ -106,7 +103,7 @@ const NotebookMainContent: React.FC<EditorContentProps> = ({
         className="notebook-tabs"
         type="card"
         showAddButton
-        onAddTab={handleAddTab}
+        onAddTab={handleCreatePySpark}
         onDeleteTab={handleCloseTab}
         editable
       >
@@ -124,13 +121,13 @@ const NotebookMainContent: React.FC<EditorContentProps> = ({
       {/* 工作区 */}
       <div className="main-workspace">
         <NotebookWorkspace
-          content={activeTabData?.content || ''}
-          fileName={activeTabData?.title || '未命名文件'}
-          currentFileId={activeTabData?.fileId}
+          content={activeTabData.content}
+          fileName={activeTabData.title || '未命名文件'}
+          currentFileId={activeTabData.fileId}
         />
       </div>
     </div>
   );
 };
 
-export default NotebookMainContent;
+export default EditorContent;

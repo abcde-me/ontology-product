@@ -1,20 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Layout, Tabs, Message } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
-import {
-  openPythonItem,
-  savePythonItem,
-  runPythonItem,
-  getRunResult,
-  getRunLog
-} from '@/api/python';
-import { OpenPythonItemRes } from '@/types/pythonApi';
-import { RunningStatus } from '@/types/pythonApi';
+import { openPythonItem } from '@/api/python';
+import { OpenPythonItemRes, PythonItemType } from '@/types/pythonApi';
 import './index.scss';
+import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -30,29 +24,6 @@ interface FileTab {
   lastModified?: string;
 }
 
-// 编辑器状态类型
-interface EditorState {
-  content: string;
-  isDirty: boolean;
-  lastSaved: string;
-  readOnly: boolean;
-  cursorPosition: {
-    line: number;
-    ch: number;
-  };
-}
-
-// 执行状态类型
-interface ExecutionState {
-  status: RunningStatus;
-  execId: string;
-  startTime: Date | null;
-  duration: number;
-  result: string;
-  log: string;
-  error: Error | null;
-}
-
 // 文件状态类型
 interface FileState {
   currentFileId: string | null;
@@ -62,78 +33,27 @@ interface FileState {
   error: Error | null;
 }
 
-// 全局状态类型
-interface PythonState {
-  files: FileState;
-  editor: EditorState;
-  execution: ExecutionState;
-}
-
 // 初始状态
-const initialState: PythonState = {
-  files: {
-    currentFileId: null,
-    fileTabs: [],
-    activeTab: '',
-    isLoading: false,
-    error: null
-  },
-  editor: {
-    content: '',
-    isDirty: false,
-    lastSaved: '',
-    readOnly: false,
-    cursorPosition: {
-      line: 0,
-      ch: 0
-    }
-  },
-  execution: {
-    status: RunningStatus.IDLE,
-    execId: '',
-    startTime: null,
-    duration: 0,
-    result: '',
-    log: '',
-    error: null
-  }
+const initialState: FileState = {
+  currentFileId: null,
+  fileTabs: [],
+  activeTab: '',
+  isLoading: false,
+  error: null
 };
 
 export default function Python() {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
-  const [state, setState] = useState<PythonState>(initialState);
+  const [fileState, setFileState] = useState<FileState>(initialState);
 
-  // 更新状态的辅助函数
-  const updateState = useCallback((updates: Partial<PythonState>) => {
-    setState((prevState) => ({ ...prevState, ...updates }));
-  }, []);
-
-  const updateFiles = useCallback((updates: Partial<FileState>) => {
-    setState((prevState) => ({
-      ...prevState,
-      files: { ...prevState.files, ...updates }
-    }));
-  }, []);
-
-  const updateEditor = useCallback((updates: Partial<EditorState>) => {
-    setState((prevState) => ({
-      ...prevState,
-      editor: { ...prevState.editor, ...updates }
-    }));
-  }, []);
-
-  const updateExecution = useCallback((updates: Partial<ExecutionState>) => {
-    setState((prevState) => ({
-      ...prevState,
-      execution: { ...prevState.execution, ...updates }
-    }));
-  }, []);
+  // DirectoryTree 的 ref，用于调用其新建功能
+  const directoryTreeRef = useRef<DirectoryTreeRef>(null);
 
   // 文件操作
   const openFile = useCallback(
-    async (fileId: string) => {
+    async (fileId: string, fileName?: string) => {
       try {
-        updateFiles({ isLoading: true, error: null });
+        setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         const response = await openPythonItem(fileId);
         if (response.status === 200 && response.data) {
@@ -141,13 +61,14 @@ export default function Python() {
 
           // 创建或更新标签页
           const newTabKey = `file-${fileId}`;
-          const existingTabIndex = state.files.fileTabs.findIndex(
+          const existingTabIndex = fileState.fileTabs.findIndex(
             (tab) => tab.fileId === fileId
           );
 
+          let updatedTabs: FileTab[];
           if (existingTabIndex >= 0) {
             // 更新现有标签页
-            const updatedTabs = state.files.fileTabs.map((tab) =>
+            updatedTabs = fileState.fileTabs.map((tab) =>
               tab.key === newTabKey
                 ? {
                     ...tab,
@@ -156,289 +77,127 @@ export default function Python() {
                   }
                 : tab
             );
-            updateFiles({ fileTabs: updatedTabs });
           } else {
             // 创建新标签页
             const newTab = {
               key: newTabKey,
-              title: `文件 ${fileId}`,
+              title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
               content: fileData.data,
               fileId: fileId,
               lastModified: new Date().toISOString()
             };
-            updateFiles({
-              fileTabs: [...state.files.fileTabs, newTab],
-              activeTab: newTabKey
-            });
+            updatedTabs = [...fileState.fileTabs, newTab];
           }
 
-          // 设置当前文件ID和活动标签页
-          updateFiles({ currentFileId: fileId, activeTab: newTabKey });
-
-          // 更新编辑器内容
-          updateEditor({
-            content: fileData.data,
-            lastSaved: new Date().toISOString()
-          });
+          setFileState((prev) => ({
+            ...prev,
+            fileTabs: updatedTabs,
+            currentFileId: fileId,
+            activeTab: newTabKey,
+            isLoading: false
+          }));
         }
       } catch (error) {
         const errorObj =
           error instanceof Error ? error : new Error('打开文件失败');
-        updateFiles({ error: errorObj });
+        setFileState((prev) => ({
+          ...prev,
+          error: errorObj,
+          isLoading: false
+        }));
         Message.error('打开文件失败');
-      } finally {
-        updateFiles({ isLoading: false });
       }
     },
-    [state.files.fileTabs, updateFiles, updateEditor]
-  );
-
-  const closeFile = useCallback(
-    (fileId: string) => {
-      const tabToClose = state.files.fileTabs.find(
-        (tab) => tab.fileId === fileId
-      );
-      if (tabToClose) {
-        const remainingTabs = state.files.fileTabs.filter(
-          (tab) => tab.key !== tabToClose.key
-        );
-        let newActiveTab = state.files.activeTab;
-
-        // 如果删除的是当前活动标签页，切换到下一个
-        if (
-          tabToClose.key === state.files.activeTab &&
-          remainingTabs.length > 0
-        ) {
-          newActiveTab = remainingTabs[0].key;
-        }
-
-        updateFiles({
-          fileTabs: remainingTabs,
-          activeTab: newActiveTab
-        });
-      }
-    },
-    [state.files.fileTabs, state.files.activeTab, updateFiles]
-  );
-
-  const saveFile = useCallback(
-    async (fileId: string, content: string) => {
-      try {
-        const response = await savePythonItem(fileId, {
-          id: Number(fileId),
-          data: content
-        });
-
-        if (response?.status === 200) {
-          updateEditor({
-            lastSaved: response.data.last_modified,
-            isDirty: false
-          });
-          Message.success('保存成功');
-        }
-      } catch (error) {
-        Message.error('保存失败');
-        throw error;
-      }
-    },
-    [updateEditor]
+    [fileState.fileTabs]
   );
 
   const addTab = useCallback(
-    (tab: FileTab) => {
-      updateFiles({
-        fileTabs: [...state.files.fileTabs, tab],
-        activeTab: tab.key
-      });
+    (newFileInfo?: any) => {
+      let newTabKey: string;
+      let newTabTitle: string;
+      let newFileId: string | undefined;
+
+      if (newFileInfo) {
+        // 如果有新文件信息，使用文件信息创建标签页
+        newTabKey = `notebook-${newFileInfo.id}`;
+        newTabTitle = newFileInfo.name;
+        newFileId = String(newFileInfo.id);
+      } else {
+        // 否则创建临时标签页
+        newTabKey = `notebook-${Date.now()}`;
+        newTabTitle = `新建笔记本 ${fileState.fileTabs.length + 1}`;
+        newFileId = undefined;
+      }
+
+      const newTab = {
+        key: newTabKey,
+        title: newTabTitle,
+        content: '',
+        fileId: newFileId,
+        lastModified: undefined
+      };
+
+      setFileState((prev) => ({
+        ...prev,
+        fileTabs: [...prev.fileTabs, newTab],
+        activeTab: newTab.key
+      }));
     },
-    [state.files.fileTabs, updateFiles]
+    [fileState.fileTabs.length]
   );
 
   const removeTab = useCallback(
     (key: string) => {
-      const remainingTabs = state.files.fileTabs.filter(
-        (tab) => tab.key !== key
-      );
-      let newActiveTab = state.files.activeTab;
+      const remainingTabs = fileState.fileTabs.filter((tab) => tab.key !== key);
+      let newActiveTab = fileState.activeTab;
 
       // 如果删除的是当前活动标签页，切换到下一个
-      if (key === state.files.activeTab && remainingTabs.length > 0) {
+      if (key === fileState.activeTab && remainingTabs.length > 0) {
         newActiveTab = remainingTabs[0].key;
       }
 
-      updateFiles({
+      setFileState((prev) => ({
+        ...prev,
         fileTabs: remainingTabs,
         activeTab: newActiveTab
-      });
+      }));
     },
-    [state.files.fileTabs, state.files.activeTab, updateFiles]
+    [fileState.fileTabs, fileState.activeTab]
   );
 
-  const switchTab = useCallback(
-    (key: string) => {
-      updateFiles({ activeTab: key });
-
-      // 更新编辑器内容
-      const targetTab = state.files.fileTabs.find((tab) => tab.key === key);
-      if (targetTab) {
-        updateEditor({
-          content: targetTab.content,
-          isDirty: false
-        });
-      }
-    },
-    [state.files.fileTabs, updateFiles, updateEditor]
-  );
-
-  // 编辑器操作
-  const updateContent = useCallback(
-    (content: string) => {
-      updateEditor({ content });
-    },
-    [updateEditor]
-  );
-
-  const setDirty = useCallback(
-    (dirty: boolean) => {
-      updateEditor({ isDirty: dirty });
-    },
-    [updateEditor]
-  );
-
-  const setCursorPosition = useCallback(
-    (line: number, ch: number) => {
-      updateEditor({ cursorPosition: { line, ch } });
-    },
-    [updateEditor]
-  );
-
-  // 执行操作
-  const runCode = useCallback(
-    async (fileId: string) => {
-      if (state.execution.status === RunningStatus.RUNNING) {
-        return;
-      }
-
-      try {
-        updateExecution({
-          status: RunningStatus.RUNNING,
-          startTime: new Date(),
-          duration: 0,
-          error: null
-        });
-
-        const response = await runPythonItem(fileId);
-        if (response?.status === 200) {
-          updateExecution({ execId: response.data.execid });
-        } else {
-          throw new Error('运行失败');
-        }
-      } catch (error) {
-        const errorObj = error instanceof Error ? error : new Error('运行失败');
-        updateExecution({
-          error: errorObj,
-          status: RunningStatus.FAILED
-        });
-        Message.error('运行失败');
-      }
-    },
-    [state.execution.status, updateExecution]
-  );
-
-  const stopExecution = useCallback(() => {
-    updateExecution({ status: RunningStatus.IDLE });
-  }, [updateExecution]);
-
-  const clearExecutionResult = useCallback(() => {
-    updateExecution({
-      status: RunningStatus.IDLE,
-      execId: '',
-      startTime: null,
-      duration: 0,
-      result: '',
-      log: '',
-      error: null
-    });
-  }, [updateExecution]);
-
-  const getExecutionResult = useCallback(
-    async (fileId: string, execId: string) => {
-      try {
-        const response = await getRunResult(fileId, { execid: execId });
-        if (response?.status === 200 && response.data) {
-          updateExecution({
-            result: response.data.run_result
-          });
-
-          // 检查执行状态
-          if (response.data.run_status !== RunningStatus.RUNNING) {
-            const status =
-              response.data.run_status === RunningStatus.SUCCESS
-                ? RunningStatus.SUCCESS
-                : RunningStatus.FAILED;
-
-            updateExecution({ status });
-
-            // 计算执行时长
-            if (state.execution.startTime) {
-              const duration = Math.floor(
-                (Date.now() - state.execution.startTime.getTime()) / 1000
-              );
-              updateExecution({ duration });
-            }
-          }
-        }
-      } catch (error) {
-        const errorObj =
-          error instanceof Error ? error : new Error('获取执行结果失败');
-        updateExecution({ error: errorObj });
-      }
-    },
-    [state.execution.startTime, updateExecution]
-  );
-
-  const getExecutionLog = useCallback(
-    async (fileId: string, execId: string) => {
-      try {
-        const response = await getRunLog(fileId, { execid: execId });
-        if (response?.status === 200 && response.data) {
-          updateExecution({ log: response.data.log });
-        }
-      } catch (error) {
-        const errorObj =
-          error instanceof Error ? error : new Error('获取执行日志失败');
-        updateExecution({ error: errorObj });
-      }
-    },
-    [updateExecution]
-  );
+  const switchTab = useCallback((key: string) => {
+    setFileState((prev) => ({ ...prev, activeTab: key }));
+  }, []);
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
   };
 
-  // 创建context value对象
-  const contextValue = {
-    state,
-    openFile,
-    closeFile,
-    saveFile,
-    addTab,
-    removeTab,
-    switchTab,
-    updateContent,
-    setDirty,
-    setCursorPosition,
-    runCode,
-    stopExecution,
-    clearExecutionResult,
-    getExecutionResult,
-    getExecutionLog
-  };
+  // 从 FileManager 获取创建文件的函数
+  const handleCreate = useCallback(
+    (finalName: string, node?: any): Promise<any> => {
+      return new Promise((resolve) => {
+        try {
+          // 直接调用 DirectoryTree 的新建 PySpark 功能
+          if (directoryTreeRef.current) {
+            directoryTreeRef.current.startRootCreate(false); // false 表示创建文件，不是文件夹
+            resolve(null); // 返回 null，因为 DirectoryTree 会自己处理创建逻辑
+          } else {
+            resolve(null);
+          }
+        } catch (error) {
+          console.error('调用新建功能失败:', error);
+          Message.error('调用新建功能失败');
+          resolve(null);
+        }
+      });
+    },
+    []
+  );
 
   return (
     <Layout className="notebook-layout">
-      <Sider width={280} className="notebook-sider">
+      <Sider width={300} className="notebook-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
@@ -446,35 +205,25 @@ export default function Python() {
           className="notebook-tabs"
           type="rounded"
         >
-          <TabPane key="files" title={<PythonIcon></PythonIcon>}>
+          <TabPane key="files" title={<PythonIcon />}>
             <FileManager
               type="files"
               onFileOpen={openFile}
-              hasOpenFiles={state.files.fileTabs.length > 0}
+              ref={directoryTreeRef}
             />
           </TabPane>
-          <TabPane key="data" title={<DataIcon></DataIcon>}>
-            {/* <NotebookTabContent type="data" /> */}
-          </TabPane>
-          <TabPane key="tools" title={<SuanziIcon></SuanziIcon>}>
-            {/* <NotebookTabContent type="tools" /> */}
-          </TabPane>
+          <TabPane key="data" title={<DataIcon />}></TabPane>
+          <TabPane key="tools" title={<SuanziIcon />}></TabPane>
         </Tabs>
       </Sider>
       <Content className="notebook-content">
         <EditorContent
-          state={state}
-          addTab={addTab}
-          removeTab={removeTab}
-          switchTab={switchTab}
-          updateContent={updateContent}
-          setDirty={setDirty}
-          setCursorPosition={setCursorPosition}
-          runCode={runCode}
-          stopExecution={stopExecution}
-          clearExecutionResult={clearExecutionResult}
-          getExecutionResult={getExecutionResult}
-          getExecutionLog={getExecutionLog}
+          fileTabs={fileState.fileTabs}
+          activeTab={fileState.activeTab}
+          onTabChange={switchTab}
+          onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+          onRemoveTab={removeTab}
+          onCreate={handleCreate}
         />
       </Content>
     </Layout>

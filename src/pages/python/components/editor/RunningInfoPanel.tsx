@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Collapse, Tabs, Typography } from '@arco-design/web-react';
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
 import './RunningInfoPanel.scss';
@@ -10,35 +10,18 @@ const { Text } = Typography;
 interface RunningInfoPanelProps {
   runResult: string;
   runLog: string;
-  loading?: boolean;
-  error?: Error | null;
-  onActiveKeyChange?: (activeKey: string) => void;
-}
-
-export enum ActiveKey {
-  RESULT = 'result',
-  LOG = 'log'
 }
 
 const RunningInfoPanel: React.FC<RunningInfoPanelProps> = ({
   runResult,
-  runLog,
-  loading = false,
-  error = null,
-  onActiveKeyChange
+  runLog
 }) => {
-  const [activeKey, setActiveKey] = useState<string>(ActiveKey.RESULT);
+  const [activeKey, setActiveKey] = useState<string>('result');
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handlePanelChange = (key: string, keys: string[]) => {
     setIsExpanded(keys.length > 0);
   };
-
-  useEffect(() => {
-    if (typeof onActiveKeyChange === 'function') {
-      onActiveKeyChange(activeKey);
-    }
-  }, [setActiveKey]);
 
   return (
     <div className="running-info-panel">
