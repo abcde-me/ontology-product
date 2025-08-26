@@ -1,50 +1,52 @@
 import { create } from 'zustand';
-import { DATAFRAMES_LIST, DATASETS_LIST, SCRIPTS_LIST } from '../constant';
-import {
-  // getCatalogList,
-  // CatalogListParams,
-  // CatalogListResponse,
-  getDatasetList,
-  DatasetListParams,
-  DatasetListResponse
-} from '@/api/sql';
-
 export interface SqlIndexStore {
-  scriptsList: any[];
-  // dataframesList: any[];
-  // datasetsList: any[];
-  // dataFramesLoaded: boolean;
-  // loadDataFrames: (params?: CatalogListParams) => Promise<void>;
-  // loadDatasets: (props: DatasetListParams) => Promise<void>;
+  /** 卷详情 弹框 */
+  volumnDetailVisible?: boolean;
+  /** 库详情 弹框 */
+  dbDetailVisible?: boolean;
+  /** 表详情 弹框 */
+  tableDetailVisible?: boolean;
+  /** 数据集详情 弹框 */
+  DatasetDetailVisible?: boolean;
+
+  /** 动作 */
+  showVolumnDetail?: () => void;
+  closeVolumnDetail?: () => void;
+  showDbDetail?: () => void;
+  closeDbDetail?: () => void;
+  showTableDetail?: () => void;
+  closeTableDetail?: () => void;
+  showDatasetDetail?: () => void;
+  closeDatasetDetail?: () => void;
 }
 
 export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
-  scriptsList: SCRIPTS_LIST
-  // dataframesList: DATAFRAMES_LIST,
-  // datasetsList: DATASETS_LIST,
-  // dataFramesLoaded: false,
-  // loadDataFrames: async (params) => {
-  //   if (get().dataFramesLoaded) return;
-
-  //   try {
-  //     const defaultParam: CatalogListParams = {
-  //       root_type: 1,
-  //       dir_type: 3,
-  //       search: ''
-  //     }
-  //     const res: CatalogListResponse = await getCatalogList({ ...defaultParam, ...params });
-  //     set({ dataFramesLoaded: true });
-  //     console.log('loadDataFrames res.data.src:', res.data.src);
-  //     set({ dataframesList: res.data.src || [] });
-  //   } catch (err) {
-  //   }
-  // },
-  // loadDatasets: async (props: DatasetListParams) => {
-  //   const res: DatasetListResponse = await getDatasetList({
-  //     sort_order: 'asc'
-  //   });
-
-  //   console.log('loadDataFrames res:', res);
-  // },
-  // loadScripts: async (props: any) => { }
+  volumnDetailVisible: false,
+  dbDetailVisible: false,
+  tableDetailVisible: false,
+  DatasetDetailVisible: false,
+  showVolumnDetail: () => {
+    set({ volumnDetailVisible: true });
+  },
+  closeVolumnDetail: () => {
+    set({ volumnDetailVisible: false });
+  },
+  showDbDetail: () => {
+    set({ dbDetailVisible: true });
+  },
+  closeDbDetail: () => {
+    set({ dbDetailVisible: false });
+  },
+  showTableDetail: () => {
+    set({ tableDetailVisible: true });
+  },
+  closeTableDetail: () => {
+    set({ tableDetailVisible: false });
+  },
+  showDatasetDetail: () => {
+    set({ DatasetDetailVisible: true });
+  },
+  closeDatasetDetail: () => {
+    set({ DatasetDetailVisible: false });
+  }
 }));
