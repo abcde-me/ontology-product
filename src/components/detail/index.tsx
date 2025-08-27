@@ -499,7 +499,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
   const [idName, setIdName] = React.useState<string>(''); //唯一标识符字段名
   const { id: urlId } = useParams<{ id: string }>(); //数据集id
-  const id = urlId || detailId;
+  const id = detailId || urlId;
   const history = useHistory();
 
   // 编辑数据
