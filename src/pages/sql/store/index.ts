@@ -8,6 +8,8 @@ export interface SqlIndexStore {
   tableDetailVisible?: boolean;
   /** 数据集详情 弹框 */
   DatasetDetailVisible?: boolean;
+  /** 选中的数据卷 ID */
+  selectedVolumnId?: string | number | null;
 
   /** 动作 */
   showVolumnDetail?: () => void;
@@ -18,6 +20,7 @@ export interface SqlIndexStore {
   closeTableDetail?: () => void;
   showDatasetDetail?: () => void;
   closeDatasetDetail?: () => void;
+  setSelectedVolumnId?: (id: string | number) => void;
 }
 
 export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
@@ -25,6 +28,7 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
   dbDetailVisible: false,
   tableDetailVisible: false,
   DatasetDetailVisible: false,
+  selectedVolumnId: null,
   showVolumnDetail: () => {
     set({ volumnDetailVisible: true });
   },
@@ -48,5 +52,8 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
   },
   closeDatasetDetail: () => {
     set({ DatasetDetailVisible: false });
+  },
+  setSelectedVolumnId: (id: string | number) => {
+    set({ selectedVolumnId: id });
   }
 }));
