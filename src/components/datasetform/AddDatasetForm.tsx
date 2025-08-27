@@ -747,6 +747,11 @@ const DatasetForm = React.forwardRef<
             field="storageType"
             rules={[{ required: true, message: '请选择数据集类型' }]}
             initialValue="file"
+            extra={
+              storageType === 'file'
+                ? '文件格式：支持各种文件类型，如图片、音频、视频等'
+                : 'JSONL格式：每行一个JSON对象，适用于结构化数据存储'
+            }
           >
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
               <Radio value="file">文件</Radio>
