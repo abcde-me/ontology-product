@@ -53,6 +53,7 @@ export async function getLoadRecordList(params) {
 
 interface CatalogListParams {
   root_type?: number; // 如果 root_type 是可选的，可以加上 ?
+  dir_type?: number;
   // 其他可能的字段...
 }
 // 获取数据集列表
