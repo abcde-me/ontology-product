@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Tabs } from '@arco-design/web-react';
-// import { IconCode, IconList } from '@arco-design/web-react/icon';
-// import DataFrames from './components/DataFrames';
-// import Datasets from './components/Datasets';
-// import Scripts from './components/Scripts';
-// import SqlWorkspace from './components/SqlWorkspace';
+import { Button, Layout, Tabs } from '@arco-design/web-react';
 import NotebookTabContent from './components/NotebookTabContent';
 import PythonTabContent from './components/PythonTabContent';
 import NotebookMainContent from './components/NotebookMainContent';
@@ -13,23 +8,31 @@ import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import './index.scss';
 import Datasets from './components/Datasets';
+import ModalFileList from './components/ModalFileList';
+import ModalTableList from './components/ModalTableList';
+import ModalTableDetail from './components/ModalTableDetail';
+import ModalDatasetDetail from './components/ModalDatasetDetail';
+import { useSqlIndexStore, SqlIndexStore } from './store';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
 type TabKey = 'data' | 'files' | 'dataset';
 
-export default function SqlEditorIndex() {
-  const [activeTab, setActiveTab] = useState<TabKey>('dataset');
-  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
-
-  const handleTabChange = (key: string) => {
-    setActiveTab(key as TabKey);
-  };
-
-  const handleFileOpen = (fileId: string) => {
-    setCurrentFileId(fileId);
-  };
+export default function SqlIndex() {
+  const {
+    // 变量
+    activeTab,
+    currentFileId,
+    // 动作
+    handleTabChange,
+    handleFileOpen,
+    // 弹框
+    showVolumnDetail,
+    showDbDetail,
+    showTableDetail,
+    showDatasetDetail
+  } = useSqlIndexHooks();
 
   function getSiderWidth() {
     switch (activeTab) {
@@ -40,7 +43,7 @@ export default function SqlEditorIndex() {
       case 'dataset':
         return 46;
       default:
-        return 288;
+        return 46;
     }
   }
 
@@ -55,6 +58,20 @@ export default function SqlEditorIndex() {
           type="rounded"
         >
           <TabPane key="data" title={<DataIcon></DataIcon>}>
+            <div className="flex flex-col gap-[10px] p-[12px]">
+              <Button size="mini" onClick={showVolumnDetail}>
+                打开数据卷详情
+              </Button>
+              <Button size="mini" onClick={showDbDetail}>
+                打开数据库详情
+              </Button>
+              <Button size="mini" onClick={showTableDetail}>
+                打开数据表详情
+              </Button>
+              <Button size="mini" onClick={showDatasetDetail}>
+                打开数据集详情
+              </Button>
+            </div>
             <NotebookTabContent type="data" />
           </TabPane>
           <TabPane key="files" title={<PythonIcon></PythonIcon>}>
@@ -70,82 +87,51 @@ export default function SqlEditorIndex() {
 
         {activeTab === 'dataset' && <Datasets />}
       </Content>
+
+      <ModalFileList />
+      <ModalTableList />
+      <ModalTableDetail />
+      <ModalDatasetDetail />
     </Layout>
   );
-
-  // return (
-  //   <div className="flex h-full overflow-hidden bg-white">
-  //     <div className="w-[300px] shrink-0 border-r">
-  //       <Tabs tabPosition="left" className="my-vertical-tabs h-full">
-  //         <TabPane key="data" title={<DataIcon></DataIcon>}>
-  //           <div className="flex h-full flex-col overflow-hidden">
-  //             <div className="flex-1 overflow-auto">
-  //               {/* 源数据 */}
-  //               <NotebookTabContent type="data" />
-  //             </div>
-  //           </div>
-  //         </TabPane>
-
-  //         <TabPane key="script" title={<PythonIcon></PythonIcon>}>
-  //           <div className="flex h-full flex-col overflow-hidden">
-  //             <div className="flex-1 overflow-auto">
-  //               {/* 脚本列表 */}
-  //               <PythonTabContent type="files" onFileOpen={handleFileOpen} />
-  //             </div>
-  //           </div>
-  //         </TabPane>
-  //       </Tabs>
-  //     </div>
-
-  //     <div className="flex-1">
-  //       {/* SQL工作区 */}
-  //       <SqlWorkspace />
-  //     </div>
-  //   </div>
-  // );
-
-  // return (
-  //   <div className="flex h-full overflow-hidden bg-white">
-  //     <div className="w-[300px] shrink-0 border-r">
-  //       <Tabs tabPosition="left" className="my-vertical-tabs h-full">
-  //         <TabPane key="data" title={<IconList className="text-[26px]" />}>
-  //           <div className="flex h-full flex-col overflow-hidden">
-  //             <TabPaneHeader title="数据目录" />
-  //             <div className="max-h-[50%] overflow-auto border-b">
-  //               {/* 源数据 */}
-  //               <DataFrames />
-  //             </div>
-  //             <div className="flex-1 overflow-auto">
-  //               {/* 数据集 */}
-  //               <Datasets />
-  //             </div>
-  //           </div>
-  //         </TabPane>
-
-  //         <TabPane key="script" title={<IconCode className="text-[26px]" />}>
-  //           <div className="flex h-full flex-col overflow-hidden">
-  //             <TabPaneHeader title="SQL 脚本列表" />
-  //             <div className="flex-1 overflow-auto">
-  //               {/* 脚本列表 */}
-  //               <Scripts />
-  //             </div>
-  //           </div>
-  //         </TabPane>
-  //       </Tabs>
-  //     </div>
-
-  //     <div className="flex-1">
-  //       {/* SQL工作区 */}
-  //       <SqlWorkspace />
-  //     </div>
-  //   </div>
-  // );
 }
 
-function TabPaneHeader({ title }) {
-  return (
-    <div className="flex justify-center bg-blue-50 py-[6px]">
-      <span className="text-[14px] font-[600]">{title}</span>
-    </div>
+function useSqlIndexHooks() {
+  const [activeTab, setActiveTab] = useState<TabKey>('data');
+  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
+
+  const showVolumnDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showVolumnDetail
   );
+
+  const showDbDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showDbDetail
+  );
+
+  const showTableDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showTableDetail
+  );
+
+  const showDatasetDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showDatasetDetail
+  );
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key as TabKey);
+  };
+
+  const handleFileOpen = (fileId: string) => {
+    setCurrentFileId(fileId);
+  };
+
+  return {
+    activeTab,
+    currentFileId,
+    handleTabChange,
+    handleFileOpen,
+    showVolumnDetail,
+    showDbDetail,
+    showTableDetail,
+    showDatasetDetail
+  };
 }

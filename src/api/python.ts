@@ -18,7 +18,9 @@ import {
   GetRunResultRes,
   RunningStatus,
   GetRunLogReq,
-  GetRunLogRes
+  GetRunLogRes,
+  GetDatasetListReq,
+  GetDatasetListRes
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -65,6 +67,7 @@ export async function getPythonList(
           last_modified: later
         }
       ];
+      // items = [];
       break;
     case '1001':
       path_name = '项目A';

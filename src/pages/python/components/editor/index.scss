@@ -30,4 +30,13 @@
     flex: 1;
     overflow: hidden;
   }
+
+  // 无数据状态下的内容区域样式
+  .empty-content-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
 }
