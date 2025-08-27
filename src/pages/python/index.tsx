@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Layout, Tabs, Message } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
+import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
@@ -43,7 +44,7 @@ const initialState: FileState = {
 };
 
 export default function Python() {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [activeTab, setActiveTab] = useState<TabKey>('data');
   const [fileState, setFileState] = useState<FileState>(initialState);
 
   // DirectoryTree 的 ref，用于调用其新建功能
@@ -212,7 +213,13 @@ export default function Python() {
               ref={directoryTreeRef}
             />
           </TabPane>
-          <TabPane key="data" title={<DataIcon />}></TabPane>
+          <TabPane key="data" title={<DataIcon />}>
+            <DataManager
+              type="files"
+              onFileOpen={openFile}
+              ref={directoryTreeRef}
+            />
+          </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}></TabPane>
         </Tabs>
       </Sider>
