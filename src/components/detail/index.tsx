@@ -482,7 +482,8 @@ const renderStatusTag = (
   return statusWithTooltip;
 };
 
-const DatasetDetail: React.FC = () => {
+const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
+  const { isHideEdit, detailId } = props;
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
@@ -498,7 +499,8 @@ const DatasetDetail: React.FC = () => {
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
   const [idName, setIdName] = React.useState<string>(''); //唯一标识符字段名
-  const { id } = useParams<{ id: string }>(); //数据集id
+  const { id: urlId } = useParams<{ id: string }>(); //数据集id
+  const id = detailId || urlId;
   const history = useHistory();
 
   // 编辑数据
@@ -1095,25 +1097,27 @@ const DatasetDetail: React.FC = () => {
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
-      <div className="breadcrumb-wrapper">
-        <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
-          onClick={() => {
-            handleBack();
-          }}
-        />
-        <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
-          <Breadcrumb.Item>
-            <span
-              style={{ fontWeight: '500', fontSize: '20px' }}
-              onClick={handleGoToDatasetList}
-            >
-              数据集管理
-            </span>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
-        </Breadcrumb>
-      </div>
+      {!isHideEdit && (
+        <div className="breadcrumb-wrapper">
+          <IconArrowLeft
+            style={{ cursor: 'pointer', fontSize: '14px' }}
+            onClick={() => {
+              handleBack();
+            }}
+          />
+          <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
+            <Breadcrumb.Item>
+              <span
+                style={{ fontWeight: '500', fontSize: '20px' }}
+                onClick={handleGoToDatasetList}
+              >
+                数据集管理
+              </span>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+      )}
 
       {/* 数据集详情面板 */}
       <Card className="basic-info-card" bordered={false}>
@@ -1121,33 +1125,35 @@ const DatasetDetail: React.FC = () => {
         {datasetDetail && (
           <>
             {/* 标题区域 */}
-            <div className="basic-info-header">
-              <Title heading={4}>基本信息</Title>
-              {datasetDetail?.perms?.includes(
-                DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
-              ) && (
-                <Tooltip
-                  content={
-                    !datasetDetail || datasetDetail.status !== 'normal'
-                      ? '当前状态下不能进行编辑'
-                      : ''
-                  }
-                >
-                  <Button
-                    disabled={
+            {!isHideEdit && (
+              <div className="basic-info-header">
+                <Title heading={4}>基本信息</Title>
+                {datasetDetail?.perms?.includes(
+                  DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
+                ) && (
+                  <Tooltip
+                    content={
                       !datasetDetail || datasetDetail.status !== 'normal'
+                        ? '当前状态下不能进行编辑'
+                        : ''
                     }
-                    onClick={handleEdit}
-                    type="text"
-                    icon={<IconEdit />}
-                    className="edit-btn"
-                    style={{ height: '100%' }}
                   >
-                    编辑
-                  </Button>
-                </Tooltip>
-              )}
-            </div>
+                    <Button
+                      disabled={
+                        !datasetDetail || datasetDetail.status !== 'normal'
+                      }
+                      onClick={handleEdit}
+                      type="text"
+                      icon={<IconEdit />}
+                      className="edit-btn"
+                      style={{ height: '100%' }}
+                    >
+                      编辑
+                    </Button>
+                  </Tooltip>
+                )}
+              </div>
+            )}
 
             {/* 内容区域 */}
             <div className="basic-info-content" style={{ marginBottom: 24 }}>
@@ -1517,21 +1523,22 @@ const DatasetDetail: React.FC = () => {
                       >
                         {datasetDetail?.perms?.includes(
                           DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
-                        ) && (
-                          <Button
-                            // type="primary"
-                            disabled={
-                              !datasetDetail ||
-                              datasetDetail.status !== 'normal'
-                            }
-                            onClick={() => setUpdateStatus(true)}
-                            type="text"
-                            icon={<IconEdit />}
-                            className="edit-btn"
-                          >
-                            编辑
-                          </Button>
-                        )}
+                        ) &&
+                          !isHideEdit && (
+                            <Button
+                              // type="primary"
+                              disabled={
+                                !datasetDetail ||
+                                datasetDetail.status !== 'normal'
+                              }
+                              onClick={() => setUpdateStatus(true)}
+                              type="text"
+                              icon={<IconEdit />}
+                              className="edit-btn"
+                            >
+                              编辑
+                            </Button>
+                          )}
                       </Tooltip>
                     )}
                   </>

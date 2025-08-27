@@ -478,6 +478,15 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                     placeholder="请输入文件类型"
                     value={customizeInputValue}
                     onChange={(v) => setCustomizeInputValue(v)}
+                    inputProps={{
+                      onKeyDown: (e) => {
+                        // 按下回车键 + 输入值非空（避免空提交）
+                        if (e.key === 'Enter' && customizeInputValue.trim()) {
+                          e.preventDefault();
+                          handleCustomizeChange(false);
+                        }
+                      }
+                    }}
                   >
                     <OptGroup key="history_add" label="历史添加">
                       {customizeOptions.map((option) => (
