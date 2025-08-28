@@ -154,8 +154,8 @@ function formatDateTime(isoString) {
   const pad = (n) => n.toString().padStart(2, '0');
   return (
     <span>
-      {date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} $
-      {pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}
+      {date.getFullYear()}-{pad(date.getMonth() + 1)}-{pad(date.getDate())}{' '}
+      {pad(date.getHours())}:{pad(date.getMinutes())}:{pad(date.getSeconds())}
     </span>
   );
 }
@@ -921,14 +921,18 @@ const DatasetForm = React.forwardRef<
                 className="form-item-select-files"
                 wrapperCol={{ span: 20 }}
                 extra={
-                  <span
-                    style={{
-                      fontSize: '14px',
-                      color: '#86909c'
-                    }}
-                  >
-                    目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                  </span>
+                  storageType === 'file' ? (
+                    ''
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        color: '#86909c'
+                      }}
+                    >
+                      目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                    </span>
+                  )
                 }
               >
                 <Tooltip
