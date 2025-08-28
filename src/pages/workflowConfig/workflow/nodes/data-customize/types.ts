@@ -16,5 +16,5 @@ export type CustomNodeType = CommonNodeType & {
   scripting_type: string;
   engine_id: string;
   desc: string;
-  run_status: boolean;
+  custom_run_status: boolean;
 };
