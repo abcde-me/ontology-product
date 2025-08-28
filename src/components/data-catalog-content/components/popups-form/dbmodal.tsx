@@ -4,10 +4,13 @@ import React, { useState } from 'react';
 import Tables from '../../dbdetail/tables';
 import AutoDefine from '../../dbdetail/auto-define';
 import Details from '../../dbdetail/details';
-export default function DbModal(props: any) {
+export default function DbModal(props: {
+  visible: boolean;
+  onCancel: () => void;
+}) {
   const { visible, onCancel } = props;
   const [activeTab, setActiveTab] = useState('1');
-  const renderTabContent = (key) => {
+  const renderTabContent = (key: string) => {
     switch (key) {
       case '1':
         return (

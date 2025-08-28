@@ -11,13 +11,35 @@ import {
   TreeDataType,
   NodeInstance
 } from '@arco-design/web-react/es/Tree/interface';
+import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { CatalogTypeEnum, subLeafKeys } from '../../dataCatalog/consts';
 
 const TreeNode = Tree.Node;
 
+// 树节点数据类型定义
+interface TreeNodeData {
+  id: string | number;
+  key: string;
+  name: string;
+  value: string;
+  label: string;
+  title: string;
+  type_name?: 'volume' | 'db_item' | 'volume_item' | 'catalog' | 'db';
+  type?: number;
+  level?: number;
+  isExpanded?: boolean;
+  hasChildren?: boolean;
+  isLastLeaf?: boolean;
+  showInput?: boolean;
+  isNew?: boolean;
+  parentId?: string | number;
+  children?: TreeNodeData[];
+  perms?: string[];
+}
+
 interface ComponentTreeProps {
-  directoryData: any[];
-  onDirectoryDataChange: (data: any[]) => void;
+  directoryData: TreeNodeData[];
+  onDirectoryDataChange: (data: TreeNodeData[]) => void;
   onSelect?: (
     selectedKeys: string[],
     extra: {
@@ -43,10 +65,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   enableRootAdd = false
 }) => {
   // 状态管理
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<RefInputType>(null);
   const [inputValue, setInputValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [hoverNode, setHoverNode] = useState<any>(null);
+  const [hoverNode, setHoverNode] = useState<TreeNodeData | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   // 聚焦输入框
@@ -60,7 +82,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   // 生成新的节点名称
-  const generateNodeName = (existingNodes: any[], prefix = '新建目录') => {
+  const generateNodeName = (
+    existingNodes: TreeNodeData[],
+    prefix = '新建目录'
+  ): string => {
     const existingNames = new Set(
       existingNodes.map((node) => node.name || node.label)
     );
@@ -75,7 +100,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   // 创建新的输入节点
-  const createInputNode = (name: string, parentNode: any) => {
+  const createInputNode = (
+    name: string,
+    parentNode?: TreeNodeData
+  ): TreeNodeData => {
     const newId = `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     return {
       id: newId,
@@ -96,12 +124,14 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   // 编辑完成处理
-  const onEditFinish = (props: any) => {
+  const onEditFinish = (props: NodeProps) => {
     const { dataRef } = props;
     if (!dataRef) return;
 
     // 递归更新函数，支持嵌套节点的更新
-    const updateNodeRecursively = (data: any[]): any[] => {
+    const updateNodeRecursively = (
+      data: TreeNodeData[]
+    ): (TreeNodeData | null)[] => {
       return data.map((item) => {
         if (item.id === dataRef.id) {
           if (!inputValue.trim()) {
@@ -119,7 +149,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         } else if (item.children && Array.isArray(item.children)) {
           // 递归处理子节点
           const updatedChildren = updateNodeRecursively(item.children).filter(
-            Boolean
+            (child): child is TreeNodeData => child !== null
           );
           return {
             ...item,
@@ -132,11 +162,15 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     if (!inputValue.trim()) {
       // 如果输入为空，删除该节点
-      const updatedData = updateNodeRecursively(directoryData).filter(Boolean);
+      const updatedData = updateNodeRecursively(directoryData).filter(
+        (item): item is TreeNodeData => item !== null
+      );
       onDirectoryDataChange(updatedData);
     } else {
       // 更新节点名称
-      const updatedData = updateNodeRecursively(directoryData);
+      const updatedData = updateNodeRecursively(directoryData).filter(
+        (item): item is TreeNodeData => item !== null
+      );
       onDirectoryDataChange(updatedData);
     }
 
@@ -146,7 +180,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 构建路径的工具函数
   const buildPathFromTreeData = (
-    data: any[],
+    data: TreeNodeData[],
     targetId: string,
     currentPath: string[] = []
   ): string[] | null => {
@@ -206,7 +240,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const name = '请输入目录名称';
     const newId = `new_${Date.now()}`;
     // 创建新的目录节点
-    const newNode = {
+    const newNode: TreeNodeData = {
       id: newId,
       key: newId,
       name: name,
@@ -243,10 +277,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const newName = generateNodeName([], '新建目录');
 
     // 创建新的输入节点
-    const newInputNode = createInputNode(newName, dataRef);
+    const newInputNode = createInputNode(newName, dataRef as TreeNodeData);
 
     // 递归更新 directoryData，在指定节点下添加新的子节点
-    const updateDirectoryData = (data: any[]): any[] => {
+    const updateDirectoryData = (data: TreeNodeData[]): TreeNodeData[] => {
       return data.map((item) => {
         if (item.id === dataRef?.id) {
           // 找到目标节点，添加新的子节点
@@ -312,7 +346,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return (
       <div
         className="flex items-center overflow-hidden"
-        onMouseEnter={() => setHoverNode(dataRef)}
+        onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
       >
         {dataRef?.showInput ? (
           <Input
