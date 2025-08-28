@@ -25,6 +25,7 @@ export async function getTaskResult(taskId: string) {
   const res = {
     task_id: taskId,
     task_status: 1,
+    update_time: '2025-08-23 09:09:23',
     result: {
       version: 0,
       tags: [],
@@ -343,7 +344,15 @@ export async function getImgJobOverview(taskId: string) {
 
 export async function getImgJobAnnotations(taskId: string) {
   const result = await getTaskResult(taskId);
-  return Promise.resolve({ data: result.data.data.result });
+  const annotations = result.data.data.result ?? {
+    version: 0,
+    tags: [],
+    shapes: [],
+    tracks: []
+  };
+  return Promise.resolve({
+    data: { ...annotations, update_time: result.data.data.update_time }
+  });
 }
 
 export async function getImgJobMeta(requirementId?: string) {

@@ -22,6 +22,7 @@ function WorkflowConfig() {
   const requirementId = useParams('rId');
   const labelType = useParams('type');
   const labelTool = useParams('tool');
+  const reqName = useParams('name');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
 
@@ -29,7 +30,7 @@ function WorkflowConfig() {
     const init = async () => {
       if (taskId) {
         setLabelUrl(
-          `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&tool=${labelTool}`
+          `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&tool=${labelTool}&name=${reqName}`
         );
         setLoading(false);
       } else {
@@ -37,18 +38,19 @@ function WorkflowConfig() {
         const {
           task_id,
           requerment_info: {
+            name,
             label_type: type,
             label_tool: { label_tool_code: tool }
           }
         } = taskInfo.data.data;
 
         history.push(
-          `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}`
+          `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}&name=${name}`
         );
       }
     };
     init();
-  }, [taskId, requirementId, labelType, labelTool, history]);
+  }, [taskId, requirementId, labelType, labelTool, reqName, history]);
 
   return (
     <div className={`app-label-editor-page h-full w-full overflow-x-auto`}>
