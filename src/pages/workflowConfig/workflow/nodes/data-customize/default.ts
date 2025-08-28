@@ -14,7 +14,7 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
     scripting_type: '',
     engine_id: '',
     desc: '执行自定义Python代码逻辑',
-    run_status: false
+    custom_run_status: false
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -32,9 +32,9 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
   },
   checkValid(payload: CustomNodeType, t: any) {
     let errorMessages = '';
-    const { script_content, run_status } = payload;
+    const { script_content, custom_run_status } = payload;
 
-    if (!run_status) {
+    if (!custom_run_status) {
       errorMessages = '代码运行失败';
     }
 

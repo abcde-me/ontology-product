@@ -104,13 +104,14 @@ const Panel = ({ id, data, parentRef }) => {
     getScriptingInfo();
   }, []);
 
-  const onChange = useCallback((val, viewUpdate) => {
+  const onChange = (val, viewUpdate) => {
     setValue(val);
     handleValueChange({
       ...inputs,
-      script_content: val
+      script_content: val,
+      custom_run_status: false
     });
-  }, []);
+  };
 
   // 计算距离的核心函数
   const calculateDistance = () => {
@@ -202,7 +203,7 @@ const Panel = ({ id, data, parentRef }) => {
         if (res?.data?.bench_status === RunningStatus.Success) {
           handleValueChange({
             ...inputs,
-            run_status: true
+            custom_run_status: true
           });
         }
         setIsRunning(false);
@@ -280,6 +281,11 @@ const Panel = ({ id, data, parentRef }) => {
 
   const handleCustomizeRun = async () => {
     const session_id = Cookies.get('session_id') as string;
+    // 点击运行禁止上线操作
+    handleValueChange({
+      ...inputs,
+      custom_run_status: false
+    });
     if (isRunning) {
       const res = await scriptingBenchCancel(
         workflow_uuid,
