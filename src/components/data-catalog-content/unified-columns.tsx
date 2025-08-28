@@ -23,7 +23,7 @@ import { PermissionGuard } from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
-
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
 const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
@@ -262,6 +262,7 @@ export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
   setVisible,
+  setVisibleDbmodel,
   hoveredRowId = null,
   refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
@@ -368,7 +369,107 @@ export const getUnifiedColumns = (
       }
     ];
   }
+  //Source表格的数据库表配置
+  // if (tableType === 'source' && dataType === 'database') {
+  //   return [
+  //     {
+  //       title: 'ID',
+  //       dataIndex: 'id',
+  //       width: 80
+  //     },
+  //     {
+  //       title: '表名',
+  //       dataIndex: 'file_name',
+  //       className: 'hover-change load-name',
+  //       ellipsis: true,
+  //       width: 200,
+  //       render: (_, record) => (
+  //         <EllipsisPopoverCom
+  //           value={record.file_name}
+  //           isEdit={false}
+  //           isLink
+  //           handleLink={() => {
+  //             setDetail(record.id, setVisibleDbmodel);
+  //           }}
+  //         />
+  //       )
+  //     },
+  //     {
+  //       title: '数据库类型',
+  //       dataIndex: 'file_type',
+  //       width: 120,
+  //       filters: sourceFileTypeFilters,
+  //       render: (_, record) => (
+  //         <div
+  //           style={{
+  //             display: 'flex',
+  //             alignItems: 'center',
+  //             gap: '6px'
+  //           }}
+  //         >
+  //           {getFileIcon(record.file_type)}
+  //           <span>{record.file_type}</span>
+  //         </div>
+  //       )
+  //     },
+  //     {
+  //       title: '表行数',
+  //       width: 120,
+  //       dataIndex: 'file_size',
+  //       render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
+  //     },
+  //     {
+  //       title: '上传用户',
+  //       dataIndex: 'upload_user',
+  //       ellipsis: true,
+  //       width: 100
+  //     },
+  //     {
+  //       title: '载入开始时间',
+  //       dataIndex: 'task_load_start_time',
+  //       width: 180,
+  //       sorter: true,
 
+  //       // sortOrder: 'ascend',
+  //       // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+  //       sortDirections: ['ascend' as const, 'descend' as const],
+  //       render: (_, record) => formatDateTime(record.task_load_start_time)
+  //     },
+  //     {
+  //       title: '连接器名称',
+  //       dataIndex: 'connector_name',
+  //       ellipsis: true,
+  //       width: 160,
+  //       render: (_, record) => (
+  //         <EllipsisPopover
+  //           value={record.connector_name}
+  //           isEdit={false}
+  //           preferTypography
+  //         />
+  //       )
+  //     },
+  //     {
+  //       title: '操作',
+  //       dataIndex: 'actions',
+  //       fixed: 'right' as const,
+  //       width: 88,
+  //       render: (_, record) => (
+  //         <span
+  //           style={{
+  //             color: '#007DFA',
+  //             cursor: 'pointer',
+  //             display: 'inline-block'
+  //           }}
+  //           onClick={() => {
+  //             setDetail(record.id, setVisibleDbmodel);
+  //           }}
+  //         >
+  //           详情
+  //         </span>
+  //       )
+  //     }
+  //   ];
+  // }
   // Target表格的卷数据列配置
   if (tableType === 'target' && dataType === 'volume') {
     return [
@@ -449,6 +550,10 @@ export const getUnifiedColumns = (
   }
 
   return [];
+};
+const setDetail = (id: string, setVisibleDbmodel) => {
+  console.log('详情', id);
+  setVisibleDbmodel(true);
 };
 
 // 处理导出操作

@@ -9,11 +9,16 @@ import {
   Tooltip,
   Tag,
   Divider,
-  TreeSelect,
-  Tree
+  TreeSelect
 } from '@arco-design/web-react';
-import { IconClose, IconPlus } from '@arco-design/web-react/icon';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { IconArchive, IconClose } from '@arco-design/web-react/icon';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  ReactNode
+} from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
@@ -23,11 +28,9 @@ import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import Uploads from './file-upload';
+import ComponentTree from './component-tree';
 import './db-tree.css';
-import {
-  NodeProps,
-  TreeDataType
-} from '@arco-design/web-react/es/Tree/interface';
+import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -47,7 +50,7 @@ const options = [
   'Chengdu',
   'Wuhan'
 ];
-const TreeNode = Tree.Node;
+
 interface propsType {
   hideModalHan: () => void;
   getList: (visible: boolean) => void;
@@ -190,12 +193,13 @@ const LoadAddModal = (props: propsType) => {
     });
     setConnectName(newres);
   };
-  const [directoryData, setDirectoryData] = useState([]);
+  const [directoryData, setDirectoryData] = useState<any[]>([]);
 
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1
+        root_type: 1,
+        dir_type: 3
       });
 
       if (res.status !== 200) {
@@ -208,10 +212,12 @@ const LoadAddModal = (props: propsType) => {
             ? {
                 value: item.id,
                 label: item.name,
+                // type_name:item.type_name,
                 children: item.children.volume.map((items) => {
                   return {
                     value: items.id,
-                    label: items.name
+                    label: items.name,
+                    type_name: items.type_name
                   };
                 })
               }
@@ -220,50 +226,68 @@ const LoadAddModal = (props: propsType) => {
         setDirectoryData(newdirectoryData);
       } else {
         console.log(sourceType, '打印sourceType8888888888888888888888');
-
-        const processTreeData = (data) => {
+        const processTreeData = (data: any[], parentNode: any = null) => {
           return data.map((item) => {
             const processedItem = {
               id: item.id,
               name: item.name,
               value: item.id,
               label: item.name,
+              type_name: item.type_name,
               ...item
             };
+            // 从父节点继承属性（如果有父节点）
+            if (parentNode) {
+              processedItem.parentId = parentNode.id;
+              processedItem.level = (parentNode.level || 0) + 1;
+            } else {
+              processedItem.level = 0;
+            }
+            // 添加自定义属性
+            processedItem.isExpanded = false;
+            processedItem.hasChildren = false;
             // 处理children数据
             if (item.children) {
               if (Array.isArray(item.children)) {
-                // 如果children是数组，直接递归处理
-                processedItem.children = processTreeData(item.children);
+                processedItem.children = processTreeData(
+                  item.children,
+                  processedItem
+                );
               } else if (
                 item.children.volume &&
                 Array.isArray(item.children.volume)
               ) {
-                // 如果children是对象且包含volume数组，处理volume
-                processedItem.children = processTreeData(item.children.volume);
+                processedItem.children = processTreeData(
+                  item.children.volume,
+                  processedItem
+                );
               } else if (typeof item.children === 'object') {
-                // 如果children是对象，尝试转换为数组
                 const childrenArray = Object.values(item.children).filter(
                   Array.isArray
                 )[0];
                 if (childrenArray) {
-                  processedItem.children = processTreeData(childrenArray);
+                  processedItem.children = processTreeData(
+                    childrenArray,
+                    processedItem
+                  );
                 }
+              }
+              // 如果有子节点，设置hasChildren为true
+              if (processedItem.children && processedItem.children.length > 0) {
+                processedItem.hasChildren = true;
               }
             }
             return processedItem;
           });
         };
         const processedData = processTreeData(res.data.src);
+        console.log(processedData, '打印processedData888888888888888888888888');
         setDirectoryData(processedData);
       }
     } catch (err) {
       console.error(err);
     }
   }
-  useEffect(() => {
-    console.log(directoryData, '打印目录数据');
-  }, []);
   // 计算响应式标签数量的函数
   const calculateMaxTagCount = useCallback(() => {
     try {
@@ -322,12 +346,10 @@ const LoadAddModal = (props: propsType) => {
   useEffect(() => {
     getdirectoryDataList();
     getConnector_name_type();
-    // 添加窗口大小变化监听
     const handleResize = () => {
       calculateMaxTagCount();
     };
     window.addEventListener('resize', handleResize);
-    // 延迟计算以确保DOM已渲染
     setTimeout(calculateMaxTagCount, 100);
     return () => {
       observer.disconnect();
@@ -346,66 +368,18 @@ const LoadAddModal = (props: propsType) => {
     childList: true,
     subtree: true
   });
-  // 自定义选择树组件
-  const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
-    console.log('正在渲染树节点:', treeData);
-    if (!Array.isArray(treeData)) {
-      console.warn('treeData不是数组:', treeData);
-      return null;
-    }
-    return treeData
-      ?.map?.((item) => {
-        if (!item || !item.id) {
-          console.warn('无效的树节点数据:', item);
-          return null;
-        }
-        const { children, id, ...rest } = item;
-        const hasChildren =
-          children && Array.isArray(children) && children.length > 0;
-        console.log(
-          `节点 ${item.name} (id: ${id}) 有子节点:`,
-          hasChildren,
-          children
-        );
-        return (
-          <TreeNode key={id} {...rest} dataRef={item} title={item.name}>
-            {hasChildren ? generatorTreeNodes(children) : null}
-          </TreeNode>
-        );
-      })
-      .filter(Boolean); // 过滤掉null值
-  }, []);
 
-  //自定义树组件新增
-  const AddTree = ({ onClick }: { onClick: () => void }) => {
-    return (
-      <>
-        <div
-          style={{
-            padding: '8px 12px 12px 0',
-            cursor: 'pointer',
-            color: '#1890ff',
-            transition: 'background-color 0.2s',
-            borderRadius: '0 0 6px 6px', // 底部圆角
-            backgroundColor: '#fff'
-          }}
-          onClick={onClick}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: '14px',
-              justifyContent: 'flex-start',
-              margin: 0
-            }}
-          >
-            <IconPlus style={{ marginRight: '4px' }} />
-            新建目录
-          </div>
-        </div>
-      </>
-    );
+  // 保留handleSelect作为ComponentTree的回调
+  const handleSelect = (
+    selectedKeys: string[],
+    extra: {
+      selected: boolean;
+      selectedNodes: NodeInstance[];
+      node: NodeInstance;
+      e: Event;
+    }
+  ) => {
+    console.log('handleSelect called in load-add-modal', selectedKeys);
   };
 
   return (
@@ -653,45 +627,21 @@ const LoadAddModal = (props: propsType) => {
                 overflow: 'hidden' // 防止外层出现滚动条
               }}
               dropdownRender={(originNode) => (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                    maxHeight: 300,
-                    position: 'relative',
-                    padding: '12px 12px 0 12px'
+                <ComponentTree
+                  directoryData={directoryData}
+                  onDirectoryDataChange={setDirectoryData}
+                  onSelect={handleSelect}
+                  onPathChange={(path) => {
+                    form.setFieldsValue({
+                      dest_path: path
+                    });
                   }}
-                >
-                  {/* 保留原有的树结构 */}
-                  <div
-                    style={{
-                      flex: 1,
-                      overflow: 'auto',
-                      minHeight: 0,
-                      padding: '4px 0'
-                    }}
-                  >
-                    <Tree showLine>{generatorTreeNodes(directoryData)}</Tree>
-                  </div>
-                  {/* 固定在底部的新建目录 */}
-                  <div
-                    style={{
-                      backgroundColor: '#fff',
-                      flexShrink: 0
-                    }}
-                  >
-                    <AddTree
-                      onClick={() => {
-                        console.log('点击新建目录');
-                        // 处理新建目录的逻辑
-                      }}
-                    />
-                  </div>
-                </div>
+                  showAddTree={true}
+                  enableRootAdd={true}
+                />
               )}
             >
-              {generatorTreeNodes(directoryData)}
+              {/* {generatorTreeNodes(directoryData)} */}
             </TreeSelect>
           </FormItem>
         )}

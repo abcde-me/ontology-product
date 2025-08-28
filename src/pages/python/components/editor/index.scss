@@ -1,0 +1,42 @@
+.notebook-main-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-left: 1px solid #e2e8f0;
+
+  .main-toolbar {
+    height: 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .main-workspace {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  // 无数据状态下的内容区域样式
+  .empty-content-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+}

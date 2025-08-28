@@ -122,6 +122,14 @@ const menus: MenuModel[] = [
         ),
         key: 'python',
         path: '/tenant/compute/modaforge/python'
+      },
+      {
+        title: 'SQL开发',
+        icon: (
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'sql',
+        path: '/tenant/compute/modaforge/sql'
       }
     ]
   },

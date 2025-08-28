@@ -1,3 +1,8 @@
 .db-tree-select .arco-tree-node .arco-tree-node-title {
   background-color: transparent !important;
 }
+.ModelTree {
+  .arco-tree-node {
+    align-items: center !important;
+  }
+}

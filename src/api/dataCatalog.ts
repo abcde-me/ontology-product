@@ -41,6 +41,13 @@ export async function addVolume(data: any) {
   const res = await UAPI.RES.volumeAddApi({}).post(data).inRegion().do();
   return res;
 }
+
+//新建数据库
+export async function addDb(data: AddDbParams) {
+  const res = await UAPI.RES.dbAddApi({}).post(data).inRegion().do();
+  return res;
+}
+
 // 删除数据卷
 export async function deleteVolume(
   id: string,
@@ -59,6 +66,12 @@ export async function renameCatalog(id: string, params: any) {
     .inRegion()
     .do();
   return res;
+}
+
+//定义新建库的参数接口
+interface AddDbParams {
+  parent_id: number;
+  name: string;
 }
 
 // 定义查询目标数据文件的参数接口

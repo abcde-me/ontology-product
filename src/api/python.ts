@@ -10,7 +10,17 @@ import {
   RenamePythonItemRes,
   CopyPythonItemReq,
   CopyPythonItemRes,
-  OpenPythonItemRes
+  OpenPythonItemRes,
+  SavePythonItemReq,
+  SavePythonItemRes,
+  RunPythonItemRes,
+  GetRunResultReq,
+  GetRunResultRes,
+  RunningStatus,
+  GetRunLogReq,
+  GetRunLogRes,
+  GetDatasetListReq,
+  GetDatasetListRes
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -34,7 +44,7 @@ export async function getPythonList(
           name: '项目A',
           type: PythonItemType.Directory,
           path: '/',
-          path_id: 1001,
+          path_id: 1,
           created: now,
           last_modified: later
         },
@@ -43,26 +53,27 @@ export async function getPythonList(
           name: '数据集',
           type: PythonItemType.Directory,
           path: '/',
-          path_id: 1002,
+          path_id: 1,
           created: now,
           last_modified: later
         },
         {
-          id: 2001,
+          id: 1003,
           name: '脚本1.py',
           type: PythonItemType.Notebook,
           path: '/',
-          path_id: 1002,
+          path_id: 1,
           created: now,
           last_modified: later
         }
       ];
+      // items = [];
       break;
     case '1001':
       path_name = '项目A';
       items = [
         {
-          id: 1101,
+          id: 10011,
           name: '子目录-代码',
           type: PythonItemType.Directory,
           path: '/项目A',
@@ -71,7 +82,7 @@ export async function getPythonList(
           last_modified: later
         },
         {
-          id: 2101,
+          id: 10012,
           name: 'main.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
@@ -80,7 +91,7 @@ export async function getPythonList(
           last_modified: later
         },
         {
-          id: 2102,
+          id: 10013,
           name: 'utils.py',
           type: PythonItemType.Notebook,
           path: '/项目A',
@@ -90,24 +101,24 @@ export async function getPythonList(
         }
       ];
       break;
-    case '1101':
+    case '10011':
       path_name = '子目录-代码';
       items = [
         {
-          id: 3101,
+          id: 100111,
           name: 'train.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
-          path_id: 1101,
+          path_id: 10011,
           created: now,
           last_modified: later
         },
         {
-          id: 3102,
+          id: 100112,
           name: 'eval.py',
           type: PythonItemType.Notebook,
           path: '/项目A/子目录-代码',
-          path_id: 1101,
+          path_id: 10011,
           created: now,
           last_modified: later
         }
@@ -117,7 +128,7 @@ export async function getPythonList(
       path_name = '数据集';
       items = [
         {
-          id: 2201,
+          id: 10021,
           name: '加载数据.ipynb',
           type: PythonItemType.Notebook,
           path: '/数据集',
@@ -307,6 +318,90 @@ print(df.describe())
 # 可视化数据
 visualize_data(df)
 print("数据可视化完成")`
+    }
+  });
+}
+
+// 修改（保存）文件
+export async function savePythonItem(
+  id: string,
+  params: SavePythonItemReq
+): Promise<ApiRes<SavePythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonSaveApi({ id }).put(params).inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 2201,
+      last_modified: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 运行代码
+export async function runPythonItem(
+  id: string
+): Promise<ApiRes<RunPythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunApi({ id }).put(params).inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      execid: '1',
+      id: 2201
+    }
+  });
+}
+
+// 获取运行结果
+export async function getRunResult(
+  id: string,
+  params: GetRunResultReq
+): Promise<ApiRes<GetRunResultRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunResultApi({ execid }).get().inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      run_result: '运行成功',
+      run_status: RunningStatus.SUCCESS,
+      run_duration: 10,
+      run_end_time: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 获取日志
+export async function getRunLog(
+  id: string,
+  params: GetRunLogReq
+): Promise<ApiRes<GetRunLogRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunLogApi({ execid, size }).get().inRegion().do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      log: '日志'
     }
   });
 }
