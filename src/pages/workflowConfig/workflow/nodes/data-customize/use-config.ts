@@ -17,6 +17,7 @@ const useConfig = (id: string, payload: CustomNodeType) => {
 
   useEffect(() => {
     inputRef.current = inputs;
+    console.log(inputs, 'inputs');
   }, [inputs]);
 
   useEffect(() => {
@@ -31,12 +32,16 @@ const useConfig = (id: string, payload: CustomNodeType) => {
 
   const handleValueChange = useCallback(
     (value: CustomNodeType) => {
+      console.log(value, 'vvvvv');
+
       const newInputs = produce(inputRef.current, (draft) => {
         draft.script_content = value.script_content;
         draft.scripting_type = value.scripting_type;
         draft.engine_id = value.engine_id;
         draft.run_status = value.run_status;
       });
+      console.log(newInputs, 'newInputs');
+
       setInputs(newInputs);
     },
     [setInputs]
