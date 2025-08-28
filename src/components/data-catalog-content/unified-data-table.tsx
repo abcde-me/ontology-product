@@ -640,7 +640,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     ) {
       setCurrentPage(1);
     }
-
     // 重新获取数据
     // getTableList();
   };

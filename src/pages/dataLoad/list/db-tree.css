@@ -5,4 +5,7 @@
   .arco-tree-node {
     align-items: center !important;
   }
+  .arco-tree-node-indent:hover {
+    background-color: transparent !important;
+  }
 }
