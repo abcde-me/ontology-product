@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { OperationColumn } from '@ccf2e/arco-material';
 import getFileIcon from '@/components/file-icon';
-import './detailModal.scss';
+import './individualModal.scss';
 
 interface DataSourceModalProps {
     visible: boolean;
@@ -28,7 +28,7 @@ interface TreeNodeType {
     isLeaf?: boolean;
     rawData?: any; // 保存原始数据引用
 }
-const DataSourceModal: React.FC<DataSourceModalProps> = ({
+const IndividualModal: React.FC<DataSourceModalProps> = ({
     visible,
     onClose,
     title = '数据源',
@@ -119,6 +119,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     const renderTreeContent = () => {
         return (
             <Tree
+                showLine
                 autoExpandParent={false}
                 treeData={treeData}
                 // checkStrictly={checkStrictly}
@@ -130,55 +131,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             />
         )
     };
-    //转换文件大小
-    const formatFileSize = (size: number): string => {
-        if (size < 1024) {
-            return `${size}B`;
-        } else if (size < 1024 * 1024) {
-            return `${(size / 1024).toFixed(2)}KB`;
-        } else if (size < 1024 * 1024 * 1024) {
-            return `${(size / 1024 / 1024).toFixed(2)}MB`;
-        } else {
-            return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-        }
-    };
-    //格式化时间函数
-    const formatDateTime = (dateTimeString: string): string => {
-        try {
-            const date = new Date(dateTimeString);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        } catch (error) {
-            return dateTimeString; // 如果格式化失败，返回原字符串
-        }
-    };
-    // 通用的操作列渲染
-    const renderActionColumn = (
-        _,
-        record,
-    ) => {
-        const params = record?.perms || [];
-        const config: {
-            label: string;
-            onClick: () => void;
-        }[] = [];
-        if (1) {
-            config.push({
-                label: '详情',
-                onClick: (() => { })
-            });
-        }
-
-        return (
-            <OperationColumn row={record} index={0} config={config} extendFont="更多" />
-        );
-    };
     useEffect(() => {
         getSourceFileTypeList({
             id: checkedKeys
@@ -188,87 +140,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }, [checkedKeys]);
     const columns = [
         {
-            title: 'ID',
-            dataIndex: 'id',
-            width: 80
-        },
-        {
-            title: '文件名',
-            dataIndex: 'file_name',
-            ellipsis: true,
-            width: 200,
-            render: (_, record) => (
-                // 产品需求：文件名提示常驻
-                <Popover content={record.file_sub_path}>
-                    <span>{record.file_name}</span>
-                </Popover>
-            )
-        },
-        {
-            title: '文件类型',
-            dataIndex: 'file_type',
-            width: 120,
-            filters: sourceFileTypeFilters,
-            render: (_, record) => (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                    }}
-                >
-                    {getFileIcon(record.file_type)}
-                    <span>{record.file_type}</span>
-                </div>
-            )
-        },
-        {
-            title: '文件大小',
-            width: 120,
-            dataIndex: 'file_size',
-            render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
-        },
-        {
-            title: '上传用户',
-            dataIndex: 'upload_user',
+            title: '姓名',
+            dataIndex: 'name',
             ellipsis: true,
             width: 100
         },
         {
-            title: '载入开始时间',
-            dataIndex: 'task_load_start_time',
-            width: 180,
-            sorter: true,
-
-            // sortOrder: 'ascend',
-            // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
-            sortDirections: ['ascend' as const, 'descend' as const],
-            render: (_, record) => formatDateTime(record.task_load_start_time)
+            title: '账号ID',
+            dataIndex: 'id',
+            width: 80
         },
-        {
-            title: '连接器名称',
-            dataIndex: 'connector_name',
-            ellipsis: true,
-            width: 160,
-            render: (_, record) => (
-                <EllipsisPopover
-                    value={record.connector_name}
-                    isEdit={false}
-                    preferTypography
-                />
-            )
-        },
-        {
-            title: '操作',
-            dataIndex: 'actions',
-            fixed: 'right' as const,
-            width: 88,
-            render: (_, record) =>
-                renderActionColumn(
-                    _,
-                    record,
-                )
-        }
     ];
     // 获取当前年份
     const currentYear = new Date().getFullYear();
@@ -441,5 +322,5 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
 };
 
 export {
-    DataSourceModal
+    IndividualModal
 }
