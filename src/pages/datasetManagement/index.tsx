@@ -1053,6 +1053,7 @@ const DatasetManagement: React.FC = () => {
     //   Message.warning('请先选择要导出的数据集');
     //   return;
     // }
+    setDownloadData(null);
     setVisible(true);
     console.log('批量导出:', selectedRows);
     // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
