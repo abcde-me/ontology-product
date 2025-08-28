@@ -38,7 +38,10 @@ const AccessDetail = () => {
       setLoading(false);
     }
   };
-
+  const reTry = (id: string) => {
+    console.log('重试的ID', id);
+    //调取重试接口
+  };
   useEffect(() => {
     getDetail();
   }, []);
@@ -138,6 +141,22 @@ const AccessDetail = () => {
                       ? RunStateType[RunState.FAILED].text
                       : ''}
             </div>
+            {arressDetail.status === 'failed' && (
+              <span
+                style={{
+                  color: '#007DFA',
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  marginLeft: '8px',
+                  fontSize: '14px'
+                }}
+                onClick={() => {
+                  reTry(arressDetail.execution_id);
+                }}
+              >
+                重试
+              </span>
+            )}
           </div>
         </div>
       </div>

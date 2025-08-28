@@ -19,7 +19,8 @@ import {
   addCatalog,
   addVolume,
   deleteVolume,
-  renameCatalog
+  renameCatalog,
+  addDb
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { PermissionGuard } from '@/components/PermissionGuard';
@@ -346,11 +347,11 @@ export function useEditableTree({ catalogTreeStore }) {
           break;
         case CatalogTypeEnum.db:
           // 新建数据库 - 后面在这里修改逻辑
-          res = await addVolume({
+          res = await addDb({
             name: fileName,
-            parent_id: dataRef.parent_id,
-            root_type: root_type,
-            type: CatalogTypeEnum.db // 明确指定类型为数据库
+            parent_id: dataRef.parent_id
+            // root_type: root_type,
+            // type: CatalogTypeEnum.db // 明确指定类型为数据库
           });
 
           if (res.status !== 200) {

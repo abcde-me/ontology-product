@@ -46,3 +46,23 @@
 .arco-timepicker-container {
   width: '100%';
 }
+
+/* 新添加的 */
+
+/* 树组件悬浮效果样式 */
+:global(.ModelTree .arco-tree-node) {
+  :global(.arco-tree-node-title) {
+    color: black !important;
+  }
+}
+
+:global(.ModelTree .arco-tree-node.arco-tree-node-selected) {
+  :global(.arco-tree-node-title) {
+    background-color: var(--color-bg-5);
+    font-weight: 400;
+    color: #007dfa;
+  }
+  :global(.whitespace-nowrap) {
+    color: #007dfa;
+  }
+}
