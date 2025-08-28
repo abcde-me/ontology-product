@@ -68,3 +68,13 @@ tbody .load-name .ellipsis-text {
   color: #6e7b8d;
   font-size: 12px;
 }
+
+.upload-file .arco-upload-trigger-drag .arco-upload-trigger-tip {
+  margin-top: 4px !important;
+}
+
+.upload-file .arco-upload-trigger-tip {
+  white-space: wrap !important;
+  padding: 0 45px;
+  line-height: 18px !important;
+}

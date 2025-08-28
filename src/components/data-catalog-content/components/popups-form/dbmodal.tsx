@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Tables from '../../dbdetail/tables';
 import AutoDefine from '../../dbdetail/auto-define';
 import Details from '../../dbdetail/details';
+
 export default function DbModal(props: {
   visible: boolean;
   onCancel: () => void;

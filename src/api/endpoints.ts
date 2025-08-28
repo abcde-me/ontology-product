@@ -328,6 +328,8 @@ export const ModaForgeResourceEndpoints = {
   getLoadListApi: PrefixAimdp + '/load_tasks_page',
   // 创建单个载入任务
   addLoadApi: PrefixAimdp + '/load_tasks',
+  //数据载入上传文件
+  uploadApi: PrefixAimdp + '/load_tasks/upload',
   // 删除指定载入任务
   delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 修改单个载入任务

@@ -55,7 +55,13 @@
     color: black !important;
   }
 }
+:global(.ModelTree .arco-tree-node-indent) {
+  background-color: white !important;
+}
 
+:global(.ModelTree .arco-tree-node-indent:hover) {
+  background-color: transparent !important;
+}
 :global(.ModelTree .arco-tree-node.arco-tree-node-selected) {
   :global(.arco-tree-node-title) {
     background-color: var(--color-bg-5);

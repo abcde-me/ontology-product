@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Tree, Input, Tooltip } from '@arco-design/web-react';
 import {
   IconCaretDown,
@@ -13,6 +13,7 @@ import {
 } from '@arco-design/web-react/es/Tree/interface';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { CatalogTypeEnum, subLeafKeys } from '../../dataCatalog/consts';
+import './index.module.css';
 
 const TreeNode = Tree.Node;
 
@@ -80,7 +81,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       }
     }, 100);
   };
-
   // 生成新的节点名称
   const generateNodeName = (
     existingNodes: TreeNodeData[],
@@ -271,7 +271,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 添加子节点
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
-    console.log('添加子节点:', dataRef);
+    // console.log('添加子节点:', dataRef?.isLastLeaf);
 
     // 生成新节点的名称
     const newName = generateNodeName([], '新建目录');
@@ -342,11 +342,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 渲染树节点标题
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
-
     return (
       <div
         className="flex items-center overflow-hidden"
         onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
+        style={{ marginLeft: dataRef?.isLastLeaf ? '-10px' : '0px' }}
       >
         {dataRef?.showInput ? (
           <Input
