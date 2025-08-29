@@ -27,6 +27,7 @@ import {
 import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { useHistory } from 'react-router';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -75,13 +76,16 @@ const DataLoadDetail = () => {
   const [editVisible, setEditVisible] = useState(false);
   // 相切列表loding的状态
   const [detailListLoading, setDetailListLoading] = useState(false);
+
+  const history = useHistory();
+
   // 点击编辑显示弹框
   const hideEditModal = () => {
     setEditVisible(false);
   };
   // 返回上一层的函数
   const OneLevelUpHan = () => {
-    history.back();
+    history.goBack();
   };
   // 通过路由id获取数据
   const getTask_idHan = async () => {
@@ -264,7 +268,7 @@ const DataLoadDetail = () => {
           }}
         >
           <BreadcrumbItem
-            href="/tenant/compute/modaforge/dataLoad"
+            onClick={() => history.push('/tenant/compute/modaforge/dataLoad')}
             style={{ color: '#7F8C9F' }}
           >
             数据载入详情
@@ -496,8 +500,8 @@ const DataLoadDetail = () => {
                   <EllipsisPopoverCom
                     value={parseCron(
                       listDetail &&
-                      listDetail.run_config &&
-                      listDetail.run_config.cycle_text
+                        listDetail.run_config &&
+                        listDetail.run_config.cycle_text
                     )}
                     isEdit={false}
                   />

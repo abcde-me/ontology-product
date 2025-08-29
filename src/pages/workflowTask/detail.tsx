@@ -552,7 +552,7 @@ export default function WorkflowTaskDetail() {
 
   const handleClickWorkflow = () => {
     openNewPage(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 

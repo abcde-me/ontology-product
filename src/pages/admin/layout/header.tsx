@@ -7,6 +7,7 @@ import cls from 'classnames';
 import { usePathChange } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
+import { openNewPage } from '@/utils/env';
 import { PrefixV2 } from '@/api/endpoints';
 import axios from 'axios';
 import { getToken } from '@/utils/request';
@@ -53,10 +54,7 @@ export default function Header({
   );
 
   const goHelp = () => {
-    window.open(
-      '../../../../assets/多模态数据治理平台 - 用户手册.pdf',
-      '_blank'
-    );
+    openNewPage('/modaforge/assets/多模态数据治理平台 - 用户手册.pdf');
     // const url = `${PrefixV2}/files/browser/api-demo`;
     // axios
     //   .get(url, {
