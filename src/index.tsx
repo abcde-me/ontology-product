@@ -103,6 +103,11 @@ function App() {
             );
           })}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
+          <Redirect
+            from="/modaforge"
+            to="/tenant/compute/modaforge/connection"
+            exact
+          />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
           <Route key="*" path="*" component={Page404} />
         </Switch>

@@ -170,7 +170,7 @@ const WorkflowIdCell = ({ record, showIcon }) => {
                 className="jump-workflow"
                 target="_blank"
                 rel="noreferrer"
-                href={`/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
+                href={`/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
               >
                 {extras.workflow_uuid}
               </a>
