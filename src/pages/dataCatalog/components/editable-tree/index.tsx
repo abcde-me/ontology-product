@@ -40,7 +40,7 @@ export default function EditableTree() {
           onChange={onSearchChange}
           maxLength={255}
           allowClear
-          style={{ height: '32px', width: '130px' }}
+          style={{ height: '32px', width: '180px' }}
         />
         <PermissionWrapper
           permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG}
