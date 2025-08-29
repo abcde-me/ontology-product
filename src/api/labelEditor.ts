@@ -18,7 +18,7 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
 }
 
 const taskResult = {
-  task_id: '',
+  task_id: 1,
   task_status: 1,
   update_time: '2025-08-23 09:09:23',
   result_type: 1,
@@ -91,7 +91,7 @@ export async function getTaskResult(taskId: string) {
   //   .post({ task_id: taskId  })
   //   .inRegion()
   //   .do();
-  taskResult.task_id = taskId;
+  taskResult.task_id = +taskId;
   return Promise.resolve({
     data: {
       data: taskResult
@@ -290,7 +290,7 @@ export async function saveImgJobAnnotations(
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
-  taskResult.result_type = params.hasResult;
+  taskResult.result_type = params.has_result;
   await saveTask(taskId, params);
   return { data: params };
 }
