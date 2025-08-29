@@ -25,7 +25,7 @@ const LoginCard = () => {
         console.error('Invalid redirect URL:', e);
       }
     }
-    return '/modaforge/tenant/compute/modaforge/connection';
+    return '/tenant/compute/modaforge/connection';
   };
 
   const handleSubmit = async (values: any) => {
