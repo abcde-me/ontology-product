@@ -11,7 +11,8 @@ export const tabKeys = [
 export enum CatalogTypeEnum {
   catalog = 1,
   volume = 2,
-  db = 3
+  db = 3,
+  table
 }
 
 export enum RootTypeEnum {

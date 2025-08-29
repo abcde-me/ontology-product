@@ -381,7 +381,9 @@ const LoadAddModal = (props: propsType) => {
   ) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
   };
-
+  const handleFileChange = (value) => {
+    console.log('上传完之后的value');
+  };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -551,9 +553,9 @@ const LoadAddModal = (props: propsType) => {
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
-            // rules={[{ required: true, message: '请输入任务名称' }]}
+            rules={[{ required: true, message: '请选择文件' }]}
           >
-            <Uploads />
+            <Uploads onFileChange={handleFileChange} />
           </FormItem>
         )}
 

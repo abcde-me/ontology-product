@@ -89,7 +89,7 @@ export default function WorkflowList() {
 
   // 创建工作流
   const handleCreateWorkflow = () => {
-    openNewPage('/tenant/compute/modaforge/workflowConfig');
+    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
   };
 
   // 跳转目录
@@ -109,7 +109,7 @@ export default function WorkflowList() {
     ds_workflow_id: number | string
   ) => {
     openNewPage(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
     );
   };
 
@@ -121,7 +121,7 @@ export default function WorkflowList() {
         content: '复制成功'
       });
       openNewPage(
-        `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
+        `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
       );
       getList();
     } else {

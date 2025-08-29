@@ -565,7 +565,7 @@ export default function Eltable() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 12,
+            marginBottom: 16,
             background: '#fff'
           }}
         >

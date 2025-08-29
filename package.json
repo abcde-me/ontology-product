@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist build",
     "start": "yarn clean && node --max-old-space-size=4096 ./scripts/start",
-    "dev": "cross-env PORT=9060 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
+    "dev": "cross-env PORT=9030 GENERATE_SOURCEMAP=false SINGLE_APP=true yarn start",
     "build": "yarn clean && cross-env NODE_ENV=production GENERATE_SOURCEMAP=false node ./scripts/build",
     "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --cache",
     "eslint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache --fix",
