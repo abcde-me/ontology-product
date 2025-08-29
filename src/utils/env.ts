@@ -17,7 +17,7 @@ export const logout = (basePath = '') => {
     (window as any).$wujie?.props?.logout();
   } else {
     if (isSingleApp) {
-      window.location.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
+      window.location.href = `/modaforge/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
     } else {
       window.location.href = `${basePath}?redirect_uri=${encodeURIComponent(window.location.href)}`;
     }
