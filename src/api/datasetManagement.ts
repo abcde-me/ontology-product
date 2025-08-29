@@ -246,7 +246,7 @@ export async function searchDatasetList(
         {
           database: 'sample_db',
           id: 1,
-          latest_size: '102400',
+          latest_size: 102400,
           latest_table: 'sample_table',
           latest_version: 'v1.0.0',
           name: '示例数据集',
@@ -260,7 +260,7 @@ export async function searchDatasetList(
         {
           database: 'test_db',
           id: 2,
-          latest_size: '204800',
+          latest_size: 204800,
           latest_table: 'test_table',
           latest_version: 'v2.1.0',
           name: '测试数据集',

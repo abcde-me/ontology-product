@@ -36,7 +36,7 @@ export interface DatasetListItem {
   /**
    * 最新版本大小(字节)
    */
-  latest_size: string;
+  latest_size: number;
   /**
    * 最新版本存储表名
    */
@@ -68,6 +68,9 @@ export interface GetDatasetListRes {
    * 页大小
    */
   limit: number;
+  /**
+   * 数据集列表
+   */
   list: DatasetListItem[];
   /**
    * 页码
