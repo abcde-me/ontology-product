@@ -17,82 +17,84 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
   return Promise.resolve();
 }
 
+const taskResult = {
+  task_id: '',
+  task_status: 1,
+  update_time: '2025-08-23 09:09:23',
+  result_type: 1,
+  result: {
+    version: 0,
+    tags: [],
+    shapes: [
+      {
+        type: 'rectangle',
+        occluded: false,
+        outside: false,
+        z_order: 0,
+        rotation: 0.0,
+        points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
+        id: 28,
+        frame: 0,
+        label_id: 2,
+        group: 0,
+        source: 'manual',
+        attributes: [
+          {
+            spec_id: 1,
+            value: 'opt1'
+          },
+          {
+            spec_id: 2,
+            value: 'opt1,other|dddddd'
+          },
+          {
+            spec_id: 3,
+            value: '1111'
+          }
+        ],
+        elements: []
+      },
+      {
+        type: 'rectangle',
+        occluded: false,
+        outside: false,
+        z_order: 0,
+        rotation: 0.0,
+        points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
+        id: 29,
+        frame: 0,
+        label_id: 2,
+        group: 0,
+        source: 'manual',
+        attributes: [
+          {
+            spec_id: 1,
+            value: 'opt1'
+          },
+          {
+            spec_id: 2,
+            value: 'opt1'
+          },
+          {
+            spec_id: 3,
+            value: ''
+          }
+        ],
+        elements: []
+      }
+    ],
+    tracks: []
+  }
+};
 export async function getTaskResult(taskId: string) {
   // return await UAPI.RES.leGetTaskReuslt({})
   //   .post({ task_id: taskId  })
   //   .inRegion()
   //   .do();
-  const res = {
-    task_id: taskId,
-    task_status: 1,
-    update_time: '2025-08-23 09:09:23',
-    result: {
-      version: 0,
-      tags: [],
-      shapes: [
-        {
-          type: 'rectangle',
-          occluded: false,
-          outside: false,
-          z_order: 0,
-          rotation: 0.0,
-          points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
-          id: 28,
-          frame: 0,
-          label_id: 2,
-          group: 0,
-          source: 'manual',
-          attributes: [
-            {
-              spec_id: 1,
-              value: 'opt1'
-            },
-            {
-              spec_id: 2,
-              value: 'opt1,other|dddddd'
-            },
-            {
-              spec_id: 3,
-              value: '1111'
-            }
-          ],
-          elements: []
-        },
-        {
-          type: 'rectangle',
-          occluded: false,
-          outside: false,
-          z_order: 0,
-          rotation: 0.0,
-          points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
-          id: 29,
-          frame: 0,
-          label_id: 2,
-          group: 0,
-          source: 'manual',
-          attributes: [
-            {
-              spec_id: 1,
-              value: 'opt1'
-            },
-            {
-              spec_id: 2,
-              value: 'opt1'
-            },
-            {
-              spec_id: 3,
-              value: ''
-            }
-          ],
-          elements: []
-        }
-      ],
-      tracks: []
-    }
-  };
+  taskResult.task_id = taskId;
   return Promise.resolve({
     data: {
-      data: res
+      data: taskResult
     }
   });
 }
@@ -288,6 +290,7 @@ export async function saveImgJobAnnotations(
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
+  taskResult.result_type = params.hasResult;
   await saveTask(taskId, params);
   return { data: params };
 }
@@ -351,7 +354,11 @@ export async function getImgJobAnnotations(taskId: string) {
     tracks: []
   };
   return Promise.resolve({
-    data: { ...annotations, update_time: result.data.data.update_time }
+    data: {
+      ...annotations,
+      update_time: result.data.data.update_time,
+      has_result: result.data.data.result_type
+    }
   });
 }
 
