@@ -142,7 +142,7 @@ function Index() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/modaforge">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
@@ -186,7 +186,6 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 
   // @ts-expect-error
   module.hot.accept('./pages/login', () => {
-    console.log('22222222');
     // 当 Login 组件发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextLogin = require('./pages/login').default;

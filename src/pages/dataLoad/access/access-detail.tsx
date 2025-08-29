@@ -9,6 +9,7 @@ import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import { useHistory } from 'react-router';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -18,9 +19,10 @@ const AccessDetail = () => {
   const name = useParams('name');
   const [arressDetail, setArressDetail] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
   // 返回上一层的函数
   const OneLevelUpHan = () => {
-    history.back();
+    history.goBack();
   };
   const [totalNum, setTotalNum] = useState(0);
   // 获取上面的详情
@@ -78,14 +80,14 @@ const AccessDetail = () => {
             }}
           >
             <BreadcrumbItem
-              href="/tenant/compute/modaforge/dataLoad"
+              onClick={() => history.push('/tenant/compute/modaforge/dataLoad')}
               style={{ color: '#7F8C9F' }}
             >
               数据载入详情
             </BreadcrumbItem>
             <BreadcrumbItem
               onClick={() => {
-                history.back();
+                history.goBack();
               }}
               className="bread-style"
             >
