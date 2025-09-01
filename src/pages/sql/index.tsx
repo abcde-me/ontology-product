@@ -7,13 +7,15 @@ import EditorContent from '@/pages/pyspark/components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
-import './index.scss';
-import Datasets from './components/Datasets';
+import DatasetsList from './components/DatasetsList';
 import ModalVolumnDetail from './components/ModalVolumnDetail';
 import ModalDbDetail from './components/ModalDbDetail';
 import ModalTableDetail from './components/ModalTableDetail';
 import ModalDatasetDetail from './components/ModalDatasetDetail';
 import { useSqlIndexStore, SqlIndexStore } from './store';
+import ModalScriptDetail from './components/ModalScriptDetail';
+
+import './index.scss';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -61,6 +63,7 @@ export default function SqlIndex() {
     showDbDetail,
     showTableDetail,
     showDatasetDetail,
+    showScriptDetail,
     handleVolumnSelect
   } = useSqlIndexHooks();
 
@@ -107,6 +110,9 @@ export default function SqlIndex() {
               <Button size="mini" onClick={showDatasetDetail}>
                 打开数据集详情
               </Button>
+              <Button size="mini" onClick={showScriptDetail}>
+                打开脚本详情
+              </Button>
             </div>
             {/* <NotebookTabContent type="data" /> */}
           </TabPane>
@@ -128,13 +134,14 @@ export default function SqlIndex() {
           />
         )}
 
-        {activeTab === 'dataset' && <Datasets />}
+        {activeTab === 'dataset' && <DatasetsList />}
       </Content>
 
       <ModalVolumnDetail />
       <ModalDbDetail />
       <ModalTableDetail />
       <ModalDatasetDetail />
+      <ModalScriptDetail />
     </Layout>
   );
 }
@@ -308,6 +315,10 @@ function useSqlIndexHooks() {
     (state: SqlIndexStore) => state.showDatasetDetail
   );
 
+  const showScriptDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showScriptDetail
+  );
+
   const setSelectedVolumnId = useSqlIndexStore(
     (state: SqlIndexStore) => state.setSelectedVolumnId
   );
@@ -331,6 +342,7 @@ function useSqlIndexHooks() {
     showDbDetail,
     showTableDetail,
     showDatasetDetail,
+    showScriptDetail,
     handleVolumnSelect
   };
 }
