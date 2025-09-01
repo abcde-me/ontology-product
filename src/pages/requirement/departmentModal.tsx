@@ -180,6 +180,16 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                         height: '60vh',
                         overflowY: 'auto',
                     }}
+                    renderTitle={({ title }: any) => {
+                        return (
+                            <span>
+                                <span style={{ width: '300px', whiteSpace: 'nowrap' }}>
+                                    {title}
+                                </span>
+                            </span>
+                        );
+
+                    }}
                     treeData={treeData}
                     // checkStrictly={checkStrictly}
                     onSelect={(value) => {

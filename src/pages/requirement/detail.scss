@@ -119,8 +119,12 @@
     }
 
     .sortable-item {
-        border: 1px solid #ccc;
         padding: 10px;
+    }
+
+    .sortable-item-content {
+        display: flex;
+        align-items: center;
     }
 
     .sortable-item-input {
@@ -156,14 +160,6 @@
         margin-bottom: 10px;
     }
 
-    .sortable-item {
-        margin-bottom: 10px;
-    }
-
-    .sortable-item-content {
-        display: flex;
-        align-items: center;
-    }
 
     .btn-content {
         margin-top: 8px;
@@ -172,6 +168,10 @@
 
     .attribute-group-item {
         background-color: #F5F9FF;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 12px;
+        margin-bottom: 12px;
     }
 
     .group-items {
@@ -241,5 +241,52 @@
 
     .btn-option-btn:hover~.btn-option-content-item {
         display: block;
+    }
+
+    .labe-and-attribute-tabs {
+        min-width: 1000px;
+
+        .arco-tabs-pane {
+            border: 1px solid #E5E7EB;
+            border-top: 0;
+        }
+
+        .arco-tabs-content {
+            padding-top: 0;
+        }
+
+        // .arco-tabs-header {
+        //     display: flex;
+        //     justify-content: space-around;
+        //     width: 100%;
+        // }
+    }
+
+    .attribute-group-item-template {
+        padding: 12px 12px 0 12px;
+        background-color: #F5F9FF;
+    }
+
+    .add-template-btn {
+        margin-top: 12px;
+        margin-left: 12px;
+    }
+
+    .btn-content-text {
+        display: flex;
+        align-items: center;
+
+        .text-content {
+            font-family: PingFang SC;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 22px;
+            margin-left: 8px;
+        }
+    }
+
+    .error-info {
+        color: #ef4444;
+        font-size: 12px;
     }
 }

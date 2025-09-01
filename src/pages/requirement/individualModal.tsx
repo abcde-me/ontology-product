@@ -253,15 +253,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                     {renderTreeContent()}
                 </div>
                 <div className='content-table'>
-                    <div className='content-table-form'>
-                        <Form className='form-option' autoComplete='off' layout='inline'>
-                            <div className='form-inputs'>
-                                <FormItem field='time'>
-                                    <DatePicker.RangePicker onChange={handleDateChange} style={{ width: 350 }} />
-                                </FormItem>
-                            </div>
-                        </Form>
-                    </div>
                     <Table
                         ref={tableRef}
                         rowKey='id'
@@ -271,7 +262,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                         rowSelection={{
                             selectedRowKeys: selectedRowKeys,
                             preserveSelectedRowKeys: true,
-                            onChange: (selectedRowKeys, selectedRows) => {
+                            onChange: (selectedRowKeys: any, selectedRows: any) => {
                                 // 合并新旧选中数据并处理取消选中
                                 const mergedMap = new Map<string, any>();
 
