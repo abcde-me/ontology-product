@@ -10,8 +10,8 @@ import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 /** 数据集详情 弹框 */
 const ModalDatasetDetail = () => {
-  const DatasetDetailVisible = useSqlIndexStore(
-    (state: SqlIndexStore) => state.DatasetDetailVisible
+  const datasetDetailVisible = useSqlIndexStore(
+    (state: SqlIndexStore) => state.datasetDetailVisible
   );
 
   const closeDatasetDetail = useSqlIndexStore(
@@ -22,7 +22,7 @@ const ModalDatasetDetail = () => {
     <Modal
       title="数据集详情"
       style={{ width: 960 }}
-      visible={DatasetDetailVisible}
+      visible={datasetDetailVisible}
       footer={null}
       onCancel={closeDatasetDetail}
     >
@@ -34,15 +34,3 @@ const ModalDatasetDetail = () => {
 };
 
 export default ModalDatasetDetail;
-
-const BaseInfo = () => {
-  return <div>BaseInfo</div>;
-};
-
-const DataContent = () => {
-  return <div>DataContent</div>;
-};
-
-const VersionHistory = () => {
-  return <div>VersionHistory</div>;
-};

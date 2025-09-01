@@ -7,7 +7,9 @@ export interface SqlIndexStore {
   /** 表详情 弹框 */
   tableDetailVisible?: boolean;
   /** 数据集详情 弹框 */
-  DatasetDetailVisible?: boolean;
+  datasetDetailVisible?: boolean;
+  /** 脚本详情 弹框 */
+  scriptDetailVisible?: boolean;
   /** 选中的数据卷 ID */
   selectedVolumnId?: string | number | null;
 
@@ -20,6 +22,8 @@ export interface SqlIndexStore {
   closeTableDetail?: () => void;
   showDatasetDetail?: () => void;
   closeDatasetDetail?: () => void;
+  showScriptDetail?: () => void;
+  closeScriptDetail?: () => void;
   setSelectedVolumnId?: (id: string | number) => void;
 }
 
@@ -27,7 +31,8 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
   volumnDetailVisible: false,
   dbDetailVisible: false,
   tableDetailVisible: false,
-  DatasetDetailVisible: false,
+  datasetDetailVisible: false,
+  scriptDetailVisible: false,
   selectedVolumnId: null,
   showVolumnDetail: () => {
     set({ volumnDetailVisible: true });
@@ -48,10 +53,16 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
     set({ tableDetailVisible: false });
   },
   showDatasetDetail: () => {
-    set({ DatasetDetailVisible: true });
+    set({ datasetDetailVisible: true });
   },
   closeDatasetDetail: () => {
-    set({ DatasetDetailVisible: false });
+    set({ datasetDetailVisible: false });
+  },
+  showScriptDetail: () => {
+    set({ scriptDetailVisible: true });
+  },
+  closeScriptDetail: () => {
+    set({ scriptDetailVisible: false });
   },
   setSelectedVolumnId: (id: string | number) => {
     set({ selectedVolumnId: id });
