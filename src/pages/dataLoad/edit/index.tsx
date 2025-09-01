@@ -6,7 +6,8 @@ import {
   Message,
   Popover,
   Radio,
-  Select
+  Select,
+  TreeSelect
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
@@ -16,6 +17,7 @@ import './index.css';
 import { validateName } from '@/utils/valiate';
 import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import ComponentTree from '../list/component-tree';
 
 // 定义目录数据类型
 interface DirectoryItem {
@@ -265,6 +267,8 @@ const Edit = (props) => {
           <RadioGroup disabled={true}>
             <Radio value="s3">对象存储</Radio>
             <Radio value="hdfs">HDFS</Radio>
+            <Radio value="db">数据库</Radio>
+            <Radio value="local">本地文件</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem
@@ -282,6 +286,27 @@ const Edit = (props) => {
             showSearch
           ></Select>
         </FormItem>
+        {props.detailData.source_type === 'db' && (
+          <FormItem
+            label="选择抽取的表："
+            field="table_id"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择抽取的表' }]}
+            initialValue={props.detailData.table_id}
+          >
+            <Select
+              mode="multiple"
+              placeholder="请选择抽取的表"
+              style={{ width: '100%', minWidth: 0 }}
+              // defaultValue={['Beijing', 'Shenzhen', 'Wuhan']}
+              allowClear
+              allowCreate
+            ></Select>
+          </FormItem>
+        )}
+
         <FormItem
           label="载入形式："
           initialValue={props.detailData.load_type}
@@ -313,30 +338,69 @@ const Edit = (props) => {
             ></SchedulerRun>
           </div>
         ) : null}
-        <FormItem
-          label="载入位置："
-          field="dest_path"
-          labelCol={{ span: 5 }}
-          wrapperCol={{ span: 19 }}
-          labelAlign="right"
-          rules={[{ required: true, message: '请选择载入位置' }]}
-        >
-          <Cascader
-            placeholder="请输入载入位置"
-            style={{ width: '100%' }}
-            options={directoryData}
-            renderOption={(node, level) => {
-              console.log(node, level);
-              return <EllipsisPopoverCom value={node.label} />;
-            }}
-            showSearch={{ retainInputValueWhileSelect: false }}
-            dropdownMenuClassName="cascader-dropdown"
-            onChange={(value) => {
-              setInitialPath(value);
-              form.setFieldsValue({ dest_path: value });
-            }}
-          />
-        </FormItem>
+        {props.detailData.source_type !== 'db' &&
+        props.detailData.source_type !== 'local' ? (
+          <FormItem
+            label="载入位置："
+            field="dest_path"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入位置' }]}
+          >
+            <Cascader
+              placeholder="请输入载入位置"
+              style={{ width: '100%' }}
+              options={directoryData}
+              renderOption={(node, level) => {
+                console.log(node, level);
+                return <EllipsisPopoverCom value={node.label} />;
+              }}
+              showSearch={{ retainInputValueWhileSelect: false }}
+              dropdownMenuClassName="cascader-dropdown"
+              onChange={(value) => {
+                setInitialPath(value);
+                form.setFieldsValue({ dest_path: value });
+              }}
+            />
+          </FormItem>
+        ) : (
+          <FormItem
+            label="载入位置："
+            field="dest_path"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入位置' }]}
+          >
+            <TreeSelect
+              className="db-tree-select"
+              placeholder="Please select ..."
+              allowClear
+              dropdownMenuStyle={{
+                maxHeight: 300,
+                padding: 0,
+                overflow: 'hidden' // 防止外层出现滚动条
+              }}
+              dropdownRender={(originNode) => (
+                <ComponentTree
+                  directoryData={directoryData}
+                  onDirectoryDataChange={setDirectoryData}
+                  // onSelect={handleSelect}
+                  onPathChange={(path) => {
+                    form.setFieldsValue({
+                      dest_path: path
+                    });
+                  }}
+                  showAddTree={true}
+                  enableRootAdd={true}
+                />
+              )}
+            >
+              {/* {generatorTreeNodes(directoryData)} */}
+            </TreeSelect>
+          </FormItem>
+        )}
       </Form>
       <div className={Styles.footerBbtnBox}>
         <Button onClick={cancelHan} style={{ marginRight: '20px' }}>

@@ -65,6 +65,15 @@ const add = forwardRef((props: any, ref) => {
         secret_key: undefined,
         region: undefined
       });
+    } else if (value === 'db') {
+      form.setFieldsValue({
+        region: '',
+        host: '',
+        port: '',
+        database: '',
+        user: '',
+        password: ''
+      });
     }
   };
   // 点击创建的按钮
@@ -214,6 +223,15 @@ const add = forwardRef((props: any, ref) => {
             {storageType == 's3' ? (
               <div>
                 <FormItem
+                  label="所属系统："
+                  field="region"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入所属系统名称" />
+                </FormItem>
+                <FormItem
                   label="Endpoint："
                   field="endpoint"
                   rules={[{ required: true, message: '请输入Endpoint' }]}
@@ -342,17 +360,17 @@ const add = forwardRef((props: any, ref) => {
               <div>
                 <FormItem
                   label="所属系统："
-                  field="db"
+                  field="region"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入所属系统名称" />
                 </FormItem>
                 <FormItem
                   label="数据库类型："
-                  field="db_type"
+                  field="sub_type"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
@@ -360,7 +378,7 @@ const add = forwardRef((props: any, ref) => {
                   disabled={inputDisabled}
                 >
                   <Select
-                    placeholder="请选择数据库类型"
+                    placeholder="请选择"
                     onChange={(value) =>
                       Message.info({
                         content: `You select ${value}.`,
@@ -378,7 +396,7 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="主机名："
-                  field="db_type"
+                  field="host"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
@@ -389,7 +407,7 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="端口："
-                  field="db_type"
+                  field="port"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
@@ -400,7 +418,7 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="数据库名："
-                  field="db_type"
+                  field="database"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
@@ -411,7 +429,7 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="用户名："
-                  field="db_type"
+                  field="user"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
@@ -422,7 +440,7 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   label="密码："
-                  field="db_type"
+                  field="password"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
