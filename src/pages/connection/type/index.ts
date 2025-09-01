@@ -34,6 +34,7 @@ interface hdfsType {
 
 // 连接器详情数据类型
 export interface connectorDetailType {
+  sub_type: string;
   id: number;
   name: string;
   type: string;
@@ -45,6 +46,10 @@ export interface connectorDetailType {
     host?: string;
     port?: string;
     user?: string;
+    system?: string; // 数据库所属系统
+    database?: string; // 数据库名
+    password?: string; // 密码
+    region?: string;
   };
   creator: string;
   created_at: string;
