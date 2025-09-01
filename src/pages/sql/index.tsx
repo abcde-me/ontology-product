@@ -3,7 +3,7 @@ import { Button, Layout, Message, Tabs } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 import { openPythonItem } from '@/api/python';
 import { OpenPythonItemRes } from '@/types/pythonApi';
-import EditorContent from '@/pages/python/components/editor';
+import EditorContent from '@/pages/pyspark/components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
