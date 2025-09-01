@@ -155,7 +155,6 @@ export interface SrcChildren {
    * 卷，固定写死为volume
    */
   volume: FluffyVolume[];
-  [property: string]: any;
 }
 
 export interface SrcCatalogItem {
