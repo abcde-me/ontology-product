@@ -123,7 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
-export const PrefixAimdpEngine = '/label-engine/api/v1';
+export const PrefixLabelEngine = '/label-engine/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -165,6 +165,7 @@ export const ResourceEndpointsV2 = {
   catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
   catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
+  dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
@@ -254,6 +255,20 @@ export const ModaForgeResourceEndpoints = {
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  // 工作流-脚本类型
+  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  // 工作流-脚本执行器列表
+  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  // 工作流-脚本模板
+  scriptingTemplate:
+    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  // 工作流-脚本执行
+  scriptingBench:
+    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  // 工作流-脚本执行结果
+  scriptingBenchResult:
+    PrefixAimdp +
+    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -327,6 +342,8 @@ export const ModaForgeResourceEndpoints = {
   getLoadListApi: PrefixAimdp + '/load_tasks_page',
   // 创建单个载入任务
   addLoadApi: PrefixAimdp + '/load_tasks',
+  //数据载入上传文件
+  uploadApi: PrefixAimdp + '/load_tasks/upload',
   // 删除指定载入任务
   delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 修改单个载入任务
@@ -357,9 +374,26 @@ export const ModaForgeResourceEndpoints = {
 
   // 数据标注接口
   // 获取数据标注列表
-  getAnnotationListApi: PrefixAimdpEngine + '/list',
+  getAnnotationListApi: PrefixLabelEngine + '/list',
   // 获取数据标注 - 任务列表
-  getAnnotationTaskListApi: PrefixAimdpEngine + '/taskList',
+  getAnnotationTaskListApi: PrefixLabelEngine + '/taskList',
+  // python开发
+  pythonListApi: PrefixAimdp + '/pyspark/{id}/list',
+  pythonCreateApi: PrefixAimdp + '/pyspark',
+  pythonRenameApi: PrefixAimdp + '/pyspark/{id}/rename',
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{id}/delete',
+  pythonCopyApi: PrefixAimdp + '/pyspark/{id}/copy',
+  pythonOpenApi: PrefixAimdp + '/pyspark/{id}/open',
+  pythonSaveApi: PrefixAimdp + '/pyspark/{id}/modify',
+  pythonRunApi: PrefixAimdp + '/pyspark/{id}/run',
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{id}/run_cancel',
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{id}/get_run_result',
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{id}/get_run_log',
+
+  leGetTask: PrefixLabelEngine + '/getTask',
+  leGetLabels: PrefixLabelEngine + '/getLabels',
+  leSaveTask: PrefixLabelEngine + '/saveTask',
+  leGetTaskReuslt: PrefixLabelEngine + '/getTaskReuslt'
 };
 
 /**

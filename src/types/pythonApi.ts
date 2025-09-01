@@ -1,0 +1,156 @@
+// 请求参数
+export interface PythonListParams {
+  /** 搜索名称，模糊搜索 */
+  name?: string;
+  /** 搜索模式：0-不返回子目录中的文件，1-返回子目录中的文件 */
+  mode?: 0 | 1;
+  /** 页码，从1开始 */
+  page?: number;
+  /** 每页数量 */
+  page_size?: number;
+}
+
+// 响应结构
+export enum PythonItemType {
+  Notebook = 'notebook',
+  Directory = 'directory'
+}
+
+export interface PythonListItem {
+  /** 项目标识 */
+  id: number;
+  /** 名称（文件或文件夹） */
+  name: string;
+  /** 类型：notebook | directory */
+  type: PythonItemType;
+  /** 文件的父目录，根目录为 . */
+  path: string;
+  /** 文件的父目录id */
+  path_id: number;
+  /** 创建时间，格式：YYYY-MM-DD HH:mm:ss */
+  created: string;
+  /** 更新时间，格式：YYYY-MM-DD HH:mm:ss */
+  last_modified: string;
+}
+
+export interface PythonListRes {
+  /** 父目录名称 */
+  path_name: string;
+  /** 父目录id */
+  path_id: number;
+  /** 列表项 */
+  items: PythonListItem[];
+  /** 总数 */
+  total: number;
+  /** 当前页码 */
+  page: number;
+  /** 每页数量 */
+  page_size: number;
+}
+
+// 创建请求/响应
+export interface CreatePythonItemReq {
+  /** 创建文件/文件夹的位置目录id，若为根目录置为0 */
+  path_id: number;
+  /** notebook - 文件；directory - 文件夹 */
+  type: PythonItemType;
+  /** 文件/文件夹名称 */
+  name: string;
+}
+
+export type CreatePythonItemRes = PythonListItem;
+
+// 重命名请求/响应
+export interface RenamePythonItemReq {
+  /** 文件id */
+  id: number;
+  /** 重命名后的名称 */
+  name: string;
+  /** 文件路径 */
+  path: string;
+  /** notebook - 文件；directory - 文件夹 */
+  type: PythonItemType;
+}
+
+export interface RenamePythonItemRes {
+  /** 文件id */
+  id: number;
+}
+
+export interface CopyPythonItemReq {
+  /** 被复制文件的id */
+  id: number;
+  /** 复制后的文件名称 */
+  name: string;
+}
+
+export type CopyPythonItemRes = PythonListItem;
+
+export enum RunningStatus {
+  /** 未运行 */
+  IDLE = -1,
+  /** 运行失败 */
+  FAILED = 0,
+  /** 运行成功 */
+  SUCCESS = 1,
+  /** 运行中 */
+  RUNNING = 2
+}
+
+// 打开Python项目响应结构
+export interface OpenPythonItemRes {
+  /** 任务执行id */
+  execid: number;
+  /** 运行状态：-1未运行 0失败 1成功 2运行中 */
+  running_status: RunningStatus;
+  /** Python文件代码内容 */
+  data: string;
+}
+export interface SavePythonItemReq {
+  /** 文件id */
+  id: number;
+  /** Python文件代码内容 */
+  data: string;
+}
+
+export interface SavePythonItemRes {
+  /** 文件id */
+  id: number;
+  /** 最后修改时间 */
+  last_modified: string;
+}
+
+export interface RunPythonItemRes {
+  /** 任务执行id */
+  execid: string;
+  /** 文件id */
+  id: number;
+}
+
+export interface GetRunResultReq {
+  /** 任务执行id */
+  execid: string;
+}
+
+export interface GetRunResultRes {
+  /** 运行结果 */
+  run_result: string;
+  /** 运行状态：0失败 1成功 2运行中 -1未运行 */
+  run_status: RunningStatus;
+  /** 运行耗时（秒） */
+  run_duration: number;
+  /** 运行结束时间（格式：yyyy-MM-dd HH:mm） */
+  run_end_time: string;
+}
+
+export interface GetRunLogReq {
+  /** 任务执行id */
+  execid: string;
+  /** 日志大小 */
+  size?: number;
+}
+
+export interface GetRunLogRes {
+  /** 日志 */
+  log: string;
+}

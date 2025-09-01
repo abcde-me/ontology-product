@@ -61,7 +61,8 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/configurationpage',
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/workflowPublic',
-  '/tenant/compute/modaforge/agentCreate'
+  '/tenant/compute/modaforge/agentCreate',
+  '/tenant/compute/modaforge/labelEditor'
 ];
 
 function App() {
@@ -103,6 +104,11 @@ function App() {
             );
           })}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
+          <Redirect
+            from="/modaforge"
+            to="/tenant/compute/modaforge/connection"
+            exact
+          />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
           <Route key="*" path="*" component={Page404} />
         </Switch>
@@ -141,7 +147,7 @@ function Index() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/modaforge">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
@@ -177,7 +183,6 @@ render(Index);
 if (process.env.NODE_ENV === 'development' && module.hot) {
   // @ts-expect-error
   module.hot.accept('./pages/admin/layout', () => {
-    console.log('11111111111');
     // 当 App 组件或其依赖发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextApp = require('./pages/admin/layout').default;
@@ -186,7 +191,6 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 
   // @ts-expect-error
   module.hot.accept('./pages/login', () => {
-    console.log('22222222');
     // 当 Login 组件发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextLogin = require('./pages/login').default;
@@ -195,7 +199,6 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 
   // @ts-expect-error
   module.hot.accept('./pages/errorPages', () => {
-    console.log('333333');
     // 当错误页面组件发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextPage404 = require('./pages/errorPages').default;

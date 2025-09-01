@@ -38,7 +38,7 @@ export default function SourceData() {
   };
 
   return (
-    <div className="data-catalog-left-box mr-[8px] w-[220px] overflow-auto rounded border border-solid border-[#E2E8F0]">
+    <div className="data-catalog-left-box mr-[16px] w-[260px] overflow-auto rounded border border-solid border-[#E2E8F0]">
       <div className="h-[40px] w-full">
         <Tabs
           activeTab={activeTab}

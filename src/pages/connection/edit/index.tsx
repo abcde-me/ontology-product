@@ -1,8 +1,18 @@
 import { validateName } from '@/utils/valiate';
-import { Button, Form, Input, Modal, Radio } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Radio,
+  Select
+} from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 // 表单
 const FormItem = Form.Item;
+const Option = Select.Option;
+const options = ['Mysql', 'Postgre'];
 // 单选
 const RadioGroup = Radio.Group;
 const Edit = (props: any) => {
@@ -27,12 +37,22 @@ const Edit = (props: any) => {
               region: props.editObj.config.region,
               path: props.editObj.config.path
             }
-          : {
-              host: props.editObj.config.host,
-              port: props.editObj.config.port,
-              user: props.editObj.config.user,
-              path: props.editObj.config.path
-            })
+          : props.editObj.type === 'hdfs'
+            ? {
+                host: props.editObj.config.host,
+                port: props.editObj.config.port,
+                user: props.editObj.config.user,
+                path: props.editObj.config.path
+              }
+            : {
+                region: props.editObj.config.region,
+                sub_type: props.editObj.sub_type,
+                host: props.editObj.config.host,
+                port: props.editObj.config.port,
+                database: props.editObj.config.database,
+                user: props.editObj.config.user,
+                password: props.editObj.config.password
+              })
       });
     }
   }, [props.editObj]);
@@ -88,6 +108,7 @@ const Edit = (props: any) => {
             >
               <Radio value="s3">对象存储</Radio>
               <Radio value="hdfs">HDFS</Radio>
+              <Radio value="db">数据库</Radio>
             </RadioGroup>
           </FormItem>
           <span
@@ -156,7 +177,7 @@ const Edit = (props: any) => {
                 <Input placeholder="请输入" />
               </FormItem>
             </div>
-          ) : (
+          ) : storageType == 'hdfs' ? (
             <div>
               <FormItem
                 label="Host："
@@ -232,6 +253,102 @@ const Edit = (props: any) => {
                 <Input placeholder="请输入" />
               </FormItem>
             </div>
+          ) : (
+            <>
+              <div>
+                <FormItem
+                  label="所属系统："
+                  field="region"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  initialValue={props.editObj.config.region}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="数据库类型："
+                  field="sub_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                  initialValue={props.editObj.sub_type}
+                >
+                  <Select
+                    placeholder="请选择数据库类型"
+                    onChange={(value) =>
+                      Message.info({
+                        content: `You select ${value}.`,
+                        showIcon: true
+                      })
+                    }
+                    disabled={true}
+                  >
+                    {options.map((option, index) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  label="主机名："
+                  field="host"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入主机名' }]}
+                  initialValue={props.editObj.config.host}
+                >
+                  <Input placeholder="请输入，如localhost，10.2.2.1" />
+                </FormItem>
+                <FormItem
+                  label="端口："
+                  field="port"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入端口' }]}
+                  initialValue={props.editObj.config.port}
+                >
+                  <Input placeholder="请输入，如3306" />
+                </FormItem>
+                <FormItem
+                  label="数据库名："
+                  field="database"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入数据库名' }]}
+                  initialValue={props.editObj.config.database}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="用户名："
+                  field="user"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                  initialValue={props.editObj.config.user}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="密码："
+                  field="password"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入密码' }]}
+                  initialValue={props.editObj.config.password}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+              </div>
+            </>
           )}
         </Form>
       </div>

@@ -4,7 +4,8 @@ import {
   Input,
   Message,
   Modal,
-  Radio
+  Radio,
+  Select
 } from '@arco-design/web-react';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import '../index.css';
@@ -14,6 +15,8 @@ import { filterValues } from '@/api/filterValues';
 import { validateName } from '@/utils/valiate';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const Option = Select.Option;
+const options = ['Mysql', 'Postgre'];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
   const [form] = Form.useForm();
@@ -25,6 +28,8 @@ const add = forwardRef((props: any, ref) => {
 
   // 确定按钮的状态
   const [loading, setLoading] = useState<boolean>(false);
+  //判断输入框的状态
+  const [inputDisabled, setInputDisabled] = useState(false);
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     displayModalView: () => {
@@ -60,6 +65,15 @@ const add = forwardRef((props: any, ref) => {
         secret_key: undefined,
         region: undefined
       });
+    } else if (value === 'db') {
+      form.setFieldsValue({
+        region: '',
+        host: '',
+        port: '',
+        database: '',
+        user: '',
+        password: ''
+      });
     }
   };
   // 点击创建的按钮
@@ -77,6 +91,7 @@ const add = forwardRef((props: any, ref) => {
         config: { ...values }
       };
       setLoading(true);
+      setInputDisabled(true);
       const res = await addconnectionList(newfrom);
       if (res.message == 'ok') {
         Message.success('测试通过，连接器创建成功');
@@ -91,6 +106,7 @@ const add = forwardRef((props: any, ref) => {
       console.log('验证失败', error);
     } finally {
       setLoading(false);
+      setInputDisabled(false);
     }
   };
   const resetHan = () => {
@@ -142,7 +158,7 @@ const add = forwardRef((props: any, ref) => {
                 fontWeight: '400'
               }}
             >
-              {'测试并保存'}
+              {'测试并创建'}
             </Button>
           </div>
         }
@@ -192,6 +208,7 @@ const add = forwardRef((props: any, ref) => {
               >
                 <Radio value="s3">对象存储</Radio>
                 <Radio value="hdfs">HDFS</Radio>
+                <Radio value="db">数据库</Radio>
               </RadioGroup>
             </FormItem>
             <span
@@ -205,6 +222,15 @@ const add = forwardRef((props: any, ref) => {
             </span>
             {storageType == 's3' ? (
               <div>
+                <FormItem
+                  label="所属系统："
+                  field="region"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                >
+                  <Input placeholder="请输入所属系统名称" />
+                </FormItem>
                 <FormItem
                   label="Endpoint："
                   field="endpoint"
@@ -257,7 +283,7 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="<桶名>/<文件夹路径>或<桶名>" />
                 </FormItem>
               </div>
-            ) : (
+            ) : storageType == 'hdfs' ? (
               <div>
                 <FormItem
                   label="Host："
@@ -328,6 +354,100 @@ const add = forwardRef((props: any, ref) => {
                   ]}
                 >
                   <Input placeholder="请输入HDFS日录路径，如/user/data" />
+                </FormItem>
+              </div>
+            ) : (
+              <div>
+                <FormItem
+                  label="所属系统："
+                  field="region"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入所属系统名称" />
+                </FormItem>
+                <FormItem
+                  label="数据库类型："
+                  field="sub_type"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                  disabled={inputDisabled}
+                >
+                  <Select
+                    placeholder="请选择"
+                    onChange={(value) =>
+                      Message.info({
+                        content: `You select ${value}.`,
+                        showIcon: true
+                      })
+                    }
+                    disabled={true}
+                  >
+                    {options.map((option, index) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  label="主机名："
+                  field="host"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入主机名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入，如localhost，10.2.2.1" />
+                </FormItem>
+                <FormItem
+                  label="端口："
+                  field="port"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入端口' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入，如3306" />
+                </FormItem>
+                <FormItem
+                  label="数据库名："
+                  field="database"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入数据库名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="用户名："
+                  field="user"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="密码："
+                  field="password"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 19 }}
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入密码' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入" />
                 </FormItem>
               </div>
             )}

@@ -4,9 +4,11 @@
   position: fixed;
   z-index: 100;
   background-color: #fff;
-  width: 203px;
+  width: 258px;
 }
-
+.tabs-center .arco-tabs-header-title {
+  padding: 9px 40px !important;
+}
 /* Custom tree node hover style */
 /* .arco-tree-node-title:hover {
   width: auto !important;

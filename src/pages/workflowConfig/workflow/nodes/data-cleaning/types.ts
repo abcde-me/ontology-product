@@ -40,6 +40,11 @@ export type CodeNodeType = CommonNodeType & {
   remove_invisible: boolean | number;
   remove_html: boolean | number;
   sample_data: string;
+  md5: boolean | number;
+  ngram: boolean | number;
+  mg_duplicate_checkbox: string;
+  mg_duplicate_ngram: number;
+  mg_duplicate: boolean;
 };
 
 export type CodeDependency = any;

@@ -86,6 +86,21 @@ const TableDetail = (props) => {
                 停止
               </span>
             )}
+          {item.status === 'failed' && (
+            <span
+              style={{
+                color: '#007DFA',
+                cursor: 'pointer',
+                display: 'inline-block',
+                marginLeft: '8px'
+              }}
+              onClick={() => {
+                reTry(item.execution_id);
+              }}
+            >
+              重试
+            </span>
+          )}
         </div>
       ),
       filters: [
@@ -210,6 +225,12 @@ const TableDetail = (props) => {
   // 模态框点击取消
   const modalNo = () => {
     setVisible(false);
+  };
+  //重试
+  const reTry = (id: string) => {
+    console.log('重试的ID', id);
+
+    //调取重试接口
   };
   useEffect(() => {
     setData(props.datalist);

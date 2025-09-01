@@ -56,8 +56,13 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       unicode,
       traditional_to_simplified,
       case_uniformity,
-      case_transform
+      case_transform,
+      mg_duplicate_checkbox,
+      mg_duplicate_ngram
     } = payload;
+    const mg_duplicate =
+      mg_duplicate_checkbox === 'md5' ||
+      (mg_duplicate_ngram !== undefined && mg_duplicate_checkbox === 'ngram');
     // 是否有其中一项true
     const isCleaningChecked = () => {
       return [
@@ -67,6 +72,7 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
         qd_is,
         df_is,
         oh_is,
+        mg_duplicate,
         threshold_switch && threshold > 0
       ].some(Boolean);
     };

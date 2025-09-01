@@ -42,6 +42,9 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.traditional_to_simplified = payload.traditional_to_simplified;
         draft.case_transform = payload.case_transform;
         draft.case_uniformity = payload.case_uniformity;
+        draft.mg_duplicate_checkbox = payload.mg_duplicate_checkbox;
+        draft.mg_duplicate_ngram = payload.mg_duplicate_ngram;
+        draft.mg_duplicate = payload?.mg_duplicate;
         draft.dclean_type = [
           {
             type: 'data_standardization',
@@ -52,7 +55,9 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               traditional_to_simplified: payload?.traditional_to_simplified
                 ? 1
                 : 0,
-              case_transform: payload?.case_uniformity ? payload?.case_transform : 0
+              case_transform: payload?.case_uniformity
+                ? payload?.case_transform
+                : 0
             }
           },
           {
@@ -102,6 +107,18 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             options: {
               // 1 处理 0 不处理
               oh_is: payload?.oh_is ? 1 : 0
+            }
+          },
+          {
+            type: 'deduplication',
+            title: '数据去重',
+            options: {
+              // 1 处理 0 不处理
+              ngram:
+                payload?.mg_duplicate_checkbox === 'ngram'
+                  ? payload?.mg_duplicate_ngram
+                  : 0,
+              md5: payload?.mg_duplicate_checkbox === 'md5' ? 1 : 0
             }
           }
         ];

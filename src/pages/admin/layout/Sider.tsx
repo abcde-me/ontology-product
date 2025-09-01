@@ -112,6 +112,29 @@ const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '数据开发',
+    key: 'DataDevelop',
+    children: [
+      {
+        title: 'PySpark开发',
+        icon: (
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'pyspark',
+        path: '/tenant/compute/modaforge/pyspark'
+      },
+      {
+        title: 'SQL开发',
+        icon: (
+          <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
+        ),
+        key: 'sql',
+        path: '/tenant/compute/modaforge/sql'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '数据管理',
     key: 'DataManagement',
     children: [
@@ -190,7 +213,7 @@ const menus: MenuModel[] = [
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList',
         permission: 'organizations:can_search'
-      },
+      }
     ]
   }
 ];
@@ -258,7 +281,8 @@ const hideSidebarPaths = [
   '/tenant/compute/modaforge/agentCreate',
   '/tenant/compute/modaforge/agentPage',
   '/tenant/compute/modaforge/login',
-  '/tenant/compute/modaforge/userinfo'
+  '/tenant/compute/modaforge/userinfo',
+  '/tenant/compute/modaforge/labelEditor'
 ];
 const collapseSidebarPaths = [
   '/tenant/compute/modaforge/appCreate',

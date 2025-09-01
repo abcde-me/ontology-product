@@ -1390,6 +1390,11 @@
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
   integrity sha1-7EBwoE12uujduxB3C6VXFKQXt8Y=
 
+"@babel/runtime@^7.18.6":
+  version "7.28.3"
+  resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.28.3.tgz#75c5034b55ba868121668be5d5bb31cc64e6e61a"
+  integrity sha1-dcUDS1W6hoEhZovl1bsxzGTm5ho=
+
 "@babel/template@^7.27.1", "@babel/template@^7.27.2", "@babel/template@^7.3.3":
   version "7.27.2"
   resolved "http://npm.cestc.cn/@babel/template/download/@babel/template-7.27.2.tgz#fa78ceed3c4e7b63ebf6cb39e5852fca45f6809d"
@@ -1469,6 +1474,365 @@
   version "11.0.3"
   resolved "http://npm.cestc.cn/@chevrotain/utils/download/@chevrotain/utils-11.0.3.tgz#e39999307b102cff3645ec4f5b3665f5297a2224"
   integrity sha1-45mZMHsQLP82RexPWzZl9Sl6IiQ=
+
+"@codemirror/autocomplete@^6.0.0", "@codemirror/autocomplete@^6.3.2", "@codemirror/autocomplete@^6.7.1":
+  version "6.18.6"
+  resolved "http://npm.cestc.cn/@codemirror/autocomplete/download/@codemirror/autocomplete-6.18.6.tgz#de26e864a1ec8192a1b241eb86addbb612964ddb"
+  integrity sha1-3iboZKHsgZKhskHrhq3bthKWTds=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/common" "^1.0.0"
+
+"@codemirror/commands@^6.0.0", "@codemirror/commands@^6.1.0":
+  version "6.8.1"
+  resolved "http://npm.cestc.cn/@codemirror/commands/download/@codemirror/commands-6.8.1.tgz#639f5559d2f33f2582a2429c58cb0c1b925c7a30"
+  integrity sha1-Y59VWdLzPyWCokKcWMsMG5JcejA=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.4.0"
+    "@codemirror/view" "^6.27.0"
+    "@lezer/common" "^1.1.0"
+
+"@codemirror/lang-angular@^0.1.0":
+  version "0.1.4"
+  resolved "http://npm.cestc.cn/@codemirror/lang-angular/download/@codemirror/lang-angular-0.1.4.tgz#5b9e940786ba201a9a42eab6db9501fa3fe2292a"
+  integrity sha1-W56UB4a6IBqaQuq225UB+j/iKSo=
+  dependencies:
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.1.2"
+    "@codemirror/language" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.3.3"
+
+"@codemirror/lang-cpp@^6.0.0":
+  version "6.0.3"
+  resolved "http://npm.cestc.cn/@codemirror/lang-cpp/download/@codemirror/lang-cpp-6.0.3.tgz#b175b59fcde8dd6e563b7feee8bbed81963a9491"
+  integrity sha1-sXW1n83o3W5WO3/u6LvtgZY6lJE=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@lezer/cpp" "^1.0.0"
+
+"@codemirror/lang-css@^6.0.0", "@codemirror/lang-css@^6.2.0":
+  version "6.3.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-css/download/@codemirror/lang-css-6.3.1.tgz#763ca41aee81bb2431be55e3cfcc7cc8e91421a3"
+  integrity sha1-djykGu6BuyQxvlXjz8x8yOkUIaM=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.2"
+    "@lezer/css" "^1.1.7"
+
+"@codemirror/lang-go@^6.0.0":
+  version "6.0.0"
+  resolved "http://npm.cestc.cn/@codemirror/lang-go/download/@codemirror/lang-go-6.0.0.tgz#67ce0307be40195918d6d3f015bfac0620f550cb"
+  integrity sha1-Z84DB75AGVkY1tPwFb+sBiD1UMs=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.6.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/go" "^1.0.0"
+
+"@codemirror/lang-html@^6.0.0", "@codemirror/lang-html@^6.4.0":
+  version "6.4.9"
+  resolved "http://npm.cestc.cn/@codemirror/lang-html/download/@codemirror/lang-html-6.4.9.tgz#d586f2cc9c341391ae07d1d7c545990dfa069727"
+  integrity sha1-1YbyzJw0E5GuB9HXxUWZDfoGlyc=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/lang-css" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.0.0"
+    "@codemirror/language" "^6.4.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/css" "^1.1.0"
+    "@lezer/html" "^1.3.0"
+
+"@codemirror/lang-java@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-java/download/@codemirror/lang-java-6.0.2.tgz#601d5b3d774a4a997d11647ccb6c05702c54bd5b"
+  integrity sha1-YB1bPXdKSpl9EWR8y2wFcCxUvVs=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@lezer/java" "^1.0.0"
+
+"@codemirror/lang-javascript@^6.0.0", "@codemirror/lang-javascript@^6.1.0", "@codemirror/lang-javascript@^6.1.2":
+  version "6.2.4"
+  resolved "http://npm.cestc.cn/@codemirror/lang-javascript/download/@codemirror/lang-javascript-6.2.4.tgz#eef2227d1892aae762f3a0f212f72bec868a02c5"
+  integrity sha1-7vIifRiSqudi86DyEvcr7IaKAsU=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.6.0"
+    "@codemirror/lint" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/javascript" "^1.0.0"
+
+"@codemirror/lang-json@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-json/download/@codemirror/lang-json-6.0.2.tgz#054b160671306667e25d80385286049841836179"
+  integrity sha1-BUsWBnEwZmfiXYA4UoYEmEGDYXk=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@lezer/json" "^1.0.0"
+
+"@codemirror/lang-less@^6.0.0", "@codemirror/lang-less@^6.0.1":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-less/download/@codemirror/lang-less-6.0.2.tgz#2e3d82a3ddb8710e6409689cd4a28c66558d0cb8"
+  integrity sha1-Lj2Co924cQ5kCWic1KKMZlWNDLg=
+  dependencies:
+    "@codemirror/lang-css" "^6.2.0"
+    "@codemirror/language" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@codemirror/lang-lezer@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-lezer/download/@codemirror/lang-lezer-6.0.2.tgz#d80286c3595a540bdb954ed13773ebf3b7d5d13f"
+  integrity sha1-2AKGw1laVAvblU7RN3Pr87fV0T8=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/lezer" "^1.0.0"
+
+"@codemirror/lang-liquid@^6.0.0":
+  version "6.2.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-liquid/download/@codemirror/lang-liquid-6.2.1.tgz#78ded5e5b2aabbdf4687787ba9a29fce0da7e2ad"
+  integrity sha1-eN7V5bKqu99Gh3h7qaKfzg2n4q0=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.3.1"
+
+"@codemirror/lang-liquid@^6.0.1":
+  version "6.2.3"
+  resolved "http://npm.cestc.cn/@codemirror/lang-liquid/download/@codemirror/lang-liquid-6.2.3.tgz#cbdb38cbf2c59bc334292420401f88aa6c4b4b27"
+  integrity sha1-y9s4y/LFm8M0KSQgQB+IqmxLSyc=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.3.1"
+
+"@codemirror/lang-markdown@^6.0.0", "@codemirror/lang-markdown@^6.1.0":
+  version "6.3.4"
+  resolved "http://npm.cestc.cn/@codemirror/lang-markdown/download/@codemirror/lang-markdown-6.3.4.tgz#c1c021ba65ba21c4e9b1f6d5add809b4c9e02c8d"
+  integrity sha1-wcAhumW6IcTpsfbVrdgJtMngLI0=
+  dependencies:
+    "@codemirror/autocomplete" "^6.7.1"
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/language" "^6.3.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/common" "^1.2.1"
+    "@lezer/markdown" "^1.0.0"
+
+"@codemirror/lang-php@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-php/download/@codemirror/lang-php-6.0.2.tgz#bdc439d195c8e73513bc5b971a99a57b5c99ee55"
+  integrity sha1-vcQ50ZXI5zUTvFuXGpmle1yZ7lU=
+  dependencies:
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/php" "^1.0.0"
+
+"@codemirror/lang-python@^6.0.0", "@codemirror/lang-python@^6.1.0":
+  version "6.2.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-python/download/@codemirror/lang-python-6.2.1.tgz#37c9930716110156865a95c548aa0eef5552863a"
+  integrity sha1-N8mTBxYRAVaGWpXFSKoO71VShjo=
+  dependencies:
+    "@codemirror/autocomplete" "^6.3.2"
+    "@codemirror/language" "^6.8.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.2.1"
+    "@lezer/python" "^1.1.4"
+
+"@codemirror/lang-rust@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-rust/download/@codemirror/lang-rust-6.0.2.tgz#69146e6b3e8f961ef149059aecb9e07bfd7bf3bd"
+  integrity sha1-aRRuaz6Plh7xSQWa7Lnge/17870=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@lezer/rust" "^1.0.0"
+
+"@codemirror/lang-sass@^6.0.0", "@codemirror/lang-sass@^6.0.1":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-sass/download/@codemirror/lang-sass-6.0.2.tgz#38c1b0a1326cc9f5cb2741d2cd51cfbcd7abc0b2"
+  integrity sha1-OMGwoTJsyfXLJ0HSzVHPvNerwLI=
+  dependencies:
+    "@codemirror/lang-css" "^6.2.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.0.2"
+    "@lezer/sass" "^1.0.0"
+
+"@codemirror/lang-sql@^6.0.0", "@codemirror/lang-sql@^6.4.0":
+  version "6.9.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-sql/download/@codemirror/lang-sql-6.9.1.tgz#9eb9f7203afef6f0f344dbaf306c8a2c6279001d"
+  integrity sha1-nrn3IDr+9vDzRNuvMGyKLGJ5AB0=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@codemirror/lang-vue@^0.1.1":
+  version "0.1.3"
+  resolved "http://npm.cestc.cn/@codemirror/lang-vue/download/@codemirror/lang-vue-0.1.3.tgz#bf79b9152cc18b4903d64c1f67e186ae045c8a97"
+  integrity sha1-v3m5FSzBi0kD1kwfZ+GGrgRcipc=
+  dependencies:
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.1.2"
+    "@codemirror/language" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.3.1"
+
+"@codemirror/lang-wast@^6.0.0":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@codemirror/lang-wast/download/@codemirror/lang-wast-6.0.2.tgz#d2b14175e5e80d7878cbbb29e20ec90dc12d3a2b"
+  integrity sha1-0rFBdeXoDXh4y7sp4g7JDcEtOis=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@codemirror/lang-xml@^6.0.0":
+  version "6.1.0"
+  resolved "http://npm.cestc.cn/@codemirror/lang-xml/download/@codemirror/lang-xml-6.1.0.tgz#e3e786e1a89fdc9520efe75c1d6d3de1c40eb91c"
+  integrity sha1-4+eG4aif3JUg7+dcHW094cQOuRw=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.4.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/common" "^1.0.0"
+    "@lezer/xml" "^1.0.0"
+
+"@codemirror/lang-yaml@^6.0.0":
+  version "6.1.1"
+  resolved "http://npm.cestc.cn/@codemirror/lang-yaml/download/@codemirror/lang-yaml-6.1.1.tgz#6f6e4e16c5a4e6d549f462c9dc2053439e070d0d"
+  integrity sha1-b25OFsWk5tVJ9GLJ3CBTQ54HDQ0=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.2.0"
+    "@lezer/yaml" "^1.0.0"
+
+"@codemirror/language-data@>=6.0.0":
+  version "6.5.1"
+  resolved "http://npm.cestc.cn/@codemirror/language-data/download/@codemirror/language-data-6.5.1.tgz#5cb9413d5225ef27a577c23781bbc0b36c58bb67"
+  integrity sha1-XLlBPVIl7yeld8I3gbvAs2xYu2c=
+  dependencies:
+    "@codemirror/lang-angular" "^0.1.0"
+    "@codemirror/lang-cpp" "^6.0.0"
+    "@codemirror/lang-css" "^6.0.0"
+    "@codemirror/lang-go" "^6.0.0"
+    "@codemirror/lang-html" "^6.0.0"
+    "@codemirror/lang-java" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.0.0"
+    "@codemirror/lang-json" "^6.0.0"
+    "@codemirror/lang-less" "^6.0.0"
+    "@codemirror/lang-liquid" "^6.0.0"
+    "@codemirror/lang-markdown" "^6.0.0"
+    "@codemirror/lang-php" "^6.0.0"
+    "@codemirror/lang-python" "^6.0.0"
+    "@codemirror/lang-rust" "^6.0.0"
+    "@codemirror/lang-sass" "^6.0.0"
+    "@codemirror/lang-sql" "^6.0.0"
+    "@codemirror/lang-vue" "^0.1.1"
+    "@codemirror/lang-wast" "^6.0.0"
+    "@codemirror/lang-xml" "^6.0.0"
+    "@codemirror/lang-yaml" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/legacy-modes" "^6.4.0"
+
+"@codemirror/language@^6.0.0", "@codemirror/language@^6.3.0", "@codemirror/language@^6.4.0", "@codemirror/language@^6.6.0", "@codemirror/language@^6.8.0", "@codemirror/language@^6.9.0":
+  version "6.11.3"
+  resolved "http://npm.cestc.cn/@codemirror/language/download/@codemirror/language-6.11.3.tgz#8e6632df566a7ed13a1bd307f9837765bb1abfdd"
+  integrity sha1-jmYy31ZqftE6G9MH+YN3Zbsav90=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.23.0"
+    "@lezer/common" "^1.1.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+    style-mod "^4.0.0"
+
+"@codemirror/legacy-modes@>=6.0.0", "@codemirror/legacy-modes@^6.4.0":
+  version "6.5.1"
+  resolved "http://npm.cestc.cn/@codemirror/legacy-modes/download/@codemirror/legacy-modes-6.5.1.tgz#6bd13fac94f67a825e5420017e0d2f3c35d09342"
+  integrity sha1-a9E/rJT2eoJeVCABfg0vPDXQk0I=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+
+"@codemirror/lint@^6.0.0":
+  version "6.8.5"
+  resolved "http://npm.cestc.cn/@codemirror/lint/download/@codemirror/lint-6.8.5.tgz#9edaa808e764e28e07665b015951934c8ec3a418"
+  integrity sha1-ntqoCOdk4o4HZlsBWVGTTI7DpBg=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.35.0"
+    crelt "^1.0.5"
+
+"@codemirror/search@^6.0.0":
+  version "6.5.11"
+  resolved "http://npm.cestc.cn/@codemirror/search/download/@codemirror/search-6.5.11.tgz#a324ffee36e032b7f67aa31c4fb9f3e6f9f3ed63"
+  integrity sha1-oyT/7jbgMrf2eqMcT7nz5vnz7WM=
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    crelt "^1.0.5"
+
+"@codemirror/state@^6.0.0", "@codemirror/state@^6.1.1", "@codemirror/state@^6.4.0", "@codemirror/state@^6.5.0":
+  version "6.5.2"
+  resolved "http://npm.cestc.cn/@codemirror/state/download/@codemirror/state-6.5.2.tgz#8eca3a64212a83367dc85475b7d78d5c9b7076c6"
+  integrity sha1-jso6ZCEqgzZ9yFR1t9eNXJtwdsY=
+  dependencies:
+    "@marijn/find-cluster-break" "^1.0.0"
+
+"@codemirror/theme-one-dark@^6.0.0":
+  version "6.1.3"
+  resolved "http://npm.cestc.cn/@codemirror/theme-one-dark/download/@codemirror/theme-one-dark-6.1.3.tgz#1dbb73f6e73c53c12ad2aed9f48c263c4e63ea37"
+  integrity sha1-Hbtz9uc8U8Eq0q7Z9IwmPE5j6jc=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+    "@lezer/highlight" "^1.0.0"
+
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.27.0", "@codemirror/view@^6.35.0":
+  version "6.38.1"
+  resolved "http://npm.cestc.cn/@codemirror/view/download/@codemirror/view-6.38.1.tgz#74214434351719ec0710431363a85f7a01e80a73"
+  integrity sha1-dCFENDUXGewHEEMTY6hfegHoCnM=
+  dependencies:
+    "@codemirror/state" "^6.5.0"
+    crelt "^1.0.6"
+    style-mod "^4.1.0"
+    w3c-keyname "^2.2.4"
 
 "@colors/colors@1.5.0":
   version "1.5.0"
@@ -2361,6 +2725,158 @@
     "@lexical/selection" "0.18.0"
     lexical "0.18.0"
 
+"@lezer/common@^1.0.0", "@lezer/common@^1.0.2", "@lezer/common@^1.1.0", "@lezer/common@^1.2.0", "@lezer/common@^1.2.1":
+  version "1.2.3"
+  resolved "http://npm.cestc.cn/@lezer/common/download/@lezer/common-1.2.3.tgz#138fcddab157d83da557554851017c6c1e5667fd"
+  integrity sha1-E4/N2rFX2D2lV1VIUQF8bB5WZ/0=
+
+"@lezer/cpp@^1.0.0":
+  version "1.1.3"
+  resolved "http://npm.cestc.cn/@lezer/cpp/download/@lezer/cpp-1.1.3.tgz#3029a542f4624fba0ed28f96511b34b8e7906352"
+  integrity sha1-MCmlQvRiT7oO0o+WURs0uOeQY1I=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/css@^1.1.0", "@lezer/css@^1.1.7":
+  version "1.3.0"
+  resolved "http://npm.cestc.cn/@lezer/css/download/@lezer/css-1.3.0.tgz#296f298814782c2fad42a936f3510042cdcd2034"
+  integrity sha1-KW8piBR4LC+tQqk281EAQs3NIDQ=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.3.0"
+
+"@lezer/go@^1.0.0":
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/@lezer/go/download/@lezer/go-1.0.0.tgz#26cd2463f8583e630f52e714dca6d7420c5f7d7e"
+  integrity sha1-Js0kY/hYPmMPUucU3KbXQgxffX4=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/highlight@^1.0.0", "@lezer/highlight@^1.1.3", "@lezer/highlight@^1.1.6", "@lezer/highlight@^1.2.0":
+  version "1.2.1"
+  resolved "http://npm.cestc.cn/@lezer/highlight/download/@lezer/highlight-1.2.1.tgz#596fa8f9aeb58a608be0a563e960c373cbf23f8b"
+  integrity sha1-WW+o+a61imCL4KVj6WDDc8vyP4s=
+  dependencies:
+    "@lezer/common" "^1.0.0"
+
+"@lezer/html@^1.3.0":
+  version "1.3.10"
+  resolved "http://npm.cestc.cn/@lezer/html/download/@lezer/html-1.3.10.tgz#1be9a029a6fe835c823b20a98a449a630416b2af"
+  integrity sha1-G+mgKab+g1yCOyCpikSaYwQWsq8=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/java@^1.0.0":
+  version "1.1.3"
+  resolved "http://npm.cestc.cn/@lezer/java/download/@lezer/java-1.1.3.tgz#9efd6a29b4142d07f211076a6fb5e8061c85e147"
+  integrity sha1-nv1qKbQULQfyEQdqb7XoBhyF4Uc=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/javascript@^1.0.0":
+  version "1.5.1"
+  resolved "http://npm.cestc.cn/@lezer/javascript/download/@lezer/javascript-1.5.1.tgz#2a424a6ec29f1d4ef3c34cbccc5447e373618ad8"
+  integrity sha1-KkJKbsKfHU7zw0y8zFRH43Nhitg=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.1.3"
+    "@lezer/lr" "^1.3.0"
+
+"@lezer/json@^1.0.0":
+  version "1.0.3"
+  resolved "http://npm.cestc.cn/@lezer/json/download/@lezer/json-1.0.3.tgz#e773a012ad0088fbf07ce49cfba875cc9e5bc05f"
+  integrity sha1-53OgEq0AiPvwfOSc+6h1zJ5bwF8=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/lezer@^1.0.0":
+  version "1.1.2"
+  resolved "http://npm.cestc.cn/@lezer/lezer/download/@lezer/lezer-1.1.2.tgz#c2bf13d505ad193d9b8f6cdc1b0f9c71aa6abd98"
+  integrity sha1-wr8T1QWtGT2bj2zcGw+ccapqvZg=
+  dependencies:
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/lr@^1.0.0", "@lezer/lr@^1.1.0", "@lezer/lr@^1.3.0", "@lezer/lr@^1.3.1", "@lezer/lr@^1.3.10", "@lezer/lr@^1.3.3", "@lezer/lr@^1.4.0":
+  version "1.4.2"
+  resolved "http://npm.cestc.cn/@lezer/lr/download/@lezer/lr-1.4.2.tgz#931ea3dea8e9de84e90781001dae30dea9ff1727"
+  integrity sha1-kx6j3qjp3oTpB4EAHa4w3qn/Fyc=
+  dependencies:
+    "@lezer/common" "^1.0.0"
+
+"@lezer/markdown@^1.0.0":
+  version "1.4.3"
+  resolved "http://npm.cestc.cn/@lezer/markdown/download/@lezer/markdown-1.4.3.tgz#a742ed5e782ac4913a621dfd1e6a8e409f4dd589"
+  integrity sha1-p0LtXngqxJE6Yh39HmqOQJ9N1Yk=
+  dependencies:
+    "@lezer/common" "^1.0.0"
+    "@lezer/highlight" "^1.0.0"
+
+"@lezer/php@^1.0.0":
+  version "1.0.4"
+  resolved "http://npm.cestc.cn/@lezer/php/download/@lezer/php-1.0.4.tgz#b759a4ac71ca318aa7855971bdb65082b9d69e65"
+  integrity sha1-t1mkrHHKMYqnhVlxvbZQgrnWnmU=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.1.0"
+
+"@lezer/python@^1.1.4":
+  version "1.1.18"
+  resolved "http://npm.cestc.cn/@lezer/python/download/@lezer/python-1.1.18.tgz#fa02fbf492741c82dc2dc98a0a042bd0d4d7f1d3"
+  integrity sha1-+gL79JJ0HILcLcmKCgQr0NTX8dM=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/rust@^1.0.0":
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/@lezer/rust/download/@lezer/rust-1.0.2.tgz#cc9a75605d67182a0e799ac40b1965a61dcc6ef0"
+  integrity sha1-zJp1YF1nGCoOeZrECxllph3MbvA=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/sass@^1.0.0":
+  version "1.0.6"
+  resolved "http://npm.cestc.cn/@lezer/sass/download/@lezer/sass-1.0.6.tgz#2ba5294c6995023988e7971fc04757bc0d83b120"
+  integrity sha1-K6UpTGmVAjmI55cfwEdXvA2DsSA=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/xml@^1.0.0":
+  version "1.0.5"
+  resolved "http://npm.cestc.cn/@lezer/xml/download/@lezer/xml-1.0.5.tgz#4bb7fd3e527f41b78372477aa753f035b41c3846"
+  integrity sha1-S7f9PlJ/QbeDckd6p1PwNbQcOEY=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.0.0"
+
+"@lezer/yaml@^1.0.0":
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/@lezer/yaml/download/@lezer/yaml-1.0.2.tgz#52e577f1284920d73e2d19089d408afb6b68d3b7"
+  integrity sha1-UuV38ShJINc+LRkInUCK+2to07c=
+  dependencies:
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.0.0"
+    "@lezer/lr" "^1.4.0"
+
 "@ljharb/resumer@~0.0.1":
   version "0.0.1"
   resolved "http://npm.cestc.cn/@ljharb/resumer/download/@ljharb/resumer-0.0.1.tgz#8a940a9192dd31f6a1df17564bbd26dc6ad3e68d"
@@ -2399,6 +2915,11 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
+"@marijn/find-cluster-break@^1.0.0":
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/@marijn/find-cluster-break/download/@marijn/find-cluster-break-1.0.2.tgz#775374306116d51c0c500b8c4face0f9a04752d8"
+  integrity sha1-d1N0MGEW1RwMUAuMT6zg+aBHUtg=
+
 "@mermaid-js/parser@^0.3.0":
   version "0.3.0"
   resolved "http://npm.cestc.cn/@mermaid-js/parser/download/@mermaid-js/parser-0.3.0.tgz#7a28714599f692f93df130b299fa1aadc9f9c8ab"
@@ -2424,6 +2945,21 @@
   integrity sha1-vMaGceNYohw4FFZrhlpUsZHiQRk=
   dependencies:
     "@monaco-editor/loader" "^1.4.0"
+
+"@nextjournal/lang-clojure@^1.0.0":
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/@nextjournal/lang-clojure/download/@nextjournal/lang-clojure-1.0.0.tgz#0efbd594769e606eea532758519a239f0d38959d"
+  integrity sha1-DvvVlHaeYG7qUydYUZojnw04lZ0=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@nextjournal/lezer-clojure" "1.0.0"
+
+"@nextjournal/lezer-clojure@1.0.0":
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/@nextjournal/lezer-clojure/download/@nextjournal/lezer-clojure-1.0.0.tgz#0e7ff75f8d0fabed36d26b9f6b5f00d8a9f385e6"
+  integrity sha1-Dn/3X40Pq+020mufa18A2KnzheY=
+  dependencies:
+    "@lezer/lr" "^1.0.0"
 
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
@@ -2644,6 +3180,28 @@
   version "4.6.0"
   resolved "http://npm.cestc.cn/@remixicon/react/download/@remixicon/react-4.6.0.tgz#c25276338b4d7acd29075c5b26a20f19feecac04"
   integrity sha1-wlJ2M4tNes0pB1xbJqIPGf7srAQ=
+
+"@replit/codemirror-lang-csharp@^6.1.0":
+  version "6.2.0"
+  resolved "http://npm.cestc.cn/@replit/codemirror-lang-csharp/download/@replit/codemirror-lang-csharp-6.2.0.tgz#bd652f5788ad93579ee0dcab5b163ed2674b974f"
+  integrity sha1-vWUvV4itk1ee4NyrWxY+0mdLl08=
+
+"@replit/codemirror-lang-nix@^6.0.1":
+  version "6.0.1"
+  resolved "http://npm.cestc.cn/@replit/codemirror-lang-nix/download/@replit/codemirror-lang-nix-6.0.1.tgz#d87af4ce9eb2cf30fdd64c9be0cb576783331217"
+  integrity sha1-2Hr0zp6yzzD91kyb4MtXZ4MzEhc=
+
+"@replit/codemirror-lang-solidity@^6.0.1":
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/@replit/codemirror-lang-solidity/download/@replit/codemirror-lang-solidity-6.0.2.tgz#035443a0f40bc95e333980f626d0c4ae92d95a4a"
+  integrity sha1-A1RDoPQLyV4zOYD2JtDErpLZWko=
+  dependencies:
+    "@lezer/highlight" "^1.2.0"
+
+"@replit/codemirror-lang-svelte@^6.0.0":
+  version "6.0.0"
+  resolved "http://npm.cestc.cn/@replit/codemirror-lang-svelte/download/@replit/codemirror-lang-svelte-6.0.0.tgz#a9d36a2c762280db66809190f0d68fa43befe0d9"
+  integrity sha1-qdNqLHYigNtmgJGQ8NaPpDvv4Nk=
 
 "@rollup/plugin-babel@^5.2.0":
   version "5.3.1"
@@ -4953,6 +5511,82 @@
   dependencies:
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
+
+"@uiw/codemirror-extensions-basic-setup@4.25.1":
+  version "4.25.1"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-extensions-basic-setup/download/@uiw/codemirror-extensions-basic-setup-4.25.1.tgz#f6280248f6f4acd010d21b936538819b5b29a6d0"
+  integrity sha1-9igCSPb0rNAQ0huTZTiBm1spptA=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/commands" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/lint" "^6.0.0"
+    "@codemirror/search" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
+"@uiw/codemirror-extensions-langs@^4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-extensions-langs/download/@uiw/codemirror-extensions-langs-4.24.2.tgz#396ceafbd80abcf93a5830769388621af2443e54"
+  integrity sha1-OWzq+9gKvPk6WDB2k4hiGvJEPlQ=
+  dependencies:
+    "@codemirror/lang-angular" "^0.1.0"
+    "@codemirror/lang-cpp" "^6.0.0"
+    "@codemirror/lang-css" "^6.2.0"
+    "@codemirror/lang-html" "^6.4.0"
+    "@codemirror/lang-java" "^6.0.0"
+    "@codemirror/lang-javascript" "^6.1.0"
+    "@codemirror/lang-json" "^6.0.0"
+    "@codemirror/lang-less" "^6.0.1"
+    "@codemirror/lang-lezer" "^6.0.0"
+    "@codemirror/lang-liquid" "^6.0.1"
+    "@codemirror/lang-markdown" "^6.1.0"
+    "@codemirror/lang-php" "^6.0.0"
+    "@codemirror/lang-python" "^6.1.0"
+    "@codemirror/lang-rust" "^6.0.0"
+    "@codemirror/lang-sass" "^6.0.1"
+    "@codemirror/lang-sql" "^6.4.0"
+    "@codemirror/lang-vue" "^0.1.1"
+    "@codemirror/lang-wast" "^6.0.0"
+    "@codemirror/lang-xml" "^6.0.0"
+    "@codemirror/language-data" ">=6.0.0"
+    "@codemirror/legacy-modes" ">=6.0.0"
+    "@nextjournal/lang-clojure" "^1.0.0"
+    "@replit/codemirror-lang-csharp" "^6.1.0"
+    "@replit/codemirror-lang-nix" "^6.0.1"
+    "@replit/codemirror-lang-solidity" "^6.0.1"
+    "@replit/codemirror-lang-svelte" "^6.0.0"
+    codemirror-lang-mermaid "^0.5.0"
+
+"@uiw/codemirror-theme-bbedit@^4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
+  integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
+"@uiw/codemirror-themes@^4.24.2":
+  version "4.24.2"
+  resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
+  integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
+"@uiw/react-codemirror@^4.25.1":
+  version "4.25.1"
+  resolved "http://npm.cestc.cn/@uiw/react-codemirror/download/@uiw/react-codemirror-4.25.1.tgz#eabfd78af19af38cda54a781527911f31f366ddf"
+  integrity sha1-6r/XivGa84zaVKeBUnkR8x82bd8=
+  dependencies:
+    "@babel/runtime" "^7.18.6"
+    "@codemirror/commands" "^6.1.0"
+    "@codemirror/state" "^6.1.1"
+    "@codemirror/theme-one-dark" "^6.0.0"
+    "@uiw/codemirror-extensions-basic-setup" "4.25.1"
+    codemirror "^6.0.0"
 
 "@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.2.0":
   version "1.3.0"
@@ -7279,6 +7913,28 @@ code-point-at@^1.0.0:
   resolved "http://npm.cestc.cn/code-point-at/download/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
+codemirror-lang-mermaid@^0.5.0:
+  version "0.5.0"
+  resolved "http://npm.cestc.cn/codemirror-lang-mermaid/download/codemirror-lang-mermaid-0.5.0.tgz#7e31bd474128febf6296d72412e85d86a9a493eb"
+  integrity sha1-fjG9R0Eo/r9iltckEuhdhqmkk+s=
+  dependencies:
+    "@codemirror/language" "^6.9.0"
+    "@lezer/highlight" "^1.1.6"
+    "@lezer/lr" "^1.3.10"
+
+codemirror@^6.0.0:
+  version "6.0.2"
+  resolved "http://npm.cestc.cn/codemirror/download/codemirror-6.0.2.tgz#4d3fea1ad60b6753f97ca835f2f48c6936a8946e"
+  integrity sha1-TT/qGtYLZ1P5fKg18vSMaTaolG4=
+  dependencies:
+    "@codemirror/autocomplete" "^6.0.0"
+    "@codemirror/commands" "^6.0.0"
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/lint" "^6.0.0"
+    "@codemirror/search" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.0.0"
+
 coffeeify@^3.0.1:
   version "3.0.1"
   resolved "http://npm.cestc.cn/coffeeify/download/coffeeify-3.0.1.tgz#5e2753000c50bd24c693115f33864248dd11136c"
@@ -7407,7 +8063,7 @@ commander@*, commander@~9.4.1:
   resolved "http://npm.cestc.cn/commander/download/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
   integrity sha1-0d2PLOb6+TFHKVwN8Tx8IRQc+90=
 
-commander@2, commander@^2.20.0, commander@^2.9.0:
+commander@2, commander@^2.19.0, commander@^2.20.0, commander@^2.9.0:
   version "2.20.3"
   resolved "http://npm.cestc.cn/commander/download/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha1-/UhehMA+tIgcIHIrpIA16FMa6zM=
@@ -7803,6 +8459,11 @@ create-require@^1.1.0:
   version "1.1.1"
   resolved "http://npm.cestc.cn/create-require/download/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha1-wdfo8eX2z8n/ZfnNNS03NIdWwzM=
+
+crelt@^1.0.5, crelt@^1.0.6:
+  version "1.0.6"
+  resolved "http://npm.cestc.cn/crelt/download/crelt-1.0.6.tgz#7cc898ea74e190fb6ef9dae57f8f81cf7302df72"
+  integrity sha1-fMiY6nThkPtu+drlf4+Bz3MC33I=
 
 cross-env@^7.0.3:
   version "7.0.3"
@@ -9073,6 +9734,11 @@ dir-glob@^3.0.1:
   integrity sha1-Vtv3PZkqSpO6FYT0U0Bj/S5BcX8=
   dependencies:
     path-type "^4.0.0"
+
+discontinuous-range@1.0.0:
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/discontinuous-range/download/discontinuous-range-1.0.0.tgz#e38331f0844bba49b9a9cb71c771585aab1bc65a"
+  integrity sha1-44Mx8IRLukm5qctxx3FYWqsbxlo=
 
 dlv@^1.1.3:
   version "1.1.3"
@@ -10996,6 +11662,11 @@ get-proto@^1.0.0, get-proto@^1.0.1:
   dependencies:
     dunder-proto "^1.0.1"
     es-object-atoms "^1.0.0"
+
+get-stdin@=8.0.0:
+  version "8.0.0"
+  resolved "http://npm.cestc.cn/get-stdin/download/get-stdin-8.0.0.tgz#cbad6a73feb75f6eeb22ba9e01f89aa28aa97a53"
+  integrity sha1-y61qc/63X27rIrqeAfiaooqpelM=
 
 get-stdin@^4.0.1:
   version "4.0.1"
@@ -15565,6 +16236,11 @@ monaco-editor@^0.46.0:
   resolved "http://npm.cestc.cn/monaco-editor/download/monaco-editor-0.46.0.tgz#013e453fd2408997e4fe0bf67b36a80a24bc7bcc"
   integrity sha1-AT5FP9JAiZfk/gv2ezaoCiS8e8w=
 
+moo@^0.5.0:
+  version "0.5.2"
+  resolved "http://npm.cestc.cn/moo/download/moo-0.5.2.tgz#f9fe82473bc7c184b0d32e2215d3f6e67278733c"
+  integrity sha1-+f6CRzvHwYSw0y4iFdP25nJ4czw=
+
 mri@^1.2.0:
   version "1.2.0"
   resolved "http://npm.cestc.cn/mri/download/mri-1.2.0.tgz#6721480fec2a11a4889861115a48b6cbe7cc8f0b"
@@ -15633,6 +16309,16 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "http://npm.cestc.cn/natural-compare/download/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
+
+nearley@^2.20.1:
+  version "2.20.1"
+  resolved "http://npm.cestc.cn/nearley/download/nearley-2.20.1.tgz#246cd33eff0d012faf197ff6774d7ac78acdd474"
+  integrity sha1-JGzTPv8NAS+vGX/2d016x4rN1HQ=
+  dependencies:
+    commander "^2.19.0"
+    moo "^0.5.0"
+    railroad-diagrams "^1.0.0"
+    randexp "0.4.6"
 
 needle@^3.1.0:
   version "3.3.1"
@@ -17816,10 +18502,23 @@ raf@^3.4.1:
   dependencies:
     performance-now "^2.1.0"
 
+railroad-diagrams@^1.0.0:
+  version "1.0.0"
+  resolved "http://npm.cestc.cn/railroad-diagrams/download/railroad-diagrams-1.0.0.tgz#eb7e6267548ddedfb899c1b90e57374559cddb7e"
+  integrity sha1-635iZ1SN3t+4mcG5Dlc3RVnN234=
+
 ramda@~0.26.1:
   version "0.26.1"
   resolved "http://npm.cestc.cn/ramda/download/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha1-jUE1HrgRHFU1Nhf8O7/62OTTXQY=
+
+randexp@0.4.6:
+  version "0.4.6"
+  resolved "http://npm.cestc.cn/randexp/download/randexp-0.4.6.tgz#e986ad5e5e31dae13ddd6f7b3019aa7c87f60ca3"
+  integrity sha1-6YatXl4x2uE93W97MBmqfIf2DKM=
+  dependencies:
+    discontinuous-range "1.0.0"
+    ret "~0.1.10"
 
 randomatic@^3.0.0:
   version "3.1.1"
@@ -19822,6 +20521,15 @@ sprintf-js@~1.0.2:
   resolved "http://npm.cestc.cn/sprintf-js/download/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
+sql-formatter@^15.4.0:
+  version "15.4.0"
+  resolved "http://npm.cestc.cn/sql-formatter/download/sql-formatter-15.4.0.tgz#b4236760f96132ee786e0acb58bc5a740f11f1b9"
+  integrity sha1-tCNnYPlhMu54bgrLWLxadA8R8bk=
+  dependencies:
+    argparse "^2.0.1"
+    get-stdin "=8.0.0"
+    nearley "^2.20.1"
+
 sshpk@^1.14.1:
   version "1.18.0"
   resolved "http://npm.cestc.cn/sshpk/download/sshpk-1.18.0.tgz#1663e55cddf4d688b86a46b77f0d5fe363aba028"
@@ -20301,6 +21009,11 @@ style-loader@^3.3.1:
   version "3.3.4"
   resolved "http://npm.cestc.cn/style-loader/download/style-loader-3.3.4.tgz#f30f786c36db03a45cbd55b6a70d930c479090e7"
   integrity sha1-8w94bDbbA6RcvVW2pw2TDEeQkOc=
+
+style-mod@^4.0.0, style-mod@^4.1.0:
+  version "4.1.2"
+  resolved "http://npm.cestc.cn/style-mod/download/style-mod-4.1.2.tgz#ca238a1ad4786520f7515a8539d5a63691d7bf67"
+  integrity sha1-yiOKGtR4ZSD3UVqFOdWmNpHXv2c=
 
 style-search@^0.1.0:
   version "0.1.0"
@@ -22049,6 +22762,11 @@ w3c-hr-time@^1.0.2:
   dependencies:
     browser-process-hrtime "^1.0.0"
 
+w3c-keyname@^2.2.4:
+  version "2.2.8"
+  resolved "http://npm.cestc.cn/w3c-keyname/download/w3c-keyname-2.2.8.tgz#7b17c8c6883d4e8b86ac8aba79d39e880f8869c5"
+  integrity sha1-exfIxog9TouGrIq6edOeiA+IacU=
+
 w3c-xmlserializer@^2.0.0:
   version "2.0.0"
   resolved "http://npm.cestc.cn/w3c-xmlserializer/download/w3c-xmlserializer-2.0.0.tgz#3e7104a05b75146cc60f564380b7f683acf1020a"
@@ -22762,6 +23480,21 @@ ws@^8.13.0:
   version "8.18.2"
   resolved "http://npm.cestc.cn/ws/download/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
   integrity sha1-QnOLK+V87YX0YVQyCqu1GrADcFo=
+
+wujie-react@1.0.29:
+  version "1.0.29"
+  resolved "http://npm.cestc.cn/wujie-react/download/wujie-react-1.0.29.tgz#471cebfe23ec9016901a7393643a0836bf1abeac"
+  integrity sha1-Rxzr/iPskBaQGnOTZDoINr8avqw=
+  dependencies:
+    prop-types "^15.8.1"
+    wujie "1.0.29"
+
+wujie@1.0.29:
+  version "1.0.29"
+  resolved "http://npm.cestc.cn/wujie/download/wujie-1.0.29.tgz#af26c9ce293743dd75fbaf51c870549f950712c8"
+  integrity sha1-rybJzik3Q911+69RyHBUn5UHEsg=
+  dependencies:
+    "@babel/runtime" "^7.18.6"
 
 x-is-string@^0.1.0:
   version "0.1.0"

@@ -20,7 +20,7 @@ const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 //   require(resolveApp('package.json')).homepage,
 //   process.env.PUBLIC_URL
 // );
-const publicUrlOrPath = '/';
+const publicUrlOrPath = '/modaforge/';
 // const buildPath = process.env.BUILD_PATH || 'build';
 const buildPath = 'dist';
 
@@ -35,13 +35,13 @@ const moduleFileExtensions = [
   'tsx',
   'json',
   'web.jsx',
-  'jsx',
+  'jsx'
 ];
 
 // Resolve file paths in the same order as webpack
 const resolveModule = (resolveFn, filePath) => {
   const extension = moduleFileExtensions.find((extension) =>
-    fs.existsSync(resolveFn(`${filePath}.${extension}`)),
+    fs.existsSync(resolveFn(`${filePath}.${extension}`))
   );
 
   if (extension) {
@@ -71,7 +71,7 @@ module.exports = {
   appTsBuildInfoFile: resolveApp('node_modules/.cache/tsconfig.tsbuildinfo'),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
   publicUrlOrPath,
-  appDistPath: resolveApp('dist'),
+  appDistPath: resolveApp('dist')
 };
 
 module.exports.moduleFileExtensions = moduleFileExtensions;

@@ -1,0 +1,339 @@
+import React, { useState, useEffect } from 'react';
+import { Button, Input, Empty, Spin } from '@arco-design/web-react';
+import {
+  IconArrowLeft,
+  IconSearch,
+  IconFile,
+  IconFolder
+} from '@arco-design/web-react/icon';
+import { useDasetTree } from '../../hooks/useDasetTree';
+import {
+  DatasetListItem,
+  DatasetVersionFileItem,
+  Scheam
+} from '@/types/datasetManagement';
+import './index.scss';
+
+interface DataSetTreeProps {
+  type: 'sql' | 'python';
+  onBack?: () => void;
+  onSelectFile?: (file: DatasetVersionFileItem | Scheam) => void;
+  onInsertFile?: (file: DatasetVersionFileItem | Scheam) => void;
+  onSelectDataset?: (dataset: DatasetListItem) => void;
+  onInsertDataset?: (dataset: DatasetListItem) => void;
+  onViewDatasetDetail?: (dataset: DatasetListItem) => void;
+}
+
+const DataSetTree: React.FC<DataSetTreeProps> = ({
+  type,
+  onBack,
+  onSelectFile,
+  onInsertFile,
+  onSelectDataset,
+  onInsertDataset,
+  onViewDatasetDetail
+}) => {
+  const {
+    dasetList,
+    dasetFileList,
+    scheamList,
+    currentPage,
+    getDasetList,
+    getDasetVersionFile,
+    getScheamList
+  } = useDasetTree(type);
+
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedFile, setSelectedFile] = useState<
+    DatasetVersionFileItem | Scheam | null
+  >(null);
+  const [selectedDataset, setSelectedDataset] =
+    useState<DatasetListItem | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>('');
+  const [isFileView, setIsFileView] = useState(false);
+  const [currentDataset, setCurrentDataset] = useState<DatasetListItem | null>(
+    null
+  );
+
+  useEffect(() => {
+    getDasetList();
+  }, [type]);
+
+  // 处理搜索
+  const handleSearch = (value: string) => {
+    setSearchKeyword(value);
+    // TODO: 实现搜索功能
+    getDasetList();
+  };
+
+  // 处理返回
+  const handleBack = () => {
+    if (isFileView) {
+      setIsFileView(false);
+      setCurrentDataset(null);
+      setCurrentPath('');
+      setSelectedFile(null);
+    } else if (onBack) {
+      onBack();
+    }
+  };
+
+  // 处理点击数据集
+  const handleDatasetClick = async (dataset: DatasetListItem) => {
+    setCurrentDataset(dataset);
+    // setSelectedDataset(dataset);
+    setIsFileView(true);
+    setCurrentPath(`.../${dataset.name}`);
+
+    // 根据类型使用不同的API请求
+    if (type === 'sql') {
+      // SQL类型使用getScheamList
+      getScheamList(dataset.id);
+    } else {
+      // Python类型使用getDasetVersionFile
+      await getDasetVersionFile(dataset.id, dataset.latest_version, 1, 50);
+    }
+  };
+
+  // 处理数据集选择
+  const handleDatasetSelect = (dataset: DatasetListItem) => {
+    // setSelectedDataset(dataset);
+    onSelectDataset?.(dataset);
+  };
+
+  // 处理数据集插入
+  const handleDatasetInsert = (
+    dataset: DatasetListItem,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    onInsertDataset?.(dataset);
+  };
+
+  // 处理查看数据集详情
+  const handleViewDatasetDetail = (
+    dataset: DatasetListItem,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    onViewDatasetDetail?.(dataset);
+  };
+
+  // 处理文件选择
+  const handleFileSelect = (file: DatasetVersionFileItem | Scheam) => {
+    setSelectedFile(file);
+    onSelectFile?.(file);
+  };
+
+  // 处理插入文件
+  const handleInsertFile = (
+    file: DatasetVersionFileItem | Scheam,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    onInsertFile?.(file);
+  };
+
+  // 格式化文件大小
+  const formatFileSize = (size: string | number) => {
+    if (typeof size === 'string') {
+      const numSize = parseInt(size, 10);
+      if (isNaN(numSize)) return size;
+      size = numSize;
+    }
+
+    if (size < 1024) return `${size}B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`;
+    if (size < 1024 * 1024 * 1024)
+      return `${(size / (1024 * 1024)).toFixed(2)}MB`;
+    return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
+  };
+
+  // 格式化数据集大小
+  const formatDatasetSize = (size: number) => {
+    if (size < 1024) return `${size}B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`;
+    if (size < 1024 * 1024 * 1024)
+      return `${(size / (1024 * 1024)).toFixed(2)}MB`;
+    return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
+  };
+
+  // 根据类型获取当前文件列表
+  const getCurrentFileList = () => {
+    if (type === 'sql') {
+      return scheamList;
+    } else {
+      return dasetFileList;
+    }
+  };
+
+  // 获取文件显示名称
+  const getFileDisplayName = (file: DatasetVersionFileItem | Scheam) => {
+    if ('file_name' in file) {
+      return file.file_name;
+    }
+    if ('name' in file) {
+      return file.name || '未命名字段';
+    }
+    return '未知';
+  };
+
+  // 获取文件大小显示
+  const getFileSizeDisplay = (file: DatasetVersionFileItem | Scheam) => {
+    if ('file_size' in file) {
+      return formatFileSize(file.file_size);
+    }
+    // SQL类型的字段没有大小信息，显示为字段类型
+    return '字段';
+  };
+
+  // 检查文件是否被选中
+  const isFileSelected = (file: DatasetVersionFileItem | Scheam) => {
+    if (!selectedFile) return false;
+
+    if ('file_name' in file && 'file_name' in selectedFile) {
+      return file.file_name === selectedFile.file_name;
+    }
+    if ('name' in file && 'name' in selectedFile) {
+      return file.name === selectedFile.name;
+    }
+    return false;
+  };
+
+  return (
+    <div className="dataset-tree">
+      {/* 第一部分：标题导航 */}
+      <div className="dataset-tree__header">
+        <div className="dataset-tree__header-left">
+          <IconArrowLeft
+            className="dataset-tree__back-icon"
+            onClick={handleBack}
+          />
+          <span className="dataset-tree__title">
+            {isFileView ? currentPath : '数据集'}
+          </span>
+        </div>
+      </div>
+
+      {/* 第二部分：搜索框 */}
+      <div className="dataset-tree__search">
+        <Input.Search
+          placeholder={isFileView ? '搜索当前文件夹' : '输入关键词搜索'}
+          value={searchKeyword}
+          onChange={setSearchKeyword}
+          onSearch={handleSearch}
+          allowClear
+          className="dataset-tree__search-input"
+        />
+      </div>
+
+      {/* 第三部分：列表 */}
+      <div className="dataset-tree__content">
+        {isFileView ? (
+          // 文件列表视图
+          <div className="dataset-tree__file-list">
+            {getCurrentFileList().length > 0 ? (
+              getCurrentFileList().map((file, index) => {
+                const isSelected = isFileSelected(file);
+
+                return (
+                  <div
+                    key={index}
+                    className={`dataset-tree__file-item ${isSelected ? 'dataset-tree__file-item--selected' : ''}`}
+                    onClick={() => handleFileSelect(file)}
+                  >
+                    <div className="dataset-tree__file-item-left">
+                      <IconFile className="dataset-tree__file-icon" />
+                      <div className="dataset-tree__file-info">
+                        <div className="dataset-tree__file-name">
+                          {getFileDisplayName(file)}
+                        </div>
+                        <div className="dataset-tree__file-size">
+                          {getFileSizeDisplay(file)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="dataset-tree__file-actions">
+                      <Button
+                        type="outline"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInsertFile(
+                            file,
+                            e as unknown as React.MouseEvent<
+                              Element,
+                              MouseEvent
+                            >
+                          );
+                        }}
+                      >
+                        插入
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <Empty description="暂无文件" />
+            )}
+          </div>
+        ) : (
+          // 数据集列表视图
+          <div className="dataset-tree__dataset-list">
+            {dasetList.length > 0 ? (
+              dasetList.map((dataset) => (
+                <div
+                  key={dataset.id}
+                  className={`dataset-tree__dataset-item ${selectedDataset?.id === dataset.id ? 'dataset-tree__dataset-item--selected' : ''}`}
+                  onClick={() => handleDatasetClick(dataset)}
+                >
+                  <div className="dataset-tree__dataset-item-left">
+                    <IconFolder className="dataset-tree__dataset-icon" />
+                    <div className="dataset-tree__dataset-info">
+                      <div className="dataset-tree__dataset-name">
+                        {dataset.name}
+                      </div>
+                      <div className="dataset-tree__dataset-size">
+                        {formatDatasetSize(dataset.latest_size)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="dataset-tree__dataset-actions">
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={(e) =>
+                        handleViewDatasetDetail(
+                          dataset,
+                          e as unknown as React.MouseEvent<Element, MouseEvent>
+                        )
+                      }
+                    >
+                      详情
+                    </Button>
+                    <Button
+                      type="outline"
+                      size="small"
+                      onClick={(e) =>
+                        handleDatasetInsert(
+                          dataset,
+                          e as unknown as React.MouseEvent<Element, MouseEvent>
+                        )
+                      }
+                    >
+                      插入
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <Empty description="暂无数据集" />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+export default DataSetTree;

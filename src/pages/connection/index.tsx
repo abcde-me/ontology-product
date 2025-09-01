@@ -43,7 +43,9 @@ enum ConnectionStatus {
 // 连接器类型枚举
 enum ConnectorType {
   S3 = 's3',
-  HDFS = 'hdfs'
+  HDFS = 'hdfs',
+  Mysql = 'mysql',
+  Postgresql = 'postgresql'
 }
 
 // 状态显示配置
@@ -61,7 +63,9 @@ const STATUS_CONFIG = {
 // 类型显示配置
 const TYPE_CONFIG = {
   [ConnectorType.S3]: '对象存储',
-  [ConnectorType.HDFS]: 'HDFS'
+  [ConnectorType.HDFS]: 'HDFS',
+  [ConnectorType.Mysql]: '数据库-Mysql',
+  [ConnectorType.Postgresql]: '数据库-Postgresql'
 };
 
 export default function Connection() {

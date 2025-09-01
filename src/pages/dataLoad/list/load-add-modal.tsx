@@ -5,9 +5,20 @@ import {
   Input,
   Message,
   Radio,
-  Select
+  Select,
+  Tooltip,
+  Tag,
+  Divider,
+  TreeSelect
 } from '@arco-design/web-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { IconArchive, IconClose } from '@arco-design/web-react/icon';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  ReactNode
+} from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
@@ -16,6 +27,10 @@ import { getConnectionList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import Uploads from './file-upload';
+import ComponentTree from './component-tree';
+import './db-tree.css';
+import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -26,12 +41,23 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
+
+const options = [
+  'Beijing',
+  'Shanghai',
+  'Guangzhou',
+  'Shenzhen',
+  'Chengdu',
+  'Wuhan'
+];
+
 interface propsType {
   hideModalHan: () => void;
   getList: (visible: boolean) => void;
 }
 const LoadAddModal = (props: propsType) => {
   const SchedulerRunRef = useRef<HTMLFormElement>(null);
+  const selectRef = useRef<any>(null);
   const history = useHistory();
   // 存放连接器名称表单的数据
   const [connectName, setConnectName] = useState<connecort_nameType[]>([]);
@@ -41,6 +67,10 @@ const LoadAddModal = (props: propsType) => {
   const [form] = Form.useForm();
   // 获取表达式的状态
   const [expression, setExpression] = useState({});
+  //切换数据源类型
+  const [sourceType, setSourceType] = useState('s3');
+  // 动态计算最大标签数量
+  const [maxTagCounts, setMaxTagCount] = useState(3);
   // 提交表单时的校验逻辑
   const handleSubmit = async () => {
     try {
@@ -163,44 +193,169 @@ const LoadAddModal = (props: propsType) => {
     });
     setConnectName(newres);
   };
-  const [directoryData, setDirectoryData] = useState([]);
+  const [directoryData, setDirectoryData] = useState<any[]>([]);
+
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1
+        root_type: 1,
+        dir_type: 3
       });
 
       if (res.status !== 200) {
         return;
       }
       console.log(res.data.src);
-
-      const newdirectoryData = res.data.src.map((item) => {
-        return item.children
-          ? {
+      if (sourceType == 's3' || sourceType == 'hdfs') {
+        const newdirectoryData = res.data.src.map((item) => {
+          return item.children
+            ? {
+                value: item.id,
+                label: item.name,
+                // type_name:item.type_name,
+                children: item.children.volume.map((items) => {
+                  return {
+                    value: items.id,
+                    label: items.name,
+                    type_name: items.type_name
+                  };
+                })
+              }
+            : { value: item.id, label: item.name };
+        });
+        setDirectoryData(newdirectoryData);
+      } else {
+        console.log(sourceType, '打印sourceType8888888888888888888888');
+        const processTreeData = (data: any[], parentNode: any = null) => {
+          return data.map((item) => {
+            const processedItem = {
+              id: item.id,
+              name: item.name,
               value: item.id,
               label: item.name,
-              children: item.children.volume.map((items) => {
-                return {
-                  value: items.id,
-                  label: items.name
-                };
-              })
+              type_name: item.type_name,
+              ...item
+            };
+            // 从父节点继承属性（如果有父节点）
+            if (parentNode) {
+              processedItem.parentId = parentNode.id;
+              processedItem.level = (parentNode.level || 0) + 1;
+            } else {
+              processedItem.level = 0;
             }
-          : { value: item.id, label: item.name };
-      });
-      setDirectoryData(newdirectoryData);
+            // 添加自定义属性
+            processedItem.isExpanded = false;
+            processedItem.hasChildren = false;
+            // 处理children数据
+            if (item.children) {
+              if (Array.isArray(item.children)) {
+                processedItem.children = processTreeData(
+                  item.children,
+                  processedItem
+                );
+              } else if (
+                item.children.volume &&
+                Array.isArray(item.children.volume)
+              ) {
+                processedItem.children = processTreeData(
+                  item.children.volume,
+                  processedItem
+                );
+              } else if (typeof item.children === 'object') {
+                const childrenArray = Object.values(item.children).filter(
+                  Array.isArray
+                )[0];
+                if (childrenArray) {
+                  processedItem.children = processTreeData(
+                    childrenArray,
+                    processedItem
+                  );
+                }
+              }
+              // 如果有子节点，设置hasChildren为true
+              if (processedItem.children && processedItem.children.length > 0) {
+                processedItem.hasChildren = true;
+              }
+            }
+            return processedItem;
+          });
+        };
+        const processedData = processTreeData(res.data.src);
+        console.log(processedData, '打印processedData888888888888888888888888');
+        setDirectoryData(processedData);
+      }
     } catch (err) {
       console.error(err);
     }
   }
+  // 计算响应式标签数量的函数
+  const calculateMaxTagCount = useCallback(() => {
+    try {
+      if (selectRef.current && selectRef.current.dom) {
+        const selectElement = selectRef.current.dom;
+        const width = selectElement.offsetWidth || selectElement.clientWidth;
+        if (width > 0) {
+          // 根据宽度计算可显示的标签数量
+          const tagWidth = 80;
+          const inputSpace = 120;
+          const availableWidth = width - inputSpace;
+          const calculatedCount = Math.max(
+            1,
+            Math.floor(availableWidth / tagWidth)
+          );
+          setMaxTagCount(calculatedCount);
+        }
+      }
+    } catch (error) {
+      console.warn('计算标签数量时出错:', error);
+      // 使用默认值
+      setMaxTagCount(3);
+    }
+  }, []);
+  //选中全部标签
+  const handAllTagChange = (value) => {
+    if (value.includes('all')) {
+      // 如果选择了"全部"，只保留"全部"选项
+      form.setFieldsValue({
+        table_id: ['all']
+      });
+    } else {
+      // 如果没有选择"全部"，移除"全部"选项（如果存在）
+      const filteredValue = value.filter((item) => item !== 'all');
+
+      // 检查是否选择了所有其他选项，如果是则自动设置为"全部"
+      const allOtherOptions = options.filter((option) => option !== 'all');
+      const hasAllOtherOptions = allOtherOptions.every((option) =>
+        filteredValue.includes(option)
+      );
+
+      if (
+        hasAllOtherOptions &&
+        filteredValue.length === allOtherOptions.length
+      ) {
+        form.setFieldsValue({
+          table_id: ['all']
+        });
+      } else {
+        form.setFieldsValue({
+          table_id: filteredValue
+        });
+      }
+    }
+  };
   useEffect(() => {
     getdirectoryDataList();
     getConnector_name_type();
+    const handleResize = () => {
+      calculateMaxTagCount();
+    };
+    window.addEventListener('resize', handleResize);
+    setTimeout(calculateMaxTagCount, 100);
     return () => {
       observer.disconnect();
+      window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [calculateMaxTagCount, sourceType]);
 
   // 创建 MutationObserver 监听 DOM 变化
   const observer = new MutationObserver(() => {
@@ -213,8 +368,22 @@ const LoadAddModal = (props: propsType) => {
     childList: true,
     subtree: true
   });
-  // 自定义下拉框搜索的逻辑
 
+  // 保留handleSelect作为ComponentTree的回调
+  const handleSelect = (
+    selectedKeys: string[],
+    extra: {
+      selected: boolean;
+      selectedNodes: NodeInstance[];
+      node: NodeInstance;
+      e: Event;
+    }
+  ) => {
+    console.log('handleSelect called in load-add-modal', selectedKeys);
+  };
+  const handleFileChange = (value) => {
+    console.log('上传完之后的value');
+  };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -261,6 +430,7 @@ const LoadAddModal = (props: propsType) => {
           rules={[{ required: true, message: '请选择数据源类型' }]}
           initialValue={typeValue}
           onChange={(value) => {
+            setSourceType((value as any).target.value);
             loadTypeChange(value);
             form.setFieldsValue({
               connector_id: undefined
@@ -270,28 +440,125 @@ const LoadAddModal = (props: propsType) => {
           <RadioGroup>
             <Radio value="s3">对象存储</Radio>
             <Radio value="hdfs">HDFS</Radio>
+            <Radio value="db">数据库</Radio>
+            <Radio value="local">本地文件</Radio>
           </RadioGroup>
         </FormItem>
-        <FormItem
-          label="绑定连接器："
-          field="connector_id"
-          labelCol={{ span: 5 }}
-          wrapperCol={{ span: 19 }}
-          labelAlign="right"
-          rules={[{ required: true, message: '请输入任务名称' }]}
-        >
-          <Select
-            placeholder="请选择连接器"
-            showSearch
-            filterOption={filterOption}
+        {sourceType !== 'local' ? (
+          <>
+            <FormItem
+              label="绑定连接器："
+              field="connector_id"
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+              labelAlign="right"
+              rules={[{ required: true, message: '请输入任务名称' }]}
+            >
+              <Select
+                placeholder="请选择连接器"
+                showSearch
+                filterOption={filterOption}
+              >
+                {connectName.map((option, index) => (
+                  <Option key={option.key} value={option.key}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+            {sourceType === 'db' && (
+              <FormItem
+                label="选择抽取的表："
+                field="table_id"
+                labelCol={{ span: 5 }}
+                wrapperCol={{ span: 19 }}
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择抽取的表' }]}
+              >
+                <Select
+                  onChange={(value) => {
+                    handAllTagChange(value);
+                  }}
+                  ref={selectRef}
+                  mode="multiple"
+                  maxTagCount={{
+                    count: maxTagCounts,
+                    // showPopover: true,
+                    render: (invisibleTagCount) => {
+                      //联调时修改的地方
+                      const allTags = form.getFieldValue('table_id') || [];
+                      const remainingTags = allTags.slice(maxTagCounts);
+                      return (
+                        <Tooltip
+                          content={remainingTags.map((item, i) => {
+                            return (
+                              <Tag
+                                key={i}
+                                style={{
+                                  height: '24px',
+                                  background: '#E7ECF0',
+                                  color: '#0F172A',
+                                  borderRadius: '2px',
+                                  fontSize: '14px',
+                                  // height: '18px',
+                                  alignItems: 'center',
+                                  margin: '0 2px'
+                                }}
+                              >
+                                {item}
+                                <IconClose
+                                  style={{
+                                    marginLeft: '2px',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => {
+                                    const filteredValue = allTags.filter(
+                                      (tag) => tag !== item
+                                    );
+                                    form.setFieldsValue({
+                                      table_id: filteredValue
+                                    });
+                                  }}
+                                />
+                              </Tag>
+                            );
+                          })}
+                        >
+                          <span>+{invisibleTagCount}</span>
+                        </Tooltip>
+                      );
+                    }
+                  }}
+                  placeholder="请选择抽取的表"
+                  style={{ width: '100%', minWidth: 0 }}
+                  // defaultValue={['Beijing', 'Shenzhen', 'Wuhan']}
+                  allowClear
+                  allowCreate
+                  onVisibleChange={calculateMaxTagCount}
+                >
+                  <Option value="all">全部</Option>
+                  {options.map((option) => (
+                    <Option key={option} value={option}>
+                      {option}
+                    </Option>
+                  ))}
+                </Select>
+              </FormItem>
+            )}
+          </>
+        ) : (
+          <FormItem
+            label="选择文件："
+            field="connector_id"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择文件' }]}
           >
-            {connectName.map((option, index) => (
-              <Option key={option.key} value={option.key}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
+            <Uploads onFileChange={handleFileChange} />
+          </FormItem>
+        )}
+
         <FormItem
           label="载入形式："
           initialValue="once"
@@ -322,26 +589,64 @@ const LoadAddModal = (props: propsType) => {
             ></SchedulerRun>
           </div>
         ) : null}
-        <FormItem
-          label="载入位置："
-          field="dest_path"
-          labelCol={{ span: 5 }}
-          wrapperCol={{ span: 19 }}
-          labelAlign="right"
-          rules={[{ required: true, message: '请选择载入位置' }]}
-        >
-          <Cascader
-            expandTrigger="hover"
-            placeholder="请输入载入位置"
-            style={{ width: '100%' }}
-            options={directoryData}
-            renderOption={(item) => {
-              return <EllipsisPopoverCom value={item.label} />;
-            }}
-            showSearch={{ retainInputValueWhileSelect: false }}
-            dropdownMenuClassName="cascader-dropdown"
-          />
-        </FormItem>
+        {sourceType === 's3' || sourceType === 'hdfs' ? (
+          <FormItem
+            label="载入位置："
+            field="dest_path"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入位置' }]}
+          >
+            <Cascader
+              expandTrigger="hover"
+              placeholder="请输入载入位置"
+              style={{ width: '100%' }}
+              options={directoryData}
+              renderOption={(item) => {
+                return <EllipsisPopoverCom value={item.label} />;
+              }}
+              showSearch={{ retainInputValueWhileSelect: false }}
+              dropdownMenuClassName="cascader-dropdown"
+            />
+          </FormItem>
+        ) : (
+          <FormItem
+            label="载入位置："
+            field="dest_path"
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入位置' }]}
+          >
+            <TreeSelect
+              className="db-tree-select"
+              placeholder="Please select ..."
+              allowClear
+              dropdownMenuStyle={{
+                maxHeight: 300,
+                padding: 0,
+                overflow: 'hidden' // 防止外层出现滚动条
+              }}
+              dropdownRender={(originNode) => (
+                <ComponentTree
+                  directoryData={directoryData}
+                  onDirectoryDataChange={setDirectoryData}
+                  onSelect={handleSelect}
+                  onPathChange={(path) => {
+                    form.setFieldsValue({
+                      dest_path: path
+                    });
+                  }}
+                  showAddTree={true}
+                  enableRootAdd={true}
+                />
+              )}
+            >
+              {/* {generatorTreeNodes(directoryData)} */}
+            </TreeSelect>
+          </FormItem>
+        )}
       </Form>
       <div className={Styles.footerBbtnBox}>
         <Button onClick={cancelHan} style={{ marginRight: '12px' }}>

@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle
 } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Modal, Tabs, Typography } from '@arco-design/web-react';
 import {
   getTargetDataFileList,
   getSourceDataFileList
@@ -17,7 +17,7 @@ import FormComponent from './components/popups-form';
 import { getUnifiedColumns, getSourceFileTypeList } from './unified-columns';
 import './index.scss';
 import { PopupsFormFrom } from './components/popups-form/types';
-
+import DbModal from './components/popups-form/dbmodal';
 const { Text } = Typography;
 
 // 数据类型接口定义
@@ -88,6 +88,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   } = props;
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
+  const [visibleDbmodel, setVisibleDbmodel] = useState(false); // 数据详情弹框控制
   const [downloadData, setDownloadData] = useState(null); // 下载的数据
   const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
@@ -138,15 +139,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     };
   }, []);
 
-  // 监听选中路径变化
-  // useEffect(() => {
-  //   console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
-  //   // 获取到路径后直接传递给后端，然后前端根据路径获取数据
-  //   if (!isFirstRender.current && selectedFullPath) {
-  //     setCurrentPage(1);
-  //     getTableList();
-  //   }
-  // }, [selectedFullPath]);
   useEffect(() => {
     if (isFirstRender.current) {
       return;
@@ -467,11 +459,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       tableType,
       dataType,
       downloadShow,
-      null,
-      getTableList,
+      setVisibleDbmodel,
+      null, // hoveredRowId
+      getTableList, // refreshData
       selectedKey,
       selectedFullPath,
-      undefined,
+      undefined, // customFileTypeFilters
       handAllReset,
       resetPage,
       sourceFileTypeFilters
@@ -495,6 +488,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         tableType,
         dataType,
         downloadShow,
+        setVisibleDbmodel,
         hoveredRowId,
         getTableList,
         selectedKey,
@@ -648,7 +642,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     ) {
       setCurrentPage(1);
     }
-
     // 重新获取数据
     // getTableList();
   };
@@ -720,6 +713,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         onCancel={() => setVisible(false)}
         visible={visible}
         resetSelectedData={handAllReset}
+      />
+      {/* 数据详情弹框 */}
+      <DbModal
+        visible={visibleDbmodel}
+        onCancel={() => setVisibleDbmodel(false)}
       />
     </>
   );

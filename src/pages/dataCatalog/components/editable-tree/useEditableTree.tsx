@@ -11,14 +11,17 @@ import {
   IconDelete,
   IconEdit,
   IconStorage,
-  IconArchive
+  IconArchive,
+  IconFolder,
+  IconCaretDown
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
   addCatalog,
   addVolume,
   deleteVolume,
-  renameCatalog
+  renameCatalog,
+  addDb
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { PermissionGuard } from '@/components/PermissionGuard';
@@ -75,6 +78,8 @@ export function useEditableTree({ catalogTreeStore }) {
   );
 
   const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
+    console.log(node, '看看看什么是node');
+
     const newNode: TreeDataType = {
       title: name,
       key: `${node?.dataRef?.type || 'catalog'}-${Date.now()}`,
@@ -156,9 +161,30 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
 
       case CatalogTypeEnum.volume:
+        // 处理数据卷编辑
         newTreeData = treeData.map((data: TreeDataType) => {
           if (data.id === dataRef?.parent_id) {
-            data.children?.[0]?.children?.forEach((item: TreeDataType) => {
+            // 找到数据卷类型的子节点
+            const volumeChild = data.children?.find(
+              (child) => child.type === 'volume'
+            );
+            volumeChild?.children?.forEach((item: TreeDataType) => {
+              if (item.key === _key) {
+                item.showInput = true;
+              }
+            });
+          }
+          return data;
+        });
+        break;
+
+      case CatalogTypeEnum.db:
+        // 处理数据库编辑
+        newTreeData = treeData.map((data: TreeDataType) => {
+          if (data.id === dataRef?.parent_id) {
+            // 找到数据库类型的子节点
+            const dbChild = data.children?.find((child) => child.type === 'db');
+            dbChild?.children?.forEach((item: TreeDataType) => {
               if (item.key === _key) {
                 item.showInput = true;
               }
@@ -225,18 +251,42 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
+  // 添加子级元素（数据卷或数据库）
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
+
     const rawChildrenTreeData = rawTreeData.find(
       (item: TreeDataType) => item.key === node?.pathParentKeys?.[0]
     );
+
+    // 根据当前节点类型找到对应的子数据数组
+    // 如果是"数据卷"节点，在数据卷下新增；如果是"数据库"节点，在数据库下新增
+    let targetChildrenArray = [];
+    if (dataRef?.type === 'volume') {
+      // 找到数据卷类型的子数组
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find((child) => child.type === 'volume')
+          ?.children ?? [];
+    } else if (dataRef?.type === 'db') {
+      // 找到数据库类型的子数组
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find((child) => child.type === 'db')
+          ?.children ?? [];
+    }
+
     const name = generateName(
-      rawChildrenTreeData?.children?.[0]?.children ?? [],
-      subLeafKeys[dataRef?.type]
+      targetChildrenArray,
+      subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
     );
+
     const cachTreeData = treeData.map((item: TreeDataType) => {
       if (item.key === node.pathParentKeys?.[0]) {
-        item.children?.[0]?.children?.unshift(genereteInputNode(name, node));
+        // 找到对应类型的子节点并在其下添加新元素
+        item.children?.forEach((child: TreeDataType) => {
+          if (child.type === dataRef?.type) {
+            child.children?.unshift(genereteInputNode(name, node));
+          }
+        });
       }
       return item;
     });
@@ -285,14 +335,30 @@ export function useEditableTree({ catalogTreeStore }) {
 
           break;
         case CatalogTypeEnum.volume:
+          // 新建数据卷
           res = await addVolume({
             name: fileName,
             parent_id: dataRef.parent_id,
-            root_type: root_type
+            root_type: root_type,
+            type: CatalogTypeEnum.volume
           });
 
           if (res.status !== 200) {
             Message.error(res?.message ?? '新建卷失败');
+          }
+
+          break;
+        case CatalogTypeEnum.db:
+          // 新建数据库 - 后面在这里修改逻辑
+          res = await addDb({
+            name: fileName,
+            parent_id: dataRef.parent_id
+            // root_type: root_type,
+            // type: CatalogTypeEnum.db // 明确指定类型为数据库
+          });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建数据库失败');
           }
 
           break;
@@ -368,7 +434,8 @@ export function useEditableTree({ catalogTreeStore }) {
               )}
             </>
           )}
-          {dataRef?.type === 'volume' &&
+          {/* 为数据卷和数据库都添加新建按钮 */}
+          {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
             perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
               <Tooltip color="white" content="新建">
                 <IconPlus
@@ -384,6 +451,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
+    console.log(dataRef, '----', dataRef?.isLastLeaf, '查看dataRef');
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
@@ -413,6 +481,7 @@ export function useEditableTree({ catalogTreeStore }) {
               : ''
           )}
         >
+          {/* {!dataRef?.isLastLeaf&&<IconFolder />} */}
           {TitleText}
         </div>
       </Tooltip>
@@ -421,15 +490,17 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
+    // console.log(dataRef?.type, '查看dataRef77777');
+    console.log(dataRef, '再次查看dataRef');
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
         {dataRef?.isLastLeaf && (
           <div className="tree-icon mr-2 w-4">
-            {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
-              dataRef?.type
-            ) ? (
+            {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
+            ) : dataRef?.type == '3' ? (
+              <IconCaretDown style={{ fontSize: '12px' }} />
             ) : (
               <IconArchive className="text-base" />
             )}

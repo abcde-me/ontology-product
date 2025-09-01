@@ -33,6 +33,7 @@ import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { openNewPage } from '@/utils/env';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import ScriptingNode from './components/scripting-node';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -60,17 +61,8 @@ enum NodeType {
   audio = 'audio',
   video = 'video',
   cleaning = 'cleaning',
-  enhancement = 'enhancement'
-}
-
-// 枚举节点类型中文名称
-enum NodeTypeName {
-  text = '文本解析',
-  pic = '图片解析',
-  audio = '音频解析',
-  video = '视频解析',
-  cleaning = '数据清洗',
-  enhancement = '数据增强'
+  enhancement = 'enhancement',
+  scripting = 'scripting'
 }
 
 // 枚举开始时间结束时间字段
@@ -125,6 +117,15 @@ export default function WorkflowTaskDetail() {
     processed_data_num: 0,
     log: ''
   });
+  // 初始化脚本节点数据
+  const [scriptingNodeData, setScriptingNodeData] = useState({
+    run_log: '',
+    output_file_num: 0,
+    input_file_num: 0,
+    input_file_size: '',
+    output_file_size: ''
+  });
+
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化分页数据
@@ -173,8 +174,8 @@ export default function WorkflowTaskDetail() {
         )
           return;
         setWorkflowName(res.data.workflow_name);
-        setActiveNode(res.data.result_info.node_code);
         setActiveNodeType(res.data.result_info.task_type);
+        setActiveNode(res.data.result_info.node_code);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
@@ -439,6 +440,8 @@ export default function WorkflowTaskDetail() {
         pageSize: res.data.data_parse.page_info.page_size,
         total: res.data.data_parse.page_info.total
       });
+    } else if (activeNodeType === NodeType.scripting) {
+      setScriptingNodeData(res.data.data_scripting);
     } else setCleaningAugmentNodeData(res.data.data_dispose);
   };
 
@@ -496,9 +499,15 @@ export default function WorkflowTaskDetail() {
                       loading={loading}
                       status={item?.status}
                     />
-                  ) : (
+                  ) : item.task_type === NodeType.enhancement ? (
                     <DataAugmentationNode
                       dataSource={cleaningAugmentNodeData}
+                      loading={loading}
+                      status={item?.status}
+                    />
+                  ) : (
+                    <ScriptingNode
+                      dataSource={scriptingNodeData}
                       loading={loading}
                       status={item?.status}
                     />
@@ -552,7 +561,7 @@ export default function WorkflowTaskDetail() {
 
   const handleClickWorkflow = () => {
     openNewPage(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 
