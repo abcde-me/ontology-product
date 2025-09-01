@@ -187,7 +187,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 </FormItem>
                 <FormItem label={null}>
                   {entityRelations?.length > 1 && (
-                    <IconDelete onClick={() => removeArrayItem(index)} />
+                    <IconDelete
+                      fontSize={18}
+                      onClick={() => removeArrayItem(index)}
+                    />
                   )}
                 </FormItem>
               </div>
