@@ -156,12 +156,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   };
 
   useEffect(() => {
-    if (
-      !searchValue ||
-      searchValue === '' ||
-      searchValue === null ||
-      searchValue === undefined
-    ) {
+    if (!searchValue) {
       console.log(1, treeData);
       setTreeData(treeData);
     } else {

@@ -25,16 +25,41 @@ import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 import { getTaskDetail } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
-import { DataSourceModal } from '@/pages/requirement/Component/detailModal';
-import { DepartmentModal } from './Component/departmentModal';
-import { IndividualModal } from './Component/individualModal';
+import { DataSourceModal } from '@/pages/requirement/components/detailModal';
+import { DepartmentModal } from './components/departmentModal';
+import { IndividualModal } from './components/individualModal';
 import { v4 as uuidV4 } from 'uuid';
 import { numberToChinese, shapeOptions } from './common';
-import AnnotationType from './Component/annotationType';
+import AnnotationType from './components/annotationType';
 import TextSubstanceComponent from './textComponent';
 
 import './detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
+
+// 标注类型
+enum AnnotationTypeStatus {
+  /** 图片 */
+  IMAGE = 1,
+  /** 文本 */
+  TEXT = 2,
+  /** 音频 */
+  AUDIO = 3,
+  /** 视频 */
+  VIDEO = 4
+}
+enum AnnotationChildType {
+  /** 实体/实体关系 */
+  ENTITY = 1,
+  /** 文本分类 */
+  TEXT_CLASSIFICATION = 2,
+  /** 问答 */
+  QA = 3,
+  /** 文本排序 */
+  TEXT_SORT = 4,
+  /** 图片标注 */
+  IMAGE_ANNOTATION = 1
+}
+
 // 定义数据类型接口
 interface LabelInfoAttribute {
   label_info_id: string;
@@ -50,12 +75,25 @@ interface LabelInfoAttributeGroup {
   attribute_group_type: 1 | 2; // 1=必选，2=非必选
   label_info_attribute: LabelInfoAttribute[];
 }
-
+enum LabelShape {
+  /** 矩形 */
+  RECTANGLE = 1,
+  /** 多边形 */
+  POLYGON = 2,
+  /** 线段 */
+  SEGMENT = 3,
+  /** 特征点 */
+  POINT = 4,
+  /** 椭圆 */
+  ELLIPSE = 5,
+  /** 立方体 */
+  CUBE = 6
+}
 interface LabelData {
   id: string;
   label_name_cn: string;
   label_name_en: string;
-  label_shape: 1 | 2 | 3 | 4; // 1=点，2=线，3=正方形，4=多边形
+  label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
   label_colour: string;
   label_info_attribute_groups: LabelInfoAttributeGroup[];
 }
@@ -100,7 +138,7 @@ export default function RequirementDetail() {
       id: uuidV4(),
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
-      label_shape: 1, //标注形状，点1，线2，正方形3，多边形4
+      label_shape: LabelShape.RECTANGLE, //标注形状，点1，线2，正方形3，多边形4
       label_colour: '#000000', //标签颜色（如#FFFFFF）
       label_info_attribute_groups: [
         {
@@ -225,34 +263,7 @@ export default function RequirementDetail() {
       </RadioGroup>
     );
   };
-  // 标注工具-文本内容
-  const annotationTextTool = () => {
-    return (
-      <div className="annotation-text-tool">
-        <RadioGroup
-          type="button"
-          value={selectedRadio}
-          onChange={(v) => {
-            setSelectedRadio(v);
-          }}
-          style={{ marginBottom: 20, display: 'flex' }}
-        >
-          <Radio value={1} key={1}>
-            实体/实体关系
-          </Radio>
-          <Radio value={2} key={2}>
-            文本分类
-          </Radio>
-          <Radio value={3} key={3}>
-            问答
-          </Radio>
-          <Radio value={4} key={4}>
-            文本排序
-          </Radio>
-        </RadioGroup>
-      </div>
-    );
-  };
+
   const handleChildData = (data: any) => {
     setSelectedData(data);
     setPublishData({ ...publishData, label_count: selectedData.length });
@@ -265,28 +276,19 @@ export default function RequirementDetail() {
     }
     // setPublishData({ ...publishData, label_count: taskAssignData.length })
   };
-
+  // 显示标注类型 以及 类型内容
+  const [annotationTypeVal, setAnnotationTypeVal] = useState(
+    AnnotationTypeStatus.IMAGE
+  );
+  const [annotationTypeContentVal, setAnnotationTypeContentVal] = useState(
+    AnnotationChildType.ENTITY || ImageAnnotationTypeStatus.IMAGE_ANNOTATION
+  );
   const getAnnotationType = (selectedRadio, activeKey) => {
+    setAnnotationTypeVal(selectedRadio);
+    setAnnotationTypeContentVal(activeKey);
     console.log('=123', selectedRadio, activeKey);
   };
 
-  // 更新属性标签内容
-  const handleInputChange = (id, field, value) => {
-    setLabelContent(
-      labelContent.map((row) => {
-        return row.id === id ? { ...row, [field]: value } : row;
-      })
-    );
-  };
-  // 属性标签内容
-  const [propertyOptions, setPropertyOptions]: any = useState([
-    {
-      id: uuidV4(),
-      type: '', // 类型
-      annotation_name: '', // 标注展现名称
-      result_val_name: '' // 结果存储名称
-    }
-  ]);
   // 工具函数：安全获取嵌套属性
   const getNestedValue = (obj, path) => {
     return path.reduce((acc, key) => {
@@ -383,7 +385,7 @@ export default function RequirementDetail() {
         id: uuidV4(),
         label_name_cn: '',
         label_name_en: '',
-        label_shape: 3,
+        label_shape: LabelShape.RECTANGLE,
         label_colour: '#0000000',
         label_info_attribute_groups: [
           {
@@ -581,7 +583,6 @@ export default function RequirementDetail() {
       <div className="detail-content">
         {/* 基础配置部分 */}
         <div className="basic-configuration">
-          <TextSubstanceComponent type="detail" />
           <div className="basic-title">基础信息</div>
           <Form
             form={form1}
@@ -678,637 +679,667 @@ export default function RequirementDetail() {
               required
             >
               {/* 循环显示内容 */}
-              <Tabs
-                className="labe-and-attribute-tabs"
-                activeTab={activeTab}
-                onChange={(val) => {
-                  setActiveTab(val);
-                }}
-                size="default"
-                destroyOnHide={true}
-                type={'card'}
-              >
-                <TabPane key="1" title="标签">
-                  <Typography.Paragraph>
-                    {datalist.map((item, labelIndex) => (
-                      <div className="sortable-item" key={labelIndex}>
-                        <div className="sortable-item-content">
-                          <FormItem
-                            label="标注名称"
-                            field="label_info_attribute_groups.name"
-                            rules={[
-                              { required: true, message: '请输入标注展示名称' }
-                            ]}
-                            style={{ padding: 0 }}
-                          >
-                            <Input
-                              onChange={(val: any) => {
-                                updateNestedValue(
-                                  [labelIndex, 'label_name_cn'],
-                                  val
-                                );
-                                updateNestedValue(
-                                  [labelIndex, 'label_name_en'],
-                                  val
-                                );
-                              }}
-                              className="sortable-item-input"
-                              placeholder="请输入标注展示名称"
-                              value={item.label_name_cn}
-                            />
-                          </FormItem>
-                          <FormItem
-                            label={
-                              <div>
-                                展示名称{' '}
-                                <Tooltip content="展示在标注页面的名称">
-                                  {' '}
-                                  <IconQuestionCircle />
-                                </Tooltip>
-                              </div>
-                            }
-                            style={{ padding: 0 }}
-                          >
-                            <Input
-                              onChange={(val: any) => {
-                                updateNestedValue(
-                                  [labelIndex, 'label_name_en'],
-                                  val
-                                );
-                              }}
-                              className="sortable-item-input"
-                              placeholder="请输入结果存储名称"
-                              value={item.label_name_en}
-                            />
-                          </FormItem>
-                          <FormItem>
-                            <Select
-                              placeholder="请选择形状"
-                              value={item.label_shape}
-                              onChange={(val: any) => {
-                                updateNestedValue(
-                                  [labelIndex, 'label_shape'],
-                                  parseInt(val)
-                                );
-                              }}
-                              style={{ width: 345, height: 40 }}
-                              renderFormat={(option, value) => {
-                                return (
-                                  <span>
-                                    <Image
-                                      width={20}
-                                      src={
-                                        shapeOptions.find(
-                                          (opt) => opt.value === value
-                                        )?.icon
-                                      }
-                                      alt="lamp"
-                                    />
-                                    {
-                                      shapeOptions.find(
-                                        (opt) => opt.value === value
-                                      )?.label
-                                    }
-                                  </span>
-                                );
-                              }}
-                            >
-                              {shapeOptions.map((option, index) => (
-                                <Option key={option.label} value={option.value}>
-                                  <Image
-                                    width={20}
-                                    src={option?.icon}
-                                    alt="lamp"
-                                  />{' '}
-                                  {option.label}
-                                </Option>
-                              ))}
-                            </Select>
-                          </FormItem>
-                          <FormItem>
-                            <input
-                              type="color"
-                              value={item?.label_colour}
-                              onChange={(e) => {
-                                console.log(e, '123');
-                                updateNestedValue(
-                                  [labelIndex, 'label_colour'],
-                                  e?.target?.value
-                                );
-                              }}
-                              style={{
-                                width: '40px',
-                                height: '40px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                marginLeft: '10px'
-                              }}
-                            />
-                          </FormItem>
-                          <FormItem>
-                            {datalist.length > 1 && (
-                              <IconDelete
-                                fontSize={20}
-                                onClick={() => {
-                                  deleteLabel(labelIndex);
-                                  // setLabelContent(labelContent.filter((j: any) => j.id !== item.id))
-                                }}
-                              />
-                            )}
-                          </FormItem>
-                        </div>
-                        {item?.label_info_attribute_groups?.length > 0 &&
-                          item?.label_info_attribute_groups?.map(
-                            (attrGroup, groupIndex) => {
-                              return (
-                                <div
-                                  key={groupIndex}
-                                  className="attribute-group-item"
-                                >
-                                  <FormItem required label="属性组件名称">
-                                    <div className="group-items">
-                                      <Input
-                                        width={400}
-                                        height={32}
-                                        value={attrGroup.attribute_group_name}
-                                        onChange={(val: any) => {
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute_groups',
-                                              groupIndex,
-                                              'attribute_group_name'
-                                            ],
-                                            val
-                                          );
-                                        }}
-                                        placeholder="请输入属性组名称"
-                                      />
-                                      <Select
-                                        className="ml-2 mr-2"
-                                        style={{ width: 100, height: 32 }}
-                                        value={attrGroup.attribute_group_class}
-                                        onChange={(value) => {
-                                          // 切换到输入框的时候 清空对应属性组的选项
-                                          if (parseInt(value) === 3) {
-                                            updateNestedValue(
-                                              [
-                                                labelIndex,
-                                                'label_info_attribute_groups',
-                                                groupIndex,
-                                                'label_info_attribute'
-                                              ],
-                                              []
-                                            );
-                                          }
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute_groups',
-                                              groupIndex,
-                                              'attribute_group_class'
-                                            ],
-                                            parseInt(value)
-                                          );
-                                        }}
-                                      >
-                                        <Option key={1} value={1}>
-                                          单选
-                                        </Option>
-                                        <Option key={2} value={2}>
-                                          多选
-                                        </Option>
-                                        <Option key={3} value={3}>
-                                          输入框
-                                        </Option>
-                                      </Select>
-                                      {/* 必选状态切换 */}
-                                      <Checkbox
-                                        style={{ whiteSpace: 'nowrap' }}
-                                        checked={
-                                          attrGroup.attribute_group_type === 1
-                                        }
-                                        onChange={(checked) => {
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute_groups',
-                                              groupIndex,
-                                              'attribute_group_type'
-                                            ],
-                                            checked ? 1 : 2
-                                          );
-                                        }}
-                                      >
-                                        必须标注
-                                      </Checkbox>
-                                      {attrGroup.attribute_group_class !==
-                                        3 && (
-                                        <IconPlus
-                                          fontSize={30}
-                                          className="ml-2"
-                                          onClick={() =>
-                                            addAttribute(labelIndex, groupIndex)
-                                          }
-                                        />
-                                      )}
-                                      {item?.label_info_attribute_groups
-                                        ?.length > 1 && (
-                                        <IconDelete
-                                          className="ml-2"
-                                          fontSize={30}
-                                          onClick={() => {
-                                            // 删除当前属性组
-                                            deleteAttributeGroup(
-                                              labelIndex,
-                                              groupIndex
-                                            );
-                                          }}
-                                        />
-                                      )}
-                                    </div>
-                                  </FormItem>
-                                  {/* 选项内容区域 */}
-                                  {attrGroup.label_info_attribute.map(
-                                    (attr, attrIndex) => (
-                                      <div
-                                        key={attr.label_info_id}
-                                        className="attribute-group-info-item"
-                                      >
-                                        <div className="attribute-group-info-title">
-                                          {1 === attrGroup.attribute_group_class
-                                            ? '单选选项'
-                                            : 2 ===
-                                                attrGroup.attribute_group_class
-                                              ? '多选选项'
-                                              : ''}
-                                        </div>
-                                        {(1 ===
-                                          attrGroup.attribute_group_class ||
-                                          2 ===
-                                            attrGroup.attribute_group_class) && (
-                                          <div className="attribute-info-item">
-                                            <FormItem
-                                              rules={[
-                                                {
-                                                  required: true,
-                                                  message: '请输入选项名称'
-                                                }
-                                              ]}
-                                              label={`选项${numberToChinese(attrIndex + 1)}`}
-                                            >
-                                              <Input
-                                                type="text"
-                                                value={attr.attribute_name_cn}
-                                                onChange={(val) =>
-                                                  updateNestedValue(
-                                                    [
-                                                      labelIndex,
-                                                      'label_info_attribute_groups',
-                                                      groupIndex,
-                                                      'label_info_attribute',
-                                                      attrIndex,
-                                                      'attribute_name_cn'
-                                                    ],
-                                                    val
-                                                  )
-                                                }
-                                              />
-                                            </FormItem>
-                                            <FormItem
-                                              label={
-                                                <div>
-                                                  展示名称{' '}
-                                                  <Tooltip content="展示在标注页面的名称">
-                                                    {' '}
-                                                    <IconQuestionCircle />
-                                                  </Tooltip>
-                                                </div>
-                                              }
-                                            >
-                                              <Input
-                                                placeholder="展示在标注页面的名称"
-                                                type="text"
-                                                value={attr.attribute_name_en}
-                                                onChange={(val) =>
-                                                  updateNestedValue(
-                                                    [
-                                                      labelIndex,
-                                                      'label_info_attribute_groups',
-                                                      groupIndex,
-                                                      'label_info_attribute',
-                                                      attrIndex,
-                                                      'attribute_name_en'
-                                                    ],
-                                                    val
-                                                  )
-                                                }
-                                              />
-                                            </FormItem>
-                                            {attrGroup.label_info_attribute
-                                              .length > 1 && (
-                                              <IconDelete
-                                                fontSize={25}
-                                                onClick={() => {
-                                                  // 删除当前属性组
-                                                  deleteAttribute(
-                                                    labelIndex,
-                                                    groupIndex,
-                                                    attrIndex
-                                                  );
-                                                }}
-                                              />
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              );
-                            }
-                          )}
-                        <div className="btn-content-items">
-                          <Button
-                            style={{ marginRight: 16 }}
-                            type="primary"
-                            onClick={() => {
-                              addNewLabel();
-                            }}
-                          >
-                            <IconPlus />
-                            添加标签
-                          </Button>
-                          <Button
-                            style={{ marginRight: 16 }}
-                            type="primary"
-                            onClick={() => {
-                              addAttributeGroup(labelIndex);
-                            }}
-                          >
-                            <IconPlus />
-                            添加属性
-                          </Button>
-                          <div className="btn-option-content">
-                            <Dropdown
-                              position={'bottom'}
-                              droplist={
-                                <Menu>
-                                  {templateData.map((TempItem, index) => (
-                                    <Menu.Item
-                                      onClick={() => {
-                                        handleTemplateClick(
-                                          TempItem?.attribute_group_name,
-                                          labelIndex
-                                        );
-                                      }}
-                                      key={String(index)}
-                                    >
-                                      {TempItem.attribute_group_name}
-                                    </Menu.Item>
-                                  ))}
-                                  <Menu.Item
-                                    onClick={() => {
-                                      setActiveTab('2');
-                                    }}
-                                    key="2"
-                                  >
-                                    创建属性模版
-                                  </Menu.Item>
-                                </Menu>
-                              }
-                            >
-                              <Button type="secondary">
-                                {' '}
-                                <IconPlus />
-                                添加模版属性
-                              </Button>
-                            </Dropdown>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </Typography.Paragraph>
-                </TabPane>
-                <TabPane key="2" title="标签模版属性">
-                  <Typography.Paragraph>
-                    {templateData.map((attrGroup, labelIndex) => (
-                      <div className="sortable-item" key={labelIndex}>
-                        <div
-                          key={labelIndex}
-                          className="attribute-group-item-template"
-                        >
-                          <FormItem required label="属性组件名称">
-                            <div className="group-items">
-                              <Input
-                                width={400}
-                                height={32}
-                                value={attrGroup.attribute_group_name}
-                                onChange={(val: any) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'attribute_group_name'],
-                                    val,
-                                    true
-                                  );
-                                }}
-                                placeholder="请输入属性组名称"
-                              />
-                              <Select
-                                className="ml-2 mr-2"
-                                style={{ width: 100, height: 32 }}
-                                value={attrGroup.attribute_group_class}
-                                onChange={(value) => {
-                                  // 更新组件类型（单选/多选/输入框）
-                                  if (parseInt(value) === 3) {
-                                    updateNestedValue(
-                                      [labelIndex, 'label_info_attribute'],
-                                      [],
-                                      true
-                                    );
+              {annotationTypeVal === AnnotationTypeStatus.IMAGE &&
+                annotationTypeContentVal ===
+                  AnnotationChildType.IMAGE_ANNOTATION && (
+                  <Tabs
+                    className="labe-and-attribute-tabs"
+                    activeTab={activeTab}
+                    onChange={(val) => {
+                      setActiveTab(val);
+                    }}
+                    size="default"
+                    destroyOnHide={true}
+                    type={'card'}
+                  >
+                    <TabPane key="1" title="标签">
+                      <Typography.Paragraph>
+                        {datalist.map((item, labelIndex) => (
+                          <div className="sortable-item" key={labelIndex}>
+                            <div className="sortable-item-content">
+                              <FormItem
+                                label="标注名称"
+                                field="label_info_attribute_groups.name"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: '请输入标注展示名称'
                                   }
-                                  updateNestedValue(
-                                    [labelIndex, 'attribute_group_class'],
-                                    parseInt(value),
-                                    true
-                                  );
-                                }}
+                                ]}
+                                style={{ padding: 0 }}
                               >
-                                <Option key={1} value={1}>
-                                  单选
-                                </Option>
-                                <Option key={2} value={2}>
-                                  多选
-                                </Option>
-                                <Option key={3} value={3}>
-                                  输入框
-                                </Option>
-                              </Select>
-                              {/* 必选状态切换 */}
-                              <Checkbox
-                                style={{ whiteSpace: 'nowrap' }}
-                                checked={attrGroup.attribute_group_type === 1}
-                                onChange={(checked) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'attribute_group_type'],
-                                    checked ? 1 : 2,
-                                    true
-                                  );
-                                }}
-                              >
-                                必须标注
-                              </Checkbox>
-                              {attrGroup.attribute_group_class !== 3 && (
-                                <IconPlus
-                                  fontSize={30}
-                                  className="ml-2"
-                                  onClick={() => addAttributeT(labelIndex)}
-                                />
-                              )}
-                              {
-                                <IconDelete
-                                  className="ml-2"
-                                  fontSize={30}
-                                  onClick={() => {
-                                    // 删除当前属性组
-                                    setTemplateData(
-                                      templateData.filter(
-                                        (g) =>
-                                          g.attribute_id !==
-                                          attrGroup.attribute_id
-                                      )
+                                <Input
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_name_cn'],
+                                      val
+                                    );
+                                    updateNestedValue(
+                                      [labelIndex, 'label_name_en'],
+                                      val
                                     );
                                   }}
+                                  className="sortable-item-input"
+                                  placeholder="请输入标注展示名称"
+                                  value={item.label_name_cn}
                                 />
-                              }
-                            </div>
-                          </FormItem>
-                          {/* 选项内容区域 */}
-                          {attrGroup.label_info_attribute.map(
-                            (attr, attrIndex) => (
-                              <div
-                                key={attr.label_info_id}
-                                className="attribute-group-info-item"
+                              </FormItem>
+                              <FormItem
+                                label={
+                                  <div>
+                                    展示名称{' '}
+                                    <Tooltip content="展示在标注页面的名称">
+                                      {' '}
+                                      <IconQuestionCircle />
+                                    </Tooltip>
+                                  </div>
+                                }
+                                style={{ padding: 0 }}
                               >
-                                <div className="attribute-group-info-title">
-                                  {1 === attrGroup.attribute_group_class
-                                    ? '单选选项'
-                                    : 2 === attrGroup.attribute_group_class
-                                      ? '多选选项'
-                                      : ''}
-                                </div>
-                                {(1 === attrGroup.attribute_group_class ||
-                                  2 === attrGroup.attribute_group_class) && (
-                                  <div className="attribute-info-item">
-                                    <FormItem
-                                      label={`选项${numberToChinese(attrIndex + 1)}`}
-                                    >
-                                      <Input
-                                        type="text"
-                                        value={attr.attribute_name_cn}
-                                        onChange={(val) =>
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute',
-                                              attrIndex,
-                                              'attribute_name_cn'
-                                            ],
-                                            val,
-                                            true
-                                          )
+                                <Input
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_name_en'],
+                                      val
+                                    );
+                                  }}
+                                  className="sortable-item-input"
+                                  placeholder="请输入结果存储名称"
+                                  value={item.label_name_en}
+                                />
+                              </FormItem>
+                              <FormItem>
+                                <Select
+                                  placeholder="请选择形状"
+                                  value={item.label_shape}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_shape'],
+                                      parseInt(val)
+                                    );
+                                  }}
+                                  style={{ width: 345, height: 40 }}
+                                  renderFormat={(option, value) => {
+                                    return (
+                                      <span>
+                                        <Image
+                                          width={20}
+                                          src={
+                                            shapeOptions.find(
+                                              (opt) => opt.value === value
+                                            )?.icon
+                                          }
+                                          alt="lamp"
+                                        />
+                                        {
+                                          shapeOptions.find(
+                                            (opt) => opt.value === value
+                                          )?.label
                                         }
-                                      />
-                                    </FormItem>
-                                    <FormItem
-                                      label={
-                                        <div>
-                                          展示名称{' '}
-                                          <Tooltip content="展示在标注页面的名称">
-                                            {' '}
-                                            <IconQuestionCircle />
-                                          </Tooltip>
+                                      </span>
+                                    );
+                                  }}
+                                >
+                                  {shapeOptions.map((option, index) => (
+                                    <Option
+                                      key={option.label}
+                                      value={option.value}
+                                    >
+                                      <Image
+                                        width={20}
+                                        src={option?.icon}
+                                        alt="lamp"
+                                      />{' '}
+                                      {option.label}
+                                    </Option>
+                                  ))}
+                                </Select>
+                              </FormItem>
+                              <FormItem>
+                                <input
+                                  type="color"
+                                  value={item?.label_colour}
+                                  onChange={(e) => {
+                                    console.log(e, '123');
+                                    updateNestedValue(
+                                      [labelIndex, 'label_colour'],
+                                      e?.target?.value
+                                    );
+                                  }}
+                                  style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    marginLeft: '10px'
+                                  }}
+                                />
+                              </FormItem>
+                              <FormItem>
+                                {datalist.length > 1 && (
+                                  <IconDelete
+                                    fontSize={20}
+                                    onClick={() => {
+                                      deleteLabel(labelIndex);
+                                      // setLabelContent(labelContent.filter((j: any) => j.id !== item.id))
+                                    }}
+                                  />
+                                )}
+                              </FormItem>
+                            </div>
+                            {item?.label_info_attribute_groups?.length > 0 &&
+                              item?.label_info_attribute_groups?.map(
+                                (attrGroup, groupIndex) => {
+                                  return (
+                                    <div
+                                      key={groupIndex}
+                                      className="attribute-group-item"
+                                    >
+                                      <FormItem required label="属性组件名称">
+                                        <div className="group-items">
+                                          <Input
+                                            width={400}
+                                            height={32}
+                                            value={
+                                              attrGroup.attribute_group_name
+                                            }
+                                            onChange={(val: any) => {
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute_groups',
+                                                  groupIndex,
+                                                  'attribute_group_name'
+                                                ],
+                                                val
+                                              );
+                                            }}
+                                            placeholder="请输入属性组名称"
+                                          />
+                                          <Select
+                                            className="ml-2 mr-2"
+                                            style={{ width: 100, height: 32 }}
+                                            value={
+                                              attrGroup.attribute_group_class
+                                            }
+                                            onChange={(value) => {
+                                              // 切换到输入框的时候 清空对应属性组的选项
+                                              if (parseInt(value) === 3) {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'label_info_attribute'
+                                                  ],
+                                                  []
+                                                );
+                                              }
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute_groups',
+                                                  groupIndex,
+                                                  'attribute_group_class'
+                                                ],
+                                                parseInt(value)
+                                              );
+                                            }}
+                                          >
+                                            <Option key={1} value={1}>
+                                              单选
+                                            </Option>
+                                            <Option key={2} value={2}>
+                                              多选
+                                            </Option>
+                                            <Option key={3} value={3}>
+                                              输入框
+                                            </Option>
+                                          </Select>
+                                          {/* 必选状态切换 */}
+                                          <Checkbox
+                                            style={{ whiteSpace: 'nowrap' }}
+                                            checked={
+                                              attrGroup.attribute_group_type ===
+                                              1
+                                            }
+                                            onChange={(checked) => {
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute_groups',
+                                                  groupIndex,
+                                                  'attribute_group_type'
+                                                ],
+                                                checked ? 1 : 2
+                                              );
+                                            }}
+                                          >
+                                            必须标注
+                                          </Checkbox>
+                                          {attrGroup.attribute_group_class !==
+                                            3 && (
+                                            <IconPlus
+                                              fontSize={30}
+                                              className="ml-2"
+                                              onClick={() =>
+                                                addAttribute(
+                                                  labelIndex,
+                                                  groupIndex
+                                                )
+                                              }
+                                            />
+                                          )}
+                                          {item?.label_info_attribute_groups
+                                            ?.length > 1 && (
+                                            <IconDelete
+                                              className="ml-2"
+                                              fontSize={30}
+                                              onClick={() => {
+                                                // 删除当前属性组
+                                                deleteAttributeGroup(
+                                                  labelIndex,
+                                                  groupIndex
+                                                );
+                                              }}
+                                            />
+                                          )}
                                         </div>
-                                      }
-                                    >
-                                      <Input
-                                        placeholder="展示在标注页面的名称"
-                                        type="text"
-                                        value={attr.attribute_name_en}
-                                        onChange={(val) =>
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute',
-                                              attrIndex,
-                                              'attribute_name_en'
-                                            ],
-                                            val,
-                                            true
-                                          )
-                                        }
-                                      />
-                                    </FormItem>
-                                    {attrGroup.label_info_attribute.length >
-                                      1 && (
-                                      <IconDelete
-                                        fontSize={25}
-                                        onClick={() => {
-                                          // 删除当前属性组中的选项
-                                          setTemplateData(
-                                            templateData.map((label) =>
-                                              label.attribute_id ===
-                                              attrGroup.attribute_id
-                                                ? {
-                                                    ...label,
-                                                    label_info_attribute:
-                                                      label.label_info_attribute.filter(
-                                                        (g) =>
-                                                          g.label_info_id !==
-                                                          attr.label_info_id
+                                      </FormItem>
+                                      {/* 选项内容区域 */}
+                                      {attrGroup.label_info_attribute.map(
+                                        (attr, attrIndex) => (
+                                          <div
+                                            key={attr.label_info_id}
+                                            className="attribute-group-info-item"
+                                          >
+                                            <div className="attribute-group-info-title">
+                                              {1 ===
+                                              attrGroup.attribute_group_class
+                                                ? '单选选项'
+                                                : 2 ===
+                                                    attrGroup.attribute_group_class
+                                                  ? '多选选项'
+                                                  : ''}
+                                            </div>
+                                            {(1 ===
+                                              attrGroup.attribute_group_class ||
+                                              2 ===
+                                                attrGroup.attribute_group_class) && (
+                                              <div className="attribute-info-item">
+                                                <FormItem
+                                                  rules={[
+                                                    {
+                                                      required: true,
+                                                      message: '请输入选项名称'
+                                                    }
+                                                  ]}
+                                                  label={`选项${numberToChinese(attrIndex + 1)}`}
+                                                >
+                                                  <Input
+                                                    type="text"
+                                                    value={
+                                                      attr.attribute_name_cn
+                                                    }
+                                                    onChange={(val) =>
+                                                      updateNestedValue(
+                                                        [
+                                                          labelIndex,
+                                                          'label_info_attribute_groups',
+                                                          groupIndex,
+                                                          'label_info_attribute',
+                                                          attrIndex,
+                                                          'attribute_name_cn'
+                                                        ],
+                                                        val
                                                       )
+                                                    }
+                                                  />
+                                                </FormItem>
+                                                <FormItem
+                                                  label={
+                                                    <div>
+                                                      展示名称{' '}
+                                                      <Tooltip content="展示在标注页面的名称">
+                                                        {' '}
+                                                        <IconQuestionCircle />
+                                                      </Tooltip>
+                                                    </div>
                                                   }
-                                                : label
-                                            )
-                                          );
+                                                >
+                                                  <Input
+                                                    placeholder="展示在标注页面的名称"
+                                                    type="text"
+                                                    value={
+                                                      attr.attribute_name_en
+                                                    }
+                                                    onChange={(val) =>
+                                                      updateNestedValue(
+                                                        [
+                                                          labelIndex,
+                                                          'label_info_attribute_groups',
+                                                          groupIndex,
+                                                          'label_info_attribute',
+                                                          attrIndex,
+                                                          'attribute_name_en'
+                                                        ],
+                                                        val
+                                                      )
+                                                    }
+                                                  />
+                                                </FormItem>
+                                                {attrGroup.label_info_attribute
+                                                  .length > 1 && (
+                                                  <IconDelete
+                                                    fontSize={25}
+                                                    onClick={() => {
+                                                      // 删除当前属性组
+                                                      deleteAttribute(
+                                                        labelIndex,
+                                                        groupIndex,
+                                                        attrIndex
+                                                      );
+                                                    }}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
+                            <div className="btn-content-items">
+                              <Button
+                                style={{ marginRight: 16 }}
+                                type="primary"
+                                onClick={() => {
+                                  addNewLabel();
+                                }}
+                              >
+                                <IconPlus />
+                                添加标签
+                              </Button>
+                              <Button
+                                style={{ marginRight: 16 }}
+                                type="primary"
+                                onClick={() => {
+                                  addAttributeGroup(labelIndex);
+                                }}
+                              >
+                                <IconPlus />
+                                添加属性
+                              </Button>
+                              <div className="btn-option-content">
+                                <Dropdown
+                                  position={'bottom'}
+                                  droplist={
+                                    <Menu>
+                                      {templateData.map((TempItem, index) => (
+                                        <Menu.Item
+                                          onClick={() => {
+                                            handleTemplateClick(
+                                              TempItem?.attribute_group_name,
+                                              labelIndex
+                                            );
+                                          }}
+                                          key={String(index)}
+                                        >
+                                          {TempItem.attribute_group_name}
+                                        </Menu.Item>
+                                      ))}
+                                      <Menu.Item
+                                        onClick={() => {
+                                          setActiveTab('2');
                                         }}
-                                      />
+                                        key="2"
+                                      >
+                                        创建属性模版
+                                      </Menu.Item>
+                                    </Menu>
+                                  }
+                                >
+                                  <Button type="secondary">
+                                    {' '}
+                                    <IconPlus />
+                                    添加模版属性
+                                  </Button>
+                                </Dropdown>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </Typography.Paragraph>
+                    </TabPane>
+                    <TabPane key="2" title="标签模版属性">
+                      <Typography.Paragraph>
+                        {templateData.map((attrGroup, labelIndex) => (
+                          <div className="sortable-item" key={labelIndex}>
+                            <div
+                              key={labelIndex}
+                              className="attribute-group-item-template"
+                            >
+                              <FormItem required label="属性组件名称">
+                                <div className="group-items">
+                                  <Input
+                                    width={400}
+                                    height={32}
+                                    value={attrGroup.attribute_group_name}
+                                    onChange={(val: any) => {
+                                      updateNestedValue(
+                                        [labelIndex, 'attribute_group_name'],
+                                        val,
+                                        true
+                                      );
+                                    }}
+                                    placeholder="请输入属性组名称"
+                                  />
+                                  <Select
+                                    className="ml-2 mr-2"
+                                    style={{ width: 100, height: 32 }}
+                                    value={attrGroup.attribute_group_class}
+                                    onChange={(value) => {
+                                      // 更新组件类型（单选/多选/输入框）
+                                      if (parseInt(value) === 3) {
+                                        updateNestedValue(
+                                          [labelIndex, 'label_info_attribute'],
+                                          [],
+                                          true
+                                        );
+                                      }
+                                      updateNestedValue(
+                                        [labelIndex, 'attribute_group_class'],
+                                        parseInt(value),
+                                        true
+                                      );
+                                    }}
+                                  >
+                                    <Option key={1} value={1}>
+                                      单选
+                                    </Option>
+                                    <Option key={2} value={2}>
+                                      多选
+                                    </Option>
+                                    <Option key={3} value={3}>
+                                      输入框
+                                    </Option>
+                                  </Select>
+                                  {/* 必选状态切换 */}
+                                  <Checkbox
+                                    style={{ whiteSpace: 'nowrap' }}
+                                    checked={
+                                      attrGroup.attribute_group_type === 1
+                                    }
+                                    onChange={(checked) => {
+                                      updateNestedValue(
+                                        [labelIndex, 'attribute_group_type'],
+                                        checked ? 1 : 2,
+                                        true
+                                      );
+                                    }}
+                                  >
+                                    必须标注
+                                  </Checkbox>
+                                  {attrGroup.attribute_group_class !== 3 && (
+                                    <IconPlus
+                                      fontSize={30}
+                                      className="ml-2"
+                                      onClick={() => addAttributeT(labelIndex)}
+                                    />
+                                  )}
+                                  {
+                                    <IconDelete
+                                      className="ml-2"
+                                      fontSize={30}
+                                      onClick={() => {
+                                        // 删除当前属性组
+                                        setTemplateData(
+                                          templateData.filter(
+                                            (g) =>
+                                              g.attribute_id !==
+                                              attrGroup.attribute_id
+                                          )
+                                        );
+                                      }}
+                                    />
+                                  }
+                                </div>
+                              </FormItem>
+                              {/* 选项内容区域 */}
+                              {attrGroup.label_info_attribute.map(
+                                (attr, attrIndex) => (
+                                  <div
+                                    key={attr.label_info_id}
+                                    className="attribute-group-info-item"
+                                  >
+                                    <div className="attribute-group-info-title">
+                                      {1 === attrGroup.attribute_group_class
+                                        ? '单选选项'
+                                        : 2 === attrGroup.attribute_group_class
+                                          ? '多选选项'
+                                          : ''}
+                                    </div>
+                                    {(1 === attrGroup.attribute_group_class ||
+                                      2 ===
+                                        attrGroup.attribute_group_class) && (
+                                      <div className="attribute-info-item">
+                                        <FormItem
+                                          label={`选项${numberToChinese(attrIndex + 1)}`}
+                                        >
+                                          <Input
+                                            type="text"
+                                            value={attr.attribute_name_cn}
+                                            onChange={(val) =>
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute',
+                                                  attrIndex,
+                                                  'attribute_name_cn'
+                                                ],
+                                                val,
+                                                true
+                                              )
+                                            }
+                                          />
+                                        </FormItem>
+                                        <FormItem
+                                          label={
+                                            <div>
+                                              展示名称{' '}
+                                              <Tooltip content="展示在标注页面的名称">
+                                                {' '}
+                                                <IconQuestionCircle />
+                                              </Tooltip>
+                                            </div>
+                                          }
+                                        >
+                                          <Input
+                                            placeholder="展示在标注页面的名称"
+                                            type="text"
+                                            value={attr.attribute_name_en}
+                                            onChange={(val) =>
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute',
+                                                  attrIndex,
+                                                  'attribute_name_en'
+                                                ],
+                                                val,
+                                                true
+                                              )
+                                            }
+                                          />
+                                        </FormItem>
+                                        {attrGroup.label_info_attribute.length >
+                                          1 && (
+                                          <IconDelete
+                                            fontSize={25}
+                                            onClick={() => {
+                                              // 删除当前属性组中的选项
+                                              setTemplateData(
+                                                templateData.map((label) =>
+                                                  label.attribute_id ===
+                                                  attrGroup.attribute_id
+                                                    ? {
+                                                        ...label,
+                                                        label_info_attribute:
+                                                          label.label_info_attribute.filter(
+                                                            (g) =>
+                                                              g.label_info_id !==
+                                                              attr.label_info_id
+                                                          )
+                                                      }
+                                                    : label
+                                                )
+                                              );
+                                            }}
+                                          />
+                                        )}
+                                      </div>
                                     )}
                                   </div>
-                                )}
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    <Button
-                      className="add-template-btn"
-                      onClick={() => {
-                        setTemplateData([
-                          ...templateData,
-                          {
-                            attribute_id: uuidV4(),
-                            attribute_group_name: '',
-                            attribute_group_class: 1,
-                            attribute_group_type: 1,
-                            label_info_attribute: [
+                                )
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        <Button
+                          className="add-template-btn"
+                          onClick={() => {
+                            setTemplateData([
+                              ...templateData,
                               {
-                                label_info_id: uuidV4(),
-                                attribute_name_cn: '',
-                                attribute_name_en: '',
-                                input_type: 1
+                                attribute_id: uuidV4(),
+                                attribute_group_name: '',
+                                attribute_group_class: 1,
+                                attribute_group_type: 1,
+                                label_info_attribute: [
+                                  {
+                                    label_info_id: uuidV4(),
+                                    attribute_name_cn: '',
+                                    attribute_name_en: '',
+                                    input_type: 1
+                                  }
+                                ]
                               }
-                            ]
-                          }
-                        ]);
-                      }}
-                    >
-                      <IconPlus />
-                      添加属性
-                    </Button>
-                  </Typography.Paragraph>
-                </TabPane>
-              </Tabs>
+                            ]);
+                          }}
+                        >
+                          <IconPlus />
+                          添加属性
+                        </Button>
+                      </Typography.Paragraph>
+                    </TabPane>
+                  </Tabs>
+                )}
+              {annotationTypeVal === AnnotationTypeStatus.TEXT &&
+                annotationTypeContentVal === AnnotationChildType.ENTITY && (
+                  <TextSubstanceComponent type="detail" />
+                )}
             </FormItem>
           </Form>
         </div>

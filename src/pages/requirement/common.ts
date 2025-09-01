@@ -18,7 +18,6 @@ export const formatDateTime = (dateTimeString) => {
   }
 };
 
-
 export const numberToChinese = (num: number) => {
   // 验证输入是否为非负整数
   if (typeof num !== 'number' || num < 0 || !Number.isInteger(num)) {
@@ -28,7 +27,20 @@ export const numberToChinese = (num: number) => {
   // 基本数字映射
   const digits = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
   // 位数单位
-  const units = ['', '十', '百', '千', '万', '十', '百', '千', '亿', '十', '百', '千'];
+  const units = [
+    '',
+    '十',
+    '百',
+    '千',
+    '万',
+    '十',
+    '百',
+    '千',
+    '亿',
+    '十',
+    '百',
+    '千'
+  ];
 
   if (num === 0) {
     return digits[0];
@@ -64,32 +76,37 @@ export const numberToChinese = (num: number) => {
   }
 
   return result;
-}
+};
 
 export const shapeOptions = [
   {
     icon: frame,
     value: 1,
-    label: '矩形',
+    label: '矩形'
   },
   {
     icon: frame,
     value: 2,
-    label: '多边形',
-  }, {
+    label: '多边形'
+  },
+  {
     icon: frame,
     value: 3,
-    label: '线段',
-  }, {
+    label: '线段'
+  },
+  {
     icon: point,
     value: 4,
-    label: '特征点',
-  }, {
+    label: '特征点'
+  },
+  {
     icon: ellipse,
     value: 5,
-    label: '椭圆',
-  }, {
+    label: '椭圆'
+  },
+  {
     icon: frame,
     value: 6,
-    label: '立方体',
-  }];
+    label: '立方体'
+  }
+];

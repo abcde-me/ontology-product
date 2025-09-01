@@ -71,6 +71,17 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     }
   ]);
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
+  // 关系标签内容
+  const [relationTags, setRelationTags] = useState([
+    {
+      order_num: 1,
+      relation_name_cn: '关系标签显示名称',
+      relation_name_en: '关系标签存储名称',
+      start_entity_labels: ['red', 'green'],
+      target_entity_labels: ['blue', 'black'],
+      colour: '#000000'
+    }
+  ]);
 
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
@@ -131,77 +142,188 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         labelCol={{ flex: 'none' }}
         wrapperCol={{ flex: 1 }}
       >
-        {entityRelations.map((item, index) => {
-          return (
-            <div className="entity-relation-item" key={item.order_num}>
-              <FormItem
-                style={{ paddingLeft: 16 }}
-                label="标签名称"
-                rules={[{ required: true, message: '请输入标签名称' }]}
-              >
-                <Input
-                  value={item.relation_name_cn}
-                  onChange={(value) => {
-                    handleFieldChange(index, 'relation_name_cn', value);
-                  }}
-                />
-              </FormItem>
-              <FormItem
-                label={
-                  <div>
-                    展示名称
-                    <Tooltip content="展示在标注页面的名称">
-                      <IconQuestionCircle />
-                    </Tooltip>
-                  </div>
-                }
-                style={{ padding: 0 }}
-              >
-                <Input
-                  value={item.relation_name_en}
-                  onChange={(value) => {
-                    // 保存当前项的order_num用于精准匹配
-                    const currentOrderNum = item.order_num;
-                    handleFieldChange(index, 'relation_name_en', value);
-                  }}
-                />
-              </FormItem>
-              <FormItem label={null}>
-                {/* <input style={{ width: 40 }} type="color" value={item.colour} onChange={(value) => {
-                                    // 保存当前项的order_num用于精准匹配
-                                    handleFieldChange(index, 'colour', value)
-                                }} /> */}
-                <ColorPicker defaultValue={'#165DFF'} showPreset showText />
-              </FormItem>
-              <FormItem label={null}>
-                {entityRelations?.length > 1 && (
-                  <IconDelete onClick={() => removeArrayItem(index)} />
-                )}
-              </FormItem>
-            </div>
-          );
-        })}
+        {selectedSubstanceValue === 1 &&
+          entityRelations.map((item, index) => {
+            return (
+              <div className="entity-relation-item" key={item.order_num}>
+                <FormItem
+                  style={{ paddingLeft: 16 }}
+                  label="标签名称"
+                  rules={[{ required: true, message: '请输入标签名称' }]}
+                >
+                  <Input
+                    placeholder="请输入标签名称"
+                    style={{ width: 260 }}
+                    value={item.relation_name_cn}
+                    onChange={(value) => {
+                      handleFieldChange(index, 'relation_name_cn', value);
+                    }}
+                  />
+                </FormItem>
+                <FormItem
+                  label={
+                    <div>
+                      展示名称
+                      <Tooltip content="展示在标注页面的名称">
+                        <IconQuestionCircle />
+                      </Tooltip>
+                    </div>
+                  }
+                  style={{ padding: 0 }}
+                >
+                  <Input
+                    placeholder="请输入展示名称"
+                    style={{ width: 250 }}
+                    value={item.relation_name_en}
+                    onChange={(value) => {
+                      // 保存当前项的order_num用于精准匹配
+                      const currentOrderNum = item.order_num;
+                      handleFieldChange(index, 'relation_name_en', value);
+                    }}
+                  />
+                </FormItem>
+                <FormItem label={null}>
+                  <ColorPicker defaultValue={'#165DFF'} showPreset />
+                </FormItem>
+                <FormItem label={null}>
+                  {entityRelations?.length > 1 && (
+                    <IconDelete onClick={() => removeArrayItem(index)} />
+                  )}
+                </FormItem>
+              </div>
+            );
+          })}
       </Form>
-      <div className="add-btn">
-        <Button
-          onClick={() => {
-            setEntityRelations([
-              ...entityRelations,
-              {
-                order_num: entityRelations.length + 1,
-                relation_name_cn: '',
-                relation_name_en: '',
-                start_entity_labels: [],
-                target_entity_labels: [],
-                colour: ''
-              }
-            ]);
-          }}
-        >
-          <IconPlus />
-          添加标签
-        </Button>
-      </div>
+      {selectedSubstanceValue === 1 && (
+        <div className="add-btn">
+          <Button
+            onClick={() => {
+              setEntityRelations([
+                ...entityRelations,
+                {
+                  order_num: entityRelations.length + 1,
+                  relation_name_cn: '',
+                  relation_name_en: '',
+                  start_entity_labels: [],
+                  target_entity_labels: [],
+                  colour: ''
+                }
+              ]);
+            }}
+          >
+            <IconPlus />
+            添加标签
+          </Button>
+        </div>
+      )}
+      {/* 关系标签内容 */}
+      {selectedSubstanceValue === 2 && (
+        <div className="relation-content">
+          <div className="relation-content-body">
+            <Form
+              form={form}
+              // disabled={type === 'detail'}
+              onValuesChange={(_, val) => {
+                // setPublishData({ ...publishData, val })
+              }}
+              layout="inline"
+              labelAlign="right"
+              labelCol={{ flex: 'none' }}
+              wrapperCol={{ flex: 1 }}
+            >
+              {relationTags.map((item, index) => {
+                return (
+                  <div className="entity-relation-item" key={item.order_num}>
+                    <FormItem
+                      style={{ paddingLeft: 16 }}
+                      label="关系名称"
+                      rules={[{ required: true, message: '请输入标签名称' }]}
+                    >
+                      <Input
+                        placeholder="用于储存标注结果"
+                        style={{ width: 260 }}
+                        value={item.relation_name_cn}
+                        onChange={(value) => {
+                          handleFieldChange(index, 'relation_name_cn', value);
+                        }}
+                      />
+                    </FormItem>
+                    <FormItem
+                      label={
+                        <div>
+                          展示名称
+                          <Tooltip content="展示在标注页面的名称">
+                            <IconQuestionCircle />
+                          </Tooltip>
+                        </div>
+                      }
+                      style={{ padding: 0 }}
+                    >
+                      <Input
+                        placeholder="展示在标注页面的名称"
+                        style={{ width: 250 }}
+                        value={item.relation_name_en}
+                        onChange={(value) => {
+                          // 保存当前项的order_num用于精准匹配
+                          const currentOrderNum = item.order_num;
+                          handleFieldChange(index, 'relation_name_en', value);
+                        }}
+                      />
+                    </FormItem>
+                    <FormItem label={null}>
+                      {entityRelations?.length > 1 && (
+                        <IconDelete onClick={() => removeArrayItem(index)} />
+                      )}
+                    </FormItem>
+                  </div>
+                );
+              })}
+            </Form>
+          </div>
+          <div>
+            <Button>
+              {' '}
+              <IconPlus
+                onClick={() => {
+                  setRelationTags([
+                    ...relationTags,
+                    {
+                      order_num: relationTags.length + 1,
+                      relation_name_cn: '',
+                      relation_name_en: '',
+                      start_entity_labels: [],
+                      target_entity_labels: [],
+                      colour: ''
+                    }
+                  ]);
+                }}
+              />
+              添加关系
+            </Button>
+            {relationTags.length > 0 && (
+              <Button>
+                {' '}
+                <IconPlus
+                  onClick={() => {
+                    setRelationTags([
+                      ...relationTags,
+                      {
+                        order_num: relationTags.length + 1,
+                        relation_name_cn: '',
+                        relation_name_en: '',
+                        start_entity_labels: [],
+                        target_entity_labels: [],
+                        colour: ''
+                      }
+                    ]);
+                  }}
+                />
+                添加标签对
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
