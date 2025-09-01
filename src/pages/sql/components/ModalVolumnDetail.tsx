@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   DatePicker,
   Form,
@@ -12,6 +12,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
 import { getTargetFileTypeList } from '@/api/dataCatalog';
 import { getSourceDataFileList } from '@/api/dataCatalog';
+import { formatDateTime, formatFileSize } from '../utils';
 import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 const FormItem = Form.Item;
@@ -70,7 +71,7 @@ const FileList = (props) => {
   // console.log('FileList render fromId:', fromId);
 
   return (
-    <div className="flex flex-col">
+    <div>
       <Form
         autoComplete="off"
         layout="inline"
@@ -94,13 +95,17 @@ const FileList = (props) => {
         </FormItem>
       </Form>
       <Table
+        style={{
+          width: '100%',
+          height: '100%'
+        }}
         columns={columns}
         data={listData}
         pagination={pagination}
         loading={loading}
         rowKey="id"
         onChange={handleTableChange}
-        scroll={{ x: true, y: 600 }}
+        scroll={{ y: 500 }}
       />
     </div>
   );
@@ -193,7 +198,6 @@ const useTableList = (props) => {
       title: '连接器名称',
       dataIndex: 'connector_name',
       ellipsis: true,
-      width: 130,
       render: (_, record) => (
         <EllipsisPopover
           value={record.connector_name}
@@ -334,32 +338,4 @@ interface ListDataItem {
   file: string;
   workflowId: string;
   full_path?: string;
-}
-
-function formatFileSize(size: number): string {
-  if (size < 1024) {
-    return `${size}B`;
-  } else if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(2)}KB`;
-  } else if (size < 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024).toFixed(2)}MB`;
-  } else {
-    return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-  }
-}
-
-function formatDateTime(dateTimeString: string): string {
-  try {
-    const date = new Date(dateTimeString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    return dateTimeString; // 如果格式化失败，返回原字符串
-  }
 }

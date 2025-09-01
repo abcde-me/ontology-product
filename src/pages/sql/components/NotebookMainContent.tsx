@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Tabs } from '@arco-design/web-react';
 import NotebookWorkspace from './NotebookWorkspace';
-import { openPythonItem } from '@/api/python';
+import { openPythonItem } from '@/api/pyspark';
 import { OpenPythonItemRes } from '@/types/pythonApi';
 import './NotebookMainContent.scss';
 

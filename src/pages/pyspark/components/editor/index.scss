@@ -5,6 +5,21 @@
   background-color: #fff;
   border-left: 1px solid #e2e8f0;
 
+  .notebook-tabs {
+    .arco-tabs-header-nav {
+      background-color: #e7ecf0;
+
+      &::before {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .arco-tabs .arco-tabs-header-nav-card .arco-tabs-header-title-active {
+    background-color: #fff !important;
+    border-radius: 0;
+  }
+
   .main-toolbar {
     height: 60px;
     background-color: #fff;

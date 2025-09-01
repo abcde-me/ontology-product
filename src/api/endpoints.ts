@@ -255,6 +255,20 @@ export const ModaForgeResourceEndpoints = {
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  // 工作流-脚本类型
+  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  // 工作流-脚本执行器列表
+  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  // 工作流-脚本模板
+  scriptingTemplate:
+    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  // 工作流-脚本执行
+  scriptingBench:
+    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  // 工作流-脚本执行结果
+  scriptingBenchResult:
+    PrefixAimdp +
+    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -359,7 +373,17 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
 
   // python开发
-  pythonListApi: PrefixAimdp + '/notebook/{id}/list',
+  pythonListApi: PrefixAimdp + '/pyspark/{id}/list',
+  pythonCreateApi: PrefixAimdp + '/pyspark',
+  pythonRenameApi: PrefixAimdp + '/pyspark/{id}/rename',
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{id}/delete',
+  pythonCopyApi: PrefixAimdp + '/pyspark/{id}/copy',
+  pythonOpenApi: PrefixAimdp + '/pyspark/{id}/open',
+  pythonSaveApi: PrefixAimdp + '/pyspark/{id}/modify',
+  pythonRunApi: PrefixAimdp + '/pyspark/{id}/run',
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{id}/run_cancel',
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{id}/get_run_result',
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{id}/get_run_log',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

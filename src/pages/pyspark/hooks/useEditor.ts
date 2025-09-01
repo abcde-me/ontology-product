@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
-import { runPythonItem, getRunResult, savePythonItem } from '@/api/python';
+import { runPythonItem, getRunResult, savePythonItem } from '@/api/pyspark';
 
 interface UseEditorOptions {
   initialContent?: string;
@@ -27,12 +27,26 @@ interface UseEditorReturn {
   handleStopRunCode: () => void;
 }
 
+const defaultContent = `
+  🎉 欢迎使用多模态数据治理平台
+     ⚡️快速开始
+    这里是您的笔记本工作区，您可以在这里进行数据分析和处理工作。
+
+    💡 使用指南
+  创建新笔记本 - 在左侧文件面板点击"+ 笔记本"创建您的专属笔记本
+  添加单元格   点击下方按钮添加代码或文档单元格
+  导入数据源 - 在左侧"开发工具"中选择数据源并导入
+  使用算子库 - 从算子库中选择预制的数据处理算子
+ 
+    🚀 开始您的数据治理之旅！
+`;
+
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const { initialContent = '', currentFileId } = options;
 
   // 状态管理
   const [editorContent, setEditorContent] = useState(initialContent);
-  const [placeholderValue, setPlaceholderValue] = useState('请输入代码...');
+  const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
   const [runDuration, setRunDuration] = useState<number>(0);
@@ -41,34 +55,39 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
 
-  // 当初始内容变化时，更新编辑器内容
+  // 使用 ref 来跟踪初始内容，避免不必要的更新
+  const initialContentRef = useRef(initialContent);
+  const currentFileIdRef = useRef(currentFileId);
+
+  // 当初始内容变化时，更新编辑器内容（只在真正需要时更新）
   useEffect(() => {
-    setEditorContent(initialContent);
+    if (initialContent !== initialContentRef.current) {
+      initialContentRef.current = initialContent;
+      setEditorContent(initialContent);
+    }
   }, [initialContent]);
 
-  // 当内容变化时，更新占位符
+  // 更新 currentFileId ref
   useEffect(() => {
-    if (editorContent && editorContent.trim() !== '') {
-      setPlaceholderValue('请输入代码...');
-    } else {
-      setPlaceholderValue('请输入代码...');
-    }
-  }, [editorContent]);
+    currentFileIdRef.current = currentFileId;
+  }, [currentFileId]);
 
-  // 延时3秒自动保存
+  // 延时3秒自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
-    async (content: string) => {
-      if (!currentFileId) {
+    useCallback(async (content: string) => {
+      const fileId = currentFileIdRef.current;
+      if (!fileId) {
         return null;
       }
 
       try {
-        const res = await savePythonItem(currentFileId, {
-          id: Number(currentFileId),
+        const res = await savePythonItem(fileId, {
+          id: Number(fileId),
           data: content
         });
 
         if (res?.status === 200) {
+          setLastAutoSave(new Date().toLocaleTimeString());
           return res.data;
         }
         return null;
@@ -76,29 +95,29 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         console.error('自动保存失败:', error);
         return null;
       }
-    },
+    }, []),
     { wait: 3000 }
   );
 
-  // 处理内容变化
+  // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
+      setRunStatus(RunningStatus.IDLE);
       setEditorContent(value);
-
       // 自动保存
       handleSaveThrottled.run(value);
     },
     [handleSaveThrottled]
   );
 
-  // 运行代码
+  // 运行代码 - 优化依赖项
   const handleRunCode = useCallback(async () => {
-    console.log('runStatus', runStatus);
     if (runStatus === RunningStatus.RUNNING) {
       return;
     }
 
-    if (!currentFileId) {
+    const fileId = currentFileIdRef.current;
+    if (!fileId) {
       Message.error('请先保存文件');
       return;
     }
@@ -108,19 +127,17 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunDuration(0);
 
     try {
-      console.log('currentFileId', currentFileId);
-      const res = await runPythonItem(currentFileId);
+      const res = await runPythonItem(fileId);
       if (res?.status === 200) {
         setExecid(res.data.execid);
       } else {
         throw new Error('运行失败');
       }
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error('运行失败');
       setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
-  }, [runStatus, currentFileId]);
+  }, [runStatus]);
 
   // 停止运行
   const handleStopRunCode = useCallback(() => {
@@ -133,16 +150,22 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       pollingInterval: 3000
     });
 
-  // 监听运行状态变化，自动获取结果
+  // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING || !execid || !currentFileId) {
+    if (
+      runStatus !== RunningStatus.RUNNING ||
+      !execid ||
+      !currentFileIdRef.current
+    ) {
       return;
     }
 
     // 运行中时，轮询获取运行结果
-    if (runStatus === RunningStatus.RUNNING) {
-      cancelGetRunResultPolling();
-      getRunResultPolling(currentFileId, { execid }).then((res) => {
+    const fetchResult = async () => {
+      try {
+        const res = await getRunResultPolling(currentFileIdRef.current!, {
+          execid
+        });
         if (res?.status === 200 && res.data) {
           setRunResult(res.data.run_result);
 
@@ -164,16 +187,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             }
           }
         }
-      });
-    }
-  }, [
-    execid,
-    runStatus,
-    currentFileId,
-    runStartTime,
-    getRunResultPolling,
-    cancelGetRunResultPolling
-  ]);
+      } catch (error) {
+        console.error('获取运行结果失败:', error);
+      }
+    };
+
+    fetchResult();
+  }, [execid, runStatus, runStartTime, getRunResultPolling]);
 
   return {
     // 状态

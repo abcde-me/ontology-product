@@ -1,5 +1,6 @@
-import { Modal } from '@arco-design/web-react';
 import React from 'react';
+import { Modal } from '@arco-design/web-react';
+import DatasetDetail from '@/components/detail';
 import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 // interface ModalDatasetDetailProps {
@@ -9,8 +10,8 @@ import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 /** 数据集详情 弹框 */
 const ModalDatasetDetail = () => {
-  const DatasetDetailVisible = useSqlIndexStore(
-    (state: SqlIndexStore) => state.DatasetDetailVisible
+  const datasetDetailVisible = useSqlIndexStore(
+    (state: SqlIndexStore) => state.datasetDetailVisible
   );
 
   const closeDatasetDetail = useSqlIndexStore(
@@ -21,29 +22,15 @@ const ModalDatasetDetail = () => {
     <Modal
       title="数据集详情"
       style={{ width: 960 }}
-      visible={DatasetDetailVisible}
+      visible={datasetDetailVisible}
       footer={null}
       onCancel={closeDatasetDetail}
     >
-      <div className="pb-[16px]">
-        <BaseInfo />
-        <DataContent />
-        <VersionHistory />
+      <div className="my-dataset-detail pb-[16px]">
+        <DatasetDetail isHideEdit={true} detailId="331" />
       </div>
     </Modal>
   );
 };
 
 export default ModalDatasetDetail;
-
-const BaseInfo = () => {
-  return <div>BaseInfo</div>;
-};
-
-const DataContent = () => {
-  return <div>DataContent</div>;
-};
-
-const VersionHistory = () => {
-  return <div>VersionHistory</div>;
-};

@@ -53,6 +53,7 @@ import {
 } from '@/components/data-catalog-content/components/popups-form/types';
 import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
+import getFileIcon from '@/components/file-icon';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -88,6 +89,7 @@ export interface Dataset {
   src_model: string;
   latest_file_path: string;
   perms: string[];
+  storage_type: datasetStorageType;
   status:
     | 'creating'
     | 'create_failed'
@@ -136,6 +138,7 @@ const columns = (
   handleExport: (record: Dataset) => void,
   tagList: { id: number; name: string }[],
   selectedTagFilters: string[],
+  selectedStorageTypeFilters: string[], //存储格式过滤
   selectedStatusFilters: string[], //状态过滤
   sortField: string,
   sortOrder: string,
@@ -263,6 +266,26 @@ const columns = (
             {latest_version}
           </div>
           {/* </Tooltip> */}
+        </div>
+      );
+    }
+  },
+  {
+    title: '存储格式',
+    dataIndex: 'storage_type',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: 'jsonl', value: datasetStorageType.jsonl },
+      { text: 'file', value: datasetStorageType.file }
+    ],
+    filteredValue: selectedStorageTypeFilters,
+    filterMultiple: true,
+    render: (status: string, record: Dataset) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div>{getFileIcon(record.storage_type ?? '-')}</div>
+          <span className="ml-[4px]">{record.storage_type ?? '-'}</span>
         </div>
       );
     }
@@ -539,6 +562,12 @@ export enum datasetStatusName {
 }
 
 // 枚举数据集状态名称
+export enum datasetStorageType {
+  jsonl = 'jsonl',
+  file = 'file'
+}
+
+// 枚举数据集状态名称
 export enum datasetStatus {
   creating = 'creating',
   create_failed = 'create_failed',
@@ -571,6 +600,10 @@ const DatasetManagement: React.FC = () => {
   const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
     []
   ); //选中的标签过滤
+
+  // 存储格式过滤相关状态
+  const [selectedStorageTypeFilters, setSelectedStorageTypeFilters] =
+    React.useState<string[]>([]); //选中的存储格式过滤
 
   // 状态过滤相关状态
   const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<
@@ -650,12 +683,14 @@ const DatasetManagement: React.FC = () => {
       name: formData.name,
       description: formData.description,
       tag_names: formData.tags || [],
+      storage_type: formData.storageType,
       src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
       src_extra:
         formData.dataSource === 'volume'
           ? {
               // path: fullPath,
-              path_id: formData.targetDataSource?.[1]?.[1] ?? ''
+              path_id: formData.targetDataSource?.[1]?.[1] ?? '',
+              path_file_ids: formData.path_file_ids || []
             }
           : {
               connector_id: parseInt(formData?.targetDataSource) || 0,
@@ -815,6 +850,12 @@ const DatasetManagement: React.FC = () => {
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
     }
+    console.log('selectedStorageTypeFilters', selectedStorageTypeFilters);
+
+    // 添加存储格式过滤参数
+    if (selectedStorageTypeFilters.length > 0) {
+      params.storage_type = selectedStorageTypeFilters;
+    }
 
     // 添加状态过滤参数
     if (selectedStatusFilters.length > 0) {
@@ -849,6 +890,7 @@ const DatasetManagement: React.FC = () => {
     actualSearchField,
     selectedTagFilters,
     selectedStatusFilters,
+    selectedStorageTypeFilters,
     sortField,
     sortOrder
   ]);
@@ -860,6 +902,14 @@ const DatasetManagement: React.FC = () => {
       setSelectedTagFilters(filters.tag_names);
       setCurrentPage(1); // 重置到第一页
     }
+    // 处理存储格式过滤
+    if (
+      filters.storage_type &&
+      filters.storage_type !== selectedStorageTypeFilters
+    ) {
+      setSelectedStorageTypeFilters(filters.storage_type);
+      setCurrentPage(1); // 重置到第一页
+    }
     // 处理状态过滤
     if (filters.status && filters.status !== selectedStatusFilters) {
       setSelectedStatusFilters(filters.status);
@@ -868,6 +918,12 @@ const DatasetManagement: React.FC = () => {
 
     if (filters.tag_names === undefined) {
       setSelectedTagFilters([]);
+      setCurrentPage(1);
+    }
+
+    // 处理存储格式过滤
+    if (filters.storage_type === undefined) {
+      setSelectedStorageTypeFilters([]);
       setCurrentPage(1);
     }
 
@@ -997,6 +1053,7 @@ const DatasetManagement: React.FC = () => {
     //   Message.warning('请先选择要导出的数据集');
     //   return;
     // }
+    setDownloadData(null);
     setVisible(true);
     console.log('批量导出:', selectedRows);
     // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
@@ -1140,6 +1197,7 @@ const DatasetManagement: React.FC = () => {
           handleExport,
           tagList,
           selectedTagFilters,
+          selectedStorageTypeFilters,
           selectedStatusFilters,
           sortField,
           sortOrder,

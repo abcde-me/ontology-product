@@ -116,12 +116,12 @@ const menus: MenuModel[] = [
     key: 'DataDevelop',
     children: [
       {
-        title: 'Notebook开发',
+        title: 'PySpark开发',
         icon: (
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
-        key: 'python',
-        path: '/tenant/compute/modaforge/python'
+        key: 'pyspark',
+        path: '/tenant/compute/modaforge/pyspark'
       },
       {
         title: 'SQL开发',

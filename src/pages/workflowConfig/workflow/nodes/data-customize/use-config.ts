@@ -17,6 +17,7 @@ const useConfig = (id: string, payload: CustomNodeType) => {
 
   useEffect(() => {
     inputRef.current = inputs;
+    console.log(inputs, 'inputs');
   }, [inputs]);
 
   useEffect(() => {
@@ -33,6 +34,9 @@ const useConfig = (id: string, payload: CustomNodeType) => {
     (value: CustomNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.script_content = value.script_content;
+        draft.scripting_type = value.scripting_type;
+        draft.engine_id = value.engine_id;
+        draft.custom_run_status = value.custom_run_status;
       });
       setInputs(newInputs);
     },
