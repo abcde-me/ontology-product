@@ -261,3 +261,38 @@ export function getDatasetList(
     }, 500);
   });
 }
+
+export const DATASET_SOURCE_LIST = [
+  {
+    id: 1,
+    name: 'nationkey',
+    c_name: '国家编号',
+    comment: '国家编号，主键'
+  },
+  {
+    id: 2,
+    name: 'name',
+    c_name: '名称',
+    comment: '国家名称'
+  },
+  {
+    id: 3,
+    name: 'regionkey',
+    c_name: '区域编号',
+    comment: '区域编号，外键，关联region表'
+  },
+  {
+    id: 4,
+    name: 'comment',
+    c_name: '备注',
+    comment: '国家备注信息'
+  }
+];
+
+export const DATASET_STORAGE_TYPE_LIST = [
+  { label: '数据库表', value: 'table' }
+];
+
+export const DATASET_TAG_LIST = [];
+
+export const DATASET_LIST = [];
