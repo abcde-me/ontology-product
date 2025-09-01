@@ -359,7 +359,17 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
 
   // python开发
-  pythonListApi: PrefixAimdp + '/notebook/{id}/list',
+  pythonListApi: PrefixAimdp + '/pyspark/{id}/list',
+  pythonCreateApi: PrefixAimdp + '/pyspark',
+  pythonRenameApi: PrefixAimdp + '/pyspark/{id}/rename',
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{id}/delete',
+  pythonCopyApi: PrefixAimdp + '/pyspark/{id}/copy',
+  pythonOpenApi: PrefixAimdp + '/pyspark/{id}/open',
+  pythonSaveApi: PrefixAimdp + '/pyspark/{id}/modify',
+  pythonRunApi: PrefixAimdp + '/pyspark/{id}/run',
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{id}/run_cancel',
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{id}/get_run_result',
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{id}/get_run_log',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

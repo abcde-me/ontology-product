@@ -4,6 +4,11 @@
   flex-direction: column;
   background-color: #f5f5f5;
 
+  .arco-btn-text:not(.arco-btn-disabled) {
+    color: #0f172a;
+    padding: 0px;
+  }
+
   // 顶部工具栏
   .notebook-toolbar {
     height: 48px;
@@ -52,47 +57,6 @@
     }
   }
 
-  // 状态信息栏
-  // .status-info-bar {
-  //   height: 40px;
-  //   background-color: #fafafa;
-  //   border-bottom: 1px solid #e5e5e5;
-  //   display: flex;
-  //   align-items: center;
-  //   justify-content: space-between;
-  //   padding: 0 20px;
-
-  //   .status-info-left {
-  //     display: flex;
-  //     align-items: center;
-  //     gap: 16px;
-
-  //     .file-name {
-  //       font-size: 14px;
-  //       font-weight: 600;
-  //       color: #1d2129;
-  //     }
-
-  //     .file-time {
-  //       font-size: 12px;
-  //       color: #86909c;
-  //       background-color: #f2f3f5;
-  //       padding: 4px 8px;
-  //       border-radius: 4px;
-  //     }
-  //   }
-
-  //   .status-info-right {
-  //     .auto-save-status {
-  //       font-size: 12px;
-  //       color: #86909c;
-  //       background-color: #f2f3f5;
-  //       padding: 4px 8px;
-  //       border-radius: 4px;
-  //     }
-  //   }
-  // }
-
   // 代码编辑器容器
   .editor-container {
     flex: 1;
@@ -101,17 +65,20 @@
     overflow: hidden;
 
     // CodeMirror 编辑器样式
-    .cm-editor {
+    .code-editor {
       height: 100%;
 
+      .cm-editor {
+        height: 100%;
+      }
+
       .cm-scroller {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
         font-size: 14px;
         line-height: 1.6;
       }
 
       .cm-content {
-        padding: 16px;
+        padding: 8px 12px;
       }
 
       .cm-line {
@@ -119,18 +86,20 @@
       }
 
       .cm-gutters {
-        background-color: #fafafa;
-        border-right: 1px solid #e5e6eb;
-        color: #86909c;
+        background-color: #fff;
+        border-right: 1px solid transparent;
+        color: #6e7b8d;
+        width: 23px;
       }
 
       .cm-activeLineGutter {
         background-color: #f0f7ff;
-        color: #165dff;
+        color: #0f172a;
       }
 
       .cm-activeLine {
-        background-color: #f8f9fa;
+        background-color: #fff;
+        color: #0f172a;
       }
 
       .cm-selectionBackground {

@@ -8,3 +8,6 @@ export {
   useHasAnyPermission,
   useUserPermissions
 } from './usePermission';
+
+// 编辑器相关 hooks
+export { useEditor } from './useEditor';

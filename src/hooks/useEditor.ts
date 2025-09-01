@@ -1,27 +1,11 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Button, Layout, Message, Tabs } from '@arco-design/web-react';
-import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { useState, useCallback, useRef } from 'react';
+import { Message } from '@arco-design/web-react';
 import { openPythonItem } from '@/api/pyspark';
 import { OpenPythonItemRes } from '@/types/pythonApi';
-import EditorContent from '@/pages/pyspark/components/editor';
-import DataIcon from '@/assets/python/data-left-menu.svg';
-import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
-import PythonIcon from '@/assets/python/python-left-menu.svg';
-import './index.scss';
-import Datasets from './components/Datasets';
-import ModalVolumnDetail from './components/ModalVolumnDetail';
-import ModalDbDetail from './components/ModalDbDetail';
-import ModalTableDetail from './components/ModalTableDetail';
-import ModalDatasetDetail from './components/ModalDatasetDetail';
-import { useSqlIndexStore, SqlIndexStore } from './store';
-
-const { Content, Sider } = Layout;
-const TabPane = Tabs.TabPane;
-
-type TabKey = 'data' | 'files' | 'dataset';
+import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 
 // 文件标签页类型
-interface FileTab {
+export interface FileTab {
   key: string;
   title: string;
   content: string;
@@ -30,7 +14,7 @@ interface FileTab {
 }
 
 // 文件状态类型
-interface FileState {
+export interface FileState {
   currentFileId: string | null;
   fileTabs: FileTab[];
   activeTab: string;
@@ -47,100 +31,7 @@ const initialState: FileState = {
   error: null
 };
 
-export default function SqlIndex() {
-  const {
-    // 变量
-    activeTab,
-    fileState,
-    // 动作
-    handleTabChange,
-    addTab,
-    removeTab,
-    switchTab,
-    handleCreate,
-    showDbDetail,
-    showTableDetail,
-    showDatasetDetail,
-    handleVolumnSelect
-  } = useSqlIndexHooks();
-
-  // console.log('SqlIndex render');
-  // console.log('SqlIndex render activeTab:', activeTab);
-
-  function getSiderWidth() {
-    switch (activeTab) {
-      case 'data':
-        return 300;
-      case 'files':
-        return 300;
-      case 'dataset':
-        return 46;
-      default:
-        return 46;
-    }
-  }
-
-  return (
-    <Layout className="notebook-layout">
-      <Sider width={getSiderWidth()} className="notebook-sider">
-        <Tabs
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          direction="vertical"
-          className="notebook-tabs"
-          type="rounded"
-        >
-          <TabPane key="data" title={<DataIcon></DataIcon>}>
-            <div className="flex flex-col gap-[10px] p-[12px]">
-              <Button size="mini" onClick={() => handleVolumnSelect(1392)}>
-                打开数据卷详情(1392)
-              </Button>
-              <Button size="mini" onClick={() => handleVolumnSelect(1381)}>
-                打开数据卷详情(1381)
-              </Button>
-              <Button size="mini" onClick={showDbDetail}>
-                打开数据库详情
-              </Button>
-              <Button size="mini" onClick={showTableDetail}>
-                打开数据表详情
-              </Button>
-              <Button size="mini" onClick={showDatasetDetail}>
-                打开数据集详情
-              </Button>
-            </div>
-            {/* <NotebookTabContent type="data" /> */}
-          </TabPane>
-          <TabPane key="files" title={<PythonIcon></PythonIcon>}>
-            {/* <PythonTabContent type="files" onFileOpen={handleFileOpen} /> */}
-          </TabPane>
-          <TabPane key="dataset" title={<SuanziIcon></SuanziIcon>}></TabPane>
-        </Tabs>
-      </Sider>
-      <Content className="notebook-content">
-        {(activeTab === 'files' || activeTab === 'data') && (
-          <EditorContent
-            fileTabs={fileState.fileTabs}
-            activeTab={fileState.activeTab}
-            onTabChange={switchTab}
-            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-            onRemoveTab={removeTab}
-            onCreate={handleCreate}
-          />
-        )}
-
-        {activeTab === 'dataset' && <Datasets />}
-      </Content>
-
-      <ModalVolumnDetail />
-      <ModalDbDetail />
-      <ModalTableDetail />
-      <ModalDatasetDetail />
-    </Layout>
-  );
-}
-
-function useSqlIndexHooks() {
-  const [activeTab, setActiveTab] = useState<TabKey>('data');
+export const useEditor = () => {
   const [fileState, setFileState] = useState<FileState>(initialState);
 
   // DirectoryTree 的 ref，用于调用其新建功能
@@ -266,10 +157,6 @@ function useSqlIndexHooks() {
     setFileState((prev) => ({ ...prev, activeTab: key }));
   }, []);
 
-  const handleTabChange = (key: string) => {
-    setActiveTab(key as TabKey);
-  };
-
   // 从 FileManager 获取创建文件的函数
   const handleCreate = useCallback(
     (finalName: string, node?: any): Promise<any> => {
@@ -292,45 +179,13 @@ function useSqlIndexHooks() {
     []
   );
 
-  const showVolumnDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showVolumnDetail
-  );
-
-  const showDbDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showDbDetail
-  );
-
-  const showTableDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showTableDetail
-  );
-
-  const showDatasetDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showDatasetDetail
-  );
-
-  const setSelectedVolumnId = useSqlIndexStore(
-    (state: SqlIndexStore) => state.setSelectedVolumnId
-  );
-
-  function handleVolumnSelect(id: string | number) {
-    setSelectedVolumnId?.(id);
-    showVolumnDetail?.();
-  }
-
   return {
-    activeTab,
-    handleTabChange,
-    openFile,
     fileState,
+    directoryTreeRef,
+    openFile,
     addTab,
     removeTab,
     switchTab,
-    handleCreate,
-    directoryTreeRef,
-    showVolumnDetail,
-    showDbDetail,
-    showTableDetail,
-    showDatasetDetail,
-    handleVolumnSelect
+    handleCreate
   };
-}
+};
