@@ -10,7 +10,7 @@ import PythonIcon from '@/assets/python/python-left-menu.svg';
 import './index.scss';
 import Datasets from './components/Datasets';
 import ModalVolumnDetail from './components/ModalVolumnDetail';
-import ModalTableList from './components/ModalTableList';
+import ModalDbDetail from './components/ModalDbDetail';
 import ModalTableDetail from './components/ModalTableDetail';
 import ModalDatasetDetail from './components/ModalDatasetDetail';
 import { useSqlIndexStore, SqlIndexStore } from './store';
@@ -132,7 +132,7 @@ export default function SqlIndex() {
       </Content>
 
       <ModalVolumnDetail />
-      <ModalTableList />
+      <ModalDbDetail />
       <ModalTableDetail />
       <ModalDatasetDetail />
     </Layout>
