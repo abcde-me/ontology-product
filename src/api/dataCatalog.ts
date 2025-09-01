@@ -27,10 +27,539 @@ export async function downloadFileById(id: string, params: any = {}) {
 //     .do({ preCheck: false });
 // }
 
-// 获取数据目录列表
-export async function getCatalogList(param: any = {}) {
-  return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
+export enum CatalogItemType {
+  /**
+   * 获取全部
+   */
+  All = 0,
+  /**
+   * 获取卷
+   */
+  Volume = 2,
+  /**
+   * 获取库
+   */
+  Database = 3
 }
+
+export enum CatalogRootType {
+  /**
+   * 获取所有数据目录
+   */
+  All = 0,
+  /**
+   * 获取源数据目录
+   */
+  Source = 1,
+  /**
+   * 获取目标数据目录
+   */
+  Target = 2
+}
+
+export interface GetCatalogListParams {
+  /**
+   * 文件夹类型，0-> 获取全部，2->仅获取卷，3->仅获取库，默认0
+   */
+  dir_type?: CatalogItemType;
+  /**
+   * 获取目录类型，0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录
+   */
+  root_type: CatalogRootType;
+  /**
+   * 搜索关键字
+   */
+  search?: string;
+}
+
+export interface PurpleVolume {
+  base_dir: string;
+  id: number;
+  name: string;
+  parent_id: number;
+  type: number;
+  type_name: string;
+}
+
+/**
+ * 子文件夹
+ */
+export interface DstChildren {
+  /**
+   * 卷，固定写死
+   */
+  volume: PurpleVolume[];
+}
+
+export interface DstCatalogItem {
+  /**
+   * 根目录名
+   */
+  base_dir?: string;
+  /**
+   * 子文件夹
+   */
+  children?: DstChildren;
+  /**
+   * 目录ID
+   */
+  id?: number;
+  /**
+   * 目录名
+   */
+  name?: string;
+  /**
+   * 父目录ID
+   */
+  parent_id?: number;
+  /**
+   * 本目录的权限点
+   */
+  perms?: string[];
+  /**
+   * 类型
+   */
+  type?: number;
+  /**
+   * 类型名称
+   */
+  type_name?: string;
+}
+
+export interface Db {
+  base_dir?: string;
+  children?: { [key: string]: any };
+  id?: number;
+  name?: string;
+  parent_id?: number;
+  perms?: string[];
+  type?: number;
+  type_name?: string;
+}
+
+export interface FluffyVolume {
+  base_dir?: string;
+  id?: number;
+  name?: string;
+  parent_id?: number;
+  type?: number;
+  type_name?: string;
+}
+
+export interface SrcChildren {
+  /**
+   * 数据库，固定写死为db
+   */
+  db: Db[];
+  /**
+   * 卷，固定写死为volume
+   */
+  volume: FluffyVolume[];
+}
+
+export interface SrcCatalogItem {
+  base_dir?: string;
+  children?: SrcChildren;
+  id?: number;
+  name?: string;
+  parent_id?: number;
+  perms?: string[];
+  type?: number;
+  type_name?: string;
+}
+
+export interface GetCatalogListRes {
+  dst: DstCatalogItem[];
+  src: SrcCatalogItem[];
+}
+
+// 获取数据目录列表
+export async function getCatalogList(
+  param: GetCatalogListParams
+): Promise<ApiRes<GetCatalogListRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
+
+  // mock data
+  return Promise.resolve({
+    code: '0',
+    message: 'success',
+    requestId: '123',
+    status: 200,
+    data: {
+      src: [
+        {
+          id: 122,
+          parent_id: 0,
+          type: 1,
+          type_name: 'catalog',
+          name: '源目录1',
+          base_dir: '/user/xxd',
+          children: {
+            volume: [
+              {
+                base_dir: '',
+                id: 201,
+                name: '目标卷A',
+                parent_id: 1,
+                type: 2,
+                type_name: 'volume'
+              }
+            ],
+            db: [
+              {
+                id: 101,
+                name: '目标数据库A',
+                type: 2,
+                type_name: 'db',
+                base_dir: '/target/volume1/dbA'
+              }
+            ]
+          }
+        }
+      ],
+      dst: [
+        {
+          id: 1,
+          name: '目标卷1',
+          type: 1,
+          type_name: 'volume',
+          base_dir: '/target/volume1',
+          parent_id: 0,
+          perms: ['read', 'write'],
+          children: {
+            volume: [
+              {
+                base_dir: '',
+                id: 201,
+                name: '目标卷A',
+                parent_id: 1,
+                type: 2,
+                type_name: 'volume'
+              }
+            ]
+          }
+        }
+      ]
+    }
+  });
+}
+
+export interface GetSourceCatalogFileListParams {
+  /**
+   * 页码
+   */
+  page?: number;
+  /**
+   * 每页大小
+   */
+  page_size?: number;
+  /**
+   * 数据父目录id
+   */
+  data_path_id: number;
+  /**
+   * 文件名（可选，用于搜索）
+   */
+  file_name?: string;
+  /**
+   * 执行ID
+   */
+  execution_id?: string;
+  /**
+   * 开始时间
+   */
+  start?: string;
+  /**
+   * 结束时间
+   */
+  end?: string;
+  /**
+   * 文件类型数组 "pdf",
+   * "ppt",
+   * "docx",
+   * "txt",
+   * "md"
+   */
+  file_type?: string[];
+  /**
+   * 排序方式：升序"asc"或降序"desc"
+   */
+  sort: 'asc' | 'desc';
+}
+
+export interface GetSourceCatalogFileListItem {
+  /**
+   * 文件ID
+   */
+  id: number;
+  /**
+   * 连接器名称
+   */
+  connector_name: string;
+  /**
+   * 连接器ID
+   */
+  connector_id: number;
+  /**
+   * 文件名
+   */
+  file_name: string;
+  /**
+   * 文件类型
+   */
+  file_type: string;
+  /**
+   * 文件大小
+   */
+  file_size: number;
+  /**
+   * 上传用户
+   */
+  upload_user: string;
+  /**
+   * 任务加载开始时间
+   */
+  task_load_start_time: string;
+  /**
+   * 数据路径ID
+   */
+  data_path_id: number;
+  /**
+   * 绝对数据路径
+   */
+  abs_data_path: string;
+  /**
+   * 文件子路径
+   */
+  file_sub_path: string;
+  /**
+   * 权限列表
+   */
+  perms: string[];
+}
+
+export interface GetSourceCatalogFileListRes {
+  /**
+   * 文件列表
+   */
+  items: GetSourceCatalogFileListItem[];
+  /**
+   * 总数
+   */
+  total: number;
+  /**
+   * 当前页
+   */
+  page: number;
+  /**
+   * 每页大小
+   */
+  page_size: number;
+}
+
+export async function getSourceCatalogFileList(
+  param: GetSourceCatalogFileListParams
+): Promise<ApiRes<GetSourceCatalogFileListRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+
+  // mock data
+  return Promise.resolve({
+    code: '0',
+    message: 'success',
+    requestId: '123',
+    status: 200,
+    data: {
+      items: [
+        {
+          id: 4283,
+          connector_name: 'hdfs-xiaof2',
+          connector_id: 406,
+          file_name: 'etst.txt',
+          file_type: 'txt',
+          file_size: 2,
+          upload_user: '肖峰',
+          task_load_start_time: '2025-07-30 10:47:09',
+          data_path_id: 954,
+          abs_data_path: '/src/xiaof12/volume/xiaof112',
+          file_sub_path: 'etst.txt',
+          perms: ['source_dir:can_export', 'source_dir:can_delete']
+        }
+      ],
+      total: 0,
+      page: 1,
+      page_size: 100
+    }
+  });
+}
+
+export interface GetTargetCatalogFileListParams {
+  /**
+   * 结束时间
+   */
+  end_time?: string;
+  /**
+   * 文件类型数组
+   * "pdf",
+   * "ppt",
+   * "docx",
+   * "txt",
+   * "md"
+   */
+  file_type?: string[];
+  /**
+   * 完整文件路径
+   */
+  full_path: string;
+  /**
+   * 页大小
+   */
+  limit?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  /**
+   * 文件所属目录ID，卷ID
+   */
+  path_id: string;
+  /**
+   * 搜索数据内容
+   */
+  search_content?: string;
+  search_id?: number;
+  sort_field: string;
+  sort_order: string;
+  /**
+   * 开始时间
+   */
+  start_time?: string;
+}
+
+export interface GetTargetCatalogFileListItem {
+  /**
+   * 文件ID
+   */
+  id: number;
+  /**
+   * 生成时间
+   */
+  generated_at: string;
+  /**
+   * 文件名
+   */
+  file_name: string;
+  /**
+   * 文件类型
+   */
+  file_type: string;
+  /**
+   * 完整文件路径
+   */
+  full_path: string;
+  /**
+   * 文件内容摘要
+   */
+  short_content: string;
+  /**
+   * 创建时间
+   */
+  created_at: string;
+  /**
+   * 更新时间
+   */
+  updated_at: string;
+  /**
+   * 删除时间
+   */
+  deleted_at: string | null;
+  /**
+   * 额外信息
+   */
+  extras: {
+    /**
+     * 数据科学工作流ID
+     */
+    ds_workflow_id: string;
+    /**
+     * 文件名
+     */
+    file_name: string;
+    /**
+     * 文件大小
+     */
+    file_size: string;
+    /**
+     * 工作流UUID
+     */
+    workflow_uuid: string;
+  };
+  /**
+   * 权限列表
+   */
+  perms: string[];
+}
+
+export interface GetTargetCatalogFileListRes {
+  /**
+   * 文件列表
+   */
+  list: GetTargetCatalogFileListItem[];
+  /**
+   * 总数
+   */
+  total: number;
+  /**
+   * 当前页
+   */
+  page: number;
+  /**
+   * 每页大小
+   */
+  page_size: number;
+}
+
+export async function getTargetCatalogFileList(
+  param: GetTargetCatalogFileListParams
+): Promise<ApiRes<GetTargetCatalogFileListRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+
+  // mock data
+  return Promise.resolve({
+    code: '0',
+    message: 'success',
+    requestId: '123',
+    status: 200,
+    data: {
+      list: [
+        {
+          id: 17228,
+          generated_at: '2025-08-28T13:43:04+08:00',
+          file_name: '1504',
+          file_type: 'jsonl',
+          full_path: '/dst/zsq数据清洗测试/volume/多轮问答',
+          short_content: '报考者能否更改已经审核通过的职位',
+          created_at: '2025-08-28T13:43:06+08:00',
+          updated_at: '2025-08-28T13:43:06+08:00',
+          deleted_at: null,
+          extras: {
+            ds_workflow_id: '150455535967520',
+            file_name: '150455535967520.469.1756359557089.augment.jsonl',
+            file_size: '',
+            workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+          },
+          perms: ['dst_file:can_export', 'dst_file:can_delete']
+        }
+      ],
+      total: 0,
+      page: 1,
+      page_size: 100
+    }
+  });
+}
+
 // 添加目录
 export async function addCatalog(data: any) {
   const res = await UAPI.RES.catalogAddApi({}).post(data).inRegion().do();

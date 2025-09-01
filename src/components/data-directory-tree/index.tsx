@@ -49,15 +49,45 @@ const DataDirectoryTree: React.FC<{}> = () => {
     setSelectedKeys([]);
   };
 
+  // 处理文件详情事件
+  const handleFileDetail = (file: any) => {
+    console.log('文件详情:', file);
+    // 这里可以添加显示文件详情的逻辑
+    // 比如打开一个模态框显示文件信息
+  };
+
+  // 处理文件插入事件
+  const handleFileInsert = (file: any) => {
+    console.log('文件插入:', file);
+    // 这里可以添加插入文件的逻辑
+    // 比如将文件添加到某个工作区或执行插入操作
+  };
+
   // 根据当前选中的节点渲染对应的组件
   const renderContent = () => {
     switch (currentNode) {
       case 'dataset':
-        return <DataCollection onBack={handleBack} />;
+        return <DataCollection type="python" onBack={handleBack} />;
       case 'source':
-        return <SourceTargetTree type="source" onBack={handleBack} />;
+        return (
+          <SourceTargetTree
+            dataType="source"
+            type="python"
+            onBack={handleBack}
+            onFileDetail={handleFileDetail}
+            onFileInsert={handleFileInsert}
+          />
+        );
       case 'target':
-        return <SourceTargetTree type="target" onBack={handleBack} />;
+        return (
+          <SourceTargetTree
+            dataType="target"
+            type="python"
+            onBack={handleBack}
+            onFileDetail={handleFileDetail}
+            onFileInsert={handleFileInsert}
+          />
+        );
       default:
         return (
           <Tree
