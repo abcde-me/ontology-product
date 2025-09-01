@@ -12,6 +12,10 @@ import ModalVolumnDetail from './components/ModalVolumnDetail';
 import ModalDbDetail from './components/ModalDbDetail';
 import ModalTableDetail from './components/ModalTableDetail';
 import ModalDatasetDetail from './components/ModalDatasetDetail';
+import {
+  ModalDatasetForm,
+  ModalDatasetFormVersion
+} from './components/ModalDatasetForm';
 import { useSqlIndexStore, SqlIndexStore } from './store';
 import ModalScriptDetail from './components/ModalScriptDetail';
 
@@ -64,6 +68,8 @@ export default function SqlIndex() {
     showTableDetail,
     showDatasetDetail,
     showScriptDetail,
+    showDatasetForm,
+    showDatasetVersionForm,
     handleVolumnSelect
   } = useSqlIndexHooks();
 
@@ -113,6 +119,12 @@ export default function SqlIndex() {
               <Button size="mini" onClick={showScriptDetail}>
                 打开脚本详情
               </Button>
+              <Button size="mini" onClick={showDatasetForm}>
+                保存为新数据集
+              </Button>
+              <Button size="mini" onClick={showDatasetVersionForm}>
+                保存为新版本
+              </Button>
             </div>
             {/* <NotebookTabContent type="data" /> */}
           </TabPane>
@@ -142,6 +154,8 @@ export default function SqlIndex() {
       <ModalTableDetail />
       <ModalDatasetDetail />
       <ModalScriptDetail />
+      <ModalDatasetForm />
+      <ModalDatasetFormVersion />
     </Layout>
   );
 }
@@ -319,6 +333,14 @@ function useSqlIndexHooks() {
     (state: SqlIndexStore) => state.showScriptDetail
   );
 
+  const showDatasetForm = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showDatasetForm
+  );
+
+  const showDatasetVersionForm = useSqlIndexStore(
+    (state: SqlIndexStore) => state.showDatasetVersionForm
+  );
+
   const setSelectedVolumnId = useSqlIndexStore(
     (state: SqlIndexStore) => state.setSelectedVolumnId
   );
@@ -343,6 +365,8 @@ function useSqlIndexHooks() {
     showTableDetail,
     showDatasetDetail,
     showScriptDetail,
+    showDatasetForm,
+    showDatasetVersionForm,
     handleVolumnSelect
   };
 }
