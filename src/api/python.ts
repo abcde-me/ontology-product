@@ -18,9 +18,7 @@ import {
   GetRunResultRes,
   RunningStatus,
   GetRunLogReq,
-  GetRunLogRes,
-  GetDatasetListReq,
-  GetDatasetListRes
+  GetRunLogRes
 } from '@/types/pythonApi';
 
 // 获取数据目录列表

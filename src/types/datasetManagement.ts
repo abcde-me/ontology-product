@@ -101,7 +101,7 @@ export interface DatasetVersionFileParams {
   page_size?: number;
 }
 
-export interface DatasetVersionFileRes {
+export interface DatasetVersionFileItem {
   /**
    * 创建时间
    */
@@ -122,4 +122,23 @@ export interface DatasetVersionFileRes {
    * 文件类型
    */
   file_type: 'file' | 'jsonl' | 'table';
+}
+
+export interface DatasetVersionFileRes {
+  /**
+   * 总条数
+   */
+  total: number;
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页大小
+   */
+  limit: number;
+  /**
+   * 数据集文件列表
+   */
+  list: DatasetVersionFileItem[];
 }

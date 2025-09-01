@@ -1,94 +1,271 @@
-.directory-tree-container {
-  .arco-tree-node {
-    position: relative;
-  }
+.dataset-tree {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
 
-  .directory-tree-nav {
-    margin-bottom: 8px;
-    padding-left: 5px;
-  }
+  // 第一部分：标题导航
+  &__header {
+    padding-bottom: 11px;
+    background: #fff;
 
-  // 多级路径导航样式
-  .directory-path-navigation {
-    .path-separator {
-      color: #666;
-      user-select: none;
-    }
-
-    .current-folder {
-      color: #334155;
-      font-weight: 500;
-    }
-  }
-
-  .directory-tree-header {
-    .arco-btn-size-small {
-      padding: 0 0 0 12px;
-    }
-  }
-
-  .directory-tree-extra {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-flex;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.12s ease;
-  }
-
-  .arco-tree-node:hover .directory-tree-extra {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .arco-tree-node-switcher {
-    width: 0;
-    margin-right: 0;
-  }
-
-  // 搜索结果路径样式
-  .search-result-path {
-    font-size: 12px;
-    color: #6e7b8d;
-    line-height: 18px;
-  }
-
-  // 空数据状态样式
-  .directory-tree-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-
-    .empty-content {
+    &-left {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      text-align: center;
+      gap: 12px;
+    }
+  }
 
-      .empty-icon {
-        margin-bottom: 16px;
-        color: #c9cdd4;
-      }
+  &__back-icon {
+    font-size: 16px;
+    color: #334155;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
 
-      .empty-text {
-        font-size: 14px;
-        color: #86909c;
-        margin-bottom: 24px;
-        line-height: 1.5;
-      }
+  &__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+  }
 
-      .empty-actions {
-        .create-file-btn {
-          height: 36px;
-          padding: 0 20px;
-          font-size: 14px;
-          border-radius: 6px;
+  // 第二部分：搜索框
+  &__search {
+    padding-bottom: 8px;
+    background: #fff;
+
+    &-input {
+      width: 100%;
+
+      .arco-input-wrapper {
+        border-radius: 6px;
+        border: 1px solid #d9d9d9;
+
+        &:hover {
+          border-color: #40a9ff;
+        }
+
+        &.arco-input-focus {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
         }
       }
+    }
+  }
+
+  // 第三部分：列表
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  // 数据集列表
+  &__dataset-list {
+    padding: 8px 0;
+  }
+
+  &__dataset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+      background-color: #eef6ff;
+      border-radius: 2px;
+
+      .dataset-tree__dataset-name {
+        color: #007dfa;
+      }
+
+      .dataset-tree__dataset-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+  }
+
+  &__dataset-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  // 当数据集被选中时显示按钮
+  &__dataset-item--selected {
+    background: #eef6ff;
+    border-radius: 2px;
+
+    .dataset-tree__dataset-actions {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  &__dataset-icon {
+    font-size: 16px;
+    color: #1e293b;
+  }
+
+  &__dataset-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__dataset-name {
+    font-size: 14px;
+    color: #1e293b;
+  }
+
+  &__dataset-size {
+    font-size: 12px;
+    color: #999;
+  }
+
+  &__file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+    position: relative;
+
+    &:hover {
+      background: #eef6ff;
+
+      .dataset-tree__file-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .dataset-tree__file-name {
+        color: #007dfa;
+      }
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &--selected {
+      background: #eef6ff;
+
+      .dataset-tree__file-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .dataset-tree__file-name {
+        color: #007dfa;
+      }
+    }
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+  }
+
+  &__file-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &__file-icon {
+    font-size: 18px;
+    color: #666;
+  }
+
+  &__file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  &__file-size {
+    font-size: 12px;
+    color: #999;
+  }
+
+  // 空状态
+  .arco-empty {
+    padding: 40px 0;
+
+    .arco-empty-description {
+      color: #999;
+      font-size: 14px;
+    }
+  }
+
+  // 按钮样式
+  .arco-btn-outline:not(.arco-btn-disabled) {
+    color: #007dfa;
+    border-color: #007dfa;
+  }
+
+  .arco-btn-outline:not(.arco-btn-disabled):active,
+  .arco-btn-outline:not(.arco-btn-disabled):hover {
+    color: #007dfa;
+    border-color: #007dfa;
+    background-color: transparent;
+  }
+
+  // 滚动条样式
+  &__content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &__content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &__content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+
+    &:hover {
+      background: #a8a8a8;
     }
   }
 }

@@ -281,7 +281,7 @@ export async function searchDatasetList(
 
 export async function getDatasetVersionFile(
   params: DatasetVersionFileParams
-): Promise<ApiRes<DatasetVersionFileRes[]>> {
+): Promise<ApiRes<DatasetVersionFileRes>> {
   // TODO: 联调
   // return UAPI.RES.datasetVersionFileApi({}).get(params).inRegion().do();
 
@@ -291,42 +291,47 @@ export async function getDatasetVersionFile(
     code: '',
     message: 'OK',
     requestId: '1',
-    data: [
-      {
-        created_at: '2021-01-01 12:00:00',
-        file_modify_time: '2021-01-01 12:00:00',
-        file_name: 'example.txt',
-        file_size: '1024',
-        file_type: 'file'
-      },
-      {
-        created_at: '2021-02-15 09:30:00',
-        file_modify_time: '2021-02-15 10:00:00',
-        file_name: 'data.jsonl',
-        file_size: '2048',
-        file_type: 'file'
-      },
-      {
-        created_at: '2021-03-10 14:20:00',
-        file_modify_time: '2021-03-10 15:00:00',
-        file_name: 'table_data.csv',
-        file_size: '4096',
-        file_type: 'file'
-      },
-      {
-        created_at: '2021-04-01 08:00:00',
-        file_modify_time: '2021-04-01 08:30:00',
-        file_name: 'report.pdf',
-        file_size: '5120',
-        file_type: 'file'
-      },
-      {
-        created_at: '2021-05-20 16:45:00',
-        file_modify_time: '2021-05-20 17:00:00',
-        file_name: 'archive.zip',
-        file_size: '8192',
-        file_type: 'file'
-      }
-    ]
+    data: {
+      list: [
+        {
+          created_at: '2021-01-01 12:00:00',
+          file_modify_time: '2021-01-01 12:00:00',
+          file_name: 'example.txt',
+          file_size: '1024',
+          file_type: 'file'
+        },
+        {
+          created_at: '2021-02-15 09:30:00',
+          file_modify_time: '2021-02-15 10:00:00',
+          file_name: 'data.jsonl',
+          file_size: '2048',
+          file_type: 'file'
+        },
+        {
+          created_at: '2021-03-10 14:20:00',
+          file_modify_time: '2021-03-10 15:00:00',
+          file_name: 'table_data.csv',
+          file_size: '4096',
+          file_type: 'file'
+        },
+        {
+          created_at: '2021-04-01 08:00:00',
+          file_modify_time: '2021-04-01 08:30:00',
+          file_name: 'report.pdf',
+          file_size: '5120',
+          file_type: 'file'
+        },
+        {
+          created_at: '2021-05-20 16:45:00',
+          file_modify_time: '2021-05-20 17:00:00',
+          file_name: 'archive.zip',
+          file_size: '8192',
+          file_type: 'file'
+        }
+      ],
+      total: 1,
+      page: 1,
+      limit: 10
+    }
   });
 }
