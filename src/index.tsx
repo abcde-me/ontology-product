@@ -104,6 +104,11 @@ function App() {
             );
           })}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
+          <Redirect
+            from="/modaforge"
+            to="/tenant/compute/modaforge/connection"
+            exact
+          />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
           <Route key="*" path="*" component={Page404} />
         </Switch>
@@ -194,7 +199,6 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 
   // @ts-expect-error
   module.hot.accept('./pages/errorPages', () => {
-    console.log('333333');
     // 当错误页面组件发生变化时，重新渲染
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const NextPage404 = require('./pages/errorPages').default;

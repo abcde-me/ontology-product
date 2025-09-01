@@ -36,7 +36,7 @@ export interface DatasetListItem {
   /**
    * 最新版本大小(字节)
    */
-  latest_size: string;
+  latest_size: number;
   /**
    * 最新版本存储表名
    */
@@ -68,6 +68,9 @@ export interface GetDatasetListRes {
    * 页大小
    */
   limit: number;
+  /**
+   * 数据集列表
+   */
   list: DatasetListItem[];
   /**
    * 页码
@@ -98,7 +101,7 @@ export interface DatasetVersionFileParams {
   page_size?: number;
 }
 
-export interface DatasetVersionFileRes {
+export interface DatasetVersionFileItem {
   /**
    * 创建时间
    */
@@ -119,4 +122,23 @@ export interface DatasetVersionFileRes {
    * 文件类型
    */
   file_type: 'file' | 'jsonl' | 'table';
+}
+
+export interface DatasetVersionFileRes {
+  /**
+   * 总条数
+   */
+  total: number;
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页大小
+   */
+  limit: number;
+  /**
+   * 数据集文件列表
+   */
+  list: DatasetVersionFileItem[];
 }

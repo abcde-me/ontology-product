@@ -208,17 +208,14 @@ export default function Python() {
         >
           <TabPane key="files" title={<PythonIcon />}>
             <FileManager
+              key="files"
               type="files"
               onFileOpen={openFile}
               ref={directoryTreeRef}
             />
           </TabPane>
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager
-              type="files"
-              onFileOpen={openFile}
-              ref={directoryTreeRef}
-            />
+            <DataManager key="data" />
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}></TabPane>
         </Tabs>

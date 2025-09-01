@@ -211,7 +211,7 @@ const ModalDetail = (props) => {
                         </span>
                       </div>
                     </div>
-                  ) : DetailData?.type !== 'hdfs' ? (
+                  ) : DetailData?.type == 'hdfs' ? (
                     <div>
                       <div className="info-item">
                         <span className="label">Host:</span>

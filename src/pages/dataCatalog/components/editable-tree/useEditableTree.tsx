@@ -12,7 +12,8 @@ import {
   IconEdit,
   IconStorage,
   IconArchive,
-  IconFolder
+  IconFolder,
+  IconCaretDown
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -77,6 +78,8 @@ export function useEditableTree({ catalogTreeStore }) {
   );
 
   const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
+    console.log(node, '看看看什么是node');
+
     const newNode: TreeDataType = {
       title: name,
       key: `${node?.dataRef?.type || 'catalog'}-${Date.now()}`,
@@ -487,7 +490,8 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
-    console.log(dataRef?.type, '查看dataRef77777');
+    // console.log(dataRef?.type, '查看dataRef77777');
+    console.log(dataRef, '再次查看dataRef');
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
@@ -495,6 +499,8 @@ export function useEditableTree({ catalogTreeStore }) {
           <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
+            ) : dataRef?.type == '3' ? (
+              <IconCaretDown style={{ fontSize: '12px' }} />
             ) : (
               <IconArchive className="text-base" />
             )}

@@ -5,29 +5,39 @@
   margin: 20px 20px 20px 0;
   overflow: hidden;
 
+  .tab-tree {
+    padding: 0 12px;
+  }
+
+  .arco-tabs-header-title {
+    border-radius: 0;
+  }
+
   .notebook-sider {
-    .notebook-tabs {
-      height: 100%;
+    .arco-layout-sider-children {
+      .notebook-tabs {
+        height: 100%;
 
-      .arco-tabs-header-nav {
-        padding: 8px;
-        border-right: 1px solid #e2e8f0;
-      }
-
-      .arco-tabs-header-nav-rounded .arco-tabs-header-title {
-        padding: 0px;
-        // border-radius: 4px;
-        margin-top: 12px;
-
-        &:first-of-type {
-          margin-top: 0px;
+        .arco-tabs-header-nav {
+          padding: 8px;
+          border-right: 1px solid #e2e8f0;
         }
-      }
 
-      .arco-tabs-content {
-        height: calc(100% - 48px);
-        overflow: hidden;
-        padding: 0px;
+        .arco-tabs-header-nav-rounded .arco-tabs-header-title {
+          padding: 0px;
+          // border-radius: 4px;
+          margin-top: 12px;
+
+          &:first-of-type {
+            margin-top: 0px;
+          }
+        }
+
+        .arco-tabs-content {
+          height: calc(100% - 48px);
+          overflow: hidden;
+          padding: 0px;
+        }
       }
     }
   }
