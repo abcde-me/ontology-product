@@ -1,16 +1,16 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Button, Layout, Message, Tabs } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
-import { openPythonItem } from '@/api/python';
+import { openPythonItem } from '@/api/pyspark';
 import { OpenPythonItemRes } from '@/types/pythonApi';
-import EditorContent from '@/pages/python/components/editor';
+import EditorContent from '@/pages/pyspark/components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import './index.scss';
 import Datasets from './components/Datasets';
 import ModalVolumnDetail from './components/ModalVolumnDetail';
-import ModalTableList from './components/ModalTableList';
+import ModalDbDetail from './components/ModalDbDetail';
 import ModalTableDetail from './components/ModalTableDetail';
 import ModalDatasetDetail from './components/ModalDatasetDetail';
 import { useSqlIndexStore, SqlIndexStore } from './store';
@@ -132,7 +132,7 @@ export default function SqlIndex() {
       </Content>
 
       <ModalVolumnDetail />
-      <ModalTableList />
+      <ModalDbDetail />
       <ModalTableDetail />
       <ModalDatasetDetail />
     </Layout>

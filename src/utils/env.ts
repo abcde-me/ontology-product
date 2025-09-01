@@ -44,6 +44,7 @@ export const removeLoginToken = () => {
   } else {
     removeLocalStorage('loginToken');
     removeLocalStorage('console_token');
+    removeLocalStorage('customizeOptions');
   }
 };
 export const openNewPage = (page: string) => {

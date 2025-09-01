@@ -76,6 +76,7 @@ interface DatasetDetail {
   created_at: string;
   updated_at: string;
   perms: string[];
+  storage_type: string;
 }
 
 const countWidth = (count: number) => {
@@ -942,6 +943,9 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
         .then((res) => {
           console.log(1111111, res);
           setDatasetDetail(res.data);
+          if (res.data.storage_type === 'file') {
+            setActiveTab('version');
+          }
         })
         .catch((err) => {
           console.error('获取数据集详情失败:', err);
@@ -990,7 +994,8 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   };
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
-    if (!datasetDetail || !id) return Promise.resolve();
+    if (!datasetDetail || !id || datasetDetail.storage_type === 'file')
+      return Promise.resolve();
 
     const params: any = {
       id: id,
@@ -1263,6 +1268,10 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                     {
                       label: '生成模型:',
                       value: datasetDetail.src_model || '-'
+                    },
+                    {
+                      label: '存储格式:',
+                      value: datasetDetail.storage_type || '-'
                     }
                   ]}
                   column={1}
@@ -1400,183 +1409,187 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
             // setCurrentPage(1);
           }}
         >
-          <TabPane key="content" title="数据内容">
-            {/* 搜索系统 */}
-            <div
-              className="search-section"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-                // marginBottom: 12
-              }}
-            >
-              <Input
-                placeholder="输入ID、关键字搜索"
-                value={searchValue}
-                onChange={setSearchValue}
-                onPressEnter={handleSearch}
-                onClear={handleClearSearch}
-                className={'custom-input'}
-                disabled={updateStatus}
+          {datasetDetail?.storage_type !== 'file' && (
+            <TabPane key="content" title="数据内容">
+              {/* 搜索系统 */}
+              <div
+                className="search-section"
                 style={{
-                  width: 300,
-                  minWidth: 300,
-                  maxWidth: 300,
-                  flexShrink: 0
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                  // marginBottom: 12
                 }}
-                allowClear
-                suffix={<IconSearch style={{ color: '#999' }} />}
-              />
-              {contentData.length !== 0 && contentColumns.length !== 0 ? (
-                <>
-                  {updateStatus ? (
-                    <Space>
-                      <Button
-                        style={{
-                          fontWeight: '400'
-                        }}
-                        className={styles.customButton}
-                        onClick={() => {
-                          // 检查是否有改动
-                          const hasChanges =
-                            changedRows.length > 0 || deletedRows.length > 0;
-                          console.log(changedRows, deletedRows);
-                          if (!hasChanges) {
-                            // 没有改动，直接取消编辑
-                            setEditingRowKey(null);
-                            setEditingData({});
-                            setChangedRows([]);
-                            setDeletedRows([]);
-                            setContentData(contentDatabackup);
-                            setUpdateStatus(false);
-                          } else {
-                            // 有改动，弹窗确认
-                            Modal.confirm({
-                              title: '确定放弃编辑?',
-                              content: (
-                                <div
-                                  style={{
-                                    fontSize: '14px',
-                                    paddingLeft: '28px'
-                                    // lineHeight: '1.5'
-                                  }}
-                                >
-                                  放弃后，当前修改不会保存
-                                </div>
-                              ),
-                              okText: '确定',
-                              cancelText: '取消',
-                              onOk: () => {
-                                // 用户确认放弃编辑
-                                setEditingRowKey(null);
-                                setEditingData({});
-                                setChangedRows([]);
-                                setDeletedRows([]);
-                                setContentData(contentDatabackup);
-                                setUpdateStatus(false);
-                              },
-                              onCancel: () => {
-                                // 用户取消，不做任何操作
-                              }
-                            });
-                          }
-                        }}
-                      >
-                        取消本页编辑
-                      </Button>
-                      <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
-                        <Button
-                          style={{ fontWeight: '400' }}
-                          className={'update-btn'}
-                          type="primary"
-                          onClick={handleSubmitChanges}
-                          disabled={
-                            editingRowKey !== null ||
-                            (changedRows.length === 0 &&
-                              deletedRows.length === 0)
-                          }
-                        >
-                          保存本页编辑
-                        </Button>
-                      </Tooltip>
-                    </Space>
-                  ) : (
-                    <Tooltip
-                      content={
-                        !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
-                      }
-                    >
-                      {datasetDetail?.perms?.includes(
-                        DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
-                      ) &&
-                        !isHideEdit && (
-                          <Button
-                            // type="primary"
-                            disabled={
-                              !datasetDetail ||
-                              datasetDetail.status !== 'normal'
-                            }
-                            onClick={() => setUpdateStatus(true)}
-                            type="text"
-                            icon={<IconEdit />}
-                            className="edit-btn"
-                          >
-                            编辑
-                          </Button>
-                        )}
-                    </Tooltip>
-                  )}
-                </>
-              ) : null}
-            </div>
-            {contentData.length !== 0 && contentColumns.length !== 0 ? (
-              <>
-                {/* 内容数据表格 */}
-                {activeTab === 'content' ? (
+              >
+                <Input
+                  placeholder="输入ID、关键字搜索"
+                  value={searchValue}
+                  onChange={setSearchValue}
+                  onPressEnter={handleSearch}
+                  onClear={handleClearSearch}
+                  className={'custom-input'}
+                  disabled={updateStatus}
+                  style={{
+                    width: 300,
+                    minWidth: 300,
+                    maxWidth: 300,
+                    flexShrink: 0
+                  }}
+                  allowClear
+                  suffix={<IconSearch style={{ color: '#999' }} />}
+                />
+                {contentData.length !== 0 && contentColumns.length !== 0 ? (
                   <>
-                    <Table
-                      columns={contentColumns}
-                      data={contentData}
-                      noDataElement={noDataElement({
-                        description: '暂无数据'
-                      })}
-                      pagination={false}
-                      scroll={{ x: 'max-content' }}
-                      border={false}
-                    />
+                    {updateStatus ? (
+                      <Space>
+                        <Button
+                          style={{
+                            fontWeight: '400'
+                          }}
+                          className={styles.customButton}
+                          onClick={() => {
+                            // 检查是否有改动
+                            const hasChanges =
+                              changedRows.length > 0 || deletedRows.length > 0;
+                            console.log(changedRows, deletedRows);
+                            if (!hasChanges) {
+                              // 没有改动，直接取消编辑
+                              setEditingRowKey(null);
+                              setEditingData({});
+                              setChangedRows([]);
+                              setDeletedRows([]);
+                              setContentData(contentDatabackup);
+                              setUpdateStatus(false);
+                            } else {
+                              // 有改动，弹窗确认
+                              Modal.confirm({
+                                title: '确定放弃编辑?',
+                                content: (
+                                  <div
+                                    style={{
+                                      fontSize: '14px',
+                                      paddingLeft: '28px'
+                                      // lineHeight: '1.5'
+                                    }}
+                                  >
+                                    放弃后，当前修改不会保存
+                                  </div>
+                                ),
+                                okText: '确定',
+                                cancelText: '取消',
+                                onOk: () => {
+                                  // 用户确认放弃编辑
+                                  setEditingRowKey(null);
+                                  setEditingData({});
+                                  setChangedRows([]);
+                                  setDeletedRows([]);
+                                  setContentData(contentDatabackup);
+                                  setUpdateStatus(false);
+                                },
+                                onCancel: () => {
+                                  // 用户取消，不做任何操作
+                                }
+                              });
+                            }
+                          }}
+                        >
+                          取消本页编辑
+                        </Button>
+                        <Tooltip
+                          content={editingRowKey ? '请完成当前编辑' : ''}
+                        >
+                          <Button
+                            style={{ fontWeight: '400' }}
+                            className={'update-btn'}
+                            type="primary"
+                            onClick={handleSubmitChanges}
+                            disabled={
+                              editingRowKey !== null ||
+                              (changedRows.length === 0 &&
+                                deletedRows.length === 0)
+                            }
+                          >
+                            保存本页编辑
+                          </Button>
+                        </Tooltip>
+                      </Space>
+                    ) : (
+                      <Tooltip
+                        content={
+                          !datasetDetail || datasetDetail.status !== 'normal'
+                            ? '当前状态下不能进行编辑'
+                            : ''
+                        }
+                      >
+                        {datasetDetail?.perms?.includes(
+                          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
+                        ) &&
+                          !isHideEdit && (
+                            <Button
+                              // type="primary"
+                              disabled={
+                                !datasetDetail ||
+                                datasetDetail.status !== 'normal'
+                              }
+                              onClick={() => setUpdateStatus(true)}
+                              type="text"
+                              icon={<IconEdit />}
+                              className="edit-btn"
+                            >
+                              编辑
+                            </Button>
+                          )}
+                      </Tooltip>
+                    )}
                   </>
                 ) : null}
+              </div>
+              {contentData.length !== 0 && contentColumns.length !== 0 ? (
+                <>
+                  {/* 内容数据表格 */}
+                  {activeTab === 'content' ? (
+                    <>
+                      <Table
+                        columns={contentColumns}
+                        data={contentData}
+                        noDataElement={noDataElement({
+                          description: '暂无数据'
+                        })}
+                        pagination={false}
+                        scroll={{ x: 'max-content' }}
+                        border={false}
+                      />
+                    </>
+                  ) : null}
 
-                {/* 分页控件 */}
-                <div className="pagination-wrapper">
-                  <Pagination
-                    disabled={updateStatus}
-                    style={{
-                      float: 'right'
-                    }}
-                    current={currentPage}
-                    pageSize={pageSize}
-                    total={total}
-                    onChange={(page) => {
-                      setCurrentPage(page);
-                    }}
-                    onPageSizeChange={handlePageSizeChange}
-                    showTotal={(total, range) =>
-                      `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                    }
-                    sizeOptions={[10, 20, 50, 100]}
-                    showJumper
-                    sizeCanChange={true}
-                  />
-                </div>
-              </>
-            ) : (
-              noDataElement({ description: '暂无数据' })
-            )}
-          </TabPane>
+                  {/* 分页控件 */}
+                  <div className="pagination-wrapper">
+                    <Pagination
+                      disabled={updateStatus}
+                      style={{
+                        float: 'right'
+                      }}
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={total}
+                      onChange={(page) => {
+                        setCurrentPage(page);
+                      }}
+                      onPageSizeChange={handlePageSizeChange}
+                      showTotal={(total, range) =>
+                        `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                      }
+                      sizeOptions={[10, 20, 50, 100]}
+                      showJumper
+                      sizeCanChange={true}
+                    />
+                  </div>
+                </>
+              ) : (
+                noDataElement({ description: '暂无数据' })
+              )}
+            </TabPane>
+          )}
           <TabPane key="version" title="版本历史">
             {activeTab === 'version' ? (
               <Table

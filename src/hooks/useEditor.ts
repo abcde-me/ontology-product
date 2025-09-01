@@ -1,23 +1,11 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Layout, Tabs, Message } from '@arco-design/web-react';
-import FileManager from './components/file-manager';
-import DataManager from './components/data-manager';
-import EditorContent from './components/editor';
-import DataIcon from '@/assets/python/data-left-menu.svg';
-import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
-import PythonIcon from '@/assets/python/python-left-menu.svg';
-import { openPythonItem } from '@/api/python';
-import { OpenPythonItemRes, PythonItemType } from '@/types/pythonApi';
-import './index.scss';
+import { useState, useCallback, useRef } from 'react';
+import { Message } from '@arco-design/web-react';
+import { openPythonItem } from '@/api/pyspark';
+import { OpenPythonItemRes } from '@/types/pythonApi';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 
-const { Content, Sider } = Layout;
-const TabPane = Tabs.TabPane;
-
-type TabKey = 'files' | 'tools' | 'data';
-
 // 文件标签页类型
-interface FileTab {
+export interface FileTab {
   key: string;
   title: string;
   content: string;
@@ -26,7 +14,7 @@ interface FileTab {
 }
 
 // 文件状态类型
-interface FileState {
+export interface FileState {
   currentFileId: string | null;
   fileTabs: FileTab[];
   activeTab: string;
@@ -43,8 +31,7 @@ const initialState: FileState = {
   error: null
 };
 
-export default function Python() {
-  const [activeTab, setActiveTab] = useState<TabKey>('data');
+export const useEditor = () => {
   const [fileState, setFileState] = useState<FileState>(initialState);
 
   // DirectoryTree 的 ref，用于调用其新建功能
@@ -170,10 +157,6 @@ export default function Python() {
     setFileState((prev) => ({ ...prev, activeTab: key }));
   }, []);
 
-  const handleTabChange = (key: string) => {
-    setActiveTab(key as TabKey);
-  };
-
   // 从 FileManager 获取创建文件的函数
   const handleCreate = useCallback(
     (finalName: string, node?: any): Promise<any> => {
@@ -196,40 +179,13 @@ export default function Python() {
     []
   );
 
-  return (
-    <Layout className="notebook-layout">
-      <Sider width={300} className="notebook-sider">
-        <Tabs
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          direction="vertical"
-          className="notebook-tabs"
-          type="rounded"
-        >
-          <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              onFileOpen={openFile}
-              ref={directoryTreeRef}
-            />
-          </TabPane>
-          <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
-          </TabPane>
-          <TabPane key="tools" title={<SuanziIcon />}></TabPane>
-        </Tabs>
-      </Sider>
-      <Content className="notebook-content">
-        <EditorContent
-          fileTabs={fileState.fileTabs}
-          activeTab={fileState.activeTab}
-          onTabChange={switchTab}
-          onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-          onRemoveTab={removeTab}
-          onCreate={handleCreate}
-        />
-      </Content>
-    </Layout>
-  );
-}
+  return {
+    fileState,
+    directoryTreeRef,
+    openFile,
+    addTab,
+    removeTab,
+    switchTab,
+    handleCreate
+  };
+};

@@ -14,6 +14,7 @@ interface DatasetListParams {
   search?: string;
   search_field?: string;
   tag_names?: string[];
+  storage_type?: string[];
   status?: string[];
   sort_field?: string;
   sort_order?: string;
@@ -105,6 +106,7 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     search_field,
     search,
     tag_names,
+    storage_type,
     status,
     sort_field,
     sort_order
@@ -118,6 +120,9 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   }
   if (tag_names && tag_names.length > 0) {
     queryParams.tags = tag_names; // 直接赋值数组
+  }
+  if (storage_type && storage_type.length > 0) {
+    queryParams.storage_type_list = storage_type; // 直接赋值数组
   }
   if (status && status.length > 0) {
     queryParams.status_list = status; // 直接赋值数组
@@ -213,6 +218,17 @@ export async function datasetVersionRebuild(
   params: DatasetVersionRebuildParams
 ) {
   return UAPI.RES.datasetVersionRebuildApi({}).post(params).inRegion().do();
+}
+
+// 定义查询目标数据文件的参数接口
+interface TargetDataFileQueryParams {
+  page: number;
+  full_path: string;
+  limit: number;
+}
+//查询目标数据文件列表
+export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
+  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
 
 //获取连接器列表

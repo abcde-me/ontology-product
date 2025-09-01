@@ -223,7 +223,7 @@ function performanceSecurityCheck(
  * 主要的 SQL Linter 函数
  * 可以直接用于 CodeMirror extensions
  */
-export function createSqlLinter(config: SqlLinterConfig = {}): any {
+export default function createSqlLinter(config: SqlLinterConfig = {}): any {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
   return linter((view) => {
@@ -240,8 +240,3 @@ export function createSqlLinter(config: SqlLinterConfig = {}): any {
     return diagnostics;
   });
 }
-
-/**
- * 便捷函数：直接返回 linter 实例
- */
-export const sqlLinter = createSqlLinter();

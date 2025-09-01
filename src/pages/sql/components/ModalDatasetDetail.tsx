@@ -1,5 +1,6 @@
-import { Modal } from '@arco-design/web-react';
 import React from 'react';
+import { Modal } from '@arco-design/web-react';
+import DatasetDetail from '@/components/detail';
 import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 // interface ModalDatasetDetailProps {
@@ -25,10 +26,8 @@ const ModalDatasetDetail = () => {
       footer={null}
       onCancel={closeDatasetDetail}
     >
-      <div className="pb-[16px]">
-        <BaseInfo />
-        <DataContent />
-        <VersionHistory />
+      <div className="my-dataset-detail pb-[16px]">
+        <DatasetDetail isHideEdit={true} detailId="331" />
       </div>
     </Modal>
   );

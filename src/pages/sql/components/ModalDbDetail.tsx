@@ -9,54 +9,49 @@ import {
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import getFileIcon from '@/components/file-icon';
-import { getTargetFileTypeList } from '@/api/dataCatalog';
 import { getSourceDataFileList } from '@/api/dataCatalog';
-import { formatDateTime, formatFileSize } from '../utils';
+import { formatDateTime } from '../utils';
 import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 const FormItem = Form.Item;
 
-// interface ModalFileListProps {
+// interface ModalTableListProps {
 //     visible?: boolean,
 //     onClose?: () => void
 // }
 
-/** 数据卷详情 弹框 */
-const ModalVolumnDetail = () => {
-  const volumnDetailVisible = useSqlIndexStore(
-    (state: SqlIndexStore) => state.volumnDetailVisible
+/** 数据库详情 弹框 */
+const ModalDbDetail = () => {
+  const dbDetailVisible = useSqlIndexStore(
+    (state: SqlIndexStore) => state.dbDetailVisible
   );
 
-  const closeVolumnDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.closeVolumnDetail
+  const closeDbDetail = useSqlIndexStore(
+    (state: SqlIndexStore) => state.closeDbDetail
   );
 
   const selectedVolumnId = useSqlIndexStore(
     (state: SqlIndexStore) => state.selectedVolumnId
   );
 
-  // console.log('ModalVolumnDetail render');
-  // console.log('ModalVolumnDetail render selectedVolumnId:', selectedVolumnId);
-
   return (
     <Modal
-      title="数据卷详情"
+      title="数据库详情"
       style={{ width: 960 }}
-      visible={volumnDetailVisible}
+      visible={dbDetailVisible}
       footer={null}
-      onCancel={closeVolumnDetail}
+      onCancel={closeDbDetail}
     >
       <div className="pb-[16px]">
-        <FileList fromId={selectedVolumnId} />
+        <TableList fromId={selectedVolumnId} />
       </div>
     </Modal>
   );
 };
 
-export default ModalVolumnDetail;
+export default ModalDbDetail;
 
-const FileList = (props) => {
+const TableList = (props) => {
   const { fromId } = props;
 
   const {
@@ -68,8 +63,6 @@ const FileList = (props) => {
     handleTableChange
   } = useTableList({ fromId });
 
-  // console.log('FileList render fromId:', fromId);
-
   return (
     <div>
       <Form
@@ -78,7 +71,7 @@ const FileList = (props) => {
         onValuesChange={handleValuesChange}
       >
         <FormItem field="file_name" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入文件名搜索" />
+          <Input.Search allowClear placeholder="输入表名搜索" />
         </FormItem>
         <FormItem field="datetime_range" style={{ marginRight: 12 }}>
           <DatePicker.RangePicker
@@ -111,11 +104,7 @@ const FileList = (props) => {
   );
 };
 
-const defaultfileTypeList = [
-  { text: 'pdf', value: 'pdf' },
-  { text: 'txt', value: 'txt' },
-  { text: 'doc', value: 'doc' }
-];
+const defaultfileTypeList = [{ text: 'Mysql', value: 'Mysql' }];
 
 const defaultSearchParams = {
   page: 1,
@@ -130,8 +119,10 @@ const useTableList = (props) => {
   const [searchParams, setSearchParams] = useState<
     SourceDataFileQueryParams | any
   >({ ...defaultSearchParams, fromId });
+
   const [fileTypeList, setFileTypeList] =
     useState<{ text: string; value: string }[]>(defaultfileTypeList);
+
   const [listData, setListData] = useState<ListDataItem[]>([]);
   const [pagination, setPagination] = useState({
     sizeCanChange: true,
@@ -150,34 +141,32 @@ const useTableList = (props) => {
       width: 60
     },
     {
-      title: '文件名',
+      title: '表名',
       dataIndex: 'file_name',
       ellipsis: true,
       width: 174,
       render: (_, record) => (
-        // 产品需求：文件名提示常驻
         <Popover content={record.file_sub_path}>
           <span>{record.file_name}</span>
         </Popover>
       )
     },
     {
-      title: '文件类型',
+      title: '数据库类型',
       dataIndex: 'file_type',
-      width: 120,
+      width: 150,
       filters: fileTypeList,
       render: (_, record) => (
         <div className="flex items-center gap-[6px]">
-          {getFileIcon(record.file_type)}
           <span>{record.file_type}</span>
         </div>
       )
     },
     {
-      title: '文件大小',
+      title: '表行数',
       width: 88,
       dataIndex: 'file_size',
-      render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
+      render: (_, record) => <div>{record.file_size}</div>
     },
     {
       title: '上传用户',
@@ -207,31 +196,6 @@ const useTableList = (props) => {
       )
     }
   ];
-
-  useEffect(() => {
-    async function loadFileTypeList() {
-      try {
-        const res = await getTargetFileTypeList();
-        if (
-          res &&
-          res.data &&
-          res.data.dst_file_type &&
-          Array.isArray(res.data.dst_file_type)
-        ) {
-          const result = res.data.dst_file_type.map((type) => ({
-            text: type,
-            value: type
-          }));
-
-          setFileTypeList((prev) => [...prev, ...result]);
-        }
-      } catch (error) {
-        console.error('获取文件类型列表失败:', error);
-      }
-    }
-
-    loadFileTypeList();
-  }, []);
 
   useEffect(() => {
     async function loadListData() {

@@ -4,7 +4,7 @@ import { bbedit } from '@uiw/codemirror-theme-bbedit';
 import { sql } from '@codemirror/lang-sql';
 import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
-import { createSqlLinter } from '../utils/sqlLinterUtil';
+import { createSqlLinter } from '../utils';
 import { FullscreenContainer } from './Fullscreen';
 import { Button, Link, Space, Typography } from '@arco-design/web-react';
 import { SQL_EDITOR_HEIGHT } from '../constant';

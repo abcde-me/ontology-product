@@ -78,3 +78,16 @@
     overflow: hidden;
   }
 }
+
+.my-descriptions .arco-descriptions-item,
+.arco-descriptions-item-label,
+.arco-descriptions-item-value {
+  font-size: 14px;
+}
+
+.my-dataset-detail .dataset-detail {
+  padding: 0;
+}
+.my-dataset-detail .basic-info-card .arco-card-body {
+  padding: 0;
+}
