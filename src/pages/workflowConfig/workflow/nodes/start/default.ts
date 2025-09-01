@@ -34,6 +34,12 @@ const nodeDefault: NodeDefault<StartNodeType> = {
         category: '视频',
         enabled: true,
         format: ['MP4', 'MOV', 'MKV']
+      },
+      {
+        id: 999,
+        category: '自定义',
+        enabled: true,
+        format: []
       }
     ]
   },
@@ -57,7 +63,8 @@ const nodeDefault: NodeDefault<StartNodeType> = {
       (data.data_category[0].enabled && data.data_category[0].format.length) ||
       (data.data_category[1].enabled && data.data_category[1].format.length) ||
       (data.data_category[2].enabled && data.data_category[2].format.length) ||
-      (data.data_category[3].enabled && data.data_category[3].format.length)
+      (data.data_category[3].enabled && data.data_category[3].format.length) ||
+      (data.data_category[4].enabled && data.data_category[4].format.length)
     ) {
       return {
         isValid: true
