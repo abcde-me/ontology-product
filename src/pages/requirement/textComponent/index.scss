@@ -1,0 +1,34 @@
+.text-component-warp {
+  width: 800px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+
+  .type-header {
+    display: flex;
+    margin-bottom: 16px;
+
+    .item-base-class {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+
+    .active {
+      border-radius: 4px 4px 0 0;
+      border-bottom: none;
+      color: #007dfa;
+    }
+  }
+
+  .entity-relation-item {
+    display: flex;
+    margin-top: 12px;
+  }
+}
