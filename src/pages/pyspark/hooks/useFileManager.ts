@@ -6,7 +6,7 @@ import {
   renamePythonItem,
   deletePythonItem,
   copyPythonItem
-} from '@/api/python';
+} from '@/api/pyspark';
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
@@ -95,6 +95,15 @@ export const useFileManager = (
       if (selectedKeys.length > 0 && extra && onFileOpen) {
         const dataRef = extra?.node?.props?.dataRef;
 
+        // 检查是否正在新建文件（showInput 或 isAdd 为 true）
+        const isCreating = dataRef?.showInput || dataRef?.isAdd;
+
+        // 如果正在新建文件，不自动打开
+        if (isCreating) {
+          console.log('🔄 正在新建文件，跳过自动打开');
+          return;
+        }
+
         // 如果点击的是文件（不是文件夹），自动打开
         if (dataRef && dataRef.type !== PythonItemType.Directory) {
           console.log(
@@ -140,10 +149,7 @@ export const useFileManager = (
             );
             // 设置选中状态
             setSelectedKeys([String(firstFile.id)]);
-            // 延迟一下打开文件，确保状态更新完成
-            setTimeout(() => {
-              onFileOpen(String(firstFile.id), firstFile.name);
-            }, 100);
+            onFileOpen(String(firstFile.id), firstFile.name);
           }
         }
       }

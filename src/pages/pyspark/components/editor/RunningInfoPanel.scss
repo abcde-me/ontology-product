@@ -1,6 +1,9 @@
 .running-info-panel {
   .panel-header {
     height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .run-result-content,
@@ -12,11 +15,33 @@
     transform: rotate(0deg);
   }
 
-  .arco-collapse-item-active > .arco-collapse-item-header {
+  .arco-collapse-item-header {
     border: none;
+    border-top: 1px solid #e2e8f0;
   }
 
   .arco-collapse-item-content-box {
     padding: 0 12px 12px;
+  }
+
+  .run-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    color: #64748b;
+
+    .mr-4 {
+      margin-right: 4px;
+    }
+
+    &.running {
+      color: #0a65cc;
+    }
+    &.success {
+      color: #059669;
+    }
+    &.failed {
+      color: #ef4444;
+    }
   }
 }

@@ -6,7 +6,7 @@ import {
   renamePythonItem,
   deletePythonItem,
   copyPythonItem
-} from '@/api/python';
+} from '@/api/pyspark';
 import { PythonListItem } from '@/types/pythonApi';
 import './PythonTabContent.scss';
 import DirectoryTree, {
