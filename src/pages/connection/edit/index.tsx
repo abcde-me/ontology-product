@@ -6,20 +6,48 @@ import {
   Message,
   Modal,
   Radio,
-  Select
+  Select,
+  FormInstance
 } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, forwardRef, useImperativeHandle } from 'react';
+import { connectorDetailType } from '../type';
+
 // 表单
 const FormItem = Form.Item;
 const Option = Select.Option;
-const options = ['Mysql', 'Postgre'];
+const options = ['mysql', 'postgresql'];
 // 单选
 const RadioGroup = Radio.Group;
-const Edit = (props: any) => {
+
+// 定义组件Props接口
+interface EditProps {
+  inEditForm: FormInstance;
+  editObj: connectorDetailType;
+  editDisabled: boolean;
+}
+
+// 定义ref暴露的方法接口
+export interface EditRef {
+  getPasswordChanged: () => boolean;
+}
+
+const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
   // 获取表单实例
   const form = props.inEditForm;
   // 判断是s3还是hdfs
   const [storageType, setStorageType] = React.useState(props.editObj.type);
+  // 跟踪密码是否被修改过
+  const [passwordChanged, setPasswordChanged] = React.useState(false);
+  // 存储原始密码值用于比较
+  const [originalPassword] = React.useState(
+    props.editObj.config?.password || ''
+  );
+
+  // 暴露密码修改状态给父组件
+  useImperativeHandle(ref, () => ({
+    getPasswordChanged: () => passwordChanged
+  }));
+
   useEffect(() => {
     // 每次 props.editObj 变化时，更新 storageType
     if (props.editObj) {
@@ -31,27 +59,27 @@ const Edit = (props: any) => {
         type: props.editObj.type,
         ...(props.editObj.type === 's3'
           ? {
-              endpoint: props.editObj.config.endpoint,
-              access_key: props.editObj.config.access_key,
-              secret_key: props.editObj.config.secret_key,
-              region: props.editObj.config.region,
-              path: props.editObj.config.path
+              endpoint: props.editObj.config?.endpoint,
+              access_key: props.editObj.config?.access_key,
+              secret_key: props.editObj.config?.secret_key,
+              region: props.editObj.config?.region,
+              path: props.editObj.config?.path
             }
           : props.editObj.type === 'hdfs'
             ? {
-                host: props.editObj.config.host,
-                port: props.editObj.config.port,
-                user: props.editObj.config.user,
-                path: props.editObj.config.path
+                host: props.editObj.config?.host,
+                port: props.editObj.config?.port,
+                user: props.editObj.config?.user,
+                path: props.editObj.config?.path
               }
             : {
-                region: props.editObj.config.region,
+                region: props.editObj.config?.region,
                 sub_type: props.editObj.sub_type,
-                host: props.editObj.config.host,
-                port: props.editObj.config.port,
-                database: props.editObj.config.database,
-                user: props.editObj.config.user,
-                password: props.editObj.config.password
+                host: props.editObj.config?.host,
+                port: props.editObj.config?.port,
+                database: props.editObj.config?.database,
+                user: props.editObj.config?.user,
+                password: props.editObj.config?.password
               })
       });
     }
@@ -129,7 +157,7 @@ const Edit = (props: any) => {
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
-                initialValue={props.editObj.config.endpoint}
+                initialValue={props.editObj.config?.endpoint}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -140,7 +168,7 @@ const Edit = (props: any) => {
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
-                initialValue={props.editObj.config.access_key}
+                initialValue={props.editObj.config?.access_key}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -151,7 +179,7 @@ const Edit = (props: any) => {
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
-                initialValue={props.editObj.config.secret_key}
+                initialValue={props.editObj.config?.secret_key}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -172,7 +200,7 @@ const Edit = (props: any) => {
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
-                initialValue={props.editObj.config.path}
+                initialValue={props.editObj.config?.path}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -186,7 +214,7 @@ const Edit = (props: any) => {
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 field="host"
-                initialValue={props.editObj.config.host}
+                initialValue={props.editObj.config?.host}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -212,7 +240,7 @@ const Edit = (props: any) => {
                     }
                   }
                 ]}
-                initialValue={props.editObj.config.port}
+                initialValue={props.editObj.config?.port}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -223,7 +251,7 @@ const Edit = (props: any) => {
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 field="user"
-                initialValue={props.editObj.config.user}
+                initialValue={props.editObj.config?.user}
               >
                 <Input placeholder="请输入" />
               </FormItem>
@@ -234,7 +262,7 @@ const Edit = (props: any) => {
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 field="path"
-                initialValue={props.editObj.config.path}
+                initialValue={props.editObj.config?.path}
                 rules={[
                   {
                     validator: (value, cb) => {
@@ -258,11 +286,11 @@ const Edit = (props: any) => {
               <div>
                 <FormItem
                   label="所属系统："
-                  field="region"
+                  field="system"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
-                  initialValue={props.editObj.config.region}
+                  initialValue={props.editObj.config?.system}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
@@ -299,7 +327,7 @@ const Edit = (props: any) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入主机名' }]}
-                  initialValue={props.editObj.config.host}
+                  initialValue={props.editObj.config?.host}
                 >
                   <Input placeholder="请输入，如localhost，10.2.2.1" />
                 </FormItem>
@@ -310,7 +338,7 @@ const Edit = (props: any) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入端口' }]}
-                  initialValue={props.editObj.config.port}
+                  initialValue={props.editObj.config?.port}
                 >
                   <Input placeholder="请输入，如3306" />
                 </FormItem>
@@ -321,7 +349,7 @@ const Edit = (props: any) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入数据库名' }]}
-                  initialValue={props.editObj.config.database}
+                  initialValue={props.editObj.config?.database}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
@@ -332,7 +360,7 @@ const Edit = (props: any) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入用户名' }]}
-                  initialValue={props.editObj.config.user}
+                  initialValue={props.editObj.config?.user}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
@@ -343,9 +371,21 @@ const Edit = (props: any) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入密码' }]}
-                  initialValue={props.editObj.config.password}
+                  initialValue={props.editObj.config?.password}
                 >
-                  <Input placeholder="请输入" />
+                  <Input.Password
+                    placeholder="请输入"
+                    defaultValue={props.editObj.config?.password}
+                    visibilityToggle={false}
+                    onChange={(value) => {
+                      // 如果输入值与原始密码不同，标记为已修改
+                      if (value !== originalPassword) {
+                        setPasswordChanged(true);
+                      } else {
+                        setPasswordChanged(false);
+                      }
+                    }}
+                  />
                 </FormItem>
               </div>
             </>
@@ -354,5 +394,5 @@ const Edit = (props: any) => {
       </div>
     </div>
   );
-};
+});
 export default Edit;

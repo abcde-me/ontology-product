@@ -19,8 +19,8 @@ import {
   getConnectionList,
   updataConnectionList
 } from '@/api/connectionApi';
-import Edit from './edit';
-import { ConnectionType } from './type';
+import Edit, { EditRef } from './edit';
+import { ConnectionType, connectorDetailType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -29,8 +29,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 interface ChildComponentMethods {
-  displayModalView: () => void; // 根据实际情况调整参数类型
-  // 可以添加其他子组件暴露的方法...
+  displayModalView: () => void;
 }
 const InputSearch = Input.Search;
 
@@ -44,8 +43,8 @@ enum ConnectionStatus {
 enum ConnectorType {
   S3 = 's3',
   HDFS = 'hdfs',
-  Mysql = 'mysql',
-  Postgresql = 'postgresql'
+  mysql = 'mysql',
+  postgresql = 'postgresql'
 }
 
 // 状态显示配置
@@ -64,8 +63,8 @@ const STATUS_CONFIG = {
 const TYPE_CONFIG = {
   [ConnectorType.S3]: '对象存储',
   [ConnectorType.HDFS]: 'HDFS',
-  [ConnectorType.Mysql]: '数据库-Mysql',
-  [ConnectorType.Postgresql]: '数据库-Postgresql'
+  [ConnectorType.mysql]: '数据库-Mysql',
+  [ConnectorType.postgresql]: '数据库-Postgresql'
 };
 
 export default function Connection() {
@@ -73,11 +72,15 @@ export default function Connection() {
   const connectionId = useParams('connector_id');
   // 默认编辑弹框状态
   const [editVisible, setEditVisible] = React.useState(false);
-  const [editObject, setEditObject] = React.useState<ConnectionType>({});
+  const [editObject, setEditObject] = React.useState<connectorDetailType>(
+    {} as connectorDetailType
+  );
   // 编辑表单实例
   const [EditForm] = Form.useForm();
   // 添加编辑弹框的实例
   const addandsetchildRef = useRef<ChildComponentMethods | null>(null);
+  // 编辑组件的ref
+  const editComponentRef = useRef<EditRef>(null);
   // 编辑按钮的状态
   const [editLoadingState, setEditLoadingState] = React.useState(false);
   // 表格默认的状态(Lodaing)
@@ -101,15 +104,45 @@ export default function Connection() {
     total: 0,
     name: connectionId || ''
   });
+  // 去除对象中所有字符串字段的前后空格
+  const trimStringValues = <T extends Record<string, unknown>>(obj: T): T => {
+    const trimmed = {} as T;
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        if (typeof value === 'string') {
+          (trimmed as Record<string, unknown>)[key] = value.trim();
+        } else {
+          trimmed[key] = value;
+        }
+      }
+    }
+    return trimmed;
+  };
+
   // 点击确认按钮编辑连接器
   const editConnectorBtnHandel = async () => {
     try {
       const values = await EditForm.validate();
-      const { type, name, ...newValues } = values;
-      const filteredValues = filterValues(values);
+
+      // 去除所有字符串字段的前后空格
+      const trimmedValues = trimStringValues(values);
+      const { type, name, sub_type, ...configValues } = trimmedValues;
+
+      // 处理密码字段：如果密码未被修改，传递空字符串
+      if (
+        type === 'db' &&
+        editComponentRef.current &&
+        !editComponentRef.current.getPasswordChanged()
+      ) {
+        configValues.password = '';
+      }
+
+      const filteredValues = filterValues(configValues);
       const newfrom = {
         name,
         type,
+        sub_type: type === 'db' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
         config: { ...filteredValues }
       };
       setEditLoadingState(true);
@@ -187,7 +220,13 @@ export default function Connection() {
       title: '数据源类型',
       width: 140,
       dataIndex: 'type',
-      render: (_, item) => <div>{TYPE_CONFIG[item.type] || '未知类型'}</div>,
+      render: (_, item) => (
+        <div>
+          {item.type !== 'db'
+            ? TYPE_CONFIG[item.type] || '未知类型'
+            : TYPE_CONFIG[item.sub_type]}
+        </div>
+      ),
       filters: [
         {
           text: TYPE_CONFIG[ConnectorType.S3],
@@ -196,6 +235,14 @@ export default function Connection() {
         {
           text: TYPE_CONFIG[ConnectorType.HDFS],
           value: ConnectorType.HDFS
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.mysql],
+          value: ConnectorType.mysql
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.postgresql],
+          value: ConnectorType.postgresql
         }
       ]
     },
@@ -558,6 +605,7 @@ export default function Connection() {
         }
       >
         <Edit
+          ref={editComponentRef}
           inEditForm={EditForm}
           editObj={editObject}
           editDisabled={editLoadingState}

@@ -23,7 +23,7 @@ import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
 import { addLoad, getDirectoryList } from '@/api/loadApi';
-import { getConnectionList } from '@/api/connectionApi';
+import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
@@ -72,12 +72,19 @@ const LoadAddModal = (props: propsType) => {
   // 动态计算最大标签数量
   const [maxTagCounts, setMaxTagCount] = useState(3);
   // 提交表单时的校验逻辑
-  const handleSubmit = async () => {
+  const handleSubmit = async (type: string) => {
     try {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
       const pathId = rest.dest_path.at(-1);
+
+      // 处理表格名称数据
+      let processedTableNames = rest.table_name;
+      if (processedTableNames && processedTableNames.includes('all')) {
+        // 如果选择了"全部"，传递所有可用的表名
+        processedTableNames = talbleList;
+      }
       if (loadVal !== 'once') {
         const valid = await SchedulerRunRef.current?.validate();
         if (!valid) return;
@@ -89,7 +96,9 @@ const LoadAddModal = (props: propsType) => {
             type: loadVal == 'once' ? 0 : 1,
             cycle_text: expression
           },
-          dest_path_id: pathId
+          dest_path_id: pathId,
+          submit_type: type == 'keep' ? 1 : 2,
+          table_name: processedTableNames
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
@@ -115,7 +124,9 @@ const LoadAddModal = (props: propsType) => {
               week: ''
             }
           },
-          dest_path_id: pathId
+          dest_path_id: pathId,
+          submit_type: type == 'keep' ? 1 : 2,
+          table_name: processedTableNames
         };
         const res = await addLoad(formData);
         if (res.code === '' && res.status === 200) {
@@ -162,7 +173,7 @@ const LoadAddModal = (props: propsType) => {
   const getConnector_name_type = async () => {
     try {
       const res = await getConnectionList({
-        type: 's3'
+        type: sourceType
       });
       const newres = res.data.items.map((item) => {
         return {
@@ -317,28 +328,28 @@ const LoadAddModal = (props: propsType) => {
     if (value.includes('all')) {
       // 如果选择了"全部"，只保留"全部"选项
       form.setFieldsValue({
-        table_id: ['all']
+        table_name: ['all']
       });
     } else {
       // 如果没有选择"全部"，移除"全部"选项（如果存在）
       const filteredValue = value.filter((item) => item !== 'all');
 
       // 检查是否选择了所有其他选项，如果是则自动设置为"全部"
-      const allOtherOptions = options.filter((option) => option !== 'all');
-      const hasAllOtherOptions = allOtherOptions.every((option) =>
+      const hasAllOtherOptions = talbleList.every((option) =>
         filteredValue.includes(option)
       );
 
       if (
         hasAllOtherOptions &&
-        filteredValue.length === allOtherOptions.length
+        filteredValue.length === talbleList.length &&
+        talbleList.length > 0
       ) {
         form.setFieldsValue({
-          table_id: ['all']
+          table_name: ['all']
         });
       } else {
         form.setFieldsValue({
-          table_id: filteredValue
+          table_name: filteredValue
         });
       }
     }
@@ -357,6 +368,27 @@ const LoadAddModal = (props: propsType) => {
     };
   }, [calculateMaxTagCount, sourceType]);
 
+  //获取连接器下面的表格
+  const [talbleList, setTableList] = useState([]);
+  const getConnectorDetailList = async (connector_id: string) => {
+    if (!connector_id) {
+      console.log('connector_id为空，跳过获取表格数据');
+      return;
+    }
+    try {
+      const res = await getdetailList(connector_id);
+      setTableList(res.data.table_name);
+      console.log(res, '获取连接器下面的表格');
+    } catch (error) {
+      console.error('获取连接器表格数据失败:', error);
+    }
+  };
+  const connectorId = Form.useWatch('connector_id', form);
+  useEffect(() => {
+    if (connectorId) {
+      getConnectorDetailList(connectorId);
+    }
+  }, [connectorId]);
   // 创建 MutationObserver 监听 DOM 变化
   const observer = new MutationObserver(() => {
     const items = document.querySelectorAll('.arco-cascader-list-item');
@@ -469,7 +501,7 @@ const LoadAddModal = (props: propsType) => {
             {sourceType === 'db' && (
               <FormItem
                 label="选择抽取的表："
-                field="table_id"
+                field="table_name"
                 labelCol={{ span: 5 }}
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
@@ -486,7 +518,7 @@ const LoadAddModal = (props: propsType) => {
                     // showPopover: true,
                     render: (invisibleTagCount) => {
                       //联调时修改的地方
-                      const allTags = form.getFieldValue('table_id') || [];
+                      const allTags = form.getFieldValue('table_name') || [];
                       const remainingTags = allTags.slice(maxTagCounts);
                       return (
                         <Tooltip
@@ -516,7 +548,7 @@ const LoadAddModal = (props: propsType) => {
                                       (tag) => tag !== item
                                     );
                                     form.setFieldsValue({
-                                      table_id: filteredValue
+                                      table_name: filteredValue
                                     });
                                   }}
                                 />
@@ -531,13 +563,12 @@ const LoadAddModal = (props: propsType) => {
                   }}
                   placeholder="请选择抽取的表"
                   style={{ width: '100%', minWidth: 0 }}
-                  // defaultValue={['Beijing', 'Shenzhen', 'Wuhan']}
                   allowClear
                   allowCreate
                   onVisibleChange={calculateMaxTagCount}
                 >
                   <Option value="all">全部</Option>
-                  {options.map((option) => (
+                  {talbleList.map((option) => (
                     <Option key={option} value={option}>
                       {option}
                     </Option>
@@ -574,7 +605,7 @@ const LoadAddModal = (props: propsType) => {
             }}
           >
             <Radio value="once">单次载入</Radio>
-            <Radio value="cron">周期载入</Radio>
+            {sourceType !== 'local' && <Radio value="cron">周期载入</Radio>}
           </RadioGroup>
         </FormItem>
         {loadVal == 'cron' ? (
@@ -649,11 +680,22 @@ const LoadAddModal = (props: propsType) => {
         )}
       </Form>
       <div className={Styles.footerBbtnBox}>
-        <Button onClick={cancelHan} style={{ marginRight: '12px' }}>
+        <Button onClick={cancelHan} style={{ marginRight: '8px' }}>
           取消
         </Button>
-        <Button onClick={handleSubmit} type="primary" disabled={loading}>
-          确认
+        <Button
+          onClick={() => handleSubmit('keep')}
+          disabled={loading}
+          style={{ marginRight: '8px' }}
+        >
+          仅保存
+        </Button>
+        <Button
+          onClick={() => handleSubmit('run')}
+          type="primary"
+          disabled={loading}
+        >
+          保存并执行
         </Button>
       </div>
     </div>

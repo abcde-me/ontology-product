@@ -68,6 +68,4 @@ const Python: React.FC = memo(() => {
   );
 });
 
-Python.displayName = 'Python';
-
 export default Python;

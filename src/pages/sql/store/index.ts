@@ -7,7 +7,13 @@ export interface SqlIndexStore {
   /** 表详情 弹框 */
   tableDetailVisible?: boolean;
   /** 数据集详情 弹框 */
-  DatasetDetailVisible?: boolean;
+  datasetDetailVisible?: boolean;
+  /** 脚本详情 弹框 */
+  scriptDetailVisible?: boolean;
+  /** 保存为新数据集表单 弹框 */
+  datasetFormVisible?: boolean;
+  /** 保存为新版本表单 弹框 */
+  datasetVersionFormVisible?: boolean;
   /** 选中的数据卷 ID */
   selectedVolumnId?: string | number | null;
 
@@ -20,6 +26,12 @@ export interface SqlIndexStore {
   closeTableDetail?: () => void;
   showDatasetDetail?: () => void;
   closeDatasetDetail?: () => void;
+  showScriptDetail?: () => void;
+  closeScriptDetail?: () => void;
+  showDatasetForm?: () => void;
+  closeDatasetForm?: () => void;
+  showDatasetVersionForm?: () => void;
+  closeDatasetVersionForm?: () => void;
   setSelectedVolumnId?: (id: string | number) => void;
 }
 
@@ -27,7 +39,10 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
   volumnDetailVisible: false,
   dbDetailVisible: false,
   tableDetailVisible: false,
-  DatasetDetailVisible: false,
+  datasetDetailVisible: false,
+  scriptDetailVisible: false,
+  datasetFormVisible: false,
+  datasetVersionFormVisible: false,
   selectedVolumnId: null,
   showVolumnDetail: () => {
     set({ volumnDetailVisible: true });
@@ -48,10 +63,28 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
     set({ tableDetailVisible: false });
   },
   showDatasetDetail: () => {
-    set({ DatasetDetailVisible: true });
+    set({ datasetDetailVisible: true });
   },
   closeDatasetDetail: () => {
-    set({ DatasetDetailVisible: false });
+    set({ datasetDetailVisible: false });
+  },
+  showScriptDetail: () => {
+    set({ scriptDetailVisible: true });
+  },
+  closeScriptDetail: () => {
+    set({ scriptDetailVisible: false });
+  },
+  showDatasetForm: () => {
+    set({ datasetFormVisible: true });
+  },
+  closeDatasetForm: () => {
+    set({ datasetFormVisible: false });
+  },
+  showDatasetVersionForm: () => {
+    set({ datasetVersionFormVisible: true });
+  },
+  closeDatasetVersionForm: () => {
+    set({ datasetVersionFormVisible: false });
   },
   setSelectedVolumnId: (id: string | number) => {
     set({ selectedVolumnId: id });
