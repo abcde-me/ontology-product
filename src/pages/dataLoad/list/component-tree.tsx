@@ -50,7 +50,7 @@ interface ComponentTreeProps {
       e: Event;
     }
   ) => void;
-  onPathChange?: (path: string) => void; // 新增：路径变化回调
+  onPathChange?: (path: string, nodeId?: string | number) => void; // 新增：路径变化回调，同时传递节点ID
   showAddTree?: boolean; // 新增：是否显示添加目录按钮
   onAddTree?: () => void; // 新增：添加目录回调
   enableRootAdd?: boolean;
@@ -220,7 +220,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       onSelect(selectedKeys, extra);
     }
 
-    // 如果有路径变化回调，构建并传递路径
+    // 如果有路径变化回调，构建并传递路径和节点ID
     if (onPathChange && selectedKeys.length > 0) {
       const selectedNode = extra.node;
       const nodeData = selectedNode.props.dataRef;
@@ -231,7 +231,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         ? pathArray.join('/') + '/xxx-aaa'
         : nodeData?.name || '';
 
-      onPathChange(fullPath);
+      // 传递路径和节点ID
+      onPathChange(fullPath, nodeData?.id);
     }
   };
 
