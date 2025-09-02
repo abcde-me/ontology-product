@@ -158,7 +158,11 @@ export async function getPythonList(
   // });
 
   // TODO: 联调
-  return await UAPI.RES.pythonListApi({ id }).get(params).inRegion().do();
+  // console.log('getPythonList', pyspark_id, params);
+  return await UAPI.RES.pythonListApi({ pyspark_id: id })
+    .get(params)
+    .inRegion()
+    .do();
 }
 
 // 文件/目录创建
@@ -194,7 +198,10 @@ export async function renamePythonItem(
   params: RenamePythonItemReq
 ): Promise<ApiRes<RenamePythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRenameApi({ id }).put(params).inRegion().do();
+  return await UAPI.RES.pythonRenameApi({ pyspark_id: id })
+    .put(params)
+    .inRegion()
+    .do();
 
   // Mock implementation per spec
   // const targetId = Number(id) || params.id;
@@ -212,7 +219,10 @@ export async function renamePythonItem(
 // 文件/目录删除
 export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
   // TODO: 联调
-  return await UAPI.RES.pythonDeleteApi({ id }).delete({}).inRegion().do();
+  return await UAPI.RES.pythonDeleteApi({ pyspark_id: id })
+    .delete({})
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -230,7 +240,10 @@ export async function copyPythonItem(
   params: CopyPythonItemReq
 ): Promise<ApiRes<CopyPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonCopyApi({ id }).post(params).inRegion().do();
+  return await UAPI.RES.pythonCopyApi({ pyspark_id: id })
+    .post(params)
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // const now = '2025-08-18 14:00';
@@ -257,7 +270,10 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonOpenApi({ id }).get({}).inRegion().do();
+  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+    .get({})
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -327,7 +343,10 @@ export async function savePythonItem(
   params: SavePythonItemReq
 ): Promise<ApiRes<SavePythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonSaveApi({ id }).put(params).inRegion().do();
+  return await UAPI.RES.pythonSaveApi({ pyspark_id: id })
+    .put(params)
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -347,7 +366,10 @@ export async function runPythonItem(
   id: string
 ): Promise<ApiRes<RunPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunApi({ id }).put({}).inRegion().do();
+  return await UAPI.RES.pythonRunApi({ pyspark_id: id })
+    .put({})
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -368,7 +390,10 @@ export async function getRunResult(
   params: GetRunResultReq
 ): Promise<ApiRes<GetRunResultRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunResultApi({ id }).get(params).inRegion().do();
+  return await UAPI.RES.pythonRunResultApi({ pyspark_id: id })
+    .get(params)
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -391,5 +416,8 @@ export async function getRunLog(
   params: GetRunLogReq
 ): Promise<ApiRes<GetRunLogRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunLogApi({ id }).get(params).inRegion().do();
+  return await UAPI.RES.pythonRunLogApi({ pyspark_id: id })
+    .get(params)
+    .inRegion()
+    .do();
 }
