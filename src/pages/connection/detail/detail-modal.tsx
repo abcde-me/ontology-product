@@ -26,6 +26,12 @@ const ModalDetail = (props) => {
       setLoading(false);
     }
   };
+  function capitalizeFirstLetter(str) {
+    if (typeof str !== 'string' || str.length === 0) {
+      return str;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
   useEffect(() => {
     getdetailListHan();
   }, [props.detailId]);
@@ -98,7 +104,11 @@ const ModalDetail = (props) => {
                   </div>
                   <div className="info-item">
                     <span className="label">数据源类型:</span>
-                    <span className="value">{DetailData?.type}</span>
+                    <span className="value">
+                      {DetailData?.type !== 'db'
+                        ? DetailData?.type
+                        : `数据库-${capitalizeFirstLetter(DetailData?.sub_type)}`}
+                    </span>
                   </div>
                   <div className="info-item">
                     <span className="label">创建人:</span>
@@ -296,7 +306,45 @@ const ModalDetail = (props) => {
                         <div className="info-item">
                           <span className="label">所属系统:</span>
                           <span className="value">
-                            {DetailData?.config.host}
+                            {DetailData?.config?.system}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config?.system}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config?.system || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">数据库类型:</span>
+                          <span className="value">
+                            {DetailData?.sub_type}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.sub_type}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.sub_type || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">主机名:</span>
+                          <span className="value">
+                            {DetailData?.config.host}{' '}
                             <Tooltip
                               position="tl"
                               trigger="hover"
@@ -313,9 +361,9 @@ const ModalDetail = (props) => {
                           </span>
                         </div>
                         <div className="info-item">
-                          <span className="label">数据库类型:</span>
+                          <span className="label">端口:</span>
                           <span className="value">
-                            {DetailData?.config.port}
+                            {DetailData?.config.port}{' '}
                             <Tooltip
                               position="tl"
                               trigger="hover"
@@ -332,7 +380,26 @@ const ModalDetail = (props) => {
                           </span>
                         </div>
                         <div className="info-item">
-                          <span className="label">主机名:</span>
+                          <span className="label">数据库名:</span>
+                          <span className="value">
+                            {DetailData?.config.database}{' '}
+                            <Tooltip
+                              position="tl"
+                              trigger="hover"
+                              content={DetailData?.config.database}
+                            >
+                              <IconCopy
+                                className="set-mouse"
+                                onClick={() => {
+                                  copy(DetailData?.config.database || '');
+                                  Message.success('复制成功');
+                                }}
+                              />
+                            </Tooltip>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">用户名:</span>
                           <span className="value">
                             {DetailData?.config.user}{' '}
                             <Tooltip
@@ -344,63 +411,6 @@ const ModalDetail = (props) => {
                                 className="set-mouse"
                                 onClick={() => {
                                   copy(DetailData?.config.user || '');
-                                  Message.success('复制成功');
-                                }}
-                              />
-                            </Tooltip>
-                          </span>
-                        </div>
-                        <div className="info-item">
-                          <span className="label">端口:</span>
-                          <span className="value">
-                            {DetailData?.config.path}{' '}
-                            <Tooltip
-                              position="tl"
-                              trigger="hover"
-                              content={DetailData?.config.path}
-                            >
-                              <IconCopy
-                                className="set-mouse"
-                                onClick={() => {
-                                  copy(DetailData?.config.path || '');
-                                  Message.success('复制成功');
-                                }}
-                              />
-                            </Tooltip>
-                          </span>
-                        </div>
-                        <div className="info-item">
-                          <span className="label">数据库名:</span>
-                          <span className="value">
-                            {DetailData?.config.path}{' '}
-                            <Tooltip
-                              position="tl"
-                              trigger="hover"
-                              content={DetailData?.config.path}
-                            >
-                              <IconCopy
-                                className="set-mouse"
-                                onClick={() => {
-                                  copy(DetailData?.config.path || '');
-                                  Message.success('复制成功');
-                                }}
-                              />
-                            </Tooltip>
-                          </span>
-                        </div>
-                        <div className="info-item">
-                          <span className="label">用户名:</span>
-                          <span className="value">
-                            {DetailData?.config.path}{' '}
-                            <Tooltip
-                              position="tl"
-                              trigger="hover"
-                              content={DetailData?.config.path}
-                            >
-                              <IconCopy
-                                className="set-mouse"
-                                onClick={() => {
-                                  copy(DetailData?.config.path || '');
                                   Message.success('复制成功');
                                 }}
                               />

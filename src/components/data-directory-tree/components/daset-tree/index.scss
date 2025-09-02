@@ -249,23 +249,4 @@
     border-color: #007dfa;
     background-color: transparent;
   }
-
-  // 滚动条样式
-  &__content::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &__content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &__content::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-
-    &:hover {
-      background: #a8a8a8;
-    }
-  }
 }
