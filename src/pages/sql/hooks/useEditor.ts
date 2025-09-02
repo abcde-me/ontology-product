@@ -1,0 +1,215 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Message } from '@arco-design/web-react';
+import { useRequest, useThrottleFn } from 'ahooks';
+import { RunningStatus } from '@/types/pythonApi';
+import { runPythonItem, getRunResult, savePythonItem } from '@/api/pyspark';
+
+interface UseEditorOptions {
+  initialContent?: string;
+  currentFileId?: string;
+}
+
+interface UseEditorReturn {
+  // 编辑器状态
+  editorContent: string;
+  placeholderValue: string;
+  runStatus: RunningStatus;
+  runStartTime: Date | null;
+  runDuration: number;
+  lastAutoSave: string;
+  execid: string;
+  runLog: string;
+  runResult: string;
+
+  // 编辑器操作
+  handleContentChange: (value: string) => void;
+  handleRunCode: () => Promise<void>;
+  handleStopRunCode: () => void;
+}
+
+const defaultContent = `
+  🎉 欢迎使用多模态数据治理平台
+     ⚡️快速开始
+    这里是您的笔记本工作区，您可以在这里进行数据分析和处理工作。
+
+    💡 使用指南
+  创建新笔记本 - 在左侧文件面板点击"+ 笔记本"创建您的专属笔记本
+  添加单元格   点击下方按钮添加代码或文档单元格
+  导入数据源 - 在左侧"开发工具"中选择数据源并导入
+  使用算子库 - 从算子库中选择预制的数据处理算子
+ 
+    🚀 开始您的数据治理之旅！
+`;
+
+export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
+  const { initialContent = '', currentFileId } = options;
+
+  // 状态管理
+  const [editorContent, setEditorContent] = useState(initialContent);
+  const [placeholderValue] = useState(defaultContent);
+  const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
+  const [runStartTime, setRunStartTime] = useState<Date | null>(null);
+  const [runDuration, setRunDuration] = useState<number>(0);
+  const [lastAutoSave, setLastAutoSave] = useState<string>('');
+  const [execid, setExecid] = useState<string>('');
+  const [runLog, setRunLog] = useState<string>('');
+  const [runResult, setRunResult] = useState<string>('');
+
+  // 使用 ref 来跟踪初始内容，避免不必要的更新
+  const initialContentRef = useRef(initialContent);
+  const currentFileIdRef = useRef(currentFileId);
+
+  // 当初始内容变化时，更新编辑器内容（只在真正需要时更新）
+  useEffect(() => {
+    if (initialContent !== initialContentRef.current) {
+      initialContentRef.current = initialContent;
+      setEditorContent(initialContent);
+    }
+  }, [initialContent]);
+
+  // 更新 currentFileId ref
+  useEffect(() => {
+    currentFileIdRef.current = currentFileId;
+  }, [currentFileId]);
+
+  // 延时3秒自动保存 - 使用 useCallback 优化
+  const handleSaveThrottled = useThrottleFn(
+    useCallback(async (content: string) => {
+      const fileId = currentFileIdRef.current;
+      if (!fileId) {
+        return null;
+      }
+
+      try {
+        const res = await savePythonItem(fileId, {
+          id: Number(fileId),
+          data: content
+        });
+
+        if (res?.status === 200) {
+          setLastAutoSave(new Date().toLocaleTimeString());
+          return res.data;
+        }
+        return null;
+      } catch (error) {
+        console.error('自动保存失败:', error);
+        return null;
+      }
+    }, []),
+    { wait: 3000 }
+  );
+
+  // 处理内容变化 - 优化依赖项
+  const handleContentChange = useCallback(
+    (value: string) => {
+      setRunStatus(RunningStatus.IDLE);
+      setEditorContent(value);
+      // 自动保存
+      handleSaveThrottled.run(value);
+    },
+    [handleSaveThrottled]
+  );
+
+  // 运行代码 - 优化依赖项
+  const handleRunCode = useCallback(async () => {
+    if (runStatus === RunningStatus.RUNNING) {
+      return;
+    }
+
+    const fileId = currentFileIdRef.current;
+    if (!fileId) {
+      Message.error('请先保存文件');
+      return;
+    }
+
+    setRunStatus(RunningStatus.RUNNING);
+    setRunStartTime(new Date());
+    setRunDuration(0);
+
+    try {
+      const res = await runPythonItem(fileId);
+      if (res?.status === 200) {
+        setExecid(res.data.execid);
+      } else {
+        throw new Error('运行失败');
+      }
+    } catch (error) {
+      setRunStatus(RunningStatus.FAILED);
+      Message.error('运行失败');
+    }
+  }, [runStatus]);
+
+  // 停止运行
+  const handleStopRunCode = useCallback(() => {
+    setRunStatus(RunningStatus.IDLE);
+  }, []);
+
+  // 轮询获取运行结果
+  const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
+    useRequest(getRunResult, {
+      pollingInterval: 3000
+    });
+
+  // 监听运行状态变化，自动获取结果 - 优化依赖项
+  useEffect(() => {
+    if (
+      runStatus !== RunningStatus.RUNNING ||
+      !execid ||
+      !currentFileIdRef.current
+    ) {
+      return;
+    }
+
+    // 运行中时，轮询获取运行结果
+    const fetchResult = async () => {
+      try {
+        const res = await getRunResultPolling(currentFileIdRef.current!, {
+          execid
+        });
+        if (res?.status === 200 && res.data) {
+          setRunResult(res.data.run_result);
+
+          // 检查执行状态
+          if (res.data.run_status !== RunningStatus.RUNNING) {
+            const status =
+              res.data.run_status === RunningStatus.SUCCESS
+                ? RunningStatus.SUCCESS
+                : RunningStatus.FAILED;
+
+            setRunStatus(status);
+
+            // 计算执行时长
+            if (runStartTime) {
+              const duration = Math.floor(
+                (Date.now() - runStartTime.getTime()) / 1000
+              );
+              setRunDuration(duration);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('获取运行结果失败:', error);
+      }
+    };
+
+    fetchResult();
+  }, [execid, runStatus, runStartTime, getRunResultPolling]);
+
+  return {
+    // 状态
+    editorContent,
+    placeholderValue,
+    runStatus,
+    runStartTime,
+    runDuration,
+    lastAutoSave,
+    execid,
+    runLog,
+    runResult,
+
+    // 操作
+    handleContentChange,
+    handleRunCode,
+    handleStopRunCode
+  };
+};

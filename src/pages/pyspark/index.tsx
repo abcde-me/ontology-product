@@ -15,7 +15,7 @@ const TabPane = Tabs.TabPane;
 type TabKey = 'files' | 'tools' | 'data';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [activeTab, setActiveTab] = useState<TabKey>('data');
   const {
     fileState,
     directoryTreeRef,

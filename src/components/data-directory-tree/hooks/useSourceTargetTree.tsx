@@ -13,7 +13,7 @@ import {
 } from '@/api/dataCatalog';
 import { useEffect, useState } from 'react';
 
-export const useSourceTargetTree = () => {
+export const useSourceTargetTree = (dataType) => {
   // 目标目录列表
   const [targetCatalogList, setTargetCatalogList] = useState<DstCatalogItem[]>(
     []
@@ -79,8 +79,10 @@ export const useSourceTargetTree = () => {
   };
 
   useEffect(() => {
-    getCatalogList(CatalogRootType.All);
-  }, []);
+    getCatalogList(
+      dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target
+    );
+  }, [dataType]);
 
   return {
     targetCatalogList,

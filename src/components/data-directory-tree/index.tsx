@@ -3,7 +3,9 @@ import { Tree } from '@arco-design/web-react';
 import DataCollection from './components/daset-tree';
 import SourceTargetTree from './components/source-taget-tree';
 import FileIcon from './assets/file-icon.svg';
+import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
+import { Db, FluffyVolume } from '@/api/dataCatalog';
 
 // 数据目录配置数组
 const directoryItems = [
@@ -31,7 +33,19 @@ const treeData = directoryItems.map((item) => ({
   icon: <FileIcon />
 }));
 
-const DataDirectoryTree: React.FC<{}> = () => {
+interface DataDirectoryTreeProps {
+  onViewDatasetDetail?: (dataset: DatasetListItem) => void;
+  onInsertDataset?: (dataset: DatasetListItem) => void;
+  onViewVolumeDetail?: (volume: FluffyVolume) => void;
+  onViewDbDetail?: (database: Db) => void;
+}
+
+const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
+  onViewDatasetDetail,
+  onInsertDataset,
+  onViewVolumeDetail,
+  onViewDbDetail
+}) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
 
@@ -63,11 +77,38 @@ const DataDirectoryTree: React.FC<{}> = () => {
     // 比如将文件添加到某个工作区或执行插入操作
   };
 
+  // 处理数据集详情查看
+  const handleDatasetDetail = (dataset: DatasetListItem) => {
+    onViewDatasetDetail?.(dataset);
+  };
+
+  // 处理数据集插入
+  const handleDatasetInsert = (dataset: DatasetListItem) => {
+    onInsertDataset?.(dataset);
+  };
+
+  // 处理数据卷详情查看
+  const handleVolumeDetail = (volume: FluffyVolume) => {
+    onViewVolumeDetail?.(volume);
+  };
+
+  // 处理数据库详情查看
+  const handleDbDetail = (database: Db) => {
+    onViewDbDetail?.(database);
+  };
+
   // 根据当前选中的节点渲染对应的组件
   const renderContent = () => {
     switch (currentNode) {
       case 'dataset':
-        return <DataCollection type="python" onBack={handleBack} />;
+        return (
+          <DataCollection
+            type="python"
+            onBack={handleBack}
+            onViewDatasetDetail={handleDatasetDetail}
+            onInsertDataset={handleDatasetInsert}
+          />
+        );
       case 'source':
         return (
           <SourceTargetTree
@@ -76,6 +117,8 @@ const DataDirectoryTree: React.FC<{}> = () => {
             onBack={handleBack}
             onFileDetail={handleFileDetail}
             onFileInsert={handleFileInsert}
+            onVolumeDetail={handleVolumeDetail}
+            onDbDetail={handleDbDetail}
           />
         );
       case 'target':
@@ -86,6 +129,8 @@ const DataDirectoryTree: React.FC<{}> = () => {
             onBack={handleBack}
             onFileDetail={handleFileDetail}
             onFileInsert={handleFileInsert}
+            onVolumeDetail={handleVolumeDetail}
+            onDbDetail={handleDbDetail}
           />
         );
       default:
