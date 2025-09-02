@@ -322,6 +322,8 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionListApi: PrefixAimdp + '/datasets/version',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  //数据内容文件表
+  dataContentFileList: PrefixAimdp + '/datasets/version/file',
 
   // 连接器接口
 
