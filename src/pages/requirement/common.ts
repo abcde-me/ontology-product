@@ -110,3 +110,13 @@ export const shapeOptions = [
     label: '立方体'
   }
 ];
+
+export const getRandomHexColorStrict = () => {
+  const hexChars = '0123456789ABCDEF';
+  let color = '#';
+  // 循环 6 次，每次随机取一个十六进制字符
+  for (let i = 0; i < 6; i++) {
+    color += hexChars[Math.floor(Math.random() * hexChars.length)];
+  }
+  return color;
+};

@@ -26,13 +26,17 @@ import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 import { getTaskDetail } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
-import { DataSourceModal } from '@/pages/requirement/components/detailModal';
-import { DepartmentModal } from './components/departmentModal';
-import { IndividualModal } from './components/individualModal';
+import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
+import { DepartmentModal } from './components/DepartmentModal';
+import { IndividualModal } from './components/IndividualModal';
 import { v4 as uuidV4 } from 'uuid';
-import { numberToChinese, shapeOptions } from './common';
-import AnnotationType from './components/annotationType';
-import TextSubstanceComponent from './components/textEntity';
+import {
+  getRandomHexColorStrict,
+  numberToChinese,
+  shapeOptions
+} from './common';
+import AnnotationType from './components/AnnotationType';
+import TextSubstanceComponent from './components/TextEntity';
 import { Classify } from './components/Classify';
 import './detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
@@ -140,32 +144,6 @@ export default function RequirementDetail() {
   const [loading, setLoading] = useState(false);
   // 标签和属性
   const [activeTab, setActiveTab] = useState(1);
-  // 工具配置功能
-  const [labelContent, setLabelContent]: any = useState([
-    {
-      id: uuidV4(),
-      label_name_cn: '', //展示名称
-      label_name_en: '', //存储名称
-      label_shape: LabelShape.RECTANGLE, //标注形状，点1，线2，正方形3，多边形4
-      label_colour: '#000000', //标签颜色（如#FFFFFF）
-      label_info_attribute_groups: [
-        {
-          attribute_id: uuidV4(),
-          attribute_group_name: '', //属性组名称
-          attribute_group_class: 1, //1单选/2多选/3输入框
-          attribute_group_type: 1, //1必选/2非必选
-          label_info_attribute: [
-            {
-              label_info_id: uuidV4(),
-              attribute_name_cn: '', //属性中文名称(展示名称)
-              attribute_name_en: '', //属性英文名称(存储名称)
-              input_type: 1 //输入类型：1选项，2输入框
-            }
-          ]
-        }
-      ]
-    }
-  ]);
   //
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
@@ -395,7 +373,7 @@ export default function RequirementDetail() {
         label_name_cn: '',
         label_name_en: '',
         label_shape: LabelShape.RECTANGLE,
-        label_colour: '#0000000',
+        label_colour: getRandomHexColorStrict(),
         label_info_attribute_groups: [
           {
             attribute_id: uuidV4(),
@@ -466,6 +444,7 @@ export default function RequirementDetail() {
     // id 唯一 要更新 然后同步更新对应的数据
     const lastItem = arr[arr.length - 1];
     lastItem.id = uuidV4();
+    lastItem.label_colour = getRandomHexColorStrict();
     // 返回最后一个元素（索引 = 数组长度 - 1）
     updateNestedValue([arr.length - 1], lastItem);
     return arr[arr.length - 1];
@@ -842,7 +821,6 @@ export default function RequirementDetail() {
                                   fontSize={20}
                                   onClick={() => {
                                     deleteLabel(labelIndex);
-                                    // setLabelContent(labelContent.filter((j: any) => j.id !== item.id))
                                   }}
                                 />
                               )}
@@ -856,7 +834,16 @@ export default function RequirementDetail() {
                                     key={groupIndex}
                                     className="attribute-group-item"
                                   >
-                                    <FormItem required label="属性组件名称">
+                                    <FormItem
+                                      field="attr-group"
+                                      rules={[
+                                        {
+                                          required: true,
+                                          message: '请输入属性组名称'
+                                        }
+                                      ]}
+                                      label="属性组件名称"
+                                    >
                                       <div className="group-items">
                                         <Input
                                           width={400}
@@ -986,6 +973,7 @@ export default function RequirementDetail() {
                                               attrGroup.attribute_group_class) && (
                                             <div className="attribute-info-item">
                                               <FormItem
+                                                field="attribute-options"
                                                 rules={[
                                                   {
                                                     required: true,
@@ -1236,9 +1224,7 @@ export default function RequirementDetail() {
                                   {(1 === attrGroup.attribute_group_class ||
                                     2 === attrGroup.attribute_group_class) && (
                                     <div className="attribute-info-item">
-                                      <FormItem
-                                        label={`选项${numberToChinese(attrIndex + 1)}`}
-                                      >
+                                      <FormItem label={`选项${attrIndex + 1}`}>
                                         <Input
                                           type="text"
                                           value={attr.attribute_name_cn}
