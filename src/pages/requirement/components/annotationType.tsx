@@ -36,7 +36,6 @@ interface AnnotationTypeProps {
   };
   getChildAnnotationType: (selectedRadio: number, activeKey: number) => void;
 }
-
 const AnnotationType: React.FC<AnnotationTypeProps> = ({
   label_type,
   label_tool,
