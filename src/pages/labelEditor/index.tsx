@@ -37,7 +37,7 @@ function WorkflowConfig() {
         const taskInfo = await getTask(requirementId!);
         const {
           task_id,
-          requerment_info: {
+          requirement_info: {
             name,
             label_type: type,
             label_tool: { label_tool_code: tool }

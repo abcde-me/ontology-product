@@ -101,15 +101,15 @@ export async function getTaskResult(taskId: string) {
 export async function getTask(requirementId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
-  // const { data: res } = await UAPI.RES.leGetTask({}).post({requerment_id: rId}).inRegion().do();
+  // const { data: res } = await UAPI.RES.leGetTask({}).post({requirement_id: rId}).inRegion().do();
   const res = {
     task_id: 5,
     item_path: 'https://temp.im/600x600',
-    item_type: 2,
-    requerment_info: {
+    item_type: 1,
+    requirement_info: {
       name: '需求名称',
       description: '描述',
-      label_type: 2,
+      label_type: 1,
       label_tool: {
         label_tool_name: '标注工具名称',
         label_tool_code: 'aaa',
@@ -130,7 +130,7 @@ export async function getTask(requirementId?: string) {
 }
 
 export async function getLabels(requirementId: string) {
-  // const { data: res } = await UAPI.RES.leGetLabels({}).post({requerment_id: requirementId}).inRegion().do();
+  // const { data: res } = await UAPI.RES.leGetLabels({}).post({requirement_id: requirementId}).inRegion().do();
   const res = {
     file_labels: [],
     labels: [
