@@ -296,3 +296,12 @@ export const DATASET_STORAGE_TYPE_LIST = [
 export const DATASET_TAG_LIST = [];
 
 export const DATASET_LIST = [];
+
+export const DEFAULT_SQL_PLACEHOLDER = `
+🎉 欢迎使用多模态数据治理平台
+
+⚡️快速开始
+这里是您的SQL开发工作区，请编写SQL 查询语句，注意符合相关语法规范。
+
+🚀 开始您的数据治理之旅！
+`;
