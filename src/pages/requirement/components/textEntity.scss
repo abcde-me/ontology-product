@@ -38,5 +38,26 @@
   .entity-relation-item {
     display: flex;
     margin-top: 12px;
+    width: 900px;
+    flex-wrap: wrap;
+
+    .relation-tag {
+      flex: 1;
+      background-color: #f5f9ff;
+      padding: 12px;
+      margin: 8px 16px 16px 16px;
+    }
+  }
+
+  .tag-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .tag-content {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
   }
 }

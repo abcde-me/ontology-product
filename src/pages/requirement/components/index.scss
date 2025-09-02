@@ -59,4 +59,15 @@
   .type-content {
     padding: 12px;
   }
+
+  .disabled-div {
+    /* 阻止鼠标交互 */
+    pointer-events: none;
+    /* 视觉上表示不可用 */
+    opacity: 0.6;
+    cursor: not-allowed;
+    /* 可选：添加灰色背景等样式 */
+    background-color: #f0f0f0;
+    color: #999;
+  }
 }

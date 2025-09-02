@@ -12,7 +12,8 @@ import {
   Tooltip,
   Image,
   Dropdown,
-  Menu
+  Menu,
+  ColorPicker
   // ColorPicker,
 } from '@arco-design/web-react';
 import {
@@ -31,8 +32,8 @@ import { IndividualModal } from './components/individualModal';
 import { v4 as uuidV4 } from 'uuid';
 import { numberToChinese, shapeOptions } from './common';
 import AnnotationType from './components/annotationType';
-import TextSubstanceComponent from './textComponent';
-
+import TextSubstanceComponent from './components/textEntity';
+import { Classify } from './components/Classify';
 import './detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -291,6 +292,7 @@ export default function RequirementDetail() {
     AnnotationChildType.ENTITY
   );
   const getAnnotationType = (selectedRadio, activeKey) => {
+    setSelectedRadio(activeKey);
     setAnnotationTypeVal(selectedRadio);
     setAnnotationTypeContentVal(activeKey);
     console.log('=123', selectedRadio, activeKey);
@@ -627,8 +629,8 @@ export default function RequirementDetail() {
                 <span className="error-info-text">请选择标注工具</span>
               )}
               <AnnotationType
-                label_type={requirementList?.label_type}
-                label_tool={requirementList?.label_tool?.label_tool_code}
+                label_type={requirementList?.label_type || 1}
+                label_tool={requirementList?.label_tool?.label_tool_code || 1}
                 getChildAnnotationType={getAnnotationType}
               />
             </FormItem>
@@ -693,7 +695,7 @@ export default function RequirementDetail() {
                 <div className="labe-and-attribute-warp">
                   <div className="attribute-header">
                     {[
-                      { key: 1, label: '属性' },
+                      { key: 1, label: '标签' },
                       { key: 2, label: '标签模版属性' }
                     ].map((item) => {
                       return (
@@ -718,7 +720,7 @@ export default function RequirementDetail() {
                         <div className="sortable-item" key={labelIndex}>
                           <div className="sortable-item-content">
                             <FormItem
-                              label="标注名称"
+                              label="标注名称:"
                               field="label_info_attribute_groups.name"
                               rules={[
                                 {
@@ -729,6 +731,9 @@ export default function RequirementDetail() {
                               style={{ padding: 0 }}
                             >
                               <Input
+                                style={{
+                                  minWidth: 206
+                                }}
                                 onChange={(val: any) => {
                                   updateNestedValue(
                                     [labelIndex, 'label_name_cn'],
@@ -751,11 +756,15 @@ export default function RequirementDetail() {
                                   <Tooltip content="展示在标注页面的名称">
                                     <IconQuestionCircle />
                                   </Tooltip>
+                                  :
                                 </div>
                               }
                               style={{ padding: 0 }}
                             >
                               <Input
+                                style={{
+                                  minWidth: 196
+                                }}
                                 onChange={(val: any) => {
                                   updateNestedValue(
                                     [labelIndex, 'label_name_en'],
@@ -777,7 +786,7 @@ export default function RequirementDetail() {
                                     parseInt(val)
                                   );
                                 }}
-                                style={{ width: 345, height: 40 }}
+                                style={{ width: 100, height: 32 }}
                                 renderFormat={(option, value) => {
                                   return (
                                     <span>
@@ -816,23 +825,15 @@ export default function RequirementDetail() {
                               </Select>
                             </FormItem>
                             <FormItem>
-                              <input
-                                type="color"
-                                value={item?.label_colour}
-                                onChange={(e) => {
-                                  console.log(e, '123');
+                              <ColorPicker
+                                defaultValue={item?.label_colour}
+                                onChange={(val: any) => {
                                   updateNestedValue(
                                     [labelIndex, 'label_colour'],
-                                    e?.target?.value
+                                    val
                                   );
                                 }}
-                                style={{
-                                  width: '40px',
-                                  height: '40px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  marginLeft: '10px'
-                                }}
+                                showPreset
                               />
                             </FormItem>
                             <FormItem>
@@ -991,7 +992,7 @@ export default function RequirementDetail() {
                                                     message: '请输入选项名称'
                                                   }
                                                 ]}
-                                                label={`选项${numberToChinese(attrIndex + 1)}`}
+                                                label={`选项${attrIndex + 1}`}
                                               >
                                                 <Input
                                                   type="text"
@@ -1066,8 +1067,8 @@ export default function RequirementDetail() {
                             )}
                           <div className="btn-content-items">
                             <Button
+                              className="btn-add-label btn-add"
                               style={{ marginRight: 16 }}
-                              type="primary"
                               onClick={() => {
                                 addNewLabel();
                               }}
@@ -1076,8 +1077,8 @@ export default function RequirementDetail() {
                               添加标签
                             </Button>
                             <Button
+                              className="btn-add-attribute btn-add"
                               style={{ marginRight: 16 }}
-                              type="primary"
                               onClick={() => {
                                 addAttributeGroup(labelIndex);
                               }}
@@ -1105,7 +1106,7 @@ export default function RequirementDetail() {
                                     ))}
                                     <Menu.Item
                                       onClick={() => {
-                                        setActiveTab('2');
+                                        setActiveTab(2);
                                       }}
                                       key="2"
                                     >
@@ -1115,7 +1116,6 @@ export default function RequirementDetail() {
                                 }
                               >
                                 <Button type="secondary">
-                                  {' '}
                                   <IconPlus />
                                   添加模版属性
                                 </Button>
@@ -1350,6 +1350,11 @@ export default function RequirementDetail() {
               {annotationTypeVal === AnnotationTypeStatus.TEXT &&
                 annotationTypeContentVal === AnnotationChildType.ENTITY && (
                   <TextSubstanceComponent type="detail" />
+                )}
+              {annotationTypeVal === AnnotationTypeStatus.TEXT &&
+                annotationTypeContentVal ===
+                  AnnotationChildType.TEXT_CLASSIFICATION && (
+                  <Classify type="detail" />
                 )}
             </FormItem>
           </Form>

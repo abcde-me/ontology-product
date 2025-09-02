@@ -116,7 +116,7 @@
   }
 
   .sortable-item {
-    padding: 10px;
+    padding: 0 16px 16px 16px;
   }
 
   .sortable-item-content {
@@ -302,6 +302,11 @@
         cursor: pointer;
         border-bottom: 1px solid #cbd5e1;
         border-right: 1px solid #cbd5e1;
+        font-family: PingFang SC;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 22px;
+        letter-spacing: 0%;
 
         &:last-child {
           border-right: none;
@@ -326,6 +331,12 @@
     .entity-relation-item {
       display: flex;
       margin-top: 12px;
+    }
+  }
+
+  .attribute-content {
+    .arco-form-label-item {
+      padding: 4px !important;
     }
   }
 }

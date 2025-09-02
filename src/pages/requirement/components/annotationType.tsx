@@ -61,7 +61,8 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
             <div
               className={[
                 'item-base-class',
-                selectedRadio === item.value ? 'active' : ''
+                selectedRadio === item.value ? 'active' : '',
+                item.value > 2 ? 'disabled-div' : ''
               ].join(' ')}
               onClick={() => {
                 (setSelectedRadio(item.value), setActiveKey(1));
