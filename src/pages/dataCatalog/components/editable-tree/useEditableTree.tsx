@@ -435,7 +435,9 @@ export function useEditableTree({ catalogTreeStore }) {
             </>
           )}
           {/* 为数据卷和数据库都添加新建按钮 */}
-          {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
+          {(dataRef?.type === 'volume' ||
+            dataRef?.type === 'db' ||
+            dataRef?.type_name === 'db') &&
             perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
               <Tooltip color="white" content="新建">
                 <IconPlus
