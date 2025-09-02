@@ -18,7 +18,9 @@ import {
   GetRunResultRes,
   RunningStatus,
   GetRunLogReq,
-  GetRunLogRes
+  GetRunLogRes,
+  GetOperatorListItem,
+  OperatorCatalog
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -420,4 +422,106 @@ export async function getRunLog(
     .get(params)
     .inRegion()
     .do();
+}
+
+// 获取算子库
+export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonOperatorApi({}).get({}).inRegion().do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: [
+      {
+        catalog: OperatorCatalog.DATA_PARSING,
+        op_items: [
+          {
+            name: '文本解析算子',
+            description: '解析文本文件,支持OCR和文本...',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['文档挖掘', '知识抽取'],
+            sample_code: '这是一串示例代码'
+          },
+          {
+            name: '图片解析算子',
+            description: '解析图片文件,生成图片描述和...',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['图像识别', '视觉分析'],
+            sample_code: '这是一串示例代码'
+          },
+          {
+            name: '音频解析算子',
+            description: '解析音频文件,进行语音转文本',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['语音识别', '音频处理'],
+            sample_code: '这是一串示例代码'
+          }
+        ]
+      },
+      {
+        catalog: OperatorCatalog.DATA_CLEANING,
+        op_items: [
+          {
+            name: '去重处理算子',
+            description: '删除数据中的重复记录',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['数据清洗', '去重'],
+            sample_code: '这是一串示例代码'
+          },
+          {
+            name: '数据验证算子',
+            description: '验证数据的完整性和格式',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['数据验证', '质量控制'],
+            sample_code: '这是一串示例代码'
+          }
+        ]
+      },
+      {
+        catalog: OperatorCatalog.DATA_AUGMENTATION,
+        op_items: [
+          {
+            name: '通用场景增强算子',
+            description: '生成通用场景的训练数据',
+            detail: '这是一段处理逻辑详细描述',
+            usage: {
+              input: '',
+              output: ''
+            },
+            usage_scenarios: '使用场景blabla...',
+            tags: ['数据增强', '训练数据'],
+            sample_code: '这是一串示例代码'
+          }
+        ]
+      }
+    ]
+  });
 }
