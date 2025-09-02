@@ -3,6 +3,7 @@ import { Message } from '@arco-design/web-react';
 import { openPythonItem } from '@/api/sql';
 import { OpenPythonItemRes } from '@/types/pythonApi';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { formatDateTime } from '../utils';
 
 // 文件标签页类型
 export interface FileTab {
@@ -100,6 +101,22 @@ export const useTabManager = () => {
     [fileState.fileTabs]
   );
 
+  const initialAddTab = useCallback(() => {
+    const newTab = {
+      key: `SQL查询 ${formatDateTime(new Date().toString())}`,
+      title: `SQL查询 ${formatDateTime(new Date().toString())}`,
+      content: '',
+      fileId: '',
+      lastModified: undefined
+    };
+
+    setFileState((prev) => ({
+      ...prev,
+      fileTabs: [...prev.fileTabs, newTab],
+      activeTab: newTab.key
+    }));
+  }, []);
+
   const addTab = useCallback(
     (newFileInfo?: any) => {
       let newTabKey: string;
@@ -184,6 +201,7 @@ export const useTabManager = () => {
     fileState,
     directoryTreeRef,
     openFile,
+    initialAddTab,
     addTab,
     removeTab,
     switchTab,

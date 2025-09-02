@@ -22,13 +22,14 @@ const SqlIndex: React.FC = memo(() => {
   const {
     fileState,
     directoryTreeRef,
+    initialAddTab,
     addTab,
     removeTab,
     switchTab,
     handleCreate
   } = useTabManager();
 
-  useEffect(() => addTab(), []);
+  useEffect(() => initialAddTab(), []);
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
@@ -73,6 +74,20 @@ const SqlIndex: React.FC = memo(() => {
     }
   }
 
+  function getEditClass() {
+    if (activeTab === 'data' || activeTab === 'files') {
+      return 'h-full visible';
+    }
+    return 'h-full hidden';
+  }
+
+  function getDatasetsClass() {
+    if (activeTab === 'tools') {
+      return 'h-full visible';
+    }
+    return 'h-full hidden';
+  }
+
   return (
     <div className="h-full py-[20px] pr-[20px]">
       <Layout className="notebook-layout">
@@ -93,7 +108,25 @@ const SqlIndex: React.FC = memo(() => {
             <TabPane key="tools" title={<SuanziIcon />}></TabPane>
           </Tabs>
         </Sider>
-        <Content className="notebook-content">{renderContent()}</Content>
+        <Content className="notebook-content">
+          {
+            <div className={getEditClass()}>
+              <EditorContent
+                fileTabs={fileState.fileTabs}
+                activeTab={fileState.activeTab}
+                onTabChange={switchTab}
+                onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+                onRemoveTab={removeTab}
+                onCreate={handleCreate}
+              />
+            </div>
+          }
+          {
+            <div className={getDatasetsClass()}>
+              <DatasetsList />
+            </div>
+          }
+        </Content>
       </Layout>
     </div>
   );
