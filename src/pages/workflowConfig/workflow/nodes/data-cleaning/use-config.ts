@@ -55,7 +55,9 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               traditional_to_simplified: payload?.traditional_to_simplified
                 ? 1
                 : 0,
-              case_transform: payload?.case_uniformity ? payload?.case_transform : 0
+              case_transform: payload?.case_uniformity
+                ? payload?.case_transform
+                : 0
             }
           },
           {
@@ -112,9 +114,11 @@ const useConfig = (id: string, payload: CodeNodeType) => {
             title: '数据去重',
             options: {
               // 1 处理 0 不处理
-              ngram: payload?.mg_duplicate_checkbox === 'ngram' ? payload?.mg_duplicate_ngram : 0,
+              ngram:
+                payload?.mg_duplicate_checkbox === 'ngram'
+                  ? payload?.mg_duplicate_ngram
+                  : 0,
               md5: payload?.mg_duplicate_checkbox === 'md5' ? 1 : 0
-
             }
           }
         ];
