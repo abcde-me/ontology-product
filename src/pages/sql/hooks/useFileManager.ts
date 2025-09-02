@@ -130,7 +130,7 @@ export const useFileManager = (
 
     setIsLoading(true);
     try {
-      const rawPythonList = await getPythonList('', {});
+      const rawPythonList = await getPythonList('0', {});
 
       if (rawPythonList.status === 200) {
         setPythonList(rawPythonList.data.items);
