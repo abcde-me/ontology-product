@@ -1,4 +1,25 @@
 import UAPI from '@/api';
+import { Get, Post } from '@/utils/request';
+import {
+  PythonListRes,
+  PythonListParams,
+  PythonItemType,
+  CreatePythonItemReq,
+  CreatePythonItemRes,
+  RenamePythonItemReq,
+  RenamePythonItemRes,
+  CopyPythonItemReq,
+  CopyPythonItemRes,
+  OpenPythonItemRes,
+  SavePythonItemReq,
+  SavePythonItemRes,
+  RunPythonItemRes,
+  GetRunResultReq,
+  GetRunResultRes,
+  RunningStatus,
+  GetRunLogReq,
+  GetRunLogRes
+} from '@/types/pythonApi';
 
 interface FileListParams {
   /** 排序字段 generated_at */
@@ -344,3 +365,1036 @@ export async function getDatasetList(
 //   const targetParam = { ...defaultParam, ...param }
 //   return await UAPI.RES.catalogListApi({}).get(targetParam).inRegion().do();
 // }
+
+// -------------------------------- 目前先用pyspark api 开发，后续再使用sql api 开发 --------------------------------
+
+// 获取数据目录列表
+export async function getPythonList(
+  id: string,
+  params: PythonListParams
+): Promise<ApiRes<PythonListRes>> {
+  // 简单的模拟：根目录返回2个目录 + 1个文件；不同目录id返回不同的内容
+  const now = '2025-08-18 14:00';
+  const later = '2025-08-18 15:00';
+
+  let items: PythonListRes['items'] = [];
+  let path_name = '';
+
+  switch (String(id || '')) {
+    case '0':
+      path_name = '';
+      items = [
+        {
+          id: 1001,
+          name: '项目A',
+          type: PythonItemType.Directory,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 1002,
+          name: '数据集',
+          type: PythonItemType.Directory,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 1003,
+          name: '脚本1.py',
+          type: PythonItemType.Notebook,
+          path: '/',
+          path_id: 1,
+          created: now,
+          last_modified: later
+        }
+      ];
+      // items = [];
+      break;
+    case '1001':
+      path_name = '项目A';
+      items = [
+        {
+          id: 10011,
+          name: '子目录-代码',
+          type: PythonItemType.Directory,
+          path: '/项目A',
+          path_id: 1001,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 10012,
+          name: 'main.py',
+          type: PythonItemType.Notebook,
+          path: '/项目A',
+          path_id: 1001,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 10013,
+          name: 'utils.py',
+          type: PythonItemType.Notebook,
+          path: '/项目A',
+          path_id: 1001,
+          created: now,
+          last_modified: later
+        }
+      ];
+      break;
+    case '10011':
+      path_name = '子目录-代码';
+      items = [
+        {
+          id: 100111,
+          name: 'train.py',
+          type: PythonItemType.Notebook,
+          path: '/项目A/子目录-代码',
+          path_id: 10011,
+          created: now,
+          last_modified: later
+        },
+        {
+          id: 100112,
+          name: 'eval.py',
+          type: PythonItemType.Notebook,
+          path: '/项目A/子目录-代码',
+          path_id: 10011,
+          created: now,
+          last_modified: later
+        }
+      ];
+      break;
+    case '1002':
+      path_name = '数据集';
+      items = [
+        {
+          id: 10021,
+          name: '加载数据.ipynb',
+          type: PythonItemType.Notebook,
+          path: '/数据集',
+          path_id: 1002,
+          created: now,
+          last_modified: later
+        }
+      ];
+      break;
+    default:
+      path_name = '';
+      items = [];
+      break;
+  }
+
+  return Promise.resolve({
+    code: '200',
+    status: 200,
+    requestId: '',
+    message: 'success',
+    data: {
+      path_id: Number(id),
+      path_name,
+      items,
+      total: items.length,
+      page: 1,
+      page_size: 10
+    }
+  });
+
+  // TODO: 联调
+  // return await UAPI.RES.pythonListApi({ pyspark_id: id })
+  //   .get(params)
+  //   .inRegion()
+  //   .do();
+}
+
+// 文件/目录创建
+export async function createPythonItem(
+  params: CreatePythonItemReq
+): Promise<ApiRes<CreatePythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonCreateApi({}).post(params).inRegion().do();
+
+  // Mock implementation per spec
+  const now = '2025-08-18 14:00';
+  const later = '2025-08-18 15:00';
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 2201,
+      name: '加载数据.ipynb',
+      type: PythonItemType.Notebook,
+      path: '/数据集',
+      path_id: 1002,
+      created: now,
+      last_modified: later
+    }
+  });
+}
+
+// 文件/目录重命名
+export async function renamePythonItem(
+  id: string,
+  params: RenamePythonItemReq
+): Promise<ApiRes<RenamePythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRenameApi({ pyspark_id: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spec
+  const targetId = Number(id) || params.id;
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: targetId
+    }
+  });
+}
+
+// 文件/目录删除
+export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonDeleteApi({ pyspark_id: id })
+  // .delete({})
+  // .inRegion()
+  // .do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: null
+  });
+}
+
+// 复制文件
+export async function copyPythonItem(
+  id: string,
+  params: CopyPythonItemReq
+): Promise<ApiRes<CopyPythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonCopyApi({ pyspark_id: id })
+  //   .post(params)
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spe
+  const now = '2025-08-18 14:00';
+  const later = '2025-08-18 15:00';
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 2201,
+      path_id: 1002,
+      name: '加载数据.ipynb',
+      type: PythonItemType.Notebook,
+      path: '/数据集',
+      created: now,
+      last_modified: later
+    }
+  });
+}
+
+// 打开文件
+export async function openPythonItem(
+  id: string
+): Promise<ApiRes<OpenPythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+  //   .get({})
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      execid: 1,
+      running_status: 1,
+      data: `# Python文件代码内容示例
+      import pandas as pd
+      import numpy as np
+      import matplotlib.pyplot as plt
+
+      # 数据加载
+      def load_data():
+      """加载示例数据"""
+      data = pd.DataFrame({
+          'x': np.random.randn(100),
+          'y': np.random.randn(100)
+      })
+      return data
+
+      # 数据处理
+      def process_data(df):
+      """处理数据"""
+      df['z'] = df['x'] + df['y']
+      return df
+
+      # 数据可视化
+      def visualize_data(df):
+      """可视化数据"""
+      plt.figure(figsize=(10, 6))
+      plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+      plt.colorbar(label='z value')
+      plt.xlabel('X values')
+      plt.ylabel('Y values')
+      plt.title('Data Visualization')
+      plt.show()
+
+      # 主函数
+      if __name__ == "__main__":
+      # 加载数据
+      df = load_data()
+      print("数据加载完成，共", len(df), "行")
+
+      # 处理数据
+      df = process_data(df)
+      print("数据处理完成")
+
+      # 显示统计信息
+      print("\\n数据统计信息:")
+      print(df.describe())
+
+      # 可视化数据
+      visualize_data(df)
+      print("数据可视化完成")`
+    }
+  });
+}
+
+// 修改（保存）文件
+export async function savePythonItem(
+  id: string,
+  params: SavePythonItemReq
+): Promise<ApiRes<SavePythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonSaveApi({ pyspark_id: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 2201,
+      last_modified: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 运行代码
+export async function runPythonItem(
+  id: string
+): Promise<ApiRes<RunPythonItemRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunApi({ pyspark_id: id })
+  //   .put({})
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      execid: '1',
+      id: 2201
+    }
+  });
+}
+
+// 获取运行结果
+export async function getRunResult(
+  id: string,
+  params: GetRunResultReq
+): Promise<ApiRes<GetRunResultRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunResultApi({ pyspark_id: id })
+  //   .get(params)
+  //   .inRegion()
+  //   .do();
+
+  // Mock implementation per spe
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      run_result: '运行成功',
+      run_status: RunningStatus.SUCCESS,
+      run_duration: 10,
+      run_end_time: '2025-08-18 15:00'
+    }
+  });
+}
+
+// 获取日志
+export async function getRunLog(
+  id: string,
+  params: GetRunLogReq
+): Promise<ApiRes<GetRunLogRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonRunLogApi({ pyspark_id: id })
+  //   .get(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      log: '运行成功'
+    }
+  });
+}
+
+export interface CreateSqlScriptParams {
+  script_content: string;
+  script_desc?: string;
+  script_name: string;
+  /** 用户id */
+  uid: string;
+}
+
+export interface SqlScriptData {
+  script_id: string;
+}
+
+export interface SqlScriptRes {
+  code: number;
+  data: SqlScriptData;
+  message: string;
+  status: number;
+}
+
+/** 创建SQL脚本 */
+export async function createSqlScript(
+  params: CreateSqlScriptParams
+): Promise<SqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/create
+  // return UAPI.RES.createSqlScript({})
+  //   .post(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    code: 200,
+    data: {
+      script_id: '1'
+    },
+    message: 'ok',
+    status: 200
+  });
+}
+
+export interface RenameSqlScriptParams {
+  script_name: string;
+}
+
+/** 重命名SQL脚本 */
+export async function renameSqlScript(
+  params: RenameSqlScriptParams
+): Promise<SqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/rename
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    code: 200,
+    data: {
+      script_id: '1'
+    },
+    message: 'ok',
+    status: 200
+  });
+}
+
+export interface updateSqlScriptParams {
+  /** sql脚本内容 */
+  script_content: string;
+  /** sql脚本说明 */
+  script_desc?: string;
+  /** 脚本id，新建不传或者传0。更新传对应的脚步id */
+  script_id: number;
+  /** sql 脚本名字 */
+  script_name: string;
+  /** 用户id */
+  uid: string;
+}
+
+/** 编辑SQL脚本 */
+export async function updateSqlScript(
+  params: updateSqlScriptParams
+): Promise<SqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/edit
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    code: 200,
+    data: {
+      script_id: '1'
+    },
+    message: 'ok',
+    status: 200
+  });
+}
+
+interface SqlScriptListParams {
+  /** 页码 */
+  page: number;
+  /** 页大小 */
+  page_size: number;
+  /** 搜索内容 */
+  search_content?: string;
+}
+
+export interface SqlScriptListRes {
+  code: number;
+  data: {
+    items: SqlScriptItem[];
+    page: string;
+    page_size: string;
+    total: string;
+  };
+  message: string;
+  status: number;
+}
+
+export interface SqlScriptItem {
+  /**
+   * 创建时间
+   */
+  create_time: string;
+  /**
+   * 数据集名字
+   */
+  data_set_name: string;
+  /**
+   * 依赖的表，逗号分割
+   */
+  dependent_tables: string;
+  /**
+   * 权限的
+   */
+  perms: string[];
+  /**
+   * 脚本说明
+   */
+  script_desc: string;
+  /**
+   * 脚本id
+   */
+  script_id: number;
+  /**
+   * 脚本名字
+   */
+  script_name: string;
+  /**
+   * 更新时间
+   */
+  update_time: string;
+  /**
+   * 创建人姓名
+   */
+  user_account: string;
+}
+
+/** 获取SQL脚本列表 */
+export async function getSqlScriptList(
+  params: SqlScriptListParams
+): Promise<SqlScriptListRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/list
+  // return await UAPI.RES.getSqlScriptList({})
+  //   .GET(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      items: [
+        {
+          script_id: 0,
+          script_name: 'string',
+          script_desc: 'string',
+          dependent_tables: 'string',
+          data_set_name: 'string',
+          user_account: 'string',
+          create_time: 'string',
+          update_time: 'string',
+          perms: ['string']
+        }
+      ],
+      page: 'string',
+      page_size: 'string',
+      total: 'string'
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface DeleteSqlScriptParams {
+  script_id: string;
+}
+
+export interface DeleteSqlScriptRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** 删除SQL脚本 */
+export async function deleteSqlScript(
+  params: DeleteSqlScriptParams
+): Promise<DeleteSqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/delete
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .delete()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {},
+    status: 0,
+    code: 0
+  });
+}
+
+export interface RunSqlScriptParams {
+  script_id: string;
+}
+
+export interface RunSqlScriptData {
+  /**
+   * 运行任务的执行id
+   */
+  script_execid: string;
+  script_id: number;
+  /**
+   * 检测出来有多个Select SQL，只执行第一个。
+   */
+  warning_msg: string;
+}
+
+export interface RunSqlScriptRes {
+  code: number;
+  data: RunSqlScriptData;
+  message: string;
+  status: number;
+}
+
+/** SQL脚本运行 */
+export async function runSqlScript(
+  params: RunSqlScriptParams
+): Promise<RunSqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/run
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0,
+      script_execid: 'string',
+      warning_msg: 'string'
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface RunCancelSqlScriptParams {
+  script_id: string;
+  script_execid: string;
+}
+
+export interface RunCancelSqlScriptRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** SQL脚本运行取消 */
+export async function runCancelSqlScript(
+  params: RunCancelSqlScriptParams
+): Promise<RunCancelSqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/run_cancel
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {},
+    status: 0,
+    code: 0
+  });
+}
+
+export interface RunResultSqlScriptParams {
+  script_id: string;
+  script_execid?: string;
+  size?: string;
+}
+
+export interface RunResultItem {
+  data: string;
+  field4: string;
+  id: string;
+  pk_id: number;
+}
+
+export interface RunResultSqlScriptRes {
+  code: number;
+  data: {
+    /**
+     * 运行耗时 单位：毫秒
+     */
+    run_duration: string;
+    /**
+     * 运行状态 0-失败 1-成功 2-运行中
+     */
+    run_status: number;
+    /**
+     * 执行结果
+     */
+    sql_result: {
+      list: RunResultItem;
+    }[];
+  };
+  message: string;
+  status: number;
+}
+
+/** 获取SQL脚本运行结果 前端可5-10s轮询一次 */
+export async function runResultSqlScript(
+  params: RunResultSqlScriptParams
+): Promise<RunResultSqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/get_run_result
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .put(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      sql_result: [
+        {
+          list: {
+            pk_id: 0,
+            id: 'string',
+            data: 'string',
+            field4: 'string'
+          }
+        }
+      ],
+      run_status: 0,
+      run_duration: 'string'
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface SqlScriptDetailParams {
+  script_id: string;
+}
+
+export interface SqlScriptDetailData {
+  /**
+   * 创建时间
+   */
+  create_time: string;
+  /**
+   * 权限点
+   */
+  persm: string[];
+  /**
+   * 脚本内容
+   */
+  script_content: string;
+  /**
+   * 脚本描述
+   */
+  script_desc: string;
+  /**
+   * 运行任务的执行id
+   */
+  script_execid: string;
+  /**
+   * 脚本id
+   */
+  script_id: number;
+  /**
+   * 脚本名字
+   */
+  script_name: string;
+  /**
+   * 更新时间
+   */
+  update_time: string;
+}
+
+export interface SqlScriptDetailRes {
+  code: number;
+  data: SqlScriptDetailData;
+  message: string;
+  status: number;
+}
+
+/** 获取脚本详情 */
+export async function getSqlScriptDetail(
+  params: SqlScriptDetailParams
+): Promise<SqlScriptDetailRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/info
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .get()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0,
+      script_name: 'string',
+      script_content: 'string',
+      script_desc: 'string',
+      script_execid: 'string',
+      create_time: 'string',
+      update_time: 'string',
+      persm: ['string']
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface CopySqlScriptParams {
+  script_id: string;
+}
+
+export interface CopySqlScriptRes {
+  code: number;
+  data: {
+    script_id: number;
+  };
+  message: string;
+  status: number;
+}
+
+/** SQL脚本复制 */
+export async function copySqlScript(
+  params: CopySqlScriptParams
+): Promise<CopySqlScriptRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface ExportSqlResultParams {
+  script_id: string;
+}
+
+export interface ExportSqlResultRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** SQL执行结果导出到新数据集 */
+export async function exportSqlResult(
+  params: ExportSqlResultParams
+): Promise<ExportSqlResultRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface ExportSqlResultVersionParams {
+  script_id: string;
+}
+
+export interface ExportSqlResultVersionRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** SQL执行结果导出到新版本 */
+export async function exportSqlResultVersion(
+  params: ExportSqlResultVersionParams
+): Promise<ExportSqlResultVersionRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface ExportSqlResultListParams {
+  script_id: string;
+}
+
+export interface ExportSqlResultListRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** SQL结果导出到数据集列表 */
+export async function getExportSqlResultList(
+  params: ExportSqlResultListParams
+): Promise<ExportSqlResultListRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface CalcelExportSqlTaskParams {
+  script_id: string;
+}
+
+export interface CalcelExportSqlTaskRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** SQL结果导出任务停止 */
+export async function calcelExportSqlTask(
+  params: CalcelExportSqlTaskParams
+): Promise<CalcelExportSqlTaskRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}
+
+export interface SqlTaskDetailParams {
+  script_id: string;
+}
+
+export interface SqlTaskDetailRes {
+  code: number;
+  data: {};
+  message: string;
+  status: number;
+}
+
+/** 获取导出任务的SQL详情 */
+export async function getSqlTaskDetail(
+  params: SqlTaskDetailParams
+): Promise<SqlTaskDetailRes> {
+  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/copy
+  // return await UAPI.RES.renameSqlScript({ scriptId: id })
+  //   .post()
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    message: 'string',
+    data: {
+      script_id: 0
+    },
+    status: 0,
+    code: 0
+  });
+}

@@ -6,7 +6,7 @@ import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
-import { useEditor } from '@/hooks/useEditor';
+import { useTabManager } from './hooks/useTabManager';
 import './index.scss';
 
 const { Content, Sider } = Layout;
@@ -15,7 +15,7 @@ const TabPane = Tabs.TabPane;
 type TabKey = 'files' | 'tools' | 'data';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [activeTab, setActiveTab] = useState<TabKey>('data');
   const {
     fileState,
     directoryTreeRef,
@@ -24,7 +24,7 @@ const Python: React.FC = memo(() => {
     removeTab,
     switchTab,
     handleCreate
-  } = useEditor();
+  } = useTabManager();
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);

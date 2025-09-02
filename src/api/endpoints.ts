@@ -322,6 +322,8 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionListApi: PrefixAimdp + '/datasets/version',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  //数据内容文件表
+  dataContentFileList: PrefixAimdp + '/datasets/version/file',
 
   // 连接器接口
 
@@ -375,17 +377,17 @@ export const ModaForgeResourceEndpoints = {
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
 
   // python开发
-  pythonListApi: PrefixAimdp + '/pyspark/{id}/list',
+  pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
   pythonCreateApi: PrefixAimdp + '/pyspark',
-  pythonRenameApi: PrefixAimdp + '/pyspark/{id}/rename',
-  pythonDeleteApi: PrefixAimdp + '/pyspark/{id}/delete',
-  pythonCopyApi: PrefixAimdp + '/pyspark/{id}/copy',
-  pythonOpenApi: PrefixAimdp + '/pyspark/{id}/open',
-  pythonSaveApi: PrefixAimdp + '/pyspark/{id}/modify',
-  pythonRunApi: PrefixAimdp + '/pyspark/{id}/run',
-  pythonRunCancelApi: PrefixAimdp + '/pyspark/{id}/run_cancel',
-  pythonRunResultApi: PrefixAimdp + '/pyspark/{id}/get_run_result',
-  pythonRunLogApi: PrefixAimdp + '/pyspark/{id}/get_run_log',
+  pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',
