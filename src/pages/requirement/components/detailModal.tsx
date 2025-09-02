@@ -22,7 +22,7 @@ import { format } from 'date-fns';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { OperationColumn } from '@ccf2e/arco-material';
 import getFileIcon from '@/components/file-icon';
-import './detailModal.scss';
+import './DetailModal.scss';
 
 interface DataSourceModalProps {
   visible: boolean;

@@ -19,7 +19,7 @@ import {
   getSourceFileTypeList
 } from '@/api/dataCatalog';
 import { format } from 'date-fns';
-import './individualModal.scss';
+import './IndividualModal.scss';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -255,7 +255,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       alignCenter={true}
       escToExit={false}
       maskClosable={false}
-      className="fullscreen-modal"
+      className="fulscreen-modal"
       style={{ width: '90vw', overflowY: 'auto' }}
       footer={
         <Button

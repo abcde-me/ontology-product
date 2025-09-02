@@ -14,8 +14,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { uuid } from '@/models/utils';
-import './classify.scss';
-import { divide } from 'lodash';
+import './Classify.scss';
 
 interface ClassifyComponentProps {
   type: 'add' | 'detail';
