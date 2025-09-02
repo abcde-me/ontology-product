@@ -230,6 +230,15 @@ interface TargetDataFileQueryParams {
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
 }
+//查询数据内容文件列表
+export async function getDataContentFileList(params: {
+  id: number | string;
+  version_id: string;
+  page: number;
+  page_size: number;
+}) {
+  return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
+}
 
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){
