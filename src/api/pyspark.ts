@@ -158,7 +158,7 @@ export async function getPythonList(
   // });
 
   // TODO: 联调
-  return await UAPI.RES.pythonListApi({ id }).post(params).inRegion().do();
+  return await UAPI.RES.pythonListApi({ id }).get(params).inRegion().do();
 }
 
 // 文件/目录创建
@@ -194,7 +194,7 @@ export async function renamePythonItem(
   params: RenamePythonItemReq
 ): Promise<ApiRes<RenamePythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRenameApi({ id }).post(params).inRegion().do();
+  return await UAPI.RES.pythonRenameApi({ id }).put(params).inRegion().do();
 
   // Mock implementation per spec
   // const targetId = Number(id) || params.id;
@@ -212,7 +212,7 @@ export async function renamePythonItem(
 // 文件/目录删除
 export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
   // TODO: 联调
-  return await UAPI.RES.pythonDeleteApi({ id }).post({}).inRegion().do();
+  return await UAPI.RES.pythonDeleteApi({ id }).delete({}).inRegion().do();
 
   // Mock implementation per spe
   // return Promise.resolve({
@@ -257,7 +257,7 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonOpenApi({ id }).post({}).inRegion().do();
+  return await UAPI.RES.pythonOpenApi({ id }).get({}).inRegion().do();
 
   // Mock implementation per spe
   // return Promise.resolve({
