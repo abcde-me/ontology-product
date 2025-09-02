@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
-import { runPythonItem, getRunResult, savePythonItem } from '@/api/pyspark';
+import { runPythonItem, getRunResult, savePythonItem } from '@/api/sql';
 
 interface UseEditorOptions {
   initialContent?: string;

@@ -6,7 +6,7 @@ import {
   renamePythonItem,
   deletePythonItem,
   copyPythonItem
-} from '@/api/pyspark';
+} from '@/api/sql';
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
