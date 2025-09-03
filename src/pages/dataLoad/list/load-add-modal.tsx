@@ -77,8 +77,21 @@ const LoadAddModal = (props: propsType) => {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
-      const pathId = rest.dest_path.at(-1);
-
+      let pathId;
+      if (sourceType === 'db' || sourceType === 'local') {
+        pathId = selectedNodeId;
+        if (!pathId) {
+          Message.error('请选择载入位置');
+          return;
+        }
+      } else {
+        pathId = rest.dest_path?.at?.(-1);
+        // 验证pathId是否有效
+        if (!pathId) {
+          Message.error('请选择载入位置');
+          return;
+        }
+      }
       // 处理表格名称数据
       let processedTableNames = rest.table_name;
       if (processedTableNames && processedTableNames.includes('all')) {
@@ -90,7 +103,7 @@ const LoadAddModal = (props: propsType) => {
         if (!valid) return;
         const formData = {
           task_name: rest.name,
-          connector_id: rest.connector_id,
+          connector_id: sourceType === 'local' ? null : rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
             type: loadVal == 'once' ? 0 : 1,
@@ -98,7 +111,9 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_name: processedTableNames
+          table_names: processedTableNames || uploadedFiles
+          // 添加上传的文件数据
+          // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
@@ -112,7 +127,7 @@ const LoadAddModal = (props: propsType) => {
       } else {
         const formData = {
           task_name: rest.name,
-          connector_id: rest.connector_id,
+          connector_id: sourceType === 'local' ? null : rest.connector_id,
           source_type: rest.source_type,
           run_cycle: {
             type: 0,
@@ -126,7 +141,9 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_name: processedTableNames
+          table_names: processedTableNames || uploadedFiles
+          // 添加上传的文件数据
+          // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
         const res = await addLoad(formData);
         if (res.code === '' && res.status === 200) {
@@ -164,139 +181,193 @@ const LoadAddModal = (props: propsType) => {
         cycle: undefined
       });
     } else {
-      form.setFieldsValue({ cron_expr: undefined }); // 如果有需要，可以重置其他字段
+      form.setFieldsValue({ cron_expr: undefined });
     }
     setLoadVal(val);
   };
 
-  // 获取连接器名称
-  const getConnector_name_type = async () => {
-    try {
-      const res = await getConnectionList({
-        type: sourceType
-      });
-      const newres = res.data.items.map((item) => {
-        return {
-          key: item.id,
-          label: item.name
-        };
-      });
-      setConnectName(newres);
-    } catch (error) {
-      console.error('获取连接器名称失败:', error);
-    }
-  };
   const filterOption = (input: string, option) => {
     return (
       option.props.children &&
       option.props.children.toLowerCase().includes(input.toLowerCase())
     );
   };
-  const loadTypeChange = async (e) => {
-    const res = await getConnectionList({
-      type: e.target.value
-    });
-    const newres = res.data.items.map((item) => {
-      return {
-        key: item.id,
-        label: item.name
-      };
-    });
-    setConnectName(newres);
+  const loadTypeChange = (e) => {
+    try {
+      const newSourceType = e.target.value;
+      console.log('切换数据源类型到:', newSourceType);
+      // 先清理所有状态
+      setDirectoryData([]);
+      setTableList([]);
+      setConnectName([]);
+      setUploadedFiles([]); // 清空上传的文件数据
+      // 清理表单字段
+      form.setFieldsValue({
+        connector_id: undefined,
+        table_name: undefined,
+        dest_path: undefined
+      });
+      console.log('数据源类型切换，清空所有表单字段');
+      // 更新sourceType状态 - 使用useEffect来处理异步数据获取
+      setSourceType(newSourceType);
+    } catch (error) {
+      console.error('切换数据源类型失败:', error);
+      Message.error('切换数据源类型失败');
+      setDirectoryData([]);
+    }
   };
   const [directoryData, setDirectoryData] = useState<any[]>([]);
+  const [directoryLoading, setDirectoryLoading] = useState(false);
 
   async function getdirectoryDataList() {
     try {
+      setDirectoryLoading(true);
+      console.log('开始获取目录数据，当前数据源类型:', sourceType);
       const res = await getDirectoryList({
         root_type: 1,
-        dir_type: 3
+        dir_type: sourceType === 'db' || sourceType === 'local' ? 3 : undefined
       });
-
-      if (res.status !== 200) {
+      console.log('API响应:', res);
+      if (!res || res.status !== 200) {
+        console.error('获取目录列表失败:', res);
+        setDirectoryData([]);
         return;
       }
-      console.log(res.data.src);
-      if (sourceType == 's3' || sourceType == 'hdfs') {
-        const newdirectoryData = res.data.src.map((item) => {
-          return item.children
-            ? {
-                value: item.id,
-                label: item.name,
-                // type_name:item.type_name,
-                children: item.children.volume.map((items) => {
-                  return {
-                    value: items.id,
-                    label: items.name,
-                    type_name: items.type_name
-                  };
-                })
+      if (!res.data || !res.data.src) {
+        console.error('目录数据结构错误 - 缺少src字段:', res.data);
+        setDirectoryData([]);
+        return;
+      }
+
+      if (!Array.isArray(res.data.src)) {
+        console.error(
+          '目录数据src不是数组:',
+          typeof res.data.src,
+          res.data.src
+        );
+        setDirectoryData([]);
+        return;
+      }
+      console.log('原始目录数据:', res.data.src);
+
+      if (sourceType === 's3' || sourceType === 'hdfs') {
+        console.log('处理对象存储/HDFS数据');
+        const processedData: any[] = [];
+        for (const item of res.data.src) {
+          if (!item || typeof item !== 'object' || !item.id) {
+            console.warn('跳过无效项目:', item);
+            continue;
+          }
+          const processedItem: any = {
+            value: item.id,
+            label: item.name || `未命名_${item.id}`
+          };
+          if (
+            item.children &&
+            item.children.volume &&
+            Array.isArray(item.children.volume)
+          ) {
+            processedItem.children = [];
+            for (const child of item.children.volume) {
+              if (child && child.id) {
+                processedItem.children.push({
+                  value: child.id,
+                  label: child.name || `未命名_${child.id}`,
+                  type_names: child.type_name
+                });
               }
-            : { value: item.id, label: item.name };
-        });
-        setDirectoryData(newdirectoryData);
+            }
+          }
+
+          processedData.push(processedItem);
+        }
+
+        console.log('处理后的对象存储数据:', processedData);
+        setDirectoryData(processedData);
       } else {
-        console.log(sourceType, '打印sourceType8888888888888888888888');
-        const processTreeData = (data: any[], parentNode: any = null) => {
-          return data.map((item) => {
-            const processedItem = {
+        console.log('处理数据库/本地文件类型数据');
+
+        const processTreeData = (
+          data: any[],
+          parentNode: any = null
+        ): any[] => {
+          if (!Array.isArray(data)) {
+            console.warn('processTreeData 接收到非数组数据:', data);
+            return [];
+          }
+
+          const result: any[] = [];
+          for (const item of data) {
+            if (!item || typeof item !== 'object' || !item.id) {
+              console.warn('跳过无效项目:', item);
+              continue;
+            }
+
+            const processedItem: any = {
               id: item.id,
               name: item.name,
               value: item.id,
-              label: item.name,
+              label: item.name || `未命名_${item.id}`,
               type_name: item.type_name,
-              ...item
+              level: parentNode ? (parentNode.level || 0) + 1 : 0,
+              isExpanded: false,
+              hasChildren: false
             };
-            // 从父节点继承属性（如果有父节点）
+
             if (parentNode) {
               processedItem.parentId = parentNode.id;
-              processedItem.level = (parentNode.level || 0) + 1;
-            } else {
-              processedItem.level = 0;
             }
-            // 添加自定义属性
-            processedItem.isExpanded = false;
-            processedItem.hasChildren = false;
+
             // 处理children数据
             if (item.children) {
+              let childrenArray: any[] | null = null;
+
               if (Array.isArray(item.children)) {
-                processedItem.children = processTreeData(
-                  item.children,
-                  processedItem
-                );
+                childrenArray = item.children;
               } else if (
                 item.children.volume &&
                 Array.isArray(item.children.volume)
               ) {
-                processedItem.children = processTreeData(
-                  item.children.volume,
-                  processedItem
-                );
+                childrenArray = item.children.volume;
               } else if (typeof item.children === 'object') {
-                const childrenArray = Object.values(item.children).filter(
-                  Array.isArray
-                )[0];
-                if (childrenArray) {
-                  processedItem.children = processTreeData(
-                    childrenArray,
-                    processedItem
-                  );
+                // 寻找第一个数组值
+                for (const value of Object.values(item.children)) {
+                  if (Array.isArray(value)) {
+                    childrenArray = value;
+                    break;
+                  }
                 }
               }
-              // 如果有子节点，设置hasChildren为true
-              if (processedItem.children && processedItem.children.length > 0) {
-                processedItem.hasChildren = true;
+
+              if (childrenArray && childrenArray.length > 0) {
+                processedItem.children = processTreeData(
+                  childrenArray,
+                  processedItem
+                );
+                processedItem.hasChildren = processedItem.children.length > 0;
               }
             }
-            return processedItem;
-          });
+
+            result.push(processedItem);
+          }
+
+          return result;
         };
+
         const processedData = processTreeData(res.data.src);
-        console.log(processedData, '打印processedData888888888888888888888888');
+        console.log('处理后的树形数据:', processedData);
         setDirectoryData(processedData);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('获取目录列表异常:', err);
+      setDirectoryData([]);
+      if (err.message && err.message.includes('timeout')) {
+        Message.error('网络请求超时，请检查网络连接后重试');
+      } else {
+        Message.error('获取目录列表失败，请重试');
+      }
+    } finally {
+      setDirectoryLoading(false);
     }
   }
   // 计算响应式标签数量的函数
@@ -354,9 +425,47 @@ const LoadAddModal = (props: propsType) => {
       }
     }
   };
+  // 处理数据源类型变化
   useEffect(() => {
-    getdirectoryDataList();
-    getConnector_name_type();
+    let cancelled = false;
+
+    const loadData = async () => {
+      try {
+        console.log('useEffect: 数据源类型变化，重新加载数据', sourceType);
+
+        // 获取连接器列表
+        if (sourceType) {
+          const res = await getConnectionList({ type: sourceType });
+          if (!cancelled && res.data && res.data.items) {
+            const newConnectName = res.data.items.map((item) => ({
+              key: item.id,
+              label: item.name
+            }));
+            setConnectName(newConnectName);
+          }
+        }
+
+        // 获取目录数据
+        if (!cancelled) {
+          await getdirectoryDataList();
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('加载数据失败:', error);
+          setDirectoryData([]);
+          setConnectName([]);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceType]);
+
+  useEffect(() => {
     const handleResize = () => {
       calculateMaxTagCount();
     };
@@ -366,7 +475,7 @@ const LoadAddModal = (props: propsType) => {
       observer.disconnect();
       window.removeEventListener('resize', handleResize);
     };
-  }, [calculateMaxTagCount, sourceType]);
+  }, [calculateMaxTagCount]);
 
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
@@ -401,6 +510,14 @@ const LoadAddModal = (props: propsType) => {
     subtree: true
   });
 
+  // 存储选中的节点ID，用于表单提交
+  const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(
+    null
+  );
+
+  // 存储上传的文件数据
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+
   // 保留handleSelect作为ComponentTree的回调
   const handleSelect = (
     selectedKeys: string[],
@@ -413,8 +530,16 @@ const LoadAddModal = (props: propsType) => {
   ) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
   };
-  const handleFileChange = (value) => {
-    console.log('上传完之后的value');
+  const handleFileChange = (fileData, blobURL) => {
+    console.log(fileData, '这个是上传后的回调');
+    setUploadedFiles((prev) => [...prev, fileData]);
+    if (sourceType === 'local' && fileData.length > 0) {
+      // 设置一个标识值来通过表单校验
+      form.setFieldsValue({
+        connector_id: 'local_files_uploaded'
+      });
+      console.log('设置表单字段值以通过校验');
+    }
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -462,11 +587,7 @@ const LoadAddModal = (props: propsType) => {
           rules={[{ required: true, message: '请选择数据源类型' }]}
           initialValue={typeValue}
           onChange={(value) => {
-            setSourceType((value as any).target.value);
             loadTypeChange(value);
-            form.setFieldsValue({
-              connector_id: undefined
-            });
           }}
         >
           <RadioGroup>
@@ -568,7 +689,7 @@ const LoadAddModal = (props: propsType) => {
                   onVisibleChange={calculateMaxTagCount}
                 >
                   <Option value="all">全部</Option>
-                  {talbleList.map((option) => (
+                  {talbleList?.map((option) => (
                     <Option key={option} value={option}>
                       {option}
                     </Option>
@@ -631,14 +752,15 @@ const LoadAddModal = (props: propsType) => {
           >
             <Cascader
               expandTrigger="hover"
-              placeholder="请输入载入位置"
+              placeholder={directoryLoading ? '加载中...' : '请输入载入位置'}
               style={{ width: '100%' }}
-              options={directoryData}
+              options={Array.isArray(directoryData) ? directoryData : []}
               renderOption={(item) => {
                 return <EllipsisPopoverCom value={item.label} />;
               }}
               showSearch={{ retainInputValueWhileSelect: false }}
               dropdownMenuClassName="cascader-dropdown"
+              loading={directoryLoading}
             />
           </FormItem>
         ) : (
@@ -664,7 +786,11 @@ const LoadAddModal = (props: propsType) => {
                   directoryData={directoryData}
                   onDirectoryDataChange={setDirectoryData}
                   onSelect={handleSelect}
-                  onPathChange={(path) => {
+                  onPathChange={(path, nodeId) => {
+                    console.log('路径变化:', path, '节点ID:', nodeId);
+                    // 存储节点ID用于表单提交
+                    setSelectedNodeId(nodeId || null);
+                    // 设置表单显示值为路径
                     form.setFieldsValue({
                       dest_path: path
                     });

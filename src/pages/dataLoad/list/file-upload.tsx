@@ -8,16 +8,34 @@ const Uploads = ({ onFileChange }) => {
   const handleUploadChange = (files: any) => {
     console.log(files, 'files666');
     setFileList(files);
+
     if (onFileChange) {
-      if (files.length > 0 && files[0].status == 'done') {
-        const blob = new Blob([files[0].data], { type: 'application/pdf' });
-        const blobURL = URL.createObjectURL(blob);
-        onFileChange(files[0].response.data, blobURL);
+      if (files.length == 0) {
+        // 清空文件列表
+        onFileChange([]);
+        return;
+      }
+      // 处理所有上传完成的文件
+      const completedFiles = files.filter(
+        (file) => file.status === 'done' && file.response && file.response.data
+      );
+
+      if (completedFiles.length > 0) {
+        // 对于每个完成的文件，调用回调
+        completedFiles.forEach((file) => {
+          console.log('文件上传完成:', file.response.data);
+          const blob = new Blob([file.data], {
+            type: file.type || 'application/octet-stream'
+          });
+          const blobURL = URL.createObjectURL(blob);
+          onFileChange(file.response.data, blobURL);
+        });
       }
     }
-    if (onFileChange && files.length == 0) {
-      onFileChange([]);
-    }
+  };
+  const getToken = () => {
+    // 从 localStorage 获取
+    return localStorage.getItem('loginToken');
   };
   const checkFile = (file: any, list: any) => {
     // 检查文件数量 - 只在第一次检测到超出限制时显示提示
@@ -59,8 +77,13 @@ const Uploads = ({ onFileChange }) => {
       multiple
       accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
       beforeUpload={(file, list) => checkFile(file, list)}
-      action="api/aimdp/v1/load_tasks/upload"
+      action="/api/aimdp/v1/load_tasks/upload"
       onChange={handleUploadChange}
+      headers={{
+        Authorization: `Bearer ${getToken()}`,
+        'X-Auth-Validate': 'true',
+        'X-Regionid': 'region1'
+      }}
       tip={
         <>
           单次上传文件总量不超过10个文件，单个文件最大不超过100M

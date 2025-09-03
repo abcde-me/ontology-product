@@ -119,7 +119,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@arco-design/web-react": "2.48.0",
+    "@arco-design/web-react": "2.64.1",
     "@arco-plugins/utils": "1.0.2",
     "@arco-plugins/webpack-react": "1.1.2",
     "@arco-themes/react-arco-pro": "^0.0.7",

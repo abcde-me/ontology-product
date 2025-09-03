@@ -373,7 +373,14 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
   // 查询任务单个执行记录详情
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+  // 重试载入任务
+  reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
 
+  // 数据标注接口
+  // 获取数据标注列表
+  getAnnotationListApi: PrefixLabelEngine + '/list',
+  // 获取数据标注 - 任务列表
+  getAnnotationTaskListApi: PrefixLabelEngine + '/taskList',
   // python开发
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
   pythonCreateApi: PrefixAimdp + '/pyspark',

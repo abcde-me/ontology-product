@@ -68,7 +68,9 @@ export const LoadType = {
 };
 enum ConnectorType {
   S3 = 's3',
-  HDFS = 'hdfs'
+  HDFS = 'hdfs',
+  DB = 'db',
+  Local = 'local'
 }
 const TYPE_CONFIG = {
   [ConnectorType.S3]: {
@@ -78,6 +80,14 @@ const TYPE_CONFIG = {
   [ConnectorType.HDFS]: {
     text: 'HDFS',
     value: 'hdfs'
+  },
+  [ConnectorType.DB]: {
+    text: '数据库',
+    value: 'db'
+  },
+  [ConnectorType.Local]: {
+    text: '本地文件',
+    value: 'local'
   }
 };
 const InputSearch = Input.Search;
@@ -185,7 +195,11 @@ export default function DataLoad() {
         <span>
           {item.source_type == TYPE_CONFIG[ConnectorType.S3].value
             ? TYPE_CONFIG[ConnectorType.S3].text
-            : TYPE_CONFIG[ConnectorType.HDFS].text}
+            : item.source_type == TYPE_CONFIG[ConnectorType.HDFS].value
+              ? TYPE_CONFIG[ConnectorType.HDFS].text
+              : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
+                ? TYPE_CONFIG[ConnectorType.DB].text
+                : TYPE_CONFIG[ConnectorType.Local].text}
         </span>
       ),
       filters: [
@@ -196,6 +210,14 @@ export default function DataLoad() {
         {
           text: TYPE_CONFIG[ConnectorType.S3].text,
           value: TYPE_CONFIG[ConnectorType.S3].value
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.DB].text,
+          value: TYPE_CONFIG[ConnectorType.DB].value
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.Local].text,
+          value: TYPE_CONFIG[ConnectorType.Local].value
         }
       ]
     },

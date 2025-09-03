@@ -19,8 +19,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-        (type) => type !== BlockEnum.End
-      );
+          (type) => type !== BlockEnum.End
+        );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -58,9 +58,11 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       case_uniformity,
       case_transform,
       mg_duplicate_checkbox,
-      mg_duplicate_ngram,
+      mg_duplicate_ngram
     } = payload;
-    const mg_duplicate = mg_duplicate_checkbox === 'md5' || (mg_duplicate_ngram !== undefined && mg_duplicate_checkbox === 'ngram');
+    const mg_duplicate =
+      mg_duplicate_checkbox === 'md5' ||
+      (mg_duplicate_ngram !== undefined && mg_duplicate_checkbox === 'ngram');
     // 是否有其中一项true
     const isCleaningChecked = () => {
       return [
