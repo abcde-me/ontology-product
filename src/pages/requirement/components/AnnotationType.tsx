@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@arco-design/web-react';
-import './index.scss';
+import './AnnotationType.scss';
 
 const typeList = [
   {

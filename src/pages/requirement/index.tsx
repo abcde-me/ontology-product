@@ -26,7 +26,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconPlus } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
-import { getAnnotationList } from '@/api/dataAnnotation';
+import { getAnnotationList, getAnnotationTaskList } from '@/api/dataAnnotation';
 import './index.scss';
 
 export default function Requirement() {
@@ -51,8 +51,10 @@ export default function Requirement() {
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    run_cycle: '',
-    sort: ''
+    name: '',
+    type: '',
+    belong: '',
+    create_by: ''
   });
   // 创建人的搜索框清楚按钮
   const [isClickClearUserName, setIsClickClearUserName] = useState(false);
@@ -79,27 +81,29 @@ export default function Requirement() {
   const getList = async () => {
     setLoading(true);
     try {
-      const params = {
-        uid: userInfo?.id,
-        search_content: searchValue,
+      const params: {
+        page: number;
+        page_size: number;
+        filters: {
+          name: string; // 需求名称
+          type: number; // 创建人
+          belong: number; // 创建人
+        };
+      } = {
         page: current, //第几页
         page_size: pageSize, //每页个数
-        ...sortValue
+        filters: {
+          name: searchValue,
+          type: Number(sortValue.type),
+          belong: Number(sortValue.belong)
+        }
       };
-      // const data1 = {
-      //   page: current,
-      //   pageSize: pageSize,
-      //   filters: {
-      //     name: '1',
-      //     create_by: '1',
-      //   }
-      // }
 
       // const res1 = await getAnnotationList(data1).then((res) => {
       //   console.log('object', res);
       // });
       // console.log(res1, '-----top');
-      const res = await getWorkflowList(params);
+      const res = await getAnnotationTaskList(params);
       if (res.status === 200 && res.data) {
         setWorkflowData(res.data.list1 || []);
         setCurrent(res.data.page_info?.page);
@@ -114,57 +118,27 @@ export default function Requirement() {
 
   // 创建工作流
   const handleCreateWorkflow = () => {
-    history.push(
-      `/tenant/compute/modaforge/requirementDetail?type=create`
-    )
+    history.push(`/tenant/compute/modaforge/requirementDetail?type=create`);
   };
 
   // 查看详情
-  const viewDetailWorkflow = (
-    id: number | string,
-  ) => {
+  const viewDetailWorkflow = (id: number | string) => {
     history.push(
       `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
-    )
-  };
-
-
-  // 删除工作流
-  const handleDeleteWorkflow = async (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    const res = await workflowDelete(workflow_uuid, workflow_version);
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '删除成功'
-      });
-      getList();
-    } else {
-      Message.error({
-        content: res?.message ?? '删除失败，请稍后重试'
-      });
-    }
+    );
   };
 
   // 筛选排序操作
   const handleTableChange = (
     _pagination: PaginationProps,
-    sorter: SorterInfo,
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
-      sort:
-        sorter.direction === undefined
-          ? ''
-          : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+      name: filters?.name?.[0] || '',
+      type: filters?.type?.[0] || '',
+      belong: filters?.belong?.[0] || '',
+      create_by: userNameValue
     };
 
     setSortValue(sortdata);
@@ -204,10 +178,7 @@ export default function Requirement() {
       width: 80,
       render: (_, record) => {
         return renderEmptyPlaceholder(record.id) !== '-' ? (
-          <EllipsisPopover
-            value={record.id}
-            isEdit={false}
-          />
+          <EllipsisPopover value={record.id} isEdit={false} />
         ) : (
           <span>-</span>
         );
@@ -280,7 +251,7 @@ export default function Requirement() {
         {
           text: '发布失败',
           value: 1
-        },
+        }
       ]
     },
     {
@@ -322,9 +293,7 @@ export default function Requirement() {
             <span
               className="operate-text"
               onClick={() => {
-                viewDetailWorkflow(
-                  record.id,
-                );
+                viewDetailWorkflow(record.id);
               }}
             >
               详情
@@ -339,20 +308,17 @@ export default function Requirement() {
   return (
     <div className="requirement">
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>需求管理</h1>
-      <div className='requirement-form' >
+      <div className="requirement-form">
         <Form
           form={form}
-          autoComplete='off'
+          autoComplete="off"
           style={{ marginTop: '16px' }}
-          layout='inline'
+          layout="inline"
           validateMessages={{
-            required: (_, { label }) => `必须填写 ${label}`,
+            required: (_, { label }) => `必须填写 ${label}`
           }}
         >
-          <FormItem
-            label='需求名称:'
-            field='name'
-          >
+          <FormItem label="需求名称:" field="name">
             <InputSearch
               onClear={() => {
                 setCurrent(1);
@@ -363,8 +329,11 @@ export default function Requirement() {
                 getList();
               }}
               onChange={(val) => {
-                setSearchValue(val)
-              }} placeholder='请输入需求名称/创建人' allowClear />
+                setSearchValue(val);
+              }}
+              placeholder="请输入需求名称/创建人"
+              allowClear
+            />
           </FormItem>
         </Form>
         <PermissionWrapper>
@@ -384,16 +353,18 @@ export default function Requirement() {
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无需求',
-          btnText:
-            <><IconPlus /> 创建需求</>
-          ,
+          btnText: (
+            <>
+              <IconPlus /> 创建需求
+            </>
+          ),
           // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
-          handleTableChange(pagination, sorter, filters)
+          handleTableChange(pagination, filters)
         }
       />
       {/* 分页 */}
