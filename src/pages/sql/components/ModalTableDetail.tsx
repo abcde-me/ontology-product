@@ -12,6 +12,7 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { useRef } from 'react';
 import { SqlIndexStore, useSqlIndexStore } from '../store';
+import { SCRIPT_CODE } from '../constant';
 
 const InputSearch = Input.Search;
 const TabPane = Tabs.TabPane;
@@ -112,28 +113,7 @@ function SimpleData(props) {
   );
 }
 
-const defaultCodeValue = `import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
-# 设置随机种子
-np.random.seed(0)
-
-# 创建一个模拟 30 天的销售额数据
-df = pd.DataFrame({
-    'day': range(1, 31),
-    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
-# 设置随机种子
-np.random.seed(0)
-
-# 创建一个模拟 30 天的销售额数据
-df = pd.DataFrame({
-    'day': range(1, 31),
-    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)`;
+const defaultCodeValue = SCRIPT_CODE;
 
 const typeFilters = [
   { text: 'INTEGER', value: 'INTEGER' },

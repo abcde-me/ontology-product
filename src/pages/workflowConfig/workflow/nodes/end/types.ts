@@ -8,6 +8,8 @@ export type EndNodeType = CommonNodeType & {
   outputs: Variable[];
   target_path_id: number;
   target_path_name: string;
+  is_embedding: boolean;
+  Knowledge_base_name: string;
   dataSource: Array<any>;
   data: {
     type: string;
@@ -16,5 +18,7 @@ export type EndNodeType = CommonNodeType & {
     selected: boolean;
     target_path_id: number;
     target_path_name: string;
+    is_embedding: boolean;
+    Knowledge_base_name: string;
   };
 };
