@@ -846,7 +846,7 @@ export interface updateSqlScriptParams {
   /** sql脚本说明 */
   script_desc?: string;
   /** 脚本id，新建不传或者传0。更新传对应的脚步id */
-  script_id: number;
+  script_id: number | string;
   /** sql 脚本名字 */
   script_name: string;
   /** 用户id */
