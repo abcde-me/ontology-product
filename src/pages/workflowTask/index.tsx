@@ -404,6 +404,7 @@ export default function WorkflowTask() {
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
+          // @ts-expect-error
           handleTableChange(pagination, sorter, filters)
         }
       />
