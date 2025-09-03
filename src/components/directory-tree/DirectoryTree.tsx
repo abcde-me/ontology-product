@@ -679,20 +679,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {icon}
                   <div className="flex flex-1 flex-col overflow-hidden">
                     <div className="file-name">
-                      <EllipsisPopover
-                        value={titleText}
-                        className="text-gray-900"
-                      />
+                      <EllipsisPopover value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
                     {isSearchMode &&
                       from !== DirectoryTreeFrom.SQL &&
                       props.dataRef?.path && (
                         <div className="search-result-path">
-                          <EllipsisPopover
-                            value={props.dataRef.path}
-                            className="text-gray-500"
-                          />
+                          <EllipsisPopover value={props.dataRef.path} />
                         </div>
                       )}
                   </div>

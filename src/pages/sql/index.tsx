@@ -15,7 +15,7 @@ const TabPane = Tabs.TabPane;
 
 type TabKey = 'files' | 'tools' | 'data';
 
-const defaultActiveTab = 'files';
+const defaultActiveTab = 'data';
 
 const SqlIndex: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
