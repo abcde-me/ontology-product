@@ -259,7 +259,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleInsertFile(
+                          handleDatasetInsert(
                             file,
                             e as unknown as React.MouseEvent<
                               Element,
