@@ -198,6 +198,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           key: typeKey,
           type: type,
           parent_id: catalog.id,
+          // 为分类节点也设置fullPath，便于选中时使用
+          fullPath: `${catalog.base_dir === '/' ? catalog.base_dir : `${catalog.base_dir}/`}${activeKey}/${catalog.name}/${type === 'volume' ? 'volume' : 'database'}`,
           children: typeData.map((item) => {
             // 根据类型设置不同的路径格式
             const pathType = type === 'volume' ? 'volume' : 'database';

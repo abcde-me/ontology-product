@@ -138,7 +138,11 @@ export function useEditableTree({ catalogTreeStore }) {
   ) => {
     const { props } = extra.node;
     const { dataRef } = props;
-    if (dataRef?.isLastLeaf && !dataRef?.showInput) {
+    if (
+      dataRef?.isLastLeaf &&
+      !dataRef?.showInput &&
+      dataRef?.type_name !== 'db'
+    ) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
         selectedPath: dataRef?.fullPath
@@ -391,9 +395,7 @@ export function useEditableTree({ catalogTreeStore }) {
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {['volume', 'db', CatalogTypeEnum.db].every(
-            (key) => dataRef?.type !== key
-          ) && (
+          {['volume'].every((key) => dataRef?.type !== key) && (
             <>
               {dataRef?.perms?.includes(
                 DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
@@ -435,9 +437,7 @@ export function useEditableTree({ catalogTreeStore }) {
             </>
           )}
           {/* 为数据卷和数据库都添加新建按钮 */}
-          {(dataRef?.type === 'volume' ||
-            dataRef?.type === 'db' ||
-            dataRef?.type_name === 'db') &&
+          {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
             perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
               <Tooltip color="white" content="新建">
                 <IconPlus
