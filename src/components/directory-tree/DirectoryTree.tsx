@@ -544,6 +544,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
         <div className="directory-tree-header mb-2 flex items-center justify-between">
           <InputSearch
+            className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
             onChange={setSearchValue}

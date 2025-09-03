@@ -5,6 +5,7 @@ import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.scss';
+import ModalToolDetail from './ModalToolDetail';
 
 // 算子图标映射类型
 type OperatorIconMap = Record<string, string>;
@@ -29,6 +30,15 @@ const ToolsManager: React.FC = () => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
+  const [toolDetailData, setToolDetailData] = useState<OperatorItem | null>(
+    null
+  );
+  const [toolDetailVisible, setToolDetailVisible] = useState(false);
+
+  const closeToolDetail = () => {
+    setToolDetailVisible(false);
+  };
 
   // 获取算子图标
   const getOperatorIcon = (name: string): string => {
@@ -80,8 +90,8 @@ const ToolsManager: React.FC = () => {
 
   // 处理详情按钮点击
   const handleDetailClick = (item: OperatorItem): void => {
-    console.log('查看详情:', item);
-    // TODO: 实现详情查看逻辑
+    setToolDetailVisible(true);
+    setToolDetailData(item);
   };
 
   // 处理插入按钮点击
@@ -167,7 +177,7 @@ const ToolsManager: React.FC = () => {
             </div>
 
             {/* 操作按钮 - 仅在hover时显示 */}
-            {hoveredItem === `operator-${categoryIndex}-${itemIndex}` && (
+            {
               <div className="tools-manager__operator-actions">
                 <Button
                   type="text"
@@ -192,7 +202,7 @@ const ToolsManager: React.FC = () => {
                   插入
                 </Button>
               </div>
-            )}
+            }
           </div>
         ),
         isLeaf: true,
@@ -219,17 +229,16 @@ const ToolsManager: React.FC = () => {
   };
 
   return (
-    <div className="tools-manager">
+    <div className="tools-manager sider-container">
       {/* 标题 */}
-      <div className="tools-manager__title">算子库</div>
+      <div className="sider-title">算子库</div>
 
       {/* 搜索框 */}
-      <div className="tools-manager__search">
+      <div className="mb-2">
         <Input.Search
           placeholder="搜索当前文件夹"
           value={searchValue}
           onChange={setSearchValue}
-          className="tools-manager__search-input"
         />
       </div>
 
@@ -246,6 +255,12 @@ const ToolsManager: React.FC = () => {
           className="tools-manager__tree"
         />
       </div>
+
+      <ModalToolDetail
+        toolDetailData={toolDetailData}
+        toolDetailVisible={toolDetailVisible}
+        closeToolDetail={closeToolDetail}
+      />
     </div>
   );
 };
