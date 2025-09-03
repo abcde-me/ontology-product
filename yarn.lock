@@ -282,10 +282,10 @@
   dependencies:
     color "^3.1.3"
 
-"@arco-design/web-react@2.48.0":
-  version "2.48.0"
-  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.48.0.tgz#c6860aca884c25f2ea13eec03b48546c311f86c8"
-  integrity sha1-xoYKyohMJfLqE+7AO0hUbDEfhsg=
+"@arco-design/web-react@2.64.1":
+  version "2.64.1"
+  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.64.1.tgz#9da8278d27000c2c2c71d98f972fbcd6ee14e34a"
+  integrity sha1-nagnjScADCwscdmPly+81u4U40o=
   dependencies:
     "@arco-design/color" "^0.4.0"
     "@babel/runtime" "^7.5.5"
@@ -295,10 +295,11 @@
     dayjs "^1.10.5"
     lodash "^4.17.21"
     number-precision "^1.3.1"
-    react-focus-lock "^2.9.1"
+    react-focus-lock "^2.12.1"
+    react-is "^18.2.0"
     react-transition-group "^4.3.0"
     resize-observer-polyfill "^1.5.1"
-    scroll-into-view-if-needed "2.2.20"
+    scroll-into-view-if-needed "^2.2.20"
     shallowequal "^1.1.0"
 
 "@arco-plugins/utils@1.0.2":
@@ -8139,12 +8140,7 @@ compression@^1.7.4:
     safe-buffer "5.2.1"
     vary "~1.1.2"
 
-compute-scroll-into-view@1.0.11:
-  version "1.0.11"
-  resolved "http://npm.cestc.cn/compute-scroll-into-view/download/compute-scroll-into-view-1.0.11.tgz#7ff0a57f9aeda6314132d8994cce7aeca794fecf"
-  integrity sha1-f/Clf5rtpjFBMtiZTM567KeU/s8=
-
-compute-scroll-into-view@^1.0.17:
+compute-scroll-into-view@^1.0.17, compute-scroll-into-view@^1.0.20:
   version "1.0.20"
   resolved "http://npm.cestc.cn/compute-scroll-into-view/download/compute-scroll-into-view-1.0.20.tgz#1768b5522d1172754f5d0c9b02de3af6be506a43"
   integrity sha1-F2i1Ui0RcnVPXQybAt469r5QakM=
@@ -11346,10 +11342,10 @@ fmin@^0.0.2:
     tape "^4.5.1"
     uglify-js "^2.6.2"
 
-focus-lock@^1.3.5:
-  version "1.3.5"
-  resolved "http://npm.cestc.cn/focus-lock/download/focus-lock-1.3.5.tgz#aa644576e5ec47d227b57eb14e1efb2abf33914c"
-  integrity sha1-qmRFduXsR9IntX6xTh77Kr8zkUw=
+focus-lock@^1.3.6:
+  version "1.3.6"
+  resolved "http://npm.cestc.cn/focus-lock/download/focus-lock-1.3.6.tgz#955eec1e10591d56f679258edb94aedb11d691cd"
+  integrity sha1-lV7sHhBZHVb2eSWO25Su2xHWkc0=
   dependencies:
     tslib "^2.0.3"
 
@@ -18650,10 +18646,10 @@ react-base16-styling@^0.6.0:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
-react-clientside-effect@^1.2.6:
-  version "1.2.6"
-  resolved "http://npm.cestc.cn/react-clientside-effect/download/react-clientside-effect-1.2.6.tgz#29f9b14e944a376b03fb650eed2a754dd128ea3a"
-  integrity sha1-KfmxTpRKN2sD+2UO7Sp1TdEo6jo=
+react-clientside-effect@^1.2.7:
+  version "1.2.8"
+  resolved "http://npm.cestc.cn/react-clientside-effect/download/react-clientside-effect-1.2.8.tgz#0b90a9d7b2a1823a3a10ed1ea3f651f7e0301cb7"
+  integrity sha1-C5Cp17Khgjo6EO0eo/ZR9+AwHLc=
   dependencies:
     "@babel/runtime" "^7.12.13"
 
@@ -18741,17 +18737,17 @@ react-fast-compare@^3.1.1, react-fast-compare@^3.2.2:
   resolved "http://npm.cestc.cn/react-fast-compare/download/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
   integrity sha1-kpqXpTIwTOn+5LyuRCNPHOLCHUk=
 
-react-focus-lock@^2.9.1:
-  version "2.13.2"
-  resolved "http://npm.cestc.cn/react-focus-lock/download/react-focus-lock-2.13.2.tgz#e1addac2f8b9550bc0581f3c416755ba0f81f5ef"
-  integrity sha1-4a3awvi5VQvAWB88QWdVug+B9e8=
+react-focus-lock@^2.12.1:
+  version "2.13.6"
+  resolved "http://npm.cestc.cn/react-focus-lock/download/react-focus-lock-2.13.6.tgz#29751bf2e4e30f6248673cd87a347c74ff2af672"
+  integrity sha1-KXUb8uTjD2JIZzzYejR8dP8q9nI=
   dependencies:
     "@babel/runtime" "^7.0.0"
-    focus-lock "^1.3.5"
+    focus-lock "^1.3.6"
     prop-types "^15.6.2"
-    react-clientside-effect "^1.2.6"
-    use-callback-ref "^1.3.2"
-    use-sidecar "^1.1.2"
+    react-clientside-effect "^1.2.7"
+    use-callback-ref "^1.3.3"
+    use-sidecar "^1.1.3"
 
 react-helmet@^6.1.0:
   version "6.1.0"
@@ -19904,12 +19900,12 @@ screenfull@^5.0.0:
   resolved "http://npm.cestc.cn/screenfull/download/screenfull-5.2.0.tgz#6533d524d30621fc1283b9692146f3f13a93d1ba"
   integrity sha1-ZTPVJNMGIfwSg7lpIUbz8TqT0bo=
 
-scroll-into-view-if-needed@2.2.20:
-  version "2.2.20"
-  resolved "http://npm.cestc.cn/scroll-into-view-if-needed/download/scroll-into-view-if-needed-2.2.20.tgz#3a46847a72233a3af9770e55df450f2a7f2e2a0e"
-  integrity sha1-OkaEenIjOjr5dw5V30UPKn8uKg4=
+scroll-into-view-if-needed@^2.2.20:
+  version "2.2.31"
+  resolved "http://npm.cestc.cn/scroll-into-view-if-needed/download/scroll-into-view-if-needed-2.2.31.tgz#d3c482959dc483e37962d1521254e3295d0d1587"
+  integrity sha1-08SClZ3Eg+N5YtFSElTjKV0NFYc=
   dependencies:
-    compute-scroll-into-view "1.0.11"
+    compute-scroll-into-view "^1.0.20"
 
 secure-compare@3.0.1:
   version "3.0.1"
@@ -22413,7 +22409,7 @@ url@^0.11.0, url@~0.11.0:
     punycode "^1.4.1"
     qs "^6.12.3"
 
-use-callback-ref@^1.3.2:
+use-callback-ref@^1.3.3:
   version "1.3.3"
   resolved "http://npm.cestc.cn/use-callback-ref/download/use-callback-ref-1.3.3.tgz#98d9fab067075841c5b2c6852090d5d0feabe2bf"
   integrity sha1-mNn6sGcHWEHFssaFIJDV0P6r4r8=
@@ -22447,7 +22443,7 @@ use-latest@^1.2.1:
   dependencies:
     use-isomorphic-layout-effect "^1.1.1"
 
-use-sidecar@^1.1.2:
+use-sidecar@^1.1.3:
   version "1.1.3"
   resolved "http://npm.cestc.cn/use-sidecar/download/use-sidecar-1.1.3.tgz#10e7fd897d130b896e2c546c63a5e8233d00efdb"
   integrity sha1-EOf9iX0TC4luLFRsY6XoIz0A79s=
