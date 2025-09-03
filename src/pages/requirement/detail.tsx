@@ -836,12 +836,7 @@ export default function RequirementDetail() {
                                   >
                                     <FormItem
                                       field="attr-group"
-                                      rules={[
-                                        {
-                                          required: true,
-                                          message: '请输入属性组名称'
-                                        }
-                                      ]}
+                                      required
                                       label="属性组件名称"
                                     >
                                       <div className="group-items">
@@ -1257,7 +1252,7 @@ export default function RequirementDetail() {
                                           placeholder="展示在标注页面的名称"
                                           type="text"
                                           value={attr.attribute_name_en}
-                                          onChange={(val) =>
+                                          onChange={(val: any) => {
                                             updateNestedValue(
                                               [
                                                 labelIndex,
@@ -1265,10 +1260,10 @@ export default function RequirementDetail() {
                                                 attrIndex,
                                                 'attribute_name_en'
                                               ],
-                                              val,
-                                              true
-                                            )
-                                          }
+                                              val
+                                            );
+                                            // 移除英文名称同步更新
+                                          }}
                                         />
                                       </FormItem>
                                       {attrGroup.label_info_attribute.length >
