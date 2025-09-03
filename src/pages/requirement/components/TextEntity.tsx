@@ -12,7 +12,7 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import './textEntity.scss';
+import './TextEntity.scss';
 import { uuid } from '@/models/utils';
 // 实体/实体关系 - 组件
 const btnList = [

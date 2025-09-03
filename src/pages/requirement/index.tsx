@@ -128,24 +128,6 @@ export default function Requirement() {
     );
   };
 
-  // 删除工作流
-  const handleDeleteWorkflow = async (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    const res = await workflowDelete(workflow_uuid, workflow_version);
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '删除成功'
-      });
-      getList();
-    } else {
-      Message.error({
-        content: res?.message ?? '删除失败，请稍后重试'
-      });
-    }
-  };
-
   // 筛选排序操作
   const handleTableChange = (
     _pagination: PaginationProps,
