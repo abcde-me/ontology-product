@@ -13,7 +13,7 @@ import './index.scss';
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
-type TabKey = 'files' | 'tools' | 'data';
+type TabKey = 'data' | 'files' | 'dataset';
 
 const defaultActiveTab = 'data';
 
@@ -41,36 +41,10 @@ const SqlIndex: React.FC = memo(() => {
         return 300;
       case 'data':
         return 300;
-      case 'tools':
+      case 'dataset':
         return 46;
       default:
         return 46;
-    }
-  }
-
-  function renderContent() {
-    const editorNode = (
-      <EditorContent
-        fileTabs={fileState.fileTabs}
-        activeTab={fileState.activeTab}
-        onTabChange={switchTab}
-        onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-        onRemoveTab={removeTab}
-        onCreate={handleCreate}
-      />
-    );
-
-    const listNode = <DatasetsList />;
-
-    switch (activeTab) {
-      case 'files':
-        return editorNode;
-      case 'data':
-        return editorNode;
-      case 'tools':
-        return listNode;
-      default:
-        return editorNode;
     }
   }
 
@@ -82,7 +56,7 @@ const SqlIndex: React.FC = memo(() => {
   }
 
   function getDatasetsClass() {
-    if (activeTab === 'tools') {
+    if (activeTab === 'dataset') {
       return 'h-full visible';
     }
     return 'h-full hidden';
@@ -105,7 +79,9 @@ const SqlIndex: React.FC = memo(() => {
             <TabPane key="files" title={<PythonIcon />}>
               <FileManager key="files" type="files" ref={directoryTreeRef} />
             </TabPane>
-            <TabPane key="tools" title={<SuanziIcon />}></TabPane>
+            <TabPane key="dataset" title={<SuanziIcon />}>
+              <DatasetsList />
+            </TabPane>
           </Tabs>
         </Sider>
         <Content className="notebook-content">
