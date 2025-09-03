@@ -425,33 +425,49 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     const handleEditFinish = async (node) => {
       const finalName = inputValue.trim() || defaultName;
-
       if (node.dataRef?.isAdd) {
         try {
           const created = await onCreate?.(finalName, node);
 
           if (!created) {
+            // 创建失败，移除临时添加的节点
+            const newTreeData = treeData.filter((item) => !item.isAdd);
+            setTreeData(newTreeData);
+            setInputValue('');
+            setDefaultName('');
             return;
           }
 
           // 如果是自动创建的文件且是Python文件，调用回调打开文件
           if (node.dataRef?.type === PythonItemType.Notebook && created?.id) {
             console.log('自动创建文件成功:', created.name);
-            // 不再自动打开文件，让用户手动选择
           }
         } catch (e) {
           Message.error('创建失败');
+          // 创建失败，移除临时添加的节点
+          const newTreeData = treeData.filter((item) => !item.isAdd);
+          setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
         }
       } else {
         try {
           const rename = await onRename?.(finalName, node);
 
           if (!rename) {
+            // 创建失败，移除临时添加的节点
+            const newTreeData = treeData.filter((item) => !item.isAdd);
+            setTreeData(newTreeData);
+            setInputValue('');
+            setDefaultName('');
             return;
           }
-
-          // 重命名成功的消息由 useFileManager 处理
         } catch (e) {
+          // 创建失败，移除临时添加的节点
+          const newTreeData = treeData.filter((item) => !item.isAdd);
+          setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
           Message.error('重命名失败');
         }
       }
@@ -471,8 +487,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         if (!copyRes) {
           return;
         }
-
-        // 复制成功的消息由 useFileManager 处理
 
         const newData = await onFolderClick?.(currentFolderId);
         const formattedData = formatTreeData(newData ?? []);
@@ -544,6 +558,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
         <div className="directory-tree-header mb-2 flex items-center justify-between">
           <InputSearch
+            className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
             onChange={setSearchValue}
@@ -577,7 +592,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   }}
                 >
                   <Menu.Item key="folder">新建文件夹</Menu.Item>
-                  <Menu.Item key="file">新建SQL</Menu.Item>
+                  <Menu.Item key="file">新建PySpark</Menu.Item>
                 </Menu>
               }
             >
