@@ -63,7 +63,7 @@ export enum DirectoryTreeFrom {
 }
 
 export interface DirectoryTreeProps {
-  from: DirectoryTreeFrom;
+  from?: DirectoryTreeFrom;
   data: TreeNodeItem[];
   selectedKeys?: string[]; // 添加外部控制的选中状态
   onSelect?: (
