@@ -2,15 +2,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
-import { runPythonItem, getRunResult, savePythonItem } from '@/api/sql';
+import {
+  runPythonItem,
+  getRunResult,
+  savePythonItem,
+  createSqlScript,
+  updateSqlScript
+} from '@/api/sql';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { FileTab } from './useTabManager';
+import { useUserInfo } from '@/store/userInfoStore';
 
 interface UseEditorOptions {
   initialContent?: string;
   currentFileId?: string;
   tabKey?: string;
   onActiveUpdate?: (tabData: any) => void;
+  hasRun?: boolean;
 }
 
 interface UseEditorReturn {
@@ -38,8 +46,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     initialContent = '',
     currentFileId,
     onActiveUpdate,
-    tabKey
+    tabKey,
+    hasRun
   } = options;
+
+  const userInfo = useUserInfo();
 
   // 状态管理
   const [editorContent, setEditorContent] = useState(initialContent);
@@ -72,17 +83,39 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 延时3秒自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
     useCallback(async (content: string) => {
+      // 更新脚本内容
+      onActiveUpdate && onActiveUpdate({ key: tabKey, content });
+
       const fileId = currentFileIdRef.current;
       if (!fileId) {
-        // TODO: 创建脚本
-        onActiveUpdate && onActiveUpdate({ key: tabKey, content: content });
-        return null;
+        try {
+          const res = await createSqlScript({
+            uid: userInfo?.id ?? '',
+            script_name: tabKey ?? '',
+            script_content: content
+          });
+
+          if (res?.status === 200) {
+            setLastAutoSave(new Date().toLocaleTimeString());
+
+            // 更新脚本ID
+            onActiveUpdate &&
+              onActiveUpdate({ key: tabKey, fileId: res.data.script_id });
+            return res.data;
+          }
+          return null;
+        } catch (error) {
+          console.error('自动保存失败:', error);
+          return null;
+        }
       }
 
       try {
-        const res = await savePythonItem(fileId, {
-          id: Number(fileId),
-          data: content
+        const res = await updateSqlScript({
+          uid: userInfo?.id ?? '',
+          script_name: tabKey ?? '',
+          script_content: content,
+          script_id: fileId
         });
 
         if (res?.status === 200) {
@@ -121,7 +154,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    onActiveUpdate && onActiveUpdate({ key: tabKey, hasRun: true });
+    if (!hasRun) {
+      onActiveUpdate && onActiveUpdate({ key: tabKey, hasRun: true });
+    }
 
     setRunStatus(RunningStatus.RUNNING);
     setRunStartTime(new Date());

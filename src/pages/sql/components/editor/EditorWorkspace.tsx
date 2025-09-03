@@ -49,7 +49,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       initialContent: content,
       currentFileId,
       tabKey: tabKey,
-      onActiveUpdate: onActiveUpdate
+      onActiveUpdate: onActiveUpdate,
+      hasRun
     });
 
     const myTheme = createTheme({
