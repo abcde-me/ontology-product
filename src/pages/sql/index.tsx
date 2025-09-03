@@ -7,13 +7,13 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
-import { useTabManager } from './hooks/useTabManager';
+import { FileTab, useTabManager } from './hooks/useTabManager';
 import './index.scss';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
-type TabKey = 'files' | 'tools' | 'data';
+type TabKey = 'data' | 'files' | 'dataset';
 
 const defaultActiveTab = 'data';
 
@@ -25,82 +25,59 @@ const SqlIndex: React.FC = memo(() => {
     addTab,
     removeTab,
     switchTab,
-    handleCreate
+    handleCreate,
+    updateTab
   } = useTabManager();
 
+  // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
+
+  const isDasetTab = activeTab === 'dataset';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
   };
 
-  function getSiderWidth() {
-    switch (activeTab) {
-      case 'files':
-        return 300;
-      case 'data':
-        return 300;
-      case 'tools':
-        return 46;
-      default:
-        return 46;
-    }
-  }
-
-  function renderContent() {
-    const editorNode = (
-      <EditorContent
-        fileTabs={fileState.fileTabs}
-        activeTab={fileState.activeTab}
-        onTabChange={switchTab}
-        onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-        onRemoveTab={removeTab}
-        onCreate={handleCreate}
-      />
-    );
-
-    const listNode = <DatasetsList />;
-
-    switch (activeTab) {
-      case 'files':
-        return editorNode;
-      case 'data':
-        return editorNode;
-      case 'tools':
-        return listNode;
-      default:
-        return editorNode;
-    }
-  }
+  const handleActiveUpdate = (tabData: FileTab) => {
+    console.log('handleActiveUpdate tabData', tabData);
+    updateTab(tabData);
+  };
 
   return (
-    <div className="h-full py-[20px] pr-[20px]">
-      <Layout className="notebook-layout">
-        <Sider width={getSiderWidth()} className="notebook-sider">
-          <Tabs
-            activeTab={activeTab}
-            onChange={handleTabChange}
-            direction="vertical"
-            className="notebook-tabs"
-            type="rounded"
-          >
-            <TabPane key="data" title={<DataIcon />}>
-              <DataManager key="data" />
-            </TabPane>
-            <TabPane key="files" title={<PythonIcon />}>
-              <FileManager
-                onFileOpen={addTab}
-                key="files"
-                type="files"
-                ref={directoryTreeRef}
-              />
-            </TabPane>
-            <TabPane key="tools" title={<SuanziIcon />}></TabPane>
-          </Tabs>
-        </Sider>
-        <Content className="notebook-content">{renderContent()}</Content>
-      </Layout>
-    </div>
+    <Layout className="notebook-layout">
+      <Sider width={isDasetTab ? '100%' : 300} className="notebook-sider">
+        <Tabs
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          direction="vertical"
+          className="notebook-tabs"
+          type="rounded"
+        >
+          <TabPane key="data" title={<DataIcon />}>
+            <DataManager key="data" />
+          </TabPane>
+          <TabPane key="files" title={<PythonIcon />}>
+            <FileManager key="files" type="files" ref={directoryTreeRef} />
+          </TabPane>
+          <TabPane key="dataset" title={<SuanziIcon />}>
+            <DatasetsList />
+          </TabPane>
+        </Tabs>
+      </Sider>
+      <Content
+        className={`notebook-content ${isDasetTab ? 'hidden' : 'visible'}`}
+      >
+        <EditorContent
+          fileTabs={fileState.fileTabs}
+          activeTab={fileState.activeTab}
+          onTabChange={switchTab}
+          onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+          onRemoveTab={removeTab}
+          onCreate={handleCreate}
+          onActiveUpdate={handleActiveUpdate}
+        />
+      </Content>
+    </Layout>
   );
 });
 

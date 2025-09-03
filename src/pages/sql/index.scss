@@ -2,7 +2,7 @@
   height: 100%;
   background-color: #f5f5f5;
   border-radius: 12px;
-  // margin: 20px 20px 20px 0;
+  margin: 20px 20px 20px 0;
   overflow: hidden;
 
   .tab-tree {
@@ -48,6 +48,7 @@
   }
 }
 
+// 删除sider组件自带宽度切换动画
 .notebook-sider.arco-layout-sider {
   transition: none;
   box-shadow: none;
