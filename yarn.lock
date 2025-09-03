@@ -282,10 +282,10 @@
   dependencies:
     color "^3.1.3"
 
-"@arco-design/web-react@2.48.0":
-  version "2.48.0"
-  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.48.0.tgz#c6860aca884c25f2ea13eec03b48546c311f86c8"
-  integrity sha1-xoYKyohMJfLqE+7AO0hUbDEfhsg=
+"@arco-design/web-react@2.64.1":
+  version "2.64.1"
+  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.64.1.tgz#9da8278d27000c2c2c71d98f972fbcd6ee14e34a"
+  integrity sha1-nagnjScADCwscdmPly+81u4U40o=
   dependencies:
     "@arco-design/color" "^0.4.0"
     "@babel/runtime" "^7.5.5"
@@ -295,10 +295,11 @@
     dayjs "^1.10.5"
     lodash "^4.17.21"
     number-precision "^1.3.1"
-    react-focus-lock "^2.9.1"
+    react-focus-lock "^2.12.1"
+    react-is "^18.2.0"
     react-transition-group "^4.3.0"
     resize-observer-polyfill "^1.5.1"
-    scroll-into-view-if-needed "2.2.20"
+    scroll-into-view-if-needed "^2.2.20"
     shallowequal "^1.1.0"
 
 "@arco-plugins/utils@1.0.2":
@@ -1385,15 +1386,15 @@
     "@babel/plugin-transform-modules-commonjs" "^7.27.1"
     "@babel/plugin-transform-typescript" "^7.27.1"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.18", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.0", "@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.18.3", "@babel/runtime@^7.19.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
-  version "7.27.6"
-  resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
-  integrity sha1-7EBwoE12uujduxB3C6VXFKQXt8Y=
-
-"@babel/runtime@^7.18.6":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.12.13", "@babel/runtime@^7.18.6", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.7":
   version "7.28.3"
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.28.3.tgz#75c5034b55ba868121668be5d5bb31cc64e6e61a"
   integrity sha1-dcUDS1W6hoEhZovl1bsxzGTm5ho=
+
+"@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.18", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.0", "@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.18.3", "@babel/runtime@^7.19.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.9.2":
+  version "7.27.6"
+  resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
+  integrity sha1-7EBwoE12uujduxB3C6VXFKQXt8Y=
 
 "@babel/template@^7.27.1", "@babel/template@^7.27.2", "@babel/template@^7.3.3":
   version "7.27.2"
@@ -5558,16 +5559,8 @@
     "@replit/codemirror-lang-svelte" "^6.0.0"
     codemirror-lang-mermaid "^0.5.0"
 
-"@uiw/codemirror-theme-bbedit@^4.24.2":
-  version "4.24.2"
-  resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
-  integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
-  dependencies:
-    "@codemirror/language" "^6.0.0"
-    "@codemirror/state" "^6.0.0"
-    "@codemirror/view" "^6.0.0"
-
-"@uiw/codemirror-themes@^4.24.2":
+"@uiw/codemirror-theme-bbedit@^4.24.2", "@uiw/codemirror-themes@^4.24.2":
+  name "@uiw/codemirror-theme-bbedit"
   version "4.24.2"
   resolved "http://npm.cestc.cn/@uiw/codemirror-themes/download/@uiw/codemirror-themes-4.24.2.tgz#578473c1c2e05767ecfd4550e925336c3f71bd88"
   integrity sha1-V4RzwcLgV2fs/UVQ6SUzbD9xvYg=
@@ -8139,12 +8132,7 @@ compression@^1.7.4:
     safe-buffer "5.2.1"
     vary "~1.1.2"
 
-compute-scroll-into-view@1.0.11:
-  version "1.0.11"
-  resolved "http://npm.cestc.cn/compute-scroll-into-view/download/compute-scroll-into-view-1.0.11.tgz#7ff0a57f9aeda6314132d8994cce7aeca794fecf"
-  integrity sha1-f/Clf5rtpjFBMtiZTM567KeU/s8=
-
-compute-scroll-into-view@^1.0.17:
+compute-scroll-into-view@^1.0.17, compute-scroll-into-view@^1.0.20:
   version "1.0.20"
   resolved "http://npm.cestc.cn/compute-scroll-into-view/download/compute-scroll-into-view-1.0.20.tgz#1768b5522d1172754f5d0c9b02de3af6be506a43"
   integrity sha1-F2i1Ui0RcnVPXQybAt469r5QakM=
@@ -9397,7 +9385,12 @@ dateformat@^3.0.2:
   resolved "http://npm.cestc.cn/dateformat/download/dateformat-3.0.3.tgz#a6e37499a4d9a9cf85ef5872044d62901c9889ae"
   integrity sha1-puN0maTZqc+F71hyBE1ikByYia4=
 
-dayjs@^1.10.5, dayjs@^1.11.10, dayjs@^1.11.13, dayjs@^1.9.1:
+dayjs@^1.10.5:
+  version "1.11.15"
+  resolved "http://npm.cestc.cn/dayjs/download/dayjs-1.11.15.tgz#fd7fd2db6fc92f08ffe4adc306756d45db00ada3"
+  integrity sha1-/X/S22/JLwj/5K3DBnVtRdsAraM=
+
+dayjs@^1.11.10, dayjs@^1.11.13, dayjs@^1.9.1:
   version "1.11.13"
   resolved "http://npm.cestc.cn/dayjs/download/dayjs-1.11.13.tgz#92430b0139055c3ebb60150aa13e860a4b5a366c"
   integrity sha1-kkMLATkFXD67YBUKoT6GCktaNmw=
@@ -11346,10 +11339,10 @@ fmin@^0.0.2:
     tape "^4.5.1"
     uglify-js "^2.6.2"
 
-focus-lock@^1.3.5:
-  version "1.3.5"
-  resolved "http://npm.cestc.cn/focus-lock/download/focus-lock-1.3.5.tgz#aa644576e5ec47d227b57eb14e1efb2abf33914c"
-  integrity sha1-qmRFduXsR9IntX6xTh77Kr8zkUw=
+focus-lock@^1.3.6:
+  version "1.3.6"
+  resolved "http://npm.cestc.cn/focus-lock/download/focus-lock-1.3.6.tgz#955eec1e10591d56f679258edb94aedb11d691cd"
+  integrity sha1-lV7sHhBZHVb2eSWO25Su2xHWkc0=
   dependencies:
     tslib "^2.0.3"
 
@@ -18650,10 +18643,10 @@ react-base16-styling@^0.6.0:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
-react-clientside-effect@^1.2.6:
-  version "1.2.6"
-  resolved "http://npm.cestc.cn/react-clientside-effect/download/react-clientside-effect-1.2.6.tgz#29f9b14e944a376b03fb650eed2a754dd128ea3a"
-  integrity sha1-KfmxTpRKN2sD+2UO7Sp1TdEo6jo=
+react-clientside-effect@^1.2.7:
+  version "1.2.8"
+  resolved "http://npm.cestc.cn/react-clientside-effect/download/react-clientside-effect-1.2.8.tgz#0b90a9d7b2a1823a3a10ed1ea3f651f7e0301cb7"
+  integrity sha1-C5Cp17Khgjo6EO0eo/ZR9+AwHLc=
   dependencies:
     "@babel/runtime" "^7.12.13"
 
@@ -18741,17 +18734,17 @@ react-fast-compare@^3.1.1, react-fast-compare@^3.2.2:
   resolved "http://npm.cestc.cn/react-fast-compare/download/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
   integrity sha1-kpqXpTIwTOn+5LyuRCNPHOLCHUk=
 
-react-focus-lock@^2.9.1:
-  version "2.13.2"
-  resolved "http://npm.cestc.cn/react-focus-lock/download/react-focus-lock-2.13.2.tgz#e1addac2f8b9550bc0581f3c416755ba0f81f5ef"
-  integrity sha1-4a3awvi5VQvAWB88QWdVug+B9e8=
+react-focus-lock@^2.12.1:
+  version "2.13.6"
+  resolved "http://npm.cestc.cn/react-focus-lock/download/react-focus-lock-2.13.6.tgz#29751bf2e4e30f6248673cd87a347c74ff2af672"
+  integrity sha1-KXUb8uTjD2JIZzzYejR8dP8q9nI=
   dependencies:
     "@babel/runtime" "^7.0.0"
-    focus-lock "^1.3.5"
+    focus-lock "^1.3.6"
     prop-types "^15.6.2"
-    react-clientside-effect "^1.2.6"
-    use-callback-ref "^1.3.2"
-    use-sidecar "^1.1.2"
+    react-clientside-effect "^1.2.7"
+    use-callback-ref "^1.3.3"
+    use-sidecar "^1.1.3"
 
 react-helmet@^6.1.0:
   version "6.1.0"
@@ -19904,12 +19897,12 @@ screenfull@^5.0.0:
   resolved "http://npm.cestc.cn/screenfull/download/screenfull-5.2.0.tgz#6533d524d30621fc1283b9692146f3f13a93d1ba"
   integrity sha1-ZTPVJNMGIfwSg7lpIUbz8TqT0bo=
 
-scroll-into-view-if-needed@2.2.20:
-  version "2.2.20"
-  resolved "http://npm.cestc.cn/scroll-into-view-if-needed/download/scroll-into-view-if-needed-2.2.20.tgz#3a46847a72233a3af9770e55df450f2a7f2e2a0e"
-  integrity sha1-OkaEenIjOjr5dw5V30UPKn8uKg4=
+scroll-into-view-if-needed@^2.2.20:
+  version "2.2.31"
+  resolved "http://npm.cestc.cn/scroll-into-view-if-needed/download/scroll-into-view-if-needed-2.2.31.tgz#d3c482959dc483e37962d1521254e3295d0d1587"
+  integrity sha1-08SClZ3Eg+N5YtFSElTjKV0NFYc=
   dependencies:
-    compute-scroll-into-view "1.0.11"
+    compute-scroll-into-view "^1.0.20"
 
 secure-compare@3.0.1:
   version "3.0.1"
@@ -20726,7 +20719,7 @@ string-natural-compare@^3.0.1:
   resolved "http://npm.cestc.cn/string-natural-compare/download/string-natural-compare-3.0.1.tgz#7a42d58474454963759e8e8b7ae63d71c1e7fdf4"
   integrity sha1-ekLVhHRFSWN1no6LeuY9ccHn/fQ=
 
-"string-width-cjs@npm:string-width@^4.2.0":
+"string-width-cjs@npm:string-width@^4.2.0", "string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "http://npm.cestc.cn/string-width/download/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha1-JpxxF9J7Ba0uU2gwqOyJXvnG0BA=
@@ -20743,15 +20736,6 @@ string-width@^1.0.1:
     code-point-at "^1.0.0"
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
-
-"string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
-  version "4.2.3"
-  resolved "http://npm.cestc.cn/string-width/download/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha1-JpxxF9J7Ba0uU2gwqOyJXvnG0BA=
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
 
 string-width@^2.0.0, string-width@^2.1.0, string-width@^2.1.1:
   version "2.1.1"
@@ -20897,7 +20881,7 @@ stringify-object@^3.3.0:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "http://npm.cestc.cn/strip-ansi/download/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha1-nibGPTD1NEPpSJSVshBdN7Z6hdk=
@@ -20924,13 +20908,6 @@ strip-ansi@^5.0.0, strip-ansi@^5.1.0, strip-ansi@^5.2.0:
   integrity sha1-jJpTb+tq/JYr36WxBKUJHBrZwK4=
   dependencies:
     ansi-regex "^4.1.0"
-
-strip-ansi@^6.0.0, strip-ansi@^6.0.1:
-  version "6.0.1"
-  resolved "http://npm.cestc.cn/strip-ansi/download/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha1-nibGPTD1NEPpSJSVshBdN7Z6hdk=
-  dependencies:
-    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1, strip-ansi@^7.1.0:
   version "7.1.0"
@@ -22413,7 +22390,7 @@ url@^0.11.0, url@~0.11.0:
     punycode "^1.4.1"
     qs "^6.12.3"
 
-use-callback-ref@^1.3.2:
+use-callback-ref@^1.3.3:
   version "1.3.3"
   resolved "http://npm.cestc.cn/use-callback-ref/download/use-callback-ref-1.3.3.tgz#98d9fab067075841c5b2c6852090d5d0feabe2bf"
   integrity sha1-mNn6sGcHWEHFssaFIJDV0P6r4r8=
@@ -22447,7 +22424,7 @@ use-latest@^1.2.1:
   dependencies:
     use-isomorphic-layout-effect "^1.1.1"
 
-use-sidecar@^1.1.2:
+use-sidecar@^1.1.3:
   version "1.1.3"
   resolved "http://npm.cestc.cn/use-sidecar/download/use-sidecar-1.1.3.tgz#10e7fd897d130b896e2c546c63a5e8233d00efdb"
   integrity sha1-EOf9iX0TC4luLFRsY6XoIz0A79s=
@@ -23370,7 +23347,7 @@ workbox-window@6.6.1:
     "@types/trusted-types" "^2.0.2"
     workbox-core "6.6.1"
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "http://npm.cestc.cn/wrap-ansi/download/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha1-Z+FFz/UQpqaYS98RUpEdadLrnkM=
@@ -23400,15 +23377,6 @@ wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "http://npm.cestc.cn/wrap-ansi/download/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha1-6Tk7oHEC5skaOyIUePAlfNKFblM=
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^7.0.0:
-  version "7.0.0"
-  resolved "http://npm.cestc.cn/wrap-ansi/download/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
-  integrity sha1-Z+FFz/UQpqaYS98RUpEdadLrnkM=
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
