@@ -1059,8 +1059,8 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
             return;
           }
           if (res.data) {
-            setContentFileData(res.data || []);
-            setFileTotal(res.data.length);
+            setContentFileData(res.data.list || []);
+            setFileTotal(res.data.total);
           }
         })
         .catch((err) => {
@@ -1492,23 +1492,30 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                 scroll={{ x: 'max-content' }}
                 border={false}
               />
-              <Pagination
-                current={fileCurrentPage}
-                pageSize={filePageSize}
-                onPageSizeChange={(pageSize) => {
-                  setFilePageSize(pageSize);
-                  setFileCurrentPage(1);
-                }}
-                onChange={(page) => {
-                  setFileCurrentPage(page);
-                }}
-                sizeOptions={[10, 20, 50, 100]}
-                showTotal
-                total={fileTotal}
-                showJumper
-                sizeCanChange
-                style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-              />
+              <div className="pagination-wrapper">
+                <Pagination
+                  disabled={updateStatus}
+                  style={{
+                    float: 'right'
+                  }}
+                  current={fileCurrentPage}
+                  pageSize={filePageSize}
+                  total={fileTotal}
+                  onChange={(filePage) => {
+                    setFileCurrentPage(filePage);
+                  }}
+                  onPageSizeChange={(filePageSize) => {
+                    setFilePageSize(filePageSize);
+                    setFileCurrentPage(1);
+                  }}
+                  showTotal={(total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                  }
+                  sizeOptions={[10, 20, 50, 100]}
+                  showJumper
+                  sizeCanChange={true}
+                />
+              </div>
             </TabPane>
           ) : (
             <TabPane key="content" title="数据内容">
