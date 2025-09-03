@@ -15,7 +15,7 @@ const TabPane = Tabs.TabPane;
 
 type TabKey = 'files' | 'tools' | 'data';
 
-const defaultActiveTab = 'data';
+const defaultActiveTab = 'files';
 
 const SqlIndex: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
@@ -88,7 +88,12 @@ const SqlIndex: React.FC = memo(() => {
               <DataManager key="data" />
             </TabPane>
             <TabPane key="files" title={<PythonIcon />}>
-              <FileManager key="files" type="files" ref={directoryTreeRef} />
+              <FileManager
+                onFileOpen={addTab}
+                key="files"
+                type="files"
+                ref={directoryTreeRef}
+              />
             </TabPane>
             <TabPane key="tools" title={<SuanziIcon />}></TabPane>
           </Tabs>

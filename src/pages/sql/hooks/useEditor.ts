@@ -143,6 +143,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
+    console.log('runStatus', runStatus);
     if (
       runStatus !== RunningStatus.RUNNING ||
       !execid ||
