@@ -15,18 +15,11 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
-import {
-  getWorkflowList,
-  workflowDelete,
-  workflowCopy
-} from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
-import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconPlus } from '@arco-design/web-react/icon';
-import { openNewPage } from '@/utils/env';
-import { getAnnotationList, getAnnotationTaskList } from '@/api/dataAnnotation';
+import { getAnnotationList } from '@/api/dataAnnotation';
+import { RequirementType, RequirementTypeMap } from './type';
 import './index.scss';
 
 export default function Requirement() {
@@ -36,9 +29,9 @@ export default function Requirement() {
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  const [searchValue, setSearchValue] = useState('图像标注需求');
+  // 初始化需求列表数据
+  const [requirementData, setRequirementData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -72,11 +65,7 @@ export default function Requirement() {
       getList();
       setIsClickClear(false);
     }
-    if (isClickClearUserName && userNameValue === '') {
-      getList();
-      setIsClickClearUserName(false);
-    }
-  }, [isClickClear, isClickClearUserName]);
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -85,30 +74,23 @@ export default function Requirement() {
         page: number;
         page_size: number;
         filters: {
-          name: string; // 需求名称
-          type: number; // 创建人
-          belong: number; // 创建人
+          keyword: string;
         };
       } = {
-        page: current, //第几页
-        page_size: pageSize, //每页个数
+        page: current || 1, //第几页
+        page_size: pageSize || 10, //每页个数
         filters: {
-          name: searchValue,
-          type: Number(sortValue.type),
-          belong: Number(sortValue.belong)
+          keyword: searchValue
         }
       };
-
-      // const res1 = await getAnnotationList(data1).then((res) => {
-      //   console.log('object', res);
-      // });
-      // console.log(res1, '-----top');
-      const res = await getAnnotationTaskList(params);
-      if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list1 || []);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total);
+      const res = await getAnnotationList(params);
+      if (res.code === 1 && res.data) {
+        setRequirementData(res.data.result || []);
+        setCurrent(res.data.page);
+        setPageSize(res.data.page_size);
+        setTotal(res.data?.total);
+        setLoading(false);
+      } else {
         setLoading(false);
       }
     } catch (error) {
@@ -153,14 +135,14 @@ export default function Requirement() {
   const columns: ColumnProps[] = [
     {
       title: '需求名称',
-      dataIndex: 'workflow_name',
+      dataIndex: 'name',
       width: 280,
       ellipsis: true,
       className: 'hover-change workflow-name',
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+        return renderEmptyPlaceholder(record.name) !== '-' ? (
           <EllipsisPopover
-            value={record.workflow_name}
+            value={record.name}
             isEdit={false}
             isLink
             handleLink={() => {
@@ -187,49 +169,55 @@ export default function Requirement() {
 
     {
       title: '类型',
-      dataIndex: 'is_online',
+      dataIndex: 'label_type',
       width: 100,
-      render: (_, record) =>
-        record.is_online ? (
-          <div className="publish-part published">
-            <Success11Icon className="mr-[6px] size-[16px]" />
-            <span>已上线</span>
-          </div>
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.label_type) !== '-' ? (
+          <EllipsisPopover
+            value={RequirementTypeMap[record.label_type]}
+            isEdit={false}
+          />
         ) : (
-          <div className="publish-part not-published">
-            <IconClockCircle className="mr-[6px] size-[16px]" />
-            <span>未上线</span>
-          </div>
-        ),
+          <span>-</span>
+        );
+      },
       filters: [
         {
-          text: '图片',
-          value: 0
+          text: '文本',
+          value: RequirementType.Text
         },
         {
-          text: '文本',
-          value: 1
+          text: '图片',
+          value: RequirementType.Image
+        },
+        {
+          text: '音频',
+          value: RequirementType.Audio
+        },
+        {
+          text: '视频',
+          value: RequirementType.Video
         }
       ]
     },
     {
       title: '数据量',
-      dataIndex: 'data_volume', // Changed from 'user_name' to unique dataIndex
+      dataIndex: 'label_count', // Changed from 'user_name' to unique dataIndex
       width: 100,
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.data_volume)} // Updated to correct data field
+          value={renderEmptyPlaceholder(record.label_count)} // Updated to correct data field
           isEdit={false}
         />
       )
     },
     {
       title: '状态',
-      dataIndex: 'is_online',
+      dataIndex: 'status',
       width: 100,
       render: (_, record) =>
-        record.is_online ? (
+        record.status ? (
           <div className="publish-part published">
             <span>标注完成</span>
           </div>
@@ -322,7 +310,8 @@ export default function Requirement() {
             <InputSearch
               onClear={() => {
                 setCurrent(1);
-                setSearchValue('');
+                setPageSize(10);
+                setSearchValue('图像标注需求');
                 setIsClickClear(true);
               }}
               onPressEnter={() => {
@@ -349,7 +338,7 @@ export default function Requirement() {
       <Table
         border={false}
         columns={columns}
-        data={workflowData}
+        data={requirementData}
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无需求',
@@ -368,7 +357,7 @@ export default function Requirement() {
         }
       />
       {/* 分页 */}
-      {workflowData && workflowData.length > 0 && (
+      {requirementData && requirementData.length > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}

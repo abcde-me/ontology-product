@@ -29,8 +29,8 @@ export default function Requirement() {
   const InputSearch = Input.Search;
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  // 初始化任务列表数据
+  const [taskData, setTaskData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -81,11 +81,11 @@ export default function Requirement() {
       };
       const res = await getAnnotationTaskList(params);
       console.log(res, '======123');
-      if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list || []);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total);
+      if (res.code === 0 && res.data) {
+        setTaskData(res?.data?.result || []);
+        setCurrent(res.data?.page);
+        setPageSize(res.data?.page_size);
+        setTotal(res.data?.total);
         setLoading(false);
       }
     } catch (error) {
@@ -307,7 +307,7 @@ export default function Requirement() {
       <Table
         border={false}
         columns={columns}
-        data={workflowData}
+        data={taskData}
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无需求'
@@ -320,7 +320,7 @@ export default function Requirement() {
         }
       />
       {/* 分页 */}
-      {workflowData && workflowData.length > 0 && (
+      {taskData && taskData.length > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}

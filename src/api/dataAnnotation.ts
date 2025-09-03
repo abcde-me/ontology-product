@@ -6,8 +6,7 @@ export async function getAnnotationList(params: {
   page: number; // 页码
   page_size: number; // 每页数量
   filters: {
-    name: string; // 需求名称
-    create_by: string; // 创建人
+    keyword: string; // 搜索关键词
   };
 }) {
   return await UAPI.RES.getAnnotationListApi({}).post(params).inRegion().do();
