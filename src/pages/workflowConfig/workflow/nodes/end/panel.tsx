@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { EndNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import { Form, Select } from '@arco-design/web-react';
+import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
 import { getWorkflowTargetPath } from '@/api/workflow';
 import './end.scss';
 
@@ -15,18 +15,22 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
+  const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
+  const [knowledgeBaseName, setKnowledgeBaseName] = useState(
+    inputs?.Knowledge_base_name || ''
+  );
 
   useEffect(() => {
-    getWorkflowTargetPath(2, '').then(res => {
+    getWorkflowTargetPath(2, '').then((res) => {
       const dirsArr: Record<string, any>[] = [];
       res.data.dst.forEach((catalog) => {
         // 重置name结构
-        const restData = catalog.children?.volume.map(item => {
+        const restData = catalog.children?.volume.map((item) => {
           return {
             ...item,
             parent_name: catalog.name
-          }
-        })
+          };
+        });
         dirsArr.push(...(restData || []));
       });
       setDataSource(dirsArr);
@@ -42,9 +46,13 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         disabled={readOnly}
         wrapperCol={{ span: 24 }}
-        onValuesChange={(_, v: any) => { onValuesChange(v, dataSource) }}
+        onValuesChange={(_, v: any) => {
+          onValuesChange(v, dataSource);
+        }}
         initialValues={{
-          target_path_id: inputs?.target_path_id
+          target_path_id: inputs?.target_path_id,
+          is_embedding: inputs?.is_embedding,
+          Knowledge_base_name: inputs?.Knowledge_base_name
         }}
       >
         <FormItem
@@ -60,7 +68,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             allowClear
             showSearch
             filterOption={(inputValue, option) => {
-              return option?.props?.children?.includes(inputValue)
+              return option?.props?.children?.includes(inputValue);
             }}
           >
             {dataSource.map((option) => (
@@ -70,6 +78,39 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
+        <FormItem
+          extra="开启后会对输出数据执行向量化（Embedding）流程。"
+          field="is_embedding"
+        >
+          <Checkbox
+            className="mt-[8px] text-[14px]"
+            checked={isEmbedding}
+            value={isEmbedding}
+            onChange={(value) => {
+              setIsEmbedding(value);
+            }}
+          >
+            是否进行Embedding
+          </Checkbox>
+        </FormItem>
+        {isEmbedding && (
+          <FormItem
+            label="知识库名称"
+            extra="为构建的知识库指定一个名称，用于后续的检索和管理"
+            field="Knowledge_base_name"
+            rules={[{ required: true, message: '知识库名称不可为空' }]}
+          >
+            <Input
+              placeholder="请输入知识库名称（50字以内）"
+              maxLength={50}
+              value={knowledgeBaseName}
+              onBlur={(e) => {
+                console.log(e.target.value);
+                setKnowledgeBaseName(e.target.value);
+              }}
+            />
+          </FormItem>
+        )}
       </Form>
     </div>
   );
