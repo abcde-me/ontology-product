@@ -7,7 +7,7 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
-import { useTabManager } from './hooks/useTabManager';
+import { FileTab, useTabManager } from './hooks/useTabManager';
 import './index.scss';
 
 const { Content, Sider } = Layout;
@@ -22,19 +22,25 @@ const SqlIndex: React.FC = memo(() => {
   const {
     fileState,
     directoryTreeRef,
-    initialAddTab,
     addTab,
     removeTab,
     switchTab,
-    handleCreate
+    handleCreate,
+    updateTab
   } = useTabManager();
 
-  useEffect(() => initialAddTab(), []);
+  // 初始化创建一个默认SQL查询标签
+  useEffect(() => addTab(), []);
 
   const isDasetTab = activeTab === 'dataset';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+  };
+
+  const handleActiveUpdate = (tabData: FileTab) => {
+    console.log('handleActiveUpdate tabData', tabData);
+    updateTab(tabData);
   };
 
   return (
@@ -68,6 +74,7 @@ const SqlIndex: React.FC = memo(() => {
           onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
           onRemoveTab={removeTab}
           onCreate={handleCreate}
+          onActiveUpdate={handleActiveUpdate}
         />
       </Content>
     </Layout>

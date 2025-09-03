@@ -4,10 +4,13 @@ import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
 import { runPythonItem, getRunResult, savePythonItem } from '@/api/sql';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
+import { FileTab } from './useTabManager';
 
 interface UseEditorOptions {
   initialContent?: string;
   currentFileId?: string;
+  tabKey?: string;
+  onActiveUpdate?: (tabData: any) => void;
 }
 
 interface UseEditorReturn {
@@ -31,7 +34,12 @@ interface UseEditorReturn {
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
-  const { initialContent = '', currentFileId } = options;
+  const {
+    initialContent = '',
+    currentFileId,
+    onActiveUpdate,
+    tabKey
+  } = options;
 
   // 状态管理
   const [editorContent, setEditorContent] = useState(initialContent);
@@ -66,6 +74,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     useCallback(async (content: string) => {
       const fileId = currentFileIdRef.current;
       if (!fileId) {
+        // TODO: 创建脚本
+        onActiveUpdate && onActiveUpdate({ key: tabKey, content: content });
         return null;
       }
 
@@ -110,6 +120,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       Message.error('请先保存文件');
       return;
     }
+
+    onActiveUpdate && onActiveUpdate({ key: tabKey, hasRun: true });
 
     setRunStatus(RunningStatus.RUNNING);
     setRunStartTime(new Date());

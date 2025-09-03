@@ -19,15 +19,19 @@ import { RunningStatus } from '@/types/pythonApi';
 
 import RunningInfoPanel from './RunningInfoPanel';
 import { useEditor } from '../../hooks/useEditor';
+import { FileTab } from '../../hooks/useTabManager';
 
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
+  hasRun?: boolean;
+  tabKey?: string;
+  onActiveUpdate?: (tabData: FileTab) => void;
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
-  ({ content, fileName, currentFileId }) => {
+  ({ content, fileName, currentFileId, hasRun, onActiveUpdate, tabKey }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
 
     // 使用useEditor hook管理编辑器状态
@@ -43,7 +47,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       runLog
     } = useEditor({
       initialContent: content,
-      currentFileId
+      currentFileId,
+      tabKey: tabKey,
+      onActiveUpdate: onActiveUpdate
     });
 
     const myTheme = createTheme({
@@ -69,6 +75,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       console.log('Calling operator...');
     };
 
+    const handleRunClick = () => {
+      if (runStatus === RunningStatus.RUNNING) {
+        handleStopRunCode();
+      } else {
+        handleRunCode().catch(console.error);
+      }
+    };
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
@@ -85,11 +99,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                   )
                 }
                 disabled={editorContent.trim() === ''}
-                onClick={
-                  runStatus === RunningStatus.RUNNING
-                    ? handleStopRunCode
-                    : () => handleRunCode().catch(console.error)
-                }
+                onClick={handleRunClick}
                 className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
@@ -145,11 +155,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         </div>
 
         {/* 运行信息面板 */}
-        <RunningInfoPanel
-          runResult={runResult}
-          runLog={runLog}
-          runStatus={runStatus}
-        />
+        {hasRun && (
+          <RunningInfoPanel
+            runResult={runResult}
+            runLog={runLog}
+            runStatus={runStatus}
+          />
+        )}
       </div>
     );
   }
