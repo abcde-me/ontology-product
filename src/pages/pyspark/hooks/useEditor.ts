@@ -147,7 +147,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResult, {
-      pollingInterval: 3000
+      pollingInterval: 3000,
+      pollingWhenHidden: false,
+      manual: true
     });
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
@@ -166,6 +168,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         const res = await getRunResultPolling(currentFileIdRef.current!, {
           execid
         });
+
         if (res?.status === 200 && res.data) {
           setRunResult(res.data.run_result);
 
@@ -193,7 +196,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     };
 
     fetchResult();
-  }, [execid, runStatus, runStartTime, getRunResultPolling]);
+  }, [execid, runStatus]);
 
   return {
     // 状态

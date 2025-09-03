@@ -9,6 +9,7 @@ import {
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
+import { useParams } from '@/utils/url';
 import './index.css';
 import { RunState } from '../list/list';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
@@ -33,9 +34,9 @@ const AccessTable = (props) => {
   // 输入框的默认状态
   const [searchValue, setSearchValue] = useState('');
   const [Judgment, setJudgment] = useState<boolean>(true);
-
+  const type = useParams('type');
   const columns = () => {
-    if (Judgment) {
+    if (type !== 'db') {
       return [
         {
           title: '文件名',
@@ -115,12 +116,12 @@ const AccessTable = (props) => {
       return [
         {
           title: '序号',
-          // width: 400,
+          width: 200,
           ellipsis: true,
-          dataIndex: 'index'
-          // render: (_, item) => {
-          //   return <EllipsisPopoverCom value={item.file_name} isEdit={false} />;
-          // }
+          dataIndex: 'index',
+          render: (_, item, index) => {
+            return <span>{index + 1}</span>;
+          }
         },
         {
           title: '表名',
@@ -179,7 +180,8 @@ const AccessTable = (props) => {
         },
         {
           title: '类型',
-          dataIndex: 'file_type',
+          // dataIndex: 'file_type',
+          render: (_, item) => <div>myslq表</div>,
           width: 120
         },
         {

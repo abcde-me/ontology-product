@@ -15,8 +15,16 @@ import {
   IconFile,
   IconStorage
 } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import NoDataEmpty from '@/components/NoDataEmpty';
 import { useSourceTargetTree } from '../../hooks/useSourceTargetTree';
-import { CatalogRootType, CatalogItemType } from '@/api/dataCatalog';
+import {
+  CatalogRootType,
+  CatalogItemType,
+  FluffyVolume,
+  Db
+} from '@/api/dataCatalog';
+import { FileData, CatalogData, DatabaseData } from '../../types';
 import './index.scss';
 
 const { Title, Text } = Typography;
@@ -25,9 +33,11 @@ interface SourceTargetTreeProps {
   type: 'python' | 'sql';
   dataType: 'source' | 'target';
   onBack: () => void;
-  onSelectFile?: (file: any) => void;
-  onFileDetail?: (file: any) => void;
-  onFileInsert?: (file: any) => void;
+  onSelectFile?: (file: FileData) => void;
+  onFileDetail?: (file: FileData) => void;
+  onFileInsert?: (file: FileData) => void;
+  onVolumeDetail?: (volume: FluffyVolume) => void;
+  onDbDetail?: (database: Db) => void;
 }
 
 interface TreeNode {
@@ -40,7 +50,7 @@ interface TreeNode {
 }
 
 // 定义当前视图层级
-type ViewLevel = 'catalog' | 'volume-db' | 'files';
+type ViewLevel = 'catalog' | 'category' | 'volume-db' | 'files';
 
 const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   type,
@@ -48,7 +58,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   onBack,
   onSelectFile,
   onFileDetail,
-  onFileInsert
+  onFileInsert,
+  onVolumeDetail,
+  onDbDetail
 }) => {
   const {
     targetCatalogList,
@@ -58,19 +70,24 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     targetCatalogFileList,
     getCatalogFileList,
     currentPage
-  } = useSourceTargetTree();
+  } = useSourceTargetTree(dataType);
 
   const [searchValue, setSearchValue] = useState('');
   const [currentViewLevel, setCurrentViewLevel] =
     useState<ViewLevel>('catalog');
-  const [selectedCatalog, setSelectedCatalog] = useState<any>(null);
-  const [selectedVolumeOrDb, setSelectedVolumeOrDb] = useState<any>(null);
+  const [selectedCatalog, setSelectedCatalog] = useState<CatalogData | null>(
+    null
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedVolumeOrDb, setSelectedVolumeOrDb] = useState<
+    FluffyVolume | Db | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [breadcrumbPath, setBreadcrumbPath] = useState<string[]>([]);
 
   // 处理文件详情按钮点击
   const handleFileDetail = useCallback(
-    (file: any, event: Event) => {
+    (file: FileData, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发文件选择
       if (onFileDetail) {
         onFileDetail(file);
@@ -81,13 +98,35 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 处理文件插入按钮点击
   const handleFileInsert = useCallback(
-    (file: any, event: Event) => {
+    (file: FileData, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发文件选择
       if (onFileInsert) {
         onFileInsert(file);
       }
     },
     [onFileInsert]
+  );
+
+  // 处理数据卷详情按钮点击
+  const handleVolumeDetail = useCallback(
+    (volume: FluffyVolume, event: Event) => {
+      event.stopPropagation(); // 阻止事件冒泡，避免触发数据卷选择
+      if (onVolumeDetail) {
+        onVolumeDetail(volume);
+      }
+    },
+    [onVolumeDetail]
+  );
+
+  // 处理数据库详情按钮点击
+  const handleDbDetail = useCallback(
+    (database: Db, event: Event) => {
+      event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
+      if (onDbDetail) {
+        onDbDetail(database);
+      }
+    },
+    [onDbDetail]
   );
 
   // 获取当前目录列表
@@ -113,7 +152,10 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       title: (
         <div className="source-target-tree__catalog-item-left">
           <IconFolder className="source-target-tree__catalog-icon" />
-          <span className="source-target-tree__catalog-name">{item.name}</span>
+          <EllipsisPopover
+            className="source-target-tree__catalog-name"
+            value={item.name}
+          ></EllipsisPopover>
         </div>
       ),
       icon: null, // 不使用默认图标，在title中自定义
@@ -122,13 +164,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     }));
   }, [currentCatalogList]);
 
-  // 生成第二层数据卷和数据库列表
+  // 生成第三层数据卷和数据库列表
   const generateVolumeDbList = useMemo((): Array<{
     key: string;
     title: React.ReactNode;
     data: any;
   }> => {
-    if (!selectedCatalog) return [];
+    if (!selectedCatalog || !selectedCategory) return [];
 
     const items: Array<{
       key: string;
@@ -136,64 +178,112 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       data: any;
     }> = [];
 
-    // 添加数据卷
-    if (
-      selectedCatalog.children?.volume &&
-      selectedCatalog.children.volume.length > 0
-    ) {
-      items.push(
-        ...selectedCatalog.children.volume.map((volume: any) => ({
-          key: `volume-${volume.id}`,
-          title: (
-            <div className="source-target-tree__volume-db-item">
-              <IconStorage className="source-target-tree__volume-db-icon" />
-              <div className="source-target-tree__volume-db-info">
-                <span className="source-target-tree__volume-db-name">
-                  {volume.name}
-                </span>
+    // 根据选中的分类过滤数据
+    if (selectedCategory === '数据卷') {
+      // 只显示数据卷
+      if (
+        selectedCatalog.children?.volume &&
+        selectedCatalog.children.volume.length > 0
+      ) {
+        items.push(
+          ...selectedCatalog.children.volume.map((volume: any) => ({
+            key: `volume-${volume.id}`,
+            title: (
+              <div className="source-target-tree__volume-db-item-content">
+                <IconStorage className="source-target-tree-icon" />
+                <div className="source-target-tree__volume-db-info">
+                  <EllipsisPopover
+                    className="source-target-tree__volume-db-name"
+                    value={volume.name}
+                  ></EllipsisPopover>
+                </div>
+                <div className="source-target-tree__volume-db-actions">
+                  {/* 详情按钮 */}
+                  <Button
+                    type="text"
+                    onClick={(e: Event) => handleVolumeDetail(volume, e)}
+                  >
+                    详情
+                  </Button>
+                  {/* 插入按钮 */}
+                  <Button
+                    type="outline"
+                    onClick={(e: Event) => handleFileInsert(volume, e)}
+                  >
+                    插入
+                  </Button>
+                </div>
               </div>
-            </div>
-          ),
-          data: { ...volume, type: 'volume', parentCatalog: selectedCatalog }
-        }))
-      );
-    }
-
-    // 添加数据库
-    if (
-      selectedCatalog.children?.db &&
-      selectedCatalog.children.db.length > 0
-    ) {
-      items.push(
-        ...selectedCatalog.children.db.map((db: any) => ({
-          key: `db-${db.id}`,
-          title: (
-            <div className="source-target-tree__volume-db-item">
-              <IconStorage className="source-target-tree__volume-db-icon" />
-              <div className="source-target-tree__volume-db-info">
-                <span className="source-target-tree__volume-db-name">
-                  {db.name}
-                </span>
+            ),
+            data: { ...volume, type: 'volume', parentCatalog: selectedCatalog }
+          }))
+        );
+      }
+    } else if (selectedCategory === '数据库') {
+      // 只显示数据库
+      if (
+        selectedCatalog.children?.db &&
+        selectedCatalog.children.db.length > 0
+      ) {
+        items.push(
+          ...selectedCatalog.children.db.map((db: any) => ({
+            key: `db-${db.id}`,
+            title: (
+              <div className="source-target-tree__volume-db-item-content">
+                <IconStorage className="source-target-tree-icon" />
+                <div className="source-target-tree__volume-db-info">
+                  <EllipsisPopover
+                    className="source-target-tree__volume-db-name"
+                    value={db.name}
+                  ></EllipsisPopover>
+                </div>
+                <div className="source-target-tree__volume-db-actions">
+                  {/* 详情按钮 */}
+                  <Button
+                    type="text"
+                    size="small"
+                    onClick={(e: Event) => handleDbDetail(db, e)}
+                  >
+                    详情
+                  </Button>
+                  {/* 插入按钮 */}
+                  <Button
+                    type="outline"
+                    size="small"
+                    onClick={(e: Event) => handleFileInsert(db, e)}
+                  >
+                    插入
+                  </Button>
+                </div>
               </div>
-            </div>
-          ),
-          data: { ...db, type: 'database', parentCatalog: selectedCatalog }
-        }))
-      );
+            ),
+            data: { ...db, type: 'database', parentCatalog: selectedCatalog }
+          }))
+        );
+      }
     }
 
     return items;
-  }, [selectedCatalog]);
+  }, [selectedCatalog, selectedCategory, handleVolumeDetail, handleDbDetail]);
 
   // 处理目录点击（第一层）
   const handleCatalogClick = (catalog: any) => {
     setSelectedCatalog(catalog);
-    setCurrentViewLevel('volume-db');
+    setCurrentViewLevel('category');
     setBreadcrumbPath([catalog.name]);
   };
 
-  // 处理数据卷或数据库点击（第二层）
+  // 处理分类点击（第二层）
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentViewLevel('volume-db');
+    setBreadcrumbPath([selectedCatalog?.name || '', category]);
+  };
+
+  // 处理数据卷或数据库点击（第三层）
   const handleVolumeDbClick = async (item: any) => {
+    if (!selectedCatalog) return;
+
     setSelectedVolumeOrDb(item);
     setCurrentViewLevel('files');
     setBreadcrumbPath([selectedCatalog.name, item.name]);
@@ -231,12 +321,20 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const handleBack = () => {
     if (currentViewLevel === 'files') {
       // 从文件列表返回到数据卷/数据库列表
-      setCurrentViewLevel('volume-db');
-      setBreadcrumbPath([selectedCatalog.name]);
+      if (selectedCatalog) {
+        setCurrentViewLevel('volume-db');
+        setBreadcrumbPath([selectedCatalog.name, selectedCategory]);
+      }
     } else if (currentViewLevel === 'volume-db') {
-      // 从数据卷/数据库列表返回到目录列表
+      // 从数据卷/数据库列表返回到分类列表
+      setCurrentViewLevel('category');
+      setSelectedVolumeOrDb(null);
+      setBreadcrumbPath([selectedCatalog?.name || '']);
+    } else if (currentViewLevel === 'category') {
+      // 从分类列表返回到目录列表
       setCurrentViewLevel('catalog');
       setSelectedCatalog(null);
+      setSelectedCategory('');
       setBreadcrumbPath([]);
     } else {
       // 从目录列表返回上级
@@ -261,12 +359,16 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       // 第一层：显示标题
       title = dataType === 'source' ? '源数据目录' : '目标数据目录';
       showBreadcrumb = false;
-    } else if (currentViewLevel === 'volume-db') {
+    } else if (currentViewLevel === 'category') {
       // 第二层：显示面包屑路径
       title = selectedCatalog?.name || '';
       showBreadcrumb = true;
-    } else if (currentViewLevel === 'files') {
+    } else if (currentViewLevel === 'volume-db') {
       // 第三层：显示面包屑路径
+      title = selectedCategory || '';
+      showBreadcrumb = true;
+    } else if (currentViewLevel === 'files') {
+      // 第四层：显示面包屑路径
       title = selectedVolumeOrDb?.name || '';
       showBreadcrumb = true;
     }
@@ -281,10 +383,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
           <div className="source-target-tree__title">
             {showBreadcrumb ? (
               <div className="source-target-tree__breadcrumb-path">
-                <Text type="secondary">.../{title}</Text>
+                <Text type="secondary">
+                  <EllipsisPopover value={`.../${title}`}></EllipsisPopover>
+                </Text>
               </div>
             ) : (
-              <div className="source-target-tree__title">{title}</div>
+              <div className="source-target-tree__title">
+                <EllipsisPopover value={title}></EllipsisPopover>
+              </div>
             )}
           </div>
         </div>
@@ -306,34 +412,89 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   );
 
   // 渲染第一层：目录列表
-  const renderCatalogList = () => (
-    <div className="source-target-tree__catalog-list">
-      {generateCatalogTreeData.map((item) => (
-        <div
-          key={item.key}
-          className="source-target-tree__catalog-item"
-          onClick={() => handleCatalogClick(item.data)}
-        >
-          {item.title}
+  const renderCatalogList = () => {
+    if (generateCatalogTreeData.length === 0) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
         </div>
-      ))}
-    </div>
-  );
+      );
+    }
 
-  // 渲染第二层：数据卷和数据库列表
-  const renderVolumeDbList = () => (
-    <div className="source-target-tree__volume-db-list">
-      {generateVolumeDbList.map((item) => (
-        <div
-          key={item.key}
-          className="source-target-tree__volume-db-item"
-          onClick={() => handleVolumeDbClick(item.data)}
-        >
-          {item.title}
+    return (
+      <div className="source-target-tree__catalog-list max-h-full overflow-y-auto">
+        {generateCatalogTreeData.map((item) => (
+          <div
+            key={item.key}
+            className="source-target-tree__catalog-item"
+            onClick={() => handleCatalogClick(item.data)}
+          >
+            {item.title}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // 渲染第二层：分类列表
+  const renderCategoryList = () => {
+    const categories = [
+      {
+        key: 'volume',
+        title: '数据卷',
+        icon: <IconFolder className="source-target-tree-icon" />
+      },
+      {
+        key: 'database',
+        title: '数据库',
+        icon: <IconFolder className="source-target-tree-icon" />
+      }
+    ];
+
+    return (
+      <div className="source-target-tree__category-list max-h-full overflow-y-auto">
+        {categories.map((category) => (
+          <div
+            key={category.key}
+            className="source-target-tree__category-item"
+            onClick={() => handleCategoryClick(category.title)}
+          >
+            <div className="source-target-tree__category-item-content">
+              {category.icon}
+              <span className="source-target-tree__category-item-title">
+                {category.title}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // 渲染第三层：数据卷和数据库列表
+  const renderVolumeDbList = () => {
+    if (generateVolumeDbList.length === 0) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
         </div>
-      ))}
-    </div>
-  );
+      );
+    }
+
+    return (
+      <div className="source-target-tree__volume-db-list max-h-full overflow-y-auto">
+        {generateVolumeDbList.map((item) => (
+          <div
+            key={item.key}
+            className="source-target-tree__volume-db-item"
+            onClick={() => handleVolumeDbClick(item.data)}
+          >
+            {item.title}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   // 渲染第三层：文件列表
   const renderFileList = () => {
@@ -349,13 +510,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     if (currentFileList.length === 0) {
       return (
         <div className="source-target-tree__empty-container">
-          <Empty description="暂无文件" />
+          <Empty />
         </div>
       );
     }
 
     return (
-      <div className="source-target-tree__file-list">
+      <div className="source-target-tree__file-list max-h-full overflow-y-auto">
         {currentFileList.map((file: any) => (
           <div
             key={file.id}
@@ -365,22 +526,17 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
             <div className="source-target-tree__file-item-left">
               <IconFile className="source-target-tree__file-icon" />
               <div className="source-target-tree__file-info">
-                <span className="source-target-tree__file-name">
-                  {file.file_name || file.name}
-                </span>
-                <span className="source-target-tree__file-size">
-                  {file.file_size || file.size || '未知大小'}
-                </span>
+                <EllipsisPopover
+                  className="source-target-tree__file-name"
+                  value={file.file_name || file.name}
+                ></EllipsisPopover>
+                <EllipsisPopover
+                  className="source-target-tree__file-size"
+                  value={file.file_size || file.size || '未知大小'}
+                ></EllipsisPopover>
               </div>
             </div>
             <div className="source-target-tree__file-actions">
-              <Button
-                type="text"
-                size="small"
-                onClick={(e: Event) => handleFileDetail(file, e)}
-              >
-                详情
-              </Button>
               <Button
                 type="outline"
                 size="small"
@@ -400,6 +556,8 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     switch (currentViewLevel) {
       case 'catalog':
         return renderCatalogList();
+      case 'category':
+        return renderCategoryList();
       case 'volume-db':
         return renderVolumeDbList();
       case 'files':
@@ -413,7 +571,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     <div className="source-target-tree">
       {renderHeader()}
       {renderSearchBox()}
-      <div className="source-target-tree__content">{renderMainContent()}</div>
+      <div className="source-target-tree__content max-h-[calc(100vh-112px)] overflow-y-auto">
+        {renderMainContent()}
+      </div>
     </div>
   );
 };

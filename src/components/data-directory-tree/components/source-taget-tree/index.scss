@@ -5,7 +5,19 @@
   flex-direction: column;
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-y: auto;
+
+  // 通用
+  .source-target-tree-icon {
+    font-size: 16px;
+    color: #1e293b;
+    margin-right: 8px;
+  }
+
+  .arco-btn-size-default {
+    padding: 0 12px;
+    height: 24px;
+  }
 
   // 第一部分：标题导航
   &__header {
@@ -30,16 +42,20 @@
     font-size: 14px;
     font-weight: 500;
     color: #333;
+    max-width: 300px; // 限制最大宽度，确保省略号能正常显示
+    overflow: hidden;
   }
 
   &__breadcrumb-path {
     font-size: 14px;
     color: #0f172a;
+    max-width: 300px; // 限制最大宽度，确保省略号能正常显示
+    overflow: hidden;
   }
 
   // 第二部分：搜索框
   &__search {
-    padding-bottom: 8px;
+    // padding-bottom: 8px;
     background: #fff;
 
     &-input {
@@ -76,7 +92,7 @@
   &__catalog-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
     padding: 6px 4px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -107,14 +123,12 @@
   &__catalog-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
     opacity: 0;
     visibility: hidden;
+    width: 0; // 非hover态时不占位
+    overflow: hidden; // 隐藏内容
     transition: all 0.2s ease;
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
+    margin-left: auto;
   }
 
   // 当目录被选中时显示按钮
@@ -122,9 +136,14 @@
     background: #eef6ff;
     border-radius: 2px;
 
+    .source-target-tree__catalog-name {
+      max-width: 90px; // 选中态时最大宽度90px
+    }
+
     .source-target-tree__catalog-actions {
       opacity: 1;
       visibility: visible;
+      width: auto; // 选中态时显示按钮
     }
   }
 
@@ -142,11 +161,48 @@
   &__catalog-name {
     font-size: 14px;
     color: #1e293b;
+    max-width: 196px; // 非hover态时最大宽度196px
+    overflow: hidden;
+    transition: max-width 0.2s ease; // 添加过渡动画
   }
 
   &__catalog-size {
     font-size: 12px;
     color: #999;
+  }
+
+  // 分类列表
+  &__category-list {
+    padding: 8px 0;
+  }
+
+  &__category-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+
+    &:hover {
+      background-color: #eef6ff;
+
+      .source-target-tree__category-item-title {
+        color: #007dfa;
+      }
+    }
+
+    &-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    &-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #1e293b;
+    }
   }
 
   // 数据卷/数据库列表
@@ -157,39 +213,43 @@
   &__volume-db-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    justify-content: space-between;
-    padding: 6px 4px;
+    padding: 7px 4px;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    border-radius: 2px;
 
     &:hover {
       background-color: #eef6ff;
-      border-radius: 2px;
 
       .source-target-tree__volume-db-name {
         color: #007dfa;
+        max-width: 90px; // hover态时最大宽度90px
       }
 
       .source-target-tree__volume-db-actions {
         opacity: 1;
         visibility: visible;
+        width: auto; // hover态时显示按钮
       }
+    }
+
+    &-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
     }
   }
 
   &__volume-db-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
     opacity: 0;
     visibility: hidden;
+    width: 0; // 非hover态时不占位
+    overflow: hidden; // 隐藏内容
     transition: all 0.2s ease;
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
+    margin-left: auto;
   }
 
   // 当数据卷/数据库被选中时显示按钮
@@ -197,9 +257,14 @@
     background: #eef6ff;
     border-radius: 2px;
 
+    .source-target-tree__volume-db-name {
+      max-width: 90px; // 选中态时最大宽度90px
+    }
+
     .source-target-tree__volume-db-actions {
       opacity: 1;
       visibility: visible;
+      width: auto; // 选中态时显示按钮
     }
   }
 
@@ -217,6 +282,8 @@
   &__volume-db-name {
     font-size: 14px;
     color: #1e293b;
+    max-width: 196px; // 非hover态时最大宽度196px
+    overflow: hidden;
   }
 
   &__volume-db-size {
@@ -238,7 +305,7 @@
   &__file-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     padding: 8px 12px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -255,6 +322,7 @@
 
       .source-target-tree__file-name {
         color: #007dfa;
+        max-width: 90px; // hover态时最大宽度90px
       }
     }
 
@@ -282,10 +350,10 @@
   &__file-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
     opacity: 1;
     visibility: visible;
     transition: all 0.2s ease;
+    margin-left: auto;
   }
 
   &__file-icon {
@@ -303,11 +371,16 @@
     font-size: 14px;
     font-weight: 500;
     color: #1e293b;
+    max-width: 196px; // 非hover态时最大宽度196px
+    overflow: hidden;
+    transition: max-width 0.2s ease; // 添加过渡动画
   }
 
   &__file-size {
     font-size: 12px;
     color: #999;
+    max-width: 100px; // 限制最大宽度，确保省略号能正常显示
+    overflow: hidden;
   }
 
   &__file-detail {
@@ -358,24 +431,5 @@
     color: #007dfa;
     border-color: #007dfa;
     background-color: transparent;
-  }
-
-  // 滚动条样式
-  &__content::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &__content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &__content::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-
-    &:hover {
-      background: #a8a8a8;
-    }
   }
 }

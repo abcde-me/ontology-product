@@ -568,6 +568,7 @@ const DataLoadDetail = () => {
             name={listDetail?.name || ''}
             change={getChildrenTableChange}
             permission={perms}
+            type={listDetail?.source_type}
           />
         </div>
         {detailList && detailList.length > 0 && (
