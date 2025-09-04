@@ -44,48 +44,51 @@ export const useTabManager = () => {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         const response = await openPythonItem(fileId);
-        console.log('openFile', response);
-        if (response.status === 200 && response.data) {
-          const fileData: OpenPythonItemRes = response.data;
 
-          // 创建或更新标签页
-          const newTabKey = `file-${fileId}`;
-          const existingTabIndex = fileState.fileTabs.findIndex(
-            (tab) => tab.fileId === fileId
-          );
-
-          let updatedTabs: FileTab[];
-          if (existingTabIndex >= 0) {
-            // 更新现有标签页
-            updatedTabs = fileState.fileTabs.map((tab) =>
-              tab.key === newTabKey
-                ? {
-                    ...tab,
-                    content: fileData.data,
-                    lastModified: new Date().toISOString()
-                  }
-                : tab
-            );
-          } else {
-            // 创建新标签页
-            const newTab = {
-              key: newTabKey,
-              title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
-              content: fileData.data,
-              fileId: fileId,
-              lastModified: new Date().toISOString()
-            };
-            updatedTabs = [...fileState.fileTabs, newTab];
-          }
-
-          setFileState((prev) => ({
-            ...prev,
-            fileTabs: updatedTabs,
-            currentFileId: fileId,
-            activeTab: newTabKey,
-            isLoading: false
-          }));
+        if (response.status !== 200 || !response.data) {
+          Message.error(response?.message ?? '打开文件失败');
+          return;
         }
+
+        const fileData: OpenPythonItemRes = response.data;
+
+        // 创建或更新标签页
+        const newTabKey = `file-${fileId}`;
+        const existingTabIndex = fileState.fileTabs.findIndex(
+          (tab) => tab.fileId === fileId
+        );
+
+        let updatedTabs: FileTab[];
+        if (existingTabIndex >= 0) {
+          // 更新现有标签页
+          updatedTabs = fileState.fileTabs.map((tab) =>
+            tab.key === newTabKey
+              ? {
+                  ...tab,
+                  content: fileData.data,
+                  lastModified: new Date().toISOString()
+                }
+              : tab
+          );
+        } else {
+          // 创建新标签页
+          const newTab = {
+            key: newTabKey,
+            title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
+            content: fileData.data,
+            fileId: fileId,
+            lastModified: new Date().toISOString()
+          };
+          updatedTabs = [...fileState.fileTabs, newTab];
+        }
+
+        setFileState((prev) => ({
+          ...prev,
+          fileTabs: updatedTabs,
+          currentFileId: fileId,
+          activeTab: newTabKey,
+          isLoading: false
+        }));
       } catch (error) {
         const errorObj =
           error instanceof Error ? error : new Error('打开文件失败');

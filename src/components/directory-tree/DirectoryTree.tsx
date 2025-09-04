@@ -43,6 +43,8 @@ import {
 import EllipsisPopover from '../ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
+import timeFormattig from '@/utils/timeFormatting';
+import { now } from 'lodash-es';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -99,17 +101,7 @@ export interface DirectoryTreeProps {
 const InputSearch = Input.Search;
 
 function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
-  const base = isFolder ? '新建文件夹' : '新建PySpark';
-  const set = new Set(
-    siblings.map((s) => (typeof s.title === 'string' ? s.title : ''))
-  );
-  let i = siblings.length + 1;
-  let name = `${base}${i}`;
-  while (set.has(name)) {
-    i += 1;
-    name = `${base}${i}`;
-  }
-  return name;
+  return isFolder ? `新建文件夹_${now()}` : `新建PySpark_${now()}`;
 }
 
 export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
@@ -187,6 +179,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const handleFolderClick = async (node: NodeInstance) => {
       // Arco Tree 会把节点对象挂到 node.props.dataRef，这里优先读 props.dataRef；
       // 如果业务层已将字段打平到节点顶层（如 formatData 中），也兼容直接读取 props
+      handleSearchClear();
       const meta = node.props.dataRef;
       const hasChildren =
         Array.isArray(meta?.children) && meta?.children?.length;
@@ -233,6 +226,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       folderName: string,
       newStack: Array<{ id: string; name: string }>
     ) => {
+      handleSearchClear();
       try {
         // 更新文件夹栈
         setFolderStack(newStack);
@@ -258,13 +252,22 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     // 处理返回上级目录
     const handleBackToParent = async () => {
+      handleSearchClear();
       // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
       if (folderStack.length === 0 && currentFolderId && currentFolderName) {
         setCurrentFolderId('');
         setCurrentFolderName('');
-        // 恢复原始数据
-        const formattedData = formatTreeData(data);
-        setTreeData(formattedData);
+        // 重新请求根目录数据
+        if (onBackToParent) {
+          try {
+            const newData = await onBackToParent('0');
+            const formattedData = formatTreeData(newData as any[]);
+            setTreeData(formattedData);
+          } catch (error) {
+            Message.error('返回根目录失败');
+            return;
+          }
+        }
         setSelectedKeys([]);
         setExpandedKeys([]);
         return;
@@ -282,9 +285,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         if (!parentFolder.id || parentFolder.id === '') {
           setCurrentFolderId('');
           setCurrentFolderName('');
-          // 恢复原始数据
-          const formattedData = formatTreeData(data);
-          setTreeData(formattedData);
+          // 重新请求根目录数据
+          if (onBackToParent) {
+            const newData = await onBackToParent('');
+            const formattedData = formatTreeData(newData as any[]);
+            setTreeData(formattedData);
+          }
         } else {
           setCurrentFolderId(parentFolder.id);
           setCurrentFolderName(parentFolder.name);
@@ -447,8 +453,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           // 创建失败，移除临时添加的节点
           const newTreeData = treeData.filter((item) => !item.isAdd);
           setTreeData(newTreeData);
-          setInputValue('');
-          setDefaultName('');
         }
       } else {
         try {
@@ -463,41 +467,26 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             return;
           }
         } catch (e) {
+          Message.error('重命名失败');
           // 创建失败，移除临时添加的节点
           const newTreeData = treeData.filter((item) => !item.isAdd);
           setTreeData(newTreeData);
-          setInputValue('');
-          setDefaultName('');
-          Message.error('重命名失败');
         }
       }
 
       setInputValue('');
       setDefaultName('');
-      // 重新获取当前文件夹数据
-      const newData = await onFolderClick?.(currentFolderId);
-      const formattedData = formatTreeData(newData ?? []);
-      setTreeData(formattedData);
     };
 
-    const handleCopy = async (node: NodeProps) => {
+    const handleCopy = (node: NodeProps) => {
       try {
-        const copyRes = await onCopy?.(`${node.dataRef?.name}_副本`, node);
-
-        if (!copyRes) {
-          return;
-        }
-
-        const newData = await onFolderClick?.(currentFolderId);
-        const formattedData = formatTreeData(newData ?? []);
-        setTreeData(formattedData);
+        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
       } catch (e) {
         Message.error('复制失败');
       }
     };
 
     const handleDelete = (node: NodeProps) => {
-      const nodeName = node.dataRef?.name || '项目';
       const nodeType =
         node.dataRef?.type === PythonItemType.Directory ? '文件夹' : '文件';
 
@@ -509,19 +498,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : `删除后，该文件不可恢复`,
         okText: '确定',
         cancelText: '取消',
-        onOk: async () => {
+        onOk: () => {
           try {
-            const deleteRes = await onDelete?.(node);
-
-            if (!deleteRes) {
-              return;
-            }
-
-            // 删除成功的消息由 useFileManager 处理
-
-            const newData = await onFolderClick?.(currentFolderId);
-            const formattedData = formatTreeData(newData ?? []);
-            setTreeData(formattedData);
+            onDelete?.(node);
           } catch (e) {
             Message.error('删除失败');
           }

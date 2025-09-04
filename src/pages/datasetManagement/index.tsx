@@ -277,7 +277,8 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: 'file', value: datasetStorageType.file }
+      { text: '文件', value: datasetStorageType.file },
+      { text: '数据库表', value: datasetStorageType.dataBaseTable }
     ],
     filteredValue: selectedStorageTypeFilters,
     filterMultiple: true,
@@ -285,7 +286,13 @@ const columns = (
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div>{getFileIcon(record.storage_type ?? '-')}</div>
-          <span className="ml-[4px]">{record.storage_type ?? '-'}</span>
+          <span className="ml-[4px]">
+            {record.storage_type === datasetStorageType.dataBaseTable
+              ? '数据库表'
+              : record.storage_type === datasetStorageType.file
+                ? '文件'
+                : (record.storage_type ?? '-')}
+          </span>
         </div>
       );
     }
@@ -564,7 +571,8 @@ export enum datasetStatusName {
 // 枚举数据集状态名称
 export enum datasetStorageType {
   jsonl = 'jsonl',
-  file = 'file'
+  file = 'file',
+  dataBaseTable = 'dataBaseTable'
 }
 
 // 枚举数据集状态名称
