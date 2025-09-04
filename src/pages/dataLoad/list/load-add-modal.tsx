@@ -71,12 +71,15 @@ const LoadAddModal = (props: propsType) => {
   const [sourceType, setSourceType] = useState('s3');
   // 动态计算最大标签数量
   const [maxTagCounts, setMaxTagCount] = useState(3);
-  const [tableNames, setTableNames] = useState('默认表名');
+  const [tableNames, setTableNames] = useState('');
   // 提交表单时的校验逻辑
   const handleSubmit = async (type: string) => {
+    const formValues = await form.validate();
+    console.log(formValues, 'formValues12321321');
     try {
       setLoading(true);
-      const formValues = await form.validate();
+      console.log(formValues, 'formValues12321321');
+
       const { time, day, cycle, ...rest } = formValues;
       let pathId;
       if (sourceType === 'db' || sourceType === 'local') {
@@ -113,7 +116,7 @@ const LoadAddModal = (props: propsType) => {
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
           table_names: processedTableNames || uploadedFiles,
-          db_name: sourceType === 'db' ? rest.db_name : null
+          db_name: sourceType === 'db' ? tableNames : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
@@ -148,7 +151,7 @@ const LoadAddModal = (props: propsType) => {
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
           table_names: processedTableNames || uploadedFiles,
-          db_name: sourceType === 'db' ? rest.db_name : null
+          db_name: sourceType === 'db' ? tableNames : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
@@ -210,14 +213,6 @@ const LoadAddModal = (props: propsType) => {
       setDirectoryData([]);
       setTableList([]);
       setConnectName([]);
-      setUploadedFiles([]); // 清空上传的文件数据
-      // 清理表单字段
-      form.setFieldsValue({
-        connector_id: undefined,
-        table_name: undefined,
-        dest_path: undefined
-      });
-      console.log('数据源类型切换，清空所有表单字段');
       // 更新sourceType状态 - 使用useEffect来处理异步数据获取
       setSourceType(newSourceType);
     } catch (error) {
@@ -498,7 +493,7 @@ const LoadAddModal = (props: propsType) => {
       const res = await getdetailList(connector_id);
       const tableNameRes = await getTableName({ connector_id: connector_id });
       console.log(tableNameRes, '获取连接器下面的表格');
-      // setTableNames(tableNameRes?.data?.table_name);
+      setTableNames(tableNameRes?.data);
       setTableList(res?.data?.table_name || []);
       console.log(res, '获取连接器下面的表格');
     } catch (error) {
@@ -546,13 +541,12 @@ const LoadAddModal = (props: propsType) => {
   const handleFileChange = (fileData, blobURL) => {
     console.log(fileData, '这个是上传后的回调');
     setUploadedFiles((prev) => [...prev, fileData]);
-    if (sourceType === 'local' && fileData.length > 0) {
-      // 设置一个标识值来通过表单校验
+    if (sourceType === 'local') {
       form.setFieldsValue({
         connector_id: 'local_files_uploaded'
       });
-      console.log('设置表单字段值以通过校验');
     }
+    // 设置表单校验状态 - 只要有文件相关操作就设置表单字
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>

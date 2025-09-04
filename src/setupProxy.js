@@ -69,6 +69,31 @@ module.exports = function (app) {
         }
       })
     );
+    // 数据标注服务
+    app.use(
+      ['/label-service/api/v1'],
+      createProxyMiddleware({
+        // 需要通过VPN访问
+        target: 'http://10.1.4.73:30432/label-service/api/v1',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        on: {
+          proxyReq: (proxyReq, req, res) => {
+            // proxyReq.removeHeader('origin');
+          },
+          proxyRes: (proxyRes, req, res) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] =
+              req.headers.origin;
+            proxyRes.headers['Access-Control-Allow-Credentials'] = true;
+            proxyRes.headers['Access-Control-Allow-Methods'] =
+              'GET, POST, PUT, DELETE, OPTIONS';
+            proxyRes.headers['Access-Control-Allow-Headers'] =
+              'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization';
+          }
+        }
+      })
+    );
     app.use(
       ['/labeleditor'],
       createProxyMiddleware({

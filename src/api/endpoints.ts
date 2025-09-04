@@ -379,13 +379,19 @@ export const ModaForgeResourceEndpoints = {
   // 重试载入任务
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
   //载入获取表名
-  getTableNameApi: '/internal/v1/generate_db_name',
+  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
 
   // 数据标注接口
+  // 数据标注配置 发布
+  publishRequirementApi: PrefixLabelService + '/requirements/create',
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
+  // 获取部门列表树内容
+  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  // 获取个人列表树内容
+  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
 
   // python开发
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',

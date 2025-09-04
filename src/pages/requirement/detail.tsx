@@ -14,7 +14,6 @@ import {
   Dropdown,
   Menu,
   ColorPicker
-  // ColorPicker,
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -37,8 +36,12 @@ import {
 } from './common';
 import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
+import { publishRequirement } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
+import _ from 'lodash';
 import './detail.scss';
+import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
+import { RequirementTypeMap, TeamType, TeamTypeMap } from './type';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 标注类型
@@ -133,7 +136,7 @@ export default function RequirementDetail() {
   const [isShowTypeErrorInfo, setIsShowTypeErrorInfo] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   // 类型定义
-  const [taskTypeVal, setTaskTypeVal] = useState(1);
+  const [taskTypeVal, setTaskTypeVal] = useState(2);
   // 发布数据集合
   const [publishData, setPublishData] = useState<any>({});
   // 数据集 - 选中数据内容
@@ -157,98 +160,6 @@ export default function RequirementDetail() {
     }
   }, [selectedRadio, selectedData]);
   // 基础配置
-  const stepNext = () => {
-    form1
-      .validate()
-      .then(() => {
-        // 验证通过，切换到下一步
-        if (selectedData?.length <= 0) {
-          setIsShowDataErrorInfo(true);
-          return;
-        }
-        if (selectedRadio === '') {
-          setIsShowErrorInfo(true);
-          return;
-        }
-      })
-      .catch((errorInfo) => {
-        if (selectedData?.length <= 0) {
-          setIsShowDataErrorInfo(true);
-        }
-        if (selectedRadio === '') {
-          setIsShowErrorInfo(true);
-          return;
-        }
-      })
-      .finally(() => {});
-    form2
-      .validate()
-      .then((val) => {
-        // 验证通过，切换到下一步
-        console.log(1, val, 'form2');
-      })
-      .catch((errorInfo) => {
-        console.log(2, 'form2', errorInfo);
-      })
-      .finally(() => {});
-    form2Child
-      .validate()
-      .then((value) => {
-        console.log(111111, value);
-      })
-      .catch((errorInfo) => {
-        console.log(errorInfo);
-      });
-    // 任务验证
-    form3
-      .validate()
-      .then(() => {
-        // 验证通过，切换到下一步
-        if (taskAssignData?.length === 0) {
-          setIsShowTypeErrorInfo(true);
-          return;
-        }
-      })
-      .catch((errorInfo) => {
-        if (taskAssignData?.length === 0) {
-          setIsShowTypeErrorInfo(true);
-          return;
-        }
-        console.log(errorInfo);
-      })
-      .finally(() => {
-        // 验证通过，切换到下一步
-      });
-  };
-
-  // 标注工具映射
-  const toolRadioName = {
-    1: '图片标注'
-  };
-  // 标注数据内容
-  const annotationData = () => {
-    return (
-      <RadioGroup
-        type="button"
-        className="annotation-radio-group"
-        disabled={type === 'detail'}
-        value={selectedRadio}
-        onChange={(v) => {
-          (setSelectedRadio(v),
-            setPublishData({
-              ...publishData,
-              label_tool_name: toolRadioName?.[v],
-              label_tool_code: v
-            }));
-        }}
-        style={{ marginBottom: 20 }}
-      >
-        <Radio className="annotation-radio" value={1} key={1}>
-          <div className="annotation-title">图片标注</div>
-        </Radio>
-      </RadioGroup>
-    );
-  };
 
   const handleChildData = (data: any) => {
     setSelectedData(data);
@@ -269,10 +180,23 @@ export default function RequirementDetail() {
   const [annotationTypeContentVal, setAnnotationTypeContentVal] = useState(
     AnnotationChildType.ENTITY
   );
-  const getAnnotationType = (selectedRadio, activeKey) => {
+  // 当前标注类型选择内容
+  const [annotationTypeContentCode, setAnnotationTypeContentCode] =
+    useState('');
+  const getAnnotationType = (
+    selectedRadio,
+    activeKey,
+    annotationTypeContentCode
+  ) => {
     setSelectedRadio(activeKey);
     setAnnotationTypeVal(selectedRadio);
     setAnnotationTypeContentVal(activeKey);
+    setAnnotationTypeContentCode(annotationTypeContentCode);
+    setPublishData({
+      ...publishData,
+      label_type_code: annotationTypeContentCode
+    });
+    setDatalist(generateInitialData());
     console.log('=123', selectedRadio, activeKey);
   };
 
@@ -410,9 +334,8 @@ export default function RequirementDetail() {
   ) => {
     if (path.length === 0) return;
     // 创建数据的深拷贝，避免直接修改原数据
-    const newData = JSON.parse(
-      JSON.stringify(isTemp ? templateData : datalist)
-    );
+    // 深拷贝
+    const newData = _.cloneDeep(isTemp ? templateData : datalist);
 
     // 遍历路径找到目标位置并更新值
     let current: any = newData;
@@ -441,13 +364,16 @@ export default function RequirementDetail() {
       console.warn('输入不是有效数组或数组为空');
       return null;
     }
-    // id 唯一 要更新 然后同步更新对应的数据
-    const lastItem = arr[arr.length - 1];
-    lastItem.id = uuidV4();
+    // 创建最后一个元素的深拷贝，避免引用冲突
+    const lastItem = _.cloneDeep(arr[arr.length - 1]);
+    // 生成全新的唯一ID
+    lastItem.id = uuidV4() + new Date().getTime();
+    lastItem.attribute_id = uuidV4();
     lastItem.label_colour = getRandomHexColorStrict();
-    // 返回最后一个元素（索引 = 数组长度 - 1）
-    updateNestedValue([arr.length - 1], lastItem);
-    return arr[arr.length - 1];
+    // 重置属性组（如果需要全新开始）
+    lastItem.label_info_attribute_groups = [];
+    // 返回新创建的元素
+    return lastItem;
   };
   // 添加新标签
   const addNewLabel = () => {
@@ -536,6 +462,177 @@ export default function RequirementDetail() {
       );
     }
   };
+
+  const stepNext = async () => {
+    const result = await Promise.all([
+      form1
+        .validate()
+        .then(() => {
+          // 验证通过，切换到下一步
+          // if (selectedData?.length <= 0) {
+          //   setIsShowDataErrorInfo(true);
+          //   return;
+          // }
+          if (selectedRadio === '') {
+            setIsShowErrorInfo(true);
+            return;
+          }
+          return true;
+        })
+        .catch((errorInfo) => {
+          if (selectedData?.length <= 0) {
+            setIsShowDataErrorInfo(true);
+          }
+          if (selectedRadio === '') {
+            setIsShowErrorInfo(true);
+            return;
+          }
+        }),
+      form2
+        .validate()
+        .then((val) => {
+          return true;
+        })
+        .catch((errorInfo) => {
+          console.log(2, 'form2', errorInfo);
+        }),
+      form2Child
+        .validate()
+        .then((value) => {
+          return true;
+        })
+        .catch((errorInfo) => {}),
+      // 任务验证
+      form3
+        .validate()
+        .then(() => {
+          // 验证通过，切换到下一步
+          if (taskAssignData?.length === 0) {
+            setIsShowTypeErrorInfo(true);
+            return;
+          }
+          return true;
+        })
+        .catch((errorInfo) => {
+          if (taskAssignData?.length === 0) {
+            setIsShowTypeErrorInfo(true);
+            return;
+          }
+          console.log(errorInfo);
+        })
+    ]);
+    // 所有的form 验证都通过调用发布接口
+    console.log(result, '======');
+    if (result.every((item) => item === true)) {
+      publish();
+    } else {
+      console.log('错误');
+    }
+  };
+  const publish = async () => {
+    // 发布数据重置
+    const new_publishData = {
+      name: publishData?.name,
+      description: publishData?.description,
+      label_type: selectedRadio,
+      label_count: 1, //数据量（所有数据集之和）
+      team_type: TeamTypeMap[TeamType.PERSON],
+      label_tool: {
+        label_tool_name: RequirementTypeMap[selectedRadio],
+        label_tool_code: annotationTypeContentCode
+      },
+      // 配置文件分类标签
+      file_labels:
+        annotationTypeVal === AnnotationTypeStatus.TEXT &&
+        annotationTypeContentVal === AnnotationChildType.ENTITY
+          ? [
+              //文件分类标签配置
+              {
+                attribute_group_name: '', //属性组名称
+                attribute_group_class: 1, //1单选/2多选/3输入框
+                attribute_group_type: 1, //1必选/2非必选
+                file_label_attribute: [
+                  {
+                    attribute_name_cn: '1', //属性中文名称(展示名称)
+                    attribute_name_en: '1', //属性英文名称(存储名称)
+                    input_type: 1 //输入类型：1选项，2输入框
+                  }
+                ]
+              }
+            ]
+          : [],
+      label_data_set: [
+        // 配置数据集
+        {
+          dir_name: '',
+          load_start_time: '',
+          load_end_time: '',
+          load_num: 100, // 数据量,
+          create_by: '', // 创建人
+          run_id: '' // 运行id
+        }
+      ],
+      labels: [
+        //配置标签
+        {
+          label_name_cn: '', //展示名称
+          label_name_en: '', //存储名称
+          label_shape: 1, //标注形状，点1，线2，正方形3，多边形4
+          label_colour: '', //标签颜色（如#FFFFFF）
+          label_info_attribute_groups: [
+            {
+              attribute_group_name: '', //属性组名称
+              attribute_group_class: 1, //1单选/2多选/3输入框
+              attribute_group_type: 1, //1必选/2非必选
+              label_info_attribute: [
+                {
+                  attribute_name_cn: '', //属性中文名称(展示名称)
+                  attribute_name_en: '', //属性英文名称(存储名称)
+                  input_type: 1 //输入类型：1选项，2输入框
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      entity_relations:
+        annotationTypeVal === AnnotationTypeStatus.TEXT &&
+        annotationTypeContentVal === AnnotationChildType.ENTITY
+          ? [
+              //文本标签-实体关系
+              {
+                relation_name_cn: '',
+                relation_name_en: '',
+                start_entity_labels: [], //起始标签，标签的存储名称
+                target_entity_labels: [], //目标(结束)标签
+                colour: ''
+              },
+              {
+                relation_name_cn: '',
+                relation_name_en: '',
+                start_entity_labels: [],
+                target_entity_labels: [],
+                colour: ''
+              }
+            ]
+          : [],
+      label_operate: [
+        //配置标注人员
+        {
+          user_id: taskTypeVal === 1 ? taskAssignData : [],
+          org_id: taskTypeVal === 2 ? taskAssignData : []
+        }
+      ]
+    };
+    setLoading(true);
+    // 发布数据
+    // @ts-expect-error TODO: FIX
+    const res = await publishRequirement(new_publishData);
+    if (res.success) {
+      history.push('/requirement');
+    }
+    setLoading(false);
+  };
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -577,7 +674,8 @@ export default function RequirementDetail() {
             disabled={type === 'detail'}
             // initialValues={{ name: 'admin' }}
             onValuesChange={(_, val) => {
-              setPublishData({ ...publishData, val });
+              console.log(val);
+              setPublishData({ ...publishData, ...val });
             }}
             labelCol={{
               span: 1
@@ -651,15 +749,11 @@ export default function RequirementDetail() {
             disabled={type === 'detail'}
             onValuesChange={(_, val) => {
               setPublishData({ ...publishData, val });
-              console.log(val, '=====');
             }}
             layout="inline"
             labelAlign="right"
             labelCol={{ flex: 'none' }}
             wrapperCol={{ flex: 1 }}
-            // labelCol={{
-            //     span: 1
-            // }}
           >
             <FormItem
               field="label_info_attribute_groups"
@@ -700,7 +794,7 @@ export default function RequirementDetail() {
                           <div className="sortable-item-content">
                             <FormItem
                               label="标注名称:"
-                              field="label_info_attribute_groups.name"
+                              field={`label_name_cn_${labelIndex}`}
                               rules={[
                                 {
                                   required: true,
@@ -718,10 +812,10 @@ export default function RequirementDetail() {
                                     [labelIndex, 'label_name_cn'],
                                     val
                                   );
-                                  updateNestedValue(
-                                    [labelIndex, 'label_name_en'],
-                                    val
-                                  );
+                                  // updateNestedValue(
+                                  //   [labelIndex, 'label_name_cn'],
+                                  //   val
+                                  // );
                                 }}
                                 className="sortable-item-input"
                                 placeholder="请输入标注展示名称"
@@ -729,6 +823,7 @@ export default function RequirementDetail() {
                               />
                             </FormItem>
                             <FormItem
+                              field={`label_name_en_${labelIndex}`}
                               label={
                                 <div>
                                   展示名称
@@ -755,7 +850,7 @@ export default function RequirementDetail() {
                                 value={item.label_name_en}
                               />
                             </FormItem>
-                            <FormItem>
+                            <FormItem field={`label_shape_${labelIndex}`}>
                               <Select
                                 placeholder="请选择形状"
                                 value={item.label_shape}
@@ -831,11 +926,11 @@ export default function RequirementDetail() {
                               (attrGroup, groupIndex) => {
                                 return (
                                   <div
-                                    key={groupIndex}
+                                    key={`${labelIndex}_${groupIndex}`}
                                     className="attribute-group-item"
                                   >
                                     <FormItem
-                                      field="attr-group"
+                                      field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
                                       required
                                       label="属性组件名称"
                                     >
@@ -968,7 +1063,7 @@ export default function RequirementDetail() {
                                               attrGroup.attribute_group_class) && (
                                             <div className="attribute-info-item">
                                               <FormItem
-                                                field="attribute-options"
+                                                field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`}
                                                 rules={[
                                                   {
                                                     required: true,
@@ -998,13 +1093,13 @@ export default function RequirementDetail() {
                                               <FormItem
                                                 label={
                                                   <div>
-                                                    展示名称{' '}
+                                                    展示名称
                                                     <Tooltip content="展示在标注页面的名称">
-                                                      {' '}
                                                       <IconQuestionCircle />
                                                     </Tooltip>
                                                   </div>
                                                 }
+                                                field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
                                               >
                                                 <Input
                                                   placeholder="展示在标注页面的名称"

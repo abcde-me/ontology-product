@@ -209,6 +209,7 @@ const DatasetsList: FC = () => {
       <Form
         autoComplete="off"
         layout="inline"
+        // @ts-expect-error TODO: FIX
         onValuesChange={handleSearchChange}
       >
         <FormItem field="search_content" style={{ marginRight: 12 }}>

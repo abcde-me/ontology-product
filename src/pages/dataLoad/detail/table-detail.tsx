@@ -231,7 +231,8 @@ const TableDetail = (props) => {
   const reTry = async (id: string) => {
     console.log('重试的ID', id);
     const res = await reTryLoad({
-      instance_id: id
+      execution_id: id,
+      task_id: props.taskId
     });
     if (res.code == '' && res.status == 200) {
       Message.success('操作成功');

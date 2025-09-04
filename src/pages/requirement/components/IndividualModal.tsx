@@ -20,6 +20,10 @@ import {
 } from '@/api/dataCatalog';
 import { format } from 'date-fns';
 import './IndividualModal.scss';
+import {
+  getDepartmentTreeList,
+  getIndividualList
+} from '@/api/individualAndDepartment';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -53,7 +57,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
-  const [activeTab, setActiveTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
@@ -66,72 +69,20 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const [total, setTotal] = useState(10);
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const handleTabChange = (key: string) => {
-    setActiveTab(key);
-  };
-  const time = Form.useWatch('time', form);
-  // 取树的内容 格式化
-  const transformData = (originalSrc) => {
-    // 递归处理单条数据（支持目录/数据卷）
-    const transformItem = (item) => {
-      const transformed = { ...item };
-      // 替换type_name（如果是数据卷）
-      if (transformed.type_name === 'volume') {
-        transformed.type_name = '数据卷';
-      }
-      // 处理children中的"volume"键为"数据卷"
-      if (transformed.children && transformed.children.volume) {
-        // 递归处理子数据卷
-        transformed.children['数据卷'] = transformed.children.volume.map(
-          (vol) => transformItem(vol)
-        );
-        // 删除原始volume键
-        delete transformed.children.volume;
-      }
-      return transformed;
-    };
-
-    // 处理整个src数组（目录列表）
-    return originalSrc.map((catalog) => transformItem(catalog));
-  };
-
   useEffect(() => {
-    let newTreeData: TreeNodeType[] = [];
     try {
-      getCatalogList({
-        root_type: activeTab === 'src' ? 1 : 2
-      }).then((res) => {
-        if (res.status !== 200) {
-          return;
-        }
-        newTreeData = transformData(res.data?.src).map((item) => {
-          return item.children
-            ? {
-                allowClick: false,
-                title: item.name,
-                key: item.id,
-                children: item.children.数据卷.map((items, index) => {
-                  return {
-                    title: '数据卷',
-                    key: `volume-${items.id}-${index}`,
-                    allowClick: false,
-                    children: [
-                      {
-                        title: items.name,
-                        key: items.id
-                      }
-                    ]
-                  };
-                })
-              }
-            : { title: item.name, key: item.id };
+      getDepartmentTreeList({})
+        .then((res) => {
+          console.log(res?.data, 'res');
+          setTreeData(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
         });
-        setTreeData(newTreeData);
-      });
     } catch (err) {
       console.log(err, 'err');
     }
-  }, [activeTab, visible]);
+  }, [visible]);
 
   // 树的内容
   const renderTreeContent = () => {
@@ -142,6 +93,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         treeData={treeData}
         // checkStrictly={checkStrictly}
         onSelect={(value) => {
+          console.log(value);
           setCurrent(1);
           setPageSize(10);
           setCheckedKeys(value);
@@ -159,18 +111,16 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const columns = [
     {
       title: '姓名',
-      dataIndex: 'name',
+      dataIndex: 'username',
       ellipsis: true,
       width: 100
     },
     {
       title: '账号ID',
-      dataIndex: 'id',
+      dataIndex: 'tenant_id',
       width: 80
     }
   ];
-  // 获取当前年份
-  const currentYear = new Date().getFullYear();
 
   const searchData = (searchValue) => {
     const loop = (data) => {
@@ -205,44 +155,22 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const getTableData = async () => {
     const sourceParams: any = {
       page: current,
-      page_size: pageSize,
-      file_name: '',
-      data_path_id: Number(checkedKeys) // 优先使用选中ID 后期改成selectedKey
-      // start: startTime, //后期改成startTime
-      // end: endTime, //后期改成endTime
-      // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
+      size: pageSize,
+      organization_id: checkedKeys[0] || ''
     };
-    const res = await getSourceDataFileList(sourceParams);
-    if (res.status === 200) {
-      setTableData(res?.data?.items);
+    const res = await getIndividualList({ ...sourceParams });
+    console.log(res?.data.data, 'res======132');
+    if (res.success) {
+      setTableData(res?.data.data);
       setCurrent(res?.data?.page);
-      setPageSize(res?.data?.page_size);
+      setPageSize(res?.data?.size);
       setTotal(res?.data?.total);
     }
   };
   useEffect(() => {
     getTableData();
-  }, [checkedKeys, activeTab, current, pageSize]);
-  const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
-  // 处理日期范围变化
-  const handleDateChange = (value) => {
-    setDateRange(value);
-    // 当选择了完整的日期范围（开始和结束），执行筛选
-    if (value && value.length === 2) {
-      const [start, end] = value;
-      // 格式化日期为 YYYY-MM-DD（确保与数据格式一致）
-      const startStr = format(start, 'yyyy-MM-dd');
-      const endStr = format(end, 'yyyy-MM-dd');
-      // 筛选数据：createTime 在 [startStr, endStr] 之间
-      const filteredData = tableData.filter((item) => {
-        return item.createTime >= startStr && item.createTime <= endStr;
-      });
-      setTableData(filteredData);
-    } else if (value === null || value === undefined || value === '') {
-      // 清空日期选择时，恢复原始数据
-      setTableData(tableData);
-    }
-  };
+  }, [checkedKeys, current, pageSize]);
+  // 表格选择内容
   const getTableSelectContent = () => {
     getChildTreeSelectData(selectedRowsContent);
     onClose();
