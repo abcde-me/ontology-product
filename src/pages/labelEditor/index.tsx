@@ -52,6 +52,10 @@ function WorkflowConfig() {
     init();
   }, [taskId, requirementId, labelType, labelTool, reqName, history]);
 
+  const goBack = () => {
+    history.push('/tenant/compute/modaforge/xxxx');
+  };
+
   return (
     <div className={`app-label-editor-page h-full w-full overflow-x-auto`}>
       {!loading && labelUrl && (
@@ -68,7 +72,8 @@ function WorkflowConfig() {
             getImgJobLabels,
             saveImgJobAnnotations,
             submitImgJobAnnotations,
-            getImgJobOverview
+            getImgJobOverview,
+            goBack
           }}
         ></WujieReact>
       )}

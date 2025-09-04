@@ -105,11 +105,11 @@ export async function getTask(requirementId?: string) {
   const res = {
     task_id: 5,
     item_path: 'https://temp.im/600x600',
-    item_type: 1,
+    item_type: 2,
     requirement_info: {
       name: '需求名称',
       description: '描述',
-      label_type: 1,
+      label_type: 2,
       label_tool: {
         label_tool_name: '标注工具名称',
         label_tool_code: 'aaa',
@@ -442,23 +442,48 @@ export async function getImgJobLabels(requirementId?: string) {
 }
 
 function handleImgAnnotationIds(params: Record<string, any>) {
-  let counter = 1;
-  if (params.shapes && Array.isArray(params.shapes)) {
+  const ids = new Set<number | undefined>();
+  if (Array.isArray(params.shapes)) {
     params.shapes.forEach((shape) => {
-      shape.id = counter++;
+      ids.add(shape.id);
     });
   }
-  if (params.tags && Array.isArray(params.tags)) {
+  if (Array.isArray(params.tags)) {
     params.tags.forEach((tag) => {
-      tag.id = counter++;
+      ids.add(tag.id);
     });
   }
-  if (params.tracks && Array.isArray(params.tracks)) {
+  if (Array.isArray(params.tracks)) {
     params.tracks.forEach((track) => {
-      track.id = counter++;
-      if (track.shapes && Array.isArray(track.shapes)) {
+      ids.add(track.id);
+      if (Array.isArray(track.shapes)) {
         track.shapes.forEach((shape) => {
-          shape.id = counter++;
+          ids.add(shape.id);
+        });
+      }
+    });
+  }
+
+  const idNums = Array.from(ids).filter(
+    (id) => id !== undefined && id !== null
+  );
+  let counter = (idNums.length ? Math.max(...idNums) : 0) + 1;
+  if (Array.isArray(params.shapes)) {
+    params.shapes.forEach((shape) => {
+      !shape.id && (shape.id = counter++);
+    });
+  }
+  if (Array.isArray(params.tags)) {
+    params.tags.forEach((tag) => {
+      !tag.id && (tag.id = counter++);
+    });
+  }
+  if (Array.isArray(params.tracks)) {
+    params.tracks.forEach((track) => {
+      !track.id && (track.id = counter++);
+      if (Array.isArray(track.shapes)) {
+        track.shapes.forEach((shape) => {
+          !shape.id && (shape.id = counter++);
         });
       }
     });
