@@ -378,6 +378,8 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
   // 重试载入任务
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  //载入获取表名
+  getTableNameApi: '/internal/v1/generate_db_name',
 
   // 数据标注接口
   // 获取数据标注列表

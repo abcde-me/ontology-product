@@ -24,20 +24,25 @@ import {
   FluffyVolume,
   Db
 } from '@/api/dataCatalog';
-import { FileData, CatalogData, DatabaseData } from '../../types';
+import {
+  FileData,
+  CatalogData,
+  DatabaseData,
+  DataDirectoryTreeFrom
+} from '../../types';
 import './index.scss';
 
 const { Title, Text } = Typography;
 
 interface SourceTargetTreeProps {
-  type: 'python' | 'sql';
+  type?: DataDirectoryTreeFrom;
   dataType: 'source' | 'target';
   onBack: () => void;
   onSelectFile?: (file: FileData) => void;
-  onFileDetail?: (file: FileData) => void;
-  onFileInsert?: (file: FileData) => void;
   onVolumeDetail?: (volume: FluffyVolume) => void;
+  onVolumeInsert?: (volume: FluffyVolume) => void;
   onDbDetail?: (database: Db) => void;
+  onDbInsert?: (database: Db) => void;
 }
 
 interface TreeNode {
@@ -53,14 +58,14 @@ interface TreeNode {
 type ViewLevel = 'catalog' | 'category' | 'volume-db' | 'files';
 
 const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
-  type,
+  type = DataDirectoryTreeFrom.PYTHON,
   dataType,
   onBack,
   onSelectFile,
-  onFileDetail,
-  onFileInsert,
   onVolumeDetail,
-  onDbDetail
+  onVolumeInsert,
+  onDbDetail,
+  onDbInsert
 }) => {
   const {
     targetCatalogList,
@@ -84,29 +89,6 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [breadcrumbPath, setBreadcrumbPath] = useState<string[]>([]);
-
-  // 处理文件详情按钮点击
-  const handleFileDetail = useCallback(
-    (file: FileData, event: Event) => {
-      event.stopPropagation(); // 阻止事件冒泡，避免触发文件选择
-      if (onFileDetail) {
-        onFileDetail(file);
-      }
-    },
-    [onFileDetail]
-  );
-
-  // 处理文件插入按钮点击
-  const handleFileInsert = useCallback(
-    (file: FileData, event: Event) => {
-      event.stopPropagation(); // 阻止事件冒泡，避免触发文件选择
-      if (onFileInsert) {
-        onFileInsert(file);
-      }
-    },
-    [onFileInsert]
-  );
-
   // 处理数据卷详情按钮点击
   const handleVolumeDetail = useCallback(
     (volume: FluffyVolume, event: Event) => {
@@ -118,6 +100,17 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     [onVolumeDetail]
   );
 
+  // 处理数据卷插入按钮点击
+  const handleVolumeInsert = useCallback(
+    (volume: FluffyVolume, event: Event) => {
+      event.stopPropagation(); // 阻止事件冒泡，避免触发数据卷选择
+      if (onVolumeInsert) {
+        onVolumeInsert(volume);
+      }
+    },
+    [onVolumeInsert]
+  );
+
   // 处理数据库详情按钮点击
   const handleDbDetail = useCallback(
     (database: Db, event: Event) => {
@@ -127,6 +120,17 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       }
     },
     [onDbDetail]
+  );
+
+  // 处理数据库插入按钮点击
+  const handleDbInsert = useCallback(
+    (database: Db, event: Event) => {
+      event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
+      if (onDbInsert) {
+        onDbInsert(database);
+      }
+    },
+    [onDbInsert]
   );
 
   // 获取当前目录列表
@@ -208,7 +212,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   {/* 插入按钮 */}
                   <Button
                     type="outline"
-                    onClick={(e: Event) => handleFileInsert(volume, e)}
+                    onClick={(e: Event) => handleVolumeInsert(volume, e)}
                   >
                     插入
                   </Button>
@@ -250,7 +254,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   <Button
                     type="outline"
                     size="small"
-                    onClick={(e: Event) => handleFileInsert(db, e)}
+                    onClick={(e: Event) => handleDbInsert(db, e)}
                   >
                     插入
                   </Button>
@@ -438,18 +442,22 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 渲染第二层：分类列表
   const renderCategoryList = () => {
-    const categories = [
-      {
-        key: 'volume',
-        title: '数据卷',
-        icon: <IconFolder className="source-target-tree-icon" />
-      },
-      {
-        key: 'database',
-        title: '数据库',
-        icon: <IconFolder className="source-target-tree-icon" />
-      }
-    ];
+    const categories =
+      type === DataDirectoryTreeFrom.PYTHON
+        ? [
+            {
+              key: 'volume',
+              title: '数据卷',
+              icon: <IconFolder className="source-target-tree-icon" />
+            }
+          ]
+        : [
+            {
+              key: 'database',
+              title: '数据库',
+              icon: <IconFolder className="source-target-tree-icon" />
+            }
+          ];
 
     return (
       <div className="source-target-tree__category-list max-h-full overflow-y-auto">
@@ -540,7 +548,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               <Button
                 type="outline"
                 size="small"
-                onClick={(e: Event) => handleFileInsert(file, e)}
+                onClick={(e: Event) => {
+                  if (type === DataDirectoryTreeFrom.SQL) {
+                    handleDbInsert(file, e);
+                  } else {
+                    handleVolumeInsert(file, e);
+                  }
+                }}
               >
                 插入
               </Button>

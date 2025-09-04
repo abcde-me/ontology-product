@@ -46,6 +46,7 @@ import './DirectoryTree.scss';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
+  dataRef?: any;
   showInput?: boolean;
   isAdd?: boolean;
   children?: TreeNodeItem[];
@@ -56,7 +57,13 @@ export interface DirectoryTreeRef {
   startRootCreate: (isFolder?: boolean) => void;
 }
 
+export enum DirectoryTreeFrom {
+  SQL = 'sql',
+  PYTHON = 'python'
+}
+
 export interface DirectoryTreeProps {
+  from?: DirectoryTreeFrom;
   data: TreeNodeItem[];
   selectedKeys?: string[]; // 添加外部控制的选中状态
   onSelect?: (
@@ -68,18 +75,9 @@ export interface DirectoryTreeProps {
       e: Event;
     }
   ) => void;
-  onCreate?: (
-    finalName: string,
-    node?: NodeProps
-  ) => Promise<CreatePythonItemRes | null>;
-  onRename?: (
-    newName: string,
-    node: NodeProps
-  ) => Promise<RenamePythonItemRes | null>;
-  onCopy?: (
-    newName: string,
-    node: NodeProps
-  ) => Promise<CopyPythonItemRes | null>;
+  onCreate?: (finalName: string, node?: NodeProps) => Promise<any>;
+  onRename?: (newName: string, node: NodeProps) => Promise<any>;
+  onCopy?: (newName: string, node: NodeProps) => Promise<any>;
   onDelete?: (node: NodeProps) => Promise<boolean>;
   onFolderClick?: (
     folderId: string
@@ -87,10 +85,7 @@ export interface DirectoryTreeProps {
   onBackToParent?: (
     parentId?: string
   ) => Promise<TreeDataType[]> | TreeDataType[];
-  onSearch?: (
-    path_id: string,
-    searchValue: string
-  ) => Promise<TreeNodeItem[]> | TreeNodeItem[];
+  onSearch?: (path_id: string, searchValue: string) => Promise<any>;
   generateDefaultName?: (
     siblings: TreeDataType[],
     isFolder?: boolean
@@ -98,7 +93,7 @@ export interface DirectoryTreeProps {
   placeholder?: string;
   newButtonText?: string;
   // 数据格式化配置
-  formatData?: (rawData: PythonListItem[]) => TreeNodeItem[];
+  formatData?: (rawData: any) => TreeNodeItem[];
 }
 
 const InputSearch = Input.Search;
@@ -120,6 +115,7 @@ function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
 export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
   function DirectoryTree(props, ref) {
     const {
+      from = DirectoryTreeFrom.PYTHON,
       data,
       selectedKeys: externalSelectedKeys,
       onSelect,
@@ -156,24 +152,23 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         setSelectedKeys(externalSelectedKeys);
       }
     }, [externalSelectedKeys]);
+
     const [searchResults, setSearchResults] = useState<TreeNodeItem[]>([]);
     const [isSearching, setIsSearching] = useState<boolean>(false);
-
     const inputRef = useRef<any>(null);
     const [inputValue, setInputValue] = useState<string>('');
     const [defaultName, setDefaultName] = useState<string>('');
 
     // 格式化数据
     const formatTreeData = (inputData: unknown[]): TreeNodeItem[] => {
-      if (Array.isArray(inputData) && inputData.length > 0) {
-        return inputData as TreeNodeItem[];
+      if (typeof props.formatData === 'function') {
+        return props.formatData(inputData);
       }
       return inputData as TreeNodeItem[];
     };
 
     useEffect(() => {
       const formattedData = formatTreeData(data);
-      console.log('formattedData', formattedData);
       setTreeData(formattedData);
     }, [data]);
 
@@ -385,14 +380,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     const handleEdit = (node: NodeProps) => {
       const currentName = node.dataRef?.name;
-      console.log('node', node);
-      console.log('treeData', treeData);
       const newTree = treeData.map((n) => {
-        if (String(n.id) === String(node.dataRef?.id)) {
-          return { ...n, showInput: true };
+        if (String(n?.id) === String(node.dataRef?.id)) {
+          return { ...n, dataRef: { ...n.dataRef, showInput: true } };
         }
         return n;
       });
+      console.log(newTree, '----', node.dataRef);
       setTreeData(newTree);
       setInputValue(currentName);
       setDefaultName(currentName);
@@ -431,35 +425,49 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     const handleEditFinish = async (node) => {
       const finalName = inputValue.trim() || defaultName;
-
       if (node.dataRef?.isAdd) {
         try {
           const created = await onCreate?.(finalName, node);
 
           if (!created) {
-            Message.error('创建失败');
+            // 创建失败，移除临时添加的节点
+            const newTreeData = treeData.filter((item) => !item.isAdd);
+            setTreeData(newTreeData);
+            setInputValue('');
+            setDefaultName('');
             return;
           }
 
           // 如果是自动创建的文件且是Python文件，调用回调打开文件
           if (node.dataRef?.type === PythonItemType.Notebook && created?.id) {
             console.log('自动创建文件成功:', created.name);
-            // 不再自动打开文件，让用户手动选择
           }
         } catch (e) {
           Message.error('创建失败');
+          // 创建失败，移除临时添加的节点
+          const newTreeData = treeData.filter((item) => !item.isAdd);
+          setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
         }
       } else {
         try {
           const rename = await onRename?.(finalName, node);
 
           if (!rename) {
-            Message.error('重命名失败');
+            // 创建失败，移除临时添加的节点
+            const newTreeData = treeData.filter((item) => !item.isAdd);
+            setTreeData(newTreeData);
+            setInputValue('');
+            setDefaultName('');
             return;
           }
-
-          // 重命名成功的消息由 useFileManager 处理
         } catch (e) {
+          // 创建失败，移除临时添加的节点
+          const newTreeData = treeData.filter((item) => !item.isAdd);
+          setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
           Message.error('重命名失败');
         }
       }
@@ -477,11 +485,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         const copyRes = await onCopy?.(`${node.dataRef?.name}_副本`, node);
 
         if (!copyRes) {
-          Message.error('复制失败');
           return;
         }
-
-        // 复制成功的消息由 useFileManager 处理
 
         const newData = await onFolderClick?.(currentFolderId);
         const formattedData = formatTreeData(newData ?? []);
@@ -509,7 +514,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             const deleteRes = await onDelete?.(node);
 
             if (!deleteRes) {
-              Message.error('删除失败');
               return;
             }
 
@@ -554,6 +558,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
         <div className="directory-tree-header mb-2 flex items-center justify-between">
           <InputSearch
+            className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
             onChange={setSearchValue}
@@ -563,28 +568,39 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             loading={isSearching}
             style={{ height: '32px' }}
           />
-          <Dropdown
-            trigger="click"
-            position="bl"
-            droplist={
-              <Menu
-                onClickMenuItem={(key) => {
-                  if (key === 'folder') {
-                    startRootCreate(true);
-                  } else if (key === 'file') {
-                    startRootCreate(false);
-                  }
-                }}
-              >
-                <Menu.Item key="folder">新建文件夹</Menu.Item>
-                <Menu.Item key="file">新建PySpark</Menu.Item>
-              </Menu>
-            }
-          >
-            <Button type="text" size="small" icon={<IconPlus />}>
-              {newButtonText}
+          {from === DirectoryTreeFrom.SQL ? (
+            <Button
+              type="text"
+              size="small"
+              icon={<IconPlus />}
+              onClick={() => startRootCreate(false)}
+            >
+              新建
             </Button>
-          </Dropdown>
+          ) : (
+            <Dropdown
+              trigger="click"
+              position="bl"
+              droplist={
+                <Menu
+                  onClickMenuItem={(key) => {
+                    if (key === 'folder') {
+                      startRootCreate(true);
+                    } else if (key === 'file') {
+                      startRootCreate(false);
+                    }
+                  }}
+                >
+                  <Menu.Item key="folder">新建文件夹</Menu.Item>
+                  <Menu.Item key="file">新建PySpark</Menu.Item>
+                </Menu>
+              }
+            >
+              <Button type="text" size="small" icon={<IconPlus />}>
+                {newButtonText}
+              </Button>
+            </Dropdown>
+          )}
         </div>
 
         {treeData.length === 0 ? (
@@ -673,41 +689,21 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               }
 
               const titleText = props.dataRef?.name;
-              let display: React.ReactNode = titleText;
-              if (searchValue && typeof titleText === 'string') {
-                const idx = titleText
-                  .toLowerCase()
-                  .indexOf(searchValue.toLowerCase());
-                if (idx !== -1) {
-                  const pre = titleText.slice(0, idx);
-                  const suf = titleText.slice(idx + searchValue.length);
-                  display = (
-                    <>
-                      {pre}
-                      <span className="text-[rgb(var(--primary-6))]">
-                        {searchValue}
-                      </span>
-                      {suf}
-                    </>
-                  );
-                }
-              }
               return (
                 <div className="flex items-center overflow-hidden">
                   {icon}
                   <div className="flex flex-1 flex-col overflow-hidden">
-                    <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                      {display}
+                    <div className="file-name">
+                      <EllipsisPopover value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
-                    {isSearchMode && props.dataRef?.path && (
-                      <div className="search-result-path">
-                        <EllipsisPopover
-                          value={props.dataRef.path}
-                          className="text-gray-500"
-                        />
-                      </div>
-                    )}
+                    {isSearchMode &&
+                      from !== DirectoryTreeFrom.SQL &&
+                      props.dataRef?.path && (
+                        <div className="search-result-path">
+                          <EllipsisPopover value={props.dataRef.path} />
+                        </div>
+                      )}
                   </div>
                 </div>
               );

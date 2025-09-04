@@ -51,10 +51,8 @@ const PythonTabContent: React.FC<{}> = () => {
   };
 
   return (
-    <div className="python-tab-content">
-      <div className="tab-header">
-        <Title className="tab-title">数据目录</Title>
-      </div>
+    <div className="python-tab-content sider-container">
+      <div className="sider-title">数据目录</div>
 
       <div className="tab-tree">
         <DataDirectoryTree

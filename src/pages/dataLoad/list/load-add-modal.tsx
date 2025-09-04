@@ -22,7 +22,7 @@ import React, {
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { dataLodaAddForm } from '../type';
-import { addLoad, getDirectoryList } from '@/api/loadApi';
+import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
@@ -71,6 +71,7 @@ const LoadAddModal = (props: propsType) => {
   const [sourceType, setSourceType] = useState('s3');
   // 动态计算最大标签数量
   const [maxTagCounts, setMaxTagCount] = useState(3);
+  const [tableNames, setTableNames] = useState('默认表名');
   // 提交表单时的校验逻辑
   const handleSubmit = async (type: string) => {
     try {
@@ -111,16 +112,21 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_names: processedTableNames || uploadedFiles
+          table_names: processedTableNames || uploadedFiles,
+          db_name: sourceType === 'db' ? rest.db_name : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
           cancelHan();
-          history.push(
-            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
-          );
+          if (type == 'run') {
+            history.push(
+              `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+            );
+          } else {
+            Message.success('新建任务成功');
+          }
         } else {
           Message.error(res.message);
         }
@@ -141,17 +147,21 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_names: processedTableNames || uploadedFiles
+          table_names: processedTableNames || uploadedFiles,
+          db_name: sourceType === 'db' ? rest.db_name : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
         const res = await addLoad(formData);
         if (res.code === '' && res.status === 200) {
-          Message.success('新建任务成功');
+          if (type == 'run') {
+            history.push(
+              `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
+            );
+          } else {
+            Message.success('新建任务成功');
+          }
           cancelHan();
-          history.push(
-            `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
-          );
         } else {
           Message.error(res.message);
         }
@@ -225,18 +235,18 @@ const LoadAddModal = (props: propsType) => {
       console.log('开始获取目录数据，当前数据源类型:', sourceType);
       const res = await getDirectoryList({
         root_type: 1,
-        dir_type: sourceType === 'db' || sourceType === 'local' ? 3 : undefined
+        dir_type: sourceType === 'db' ? 3 : undefined
       });
       console.log('API响应:', res);
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
         setDirectoryData([]);
-        return;
+        return [];
       }
       if (!res.data || !res.data.src) {
         console.error('目录数据结构错误 - 缺少src字段:', res.data);
         setDirectoryData([]);
-        return;
+        return [];
       }
 
       if (!Array.isArray(res.data.src)) {
@@ -246,7 +256,7 @@ const LoadAddModal = (props: propsType) => {
           res.data.src
         );
         setDirectoryData([]);
-        return;
+        return [];
       }
       console.log('原始目录数据:', res.data.src);
 
@@ -284,6 +294,7 @@ const LoadAddModal = (props: propsType) => {
 
         console.log('处理后的对象存储数据:', processedData);
         setDirectoryData(processedData);
+        return processedData;
       } else {
         console.log('处理数据库/本地文件类型数据');
 
@@ -320,31 +331,21 @@ const LoadAddModal = (props: propsType) => {
 
             // 处理children数据
             if (item.children) {
-              let childrenArray: any[] | null = null;
-
               if (Array.isArray(item.children)) {
-                childrenArray = item.children;
-              } else if (
-                item.children.volume &&
-                Array.isArray(item.children.volume)
-              ) {
-                childrenArray = item.children.volume;
-              } else if (typeof item.children === 'object') {
-                // 寻找第一个数组值
-                for (const value of Object.values(item.children)) {
-                  if (Array.isArray(value)) {
-                    childrenArray = value;
-                    break;
-                  }
-                }
-              }
-
-              if (childrenArray && childrenArray.length > 0) {
+                // 如果children是数组，递归处理
                 processedItem.children = processTreeData(
-                  childrenArray,
+                  item.children,
                   processedItem
                 );
                 processedItem.hasChildren = processedItem.children.length > 0;
+              } else if (typeof item.children === 'object') {
+                // 如果children是对象（如{db: [...], volume: [...]}），保留原始结构
+                processedItem.children = item.children;
+                // 检查是否有子数据
+                const hasChildren = Object.values(item.children).some(
+                  (value: any) => Array.isArray(value) && value.length > 0
+                );
+                processedItem.hasChildren = hasChildren;
               }
             }
 
@@ -357,6 +358,7 @@ const LoadAddModal = (props: propsType) => {
         const processedData = processTreeData(res.data.src);
         console.log('处理后的树形数据:', processedData);
         setDirectoryData(processedData);
+        return processedData;
       }
     } catch (err: any) {
       console.error('获取目录列表异常:', err);
@@ -366,10 +368,17 @@ const LoadAddModal = (props: propsType) => {
       } else {
         Message.error('获取目录列表失败，请重试');
       }
+      return [];
     } finally {
       setDirectoryLoading(false);
     }
   }
+
+  // 数据刷新回调函数
+  const handleDataRefresh = async () => {
+    console.log('ComponentTree 请求数据刷新');
+    return await getdirectoryDataList();
+  };
   // 计算响应式标签数量的函数
   const calculateMaxTagCount = useCallback(() => {
     try {
@@ -432,7 +441,6 @@ const LoadAddModal = (props: propsType) => {
     const loadData = async () => {
       try {
         console.log('useEffect: 数据源类型变化，重新加载数据', sourceType);
-
         // 获取连接器列表
         if (sourceType) {
           const res = await getConnectionList({ type: sourceType });
@@ -479,6 +487,8 @@ const LoadAddModal = (props: propsType) => {
 
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
+  //拼接路径的表名
+
   const getConnectorDetailList = async (connector_id: string) => {
     if (!connector_id) {
       console.log('connector_id为空，跳过获取表格数据');
@@ -486,7 +496,10 @@ const LoadAddModal = (props: propsType) => {
     }
     try {
       const res = await getdetailList(connector_id);
-      setTableList(res.data.table_name);
+      const tableNameRes = await getTableName({ connector_id: connector_id });
+      console.log(tableNameRes, '获取连接器下面的表格');
+      // setTableNames(tableNameRes?.data?.table_name);
+      setTableList(res?.data?.table_name || []);
       console.log(res, '获取连接器下面的表格');
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
@@ -797,6 +810,10 @@ const LoadAddModal = (props: propsType) => {
                   }}
                   showAddTree={true}
                   enableRootAdd={true}
+                  activeTab="src"
+                  onDataRefresh={handleDataRefresh}
+                  dataSourceType={sourceType}
+                  tableNameNames={tableNames}
                 />
               )}
             >

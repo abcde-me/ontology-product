@@ -1,13 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Message } from '@arco-design/web-react';
+import { now } from 'lodash-es';
 import {
-  getPythonList,
-  createPythonItem,
-  renamePythonItem,
-  deletePythonItem,
-  copyPythonItem
+  type SqlScriptItem,
+  getSqlScriptList,
+  createSqlScript,
+  renameSqlScript,
+  deleteSqlScript,
+  copySqlScript
 } from '@/api/sql';
-import { PythonListItem, PythonItemType } from '@/types/pythonApi';
+import { PythonItemType } from '@/types/pythonApi';
+import timeFormattig from '@/utils/timeFormatting';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
@@ -15,17 +18,18 @@ interface UseFileManagerOptions {
 
 interface UseFileManagerReturn {
   // 状态
-  pythonList: PythonListItem[];
+  sqlScriptList: SqlScriptItem[];
   searchValue: string;
   expandedKeys: string[];
   isLoading: boolean;
   selectedKeys: string[];
 
   // 操作函数
+  generateDefaultName: (node: any) => string;
   handleSearch: (
     path_id: string,
     searchValue: string
-  ) => Promise<PythonListItem[]>;
+  ) => Promise<SqlScriptItem[]>;
   handleNew: () => void;
   handleTreeSelect: (selectedKeys: string[]) => void;
   handleTreeExpand: (keys: string[]) => void;
@@ -33,11 +37,11 @@ interface UseFileManagerReturn {
   handleRename: (finalName: string, node: any) => Promise<any>;
   handleCopy: (newName: string, node: any) => Promise<any>;
   handleDelete: (node: any) => Promise<boolean>;
-  handleFolderClick: (folderId: string) => Promise<PythonListItem[]>;
-  handleBackToParent: (parentId: string) => Promise<PythonListItem[]>;
+  handleFolderClick: (folderId: string) => Promise<SqlScriptItem[]>;
+  handleBackToParent: (parentId: string) => Promise<SqlScriptItem[]>;
 
   // 工具函数
-  getRawPythonList: () => Promise<void>;
+  getRawSqlScriptList: () => Promise<void>;
   formatData: (data: unknown[]) => any[];
 }
 
@@ -47,19 +51,23 @@ export const useFileManager = (
   const { onFileOpen } = options;
 
   // 状态管理
-  const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
+  const [sqlScriptList, setSqlScriptList] = useState<SqlScriptItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
 
+  const generateDefaultName = useCallback((node: any) => {
+    // 生成默认文件名：SQL查询 + 时间戳
+    return `SQL查询 ${timeFormattig(now())}`;
+  }, []);
+
   // 搜索功能
   const handleSearch = useCallback(
     async (path_id: string, searchValue: string) => {
       try {
-        const res = await getPythonList(path_id, {
-          name: searchValue,
-          mode: 0,
+        const res = await getSqlScriptList({
+          search_content: searchValue,
           page: 1,
           page_size: 100
         });
@@ -124,37 +132,22 @@ export const useFileManager = (
     setExpandedKeys(keys);
   }, []);
 
-  // 获取原始Python列表
-  const getRawPythonList = useCallback(async () => {
+  // 获取原始SqlScript列表
+  const getRawSqlScriptList = useCallback(async () => {
     if (isLoading) return; // 防止重复请求
 
     setIsLoading(true);
     try {
-      const rawPythonList = await getPythonList('0', {});
+      const rawSqlScriptListRes = await getSqlScriptList({});
 
-      if (rawPythonList.status === 200) {
-        setPythonList(rawPythonList.data.items);
-
-        // 列表加载完成后，自动打开第一个文件（如果存在且编辑器中无文件打开）
-        if (rawPythonList.data.items.length > 0 && onFileOpen) {
-          const firstFile = rawPythonList.data.items.find(
-            (item) => item.type !== PythonItemType.Directory
-          );
-          if (firstFile) {
-            console.log(
-              '🚀 初始化时自动打开第一个文件:',
-              firstFile.name,
-              'ID:',
-              firstFile.id
-            );
-            // 设置选中状态
-            setSelectedKeys([String(firstFile.id)]);
-            onFileOpen(String(firstFile.id), firstFile.name);
-          }
-        }
+      if (rawSqlScriptListRes.status !== 200) {
+        Message.error(rawSqlScriptListRes.message);
+        return;
       }
+
+      const rawSqlScriptList = rawSqlScriptListRes.data.items;
+      setSqlScriptList(rawSqlScriptList);
     } catch (error) {
-      console.error('获取Python列表失败:', error);
       Message.error('获取文件列表失败');
     } finally {
       setIsLoading(false);
@@ -165,126 +158,138 @@ export const useFileManager = (
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const createRes = await createPythonItem({
-          path_id: node?.dataRef?.path_id,
-          type: node?.dataRef?.type,
-          name: finalName
+        const createRes = await createSqlScript({
+          uid: '',
+          script_name: finalName
         });
 
-        if (createRes.status === 200) {
-          Message.success('创建成功');
-          // 刷新列表
-          await getRawPythonList();
-
-          // 如果是创建的文件（不是文件夹），自动在编辑器中打开
-          if (
-            createRes.data &&
-            createRes.data.type !== PythonItemType.Directory &&
-            onFileOpen
-          ) {
-            console.log(
-              '✅ 新建文件成功，自动打开文件:',
-              createRes.data.name,
-              'ID:',
-              createRes.data.id
-            );
-            // 设置选中状态
-            setSelectedKeys([String(createRes.data.id)]);
-            // 延迟一下打开文件，确保列表刷新完成
-            setTimeout(() => {
-              onFileOpen(String(createRes.data.id), createRes.data.name);
-            }, 100);
-          } else if (
-            createRes.data &&
-            createRes.data.type === PythonItemType.Directory
-          ) {
-            console.log('✅ 新建文件夹成功:', createRes.data.name);
-          }
-
-          return createRes.data;
+        if (createRes.status !== 200) {
+          Message.error(createRes.message);
+          return;
         }
-        return null;
+
+        Message.success('创建成功');
+
+        // 刷新列表
+        await getRawSqlScriptList();
+
+        // 设置选中状态
+        setSelectedKeys([String(createRes.data.script_id)]);
+
+        // 编辑器自动打开当前脚本
+        onFileOpen && onFileOpen(String(createRes.data.script_id));
+
+        // if (createRes.status === 200) {
+        //   Message.success('创建成功');
+        //   // 刷新列表
+        //   await getRawSqlScriptList();
+
+        //   // 如果是创建的文件（不是文件夹），自动在编辑器中打开
+        //   if (
+        //     createRes.data &&
+        //     createRes.data.type !== PythonItemType.Directory &&
+        //     onFileOpen
+        //   ) {
+        //     console.log(
+        //       '✅ 新建文件成功，自动打开文件:',
+        //       createRes.data.name,
+        //       'ID:',
+        //       createRes.data.id
+        //     );
+
+        //   } else if (
+        //     createRes.data &&
+        //     createRes.data.type === PythonItemType.Directory
+        //   ) {
+        //     console.log('✅ 新建文件夹成功:', createRes.data.name);
+        //   }
+
+        //   return createRes.data;
+        // }
+        // return null;
       } catch (error) {
         console.error('创建失败:', error);
         Message.error('创建失败');
         return null;
       }
     },
-    [getRawPythonList, onFileOpen]
+    [getRawSqlScriptList, onFileOpen]
   );
 
   // 重命名
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const renameRes = await renamePythonItem(node?.dataRef?.id, {
-          id: node?.dataRef?.id,
-          name: finalName,
-          path: node?.dataRef?.path,
-          type: node?.dataRef?.type
+        const renameRes = await renameSqlScript({
+          script_name: finalName
         });
 
-        if (renameRes.status === 200) {
-          Message.success('重命名成功');
-          // 刷新列表
-          await getRawPythonList();
-          return renameRes.data;
+        if (renameRes.status !== 200) {
+          Message.error(renameRes.message);
+          return null;
         }
-        return null;
+
+        Message.success('重命名成功');
+        // 刷新列表
+        await getRawSqlScriptList();
+        return renameRes.data;
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
         return null;
       }
     },
-    [getRawPythonList]
+    [getRawSqlScriptList]
   );
 
   // 复制
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copyPythonItem(node?.dataRef?.id, {
-          id: node?.dataRef?.id,
-          name: newName
+        const copyRes = await copySqlScript({
+          script_id: node?.dataRef?.id
         });
 
-        if (copyRes.status === 200) {
-          Message.success('复制成功');
-          // 刷新列表
-          await getRawPythonList();
-          return copyRes.data;
+        if (copyRes.status !== 200) {
+          Message.error(copyRes.message);
+          return null;
         }
-        return null;
+
+        Message.success('复制成功');
+        // 刷新列表
+        await getRawSqlScriptList();
+        return copyRes.data;
       } catch (error) {
         console.error('复制失败:', error);
         Message.error('复制失败');
         return null;
       }
     },
-    [getRawPythonList]
+    [getRawSqlScriptList]
   );
 
   // 删除
   const handleDelete = useCallback(
     async (node: any) => {
       try {
-        const deleteRes = await deletePythonItem(node?.dataRef?.id);
+        const deleteRes = await deleteSqlScript(node?.dataRef?.id);
 
-        if (deleteRes.status === 200) {
-          Message.success('删除成功');
-          // 刷新列表
-          await getRawPythonList();
-          return true;
+        if (deleteRes.status !== 200) {
+          Message.error(deleteRes.message);
+          return false;
         }
-        return false;
+
+        Message.success('删除成功');
+        // 刷新列表
+        await getRawSqlScriptList();
+        return true;
       } catch (error) {
         console.error('删除失败:', error);
         Message.error('删除失败');
         return false;
       }
     },
-    [getRawPythonList]
+    [getRawSqlScriptList]
   );
 
   // 数据格式化函数
@@ -292,10 +297,15 @@ export const useFileManager = (
     return (
       data?.map((item: any) => {
         return {
-          ...item,
-          key: String(item.id),
+          id: item.script_id,
+          name: item.script_name,
+          type: PythonItemType.Notebook,
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
-          dataRef: item
+          dataRef: {
+            name: item.script_name,
+            id: item.script_id,
+            type: PythonItemType.Notebook
+          }
         };
       }) ?? []
     );
@@ -305,11 +315,10 @@ export const useFileManager = (
   const handleFolderClick = useCallback(
     async (folderId: string) => {
       try {
-        const res = await getPythonList(String(folderId), {
-          name: searchValue,
-          mode: 0,
+        const res = await getSqlScriptList({
+          search_content: searchValue,
           page: 1,
-          page_size: 20
+          page_size: 100
         });
         return res?.data?.items ?? [];
       } catch (error) {
@@ -324,7 +333,7 @@ export const useFileManager = (
   // 返回父级处理
   const handleBackToParent = useCallback(async (parentId: string) => {
     try {
-      const res = await getPythonList(String(parentId || ''), {} as any);
+      const res = await getSqlScriptList({});
       return res?.data?.items || [];
     } catch (error) {
       console.error('返回父级失败:', error);
@@ -335,18 +344,19 @@ export const useFileManager = (
 
   // 组件挂载时获取数据
   useEffect(() => {
-    getRawPythonList();
+    getRawSqlScriptList();
   }, []); // 只在组件挂载时执行一次
 
   return {
     // 状态
-    pythonList,
+    sqlScriptList,
     searchValue,
     expandedKeys,
     isLoading,
     selectedKeys,
 
     // 操作函数
+    generateDefaultName,
     handleSearch,
     handleNew,
     handleTreeSelect,
@@ -359,7 +369,7 @@ export const useFileManager = (
     handleBackToParent,
 
     // 工具函数
-    getRawPythonList,
+    getRawSqlScriptList,
     formatData
   };
 };

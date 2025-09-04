@@ -198,7 +198,7 @@ export default function DataLoad() {
             : item.source_type == TYPE_CONFIG[ConnectorType.HDFS].value
               ? TYPE_CONFIG[ConnectorType.HDFS].text
               : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
-                ? TYPE_CONFIG[ConnectorType.DB].text
+                ? `${TYPE_CONFIG[ConnectorType.DB].text}-${item.sub_type || ''}`
                 : TYPE_CONFIG[ConnectorType.Local].text}
         </span>
       ),

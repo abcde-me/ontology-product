@@ -49,5 +49,4 @@ export const FullscreenContainer: React.FC<FullscreenContainerProps> = ({
   );
 };
 
-// 导出 Hook 供外部使用
 export { useFullscreen };
