@@ -59,7 +59,9 @@ export const useFileManager = (
   const handleSearch = useCallback(
     async (path_id: string, searchValue: string) => {
       try {
-        const res = await getPythonList(path_id, {
+        const targetFolderId = path_id || currentFolderId;
+        console.log('targetFolderId', targetFolderId);
+        const res = await getPythonList(targetFolderId, {
           name: searchValue,
           mode: 0,
           page: 1,

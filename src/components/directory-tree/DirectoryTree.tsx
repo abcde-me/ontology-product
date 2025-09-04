@@ -43,6 +43,8 @@ import {
 import EllipsisPopover from '../ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
+import timeFormattig from '@/utils/timeFormatting';
+import { now } from 'lodash-es';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -99,17 +101,7 @@ export interface DirectoryTreeProps {
 const InputSearch = Input.Search;
 
 function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
-  const base = isFolder ? '新建文件夹' : '新建PySpark';
-  const set = new Set(
-    siblings.map((s) => (typeof s.title === 'string' ? s.title : ''))
-  );
-  let i = siblings.length + 1;
-  let name = `${base}${i}`;
-  while (set.has(name)) {
-    i += 1;
-    name = `${base}${i}`;
-  }
-  return name;
+  return isFolder ? `新建文件夹_${now()}` : `新建PySpark_${now()}`;
 }
 
 export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
@@ -187,6 +179,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const handleFolderClick = async (node: NodeInstance) => {
       // Arco Tree 会把节点对象挂到 node.props.dataRef，这里优先读 props.dataRef；
       // 如果业务层已将字段打平到节点顶层（如 formatData 中），也兼容直接读取 props
+      handleSearchClear();
       const meta = node.props.dataRef;
       const hasChildren =
         Array.isArray(meta?.children) && meta?.children?.length;
@@ -233,6 +226,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       folderName: string,
       newStack: Array<{ id: string; name: string }>
     ) => {
+      handleSearchClear();
       try {
         // 更新文件夹栈
         setFolderStack(newStack);
@@ -258,6 +252,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     // 处理返回上级目录
     const handleBackToParent = async () => {
+      handleSearchClear();
       // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
       if (folderStack.length === 0 && currentFolderId && currentFolderName) {
         setCurrentFolderId('');
@@ -485,7 +480,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     const handleCopy = (node: NodeProps) => {
       try {
-        onCopy?.(`${node.dataRef?.name}_副本`, node);
+        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
       } catch (e) {
         Message.error('复制失败');
       }
