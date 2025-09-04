@@ -277,7 +277,8 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: 'file', value: datasetStorageType.file }
+      { text: 'file', value: datasetStorageType.file },
+      { text: 'dataBaseTable', value: datasetStorageType.dataBaseTable }
     ],
     filteredValue: selectedStorageTypeFilters,
     filterMultiple: true,
@@ -564,7 +565,8 @@ export enum datasetStatusName {
 // 枚举数据集状态名称
 export enum datasetStorageType {
   jsonl = 'jsonl',
-  file = 'file'
+  file = 'file',
+  dataBaseTable = 'dataBaseTable'
 }
 
 // 枚举数据集状态名称
