@@ -4,30 +4,32 @@ import {
   IconUpload,
   IconSettings,
   IconPlayArrow,
-  IconStop
+  IconStop,
+  IconMenu
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import { python } from '@codemirror/lang-python';
+import { sql } from '@codemirror/lang-sql';
+import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
-import {
-  syntaxHighlighting,
-  defaultHighlightStyle
-} from '@codemirror/language';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { RunningStatus } from '@/types/pythonApi';
 
 import RunningInfoPanel from './RunningInfoPanel';
 import { useEditor } from '../../hooks/useEditor';
+import { FileTab } from '../../hooks/useTabManager';
 
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
+  hasRun?: boolean;
+  tabKey?: string;
+  onActiveUpdate?: (tabData: FileTab) => void;
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
-  ({ content, fileName, currentFileId }) => {
+  ({ content, fileName, currentFileId, hasRun, onActiveUpdate, tabKey }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
 
     // 使用useEditor hook管理编辑器状态
@@ -37,13 +39,19 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handleRunCode,
       lastAutoSave,
       editorContent,
+      setEditorContent,
       handleContentChange,
       placeholderValue,
       runResult,
-      runLog
+      runLog,
+      size,
+      setSize
     } = useEditor({
       initialContent: content,
-      currentFileId
+      currentFileId,
+      tabKey: tabKey,
+      onActiveUpdate: onActiveUpdate,
+      hasRun
     });
 
     const myTheme = createTheme({
@@ -69,6 +77,25 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       console.log('Calling operator...');
     };
 
+    const handleRunClick = () => {
+      if (runStatus === RunningStatus.RUNNING) {
+        handleStopRunCode();
+      } else {
+        handleRunCode().catch(console.error);
+      }
+    };
+
+    const handleFormatCode = () => {
+      if (editorContent) {
+        try {
+          const formattedCode = format(editorContent, { language: 'sql' });
+          setEditorContent(formattedCode);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
@@ -85,31 +112,37 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                   )
                 }
                 disabled={editorContent.trim() === ''}
-                onClick={
-                  runStatus === RunningStatus.RUNNING
-                    ? handleStopRunCode
-                    : () => handleRunCode().catch(console.error)
-                }
+                onClick={handleRunClick}
                 className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
               </Button>
+
               <Button
+                type="text"
+                icon={<IconMenu />}
+                onClick={handleFormatCode}
+                className="h-[26px]"
+              >
+                格式化
+              </Button>
+
+              {/* <Button
                 icon={<IconUpload />}
                 onClick={handleExportDataset}
                 className="h-[26px]"
                 disabled={editorContent.trim() === ''}
               >
                 导出数据集
-              </Button>
-              <Button
+              </Button> */}
+              {/* <Button
                 type="text"
                 icon={<IconSettings />}
                 onClick={handleCallOperator}
                 className="h-[26px]"
               >
                 调用算子
-              </Button>
+              </Button> */}
             </Space>
           </div>
           {lastAutoSave && (
@@ -130,12 +163,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
-            extensions={[
-              python(),
-              lintGutter(),
-              syntaxHighlighting(defaultHighlightStyle, { fallback: true })
-            ]}
-            theme={myTheme}
+            extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
             basicSetup={{
               lineNumbers: true,
               highlightActiveLineGutter: false
@@ -145,11 +173,15 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         </div>
 
         {/* 运行信息面板 */}
-        <RunningInfoPanel
-          runResult={runResult}
-          runLog={runLog}
-          runStatus={runStatus}
-        />
+        {hasRun && (
+          <RunningInfoPanel
+            runResult={runResult}
+            runLog={runLog}
+            runStatus={runStatus}
+            size={size}
+            setSize={setSize}
+          />
+        )}
       </div>
     );
   }

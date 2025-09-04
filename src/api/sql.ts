@@ -20,6 +20,14 @@ import {
   GetRunLogReq,
   GetRunLogRes
 } from '@/types/pythonApi';
+import {
+  CreateSqlScriptData,
+  CreateSqlScriptParams,
+  RenameSqlScriptParams,
+  SqlScriptListData,
+  SqlScriptListParams,
+  updateSqlScriptParams
+} from '@/types/sqlApi';
 
 interface FileListParams {
   /** 排序字段 generated_at */
@@ -368,148 +376,148 @@ export async function getDatasetList(
 
 // -------------------------------- 目前先用pyspark api 开发，后续再使用sql api 开发 --------------------------------
 
-// 获取数据目录列表
-export async function getPythonList(
-  id: string,
-  params: PythonListParams
-): Promise<ApiRes<PythonListRes>> {
-  // 简单的模拟：根目录返回2个目录 + 1个文件；不同目录id返回不同的内容
-  const now = '2025-08-18 14:00';
-  const later = '2025-08-18 15:00';
+// // 获取数据目录列表
+// export async function getPythonList(
+//   id: string,
+//   params: PythonListParams
+// ): Promise<ApiRes<PythonListRes>> {
+//   // 简单的模拟：根目录返回2个目录 + 1个文件；不同目录id返回不同的内容
+//   const now = '2025-08-18 14:00';
+//   const later = '2025-08-18 15:00';
 
-  let items: PythonListRes['items'] = [];
-  let path_name = '';
+//   let items: PythonListRes['items'] = [];
+//   let path_name = '';
 
-  switch (String(id || '')) {
-    case '0':
-      path_name = '';
-      items = [
-        {
-          id: 1001,
-          name: '项目A',
-          type: PythonItemType.Directory,
-          path: '/',
-          path_id: 1,
-          created: now,
-          last_modified: later
-        },
-        {
-          id: 1002,
-          name: '数据集',
-          type: PythonItemType.Directory,
-          path: '/',
-          path_id: 1,
-          created: now,
-          last_modified: later
-        },
-        {
-          id: 1003,
-          name: '脚本1.py',
-          type: PythonItemType.Notebook,
-          path: '/',
-          path_id: 1,
-          created: now,
-          last_modified: later
-        }
-      ];
-      // items = [];
-      break;
-    case '1001':
-      path_name = '项目A';
-      items = [
-        {
-          id: 10011,
-          name: '子目录-代码',
-          type: PythonItemType.Directory,
-          path: '/项目A',
-          path_id: 1001,
-          created: now,
-          last_modified: later
-        },
-        {
-          id: 10012,
-          name: 'main.py',
-          type: PythonItemType.Notebook,
-          path: '/项目A',
-          path_id: 1001,
-          created: now,
-          last_modified: later
-        },
-        {
-          id: 10013,
-          name: 'utils.py',
-          type: PythonItemType.Notebook,
-          path: '/项目A',
-          path_id: 1001,
-          created: now,
-          last_modified: later
-        }
-      ];
-      break;
-    case '10011':
-      path_name = '子目录-代码';
-      items = [
-        {
-          id: 100111,
-          name: 'train.py',
-          type: PythonItemType.Notebook,
-          path: '/项目A/子目录-代码',
-          path_id: 10011,
-          created: now,
-          last_modified: later
-        },
-        {
-          id: 100112,
-          name: 'eval.py',
-          type: PythonItemType.Notebook,
-          path: '/项目A/子目录-代码',
-          path_id: 10011,
-          created: now,
-          last_modified: later
-        }
-      ];
-      break;
-    case '1002':
-      path_name = '数据集';
-      items = [
-        {
-          id: 10021,
-          name: '加载数据.ipynb',
-          type: PythonItemType.Notebook,
-          path: '/数据集',
-          path_id: 1002,
-          created: now,
-          last_modified: later
-        }
-      ];
-      break;
-    default:
-      path_name = '';
-      items = [];
-      break;
-  }
+//   switch (String(id || '')) {
+//     case '0':
+//       path_name = '';
+//       items = [
+//         {
+//           id: 1001,
+//           name: '项目A',
+//           type: PythonItemType.Directory,
+//           path: '/',
+//           path_id: 1,
+//           created: now,
+//           last_modified: later
+//         },
+//         {
+//           id: 1002,
+//           name: '数据集',
+//           type: PythonItemType.Directory,
+//           path: '/',
+//           path_id: 1,
+//           created: now,
+//           last_modified: later
+//         },
+//         {
+//           id: 1003,
+//           name: '脚本1.py',
+//           type: PythonItemType.Notebook,
+//           path: '/',
+//           path_id: 1,
+//           created: now,
+//           last_modified: later
+//         }
+//       ];
+//       // items = [];
+//       break;
+//     case '1001':
+//       path_name = '项目A';
+//       items = [
+//         {
+//           id: 10011,
+//           name: '子目录-代码',
+//           type: PythonItemType.Directory,
+//           path: '/项目A',
+//           path_id: 1001,
+//           created: now,
+//           last_modified: later
+//         },
+//         {
+//           id: 10012,
+//           name: 'main.py',
+//           type: PythonItemType.Notebook,
+//           path: '/项目A',
+//           path_id: 1001,
+//           created: now,
+//           last_modified: later
+//         },
+//         {
+//           id: 10013,
+//           name: 'utils.py',
+//           type: PythonItemType.Notebook,
+//           path: '/项目A',
+//           path_id: 1001,
+//           created: now,
+//           last_modified: later
+//         }
+//       ];
+//       break;
+//     case '10011':
+//       path_name = '子目录-代码';
+//       items = [
+//         {
+//           id: 100111,
+//           name: 'train.py',
+//           type: PythonItemType.Notebook,
+//           path: '/项目A/子目录-代码',
+//           path_id: 10011,
+//           created: now,
+//           last_modified: later
+//         },
+//         {
+//           id: 100112,
+//           name: 'eval.py',
+//           type: PythonItemType.Notebook,
+//           path: '/项目A/子目录-代码',
+//           path_id: 10011,
+//           created: now,
+//           last_modified: later
+//         }
+//       ];
+//       break;
+//     case '1002':
+//       path_name = '数据集';
+//       items = [
+//         {
+//           id: 10021,
+//           name: '加载数据.ipynb',
+//           type: PythonItemType.Notebook,
+//           path: '/数据集',
+//           path_id: 1002,
+//           created: now,
+//           last_modified: later
+//         }
+//       ];
+//       break;
+//     default:
+//       path_name = '';
+//       items = [];
+//       break;
+//   }
 
-  return Promise.resolve({
-    code: '200',
-    status: 200,
-    requestId: '',
-    message: 'success',
-    data: {
-      path_id: Number(id),
-      path_name,
-      items,
-      total: items.length,
-      page: 1,
-      page_size: 10
-    }
-  });
+//   return Promise.resolve({
+//     code: '200',
+//     status: 200,
+//     requestId: '',
+//     message: 'success',
+//     data: {
+//       path_id: Number(id),
+//       path_name,
+//       items,
+//       total: items.length,
+//       page: 1,
+//       page_size: 10
+//     }
+//   });
 
-  // TODO: 联调
-  // return await UAPI.RES.pythonListApi({ pyspark_id: id })
-  //   .get(params)
-  //   .inRegion()
-  //   .do();
-}
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonListApi({ pyspark_id: id })
+//   //   .get(params)
+//   //   .inRegion()
+//   //   .do();
+// }
 
 // 文件/目录创建
 export async function createPythonItem(
@@ -777,195 +785,135 @@ export async function getRunLog(
   });
 }
 
-export interface CreateSqlScriptParams {
-  script_content: string;
-  script_desc?: string;
-  script_name: string;
-  /** 用户id */
-  uid: string;
-}
-
-export interface SqlScriptData {
-  script_id: string;
-}
-
-export interface SqlScriptRes {
-  code: number;
-  data: SqlScriptData;
-  message: string;
-  status: number;
-}
-
 /** 创建SQL脚本 */
 export async function createSqlScript(
   params: CreateSqlScriptParams
-): Promise<SqlScriptRes> {
-  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/create
-  // return UAPI.RES.createSqlScript({})
-  //   .post(params)
-  //   .inRegion()
-  //   .do();
+): Promise<ApiRes<CreateSqlScriptData>> {
+  return await UAPI.RES.sqlCreateApi({}).post(params).inRegion().do();
 
-  return Promise.resolve({
-    code: 200,
-    data: {
-      script_id: '1'
-    },
-    message: 'ok',
-    status: 200
-  });
-}
-
-export interface RenameSqlScriptParams {
-  script_name: string;
+  // return Promise.resolve({
+  //   code: 200,
+  //   data: {
+  //     script_id: '1'
+  //   },
+  //   message: 'ok',
+  //   status: 200
+  // });
 }
 
 /** 重命名SQL脚本 */
 export async function renameSqlScript(
+  id: number,
   params: RenameSqlScriptParams
-): Promise<SqlScriptRes> {
-  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/rename
-  // return await UAPI.RES.renameSqlScript({ scriptId: id })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+): Promise<ApiRes<CreateSqlScriptData>> {
+  return await UAPI.RES.sqlRenameApi({ script_id: id })
+    .put(params)
+    .inRegion()
+    .do();
 
-  return Promise.resolve({
-    code: 200,
-    data: {
-      script_id: '1'
-    },
-    message: 'ok',
-    status: 200
-  });
-}
-
-export interface updateSqlScriptParams {
-  /** sql脚本内容 */
-  script_content: string;
-  /** sql脚本说明 */
-  script_desc?: string;
-  /** 脚本id，新建不传或者传0。更新传对应的脚步id */
-  script_id: number;
-  /** sql 脚本名字 */
-  script_name: string;
-  /** 用户id */
-  uid: string;
+  // return Promise.resolve({
+  //   code: 200,
+  //   data: {
+  //     script_id: '1'
+  //   },
+  //   message: 'ok',
+  //   status: 200
+  // });
 }
 
 /** 编辑SQL脚本 */
 export async function updateSqlScript(
+  id: number,
   params: updateSqlScriptParams
-): Promise<SqlScriptRes> {
-  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/edit
-  // return await UAPI.RES.renameSqlScript({ scriptId: id })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+): Promise<ApiRes<CreateSqlScriptData>> {
+  return await UAPI.RES.sqlSaveApi({ scriptId: id })
+    .put(params)
+    .inRegion()
+    .do();
 
-  return Promise.resolve({
-    code: 200,
-    data: {
-      script_id: '1'
-    },
-    message: 'ok',
-    status: 200
-  });
-}
-
-interface SqlScriptListParams {
-  /** 页码 */
-  page: number;
-  /** 页大小 */
-  page_size: number;
-  /** 搜索内容 */
-  search_content?: string;
-}
-
-export interface SqlScriptListRes {
-  code: number;
-  data: {
-    items: SqlScriptItem[];
-    page: string;
-    page_size: string;
-    total: string;
-  };
-  message: string;
-  status: number;
-}
-
-export interface SqlScriptItem {
-  /**
-   * 创建时间
-   */
-  create_time: string;
-  /**
-   * 数据集名字
-   */
-  data_set_name: string;
-  /**
-   * 依赖的表，逗号分割
-   */
-  dependent_tables: string;
-  /**
-   * 权限的
-   */
-  perms: string[];
-  /**
-   * 脚本说明
-   */
-  script_desc: string;
-  /**
-   * 脚本id
-   */
-  script_id: number;
-  /**
-   * 脚本名字
-   */
-  script_name: string;
-  /**
-   * 更新时间
-   */
-  update_time: string;
-  /**
-   * 创建人姓名
-   */
-  user_account: string;
+  // return Promise.resolve({
+  //   code: 200,
+  //   data: {
+  //     script_id: '1'
+  //   },
+  //   message: 'ok',
+  //   status: 200
+  // });
 }
 
 /** 获取SQL脚本列表 */
 export async function getSqlScriptList(
   params: SqlScriptListParams
-): Promise<SqlScriptListRes> {
-  // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/list
-  // return await UAPI.RES.getSqlScriptList({})
-  //   .GET(params)
-  //   .inRegion()
-  //   .do();
+): Promise<ApiRes<SqlScriptListData>> {
+  return await UAPI.RES.sqlListApi({}).get(params).inRegion().do();
 
-  return Promise.resolve({
-    message: 'string',
-    data: {
-      items: [
-        {
-          script_id: 0,
-          script_name: 'string',
-          script_desc: 'string',
-          dependent_tables: 'string',
-          data_set_name: 'string',
-          user_account: 'string',
-          create_time: 'string',
-          update_time: 'string',
-          perms: ['string']
-        }
-      ],
-      page: 'string',
-      page_size: 'string',
-      total: 'string'
-    },
-    status: 0,
-    code: 0
-  });
+  // return Promise.resolve({
+  //   message: 'string',
+  //   data: {
+  //     items: [
+  //       {
+  //         script_id: 1,
+  //         script_name: 'SQL查询 2025-06-06 14:14:14',
+  //         script_desc: 'string',
+  //         dependent_tables: 'string',
+  //         data_set_name: 'string',
+  //         user_account: 'string',
+  //         create_time: 'string',
+  //         update_time: 'string',
+  //         perms: ['string']
+  //       },
+  //       {
+  //         script_id: 2,
+  //         script_name: 'SQL查询 2025-06-06 13:14:14',
+  //         script_desc: 'string',
+  //         dependent_tables: 'string',
+  //         data_set_name: 'string',
+  //         user_account: 'string',
+  //         create_time: 'string',
+  //         update_time: 'string',
+  //         perms: ['string']
+  //       },
+  //       {
+  //         script_id: 3,
+  //         script_name: 'SQL查询 2025-06-06 12:14:14',
+  //         script_desc: 'string',
+  //         dependent_tables: 'string',
+  //         data_set_name: 'string',
+  //         user_account: 'string',
+  //         create_time: 'string',
+  //         update_time: 'string',
+  //         perms: ['string']
+  //       },
+  //       {
+  //         script_id: 4,
+  //         script_name: 'SQL查询 2025-06-06 11:14:14',
+  //         script_desc: 'string',
+  //         dependent_tables: 'string',
+  //         data_set_name: 'string',
+  //         user_account: 'string',
+  //         create_time: 'string',
+  //         update_time: 'string',
+  //         perms: ['string']
+  //       },
+  //       {
+  //         script_id: 5,
+  //         script_name: 'SQL查询 2025-06-06 10:14:14',
+  //         script_desc: 'string',
+  //         dependent_tables: 'string',
+  //         data_set_name: 'string',
+  //         user_account: 'string',
+  //         create_time: 'string',
+  //         update_time: 'string',
+  //         perms: ['string']
+  //       }
+  //     ],
+  //     page: 'string',
+  //     page_size: 'string',
+  //     total: 'string'
+  //   },
+  //   status: 200,
+  //   code: 0
+  // });
 }
 
 export interface DeleteSqlScriptParams {
@@ -992,7 +940,7 @@ export async function deleteSqlScript(
   return Promise.resolve({
     message: 'string',
     data: {},
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1037,7 +985,7 @@ export async function runSqlScript(
       script_execid: 'string',
       warning_msg: 'string'
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1067,7 +1015,7 @@ export async function runCancelSqlScript(
   return Promise.resolve({
     message: 'string',
     data: {},
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1076,6 +1024,10 @@ export interface RunResultSqlScriptParams {
   script_id: string;
   script_execid?: string;
   size?: string;
+}
+
+export interface RunResult {
+  list: RunResultItem;
 }
 
 export interface RunResultItem {
@@ -1099,16 +1051,14 @@ export interface RunResultSqlScriptRes {
     /**
      * 执行结果
      */
-    sql_result: {
-      list: RunResultItem;
-    }[];
+    sql_result: RunResult[];
   };
   message: string;
   status: number;
 }
 
 /** 获取SQL脚本运行结果 前端可5-10s轮询一次 */
-export async function runResultSqlScript(
+export async function getRunResultSqlScript(
   params: RunResultSqlScriptParams
 ): Promise<RunResultSqlScriptRes> {
   // TODO: 联调 10.1.4.73:31183/api/aimdp/v1/sql_script/{script_id}/get_run_result
@@ -1116,6 +1066,8 @@ export async function runResultSqlScript(
   //   .put(params)
   //   .inRegion()
   //   .do();
+
+  // console.log('轮询查运行结果 getRunResultSqlScript count:')
 
   return Promise.resolve({
     message: 'string',
@@ -1130,10 +1082,10 @@ export async function runResultSqlScript(
           }
         }
       ],
-      run_status: 0,
+      run_status: 1,
       run_duration: 'string'
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1206,7 +1158,7 @@ export async function getSqlScriptDetail(
       update_time: 'string',
       persm: ['string']
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1239,7 +1191,7 @@ export async function copySqlScript(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1270,7 +1222,7 @@ export async function exportSqlResult(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1301,7 +1253,7 @@ export async function exportSqlResultVersion(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1332,7 +1284,7 @@ export async function getExportSqlResultList(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1363,7 +1315,7 @@ export async function calcelExportSqlTask(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }
@@ -1394,7 +1346,7 @@ export async function getSqlTaskDetail(
     data: {
       script_id: 0
     },
-    status: 0,
+    status: 200,
     code: 0
   });
 }

@@ -1,5 +1,10 @@
 import { FluffyVolume, Db } from '@/api/dataCatalog';
 
+export enum DataDirectoryTreeFrom {
+  PYTHON = 'python',
+  SQL = 'sql'
+}
+
 // 数据卷类型定义
 export interface VolumeData extends Omit<FluffyVolume, 'type'> {
   type?: 'volume';

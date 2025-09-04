@@ -41,10 +41,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   });
 
   return (
-    <div className="python-tab-content">
-      <div className="tab-header">
-        <Title className="tab-title">PySpark文件</Title>
-      </div>
+    <div className="python-tab-content sider-container">
+      <div className="sider-title">PySpark文件</div>
 
       <div className="tab-tree">
         <DirectoryTree

@@ -6,7 +6,7 @@ import '@ccf2e/arco-material/lib/style/css.js';
 import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.less';
-import './style/theme.less';
+import './style/theme.scss';
 import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';

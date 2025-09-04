@@ -40,7 +40,7 @@ interface Dataset {
   tags: string[];
   description: string;
   dataSource: 'volume' | 'connector';
-  storageType: 'jsonl' | 'file';
+  storageType: StorageType;
   targetDataSource?: string;
   selectedFiles?: string[];
 }
@@ -60,6 +60,12 @@ interface ConnectorFile {
   type: string;
   sub_path: string;
   file_id: string;
+}
+
+enum StorageType {
+  Jsonl = 'jsonl',
+  File = 'file',
+  DataBaseTable = 'dataBaseTable'
 }
 
 interface DatasetFormProps {
@@ -212,7 +218,7 @@ const DatasetForm = React.forwardRef<
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
-  const [storageType, setStorageType] = useState<'jsonl' | 'file'>('file');
+  const [storageType, setStorageType] = useState<StorageType>(StorageType.File);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     null
   ); //选择的连接器ID
@@ -226,7 +232,7 @@ const DatasetForm = React.forwardRef<
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
-  const [previewFileData, setPreviewFileData] = useState([]); //数据目录文件预览数据
+  const [previewFileData, setPreviewFileData] = useState<string[] | null>(null); //数据目录文件预览数据
   const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
@@ -257,16 +263,16 @@ const DatasetForm = React.forwardRef<
       form.setFieldValue('name', '');
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
-      setStorageType('file'); //重置数据集类型
+      setStorageType(StorageType.File); //重置数据集类型
       setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
       setIsPreviewFile(false);
-      setPreviewFileData([]);
+      setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
-      form.setFieldValue('storageType', 'file');
+      form.setFieldValue('storageType', StorageType.File);
       setIscreateTagDisabled(false);
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
@@ -338,7 +344,7 @@ const DatasetForm = React.forwardRef<
     setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setIsPreviewFile(false);
-    setPreviewFileData([]); //重置文件预览数据
+    setPreviewFileData(null); //重置文件预览数据
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
     form.setFieldValue('connector', undefined);
@@ -346,7 +352,7 @@ const DatasetForm = React.forwardRef<
   };
 
   // 处理数据集类型变化
-  const handleStorageTypeChange = (value: 'jsonl' | 'file') => {
+  const handleStorageTypeChange = (value: StorageType) => {
     form.setFieldValue('targetDataSource', undefined);
     setStorageType(value);
     form.setFieldValue('storageType', value);
@@ -357,7 +363,7 @@ const DatasetForm = React.forwardRef<
     setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setIsPreviewFile(false);
-    setPreviewFileData([]); //重置文件预览数据
+    setPreviewFileData(null); //重置文件预览数据
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
     form.setFieldValue('connector', undefined);
@@ -413,7 +419,10 @@ const DatasetForm = React.forwardRef<
     // 获取连接器文件信息
     getConnectorFileInformationfun(
       value,
-      storageType === 'file' ? '' : 'jsonl'
+      storageType === StorageType.File ||
+        storageType === StorageType.DataBaseTable
+        ? ''
+        : 'jsonl'
     );
   };
 
@@ -477,7 +486,7 @@ const DatasetForm = React.forwardRef<
   const getVolumePreviewData = (volumeId: string, file_path: string) => {
     setTableLoading(true);
     // 这里应该调用真实的API
-    if (storageType === 'jsonl') {
+    if (storageType === StorageType.Jsonl) {
       getCatalogPreview({ path_id: volumeId })
         .then((res) => {
           if (res.status !== 200) {
@@ -492,7 +501,7 @@ const DatasetForm = React.forwardRef<
         .finally(() => {
           setTableLoading(false);
         });
-    } else if (storageType === 'file') {
+    } else if (storageType === StorageType.File) {
       const params = {
         path_id: volumeId,
         full_path: file_path,
@@ -748,14 +757,17 @@ const DatasetForm = React.forwardRef<
             rules={[{ required: true, message: '请选择数据集类型' }]}
             initialValue="file"
             extra={
-              storageType === 'file'
+              storageType === StorageType.File
                 ? '文件格式：支持各种文件类型，如图片、音频、视频等'
-                : 'JSONL格式：每行一个JSON对象，适用于结构化数据存储'
+                : storageType === StorageType.Jsonl
+                  ? 'JSONL格式：每行一个JSON对象，适用于结构化数据存储'
+                  : '数据库表格式：表格形式的数据，支持SQL查询和数据分析'
             }
           >
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
-              <Radio value="file">文件</Radio>
-              <Radio value="jsonl">jsonl</Radio>
+              <Radio value={StorageType.File}>文件</Radio>
+              <Radio value={StorageType.Jsonl}>jsonl</Radio>
+              <Radio value={StorageType.DataBaseTable}>数据库表</Radio>
             </Radio.Group>
           </FormItem>
 
@@ -813,12 +825,16 @@ const DatasetForm = React.forwardRef<
                   marginBottom: 8
                 }}
               >
-                {previewData ? (
+                {previewData || previewFileData ? (
                   <span style={{ fontSize: '14px' }}>
                     <span style={{ fontWeight: '500', color: '#000' }}>
                       预览
                     </span>{' '}
-                    目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                    {storageType === StorageType.File
+                      ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                      : storageType === StorageType.Jsonl
+                        ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
+                        : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
                   </span>
                 ) : (
                   <span style={{ fontSize: '14px' }}>
@@ -848,7 +864,7 @@ const DatasetForm = React.forwardRef<
                   />
                 </div>
               ) : null}
-              {isPreviewFile ? (
+              {isPreviewFile && previewFileData ? (
                 <>
                   <Table
                     rowKey="id"
@@ -921,7 +937,8 @@ const DatasetForm = React.forwardRef<
                 className="form-item-select-files"
                 wrapperCol={{ span: 20 }}
                 extra={
-                  storageType === 'file' ? (
+                  storageType === StorageType.File ||
+                  storageType === StorageType.DataBaseTable ? (
                     ''
                   ) : (
                     <span

@@ -270,6 +270,8 @@ export const ModaForgeResourceEndpoints = {
   scriptingBenchResult:
     PrefixAimdp +
     '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  // 工作流-知识库名称校验
+  knowledgeBaseNameCheck: '/query/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -376,6 +378,8 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
   // 重试载入任务
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  //载入获取表名
+  getTableNameApi: '/internal/v1/generate_db_name',
 
   // 数据标注接口
   // 数据标注配置 发布
@@ -401,6 +405,12 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+
+  // SQL开发
+  sqlListApi: PrefixAimdp + '/sql_script/list',
+  sqlCreateApi: PrefixAimdp + '/sql_script/create',
+  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

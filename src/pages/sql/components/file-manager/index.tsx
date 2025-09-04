@@ -4,6 +4,7 @@ import { PythonListItem } from '@/types/pythonApi';
 import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
+  DirectoryTreeFrom,
   DirectoryTreeRef
 } from '@/components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
@@ -22,8 +23,9 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
 }) => {
   // 使用文件管理器hook
   const {
-    pythonList,
+    sqlScriptList,
     selectedKeys,
+    generateDefaultName,
     handleSearch,
     handleNew,
     handleTreeSelect,
@@ -43,14 +45,16 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   return (
     <div className="python-tab-content">
       <div className="tab-header">
-        <Title className="tab-title">PySpark文件</Title>
+        <Title className="tab-title">SQL脚本列表</Title>
       </div>
 
       <div className="tab-tree">
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
-          data={pythonList as TreeNodeItem[]}
+          from={DirectoryTreeFrom.SQL}
+          data={sqlScriptList as TreeNodeItem[]}
           selectedKeys={selectedKeys} // 传递选中状态
+          generateDefaultName={generateDefaultName}
           onSelect={handleTreeSelect} // 添加文件选择处理
           onCreate={handleCreate}
           onRename={handleRename}

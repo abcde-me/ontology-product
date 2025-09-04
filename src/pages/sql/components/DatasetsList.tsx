@@ -1,9 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import {
   Form,
   Input,
   Link,
-  PaginationProps,
   Table,
   TableColumnProps
 } from '@arco-design/web-react';
@@ -104,7 +103,7 @@ const DatasetsList: FC = () => {
     {
       title: '导出状态',
       dataIndex: 'export_status',
-      width: 130,
+      width: 180,
       render: (_, item) => {
         let text = '未知状态';
         let color = '#999999';

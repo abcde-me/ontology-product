@@ -20,6 +20,7 @@ interface UseFileManagerReturn {
   expandedKeys: string[];
   isLoading: boolean;
   selectedKeys: string[];
+  currentFolderId: string;
 
   // 操作函数
   handleSearch: (
@@ -37,7 +38,7 @@ interface UseFileManagerReturn {
   handleBackToParent: (parentId: string) => Promise<PythonListItem[]>;
 
   // 工具函数
-  getRawPythonList: () => Promise<void>;
+  getRawPythonList: (folderId?: string) => Promise<PythonListItem[]>;
   formatData: (data: unknown[]) => any[];
 }
 
@@ -52,12 +53,15 @@ export const useFileManager = (
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
+  const [currentFolderId, setCurrentFolderId] = useState<string>('0'); // 当前文件夹ID，默认为根目录
 
   // 搜索功能
   const handleSearch = useCallback(
     async (path_id: string, searchValue: string) => {
       try {
-        const res = await getPythonList(path_id, {
+        const targetFolderId = path_id || currentFolderId;
+        console.log('targetFolderId', targetFolderId);
+        const res = await getPythonList(targetFolderId, {
           name: searchValue,
           mode: 0,
           page: 1,
@@ -125,92 +129,81 @@ export const useFileManager = (
   }, []);
 
   // 获取原始Python列表
-  const getRawPythonList = useCallback(async () => {
-    if (isLoading) return; // 防止重复请求
+  const getRawPythonList = useCallback(
+    async (folderId?: string) => {
+      if (isLoading) return []; // 防止重复请求
 
-    setIsLoading(true);
-    try {
-      const rawPythonList = await getPythonList('0', {});
+      const targetFolderId = folderId || currentFolderId;
+      setIsLoading(true);
+      try {
+        const rawPythonList = await getPythonList(targetFolderId, {});
 
-      if (rawPythonList.status === 200) {
-        setPythonList(rawPythonList.data.items);
-
-        // 列表加载完成后，自动打开第一个文件（如果存在且编辑器中无文件打开）
-        if (rawPythonList.data.items.length > 0 && onFileOpen) {
-          const firstFile = rawPythonList.data.items.find(
-            (item) => item.type !== PythonItemType.Directory
-          );
-          if (firstFile) {
-            console.log(
-              '🚀 初始化时自动打开第一个文件:',
-              firstFile.name,
-              'ID:',
-              firstFile.id
-            );
-            // 设置选中状态
-            setSelectedKeys([String(firstFile.id)]);
-            onFileOpen(String(firstFile.id), firstFile.name);
-          }
+        if (rawPythonList.status !== 200) {
+          Message.error(rawPythonList?.message ?? '获取文件列表失败');
+          return [];
         }
+
+        const items = rawPythonList?.data?.items ?? [];
+        setPythonList(items);
+        return items; // 返回获取到的数据
+      } catch (error) {
+        console.error('获取Python列表失败:', error);
+        Message.error('获取文件列表失败');
+        return [];
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('获取Python列表失败:', error);
-      Message.error('获取文件列表失败');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, onFileOpen]);
+    },
+    [isLoading, currentFolderId]
+  );
 
   // 创建文件/文件夹
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
       try {
         const createRes = await createPythonItem({
-          path_id: node?.dataRef?.path_id,
+          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
           type: node?.dataRef?.type,
           name: finalName
         });
 
-        if (createRes.status === 200) {
-          Message.success('创建成功');
-          // 刷新列表
-          await getRawPythonList();
-
-          // 如果是创建的文件（不是文件夹），自动在编辑器中打开
-          if (
-            createRes.data &&
-            createRes.data.type !== PythonItemType.Directory &&
-            onFileOpen
-          ) {
-            console.log(
-              '✅ 新建文件成功，自动打开文件:',
-              createRes.data.name,
-              'ID:',
-              createRes.data.id
-            );
-            // 设置选中状态
-            setSelectedKeys([String(createRes.data.id)]);
-            // 延迟一下打开文件，确保列表刷新完成
-            setTimeout(() => {
-              onFileOpen(String(createRes.data.id), createRes.data.name);
-            }, 100);
-          } else if (
-            createRes.data &&
-            createRes.data.type === PythonItemType.Directory
-          ) {
-            console.log('✅ 新建文件夹成功:', createRes.data.name);
-          }
-
-          return createRes.data;
+        if (createRes.status !== 200) {
+          Message.error(createRes?.message ?? '创建失败');
+          return null;
         }
-        return null;
+
+        Message.success('创建成功');
+        // 刷新当前文件夹列表
+        await getRawPythonList(currentFolderId);
+
+        // 如果是创建的文件（不是文件夹），自动在编辑器中打开
+        if (
+          createRes.data &&
+          createRes.data.type !== PythonItemType.Directory
+        ) {
+          console.log(
+            '✅ 新建文件成功，自动打开文件:',
+            createRes.data.name,
+            'ID:',
+            createRes.data.id
+          );
+          // 设置选中状态
+          setSelectedKeys([String(createRes.data.id)]);
+        } else if (
+          createRes.data &&
+          createRes.data.type === PythonItemType.Directory
+        ) {
+          console.log('✅ 新建文件夹成功:', createRes.data.name);
+        }
+
+        return createRes.data;
       } catch (error) {
         console.error('创建失败:', error);
         Message.error('创建失败');
         return null;
       }
     },
-    [getRawPythonList, onFileOpen]
+    [getRawPythonList, currentFolderId]
   );
 
   // 重命名
@@ -224,20 +217,22 @@ export const useFileManager = (
           type: node?.dataRef?.type
         });
 
-        if (renameRes.status === 200) {
-          Message.success('重命名成功');
-          // 刷新列表
-          await getRawPythonList();
-          return renameRes.data;
+        if (renameRes.status !== 200) {
+          Message.error(renameRes?.message ?? '重命名失败');
+          return null;
         }
-        return null;
+
+        Message.success('重命名成功');
+        // 刷新当前文件夹列表
+        await getRawPythonList(currentFolderId);
+        return renameRes.data;
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
         return null;
       }
     },
-    [getRawPythonList]
+    [getRawPythonList, currentFolderId]
   );
 
   // 复制
@@ -249,13 +244,15 @@ export const useFileManager = (
           name: newName
         });
 
-        if (copyRes.status === 200) {
-          Message.success('复制成功');
-          // 刷新列表
-          await getRawPythonList();
-          return copyRes.data;
+        if (copyRes.status !== 200) {
+          Message.error(copyRes?.message ?? '复制失败');
+          return null;
         }
-        return null;
+
+        Message.success('复制成功');
+        // 刷新当前文件夹列表
+        await getRawPythonList(currentFolderId);
+        return copyRes.data;
       } catch (error) {
         console.error('复制失败:', error);
         Message.error('复制失败');
@@ -271,20 +268,22 @@ export const useFileManager = (
       try {
         const deleteRes = await deletePythonItem(node?.dataRef?.id);
 
-        if (deleteRes.status === 200) {
-          Message.success('删除成功');
-          // 刷新列表
-          await getRawPythonList();
-          return true;
+        if (deleteRes.status !== 200) {
+          Message.error(deleteRes?.message ?? '删除失败');
+          return false;
         }
-        return false;
+
+        Message.success('删除成功');
+        // 刷新当前文件夹列表
+        await getRawPythonList(currentFolderId);
+        return true;
       } catch (error) {
         console.error('删除失败:', error);
         Message.error('删除失败');
         return false;
       }
     },
-    [getRawPythonList]
+    [getRawPythonList, currentFolderId]
   );
 
   // 数据格式化函数
@@ -305,6 +304,9 @@ export const useFileManager = (
   const handleFolderClick = useCallback(
     async (folderId: string) => {
       try {
+        // 更新当前文件夹ID
+        setCurrentFolderId(folderId);
+
         const res = await getPythonList(String(folderId), {
           name: searchValue,
           mode: 0,
@@ -324,6 +326,9 @@ export const useFileManager = (
   // 返回父级处理
   const handleBackToParent = useCallback(async (parentId: string) => {
     try {
+      // 更新当前文件夹ID
+      setCurrentFolderId(parentId || '0');
+
       const res = await getPythonList(String(parentId || ''), {} as any);
       return res?.data?.items || [];
     } catch (error) {
@@ -335,7 +340,26 @@ export const useFileManager = (
 
   // 组件挂载时获取数据
   useEffect(() => {
-    getRawPythonList();
+    getRawPythonList().then((items) => {
+      // 只有在根目录且列表加载完成后，才自动打开第一个文件（如果存在且编辑器中无文件打开）
+      if (items.length > 0 && onFileOpen) {
+        const firstFile = items.find(
+          (item) => item.type !== PythonItemType.Directory
+        );
+
+        if (firstFile) {
+          console.log(
+            '🚀 初始化时自动打开第一个文件:',
+            firstFile.name,
+            'ID:',
+            firstFile.id
+          );
+          // 设置选中状态
+          setSelectedKeys([String(firstFile.id)]);
+          onFileOpen(String(firstFile.id), firstFile.name);
+        }
+      }
+    });
   }, []); // 只在组件挂载时执行一次
 
   return {
@@ -345,6 +369,7 @@ export const useFileManager = (
     expandedKeys,
     isLoading,
     selectedKeys,
+    currentFolderId,
 
     // 操作函数
     handleSearch,

@@ -5,9 +5,61 @@
   margin: 20px 20px 20px 0;
   overflow: hidden;
 
-  .tab-tree {
-    padding: 0 12px;
+  // ---以下组件样式覆盖---
+  .arco-btn-outline:not(.arco-btn-disabled) {
+    color: #007dfa;
+    border-color: #007dfa;
   }
+
+  .arco-btn-outline:not(.arco-btn-disabled):active,
+  .arco-btn-outline:not(.arco-btn-disabled):hover {
+    color: #007dfa;
+    border-color: #007dfa;
+    background-color: transparent;
+  }
+
+  .arco-tree-node {
+    // padding: 0;
+    // margin: 0;
+
+    // .arco-tree-node-title {
+    //   padding: 0;
+    //   height: auto;
+    //   line-height: normal;
+    //   border-radius: 0;
+
+    //   &:hover {
+    //     background: none;
+    //   }
+    // }
+
+    .arco-tree-node-indent {
+      display: none;
+    }
+
+    // .arco-tree-node-switcher {
+    //   display: none;
+    // }
+
+    // .arco-tree-node-icon {
+    //   display: none;
+    // }
+  }
+
+  // ---以上组件样式覆盖---
+
+  // ---以下左侧目录通用样式---
+  .sider-container {
+    padding: 9px 12px;
+  }
+
+  .sider-title {
+    padding-bottom: 9px;
+    font-size: var(--font-size-primary);
+    font-weight: 500;
+    color: var(--color-text-2);
+  }
+  // ---以上左侧目录通用样式---
 
   .arco-tabs-header-title {
     border-radius: 0;
