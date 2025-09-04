@@ -270,6 +270,8 @@ export const ModaForgeResourceEndpoints = {
   scriptingBenchResult:
     PrefixAimdp +
     '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  // 工作流-知识库名称校验
+  knowledgeBaseNameCheck: '/query/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',

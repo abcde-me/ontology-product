@@ -5,10 +5,12 @@ import useConfig from './use-config';
 import type { EndNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
-import { getWorkflowTargetPath } from '@/api/workflow';
+import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
+import { useUserInfo } from '@/store/userInfoStore';
 import './end.scss';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
+  const userInfo = useUserInfo();
   const { readOnly, inputs, onValuesChange } = useConfig(id, data);
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -98,7 +100,24 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             label="知识库名称"
             extra="为构建的知识库指定一个名称，用于后续的检索和管理"
             field="Knowledge_base_name"
-            rules={[{ required: true, message: '知识库名称不可为空' }]}
+            rules={[
+              {
+                required: true,
+                validateTrigger: 'onBlur',
+                validator: async (value, callback) => {
+                  return knowledgeBaseNameCheck({
+                    knowledgeName: value,
+                    userId: userInfo?.id || ''
+                  }).then((res) => {
+                    if (res.data && res.msg === 'success') {
+                      return true;
+                    } else {
+                      callback(res.msg);
+                    }
+                  });
+                }
+              }
+            ]}
           >
             <Input
               placeholder="请输入知识库名称（50字以内）"
