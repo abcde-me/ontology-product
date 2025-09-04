@@ -71,6 +71,7 @@ const LoadAddModal = (props: propsType) => {
   const [sourceType, setSourceType] = useState('s3');
   // 动态计算最大标签数量
   const [maxTagCounts, setMaxTagCount] = useState(3);
+  const [tableNames, setTableNames] = useState('默认表名');
   // 提交表单时的校验逻辑
   const handleSubmit = async (type: string) => {
     try {
@@ -111,7 +112,8 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_names: processedTableNames || uploadedFiles
+          table_names: processedTableNames || uploadedFiles,
+          db_name: sourceType === 'db' ? rest.db_name : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
@@ -145,7 +147,8 @@ const LoadAddModal = (props: propsType) => {
           },
           dest_path_id: pathId,
           submit_type: type == 'keep' ? 1 : 2,
-          table_names: processedTableNames || uploadedFiles
+          table_names: processedTableNames || uploadedFiles,
+          db_name: sourceType === 'db' ? rest.db_name : null
           // 添加上传的文件数据
           // uploaded_files: sourceType === 'local' ? uploadedFiles : undefined
         };
@@ -485,7 +488,7 @@ const LoadAddModal = (props: propsType) => {
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
   //拼接路径的表名
-  const [tableNames, setTableNames] = useState('默认表名');
+
   const getConnectorDetailList = async (connector_id: string) => {
     if (!connector_id) {
       console.log('connector_id为空，跳过获取表格数据');

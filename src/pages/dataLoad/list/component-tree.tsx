@@ -120,7 +120,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         }
 
         // 为目录节点添加"数据库"子节点
-        if (!hasDbNode) {
+        if (!hasDbNode && dataSourceType !== 'local') {
           const dbNodeKey = `${item.id}-db`;
           const dbInputNode = dbInputNodes.get(dbNodeKey);
 
@@ -473,11 +473,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     if (
       nodeData?.type_name === 'db_parent' ||
-      nodeData?.title === '数据库' ||
-      nodeData?.name === '数据库' ||
-      nodeData?.type_name === 'datasource_parent' ||
-      nodeData?.title === '数据源' ||
-      nodeData?.name === '数据源'
+      nodeData?.type_name === 'datasource_parent'
     ) {
       console.log('数据库节点或数据源节点不可选中');
       return; // 阻止选中数据库节点和数据源节点
