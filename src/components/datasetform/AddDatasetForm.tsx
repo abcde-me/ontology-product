@@ -232,7 +232,7 @@ const DatasetForm = React.forwardRef<
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
-  const [previewFileData, setPreviewFileData] = useState([]); //数据目录文件预览数据
+  const [previewFileData, setPreviewFileData] = useState<string[] | null>(null); //数据目录文件预览数据
   const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
@@ -270,7 +270,7 @@ const DatasetForm = React.forwardRef<
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
       setIsPreviewFile(false);
-      setPreviewFileData([]);
+      setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
       form.setFieldValue('storageType', StorageType.File);
       setIscreateTagDisabled(false);
@@ -344,7 +344,7 @@ const DatasetForm = React.forwardRef<
     setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setIsPreviewFile(false);
-    setPreviewFileData([]); //重置文件预览数据
+    setPreviewFileData(null); //重置文件预览数据
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
     form.setFieldValue('connector', undefined);
@@ -363,7 +363,7 @@ const DatasetForm = React.forwardRef<
     setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setIsPreviewFile(false);
-    setPreviewFileData([]); //重置文件预览数据
+    setPreviewFileData(null); //重置文件预览数据
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
     form.setFieldValue('connector', undefined);
@@ -761,7 +761,7 @@ const DatasetForm = React.forwardRef<
                 ? '文件格式：支持各种文件类型，如图片、音频、视频等'
                 : storageType === StorageType.Jsonl
                   ? 'JSONL格式：每行一个JSON对象，适用于结构化数据存储'
-                  : '数据库表：从数据库中查询数据'
+                  : '数据库表格式：表格形式的数据，支持SQL查询和数据分析'
             }
           >
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
@@ -825,12 +825,16 @@ const DatasetForm = React.forwardRef<
                   marginBottom: 8
                 }}
               >
-                {previewData ? (
+                {previewData || previewFileData ? (
                   <span style={{ fontSize: '14px' }}>
                     <span style={{ fontWeight: '500', color: '#000' }}>
                       预览
                     </span>{' '}
-                    目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                    {storageType === StorageType.File
+                      ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                      : storageType === StorageType.Jsonl
+                        ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
+                        : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
                   </span>
                 ) : (
                   <span style={{ fontSize: '14px' }}>
@@ -860,7 +864,7 @@ const DatasetForm = React.forwardRef<
                   />
                 </div>
               ) : null}
-              {isPreviewFile ? (
+              {isPreviewFile && previewFileData ? (
                 <>
                   <Table
                     rowKey="id"
