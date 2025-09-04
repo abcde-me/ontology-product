@@ -160,7 +160,7 @@ export const useFileManager = (
     async (finalName: string, node: any) => {
       try {
         const createRes = await createPythonItem({
-          path_id: node?.dataRef?.path_id || currentFolderId,
+          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
           type: node?.dataRef?.type,
           name: finalName
         });
