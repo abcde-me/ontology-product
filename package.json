@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@antv/data-set": "^0.11.8",
+    "@arco-design/web-react": "2.64.1",
     "@arco-themes/react-cecloud-design": "^1.0.61",
     "@babel/preset-typescript": "^7.27.0",
     "@ccf2e/arco-material": "^0.7.2",
@@ -48,8 +49,8 @@
     "@svgdotjs/svg.js": "^3.2.4",
     "@turf/turf": "^6.5.0",
     "@types/use-sync-external-store": "^0.0.6",
-    "@uiw/codemirror-theme-bbedit": "^4.24.2",
     "@uiw/codemirror-extensions-langs": "^4.24.2",
+    "@uiw/codemirror-theme-bbedit": "^4.24.2",
     "@uiw/codemirror-themes": "^4.24.2",
     "@uiw/react-codemirror": "^4.25.1",
     "ahooks": "^3.8.1",
@@ -119,7 +120,6 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@arco-design/web-react": "2.48.0",
     "@arco-plugins/utils": "1.0.2",
     "@arco-plugins/webpack-react": "1.1.2",
     "@arco-themes/react-arco-pro": "^0.0.7",

@@ -47,7 +47,8 @@ import {
   editDatasetVersion,
   type DataChangeItem,
   getDatasetVersionList,
-  datasetVersionRebuild
+  datasetVersionRebuild,
+  getDataContentFileList
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -56,6 +57,7 @@ import { PermissionGuard } from '@/components/PermissionGuard';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
+import getFileIcon from '@/components/file-icon';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -264,6 +266,51 @@ const formatDate = (dateString: string) => {
     </div>
   );
 };
+
+// 数据内容文件表格列定义
+const contentFileColumns = [
+  {
+    title: 'ID',
+    dataIndex: 'id',
+    width: 80
+  },
+  {
+    title: '文件名称',
+    dataIndex: 'file_name',
+    width: 300,
+    render: (_, record) => (
+      <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+    )
+  },
+  {
+    title: '文件类型',
+    dataIndex: 'file_type',
+    width: 100,
+    render: (_, record) => (
+      <div>
+        {getFileIcon(record.file_type)} {record.file_type}
+      </div>
+    )
+  },
+  {
+    title: '文件大小',
+    dataIndex: 'file_size',
+    width: 100,
+    render: (_, record) => <span>{record.file_size} KB</span>
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'created_at',
+    width: 180,
+    render: (_, record) => <span>{formatDate(record.created_at)}</span>
+  },
+  {
+    title: '修改时间',
+    dataIndex: 'file_modify_time',
+    width: 180,
+    render: (_, record) => <span>{formatDate(record.file_modify_time)}</span>
+  }
+];
 
 // 版本历史表格列定义
 const versionColumns: any[] = [
@@ -489,6 +536,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
   const [activeTab, setActiveTab] = React.useState('content'); //当前选中的tab
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
+  const [contentFileData, setContentFileData] = React.useState<any[]>([]); //文件内容数据
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
 
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
@@ -496,6 +544,9 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
   const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
+  const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
+  const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
+  const [fileTotal, setFileTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
   const [idName, setIdName] = React.useState<string>(''); //唯一标识符字段名
@@ -943,9 +994,6 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
         .then((res) => {
           console.log(1111111, res);
           setDatasetDetail(res.data);
-          if (res.data.storage_type === 'file') {
-            setActiveTab('version');
-          }
         })
         .catch((err) => {
           console.error('获取数据集详情失败:', err);
@@ -994,35 +1042,59 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   };
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
-    if (!datasetDetail || !id || datasetDetail.storage_type === 'file')
-      return Promise.resolve();
+    if (!datasetDetail || !id) return Promise.resolve();
 
-    const params: any = {
-      id: id,
-      page: currentPage,
-      limit: pageSize,
-      keyword: actualSearchValue || undefined,
-      version_id: datasetDetail.latest_version
-    };
+    if (datasetDetail.storage_type === 'file') {
+      const params = {
+        id: id,
+        version_id: datasetDetail.latest_version,
+        page: fileCurrentPage,
+        page_size: filePageSize
+      };
+      return getDataContentFileList(params)
+        .then((res) => {
+          console.log(res, 'res');
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentFileData(res.data.list || []);
+            setFileTotal(res.data.total);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    } else {
+      const params: any = {
+        id: id,
+        page: currentPage,
+        limit: pageSize,
+        keyword: actualSearchValue || undefined,
+        version_id: datasetDetail.latest_version
+      };
 
-    return getDatasetContents(params)
-      .then((res) => {
-        if (res.status !== 200) {
-          Message.error('获取内容数据失败');
-          return;
-        }
-        if (res.data) {
-          setContentData(res.data.list || []);
-          setContentColumnslist(res.data.field_names || []);
-          setIdName(res.data.id_name || '');
-          setTotal(res.data.total || 0);
-          setContentDatabackup(res.data.list || []);
-        }
-      })
-      .catch((err) => {
-        console.error('获取数据集内容失败:', err);
-        Message.error('加载数据失败');
-      });
+      return getDatasetContents(params)
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentData(res.data.list || []);
+            setContentColumnslist(res.data.field_names || []);
+            setIdName(res.data.id_name || '');
+            setTotal(res.data.total || 0);
+            setContentDatabackup(res.data.list || []);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    }
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
@@ -1409,7 +1481,43 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type !== 'file' && (
+          {datasetDetail?.storage_type === 'file' ? (
+            <TabPane key="content" title="数据内容">
+              <Table
+                columns={contentFileColumns}
+                data={contentFileData}
+                pagination={false}
+                rowKey="id"
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                scroll={{ x: 'max-content' }}
+                border={false}
+              />
+              <div className="pagination-wrapper">
+                <Pagination
+                  disabled={updateStatus}
+                  style={{
+                    float: 'right'
+                  }}
+                  current={fileCurrentPage}
+                  pageSize={filePageSize}
+                  total={fileTotal}
+                  onChange={(filePage) => {
+                    setFileCurrentPage(filePage);
+                  }}
+                  onPageSizeChange={(filePageSize) => {
+                    setFilePageSize(filePageSize);
+                    setFileCurrentPage(1);
+                  }}
+                  showTotal={(total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                  }
+                  sizeOptions={[10, 20, 50, 100]}
+                  showJumper
+                  sizeCanChange={true}
+                />
+              </div>
+            </TabPane>
+          ) : (
             <TabPane key="content" title="数据内容">
               {/* 搜索系统 */}
               <div

@@ -72,3 +72,9 @@
     color: #007dfa;
   }
 }
+:global(.ModelTree .arco-tree-node-indent-block:hover) {
+  background-color: transparent !important;
+}
+:global(.ModelTree .arco-tree-node-title arco-tree-node-title-block) {
+  margin-left: -20px !important;
+}

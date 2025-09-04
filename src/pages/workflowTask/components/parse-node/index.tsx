@@ -242,6 +242,7 @@ export default function ParseNode(props: {
             sorter,
             filters
           });
+          // @ts-expect-error
           onSortData(sorter, filters);
         }}
       />

@@ -451,6 +451,7 @@ export default function WorkflowList() {
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
+          // @ts-expect-error
           handleTableChange(pagination, sorter, filters)
         }
       />

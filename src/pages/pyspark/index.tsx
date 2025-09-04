@@ -6,16 +6,18 @@ import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
-import { useEditor } from '@/hooks/useEditor';
+import { useTabManager } from './hooks/useTabManager';
 import './index.scss';
+import DatasetsList from './components/daset-export/DatasetsList';
+import ToolsManager from './components/tools-manager';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
-type TabKey = 'files' | 'tools' | 'data';
+type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [activeTab, setActiveTab] = useState<TabKey>('tools');
   const {
     fileState,
     directoryTreeRef,
@@ -24,7 +26,9 @@ const Python: React.FC = memo(() => {
     removeTab,
     switchTab,
     handleCreate
-  } = useEditor();
+  } = useTabManager();
+
+  const isDasetTab = activeTab === 'daset';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
@@ -32,7 +36,7 @@ const Python: React.FC = memo(() => {
 
   return (
     <Layout className="notebook-layout">
-      <Sider width={300} className="notebook-sider">
+      <Sider width={isDasetTab ? '100%' : 300} className="notebook-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
@@ -51,19 +55,26 @@ const Python: React.FC = memo(() => {
           <TabPane key="data" title={<DataIcon />}>
             <DataManager key="data" />
           </TabPane>
-          <TabPane key="tools" title={<SuanziIcon />}></TabPane>
+          <TabPane key="tools" title={<SuanziIcon />}>
+            <ToolsManager key="tools" />
+          </TabPane>
+          <TabPane key="daset" title={<SuanziIcon />}>
+            <DatasetsList />
+          </TabPane>
         </Tabs>
       </Sider>
-      <Content className="notebook-content">
-        <EditorContent
-          fileTabs={fileState.fileTabs}
-          activeTab={fileState.activeTab}
-          onTabChange={switchTab}
-          onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-          onRemoveTab={removeTab}
-          onCreate={handleCreate}
-        />
-      </Content>
+      {!isDasetTab && (
+        <Content className="notebook-content">
+          <EditorContent
+            fileTabs={fileState.fileTabs}
+            activeTab={fileState.activeTab}
+            onTabChange={switchTab}
+            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+            onRemoveTab={removeTab}
+            onCreate={handleCreate}
+          />
+        </Content>
+      )}
     </Layout>
   );
 });

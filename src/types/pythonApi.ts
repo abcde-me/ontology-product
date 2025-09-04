@@ -154,3 +154,38 @@ export interface GetRunLogRes {
   /** 日志 */
   log: string;
 }
+
+export enum OperatorCatalog {
+  DATA_CLEANING = '数据清洗类',
+  DATA_PARSING = '数据解析类',
+  DATA_AUGMENTATION = '数据增强类'
+}
+
+export interface GetOperatorListItem {
+  /** 算子分类 */
+  catalog: string;
+  /** 算子列表 */
+  op_items: OperatorItem[];
+}
+
+export interface OperatorItem {
+  /** 算子名称 */
+  name: string;
+  /** 算子描述 */
+  description: string;
+  /** 处理逻辑详细描述 */
+  detail: string;
+  /** 使用方式 */
+  usage: {
+    /** 输入 */
+    input: string;
+    /** 输出 */
+    output: string;
+  };
+  /** 使用场景 */
+  usage_scenarios: string;
+  /** 标签 */
+  tags: string[];
+  /** 示例代码 */
+  sample_code: string;
+}

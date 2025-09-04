@@ -92,7 +92,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           mg_duplicate: inputs?.mg_duplicate_checkbox,
-          mg_duplicate_ngram: inputs?.mg_duplicate_ngram,
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
@@ -427,16 +427,31 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           </div>
           {mg_duplicate && (
             <>
-              <div className='mg-content-duplicates' style={{ display: 'flex' }}>
+              <div
+                className="mg-content-duplicates"
+                style={{ display: 'flex' }}
+              >
                 <FormItem
                   layout="vertical"
                   label={null}
                   field="mg_duplicate_checkbox"
                   labelAlign="left"
                 >
-                  <RadioGroup value={form.getFieldValue('mg_duplicate_checkbox')} onChange={(value) => form.setFieldValue('mg_duplicate_checkbox', value)}>
-                    <Radio style={{ whiteSpace: 'nowrap' }} value='ngram'>重复比率过滤</Radio>
-                    <Radio style={{ whiteSpace: 'nowrap', marginLeft: 16 }} value='md5'>基于MD5去重</Radio>
+                  <RadioGroup
+                    value={form.getFieldValue('mg_duplicate_checkbox')}
+                    onChange={(value) =>
+                      form.setFieldValue('mg_duplicate_checkbox', value)
+                    }
+                  >
+                    <Radio style={{ whiteSpace: 'nowrap' }} value="ngram">
+                      重复比率过滤
+                    </Radio>
+                    <Radio
+                      style={{ whiteSpace: 'nowrap', marginLeft: 16 }}
+                      value="md5"
+                    >
+                      基于MD5去重
+                    </Radio>
                   </RadioGroup>
                 </FormItem>
               </div>
@@ -444,12 +459,19 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 label={null}
                 field="ngram_threshold"
                 labelAlign="left"
-                disabled={form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'}>
+                disabled={
+                  form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'
+                }
+              >
                 <InputNumber
-                  disabled={form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'}
-                  onChange={value => form.setFieldValue('mg_duplicate_ngram', value)}
+                  disabled={
+                    form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'
+                  }
+                  onChange={(value) =>
+                    form.setFieldValue('mg_duplicate_ngram', value)
+                  }
                   style={{ marginLeft: 16, marginRight: 16 }}
-                  size='small'
+                  size="small"
                   min={0}
                   max={1}
                   step={0.1}

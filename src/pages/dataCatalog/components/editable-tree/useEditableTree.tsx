@@ -138,7 +138,11 @@ export function useEditableTree({ catalogTreeStore }) {
   ) => {
     const { props } = extra.node;
     const { dataRef } = props;
-    if (dataRef?.isLastLeaf && !dataRef?.showInput) {
+    if (
+      dataRef?.isLastLeaf &&
+      !dataRef?.showInput &&
+      dataRef?.type_name !== 'db'
+    ) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
         selectedPath: dataRef?.fullPath
@@ -391,9 +395,7 @@ export function useEditableTree({ catalogTreeStore }) {
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {['volume', 'db', CatalogTypeEnum.db].every(
-            (key) => dataRef?.type !== key
-          ) && (
+          {['volume'].every((key) => dataRef?.type !== key) && (
             <>
               {dataRef?.perms?.includes(
                 DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS

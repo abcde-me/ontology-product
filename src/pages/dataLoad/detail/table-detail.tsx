@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import './index.css';
 import { useHistory } from 'react-router-dom';
 import { ExecutionHistory } from '../type';
-import { stopeLoad } from '@/api/loadApi';
+import { stopeLoad, reTryLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
@@ -22,6 +22,7 @@ interface PropsType {
 }
 const TableDetail = (props) => {
   const history = useHistory();
+  const { type } = props;
   const columns: any = [
     {
       title: '运行ID',
@@ -164,7 +165,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}`
+              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}&type=${type}`
             );
           }}
         >
@@ -227,9 +228,16 @@ const TableDetail = (props) => {
     setVisible(false);
   };
   //重试
-  const reTry = (id: string) => {
+  const reTry = async (id: string) => {
     console.log('重试的ID', id);
-
+    const res = await reTryLoad({
+      instance_id: id
+    });
+    if (res.code == '' && res.status == 200) {
+      Message.success('操作成功');
+    } else {
+      Message.error(res.message);
+    }
     //调取重试接口
   };
   useEffect(() => {

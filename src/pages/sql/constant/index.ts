@@ -296,3 +296,35 @@ export const DATASET_STORAGE_TYPE_LIST = [
 export const DATASET_TAG_LIST = [];
 
 export const DATASET_LIST = [];
+
+export const DEFAULT_SQL_PLACEHOLDER = `
+🎉 欢迎使用多模态数据治理平台
+
+⚡️快速开始
+这里是您的SQL开发工作区，请编写SQL 查询语句，注意符合相关语法规范。
+
+🚀 开始您的数据治理之旅！
+`;
+
+export const SCRIPT_CODE = `import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 设置随机种子
+np.random.seed(0)
+
+# 创建一个模拟 30 天的销售额数据
+df = pd.DataFrame({
+    'day': range(1, 31),
+    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 设置随机种子
+np.random.seed(0)
+
+# 创建一个模拟 30 天的销售额数据
+df = pd.DataFrame({
+    'day': range(1, 31),
+    'sales': np.random.normal(loc=200, scale=30, size=30).astype(int)`;

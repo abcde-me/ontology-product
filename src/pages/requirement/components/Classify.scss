@@ -1,0 +1,31 @@
+.classify-warp {
+  width: 800px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+
+  .classify-item {
+    width: 100%;
+  }
+
+  .classify-relation-item {
+    display: flex;
+    margin-top: 12px;
+    width: 900px;
+    flex-wrap: wrap;
+  }
+
+  .add-btn {
+    margin-left: 16px;
+    margin-bottom: 16px;
+  }
+
+  .attribute-list {
+    background-color: #f5f9ff;
+    padding: 12px;
+    margin: 8px 16px 16px 16px;
+  }
+
+  .attribute-item {
+    display: flex;
+  }
+}

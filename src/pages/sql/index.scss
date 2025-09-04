@@ -1,38 +1,3 @@
-.my-vertical-tabs {
-  .arco-tabs-content {
-    padding: 0;
-  }
-
-  .arco-tabs-content-inner {
-    height: 100%;
-  }
-
-  .arco-tabs-pane {
-    height: 100%;
-  }
-}
-
-.my-horizontal-tabs {
-  height: 100%;
-
-  .arco-tabs-content {
-    padding: 0;
-    height: 100%;
-  }
-
-  .arco-tabs-content-inner {
-    height: 100%;
-  }
-
-  .arco-tabs-pane {
-    height: 100%;
-  }
-}
-
-.my-alert.arco-alert {
-  border-radius: 0;
-}
-
 .notebook-layout {
   height: 100%;
   background-color: #f5f5f5;
@@ -40,35 +5,39 @@
   margin: 20px 20px 20px 0;
   overflow: hidden;
 
-  .notebook-sider.arco-layout-sider {
-    transition: none;
-    box-shadow: none;
-    border-right: 1px solid #e2e8f0;
+  .tab-tree {
+    padding: 0 12px;
+  }
+
+  .arco-tabs-header-title {
+    border-radius: 0;
   }
 
   .notebook-sider {
-    .notebook-tabs {
-      height: 100%;
+    .arco-layout-sider-children {
+      .notebook-tabs {
+        height: 100%;
 
-      .arco-tabs-header-nav {
-        padding: 8px;
-        border-right: 1px solid #e2e8f0;
-      }
-
-      .arco-tabs-header-nav-rounded .arco-tabs-header-title {
-        padding: 0px;
-        // border-radius: 4px;
-        margin-top: 12px;
-
-        &:first-of-type {
-          margin-top: 0px;
+        .arco-tabs-header-nav {
+          padding: 8px;
+          border-right: 1px solid #e2e8f0;
         }
-      }
 
-      .arco-tabs-content {
-        height: calc(100% - 48px);
-        overflow: hidden;
-        padding: 0px;
+        .arco-tabs-header-nav-rounded .arco-tabs-header-title {
+          padding: 0px;
+          // border-radius: 4px;
+          margin-top: 12px;
+
+          &:first-of-type {
+            margin-top: 0px;
+          }
+        }
+
+        .arco-tabs-content {
+          height: calc(100% - 48px);
+          overflow: hidden;
+          padding: 0px;
+        }
       }
     }
   }
@@ -77,6 +46,13 @@
     background-color: #fff;
     overflow: hidden;
   }
+}
+
+// 删除sider组件自带宽度切换动画
+.notebook-sider.arco-layout-sider {
+  transition: none;
+  box-shadow: none;
+  border-right: 1px solid #e2e8f0;
 }
 
 .my-descriptions .arco-descriptions-item,

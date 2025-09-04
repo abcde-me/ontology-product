@@ -171,8 +171,6 @@ export const useNodesSyncDraft = () => {
       params = {}
     ) => {
       if (getNodesReadOnly()) return;
-      console.log(sync, 'syncsync');
-
       if (sync) doSyncWorkflowDraft(notRefreshWhenSyncError, callback, params);
       else debouncedSyncWorkflowDraft(doSyncWorkflowDraft);
     },

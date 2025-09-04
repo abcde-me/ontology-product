@@ -331,6 +331,7 @@
 }
 .custom-tabs .arco-tabs-content {
   padding-top: 12px;
+  min-height: 520px;
 }
 .custom-tabs .arco-tabs-header-nav-line .arco-tabs-header-title-text {
   padding: 0 0 8px 0;

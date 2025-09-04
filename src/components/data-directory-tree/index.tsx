@@ -3,7 +3,10 @@ import { Tree } from '@arco-design/web-react';
 import DataCollection from './components/daset-tree';
 import SourceTargetTree from './components/source-taget-tree';
 import FileIcon from './assets/file-icon.svg';
+import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
+import { Db, FluffyVolume } from '@/api/dataCatalog';
+import { DataDirectoryTreeFrom } from './types';
 
 // 数据目录配置数组
 const directoryItems = [
@@ -31,7 +34,25 @@ const treeData = directoryItems.map((item) => ({
   icon: <FileIcon />
 }));
 
-const DataDirectoryTree: React.FC<{}> = () => {
+interface DataDirectoryTreeProps {
+  from?: DataDirectoryTreeFrom;
+  onViewDatasetDetail?: (dataset: DatasetListItem) => void;
+  onInsertDataset?: (dataset: DatasetListItem) => void;
+  onViewVolumeDetail?: (volume: FluffyVolume) => void;
+  onVolumeInsert?: (volume: FluffyVolume) => void;
+  onViewDbDetail?: (database: Db) => void;
+  onDbInsert?: (database: Db) => void;
+}
+
+const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
+  from = DataDirectoryTreeFrom.PYTHON,
+  onViewDatasetDetail,
+  onInsertDataset,
+  onViewVolumeDetail,
+  onVolumeInsert,
+  onViewDbDetail,
+  onDbInsert
+}) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
 
@@ -49,43 +70,80 @@ const DataDirectoryTree: React.FC<{}> = () => {
     setSelectedKeys([]);
   };
 
-  // 处理文件详情事件
-  const handleFileDetail = (file: any) => {
-    console.log('文件详情:', file);
-    // 这里可以添加显示文件详情的逻辑
-    // 比如打开一个模态框显示文件信息
+  // 处理数据集详情查看
+  const handleDatasetDetail = (dataset: DatasetListItem) => {
+    onViewDatasetDetail?.(dataset);
   };
 
-  // 处理文件插入事件
-  const handleFileInsert = (file: any) => {
-    console.log('文件插入:', file);
-    // 这里可以添加插入文件的逻辑
-    // 比如将文件添加到某个工作区或执行插入操作
+  // 处理数据集插入
+  const handleDatasetInsert = (dataset: DatasetListItem) => {
+    onInsertDataset?.(dataset);
+  };
+
+  // 处理数据卷详情查看
+  const handleVolumeDetail = (volume: FluffyVolume) => {
+    onViewVolumeDetail?.(volume);
+  };
+
+  // 处理数据卷插入
+  const handleVolumeInsert = (volume: FluffyVolume) => {
+    onVolumeInsert?.(volume);
+  };
+
+  // 处理数据库详情查看
+  const handleDbDetail = (database: Db) => {
+    onViewDbDetail?.(database);
+  };
+
+  // 处理数据库插入
+  const handleDbInsert = (database: Db) => {
+    onDbInsert?.(database);
   };
 
   // 根据当前选中的节点渲染对应的组件
   const renderContent = () => {
     switch (currentNode) {
       case 'dataset':
-        return <DataCollection type="python" onBack={handleBack} />;
+        return (
+          <DataCollection
+            type={from}
+            onBack={handleBack}
+            // 数据集详情
+            onViewDatasetDetail={handleDatasetDetail}
+            // 数据集插入
+            onInsertDataset={handleDatasetInsert}
+          />
+        );
       case 'source':
         return (
           <SourceTargetTree
             dataType="source"
-            type="python"
+            type={from}
             onBack={handleBack}
-            onFileDetail={handleFileDetail}
-            onFileInsert={handleFileInsert}
+            // 数据卷详情
+            onVolumeDetail={handleVolumeDetail}
+            // 数据卷插入
+            onVolumeInsert={handleVolumeInsert}
+            // 数据库详情
+            onDbDetail={handleDbDetail}
+            // 数据库插入
+            onDbInsert={handleDbInsert}
           />
         );
       case 'target':
         return (
           <SourceTargetTree
             dataType="target"
-            type="python"
+            type={from}
             onBack={handleBack}
-            onFileDetail={handleFileDetail}
-            onFileInsert={handleFileInsert}
+            // 数据卷详情
+            onVolumeDetail={handleVolumeDetail}
+            // 数据卷插入
+            onVolumeInsert={handleVolumeInsert}
+            // 数据库详情
+            onDbDetail={handleDbDetail}
+            // 数据库插入
+            onDbInsert={handleDbInsert}
           />
         );
       default:

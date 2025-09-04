@@ -124,6 +124,7 @@ export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
 export const PrefixLabelEngine = '/label-engine/api/v1';
+export const PrefixLabelService = '/label-service/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -322,6 +323,8 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionListApi: PrefixAimdp + '/datasets/version',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  //数据内容文件表
+  dataContentFileList: PrefixAimdp + '/datasets/version/file',
 
   // 连接器接口
 
@@ -371,19 +374,28 @@ export const ModaForgeResourceEndpoints = {
   getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
   // 查询任务单个执行记录详情
   getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+  // 重试载入任务
+  reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  //载入获取表名
+  getTableNameApi: '/internal/v1/generate_db_name',
 
+  // 数据标注接口
+  // 获取数据标注列表
+  getAnnotationListApi: PrefixLabelService + '/requirements/list',
+  // 获取数据标注 - 任务列表
+  getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // python开发
-  pythonListApi: PrefixAimdp + '/pyspark/{id}/list',
+  pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
   pythonCreateApi: PrefixAimdp + '/pyspark',
-  pythonRenameApi: PrefixAimdp + '/pyspark/{id}/rename',
-  pythonDeleteApi: PrefixAimdp + '/pyspark/{id}/delete',
-  pythonCopyApi: PrefixAimdp + '/pyspark/{id}/copy',
-  pythonOpenApi: PrefixAimdp + '/pyspark/{id}/open',
-  pythonSaveApi: PrefixAimdp + '/pyspark/{id}/modify',
-  pythonRunApi: PrefixAimdp + '/pyspark/{id}/run',
-  pythonRunCancelApi: PrefixAimdp + '/pyspark/{id}/run_cancel',
-  pythonRunResultApi: PrefixAimdp + '/pyspark/{id}/get_run_result',
-  pythonRunLogApi: PrefixAimdp + '/pyspark/{id}/get_run_log',
+  pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

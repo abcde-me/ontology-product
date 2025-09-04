@@ -282,10 +282,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       let res;
       if (tableType === 'target') {
         // 调用目标数据API
+        console.log(newParams, 'top----111111');
         res = await getTargetDataFileList(newParams);
         console.log('调用目标数据API，参数:', newParams);
       } else {
         // 调用源数据API
+        console.log(newSourceParams, 'top-------2222');
         res = await getSourceDataFileList(newSourceParams);
         console.log('调用源数据API，参数:', newSourceParams);
       }
