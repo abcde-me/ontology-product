@@ -1,100 +1,47 @@
 .tools-manager {
-  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
 
-  // 按钮样式
-  .arco-btn-outline:not(.arco-btn-disabled) {
-    color: #007dfa;
-    border-color: #007dfa;
-  }
-
-  .arco-btn-outline:not(.arco-btn-disabled):active,
-  .arco-btn-outline:not(.arco-btn-disabled):hover {
-    color: #007dfa;
-    border-color: #007dfa;
+  .arco-tree-node:hover {
     background-color: transparent;
   }
 
-  &__title {
-    padding: 8px 12px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1d2129;
+  .arco-tree-node-title:hover {
+    background-color: transparent;
   }
 
-  &__search {
-    padding: 8px 12px;
+  .arco-tree-node-is-leaf {
+    &:hover {
+      background-color: #eef6ff;
+      border-radius: 2px;
+      overflow: hidden;
 
-    &-input {
-      width: 100%;
+      .tools-manager__operator-info {
+        .tools-manager__operator-name {
+          max-width: 84px !important;
+        }
+
+        .tools-manager__operator-desc {
+          max-width: 84px !important;
+        }
+      }
+
+      .tools-manager__operator-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    .arco-tree-node-title {
+      margin-left: -24px;
+      padding: 6px 8px;
     }
   }
 
   &__content {
-    flex: 1;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: 0 12px;
-
-    .tools-manager__tree {
-      flex: 1;
-
-      // 自定义Tree样式
-      .arco-tree {
-        background: transparent;
-      }
-
-      .arco-tree-node {
-        padding: 0;
-        margin: 0;
-
-        .arco-tree-node-title {
-          padding: 0;
-          height: auto;
-          line-height: normal;
-          border-radius: 0;
-
-          &:hover {
-            background: none;
-          }
-        }
-
-        .arco-tree-node-indent {
-          display: none;
-        }
-
-        .arco-tree-node-switcher {
-          display: none;
-        }
-
-        .arco-tree-node-icon {
-          display: none;
-        }
-      }
-
-      // 分类节点样式
-      .arco-tree-node[data-key*='category-'] {
-        .arco-tree-node-title {
-          padding: 8px 16px;
-          background: #f7f8fa;
-          border-bottom: 1px solid #e5e6eb;
-          font-weight: 500;
-        }
-      }
-
-      // 算子节点样式
-      .arco-tree-node[data-key*='operator-'] {
-        .arco-tree-node-title {
-          padding: 0 16px;
-        }
-      }
-    }
   }
 
   &__category {
@@ -121,36 +68,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 8px;
     position: relative;
 
-    &:hover {
-      background: #eef6ff;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    &--hovered {
-      .tools-manager__operator-info {
-        .tools-manager__operator-name {
-          max-width: 84px !important;
-        }
-
-        .tools-manager__operator-desc {
-          max-width: 84px !important;
-        }
-      }
-
-      .tools-manager__operator-actions {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-
     &-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -164,22 +87,21 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 4px;
     }
 
     &-title {
       .tools-manager__operator-name {
-        font-size: 14px;
+        font-size: var(--font-size-primary);
         font-weight: 500;
-        color: #1d2129;
+        color: var(--color-text-2);
         max-width: 180px;
       }
     }
 
     &-description {
       .tools-manager__operator-desc {
-        font-size: 12px;
-        color: #86909c;
+        font-size: var(--font-size-secondary);
+        color: var(--color-text-4);
         max-width: 180px;
       }
     }
@@ -222,65 +144,6 @@
         background: #165dff;
         color: #fff;
       }
-    }
-  }
-}
-
-// EllipsisPopover 样式调整
-// .ellipsis-popover-div {
-//   width: 100%;
-
-//   .ellipsis-text {
-//     display: inline-block;
-//     width: 100%;
-//     overflow: hidden;
-//     text-overflow: ellipsis;
-//     white-space: nowrap;
-//   }
-// }
-
-// 滚动条样式
-// .tools-manager__content .tools-manager__tree {
-//   &::-webkit-scrollbar {
-//     width: 6px;
-//   }
-
-//   &::-webkit-scrollbar-track {
-//     background: #f1f1f1;
-//     border-radius: 3px;
-//   }
-
-//   &::-webkit-scrollbar-thumb {
-//     background: #c1c1c1;
-//     border-radius: 3px;
-
-//     &:hover {
-//       background: #a8a8a8;
-//     }
-//   }
-// }
-
-// 搜索框样式优化
-.tools-manager__search-input {
-  .arco-input-inner-wrapper {
-    border-radius: 6px;
-    border: 1px solid #e5e6eb;
-
-    &:hover {
-      border-color: #c9cdd4;
-    }
-
-    &:focus-within {
-      border-color: #165dff;
-    }
-  }
-}
-
-// Tree组件选中状态样式
-.tools-manager__tree {
-  .arco-tree-node-selected {
-    .arco-tree-node-title {
-      background: none !important;
     }
   }
 }
