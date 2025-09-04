@@ -447,8 +447,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           // 创建失败，移除临时添加的节点
           const newTreeData = treeData.filter((item) => !item.isAdd);
           setTreeData(newTreeData);
-          setInputValue('');
-          setDefaultName('');
         }
       } else {
         try {
@@ -463,41 +461,26 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             return;
           }
         } catch (e) {
+          Message.error('重命名失败');
           // 创建失败，移除临时添加的节点
           const newTreeData = treeData.filter((item) => !item.isAdd);
           setTreeData(newTreeData);
-          setInputValue('');
-          setDefaultName('');
-          Message.error('重命名失败');
         }
       }
 
       setInputValue('');
       setDefaultName('');
-      // 重新获取当前文件夹数据
-      const newData = await onFolderClick?.(currentFolderId);
-      const formattedData = formatTreeData(newData ?? []);
-      setTreeData(formattedData);
     };
 
-    const handleCopy = async (node: NodeProps) => {
+    const handleCopy = (node: NodeProps) => {
       try {
-        const copyRes = await onCopy?.(`${node.dataRef?.name}_副本`, node);
-
-        if (!copyRes) {
-          return;
-        }
-
-        const newData = await onFolderClick?.(currentFolderId);
-        const formattedData = formatTreeData(newData ?? []);
-        setTreeData(formattedData);
+        onCopy?.(`${node.dataRef?.name}_副本`, node);
       } catch (e) {
         Message.error('复制失败');
       }
     };
 
     const handleDelete = (node: NodeProps) => {
-      const nodeName = node.dataRef?.name || '项目';
       const nodeType =
         node.dataRef?.type === PythonItemType.Directory ? '文件夹' : '文件';
 
@@ -509,19 +492,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : `删除后，该文件不可恢复`,
         okText: '确定',
         cancelText: '取消',
-        onOk: async () => {
+        onOk: () => {
           try {
-            const deleteRes = await onDelete?.(node);
-
-            if (!deleteRes) {
-              return;
-            }
-
-            // 删除成功的消息由 useFileManager 处理
-
-            const newData = await onFolderClick?.(currentFolderId);
-            const formattedData = formatTreeData(newData ?? []);
-            setTreeData(formattedData);
+            onDelete?.(node);
           } catch (e) {
             Message.error('删除失败');
           }

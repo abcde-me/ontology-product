@@ -38,7 +38,7 @@ interface UseFileManagerReturn {
   handleBackToParent: (parentId: string) => Promise<PythonListItem[]>;
 
   // 工具函数
-  getRawPythonList: () => Promise<void>;
+  getRawPythonList: (folderId?: string) => Promise<PythonListItem[]>;
   formatData: (data: unknown[]) => any[];
 }
 
@@ -129,7 +129,7 @@ export const useFileManager = (
   // 获取原始Python列表
   const getRawPythonList = useCallback(
     async (folderId?: string) => {
-      if (isLoading) return; // 防止重复请求
+      if (isLoading) return []; // 防止重复请求
 
       const targetFolderId = folderId || currentFolderId;
       setIsLoading(true);
@@ -137,38 +137,21 @@ export const useFileManager = (
         const rawPythonList = await getPythonList(targetFolderId, {});
 
         if (rawPythonList.status === 200) {
-          setPythonList(rawPythonList.data.items);
-
-          // 只有在根目录且列表加载完成后，才自动打开第一个文件（如果存在且编辑器中无文件打开）
-          if (
-            targetFolderId === '0' &&
-            rawPythonList.data.items.length > 0 &&
-            onFileOpen
-          ) {
-            const firstFile = rawPythonList.data.items.find(
-              (item) => item.type !== PythonItemType.Directory
-            );
-            if (firstFile) {
-              console.log(
-                '🚀 初始化时自动打开第一个文件:',
-                firstFile.name,
-                'ID:',
-                firstFile.id
-              );
-              // 设置选中状态
-              setSelectedKeys([String(firstFile.id)]);
-              onFileOpen(String(firstFile.id), firstFile.name);
-            }
-          }
+          const items = rawPythonList?.data?.items ?? [];
+          console.log('rawPythonList', items);
+          setPythonList(items);
+          return items; // 返回获取到的数据
         }
+        return [];
       } catch (error) {
         console.error('获取Python列表失败:', error);
         Message.error('获取文件列表失败');
+        return [];
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, onFileOpen, currentFolderId]
+    [isLoading, currentFolderId]
   );
 
   // 创建文件/文件夹
@@ -193,8 +176,7 @@ export const useFileManager = (
         // 如果是创建的文件（不是文件夹），自动在编辑器中打开
         if (
           createRes.data &&
-          createRes.data.type !== PythonItemType.Directory &&
-          onFileOpen
+          createRes.data.type !== PythonItemType.Directory
         ) {
           console.log(
             '✅ 新建文件成功，自动打开文件:',
@@ -204,8 +186,6 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
-          // 延迟一下打开文件，确保列表刷新完成
-          onFileOpen(String(createRes.data.id), createRes.data.name);
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
@@ -220,7 +200,7 @@ export const useFileManager = (
         return null;
       }
     },
-    [getRawPythonList, onFileOpen, currentFolderId]
+    [getRawPythonList, currentFolderId]
   );
 
   // 重命名
@@ -357,7 +337,26 @@ export const useFileManager = (
 
   // 组件挂载时获取数据
   useEffect(() => {
-    getRawPythonList();
+    getRawPythonList().then((items) => {
+      // 只有在根目录且列表加载完成后，才自动打开第一个文件（如果存在且编辑器中无文件打开）
+      if (items.length > 0 && onFileOpen) {
+        const firstFile = items.find(
+          (item) => item.type !== PythonItemType.Directory
+        );
+
+        if (firstFile) {
+          console.log(
+            '🚀 初始化时自动打开第一个文件:',
+            firstFile.name,
+            'ID:',
+            firstFile.id
+          );
+          // 设置选中状态
+          setSelectedKeys([String(firstFile.id)]);
+          onFileOpen(String(firstFile.id), firstFile.name);
+        }
+      }
+    });
   }, []); // 只在组件挂载时执行一次
 
   return {
