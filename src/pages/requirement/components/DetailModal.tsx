@@ -11,7 +11,8 @@ import {
   Table,
   Popover,
   Pagination,
-  Message
+  Message,
+  Empty
 } from '@arco-design/web-react';
 import {
   getCatalogList,
@@ -139,16 +140,22 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   // 树的内容
   const renderTreeContent = () => {
     return (
-      <Tree
-        autoExpandParent={false}
-        treeData={treeData}
-        // checkStrictly={checkStrictly}
-        onSelect={(value) => {
-          setCurrent(1);
-          setPageSize(10);
-          setCheckedKeys(value);
-        }}
-      />
+      <div>
+        {treeData && treeData.length > 0 ? (
+          <Tree
+            autoExpandParent={false}
+            treeData={treeData}
+            // checkStrictly={checkStrictly}
+            onSelect={(value) => {
+              setCurrent(1);
+              setPageSize(10);
+              setCheckedKeys(value);
+            }}
+          />
+        ) : (
+          <Empty description="暂无数据" />
+        )}
+      </div>
     );
   };
   //转换文件大小

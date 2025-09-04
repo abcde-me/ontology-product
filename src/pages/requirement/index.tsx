@@ -19,7 +19,12 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { IconClockCircle, IconPlus } from '@arco-design/web-react/icon';
 import { getAnnotationList } from '@/api/dataAnnotation';
-import { RequirementType, RequirementTypeMap } from './type';
+import {
+  RequirementStatus,
+  RequirementStatusMap,
+  RequirementType,
+  RequirementTypeMap
+} from './type';
 import './index.scss';
 
 export default function Requirement() {
@@ -216,29 +221,33 @@ export default function Requirement() {
       title: '状态',
       dataIndex: 'status',
       width: 100,
-      render: (_, record) =>
-        record.status ? (
-          <div className="publish-part published">
-            <span>标注完成</span>
-          </div>
+      render: (_, record) => {
+        console.log(record, record.status);
+        return renderEmptyPlaceholder(record.status) !== '-' ? (
+          <EllipsisPopover
+            value={RequirementStatusMap[record.status]}
+            isEdit={false}
+          />
         ) : (
-          <div className="publish-part not-published">
-            <IconClockCircle className="mr-[6px] size-[16px]" />
-            <span>发布中</span>
-          </div>
-        ),
+          <span>-</span>
+        );
+      },
       filters: [
         {
           text: '发布中',
-          value: 0
+          value: RequirementStatus.Draft
         },
         {
           text: '已发布',
-          value: 1
+          value: RequirementStatus.Published
         },
         {
           text: '发布失败',
-          value: 1
+          value: RequirementStatus.PublishFailed
+        },
+        {
+          text: '标注完成',
+          value: RequirementStatus.Annotated
         }
       ]
     },
@@ -257,13 +266,13 @@ export default function Requirement() {
     },
     {
       title: '创建人',
-      dataIndex: 'user_name',
-      key: `user_name+id`,
+      dataIndex: 'create_by',
+      key: `create_by+id`,
       width: 100,
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
+          value={renderEmptyPlaceholder(record.create_by)}
           isEdit={false}
         />
       )

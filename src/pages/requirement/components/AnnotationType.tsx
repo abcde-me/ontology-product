@@ -21,12 +21,12 @@ const typeList = [
     value: 4
   }
 ];
-const btnPicData = [{ key: 1, label: '图片' }];
+const btnPicData = [{ key: 1, label: '图片', code: 'IMAGE_ANNOTATION' }];
 const btnTextData = [
-  { key: 1, label: '实体/实体关系' },
-  { key: 2, label: '文本分类' },
-  { key: 3, label: '问答' },
-  { key: 4, label: '文本排序' }
+  { key: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
+  { key: 2, label: '文本分类', code: 'TEXT_CLASSIFICATION' },
+  { key: 3, label: '问答', code: 'TEXT_QA' },
+  { key: 4, label: '文本排序', code: 'TEXT_SORT' }
 ];
 interface AnnotationTypeProps {
   label_type: number;
@@ -34,15 +34,24 @@ interface AnnotationTypeProps {
     label_tool_name: number;
     label_tool_code: number;
   };
-  getChildAnnotationType: (selectedRadio: number, activeKey: number) => void;
+  getChildAnnotationType: (
+    selectedRadio: number,
+    activeKey: number,
+    annotationTypeContentCode: string
+  ) => void;
 }
 const AnnotationType: React.FC<AnnotationTypeProps> = ({
   label_type,
   label_tool,
   getChildAnnotationType
 }) => {
+  // 标注类型当前选择项
   const [selectedRadio, setSelectedRadio] = useState(label_type || 1);
+  // 标注工具
   const [activeKey, setActiveKey] = useState(label_tool?.label_tool_code || 1);
+  // 当前标注类型选择内容
+  const [annotationTypeContentCode, setAnnotationTypeContentCode] =
+    useState('');
   const handleBtnClick = (key) => {
     if (key !== activeKey) {
       // 避免重复点击触发更新
@@ -50,8 +59,8 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
     }
   };
   useEffect(() => {
-    getChildAnnotationType(selectedRadio, activeKey);
-  }, [selectedRadio, activeKey]);
+    getChildAnnotationType(selectedRadio, activeKey, annotationTypeContentCode);
+  }, [selectedRadio, activeKey, annotationTypeContentCode]);
   return (
     <div className="annotation-type-warp">
       <div className="type-header">
@@ -81,6 +90,7 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                   className={`mutex-btn ${activeKey === item.key ? 'active' : ''}`}
                   onClick={() => {
                     handleBtnClick(item.key);
+                    setAnnotationTypeContentCode(item.code);
                   }}
                   key={item.key}
                 >
@@ -96,6 +106,7 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                   className={`mutex-btn ${activeKey === item.key ? 'active' : ''}`}
                   onClick={() => {
                     handleBtnClick(item.key);
+                    setAnnotationTypeContentCode(item.code);
                   }}
                   key={item.key}
                 >
