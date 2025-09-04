@@ -127,3 +127,11 @@ export async function scriptingBenchCancel(
     .inRegion()
     .do();
 }
+
+// 工作流-知识库名称校验
+export async function knowledgeBaseNameCheck(params: {
+  knowledgeName: string;
+  userId: string;
+}) {
+  return await UAPI.RES.knowledgeBaseNameCheck({}).post(params).inRegion().do();
+}

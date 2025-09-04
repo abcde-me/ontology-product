@@ -985,5 +985,6 @@ export enum FileType {
   avi = 'avi',
   wmv = 'wmv',
   flac = 'flac',
-  file = 'file'
+  file = 'file',
+  database = 'database'
 }

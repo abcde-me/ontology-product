@@ -24,6 +24,14 @@ const nodeDefault: NodeDefault<EndNodeType> = {
   checkValid(payload: EndNodeType) {
     let isValid = true;
     let errorMessages = '';
+    if (
+      payload.is_embedding === true &&
+      (payload.Knowledge_base_name === undefined ||
+        payload.Knowledge_base_name === '')
+    ) {
+      isValid = true;
+      errorMessages = '知识库名称未配置';
+    }
     if (payload.target_path_id === undefined) {
       isValid = true;
       errorMessages = '数据目标目录未配置';
