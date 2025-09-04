@@ -78,6 +78,7 @@ interface ComponentTreeProps {
   onDataRefresh?: () => Promise<TreeNodeData[]>; // 新增：数据刷新回调
   dataSourceType?: string; // 新增：数据源类型，用于判断是否显示数据源节点
   tableNameNames?: string; // 新增：表名
+  selectedKeys?: string[]; // 新增：选中的节点keys
 }
 
 const ComponentTree: React.FC<ComponentTreeProps> = ({
@@ -91,7 +92,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   activeTab = 'src',
   onDataRefresh,
   dataSourceType,
-  tableNameNames
+  tableNameNames,
+  selectedKeys = []
 }) => {
   // 数据库节点下的输入框状态
   const [dbInputNodes, setDbInputNodes] = useState<Map<string, TreeNodeData>>(
@@ -848,7 +850,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       return false;
     }
     // 其他情况显示三角标
-    console.log('Showing switcher');
     return true;
   };
 
@@ -953,13 +954,18 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           showLine
           blockNode
           selectable
+          selectedKeys={selectedKeys}
           expandedKeys={expandedKeys}
           onExpand={(keys) => setExpandedKeys(keys)}
           renderTitle={renderTitle}
           icons={(node) => ({
             switcherIcon: shouldShowSwitcherIcon(node) ? (
               <IconCaretDown />
-            ) : null
+            ) : (
+              (node as any)?.type_name === 'volume' && (
+                <IconStorage style={{ fontSize: '14px' }} />
+              )
+            )
           })}
           onSelect={handleEnhancedSelect}
           renderExtra={renderExtra}
