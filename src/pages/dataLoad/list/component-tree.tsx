@@ -745,12 +745,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const { dataRef, title } = props;
     const TitleText = title;
 
-    // 检查是否是数据库节点（不可选中）
-    const isDbNode =
-      dataRef?.type_name === 'db_parent' ||
-      dataRef?.title === '数据库' ||
-      dataRef?.name === '数据库';
-
     return (
       <Tooltip color="white" content={!subLeafKeys[dataRef?.type] ? title : ''}>
         <div
@@ -876,15 +870,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         const { children, id, ...rest } = item;
         const hasChildren =
           children && Array.isArray(children) && children.length > 0;
-
-        // 检查是否是数据库节点或数据源节点（不可选中）
-        const isDbNode =
-          item.type_name === 'db_parent' ||
-          item.title === '数据库' ||
-          item.name === '数据库' ||
-          item.type_name === 'datasource_parent' ||
-          item.title === '数据源' ||
-          item.name === '数据源';
 
         return (
           <TreeNode
