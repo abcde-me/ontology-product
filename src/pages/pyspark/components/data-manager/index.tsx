@@ -64,18 +64,22 @@ const PythonTabContent: React.FC<{}> = () => {
       </div>
 
       {/* 数据集详情 */}
-      <ModalDatasetDetail
-        datasetDetailVisible={datasetDetailVisible}
-        detailId={detailId}
-        closeDatasetDetail={closeDatasetDetail}
-      />
+      {datasetDetailVisible && (
+        <ModalDatasetDetail
+          datasetDetailVisible={datasetDetailVisible}
+          detailId={detailId}
+          closeDatasetDetail={closeDatasetDetail}
+        />
+      )}
 
       {/* 数据卷详情 */}
-      <ModalVolumnDetail
-        volumnDetailVisible={volumnDetailVisible}
-        selectedVolumnId={selectedVolumnId}
-        closeVolumnDetail={closeVolumnDetail}
-      />
+      {volumnDetailVisible && (
+        <ModalVolumnDetail
+          volumnDetailVisible={volumnDetailVisible}
+          selectedVolumnId={selectedVolumnId}
+          closeVolumnDetail={closeVolumnDetail}
+        />
+      )}
     </div>
   );
 };

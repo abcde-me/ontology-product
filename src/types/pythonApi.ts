@@ -189,3 +189,70 @@ export interface OperatorItem {
   /** 示例代码 */
   sample_code: string;
 }
+
+export interface GetExportFileReq {
+  // pyspark文件ID
+  pyspark_id: number;
+  /** 存储类型 */
+  storage_type: StorageType;
+  /** 页码 */
+  page: number;
+  /** 每页数量 */
+  limit: number;
+}
+
+export enum StorageType {
+  File = 'file',
+  Jsonl = 'jsonl'
+}
+
+export interface ExportDatasetReq {
+  /**
+   * 数据集描述
+   */
+  description?: string;
+  /**
+   * 文件名列表
+   */
+  file_names?: string[];
+  /**
+   * 数据集名称
+   */
+  name: string;
+  /**
+   * pyspark文件ID
+   */
+  pyspark_id: number;
+  /**
+   * 存储类型：file,jsonl
+   */
+  storage_type: StorageType;
+  /**
+   * 标签列表
+   */
+  tag_names?: string[];
+}
+
+export interface ExportDatasetRes {
+  // 导出任务id
+  id: number;
+}
+
+export interface ExportFileRes {
+  /**
+   * 修改时间
+   */
+  file_modify_time: string;
+  /**
+   * 文件名称
+   */
+  file_name: string;
+  /**
+   * 文件大小
+   */
+  file_size: string;
+  /**
+   * 文件类型
+   */
+  file_type: string;
+}

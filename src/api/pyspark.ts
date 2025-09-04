@@ -20,7 +20,11 @@ import {
   GetRunLogReq,
   GetRunLogRes,
   GetOperatorListItem,
-  OperatorCatalog
+  OperatorCatalog,
+  ExportDatasetReq,
+  ExportDatasetRes,
+  ExportFileRes,
+  GetExportFileReq
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -523,5 +527,50 @@ export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
         ]
       }
     ]
+  });
+}
+
+// 导出数据集
+export async function exportDataset(
+  params: ExportDatasetReq
+): Promise<ApiRes<ExportDatasetRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetApi({ pyspark_id: id })
+  //   .post(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 1
+    }
+  });
+}
+
+// 查询导出文件列表
+export async function getExportFile(
+  params: GetExportFileReq
+): Promise<ApiRes<ExportFileRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetStatusApi({ pyspark_id: id })
+  //   .get({})
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      file_modify_time: '2025-08-18 15:00',
+      file_name: 'example.txt',
+      file_size: '1024',
+      file_type: 'file'
+    }
   });
 }
