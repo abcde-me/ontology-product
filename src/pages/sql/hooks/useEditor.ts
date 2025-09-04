@@ -7,7 +7,11 @@ import {
   getRunResult,
   savePythonItem,
   createSqlScript,
-  updateSqlScript
+  updateSqlScript,
+  runSqlScript,
+  getRunResultSqlScript,
+  RunResultItem,
+  RunResult
 } from '@/api/sql';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { FileTab } from './useTabManager';
@@ -24,14 +28,17 @@ interface UseEditorOptions {
 interface UseEditorReturn {
   // 编辑器状态
   editorContent: string;
+  setEditorContent: (value: string) => void;
   placeholderValue: string;
   runStatus: RunningStatus;
   runStartTime: Date | null;
   runDuration: number;
   lastAutoSave: string;
   execid: string;
+  size: string | number;
+  setSize: (value: string | number) => void;
   runLog: string;
-  runResult: string;
+  runResult: RunResult[];
 
   // 编辑器操作
   handleContentChange: (value: string) => void;
@@ -60,8 +67,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runDuration, setRunDuration] = useState<number>(0);
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
   const [execid, setExecid] = useState<string>('');
+  const [size, setSize] = useState<string | number>(100);
   const [runLog, setRunLog] = useState<string>('');
-  const [runResult, setRunResult] = useState<string>('');
+  const [runResult, setRunResult] = useState<RunResult[]>([]);
 
   // 使用 ref 来跟踪初始内容，避免不必要的更新
   const initialContentRef = useRef(initialContent);
@@ -163,9 +171,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunDuration(0);
 
     try {
-      const res = await runPythonItem(fileId);
+      const res = await runSqlScript({ script_id: fileId });
+      console.log('运行接口调用 res', res);
       if (res?.status === 200) {
-        setExecid(res.data.execid);
+        setExecid(res.data.script_execid);
       } else {
         throw new Error('运行失败');
       }
@@ -182,7 +191,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
-    useRequest(getRunResult, {
+    useRequest(getRunResultSqlScript, {
       pollingInterval: 3000,
       pollingWhenHidden: false,
       manual: true
@@ -205,12 +214,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 运行中时，轮询获取运行结果
     const fetchResult = async () => {
       try {
-        const res = await getRunResultPolling(currentFileIdRef.current!, {
-          execid
+        const res = await getRunResultPolling({
+          script_id: currentFileIdRef.current!,
+          script_execid: execid,
+          size: '100'
         });
-        if (res?.status === 200 && res.data) {
-          setRunResult(res.data.run_result);
 
+        if (res?.status === 200 && res.data) {
+          setRunResult(res.data?.sql_result);
           // 检查执行状态
           if (res.data.run_status !== RunningStatus.RUNNING) {
             const status =
@@ -240,12 +251,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   return {
     // 状态
     editorContent,
+    setEditorContent,
     placeholderValue,
     runStatus,
     runStartTime,
     runDuration,
     lastAutoSave,
     execid,
+    size,
+    setSize,
     runLog,
     runResult,
 
