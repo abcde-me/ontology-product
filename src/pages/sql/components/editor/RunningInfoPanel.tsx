@@ -1,5 +1,16 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Collapse, Tabs, Typography } from '@arco-design/web-react';
+import {
+  Button,
+  Collapse,
+  Dropdown,
+  Empty,
+  Input,
+  Menu,
+  Space,
+  Table,
+  Tabs,
+  Typography
+} from '@arco-design/web-react';
 import {
   IconDown,
   IconUp,
@@ -9,22 +20,97 @@ import {
 } from '@arco-design/web-react/icon';
 import { RunningStatus } from '@/types/pythonApi';
 import './RunningInfoPanel.scss';
+import { RunResult } from '@/api/sql';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
 const { Text } = Typography;
 
+const data = Array(5)
+  .fill('')
+  .map((_, index) => ({
+    key: `${index}`,
+    name: `Kevin ${index}`,
+    salary: 22000,
+    address: `${index} Park Road, London`,
+    email: `kevin.sandra_${index}@example.com`,
+    email2: `kevin.sandra_${index}@example.com`,
+    email3: `kevin.sandra_${index}@example.com`,
+    email4: `kevin.sandra_${index}@example.com`,
+    email5: `kevin.sandra_${index}@example.com`,
+    email6: `kevin.sandra_${index}@example.com`
+  }));
+
 interface RunningInfoPanelProps {
-  runResult: string;
+  runResult: RunResult[];
   runLog: string;
   runStatus?: RunningStatus; // 使用正确的类型
+  size: string | number;
+  setSize: (value: string | number) => void;
 }
 
 const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
-  ({ runResult, runLog, runStatus }) => {
+  ({ runResult, runLog, runStatus, size, setSize }) => {
     const [activeKey, setActiveKey] = useState<string>('result');
     const [isExpanded, setIsExpanded] = useState(false);
     const [hasUserClosed, setHasUserClosed] = useState(false);
+
+    const columns = [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Salary',
+        dataIndex: 'salary',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Address',
+        dataIndex: 'address',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email2',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email3',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email4',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email5',
+        width: 150,
+        ellipsis: true
+      },
+      {
+        title: 'WeiTing',
+        dataIndex: 'email6',
+        width: 150,
+        ellipsis: true
+      }
+    ];
 
     // 监听运行结果变化，自动展开面板
     useEffect(() => {
@@ -62,10 +148,15 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       }
       if (status === RunningStatus.SUCCESS) {
         return (
-          <div className="run-status success">
-            <span className="mr-4">运行成功</span>
-            <IconCheckCircle style={{ color: '#10B981' }} />
-          </div>
+          <Space>
+            <div className="run-status success">
+              <span className="mr-4">运行成功</span>
+              <IconCheckCircle style={{ color: '#10B981' }} />
+            </div>
+            <div className="run-status">
+              <span className="mr-4">2025-09-09 09:22:22 (23s)</span>
+            </div>
+          </Space>
         );
       }
       if (status === RunningStatus.FAILED) {
@@ -84,6 +175,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         <Collapse
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
+          triggerRegion="icon"
           expandIconPosition="left"
           expandIcon={isExpanded ? <IconDown /> : <IconUp />}
           style={{
@@ -93,30 +185,67 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           <CollapseItem
             header={
               <div className="panel-header">
-                <Text style={{ fontSize: '14px', fontWeight: 500 }}>
-                  运行信息
-                </Text>
-                {renderRunStatus(runStatus)}
+                <div className="flex flex-1 items-center gap-[12px]">
+                  <Text style={{ fontSize: '14px', fontWeight: 500 }}>
+                    运行信息
+                  </Text>
+                  {renderRunStatus(runStatus)}
+                </div>
+                <div className="flex items-center gap-[12px]">
+                  <Space>
+                    <span>展示</span>
+                    <Input
+                      style={{ width: 52, height: 22 }}
+                      size="mini"
+                      value={String(size)}
+                      onChange={(value) => setSize(value)}
+                    />
+                    <span>行数据</span>
+                  </Space>
+                  <Dropdown
+                    position="br"
+                    droplist={
+                      <Menu>
+                        <Menu.Item key="1">保存为新数据集</Menu.Item>
+                        <Menu.Item key="2">保存为新版本</Menu.Item>
+                      </Menu>
+                    }
+                  >
+                    <Button type="outline" size="mini">
+                      保存到数据集
+                    </Button>
+                  </Dropdown>
+                </div>
               </div>
             }
             name="1"
           >
             <div className="panel-content">
-              <Tabs
-                defaultActiveTab={activeKey}
-                onChange={setActiveKey}
-                style={{
-                  backgroundColor: '#F8FAFD'
-                }}
-              >
-                <TabPane key="result" title="结果">
-                  <div className="run-result-content">{runResult}</div>
-                </TabPane>
+              {runStatus === RunningStatus.RUNNING && (
+                <Empty description="正在运行中，请等待..." />
+              )}
 
-                <TabPane key="log" title="日志">
-                  <div className="runlog-content">{runLog}</div>
-                </TabPane>
-              </Tabs>
+              {runStatus === RunningStatus.FAILED && (
+                <div className="h-[100px]">
+                  <Typography.Text>
+                    有无法执行的语法，请修改后重试
+                  </Typography.Text>
+                </div>
+              )}
+
+              {runStatus === RunningStatus.SUCCESS && (
+                <div className="flex flex-col gap-[8px]">
+                  <Typography.Text>
+                    检测到有多个Select语句，当前展示的是第一个Select语句的运行结果
+                  </Typography.Text>
+                  <Table
+                    border
+                    columns={columns}
+                    data={data}
+                    pagination={false}
+                  />
+                </div>
+              )}
             </div>
           </CollapseItem>
         </Collapse>
