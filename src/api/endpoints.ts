@@ -399,6 +399,12 @@ export const ModaForgeResourceEndpoints = {
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
 
+  // SQL开发
+  sqlListApi: PrefixAimdp + '/sql_script/list',
+  sqlCreateApi: PrefixAimdp + '/sql_script/create',
+  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
+
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',
   leSaveTask: PrefixLabelEngine + '/saveTask',
