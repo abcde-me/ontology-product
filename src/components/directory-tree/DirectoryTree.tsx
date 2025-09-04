@@ -262,9 +262,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       if (folderStack.length === 0 && currentFolderId && currentFolderName) {
         setCurrentFolderId('');
         setCurrentFolderName('');
-        // 恢复原始数据
-        const formattedData = formatTreeData(data);
-        setTreeData(formattedData);
+        // 重新请求根目录数据
+        if (onBackToParent) {
+          try {
+            const newData = await onBackToParent('0');
+            const formattedData = formatTreeData(newData as any[]);
+            setTreeData(formattedData);
+          } catch (error) {
+            Message.error('返回根目录失败');
+            return;
+          }
+        }
         setSelectedKeys([]);
         setExpandedKeys([]);
         return;
@@ -282,9 +290,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         if (!parentFolder.id || parentFolder.id === '') {
           setCurrentFolderId('');
           setCurrentFolderName('');
-          // 恢复原始数据
-          const formattedData = formatTreeData(data);
-          setTreeData(formattedData);
+          // 重新请求根目录数据
+          if (onBackToParent) {
+            const newData = await onBackToParent('');
+            const formattedData = formatTreeData(newData as any[]);
+            setTreeData(formattedData);
+          }
         } else {
           setCurrentFolderId(parentFolder.id);
           setCurrentFolderName(parentFolder.name);
