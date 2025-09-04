@@ -386,6 +386,7 @@ export const ModaForgeResourceEndpoints = {
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
+
   // python开发
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
   pythonCreateApi: PrefixAimdp + '/pyspark',
@@ -398,6 +399,10 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonExportDatasetStopApi:
+    PrefixAimdp + 'pyspark/export/dataset/{pyspark_id}/stop',
+  pythonExportDatasetRetryApi:
+    PrefixAimdp + '/pyspark/export/dataset/{pyspark_id}/retry',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/sql_script/list',

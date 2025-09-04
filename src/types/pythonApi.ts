@@ -256,3 +256,92 @@ export interface ExportFileRes {
    */
   file_type: string;
 }
+
+export enum ExportStatus {
+  /**
+   * 导出中
+   */
+  Exporting = 'exporting',
+  /**
+   * 导出成功
+   */
+  ExportSuccess = 'export_success',
+  /**
+   * 导出失败
+   */
+  ExportFailed = 'export_failed',
+  /**
+   * 终止导出
+   */
+  ExportTerminated = 'export_terminated'
+}
+
+export interface GetExportDatasetListReq {
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页面大小
+   */
+  page_size: number;
+  /**
+   * created_at-创建时间
+   */
+  sort_field?: string;
+  /**
+   * asc-正序、desc-倒序
+   */
+  sort_order?: 'asc' | 'desc';
+  /**
+   * 导出状态（exporting-导出中、export_success-导出成功、export_failed-导出失败、export_terminated-终止导出），可配置多个
+   */
+  status?: ExportStatus[];
+}
+
+export interface GetExportDatasetListItem {
+  /**
+   * 创建时间
+   */
+  created_at: string;
+  /**
+   * 数据集名称
+   */
+  dataset_name: string;
+  /**
+   * ID
+   */
+  id: number;
+  /**
+   * pyspark文件Id
+   */
+  pyspark_id: number;
+  /**
+   * pyspark文件名称
+   */
+  pyspark_name: string;
+  /**
+   * 数据集大小(字节)
+   */
+  size: number;
+  /**
+   * 导出状态：exporting-导出中、export_success-导出成功、export_failed-导出失败、export_terminated-导出终止
+   */
+  status: ExportStatus;
+}
+
+export interface GetExportDatasetListRes {
+  items: GetExportDatasetListItem[];
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页面大小
+   */
+  page_size: number;
+  /**
+   * 总条数
+   */
+  total: number;
+}

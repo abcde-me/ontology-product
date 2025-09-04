@@ -24,7 +24,10 @@ import {
   ExportDatasetReq,
   ExportDatasetRes,
   ExportFileRes,
-  GetExportFileReq
+  GetExportFileReq,
+  GetExportDatasetListReq,
+  GetExportDatasetListRes,
+  ExportStatus
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -530,6 +533,63 @@ export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
   });
 }
 
+// 导出数据集列表
+export async function getExportDatasetList(
+  params: GetExportDatasetListReq
+): Promise<ApiRes<GetExportDatasetListRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetListApi({}).get(params).inRegion().do();
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      items: [
+        {
+          created_at: '2025-08-18 15:00',
+          dataset_name: '示例数据集',
+          id: 1,
+          pyspark_id: 1,
+          pyspark_name: '示例数据集',
+          size: 1024,
+          status: ExportStatus.Exporting
+        },
+        {
+          created_at: '2025-08-18 15:00',
+          dataset_name: '示例数据集',
+          id: 2,
+          pyspark_id: 1,
+          pyspark_name: '示例数据集',
+          size: 1024,
+          status: ExportStatus.ExportSuccess
+        },
+        {
+          created_at: '2025-08-18 15:00',
+          dataset_name: '示例数据集',
+          id: 3,
+          pyspark_id: 1,
+          pyspark_name: '示例数据集',
+          size: 1024,
+          status: ExportStatus.ExportFailed
+        },
+        {
+          created_at: '2025-08-18 15:00',
+          dataset_name: '示例数据集',
+          id: 4,
+          pyspark_id: 1,
+          pyspark_name: '示例数据集',
+          size: 1024,
+          status: ExportStatus.ExportTerminated
+        }
+      ],
+      page: 1,
+      page_size: 10,
+      total: 4
+    }
+  });
+}
+
 // 导出数据集
 export async function exportDataset(
   params: ExportDatasetReq
@@ -573,4 +633,33 @@ export async function getExportFile(
       file_type: 'file'
     }
   });
+}
+
+// 导出任务停止
+export async function stopExportDataset(
+  // 导出任务id
+  id: number,
+  params: {
+    pyspark_id: number;
+  }
+): Promise<ApiRes<object>> {
+  // TODO: 联调
+  return await UAPI.RES.pythonExportDatasetStopApi({ id })
+    .put(params)
+    .inRegion()
+    .do();
+}
+
+// 重试导出任务
+export async function retryExportDataset(
+  id: number,
+  params: {
+    pyspark_id: number;
+  }
+): Promise<ApiRes<object>> {
+  // TODO: 联调
+  return await UAPI.RES.pythonExportDatasetRetryApi({ id })
+    .put(params)
+    .inRegion()
+    .do();
 }
