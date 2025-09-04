@@ -136,13 +136,14 @@ export const useFileManager = (
       try {
         const rawPythonList = await getPythonList(targetFolderId, {});
 
-        if (rawPythonList.status === 200) {
-          const items = rawPythonList?.data?.items ?? [];
-          console.log('rawPythonList', items);
-          setPythonList(items);
-          return items; // 返回获取到的数据
+        if (rawPythonList.status !== 200) {
+          Message.error(rawPythonList?.message ?? '获取文件列表失败');
+          return [];
         }
-        return [];
+
+        const items = rawPythonList?.data?.items ?? [];
+        setPythonList(items);
+        return items; // 返回获取到的数据
       } catch (error) {
         console.error('获取Python列表失败:', error);
         Message.error('获取文件列表失败');
@@ -159,7 +160,7 @@ export const useFileManager = (
     async (finalName: string, node: any) => {
       try {
         const createRes = await createPythonItem({
-          path_id: node?.dataRef?.path_id,
+          path_id: node?.dataRef?.path_id || currentFolderId,
           type: node?.dataRef?.type,
           name: finalName
         });
