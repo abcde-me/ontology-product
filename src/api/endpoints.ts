@@ -405,6 +405,10 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonExportDatasetStopApi:
+    PrefixAimdp + 'pyspark/export/dataset/{pyspark_id}/stop',
+  pythonExportDatasetRetryApi:
+    PrefixAimdp + '/pyspark/export/dataset/{pyspark_id}/retry',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/sql_script/list',

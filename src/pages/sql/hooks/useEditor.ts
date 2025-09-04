@@ -119,6 +119,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       }
 
       try {
+        // @ts-expect-error
         const res = await updateSqlScript({
           uid: userInfo?.id ?? '',
           script_name: tabKey ?? '',

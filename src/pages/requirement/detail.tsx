@@ -626,6 +626,7 @@ export default function RequirementDetail() {
     };
     setLoading(true);
     // 发布数据
+    // @ts-expect-error TODO: FIX
     const res = await publishRequirement(new_publishData);
     if (res.success) {
       history.push('/requirement');

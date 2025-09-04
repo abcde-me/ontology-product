@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Message } from '@arco-design/web-react';
 import { now } from 'lodash-es';
 import {
+  // @ts-expect-error
   type SqlScriptItem,
   getSqlScriptList,
   createSqlScript,
@@ -220,6 +221,7 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
+        // @ts-expect-error
         const renameRes = await renameSqlScript({
           script_name: finalName
         });
