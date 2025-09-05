@@ -36,6 +36,13 @@ const PythonTabContent: React.FC<{}> = () => {
     // 比如将数据集添加到代码编辑器中或执行其他插入操作
   };
 
+  // 处理数据卷插入
+  const handleVolumeInsert = (volume: FluffyVolume) => {
+    console.log('数据卷插入:', volume);
+    // 这里可以添加插入数据卷的逻辑
+    // 比如将数据卷添加到代码编辑器中或执行其他插入操作
+  };
+
   // 处理数据卷详情查看
   const handleViewVolumeDetail = (volume: FluffyVolume) => {
     console.log('数据卷详情:', volume);
@@ -56,6 +63,7 @@ const PythonTabContent: React.FC<{}> = () => {
 
       <div className="tab-tree">
         <DataDirectoryTree
+          onVolumeInsert={handleVolumeInsert}
           onViewDatasetDetail={handleViewDatasetDetail}
           onInsertDataset={handleInsertDataset}
           onViewVolumeDetail={handleViewVolumeDetail}

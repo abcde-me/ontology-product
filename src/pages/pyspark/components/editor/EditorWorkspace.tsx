@@ -26,10 +26,11 @@ interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
+  pysparkExecId?: number;
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
-  ({ content, fileName, currentFileId }) => {
+  ({ content, fileName, currentFileId, pysparkExecId }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     // 使用useEditor hook管理编辑器状态
     const {
@@ -166,6 +167,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         {/* 新建数据集弹框 */}
         {modalDatasetVisible && (
           <DatasetForm
+            pysparkId={Number(currentFileId)}
+            pysparkExecId={pysparkExecId ?? 0}
             visible={modalDatasetVisible}
             onSubmit={handleSubmit}
             onCancel={handleCancelDatasetModal}

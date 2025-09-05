@@ -19,6 +19,7 @@ type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [pysparkExecId, setPysparkExecId] = useState<number>(0);
   const {
     fileState,
     directoryTreeRef,
@@ -68,6 +69,7 @@ const Python: React.FC = memo(() => {
       {!isDasetTab && (
         <Content className="notebook-content">
           <EditorContent
+            pysparkExecId={pysparkExecId}
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
             onTabChange={switchTab}
