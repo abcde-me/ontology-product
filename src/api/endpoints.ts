@@ -270,6 +270,8 @@ export const ModaForgeResourceEndpoints = {
   scriptingBenchResult:
     PrefixAimdp +
     '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  // 工作流-知识库名称校验
+  knowledgeBaseNameCheck: '/query/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -377,13 +379,20 @@ export const ModaForgeResourceEndpoints = {
   // 重试载入任务
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
   //载入获取表名
-  getTableNameApi: '/internal/v1/generate_db_name',
+  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
 
   // 数据标注接口
+  // 数据标注配置 发布
+  publishRequirementApi: PrefixLabelService + '/requirements/create',
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
+  // 获取部门列表树内容
+  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  // 获取个人列表树内容
+  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+
   // python开发
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
   pythonCreateApi: PrefixAimdp + '/pyspark',
@@ -396,6 +405,16 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonExportDatasetStopApi:
+    PrefixAimdp + 'pyspark/export/dataset/{pyspark_id}/stop',
+  pythonExportDatasetRetryApi:
+    PrefixAimdp + '/pyspark/export/dataset/{pyspark_id}/retry',
+
+  // SQL开发
+  sqlListApi: PrefixAimdp + '/sql_script/list',
+  sqlCreateApi: PrefixAimdp + '/sql_script/create',
+  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

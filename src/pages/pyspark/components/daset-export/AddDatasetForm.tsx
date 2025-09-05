@@ -16,7 +16,6 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
-import TooltipOnOverflow from './tootioOnocweflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
@@ -31,13 +30,13 @@ import {
   getTargetDataFileList
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
-import getFileIcon from '../file-icon';
+import getFileIcon from '@/components/file-icon';
 const { Text } = Typography;
 
 interface Dataset {
   key?: string;
   name: string;
-  tags: string[];
+  tag_names: string[];
   description: string;
   dataSource: 'volume' | 'connector';
   storageType: StorageType;
@@ -371,85 +370,85 @@ const DatasetForm = React.forwardRef<
   };
 
   // 处理目标数据源选择
-  const handleTargetDataSourceChange = (
-    value: string | (string | string[])[]
-  ) => {
-    if (dataSource === 'volume') {
-      console.log('选择的值:', value);
-      setTargetData(value);
+  // const handleTargetDataSourceChange = (
+  //   value: string | (string | string[])[]
+  // ) => {
+  //   if (dataSource === 'volume') {
+  //     console.log('选择的值:', value);
+  //     setTargetData(value);
 
-      // 判断是一级目录还是二级目录
-      if (Array.isArray(value) && Array.isArray(value[0])) {
-        // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
+  //     // 判断是一级目录还是二级目录
+  //     if (Array.isArray(value) && Array.isArray(value[0])) {
+  //       // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
 
-        // const catalogpath = value?.[0]?.[0];
-        // const catalogId = value?.[0]?.[1];
-        const selectedItem = value?.[1]?.[0];
-        // const basePath = String(catalogpath?.[0]?.[0]??'');
-        // const formattedPath =
-        //   basePath.length > 1 && basePath.endsWith('/')
-        //     ? `${basePath}/`
-        //     : basePath;
-        // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
-        if (selectedItem == undefined) {
-          setPreviewColumns([]);
-          Message.warning('请选择二级目录！');
-          return;
-        }
-        // getVolumePreviewData(path);
-        getVolumePreviewData(
-          value?.[1]?.[1],
-          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
-        );
-      } else if (Array.isArray(value) && value.length === 2) {
-        return;
-      }
-    }
-  };
+  //       // const catalogpath = value?.[0]?.[0];
+  //       // const catalogId = value?.[0]?.[1];
+  //       const selectedItem = value?.[1]?.[0];
+  //       // const basePath = String(catalogpath?.[0]?.[0]??'');
+  //       // const formattedPath =
+  //       //   basePath.length > 1 && basePath.endsWith('/')
+  //       //     ? `${basePath}/`
+  //       //     : basePath;
+  //       // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
+  //       if (selectedItem == undefined) {
+  //         setPreviewColumns([]);
+  //         Message.warning('请选择二级目录！');
+  //         return;
+  //       }
+  //       // getVolumePreviewData(path);
+  //       getVolumePreviewData(
+  //         value?.[1]?.[1],
+  //         '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+  //       );
+  //     } else if (Array.isArray(value) && value.length === 2) {
+  //       return;
+  //     }
+  //   }
+  // };
 
   // 处理连接器选择
-  const handleConnectorChange = (value: string) => {
-    console.log('选择的连接器ID:', value);
-    setSelectedConnector(value);
-    form.setFieldValue('connector', value);
-    // 清除之前的文件选择
-    setSelectedFiles([]);
-    setConnectorFileInformation([]);
-    form.setFieldValue('selectedFiles', []);
-    // 获取连接器文件信息
-    getConnectorFileInformationfun(
-      value,
-      storageType === StorageType.File ||
-        storageType === StorageType.DataBaseTable
-        ? ''
-        : 'jsonl'
-    );
-  };
+  // const handleConnectorChange = (value: string) => {
+  //   console.log('选择的连接器ID:', value);
+  //   setSelectedConnector(value);
+  //   form.setFieldValue('connector', value);
+  //   // 清除之前的文件选择
+  //   setSelectedFiles([]);
+  //   setConnectorFileInformation([]);
+  //   form.setFieldValue('selectedFiles', []);
+  //   // 获取连接器文件信息
+  //   getConnectorFileInformationfun(
+  //     value,
+  //     storageType === StorageType.File ||
+  //       storageType === StorageType.DataBaseTable
+  //       ? ''
+  //       : 'jsonl'
+  //   );
+  // };
 
   // 模拟连接器文件数据
-  const getConnectorFileInformationfun = (id: string, type?: string) => {
-    getConnectorFileList({ connector_id: id, type: type })
-      .then((res) => {
-        // 判断接口返回状态
-        if (res.stat !== 0 && !res.code) {
-          // 有业务结果且无错误
-          if (res.data && Array.isArray(res.data.files)) {
-            setConnectorFileInformation(res.data.files);
-          } else {
-            setConnectorFileInformation([]);
-            console.warn('文件列表为空或格式不正确');
-          }
-        } else {
-          // 无业务结果或接口返回错误
-          console.error('获取文件列表失败:', res.msg);
-          setConnectorFileInformation([]);
-        }
-      })
-      .catch((error) => {
-        console.error('请求文件列表出错:', error);
-        setConnectorFileInformation([]);
-      });
-  }; //查询指定连接器加载成功的文件信息
+  // const getConnectorFileInformationfun = (id: string, type?: string) => {
+  //   getConnectorFileList({ connector_id: id, type: type })
+  //     .then((res) => {
+  //       // 判断接口返回状态
+  //       if (res.stat !== 0 && !res.code) {
+  //         // 有业务结果且无错误
+  //         if (res.data && Array.isArray(res.data.files)) {
+  //           setConnectorFileInformation(res.data.files);
+  //         } else {
+  //           setConnectorFileInformation([]);
+  //           console.warn('文件列表为空或格式不正确');
+  //         }
+  //       } else {
+  //         // 无业务结果或接口返回错误
+  //         console.error('获取文件列表失败:', res.msg);
+  //         setConnectorFileInformation([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('请求文件列表出错:', error);
+  //       setConnectorFileInformation([]);
+  //     });
+  // }; //查询指定连接器加载成功的文件信息
 
   const stringifyFirstLevelValues = (obj) => {
     return obj.map((item) => {
@@ -471,10 +470,6 @@ const DatasetForm = React.forwardRef<
   };
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
@@ -609,12 +604,13 @@ const DatasetForm = React.forwardRef<
 
   return (
     <Modal
-      title="新建数据集"
+      title="导出数据集"
       visible={visible}
       footer={null}
       style={{ width: '960px' }}
       onCancel={onCancel}
       maskClosable={false}
+      unmountOnExit={true}
       className={styles.modalWrapper}
       // unmountOnExit={true}
     >
@@ -669,7 +665,7 @@ const DatasetForm = React.forwardRef<
           <div className="formSelect">
             <FormItem
               label="标签"
-              field="tags"
+              field="tag_names"
               rules={[{ required: false, message: '请选择至少一个标签' }]}
             >
               <Select
@@ -683,7 +679,7 @@ const DatasetForm = React.forwardRef<
                   count: 10,
                   render: (invisibleTagCount) => {
                     // 从当前表单值获取完整的标签列表
-                    const allTags = form.getFieldValue('tags') || [];
+                    const allTags = form.getFieldValue('tag_names') || [];
                     const remainingTags = allTags.slice(10);
                     // const remainingLabels = remainingTags.join(', ');
                     return (
@@ -736,7 +732,7 @@ const DatasetForm = React.forwardRef<
               // style={{ marginLeft: 10 }}
             />
           </FormItem>
-          <FormItem
+          {/* <FormItem
             label="数据来源"
             field="dataSource"
             rules={[{ required: true, message: '请选择数据来源' }]}
@@ -745,12 +741,12 @@ const DatasetForm = React.forwardRef<
             <Radio.Group
               value={dataSource}
               onChange={handleDataSourceChange}
-              // style={{ marginLeft: 10 }}
+            // style={{ marginLeft: 10 }}
             >
               <Radio value="volume">数据目录卷</Radio>
               <Radio value="connector">连接器</Radio>
             </Radio.Group>
-          </FormItem>
+          </FormItem> */}
           <FormItem
             label="数据集类型"
             field="storageType"
@@ -767,142 +763,140 @@ const DatasetForm = React.forwardRef<
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
-              <Radio value={StorageType.DataBaseTable}>数据库表</Radio>
+              {/* <Radio value={StorageType.DataBaseTable}>数据库表</Radio> */}
             </Radio.Group>
           </FormItem>
 
-          {dataSource === 'volume' && (
+          {/* {dataSource === 'volume' && ( */}
+          <div
+            style={{
+              border: '#CBD5E1 1px solid',
+              borderRadius: '4px',
+              padding: '16px',
+              gap: '16px',
+              marginLeft: 28,
+              overflow: 'hidden'
+              // display: 'flex',
+              // flexDirection: 'column'
+            }}
+          >
+            {/* <FormItem
+              label="选择目标数据目录/卷"
+              field="targetDataSource"
+              rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+            >
+              <Cascader
+                placeholder="请选择"
+                //@ts-expect-error
+                renderFormat={(labels, selectedOptions) => {
+                  const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
+                  return (
+                    <div>
+                      <EllipsisPopover value={value}></EllipsisPopover>
+                    </div>
+                  );
+                }}
+                options={targetDataSourceOptions}
+                onChange={handleTargetDataSourceChange}
+                expandTrigger="hover"
+                dropdownMenuColumnStyle={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '400px',
+                  display: 'inline-block',
+                  verticalAlign: 'middle'
+                }}
+                dropdownMenuClassName="showData"
+              />
+            </FormItem> */}
             <div
               style={{
-                border: '#CBD5E1 1px solid',
-                borderRadius: '4px',
-                padding: '16px',
-                gap: '16px',
-                marginLeft: 28,
-                overflow: 'hidden'
-                // display: 'flex',
-                // flexDirection: 'column'
+                // marginLeft: 20,
+                marginTop: 0,
+                fontSize: '12px',
+                color: '#86909c',
+                marginBottom: 8
               }}
             >
-              <FormItem
-                label="选择目标数据目录/卷"
-                field="targetDataSource"
-                rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-                labelCol={{ span: 5 }}
-                wrapperCol={{ span: 19 }}
-              >
-                <Cascader
-                  placeholder="请选择"
-                  //@ts-expect-error
-                  renderFormat={(labels, selectedOptions) => {
-                    const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
-                    return (
-                      <div>
-                        <EllipsisPopover value={value}></EllipsisPopover>
-                      </div>
-                    );
-                  }}
-                  options={targetDataSourceOptions}
-                  onChange={handleTargetDataSourceChange}
-                  expandTrigger="hover"
-                  dropdownMenuColumnStyle={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '400px',
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                  }}
-                  dropdownMenuClassName="showData"
-                />
-              </FormItem>
-              <div
-                style={{
-                  // marginLeft: 20,
-                  marginTop: 0,
-                  fontSize: '12px',
-                  color: '#86909c',
-                  marginBottom: 8
-                }}
-              >
-                {previewData || previewFileData ? (
-                  <span style={{ fontSize: '14px' }}>
-                    <span style={{ fontWeight: '500', color: '#000' }}>
-                      预览
-                    </span>{' '}
-                    {storageType === StorageType.File
-                      ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
-                      : storageType === StorageType.Jsonl
-                        ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
-                        : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
+              {previewData || previewFileData ? (
+                <span style={{ fontSize: '14px' }}>
+                  <span style={{ fontWeight: '500', color: '#000' }}>预览</span>{' '}
+                  {storageType === StorageType.File
+                    ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                    : storageType === StorageType.Jsonl
+                      ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
+                      : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
+                </span>
+              ) : (
+                <span style={{ fontSize: '14px' }}>
+                  <span style={{ fontWeight: '500', color: '#000' }}>
+                    预览：
                   </span>
-                ) : (
-                  <span style={{ fontSize: '14px' }}>
-                    <span style={{ fontWeight: '500', color: '#000' }}>
-                      预览：
-                    </span>
-                    请先选择目标数据目录卷/卷
-                  </span>
-                )}
-              </div>
-              {previewData ? (
-                <div className={styles.previewContainer}>
-                  <Table
-                    // style={{border:null}}
-                    border={false}
-                    className={styles.previewTable}
-                    columns={previewColumns}
-                    data={previewData}
-                    pagination={false}
-                    scroll={{
-                      x: Math.max(800, previewColumns.length * 200),
-                      y: 250
-                    }}
-                    size="small"
-                    loading={tableLoading}
-                    placeholder="暂无数据"
-                  />
-                </div>
-              ) : null}
-              {isPreviewFile && previewFileData ? (
-                <>
-                  <Table
-                    rowKey="id"
-                    columns={fileColumns}
-                    data={previewFileData}
-                    pagination={false}
-                    rowSelection={{
-                      type: 'checkbox',
-                      onChange: (selectedRowKeys, selectedRows) => {
-                        setFileIds(selectedRowKeys as string[]);
-                      }
-                    }}
-                  />
-                  {previewFileData && previewFileData.length > 0 && (
-                    <Pagination
-                      current={current}
-                      pageSize={pageSize}
-                      onPageSizeChange={(pageSize) => {
-                        setPageSize(pageSize);
-                        setCurrent(1);
-                      }}
-                      onChange={(page) => {
-                        setCurrent(page);
-                      }}
-                      sizeOptions={[10, 20, 50, 100]}
-                      showTotal
-                      total={total}
-                      showJumper
-                      sizeCanChange
-                      style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-                    />
-                  )}
-                </>
-              ) : null}
+                  请先选择目标数据目录卷/卷
+                </span>
+              )}
             </div>
-          )}
+            {previewData ? (
+              <div className={styles.previewContainer}>
+                <Table
+                  // style={{border:null}}
+                  border={false}
+                  className={styles.previewTable}
+                  columns={previewColumns}
+                  data={previewData}
+                  pagination={false}
+                  scroll={{
+                    x: Math.max(800, previewColumns.length * 200),
+                    y: 250
+                  }}
+                  size="small"
+                  loading={tableLoading}
+                  placeholder="暂无数据"
+                />
+              </div>
+            ) : null}
+            {isPreviewFile && previewFileData ? (
+              <>
+                <Table
+                  rowKey="id"
+                  columns={fileColumns}
+                  data={previewFileData}
+                  pagination={false}
+                  rowSelection={{
+                    type: 'checkbox',
+                    onChange: (selectedRowKeys, selectedRows) => {
+                      setFileIds(selectedRowKeys as string[]);
+                    }
+                  }}
+                />
+                {previewFileData && previewFileData.length > 0 && (
+                  <Pagination
+                    current={current}
+                    pageSize={pageSize}
+                    onPageSizeChange={(pageSize) => {
+                      setPageSize(pageSize);
+                      setCurrent(1);
+                    }}
+                    onChange={(page) => {
+                      setCurrent(page);
+                    }}
+                    sizeOptions={[10, 20, 50, 100]}
+                    showTotal
+                    total={total}
+                    showJumper
+                    sizeCanChange
+                    style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+                  />
+                )}
+              </>
+            ) : null}
+          </div>
+          {/* )} */}
 
-          {dataSource === 'connector' && (
+          {/* {dataSource === 'connector' && (
             <div
               style={{
                 border: '#CBD5E1 1px solid',
@@ -938,7 +932,7 @@ const DatasetForm = React.forwardRef<
                 wrapperCol={{ span: 20 }}
                 extra={
                   storageType === StorageType.File ||
-                  storageType === StorageType.DataBaseTable ? (
+                    storageType === StorageType.DataBaseTable ? (
                     ''
                   ) : (
                     <span
@@ -1088,7 +1082,7 @@ const DatasetForm = React.forwardRef<
                 </Tooltip>
               </FormItem>
             </div>
-          )}
+          )} */}
 
           <FormItem wrapperCol={{ span: 24 }}>
             <div

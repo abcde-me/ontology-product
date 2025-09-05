@@ -76,7 +76,8 @@ export async function getLoadRecordLists(params: any = {}) {
 }
 //重试载入任务
 interface reTryLoadParams {
-  instance_id: string;
+  execution_id: string;
+  task_id: number;
 }
 export async function reTryLoad(params: reTryLoadParams) {
   return await UAPI.RES.reTryLoadApi({}).post(params).inRegion().do();
@@ -86,14 +87,14 @@ interface getTableNameParams {
   connector_id: string;
 }
 export async function getTableName(params: getTableNameParams) {
-  // return await UAPI.RES.getTableNameApi({}).post(params).inRegion().do();
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        data: {
-          table_name: '模拟的数据名'
-        }
-      });
-    }, 500);
-  });
+  return await UAPI.RES.getTableNameApi({}).post(params).inRegion().do();
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve({
+  //       data: {
+  //         table_name: '模拟的数据名'
+  //       }
+  //     });
+  //   }, 500);
+  // });
 }

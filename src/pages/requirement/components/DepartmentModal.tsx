@@ -11,7 +11,8 @@ import {
   Table,
   Popover,
   Pagination,
-  Message
+  Message,
+  Empty
 } from '@arco-design/web-react';
 import {
   getCatalogList,
@@ -23,6 +24,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { OperationColumn } from '@ccf2e/arco-material';
 import getFileIcon from '@/components/file-icon';
 import './DepartmentModal.scss';
+import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -86,49 +88,14 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   };
 
   useEffect(() => {
-    let newTreeData: TreeNodeType[] = [];
+    // let newTreeData: TreeNodeType[] = [];
     try {
-      getCatalogList({
-        root_type: activeTab === 'src' ? 1 : 2
-      })
+      getDepartmentTreeList({})
         .then((res) => {
-          if (res.status !== 200) {
-            Message.error('数据加载失败');
-            return;
-          }
-          if (!res.data?.src || res.data.src.length === 0) {
-            Message.warning('没有找到数据');
-            setTreeData([]);
-            setOriginalTreeData([]);
-            return;
-          }
-          newTreeData = transformData(res.data?.src).map((item) => {
-            return item.children
-              ? {
-                  allowClick: false,
-                  title: item.name,
-                  key: item.id,
-                  children: item.children.数据卷.map((items, index) => {
-                    return {
-                      title: '数据卷',
-                      key: `volume-${items.id}-${index}`,
-                      allowClick: false,
-                      children: [
-                        {
-                          title: items.name,
-                          key: items.id
-                        }
-                      ]
-                    };
-                  })
-                }
-              : { title: item.name, key: item.id };
-          });
-          setTreeData(newTreeData);
-          setOriginalTreeData(newTreeData); // 保存原始数据
+          console.log(res?.data, 'res');
+          setTreeData(res.data);
         })
         .catch((err) => {
-          Message.error('接口调用失败');
           console.error(err);
         });
     } catch (err) {
@@ -214,34 +181,37 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             }}
           />
         </div>
-        <Tree
-          showLine
-          checkable
-          autoExpandParent={false}
-          style={{
-            height: '60vh',
-            overflowY: 'auto'
-          }}
-          renderTitle={({ title }: any) => {
-            return (
-              <span>
-                <span style={{ width: '300px', whiteSpace: 'nowrap' }}>
-                  {title}
+        {treeData && treeData?.length > 0 ? (
+          <Tree
+            checkable
+            autoExpandParent={false}
+            style={{
+              height: '60vh',
+              overflowY: 'auto'
+            }}
+            renderTitle={({ title }: any) => {
+              return (
+                <span>
+                  <span style={{ width: '300px', whiteSpace: 'nowrap' }}>
+                    {title}
+                  </span>
                 </span>
-              </span>
-            );
-          }}
-          treeData={treeData}
-          // checkStrictly={checkStrictly}
-          onSelect={(value) => {
-            setCurrent(1);
-            setPageSize(10);
-          }}
-          onCheck={(key, val) => {
-            console.log(key, val, '=====');
-            setCheckedKeys(key);
-          }}
-        />
+              );
+            }}
+            treeData={treeData}
+            // checkStrictly={checkStrictly}
+            onSelect={(value) => {
+              setCurrent(1);
+              setPageSize(10);
+            }}
+            onCheck={(key, val) => {
+              console.log(key, val, '=====');
+              setCheckedKeys(key);
+            }}
+          />
+        ) : (
+          <Empty description="暂无数据" />
+        )}
       </div>
     </Modal>
   );

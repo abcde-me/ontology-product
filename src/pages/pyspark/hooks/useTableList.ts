@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PaginationProps } from '@arco-design/web-react';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { GetExportDatasetListRes } from '@/types/pythonApi';
 
 interface HttpResponse<T> {
   data: {
@@ -12,7 +13,7 @@ interface HttpResponse<T> {
 }
 
 interface UseTableListProps<T, U> {
-  onRequest?: (params: U) => Promise<HttpResponse<T>>;
+  onRequest?: (params: U) => Promise<ApiRes<GetExportDatasetListRes>>;
   initialSearchParams?: U;
   formatFilter?: (filters: Partial<Record<keyof T, string[]>>) => U | {};
   formatSorter?: (sorter: SorterInfo) => U | {};

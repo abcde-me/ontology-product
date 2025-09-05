@@ -26,7 +26,8 @@ const SqlIndex: React.FC = memo(() => {
     removeTab,
     switchTab,
     handleCreate,
-    updateTab
+    updateTab,
+    openFile
   } = useTabManager();
 
   // 初始化创建一个默认SQL查询标签
@@ -57,7 +58,12 @@ const SqlIndex: React.FC = memo(() => {
             <DataManager key="data" />
           </TabPane>
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager key="files" type="files" ref={directoryTreeRef} />
+            <FileManager
+              key="files"
+              type="files"
+              ref={directoryTreeRef}
+              onFileOpen={openFile}
+            />
           </TabPane>
           <TabPane key="dataset" title={<SuanziIcon />}>
             <DatasetsList />
