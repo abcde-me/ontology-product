@@ -3,19 +3,15 @@ import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
 import {
-  runPythonItem,
-  getRunResult,
-  savePythonItem,
   createSqlScript,
   updateSqlScript,
   runSqlScript,
   getRunResultSqlScript,
-  RunResultItem,
-  RunResult
+  runCancelSqlScript
 } from '@/api/sql';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
-import { FileTab } from './useTabManager';
 import { useUserInfo } from '@/store/userInfoStore';
+import { RunResult } from '@/types/sqlApi';
 
 interface UseEditorOptions {
   initialContent?: string;
@@ -98,7 +94,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       if (!fileId) {
         try {
           const res = await createSqlScript({
-            uid: userInfo?.id ?? '',
+            uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
             script_name: tabKey ?? '',
             script_content: content
           });
@@ -170,7 +166,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunDuration(0);
 
     try {
-      const res = await runSqlScript({ script_id: fileId });
+      const res = await runSqlScript(fileId);
       console.log('运行接口调用 res', res);
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
@@ -184,16 +180,41 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [runStatus]);
 
   // 停止运行
-  const handleStopRunCode = useCallback(() => {
-    setRunStatus(RunningStatus.IDLE);
+  const handleStopRunCode = useCallback(async () => {
+    try {
+      const res = await runCancelSqlScript(currentFileIdRef.current!, {
+        script_execid: execid
+      });
+      setRunStatus(RunningStatus.IDLE);
+    } catch (error) {
+      console.error('获取运行结果失败:', error);
+    }
   }, []);
 
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResultSqlScript, {
-      pollingInterval: 3000,
+      pollingInterval: 5000,
       pollingWhenHidden: false,
-      manual: true
+      manual: true,
+      onSuccess: (res) => {
+        if (res?.status === 200 && res.data) {
+          setRunResult(res.data?.sql_result);
+          if (res.data.run_status !== RunningStatus.RUNNING) {
+            const status =
+              res.data.run_status === RunningStatus.SUCCESS
+                ? RunningStatus.SUCCESS
+                : RunningStatus.FAILED;
+            setRunStatus(status);
+            if (runStartTime) {
+              const duration = Math.floor(
+                (Date.now() - runStartTime.getTime()) / 1000
+              );
+              setRunDuration(duration);
+            }
+          }
+        }
+      }
     });
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
@@ -210,41 +231,45 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    getRunResultPolling(currentFileIdRef.current, {
+      script_execid: execid,
+      size: '100'
+    });
+
     // 运行中时，轮询获取运行结果
-    const fetchResult = async () => {
-      try {
-        const res = await getRunResultPolling({
-          script_id: currentFileIdRef.current!,
-          script_execid: execid,
-          size: '100'
-        });
+    // const fetchResult = async () => {
+    //   try {
+    //     const res = await getRunResultPolling(currentFileIdRef.current!, {
+    //       script_execid: execid,
+    //       size: '100'
+    //     });
 
-        if (res?.status === 200 && res.data) {
-          setRunResult(res.data?.sql_result);
-          // 检查执行状态
-          if (res.data.run_status !== RunningStatus.RUNNING) {
-            const status =
-              res.data.run_status === RunningStatus.SUCCESS
-                ? RunningStatus.SUCCESS
-                : RunningStatus.FAILED;
+    //     if (res?.status === 200 && res.data) {
+    //       setRunResult(res.data?.sql_result);
+    //       // 检查执行状态
+    //       if (res.data.run_status !== RunningStatus.RUNNING) {
+    //         const status =
+    //           res.data.run_status === RunningStatus.SUCCESS
+    //             ? RunningStatus.SUCCESS
+    //             : RunningStatus.FAILED;
 
-            setRunStatus(status);
+    //         setRunStatus(status);
 
-            // 计算执行时长
-            if (runStartTime) {
-              const duration = Math.floor(
-                (Date.now() - runStartTime.getTime()) / 1000
-              );
-              setRunDuration(duration);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('获取运行结果失败:', error);
-      }
-    };
+    //         // 计算执行时长
+    //         if (runStartTime) {
+    //           const duration = Math.floor(
+    //             (Date.now() - runStartTime.getTime()) / 1000
+    //           );
+    //           setRunDuration(duration);
+    //         }
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.error('获取运行结果失败:', error);
+    //   }
+    // };
 
-    fetchResult();
+    // fetchResult();
   }, [execid, runStatus]);
 
   return {

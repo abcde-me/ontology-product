@@ -414,7 +414,21 @@ export const ModaForgeResourceEndpoints = {
   sqlListApi: PrefixAimdp + '/sql_script/list',
   sqlCreateApi: PrefixAimdp + '/sql_script/create',
   sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlDeleteApi: PrefixAimdp + '/sql_script/{script_id}/delete',
+  sqlCopyApi: PrefixAimdp + '/sql_script/{script_id}/copy',
+  sqlOpenApi: PrefixAimdp + '/sql_script/{script_id}/info',
   sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
+  sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
+  sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
+  sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
+  sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
+  sqlExportDatasetVersion:
+    PrefixAimdp + '/sql_script/{script_id}/export_version_update',
+  sqlExportDatasetList: PrefixAimdp + '/sql_script/export_task/list',
+  sqlExportDatasetStopApi: PrefixAimdp + '/sql_script/export_task/{id}/stop',
+  sqlExportDatasetRetryApi: PrefixAimdp + '/sql_script/export_task/{id}/retry',
+  sqlExportDatasetDetailApi:
+    PrefixAimdp + '/sql_script/export_task/{id}/get_sql_info',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

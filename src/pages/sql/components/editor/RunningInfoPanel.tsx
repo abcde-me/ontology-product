@@ -19,8 +19,9 @@ import {
   IconCloseCircle
 } from '@arco-design/web-react/icon';
 import { RunningStatus } from '@/types/pythonApi';
+import { RunResult } from '@/types/sqlApi';
+
 import './RunningInfoPanel.scss';
-import { RunResult } from '@/api/sql';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -45,12 +46,22 @@ interface RunningInfoPanelProps {
   runResult: RunResult[];
   runLog: string;
   runStatus?: RunningStatus; // 使用正确的类型
+  runDuration: number;
+  runStartTime: Date | null;
   size: string | number;
   setSize: (value: string | number) => void;
 }
 
 const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
-  ({ runResult, runLog, runStatus, size, setSize }) => {
+  ({
+    runResult,
+    runLog,
+    runStatus,
+    size,
+    setSize,
+    runDuration,
+    runStartTime
+  }) => {
     const [activeKey, setActiveKey] = useState<string>('result');
     const [isExpanded, setIsExpanded] = useState(false);
     const [hasUserClosed, setHasUserClosed] = useState(false);
@@ -154,7 +165,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
               <IconCheckCircle style={{ color: '#10B981' }} />
             </div>
             <div className="run-status">
-              <span className="mr-4">2025-09-09 09:22:22 (23s)</span>
+              <span className="mr-4">
+                {runStartTime} ({runDuration}s)
+              </span>
             </div>
           </Space>
         );
