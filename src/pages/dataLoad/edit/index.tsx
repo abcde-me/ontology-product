@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { editLoad, getDirectoryList } from '@/api/loadApi';
+import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
 import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
@@ -59,6 +60,102 @@ function findPathById(
   return findPath(data, targetId);
 }
 
+// 添加根据ID构建TreeSelect路径的函数
+function findTreeSelectPathById(
+  data: any[],
+  targetId: string | number
+): string | null {
+  function findInTree(items: any[], target: string | number): any | null {
+    for (const item of items) {
+      // 直接匹配节点ID
+      if (String(item.id) === String(target)) {
+        return item;
+      }
+
+      // 在子节点中查找
+      if (item.children && Array.isArray(item.children)) {
+        const result = findInTree(item.children, target);
+        if (result) return result;
+      }
+
+      // 对于数据库类型，还需要检查children.db数组
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.db
+      ) {
+        const result = findInTree(item.children.db, target);
+        if (result) return result;
+      }
+
+      // 对于本地文件类型，还需要检查children.volume数组
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.volume
+      ) {
+        const result = findInTree(item.children.volume, target);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+
+  const foundNode = findInTree(data, targetId);
+  return foundNode ? String(foundNode.id) : null;
+}
+
+// 构建TreeSelect显示路径的函数
+function buildTreeSelectDisplayPath(
+  data: any[],
+  targetId: string | number
+): string {
+  function buildPath(
+    items: any[],
+    target: string | number,
+    currentPath: string[] = []
+  ): string[] | null {
+    for (const item of items) {
+      const newPath = [...currentPath, item.name || item.label];
+
+      // 如果找到目标节点，返回路径
+      if (String(item.id) === String(target)) {
+        return newPath;
+      }
+
+      // 在子节点中查找
+      if (item.children && Array.isArray(item.children)) {
+        const result = buildPath(item.children, target, newPath);
+        if (result) return result;
+      }
+
+      // 对于数据库类型，还需要检查children.db数组
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.db
+      ) {
+        const result = buildPath(item.children.db, target, newPath);
+        if (result) return result;
+      }
+
+      // 对于本地文件类型，还需要检查children.volume数组
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.volume
+      ) {
+        const result = buildPath(item.children.volume, target, newPath);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+
+  const pathArray = buildPath(data, targetId);
+  return pathArray ? pathArray.join('/') : '';
+}
+
 // 单选框实例
 const RadioGroup = Radio.Group;
 
@@ -77,46 +174,221 @@ const Edit = (props) => {
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
   const [directoryData, setDirectoryData] = useState([]) as any;
+  const [directoryLoading, setDirectoryLoading] = useState(false);
+  // TreeSelect选中的keys
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+  // TreeSelect显示的值（路径）
+  const [treeSelectDisplayValue, setTreeSelectDisplayValue] =
+    useState<string>('');
+  //获取连接器下面的表格
+  const [talbleList, setTableList] = useState([]);
+  const getTableList = async (connector_id: string) => {
+    try {
+      const res = await getdetailList(connector_id);
+      setTableList(res?.data?.table_name || []);
+      console.log(res, '获取连接器下面的表格');
+    } catch (error) {
+      console.error('获取连接器表格数据失败:', error);
+    }
+  };
+  useEffect(() => {
+    if (props.detailData?.connector_id) {
+      getTableList(props.detailData.connector_id);
+    }
+    getdirectoryDataList();
+  }, []);
   async function getdirectoryDataList() {
     try {
+      setDirectoryLoading(true);
+      console.log(
+        '开始获取目录数据，当前数据源类型:',
+        props.detailData.source_type
+      );
       const res = await getDirectoryList({
-        root_type: 1
+        root_type: 1,
+        dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
-
-      if (res.status !== 200) {
-        return;
+      console.log('API响应:', res);
+      if (!res || res.status !== 200) {
+        console.error('获取目录列表失败:', res);
+        setDirectoryData([]);
+        return [];
       }
-      const newdirectoryData = res.data.src.map((item) => {
-        return item.children
-          ? {
-              value: item.id,
-              label: item.name,
-              children: item.children.volume.map((items) => {
-                return {
-                  value: items.id,
-                  label: items.name
-                };
-              })
+      if (!res.data || !res.data.src) {
+        console.error('目录数据结构错误 - 缺少src字段:', res.data);
+        setDirectoryData([]);
+        return [];
+      }
+
+      if (!Array.isArray(res.data.src)) {
+        console.error(
+          '目录数据src不是数组:',
+          typeof res.data.src,
+          res.data.src
+        );
+        setDirectoryData([]);
+        return [];
+      }
+      console.log('原始目录数据:', res.data.src);
+
+      if (
+        props.detailData.source_type === 's3' ||
+        props.detailData.source_type === 'hdfs'
+      ) {
+        console.log('处理对象存储/HDFS数据');
+        const processedData: any[] = [];
+        for (const item of res.data.src) {
+          if (!item || typeof item !== 'object' || !item.id) {
+            console.warn('跳过无效项目:', item);
+            continue;
+          }
+          const processedItem: any = {
+            value: item.id,
+            label: item.name || `未命名_${item.id}`
+          };
+          if (
+            item.children &&
+            item.children.volume &&
+            Array.isArray(item.children.volume)
+          ) {
+            processedItem.children = [];
+            for (const child of item.children.volume) {
+              if (child && child.id) {
+                processedItem.children.push({
+                  value: child.id,
+                  label: child.name || `未命名_${child.id}`,
+                  type_names: child.type_name
+                });
+              }
             }
-          : { value: item.id, label: item.name };
-      });
-      setDirectoryData(newdirectoryData);
-    } catch (err) {
-      console.error(err);
+          }
+
+          processedData.push(processedItem);
+        }
+
+        console.log('处理后的对象存储数据:', processedData);
+        setDirectoryData(processedData);
+        return processedData;
+      } else {
+        console.log('处理数据库/本地文件类型数据');
+
+        const processTreeData = (
+          data: any[],
+          parentNode: any = null
+        ): any[] => {
+          if (!Array.isArray(data)) {
+            console.warn('processTreeData 接收到非数组数据:', data);
+            return [];
+          }
+
+          const result: any[] = [];
+          for (const item of data) {
+            if (!item || typeof item !== 'object' || !item.id) {
+              console.warn('跳过无效项目:', item);
+              continue;
+            }
+
+            const processedItem: any = {
+              id: item.id,
+              name: item.name,
+              value: item.id,
+              label: item.name || `未命名_${item.id}`,
+              type_name: item.type_name,
+              level: parentNode ? (parentNode.level || 0) + 1 : 0,
+              isExpanded: false,
+              hasChildren: false
+            };
+
+            if (parentNode) {
+              processedItem.parentId = parentNode.id;
+            }
+
+            // 处理children数据
+            if (item.children) {
+              if (Array.isArray(item.children)) {
+                // 如果children是数组，递归处理
+                processedItem.children = processTreeData(
+                  item.children,
+                  processedItem
+                );
+                processedItem.hasChildren = processedItem.children.length > 0;
+              } else if (typeof item.children === 'object') {
+                // 如果children是对象保留原始结构
+                processedItem.children = item.children;
+                // 检查是否有子数据
+                const hasChildren = Object.values(item.children).some(
+                  (value: any) => Array.isArray(value) && value.length > 0
+                );
+                processedItem.hasChildren = hasChildren;
+              }
+            }
+
+            result.push(processedItem);
+          }
+
+          return result;
+        };
+
+        const processedData = processTreeData(res.data.src);
+        console.log('处理后的树形数据:', processedData);
+        setDirectoryData(processedData);
+        return processedData;
+      }
+    } catch (err: any) {
+      console.error('获取目录列表异常:', err);
+      setDirectoryData([]);
+      if (err.message && err.message.includes('timeout')) {
+        Message.error('网络请求超时，请检查网络连接后重试');
+      } else {
+        Message.error('获取目录列表失败，请重试');
+      }
+      return [];
+    } finally {
+      setDirectoryLoading(false);
     }
   }
-  // 根据data_path_id构建级联路径
+  // 根据data_path_id构建路径
   useEffect(() => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
-      const path = findPathById(directoryData, props.detailData.data_path_id);
-      if (path) {
-        setInitialPath(path as (string | string[])[]);
-        form.setFieldsValue({
-          dest_path: path
-        });
+      if (
+        props.detailData.source_type === 'db' ||
+        props.detailData.source_type === 'local'
+      ) {
+        // 数据库类型使用TreeSelect，需要找到对应的节点ID
+        const nodeId = findTreeSelectPathById(
+          directoryData,
+          props.detailData.data_path_id
+        );
+        if (nodeId) {
+          console.log('数据库类型设置初始值:', nodeId);
+          setSelectedTreeKeys([nodeId]);
+          // 构建显示路径
+          const displayPath = buildTreeSelectDisplayPath(
+            directoryData,
+            props.detailData.data_path_id
+          );
+          setTreeSelectDisplayValue(displayPath);
+          form.setFieldsValue({
+            dest_path: nodeId,
+            dest_path_display: displayPath
+          });
+        }
+      } else {
+        // 对象存储和HDFS类型使用Cascader
+        const path = findPathById(directoryData, props.detailData.data_path_id);
+        if (path) {
+          setInitialPath(path as (string | string[])[]);
+          form.setFieldsValue({
+            dest_path: path
+          });
+        }
       }
     }
-  }, [props.detailData?.data_path_id, directoryData]);
+  }, [
+    props.detailData?.data_path_id,
+    directoryData,
+    props.detailData.source_type
+  ]);
   useEffect(() => {
     getdirectoryDataList();
     return () => {
@@ -162,7 +434,20 @@ const Edit = (props) => {
       setLoading(true);
       const formValues = await form.validate();
       const { time, day, cycle, ...rest } = formValues;
-      const pathId = rest.dest_path.at(-1);
+      // 处理不同数据源类型的路径ID获取
+      let pathId;
+      if (
+        props.detailData.source_type === 'db' ||
+        props.detailData.source_type === 'local'
+      ) {
+        // 数据库和本地文件类型：dest_path直接是节点ID
+        pathId = rest.dest_path;
+      } else {
+        // 对象存储和HDFS类型：dest_path是数组，取最后一个元素
+        pathId = Array.isArray(rest.dest_path)
+          ? rest.dest_path.at(-1)
+          : rest.dest_path;
+      }
       if (props.detailData.load_type !== 'once') {
         const valid = await SchedulerRunRef.current?.validate();
         if (!valid) return;
@@ -300,10 +585,16 @@ const Edit = (props) => {
               mode="multiple"
               placeholder="请选择抽取的表"
               style={{ width: '100%', minWidth: 0 }}
-              // defaultValue={['Beijing', 'Shenzhen', 'Wuhan']}
               allowClear
               allowCreate
-            ></Select>
+            >
+              <Option value="all">全部</Option>
+              {talbleList?.map((option) => (
+                <Option key={option} value={option}>
+                  {option}
+                </Option>
+              ))}
+            </Select>
           </FormItem>
         )}
 
@@ -365,41 +656,67 @@ const Edit = (props) => {
             />
           </FormItem>
         ) : (
-          <FormItem
-            label="载入位置："
-            field="dest_path"
-            labelCol={{ span: 5 }}
-            wrapperCol={{ span: 19 }}
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入位置' }]}
-          >
-            <TreeSelect
-              className="db-tree-select"
-              placeholder="Please select ..."
-              allowClear
-              dropdownMenuStyle={{
-                maxHeight: 300,
-                padding: 0,
-                overflow: 'hidden' // 防止外层出现滚动条
-              }}
-              dropdownRender={(originNode) => (
-                <ComponentTree
-                  directoryData={directoryData}
-                  onDirectoryDataChange={setDirectoryData}
-                  // onSelect={handleSelect}
-                  onPathChange={(path) => {
-                    form.setFieldsValue({
-                      dest_path: path
-                    });
-                  }}
-                  showAddTree={true}
-                  enableRootAdd={true}
-                />
-              )}
+          <>
+            <FormItem
+              label="载入位置："
+              field="dest_path_display"
+              labelCol={{ span: 5 }}
+              wrapperCol={{ span: 19 }}
+              labelAlign="right"
+              rules={[{ required: true, message: '请选择载入位置' }]}
             >
-              {/* {generatorTreeNodes(directoryData)} */}
-            </TreeSelect>
-          </FormItem>
+              <TreeSelect
+                className="db-tree-select"
+                placeholder="Please select ..."
+                allowClear
+                value={treeSelectDisplayValue}
+                onChange={(value) => {
+                  // 处理清除选择的情况
+                  if (!value) {
+                    setSelectedTreeKeys([]);
+                    setTreeSelectDisplayValue('');
+                    form.setFieldsValue({
+                      dest_path: undefined,
+                      dest_path_display: undefined
+                    });
+                  }
+                }}
+                dropdownMenuStyle={{
+                  maxHeight: 300,
+                  padding: 0,
+                  overflow: 'hidden' // 防止外层出现滚动条
+                }}
+                dropdownRender={(originNode) => (
+                  <ComponentTree
+                    directoryData={directoryData}
+                    onDirectoryDataChange={setDirectoryData}
+                    selectedKeys={selectedTreeKeys}
+                    // onSelect={handleSelect}
+                    onPathChange={(path, nodeId) => {
+                      console.log('路径变化:', path, '节点ID:', nodeId);
+                      // 更新选中的keys
+                      setSelectedTreeKeys([String(nodeId)]);
+                      // 更新显示值
+                      setTreeSelectDisplayValue(path);
+                      // 存储节点ID用于表单提交和显示值用于验证
+                      form.setFieldsValue({
+                        dest_path: nodeId,
+                        dest_path_display: path
+                      });
+                    }}
+                    showAddTree={true}
+                    enableRootAdd={true}
+                    activeTab="src"
+                    onDataRefresh={getdirectoryDataList}
+                    dataSourceType={props.detailData.source_type}
+                    tableNameNames={props.detailData.table_names}
+                  />
+                )}
+              >
+                {/* {generatorTreeNodes(directoryData)} */}
+              </TreeSelect>
+            </FormItem>
+          </>
         )}
       </Form>
       <div className={Styles.footerBbtnBox}>

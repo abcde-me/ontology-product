@@ -1,6 +1,9 @@
-import frame from './image/body.png';
-import ellipse from './image/ellipse.png';
+import rectangle from './image/rectangle.png';
+import polygon from './image/polygon.png';
+import lineSegment from './image/lineSegment.png';
 import point from './image/point.png';
+import ellipse from './image/ellipse.png';
+import cube from './image/cube.png';
 //格式化时间函数
 export const formatDateTime = (dateTimeString) => {
   try {
@@ -80,17 +83,17 @@ export const numberToChinese = (num: number) => {
 
 export const shapeOptions = [
   {
-    icon: frame,
+    icon: rectangle,
     value: 1,
     label: '矩形'
   },
   {
-    icon: frame,
+    icon: polygon,
     value: 2,
     label: '多边形'
   },
   {
-    icon: frame,
+    icon: lineSegment,
     value: 3,
     label: '线段'
   },
@@ -105,7 +108,7 @@ export const shapeOptions = [
     label: '椭圆'
   },
   {
-    icon: frame,
+    icon: cube,
     value: 6,
     label: '立方体'
   }

@@ -19,6 +19,8 @@ import { RunningStatus } from '@/types/pythonApi';
 
 import RunningInfoPanel from './RunningInfoPanel';
 import { useEditor } from '../../hooks/useEditor';
+import { useExportDaset } from '../../hooks/useExportDaset';
+import DatasetForm from '../daset-export/AddDatasetForm';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -29,7 +31,6 @@ interface NotebookWorkspaceProps {
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
   ({ content, fileName, currentFileId }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
-
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -46,6 +47,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       currentFileId
     });
 
+    const {
+      modalDatasetVisible,
+      handleSubmit,
+      setModalDatasetVisible,
+      childRef
+    } = useExportDaset();
+
     const myTheme = createTheme({
       theme: 'light',
       settings: {
@@ -58,7 +66,11 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     });
 
     const handleExportDataset = () => {
-      console.log('Exporting dataset...');
+      setModalDatasetVisible(true);
+    };
+
+    const handleCancelDatasetModal = () => {
+      setModalDatasetVisible(false);
     };
 
     const handleExportList = () => {
@@ -150,6 +162,16 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           runLog={runLog}
           runStatus={runStatus}
         />
+
+        {/* 新建数据集弹框 */}
+        {modalDatasetVisible && (
+          <DatasetForm
+            visible={modalDatasetVisible}
+            onSubmit={handleSubmit}
+            onCancel={handleCancelDatasetModal}
+            ref={childRef}
+          />
+        )}
       </div>
     );
   }

@@ -4,15 +4,13 @@ import {
   IconUpload,
   IconSettings,
   IconPlayArrow,
-  IconStop
+  IconStop,
+  IconMenu
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import { python } from '@codemirror/lang-python';
+import { sql } from '@codemirror/lang-sql';
+import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
-import {
-  syntaxHighlighting,
-  defaultHighlightStyle
-} from '@codemirror/language';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { RunningStatus } from '@/types/pythonApi';
@@ -41,10 +39,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handleRunCode,
       lastAutoSave,
       editorContent,
+      setEditorContent,
       handleContentChange,
       placeholderValue,
       runResult,
-      runLog
+      runLog,
+      size,
+      setSize
     } = useEditor({
       initialContent: content,
       currentFileId,
@@ -84,6 +85,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     };
 
+    const handleFormatCode = () => {
+      if (editorContent) {
+        try {
+          const formattedCode = format(editorContent, { language: 'sql' });
+          setEditorContent(formattedCode);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
@@ -105,22 +117,32 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
               </Button>
+
               <Button
+                type="text"
+                icon={<IconMenu />}
+                onClick={handleFormatCode}
+                className="h-[26px]"
+              >
+                格式化
+              </Button>
+
+              {/* <Button
                 icon={<IconUpload />}
                 onClick={handleExportDataset}
                 className="h-[26px]"
                 disabled={editorContent.trim() === ''}
               >
                 导出数据集
-              </Button>
-              <Button
+              </Button> */}
+              {/* <Button
                 type="text"
                 icon={<IconSettings />}
                 onClick={handleCallOperator}
                 className="h-[26px]"
               >
                 调用算子
-              </Button>
+              </Button> */}
             </Space>
           </div>
           {lastAutoSave && (
@@ -141,12 +163,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
-            extensions={[
-              python(),
-              lintGutter(),
-              syntaxHighlighting(defaultHighlightStyle, { fallback: true })
-            ]}
-            theme={myTheme}
+            extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
             basicSetup={{
               lineNumbers: true,
               highlightActiveLineGutter: false
@@ -161,6 +178,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             runResult={runResult}
             runLog={runLog}
             runStatus={runStatus}
+            size={size}
+            setSize={setSize}
           />
         )}
       </div>

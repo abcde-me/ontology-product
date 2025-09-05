@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PaginationProps } from '@arco-design/web-react';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { GetExportDatasetListRes } from '@/types/pythonApi';
 
 interface HttpResponse<T> {
   data: {
@@ -12,7 +13,7 @@ interface HttpResponse<T> {
 }
 
 interface UseTableListProps<T, U> {
-  onRequest?: (params: U) => Promise<HttpResponse<T>>;
+  onRequest?: (params: U) => Promise<ApiRes<GetExportDatasetListRes>>;
   initialSearchParams?: U;
   formatFilter?: (filters: Partial<Record<keyof T, string[]>>) => U | {};
   formatSorter?: (sorter: SorterInfo) => U | {};
@@ -42,7 +43,8 @@ export const useTableList = <T = {}, U = {}>(
     total: 0,
     pageSize: 10,
     current: 1,
-    pageSizeChangeResetCurrent: true
+    pageSizeChangeResetCurrent: true,
+    sizeOptions: [10, 20, 50, 100]
   });
 
   useEffect(() => {
@@ -73,19 +75,20 @@ export const useTableList = <T = {}, U = {}>(
     loadData();
   }, [searchParams]);
 
-  function handleSearchChange(values: U) {
+  function handleSearchChange(value: Partial<U>) {
+    console.log('value', value);
     setSearchParams((prev) => {
       return {
         ...prev,
-        ...values
+        ...value
       };
     });
   }
 
   function handleTableChange(
     pagination: PaginationProps,
-    filters: any,
-    sorter: any
+    sorter: any,
+    filters: any
   ) {
     setSearchParams((prev) => {
       return {

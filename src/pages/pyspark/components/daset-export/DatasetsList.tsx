@@ -3,32 +3,27 @@ import {
   Form,
   Input,
   Link,
+  Message,
   PaginationProps,
   Table,
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { getDatasetList } from '@/pages/sql/constant';
+import {
+  getExportDatasetList,
+  retryExportDataset,
+  stopExportDataset
+} from '@/api/pyspark';
 import { useTableList } from '../../hooks/useTableList';
-// import { useSqlIndexStore, SqlIndexStore } from '../store';
+import {
+  ExportStatus,
+  GetExportDatasetListItem,
+  GetExportDatasetListReq
+} from '@/types/pythonApi';
+import { formatFileSize } from '@/utils/format';
+import noDataElement from '@/components/no-data';
 
 const FormItem = Form.Item;
-
-interface DatasetListParams {
-  page?: number;
-  page_size?: number;
-  search_content?: string;
-}
-
-interface DatasetItem {
-  id: number;
-  script_name: string;
-  dataset_name: string;
-  dataset_table_name: string;
-  /** 0: 导出中, 1: 导出成功, 2: 导出失败 */
-  export_status: number;
-  export_start_time: string;
-}
 
 const DatasetsList: FC = () => {
   // const showScriptDetail = useSqlIndexStore(
@@ -45,13 +40,23 @@ const DatasetsList: FC = () => {
     loading,
     handleSearchChange,
     handleTableChange
-  } = useTableList<DatasetItem, DatasetListParams>({
-    onRequest: getDatasetList,
+  } = useTableList<GetExportDatasetListItem, GetExportDatasetListReq>({
+    onRequest: getExportDatasetList,
+    formatFilter: (filters: any) => {
+      let result = {};
+      if (filters.status) {
+        result = {
+          status: filters.status
+        };
+      }
+      return result;
+    },
     formatSorter: (sorter: any) => {
       let result = {};
-      if (sorter.export_status) {
+      if (sorter.field && sorter.direction) {
         result = {
-          export_status: sorter.export_status
+          sort_field: sorter.field,
+          sort_order: sorter.direction === 'ascend' ? 'asc' : 'desc'
         };
       }
       return result;
@@ -61,15 +66,14 @@ const DatasetsList: FC = () => {
   const columns: TableColumnProps[] = [
     {
       title: 'PySpark文件名称',
-      dataIndex: 'script_name',
+      dataIndex: 'pyspark_name',
       width: 230,
       render: (_, item) => {
         return (
           <EllipsisPopover
             className="text-[var(--color-text-2)]"
-            value={item.script_name}
+            value={item.pyspark_name}
             isEdit={false}
-            isLink
             // handleLink={() => handleScriptDetail(item.id)}
           />
         );
@@ -85,7 +89,6 @@ const DatasetsList: FC = () => {
             className="text-[var(--color-text-2)]"
             value={item.dataset_name}
             isEdit={false}
-            isLink
             // handleLink={() => handleDatasetDetail(item.id)}
           />
         );
@@ -93,33 +96,33 @@ const DatasetsList: FC = () => {
     },
     {
       title: '导出状态',
-      dataIndex: 'export_status',
+      dataIndex: 'status',
       width: 130,
       render: (_, item) => {
         let text = '未知状态';
         let color = '#999999';
         let actionBtn: React.ReactNode = null;
 
-        switch (item.export_status) {
-          case 0:
+        switch (item.status) {
+          case ExportStatus.Exporting:
             text = '导出中';
             color = '#1890ff';
             actionBtn = (
-              <Link href="#" onClick={() => handleStopTask(item.id)}>
+              <Link href="#" onClick={() => handleStopTask(item)}>
                 {' '}
                 停止{' '}
               </Link>
             );
             break;
-          case 1:
+          case ExportStatus.ExportSuccess:
             text = '导出成功';
             color = '#52c41a';
             break;
-          case 2:
+          case ExportStatus.ExportFailed:
             text = '导出失败';
             color = '#ff4d4f';
             actionBtn = (
-              <Link href="#" onClick={() => handleRetryTask(item.id)}>
+              <Link href="#" onClick={() => handleRetryTask(item)}>
                 {' '}
                 重试{' '}
               </Link>
@@ -146,38 +149,63 @@ const DatasetsList: FC = () => {
           </div>
         );
       },
+      filterMultiple: true,
       filters: [
         {
           text: '导出中',
-          value: 0
+          value: ExportStatus.Exporting
         },
         {
           text: '导出成功',
-          value: 1
+          value: ExportStatus.ExportSuccess
         },
         {
           text: '导出失败',
-          value: 2
+          value: ExportStatus.ExportFailed
         }
-      ]
+      ],
+      onFilter: (value, record) => {
+        return value.includes(record.status);
+      }
+    },
+    {
+      title: '文件大小',
+      dataIndex: 'size',
+      width: 180,
+      render: (_, item) => (
+        <div className="fontMM">{formatFileSize(item.size)}</div>
+      )
     },
     {
       title: '操作时间',
-      dataIndex: 'export_start_time',
+      dataIndex: 'created_at',
       width: 180,
-      render: (_, item) => (
-        <div className="fontMM">{item.export_start_time}</div>
-      ),
+      render: (_, item) => <div className="fontMM">{item.created_at}</div>,
       sorter: (a, b) => a.export_start_time.localeCompare(b.export_start_time)
     }
   ];
 
-  function handleStopTask(id: number) {
-    console.log('停止任务', id);
+  async function handleStopTask(item: GetExportDatasetListItem) {
+    const res = await stopExportDataset(item.id, {
+      pyspark_id: item.pyspark_id
+    });
+
+    if (res.code == '' && res.status == 200) {
+      Message.success('停止任务成功');
+    } else {
+      Message.error(res.message ?? '停止任务失败');
+    }
   }
 
-  function handleRetryTask(id: number) {
-    console.log('重试任务', id);
+  async function handleRetryTask(item: GetExportDatasetListItem) {
+    const res = await retryExportDataset(item.id, {
+      pyspark_id: item.pyspark_id
+    });
+    if (res.code == '' && res.status == 200) {
+      Message.success('重试任务成功');
+    } else {
+      Message.error(res.message ?? '重试任务失败');
+    }
   }
 
   // function handleScriptDetail(id: number) {
@@ -191,13 +219,18 @@ const DatasetsList: FC = () => {
   return (
     <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
-      <Form
-        autoComplete="off"
-        layout="inline"
-        onValuesChange={handleSearchChange}
-      >
-        <FormItem field="search_content" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入文件名搜索" />
+      <Form autoComplete="off" layout="inline">
+        <FormItem field="file_name" style={{ marginRight: 12 }}>
+          <Input.Search
+            allowClear
+            placeholder="输入文件名搜索"
+            onSearch={(value) => {
+              handleSearchChange({ file_name: value });
+            }}
+            onClear={() => {
+              handleSearchChange({ file_name: '' });
+            }}
+          />
         </FormItem>
       </Form>
       <Table
@@ -212,6 +245,7 @@ const DatasetsList: FC = () => {
         rowKey="id"
         onChange={handleTableChange}
         scroll={{ y: 500 }}
+        noDataElement={noDataElement({ description: '暂无数据' })}
       />
     </div>
   );

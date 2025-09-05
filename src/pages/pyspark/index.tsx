@@ -4,6 +4,7 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
+import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import { useTabManager } from './hooks/useTabManager';
@@ -58,7 +59,7 @@ const Python: React.FC = memo(() => {
           <TabPane key="tools" title={<SuanziIcon />}>
             <ToolsManager key="tools" />
           </TabPane>
-          <TabPane key="daset" title={<SuanziIcon />}>
+          <TabPane key="daset" title={<DasetIcon />}>
             <DatasetsList />
           </TabPane>
         </Tabs>
