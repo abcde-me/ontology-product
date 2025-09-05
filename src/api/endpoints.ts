@@ -271,7 +271,8 @@ export const ModaForgeResourceEndpoints = {
     PrefixAimdp +
     '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
   // 工作流-知识库名称校验
-  knowledgeBaseNameCheck: '/query/api/knowledge/validKnowledgeName',
+  knowledgeBaseNameCheck:
+    PrefixAimdp + '/query/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -379,7 +380,7 @@ export const ModaForgeResourceEndpoints = {
   // 重试载入任务
   reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
   //载入获取表名
-  getTableNameApi: '/internal/v1/generate_db_name',
+  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
 
   // 数据标注接口
   // 数据标注配置 发布
@@ -410,12 +411,31 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
+  pythonExportDatasetStopApi:
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
+  pythonExportDatasetRetryApi:
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/sql_script/list',
   sqlCreateApi: PrefixAimdp + '/sql_script/create',
   sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlDeleteApi: PrefixAimdp + '/sql_script/{script_id}/delete',
+  sqlCopyApi: PrefixAimdp + '/sql_script/{script_id}/copy',
+  sqlOpenApi: PrefixAimdp + '/sql_script/{script_id}/info',
   sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
+  sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
+  sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
+  sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
+  sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
+  sqlExportDatasetVersion:
+    PrefixAimdp + '/sql_script/{script_id}/export_version_update',
+  sqlExportDatasetList: PrefixAimdp + '/sql_script/export_task/list',
+  sqlExportDatasetStopApi: PrefixAimdp + '/sql_script/export_task/{id}/stop',
+  sqlExportDatasetRetryApi: PrefixAimdp + '/sql_script/export_task/{id}/retry',
+  sqlExportDatasetDetailApi:
+    PrefixAimdp + '/sql_script/export_task/{id}/get_sql_info',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',

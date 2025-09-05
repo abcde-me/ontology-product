@@ -3,6 +3,7 @@ import { Layout, Tabs } from '@arco-design/web-react';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
+import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
@@ -65,7 +66,7 @@ const SqlIndex: React.FC = memo(() => {
               onFileOpen={openFile}
             />
           </TabPane>
-          <TabPane key="dataset" title={<SuanziIcon />}>
+          <TabPane key="dataset" title={<DasetIcon />}>
             <DatasetsList />
           </TabPane>
         </Tabs>

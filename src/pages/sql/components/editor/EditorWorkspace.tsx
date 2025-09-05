@@ -35,6 +35,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
+      runDuration,
+      runStartTime,
       handleStopRunCode,
       handleRunCode,
       lastAutoSave,
@@ -178,6 +180,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             runResult={runResult}
             runLog={runLog}
             runStatus={runStatus}
+            runDuration={runDuration}
+            runStartTime={runStartTime}
             size={size}
             setSize={setSize}
           />

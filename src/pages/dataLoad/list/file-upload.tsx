@@ -35,7 +35,8 @@ const Uploads = ({ onFileChange }) => {
   };
   const getToken = () => {
     // 从 localStorage 获取
-    return localStorage.getItem('loginToken');
+    const token = localStorage.getItem('loginToken');
+    return token ? token.replace(/"/g, '') : ''; // 移除所有引号
   };
   const checkFile = (file: any, list: any) => {
     // 检查文件数量 - 只在第一次检测到超出限制时显示提示
@@ -67,7 +68,6 @@ const Uploads = ({ onFileChange }) => {
       Message.error('单文件大小不能超过50M');
       return false;
     }
-
     return true;
   };
   return (
@@ -80,7 +80,7 @@ const Uploads = ({ onFileChange }) => {
       action="/api/aimdp/v1/load_tasks/upload"
       onChange={handleUploadChange}
       headers={{
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: getToken(),
         'X-Auth-Validate': 'true',
         'X-Regionid': 'region1'
       }}

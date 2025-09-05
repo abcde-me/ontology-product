@@ -285,7 +285,7 @@ export interface GetSourceCatalogFileListParams {
   /**
    * 排序方式：升序"asc"或降序"desc"
    */
-  sort: 'asc' | 'desc';
+  sort?: 'asc' | 'desc';
 }
 
 export interface GetSourceCatalogFileListItem {
@@ -358,40 +358,40 @@ export interface GetSourceCatalogFileListRes {
   page_size: number;
 }
 
+// 源数据目录文件列表
 export async function getSourceCatalogFileList(
   param: GetSourceCatalogFileListParams
 ): Promise<ApiRes<GetSourceCatalogFileListRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.getLoadTaskFiles({}).post(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      items: [
-        {
-          id: 4283,
-          connector_name: 'hdfs-xiaof2',
-          connector_id: 406,
-          file_name: 'etst.txt',
-          file_type: 'txt',
-          file_size: 2,
-          upload_user: '肖峰',
-          task_load_start_time: '2025-07-30 10:47:09',
-          data_path_id: 954,
-          abs_data_path: '/src/xiaof12/volume/xiaof112',
-          file_sub_path: 'etst.txt',
-          perms: ['source_dir:can_export', 'source_dir:can_delete']
-        }
-      ],
-      total: 0,
-      page: 1,
-      page_size: 100
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     items: [
+  //       {
+  //         id: 4283,
+  //         connector_name: 'hdfs-xiaof2',
+  //         connector_id: 406,
+  //         file_name: 'etst.txt',
+  //         file_type: 'txt',
+  //         file_size: 2,
+  //         upload_user: '肖峰',
+  //         task_load_start_time: '2025-07-30 10:47:09',
+  //         data_path_id: 954,
+  //         abs_data_path: '/src/xiaof12/volume/xiaof112',
+  //         file_sub_path: 'etst.txt',
+  //         perms: ['source_dir:can_export', 'source_dir:can_delete']
+  //       }
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  // });
 }
 
 export interface GetTargetCatalogFileListParams {

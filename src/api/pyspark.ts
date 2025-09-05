@@ -20,7 +20,15 @@ import {
   GetRunLogReq,
   GetRunLogRes,
   GetOperatorListItem,
-  OperatorCatalog
+  OperatorCatalog,
+  ExportDatasetReq,
+  ExportDatasetRes,
+  GetExportFileReq,
+  GetExportDatasetListReq,
+  GetExportDatasetListRes,
+  GetExportJsonlReq,
+  GetExportJsonlRes,
+  GetExportFile
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -36,38 +44,38 @@ export async function getPythonList(
   // let path_name = '';
 
   // switch (String(id || '')) {
-  //   case '':
+  //   case '0':
   //     path_name = '';
-  //     // items = [
-  //     //   {
-  //     //     id: 1001,
-  //     //     name: '项目A',
-  //     //     type: PythonItemType.Directory,
-  //     //     path: '/',
-  //     //     path_id: 1,
-  //     //     created: now,
-  //     //     last_modified: later
-  //     //   },
-  //     //   {
-  //     //     id: 1002,
-  //     //     name: '数据集',
-  //     //     type: PythonItemType.Directory,
-  //     //     path: '/',
-  //     //     path_id: 1,
-  //     //     created: now,
-  //     //     last_modified: later
-  //     //   },
-  //     //   {
-  //     //     id: 1003,
-  //     //     name: '脚本1.py',
-  //     //     type: PythonItemType.Notebook,
-  //     //     path: '/',
-  //     //     path_id: 1,
-  //     //     created: now,
-  //     //     last_modified: later
-  //     //   }
-  //     // ];
-  //     items = [];
+  //     items = [
+  //       {
+  //         id: 1001,
+  //         name: '项目A',
+  //         type: PythonItemType.Directory,
+  //         path: '/',
+  //         path_id: 1,
+  //         created: now,
+  //         last_modified: later
+  //       },
+  //       {
+  //         id: 1002,
+  //         name: '数据集',
+  //         type: PythonItemType.Directory,
+  //         path: '/',
+  //         path_id: 1,
+  //         created: now,
+  //         last_modified: later
+  //       },
+  //       {
+  //         id: 1003,
+  //         name: '脚本1.py',
+  //         type: PythonItemType.Notebook,
+  //         path: '/',
+  //         path_id: 1,
+  //         created: now,
+  //         last_modified: later
+  //       }
+  //     ];
+  //     // items = [];
   //     break;
   //   case '1001':
   //     path_name = '项目A';
@@ -162,7 +170,7 @@ export async function getPythonList(
   // TODO: 联调
   // console.log('getPythonList', pyspark_id, params);
   return await UAPI.RES.pythonListApi({ pyspark_id: id })
-    .get(params)
+    .post(params)
     .inRegion()
     .do();
 }
@@ -272,71 +280,71 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
-    .get({})
-    .inRegion()
-    .do();
+  // return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+  //   .get({})
+  //   .inRegion()
+  //   .do();
 
   // Mock implementation per spe
-  // return Promise.resolve({
-  //   status: 200,
-  //   code: '',
-  //   message: 'OK',
-  //   requestId: '1',
-  //   data: {
-  //     execid: 1,
-  //     running_status: 1,
-  //     //       data: `# Python文件代码内容示例
-  //     // import pandas as pd
-  //     // import numpy as np
-  //     // import matplotlib.pyplot as plt
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      execid: 1,
+      running_status: 1,
+      //       data: `# Python文件代码内容示例
+      // import pandas as pd
+      // import numpy as np
+      // import matplotlib.pyplot as plt
 
-  //     // # 数据加载
-  //     // def load_data():
-  //     // """加载示例数据"""
-  //     // data = pd.DataFrame({
-  //     //     'x': np.random.randn(100),
-  //     //     'y': np.random.randn(100)
-  //     // })
-  //     // return data
+      // # 数据加载
+      // def load_data():
+      // """加载示例数据"""
+      // data = pd.DataFrame({
+      //     'x': np.random.randn(100),
+      //     'y': np.random.randn(100)
+      // })
+      // return data
 
-  //     // # 数据处理
-  //     // def process_data(df):
-  //     // """处理数据"""
-  //     // df['z'] = df['x'] + df['y']
-  //     // return df
+      // # 数据处理
+      // def process_data(df):
+      // """处理数据"""
+      // df['z'] = df['x'] + df['y']
+      // return df
 
-  //     // # 数据可视化
-  //     // def visualize_data(df):
-  //     // """可视化数据"""
-  //     // plt.figure(figsize=(10, 6))
-  //     // plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
-  //     // plt.colorbar(label='z value')
-  //     // plt.xlabel('X values')
-  //     // plt.ylabel('Y values')
-  //     // plt.title('Data Visualization')
-  //     // plt.show()
+      // # 数据可视化
+      // def visualize_data(df):
+      // """可视化数据"""
+      // plt.figure(figsize=(10, 6))
+      // plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+      // plt.colorbar(label='z value')
+      // plt.xlabel('X values')
+      // plt.ylabel('Y values')
+      // plt.title('Data Visualization')
+      // plt.show()
 
-  //     // # 主函数
-  //     // if __name__ == "__main__":
-  //     // # 加载数据
-  //     // df = load_data()
-  //     // print("数据加载完成，共", len(df), "行")
+      // # 主函数
+      // if __name__ == "__main__":
+      // # 加载数据
+      // df = load_data()
+      // print("数据加载完成，共", len(df), "行")
 
-  //     // # 处理数据
-  //     // df = process_data(df)
-  //     // print("数据处理完成")
+      // # 处理数据
+      // df = process_data(df)
+      // print("数据处理完成")
 
-  //     // # 显示统计信息
-  //     // print("\\n数据统计信息:")
-  //     // print(df.describe())
+      // # 显示统计信息
+      // print("\\n数据统计信息:")
+      // print(df.describe())
 
-  //     // # 可视化数据
-  //     // visualize_data(df)
-  //     // print("数据可视化完成")`
-  //     data: ''
-  //   }
-  // });
+      // # 可视化数据
+      // visualize_data(df)
+      // print("数据可视化完成")`
+      data: ''
+    }
+  });
 }
 
 // 修改（保存）文件
@@ -524,4 +532,183 @@ export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
       }
     ]
   });
+}
+
+// 导出数据集列表
+export async function getExportDatasetList(
+  params: GetExportDatasetListReq
+): Promise<ApiRes<GetExportDatasetListRes>> {
+  // TODO: 联调
+  return await UAPI.RES.pythonExportDatasetListApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     items: [
+  //       {
+  //         created_at: '2025-08-18 15:00',
+  //         dataset_name: '示例数据集',
+  //         id: 1,
+  //         pyspark_id: 1,
+  //         pyspark_name: '示例数据集',
+  //         size: 1024,
+  //         status: ExportStatus.Exporting
+  //       },
+  //       {
+  //         created_at: '2025-08-18 15:00',
+  //         dataset_name: '示例数据集',
+  //         id: 2,
+  //         pyspark_id: 1,
+  //         pyspark_name: '示例数据集',
+  //         size: 1024,
+  //         status: ExportStatus.ExportSuccess
+  //       },
+  //       {
+  //         created_at: '2025-08-18 15:00',
+  //         dataset_name: '示例数据集',
+  //         id: 3,
+  //         pyspark_id: 1,
+  //         pyspark_name: '示例数据集',
+  //         size: 1024,
+  //         status: ExportStatus.ExportFailed
+  //       },
+  //       {
+  //         created_at: '2025-08-18 15:00',
+  //         dataset_name: '示例数据集',
+  //         id: 4,
+  //         pyspark_id: 1,
+  //         pyspark_name: '示例数据集',
+  //         size: 1024,
+  //         status: ExportStatus.ExportTerminated
+  //       }
+  //     ],
+  //     page: 1,
+  //     page_size: 10,
+  //     total: 4
+  //   }
+  // });
+}
+
+// 导出数据集
+export async function exportDataset(
+  params: ExportDatasetReq
+): Promise<ApiRes<ExportDatasetRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetApi({ pyspark_id: id })
+  //   .post(params)
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      id: 1
+    }
+  });
+}
+
+// 查询file导出文件列表
+export async function getExportFile(
+  params: GetExportFileReq
+): Promise<ApiRes<GetExportFile[]>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetStatusApi({ pyspark_id: id })
+  //   .get({})
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: [
+      {
+        file_modify_time: '2025-08-18 15:00',
+        file_name: 'example1.txt',
+        file_size: '1024',
+        file_type: 'file'
+      },
+      {
+        file_modify_time: '2025-08-18 15:00',
+        file_name: 'example2.txt',
+        file_size: '1024',
+        file_type: 'file'
+      },
+      {
+        file_modify_time: '2025-08-18 15:00',
+        file_name: 'example3.txt',
+        file_size: '1024',
+        file_type: 'file'
+      },
+      {
+        file_modify_time: '2025-08-18 15:00',
+        file_name: 'example4.txt',
+        file_size: '1024',
+        file_type: 'file'
+      }
+    ]
+  });
+}
+
+// 查询jsonl导出文件列表
+export async function getExportJsonl(
+  params: GetExportJsonlReq
+): Promise<ApiRes<GetExportJsonlRes>> {
+  // TODO: 联调
+  // return await UAPI.RES.pythonExportDatasetStatusApi({ pyspark_id: id })
+  //   .get({})
+  //   .inRegion()
+  //   .do();
+
+  return Promise.resolve({
+    status: 200,
+    code: '',
+    message: 'OK',
+    requestId: '1',
+    data: {
+      field_names: ['name', 'age', 'gender'],
+      list: [
+        { name: '张三', age: 20, gender: '男' },
+        { name: '李四', age: 21, gender: '女' }
+      ]
+    }
+  });
+}
+
+// 导出任务停止
+export async function stopExportDataset(
+  // 导出任务id
+  export_id: number,
+  params: {
+    pyspark_id: number;
+  }
+): Promise<ApiRes<object>> {
+  // TODO: 联调
+  return await UAPI.RES.pythonExportDatasetStopApi({ export_id })
+    .put(params)
+    .inRegion()
+    .do();
+}
+
+// 重试导出任务
+export async function retryExportDataset(
+  export_id: number,
+  params: {
+    pyspark_id: number;
+  }
+): Promise<ApiRes<object>> {
+  // TODO: 联调
+  return await UAPI.RES.pythonExportDatasetRetryApi({ export_id })
+    .put(params)
+    .inRegion()
+    .do();
 }
