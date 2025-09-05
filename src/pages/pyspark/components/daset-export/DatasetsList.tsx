@@ -15,16 +15,15 @@ import {
   stopExportDataset
 } from '@/api/pyspark';
 import { useTableList } from '../../hooks/useTableList';
-import { ExportStatus, GetExportDatasetListItem } from '@/types/pythonApi';
+import {
+  ExportStatus,
+  GetExportDatasetListItem,
+  GetExportDatasetListReq
+} from '@/types/pythonApi';
 import { formatFileSize } from '@/utils/format';
+import noDataElement from '@/components/no-data';
 
 const FormItem = Form.Item;
-
-interface DatasetListParams {
-  page: number;
-  page_size: number;
-  search_content?: string;
-}
 
 const DatasetsList: FC = () => {
   // const showScriptDetail = useSqlIndexStore(
@@ -41,13 +40,23 @@ const DatasetsList: FC = () => {
     loading,
     handleSearchChange,
     handleTableChange
-  } = useTableList<GetExportDatasetListItem, DatasetListParams>({
+  } = useTableList<GetExportDatasetListItem, GetExportDatasetListReq>({
     onRequest: getExportDatasetList,
+    formatFilter: (filters: any) => {
+      let result = {};
+      if (filters.status) {
+        result = {
+          status: filters.status
+        };
+      }
+      return result;
+    },
     formatSorter: (sorter: any) => {
       let result = {};
-      if (sorter.export_status) {
+      if (sorter.field && sorter.direction) {
         result = {
-          export_status: sorter.export_status
+          sort_field: sorter.field,
+          sort_order: sorter.direction === 'ascend' ? 'asc' : 'desc'
         };
       }
       return result;
@@ -140,20 +149,24 @@ const DatasetsList: FC = () => {
           </div>
         );
       },
+      filterMultiple: true,
       filters: [
         {
           text: '导出中',
-          value: 0
+          value: ExportStatus.Exporting
         },
         {
           text: '导出成功',
-          value: 1
+          value: ExportStatus.ExportSuccess
         },
         {
           text: '导出失败',
-          value: 2
+          value: ExportStatus.ExportFailed
         }
-      ]
+      ],
+      onFilter: (value, record) => {
+        return value.includes(record.status);
+      }
     },
     {
       title: '文件大小',
@@ -206,14 +219,18 @@ const DatasetsList: FC = () => {
   return (
     <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
-      <Form
-        autoComplete="off"
-        layout="inline"
-        // @ts-expect-error TODO: FIX
-        onValuesChange={handleSearchChange}
-      >
-        <FormItem field="search_content" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入文件名搜索" />
+      <Form autoComplete="off" layout="inline">
+        <FormItem field="file_name" style={{ marginRight: 12 }}>
+          <Input.Search
+            allowClear
+            placeholder="输入文件名搜索"
+            onSearch={(value) => {
+              handleSearchChange({ file_name: value });
+            }}
+            onClear={() => {
+              handleSearchChange({ file_name: '' });
+            }}
+          />
         </FormItem>
       </Form>
       <Table
@@ -228,6 +245,7 @@ const DatasetsList: FC = () => {
         rowKey="id"
         onChange={handleTableChange}
         scroll={{ y: 500 }}
+        noDataElement={noDataElement({ description: '暂无数据' })}
       />
     </div>
   );
