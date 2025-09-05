@@ -191,14 +191,10 @@ export interface OperatorItem {
 }
 
 export interface GetExportFileReq {
-  // pyspark文件ID
+  /** pyspark文件ID */
   pyspark_id: number;
-  /** 存储类型 */
-  storage_type: StorageType;
-  /** 页码 */
-  page: number;
-  /** 每页数量 */
-  limit: number;
+  /** pyspark任务执行ID */
+  pyspark_exec_id: number;
 }
 
 export enum StorageType {
@@ -224,6 +220,10 @@ export interface ExportDatasetReq {
    */
   pyspark_id: number;
   /**
+   * pyspark运行ID
+   */
+  pyspark_exec_id: number;
+  /**
    * 存储类型：file,jsonl
    */
   storage_type: StorageType;
@@ -238,7 +238,7 @@ export interface ExportDatasetRes {
   id: number;
 }
 
-export interface ExportFileRes {
+export interface GetExportFile {
   /**
    * 修改时间
    */
@@ -274,6 +274,28 @@ export enum ExportStatus {
    * 终止导出
    */
   ExportTerminated = 'export_terminated'
+}
+
+export interface GetExportJsonlReq {
+  /**
+   * pyspark文件ID
+   */
+  pyspark_id: number;
+  /**
+   * pyspark任务执行ID
+   */
+  pyspark_exec_id: number;
+}
+
+export interface GetExportJsonlRes {
+  /**
+   * 表头
+   */
+  field_names: string[];
+  /**
+   * 文件名称
+   */
+  list: any[];
 }
 
 export interface GetExportDatasetListReq {

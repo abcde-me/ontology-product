@@ -31,6 +31,8 @@ import {
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
 import getFileIcon from '@/components/file-icon';
+import { getExportFile, getExportJsonl } from '@/api/pyspark';
+import { GetExportFile } from '@/types/pythonApi';
 const { Text } = Typography;
 
 interface Dataset {
@@ -68,6 +70,8 @@ enum StorageType {
 }
 
 interface DatasetFormProps {
+  pysparkId: number;
+  pysparkExecId: number;
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
@@ -212,7 +216,7 @@ const DatasetForm = React.forwardRef<
   { resetForm: () => void },
   DatasetFormProps
 >((props, ref) => {
-  const { visible, onSubmit, onCancel } = props;
+  const { visible, onSubmit, onCancel, pysparkId, pysparkExecId } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -231,7 +235,9 @@ const DatasetForm = React.forwardRef<
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
-  const [previewFileData, setPreviewFileData] = useState<string[] | null>(null); //数据目录文件预览数据
+  const [previewFileData, setPreviewFileData] = useState<
+    GetExportFile[] | null
+  >(null); //数据目录文件预览数据
   const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
@@ -471,18 +477,18 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 仅在 current 或 pageSize 变化时执行
-    getVolumePreviewData(
-      targetData?.[1]?.[1],
-      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
-    );
-  }, [current, pageSize]);
+    getVolumePreviewData();
+  }, [storageType]);
 
   // 获取数据目录卷预览数据的方法
-  const getVolumePreviewData = (volumeId: string, file_path: string) => {
+  const getVolumePreviewData = () => {
     setTableLoading(true);
     // 这里应该调用真实的API
     if (storageType === StorageType.Jsonl) {
-      getCatalogPreview({ path_id: volumeId })
+      getExportJsonl({
+        pyspark_id: pysparkId,
+        pyspark_exec_id: pysparkExecId
+      })
         .then((res) => {
           if (res.status !== 200) {
             Message.error(res.message);
@@ -497,21 +503,17 @@ const DatasetForm = React.forwardRef<
           setTableLoading(false);
         });
     } else if (storageType === StorageType.File) {
-      const params = {
-        path_id: volumeId,
-        full_path: file_path,
-        page: current,
-        limit: pageSize
-      };
-      getTargetDataFileList(params).then((res) => {
-        if (res.data && res.code === '') {
-          setIsPreviewFile(true);
-          setPreviewFileData(res.data.list || []);
-          setTotal(res.data.total);
-        } else {
+      getExportFile({
+        pyspark_id: pysparkId,
+        pyspark_exec_id: pysparkExecId
+      }).then((res) => {
+        if (res.status !== 200) {
           Message.error(res.message);
           setIsPreviewFile(false);
+          return;
         }
+        setIsPreviewFile(true);
+        setPreviewFileData(res?.data ?? []);
       });
     }
 
@@ -559,11 +561,11 @@ const DatasetForm = React.forwardRef<
   }, 500);
 
   const fileColumns = [
-    {
-      title: '文件ID',
-      dataIndex: 'id',
-      width: 80
-    },
+    // {
+    //   title: '文件ID',
+    //   dataIndex: 'id',
+    //   width: 80
+    // },
     {
       title: '文件名',
       dataIndex: 'file_name',
@@ -571,7 +573,7 @@ const DatasetForm = React.forwardRef<
       width: 300,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.extras?.file_name || '-'}
+          value={record?.file_name || '-'}
           isEdit={false}
           preferTypography
         />
@@ -579,7 +581,7 @@ const DatasetForm = React.forwardRef<
     },
     {
       title: '文件类型',
-      dataIndex: 'type', // 使用动态获取的文件类型筛选器
+      dataIndex: 'file_type', // 使用动态获取的文件类型筛选器
       width: 134,
       render: (_, record) => (
         <div
@@ -589,8 +591,8 @@ const DatasetForm = React.forwardRef<
             gap: '6px'
           }}
         >
-          {getFileIcon(record.type)}
-          <span>{record.file_type}</span>
+          {getFileIcon(record?.file_type)}
+          <span>{record?.file_type}</span>
         </div>
       )
     },
@@ -598,7 +600,13 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record.extras?.file_size || '-'}</span>
+      render: (_, record) => <span>{record?.file_size || '-'}</span>
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'file_modify_time', // 使用动态获取的文件类型筛选器
+      width: 134,
+      render: (_, record) => <span>{record?.file_modify_time || '-'}</span>
     }
   ];
 
@@ -861,7 +869,7 @@ const DatasetForm = React.forwardRef<
             {isPreviewFile && previewFileData ? (
               <>
                 <Table
-                  rowKey="id"
+                  rowKey="file_name"
                   columns={fileColumns}
                   data={previewFileData}
                   pagination={false}
@@ -872,25 +880,6 @@ const DatasetForm = React.forwardRef<
                     }
                   }}
                 />
-                {previewFileData && previewFileData.length > 0 && (
-                  <Pagination
-                    current={current}
-                    pageSize={pageSize}
-                    onPageSizeChange={(pageSize) => {
-                      setPageSize(pageSize);
-                      setCurrent(1);
-                    }}
-                    onChange={(page) => {
-                      setCurrent(page);
-                    }}
-                    sizeOptions={[10, 20, 50, 100]}
-                    showTotal
-                    total={total}
-                    showJumper
-                    sizeCanChange
-                    style={{ justifyContent: 'flex-end', marginTop: '10px' }}
-                  />
-                )}
               </>
             ) : null}
           </div>
