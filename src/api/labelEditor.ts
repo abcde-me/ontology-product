@@ -92,9 +92,13 @@ export async function getTaskResult(taskId: string) {
   //   .inRegion()
   //   .do();
   taskResult.task_id = +taskId;
+  const taskResultCopy = JSON.parse(JSON.stringify(taskResult));
+  if (taskResult.task_id % 2) {
+    taskResultCopy.result.shapes.splice(1, 1);
+  }
   return Promise.resolve({
     data: {
-      data: taskResult
+      data: taskResultCopy
     }
   });
 }
@@ -103,11 +107,12 @@ export async function getTask(requirementId?: string) {
   const rId = requirementId || searchParams.get('rId');
   // const { data: res } = await UAPI.RES.leGetTask({}).post({requirement_id: rId}).inRegion().do();
   const res = {
-    task_id: 5,
+    task_id: Math.floor(1 + Math.random() * 10),
     item_path: 'https://temp.im/600x600',
     item_type: 2,
     requirement_info: {
-      name: '需求名称',
+      name: '需求名称' + Math.random(),
+      not_started_num: 123,
       description: '描述',
       label_type: 2,
       label_tool: {
@@ -131,13 +136,14 @@ export async function getTask(requirementId?: string) {
 
 export async function getLabels(requirementId: string) {
   // const { data: res } = await UAPI.RES.leGetLabels({}).post({requirement_id: requirementId}).inRegion().do();
+  const idx = Math.floor(1 + Math.random() * 100);
   const res = {
     file_labels: [],
     labels: [
       {
         id: 1,
         order_num: 1,
-        label_name_cn: '标签1',
+        label_name_cn: '标签' + idx,
         label_name_en: '',
         label_shape: 1,
         label_colour: '#FFFFFF',
@@ -209,7 +215,7 @@ export async function getLabels(requirementId: string) {
       {
         id: 2,
         order_num: 2,
-        label_name_cn: '标签2',
+        label_name_cn: '标签' + (idx + 1),
         label_name_en: '',
         label_shape: 3,
         label_colour: '#FF0000',
