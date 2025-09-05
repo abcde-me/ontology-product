@@ -43,7 +43,8 @@ import {
   TableDetailParams,
   TableListParams,
   TableListData,
-  updateSqlScriptParams
+  updateSqlScriptParams,
+  SqlTaskDetailData
 } from '@/types/sqlApi';
 
 /** 查询目标目录文件列表 卷详情 文件列表 */
