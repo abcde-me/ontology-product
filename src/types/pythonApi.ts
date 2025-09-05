@@ -297,6 +297,10 @@ export interface GetExportDatasetListReq {
    * 导出状态（exporting-导出中、export_success-导出成功、export_failed-导出失败、export_terminated-终止导出），可配置多个
    */
   status?: ExportStatus[];
+  /**
+   * 搜索内容
+   */
+  file_name?: string;
 }
 
 export interface GetExportDatasetListItem {
