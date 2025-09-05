@@ -46,21 +46,22 @@ const Python: React.FC = memo(() => {
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              onFileOpen={openFile}
-              ref={directoryTreeRef}
-            />
+            {activeTab === 'files' && (
+              <FileManager
+                type="files"
+                onFileOpen={openFile}
+                ref={directoryTreeRef}
+              />
+            )}
           </TabPane>
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
+            {activeTab === 'data' && <DataManager />}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}>
-            <ToolsManager key="tools" />
+            {activeTab === 'tools' && <ToolsManager />}
           </TabPane>
           <TabPane key="daset" title={<DasetIcon />}>
-            <DatasetsList />
+            {isDasetTab && <DatasetsList />}
           </TabPane>
         </Tabs>
       </Sider>

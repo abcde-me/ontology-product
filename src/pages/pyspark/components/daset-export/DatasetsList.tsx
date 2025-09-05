@@ -26,14 +26,6 @@ import noDataElement from '@/components/no-data';
 const FormItem = Form.Item;
 
 const DatasetsList: FC = () => {
-  // const showScriptDetail = useSqlIndexStore(
-  //   (state: SqlIndexStore) => state.showScriptDetail
-  // );
-
-  // const showDatasetDetail = useSqlIndexStore(
-  //   (state: SqlIndexStore) => state.showDatasetDetail
-  // );
-
   const {
     listData,
     pagination,
@@ -74,7 +66,6 @@ const DatasetsList: FC = () => {
             className="text-[var(--color-text-2)]"
             value={item.pyspark_name}
             isEdit={false}
-            // handleLink={() => handleScriptDetail(item.id)}
           />
         );
       }
@@ -89,7 +80,6 @@ const DatasetsList: FC = () => {
             className="text-[var(--color-text-2)]"
             value={item.dataset_name}
             isEdit={false}
-            // handleLink={() => handleDatasetDetail(item.id)}
           />
         );
       }

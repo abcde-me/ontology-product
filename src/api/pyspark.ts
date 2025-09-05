@@ -641,13 +641,13 @@ export async function getExportFile(
 // 导出任务停止
 export async function stopExportDataset(
   // 导出任务id
-  id: number,
+  export_id: number,
   params: {
     pyspark_id: number;
   }
 ): Promise<ApiRes<object>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportDatasetStopApi({ id })
+  return await UAPI.RES.pythonExportDatasetStopApi({ export_id })
     .put(params)
     .inRegion()
     .do();
@@ -655,13 +655,13 @@ export async function stopExportDataset(
 
 // 重试导出任务
 export async function retryExportDataset(
-  id: number,
+  export_id: number,
   params: {
     pyspark_id: number;
   }
 ): Promise<ApiRes<object>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportDatasetRetryApi({ id })
+  return await UAPI.RES.pythonExportDatasetRetryApi({ export_id })
     .put(params)
     .inRegion()
     .do();
