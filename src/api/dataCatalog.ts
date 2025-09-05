@@ -520,6 +520,23 @@ export interface GetTargetCatalogFileListRes {
   page_size: number;
 }
 
+//查询源库下的表列表
+export interface DbTableListParamss {
+  path_id: number;
+  search: string;
+  page: number;
+  limit: number;
+  database: string;
+}
+
+//查询源库下的表详情
+export interface GetDbItemDetailParams {
+  detail_type: string;
+  database: string;
+  table: string;
+  path_id: number;
+}
+
 export async function getTargetCatalogFileList(
   param: GetTargetCatalogFileListParams
 ): Promise<ApiRes<GetTargetCatalogFileListRes>> {
@@ -749,4 +766,14 @@ export async function createCatalog(data: any) {
 //导出文件
 export async function exportFile(params: any = {}) {
   return await UAPI.RES.fileExportApi({}).post(params).inRegion().do();
+}
+
+//获取数据库表列表
+export async function getDbItemList(params: DbTableListParamss) {
+  return await UAPI.RES.dbItemListApi({}).post(params).inRegion().do();
+}
+
+//查询源库下的表详情
+export async function getDbItemDetail(params: DbTableListParamss) {
+  return await UAPI.RES.dbItemDetailApi({}).post(params).inRegion().do();
 }

@@ -179,6 +179,8 @@ export const ResourceEndpointsV2 = {
     PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
   sourceDataFileDeleteBatcheApi:
     PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/connectors/files/output`,

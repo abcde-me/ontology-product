@@ -58,9 +58,19 @@ interface TableRefType {
 export default function Eltable() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { activeTab, selectedKey, selectedPath } = catalogTreeStore.useGetState(
-    ['activeTab', 'selectedKey', 'selectedPath']
-  );
+  const {
+    activeTab,
+    selectedKey,
+    selectedPath,
+    selectedNodeType,
+    selectedParentId
+  } = catalogTreeStore.useGetState([
+    'activeTab',
+    'selectedKey',
+    'selectedPath',
+    'selectedNodeType',
+    'selectedParentId'
+  ]);
 
   // 通用状态管理
   const [selectedRows, setSelectedRows] = useState<
@@ -605,10 +615,12 @@ export default function Eltable() {
             endTime={endTime}
             tableType={activeTab === 'src' ? 'source' : 'target'}
             // 数据类型标识，默认为volume，可根据需要扩展
-            dataType="volume"
+            dataType={selectedNodeType === 'db_item' ? 'database' : 'volume'}
             selectedFullPath={selectedPath}
             selectedKey={selectedKey}
-            key={`${activeTab}-${selectedKey}-${selectedPath}`}
+            selectedNodeType={selectedNodeType} // 传递选中节点类型
+            selectedParentId={selectedParentId} // 传递选中节点的父节点ID
+            key={`${activeTab}-${selectedKey}-${selectedPath}-${selectedNodeType}`}
           />
         </div>
       </div>

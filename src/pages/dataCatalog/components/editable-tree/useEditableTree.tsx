@@ -13,7 +13,8 @@ import {
   IconStorage,
   IconArchive,
   IconFolder,
-  IconCaretDown
+  IconCaretDown,
+  IconFile
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -21,7 +22,8 @@ import {
   addVolume,
   deleteVolume,
   renameCatalog,
-  addDb
+  addDb,
+  getDbItemList
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { PermissionGuard } from '@/components/PermissionGuard';
@@ -52,9 +54,14 @@ export function useEditableTree({ catalogTreeStore }) {
   const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
     return treeData?.map?.((item) => {
       const { children, key, ...rest } = item;
+      // 确保数据库类型的节点能正确渲染其子节点
+      const hasChildren = children && children.length > 0;
+      const isExpandable =
+        hasChildren || (item.type === 'db' && !item.isLastLeaf);
+
       return (
-        <Tree.Node key={key} {...rest} dataRef={item}>
-          {children ? generatorTreeNodes(children) : null}
+        <Tree.Node key={key} {...rest} dataRef={item} isLeaf={!isExpandable}>
+          {hasChildren ? generatorTreeNodes(children) : null}
         </Tree.Node>
       );
     });
@@ -121,7 +128,14 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const handleExpand = (expandedKeys: string[]) => {
+  const handleExpand = (
+    expandedKeys: string[],
+    extra?: {
+      expanded: boolean;
+      node: NodeInstance;
+      expandedNodes: NodeInstance[];
+    }
+  ) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
     });
@@ -145,7 +159,9 @@ export function useEditableTree({ catalogTreeStore }) {
     ) {
       catalogTreeStore.setState({
         selectedKey: selectedKeys[0],
-        selectedPath: dataRef?.fullPath
+        selectedPath: dataRef?.fullPath,
+        selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
+        selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
       });
     }
   };
@@ -210,7 +226,7 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
-  // 删除目录 or 卷
+  // 删除目录 or 卷 or 数据库表
   const handleDelete = async (node: NodeProps) => {
     const { _key, dataRef } = node;
 
@@ -390,34 +406,23 @@ export function useEditableTree({ catalogTreeStore }) {
   let perms: string[] = [];
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
-
     perms = dataRef?.perms ? dataRef.perms : perms;
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {['volume'].every((key) => dataRef?.type !== key) && (
+          {/* db_item 类型只显示删除按钮 */}
+          {dataRef?.type === CatalogTypeEnum.db_item ? (
             <>
-              {dataRef?.perms?.includes(
-                DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
-              ) && (
-                <Tooltip color="white" content="重命名">
-                  <IconEdit
-                    className={
-                      'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                    }
-                    onClick={() => handleEdit(node)}
-                  />
-                </Tooltip>
-              )}
-              {dataRef?.perms?.includes(
+              {(dataRef?.perms?.includes(
                 DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-              ) && (
+              ) ||
+                dataRef?.type === CatalogTypeEnum.db_item) && (
                 <Tooltip color="white" content="删除">
                   <IconDelete
                     onClick={() => {
                       Modal.confirm({
-                        title: '确认删除目录?',
-                        content: '删除后，该目录下所有内容将被删除，不可恢复',
+                        title: '确认删除数据库表?',
+                        content: '删除后不可恢复',
                         async onOk() {
                           try {
                             await handleDelete(node);
@@ -435,17 +440,64 @@ export function useEditableTree({ catalogTreeStore }) {
                 </Tooltip>
               )}
             </>
+          ) : (
+            <>
+              {/* 其他类型的操作按钮 */}
+              {['volume'].every((key) => dataRef?.type !== key) && (
+                <>
+                  {dataRef?.perms?.includes(
+                    DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
+                  ) && (
+                    <Tooltip color="white" content="重命名">
+                      <IconEdit
+                        className={
+                          'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                        }
+                        onClick={() => handleEdit(node)}
+                      />
+                    </Tooltip>
+                  )}
+                  {dataRef?.perms?.includes(
+                    DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
+                  ) && (
+                    <Tooltip color="white" content="删除">
+                      <IconDelete
+                        onClick={() => {
+                          Modal.confirm({
+                            title: '确认删除目录?',
+                            content:
+                              '删除后，该目录下所有内容将被删除，不可恢复',
+                            async onOk() {
+                              try {
+                                await handleDelete(node);
+                              } catch (apiError: any) {
+                                Message.error(
+                                  '删除失败: ' +
+                                    (apiError.message || '请稍后重试')
+                                );
+                              }
+                            },
+                            className: styles['modalWrapper']
+                          });
+                        }}
+                        className="hover:text-[rgb(var(--primary-6))]"
+                      />
+                    </Tooltip>
+                  )}
+                </>
+              )}
+              {/* 为数据卷和数据库都添加新建按钮 */}
+              {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
+                perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+                  <Tooltip color="white" content="新建">
+                    <IconPlus
+                      className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => addSubVolume(node)}
+                    />
+                  </Tooltip>
+                )}
+            </>
           )}
-          {/* 为数据卷和数据库都添加新建按钮 */}
-          {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
-            perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
-              <Tooltip color="white" content="新建">
-                <IconPlus
-                  className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => addSubVolume(node)}
-                />
-              </Tooltip>
-            )}
         </div>
       )
     );
@@ -501,9 +553,9 @@ export function useEditableTree({ catalogTreeStore }) {
           <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
-            ) : dataRef?.type == '3' ? (
-              <IconCaretDown style={{ fontSize: '12px' }} />
-            ) : (
+            ) : dataRef?.type ===
+              CatalogTypeEnum.db ? // <IconCaretDown style={{ fontSize: '12px' }} />
+            null : (
               <IconArchive className="text-base" />
             )}
           </div>

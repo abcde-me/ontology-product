@@ -8,7 +8,8 @@ import React, {
 import { Modal, Tabs, Typography } from '@arco-design/web-react';
 import {
   getTargetDataFileList,
-  getSourceDataFileList
+  getSourceDataFileList,
+  getDbItemList
 } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable, { UnifiedTableRef } from './unified-table';
@@ -68,6 +69,10 @@ interface UnifiedDataTableProps {
   // 选中节点的完整路径
   selectedFullPath?: string;
   selectedKey?: string;
+  // 选中节点的类型
+  selectedNodeType?: string;
+  // 选中节点的父节点ID
+  selectedParentId?: string;
 }
 
 /**
@@ -84,7 +89,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     tableType,
     dataType = 'volume',
     selectedFullPath,
-    selectedKey
+    selectedKey,
+    selectedNodeType,
+    selectedParentId
   } = props;
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
@@ -163,7 +170,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         tableRef.current.resetSelection();
       }
     }
-  }, [selectedKey, selectedFullPath]);
+  }, [selectedKey, selectedFullPath, selectedNodeType, selectedParentId]);
   // 监听搜索类型变化
   useEffect(() => {
     if (isFirstRender.current) {
@@ -280,7 +287,31 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newSourceParams.end = endTime;
       }
       let res;
-      if (tableType === 'target') {
+      console.log(tableType, '查看tableType11111111');
+      console.log(selectedNodeType, '查看selectedNodeType');
+
+      // 根据节点类型决定调用哪个API
+      if (selectedNodeType === 'db_item') {
+        let databaseName = '';
+        if (selectedFullPath) {
+          const pathParts = selectedFullPath.split('/');
+          if (pathParts.length >= 2) {
+            databaseName = pathParts[pathParts.length - 1];
+          }
+        }
+        const dbParams = {
+          path_id: Number(selectedParentId || selectedKey), // 使用父节点ID（数据库ID），如果没有则使用selectedKey
+          search:
+            tableType === 'source'
+              ? searchValue || ''
+              : searchConditionKeyword || '',
+          page: currentPage,
+          limit: pageSize,
+          database: databaseName // 使用提取的数据库名称
+        };
+        res = await getDbItemList(dbParams);
+        console.log('调用数据库表API，参数:', dbParams);
+      } else if (tableType === 'target') {
         // 调用目标数据API
         console.log(newParams, 'top----111111');
         res = await getTargetDataFileList(newParams);
@@ -397,7 +428,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     fileTypeFilters,
     tableType,
     sortField,
-    sortOrder
+    sortOrder,
+    selectedNodeType,
+    selectedParentId
   ]);
 
   // 当tableType变化时重置相关状态，不再重复调用getTableList
@@ -418,6 +451,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   }, [tableType]);
 
   useEffect(() => {
+    console.log('查看table是什么类型', tableType);
+
     const handleResetPage = (event) => {
       const { tableType: eventTableType } = event.detail;
       if (eventTableType === tableType) {
@@ -467,7 +502,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       undefined, // customFileTypeFilters
       handAllReset,
       resetPage,
-      sourceFileTypeFilters
+      sourceFileTypeFilters,
+      selectedNodeType
     );
   }, [
     tableType,
@@ -477,7 +513,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedFullPath,
     handAllReset,
     resetPage,
-    sourceFileTypeFilters
+    sourceFileTypeFilters,
+    selectedNodeType
   ]);
 
   // 处理带有hoveredRowId的列配置
@@ -494,7 +531,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedKey,
         selectedFullPath,
         undefined,
-        handAllReset
+        handAllReset,
+        resetPage,
+        sourceFileTypeFilters,
+        selectedNodeType
       );
     }
     return baseColumns;
@@ -506,7 +546,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     hoveredRowId,
     selectedKey,
     selectedFullPath,
-    handAllReset
+    handAllReset,
+    resetPage,
+    sourceFileTypeFilters,
+    selectedNodeType
   ]);
 
   // 处理表格选择变化 - 支持跨页选择
@@ -560,17 +603,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       crossPageSelectedRows
     ]
   );
-
-  // 处理从外部传入的selectedNode
-  // useEffect(() => {
-  //   if (selectedNode) {
-  //     console.log(
-  //       `UnifiedDataTable (${tableType}) - Selected node changed:`,
-  //       selectedNode
-  //     );
-  //     // 这里可以根据selectedNode来更新表格数据
-  //   }
-  // }, [selectedNode, tableType]);
 
   // 页码变化处理 - 使用useCallback避免重新创建
   const handlePageChange = React.useCallback(
