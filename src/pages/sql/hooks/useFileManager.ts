@@ -246,9 +246,7 @@ export const useFileManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript({
-          script_id: node?.dataRef?.id
-        });
+        const copyRes = await copySqlScript(node?.dataRef?.id);
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
