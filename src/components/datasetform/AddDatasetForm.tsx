@@ -64,8 +64,7 @@ interface ConnectorFile {
 
 enum StorageType {
   Jsonl = 'jsonl',
-  File = 'file',
-  DataBaseTable = 'dataBaseTable'
+  File = 'file'
 }
 
 interface DatasetFormProps {
@@ -419,10 +418,7 @@ const DatasetForm = React.forwardRef<
     // 获取连接器文件信息
     getConnectorFileInformationfun(
       value,
-      storageType === StorageType.File ||
-        storageType === StorageType.DataBaseTable
-        ? ''
-        : 'jsonl'
+      storageType === StorageType.File ? '' : 'jsonl'
     );
   };
 
@@ -767,7 +763,6 @@ const DatasetForm = React.forwardRef<
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
-              <Radio value={StorageType.DataBaseTable}>数据库表</Radio>
             </Radio.Group>
           </FormItem>
 
@@ -832,9 +827,7 @@ const DatasetForm = React.forwardRef<
                     </span>{' '}
                     {storageType === StorageType.File
                       ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
-                      : storageType === StorageType.Jsonl
-                        ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
-                        : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
+                      : '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'}
                   </span>
                 ) : (
                   <span style={{ fontSize: '14px' }}>
@@ -937,8 +930,7 @@ const DatasetForm = React.forwardRef<
                 className="form-item-select-files"
                 wrapperCol={{ span: 20 }}
                 extra={
-                  storageType === StorageType.File ||
-                  storageType === StorageType.DataBaseTable ? (
+                  storageType === StorageType.File ? (
                     ''
                   ) : (
                     <span

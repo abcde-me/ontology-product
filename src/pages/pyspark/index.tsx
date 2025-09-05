@@ -4,6 +4,7 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
+import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import { useTabManager } from './hooks/useTabManager';
@@ -45,21 +46,22 @@ const Python: React.FC = memo(() => {
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              onFileOpen={openFile}
-              ref={directoryTreeRef}
-            />
+            {activeTab === 'files' && (
+              <FileManager
+                type="files"
+                onFileOpen={openFile}
+                ref={directoryTreeRef}
+              />
+            )}
           </TabPane>
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
+            {activeTab === 'data' && <DataManager />}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}>
-            <ToolsManager key="tools" />
+            {activeTab === 'tools' && <ToolsManager />}
           </TabPane>
-          <TabPane key="daset" title={<SuanziIcon />}>
-            <DatasetsList />
+          <TabPane key="daset" title={<DasetIcon />}>
+            {isDasetTab && <DatasetsList />}
           </TabPane>
         </Tabs>
       </Sider>

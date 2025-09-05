@@ -271,7 +271,8 @@ export const ModaForgeResourceEndpoints = {
     PrefixAimdp +
     '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
   // 工作流-知识库名称校验
-  knowledgeBaseNameCheck: '/query/api/knowledge/validKnowledgeName',
+  knowledgeBaseNameCheck:
+    PrefixAimdp + '/query/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -405,10 +406,11 @@ export const ModaForgeResourceEndpoints = {
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
   pythonExportDatasetStopApi:
-    PrefixAimdp + 'pyspark/export/dataset/{pyspark_id}/stop',
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
   pythonExportDatasetRetryApi:
-    PrefixAimdp + '/pyspark/export/dataset/{pyspark_id}/retry',
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/sql_script/list',
