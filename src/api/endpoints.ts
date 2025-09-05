@@ -384,6 +384,8 @@ export const ModaForgeResourceEndpoints = {
   // 数据标注接口
   // 数据标注配置 发布
   publishRequirementApi: PrefixLabelService + '/requirements/create',
+  // 需求详情查看
+  getRequirementDetailApi: PrefixLabelService + '/requirements/query',
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
   // 获取数据标注 - 任务列表
@@ -392,6 +394,9 @@ export const ModaForgeResourceEndpoints = {
   getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
   // 获取个人列表树内容
   getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  //  查询标注数据表格内容
+  getAnnotationTabledDataApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
 
   // python开发
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',

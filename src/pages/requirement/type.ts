@@ -79,3 +79,26 @@ export const TeamTypeMap = {
   [TeamType.PERSON]: '个人',
   [TeamType.DEPARTMENT]: '部门'
 };
+// 标注工具查询表格type类型
+// 1 图片 2 文本 3 音频 4 视频
+export const toolFileType = {
+  1: ['jpeg', 'jpg', 'png', 'gif'],
+  2: ['txt', 'jsonl'],
+  3: ['mp3', 'wma', 'wav', 'flac', 'ape', 'aac'],
+  4: [
+    'wmv',
+    'asf',
+    'asx',
+    'rm',
+    'rmvb',
+    'mp4',
+    '3gp',
+    'mov',
+    'm4v',
+    'avi',
+    'dat',
+    'mkv',
+    'flv',
+    'vob'
+  ]
+};
