@@ -189,3 +189,185 @@ export interface OperatorItem {
   /** 示例代码 */
   sample_code: string;
 }
+
+export interface GetExportFileReq {
+  /** pyspark文件ID */
+  pyspark_id: number;
+  /** pyspark任务执行ID */
+  pyspark_exec_id: number;
+}
+
+export enum StorageType {
+  File = 'file',
+  Jsonl = 'jsonl'
+}
+
+export interface ExportDatasetReq {
+  /**
+   * 数据集描述
+   */
+  description?: string;
+  /**
+   * 文件名列表
+   */
+  file_names?: string[];
+  /**
+   * 数据集名称
+   */
+  name: string;
+  /**
+   * pyspark文件ID
+   */
+  pyspark_id: number;
+  /**
+   * pyspark运行ID
+   */
+  pyspark_exec_id: number;
+  /**
+   * 存储类型：file,jsonl
+   */
+  storage_type: StorageType;
+  /**
+   * 标签列表
+   */
+  tag_names?: string[];
+}
+
+export interface ExportDatasetRes {
+  // 导出任务id
+  id: number;
+}
+
+export interface GetExportFile {
+  /**
+   * 修改时间
+   */
+  file_modify_time: string;
+  /**
+   * 文件名称
+   */
+  file_name: string;
+  /**
+   * 文件大小
+   */
+  file_size: string;
+  /**
+   * 文件类型
+   */
+  file_type: string;
+}
+
+export enum ExportStatus {
+  /**
+   * 导出中
+   */
+  Exporting = 'exporting',
+  /**
+   * 导出成功
+   */
+  ExportSuccess = 'export_success',
+  /**
+   * 导出失败
+   */
+  ExportFailed = 'export_failed',
+  /**
+   * 终止导出
+   */
+  ExportTerminated = 'export_terminated'
+}
+
+export interface GetExportJsonlReq {
+  /**
+   * pyspark文件ID
+   */
+  pyspark_id: number;
+  /**
+   * pyspark任务执行ID
+   */
+  pyspark_exec_id: number;
+}
+
+export interface GetExportJsonlRes {
+  /**
+   * 表头
+   */
+  field_names: string[];
+  /**
+   * 文件名称
+   */
+  list: any[];
+}
+
+export interface GetExportDatasetListReq {
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页面大小
+   */
+  page_size: number;
+  /**
+   * created_at-创建时间
+   */
+  sort_field?: string;
+  /**
+   * asc-正序、desc-倒序
+   */
+  sort_order?: 'asc' | 'desc';
+  /**
+   * 导出状态（exporting-导出中、export_success-导出成功、export_failed-导出失败、export_terminated-终止导出），可配置多个
+   */
+  status?: ExportStatus[];
+  /**
+   * 搜索内容
+   */
+  file_name?: string;
+}
+
+export interface GetExportDatasetListItem {
+  /**
+   * 创建时间
+   */
+  created_at: string;
+  /**
+   * 数据集名称
+   */
+  dataset_name: string;
+  /**
+   * ID
+   */
+  id: number;
+  /**
+   * pyspark文件Id
+   */
+  pyspark_id: number;
+  /**
+   * pyspark文件名称
+   */
+  pyspark_name: string;
+  /**
+   * 数据集大小(字节)
+   */
+  size: number;
+  /**
+   * 导出状态：exporting-导出中、export_success-导出成功、export_failed-导出失败、export_terminated-导出终止
+   */
+  status: ExportStatus;
+}
+
+export interface GetExportDatasetListRes {
+  items: GetExportDatasetListItem[];
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 页面大小
+   */
+  page_size: number;
+  /**
+   * 总条数
+   */
+  total: number;
+}

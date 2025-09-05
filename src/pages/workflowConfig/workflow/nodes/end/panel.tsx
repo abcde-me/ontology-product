@@ -49,7 +49,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         disabled={readOnly}
         wrapperCol={{ span: 24 }}
         onValuesChange={(_, v: any) => {
-          onValuesChange(v, dataSource);
+          onValuesChange({ ...v, Knowledge_base_name: '' }, dataSource);
         }}
         initialValues={{
           target_path_id: inputs?.target_path_id,
@@ -105,13 +105,21 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                 required: true,
                 validateTrigger: 'onBlur',
                 validator: async (value, callback) => {
+                  const formData = form.getFieldsValue() as EndNodeType;
                   return knowledgeBaseNameCheck({
                     knowledgeName: value,
                     userId: userInfo?.id || ''
                   }).then((res) => {
                     if (res.data && res.msg === 'success') {
-                      return true;
+                      setKnowledgeBaseName(value);
+                      // 校验通过保存名称
+                      onValuesChange(formData, dataSource);
                     } else {
+                      // 校验未通过名称重置为之前名称
+                      onValuesChange(
+                        { ...formData, Knowledge_base_name: knowledgeBaseName },
+                        dataSource
+                      );
                       callback(res.msg);
                     }
                   });
@@ -123,10 +131,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
               placeholder="请输入知识库名称（50字以内）"
               maxLength={50}
               value={knowledgeBaseName}
-              onBlur={(e) => {
-                console.log(e.target.value);
-                setKnowledgeBaseName(e.target.value);
-              }}
             />
           </FormItem>
         )}

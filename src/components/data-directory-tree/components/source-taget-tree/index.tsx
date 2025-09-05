@@ -31,6 +31,7 @@ import {
   DataDirectoryTreeFrom
 } from '../../types';
 import './index.scss';
+import { formatFileSize } from '@/utils/format';
 
 const { Title, Text } = Typography;
 
@@ -103,6 +104,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 处理数据卷插入按钮点击
   const handleVolumeInsert = useCallback(
     (volume: FluffyVolume, event: Event) => {
+      console.log('走到这里了吗？', volume);
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据卷选择
       if (onVolumeInsert) {
         onVolumeInsert(volume);
@@ -297,13 +299,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     try {
       const rootType =
         dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
+      // TODO: 后期改page\page_size
       const params = {
-        path_id: item.id.toString(),
         page: 1,
-        limit: 100,
-        full_path: item.base_dir || '',
-        sort_field: 'created_at',
-        sort_order: 'desc'
+        page_size: 100,
+        data_path_id: Number(item.id),
+        file_name: '',
+        sort: 'desc' as 'asc' | 'desc'
       };
 
       await getCatalogFileList(rootType, params);
@@ -540,7 +542,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 ></EllipsisPopover>
                 <EllipsisPopover
                   className="source-target-tree__file-size"
-                  value={file.file_size || file.size || '未知大小'}
+                  value={formatFileSize(file.file_size || file.size)}
                 ></EllipsisPopover>
               </div>
             </div>
@@ -567,6 +569,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 渲染主要内容
   const renderMainContent = () => {
+    console.log('让我瞅瞅这是第几层', currentViewLevel);
     switch (currentViewLevel) {
       case 'catalog':
         return renderCatalogList();

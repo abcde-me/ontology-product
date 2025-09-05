@@ -1,0 +1,68 @@
+/* 数据集表单样式 */
+
+/* Modal内容区域样式调整 - 只影响这个组件的Modal */
+.modalWrapper :global(.arco-modal-content) {
+  padding-left: 0px;
+}
+.modalWrapper :global(.arco-form-label-item > label) {
+  white-space: nowrap;
+  /* 不换行 */
+}
+/* 单元格内容截断显示 */
+.cellContent {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.cellContent:hover {
+  white-space: normal;
+  word-wrap: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* 长文本展开提示 */
+.cellContent.longText::after {
+  content: '...';
+  color: #86909c;
+}
+
+.dropdownMenuSelect
+  :global(.arco-select-option-wrapper .arco-select-highlight) {
+  color: #007dfa;
+}
+
+/* 数据类型指示器（可选功能） */
+.dataTypeIndicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.dataTypeIndicator.string {
+  background-color: #52c41a;
+}
+
+.dataTypeIndicator.number {
+  background-color: #1890ff;
+}
+
+.dataTypeIndicator.boolean {
+  background-color: #fa8c16;
+}
+
+.dataTypeIndicator.object {
+  background-color: #722ed1;
+}
+
+.form :global(.arco-select-highlight) {
+  background-color: #f5f5f5;
+  color: #145cec;
+}
