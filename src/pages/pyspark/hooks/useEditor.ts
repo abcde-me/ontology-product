@@ -1,12 +1,24 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
-import { runPythonItem, getRunResult, savePythonItem } from '@/api/pyspark';
+import {
+  runPythonItem,
+  getRunResult,
+  savePythonItem,
+  openPythonItem,
+  getRunLog
+} from '@/api/pyspark';
 
 interface UseEditorOptions {
-  initialContent?: string;
-  currentFileId?: string;
+  activeTab?: string;
+  fileTabs?: Array<{
+    key: string;
+    title: string;
+    content: string;
+    fileId?: string;
+  }>;
+  onTabContentUpdate?: (tabKey: string, content: string) => void;
 }
 
 interface UseEditorReturn {
@@ -20,11 +32,14 @@ interface UseEditorReturn {
   execid: string;
   runLog: string;
   runResult: string;
+  isPanelOpen: boolean;
 
   // 编辑器操作
   handleContentChange: (value: string) => void;
   handleRunCode: () => Promise<void>;
+  handleGetRunLog: () => Promise<void>;
   handleStopRunCode: () => void;
+  handlePanelStateChange: (isOpen: boolean) => void;
 }
 
 const defaultContent = `
@@ -42,10 +57,10 @@ const defaultContent = `
 `;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
-  const { initialContent = '', currentFileId } = options;
+  const { activeTab, fileTabs = [], onTabContentUpdate } = options;
 
   // 状态管理
-  const [editorContent, setEditorContent] = useState(initialContent);
+  const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
@@ -54,60 +69,125 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [execid, setExecid] = useState<string>('');
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
 
-  // 使用 ref 来跟踪初始内容，避免不必要的更新
-  const initialContentRef = useRef(initialContent);
-  const currentFileIdRef = useRef(currentFileId);
+  // 当前文件ID，从 activeTab 对应的标签页获取
+  const currentFileId = fileTabs.find((tab) => tab.key === activeTab)?.fileId;
 
-  // 当初始内容变化时，更新编辑器内容（只在真正需要时更新）
+  // 轮询获取运行结果
+  const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
+    useRequest(getRunResult, {
+      pollingInterval: 10000,
+      pollingWhenHidden: false,
+      manual: true
+    });
+
+  // 清空编辑器状态的函数
+  const clearEditorState = useCallback(() => {
+    setRunStatus(RunningStatus.IDLE);
+    setExecid('');
+    setRunStartTime(null);
+    setRunDuration(0);
+    setRunLog('');
+    setRunResult('');
+    setLastAutoSave('');
+    setIsPanelOpen(false); // 重置面板状态为关闭
+    // 取消正在进行的轮询
+    cancelGetRunResultPolling();
+  }, [cancelGetRunResultPolling]);
+
+  // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
-    if (initialContent !== initialContentRef.current) {
-      initialContentRef.current = initialContent;
-      setEditorContent(initialContent);
+    if (!activeTab || !fileTabs.length) {
+      return;
     }
-  }, [initialContent]);
 
-  // 更新 currentFileId ref
-  useEffect(() => {
-    currentFileIdRef.current = currentFileId;
-  }, [currentFileId]);
+    // 标签页切换时重置面板状态为关闭
+    setIsPanelOpen(false);
 
-  // 延时3秒自动保存 - 使用 useCallback 优化
-  const handleSaveThrottled = useThrottleFn(
-    useCallback(async (content: string) => {
-      const fileId = currentFileIdRef.current;
-      if (!fileId) {
-        return null;
-      }
+    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
+    if (!currentTab) {
+      return;
+    }
 
-      try {
-        const res = await savePythonItem(fileId, {
-          id: Number(fileId),
-          data: content
-        });
+    // 如果有 fileId，重新加载文件内容以获取最新状态
+    if (currentTab.fileId) {
+      const loadFileContent = async () => {
+        try {
+          const response = await openPythonItem(currentTab.fileId!);
 
-        if (res?.status === 200) {
-          setLastAutoSave(new Date().toLocaleTimeString());
-          return res.data;
+          if (response.status === 200 && response.data) {
+            const fileData = response.data;
+
+            // 更新编辑器内容
+            setEditorContent(fileData.data);
+
+            // 更新运行状态
+            setExecid(String(fileData.execid));
+
+            // 通知父组件更新标签页内容
+            if (onTabContentUpdate) {
+              onTabContentUpdate(currentTab.key, fileData.data);
+            }
+          } else {
+            Message.error(response?.message ?? '加载文件失败');
+          }
+        } catch (error) {
+          console.error('加载文件失败:', error);
+          Message.error('加载文件失败');
         }
-        return null;
-      } catch (error) {
-        console.error('自动保存失败:', error);
-        return null;
-      }
-    }, []),
-    { wait: 3000 }
+      };
+
+      loadFileContent();
+    } else if (currentTab.content) {
+      // 如果没有 fileId 但有内容，直接使用标签页内容
+      setEditorContent(currentTab.content);
+    }
+  }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
+
+  // 当 currentFileId 变化时，重置运行相关状态
+  useEffect(() => {
+    clearEditorState();
+  }, [currentFileId, clearEditorState]);
+
+  // 延时自动保存 - 使用 useCallback 优化
+  const handleSaveThrottled = useThrottleFn(
+    useCallback(
+      async (content: string) => {
+        if (!currentFileId) {
+          return null;
+        }
+
+        try {
+          const res = await savePythonItem(currentFileId, {
+            id: Number(currentFileId),
+            data: content
+          });
+
+          if (res?.status === 200) {
+            setLastAutoSave(new Date().toLocaleTimeString());
+            return res.data;
+          }
+          return null;
+        } catch (error) {
+          console.error('自动保存失败:', error);
+          return null;
+        }
+      },
+      [currentFileId]
+    ),
+    { wait: 5000 }
   );
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      setRunStatus(RunningStatus.IDLE);
+      clearEditorState();
       setEditorContent(value);
       // 自动保存
       handleSaveThrottled.run(value);
     },
-    [handleSaveThrottled]
+    [handleSaveThrottled, clearEditorState]
   );
 
   // 运行代码 - 优化依赖项
@@ -116,18 +196,19 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    const fileId = currentFileIdRef.current;
-    if (!fileId) {
+    if (!currentFileId) {
       Message.error('请先保存文件');
       return;
     }
 
     setRunStatus(RunningStatus.RUNNING);
+    setRunResult('');
+    setExecid('');
     setRunStartTime(new Date());
     setRunDuration(0);
 
     try {
-      const res = await runPythonItem(fileId);
+      const res = await runPythonItem(currentFileId);
       if (res?.status === 200) {
         setExecid(res.data.execid);
       } else {
@@ -137,71 +218,69 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
-  }, [runStatus]);
+  }, [runStatus, currentFileId]);
 
   // 停止运行
   const handleStopRunCode = useCallback(() => {
     setRunStatus(RunningStatus.IDLE);
   }, []);
 
-  // 轮询获取运行结果
-  const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
-    useRequest(getRunResult, {
-      pollingInterval: 3000,
-      pollingWhenHidden: false,
-      manual: true
-    });
+  // 获取运行日志
+  const handleGetRunLog = useCallback(async () => {
+    if (!currentFileId || !execid) {
+      return;
+    }
+    const res = await getRunLog(currentFileId, { execid });
+
+    if (res?.status === 200) {
+      setRunLog(res.data.log);
+    }
+  }, [currentFileId, execid]);
+
+  // 处理面板状态变化
+  const handlePanelStateChange = useCallback((isOpen: boolean) => {
+    setIsPanelOpen(isOpen);
+  }, []);
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
     if (runStatus !== RunningStatus.RUNNING) {
+      console.log('取消轮询');
       cancelGetRunResultPolling();
     }
 
-    console.log('runStatus', runStatus);
-    if (
-      runStatus !== RunningStatus.RUNNING ||
-      !execid ||
-      !currentFileIdRef.current
-    ) {
+    if (!execid || !currentFileId) {
       return;
     }
 
     // 运行中时，轮询获取运行结果
     const fetchResult = async () => {
       try {
-        const res = await getRunResultPolling(currentFileIdRef.current!, {
+        const res = await getRunResultPolling(currentFileId, {
           execid
         });
 
-        if (res?.status === 200 && res.data) {
-          setRunResult(res.data.run_result);
-
-          // 检查执行状态
-          if (res.data.run_status !== RunningStatus.RUNNING) {
-            const status =
-              res.data.run_status === RunningStatus.SUCCESS
-                ? RunningStatus.SUCCESS
-                : RunningStatus.FAILED;
-
-            setRunStatus(status);
-
-            // 计算执行时长
-            if (runStartTime) {
-              const duration = Math.floor(
-                (Date.now() - runStartTime.getTime()) / 1000
-              );
-              setRunDuration(duration);
-            }
-          }
+        if (res?.status !== 200) {
+          setRunStatus(RunningStatus.FAILED);
+          setRunResult(res?.message ?? '获取运行结果失败');
+          return;
         }
+
+        if (res?.data?.run_status !== RunningStatus.RUNNING) {
+          cancelGetRunResultPolling();
+        }
+
+        setRunResult(res?.data?.run_result ?? '');
+        setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
+        setRunDuration(res?.data?.run_duration ?? 0);
       } catch (error) {
         console.error('获取运行结果失败:', error);
+        setRunStatus(RunningStatus.FAILED);
       }
     };
 
     fetchResult();
-  }, [execid, runStatus]);
+  }, [execid]);
 
   return {
     // 状态
@@ -214,10 +293,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     execid,
     runLog,
     runResult,
+    isPanelOpen,
 
     // 操作
     handleContentChange,
     handleRunCode,
-    handleStopRunCode
+    handleGetRunLog,
+    handleStopRunCode,
+    handlePanelStateChange
   };
 };

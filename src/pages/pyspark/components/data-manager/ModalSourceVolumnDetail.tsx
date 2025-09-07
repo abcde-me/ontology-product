@@ -46,7 +46,7 @@ const formatFileSize = (size: number): string => {
 /** 数据卷详情 弹框 */
 const ModalVolumnDetail = ({
   volumnDetailVisible,
-  selectedVolumnId,
+  selectedVolumn,
   closeVolumnDetail
 }) => {
   return (
@@ -57,7 +57,7 @@ const ModalVolumnDetail = ({
       footer={null}
       onCancel={closeVolumnDetail}
     >
-      <FileList fromId={selectedVolumnId} />
+      <FileList fromId={String(selectedVolumn.id)} />
     </Modal>
   );
 };
@@ -134,8 +134,7 @@ const defaultfileTypeList = [
 const defaultSearchParams = {
   page: 1,
   page_size: 10,
-  file_name: '',
-  data_path_id: 1392
+  file_name: ''
 };
 
 const useTableList = (props) => {
@@ -307,14 +306,12 @@ const useTableList = (props) => {
   }
 
   function handleTableChange(pagination: any, filters: any, sorter: any) {
-    // console.log('Table change:', pagination, filters, sorter);
-
     setSearchParams((prev) => {
       return {
         ...prev,
         pagination,
-        filters,
-        sorter
+        ...(filters ? filters : {}),
+        ...(sorter ? sorter : {})
       };
     });
   }

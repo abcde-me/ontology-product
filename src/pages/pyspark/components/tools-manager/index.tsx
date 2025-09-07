@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Tree, Input, Button } from '@arco-design/web-react';
+import { Tree, Input, Button, Empty } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
@@ -123,6 +123,14 @@ const ToolsManager: React.FC = () => {
       .filter((category) => category.op_items.length > 0);
   }, [operatorList, searchValue]);
 
+  // 检查是否有数据
+  const hasData = useMemo(() => {
+    return (
+      filteredOperatorList.length > 0 &&
+      filteredOperatorList.some((category) => category.op_items.length > 0)
+    );
+  }, [filteredOperatorList]);
+
   // 构建Tree数据
   const treeData = useMemo(() => {
     return filteredOperatorList.map((category, categoryIndex) => ({
@@ -238,29 +246,36 @@ const ToolsManager: React.FC = () => {
         <Input.Search
           placeholder="搜索当前文件夹"
           value={searchValue}
+          allowClear
           onChange={setSearchValue}
         />
       </div>
 
       {/* Tree组件 */}
       <div className="tools-manager__content">
-        <Tree
-          treeData={treeData}
-          expandedKeys={expandedKeys}
-          selectedKeys={[]}
-          onExpand={handleExpand}
-          onSelect={handleSelect}
-          showLine={false}
-          blockNode={true}
-          className="tools-manager__tree"
-        />
+        {hasData ? (
+          <Tree
+            treeData={treeData}
+            expandedKeys={expandedKeys}
+            selectedKeys={[]}
+            onExpand={handleExpand}
+            onSelect={handleSelect}
+            showLine={false}
+            blockNode={true}
+            className="tools-manager__tree"
+          />
+        ) : (
+          <Empty description="暂无数据" />
+        )}
       </div>
 
-      <ModalToolDetail
-        toolDetailData={toolDetailData}
-        toolDetailVisible={toolDetailVisible}
-        closeToolDetail={closeToolDetail}
-      />
+      {toolDetailVisible && (
+        <ModalToolDetail
+          toolDetailData={toolDetailData}
+          toolDetailVisible={toolDetailVisible}
+          closeToolDetail={closeToolDetail}
+        />
+      )}
     </div>
   );
 };

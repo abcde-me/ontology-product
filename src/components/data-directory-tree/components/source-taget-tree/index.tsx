@@ -44,6 +44,7 @@ interface SourceTargetTreeProps {
   onVolumeInsert?: (volume: FluffyVolume) => void;
   onDbDetail?: (database: Db) => void;
   onDbInsert?: (database: Db) => void;
+  isEditorFocused?: boolean;
 }
 
 interface TreeNode {
@@ -66,7 +67,8 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   onVolumeDetail,
   onVolumeInsert,
   onDbDetail,
-  onDbInsert
+  onDbInsert,
+  isEditorFocused = false
 }) => {
   const {
     targetCatalogList,
@@ -104,13 +106,11 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 处理数据卷插入按钮点击
   const handleVolumeInsert = useCallback(
     (volume: FluffyVolume, event: Event) => {
-      console.log('走到这里了吗？', volume);
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据卷选择
-      if (onVolumeInsert) {
-        onVolumeInsert(volume);
-      }
+
+      onVolumeInsert?.(volume);
     },
-    [onVolumeInsert]
+    [onVolumeInsert, isEditorFocused]
   );
 
   // 处理数据库详情按钮点击
@@ -128,11 +128,11 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const handleDbInsert = useCallback(
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
-      if (onDbInsert) {
-        onDbInsert(database);
-      }
+
+      // 编辑器聚焦时插入内容
+      onDbInsert?.(database);
     },
-    [onDbInsert]
+    [onDbInsert, isEditorFocused]
   );
 
   // 获取当前目录列表
@@ -216,7 +216,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                     type="outline"
                     onClick={(e: Event) => handleVolumeInsert(volume, e)}
                   >
-                    插入
+                    {isEditorFocused ? '插入' : '复制'}
                   </Button>
                 </div>
               </div>
@@ -258,7 +258,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                     size="small"
                     onClick={(e: Event) => handleDbInsert(db, e)}
                   >
-                    插入
+                    {isEditorFocused ? '插入' : '复制'}
                   </Button>
                 </div>
               </div>
@@ -288,6 +288,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 处理数据卷或数据库点击（第三层）
   const handleVolumeDbClick = async (item: any) => {
+    console.log('执行到这里了吗？');
     if (!selectedCatalog) return;
 
     setSelectedVolumeOrDb(item);
@@ -299,14 +300,23 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     try {
       const rootType =
         dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
-      // TODO: 后期改page\page_size
-      const params = {
-        page: 1,
-        page_size: 100,
-        data_path_id: Number(item.id),
-        file_name: '',
-        sort: 'desc' as 'asc' | 'desc'
-      };
+      const params =
+        dataType === 'source'
+          ? {
+              page: 1,
+              page_size: 100,
+              data_path_id: Number(item.id),
+              file_name: '',
+              sort: 'desc' as 'asc' | 'desc'
+            }
+          : {
+              page: 1,
+              limit: 100,
+              full_path: item.full_path || '',
+              sort_field: item.sort_field || '',
+              sort_order: 'desc' as 'asc' | 'desc',
+              path_id: item.id.toString()
+            };
 
       await getCatalogFileList(rootType, params);
     } catch (error) {
@@ -558,7 +568,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   }
                 }}
               >
-                插入
+                {isEditorFocused ? '插入' : '复制'}
               </Button>
             </div>
           </div>

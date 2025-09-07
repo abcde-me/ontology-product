@@ -194,7 +194,7 @@ export interface GetExportFileReq {
   /** pyspark文件ID */
   pyspark_id: number;
   /** pyspark任务执行ID */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
 }
 
 export enum StorageType {
@@ -222,7 +222,7 @@ export interface ExportDatasetReq {
   /**
    * pyspark运行ID
    */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
   /**
    * 存储类型：file,jsonl
    */
@@ -284,7 +284,7 @@ export interface GetExportJsonlReq {
   /**
    * pyspark任务执行ID
    */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
 }
 
 export interface GetExportJsonlRes {

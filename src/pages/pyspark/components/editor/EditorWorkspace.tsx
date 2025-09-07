@@ -1,4 +1,4 @@
-import React, { useRef, memo } from 'react';
+import React, { useRef, memo, useCallback, useEffect } from 'react';
 import { Button, Space } from '@arco-design/web-react';
 import {
   IconUpload,
@@ -13,6 +13,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle
 } from '@codemirror/language';
+import { EditorView } from '@codemirror/view';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { RunningStatus } from '@/types/pythonApi';
@@ -26,26 +27,55 @@ interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
-  pysparkExecId?: number;
+  activeTab?: string;
+  fileTabs?: Array<{
+    key: string;
+    title: string;
+    content: string;
+    fileId?: string;
+  }>;
+  onTabContentUpdate?: (tabKey: string, content: string) => void;
+  onSidebarTabChange?: (tabKey: 'files' | 'tools' | 'data' | 'daset') => void;
+  onInsertContent?: (insertFn: (content: string) => void) => void;
+  onEditorFocusChange?: (isFocused: boolean) => void;
 }
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
-  ({ content, fileName, currentFileId, pysparkExecId }) => {
+  ({
+    content,
+    fileName,
+    currentFileId,
+    activeTab,
+    fileTabs,
+    onTabContentUpdate,
+    onSidebarTabChange,
+    onInsertContent,
+    onEditorFocusChange
+  }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
+    const [lastCursorPosition, setLastCursorPosition] =
+      React.useState<number>(0);
+    const [isEditorFocused, setIsEditorFocused] =
+      React.useState<boolean>(false);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
       handleStopRunCode,
       handleRunCode,
+      handleGetRunLog,
       lastAutoSave,
       editorContent,
       handleContentChange,
       placeholderValue,
       runResult,
-      runLog
+      runLog,
+      isPanelOpen,
+      handlePanelStateChange,
+      execid
     } = useEditor({
-      initialContent: content,
-      currentFileId
+      activeTab,
+      fileTabs,
+      onTabContentUpdate
     });
 
     const {
@@ -53,7 +83,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handleSubmit,
       setModalDatasetVisible,
       childRef
-    } = useExportDaset();
+    } = useExportDaset(currentFileId, execid);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -79,8 +109,56 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     };
 
     const handleCallOperator = () => {
-      console.log('Calling operator...');
+      // 切换到左侧tools菜单
+      if (onSidebarTabChange) {
+        onSidebarTabChange('tools');
+      }
     };
+
+    // 处理光标位置变化
+    const handleCursorChange = useCallback((view: EditorView) => {
+      const pos = view.state.selection.main.head;
+      setLastCursorPosition(pos);
+    }, []);
+
+    // 处理编辑器聚焦状态变化
+    const handleFocusChange = useCallback(
+      (focused: boolean) => {
+        setIsEditorFocused(focused);
+        if (onEditorFocusChange) {
+          onEditorFocusChange(focused);
+        }
+      },
+      [onEditorFocusChange]
+    );
+
+    // 插入内容到光标位置
+    const insertContentAtCursor = useCallback((contentToInsert: string) => {
+      if (!editorRef.current?.view) return;
+
+      const view = editorRef.current.view;
+      const currentPos = view.state.selection.main.head;
+
+      // 在当前位置插入内容
+      view.dispatch({
+        changes: {
+          from: currentPos,
+          to: currentPos,
+          insert: contentToInsert
+        },
+        selection: {
+          anchor: currentPos + contentToInsert.length
+        }
+      });
+    }, []);
+
+    // 监听插入内容事件
+    useEffect(() => {
+      if (onInsertContent) {
+        // 将插入函数暴露给父组件
+        onInsertContent(insertContentAtCursor);
+      }
+    }, [insertContentAtCursor, onInsertContent]);
 
     return (
       <div className="notebook-content">
@@ -146,7 +224,15 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             extensions={[
               python(),
               lintGutter(),
-              syntaxHighlighting(defaultHighlightStyle, { fallback: true })
+              syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+              EditorView.updateListener.of((update) => {
+                if (update.selectionSet) {
+                  handleCursorChange(update.view);
+                }
+                if (update.focusChanged) {
+                  handleFocusChange(update.view.hasFocus);
+                }
+              })
             ]}
             theme={myTheme}
             basicSetup={{
@@ -159,16 +245,20 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         {/* 运行信息面板 */}
         <RunningInfoPanel
+          key={currentFileId}
           runResult={runResult}
           runLog={runLog}
           runStatus={runStatus}
+          onGetRunLog={handleGetRunLog}
+          isPanelOpen={isPanelOpen}
+          onPanelStateChange={handlePanelStateChange}
         />
 
         {/* 新建数据集弹框 */}
         {modalDatasetVisible && (
           <DatasetForm
             pysparkId={Number(currentFileId)}
-            pysparkExecId={pysparkExecId ?? 0}
+            execid={execid}
             visible={modalDatasetVisible}
             onSubmit={handleSubmit}
             onCancel={handleCancelDatasetModal}

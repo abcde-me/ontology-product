@@ -280,71 +280,71 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
-  //   .get({})
-  //   .inRegion()
-  //   .do();
+  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+    .get({})
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      execid: 1,
-      running_status: 1,
-      //       data: `# Python文件代码内容示例
-      // import pandas as pd
-      // import numpy as np
-      // import matplotlib.pyplot as plt
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     execid: 1,
+  //     running_status: 1,
+  //     //       data: `# Python文件代码内容示例
+  //     // import pandas as pd
+  //     // import numpy as np
+  //     // import matplotlib.pyplot as plt
 
-      // # 数据加载
-      // def load_data():
-      // """加载示例数据"""
-      // data = pd.DataFrame({
-      //     'x': np.random.randn(100),
-      //     'y': np.random.randn(100)
-      // })
-      // return data
+  //     // # 数据加载
+  //     // def load_data():
+  //     // """加载示例数据"""
+  //     // data = pd.DataFrame({
+  //     //     'x': np.random.randn(100),
+  //     //     'y': np.random.randn(100)
+  //     // })
+  //     // return data
 
-      // # 数据处理
-      // def process_data(df):
-      // """处理数据"""
-      // df['z'] = df['x'] + df['y']
-      // return df
+  //     // # 数据处理
+  //     // def process_data(df):
+  //     // """处理数据"""
+  //     // df['z'] = df['x'] + df['y']
+  //     // return df
 
-      // # 数据可视化
-      // def visualize_data(df):
-      // """可视化数据"""
-      // plt.figure(figsize=(10, 6))
-      // plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
-      // plt.colorbar(label='z value')
-      // plt.xlabel('X values')
-      // plt.ylabel('Y values')
-      // plt.title('Data Visualization')
-      // plt.show()
+  //     // # 数据可视化
+  //     // def visualize_data(df):
+  //     // """可视化数据"""
+  //     // plt.figure(figsize=(10, 6))
+  //     // plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+  //     // plt.colorbar(label='z value')
+  //     // plt.xlabel('X values')
+  //     // plt.ylabel('Y values')
+  //     // plt.title('Data Visualization')
+  //     // plt.show()
 
-      // # 主函数
-      // if __name__ == "__main__":
-      // # 加载数据
-      // df = load_data()
-      // print("数据加载完成，共", len(df), "行")
+  //     // # 主函数
+  //     // if __name__ == "__main__":
+  //     // # 加载数据
+  //     // df = load_data()
+  //     // print("数据加载完成，共", len(df), "行")
 
-      // # 处理数据
-      // df = process_data(df)
-      // print("数据处理完成")
+  //     // # 处理数据
+  //     // df = process_data(df)
+  //     // print("数据处理完成")
 
-      // # 显示统计信息
-      // print("\\n数据统计信息:")
-      // print(df.describe())
+  //     // # 显示统计信息
+  //     // print("\\n数据统计信息:")
+  //     // print(df.describe())
 
-      // # 可视化数据
-      // visualize_data(df)
-      // print("数据可视化完成")`
-      data: ''
-    }
-  });
+  //     // # 可视化数据
+  //     // visualize_data(df)
+  //     // print("数据可视化完成")`
+  //     data: ''
+  //   }
+  // });
 }
 
 // 修改（保存）文件
@@ -435,103 +435,103 @@ export async function getRunLog(
 // 获取算子库
 export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonOperatorApi({}).get({}).inRegion().do();
+  return await UAPI.RES.pythonOperatorApi({}).post({}).inRegion().do();
 
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: [
-      {
-        catalog: OperatorCatalog.DATA_PARSING,
-        op_items: [
-          {
-            name: '文本解析算子',
-            description: '解析文本文件,支持OCR和文本...',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['文档挖掘', '知识抽取'],
-            sample_code: '这是一串示例代码'
-          },
-          {
-            name: '图片解析算子',
-            description: '解析图片文件,生成图片描述和...',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['图像识别', '视觉分析'],
-            sample_code: '这是一串示例代码'
-          },
-          {
-            name: '音频解析算子',
-            description: '解析音频文件,进行语音转文本',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['语音识别', '音频处理'],
-            sample_code: '这是一串示例代码'
-          }
-        ]
-      },
-      {
-        catalog: OperatorCatalog.DATA_CLEANING,
-        op_items: [
-          {
-            name: '去重处理算子',
-            description: '删除数据中的重复记录',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['数据清洗', '去重'],
-            sample_code: '这是一串示例代码'
-          },
-          {
-            name: '数据验证算子',
-            description: '验证数据的完整性和格式',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['数据验证', '质量控制'],
-            sample_code: '这是一串示例代码'
-          }
-        ]
-      },
-      {
-        catalog: OperatorCatalog.DATA_AUGMENTATION,
-        op_items: [
-          {
-            name: '通用场景增强算子',
-            description: '生成通用场景的训练数据',
-            detail: '这是一段处理逻辑详细描述',
-            usage: {
-              input: '',
-              output: ''
-            },
-            usage_scenarios: '使用场景blabla...',
-            tags: ['数据增强', '训练数据'],
-            sample_code: '这是一串示例代码'
-          }
-        ]
-      }
-    ]
-  });
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: [
+  //     {
+  //       catalog: OperatorCatalog.DATA_PARSING,
+  //       op_items: [
+  //         {
+  //           name: '文本解析算子',
+  //           description: '解析文本文件,支持OCR和文本...',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['文档挖掘', '知识抽取'],
+  //           sample_code: '这是一串示例代码'
+  //         },
+  //         {
+  //           name: '图片解析算子',
+  //           description: '解析图片文件,生成图片描述和...',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['图像识别', '视觉分析'],
+  //           sample_code: '这是一串示例代码'
+  //         },
+  //         {
+  //           name: '音频解析算子',
+  //           description: '解析音频文件,进行语音转文本',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['语音识别', '音频处理'],
+  //           sample_code: '这是一串示例代码'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       catalog: OperatorCatalog.DATA_CLEANING,
+  //       op_items: [
+  //         {
+  //           name: '去重处理算子',
+  //           description: '删除数据中的重复记录',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['数据清洗', '去重'],
+  //           sample_code: '这是一串示例代码'
+  //         },
+  //         {
+  //           name: '数据验证算子',
+  //           description: '验证数据的完整性和格式',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['数据验证', '质量控制'],
+  //           sample_code: '这是一串示例代码'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       catalog: OperatorCatalog.DATA_AUGMENTATION,
+  //       op_items: [
+  //         {
+  //           name: '通用场景增强算子',
+  //           description: '生成通用场景的训练数据',
+  //           detail: '这是一段处理逻辑详细描述',
+  //           usage: {
+  //             input: '',
+  //             output: ''
+  //           },
+  //           usage_scenarios: '使用场景blabla...',
+  //           tags: ['数据增强', '训练数据'],
+  //           sample_code: '这是一串示例代码'
+  //         }
+  //       ]
+  //     }
+  //   ]
+  // });
 }
 
 // 导出数据集列表
@@ -599,20 +599,17 @@ export async function exportDataset(
   params: ExportDatasetReq
 ): Promise<ApiRes<ExportDatasetRes>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonExportDatasetApi({ pyspark_id: id })
-  //   .post(params)
-  //   .inRegion()
-  //   .do();
+  return await UAPI.RES.pythonExportDatasetApi({}).post(params).inRegion().do();
 
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      id: 1
-    }
-  });
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     id: 1
+  //   }
+  // });
 }
 
 // 查询file导出文件列表
@@ -620,43 +617,40 @@ export async function getExportFile(
   params: GetExportFileReq
 ): Promise<ApiRes<GetExportFile[]>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonExportDatasetStatusApi({ pyspark_id: id })
-  //   .get({})
-  //   .inRegion()
-  //   .do();
+  return await UAPI.RES.pythonExportFileApi({}).get(params).inRegion().do();
 
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: [
-      {
-        file_modify_time: '2025-08-18 15:00',
-        file_name: 'example1.txt',
-        file_size: '1024',
-        file_type: 'file'
-      },
-      {
-        file_modify_time: '2025-08-18 15:00',
-        file_name: 'example2.txt',
-        file_size: '1024',
-        file_type: 'file'
-      },
-      {
-        file_modify_time: '2025-08-18 15:00',
-        file_name: 'example3.txt',
-        file_size: '1024',
-        file_type: 'file'
-      },
-      {
-        file_modify_time: '2025-08-18 15:00',
-        file_name: 'example4.txt',
-        file_size: '1024',
-        file_type: 'file'
-      }
-    ]
-  });
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: [
+  //     {
+  //       file_modify_time: '2025-08-18 15:00',
+  //       file_name: 'example1.txt',
+  //       file_size: '1024',
+  //       file_type: 'file'
+  //     },
+  //     {
+  //       file_modify_time: '2025-08-18 15:00',
+  //       file_name: 'example2.txt',
+  //       file_size: '1024',
+  //       file_type: 'file'
+  //     },
+  //     {
+  //       file_modify_time: '2025-08-18 15:00',
+  //       file_name: 'example3.txt',
+  //       file_size: '1024',
+  //       file_type: 'file'
+  //     },
+  //     {
+  //       file_modify_time: '2025-08-18 15:00',
+  //       file_name: 'example4.txt',
+  //       file_size: '1024',
+  //       file_type: 'file'
+  //     }
+  //   ]
+  // });
 }
 
 // 查询jsonl导出文件列表
@@ -664,24 +658,21 @@ export async function getExportJsonl(
   params: GetExportJsonlReq
 ): Promise<ApiRes<GetExportJsonlRes>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonExportDatasetStatusApi({ pyspark_id: id })
-  //   .get({})
-  //   .inRegion()
-  //   .do();
+  return await UAPI.RES.pythonExportPreviewApi({}).get(params).inRegion().do();
 
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      field_names: ['name', 'age', 'gender'],
-      list: [
-        { name: '张三', age: 20, gender: '男' },
-        { name: '李四', age: 21, gender: '女' }
-      ]
-    }
-  });
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     field_names: ['name', 'age', 'gender'],
+  //     list: [
+  //       { name: '张三', age: 20, gender: '男' },
+  //       { name: '李四', age: 21, gender: '女' }
+  //     ]
+  //   }
+  // });
 }
 
 // 导出任务停止
