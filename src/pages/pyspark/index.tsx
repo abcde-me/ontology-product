@@ -90,7 +90,12 @@ const Python: React.FC = memo(() => {
             )}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}>
-            {activeTab === 'tools' && <ToolsManager />}
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                isEditorFocused={isEditorFocused}
+              />
+            )}
           </TabPane>
           <TabPane key="daset" title={<DasetIcon />}>
             {isDasetTab && <DatasetsList />}

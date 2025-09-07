@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Tree, Input, Button, Empty } from '@arco-design/web-react';
+import { Tree, Input, Button, Empty, Message } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
 
@@ -25,7 +26,16 @@ interface TreeNodeData {
   operator?: OperatorItem;
 }
 
-const ToolsManager: React.FC = () => {
+// 组件Props接口
+interface ToolsManagerProps {
+  onInsertContent?: (content: string) => void;
+  isEditorFocused?: boolean;
+}
+
+const ToolsManager: React.FC<ToolsManagerProps> = ({
+  onInsertContent,
+  isEditorFocused = false
+}) => {
   const { operatorList, getOperator } = useToolsManager();
   const [searchValue, setSearchValue] = useState<string>('');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -97,7 +107,15 @@ const ToolsManager: React.FC = () => {
   // 处理插入按钮点击
   const handleInsertClick = (item: OperatorItem): void => {
     console.log('插入算子:', item);
-    // TODO: 实现插入逻辑
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(item.sample_code);
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(item.sample_code);
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
   // 根据搜索值过滤算子
@@ -207,7 +225,7 @@ const ToolsManager: React.FC = () => {
                     handleInsertClick(item);
                   }}
                 >
-                  插入
+                  {isEditorFocused ? '插入' : '复制'}
                 </Button>
               </div>
             }
