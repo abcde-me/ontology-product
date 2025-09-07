@@ -27,13 +27,6 @@ const directoryItems = [
   }
 ];
 
-// 转换为 Tree 组件需要的数据格式
-const treeData = directoryItems.map((item) => ({
-  key: item.id,
-  title: item.label,
-  icon: <FileIcon />
-}));
-
 interface DataDirectoryTreeProps {
   from?: DataDirectoryTreeFrom;
   onViewDatasetDetail?: (dataset: DatasetListItem) => void;
@@ -62,6 +55,22 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
+
+  // 根据 from 参数动态过滤目录项
+  const getFilteredDirectoryItems = () => {
+    if (from === DataDirectoryTreeFrom.SQL) {
+      // 如果是 SQL，不展示目标数据目录
+      return directoryItems.filter((item) => item.id !== 'target');
+    }
+    return directoryItems;
+  };
+
+  // 转换为 Tree 组件需要的数据格式
+  const treeData = getFilteredDirectoryItems().map((item) => ({
+    key: item.id,
+    title: item.label,
+    icon: <FileIcon />
+  }));
 
   const handleSelect = (selectedKeys: string[]) => {
     if (selectedKeys.length > 0) {
