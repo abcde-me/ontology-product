@@ -140,10 +140,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
               onActiveUpdate({ key: tabKey, fileId: res.data.script_id });
             return res.data;
           } else {
+            Message.error(`自动保存失败: ${res.message || '未知错误'}`);
             console.error('自动保存失败:', res.message);
           }
           return null;
         } catch (error) {
+          Message.error(`自动保存失败`);
           console.error('自动保存失败:', error);
           return null;
         }
@@ -159,9 +161,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         if (res?.status === 200) {
           setLastAutoSave(new Date().toLocaleTimeString());
           return res.data;
+        } else {
+          Message.error(`自动保存失败: ${res.message || '未知错误'}`);
+          console.error('自动保存失败:', res.message);
         }
         return null;
       } catch (error) {
+        Message.error(`自动保存失败`);
         console.error('自动保存失败:', error);
         return null;
       }
