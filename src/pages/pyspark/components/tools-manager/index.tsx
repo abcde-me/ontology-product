@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Tree, Input, Button } from '@arco-design/web-react';
+import { Tree, Input, Button, Empty, Message } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
 
@@ -25,7 +26,16 @@ interface TreeNodeData {
   operator?: OperatorItem;
 }
 
-const ToolsManager: React.FC = () => {
+// 组件Props接口
+interface ToolsManagerProps {
+  onInsertContent?: (content: string) => void;
+  isEditorFocused?: boolean;
+}
+
+const ToolsManager: React.FC<ToolsManagerProps> = ({
+  onInsertContent,
+  isEditorFocused = false
+}) => {
   const { operatorList, getOperator } = useToolsManager();
   const [searchValue, setSearchValue] = useState<string>('');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -97,7 +107,15 @@ const ToolsManager: React.FC = () => {
   // 处理插入按钮点击
   const handleInsertClick = (item: OperatorItem): void => {
     console.log('插入算子:', item);
-    // TODO: 实现插入逻辑
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(item.sample_code);
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(item.sample_code);
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
   // 根据搜索值过滤算子
@@ -122,6 +140,14 @@ const ToolsManager: React.FC = () => {
       }))
       .filter((category) => category.op_items.length > 0);
   }, [operatorList, searchValue]);
+
+  // 检查是否有数据
+  const hasData = useMemo(() => {
+    return (
+      filteredOperatorList.length > 0 &&
+      filteredOperatorList.some((category) => category.op_items.length > 0)
+    );
+  }, [filteredOperatorList]);
 
   // 构建Tree数据
   const treeData = useMemo(() => {
@@ -199,7 +225,7 @@ const ToolsManager: React.FC = () => {
                     handleInsertClick(item);
                   }}
                 >
-                  插入
+                  {isEditorFocused ? '插入' : '复制'}
                 </Button>
               </div>
             }
@@ -238,29 +264,36 @@ const ToolsManager: React.FC = () => {
         <Input.Search
           placeholder="搜索当前文件夹"
           value={searchValue}
+          allowClear
           onChange={setSearchValue}
         />
       </div>
 
       {/* Tree组件 */}
       <div className="tools-manager__content">
-        <Tree
-          treeData={treeData}
-          expandedKeys={expandedKeys}
-          selectedKeys={[]}
-          onExpand={handleExpand}
-          onSelect={handleSelect}
-          showLine={false}
-          blockNode={true}
-          className="tools-manager__tree"
-        />
+        {hasData ? (
+          <Tree
+            treeData={treeData}
+            expandedKeys={expandedKeys}
+            selectedKeys={[]}
+            onExpand={handleExpand}
+            onSelect={handleSelect}
+            showLine={false}
+            blockNode={true}
+            className="tools-manager__tree"
+          />
+        ) : (
+          <Empty description="暂无数据" />
+        )}
       </div>
 
-      <ModalToolDetail
-        toolDetailData={toolDetailData}
-        toolDetailVisible={toolDetailVisible}
-        closeToolDetail={closeToolDetail}
-      />
+      {toolDetailVisible && (
+        <ModalToolDetail
+          toolDetailData={toolDetailData}
+          toolDetailVisible={toolDetailVisible}
+          closeToolDetail={closeToolDetail}
+        />
+      )}
     </div>
   );
 };

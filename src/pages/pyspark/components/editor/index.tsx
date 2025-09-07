@@ -1,14 +1,14 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Tabs, Message } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
+import { RunningStatus } from '@/types/pythonApi';
 import './index.scss';
 
 const { TabPane } = Tabs;
 
 // 简化的props接口
 interface EditorContentProps {
-  pysparkExecId?: number;
   fileTabs: Array<{
     key: string;
     title: string;
@@ -19,18 +19,25 @@ interface EditorContentProps {
   onTabChange: (key: string) => void;
   onAddTab: (newFileInfo: any) => void;
   onRemoveTab: (key: string) => void;
-  onCreate?: (finalName: string, node?: any) => Promise<any>; // 修改：改为 onCreate 以匹配父组件
+  onCreate?: (finalName: string, node?: any) => Promise<any>;
+  onTabContentUpdate?: (tabKey: string, content: string) => void;
+  onSidebarTabChange?: (tabKey: 'files' | 'tools' | 'data' | 'daset') => void;
+  onInsertContent?: (insertFn: (content: string) => void) => void;
+  onEditorFocusChange?: (isFocused: boolean) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
   ({
-    pysparkExecId,
     fileTabs,
     activeTab,
     onTabChange,
     onAddTab,
     onRemoveTab,
-    onCreate
+    onCreate,
+    onTabContentUpdate,
+    onSidebarTabChange,
+    onInsertContent,
+    onEditorFocusChange
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -127,7 +134,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             content={activeTabData.content}
             fileName={activeTabData.title || '未命名文件'}
             currentFileId={activeTabData.fileId}
-            pysparkExecId={pysparkExecId}
+            activeTab={activeTab}
+            fileTabs={fileTabs}
+            onTabContentUpdate={onTabContentUpdate}
+            onSidebarTabChange={onSidebarTabChange}
+            onInsertContent={onInsertContent}
+            onEditorFocusChange={onEditorFocusChange}
           />
         </div>
       </div>

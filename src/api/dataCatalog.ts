@@ -362,7 +362,7 @@ export interface GetSourceCatalogFileListRes {
 export async function getSourceCatalogFileList(
   param: GetSourceCatalogFileListParams
 ): Promise<ApiRes<GetSourceCatalogFileListRes>> {
-  return await UAPI.RES.getLoadTaskFiles({}).post(param).inRegion().do();
+  return await UAPI.RES.getLoadTaskFiles({}).get(param).inRegion().do();
 
   // mock data
   // return Promise.resolve({
@@ -430,7 +430,7 @@ export interface GetTargetCatalogFileListParams {
   search_content?: string;
   search_id?: number;
   sort_field: string;
-  sort_order: string;
+  sort_order: 'asc' | 'desc';
   /**
    * 开始时间
    */
@@ -524,40 +524,40 @@ export async function getTargetCatalogFileList(
   param: GetTargetCatalogFileListParams
 ): Promise<ApiRes<GetTargetCatalogFileListRes>> {
   // TODO: 联调
-  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      list: [
-        {
-          id: 17228,
-          generated_at: '2025-08-28T13:43:04+08:00',
-          file_name: '1504',
-          file_type: 'jsonl',
-          full_path: '/dst/zsq数据清洗测试/volume/多轮问答',
-          short_content: '报考者能否更改已经审核通过的职位',
-          created_at: '2025-08-28T13:43:06+08:00',
-          updated_at: '2025-08-28T13:43:06+08:00',
-          deleted_at: null,
-          extras: {
-            ds_workflow_id: '150455535967520',
-            file_name: '150455535967520.469.1756359557089.augment.jsonl',
-            file_size: '',
-            workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-          },
-          perms: ['dst_file:can_export', 'dst_file:can_delete']
-        }
-      ],
-      total: 0,
-      page: 1,
-      page_size: 100
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     list: [
+  //       {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         full_path: '/dst/zsq数据清洗测试/volume/多轮问答',
+  //         short_content: '报考者能否更改已经审核通过的职位',
+  //         created_at: '2025-08-28T13:43:06+08:00',
+  //         updated_at: '2025-08-28T13:43:06+08:00',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       }
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  // });
 }
 
 // 添加目录
