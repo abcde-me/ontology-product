@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import {
   Form,
   Input,
@@ -10,6 +10,8 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { getDatasetList } from '@/pages/sql/constant';
 import { useTableList } from '../hooks/useTableList';
 import { useSqlIndexStore, SqlIndexStore } from '../store';
+import ModalScriptDetail from './ModalScriptDetail';
+import ModalDatasetDetail from './data-manager/ModalDatasetDetail';
 
 const FormItem = Form.Item;
 
@@ -37,6 +39,10 @@ const DatasetsList: FC = () => {
   const showDatasetDetail = useSqlIndexStore(
     (state: SqlIndexStore) => state.showDatasetDetail
   );
+
+  // 数据集详情Modal状态管理
+  const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
+  const [detailId, setDetailId] = useState('');
 
   const {
     listData,
@@ -194,7 +200,13 @@ const DatasetsList: FC = () => {
   }
 
   function handleDatasetDetail(id: number) {
-    showDatasetDetail && showDatasetDetail();
+    setDetailId(id.toString());
+    setDatasetDetailVisible(true);
+  }
+
+  function closeDatasetDetail() {
+    setDatasetDetailVisible(false);
+    setDetailId('');
   }
 
   return (
@@ -221,6 +233,13 @@ const DatasetsList: FC = () => {
         rowKey="id"
         onChange={handleTableChange}
         scroll={{ y: 500 }}
+      />
+
+      <ModalScriptDetail />
+      <ModalDatasetDetail
+        detailId={detailId}
+        datasetDetailVisible={datasetDetailVisible}
+        closeDatasetDetail={closeDatasetDetail}
       />
     </div>
   );
