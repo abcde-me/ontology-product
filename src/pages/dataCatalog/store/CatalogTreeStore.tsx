@@ -23,8 +23,8 @@ interface BaseTreeData {
 interface ITreeData extends BaseTreeData {
   children?: {
     volume?: BaseTreeData[];
-    // TODO 下一期做
     db?: BaseTreeData[];
+    db_item?: BaseTreeData[];
   };
 }
 
@@ -36,6 +36,8 @@ export interface CatalogTreeState {
   rawTreeData: TreeDataType[];
   expandedKeys: string[];
   selectedKey: string;
+  selectedNodeType: string; // 新增：存储选中节点的类型
+  selectedParentId: string; // 新增：存储选中节点的父节点ID
   inputRef: React.RefObject<RefInputType>;
   selectedPath: string;
   loading?: boolean;
@@ -61,6 +63,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         rawTreeData: [],
         expandedKeys: [],
         selectedKey: '',
+        selectedNodeType: '', // 初始化选中节点类型
+        selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
         selectedPath: ''
       },
@@ -208,8 +212,25 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
               title: item.name,
               key: String(item.id), // 转换为字符串
               parent_id: catalog.id,
-              isLastLeaf: true,
-              fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}`
+              // 对于数据库类型，始终不是叶子节点；对于数据卷，总是叶子节点
+              isLastLeaf: type === 'volume',
+              fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}`,
+              // 如果是数据库且有表，则添加表作为子节点；否则初始化为空数组
+              children:
+                type === 'db'
+                  ? item.children?.db_item && item.children.db_item.length > 0
+                    ? item.children.db_item.map((table) => ({
+                        ...table,
+                        title: table.name,
+                        key: `${table.id}`,
+                        parent_id: item.id,
+                        type: table.type,
+                        type_name: 'db_item',
+                        isLastLeaf: true,
+                        fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}/${table.name}`
+                      }))
+                    : []
+                  : undefined
             };
           })
         };
