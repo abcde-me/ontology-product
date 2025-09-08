@@ -71,6 +71,16 @@ const RunningInfoPanel: React.FC = memo(() => {
     }
   }, [runStatus]);
 
+  // 监听运行状态变化，当运行成功或失败时自动弹开面板
+  useEffect(() => {
+    if (
+      runStatus === RunningStatus.SUCCESS ||
+      runStatus === RunningStatus.FAILED
+    ) {
+      setIsExpanded(true);
+    }
+  }, [runStatus]);
+
   const handlePanelChange = (key: string, keys: string[]) => {
     const newExpanded = keys.length > 0;
     setIsExpanded(newExpanded);
@@ -166,6 +176,7 @@ const RunningInfoPanel: React.FC = memo(() => {
                     size="mini"
                     value={String(size)}
                     maxLength={1000}
+                    disabled={runStatus !== RunningStatus.SUCCESS}
                     onChange={(value) => setSize(value)}
                     onPressEnter={() => {
                       // 按回车键时触发轮询获取新结果
