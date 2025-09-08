@@ -37,6 +37,7 @@ import {
   IconInfoCircle
   //  IconRefresh
 } from '@arco-design/web-react/icon';
+import formatFileSize from '@/utils/fileSize';
 
 import { Breadcrumb } from '@arco-design/web-react';
 import {
@@ -296,7 +297,7 @@ const contentFileColumns = [
     title: '文件大小',
     dataIndex: 'file_size',
     width: 100,
-    render: (_, record) => <span>{record.file_size} KB</span>
+    render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
   },
   {
     title: '创建时间',
