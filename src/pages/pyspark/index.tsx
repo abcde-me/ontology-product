@@ -63,13 +63,13 @@ const Python: React.FC = memo(() => {
   };
 
   return (
-    <Layout className="notebook-layout">
-      <Sider width={isDasetTab ? '100%' : 300} className="notebook-sider">
+    <Layout className="pyspark-layout">
+      <Sider width={isDasetTab ? '100%' : 300} className="pyspark-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="notebook-tabs"
+          className="pyspark-tabs"
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon />}>
@@ -103,7 +103,7 @@ const Python: React.FC = memo(() => {
         </Tabs>
       </Sider>
       {!isDasetTab && (
-        <Content className="notebook-content">
+        <Content className="pyspark-content">
           <EditorContent
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
