@@ -36,6 +36,7 @@ export interface UseEditorReturn {
   setSize: (value: string | number) => void;
   runLog: string;
   runResult: RunResult[];
+  currentFileId?: string;
 
   // 表格数据处理
   columns: any[];
@@ -296,6 +297,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setSize,
     runLog,
     runResult,
+    currentFileId,
 
     // 表格数据处理
     columns,
