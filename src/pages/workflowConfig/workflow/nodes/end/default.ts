@@ -27,7 +27,7 @@ const nodeDefault: NodeDefault<EndNodeType> = {
     if (
       payload.is_embedding === true &&
       (payload.Knowledge_base_name === undefined ||
-        payload.Knowledge_base_name === '')
+        payload.knowledge_base_name === '')
     ) {
       isValid = true;
       errorMessages = '知识库名称未配置';
