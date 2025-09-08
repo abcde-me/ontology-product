@@ -19,7 +19,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const [dataSource, setDataSource]: Array<any> = useState([]);
   const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
   const [knowledgeBaseName, setKnowledgeBaseName] = useState(
-    inputs?.Knowledge_base_name || ''
+    inputs?.knowledge_base_name || ''
   );
 
   useEffect(() => {
@@ -49,12 +49,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         disabled={readOnly}
         wrapperCol={{ span: 24 }}
         onValuesChange={(_, v: any) => {
-          onValuesChange({ ...v, Knowledge_base_name: '' }, dataSource);
+          onValuesChange({ ...v, knowledge_base_name: '' }, dataSource);
         }}
         initialValues={{
           target_path_id: inputs?.target_path_id,
           is_embedding: inputs?.is_embedding,
-          Knowledge_base_name: inputs?.Knowledge_base_name
+          knowledge_base_name: inputs?.knowledge_base_name
         }}
       >
         <FormItem
@@ -99,7 +99,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           <FormItem
             label="知识库名称"
             extra="为构建的知识库指定一个名称，用于后续的检索和管理"
-            field="Knowledge_base_name"
+            field="knowledge_base_name"
             rules={[
               {
                 required: true,
@@ -117,7 +117,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                     } else {
                       // 校验未通过名称重置为之前名称
                       onValuesChange(
-                        { ...formData, Knowledge_base_name: knowledgeBaseName },
+                        { ...formData, knowledge_base_name: knowledgeBaseName },
                         dataSource
                       );
                       callback(res.msg);
