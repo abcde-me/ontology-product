@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Typography } from '@arco-design/web-react';
 import DataDirectoryTree from '@/components/data-directory-tree';
-import ModalDatasetDetail from './ModalDatasetDetail';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
 import { Db } from '@/api/dataCatalog';
@@ -11,24 +10,11 @@ import ModalDbDetail from './ModalDbDetail';
 const { Title } = Typography;
 
 const PythonTabContent: React.FC<{}> = () => {
-  const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
-  const [detailId, setDetailId] = useState('');
   const [dbDetailVisible, setDbDetailVisible] = useState(false);
   const [selectedDbId, setSelectedDbId] = useState('');
 
-  const closeDatasetDetail = () => {
-    setDatasetDetailVisible(false);
-  };
-
   const closeDbDetail = () => {
     setDbDetailVisible(false);
-  };
-
-  // 处理数据集详情查看
-  const handleViewDatasetDetail = (dataset: DatasetListItem) => {
-    console.log('数据集详情:', dataset);
-    setDetailId(String(dataset.id));
-    setDatasetDetailVisible(true);
   };
 
   // 处理数据集插入
@@ -58,11 +44,9 @@ const PythonTabContent: React.FC<{}> = () => {
         <Title className="tab-title">数据目录</Title>
       </div>
 
-      <div className="tab-tree">
+      <div className="tab-tree sider-container">
         <DataDirectoryTree
           from={DataDirectoryTreeFrom.SQL}
-          // 数据集详情
-          onViewDatasetDetail={handleViewDatasetDetail}
           // 数据集插入
           onInsertDataset={handleInsertDataset}
           // 数据库详情
@@ -72,19 +56,14 @@ const PythonTabContent: React.FC<{}> = () => {
         />
       </div>
 
-      {/* 数据集详情 */}
-      <ModalDatasetDetail
-        datasetDetailVisible={datasetDetailVisible}
-        detailId={detailId}
-        closeDatasetDetail={closeDatasetDetail}
-      />
-
       {/* 数据库详情 */}
-      <ModalDbDetail
-        dbDetailVisible={dbDetailVisible}
-        selectedDbId={selectedDbId}
-        closeDbDetail={closeDbDetail}
-      />
+      {dbDetailVisible && (
+        <ModalDbDetail
+          dbDetailVisible={dbDetailVisible}
+          selectedDbId={selectedDbId}
+          closeDbDetail={closeDbDetail}
+        />
+      )}
     </div>
   );
 };

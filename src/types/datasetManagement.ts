@@ -6,7 +6,7 @@ export interface GetDatasetListReq {
   /**
    * 数据集类型：file、jsonl、table;多个以","分隔
    */
-  storage_type_list?: string;
+  storage_type_list?: string[];
   /**
    * 表名称
    */

@@ -46,7 +46,7 @@ const formatFileSize = (size: number): string => {
 /** 数据卷详情 弹框 */
 const ModalVolumnDetail = ({
   volumnDetailVisible,
-  selectedVolumnId,
+  selectedVolumn,
   closeVolumnDetail
 }) => {
   return (
@@ -57,7 +57,7 @@ const ModalVolumnDetail = ({
       footer={null}
       onCancel={closeVolumnDetail}
     >
-      <FileList fromId={selectedVolumnId} />
+      <FileList fromId={String(selectedVolumn.id)} />
     </Modal>
   );
 };
@@ -78,13 +78,18 @@ const FileList = (props) => {
 
   return (
     <div>
-      <Form
-        autoComplete="off"
-        layout="inline"
-        onValuesChange={handleValuesChange}
-      >
+      <Form autoComplete="off" layout="inline">
         <FormItem field="file_name" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入文件名搜索" />
+          <Input.Search
+            onSearch={(value) => {
+              handleValuesChange({ file_name: value });
+            }}
+            onClear={() => {
+              handleValuesChange({ file_name: '' });
+            }}
+            allowClear
+            placeholder="输入文件名搜索"
+          />
         </FormItem>
         <FormItem field="datetime_range" style={{ marginRight: 12 }}>
           <DatePicker.RangePicker
@@ -93,7 +98,9 @@ const FileList = (props) => {
               format: 'HH:mm:ss'
             }}
             format="YYYY-MM-DD HH:mm:ss"
-            onChange={() => {}}
+            onChange={(date) => {
+              handleValuesChange({ datetime_range: date });
+            }}
             onSelect={() => {}}
             onOk={() => {}}
             allowClear={true}
@@ -103,7 +110,8 @@ const FileList = (props) => {
       <Table
         style={{
           width: '100%',
-          height: '100%'
+          height: '100%',
+          marginBottom: 28
         }}
         columns={columns}
         data={listData}
@@ -126,8 +134,7 @@ const defaultfileTypeList = [
 const defaultSearchParams = {
   page: 1,
   page_size: 10,
-  file_name: '',
-  data_path_id: 1392
+  file_name: ''
 };
 
 const useTableList = (props) => {
@@ -144,6 +151,7 @@ const useTableList = (props) => {
     showTotal: true,
     total: 0,
     pageSize: 10,
+    pageSizeOptions: [10, 20, 50, 100],
     current: 1,
     pageSizeChangeResetCurrent: true
   });
@@ -243,10 +251,8 @@ const useTableList = (props) => {
     async function loadListData() {
       const { pagination, sorter, filters } = searchParams;
 
-      // console.log('loadListData searchParams:', searchParams);
-
       const targetParams: any = {
-        data_path_id: fromId || 0,
+        data_path_id: Number(fromId) || 0,
         page: pagination?.current || 1,
         page_size: pagination?.pageSize || 10,
         file_name: searchParams.file_name || '',
@@ -300,14 +306,12 @@ const useTableList = (props) => {
   }
 
   function handleTableChange(pagination: any, filters: any, sorter: any) {
-    // console.log('Table change:', pagination, filters, sorter);
-
     setSearchParams((prev) => {
       return {
         ...prev,
         pagination,
-        filters,
-        sorter
+        ...(filters ? filters : {}),
+        ...(sorter ? sorter : {})
       };
     });
   }

@@ -71,7 +71,7 @@ enum StorageType {
 
 interface DatasetFormProps {
   pysparkId: number;
-  pysparkExecId: number;
+  execid: string;
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
@@ -216,7 +216,7 @@ const DatasetForm = React.forwardRef<
   { resetForm: () => void },
   DatasetFormProps
 >((props, ref) => {
-  const { visible, onSubmit, onCancel, pysparkId, pysparkExecId } = props;
+  const { visible, onSubmit, onCancel, pysparkId, execid } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -487,7 +487,7 @@ const DatasetForm = React.forwardRef<
     if (storageType === StorageType.Jsonl) {
       getExportJsonl({
         pyspark_id: pysparkId,
-        pyspark_exec_id: pysparkExecId
+        pyspark_exec_id: execid
       })
         .then((res) => {
           if (res.status !== 200) {
@@ -505,7 +505,7 @@ const DatasetForm = React.forwardRef<
     } else if (storageType === StorageType.File) {
       getExportFile({
         pyspark_id: pysparkId,
-        pyspark_exec_id: pysparkExecId
+        pyspark_exec_id: execid
       }).then((res) => {
         if (res.status !== 200) {
           Message.error(res.message);

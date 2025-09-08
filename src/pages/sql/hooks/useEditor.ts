@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
-import { RunningStatus } from '@/types/pythonApi';
+import { RunningStatus } from '@/types/sqlApi';
 import {
   createSqlScript,
   updateSqlScript,
@@ -13,15 +13,16 @@ import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 
-interface UseEditorOptions {
+export interface UseEditorOptions {
   initialContent?: string;
   currentFileId?: string;
   tabKey?: string;
   onActiveUpdate?: (tabData: any) => void;
   hasRun?: boolean;
+  fileName?: string;
 }
 
-interface UseEditorReturn {
+export interface UseEditorReturn {
   // 编辑器状态
   editorContent: string;
   setEditorContent: (value: string) => void;
@@ -35,6 +36,10 @@ interface UseEditorReturn {
   setSize: (value: string | number) => void;
   runLog: string;
   runResult: RunResult[];
+
+  // 表格数据处理
+  columns: any[];
+  data: any[];
 
   // 编辑器操作
   handleContentChange: (value: string) => void;
@@ -50,7 +55,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     currentFileId,
     onActiveUpdate,
     tabKey,
-    hasRun
+    hasRun,
+    fileName
   } = options;
 
   const userInfo = useUserInfo();
@@ -67,22 +73,49 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<RunResult[]>([]);
 
+  // 动态生成表格列
+  const generateTableColumns = (runResult: RunResult[]) => {
+    if (
+      !runResult ||
+      runResult.length === 0 ||
+      !runResult[0]?.list ||
+      runResult[0].list.length === 0
+    ) {
+      return [];
+    }
+
+    // 从第一行数据中获取所有的 key 作为列头
+    const firstRow = runResult[0].list[0];
+    const keys = Object.keys(firstRow);
+
+    return keys.map((key) => ({
+      title: key,
+      dataIndex: key,
+      width: 150,
+      ellipsis: true
+    }));
+  };
+
+  // 动态生成表格数据
+  const generateTableData = (runResult: RunResult[]) => {
+    if (!runResult || runResult.length === 0 || !runResult[0]?.list) {
+      return [];
+    }
+
+    // 将 runResult[0].list 转换为表格数据格式，添加 key 字段
+    return runResult[0].list.map((row, index) => ({
+      key: `${index}`,
+      ...row
+    }));
+  };
+
+  // 计算表格列和数据
+  const columns = generateTableColumns(runResult);
+  const data = generateTableData(runResult);
+
   // 使用 ref 来跟踪初始内容，避免不必要的更新
   const initialContentRef = useRef(initialContent);
   const currentFileIdRef = useRef(currentFileId);
-
-  // 当初始内容变化时，更新编辑器内容（只在真正需要时更新）
-  useEffect(() => {
-    if (initialContent !== initialContentRef.current) {
-      initialContentRef.current = initialContent;
-      setEditorContent(initialContent);
-    }
-  }, [initialContent]);
-
-  // 更新 currentFileId ref
-  useEffect(() => {
-    currentFileIdRef.current = currentFileId;
-  }, [currentFileId]);
 
   // 延时3秒自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
@@ -95,20 +128,24 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         try {
           const res = await createSqlScript({
             uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name: tabKey ?? '',
+            script_name: fileName ?? '',
             script_content: content
           });
 
           if (res?.status === 200) {
-            setLastAutoSave(new Date().toLocaleTimeString());
+            // setLastAutoSave(new Date().toLocaleTimeString());
 
             // 更新脚本ID
             onActiveUpdate &&
               onActiveUpdate({ key: tabKey, fileId: res.data.script_id });
             return res.data;
+          } else {
+            Message.error(`自动保存失败: ${res.message || '未知错误'}`);
+            console.error('自动保存失败:', res.message);
           }
           return null;
         } catch (error) {
+          Message.error(`自动保存失败`);
           console.error('自动保存失败:', error);
           return null;
         }
@@ -117,21 +154,25 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         const res = await updateSqlScript(Number(fileId), {
           uid: userInfo?.id ?? '',
-          script_name: tabKey ?? '',
+          script_name: fileName ?? '',
           script_content: content
         });
 
         if (res?.status === 200) {
           setLastAutoSave(new Date().toLocaleTimeString());
           return res.data;
+        } else {
+          Message.error(`自动保存失败: ${res.message || '未知错误'}`);
+          console.error('自动保存失败:', res.message);
         }
         return null;
       } catch (error) {
+        Message.error(`自动保存失败`);
         console.error('自动保存失败:', error);
         return null;
       }
     }, []),
-    { wait: 3000 }
+    { wait: 3000, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
@@ -167,15 +208,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     try {
       const res = await runSqlScript(fileId);
-      console.log('运行接口调用 res', res);
-      if (res?.status === 200) {
-        setExecid(res.data.script_execid);
-      } else {
-        throw new Error('运行失败');
+
+      if (res?.status !== 200) {
+        setRunStatus(RunningStatus.FAILED);
+        return;
       }
+
+      setExecid(res.data.script_execid);
+      setRunLog(res.data.warning_msg);
     } catch (error) {
       setRunStatus(RunningStatus.FAILED);
-      Message.error('运行失败');
     }
   }, [runStatus]);
 
@@ -198,36 +240,39 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       pollingWhenHidden: false,
       manual: true,
       onSuccess: (res) => {
-        if (res?.status === 200 && res.data) {
-          setRunResult(res.data?.sql_result);
-          if (res.data.run_status !== RunningStatus.RUNNING) {
-            const status =
-              res.data.run_status === RunningStatus.SUCCESS
-                ? RunningStatus.SUCCESS
-                : RunningStatus.FAILED;
-            setRunStatus(status);
-            if (runStartTime) {
-              const duration = Math.floor(
-                (Date.now() - runStartTime.getTime()) / 1000
-              );
-              setRunDuration(duration);
-            }
-          }
+        if (res.data.run_status !== RunningStatus.RUNNING) {
+          console.log('运行结束，取消轮询');
+          cancelGetRunResultPolling();
         }
+
+        setRunStatus(res.data?.run_status);
+        setRunResult(res.data?.sql_result_lists);
+        setRunDuration(Number(res.data?.run_duration));
+      },
+      onError: (error) => {
+        setRunStatus(RunningStatus.FAILED);
+        cancelGetRunResultPolling();
       }
     });
 
+  // 当初始内容变化时，更新编辑器内容（只在真正需要时更新）
+  useEffect(() => {
+    if (initialContent !== initialContentRef.current) {
+      initialContentRef.current = initialContent;
+      setEditorContent(initialContent);
+    }
+  }, [initialContent]);
+
+  // 更新 currentFileId ref
+  useEffect(() => {
+    currentFileIdRef.current = currentFileId;
+  }, [currentFileId]);
+
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING) {
-      cancelGetRunResultPolling();
-    }
+    cancelGetRunResultPolling();
 
-    if (
-      runStatus !== RunningStatus.RUNNING ||
-      !execid ||
-      !currentFileIdRef.current
-    ) {
+    if (!execid || !currentFileIdRef.current) {
       return;
     }
 
@@ -235,41 +280,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       script_execid: execid,
       size: '100'
     });
-
-    // 运行中时，轮询获取运行结果
-    // const fetchResult = async () => {
-    //   try {
-    //     const res = await getRunResultPolling(currentFileIdRef.current!, {
-    //       script_execid: execid,
-    //       size: '100'
-    //     });
-
-    //     if (res?.status === 200 && res.data) {
-    //       setRunResult(res.data?.sql_result);
-    //       // 检查执行状态
-    //       if (res.data.run_status !== RunningStatus.RUNNING) {
-    //         const status =
-    //           res.data.run_status === RunningStatus.SUCCESS
-    //             ? RunningStatus.SUCCESS
-    //             : RunningStatus.FAILED;
-
-    //         setRunStatus(status);
-
-    //         // 计算执行时长
-    //         if (runStartTime) {
-    //           const duration = Math.floor(
-    //             (Date.now() - runStartTime.getTime()) / 1000
-    //           );
-    //           setRunDuration(duration);
-    //         }
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error('获取运行结果失败:', error);
-    //   }
-    // };
-
-    // fetchResult();
   }, [execid, runStatus]);
 
   return {
@@ -286,6 +296,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setSize,
     runLog,
     runResult,
+
+    // 表格数据处理
+    columns,
+    data,
 
     // 操作
     handleContentChange,

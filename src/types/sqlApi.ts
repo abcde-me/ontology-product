@@ -266,14 +266,18 @@ export interface RunResultSqlScriptParams {
 }
 
 export interface RunResult {
-  list: RunResultItem;
+  list: Record<string, unknown>[];
 }
 
-export interface RunResultItem {
-  data: string;
-  field4: string;
-  id: string;
-  pk_id: number;
+export enum RunningStatus {
+  /** 未运行 */
+  IDLE = -1,
+  /** 运行失败 */
+  FAILED = 0,
+  /** 运行成功 */
+  SUCCESS = 1,
+  /** 运行中 */
+  RUNNING = 2
 }
 
 export interface RunResultSqlScriptData {
@@ -284,11 +288,11 @@ export interface RunResultSqlScriptData {
   /**
    * 运行状态 0-失败 1-成功 2-运行中
    */
-  run_status: number;
+  run_status: RunningStatus;
   /**
    * 执行结果
    */
-  sql_result: RunResult[];
+  sql_result_lists: RunResult[];
 }
 
 export interface RunCancelSqlScriptParams {

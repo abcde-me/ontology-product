@@ -467,166 +467,166 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  // return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
-  //   .get({})
-  //   .inRegion()
-  //   .do();
+  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+    .get({})
+    .inRegion()
+    .do();
 
   // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      execid: 1,
-      running_status: 1,
-      data: `# Python文件代码内容示例
-      import pandas as pd
-      import numpy as np
-      import matplotlib.pyplot as plt
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     execid: 1,
+  //     running_status: 1,
+  //     data: `# Python文件代码内容示例
+  //     import pandas as pd
+  //     import numpy as np
+  //     import matplotlib.pyplot as plt
 
-      # 数据加载
-      def load_data():
-      """加载示例数据"""
-      data = pd.DataFrame({
-          'x': np.random.randn(100),
-          'y': np.random.randn(100)
-      })
-      return data
+  //     # 数据加载
+  //     def load_data():
+  //     """加载示例数据"""
+  //     data = pd.DataFrame({
+  //         'x': np.random.randn(100),
+  //         'y': np.random.randn(100)
+  //     })
+  //     return data
 
-      # 数据处理
-      def process_data(df):
-      """处理数据"""
-      df['z'] = df['x'] + df['y']
-      return df
+  //     # 数据处理
+  //     def process_data(df):
+  //     """处理数据"""
+  //     df['z'] = df['x'] + df['y']
+  //     return df
 
-      # 数据可视化
-      def visualize_data(df):
-      """可视化数据"""
-      plt.figure(figsize=(10, 6))
-      plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
-      plt.colorbar(label='z value')
-      plt.xlabel('X values')
-      plt.ylabel('Y values')
-      plt.title('Data Visualization')
-      plt.show()
+  //     # 数据可视化
+  //     def visualize_data(df):
+  //     """可视化数据"""
+  //     plt.figure(figsize=(10, 6))
+  //     plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+  //     plt.colorbar(label='z value')
+  //     plt.xlabel('X values')
+  //     plt.ylabel('Y values')
+  //     plt.title('Data Visualization')
+  //     plt.show()
 
-      # 主函数
-      if __name__ == "__main__":
-      # 加载数据
-      df = load_data()
-      print("数据加载完成，共", len(df), "行")
+  //     # 主函数
+  //     if __name__ == "__main__":
+  //     # 加载数据
+  //     df = load_data()
+  //     print("数据加载完成，共", len(df), "行")
 
-      # 处理数据
-      df = process_data(df)
-      print("数据处理完成")
+  //     # 处理数据
+  //     df = process_data(df)
+  //     print("数据处理完成")
 
-      # 显示统计信息
-      print("\\n数据统计信息:")
-      print(df.describe())
+  //     # 显示统计信息
+  //     print("\\n数据统计信息:")
+  //     print(df.describe())
 
-      # 可视化数据
-      visualize_data(df)
-      print("数据可视化完成")`
-    }
-  });
+  //     # 可视化数据
+  //     visualize_data(df)
+  //     print("数据可视化完成")`
+  //   }
+  // });
 }
 
 // 修改（保存）文件
-export async function savePythonItem(
-  id: string,
-  params: SavePythonItemReq
-): Promise<ApiRes<SavePythonItemRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonSaveApi({ pyspark_id: id })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+// export async function savePythonItem(
+//   id: string,
+//   params: SavePythonItemReq
+// ): Promise<ApiRes<SavePythonItemRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonSaveApi({ pyspark_id: id })
+//   //   .put(params)
+//   //   .inRegion()
+//   //   .do();
 
-  // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      id: 2201,
-      last_modified: '2025-08-18 15:00'
-    }
-  });
-}
+//   // Mock implementation per spe
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       id: 2201,
+//       last_modified: '2025-08-18 15:00'
+//     }
+//   });
+// }
 
 // 运行代码
-export async function runPythonItem(
-  id: string
-): Promise<ApiRes<RunPythonItemRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonRunApi({ pyspark_id: id })
-  //   .put({})
-  //   .inRegion()
-  //   .do();
+// export async function runPythonItem(
+//   id: string
+// ): Promise<ApiRes<RunPythonItemRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonRunApi({ pyspark_id: id })
+//   //   .put({})
+//   //   .inRegion()
+//   //   .do();
 
-  // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      execid: '1',
-      id: 2201
-    }
-  });
-}
+//   // Mock implementation per spe
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       execid: '1',
+//       id: 2201
+//     }
+//   });
+// }
 
 // 获取运行结果
-export async function getRunResult(
-  id: string,
-  params: GetRunResultReq
-): Promise<ApiRes<GetRunResultRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonRunResultApi({ pyspark_id: id })
-  //   .get(params)
-  //   .inRegion()
-  //   .do();
+// export async function getRunResult(
+//   id: string,
+//   params: GetRunResultReq
+// ): Promise<ApiRes<GetRunResultRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonRunResultApi({ pyspark_id: id })
+//   //   .get(params)
+//   //   .inRegion()
+//   //   .do();
 
-  // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      run_result: '运行成功',
-      run_status: RunningStatus.SUCCESS,
-      run_duration: 10,
-      run_end_time: '2025-08-18 15:00'
-    }
-  });
-}
+//   // Mock implementation per spe
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       run_result: '运行成功',
+//       run_status: RunningStatus.SUCCESS,
+//       run_duration: 10,
+//       run_end_time: '2025-08-18 15:00'
+//     }
+//   });
+// }
 
 // 获取日志
-export async function getRunLog(
-  id: string,
-  params: GetRunLogReq
-): Promise<ApiRes<GetRunLogRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonRunLogApi({ pyspark_id: id })
-  //   .get(params)
-  //   .inRegion()
-  //   .do();
+// export async function getRunLog(
+//   id: string,
+//   params: GetRunLogReq
+// ): Promise<ApiRes<GetRunLogRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonRunLogApi({ pyspark_id: id })
+//   //   .get(params)
+//   //   .inRegion()
+//   //   .do();
 
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      log: '运行成功'
-    }
-  });
-}
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       log: '运行成功'
+//     }
+//   });
+// }
 
 /** 创建SQL脚本 */
 export async function createSqlScript(
@@ -651,7 +651,7 @@ export async function updateSqlScript(
   id: number,
   params: updateSqlScriptParams
 ): Promise<ApiRes<CreateSqlScriptData>> {
-  return await UAPI.RES.sqlSaveApi({ scriptId: id })
+  return await UAPI.RES.sqlSaveApi({ script_id: id })
     .put(params)
     .inRegion()
     .do();

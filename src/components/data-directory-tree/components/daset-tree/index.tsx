@@ -12,7 +12,9 @@ import {
   DatasetVersionFileItem,
   Scheam
 } from '@/types/datasetManagement';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.scss';
+import { formatFileSize } from '@/utils/format';
 
 interface DataSetTreeProps {
   type: 'sql' | 'python';
@@ -22,6 +24,8 @@ interface DataSetTreeProps {
   onSelectDataset?: (dataset: DatasetListItem) => void;
   onInsertDataset?: (dataset: DatasetListItem) => void;
   onViewDatasetDetail?: (dataset: DatasetListItem) => void;
+  onInsertContent?: (content: string) => void;
+  isEditorFocused?: boolean;
 }
 
 const DataSetTree: React.FC<DataSetTreeProps> = ({
@@ -31,7 +35,9 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   onInsertFile,
   onSelectDataset,
   onInsertDataset,
-  onViewDatasetDetail
+  onViewDatasetDetail,
+  onInsertContent,
+  isEditorFocused = false
 }) => {
   const {
     dasetList,
@@ -54,10 +60,6 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   const [currentDataset, setCurrentDataset] = useState<DatasetListItem | null>(
     null
   );
-
-  useEffect(() => {
-    getDasetList();
-  }, [type]);
 
   // 处理搜索
   const handleSearch = (value: string) => {
@@ -125,39 +127,6 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     onSelectFile?.(file);
   };
 
-  // 处理插入文件
-  const handleInsertFile = (
-    file: DatasetVersionFileItem | Scheam,
-    e: React.MouseEvent
-  ) => {
-    e.stopPropagation();
-    onInsertFile?.(file);
-  };
-
-  // 格式化文件大小
-  const formatFileSize = (size: string | number) => {
-    if (typeof size === 'string') {
-      const numSize = parseInt(size, 10);
-      if (isNaN(numSize)) return size;
-      size = numSize;
-    }
-
-    if (size < 1024) return `${size}B`;
-    if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`;
-    if (size < 1024 * 1024 * 1024)
-      return `${(size / (1024 * 1024)).toFixed(2)}MB`;
-    return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
-  };
-
-  // 格式化数据集大小
-  const formatDatasetSize = (size: number) => {
-    if (size < 1024) return `${size}B`;
-    if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`;
-    if (size < 1024 * 1024 * 1024)
-      return `${(size / (1024 * 1024)).toFixed(2)}MB`;
-    return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
-  };
-
   // 根据类型获取当前文件列表
   const getCurrentFileList = () => {
     if (type === 'sql') {
@@ -179,12 +148,8 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   };
 
   // 获取文件大小显示
-  const getFileSizeDisplay = (file: DatasetVersionFileItem | Scheam) => {
-    if ('file_size' in file) {
-      return formatFileSize(file.file_size);
-    }
-    // SQL类型的字段没有大小信息，显示为字段类型
-    return '字段';
+  const getFileSizeDisplay = (file: DatasetVersionFileItem) => {
+    return formatFileSize(Number(file?.file_size ?? 0));
   };
 
   // 检查文件是否被选中
@@ -248,15 +213,16 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                         <div className="dataset-tree__file-name">
                           {getFileDisplayName(file)}
                         </div>
-                        <div className="dataset-tree__file-size">
-                          {getFileSizeDisplay(file)}
-                        </div>
+                        {file.file_size && (
+                          <div className="dataset-tree__file-size">
+                            {getFileSizeDisplay(file)}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="dataset-tree__file-actions">
                       <Button
                         type="outline"
-                        size="small"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDatasetInsert(
@@ -268,14 +234,14 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                           );
                         }}
                       >
-                        插入
+                        {isEditorFocused ? '插入' : '复制'}
                       </Button>
                     </div>
                   </div>
                 );
               })
             ) : (
-              <Empty description="暂无文件" />
+              <Empty description="暂无数据" />
             )}
           </div>
         ) : (
@@ -291,18 +257,18 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                   <div className="dataset-tree__dataset-item-left">
                     <IconFolder className="dataset-tree__dataset-icon" />
                     <div className="dataset-tree__dataset-info">
-                      <div className="dataset-tree__dataset-name">
-                        {dataset.name}
-                      </div>
+                      <EllipsisPopover
+                        value={dataset.name}
+                        className="dataset-tree__dataset-name"
+                      />
                       <div className="dataset-tree__dataset-size">
-                        {formatDatasetSize(dataset.latest_size)}
+                        {formatFileSize(Number(dataset.latest_size ?? 0))}
                       </div>
                     </div>
                   </div>
                   <div className="dataset-tree__dataset-actions">
                     <Button
                       type="text"
-                      size="small"
                       onClick={(e) =>
                         handleViewDatasetDetail(
                           dataset,
@@ -314,7 +280,6 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     </Button>
                     <Button
                       type="outline"
-                      size="small"
                       onClick={(e) =>
                         handleDatasetInsert(
                           dataset,
@@ -322,13 +287,13 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                         )
                       }
                     >
-                      插入
+                      {isEditorFocused ? '插入' : '复制'}
                     </Button>
                   </div>
                 </div>
               ))
             ) : (
-              <Empty description="暂无数据集" />
+              <Empty description="暂无数据" />
             )}
           </div>
         )}

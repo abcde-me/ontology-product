@@ -76,7 +76,6 @@ export const useTableList = <T = {}, U = {}>(
   }, [searchParams]);
 
   function handleSearchChange(value: Partial<U>) {
-    console.log('value', value);
     setSearchParams((prev) => {
       return {
         ...prev,

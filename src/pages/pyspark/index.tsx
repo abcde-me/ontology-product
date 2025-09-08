@@ -19,7 +19,10 @@ type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
-  const [pysparkExecId, setPysparkExecId] = useState<number>(0);
+  const [insertContentFunction, setInsertContentFunction] = useState<
+    ((content: string) => void) | null
+  >(null);
+  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const {
     fileState,
     directoryTreeRef,
@@ -27,8 +30,14 @@ const Python: React.FC = memo(() => {
     addTab,
     removeTab,
     switchTab,
+    updateTabContent,
     handleCreate
   } = useTabManager();
+
+  // 处理标签页内容更新
+  const handleTabContentUpdate = (tabKey: string, content: string) => {
+    updateTabContent(tabKey, content);
+  };
 
   const isDasetTab = activeTab === 'daset';
 
@@ -36,14 +45,31 @@ const Python: React.FC = memo(() => {
     setActiveTab(key as TabKey);
   };
 
+  // 处理插入内容功能注册
+  const handleInsertContentRegister = (insertFn: (content: string) => void) => {
+    setInsertContentFunction(() => insertFn);
+  };
+
+  // 插入内容到编辑器
+  const insertContentToEditor = (content: string) => {
+    if (insertContentFunction) {
+      insertContentFunction(content);
+    }
+  };
+
+  // 处理编辑器聚焦状态变化
+  const handleEditorFocusChange = (focused: boolean) => {
+    setIsEditorFocused(focused);
+  };
+
   return (
-    <Layout className="notebook-layout">
-      <Sider width={isDasetTab ? '100%' : 300} className="notebook-sider">
+    <Layout className="pyspark-layout">
+      <Sider width={isDasetTab ? '100%' : 300} className="pyspark-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="notebook-tabs"
+          className="pyspark-tabs"
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon />}>
@@ -56,10 +82,20 @@ const Python: React.FC = memo(() => {
             )}
           </TabPane>
           <TabPane key="data" title={<DataIcon />}>
-            {activeTab === 'data' && <DataManager />}
+            {activeTab === 'data' && (
+              <DataManager
+                onInsertContent={insertContentToEditor}
+                isEditorFocused={isEditorFocused}
+              />
+            )}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}>
-            {activeTab === 'tools' && <ToolsManager />}
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                isEditorFocused={isEditorFocused}
+              />
+            )}
           </TabPane>
           <TabPane key="daset" title={<DasetIcon />}>
             {isDasetTab && <DatasetsList />}
@@ -67,15 +103,18 @@ const Python: React.FC = memo(() => {
         </Tabs>
       </Sider>
       {!isDasetTab && (
-        <Content className="notebook-content">
+        <Content className="pyspark-content">
           <EditorContent
-            pysparkExecId={pysparkExecId}
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
             onTabChange={switchTab}
             onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
             onRemoveTab={removeTab}
             onCreate={handleCreate}
+            onTabContentUpdate={handleTabContentUpdate}
+            onSidebarTabChange={setActiveTab}
+            onInsertContent={handleInsertContentRegister}
+            onEditorFocusChange={handleEditorFocusChange}
           />
         </Content>
       )}
