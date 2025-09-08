@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Button } from '@arco-design/web-react';
 import './AnnotationType.scss';
 
 const typeList = [
   {
     label: '图片',
-    value: 1
+    value: 2
   },
   {
     label: '文本',
-    value: 2
+    value: 1
   },
   {
     label: '音频',
@@ -21,36 +20,37 @@ const typeList = [
     value: 4
   }
 ];
-const btnPicData = [{ key: 1, label: '图片', code: 'IMAGE_ANNOTATION' }];
+const btnPicData = [
+  { key: 2, value: 2, label: '图片标注', code: 'IMAGE_ANNOTATION' }
+];
 const btnTextData = [
-  { key: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
-  { key: 2, label: '文本分类', code: 'TEXT_CLASSIFICATION' },
-  { key: 3, label: '问答', code: 'TEXT_QA' },
-  { key: 4, label: '文本排序', code: 'TEXT_SORT' }
+  { key: 1, value: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
+  { key: 2, value: 2, label: '文本分类', code: 'TEXT_CLASSIFICATION' },
+  { key: 3, value: 3, label: '问答', code: 'TEXT_QA' },
+  { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT' }
 ];
 interface AnnotationTypeProps {
   isDisabled: boolean;
   label_type: number;
-  label_tool: {
-    label_tool_name: number;
-    label_tool_code: number;
-  };
+  label_tool_code: string;
   getChildAnnotationType: (
     selectedRadio: number,
-    activeKey: number,
+    activeKey: string | number,
     annotationTypeContentCode: string
   ) => void;
 }
 const AnnotationType: React.FC<AnnotationTypeProps> = ({
   isDisabled,
   label_type,
-  label_tool,
+  label_tool_code,
   getChildAnnotationType
 }) => {
   // 标注类型当前选择项
-  const [selectedRadio, setSelectedRadio] = useState(label_type || 1);
+  const [selectedRadio, setSelectedRadio] = useState(label_type || 2);
   // 标注工具
-  const [activeKey, setActiveKey] = useState(label_tool?.label_tool_code || 1);
+  const [activeKey, setActiveKey] = useState<string | number>(
+    label_tool_code || 'IMAGE_ANNOTATION'
+  );
   // 当前标注类型选择内容
   const [annotationTypeContentCode, setAnnotationTypeContentCode] =
     useState('IMAGE_ANNOTATION');
@@ -61,17 +61,23 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
     }
   };
   useEffect(() => {
+    setSelectedRadio(label_type);
+    setActiveKey(label_tool_code);
+  }, [label_type, label_tool_code]);
+  useEffect(() => {
     getChildAnnotationType(selectedRadio, activeKey, annotationTypeContentCode);
   }, [selectedRadio, activeKey, annotationTypeContentCode]);
 
   // 头部点击事件
   const headerItemClick = (item) => {
+    console.log(item, 'top');
     setSelectedRadio(item.value);
-    setActiveKey(1);
-    if (item?.value === 1) {
+    if (item?.value === 2) {
+      setActiveKey('IMAGE_ANNOTATION');
       setAnnotationTypeContentCode('IMAGE_ANNOTATION');
     }
-    if (item?.value === 2) {
+    if (item?.value === 1) {
+      setActiveKey('TEXT_ENTITY');
       setAnnotationTypeContentCode('TEXT_ENTITY');
     }
   };
@@ -99,29 +105,29 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
         })}
       </div>
       <div className="type-content">
-        {selectedRadio === 1
+        {selectedRadio === 2
           ? btnPicData.map((item) => {
               return (
                 <div
-                  className={`mutex-btn ${activeKey === item.key ? 'active' : ''}`}
+                  className={`mutex-btn ${activeKey === item.code ? 'active' : ''}`}
                   onClick={() => {
-                    handleBtnClick(item.key);
+                    handleBtnClick(item.code);
                     setAnnotationTypeContentCode(item.code);
                   }}
-                  key={item.key}
+                  key={item.value}
                 >
                   {item.label}
                 </div>
               );
             })
           : null}
-        {selectedRadio === 2
+        {selectedRadio === 1
           ? btnTextData.map((item) => {
               return (
                 <div
-                  className={`mutex-btn ${activeKey === item.key ? 'active' : ''}`}
+                  className={`mutex-btn ${activeKey === item.code || activeKey === item.key ? 'active' : ''} ${isDisabled ? 'disabled-div' : ''}`}
                   onClick={() => {
-                    handleBtnClick(item.key);
+                    handleBtnClick(item.code);
                     setAnnotationTypeContentCode(item.code);
                   }}
                   key={item.key}

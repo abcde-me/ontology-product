@@ -28,4 +28,10 @@
   .attribute-item {
     display: flex;
   }
+
+  .disabled-icon {
+    cursor: not-allowed;
+    color: #999;
+    opacity: 0.7;
+  }
 }

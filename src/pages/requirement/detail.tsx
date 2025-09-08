@@ -39,7 +39,7 @@ import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty } from 'lodash';
+import _, { omitBy, isArray, isEmpty, get } from 'lodash';
 import './detail.scss';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
 import {
@@ -53,9 +53,9 @@ const BreadcrumbItem = Breadcrumb.Item;
 // 标注类型
 enum AnnotationTypeStatus {
   /** 图片 */
-  IMAGE = 1,
+  IMAGE = 2,
   /** 文本 */
-  TEXT = 2,
+  TEXT = 1,
   /** 音频 */
   AUDIO = 3,
   /** 视频 */
@@ -72,6 +72,19 @@ enum AnnotationChildType {
   TEXT_SORT = 4,
   /** 图片标注 */
   IMAGE_ANNOTATION = 1
+}
+
+enum AnnotationTypeContentCode {
+  /** 实体/实体关系 */
+  ENTITY = 'TEXT_ENTITY',
+  /** 文本分类 */
+  TEXT_CLASSIFICATION = 'TEXT_CLASSIFICATION',
+  /** 问答 */
+  QA = 'TEXT_QA',
+  /** 文本排序 */
+  TEXT_SORT = 'TEXT_SORT',
+  /** 图片标注 */
+  IMAGE_ANNOTATION = 'IMAGE_ANNOTATION'
 }
 
 enum LabelInfoAttributeGroupType {
@@ -130,8 +143,6 @@ export default function RequirementDetail() {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
 
-  // 获取整体需求list
-  const [requirementList, setRequirementList]: any = useState({});
   const type = useParams('type');
   const requirementId = useParams('id') as string;
   const history = useHistory();
@@ -153,7 +164,8 @@ export default function RequirementDetail() {
   const [loading, setLoading] = useState(false);
   // 标签和属性
   const [activeTab, setActiveTab] = useState(1);
-  //
+  // 详情数据存储
+  const [getDetailObj, setGetDetailObj]: any = useState({});
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
   useEffect(() => {
@@ -167,7 +179,6 @@ export default function RequirementDetail() {
   // 基础配置
 
   const handleChildData = (data: any) => {
-    console.log(data, '==1=2');
     const newSetDataContent = data.map((item) => {
       return {
         dir_name: 'car_images/train',
@@ -192,9 +203,9 @@ export default function RequirementDetail() {
   const [annotationTypeVal, setAnnotationTypeVal] = useState(
     AnnotationTypeStatus.IMAGE
   );
-  const [annotationTypeContentVal, setAnnotationTypeContentVal] = useState(
-    AnnotationChildType.ENTITY
-  );
+  const [annotationTypeContentVal, setAnnotationTypeContentVal] = useState<
+    string | number
+  >(AnnotationChildType.ENTITY);
   // 当前标注类型选择内容
   const [annotationTypeContentCode, setAnnotationTypeContentCode] =
     useState('');
@@ -211,8 +222,7 @@ export default function RequirementDetail() {
       ...publishData,
       label_type_code: annotationTypeContentCode
     });
-    setDatalist(generateInitialData());
-    console.log('=123', selectedRadio, activeKey, annotationTypeContentCode);
+    // setDatalist(generateInitialData());
   };
 
   // 工具函数：安全获取嵌套属性
@@ -376,7 +386,6 @@ export default function RequirementDetail() {
   const getLastItem = (arr) => {
     // 先校验：确保输入是数组且非空
     if (!Array.isArray(arr) || arr.length === 0) {
-      console.warn('输入不是有效数组或数组为空');
       return null;
     }
     // 创建最后一个元素的深拷贝，避免引用冲突
@@ -448,7 +457,6 @@ export default function RequirementDetail() {
 
     // 获取当前属性并添加新属性
     const currentAttributes = datalist[labelIndex].label_info_attribute_groups;
-    console.log('======', templateData[labelIndex], templateData);
     updateNestedValue(
       [labelIndex, 'label_info_attribute_groups'],
       [...currentAttributes, newAttribute],
@@ -508,9 +516,7 @@ export default function RequirementDetail() {
         .then((val) => {
           return true;
         })
-        .catch((errorInfo) => {
-          console.log(2, 'form2', errorInfo);
-        }),
+        .catch((errorInfo) => {}),
       form2Child
         .validate()
         .then((value) => {
@@ -533,15 +539,12 @@ export default function RequirementDetail() {
             setIsShowTypeErrorInfo(true);
             return;
           }
-          console.log(errorInfo);
         })
     ]);
     // 所有的form 验证都通过调用发布接口
-    console.log(result, '======');
     if (result.every((item) => item === true)) {
       publish();
     } else {
-      console.log('错误');
     }
   };
   const removeEmptyArrays = (obj) => {
@@ -639,12 +642,11 @@ export default function RequirementDetail() {
       ]
     };
     const obj: any = removeEmptyArrays(new_publishData);
-    console.log(datalist, '123');
     setLoading(true);
     // 发布数据
     const res = await publishRequirement(obj);
-    if (res.success) {
-      history.push('/requirement');
+    if (res.code === 0) {
+      history.goBack();
     }
     setLoading(false);
   };
@@ -654,14 +656,45 @@ export default function RequirementDetail() {
       const res = await getRequirementDetail({
         requirement_id: Number(requirementId)
       });
-      if (res.success) {
-        console.log(res, '=======');
-        setPublishData(res.data);
-        setDatalist(res.data);
+      if (res.code === 0) {
+        setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
+        form1.setFieldValue('name', res?.data?.name);
+        form1.setFieldValue('description', res?.data?.description);
+        setGetDetailObj(res?.data);
+        setTaskTypeVal(res?.data?.team_type);
+        res?.data?.labels?.map((item) => {
+          form2.setFieldValue(
+            `label_name_cn_${item?.order_num}`,
+            item?.label_name_cn
+          );
+          form2.setFieldValue(
+            `label_name_en_${item?.order_num}`,
+            item?.label_name_en
+          );
+          form2.setFieldValue(
+            `label_shape_${item?.order_num}`,
+            item?.label_shape
+          );
+          form2.setFieldValue(
+            `label_colour_${item?.order_num}`,
+            item?.label_colour
+          );
+          item?.label_info_attribute_groups?.map((group) => {
+            group?.label_info_attribute?.map((attribute) => {
+              form2.setFieldValue(
+                `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
+                attribute?.attribute_name_cn
+              );
+              form2.setFieldValue(
+                `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_en`,
+                attribute?.attribute_name_en
+              );
+            });
+          });
+        });
+        setDatalist(res?.data?.labels);
       }
-    } catch (error) {
-      console.log(error, '=======');
-    }
+    } catch (error) {}
   };
   useEffect(() => {
     if (type === 'detail') {
@@ -707,9 +740,8 @@ export default function RequirementDetail() {
           <Form
             form={form1}
             disabled={type === 'detail'}
-            // initialValues={{ name: 'admin' }}
+            initialValues={{ name: publishData?.name }}
             onValuesChange={(_, val) => {
-              console.log(val);
               setPublishData({ ...publishData, ...val });
             }}
             labelCol={{
@@ -742,8 +774,11 @@ export default function RequirementDetail() {
               )}
               <AnnotationType
                 isDisabled={type === 'detail'}
-                label_type={requirementList?.label_type || 1}
-                label_tool={requirementList?.label_tool?.label_tool_code || 1}
+                label_type={getDetailObj?.label_type || 2}
+                label_tool_code={
+                  getDetailObj?.label_tool?.label_tool_code ||
+                  'IMAGE_ANNOTATION'
+                }
                 getChildAnnotationType={getAnnotationType}
               />
             </FormItem>
@@ -759,7 +794,7 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="data-set-text">
-                  已选数据量：{selectedData.length}
+                  已选数据量：{selectedData.length || getDetailObj?.label_count}
                 </div>
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
@@ -827,425 +862,454 @@ export default function RequirementDetail() {
                   </div>
                   {activeTab === LabelInfoAttributeGroupType.LABEL && (
                     <div className="attribute-content">
-                      {datalist.map((item, labelIndex) => (
-                        <div className="sortable-item" key={labelIndex}>
-                          <div className="sortable-item-content">
-                            <FormItem
-                              label="标注名称:"
-                              field={`label_name_cn_${labelIndex}`}
-                              rules={[
-                                {
-                                  required: true,
-                                  message: '请输入标注展示名称'
+                      {datalist &&
+                        datalist?.map((item, labelIndex) => (
+                          <div className="sortable-item" key={labelIndex}>
+                            <div className="sortable-item-content">
+                              <FormItem
+                                label="标注名称:"
+                                field={`label_name_cn_${labelIndex}`}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: '请输入标注展示名称'
+                                  }
+                                ]}
+                                style={{ padding: 0 }}
+                              >
+                                <Input
+                                  style={{
+                                    minWidth: 206
+                                  }}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_name_cn'],
+                                      val
+                                    );
+                                    // updateNestedValue(
+                                    //   [labelIndex, 'label_name_cn'],
+                                    //   val
+                                    // );
+                                  }}
+                                  className="sortable-item-input"
+                                  placeholder="请输入标注展示名称"
+                                  value={item.label_name_cn}
+                                />
+                              </FormItem>
+                              <FormItem
+                                field={`label_name_en_${labelIndex}`}
+                                label={
+                                  <div>
+                                    展示名称
+                                    <Tooltip content="展示在标注页面的名称">
+                                      <IconQuestionCircle />
+                                    </Tooltip>
+                                    :
+                                  </div>
                                 }
-                              ]}
-                              style={{ padding: 0 }}
-                            >
-                              <Input
-                                style={{
-                                  minWidth: 206
-                                }}
-                                onChange={(val: any) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'label_name_cn'],
-                                    val
-                                  );
-                                  // updateNestedValue(
-                                  //   [labelIndex, 'label_name_cn'],
-                                  //   val
-                                  // );
-                                }}
-                                className="sortable-item-input"
-                                placeholder="请输入标注展示名称"
-                                value={item.label_name_cn}
-                              />
-                            </FormItem>
-                            <FormItem
-                              field={`label_name_en_${labelIndex}`}
-                              label={
-                                <div>
-                                  展示名称
-                                  <Tooltip content="展示在标注页面的名称">
-                                    <IconQuestionCircle />
-                                  </Tooltip>
-                                  :
-                                </div>
-                              }
-                              style={{ padding: 0 }}
-                            >
-                              <Input
-                                style={{
-                                  minWidth: 196
-                                }}
-                                onChange={(val: any) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'label_name_en'],
-                                    val
-                                  );
-                                }}
-                                className="sortable-item-input"
-                                placeholder="请输入结果存储名称"
-                                value={item.label_name_en}
-                              />
-                            </FormItem>
-                            <FormItem field={`label_shape_${labelIndex}`}>
-                              <Select
-                                placeholder="请选择形状"
-                                value={item.label_shape}
-                                onChange={(val: any) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'label_shape'],
-                                    parseInt(val)
-                                  );
-                                }}
-                                style={{ width: 100, height: 32 }}
-                                renderFormat={(option, value) => {
-                                  return (
-                                    <span>
-                                      <Image
-                                        width={20}
-                                        style={{ marginRight: 8 }}
-                                        src={
+                                style={{ padding: 0 }}
+                              >
+                                <Input
+                                  style={{
+                                    minWidth: 196
+                                  }}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_name_en'],
+                                      val
+                                    );
+                                  }}
+                                  className="sortable-item-input"
+                                  placeholder="请输入结果存储名称"
+                                  value={item.label_name_en}
+                                />
+                              </FormItem>
+                              <FormItem field={`label_shape_${labelIndex}`}>
+                                <Select
+                                  placeholder="请选择形状"
+                                  value={item.label_shape}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_shape'],
+                                      parseInt(val)
+                                    );
+                                  }}
+                                  style={{ width: 100, height: 32 }}
+                                  renderFormat={(option, value) => {
+                                    return (
+                                      <span>
+                                        <Image
+                                          width={20}
+                                          style={{ marginRight: 8 }}
+                                          src={
+                                            shapeOptions.find(
+                                              (opt) => opt.value === value
+                                            )?.icon
+                                          }
+                                          alt="lamp"
+                                        />
+                                        {
                                           shapeOptions.find(
                                             (opt) => opt.value === value
-                                          )?.icon
+                                          )?.label
                                         }
-                                        alt="lamp"
-                                      />
-                                      {
-                                        shapeOptions.find(
-                                          (opt) => opt.value === value
-                                        )?.label
-                                      }
-                                    </span>
-                                  );
-                                }}
-                              >
-                                {shapeOptions.map((option, index) => (
-                                  <Option
-                                    key={option.label}
-                                    value={option.value}
-                                  >
-                                    <Image
-                                      width={20}
-                                      src={option?.icon}
-                                      alt="lamp"
-                                    />{' '}
-                                    {option.label}
-                                  </Option>
-                                ))}
-                              </Select>
-                            </FormItem>
-                            <FormItem>
-                              <ColorPicker
-                                defaultValue={item?.label_colour}
-                                onChange={(val: any) => {
-                                  updateNestedValue(
-                                    [labelIndex, 'label_colour'],
-                                    val
-                                  );
-                                }}
-                                showPreset
-                              />
-                            </FormItem>
-                            <FormItem>
-                              {datalist.length > 1 && (
-                                <IconDelete
-                                  fontSize={20}
-                                  onClick={() => {
-                                    deleteLabel(labelIndex);
+                                      </span>
+                                    );
                                   }}
-                                />
-                              )}
-                            </FormItem>
-                          </div>
-                          {item?.label_info_attribute_groups?.length > 0 &&
-                            item?.label_info_attribute_groups?.map(
-                              (attrGroup, groupIndex) => {
-                                return (
-                                  <div
-                                    key={`${labelIndex}_${groupIndex}`}
-                                    className="attribute-group-item"
-                                  >
-                                    <FormItem
-                                      field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
-                                      required
-                                      disabled={type === 'detail'}
-                                      label="属性组件名称"
+                                >
+                                  {shapeOptions.map((option, index) => (
+                                    <Option
+                                      key={option.label}
+                                      value={option.value}
                                     >
-                                      <div className="group-items">
-                                        <Input
-                                          width={400}
-                                          height={32}
-                                          value={attrGroup.attribute_group_name}
-                                          onChange={(val: any) => {
-                                            updateNestedValue(
-                                              [
-                                                labelIndex,
-                                                'label_info_attribute_groups',
-                                                groupIndex,
-                                                'attribute_group_name'
-                                              ],
-                                              val
-                                            );
-                                          }}
-                                          placeholder="请输入属性组名称"
-                                        />
-                                        <Select
-                                          className="ml-2 mr-2"
-                                          style={{ width: 100, height: 32 }}
-                                          value={
-                                            attrGroup.attribute_group_class
-                                          }
-                                          onChange={(value) => {
-                                            // 切换到输入框的时候 清空对应属性组的选项
-                                            if (parseInt(value) === 3) {
+                                      <Image
+                                        width={20}
+                                        src={option?.icon}
+                                        alt="lamp"
+                                      />{' '}
+                                      {option.label}
+                                    </Option>
+                                  ))}
+                                </Select>
+                              </FormItem>
+                              <FormItem field={`label_colour_${labelIndex}`}>
+                                <ColorPicker
+                                  defaultValue={item?.label_colour}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'label_colour'],
+                                      val
+                                    );
+                                  }}
+                                  showPreset
+                                />
+                              </FormItem>
+                              <FormItem>
+                                {datalist.length > 1 && (
+                                  <IconDelete
+                                    className={
+                                      type === 'detail' ? 'is-disabled' : ''
+                                    }
+                                    fontSize={20}
+                                    onClick={() => {
+                                      if (type !== 'detail') {
+                                        deleteLabel(labelIndex);
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </FormItem>
+                            </div>
+                            {item?.label_info_attribute_groups?.length > 0 &&
+                              item?.label_info_attribute_groups?.map(
+                                (attrGroup, groupIndex) => {
+                                  return (
+                                    <div
+                                      key={`${labelIndex}_${groupIndex}`}
+                                      className="attribute-group-item"
+                                    >
+                                      <FormItem
+                                        field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
+                                        required
+                                        disabled={type === 'detail'}
+                                        label="属性组件名称"
+                                      >
+                                        <div className="group-items">
+                                          <Input
+                                            width={400}
+                                            height={32}
+                                            disabled={type === 'detail'}
+                                            value={
+                                              attrGroup.attribute_group_name
+                                            }
+                                            onChange={(val: any) => {
                                               updateNestedValue(
                                                 [
                                                   labelIndex,
                                                   'label_info_attribute_groups',
                                                   groupIndex,
-                                                  'label_info_attribute'
+                                                  'attribute_group_name'
                                                 ],
-                                                []
-                                              );
-                                            }
-                                            updateNestedValue(
-                                              [
-                                                labelIndex,
-                                                'label_info_attribute_groups',
-                                                groupIndex,
-                                                'attribute_group_class'
-                                              ],
-                                              parseInt(value)
-                                            );
-                                          }}
-                                        >
-                                          <Option key={1} value={1}>
-                                            单选
-                                          </Option>
-                                          <Option key={2} value={2}>
-                                            多选
-                                          </Option>
-                                          <Option key={3} value={3}>
-                                            输入框
-                                          </Option>
-                                        </Select>
-                                        {/* 必选状态切换 */}
-                                        <Checkbox
-                                          style={{ whiteSpace: 'nowrap' }}
-                                          checked={
-                                            attrGroup.attribute_group_type === 1
-                                          }
-                                          onChange={(checked) => {
-                                            updateNestedValue(
-                                              [
-                                                labelIndex,
-                                                'label_info_attribute_groups',
-                                                groupIndex,
-                                                'attribute_group_type'
-                                              ],
-                                              checked ? 1 : 2
-                                            );
-                                          }}
-                                        >
-                                          必须标注
-                                        </Checkbox>
-                                        {attrGroup.attribute_group_class !==
-                                          3 && (
-                                          <IconPlus
-                                            fontSize={30}
-                                            className="ml-2"
-                                            onClick={() =>
-                                              addAttribute(
-                                                labelIndex,
-                                                groupIndex
-                                              )
-                                            }
-                                          />
-                                        )}
-                                        {item?.label_info_attribute_groups
-                                          ?.length > 1 && (
-                                          <IconDelete
-                                            className="ml-2"
-                                            fontSize={30}
-                                            onClick={() => {
-                                              // 删除当前属性组
-                                              deleteAttributeGroup(
-                                                labelIndex,
-                                                groupIndex
+                                                val
                                               );
                                             }}
+                                            placeholder="请输入属性组名称"
                                           />
-                                        )}
-                                      </div>
-                                    </FormItem>
-                                    {/* 选项内容区域 */}
-                                    {attrGroup.label_info_attribute.map(
-                                      (attr, attrIndex) => (
-                                        <div
-                                          key={attr.label_info_id}
-                                          className="attribute-group-info-item"
-                                        >
-                                          <div className="attribute-group-info-title">
-                                            {1 ===
-                                            attrGroup.attribute_group_class
-                                              ? '单选选项'
-                                              : 2 ===
-                                                  attrGroup.attribute_group_class
-                                                ? '多选选项'
-                                                : ''}
-                                          </div>
-                                          {(1 ===
-                                            attrGroup.attribute_group_class ||
-                                            2 ===
-                                              attrGroup.attribute_group_class) && (
-                                            <div className="attribute-info-item">
-                                              <FormItem
-                                                field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`}
-                                                rules={[
-                                                  {
-                                                    required: true,
-                                                    message: '请输入选项名称'
-                                                  }
-                                                ]}
-                                                label={`选项${attrIndex + 1}`}
-                                              >
-                                                <Input
-                                                  type="text"
-                                                  value={attr.attribute_name_cn}
-                                                  onChange={(val) =>
-                                                    updateNestedValue(
-                                                      [
-                                                        labelIndex,
-                                                        'label_info_attribute_groups',
-                                                        groupIndex,
-                                                        'label_info_attribute',
-                                                        attrIndex,
-                                                        'attribute_name_cn'
-                                                      ],
-                                                      val
-                                                    )
-                                                  }
-                                                />
-                                              </FormItem>
-                                              <FormItem
-                                                label={
-                                                  <div>
-                                                    展示名称
-                                                    <Tooltip content="展示在标注页面的名称">
-                                                      <IconQuestionCircle />
-                                                    </Tooltip>
-                                                  </div>
+                                          <Select
+                                            disabled={type === 'detail'}
+                                            className="ml-2 mr-2"
+                                            style={{ width: 100, height: 32 }}
+                                            value={
+                                              attrGroup.attribute_group_class
+                                            }
+                                            onChange={(value) => {
+                                              // 切换到输入框的时候 清空对应属性组的选项
+                                              if (parseInt(value) === 3) {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'label_info_attribute'
+                                                  ],
+                                                  []
+                                                );
+                                              }
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute_groups',
+                                                  groupIndex,
+                                                  'attribute_group_class'
+                                                ],
+                                                parseInt(value)
+                                              );
+                                            }}
+                                          >
+                                            <Option key={1} value={1}>
+                                              单选
+                                            </Option>
+                                            <Option key={2} value={2}>
+                                              多选
+                                            </Option>
+                                            <Option key={3} value={3}>
+                                              输入框
+                                            </Option>
+                                          </Select>
+                                          {/* 必选状态切换 */}
+                                          <Checkbox
+                                            disabled={type === 'detail'}
+                                            style={{ whiteSpace: 'nowrap' }}
+                                            checked={
+                                              attrGroup.attribute_group_type ===
+                                              1
+                                            }
+                                            onChange={(checked) => {
+                                              updateNestedValue(
+                                                [
+                                                  labelIndex,
+                                                  'label_info_attribute_groups',
+                                                  groupIndex,
+                                                  'attribute_group_type'
+                                                ],
+                                                checked ? 1 : 2
+                                              );
+                                            }}
+                                          >
+                                            必须标注
+                                          </Checkbox>
+                                          {attrGroup.attribute_group_class !==
+                                            3 && (
+                                            <IconPlus
+                                              style={{
+                                                cursor:
+                                                  type === 'detail'
+                                                    ? 'not-allowed'
+                                                    : 'pointer'
+                                              }}
+                                              className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
+                                              fontSize={30}
+                                              onClick={() => {
+                                                if (type !== 'detail') {
+                                                  addAttribute(
+                                                    labelIndex,
+                                                    groupIndex
+                                                  );
                                                 }
-                                                field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
-                                              >
-                                                <Input
-                                                  placeholder="展示在标注页面的名称"
-                                                  type="text"
-                                                  value={attr.attribute_name_en}
-                                                  onChange={(val) =>
-                                                    updateNestedValue(
-                                                      [
-                                                        labelIndex,
-                                                        'label_info_attribute_groups',
-                                                        groupIndex,
-                                                        'label_info_attribute',
-                                                        attrIndex,
-                                                        'attribute_name_en'
-                                                      ],
-                                                      val
-                                                    )
-                                                  }
-                                                />
-                                              </FormItem>
-                                              {attrGroup.label_info_attribute
-                                                .length > 1 && (
-                                                <IconDelete
-                                                  fontSize={25}
-                                                  onClick={() => {
-                                                    // 删除当前属性组
-                                                    deleteAttribute(
-                                                      labelIndex,
-                                                      groupIndex,
-                                                      attrIndex
-                                                    );
-                                                  }}
-                                                />
-                                              )}
-                                            </div>
+                                              }}
+                                            />
+                                          )}
+                                          {item?.label_info_attribute_groups
+                                            ?.length > 1 && (
+                                            <IconDelete
+                                              className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                              fontSize={30}
+                                              onClick={() => {
+                                                // 删除当前属性组
+                                                if (type !== 'detail') {
+                                                  deleteAttributeGroup(
+                                                    labelIndex,
+                                                    groupIndex
+                                                  );
+                                                }
+                                              }}
+                                            />
                                           )}
                                         </div>
-                                      )
-                                    )}
-                                  </div>
-                                );
-                              }
-                            )}
-                          <div className="btn-content-items">
-                            <Button
-                              disabled={type === 'detail'}
-                              className="btn-add-label btn-add"
-                              style={{ marginRight: 16 }}
-                              onClick={() => {
-                                addNewLabel();
-                              }}
-                            >
-                              <IconPlus />
-                              添加标签
-                            </Button>
-                            <Button
-                              disabled={type === 'detail'}
-                              className="btn-add-attribute btn-add"
-                              style={{ marginRight: 16 }}
-                              onClick={() => {
-                                addAttributeGroup(labelIndex);
-                              }}
-                            >
-                              <IconPlus />
-                              添加属性
-                            </Button>
-                            <div className="btn-option-content">
-                              <Dropdown
-                                position={'bottom'}
-                                droplist={
-                                  <Menu>
-                                    {templateData.map((TempItem, index) => (
+                                      </FormItem>
+                                      {/* 选项内容区域 */}
+                                      {attrGroup?.label_info_attribute.map(
+                                        (attr, attrIndex) => (
+                                          <div
+                                            key={attr.label_info_id}
+                                            className="attribute-group-info-item"
+                                          >
+                                            <div className="attribute-group-info-title">
+                                              {1 ===
+                                              attrGroup.attribute_group_class
+                                                ? '单选选项'
+                                                : 2 ===
+                                                    attrGroup.attribute_group_class
+                                                  ? '多选选项'
+                                                  : ''}
+                                            </div>
+                                            {(1 ===
+                                              attrGroup.attribute_group_class ||
+                                              2 ===
+                                                attrGroup.attribute_group_class) && (
+                                              <div className="attribute-info-item">
+                                                <FormItem
+                                                  field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`}
+                                                  rules={[
+                                                    {
+                                                      required: true,
+                                                      message: '请输入选项名称'
+                                                    }
+                                                  ]}
+                                                  label={`选项${attrIndex + 1}`}
+                                                >
+                                                  <Input
+                                                    type="text"
+                                                    value={
+                                                      attr.attribute_name_cn
+                                                    }
+                                                    onChange={(val) =>
+                                                      updateNestedValue(
+                                                        [
+                                                          labelIndex,
+                                                          'label_info_attribute_groups',
+                                                          groupIndex,
+                                                          'label_info_attribute',
+                                                          attrIndex,
+                                                          'attribute_name_cn'
+                                                        ],
+                                                        val
+                                                      )
+                                                    }
+                                                  />
+                                                </FormItem>
+                                                <FormItem
+                                                  label={
+                                                    <div>
+                                                      展示名称
+                                                      <Tooltip content="展示在标注页面的名称">
+                                                        <IconQuestionCircle />
+                                                      </Tooltip>
+                                                    </div>
+                                                  }
+                                                  field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
+                                                >
+                                                  <Input
+                                                    placeholder="展示在标注页面的名称"
+                                                    type="text"
+                                                    value={
+                                                      attr.attribute_name_en
+                                                    }
+                                                    onChange={(val) =>
+                                                      updateNestedValue(
+                                                        [
+                                                          labelIndex,
+                                                          'label_info_attribute_groups',
+                                                          groupIndex,
+                                                          'label_info_attribute',
+                                                          attrIndex,
+                                                          'attribute_name_en'
+                                                        ],
+                                                        val
+                                                      )
+                                                    }
+                                                  />
+                                                </FormItem>
+                                                {attrGroup.label_info_attribute
+                                                  .length > 1 && (
+                                                  <IconDelete
+                                                    className={`${type === 'detail' ? 'is-disabled' : ''}`}
+                                                    fontSize={25}
+                                                    onClick={() => {
+                                                      // 删除当前属性组
+                                                      if (type !== 'detail') {
+                                                        deleteAttribute(
+                                                          labelIndex,
+                                                          groupIndex,
+                                                          attrIndex
+                                                        );
+                                                      }
+                                                    }}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
+                            <div className="btn-content-items">
+                              <Button
+                                disabled={type === 'detail'}
+                                className="btn-add-label btn-add"
+                                style={{ marginRight: 16 }}
+                                onClick={() => {
+                                  addNewLabel();
+                                }}
+                              >
+                                <IconPlus />
+                                添加标签
+                              </Button>
+                              <Button
+                                disabled={type === 'detail'}
+                                className="btn-add-attribute btn-add"
+                                style={{ marginRight: 16 }}
+                                onClick={() => {
+                                  addAttributeGroup(labelIndex);
+                                }}
+                              >
+                                <IconPlus />
+                                添加属性
+                              </Button>
+                              <div className="btn-option-content">
+                                <Dropdown
+                                  position={'bottom'}
+                                  droplist={
+                                    <Menu>
+                                      {templateData.map((TempItem, index) => (
+                                        <Menu.Item
+                                          onClick={() => {
+                                            handleTemplateClick(
+                                              TempItem?.attribute_group_name,
+                                              labelIndex
+                                            );
+                                          }}
+                                          key={String(index)}
+                                        >
+                                          {TempItem.attribute_group_name}
+                                        </Menu.Item>
+                                      ))}
                                       <Menu.Item
                                         onClick={() => {
-                                          handleTemplateClick(
-                                            TempItem?.attribute_group_name,
-                                            labelIndex
-                                          );
+                                          setActiveTab(2);
                                         }}
-                                        key={String(index)}
+                                        key="2"
                                       >
-                                        {TempItem.attribute_group_name}
+                                        创建属性模版
                                       </Menu.Item>
-                                    ))}
-                                    <Menu.Item
-                                      onClick={() => {
-                                        setActiveTab(2);
-                                      }}
-                                      key="2"
-                                    >
-                                      创建属性模版
-                                    </Menu.Item>
-                                  </Menu>
-                                }
-                              >
-                                <Button
-                                  disabled={type === 'detail'}
-                                  type="secondary"
+                                    </Menu>
+                                  }
                                 >
-                                  <IconPlus />
-                                  添加模版属性
-                                </Button>
-                              </Dropdown>
+                                  <Button
+                                    disabled={type === 'detail'}
+                                    type="secondary"
+                                  >
+                                    <IconPlus />
+                                    添加模版属性
+                                  </Button>
+                                </Dropdown>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                   {activeTab ===
@@ -1332,17 +1396,19 @@ export default function RequirementDetail() {
                                 )}
                                 {
                                   <IconDelete
-                                    className="ml-2"
+                                    className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
                                     fontSize={30}
                                     onClick={() => {
                                       // 删除当前属性组
-                                      setTemplateData(
-                                        templateData.filter(
-                                          (g) =>
-                                            g.attribute_id !==
-                                            attrGroup.attribute_id
-                                        )
-                                      );
+                                      if (type !== 'detail') {
+                                        setTemplateData(
+                                          templateData.filter(
+                                            (g) =>
+                                              g.attribute_id !==
+                                              attrGroup.attribute_id
+                                          )
+                                        );
+                                      }
                                     }}
                                   />
                                 }
@@ -1415,25 +1481,28 @@ export default function RequirementDetail() {
                                       {attrGroup.label_info_attribute.length >
                                         1 && (
                                         <IconDelete
+                                          className={`${type === 'detail' ? 'is-disabled' : ''}`}
                                           fontSize={25}
                                           onClick={() => {
                                             // 删除当前属性组中的选项
-                                            setTemplateData(
-                                              templateData.map((label) =>
-                                                label.attribute_id ===
-                                                attrGroup.attribute_id
-                                                  ? {
-                                                      ...label,
-                                                      label_info_attribute:
-                                                        label.label_info_attribute.filter(
-                                                          (g) =>
-                                                            g.label_info_id !==
-                                                            attr.label_info_id
-                                                        )
-                                                    }
-                                                  : label
-                                              )
-                                            );
+                                            if (type !== 'detail') {
+                                              setTemplateData(
+                                                templateData.map((label) =>
+                                                  label.attribute_id ===
+                                                  attrGroup.attribute_id
+                                                    ? {
+                                                        ...label,
+                                                        label_info_attribute:
+                                                          label.label_info_attribute.filter(
+                                                            (g) =>
+                                                              g.label_info_id !==
+                                                              attr.label_info_id
+                                                          )
+                                                      }
+                                                    : label
+                                                )
+                                              );
+                                            }
                                           }}
                                         />
                                       )}
@@ -1447,6 +1516,7 @@ export default function RequirementDetail() {
                       ))}
                       <Button
                         className="add-template-btn"
+                        disabled={type === 'detail'}
                         onClick={() => {
                           setTemplateData([
                             ...templateData,
@@ -1475,13 +1545,17 @@ export default function RequirementDetail() {
                 </div>
               )}
               {annotationTypeVal === AnnotationTypeStatus.TEXT &&
-                annotationTypeContentVal === AnnotationChildType.ENTITY && (
-                  <TextSubstanceComponent type="detail" />
+                annotationTypeContentVal ===
+                  AnnotationTypeContentCode.ENTITY && (
+                  <TextSubstanceComponent
+                    type={type}
+                    getDetailObj={getDetailObj}
+                  />
                 )}
               {annotationTypeVal === AnnotationTypeStatus.TEXT &&
                 annotationTypeContentVal ===
-                  AnnotationChildType.TEXT_CLASSIFICATION && (
-                  <Classify type="detail" />
+                  AnnotationTypeContentCode.TEXT_CLASSIFICATION && (
+                  <Classify type={type} getDetailObj={getDetailObj} />
                 )}
             </FormItem>
           </Form>
@@ -1510,8 +1584,8 @@ export default function RequirementDetail() {
                   setTaskAssignData([]);
                 }}
               >
-                <Radio value={1}>部门</Radio>
-                <Radio value={2}>个人</Radio>
+                <Radio value={2}>部门</Radio>
+                <Radio value={1}>个人</Radio>
               </RadioGroup>
             </FormItem>
             <FormItem
@@ -1521,13 +1595,14 @@ export default function RequirementDetail() {
                   message: '请选择类型'
                 }
               ]}
-              label={taskTypeVal === 1 ? '选择部门' : '选择个人'}
+              label={taskTypeVal === 2 ? '选择部门' : '选择个人'}
               disabled={type === 'detail'}
             >
               <div className="btn-content-text">
                 <Button
+                  disabled={type === 'detail'}
                   onClick={() => {
-                    taskTypeVal === 1
+                    taskTypeVal === 2
                       ? setDepartmentModalVisible(true)
                       : setIndividualModalVisible(true);
                   }}
@@ -1535,7 +1610,10 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="text-content">
-                  已选：{taskAssignData.length}
+                  已选：
+                  {taskAssignData.length ||
+                    getDetailObj?.label_operate?.[0].user_id?.length ||
+                    getDetailObj?.label_operate?.[0].org_id?.length}
                 </div>
               </div>
             </FormItem>
@@ -1544,7 +1622,7 @@ export default function RequirementDetail() {
             ) : null}
           </Form>
         </div>
-        {taskTypeVal === 1 ? (
+        {taskTypeVal === 2 ? (
           <DepartmentModal
             visible={departmentModalVisible}
             onClose={() => {
@@ -1568,6 +1646,7 @@ export default function RequirementDetail() {
             onClick={() => {
               stepNext();
             }}
+            disabled={type === 'detail'}
             style={{ marginRight: 8 }}
             type="primary"
           >
