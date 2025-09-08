@@ -39,10 +39,10 @@ export interface UseEditorReturn {
   runDuration: number;
   lastAutoSave: string;
   execid: string;
-  runResult: RunResult[];
+  size: number;
   runLog: string;
-  size: string | number;
-  setSize: (size: string | number) => void;
+  runResult: RunResult[];
+  currentFileId?: string;
 
   // 表格数据处理
   columns: Array<{
@@ -54,6 +54,7 @@ export interface UseEditorReturn {
   data: Array<Record<string, any> & { key: string }>;
 
   // 编辑器操作
+  setSize: (size: number) => void;
   handleContentChange: (value: string) => void;
   handleRunCode: () => Promise<void>;
   handleStopRunCode: () => void;
@@ -74,7 +75,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
   const [execid, setExecid] = useState<string>('');
   const [runResult, setRunResult] = useState<RunResult[]>([]);
-  const [size, setSize] = useState<string | number>(100);
+  const [size, setSize] = useState<number>(100);
   const [runLog, setRunLog] = useState<string>('');
 
   // 动态生成表格列
@@ -375,15 +376,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     lastAutoSave,
     execid,
     runResult,
-    runLog,
     size,
-    setSize,
+    runLog,
+    currentFileId: currentFile?.fileId,
 
     // 表格数据处理
     columns,
     data,
 
     // 操作
+    setSize,
     handleContentChange,
     handleRunCode,
     handleStopRunCode

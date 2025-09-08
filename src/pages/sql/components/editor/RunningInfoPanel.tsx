@@ -44,15 +44,19 @@ const RunningInfoPanel: React.FC = memo(() => {
     runStatus,
     runDuration,
     runStartTime,
-    runLog
+    runLog,
+    size,
+    setSize,
+    currentFileId
   } = useEditorContext();
-
-  console.log('RunningInfoPanel render runResult:', runResult);
 
   // 获取store中的方法
   const showDatasetForm = useSqlIndexStore((state) => state.showDatasetForm);
   const showDatasetVersionForm = useSqlIndexStore(
     (state) => state.showDatasetVersionForm
+  );
+  const setCurrentRunResult = useSqlIndexStore(
+    (state) => state.setCurrentRunResult
   );
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
@@ -74,6 +78,9 @@ const RunningInfoPanel: React.FC = memo(() => {
 
   // 处理菜单点击事件
   const handleMenuClick = (key: string) => {
+    setCurrentRunResult &&
+      setCurrentRunResult({ columns: columns, script_id: currentFileId });
+
     if (key === '1') {
       showDatasetForm?.();
     } else if (key === '2') {
