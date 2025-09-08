@@ -16,6 +16,8 @@ export interface SqlIndexStore {
   datasetVersionFormVisible?: boolean;
   /** 选中的数据卷 ID */
   selectedVolumnId?: string | number | null;
+  /** 选中的运行结果 ID */
+  currentRunResult?: null | {};
 
   /** 动作 */
   showVolumnDetail?: () => void;
@@ -33,6 +35,7 @@ export interface SqlIndexStore {
   showDatasetVersionForm?: () => void;
   closeDatasetVersionForm?: () => void;
   setSelectedVolumnId?: (id: string | number) => void;
+  setCurrentRunResult?: (value: {}) => void;
 }
 
 export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
@@ -88,5 +91,8 @@ export const useSqlIndexStore = create<SqlIndexStore>((set, get) => ({
   },
   setSelectedVolumnId: (id: string | number) => {
     set({ selectedVolumnId: id });
+  },
+  setCurrentRunResult: (value: {}) => {
+    set({ currentRunResult: value });
   }
 }));
