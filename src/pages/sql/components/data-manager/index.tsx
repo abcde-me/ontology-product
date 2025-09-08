@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Message, Typography } from '@arco-design/web-react';
 import DataDirectoryTree from '@/components/data-directory-tree';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
 import { Db } from '@/api/dataCatalog';
 import { DataDirectoryTreeFrom } from '@/components/data-directory-tree/types';
 import ModalDbDetail from './ModalDbDetail';
+import copy from 'copy-to-clipboard';
 
 const { Title } = Typography;
 
-const PythonTabContent: React.FC<{}> = () => {
+interface DataManagerProps {
+  onInsertContent?: (content: string) => void;
+  getIsEditorFocused?: () => boolean;
+}
+
+const PythonTabContent: React.FC<DataManagerProps> = ({
+  onInsertContent,
+  getIsEditorFocused
+}) => {
   const [dbDetailVisible, setDbDetailVisible] = useState(false);
   const [selectedDbId, setSelectedDbId] = useState('');
 
@@ -19,9 +28,24 @@ const PythonTabContent: React.FC<{}> = () => {
 
   // 处理数据集插入
   const handleInsertDataset = (dataset: DatasetListItem) => {
-    console.log('数据集插入:', dataset);
-    // 这里可以添加插入数据集的逻辑
-    // 比如将数据集添加到代码编辑器中或执行其他插入操作
+    const isEditorFocused = getIsEditorFocused?.() ?? false;
+    console.log(
+      '数据集插入:',
+      dataset,
+      'isEditorFocused:',
+      isEditorFocused,
+      'onInsertContent:',
+      onInsertContent
+    );
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(dataset?.name ?? '');
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(dataset?.name ?? '');
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
   // 处理数据库详情查看
@@ -33,9 +57,17 @@ const PythonTabContent: React.FC<{}> = () => {
 
   // 处理数据库插入
   const handleDbInsert = (database: Db) => {
-    console.log('数据库插入:', database);
-    // 这里可以添加插入数据库的逻辑
-    // 比如将数据库添加到代码编辑器中或执行其他插入操作
+    const isEditorFocused = getIsEditorFocused?.() ?? false;
+    console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(database?.name ?? '');
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(database?.name ?? '');
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
   return (
@@ -53,6 +85,7 @@ const PythonTabContent: React.FC<{}> = () => {
           onViewDbDetail={handleViewDbDetail}
           // 数据库插入
           onDbInsert={handleDbInsert}
+          getIsEditorFocused={getIsEditorFocused}
         />
       </div>
 

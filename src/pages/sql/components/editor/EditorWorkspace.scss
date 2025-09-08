@@ -1,5 +1,6 @@
-.notebook-content {
+.sql-content {
   height: 100%;
+  min-height: calc(100vh - 120px); // 确保最小高度充满屏幕
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
@@ -10,7 +11,7 @@
   }
 
   // 顶部工具栏
-  .notebook-toolbar {
+  .sql-toolbar {
     height: 48px;
     background-color: #fff;
     border-bottom: 1px solid #e2e8f0;
@@ -63,6 +64,7 @@
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     overflow: hidden;
+    position: relative;
 
     // CodeMirror 编辑器样式
     .code-editor {
