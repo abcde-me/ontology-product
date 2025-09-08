@@ -14,18 +14,14 @@ import {
   Message,
   Empty
 } from '@arco-design/web-react';
-import {
-  getCatalogList,
-  getSourceDataFileList,
-  getSourceFileTypeList
-} from '@/api/dataCatalog';
+import { getCatalogList } from '@/api/dataCatalog';
 import { format } from 'date-fns';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { OperationColumn } from '@ccf2e/arco-material';
-import getFileIcon from '@/components/file-icon';
+import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import './DetailModal.scss';
 
 interface DataSourceModalProps {
+  fileType: Record<number, string[]>;
   visible: boolean;
   onClose: () => void;
   title?: string;
@@ -47,6 +43,7 @@ interface TreeNodeType {
   rawData?: any; // 保存原始数据引用
 }
 const DataSourceModal: React.FC<DataSourceModalProps> = ({
+  fileType,
   visible,
   onClose,
   title = '数据源',
@@ -57,7 +54,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
-  const [activeTab, setActiveTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
@@ -70,9 +66,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [total, setTotal] = useState(10);
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const handleTabChange = (key: string) => {
-    setActiveTab(key);
-  };
+  const [tableLoading, settableLoading] = useState(false);
   const time = Form.useWatch('time', form);
   // 取树的内容 格式化
   const transformData = (originalSrc) => {
@@ -103,7 +97,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     let newTreeData: TreeNodeType[] = [];
     try {
       getCatalogList({
-        root_type: activeTab === 'src' ? 1 : 2
+        root_type: 1
       }).then((res) => {
         if (res.status !== 200) {
           return;
@@ -114,7 +108,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 allowClick: false,
                 title: item.name,
                 key: item.id,
-                children: item.children.数据卷.map((items, index) => {
+                children: item?.children?.数据卷?.map((items, index) => {
                   return {
                     title: '数据卷',
                     key: `volume-${items.id}-${index}`,
@@ -135,7 +129,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {
       console.log(err, 'err');
     }
-  }, [activeTab, visible]);
+  }, [visible]);
 
   // 树的内容
   const renderTreeContent = () => {
@@ -148,7 +142,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             // checkStrictly={checkStrictly}
             onSelect={(value) => {
               setCurrent(1);
-              setPageSize(10);
+              setPageSize(20);
               setCheckedKeys(value);
             }}
           />
@@ -209,91 +203,34 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       />
     );
   };
-  useEffect(() => {
-    getSourceFileTypeList({
-      id: checkedKeys
-    }).then((result) => {
-      setSourceFileTypeFilters(result);
-    });
-  }, [checkedKeys]);
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      width: 80
+      title: '载入开始时间',
+      dataIndex: 'start_time',
+      width: 180,
+      sorter: true,
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (_, record) => formatDateTime(record.start_time)
     },
     {
-      title: '文件名',
-      dataIndex: 'file_name',
-      ellipsis: true,
-      width: 200,
-      render: (_, record) => (
-        // 产品需求：文件名提示常驻
-        <Popover content={record.file_sub_path}>
-          <span>{record.file_name}</span>
-        </Popover>
-      )
+      title: '载入开始时间',
+      dataIndex: 'end_time',
+      width: 180,
+      sorter: true,
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (_, record) => formatDateTime(record.end_time)
     },
     {
-      title: '文件类型',
-      dataIndex: 'file_type',
-      width: 120,
-      filters: sourceFileTypeFilters,
-      render: (_, record) => (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          {getFileIcon(record.file_type)}
-          <span>{record.file_type}</span>
-        </div>
-      )
-    },
-    {
-      title: '文件大小',
-      width: 120,
-      dataIndex: 'file_size',
-      render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
-    },
-    {
-      title: '上传用户',
-      dataIndex: 'upload_user',
+      title: '数据量',
+      dataIndex: 'load_num',
       ellipsis: true,
       width: 100
     },
     {
-      title: '载入开始时间',
-      dataIndex: 'task_load_start_time',
-      width: 180,
-      sorter: true,
-
-      // sortOrder: 'ascend',
-      // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.task_load_start_time)
-    },
-    {
-      title: '连接器名称',
-      dataIndex: 'connector_name',
+      title: '创建人',
+      dataIndex: 'upload_user',
       ellipsis: true,
-      width: 160,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={record.connector_name}
-          isEdit={false}
-          preferTypography
-        />
-      )
-    },
-    {
-      title: '操作',
-      dataIndex: 'actions',
-      fixed: 'right' as const,
-      width: 88,
-      render: (_, record) => renderActionColumn(_, record)
+      width: 100
     }
   ];
   // 获取当前年份
@@ -333,26 +270,30 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     const sourceParams: any = {
       page: current,
       page_size: pageSize,
-      file_name: '',
-      data_path_id: Number(checkedKeys) // 优先使用选中ID 后期改成selectedKey
-      // start: startTime, //后期改成startTime
-      // end: endTime, //后期改成endTime
-      // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
+      data_path_id: Number(checkedKeys), // 优先使用选中ID 后期改成selectedKey
+      start: dateRange[0], //后期改成startTime
+      end: dateRange[1], //后期改成endTime
+      file_type: fileType, // 使用筛选条件中的文件类型
+      sort_by: 'start_time',
+      sort: 'asc'
     };
-    const res = await getSourceDataFileList(sourceParams);
+    const res = await getAnnotationTabledData(sourceParams);
     if (res.status === 200) {
       setTableData(res?.data?.items);
       setCurrent(res?.data?.page);
       setPageSize(res?.data?.page_size);
       setTotal(res?.data?.total);
+      settableLoading(false);
     }
   };
   useEffect(() => {
+    settableLoading(true);
     getTableData();
-  }, [checkedKeys, activeTab, current, pageSize]);
+  }, [checkedKeys, current, pageSize]);
   const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
   // 处理日期范围变化
   const handleDateChange = (value) => {
+    console.log(value, ' =====');
     setDateRange(value);
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
@@ -426,6 +367,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             rowKey="id"
             columns={columns}
             data={tableData}
+            loading={tableLoading}
             pagination={false}
             rowSelection={{
               selectedRowKeys: selectedRowKeys,

@@ -14,6 +14,7 @@ import {
 } from '@arco-design/web-react/icon';
 import './TextEntity.scss';
 import { uuid } from '@/models/utils';
+import { getRandomHexColorStrict } from '../common';
 // 实体/实体关系 - 组件
 const btnList = [
   {
@@ -25,52 +26,6 @@ const btnList = [
     label: '关系标签'
   }
 ];
-
-// "entity_relations": [ //文本标签-实体关系
-//     {
-//         "order_num": 1,
-//         "relation_name_cn": "实体关系显示名称",
-//         "relation_name_en": "实体关系存储名称",
-//         "start_entity_labels": ["red", "green"],//标签的醋存储名称
-//         "target_entity_labels": ["blue", "black"],
-//         "colour": "AAAAA"
-//     },
-//     {
-//         "order_num": 1,
-//         "relation_name_cn": "实体关系显示名称2",
-//         "relation_name_en": "实体关系存储名称2",
-//         "start_entity_labels": ["red", "green"],
-//         "target_entity_labels": ["blue", "black"],
-//         "colour": "BBBBB"
-//     }
-// ],
-
-// "labels": [//配置标签
-//   {
-//     "order_num": 1// 排序
-//             "label_name_cn": "",//展示名称
-//     "label_name_en": "",//存储名称
-//     "label_shape": 1//标注形状，点1，线2，正方形3，多边形4
-//             "label_colour": ""//标签颜色（如#FFFFFF）
-//             "label_info_attribute_groups": [
-//       {
-//         "order_num": 1// 排序
-//                     "attribute_group_name": "",//属性组名称
-//         "attribute_group_class": 1,//1单选/2多选/3输入框
-//         "attribute_group_type": 1,//1必选/2非必选
-//         "label_info_attribute": [
-//           {
-//             "order_num": 1,//排序
-//             "attribute_name_cn": ""//属性中文名称(展示名称)
-//                         "attribute_name_en": ""//属性英文名称(存储名称)
-//                         "input_type": 1//输入类型：1选项，2输入框
-//           }
-//         ]
-
-//       }
-//     ]
-//   }
-// ],
 interface TextSubstanceComponentProps {
   type: 'add' | 'detail';
   // publishData: any,
@@ -96,15 +51,15 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     {
       id: uuid(),
       order_num: 1,
-      relation_name_cn: '实体关系显示名称',
-      relation_name_en: '实体关系存储名称',
-      start_entity_labels: ['red', 'green'], //标签的醋存储名称
-      target_entity_labels: ['blue', 'black'],
-      colour: '#000000'
+      relation_name_cn: '',
+      relation_name_en: '',
+      start_entity_labels: [], //标签的醋存储名称
+      target_entity_labels: [],
+      colour: getRandomHexColorStrict()
     }
   ]);
   // 选中的标签类型
-  const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(2);
+  const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
     const newData = [...entityRelations];
@@ -334,8 +289,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           >
                             {entityRelations.map((option, index) => (
                               <Option
+                                // 禁用内容为空标签
+                                disabled={!option.label_name_cn}
                                 key={option.label_name_cn}
-                                disabled={index === 4}
                                 value={option.label_name_cn}
                               >
                                 {option.label_name_cn}
@@ -359,8 +315,8 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           >
                             {entityRelations.map((option, index) => (
                               <Option
+                                disabled={!option.label_name_cn}
                                 key={option.label_name_cn}
-                                disabled={index === 4}
                                 value={option.label_name_cn}
                               >
                                 {option.label_name_cn}
@@ -388,7 +344,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     relation_name_en: '',
                     start_entity_labels: [],
                     target_entity_labels: [],
-                    colour: '#0000000'
+                    colour: getRandomHexColorStrict()
                   }
                 ]);
               }}

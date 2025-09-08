@@ -28,7 +28,8 @@ import {
   GetExportDatasetListRes,
   GetExportJsonlReq,
   GetExportJsonlRes,
-  GetExportFile
+  GetExportFile,
+  StopRunPythonItemReq
 } from '@/types/pythonApi';
 
 // 获取数据目录列表
@@ -418,6 +419,17 @@ export async function getRunResult(
   //     run_end_time: '2025-08-18 15:00'
   //   }
   // });
+}
+
+// 停止运行
+export async function stopRunPythonItem(
+  id: string,
+  params: StopRunPythonItemReq
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.pythonRunCancelApi({ pyspark_id: id })
+    .put(params)
+    .inRegion()
+    .do();
 }
 
 // 获取日志

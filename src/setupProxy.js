@@ -49,7 +49,7 @@ module.exports = function (app) {
         // 蜂巢工区可以不通过VPN访问
         // target: 'http://10.56.56.6:30084/api/auth/v1',
         // 需要通过VPN访问
-        target: 'http://61.182.98.8:38055/api/aimdp/v1',
+        target: 'http://10.1.4.73:31183/api/aimdp/v1',
         changeOrigin: true,
         secure: false,
         logger: console,

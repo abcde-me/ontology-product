@@ -651,7 +651,7 @@ export async function updateSqlScript(
   id: number,
   params: updateSqlScriptParams
 ): Promise<ApiRes<CreateSqlScriptData>> {
-  return await UAPI.RES.sqlSaveApi({ scriptId: id })
+  return await UAPI.RES.sqlSaveApi({ script_id: id })
     .put(params)
     .inRegion()
     .do();

@@ -34,7 +34,7 @@ export default function Requirement() {
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('图像标注需求');
+  const [searchValue, setSearchValue] = useState('');
   // 初始化需求列表数据
   const [requirementData, setRequirementData] = useState([]);
   // 当前的第几页
@@ -89,7 +89,7 @@ export default function Requirement() {
         }
       };
       const res = await getAnnotationList(params);
-      if (res.code === 1 && res.data) {
+      if (res.code === 0 && res.data) {
         setRequirementData(res.data.result || []);
         setCurrent(res.data.page);
         setPageSize(res.data.page_size);
@@ -320,7 +320,7 @@ export default function Requirement() {
               onClear={() => {
                 setCurrent(1);
                 setPageSize(10);
-                setSearchValue('图像标注需求');
+                setSearchValue('');
                 setIsClickClear(true);
               }}
               onPressEnter={() => {
