@@ -91,7 +91,7 @@ const EditorWorkspaceContent: React.FC = memo(() => {
                   <IconPlayArrow className="mr-[4px]" />
                 )
               }
-              disabled={editorContent.trim() === ''}
+              disabled={editorContent?.trim() === ''}
               onClick={handleRunClick}
               className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
             >
