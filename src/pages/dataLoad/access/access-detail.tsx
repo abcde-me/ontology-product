@@ -1,10 +1,10 @@
-import { Breadcrumb, Grid, Input } from '@arco-design/web-react';
+import { Breadcrumb, Grid, Input, Message } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconHome } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
-import { getLoadRecord } from '@/api/loadApi';
+import { getLoadRecord, reTryLoad } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
@@ -40,9 +40,19 @@ const AccessDetail = () => {
       setLoading(false);
     }
   };
-  const reTry = (id: string) => {
+  const reTry = async (id: string) => {
+    console.log('重试的ID666666666666666666666666666', id);
     console.log('重试的ID', id);
-    //调取重试接口
+    const res = await reTryLoad({
+      execution_id: id,
+      task_id: arressDetail?.task_id
+    });
+    if (res.code == '' && res.status == 200) {
+      getDetail();
+      Message.success('操作成功');
+    } else {
+      Message.error(res.message);
+    }
   };
   useEffect(() => {
     getDetail();

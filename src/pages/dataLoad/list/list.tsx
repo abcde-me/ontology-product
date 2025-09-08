@@ -74,7 +74,7 @@ enum ConnectorType {
 }
 const TYPE_CONFIG = {
   [ConnectorType.S3]: {
-    text: '对象存储',
+    text: '对象存储(S3)',
     value: 's3'
   },
   [ConnectorType.HDFS]: {

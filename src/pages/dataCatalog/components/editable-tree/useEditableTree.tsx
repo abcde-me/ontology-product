@@ -56,8 +56,7 @@ export function useEditableTree({ catalogTreeStore }) {
       const { children, key, ...rest } = item;
       // 确保数据库类型的节点能正确渲染其子节点
       const hasChildren = children && children.length > 0;
-      const isExpandable =
-        hasChildren || (item.type === 'db' && !item.isLastLeaf);
+      const isExpandable = hasChildren;
 
       return (
         <Tree.Node key={key} {...rest} dataRef={item} isLeaf={!isExpandable}>
@@ -87,10 +86,16 @@ export function useEditableTree({ catalogTreeStore }) {
   const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
     console.log(node, '看看看什么是node');
 
+    // 生成key，避免同级节点key冲突
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    const nodeType = node?.dataRef?.type || 'catalog';
+    const parentId = node?.dataRef?.parent_id || 'root';
+
     const newNode: TreeDataType = {
       title: name,
-      key: `${node?.dataRef?.type || 'catalog'}-${Date.now()}`,
-      type: CatalogTypeEnum[node?.dataRef?.type || 'catalog'],
+      key: `${nodeType}-${parentId}-${timestamp}-${random}`,
+      type: CatalogTypeEnum[nodeType],
       isLastLeaf: node ? true : false,
       showInput: true,
       isAdd: true
@@ -311,11 +316,24 @@ export function useEditableTree({ catalogTreeStore }) {
       return item;
     });
 
+    // 只展开当前操作的节点路径，避免展开同级节点
+    const newExpandedKeys = [...expandedKeys];
+    if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
+      newExpandedKeys.push(dataRef.key);
+    }
+    // 确保父节点也是展开状态
+    if (
+      node.pathParentKeys?.[0] &&
+      !newExpandedKeys.includes(node.pathParentKeys[0])
+    ) {
+      newExpandedKeys.push(node.pathParentKeys[0]);
+    }
+
     catalogTreeStore.setState({
       inputValue: name,
       defaultName: name,
       treeData: cachTreeData,
-      expandedKeys: [...new Set([...expandedKeys, dataRef?.key])]
+      expandedKeys: newExpandedKeys
     });
     focusAndSelectInput();
   };
@@ -553,9 +571,7 @@ export function useEditableTree({ catalogTreeStore }) {
           <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
-            ) : dataRef?.type ===
-              CatalogTypeEnum.db ? // <IconCaretDown style={{ fontSize: '12px' }} />
-            null : (
+            ) : dataRef?.type === CatalogTypeEnum.db ? null : ( // <IconCaretDown style={{ fontSize: '12px' }} />
               <IconArchive className="text-base" />
             )}
           </div>

@@ -494,7 +494,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         selectedKeys[0]
       );
       const fullPath = pathArray
-        ? pathArray.join('/') + '/' + tableNameNames //修改为拼接表名
+        ? pathArray.join('/') +
+          (dataSourceType !== 'local' ? '/' + tableNameNames : '') // 非本地文件类型才拼接表名
         : nodeData?.name || '';
 
       // 传递路径和节点ID

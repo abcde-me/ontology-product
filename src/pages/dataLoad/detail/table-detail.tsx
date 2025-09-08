@@ -235,6 +235,7 @@ const TableDetail = (props) => {
       task_id: props.taskId
     });
     if (res.code == '' && res.status == 200) {
+      setData(props.datalist);
       Message.success('操作成功');
     } else {
       Message.error(res.message);
