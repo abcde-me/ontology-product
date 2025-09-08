@@ -114,22 +114,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
               key={tab.key}
               title={tab.title}
               closable={fileTabs.length > 1}
+              className="tab-pane-content"
             >
               {/* 标签页内容为空，实际内容在工作区 */}
-            </TabPane>
-          ))}
-        </Tabs>
-
-        {/* 工作区 - 使用条件渲染保持组件实例 */}
-        <div className="main-workspace">
-          {fileTabs.map((tab) => (
-            <div
-              key={tab.key}
-              className={`tab-content ${tab.key === activeTab ? 'active' : 'hidden'}`}
-              style={{
-                display: tab.key === activeTab ? 'block' : 'none'
-              }}
-            >
               <EditorWorkspace
                 key={tab.key} // 使用tab.key作为key，确保每个tab有独立的组件实例
                 content={tab.content}
@@ -139,9 +126,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
                 tabKey={tab.key}
                 onActiveUpdate={handleActiveUpdate}
               />
-            </div>
+            </TabPane>
           ))}
-        </div>
+        </Tabs>
       </div>
     );
   }
