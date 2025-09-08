@@ -153,7 +153,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       currentFileId,
       tabKey: tabKey,
       onActiveUpdate: onActiveUpdate,
-      hasRun
+      hasRun,
+      fileName
     };
 
     return (

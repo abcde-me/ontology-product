@@ -19,6 +19,7 @@ export interface UseEditorOptions {
   tabKey?: string;
   onActiveUpdate?: (tabData: any) => void;
   hasRun?: boolean;
+  fileName?: string;
 }
 
 export interface UseEditorReturn {
@@ -54,7 +55,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     currentFileId,
     onActiveUpdate,
     tabKey,
-    hasRun
+    hasRun,
+    fileName
   } = options;
 
   const userInfo = useUserInfo();
@@ -121,14 +123,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       // 更新脚本内容
       onActiveUpdate && onActiveUpdate({ key: tabKey, content });
 
-      console.log('执行到这里了吗？', content);
-
       const fileId = currentFileIdRef.current;
       if (!fileId) {
         try {
           const res = await createSqlScript({
             uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name: tabKey ?? '',
+            script_name: fileName ?? '',
             script_content: content
           });
 
@@ -154,7 +154,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         const res = await updateSqlScript(Number(fileId), {
           uid: userInfo?.id ?? '',
-          script_name: tabKey ?? '',
+          script_name: fileName ?? '',
           script_content: content
         });
 
@@ -203,6 +203,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     setRunStatus(RunningStatus.RUNNING);
+    setRunStartTime(new Date());
     setRunDuration(0);
 
     try {
@@ -214,6 +215,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       }
 
       setExecid(res.data.script_execid);
+      setRunLog(res.data.warning_msg);
     } catch (error) {
       setRunStatus(RunningStatus.FAILED);
     }
