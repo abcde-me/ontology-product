@@ -1,7 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { openPythonItem } from '@/api/pyspark';
-import { OpenPythonItemRes } from '@/types/pythonApi';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 
 // 文件标签页类型
@@ -15,20 +13,14 @@ export interface FileTab {
 
 // 文件状态类型
 export interface FileState {
-  currentFileId: string | null;
   fileTabs: FileTab[];
   activeTab: string;
-  isLoading: boolean;
-  error: Error | null;
 }
 
 // 初始状态
 const initialState: FileState = {
-  currentFileId: null,
   fileTabs: [],
-  activeTab: '',
-  isLoading: false,
-  error: null
+  activeTab: ''
 };
 
 export const useTabManager = () => {
@@ -37,68 +29,35 @@ export const useTabManager = () => {
   // DirectoryTree 的 ref，用于调用其新建功能
   const directoryTreeRef = useRef<DirectoryTreeRef>(null);
 
-  // 文件操作
+  // 打开文件 - 只创建或切换到标签页，不请求文件内容
   const openFile = useCallback(
-    async (fileId: string, fileName?: string) => {
-      try {
-        setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
+    (fileId: string, fileName?: string) => {
+      const newTabKey = `file-${fileId}`;
+      const existingTabIndex = fileState.fileTabs.findIndex(
+        (tab) => tab.fileId === fileId
+      );
 
-        const response = await openPythonItem(fileId);
-
-        if (response.status !== 200 || !response.data) {
-          Message.error(response?.message ?? '打开文件失败');
-          return;
-        }
-
-        const fileData: OpenPythonItemRes = response.data;
-
-        // 创建或更新标签页
-        const newTabKey = `file-${fileId}`;
-        const existingTabIndex = fileState.fileTabs.findIndex(
-          (tab) => tab.fileId === fileId
-        );
-
-        let updatedTabs: FileTab[];
-        if (existingTabIndex >= 0) {
-          // 更新现有标签页
-          updatedTabs = fileState.fileTabs.map((tab) =>
-            tab.key === newTabKey
-              ? {
-                  ...tab,
-                  content: fileData.data,
-                  lastModified: new Date().toISOString()
-                }
-              : tab
-          );
-        } else {
-          // 创建新标签页
-          const newTab = {
-            key: newTabKey,
-            title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
-            content: fileData.data,
-            fileId: fileId,
-            lastModified: new Date().toISOString()
-          };
-          updatedTabs = [...fileState.fileTabs, newTab];
-        }
-
-        setFileState((prev) => ({
-          ...prev,
-          fileTabs: updatedTabs,
-          currentFileId: fileId,
-          activeTab: newTabKey,
-          isLoading: false
-        }));
-      } catch (error) {
-        const errorObj =
-          error instanceof Error ? error : new Error('打开文件失败');
-        setFileState((prev) => ({
-          ...prev,
-          error: errorObj,
-          isLoading: false
-        }));
-        Message.error('打开文件失败');
+      let updatedTabs: FileTab[];
+      if (existingTabIndex >= 0) {
+        // 如果标签页已存在，只切换活动标签页
+        updatedTabs = fileState.fileTabs;
+      } else {
+        // 创建新标签页
+        const newTab = {
+          key: newTabKey,
+          title: fileName || `文件 ${fileId}`,
+          content: '', // 初始内容为空，由 useEditor 负责加载
+          fileId: fileId,
+          lastModified: new Date().toISOString()
+        };
+        updatedTabs = [...fileState.fileTabs, newTab];
       }
+
+      setFileState((prev) => ({
+        ...prev,
+        fileTabs: updatedTabs,
+        activeTab: newTabKey
+      }));
     },
     [fileState.fileTabs]
   );
@@ -158,7 +117,23 @@ export const useTabManager = () => {
   );
 
   const switchTab = useCallback((key: string) => {
-    setFileState((prev) => ({ ...prev, activeTab: key }));
+    // 只切换活动标签页
+    setFileState((prev) => ({
+      ...prev,
+      activeTab: key
+    }));
+  }, []);
+
+  // 更新标签页内容
+  const updateTabContent = useCallback((tabKey: string, content: string) => {
+    setFileState((prev) => ({
+      ...prev,
+      fileTabs: prev.fileTabs.map((tab) =>
+        tab.key === tabKey
+          ? { ...tab, content, lastModified: new Date().toISOString() }
+          : tab
+      )
+    }));
   }, []);
 
   // 从 FileManager 获取创建文件的函数
@@ -190,6 +165,7 @@ export const useTabManager = () => {
     addTab,
     removeTab,
     switchTab,
+    updateTabContent,
     handleCreate
   };
 };

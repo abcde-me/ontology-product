@@ -285,7 +285,7 @@ export interface GetSourceCatalogFileListParams {
   /**
    * 排序方式：升序"asc"或降序"desc"
    */
-  sort: 'asc' | 'desc';
+  sort?: 'asc' | 'desc';
 }
 
 export interface GetSourceCatalogFileListItem {
@@ -358,40 +358,40 @@ export interface GetSourceCatalogFileListRes {
   page_size: number;
 }
 
+// 源数据目录文件列表
 export async function getSourceCatalogFileList(
   param: GetSourceCatalogFileListParams
 ): Promise<ApiRes<GetSourceCatalogFileListRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.getLoadTaskFiles({}).get(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      items: [
-        {
-          id: 4283,
-          connector_name: 'hdfs-xiaof2',
-          connector_id: 406,
-          file_name: 'etst.txt',
-          file_type: 'txt',
-          file_size: 2,
-          upload_user: '肖峰',
-          task_load_start_time: '2025-07-30 10:47:09',
-          data_path_id: 954,
-          abs_data_path: '/src/xiaof12/volume/xiaof112',
-          file_sub_path: 'etst.txt',
-          perms: ['source_dir:can_export', 'source_dir:can_delete']
-        }
-      ],
-      total: 0,
-      page: 1,
-      page_size: 100
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     items: [
+  //       {
+  //         id: 4283,
+  //         connector_name: 'hdfs-xiaof2',
+  //         connector_id: 406,
+  //         file_name: 'etst.txt',
+  //         file_type: 'txt',
+  //         file_size: 2,
+  //         upload_user: '肖峰',
+  //         task_load_start_time: '2025-07-30 10:47:09',
+  //         data_path_id: 954,
+  //         abs_data_path: '/src/xiaof12/volume/xiaof112',
+  //         file_sub_path: 'etst.txt',
+  //         perms: ['source_dir:can_export', 'source_dir:can_delete']
+  //       }
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  // });
 }
 
 export interface GetTargetCatalogFileListParams {
@@ -430,7 +430,7 @@ export interface GetTargetCatalogFileListParams {
   search_content?: string;
   search_id?: number;
   sort_field: string;
-  sort_order: string;
+  sort_order: 'asc' | 'desc';
   /**
    * 开始时间
    */
@@ -520,44 +520,61 @@ export interface GetTargetCatalogFileListRes {
   page_size: number;
 }
 
+//查询源库下的表列表
+export interface DbTableListParamss {
+  path_id: number;
+  search: string;
+  page: number;
+  limit: number;
+  database: string;
+}
+
+//查询源库下的表详情
+export interface GetDbItemDetailParams {
+  detail_type: string;
+  database: string;
+  table: string;
+  path_id: number;
+}
+
 export async function getTargetCatalogFileList(
   param: GetTargetCatalogFileListParams
 ): Promise<ApiRes<GetTargetCatalogFileListRes>> {
   // TODO: 联调
-  // return await UAPI.RES.catalogFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      list: [
-        {
-          id: 17228,
-          generated_at: '2025-08-28T13:43:04+08:00',
-          file_name: '1504',
-          file_type: 'jsonl',
-          full_path: '/dst/zsq数据清洗测试/volume/多轮问答',
-          short_content: '报考者能否更改已经审核通过的职位',
-          created_at: '2025-08-28T13:43:06+08:00',
-          updated_at: '2025-08-28T13:43:06+08:00',
-          deleted_at: null,
-          extras: {
-            ds_workflow_id: '150455535967520',
-            file_name: '150455535967520.469.1756359557089.augment.jsonl',
-            file_size: '',
-            workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-          },
-          perms: ['dst_file:can_export', 'dst_file:can_delete']
-        }
-      ],
-      total: 0,
-      page: 1,
-      page_size: 100
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     list: [
+  //       {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         full_path: '/dst/zsq数据清洗测试/volume/多轮问答',
+  //         short_content: '报考者能否更改已经审核通过的职位',
+  //         created_at: '2025-08-28T13:43:06+08:00',
+  //         updated_at: '2025-08-28T13:43:06+08:00',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       }
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  // });
 }
 
 // 添加目录
@@ -749,4 +766,14 @@ export async function createCatalog(data: any) {
 //导出文件
 export async function exportFile(params: any = {}) {
   return await UAPI.RES.fileExportApi({}).post(params).inRegion().do();
+}
+
+//获取数据库表列表
+export async function getDbItemList(params: DbTableListParamss) {
+  return await UAPI.RES.dbItemListApi({}).post(params).inRegion().do();
+}
+
+//查询源库下的表详情
+export async function getDbItemDetail(params: DbTableListParamss) {
+  return await UAPI.RES.dbItemDetailApi({}).post(params).inRegion().do();
 }

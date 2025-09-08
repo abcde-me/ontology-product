@@ -31,6 +31,7 @@ import {
   DataDirectoryTreeFrom
 } from '../../types';
 import './index.scss';
+import { formatFileSize } from '@/utils/format';
 
 const { Title, Text } = Typography;
 
@@ -43,6 +44,7 @@ interface SourceTargetTreeProps {
   onVolumeInsert?: (volume: FluffyVolume) => void;
   onDbDetail?: (database: Db) => void;
   onDbInsert?: (database: Db) => void;
+  isEditorFocused?: boolean;
 }
 
 interface TreeNode {
@@ -65,7 +67,8 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   onVolumeDetail,
   onVolumeInsert,
   onDbDetail,
-  onDbInsert
+  onDbInsert,
+  isEditorFocused = false
 }) => {
   const {
     targetCatalogList,
@@ -104,11 +107,10 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const handleVolumeInsert = useCallback(
     (volume: FluffyVolume, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据卷选择
-      if (onVolumeInsert) {
-        onVolumeInsert(volume);
-      }
+
+      onVolumeInsert?.(volume);
     },
-    [onVolumeInsert]
+    [onVolumeInsert, isEditorFocused]
   );
 
   // 处理数据库详情按钮点击
@@ -126,11 +128,11 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const handleDbInsert = useCallback(
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
-      if (onDbInsert) {
-        onDbInsert(database);
-      }
+
+      // 编辑器聚焦时插入内容
+      onDbInsert?.(database);
     },
-    [onDbInsert]
+    [onDbInsert, isEditorFocused]
   );
 
   // 获取当前目录列表
@@ -214,7 +216,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                     type="outline"
                     onClick={(e: Event) => handleVolumeInsert(volume, e)}
                   >
-                    插入
+                    {isEditorFocused ? '插入' : '复制'}
                   </Button>
                 </div>
               </div>
@@ -256,7 +258,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                     size="small"
                     onClick={(e: Event) => handleDbInsert(db, e)}
                   >
-                    插入
+                    {isEditorFocused ? '插入' : '复制'}
                   </Button>
                 </div>
               </div>
@@ -286,6 +288,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 处理数据卷或数据库点击（第三层）
   const handleVolumeDbClick = async (item: any) => {
+    console.log('执行到这里了吗？');
     if (!selectedCatalog) return;
 
     setSelectedVolumeOrDb(item);
@@ -297,14 +300,23 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     try {
       const rootType =
         dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
-      const params = {
-        path_id: item.id.toString(),
-        page: 1,
-        limit: 100,
-        full_path: item.base_dir || '',
-        sort_field: 'created_at',
-        sort_order: 'desc'
-      };
+      const params =
+        dataType === 'source'
+          ? {
+              page: 1,
+              page_size: 100,
+              data_path_id: Number(item.id),
+              file_name: '',
+              sort: 'desc' as 'asc' | 'desc'
+            }
+          : {
+              page: 1,
+              limit: 100,
+              full_path: item.full_path || '',
+              sort_field: item.sort_field || '',
+              sort_order: 'desc' as 'asc' | 'desc',
+              path_id: item.id.toString()
+            };
 
       await getCatalogFileList(rootType, params);
     } catch (error) {
@@ -540,7 +552,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 ></EllipsisPopover>
                 <EllipsisPopover
                   className="source-target-tree__file-size"
-                  value={file.file_size || file.size || '未知大小'}
+                  value={formatFileSize(file.file_size || file.size)}
                 ></EllipsisPopover>
               </div>
             </div>
@@ -556,7 +568,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   }
                 }}
               >
-                插入
+                {isEditorFocused ? '插入' : '复制'}
               </Button>
             </div>
           </div>
@@ -567,6 +579,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 渲染主要内容
   const renderMainContent = () => {
+    console.log('让我瞅瞅这是第几层', currentViewLevel);
     switch (currentViewLevel) {
       case 'catalog':
         return renderCatalogList();

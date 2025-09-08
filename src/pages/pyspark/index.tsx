@@ -4,6 +4,7 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DataIcon from '@/assets/python/data-left-menu.svg';
+import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import { useTabManager } from './hooks/useTabManager';
@@ -18,6 +19,10 @@ type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const [insertContentFunction, setInsertContentFunction] = useState<
+    ((content: string) => void) | null
+  >(null);
+  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const {
     fileState,
     directoryTreeRef,
@@ -25,13 +30,36 @@ const Python: React.FC = memo(() => {
     addTab,
     removeTab,
     switchTab,
+    updateTabContent,
     handleCreate
   } = useTabManager();
+
+  // 处理标签页内容更新
+  const handleTabContentUpdate = (tabKey: string, content: string) => {
+    updateTabContent(tabKey, content);
+  };
 
   const isDasetTab = activeTab === 'daset';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+  };
+
+  // 处理插入内容功能注册
+  const handleInsertContentRegister = (insertFn: (content: string) => void) => {
+    setInsertContentFunction(() => insertFn);
+  };
+
+  // 插入内容到编辑器
+  const insertContentToEditor = (content: string) => {
+    if (insertContentFunction) {
+      insertContentFunction(content);
+    }
+  };
+
+  // 处理编辑器聚焦状态变化
+  const handleEditorFocusChange = (focused: boolean) => {
+    setIsEditorFocused(focused);
   };
 
   return (
@@ -45,21 +73,32 @@ const Python: React.FC = memo(() => {
           type="rounded"
         >
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              onFileOpen={openFile}
-              ref={directoryTreeRef}
-            />
+            {activeTab === 'files' && (
+              <FileManager
+                type="files"
+                onFileOpen={openFile}
+                ref={directoryTreeRef}
+              />
+            )}
           </TabPane>
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
+            {activeTab === 'data' && (
+              <DataManager
+                onInsertContent={insertContentToEditor}
+                isEditorFocused={isEditorFocused}
+              />
+            )}
           </TabPane>
           <TabPane key="tools" title={<SuanziIcon />}>
-            <ToolsManager key="tools" />
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                isEditorFocused={isEditorFocused}
+              />
+            )}
           </TabPane>
-          <TabPane key="daset" title={<SuanziIcon />}>
-            <DatasetsList />
+          <TabPane key="daset" title={<DasetIcon />}>
+            {isDasetTab && <DatasetsList />}
           </TabPane>
         </Tabs>
       </Sider>
@@ -72,6 +111,10 @@ const Python: React.FC = memo(() => {
             onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
             onRemoveTab={removeTab}
             onCreate={handleCreate}
+            onTabContentUpdate={handleTabContentUpdate}
+            onSidebarTabChange={setActiveTab}
+            onInsertContent={handleInsertContentRegister}
+            onEditorFocusChange={handleEditorFocusChange}
           />
         </Content>
       )}

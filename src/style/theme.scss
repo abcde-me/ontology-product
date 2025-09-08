@@ -125,6 +125,7 @@ $spacing-9: 24px;
 
 .arco-tree-node.arco-tree-node-selected {
   background-color: var(--color-bg-3);
+  color: rgb(var(--primary-6));
 }
 
 .arco-tree-node-selected .arco-tree-node-title,
@@ -359,7 +360,8 @@ $spacing-9: 24px;
 
 // table-no-data
 .arco-table-no-data {
-  width: 100% !important;
+  // TODO: fix 和表格的无数据冲突
+  // width: 100% !important;
 }
 
 // popover

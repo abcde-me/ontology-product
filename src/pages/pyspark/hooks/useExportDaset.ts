@@ -9,8 +9,9 @@ import {
 } from '@/api/datasetManagement';
 import { Message } from '@arco-design/web-react';
 import React from 'react';
+import { exportDataset } from '@/api/pyspark';
 
-export const useExportDaset = () => {
+export const useExportDaset = (currentFileId?: string, execid?: string) => {
   // Modal相关状态
   const [modalDatasetVisible, setModalDatasetVisible] =
     React.useState<boolean>(false);
@@ -87,7 +88,7 @@ export const useExportDaset = () => {
 
   // 提交表单数据,新建数据集
   const handleSubmit = async (formData: any) => {
-    // console.log('新建数据集:', String(formData.targetDataSource[0][0]));
+    console.log('新建数据集:', formData);
     // let formattedPath;
     // let fullPath;
     // if (formData.dataSource === 'volume') {
@@ -120,38 +121,44 @@ export const useExportDaset = () => {
     console.log('提交数据:', submitData);
 
     try {
-      const createDatasetRes = await createDataset(submitData);
+      const createDatasetRes = await exportDataset({
+        name: formData.name,
+        pyspark_id: currentFileId ? Number(currentFileId) : 0,
+        storage_type: formData.storageType,
+        file_names: formData.selectedFiles,
+        tag_names: formData.tags,
+        pyspark_exec_id: execid ?? ''
+      });
 
       if (createDatasetRes.status !== 200) {
-        Message.error(createDatasetRes.message || '数据集创建失败！');
-        childRef.current?.setcreateTagDisabled();
+        Message.error(createDatasetRes.message ?? '数据集创建失败！');
         return;
       }
 
       // 刷新数据列表
       // fetchDatasetList();
-      closeModal();
+      // closeModal();
 
       //获取标签
-      const tagListRes = await getTagList();
+      // const tagListRes = await getTagList();
 
-      try {
-        if (tagListRes.data && Array.isArray(tagListRes.data)) {
-          setTagList(tagListRes.data);
-        } else {
-          console.error('标签列表数据格式错误:', tagListRes);
-          setTagList([]);
-        }
-      } catch {
-        setTagList([]);
-        Message.error('获取标签列表失败');
-      }
+      // try {
+      //   if (tagListRes.data && Array.isArray(tagListRes.data)) {
+      //     setTagList(tagListRes.data);
+      //   } else {
+      //     console.error('标签列表数据格式错误:', tagListRes);
+      //     setTagList([]);
+      //   }
+      // } catch {
+      //   setTagList([]);
+      //   Message.error('获取标签列表失败');
+      // }
 
       childRef.current?.resetForm();
       childRef.current?.setcreateTagDisabled();
-      Message.success('数据集创建成功！');
+      // TODO: 补充跳转导出列表的链接
+      Message.success('导出任务创建成功，可点击导出列表查看详情');
     } catch {
-      childRef.current?.setcreateTagDisabled();
       Message.error('数据集创建失败！');
     }
   };

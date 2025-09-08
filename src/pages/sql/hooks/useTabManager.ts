@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { openPythonItem } from '@/api/sql';
-import { OpenPythonItemRes } from '@/types/pythonApi';
+import { getSqlScriptDetail, openPythonItem } from '@/api/sql';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 import { formatDateTime } from '../utils';
 
@@ -45,10 +44,9 @@ export const useTabManager = () => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        const response = await openPythonItem(fileId);
-        console.log('openFile', response);
+        const response = await getSqlScriptDetail(fileId);
         if (response.status === 200 && response.data) {
-          const fileData: OpenPythonItemRes = response.data;
+          const fileData = response.data;
 
           // 创建或更新标签页
           const newTabKey = `file-${fileId}`;
@@ -63,7 +61,7 @@ export const useTabManager = () => {
               tab.key === newTabKey
                 ? {
                     ...tab,
-                    content: fileData.data,
+                    content: fileData.script_content,
                     lastModified: new Date().toISOString()
                   }
                 : tab
@@ -73,7 +71,7 @@ export const useTabManager = () => {
             const newTab = {
               key: newTabKey,
               title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
-              content: fileData.data,
+              content: fileData.script_content,
               fileId: fileId,
               lastModified: new Date().toISOString()
             };
@@ -139,41 +137,6 @@ export const useTabManager = () => {
     [fileState.fileTabs.length]
   );
 
-  // const addTab = useCallback(
-  //   (newFileInfo?: any) => {
-  //     let newTabKey: string;
-  //     let newTabTitle: string;
-  //     let newFileId: string | undefined;
-
-  //     if (newFileInfo) {
-  //       // 如果有新文件信息，使用文件信息创建标签页
-  //       newTabKey = `notebook-${newFileInfo.id}`;
-  //       newTabTitle = newFileInfo.name;
-  //       newFileId = String(newFileInfo.id);
-  //     } else {
-  //       // 否则创建临时标签页
-  //       newTabKey = `notebook-${Date.now()}`;
-  //       newTabTitle = `新建笔记本 ${fileState.fileTabs.length + 1}`;
-  //       newFileId = undefined;
-  //     }
-
-  //     const newTab = {
-  //       key: newTabKey,
-  //       title: newTabTitle,
-  //       content: '',
-  //       fileId: newFileId,
-  //       lastModified: undefined
-  //     };
-
-  //     setFileState((prev) => ({
-  //       ...prev,
-  //       fileTabs: [...prev.fileTabs, newTab],
-  //       activeTab: newTab.key
-  //     }));
-  //   },
-  //   [fileState.fileTabs.length]
-  // );
-
   const removeTab = useCallback(
     (key: string) => {
       const remainingTabs = fileState.fileTabs.filter((tab) => tab.key !== key);
@@ -228,28 +191,6 @@ export const useTabManager = () => {
     },
     []
   );
-
-  // 从 FileManager 获取创建文件的函数
-  // const handleCreate = useCallback(
-  //   (finalName: string, node?: any): Promise<any> => {
-  //     return new Promise((resolve) => {
-  //       try {
-  //         // 直接调用 DirectoryTree 的新建 PySpark 功能
-  //         if (directoryTreeRef.current) {
-  //           directoryTreeRef.current.startRootCreate(false); // false 表示创建文件，不是文件夹
-  //           resolve(null); // 返回 null，因为 DirectoryTree 会自己处理创建逻辑
-  //         } else {
-  //           resolve(null);
-  //         }
-  //       } catch (error) {
-  //         console.error('调用新建功能失败:', error);
-  //         Message.error('调用新建功能失败');
-  //         resolve(null);
-  //       }
-  //     });
-  //   },
-  //   []
-  // );
 
   return {
     fileState,

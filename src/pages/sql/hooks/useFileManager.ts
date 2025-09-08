@@ -2,8 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { Message } from '@arco-design/web-react';
 import { now } from 'lodash-es';
 import {
-  // @ts-expect-error
-  type SqlScriptItem,
   getSqlScriptList,
   createSqlScript,
   renameSqlScript,
@@ -12,6 +10,7 @@ import {
 } from '@/api/sql';
 import { PythonItemType } from '@/types/pythonApi';
 import timeFormattig from '@/utils/timeFormatting';
+import { SqlScriptItem } from '@/types/sqlApi';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
@@ -221,8 +220,7 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        // @ts-expect-error
-        const renameRes = await renameSqlScript({
+        const renameRes = await renameSqlScript(node?.dataRef?.id, {
           script_name: finalName
         });
 
@@ -248,9 +246,7 @@ export const useFileManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript({
-          script_id: node?.dataRef?.id
-        });
+        const copyRes = await copySqlScript(node?.dataRef?.id);
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);

@@ -1,8 +1,6 @@
 .operator-detail-container {
   display: flex;
-  padding-bottom: 20px;
-  height: 600px;
-  background: #fff;
+  padding: 12px 0 20px;
 }
 
 // 左侧详情面板
@@ -12,32 +10,24 @@
 
   .operator-info {
     .operator-name {
-      margin-bottom: 24px;
-
-      h3 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #1d2129;
-        line-height: 28px;
-      }
+      margin-bottom: 12px;
     }
 
     .operator-section {
       margin-bottom: 24px;
 
       h4 {
-        margin: 0 0 12px 0;
         font-size: 14px;
-        font-weight: 600;
-        color: #1d2129;
+        line-height: 22px;
+        font-weight: 500;
+        color: var(--color-text-2);
         line-height: 20px;
       }
 
       p {
         margin: 0;
         font-size: 14px;
-        color: #4e5969;
+        color: var(--color-text-2);
         line-height: 22px;
         word-break: break-word;
       }
@@ -45,29 +35,10 @@
       .io-container {
         .io-item {
           display: flex;
-          margin-bottom: 8px;
           align-items: flex-start;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-
-          .io-label {
-            flex-shrink: 0;
-            width: 60px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1d2129;
-            line-height: 22px;
-          }
-
-          .io-value {
-            flex: 1;
-            font-size: 14px;
-            color: #4e5969;
-            line-height: 22px;
-            word-break: break-word;
-          }
+          font-size: 14px;
+          color: var(--color-text-2);
+          line-height: 22px;
         }
       }
     }
@@ -80,6 +51,19 @@
   display: flex;
   flex-direction: column;
   background-color: #f8fafd;
+  position: relative;
+
+  .arco-btn-outline:not(.arco-btn-disabled) {
+    color: #007dfa;
+    border-color: #007dfa;
+  }
+
+  .arco-btn-outline:not(.arco-btn-disabled):active,
+  .arco-btn-outline:not(.arco-btn-disabled):hover {
+    color: #007dfa;
+    border-color: #007dfa;
+    background-color: transparent;
+  }
 
   .code-editor-header {
     display: flex;
@@ -95,91 +79,26 @@
       color: #1d2129;
       line-height: 20px;
     }
-
-    .copy-button {
-      padding: 4px 8px;
-      font-size: 12px;
-      color: #165dff;
-      border: 1px solid #e5e6eb;
-      border-radius: 4px;
-      background: transparent;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #f2f3f5;
-        border-color: #c9cdd4;
-      }
-
-      .arco-icon {
-        margin-right: 4px;
-        font-size: 12px;
-      }
-    }
   }
 
   .code-editor-container {
     flex: 1;
-    padding: 16px;
-    overflow: hidden;
+    overflow-y: auto;
+    position: relative;
+
+    .copy-button {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1;
+    }
 
     .code-textarea {
       height: 100%;
-      resize: none;
-
-      .arco-textarea {
-        background-color: #f8f9fa;
-        border: 1px solid #e5e6eb;
-        border-radius: 6px;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        padding: 12px;
-        height: 100%;
-
-        &:focus {
-          border-color: #165dff;
-          box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
-        }
-      }
+      padding: 20px;
+      color: #000;
+      font-size: 14px;
+      line-height: 24px; /* 171.429% */
     }
   }
-}
-
-// 响应式设计
-@media (max-width: 1200px) {
-  .operator-detail-container {
-    flex-direction: column;
-    height: auto;
-    max-height: 80vh;
-  }
-
-  .operator-detail-left {
-    border-right: none;
-    border-bottom: 1px solid #e5e6eb;
-    max-height: 300px;
-  }
-
-  .operator-detail-right {
-    flex: none;
-    height: 300px;
-  }
-}
-
-// 滚动条样式
-.operator-detail-left::-webkit-scrollbar {
-  width: 6px;
-}
-
-.operator-detail-left::-webkit-scrollbar-track {
-  background: #f1f3f4;
-  border-radius: 3px;
-}
-
-.operator-detail-left::-webkit-scrollbar-thumb {
-  background: #c1c7d0;
-  border-radius: 3px;
-}
-
-.operator-detail-left::-webkit-scrollbar-thumb:hover {
-  background: #a8b0b9;
 }
