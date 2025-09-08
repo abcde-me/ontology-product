@@ -25,6 +25,7 @@ import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
 import { useSqlIndexStore } from '../../store';
 
 import './RunningInfoPanel.scss';
+import { formatDateTime } from '../../utils';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -47,6 +48,8 @@ const RunningInfoPanel: React.FC = memo(() => {
     size,
     setSize
   } = useEditorContext();
+
+  console.log('RunningInfoPanel render runResult:', runResult);
 
   // 获取store中的方法
   const showDatasetForm = useSqlIndexStore((state) => state.showDatasetForm);
@@ -106,9 +109,11 @@ const RunningInfoPanel: React.FC = memo(() => {
           </div>
           <div className="run-status">
             <span className="mr-4">
+              {formatDateTime(runStartTime || '')}（
               {runDuration < 1000
                 ? `${runDuration}ms`
                 : `${(runDuration / 1000).toFixed(2)}s`}
+              ）
             </span>
           </div>
         </Space>
@@ -190,9 +195,7 @@ const RunningInfoPanel: React.FC = memo(() => {
 
             {runStatus === RunningStatus.SUCCESS && (
               <div className="flex flex-col gap-[8px]">
-                <Typography.Text>
-                  检测到有多个Select语句，当前展示的是第一个Select语句的运行结果
-                </Typography.Text>
+                {runLog && <Typography.Text>{runLog}</Typography.Text>}
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border
