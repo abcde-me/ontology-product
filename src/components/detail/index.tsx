@@ -37,8 +37,7 @@ import {
   IconInfoCircle
   //  IconRefresh
 } from '@arco-design/web-react/icon';
-import formatFileSize from '@/utils/fileSize';
-
+import { formatFileSize } from '@/utils/format';
 import { Breadcrumb } from '@arco-design/web-react';
 import {
   getDatasetDetail,
