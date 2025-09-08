@@ -1,4 +1,4 @@
-.notebook-content {
+.sql-content {
   height: 100%;
   min-height: calc(100vh - 120px); // 确保最小高度充满屏幕
   display: flex;
@@ -11,7 +11,7 @@
   }
 
   // 顶部工具栏
-  .notebook-toolbar {
+  .sql-toolbar {
     height: 48px;
     background-color: #fff;
     border-bottom: 1px solid #e2e8f0;

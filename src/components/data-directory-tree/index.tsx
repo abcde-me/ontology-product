@@ -39,7 +39,7 @@ interface DataDirectoryTreeProps {
   onViewDbDetail?: (database: Db) => void;
   onDbInsert?: (database: Db) => void;
   onInsertContent?: (content: string) => void;
-  isEditorFocused?: boolean;
+  getIsEditorFocused?: () => boolean;
 }
 
 const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
@@ -51,7 +51,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
   onViewDbDetail,
   onDbInsert,
   onInsertContent,
-  isEditorFocused = false
+  getIsEditorFocused
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
@@ -134,7 +134,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             // 插入内容
             onInsertContent={onInsertContent}
             // 编辑器聚焦状态
-            isEditorFocused={isEditorFocused}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
           />
         );
       case 'source':
@@ -152,7 +152,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             // 数据库插入
             onDbInsert={handleDbInsert}
             // 编辑器聚焦状态
-            isEditorFocused={isEditorFocused}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
           />
         );
       case 'target':
@@ -170,7 +170,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             // 数据库插入
             onDbInsert={handleDbInsert}
             // 编辑器聚焦状态
-            isEditorFocused={isEditorFocused}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
           />
         );
       default:

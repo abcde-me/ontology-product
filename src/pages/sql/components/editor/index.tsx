@@ -15,6 +15,8 @@ interface EditorContentProps {
   onRemoveTab: (key: string) => void;
   onCreate?: (finalName: string, node?: any) => Promise<any>; // 修改：改为 onCreate 以匹配父组件
   onActiveUpdate?: (tabData: any) => void;
+  onInsertContent?: (insertFn: (content: string) => void) => void;
+  onEditorFocusChange?: (isFocused: boolean) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -25,7 +27,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onAddTab,
     onRemoveTab,
     onCreate,
-    onActiveUpdate
+    onActiveUpdate,
+    onInsertContent,
+    onEditorFocusChange
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -57,12 +61,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {
       return (
-        <div className="notebook-main-content">
+        <div className="sql-main-content">
           {/* 头部标签页区域 - 即使没有内容也保留 */}
           <Tabs
             activeTab={activeTab}
             onChange={handleTabChange}
-            className="notebook-tabs"
+            className="sql-tabs"
             type="card"
             showAddButton
             onAddTab={handleCreatePySpark}
@@ -97,12 +101,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     }
 
     return (
-      <div className="notebook-main-content">
+      <div className="sql-main-content">
         {/* 头部标签页区域 */}
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
-          className="notebook-tabs"
+          className="sql-tabs"
           type="card"
           showAddButton
           onAddTab={handleCreatePySpark}
@@ -125,6 +129,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
                 hasRun={tab.hasRun}
                 tabKey={tab.key}
                 onActiveUpdate={handleActiveUpdate}
+                onInsertContent={onInsertContent}
+                onEditorFocusChange={onEditorFocusChange}
               />
             </TabPane>
           ))}

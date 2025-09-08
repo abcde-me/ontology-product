@@ -1,4 +1,4 @@
-.notebook-layout {
+.sql-layout {
   height: calc(100% - 20px - 20px);
   background-color: #f5f5f5;
   border-radius: 12px;
@@ -13,9 +13,9 @@
     border-radius: 0;
   }
 
-  .notebook-sider {
+  .sql-sider {
     .arco-layout-sider-children {
-      .notebook-tabs {
+      .sql-tabs {
         height: 100%;
 
         .arco-tabs-header-nav {
@@ -42,7 +42,7 @@
     }
   }
 
-  .notebook-content {
+  .sql-content {
     background-color: #fff;
     overflow: hidden;
     height: 100%;
@@ -52,7 +52,7 @@
 }
 
 // 删除sider组件自带宽度切换动画
-.notebook-sider.arco-layout-sider {
+.sql-sider.arco-layout-sider {
   transition: none;
   box-shadow: none;
   border-right: 1px solid #e2e8f0;
