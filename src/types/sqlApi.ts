@@ -293,6 +293,14 @@ export interface RunResultSqlScriptData {
    * 执行结果
    */
   sql_result_lists: RunResult[];
+  /**
+   * 运行结束时间
+   */
+  run_end_time?: string;
+  // /**
+  //  * 运行结果行数
+  //  */
+  // size: string;
 }
 
 export interface RunCancelSqlScriptParams {

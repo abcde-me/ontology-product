@@ -41,13 +41,9 @@ const EditorWorkspaceContent: React.FC = memo(() => {
     handleRunCode,
     lastAutoSave,
     editorContent,
-    setEditorContent,
     handleContentChange,
     placeholderValue,
-    runResult,
-    runLog,
-    size,
-    setSize
+    runResult
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -73,7 +69,7 @@ const EditorWorkspaceContent: React.FC = memo(() => {
     if (editorContent) {
       try {
         const formattedCode = format(editorContent, { language: 'sql' });
-        setEditorContent(formattedCode);
+        handleContentChange(formattedCode);
       } catch (e) {
         console.error(e);
       }
@@ -149,12 +145,29 @@ const EditorWorkspaceContent: React.FC = memo(() => {
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
   ({ content, fileName, currentFileId, hasRun, onActiveUpdate, tabKey }) => {
     const editorOptions = {
-      initialContent: content,
-      currentFileId,
-      tabKey: tabKey,
-      onActiveUpdate: onActiveUpdate,
-      hasRun,
-      fileName
+      activeTab: tabKey,
+      fileTabs: [
+        {
+          key: tabKey || 'default',
+          title: fileName,
+          content: content,
+          fileId: currentFileId
+        }
+      ],
+      onTabUpdate: (
+        tabKey: string,
+        updates: { content?: string; fileId?: string; title?: string }
+      ) => {
+        if (onActiveUpdate) {
+          onActiveUpdate({
+            key: tabKey,
+            title: updates.title || fileName,
+            content: updates.content || content,
+            fileId: updates.fileId || currentFileId,
+            hasRun
+          });
+        }
+      }
     };
 
     return (

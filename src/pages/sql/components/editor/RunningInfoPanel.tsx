@@ -41,12 +41,10 @@ const RunningInfoPanel: React.FC = memo(() => {
     columns,
     data,
     runResult,
-    runLog,
     runStatus,
     runDuration,
     runStartTime,
-    size,
-    setSize
+    runLog
   } = useEditorContext();
 
   console.log('RunningInfoPanel render runResult:', runResult);
@@ -56,14 +54,6 @@ const RunningInfoPanel: React.FC = memo(() => {
   const showDatasetVersionForm = useSqlIndexStore(
     (state) => state.showDatasetVersionForm
   );
-
-  // 监听运行结果变化，自动展开面板
-  useEffect(() => {
-    // 当有运行结果或日志时，自动展开面板（除非用户手动关闭过）
-    if ((runResult || runLog) && !hasUserClosed) {
-      setIsExpanded(true);
-    }
-  }, [runResult, runLog, hasUserClosed]);
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
   useEffect(() => {
@@ -152,16 +142,6 @@ const RunningInfoPanel: React.FC = memo(() => {
                 {renderRunStatus(runStatus)}
               </div>
               <div className="flex items-center gap-[12px]">
-                <Space>
-                  <span>展示</span>
-                  <Input
-                    style={{ width: 52, height: 22 }}
-                    size="mini"
-                    value={String(size)}
-                    onChange={(value) => setSize(value)}
-                  />
-                  <span>行数据</span>
-                </Space>
                 <Dropdown
                   position="br"
                   droplist={
@@ -187,15 +167,12 @@ const RunningInfoPanel: React.FC = memo(() => {
 
             {runStatus === RunningStatus.FAILED && (
               <div className="h-[100px]">
-                <Typography.Text>
-                  有无法执行的语法，请修改后重试
-                </Typography.Text>
+                <Typography.Text>{runLog}</Typography.Text>
               </div>
             )}
 
             {runStatus === RunningStatus.SUCCESS && (
               <div className="flex flex-col gap-[8px]">
-                {runLog && <Typography.Text>{runLog}</Typography.Text>}
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border

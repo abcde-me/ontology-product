@@ -3,6 +3,7 @@ import { Message } from '@arco-design/web-react';
 import { getSqlScriptDetail, openPythonItem } from '@/api/sql';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 import { formatDateTime } from '../utils';
+import { generateSqlDefaultName } from '../utils/formatDateTime';
 
 // 文件标签页类型
 export interface FileTab {
@@ -40,52 +41,45 @@ export const useTabManager = () => {
 
   // 文件操作
   const openFile = useCallback(
-    async (fileId: string, fileName?: string) => {
+    (fileId: string, fileName?: string) => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-        const response = await getSqlScriptDetail(fileId);
-        if (response.status === 200 && response.data) {
-          const fileData = response.data;
+        // 创建或更新标签页
+        const newTabKey = `file-${fileId}`;
+        const existingTabIndex = fileState.fileTabs.findIndex(
+          (tab) => tab.fileId === fileId
+        );
 
-          // 创建或更新标签页
-          const newTabKey = `file-${fileId}`;
-          const existingTabIndex = fileState.fileTabs.findIndex(
-            (tab) => tab.fileId === fileId
-          );
-
-          let updatedTabs: FileTab[];
-          if (existingTabIndex >= 0) {
-            // 更新现有标签页
-            updatedTabs = fileState.fileTabs.map((tab) =>
-              tab.key === newTabKey
-                ? {
-                    ...tab,
-                    content: fileData.script_content,
-                    lastModified: new Date().toISOString()
-                  }
-                : tab
-            );
-          } else {
-            // 创建新标签页
-            const newTab = {
-              key: newTabKey,
-              title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
-              content: fileData.script_content,
-              fileId: fileId,
-              lastModified: new Date().toISOString()
-            };
-            updatedTabs = [...fileState.fileTabs, newTab];
-          }
-
+        let updatedTabs: FileTab[];
+        if (existingTabIndex >= 0) {
+          // 如果标签页已存在，直接激活它
           setFileState((prev) => ({
             ...prev,
-            fileTabs: updatedTabs,
             currentFileId: fileId,
             activeTab: newTabKey,
             isLoading: false
           }));
+          return;
+        } else {
+          // 创建新标签页（内容由 useEditor 负责加载）
+          const newTab = {
+            key: newTabKey,
+            title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
+            content: '', // 初始内容为空，由 useEditor 加载
+            fileId: fileId,
+            lastModified: new Date().toISOString()
+          };
+          updatedTabs = [...fileState.fileTabs, newTab];
         }
+
+        setFileState((prev) => ({
+          ...prev,
+          fileTabs: updatedTabs,
+          currentFileId: fileId,
+          activeTab: newTabKey,
+          isLoading: false
+        }));
       } catch (error) {
         const errorObj =
           error instanceof Error ? error : new Error('打开文件失败');
@@ -113,7 +107,7 @@ export const useTabManager = () => {
         newFileId = String(newFileInfo.id);
       } else {
         // 否则创建临时标签页
-        const tempStr = `SQL查询 ${formatDateTime(new Date().toString())}`;
+        const tempStr = generateSqlDefaultName(new Date());
         newTabKey = tempStr;
         newTabTitle = tempStr;
         newFileId = undefined;
