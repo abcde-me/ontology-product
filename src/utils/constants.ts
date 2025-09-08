@@ -2,5 +2,6 @@ export const LabelShapMap = {
   1: 'points',
   2: 'polyline',
   3: 'rectangle',
-  4: 'polygon'
+  4: 'polygon',
+  5: 'ellipse'
 };
