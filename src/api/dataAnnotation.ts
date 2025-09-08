@@ -40,7 +40,7 @@ export async function publishRequirement(params: {
     //标注工具配置
     label_tool_name: string;
     label_tool_code: string;
-    // image_out_of_bounds: number //图片外标注，1是，0否
+    image_out_of_bounds: number; //图片外标注，1是，0否
   };
   file_labels: [
     //文件分类标签配置
@@ -117,6 +117,31 @@ export async function publishRequirement(params: {
   ];
 }) {
   return await UAPI.RES.publishRequirementApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 需求详情查看
+export async function getRequirementDetail(params: { requirement_id: number }) {
+  return await UAPI.RES.getRequirementDetailApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+//  查询标注数据表格内容
+export async function getAnnotationTabledData(params: {
+  page: number;
+  page_size: number;
+  data_path_id: number;
+  start: string;
+  end: string;
+  file_type: string[];
+  sort_by: 'start_time'; // 或结束时间 "end_time"，默认按开始时间
+  sort: 'asc'; // 排序方式("asc"升序,"desc"降序),默认desc
+}) {
+  return await UAPI.RES.getAnnotationTabledDataApi({})
     .post({ ...params })
     .inRegion()
     .do();

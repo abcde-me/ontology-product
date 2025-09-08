@@ -29,6 +29,7 @@ const btnTextData = [
   { key: 4, label: '文本排序', code: 'TEXT_SORT' }
 ];
 interface AnnotationTypeProps {
+  isDisabled: boolean;
   label_type: number;
   label_tool: {
     label_tool_name: number;
@@ -41,6 +42,7 @@ interface AnnotationTypeProps {
   ) => void;
 }
 const AnnotationType: React.FC<AnnotationTypeProps> = ({
+  isDisabled,
   label_type,
   label_tool,
   getChildAnnotationType
@@ -51,7 +53,7 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
   const [activeKey, setActiveKey] = useState(label_tool?.label_tool_code || 1);
   // 当前标注类型选择内容
   const [annotationTypeContentCode, setAnnotationTypeContentCode] =
-    useState('');
+    useState('IMAGE_ANNOTATION');
   const handleBtnClick = (key) => {
     if (key !== activeKey) {
       // 避免重复点击触发更新
@@ -61,9 +63,23 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
   useEffect(() => {
     getChildAnnotationType(selectedRadio, activeKey, annotationTypeContentCode);
   }, [selectedRadio, activeKey, annotationTypeContentCode]);
+
+  // 头部点击事件
+  const headerItemClick = (item) => {
+    setSelectedRadio(item.value);
+    setActiveKey(1);
+    if (item?.value === 1) {
+      setAnnotationTypeContentCode('IMAGE_ANNOTATION');
+    }
+    if (item?.value === 2) {
+      setAnnotationTypeContentCode('TEXT_ENTITY');
+    }
+  };
   return (
     <div className="annotation-type-warp">
-      <div className="type-header">
+      <div
+        className={['type-header', isDisabled ? 'disabled-div' : ''].join(' ')}
+      >
         {typeList.map((item) => {
           return (
             <div
@@ -73,7 +89,7 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                 item.value > 2 ? 'disabled-div' : ''
               ].join(' ')}
               onClick={() => {
-                (setSelectedRadio(item.value), setActiveKey(1));
+                headerItemClick(item);
               }}
               key={item.value}
             >

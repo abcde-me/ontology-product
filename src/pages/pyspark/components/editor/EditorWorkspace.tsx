@@ -189,7 +189,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 icon={<IconUpload />}
                 onClick={handleExportDataset}
                 className="h-[26px]"
-                disabled={editorContent.trim() === ''}
+                disabled={runStatus !== RunningStatus.SUCCESS}
               >
                 导出数据集
               </Button>

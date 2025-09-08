@@ -150,6 +150,11 @@ export interface GetRunLogReq {
   size?: number;
 }
 
+export interface StopRunPythonItemReq {
+  /** 任务执行id */
+  execid: string;
+}
+
 export interface GetRunLogRes {
   /** 日志 */
   log: string;
