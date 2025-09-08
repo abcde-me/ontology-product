@@ -26,7 +26,7 @@ const nodeDefault: NodeDefault<EndNodeType> = {
     let errorMessages = '';
     if (
       payload.is_embedding === true &&
-      (payload.Knowledge_base_name === undefined ||
+      (payload.knowledge_base_name === undefined ||
         payload.knowledge_base_name === '')
     ) {
       isValid = true;
