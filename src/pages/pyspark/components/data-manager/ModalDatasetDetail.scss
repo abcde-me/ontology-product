@@ -1,5 +1,9 @@
 // 数据集详情
 .my-dataset-detail {
+  .arco-card-size-default .arco-card-body {
+    padding: 0;
+  }
+
   .arco-table-container {
     tbody {
       display: flex;
@@ -9,8 +13,17 @@
     }
   }
 
+  .custom-tabs .arco-tabs-content {
+    min-height: unset;
+  }
+
+  .basic-info-card {
+    box-shadow: unset;
+  }
+
   .dataset-detail {
     min-height: unset;
+    padding: 0;
 
     .basic-info-card {
       min-height: unset;

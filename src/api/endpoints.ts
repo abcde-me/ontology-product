@@ -330,6 +330,8 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
   //数据内容文件表
   dataContentFileList: PrefixAimdp + '/datasets/version/file',
+  //数据内容数据库表
+  dataContentTableList: PrefixAimdp + '/datasets/version/table',
 
   // 连接器接口
 
@@ -387,6 +389,8 @@ export const ModaForgeResourceEndpoints = {
   // 数据标注接口
   // 数据标注配置 发布
   publishRequirementApi: PrefixLabelService + '/requirements/create',
+  // 需求详情查看
+  getRequirementDetailApi: PrefixLabelService + '/requirements/query',
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
   // 获取数据标注 - 任务列表
@@ -395,24 +399,49 @@ export const ModaForgeResourceEndpoints = {
   getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
   // 获取个人列表树内容
   getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  //  查询标注数据表格内容
+  getAnnotationTabledDataApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
 
   // python开发
+  // 获取python列表
   pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
+  // 创建python
   pythonCreateApi: PrefixAimdp + '/pyspark',
+  // 重命名python
   pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  // 删除python
   pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  // 复制python
   pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  // 打开python
   pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  // 修改python
   pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  // 运行python
   pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  // 停止运行python
   pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  // 获取运行结果
   pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  // 获取运行日志
   pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  // 获取导出数据集列表
   pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
+  // 停止导出数据集
   pythonExportDatasetStopApi:
     PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
+  // 重试导出数据集
   pythonExportDatasetRetryApi:
     PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
+  // 获取算子
+  pythonOperatorApi: PrefixAimdp + '/directory/get-operator',
+  // 导出数据集
+  pythonExportDatasetApi: PrefixAimdp + '/pyspark/export/dataset',
+  // 获取导出文件列表
+  pythonExportFileApi: PrefixAimdp + '/pyspark/export/file',
+  // 获取导出预览数据
+  pythonExportPreviewApi: PrefixAimdp + '/pyspark/export/preview',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/sql_script/list',

@@ -4,14 +4,23 @@ import {
   Form,
   Input,
   Modal,
+  PaginationProps,
   Popover,
+  Select,
   Table,
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
-import { getTargetFileTypeList } from '@/api/dataCatalog';
-import { getSourceDataFileList } from '@/api/dataCatalog';
+// import { getTargetFileTypeList } from '@/api/dataCatalog';
+// import { getSourceDataFileList } from '@/api/dataCatalog';
+import { formatTime } from '@/utils/format';
+import {
+  getTargetCatalogFileList,
+  GetTargetCatalogFileListItem,
+  getTargetDataFileList,
+  getTargetFileTypeList
+} from '@/api/dataCatalog';
 
 const FormItem = Form.Item;
 
@@ -31,24 +40,13 @@ const formatDateTime = (dateTimeString: string): string => {
   }
 };
 
-const formatFileSize = (size: number): string => {
-  if (size < 1024) {
-    return `${size}B`;
-  } else if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(2)}KB`;
-  } else if (size < 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024).toFixed(2)}MB`;
-  } else {
-    return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-  }
-};
-
 /** 数据卷详情 弹框 */
 const ModalVolumnDetail = ({
   volumnDetailVisible,
-  selectedVolumnId,
+  selectedVolumn,
   closeVolumnDetail
 }) => {
+  console.log('selectedVolumn', selectedVolumn);
   return (
     <Modal
       title="数据卷详情"
@@ -57,7 +55,7 @@ const ModalVolumnDetail = ({
       footer={null}
       onCancel={closeVolumnDetail}
     >
-      <FileList fromId={selectedVolumnId} />
+      <FileList volumn={selectedVolumn} />
     </Modal>
   );
 };
@@ -65,7 +63,12 @@ const ModalVolumnDetail = ({
 export default ModalVolumnDetail;
 
 const FileList = (props) => {
-  const { fromId } = props;
+  const { volumn } = props;
+  const [searchType, setSearchType] = useState('content');
+
+  const handleSearchTypeChange = (value) => {
+    setSearchType(value);
+  };
 
   const {
     columns,
@@ -74,22 +77,43 @@ const FileList = (props) => {
     loading,
     handleValuesChange,
     handleTableChange
-  } = useTableList({ fromId });
+  } = useTableList({ volumn });
 
   return (
     <div>
       <Form autoComplete="off" layout="inline">
-        <FormItem field="file_name" style={{ marginRight: 12 }}>
-          <Input.Search
-            onSearch={(value) => {
-              handleValuesChange({ file_name: value });
-            }}
-            onClear={() => {
-              handleValuesChange({ file_name: '' });
-            }}
-            allowClear
-            placeholder="输入文件名搜索"
-          />
+        <FormItem
+          field="['file_name', 'search_type']"
+          style={{ marginRight: 12 }}
+        >
+          <Input.Group compact>
+            <Select
+              style={{ width: '100px' }}
+              value={searchType}
+              onChange={handleSearchTypeChange}
+            >
+              <Select.Option key="数据内容" value="content">
+                数据内容
+              </Select.Option>
+              <Select.Option key="ID" value="id">
+                ID
+              </Select.Option>
+            </Select>
+            <Input.Search
+              onSearch={(value) => {
+                if (searchType === 'content') {
+                  handleValuesChange({ search_content: value, search_id: '' });
+                } else if (searchType === 'id') {
+                  handleValuesChange({ search_id: value, search_content: '' });
+                }
+              }}
+              onClear={() => {
+                handleValuesChange({ search_content: '', search_id: '' });
+              }}
+              allowClear
+              placeholder={`输入ID/关键字搜索`}
+            />
+          </Input.Group>
         </FormItem>
         <FormItem field="datetime_range" style={{ marginRight: 12 }}>
           <DatePicker.RangePicker
@@ -134,19 +158,21 @@ const defaultfileTypeList = [
 const defaultSearchParams = {
   page: 1,
   page_size: 10,
-  file_name: '',
-  data_path_id: 1392
+  file_name: ''
 };
 
 const useTableList = (props) => {
-  const { fromId } = props;
-
+  const { volumn } = props;
   const [searchParams, setSearchParams] = useState<
     SourceDataFileQueryParams | any
-  >({ ...defaultSearchParams, fromId });
+  >({
+    ...defaultSearchParams,
+    path_id: volumn.id,
+    full_path: volumn.full_path ?? ''
+  });
   const [fileTypeList, setFileTypeList] =
     useState<{ text: string; value: string }[]>(defaultfileTypeList);
-  const [listData, setListData] = useState<ListDataItem[]>([]);
+  const [listData, setListData] = useState<GetTargetCatalogFileListItem[]>([]);
   const [pagination, setPagination] = useState({
     sizeCanChange: true,
     showTotal: true,
@@ -157,68 +183,48 @@ const useTableList = (props) => {
     pageSizeChangeResetCurrent: true
   });
   const [loading, setLoading] = useState<boolean>(false);
-
   const columns: TableColumnProps[] = [
     {
       title: 'ID',
       dataIndex: 'id',
-      width: 60
+      width: 80
     },
     {
-      title: '文件名',
-      dataIndex: 'file_name',
+      title: '数据内容',
+      dataIndex: 'short_content',
       ellipsis: true,
-      width: 174,
-      render: (_, record) => (
-        // 产品需求：文件名提示常驻
-        <Popover content={record.file_sub_path}>
-          <span>{record.file_name}</span>
-        </Popover>
-      )
-    },
-    {
-      title: '文件类型',
-      dataIndex: 'file_type',
-      width: 120,
-      filters: fileTypeList,
-      render: (_, record) => (
-        <div className="flex items-center gap-[6px]">
-          {getFileIcon(record.file_type)}
-          <span>{record.file_type}</span>
-        </div>
-      )
-    },
-    {
-      title: '文件大小',
-      width: 88,
-      dataIndex: 'file_size',
-      render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
-    },
-    {
-      title: '上传用户',
-      dataIndex: 'upload_user',
-      ellipsis: true,
-      width: 100
-    },
-    {
-      title: '载入开始时间',
-      dataIndex: 'task_load_start_time',
-      width: 180,
-      sorter: true,
-
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.task_load_start_time)
-    },
-    {
-      title: '连接器名称',
-      dataIndex: 'connector_name',
-      ellipsis: true,
+      width: 300,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.connector_name}
+          value={record.short_content}
           isEdit={false}
           preferTypography
         />
+      )
+    },
+    {
+      title: '生成时间',
+      dataIndex: 'generated_at',
+      width: 180,
+      sorter: true,
+      render: (_, record) => formatTime(record.generated_at)
+    },
+    {
+      title: '原文件类型',
+      dataIndex: 'file_type',
+      filters: fileTypeList, // 使用动态获取的文件类型筛选器
+      width: 134,
+      render: (_, record) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          {getFileIcon(record.type)}
+          <span>{record.file_type}</span>
+        </div>
       )
     }
   ];
@@ -227,19 +233,17 @@ const useTableList = (props) => {
     async function loadFileTypeList() {
       try {
         const res = await getTargetFileTypeList();
-        if (
-          res &&
-          res.data &&
-          res.data.dst_file_type &&
-          Array.isArray(res.data.dst_file_type)
-        ) {
-          const result = res.data.dst_file_type.map((type) => ({
-            text: type,
-            value: type
-          }));
 
-          setFileTypeList((prev) => [...prev, ...result]);
+        if (res?.status !== 200 || !Array.isArray(res?.data?.dst_file_type)) {
+          return;
         }
+
+        const result = res.data.dst_file_type.map((type) => ({
+          text: type,
+          value: type
+        }));
+
+        setFileTypeList((prev) => [...prev, ...result]);
       } catch (error) {
         console.error('获取文件类型列表失败:', error);
       }
@@ -250,40 +254,24 @@ const useTableList = (props) => {
 
   useEffect(() => {
     async function loadListData() {
-      const { pagination, sorter, filters } = searchParams;
-
-      const targetParams: any = {
-        data_path_id: Number(fromId) || 0,
-        page: pagination?.current || 1,
-        page_size: pagination?.pageSize || 10,
-        file_name: searchParams.file_name || '',
-        file_type: sorter?.file_type || [],
-        start: searchParams.datetime_range
-          ? searchParams.datetime_range[0]
-          : undefined,
-        end: searchParams.datetime_range
-          ? searchParams.datetime_range[1]
-          : undefined,
-        sort:
-          filters?.direction == undefined
-            ? ''
-            : filters?.direction == 'ascend'
-              ? 'asc'
-              : 'desc',
-        sort_by: filters?.field == undefined ? '' : filters?.field
-      };
-
       setLoading(true);
 
       try {
-        const res = await getSourceDataFileList(targetParams);
+        const res = await getTargetDataFileList(searchParams);
+
+        if (res?.status !== 200) {
+          setLoading(false);
+          setListData([]);
+          return;
+        }
+
         setPagination((prev) => ({
           ...prev,
           current: res.data?.page,
           pageSize: res.data?.page_size,
           total: res.data?.total
         }));
-        setListData(res.data?.items);
+        setListData(res.data?.list);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -293,11 +281,9 @@ const useTableList = (props) => {
 
     setListData([]);
     loadListData();
-  }, [searchParams, fromId]);
+  }, [searchParams, volumn.id, volumn.full_path]);
 
   function handleValuesChange(values: any) {
-    // console.log('Form values changed:', values);
-
     setSearchParams((prev) => {
       return {
         ...prev,
@@ -306,20 +292,30 @@ const useTableList = (props) => {
     });
   }
 
-  function handleTableChange(pagination: any, filters: any, sorter: any) {
-    // console.log('Table change:', pagination, filters, sorter);
-
+  function handleTableChange(
+    pagination: PaginationProps,
+    sorter: any,
+    filters: any
+  ) {
     setSearchParams((prev) => {
       return {
         ...prev,
-        pagination,
-        filters,
-        sorter
+        page: pagination.current,
+        page_size: pagination.pageSize,
+        ...(filters
+          ? {
+              file_type: filters.file_type
+            }
+          : {}),
+        ...(sorter
+          ? {
+              sort_field: sorter.field,
+              sort_order: sorter.direction === 'ascend' ? 'asc' : 'desc'
+            }
+          : {})
       };
     });
   }
-
-  // const handleTableChange = useCallback(onTableChange, []);
 
   return {
     handleValuesChange,
@@ -332,23 +328,33 @@ const useTableList = (props) => {
 };
 
 interface SourceDataFileQueryParams {
-  page: number;
-  page_size: number;
-  file_name?: string;
-  data_path_id?: number;
-  start?: string;
-  end?: string;
-  file_type?: Array<string>;
+  full_path: string;
+  start_time: string;
+  end_time: string;
+  search_content: string;
+  search_id: number;
+  limit: number;
+  file_type: Array<string>;
   sort_field?: string;
   sort_order?: string;
+  path_id: string;
 }
 
 interface ListDataItem {
   id: number;
-  content: string;
-  type: string;
-  createdAt: string;
-  file: string;
-  workflowId: string;
-  full_path?: string;
+  generated_at: string;
+  FileName: string;
+  file_type: string;
+  full_path: string;
+  short_content: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  extras: {
+    ds_workflow_id: string;
+    file_name: string;
+    file_size: string;
+    workflow_uuid: string;
+  };
+  perms: string[];
 }

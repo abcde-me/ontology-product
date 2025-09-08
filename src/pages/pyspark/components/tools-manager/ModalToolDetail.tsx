@@ -54,25 +54,25 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
           <div className="operator-info">
             {/* 算子名称 */}
             <div className="operator-section">
-              <h4>算子名称</h4>
+              <h4>算子名称：</h4>
               <p>{toolDetailData.name}</p>
             </div>
 
             {/* 算子介绍 */}
             <div className="operator-section">
-              <h4>算子介绍</h4>
+              <h4>算子介绍：</h4>
               <p>{toolDetailData.description}</p>
             </div>
 
             {/* 处理逻辑 */}
             <div className="operator-section">
-              <h4>处理逻辑</h4>
+              <h4>处理逻辑：</h4>
               <p>{toolDetailData.detail}</p>
             </div>
 
             {/* 输入输出 */}
             <div className="operator-section">
-              <h4>输入输出</h4>
+              <h4>输入输出：</h4>
               <div className="io-container">
                 <div className="io-item">
                   <span className="io-label">输入:</span>
@@ -89,23 +89,24 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
 
             {/* 应用场景 */}
             <div className="operator-section">
-              <h4>应用场景</h4>
+              <h4>应用场景：</h4>
               <p>{toolDetailData.usage_scenarios}</p>
+              {/* 标签 */}
+              <Space wrap>
+                {toolDetailData.tags.map((tag, index) => (
+                  <Tag
+                    key={index}
+                    style={{
+                      borderRadius: '4px',
+                      color: '#0F172A',
+                      backgroundColor: '#E7ECF0'
+                    }}
+                  >
+                    {tag}
+                  </Tag>
+                ))}
+              </Space>
             </div>
-
-            {/* 标签 */}
-            {toolDetailData.tags && toolDetailData.tags.length > 0 && (
-              <div className="operator-section">
-                <h4>标签</h4>
-                <Space wrap>
-                  {toolDetailData.tags.map((tag, index) => (
-                    <Tag key={index} color="blue">
-                      {tag}
-                    </Tag>
-                  ))}
-                </Space>
-              </div>
-            )}
           </div>
         </div>
 
@@ -121,20 +122,7 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
             >
               复制代码
             </Button>
-            <Input.TextArea
-              value={toolDetailData.sample_code}
-              readOnly={true}
-              autoSize={{ minRows: 15, maxRows: 20 }}
-              className="code-textarea"
-              style={{
-                fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                fontSize: '14px',
-                lineHeight: '1.5',
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #e5e6eb',
-                borderRadius: '6px'
-              }}
-            />
+            <div className="code-textarea">{toolDetailData.sample_code}</div>
           </div>
         </div>
       </div>

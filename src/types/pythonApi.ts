@@ -150,6 +150,11 @@ export interface GetRunLogReq {
   size?: number;
 }
 
+export interface StopRunPythonItemReq {
+  /** 任务执行id */
+  execid: string;
+}
+
 export interface GetRunLogRes {
   /** 日志 */
   log: string;
@@ -194,7 +199,7 @@ export interface GetExportFileReq {
   /** pyspark文件ID */
   pyspark_id: number;
   /** pyspark任务执行ID */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
 }
 
 export enum StorageType {
@@ -222,7 +227,7 @@ export interface ExportDatasetReq {
   /**
    * pyspark运行ID
    */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
   /**
    * 存储类型：file,jsonl
    */
@@ -284,7 +289,7 @@ export interface GetExportJsonlReq {
   /**
    * pyspark任务执行ID
    */
-  pyspark_exec_id: number;
+  pyspark_exec_id: string;
 }
 
 export interface GetExportJsonlRes {

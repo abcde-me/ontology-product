@@ -27,21 +27,19 @@ const directoryItems = [
   }
 ];
 
-// 转换为 Tree 组件需要的数据格式
-const treeData = directoryItems.map((item) => ({
-  key: item.id,
-  title: item.label,
-  icon: <FileIcon />
-}));
-
 interface DataDirectoryTreeProps {
   from?: DataDirectoryTreeFrom;
   onViewDatasetDetail?: (dataset: DatasetListItem) => void;
   onInsertDataset?: (dataset: DatasetListItem) => void;
-  onViewVolumeDetail?: (volume: FluffyVolume) => void;
+  onViewVolumeDetail?: (
+    dataType: 'source' | 'target',
+    volume: FluffyVolume
+  ) => void;
   onVolumeInsert?: (volume: FluffyVolume) => void;
   onViewDbDetail?: (database: Db) => void;
   onDbInsert?: (database: Db) => void;
+  onInsertContent?: (content: string) => void;
+  isEditorFocused?: boolean;
 }
 
 const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
@@ -51,10 +49,28 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
   onViewVolumeDetail,
   onVolumeInsert,
   onViewDbDetail,
-  onDbInsert
+  onDbInsert,
+  onInsertContent,
+  isEditorFocused = false
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
+
+  // 根据 from 参数动态过滤目录项
+  const getFilteredDirectoryItems = () => {
+    if (from === DataDirectoryTreeFrom.SQL) {
+      // 如果是 SQL，不展示目标数据目录
+      return directoryItems.filter((item) => item.id !== 'target');
+    }
+    return directoryItems;
+  };
+
+  // 转换为 Tree 组件需要的数据格式
+  const treeData = getFilteredDirectoryItems().map((item) => ({
+    key: item.id,
+    title: item.label,
+    icon: <FileIcon />
+  }));
 
   const handleSelect = (selectedKeys: string[]) => {
     if (selectedKeys.length > 0) {
@@ -81,8 +97,11 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
   };
 
   // 处理数据卷详情查看
-  const handleVolumeDetail = (volume: FluffyVolume) => {
-    onViewVolumeDetail?.(volume);
+  const handleVolumeDetail = (
+    dataType: 'source' | 'target',
+    volume: FluffyVolume
+  ) => {
+    onViewVolumeDetail?.(dataType, volume);
   };
 
   // 处理数据卷插入
@@ -112,6 +131,10 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             onViewDatasetDetail={handleDatasetDetail}
             // 数据集插入
             onInsertDataset={handleDatasetInsert}
+            // 插入内容
+            onInsertContent={onInsertContent}
+            // 编辑器聚焦状态
+            isEditorFocused={isEditorFocused}
           />
         );
       case 'source':
@@ -121,13 +144,15 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             type={from}
             onBack={handleBack}
             // 数据卷详情
-            onVolumeDetail={handleVolumeDetail}
+            onVolumeDetail={(v) => handleVolumeDetail('source', v)}
             // 数据卷插入
             onVolumeInsert={handleVolumeInsert}
             // 数据库详情
             onDbDetail={handleDbDetail}
             // 数据库插入
             onDbInsert={handleDbInsert}
+            // 编辑器聚焦状态
+            isEditorFocused={isEditorFocused}
           />
         );
       case 'target':
@@ -137,13 +162,15 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             type={from}
             onBack={handleBack}
             // 数据卷详情
-            onVolumeDetail={handleVolumeDetail}
+            onVolumeDetail={(v) => handleVolumeDetail('target', v)}
             // 数据卷插入
             onVolumeInsert={handleVolumeInsert}
             // 数据库详情
             onDbDetail={handleDbDetail}
             // 数据库插入
             onDbInsert={handleDbInsert}
+            // 编辑器聚焦状态
+            isEditorFocused={isEditorFocused}
           />
         );
       default:

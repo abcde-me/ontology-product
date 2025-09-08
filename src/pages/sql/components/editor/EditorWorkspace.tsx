@@ -13,10 +13,10 @@ import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
-import { RunningStatus } from '@/types/pythonApi';
+import { RunningStatus } from '@/types/sqlApi';
 
 import RunningInfoPanel from './RunningInfoPanel';
-import { useEditor } from '../../hooks/useEditor';
+import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 
 interface NotebookWorkspaceProps {
@@ -28,165 +28,152 @@ interface NotebookWorkspaceProps {
   onActiveUpdate?: (tabData: FileTab) => void;
 }
 
+// 内部组件，使用 EditorContext
+const EditorWorkspaceContent: React.FC = memo(() => {
+  const editorRef = useRef<ReactCodeMirrorRef>(null);
+
+  // 从 Context 获取编辑器状态
+  const {
+    runStatus,
+    runDuration,
+    runStartTime,
+    handleStopRunCode,
+    handleRunCode,
+    lastAutoSave,
+    editorContent,
+    handleContentChange,
+    placeholderValue,
+    runResult
+  } = useEditorContext();
+
+  const myTheme = createTheme({
+    theme: 'light',
+    settings: {
+      background: '#ffffff',
+      backgroundImage: '',
+      foreground: '#5d00ff',
+      lineHighlight: '#8a91991a'
+    },
+    styles: []
+  });
+
+  const handleRunClick = () => {
+    if (runStatus === RunningStatus.RUNNING) {
+      handleStopRunCode();
+    } else {
+      handleRunCode().catch(console.error);
+    }
+  };
+
+  const handleFormatCode = () => {
+    if (editorContent) {
+      try {
+        const formattedCode = format(editorContent, { language: 'sql' });
+        handleContentChange(formattedCode);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  return (
+    <div className="notebook-content">
+      {/* 顶部工具栏 */}
+      <div className="notebook-toolbar">
+        <div className="toolbar-left">
+          <Space size={12}>
+            <Button
+              type="primary"
+              icon={
+                runStatus === RunningStatus.RUNNING ? (
+                  <IconStop className="mr-[4px]" />
+                ) : (
+                  <IconPlayArrow className="mr-[4px]" />
+                )
+              }
+              disabled={editorContent.trim() === ''}
+              onClick={handleRunClick}
+              className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
+            >
+              {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
+            </Button>
+
+            <Button
+              type="text"
+              icon={<IconMenu />}
+              onClick={handleFormatCode}
+              className="h-[26px]"
+            >
+              格式化
+            </Button>
+          </Space>
+        </div>
+        {lastAutoSave && (
+          <div className="toolbar-right">
+            <Space size={12}>
+              <span className="text-sm text-gray-500">
+                自动保存: {lastAutoSave || '未保存'}
+              </span>
+            </Space>
+          </div>
+        )}
+      </div>
+
+      {/* 编辑器区域 */}
+      <div className="editor-container">
+        <CodeMirror
+          ref={editorRef}
+          value={editorContent}
+          onChange={handleContentChange}
+          placeholder={placeholderValue}
+          extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
+          basicSetup={{
+            lineNumbers: true,
+            highlightActiveLineGutter: false
+          }}
+          className="code-editor"
+        />
+      </div>
+
+      {/* 运行信息面板 */}
+      <RunningInfoPanel />
+    </div>
+  );
+});
+
+// 主组件，提供 EditorContext
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
   ({ content, fileName, currentFileId, hasRun, onActiveUpdate, tabKey }) => {
-    const editorRef = useRef<ReactCodeMirrorRef>(null);
-
-    // 使用useEditor hook管理编辑器状态
-    const {
-      runStatus,
-      runDuration,
-      runStartTime,
-      handleStopRunCode,
-      handleRunCode,
-      lastAutoSave,
-      editorContent,
-      setEditorContent,
-      handleContentChange,
-      placeholderValue,
-      runResult,
-      runLog,
-      size,
-      setSize
-    } = useEditor({
-      initialContent: content,
-      currentFileId,
-      tabKey: tabKey,
-      onActiveUpdate: onActiveUpdate,
-      hasRun
-    });
-
-    const myTheme = createTheme({
-      theme: 'light',
-      settings: {
-        background: '#ffffff',
-        backgroundImage: '',
-        foreground: '#5d00ff',
-        lineHighlight: '#8a91991a'
-      },
-      styles: []
-    });
-
-    const handleExportDataset = () => {
-      console.log('Exporting dataset...');
-    };
-
-    const handleExportList = () => {
-      console.log('Exporting list...');
-    };
-
-    const handleCallOperator = () => {
-      console.log('Calling operator...');
-    };
-
-    const handleRunClick = () => {
-      if (runStatus === RunningStatus.RUNNING) {
-        handleStopRunCode();
-      } else {
-        handleRunCode().catch(console.error);
-      }
-    };
-
-    const handleFormatCode = () => {
-      if (editorContent) {
-        try {
-          const formattedCode = format(editorContent, { language: 'sql' });
-          setEditorContent(formattedCode);
-        } catch (e) {
-          console.error(e);
+    const editorOptions = {
+      activeTab: tabKey,
+      fileTabs: [
+        {
+          key: tabKey || 'default',
+          title: fileName,
+          content: content,
+          fileId: currentFileId
+        }
+      ],
+      onTabUpdate: (
+        tabKey: string,
+        updates: { content?: string; fileId?: string; title?: string }
+      ) => {
+        if (onActiveUpdate) {
+          onActiveUpdate({
+            key: tabKey,
+            title: updates.title || fileName,
+            content: updates.content || content,
+            fileId: updates.fileId || currentFileId,
+            hasRun
+          });
         }
       }
     };
 
     return (
-      <div className="notebook-content">
-        {/* 顶部工具栏 */}
-        <div className="notebook-toolbar">
-          <div className="toolbar-left">
-            <Space size={12}>
-              <Button
-                type="primary"
-                icon={
-                  runStatus === RunningStatus.RUNNING ? (
-                    <IconStop className="mr-[4px]" />
-                  ) : (
-                    <IconPlayArrow className="mr-[4px]" />
-                  )
-                }
-                disabled={editorContent.trim() === ''}
-                onClick={handleRunClick}
-                className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
-              >
-                {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
-              </Button>
-
-              <Button
-                type="text"
-                icon={<IconMenu />}
-                onClick={handleFormatCode}
-                className="h-[26px]"
-              >
-                格式化
-              </Button>
-
-              {/* <Button
-                icon={<IconUpload />}
-                onClick={handleExportDataset}
-                className="h-[26px]"
-                disabled={editorContent.trim() === ''}
-              >
-                导出数据集
-              </Button> */}
-              {/* <Button
-                type="text"
-                icon={<IconSettings />}
-                onClick={handleCallOperator}
-                className="h-[26px]"
-              >
-                调用算子
-              </Button> */}
-            </Space>
-          </div>
-          {lastAutoSave && (
-            <div className="toolbar-right">
-              <Space size={12}>
-                <span className="text-sm text-gray-500">
-                  自动保存: {lastAutoSave || '未保存'}
-                </span>
-              </Space>
-            </div>
-          )}
-        </div>
-
-        {/* 编辑器区域 */}
-        <div className="editor-container">
-          <CodeMirror
-            ref={editorRef}
-            value={editorContent}
-            onChange={handleContentChange}
-            placeholder={placeholderValue}
-            extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLineGutter: false
-            }}
-            className="code-editor"
-          />
-        </div>
-
-        {/* 运行信息面板 */}
-        {hasRun && (
-          <RunningInfoPanel
-            runResult={runResult}
-            runLog={runLog}
-            runStatus={runStatus}
-            runDuration={runDuration}
-            runStartTime={runStartTime}
-            size={size}
-            setSize={setSize}
-          />
-        )}
-      </div>
+      <EditorProvider options={editorOptions}>
+        <EditorWorkspaceContent />
+      </EditorProvider>
     );
   }
 );

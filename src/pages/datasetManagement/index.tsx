@@ -149,8 +149,8 @@ const columns = (
     title: '数据集名称',
     dataIndex: 'name',
     width: 200,
-    className: 'hover-change workflow-name',
-    rowClassName: 'hover-change',
+    className: 'dataset-management-hover-change workflow-name',
+    rowClassName: 'dataset-management-hover-change',
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (

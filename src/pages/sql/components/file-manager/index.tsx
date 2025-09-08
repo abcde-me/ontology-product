@@ -1,6 +1,5 @@
 import React, { forwardRef } from 'react';
 import { Typography } from '@arco-design/web-react';
-import { PythonListItem } from '@/types/pythonApi';
 import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
@@ -48,7 +47,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
         <Title className="tab-title">SQL脚本列表</Title>
       </div>
 
-      <div className="tab-tree">
+      <div className="tab-tree sider-container">
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           from={DirectoryTreeFrom.SQL}

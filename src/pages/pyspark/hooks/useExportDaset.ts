@@ -11,7 +11,7 @@ import { Message } from '@arco-design/web-react';
 import React from 'react';
 import { exportDataset } from '@/api/pyspark';
 
-export const useExportDaset = () => {
+export const useExportDaset = (currentFileId?: string, execid?: string) => {
   // Modal相关状态
   const [modalDatasetVisible, setModalDatasetVisible] =
     React.useState<boolean>(false);
@@ -123,11 +123,11 @@ export const useExportDaset = () => {
     try {
       const createDatasetRes = await exportDataset({
         name: formData.name,
-        pyspark_id: formData.pysparkId,
+        pyspark_id: currentFileId ? Number(currentFileId) : 0,
         storage_type: formData.storageType,
         file_names: formData.selectedFiles,
         tag_names: formData.tags,
-        pyspark_exec_id: formData.pysparkExecId
+        pyspark_exec_id: execid ?? ''
       });
 
       if (createDatasetRes.status !== 200) {

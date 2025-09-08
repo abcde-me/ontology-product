@@ -1,26 +1,45 @@
 import React, { useState } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Message, Typography } from '@arco-design/web-react';
 import DataDirectoryTree from '@/components/data-directory-tree';
 import ModalDatasetDetail from './ModalDatasetDetail';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
-import ModalVolumnDetail from './ModalVolumnDetail';
+import ModalSourceVolumnDetail from './ModalSourceVolumnDetail';
+import ModalTargetVolumnDetail from './ModalTargetVolumnDetail';
 import { Db, FluffyVolume } from '@/api/dataCatalog';
+import copy from 'copy-to-clipboard';
 
 const { Title } = Typography;
 
-const PythonTabContent: React.FC<{}> = () => {
+interface PythonTabContentProps {
+  onInsertContent?: (content: string) => void;
+  isEditorFocused?: boolean;
+}
+
+const PythonTabContent: React.FC<PythonTabContentProps> = ({
+  onInsertContent,
+  isEditorFocused = false
+}) => {
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
-  const [volumnDetailVisible, setVolumnDetailVisible] = useState(false);
-  const [selectedVolumnId, setSelectedVolumnId] = useState('');
+  const [sourceVolumnDetailVisible, setSourceVolumnDetailVisible] =
+    useState(false);
+  const [targetVolumnDetailVisible, setTargetVolumnDetailVisible] =
+    useState(false);
+  const [selectedVolumn, setSelectedVolumn] = useState<FluffyVolume | null>(
+    null
+  );
 
   const closeDatasetDetail = () => {
     setDatasetDetailVisible(false);
   };
 
-  const closeVolumnDetail = () => {
-    setVolumnDetailVisible(false);
+  const closeSourceVolumnDetail = () => {
+    setSourceVolumnDetailVisible(false);
+  };
+
+  const closeTargetVolumnDetail = () => {
+    setTargetVolumnDetailVisible(false);
   };
 
   // 处理数据集详情查看
@@ -29,25 +48,44 @@ const PythonTabContent: React.FC<{}> = () => {
     setDatasetDetailVisible(true);
   };
 
-  // 处理数据集插入
+  // 处理数据集插入或复制
   const handleInsertDataset = (dataset: DatasetListItem) => {
-    console.log('数据集插入:', dataset);
-    // 这里可以添加插入数据集的逻辑
-    // 比如将数据集添加到代码编辑器中或执行其他插入操作
+    console.log('数据集插入:', dataset, isEditorFocused, onInsertContent);
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(dataset.name ?? '');
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(dataset.name ?? '');
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
-  // 处理数据卷插入
+  // 处理数据卷插入或复制
   const handleVolumeInsert = (volume: FluffyVolume) => {
     console.log('数据卷插入:', volume);
-    // 这里可以添加插入数据卷的逻辑
-    // 比如将数据卷添加到代码编辑器中或执行其他插入操作
+
+    if (isEditorFocused && onInsertContent) {
+      // 编辑器聚焦时插入内容
+      onInsertContent(volume?.name ?? '');
+    } else {
+      // 编辑器未聚焦时复制到剪贴板
+      copy(volume?.name ?? '1111');
+      Message.success('内容复制成功，请粘贴到编辑器');
+    }
   };
 
   // 处理数据卷详情查看
-  const handleViewVolumeDetail = (volume: FluffyVolume) => {
+  const handleViewVolumeDetail = (
+    rootType: 'source' | 'target',
+    volume: FluffyVolume
+  ) => {
     console.log('数据卷详情:', volume);
-    setSelectedVolumnId(String(volume.id));
-    setVolumnDetailVisible(true);
+    setSelectedVolumn(volume);
+    rootType === 'source'
+      ? setSourceVolumnDetailVisible(true)
+      : setTargetVolumnDetailVisible(true);
   };
 
   // 处理数据库详情查看
@@ -68,6 +106,8 @@ const PythonTabContent: React.FC<{}> = () => {
           onInsertDataset={handleInsertDataset}
           onViewVolumeDetail={handleViewVolumeDetail}
           onViewDbDetail={handleViewDbDetail}
+          onInsertContent={onInsertContent}
+          isEditorFocused={isEditorFocused}
         />
       </div>
 
@@ -80,12 +120,21 @@ const PythonTabContent: React.FC<{}> = () => {
         />
       )}
 
-      {/* 数据卷详情 */}
-      {volumnDetailVisible && (
-        <ModalVolumnDetail
-          volumnDetailVisible={volumnDetailVisible}
-          selectedVolumnId={selectedVolumnId}
-          closeVolumnDetail={closeVolumnDetail}
+      {/* 源数据卷详情 */}
+      {sourceVolumnDetailVisible && (
+        <ModalSourceVolumnDetail
+          volumnDetailVisible={sourceVolumnDetailVisible}
+          selectedVolumn={selectedVolumn}
+          closeVolumnDetail={closeSourceVolumnDetail}
+        />
+      )}
+
+      {/* 目标数据卷详情 */}
+      {targetVolumnDetailVisible && (
+        <ModalTargetVolumnDetail
+          volumnDetailVisible={targetVolumnDetailVisible}
+          selectedVolumn={selectedVolumn}
+          closeVolumnDetail={closeTargetVolumnDetail}
         />
       )}
     </div>

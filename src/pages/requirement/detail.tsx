@@ -30,18 +30,24 @@ import { DepartmentModal } from './components/DepartmentModal';
 import { IndividualModal } from './components/IndividualModal';
 import { v4 as uuidV4 } from 'uuid';
 import {
+  convertToUTCFormat,
   getRandomHexColorStrict,
   numberToChinese,
   shapeOptions
 } from './common';
 import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
-import { publishRequirement } from '@/api/dataAnnotation';
+import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _ from 'lodash';
+import _, { omitBy, isArray, isEmpty } from 'lodash';
 import './detail.scss';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
-import { RequirementTypeMap, TeamType, TeamTypeMap } from './type';
+import {
+  RequirementTypeMap,
+  TeamType,
+  TeamTypeMap,
+  toolFileType
+} from './type';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 标注类型
@@ -127,7 +133,7 @@ export default function RequirementDetail() {
   // 获取整体需求list
   const [requirementList, setRequirementList]: any = useState({});
   const type = useParams('type');
-  const taskId = useParams('id') as string;
+  const requirementId = useParams('id') as string;
   const history = useHistory();
   const userInfo = useUserInfo();
   const [selectedRadio, setSelectedRadio] = useState('');
@@ -150,7 +156,6 @@ export default function RequirementDetail() {
   //
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
-
   useEffect(() => {
     if (selectedRadio !== '') {
       setIsShowErrorInfo(false);
@@ -162,8 +167,18 @@ export default function RequirementDetail() {
   // 基础配置
 
   const handleChildData = (data: any) => {
-    setSelectedData(data);
-    setPublishData({ ...publishData, label_count: selectedData.length });
+    console.log(data, '==1=2');
+    const newSetDataContent = data.map((item) => {
+      return {
+        dir_name: 'car_images/train',
+        load_start_time: convertToUTCFormat(item?.start_time),
+        load_end_time: convertToUTCFormat(item?.end_time),
+        load_num: item?.load_num,
+        create_by: item?.upload_user,
+        run_id: String(item?.data_path_id)
+      };
+    });
+    setSelectedData(newSetDataContent);
   };
 
   const handleChildTreeSelectData = (data: any) => {
@@ -197,7 +212,7 @@ export default function RequirementDetail() {
       label_type_code: annotationTypeContentCode
     });
     setDatalist(generateInitialData());
-    console.log('=123', selectedRadio, activeKey);
+    console.log('=123', selectedRadio, activeKey, annotationTypeContentCode);
   };
 
   // 工具函数：安全获取嵌套属性
@@ -480,9 +495,9 @@ export default function RequirementDetail() {
           return true;
         })
         .catch((errorInfo) => {
-          if (selectedData?.length <= 0) {
-            setIsShowDataErrorInfo(true);
-          }
+          // if (selectedData?.length <= 0) {
+          //   setIsShowDataErrorInfo(true);
+          // }
           if (selectedRadio === '') {
             setIsShowErrorInfo(true);
             return;
@@ -529,17 +544,48 @@ export default function RequirementDetail() {
       console.log('错误');
     }
   };
+  const removeEmptyArrays = (obj) => {
+    return omitBy(obj, (value) => isArray(value) && isEmpty(value));
+  };
+
   const publish = async () => {
+    const newSetLabels = datalist.map((item, index) => {
+      return {
+        ...item,
+        order_num: index,
+        label_info_attribute_groups: item.label_info_attribute_groups.map(
+          (group) => {
+            return {
+              ...group,
+              order_num: index,
+              label_info_attribute: group.label_info_attribute.map(
+                (attribute) => {
+                  return {
+                    ...attribute,
+                    order_num: index,
+                    attribute_name_en: attribute.attribute_name_en.replace(
+                      /\s+/g,
+                      '_'
+                    )
+                  };
+                }
+              )
+            };
+          }
+        )
+      };
+    });
     // 发布数据重置
     const new_publishData = {
       name: publishData?.name,
       description: publishData?.description,
       label_type: selectedRadio,
       label_count: 1, //数据量（所有数据集之和）
-      team_type: TeamTypeMap[TeamType.PERSON],
+      team_type: taskTypeVal,
       label_tool: {
         label_tool_name: RequirementTypeMap[selectedRadio],
-        label_tool_code: annotationTypeContentCode
+        label_tool_code: annotationTypeContentCode,
+        image_out_of_bounds: 0
       },
       // 配置文件分类标签
       file_labels:
@@ -561,40 +607,8 @@ export default function RequirementDetail() {
               }
             ]
           : [],
-      label_data_set: [
-        // 配置数据集
-        {
-          dir_name: '',
-          load_start_time: '',
-          load_end_time: '',
-          load_num: 100, // 数据量,
-          create_by: '', // 创建人
-          run_id: '' // 运行id
-        }
-      ],
-      labels: [
-        //配置标签
-        {
-          label_name_cn: '', //展示名称
-          label_name_en: '', //存储名称
-          label_shape: 1, //标注形状，点1，线2，正方形3，多边形4
-          label_colour: '', //标签颜色（如#FFFFFF）
-          label_info_attribute_groups: [
-            {
-              attribute_group_name: '', //属性组名称
-              attribute_group_class: 1, //1单选/2多选/3输入框
-              attribute_group_type: 1, //1必选/2非必选
-              label_info_attribute: [
-                {
-                  attribute_name_cn: '', //属性中文名称(展示名称)
-                  attribute_name_en: '', //属性英文名称(存储名称)
-                  input_type: 1 //输入类型：1选项，2输入框
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      label_data_set: selectedData,
+      labels: newSetLabels,
       entity_relations:
         annotationTypeVal === AnnotationTypeStatus.TEXT &&
         annotationTypeContentVal === AnnotationChildType.ENTITY
@@ -624,15 +638,36 @@ export default function RequirementDetail() {
         }
       ]
     };
+    const obj: any = removeEmptyArrays(new_publishData);
+    console.log(datalist, '123');
     setLoading(true);
     // 发布数据
-    // @ts-expect-error TODO: FIX
-    const res = await publishRequirement(new_publishData);
+    const res = await publishRequirement(obj);
     if (res.success) {
       history.push('/requirement');
     }
     setLoading(false);
   };
+  // 需求详情查看
+  const getDetail = async () => {
+    try {
+      const res = await getRequirementDetail({
+        requirement_id: Number(requirementId)
+      });
+      if (res.success) {
+        console.log(res, '=======');
+        setPublishData(res.data);
+        setDatalist(res.data);
+      }
+    } catch (error) {
+      console.log(error, '=======');
+    }
+  };
+  useEffect(() => {
+    if (type === 'detail') {
+      getDetail();
+    }
+  }, [requirementId]);
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -660,7 +695,7 @@ export default function RequirementDetail() {
               >
                 标注详情
               </BreadcrumbItem>
-              <BreadcrumbItem>{taskId}</BreadcrumbItem>
+              <BreadcrumbItem>{requirementId}</BreadcrumbItem>
             </Breadcrumb>
           </div>
         )}
@@ -706,6 +741,7 @@ export default function RequirementDetail() {
                 <span className="error-info-text">请选择标注工具</span>
               )}
               <AnnotationType
+                isDisabled={type === 'detail'}
                 label_type={requirementList?.label_type || 1}
                 label_tool={requirementList?.label_tool?.label_tool_code || 1}
                 getChildAnnotationType={getAnnotationType}
@@ -714,6 +750,7 @@ export default function RequirementDetail() {
             <FormItem field="dataset" label="标注数据" required>
               <div className="data-content-set">
                 <Button
+                  disabled={type === 'detail'}
                   type="primary"
                   onClick={() => {
                     setModalVisible(true);
@@ -733,6 +770,7 @@ export default function RequirementDetail() {
             </FormItem>
           </Form>
           <DataSourceModal
+            fileType={toolFileType[Number(annotationTypeVal)]}
             visible={modalVisible}
             onClose={() => {
               setModalVisible(false);
@@ -932,6 +970,7 @@ export default function RequirementDetail() {
                                     <FormItem
                                       field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
                                       required
+                                      disabled={type === 'detail'}
                                       label="属性组件名称"
                                     >
                                       <div className="group-items">
@@ -1145,6 +1184,7 @@ export default function RequirementDetail() {
                             )}
                           <div className="btn-content-items">
                             <Button
+                              disabled={type === 'detail'}
                               className="btn-add-label btn-add"
                               style={{ marginRight: 16 }}
                               onClick={() => {
@@ -1155,6 +1195,7 @@ export default function RequirementDetail() {
                               添加标签
                             </Button>
                             <Button
+                              disabled={type === 'detail'}
                               className="btn-add-attribute btn-add"
                               style={{ marginRight: 16 }}
                               onClick={() => {
@@ -1193,7 +1234,10 @@ export default function RequirementDetail() {
                                   </Menu>
                                 }
                               >
-                                <Button type="secondary">
+                                <Button
+                                  disabled={type === 'detail'}
+                                  type="secondary"
+                                >
                                   <IconPlus />
                                   添加模版属性
                                 </Button>
@@ -1213,9 +1257,14 @@ export default function RequirementDetail() {
                             key={labelIndex}
                             className="attribute-group-item-template"
                           >
-                            <FormItem required label="属性组件名称">
+                            <FormItem
+                              required
+                              label="属性组件名称"
+                              disabled={type === 'detail'}
+                            >
                               <div className="group-items">
                                 <Input
+                                  disabled={type === 'detail'}
                                   width={400}
                                   height={32}
                                   value={attrGroup.attribute_group_name}
@@ -1276,7 +1325,9 @@ export default function RequirementDetail() {
                                   <IconPlus
                                     fontSize={30}
                                     className="ml-2"
-                                    onClick={() => addAttributeT(labelIndex)}
+                                    onClick={() => {
+                                      addAttributeT(labelIndex);
+                                    }}
                                   />
                                 )}
                                 {
@@ -1471,6 +1522,7 @@ export default function RequirementDetail() {
                 }
               ]}
               label={taskTypeVal === 1 ? '选择部门' : '选择个人'}
+              disabled={type === 'detail'}
             >
               <div className="btn-content-text">
                 <Button

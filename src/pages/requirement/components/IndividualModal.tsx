@@ -172,7 +172,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   }, [checkedKeys, current, pageSize]);
   // 表格选择内容
   const getTableSelectContent = () => {
-    getChildTreeSelectData(selectedRowsContent);
+    getChildTreeSelectData(selectedRowKeys);
     onClose();
   };
   return (

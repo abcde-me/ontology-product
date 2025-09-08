@@ -56,18 +56,20 @@ const SqlIndex: React.FC = memo(() => {
           type="rounded"
         >
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
+            {activeTab === 'data' && <DataManager key="data" />}
           </TabPane>
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              ref={directoryTreeRef}
-              onFileOpen={openFile}
-            />
+            {activeTab === 'files' && (
+              <FileManager
+                key="files"
+                type="files"
+                ref={directoryTreeRef}
+                onFileOpen={openFile}
+              />
+            )}
           </TabPane>
           <TabPane key="dataset" title={<DasetIcon />}>
-            <DatasetsList />
+            {activeTab === 'dataset' && <DatasetsList />}
           </TabPane>
         </Tabs>
       </Sider>
