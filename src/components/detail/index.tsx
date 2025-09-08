@@ -19,7 +19,8 @@ import {
   Select,
   Pagination,
   Tooltip,
-  Empty
+  Empty,
+  TableColumnProps
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -48,7 +49,8 @@ import {
   type DataChangeItem,
   getDatasetVersionList,
   datasetVersionRebuild,
-  getDataContentFileList
+  getDataContentFileList,
+  getDataContentTableList
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -79,6 +81,17 @@ interface DatasetDetail {
   updated_at: string;
   perms: string[];
   storage_type: string;
+}
+
+enum StorageType {
+  jsonl = 'jsonl',
+  file = 'file',
+  table = 'table'
+}
+
+interface TableColumn {
+  name: string;
+  cn_name: string;
 }
 
 const countWidth = (count: number) => {
@@ -538,6 +551,15 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
   const [contentFileData, setContentFileData] = React.useState<any[]>([]); //文件内容数据
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
+  const [contentTableColumns, setContentTableColumns] = React.useState<
+    TableColumnProps[]
+  >([]); //数据库内容列信息
+  const [contentTableColumnsList, setContentTableColumnsList] = React.useState<
+    TableColumn[]
+  >([]); //数据库内容列数据
+  const [contentTableData, setContentTableData] = React.useState<Array<Object>>(
+    []
+  ); //数据库内容数据
 
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
@@ -666,6 +688,18 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
       window.removeEventListener('resize', updateWidth);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (contentTableColumnsList.length > 0) {
+      setContentTableColumns(
+        contentTableColumnsList.map((item) => ({
+          title: `${item.name}(${item.cn_name})`,
+          dataIndex: item.name,
+          key: item.name
+        }))
+      );
+    }
+  }, [contentTableColumnsList]);
 
   // 返回按钮
   const handleBack = () => {
@@ -1044,7 +1078,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    if (datasetDetail.storage_type === 'file') {
+    if (datasetDetail.storage_type === StorageType.file) {
       const params = {
         id: id,
         version_id: datasetDetail.latest_version,
@@ -1053,7 +1087,6 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
       };
       return getDataContentFileList(params)
         .then((res) => {
-          console.log(res, 'res');
           if (res.status !== 200) {
             Message.error('获取内容数据失败');
             return;
@@ -1067,7 +1100,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
           console.error('获取数据集内容失败:', err);
           Message.error('加载数据失败');
         });
-    } else {
+    } else if (datasetDetail.storage_type === StorageType.jsonl) {
       const params: any = {
         id: id,
         page: currentPage,
@@ -1088,6 +1121,26 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
             setIdName(res.data.id_name || '');
             setTotal(res.data.total || 0);
             setContentDatabackup(res.data.list || []);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    } else {
+      const params = {
+        id: id,
+        version_id: datasetDetail.latest_version
+      };
+      return getDataContentTableList(params)
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentTableColumnsList(res.data.columns || []);
+            setContentTableData(res.data.list || []);
           }
         })
         .catch((err) => {
@@ -1481,7 +1534,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type === 'file' ? (
+          {datasetDetail?.storage_type === StorageType.file ? (
             <TabPane key="content" title="数据内容">
               <Table
                 columns={contentFileColumns}
@@ -1517,7 +1570,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                 />
               </div>
             </TabPane>
-          ) : (
+          ) : datasetDetail?.storage_type === StorageType.jsonl ? (
             <TabPane key="content" title="数据内容">
               {/* 搜索系统 */}
               <div
@@ -1696,6 +1749,16 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
               ) : (
                 noDataElement({ description: '暂无数据' })
               )}
+            </TabPane>
+          ) : (
+            // 数据库表数据内容
+            <TabPane key="content" title="数据内容">
+              <Table
+                columns={contentTableColumns}
+                data={contentTableData}
+                pagination={false}
+                rowKey="id"
+              />
             </TabPane>
           )}
           <TabPane key="version" title="版本历史">

@@ -239,6 +239,13 @@ export async function getDataContentFileList(params: {
 }) {
   return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
 }
+//查询数据内容数据库列表
+export async function getDataContentTableList(params: {
+  id: number | string;
+  version_id: string;
+}) {
+  return await UAPI.RES.dataContentTableList({}).get(params).inRegion().do();
+}
 
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){
