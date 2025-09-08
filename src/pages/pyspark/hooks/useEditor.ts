@@ -7,6 +7,7 @@ import {
   getRunResult,
   savePythonItem,
   openPythonItem,
+  stopRunPythonItem,
   getRunLog
 } from '@/api/pyspark';
 
@@ -79,7 +80,28 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     useRequest(getRunResult, {
       pollingInterval: 10000,
       pollingWhenHidden: false,
-      manual: true
+      manual: true,
+      onSuccess: (res) => {
+        if (res?.status !== 200) {
+          setRunStatus(RunningStatus.FAILED);
+          cancelGetRunResultPolling();
+          setRunResult(res?.message ?? '获取运行结果失败');
+          return;
+        }
+
+        if (res?.data?.run_status !== RunningStatus.RUNNING) {
+          cancelGetRunResultPolling();
+        }
+
+        setRunResult(res?.data?.run_result ?? '');
+        setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
+        setRunDuration(res?.data?.run_duration ?? 0);
+      },
+      onError: (error) => {
+        setRunStatus(RunningStatus.FAILED);
+        cancelGetRunResultPolling();
+        setRunResult(error?.message ?? '获取运行结果失败');
+      }
     });
 
   // 清空编辑器状态的函数
@@ -221,9 +243,17 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [runStatus, currentFileId]);
 
   // 停止运行
-  const handleStopRunCode = useCallback(() => {
+  const handleStopRunCode = async () => {
+    const res = await stopRunPythonItem(currentFileId ?? '', { execid });
+
+    if (res?.status !== 200 || Number(res?.code) !== 0) {
+      Message.error(res?.message ?? '停止运行失败');
+      return;
+    }
+
+    cancelGetRunResultPolling();
     setRunStatus(RunningStatus.IDLE);
-  }, []);
+  };
 
   // 获取运行日志
   const handleGetRunLog = useCallback(async () => {
@@ -254,25 +284,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     // 运行中时，轮询获取运行结果
-    const fetchResult = async () => {
+    const fetchResult = () => {
       try {
-        const res = await getRunResultPolling(currentFileId, {
+        getRunResultPolling(currentFileId, {
           execid
         });
-
-        if (res?.status !== 200) {
-          setRunStatus(RunningStatus.FAILED);
-          setRunResult(res?.message ?? '获取运行结果失败');
-          return;
-        }
-
-        if (res?.data?.run_status !== RunningStatus.RUNNING) {
-          cancelGetRunResultPolling();
-        }
-
-        setRunResult(res?.data?.run_result ?? '');
-        setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
-        setRunDuration(res?.data?.run_duration ?? 0);
       } catch (error) {
         console.error('获取运行结果失败:', error);
         setRunStatus(RunningStatus.FAILED);

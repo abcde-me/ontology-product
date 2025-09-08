@@ -17,10 +17,10 @@ const { Text } = Typography;
 interface RunningInfoPanelProps {
   runResult: string;
   runLog: string;
-  runStatus?: RunningStatus; // 使用正确的类型
-  onGetRunLog?: () => Promise<void>; // 获取运行日志的函数
-  isPanelOpen?: boolean; // 控制面板是否打开
-  onPanelStateChange?: (isOpen: boolean) => void; // 面板状态变化回调
+  runStatus?: RunningStatus;
+  onGetRunLog?: () => Promise<void>;
+  isPanelOpen?: boolean;
+  onPanelStateChange?: (isOpen: boolean) => void;
 }
 
 const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
@@ -34,38 +34,30 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
   }) => {
     const [activeKey, setActiveKey] = useState<string>('result');
     const [isExpanded, setIsExpanded] = useState(false);
-    const [hasUserClosed, setHasUserClosed] = useState(false);
 
-    // 监听外部控制的面板状态
+    // 监听父组件传递的面板状态变化
     useEffect(() => {
-      if (isPanelOpen !== undefined) {
-        setIsExpanded(isPanelOpen);
-        if (!isPanelOpen) {
-          setHasUserClosed(false); // 重置用户关闭状态
-        }
-      }
+      setIsExpanded(isPanelOpen || false);
     }, [isPanelOpen]);
 
-    // 监听运行状态变化，当运行完成时自动打开面板（但初始状态为收起）
+    // 监听运行状态变化，自动展开面板
     useEffect(() => {
+      // 运行完成时自动展开面板
       if (
         runStatus === RunningStatus.SUCCESS ||
         runStatus === RunningStatus.FAILED
       ) {
-        // 运行完成时，如果面板当前是关闭的，则自动打开
-        if (!isExpanded && !hasUserClosed) {
-          setIsExpanded(true);
-          onPanelStateChange?.(true);
+        setIsExpanded(true);
+        onPanelStateChange?.(true);
+
+        // 根据运行结果自动定位到对应标签页
+        if (runStatus === RunningStatus.SUCCESS) {
+          setActiveKey('result');
+        } else if (runStatus === RunningStatus.FAILED) {
+          setActiveKey('log');
         }
       }
-    }, [runStatus, isExpanded, hasUserClosed, onPanelStateChange]);
-
-    // 监听运行状态变化，当开始新运行时重置用户关闭状态
-    useEffect(() => {
-      if (runStatus === RunningStatus.RUNNING) {
-        setHasUserClosed(false);
-      }
-    }, [runStatus]);
+    }, [runStatus, onPanelStateChange]);
 
     // 监听TabPane切换，当切换到log时获取日志
     useEffect(() => {
@@ -78,11 +70,6 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       const newExpanded = keys.length > 0;
       setIsExpanded(newExpanded);
       onPanelStateChange?.(newExpanded);
-
-      // 如果用户手动关闭面板，记录这个状态
-      if (!newExpanded) {
-        setHasUserClosed(true);
-      }
     };
 
     const renderRunStatus = (status?: RunningStatus) => {
@@ -137,7 +124,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           >
             <div className="panel-content">
               <Tabs
-                defaultActiveTab={activeKey}
+                activeTab={activeKey}
                 onChange={setActiveKey}
                 style={{
                   backgroundColor: '#F8FAFD'

@@ -433,7 +433,7 @@ export const ModaForgeResourceEndpoints = {
   pythonExportDatasetRetryApi:
     PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
   // 获取算子
-  pythonOperatorApi: PrefixAimdp + '/get-operator',
+  pythonOperatorApi: PrefixAimdp + '/directory/get-operator',
   // 导出数据集
   pythonExportDatasetApi: PrefixAimdp + '/pyspark/export/dataset',
   // 获取导出文件列表
