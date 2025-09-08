@@ -7,8 +7,12 @@ import {
   IconCheckCircle,
   IconCloseCircle
 } from '@arco-design/web-react/icon';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/pythonApi';
 import './RunningInfoPanel.scss';
+import { formatTime } from '@/utils/format';
+import timeFormattig from '@/utils/timeFormatting';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -18,6 +22,8 @@ interface RunningInfoPanelProps {
   runResult: string;
   runLog: string;
   runStatus?: RunningStatus;
+  runStartTime?: Date | null;
+  runDuration?: number;
   onGetRunLog?: () => Promise<void>;
   isPanelOpen?: boolean;
   onPanelStateChange?: (isOpen: boolean) => void;
@@ -28,6 +34,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     runResult,
     runLog,
     runStatus,
+    runStartTime,
+    runDuration,
     onGetRunLog,
     isPanelOpen,
     onPanelStateChange
@@ -72,28 +80,44 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       onPanelStateChange?.(newExpanded);
     };
 
+    // 格式化时间显示
+    const formatTimeInfo = (startTime?: Date | null, duration?: number) => {
+      if (!startTime || !duration) return '';
+
+      const startTimeStr = timeFormattig(startTime.getTime());
+
+      const durationStr =
+        duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
+
+      return `${startTimeStr}（${durationStr}）`;
+    };
+
     const renderRunStatus = (status?: RunningStatus) => {
       if (status === RunningStatus.RUNNING) {
         return (
-          <div className="run-status running">
+          <div className="run-status">
             <span className="mr-4">运行中</span>
             <IconLoading style={{ color: '#007DFA' }} />
           </div>
         );
       }
       if (status === RunningStatus.SUCCESS) {
+        const timeInfo = formatTimeInfo(runStartTime, runDuration);
         return (
-          <div className="run-status success">
+          <div className="run-status">
             <span className="mr-4">运行成功</span>
-            <IconCheckCircle style={{ color: '#10B981' }} />
+            <RunSuccessIcon className="mr-[8px]" />
+            {timeInfo && <span>{timeInfo}</span>}
           </div>
         );
       }
       if (status === RunningStatus.FAILED) {
+        const timeInfo = formatTimeInfo(runStartTime, runDuration);
         return (
-          <div className="run-status failed">
+          <div className="run-status">
             <span className="mr-4">运行失败</span>
-            <IconCloseCircle style={{ color: '#EF4444' }} />
+            <RunFailedIcon className="mr-[8px]" />
+            {timeInfo && <span>{timeInfo}</span>}
           </div>
         );
       }
