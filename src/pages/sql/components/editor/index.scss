@@ -44,6 +44,25 @@
   .main-workspace {
     flex: 1;
     overflow: hidden;
+    position: relative;
+
+    .tab-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+
+      &.hidden {
+        display: none !important;
+      }
+
+      &.active {
+        display: block !important;
+      }
+    }
   }
 
   // 无数据状态下的内容区域样式

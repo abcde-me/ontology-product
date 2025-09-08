@@ -120,17 +120,27 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           ))}
         </Tabs>
 
-        {/* 工作区 */}
+        {/* 工作区 - 使用条件渲染保持组件实例 */}
         <div className="main-workspace">
-          <EditorWorkspace
-            key={activeTab}
-            content={activeTabData.content}
-            fileName={activeTabData.title || '未命名文件'}
-            currentFileId={activeTabData.fileId}
-            hasRun={activeTabData.hasRun}
-            tabKey={activeTab}
-            onActiveUpdate={handleActiveUpdate}
-          />
+          {fileTabs.map((tab) => (
+            <div
+              key={tab.key}
+              className={`tab-content ${tab.key === activeTab ? 'active' : 'hidden'}`}
+              style={{
+                display: tab.key === activeTab ? 'block' : 'none'
+              }}
+            >
+              <EditorWorkspace
+                key={tab.key} // 使用tab.key作为key，确保每个tab有独立的组件实例
+                content={tab.content}
+                fileName={tab.title || '未命名文件'}
+                currentFileId={tab.fileId}
+                hasRun={tab.hasRun}
+                tabKey={tab.key}
+                onActiveUpdate={handleActiveUpdate}
+              />
+            </div>
+          ))}
         </div>
       </div>
     );
