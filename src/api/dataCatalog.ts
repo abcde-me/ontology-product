@@ -362,7 +362,7 @@ export interface GetSourceCatalogFileListRes {
 export async function getSourceCatalogFileList(
   param: GetSourceCatalogFileListParams
 ): Promise<ApiRes<GetSourceCatalogFileListRes>> {
-  return await UAPI.RES.getLoadTaskFiles({}).get(param).inRegion().do();
+  return await UAPI.RES.getLoadTaskFiles({}).post(param).inRegion().do();
 
   // mock data
   // return Promise.resolve({
