@@ -30,7 +30,7 @@ export const useDasetTree = (type: 'sql' | 'python') => {
   // 获取数据集目录列表, sql和python用的一个接口
   const getDasetList = async () => {
     const res = await searchDatasetList({
-      storage_type_list: type === 'sql' ? ['file', 'jsonl'] : ['file', 'jsonl']
+      storage_type_list: type === 'sql' ? ['table'] : ['file', 'jsonl']
     });
 
     if (res?.status !== 200) {
