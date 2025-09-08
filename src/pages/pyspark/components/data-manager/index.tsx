@@ -71,7 +71,7 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
       onInsertContent(volume?.name ?? '');
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(volume?.name ?? '');
+      copy(volume?.name ?? '1111');
       Message.success('内容复制成功，请粘贴到编辑器');
     }
   };
