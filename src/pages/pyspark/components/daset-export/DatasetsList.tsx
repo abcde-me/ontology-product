@@ -123,6 +123,16 @@ const DatasetsList: FC = () => {
               </Link>
             );
             break;
+          case ExportStatus.ExportTerminated:
+            text = '导出终止';
+            color = '#FB923C';
+            actionBtn = (
+              <Link href="#" onClick={() => handleRetryTask(item)}>
+                {' '}
+                重试{' '}
+              </Link>
+            );
+            break;
 
           default:
             break;
@@ -220,10 +230,10 @@ const DatasetsList: FC = () => {
             allowClear
             placeholder="输入文件名搜索"
             onSearch={(value) => {
-              handleSearchChange({ file_name: value });
+              handleSearchChange({ name: value });
             }}
             onClear={() => {
-              handleSearchChange({ file_name: '' });
+              handleSearchChange({ name: '' });
             }}
           />
         </FormItem>

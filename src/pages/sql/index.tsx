@@ -46,7 +46,7 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   const handleActiveUpdate = (tabData: FileTab) => {
-    console.log('handleActiveUpdate tabData', tabData);
+    // console.log('handleActiveUpdate tabData', tabData);
     updateTab(tabData);
   };
 

@@ -14,6 +14,7 @@ import {
   defaultHighlightStyle
 } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
+import { tags as t } from '@lezer/highlight';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { RunningStatus } from '@/types/pythonApi';
@@ -87,15 +88,41 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       childRef
     } = useExportDaset(currentFileId, execid);
 
+    // const myTheme = createTheme({
+    //   theme: 'light',
+    //   settings: {
+    //     background: '#ffffff',
+    //     backgroundImage: '',
+    //     foreground: '#5d00ff',
+    //     lineHighlight: '#8a91991a'
+    //   },
+    //   styles: []
+    // });
+
     const myTheme = createTheme({
       theme: 'light',
       settings: {
         background: '#ffffff',
         backgroundImage: '',
-        foreground: '#5d00ff',
-        lineHighlight: '#8a91991a'
+        foreground: '#75baff',
+        caret: '#5d00ff',
+        selection: '#036dd626',
+        selectionMatch: '#036dd626',
+        lineHighlight: '#8a91991a',
+        gutterBackground: '#fff',
+        gutterForeground: '#8a919966'
       },
-      styles: []
+      styles: [
+        { tag: t.comment, color: '#6a737d', fontStyle: 'italic' },
+        { tag: t.keyword, color: '#9a42a7', fontWeight: 'bold' },
+        { tag: t.definition(t.typeName), color: '#194a7b' },
+        { tag: t.typeName, color: '#194a7b' },
+        { tag: t.tagName, color: '#008a02' },
+        { tag: t.variableName, color: '#1a00db' },
+        { tag: t.string, color: '#047013' },
+        { tag: t.number, color: '#29a0aa' },
+        { tag: t.bool, color: '#2d2aee' }
+      ]
     });
 
     const handleExportDataset = () => {

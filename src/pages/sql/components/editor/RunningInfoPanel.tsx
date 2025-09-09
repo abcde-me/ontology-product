@@ -22,9 +22,7 @@ import {
 import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/sqlApi';
-import { RunResult } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
-import { useSqlIndexStore } from '../../store';
 
 import './RunningInfoPanel.scss';
 import { formatDateTime } from '../../utils';
@@ -38,15 +36,17 @@ const RunningInfoPanel: React.FC = memo(() => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasUserClosed, setHasUserClosed] = useState(false);
 
+  const [formVisible, setFormVisible] = useState(false); // 保存为新数据集
+  const [versionFormVisible, setVersionFormVisible] = useState(false); // 保存为新版本
+  const [formOrigin, setFormOrigin] = useState({});
+
   // 从 EditorContext 获取所有需要的数据
   const {
     columns,
     data,
-    runResult,
     runStatus,
     runDuration,
     runStartTime,
-    runLog,
     runError,
     size,
     setSize,
@@ -55,15 +55,6 @@ const RunningInfoPanel: React.FC = memo(() => {
     cancelGetRunResultPolling,
     getRunResultPolling
   } = useEditorContext();
-
-  // 获取store中的方法
-  const showDatasetForm = useSqlIndexStore((state) => state.showDatasetForm);
-  const showDatasetVersionForm = useSqlIndexStore(
-    (state) => state.showDatasetVersionForm
-  );
-  const setCurrentRunResult = useSqlIndexStore(
-    (state) => state.setCurrentRunResult
-  );
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
   useEffect(() => {
@@ -82,6 +73,22 @@ const RunningInfoPanel: React.FC = memo(() => {
     }
   }, [runStatus]);
 
+  const handleShowForm = () => {
+    setFormVisible(true);
+  };
+
+  const handleHideForm = () => {
+    setFormVisible(false);
+  };
+
+  const handleShowVersionForm = () => {
+    setVersionFormVisible(true);
+  };
+
+  const handleHideVersionForm = () => {
+    setVersionFormVisible(false);
+  };
+
   const handlePanelChange = (key: string, keys: string[]) => {
     const newExpanded = keys.length > 0;
     setIsExpanded(newExpanded);
@@ -94,13 +101,16 @@ const RunningInfoPanel: React.FC = memo(() => {
 
   // 处理菜单点击事件
   const handleMenuClick = (key: string) => {
-    setCurrentRunResult &&
-      setCurrentRunResult({ columns: columns, script_id: currentFileId });
+    setFormOrigin({
+      columns: columns,
+      script_id: currentFileId,
+      execid: execid
+    });
 
     if (key === '1') {
-      showDatasetForm?.();
+      handleShowForm();
     } else if (key === '2') {
-      showDatasetVersionForm?.();
+      handleShowVersionForm();
     }
   };
 
@@ -244,8 +254,16 @@ const RunningInfoPanel: React.FC = memo(() => {
       </Collapse>
 
       {/* 模态框组件 */}
-      <ModalDatasetForm />
-      <ModalDatasetFormVersion />
+      <ModalDatasetForm
+        formOrigin={formOrigin}
+        visible={formVisible}
+        onCancel={handleHideForm}
+      />
+      <ModalDatasetFormVersion
+        formOrigin={formOrigin}
+        visible={versionFormVisible}
+        onCancel={handleHideVersionForm}
+      />
     </div>
   );
 });

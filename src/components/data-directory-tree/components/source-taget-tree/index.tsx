@@ -212,13 +212,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   >
                     详情
                   </Button>
-                  {/* 插入按钮 */}
-                  <Button
+                  {/* 插入按钮: 临时注释掉，9.30不支持目录插入 */}
+                  {/* <Button
                     type="outline"
                     onClick={(e: Event) => handleVolumeInsert(volume, e)}
                   >
                     {isEditorFocused ? '插入' : '复制'}
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             ),
@@ -253,14 +253,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   >
                     详情
                   </Button>
-                  {/* 插入按钮 */}
-                  <Button
+                  {/* 插入按钮，9.30不支持目录插入 */}
+                  {/* <Button
                     type="outline"
                     size="small"
                     onClick={(e: Event) => handleDbInsert(db, e)}
                   >
                     {isEditorFocused ? '插入' : '复制'}
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             ),
@@ -570,6 +570,10 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   } else {
                     handleVolumeInsert(file, e);
                   }
+                }}
+                onMouseDown={(e) => {
+                  // 阻止按钮获得焦点，保持编辑器焦点
+                  e.preventDefault();
                 }}
               >
                 {isEditorFocused ? '插入' : '复制'}
