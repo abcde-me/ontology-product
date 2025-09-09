@@ -144,6 +144,8 @@ export interface FluffyVolume {
   parent_id?: number;
   type?: number;
   type_name?: string;
+  file_name?: string;
+  file_id?: number;
 }
 
 export interface SrcChildren {

@@ -140,11 +140,11 @@
       max-width: 90px; // 选中态时最大宽度90px
     }
 
-    .source-target-tree__catalog-actions {
-      opacity: 1;
-      visibility: visible;
-      width: auto; // 选中态时显示按钮
-    }
+    // .source-target-tree__catalog-actions {
+    //   opacity: 1;
+    //   visibility: visible;
+    //   width: auto; // 选中态时显示按钮
+    // }
   }
 
   &__catalog-icon {
@@ -261,11 +261,11 @@
       max-width: 90px; // 选中态时最大宽度90px
     }
 
-    .source-target-tree__volume-db-actions {
-      opacity: 1;
-      visibility: visible;
-      width: auto; // 选中态时显示按钮
-    }
+    // .source-target-tree__volume-db-actions {
+    //   opacity: 1;
+    //   visibility: visible;
+    //   width: auto; // 选中态时显示按钮
+    // }
   }
 
   &__volume-db-icon {
@@ -306,7 +306,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 8px 4px;
     cursor: pointer;
     transition: all 0.2s ease;
     border-radius: 4px;
@@ -333,10 +333,10 @@
     &--selected {
       background: #eef6ff;
 
-      .source-target-tree__file-actions {
-        opacity: 1;
-        visibility: visible;
-      }
+      // .source-target-tree__file-actions {
+      //   opacity: 1;
+      //   visibility: visible;
+      // }
     }
 
     &-left {
@@ -350,8 +350,8 @@
   &__file-actions {
     display: flex;
     align-items: center;
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     transition: all 0.2s ease;
     margin-left: auto;
   }
