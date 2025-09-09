@@ -19,6 +19,8 @@ import {
   IconCheckCircle,
   IconCloseCircle
 } from '@arco-design/web-react/icon';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/sqlApi';
 import { RunResult } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
@@ -47,7 +49,10 @@ const RunningInfoPanel: React.FC = memo(() => {
     runLog,
     size,
     setSize,
-    currentFileId
+    currentFileId,
+    execid,
+    cancelGetRunResultPolling,
+    getRunResultPolling
   } = useEditorContext();
 
   // 获取store中的方法
@@ -63,6 +68,16 @@ const RunningInfoPanel: React.FC = memo(() => {
   useEffect(() => {
     if (runStatus === RunningStatus.RUNNING) {
       setHasUserClosed(false);
+    }
+  }, [runStatus]);
+
+  // 监听运行状态变化，当运行成功或失败时自动弹开面板
+  useEffect(() => {
+    if (
+      runStatus === RunningStatus.SUCCESS ||
+      runStatus === RunningStatus.FAILED
+    ) {
+      setIsExpanded(true);
     }
   }, [runStatus]);
 
@@ -91,7 +106,7 @@ const RunningInfoPanel: React.FC = memo(() => {
   const renderRunStatus = (status?: RunningStatus) => {
     if (status === RunningStatus.RUNNING) {
       return (
-        <div className="run-status running">
+        <div className="run-status">
           <span className="mr-4">运行中</span>
           <IconLoading style={{ color: '#007DFA' }} />
         </div>
@@ -100,12 +115,10 @@ const RunningInfoPanel: React.FC = memo(() => {
     if (status === RunningStatus.SUCCESS) {
       return (
         <Space>
-          <div className="run-status success">
-            <span className="mr-4">运行成功</span>
-            <IconCheckCircle style={{ color: '#10B981' }} />
-          </div>
           <div className="run-status">
-            <span className="mr-4">
+            <span className="mr-4">运行成功</span>
+            <RunSuccessIcon className="mr-[8px]" />
+            <span>
               {formatDateTime(runStartTime || '')}（
               {runDuration < 1000
                 ? `${runDuration}ms`
@@ -118,9 +131,16 @@ const RunningInfoPanel: React.FC = memo(() => {
     }
     if (status === RunningStatus.FAILED) {
       return (
-        <div className="run-status failed">
+        <div className="run-status">
           <span className="mr-4">运行失败</span>
-          <IconCloseCircle style={{ color: '#EF4444' }} />
+          <RunFailedIcon className="mr-[8px]" />
+          <span>
+            {formatDateTime(runStartTime || '')}（
+            {runDuration < 1000
+              ? `${runDuration}ms`
+              : `${(runDuration / 1000).toFixed(2)}s`}
+            ）
+          </span>
         </div>
       );
     }
@@ -149,6 +169,28 @@ const RunningInfoPanel: React.FC = memo(() => {
                 {renderRunStatus(runStatus)}
               </div>
               <div className="flex items-center gap-[12px]">
+                <Space>
+                  <span>展示</span>
+                  <Input
+                    style={{ width: 52, height: 22 }}
+                    size="mini"
+                    value={String(size)}
+                    maxLength={1000}
+                    disabled={runStatus !== RunningStatus.SUCCESS}
+                    onChange={(value) => setSize(value)}
+                    onPressEnter={() => {
+                      // 按回车键时触发轮询获取新结果
+                      if (execid) {
+                        cancelGetRunResultPolling();
+                        getRunResultPolling(currentFileId ?? '', {
+                          script_execid: execid,
+                          size: size
+                        });
+                      }
+                    }}
+                  />
+                  <span>行数据</span>
+                </Space>
                 <Dropdown
                   position="br"
                   droplist={
@@ -158,7 +200,11 @@ const RunningInfoPanel: React.FC = memo(() => {
                     </Menu>
                   }
                 >
-                  <Button type="outline" size="mini">
+                  <Button
+                    type="outline"
+                    size="mini"
+                    disabled={runStatus !== RunningStatus.SUCCESS}
+                  >
                     保存到数据集
                   </Button>
                 </Dropdown>

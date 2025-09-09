@@ -13,12 +13,12 @@ const { Title } = Typography;
 
 interface PythonTabContentProps {
   onInsertContent?: (content: string) => void;
-  isEditorFocused?: boolean;
+  getIsEditorFocused?: () => boolean;
 }
 
 const PythonTabContent: React.FC<PythonTabContentProps> = ({
   onInsertContent,
-  isEditorFocused = false
+  getIsEditorFocused
 }) => {
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
@@ -50,9 +50,10 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
 
   // 处理数据集插入或复制
   const handleInsertDataset = (dataset: DatasetListItem) => {
-    console.log('数据集插入:', dataset, isEditorFocused, onInsertContent);
+    const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
+    console.log('数据集插入:', dataset, isEditorFocusedNow, onInsertContent);
 
-    if (isEditorFocused && onInsertContent) {
+    if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
       onInsertContent(dataset.name ?? '');
     } else {
@@ -64,9 +65,10 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
 
   // 处理数据卷插入或复制
   const handleVolumeInsert = (volume: FluffyVolume) => {
+    const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
     console.log('数据卷插入:', volume);
 
-    if (isEditorFocused && onInsertContent) {
+    if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
       onInsertContent(volume?.name ?? '');
     } else {
@@ -107,7 +109,7 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
           onViewVolumeDetail={handleViewVolumeDetail}
           onViewDbDetail={handleViewDbDetail}
           onInsertContent={onInsertContent}
-          isEditorFocused={isEditorFocused}
+          getIsEditorFocused={getIsEditorFocused}
         />
       </div>
 

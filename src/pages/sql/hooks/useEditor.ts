@@ -39,7 +39,7 @@ export interface UseEditorReturn {
   runDuration: number;
   lastAutoSave: string;
   execid: string;
-  size: number;
+  size: string;
   runLog: string;
   runResult: RunResult[];
   currentFileId?: string;
@@ -54,10 +54,12 @@ export interface UseEditorReturn {
   data: Array<Record<string, any> & { key: string }>;
 
   // 编辑器操作
-  setSize: (size: number) => void;
+  setSize: (size: string) => void;
   handleContentChange: (value: string) => void;
   handleRunCode: () => Promise<void>;
   handleStopRunCode: () => void;
+  getRunResultPolling: (id: string, params: any) => void;
+  cancelGetRunResultPolling: () => void;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -75,7 +77,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
   const [execid, setExecid] = useState<string>('');
   const [runResult, setRunResult] = useState<RunResult[]>([]);
-  const [size, setSize] = useState<number>(100);
+  const [size, setSize] = useState<string>('100');
   const [runLog, setRunLog] = useState<string>('');
 
   // 动态生成表格列
@@ -120,7 +122,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
-  console.log('刚进入页面这个值是啥呀', currentFile);
 
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
@@ -171,59 +172,56 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 延时自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
-    useCallback(
-      async (content: string) => {
-        if (!currentFile?.fileId) {
-          try {
-            const res = await createSqlScript({
-              uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-              script_name: generateSqlDefaultName(new Date()),
-              script_content: content
-            });
-
-            if (res?.status === 200) {
-              setLastAutoSave(new Date().toLocaleTimeString());
-
-              // 更新脚本ID到标签页
-              if (onTabUpdate && currentFile) {
-                onTabUpdate(currentFile.key, {
-                  content,
-                  fileId: res.data.script_id,
-                  title: currentFile.title // 保持原有标题
-                });
-              }
-              return res.data;
-            } else {
-              Message.error(`自动保存失败: ${res.message || '未知错误'}`);
-              console.error('自动保存失败:', res.message);
-            }
-            return null;
-          } catch (error) {
-            Message.error(`自动保存失败`);
-            console.error('自动保存失败:', error);
-            return null;
-          }
-        }
-
+    async (content: string) => {
+      if (!currentFile?.fileId) {
         try {
-          const res = await updateSqlScript(Number(currentFile?.fileId), {
+          const res = await createSqlScript({
             uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name: currentFile.title ?? '',
+            script_name: generateSqlDefaultName(new Date()),
             script_content: content
           });
 
           if (res?.status === 200) {
             setLastAutoSave(new Date().toLocaleTimeString());
+
+            // 更新脚本ID到标签页
+            if (onTabUpdate && currentFile) {
+              onTabUpdate(currentFile.key, {
+                content,
+                fileId: res.data.script_id,
+                title: currentFile.title // 保持原有标题
+              });
+            }
             return res.data;
+          } else {
+            Message.error(`自动保存失败: ${res.message || '未知错误'}`);
+            console.error('自动保存失败:', res.message);
           }
           return null;
         } catch (error) {
+          Message.error(`自动保存失败`);
           console.error('自动保存失败:', error);
           return null;
         }
-      },
-      [currentFile?.fileId]
-    ),
+      }
+
+      try {
+        const res = await updateSqlScript(Number(currentFile?.fileId), {
+          uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+          script_name: currentFile.title ?? '',
+          script_content: content
+        });
+
+        if (res?.status === 200) {
+          setLastAutoSave(new Date().toLocaleTimeString());
+          return res.data;
+        }
+        return null;
+      } catch (error) {
+        console.error('自动保存失败:', error);
+        return null;
+      }
+    },
     { wait: 3000, trailing: true }
   );
 
@@ -338,7 +336,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setEditorContent(fileData.script_content);
 
             // 更新运行状态
-            setExecid(String(fileData.script_execid));
+            // setExecid(String(fileData.script_execid));
 
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
@@ -388,6 +386,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setSize,
     handleContentChange,
     handleRunCode,
-    handleStopRunCode
+    handleStopRunCode,
+    getRunResultPolling,
+    cancelGetRunResultPolling
   };
 };
