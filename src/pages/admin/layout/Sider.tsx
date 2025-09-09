@@ -121,7 +121,8 @@ const menus: MenuModel[] = [
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'pyspark',
-        path: '/tenant/compute/modaforge/pyspark'
+        path: '/tenant/compute/modaforge/pyspark',
+        permission: 'pyspark:can_search'
       },
       {
         title: 'SQL开发',

@@ -16,6 +16,7 @@ interface UseFileManagerOptions {
 interface UseFileManagerReturn {
   // 状态
   pythonList: PythonListItem[];
+  isCanCreate: boolean;
   searchValue: string;
   expandedKeys: string[];
   isLoading: boolean;
@@ -49,6 +50,7 @@ export const useFileManager = (
 
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
+  const [isCanCreate, setIsCanCreate] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -145,6 +147,7 @@ export const useFileManager = (
 
         const items = rawPythonList?.data?.items ?? [];
         setPythonList(items);
+        setIsCanCreate(rawPythonList?.data?.create_perm ?? false);
         return items; // 返回获取到的数据
       } catch (error) {
         console.error('获取Python列表失败:', error);
@@ -365,6 +368,7 @@ export const useFileManager = (
   return {
     // 状态
     pythonList,
+    isCanCreate,
     searchValue,
     expandedKeys,
     isLoading,

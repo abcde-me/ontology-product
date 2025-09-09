@@ -101,6 +101,14 @@ export const DATA_MANAGEMENT_PERMISSIONS = {
   CAN_UPDATE_VERSION_DATA: 'datasets:can_update_version_data' //编辑数据内容
 } as const;
 
+// PySpark权限
+export const PYSPARK_PERMISSIONS = {
+  CAN_SEARCH: 'pyspark:can_search', // 菜单权限
+  CAN_DELETE: 'pyspark:can_delete', // 删除
+  CAN_UPDATE: 'pyspark:can_update', // 编辑
+  CAN_COPY: 'pyspark:can_copy' // 复制
+} as const;
+
 // 聚合所有权限
 export const ALL_PERMISSIONS = {
   USER: USER_PERMISSIONS,
@@ -111,7 +119,8 @@ export const ALL_PERMISSIONS = {
   WORKFLOW_DETAIL: WORKFLOW_DETAIL_PERMISSIONS,
   WORKFLOW_TASK: WORKFLOW_TASK_PERMISSIONS,
   DATA_CATALOG: DATA_CATALOG_PERMISSIONS,
-  DATA_MANAGEMENT: DATA_MANAGEMENT_PERMISSIONS
+  DATA_MANAGEMENT: DATA_MANAGEMENT_PERMISSIONS,
+  PYSPARK: PYSPARK_PERMISSIONS
 } as const;
 
 // 权限检查辅助函数
