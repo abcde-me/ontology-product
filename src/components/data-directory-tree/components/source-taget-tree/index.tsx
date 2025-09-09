@@ -221,7 +221,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                     preferTypography
                   ></EllipsisPopover>
                 </div>
-                <div className="list-item-content-actions">
+                <div className="list-item-actions">
                   {/* 详情按钮 */}
                   <Button
                     type="text"
@@ -692,7 +692,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 ></EllipsisPopover>
               </div>
             </div>
-            <div className="list-item-content-actions">
+            <div className="list-item-actions">
               <Button
                 type="outline"
                 size="small"
@@ -743,6 +743,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 <EllipsisPopover
                   className="list-item-content-info-name"
                   value={dbItem.name}
+                  preferTypography
                 ></EllipsisPopover>
                 <EllipsisPopover
                   className="list-item-content-info-size"
@@ -811,6 +812,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 <EllipsisPopover
                   className="list-item-content-info-name"
                   value={table.table_name ?? ''}
+                  preferTypography
                 ></EllipsisPopover>
                 <EllipsisPopover
                   className="list-item-content-info-size"
@@ -877,6 +879,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                 <EllipsisPopover
                   className="list-item-content-info-name"
                   value={fileld ?? ''}
+                  preferTypography
                 ></EllipsisPopover>
               </div>
             </div>
