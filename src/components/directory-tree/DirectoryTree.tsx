@@ -621,7 +621,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               return (
                 <div className="directory-tree-extra">
                   {node.dataRef?.perms?.includes(
-                    PYSPARK_PERMISSIONS.CAN_UPDATE
+                    PYSPARK_PERMISSIONS.CAN_RENAME
                   ) && (
                     <Tooltip color="white" content="重命名">
                       <IconEdit

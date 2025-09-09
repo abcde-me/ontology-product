@@ -106,7 +106,8 @@ export const PYSPARK_PERMISSIONS = {
   CAN_SEARCH: 'pyspark:can_search', // 菜单权限
   CAN_DELETE: 'pyspark:can_delete', // 删除
   CAN_UPDATE: 'pyspark:can_update', // 编辑
-  CAN_COPY: 'pyspark:can_copy' // 复制
+  CAN_COPY: 'pyspark:can_copy', // 复制
+  CAN_RENAME: 'pyspark:can_rename' // 重命名
 } as const;
 
 // 聚合所有权限
