@@ -77,7 +77,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     sourceCatalogFileList,
     targetCatalogFileList,
     getCatalogFileList,
-    currentPage
+    currentPage,
+    getNodeHierarchyInfo,
+    findFullPathById
   } = useSourceTargetTree(dataType);
 
   const [searchValue, setSearchValue] = useState('');
@@ -300,6 +302,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     try {
       const rootType =
         dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
+
       const params =
         dataType === 'source'
           ? {
@@ -317,6 +320,10 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               sort_order: 'desc' as 'asc' | 'desc',
               path_id: item.id.toString()
             };
+
+      const test = findFullPathById(item.id.toString());
+
+      console.log('测试一下拿到的是什么：', test);
 
       await getCatalogFileList(rootType, params);
     } catch (error) {
@@ -602,7 +609,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     <div className="source-target-tree">
       {renderHeader()}
       {renderSearchBox()}
-      <div className="source-target-tree__content max-h-[calc(100vh-112px)] overflow-y-auto">
+      <div className="source-target-tree__content max-h-[calc(100vh-65px)] overflow-y-auto">
         {renderMainContent()}
       </div>
     </div>
