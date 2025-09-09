@@ -102,6 +102,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     databaseName: string;
     tableName: string;
     path_id: number;
+    table_id: number;
   } | null>(null); // 当前选中的数据库详情
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
   const [loading, setLoading] = useState(false); // 添加加载状态

@@ -591,7 +591,7 @@ const Edit = (props) => {
             <Select
               mode="multiple"
               placeholder="请选择抽取的表"
-              maxTagCount={3}
+              maxTagCount={2}
               style={{ width: '100%', minWidth: 0 }}
               allowClear
               allowCreate
