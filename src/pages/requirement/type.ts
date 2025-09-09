@@ -23,27 +23,12 @@ export const RequirementStatusMap = {
   [RequirementStatus.Annotated]: '标注完成'
 };
 
-export enum LabelShape {
-  /** 矩形 */
-  RECTANGLE = 1,
-  /** 多边形 */
-  POLYGON = 2,
-  /** 线段 */
-  SEGMENT = 3,
-  /** 特征点 */
-  POINT = 4,
-  /** 椭圆 */
-  ELLIPSE = 5,
-  /** 立方体 */
-  CUBE = 6
-}
-
 // 标注类型
 export enum AnnotationTypeStatus {
   /** 图片 */
-  IMAGE = 1,
+  IMAGE = 2,
   /** 文本 */
-  TEXT = 2,
+  TEXT = 1,
   /** 音频 */
   AUDIO = 3,
   /** 视频 */
@@ -60,6 +45,34 @@ export enum AnnotationChildType {
   TEXT_SORT = 4,
   /** 图片标注 */
   IMAGE_ANNOTATION = 1
+}
+
+export enum AnnotationTypeContentCode {
+  /** 实体/实体关系 */
+  ENTITY = 'TEXT_ENTITY',
+  /** 文本分类 */
+  TEXT_CLASSIFICATION = 'TEXT_CLASSIFICATION',
+  /** 问答 */
+  QA = 'TEXT_QA',
+  /** 文本排序 */
+  TEXT_SORT = 'TEXT_SORT',
+  /** 图片标注 */
+  IMAGE_ANNOTATION = 'IMAGE_ANNOTATION'
+}
+
+export enum LabelShape {
+  /** 矩形 */
+  RECTANGLE = 1,
+  /** 多边形 */
+  POLYGON = 2,
+  /** 线段 */
+  SEGMENT = 3,
+  /** 特征点 */
+  POINT = 4,
+  /** 椭圆 */
+  ELLIPSE = 5,
+  /** 立方体 */
+  CUBE = 6
 }
 
 export enum LabelInfoAttributeGroupType {

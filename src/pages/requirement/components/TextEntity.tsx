@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Form,
@@ -27,12 +27,14 @@ const btnList = [
   }
 ];
 interface TextSubstanceComponentProps {
-  type: 'add' | 'detail';
-  // publishData: any,
-  // setPublishData: (data: any) => void
+  type: any;
+  getDetailObj?: any;
 }
+
+// 实体 --  labels
+// 实体关系 --  entity_relations
 const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
-  const { type } = props;
+  const { type, getDetailObj } = props;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
@@ -87,6 +89,16 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     );
     setEntityRelations(newEntityRelations);
   };
+
+  useEffect(() => {
+    if (type === 'detail') {
+      setEntityRelations(getDetailObj?.labels);
+      setRelationRelations(getDetailObj?.entity_relations);
+      getDetailObj?.entity_relations?.forEach((item) => {
+        form.setFieldValue('start_entity_labels', item.start_entity_labels);
+      });
+    }
+  }, [getDetailObj]);
   return (
     <div className="text-component-warp">
       <div className="type-header">
@@ -109,7 +121,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       </div>
       <Form
         form={form}
-        // disabled={type === 'detail'}
+        disabled={type === 'detail'}
         onValuesChange={(_, val) => {
           // setPublishData({ ...publishData, val })
         }}
@@ -119,6 +131,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         wrapperCol={{ flex: 1 }}
       >
         {selectedSubstanceValue === 1 &&
+          entityRelations &&
           entityRelations.map((item, index) => {
             return (
               <div className="entity-relation-item" key={item.order_num}>
@@ -171,7 +184,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   {entityRelations?.length > 1 && (
                     <IconDelete
                       fontSize={18}
-                      onClick={() => removeArrayItem(index)}
+                      className={type === 'detail' ? 'is-disabled' : ''}
+                      onClick={() => {
+                        if (type !== 'detail') {
+                          removeArrayItem(index);
+                        }
+                      }}
                     />
                   )}
                 </FormItem>
@@ -182,20 +200,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       {selectedSubstanceValue === 1 && (
         <div className="add-btn">
           <Button
+            disabled={type === 'detail'}
             onClick={() => {
-              setEntityRelations([
-                ...entityRelations,
-                {
-                  id: uuid(),
-                  order_num: 1, // 排序
-                  label_name_cn: '', //展示名称
-                  label_name_en: '', //存储名称
-                  label_colour: '' //标签颜色（如#FFFFFF）
-                }
-              ]);
+              if (type !== 'detail') {
+                setEntityRelations([
+                  ...entityRelations,
+                  {
+                    id: uuid(),
+                    order_num: 1, // 排序
+                    label_name_cn: '', //展示名称
+                    label_name_en: '', //存储名称
+                    label_colour: '' //标签颜色（如#FFFFFF）
+                  }
+                ]);
+              }
             }}
           >
-            <IconPlus />
+            <IconPlus className={`${type === 'detail' ? 'is-disabled' : ''}`} />
             添加标签
           </Button>
         </div>
@@ -206,135 +227,147 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           <div className="relation-content-body">
             <Form
               form={form}
+              disabled={type === 'detail'}
               onValuesChange={(_, val) => {}}
               layout="inline"
               labelAlign="right"
               labelCol={{ flex: 'none' }}
               wrapperCol={{ flex: 1 }}
             >
-              {relationRelations.map((item, index) => {
-                return (
-                  <div className="entity-relation-item" key={item.id}>
-                    <FormItem
-                      style={{ paddingLeft: 16 }}
-                      label="关系名称"
-                      rules={[{ required: true, message: '请输入标签名称' }]}
-                    >
-                      <Input
-                        placeholder="用于储存标注结果"
-                        style={{ width: 260 }}
-                        value={item.relation_name_cn}
-                        onChange={(value) => {
-                          handleRelationFieldChange(
-                            index,
-                            'relation_name_cn',
-                            value
-                          );
-                        }}
-                      />
-                    </FormItem>
-                    <FormItem
-                      label={
-                        <div>
-                          展示名称
-                          <Tooltip content="展示在标注页面的名称">
-                            <IconQuestionCircle />
-                          </Tooltip>
-                        </div>
-                      }
-                      style={{ padding: 0 }}
-                    >
-                      <Input
-                        placeholder="展示在标注页面的名称"
-                        style={{ width: 250 }}
-                        value={item.relation_name_en}
-                        onChange={(value) => {
-                          handleRelationFieldChange(
-                            index,
-                            'relation_name_en',
-                            value
-                          );
-                        }}
-                      />
-                    </FormItem>
-                    <FormItem label={null}>
-                      {relationRelations?.length > 1 && (
-                        <IconDelete
-                          onClick={() => removeRelationArrayItem(index)}
+              {relationRelations &&
+                relationRelations.map((item, index) => {
+                  return (
+                    <div className="entity-relation-item" key={item.id}>
+                      <FormItem
+                        style={{ paddingLeft: 16 }}
+                        label="关系名称"
+                        rules={[{ required: true, message: '请输入标签名称' }]}
+                      >
+                        <Input
+                          placeholder="用于储存标注结果"
+                          style={{ width: 260 }}
+                          value={item.relation_name_cn}
+                          onChange={(value) => {
+                            handleRelationFieldChange(
+                              index,
+                              'relation_name_cn',
+                              value
+                            );
+                          }}
                         />
-                      )}
-                    </FormItem>
-                    <div className="relation-tag">
-                      <div className="tag-title">标签对</div>
-                      <div className="tag-content">
-                        <FormItem
-                          style={{ paddingLeft: 16 }}
-                          label="起始标签:"
-                          rules={[
-                            { required: true, message: '请输入标签名称' }
-                          ]}
-                        >
-                          <Select
-                            mode="multiple"
-                            allowClear
-                            placeholder="请选择起始标签"
-                            style={{ width: 154 }}
-                            onChange={(value) => {
-                              handleRelationFieldChange(
-                                index,
-                                'start_entity_labels',
-                                value
-                              );
+                      </FormItem>
+                      <FormItem
+                        label={
+                          <div>
+                            展示名称
+                            <Tooltip content="展示在标注页面的名称">
+                              <IconQuestionCircle />
+                            </Tooltip>
+                          </div>
+                        }
+                        style={{ padding: 0 }}
+                      >
+                        <Input
+                          placeholder="展示在标注页面的名称"
+                          style={{ width: 250 }}
+                          value={item.relation_name_en}
+                          onChange={(value) => {
+                            handleRelationFieldChange(
+                              index,
+                              'relation_name_en',
+                              value
+                            );
+                          }}
+                        />
+                      </FormItem>
+                      <FormItem label={null}>
+                        {relationRelations?.length > 1 && (
+                          <IconDelete
+                            fontSize={18}
+                            className={type === 'detail' ? 'is-disabled' : ''}
+                            onClick={() => {
+                              if (type !== 'detail') {
+                                removeRelationArrayItem(index);
+                              }
                             }}
+                          />
+                        )}
+                      </FormItem>
+                      <div className="relation-tag">
+                        <div className="tag-title">标签对</div>
+                        <div className="tag-content">
+                          <FormItem
+                            style={{ paddingLeft: 16 }}
+                            label="起始标签:"
+                            rules={[
+                              { required: true, message: '请输入标签名称' }
+                            ]}
                           >
-                            {entityRelations.map((option, index) => (
-                              <Option
-                                // 禁用内容为空标签
-                                disabled={!option.label_name_cn}
-                                key={option.label_name_cn}
-                                value={option.label_name_cn}
-                              >
-                                {option.label_name_cn}
-                              </Option>
-                            ))}
-                          </Select>
-                        </FormItem>
-                        <FormItem label="目标标签:" style={{ padding: 0 }}>
-                          <Select
-                            mode="multiple"
-                            allowClear
-                            placeholder="请选择起始标签"
-                            style={{ width: 154 }}
-                            onChange={(value) => {
-                              handleRelationFieldChange(
-                                index,
-                                'target_entity_labels',
-                                value
-                              );
-                            }}
-                          >
-                            {entityRelations.map((option, index) => (
-                              <Option
-                                disabled={!option.label_name_cn}
-                                key={option.label_name_cn}
-                                value={option.label_name_cn}
-                              >
-                                {option.label_name_cn}
-                              </Option>
-                            ))}
-                          </Select>
-                        </FormItem>
+                            <Select
+                              mode="multiple"
+                              allowClear
+                              placeholder="请选择起始标签"
+                              style={{ width: 154 }}
+                              onChange={(value) => {
+                                handleRelationFieldChange(
+                                  index,
+                                  'start_entity_labels',
+                                  value
+                                );
+                              }}
+                              value={item?.start_entity_labels}
+                            >
+                              {entityRelations &&
+                                entityRelations?.map((item) => {
+                                  return (
+                                    <Option
+                                      key={item.label_name_en}
+                                      value={item.label_name_en}
+                                    >
+                                      {item.label_name_en}
+                                    </Option>
+                                  );
+                                })}
+                            </Select>
+                          </FormItem>
+                          <FormItem label="目标标签:" style={{ padding: 0 }}>
+                            <Select
+                              mode="multiple"
+                              allowClear
+                              placeholder="请选择起始标签"
+                              style={{ width: 154 }}
+                              onChange={(value) => {
+                                handleRelationFieldChange(
+                                  index,
+                                  'target_entity_labels',
+                                  value
+                                );
+                              }}
+                              value={item?.target_entity_labels}
+                            >
+                              {entityRelations &&
+                                entityRelations.map((option, index) => (
+                                  <Option
+                                    disabled={!option.label_name_en}
+                                    key={option.label_name_en}
+                                    value={option.label_name_en}
+                                  >
+                                    {option.label_name_en}
+                                  </Option>
+                                ))}
+                            </Select>
+                          </FormItem>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </Form>
           </div>
           <div className="add-btn">
             <Button
+              disabled={type === 'detail'}
               onClick={() => {
-                console.log(123);
                 setRelationRelations([
                   ...relationRelations,
                   {

@@ -21,6 +21,13 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import './index.scss';
 
+enum typeCode {
+  TEXT_ENTITY = 'entity', // 实体关系
+  TEXT_CLASSIFICATION = 'classification', // 文本分类
+  TEXT_QA = 'qa', // 问答
+  TEXT_SORT = 'ranking' // 排序
+}
+
 export default function Requirement() {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
@@ -94,10 +101,15 @@ export default function Requirement() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (id: number | string) => {
+  const viewDetailWorkflow = (type: typeCode) => {
     // 等待跳转页面
+    //     TEXT_ENTITY, 实体关系
+    //     TEXT_CLASSIFICATION, 文件分类
+    //     TEXT_QA, 问答
+    // TEXT_SORT 排序
+    // classification: 分类标注、qa： 问答、ranking：排序、entity-relation： 实体标签
     // history.push(
-    //     `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
+    // `/tenant/compute/modaforge/requirementDetail?kind=${type}`
     // )
   };
 
@@ -131,14 +143,7 @@ export default function Requirement() {
       className: 'hover-change workflow-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.id);
-            }}
-          />
+          <EllipsisPopover value={record.workflow_name} isEdit={false} isLink />
         ) : (
           <span>-</span>
         );
@@ -260,7 +265,7 @@ export default function Requirement() {
             <span
               className="operate-text"
               onClick={() => {
-                viewDetailWorkflow(record.id);
+                viewDetailWorkflow(record.type);
               }}
             >
               标注
