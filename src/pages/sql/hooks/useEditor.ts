@@ -43,6 +43,7 @@ export interface UseEditorReturn {
   runLog: string;
   runResult: RunResult[];
   currentFileId?: string;
+  runError: string;
 
   // 表格数据处理
   columns: Array<{
@@ -79,6 +80,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runResult, setRunResult] = useState<RunResult[]>([]);
   const [size, setSize] = useState<string>('100');
   const [runLog, setRunLog] = useState<string>('');
+  const [runError, setRunError] = useState<string>('');
 
   // 动态生成表格列
   const generateTableColumns = (runResult: RunResult[]) => {
@@ -260,6 +262,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
       } else {
+        setRunError(res.message);
         throw new Error('运行失败');
       }
     } catch (error) {
@@ -378,6 +381,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     size,
     runLog,
     currentFileId: currentFile?.fileId,
+    runError,
 
     // 表格数据处理
     columns,
