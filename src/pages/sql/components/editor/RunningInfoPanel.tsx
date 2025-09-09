@@ -47,6 +47,7 @@ const RunningInfoPanel: React.FC = memo(() => {
     runDuration,
     runStartTime,
     runLog,
+    runError,
     size,
     setSize,
     currentFileId,
@@ -220,7 +221,7 @@ const RunningInfoPanel: React.FC = memo(() => {
 
             {runStatus === RunningStatus.FAILED && (
               <div className="h-[100px]">
-                <Typography.Text>{runLog}</Typography.Text>
+                <Typography.Text>{runError}</Typography.Text>
               </div>
             )}
 
