@@ -61,7 +61,7 @@ const STATUS_CONFIG = {
 
 // 类型显示配置
 const TYPE_CONFIG = {
-  [ConnectorType.S3]: '对象存储',
+  [ConnectorType.S3]: '对象存储(S3)',
   [ConnectorType.HDFS]: 'HDFS',
   [ConnectorType.mysql]: '数据库-Mysql',
   [ConnectorType.postgresql]: '数据库-Postgresql'

@@ -134,7 +134,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                 setStorageType(value);
               }}
             >
-              <Radio value="s3">对象存储</Radio>
+              <Radio value="s3">对象存储(S3)</Radio>
               <Radio value="hdfs">HDFS</Radio>
               <Radio value="db">数据库</Radio>
             </RadioGroup>

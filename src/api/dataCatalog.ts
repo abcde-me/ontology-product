@@ -771,9 +771,240 @@ export async function exportFile(params: any = {}) {
 //获取数据库表列表
 export async function getDbItemList(params: DbTableListParamss) {
   return await UAPI.RES.dbItemListApi({}).post(params).inRegion().do();
+  //模拟数据
+  //  return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     list: [
+  //       {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王1',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王2',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王3',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+
+  //       {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王4',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王5',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王6',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王7',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王8',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王9',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王10',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王11',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //               {
+  //         id: 17228,
+  //         generated_at: '2025-08-28T13:43:04+08:00',
+  //         file_name: '1504',
+  //         file_type: 'jsonl',
+  //         file_size: 100,
+  //         upload_user: '小王12',
+  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
+  //         connector_name: 'mysql',
+  //         deleted_at: null,
+  //         extras: {
+  //           ds_workflow_id: '150455535967520',
+  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
+  //           file_size: '',
+  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
+  //         },
+  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
+  //       },
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  // });
 }
 
 //查询源库下的表详情
-export async function getDbItemDetail(params: DbTableListParamss) {
+export async function getDbItemDetail(params: GetDbItemDetailParams) {
   return await UAPI.RES.dbItemDetailApi({}).post(params).inRegion().do();
 }

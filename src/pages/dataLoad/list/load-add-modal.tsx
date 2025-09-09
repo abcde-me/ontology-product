@@ -538,15 +538,48 @@ const LoadAddModal = (props: propsType) => {
   ) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
   };
+  // 处理文件删除
+  const handleFileDelete = (fileName: string) => {
+    setUploadedFiles((prev) => {
+      const updatedFiles = prev.filter((file) => file.name !== fileName);
+      if (updatedFiles.length === 0) {
+        form.setFieldsValue({
+          connector_id: undefined
+        });
+      }
+      return updatedFiles;
+    });
+  };
+
   const handleFileChange = (fileData, blobURL) => {
+    if (Array.isArray(fileData)) {
+      // 如果是清空操作
+      setUploadedFiles([]);
+      if (sourceType === 'local') {
+        form.setFieldsValue({
+          connector_id: undefined
+        });
+      }
+      return;
+    }
+
     console.log(fileData, '这个是上传后的回调');
-    setUploadedFiles((prev) => [...prev, fileData]);
+    if (!fileData) return;
+
+    setUploadedFiles((prev) => {
+      // 检查新文件是否已经存在
+      const isFileExists = prev.some((file) => file.name === fileData.name);
+      if (isFileExists) {
+        return prev;
+      }
+      return [...prev, fileData];
+    });
+
     if (sourceType === 'local') {
       form.setFieldsValue({
         connector_id: 'local_files_uploaded'
       });
     }
-    // 设置表单校验状态 - 只要有文件相关操作就设置表单字
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -598,7 +631,7 @@ const LoadAddModal = (props: propsType) => {
           }}
         >
           <RadioGroup>
-            <Radio value="s3">对象存储</Radio>
+            <Radio value="s3">对象存储(S3)</Radio>
             <Radio value="hdfs">HDFS</Radio>
             <Radio value="db">数据库</Radio>
             <Radio value="local">本地文件</Radio>
@@ -642,49 +675,66 @@ const LoadAddModal = (props: propsType) => {
                   ref={selectRef}
                   mode="multiple"
                   maxTagCount={{
-                    count: maxTagCounts,
-                    // showPopover: true,
+                    count: 2,
                     render: (invisibleTagCount) => {
-                      //联调时修改的地方
+                      console.log('maxTagCount render被调用:', {
+                        invisibleTagCount,
+                        formValues: form.getFieldValue('table_name')
+                      });
+
+                      if (invisibleTagCount <= 0) {
+                        return null;
+                      }
+
                       const allTags = form.getFieldValue('table_name') || [];
-                      const remainingTags = allTags.slice(maxTagCounts);
+                      const remainingTags = allTags.slice(2);
+
                       return (
                         <Tooltip
-                          content={remainingTags.map((item, i) => {
-                            return (
-                              <Tag
-                                key={i}
-                                style={{
-                                  height: '24px',
-                                  background: '#E7ECF0',
-                                  color: '#0F172A',
-                                  borderRadius: '2px',
-                                  fontSize: '14px',
-                                  // height: '18px',
-                                  alignItems: 'center',
-                                  margin: '0 2px'
-                                }}
-                              >
-                                {item}
-                                <IconClose
-                                  style={{
-                                    marginLeft: '2px',
-                                    fontSize: '12px'
-                                  }}
-                                  onClick={() => {
-                                    const filteredValue = allTags.filter(
-                                      (tag) => tag !== item
-                                    );
-                                    form.setFieldsValue({
-                                      table_name: filteredValue
-                                    });
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
+                          content={
+                            <div>
+                              {remainingTags.map((item, i) => (
+                                <div key={i} style={{ margin: '4px 0' }}>
+                                  <Tag
+                                    closable
+                                    style={{
+                                      height: '24px',
+                                      background: '#E7ECF0',
+                                      color: '#0F172A',
+                                      borderRadius: '2px',
+                                      fontSize: '14px',
+                                      alignItems: 'center',
+                                      margin: '0 2px'
+                                    }}
+                                    onClose={() => {
+                                      const filteredValue = allTags.filter(
+                                        (tag) => tag !== item
+                                      );
+                                      form.setFieldsValue({
+                                        table_name: filteredValue
+                                      });
+                                    }}
+                                  >
+                                    {item}
+                                  </Tag>
+                                </div>
+                              ))}
+                            </div>
+                          }
                         >
-                          <span>+{invisibleTagCount}</span>
+                          <span
+                            style={{
+                              color: '#1890ff',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              padding: '2px 4px',
+                              // backgroundColor: '#f5f5f5',
+                              borderRadius: '2px'
+                              // border: '1px dashed #d9d9d9'
+                            }}
+                          >
+                            +{invisibleTagCount}
+                          </span>
                         </Tooltip>
                       );
                     }
@@ -692,7 +742,7 @@ const LoadAddModal = (props: propsType) => {
                   placeholder="请选择抽取的表"
                   style={{ width: '100%', minWidth: 0 }}
                   allowClear
-                  allowCreate
+                  // allowCreate
                   onVisibleChange={calculateMaxTagCount}
                 >
                   <Option value="all">全部</Option>
@@ -712,9 +762,22 @@ const LoadAddModal = (props: propsType) => {
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
-            rules={[{ required: true, message: '请选择文件' }]}
+            rules={[
+              {
+                required: true,
+                validator: (value, cb) => {
+                  if (uploadedFiles.length === 0) {
+                    return cb('请选择文件');
+                  }
+                  return cb();
+                }
+              }
+            ]}
           >
-            <Uploads onFileChange={handleFileChange} />
+            <Uploads
+              onFileChange={handleFileChange}
+              onFileDelete={handleFileDelete}
+            />
           </FormItem>
         )}
 

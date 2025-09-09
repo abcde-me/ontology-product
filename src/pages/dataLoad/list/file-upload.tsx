@@ -2,15 +2,35 @@ import { Upload, Message, Tooltip } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
-const Uploads = ({ onFileChange }) => {
+interface UploadsProps {
+  onFileChange: (fileData: any, blobURL?: string) => void;
+  onFileDelete?: (fileName: string) => void;
+}
+
+const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
+
   const handleUploadChange = (files: any) => {
     console.log(files, 'files666');
+    const prevLength = fileList.length;
     setFileList(files);
 
+    // 检查是否有文件被删除
+    if (prevLength > files.length) {
+      const deletedFiles = fileList.filter(
+        (prevFile) => !files.some((newFile) => newFile.name === prevFile.name)
+      );
+      // 通知父组件文件被删除
+      deletedFiles.forEach((file) => {
+        if (onFileDelete && file.response && file.response.data) {
+          onFileDelete(file.response.data.name);
+        }
+      });
+    }
+
     if (onFileChange) {
-      if (files.length == 0) {
+      if (files.length === 0) {
         // 清空文件列表
         onFileChange([]);
         return;
@@ -40,9 +60,9 @@ const Uploads = ({ onFileChange }) => {
   };
   const checkFile = (file: any, list: any) => {
     // 检查文件数量 - 只在第一次检测到超出限制时显示提示
-    if (Array.isArray(list) && list?.length > 10) {
+    if (Array.isArray(list) && list?.length > 1000) {
       if (!hasShownFileCountError) {
-        Message.error('单次最多上传10个文件');
+        Message.error('单次最多上传1000个文件');
         hasShownFileCountError = true;
         setTimeout(() => {
           hasShownFileCountError = false;
