@@ -301,7 +301,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         setRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFile?.fileId ?? '', {
-          script_execid: execid
+          script_execid: execid,
+          size: size
         });
       } catch (error) {
         console.error('获取运行结果失败:', error);
