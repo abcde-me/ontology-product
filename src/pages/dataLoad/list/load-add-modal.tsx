@@ -229,8 +229,8 @@ const LoadAddModal = (props: propsType) => {
       setDirectoryLoading(true);
       console.log('开始获取目录数据，当前数据源类型:', sourceType);
       const res = await getDirectoryList({
-        root_type: 1,
-        dir_type: sourceType === 'db' ? 3 : undefined
+        root_type: 1
+        // dir_type: sourceType === 'db' ? 3 : undefined
       });
       console.log('API响应:', res);
       if (!res || res.status !== 200) {
