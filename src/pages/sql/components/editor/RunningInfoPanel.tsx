@@ -19,6 +19,8 @@ import {
   IconCheckCircle,
   IconCloseCircle
 } from '@arco-design/web-react/icon';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/sqlApi';
 import { RunResult } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
@@ -41,34 +43,42 @@ const RunningInfoPanel: React.FC = memo(() => {
     columns,
     data,
     runResult,
-    runLog,
     runStatus,
     runDuration,
     runStartTime,
+    runLog,
+    runError,
     size,
-    setSize
+    setSize,
+    currentFileId,
+    execid,
+    cancelGetRunResultPolling,
+    getRunResultPolling
   } = useEditorContext();
-
-  console.log('RunningInfoPanel render runResult:', runResult);
 
   // 获取store中的方法
   const showDatasetForm = useSqlIndexStore((state) => state.showDatasetForm);
   const showDatasetVersionForm = useSqlIndexStore(
     (state) => state.showDatasetVersionForm
   );
-
-  // 监听运行结果变化，自动展开面板
-  useEffect(() => {
-    // 当有运行结果或日志时，自动展开面板（除非用户手动关闭过）
-    if ((runResult || runLog) && !hasUserClosed) {
-      setIsExpanded(true);
-    }
-  }, [runResult, runLog, hasUserClosed]);
+  const setCurrentRunResult = useSqlIndexStore(
+    (state) => state.setCurrentRunResult
+  );
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
   useEffect(() => {
     if (runStatus === RunningStatus.RUNNING) {
       setHasUserClosed(false);
+    }
+  }, [runStatus]);
+
+  // 监听运行状态变化，当运行成功或失败时自动弹开面板
+  useEffect(() => {
+    if (
+      runStatus === RunningStatus.SUCCESS ||
+      runStatus === RunningStatus.FAILED
+    ) {
+      setIsExpanded(true);
     }
   }, [runStatus]);
 
@@ -84,6 +94,9 @@ const RunningInfoPanel: React.FC = memo(() => {
 
   // 处理菜单点击事件
   const handleMenuClick = (key: string) => {
+    setCurrentRunResult &&
+      setCurrentRunResult({ columns: columns, script_id: currentFileId });
+
     if (key === '1') {
       showDatasetForm?.();
     } else if (key === '2') {
@@ -94,7 +107,7 @@ const RunningInfoPanel: React.FC = memo(() => {
   const renderRunStatus = (status?: RunningStatus) => {
     if (status === RunningStatus.RUNNING) {
       return (
-        <div className="run-status running">
+        <div className="run-status">
           <span className="mr-4">运行中</span>
           <IconLoading style={{ color: '#007DFA' }} />
         </div>
@@ -103,12 +116,10 @@ const RunningInfoPanel: React.FC = memo(() => {
     if (status === RunningStatus.SUCCESS) {
       return (
         <Space>
-          <div className="run-status success">
-            <span className="mr-4">运行成功</span>
-            <IconCheckCircle style={{ color: '#10B981' }} />
-          </div>
           <div className="run-status">
-            <span className="mr-4">
+            <span className="mr-4">运行成功</span>
+            <RunSuccessIcon className="mr-[8px]" />
+            <span>
               {formatDateTime(runStartTime || '')}（
               {runDuration < 1000
                 ? `${runDuration}ms`
@@ -121,9 +132,16 @@ const RunningInfoPanel: React.FC = memo(() => {
     }
     if (status === RunningStatus.FAILED) {
       return (
-        <div className="run-status failed">
+        <div className="run-status">
           <span className="mr-4">运行失败</span>
-          <IconCloseCircle style={{ color: '#EF4444' }} />
+          <RunFailedIcon className="mr-[8px]" />
+          <span>
+            {formatDateTime(runStartTime || '')}（
+            {runDuration < 1000
+              ? `${runDuration}ms`
+              : `${(runDuration / 1000).toFixed(2)}s`}
+            ）
+          </span>
         </div>
       );
     }
@@ -158,7 +176,19 @@ const RunningInfoPanel: React.FC = memo(() => {
                     style={{ width: 52, height: 22 }}
                     size="mini"
                     value={String(size)}
+                    maxLength={1000}
+                    disabled={runStatus !== RunningStatus.SUCCESS}
                     onChange={(value) => setSize(value)}
+                    onPressEnter={() => {
+                      // 按回车键时触发轮询获取新结果
+                      if (execid) {
+                        cancelGetRunResultPolling();
+                        getRunResultPolling(currentFileId ?? '', {
+                          script_execid: execid,
+                          size: size
+                        });
+                      }
+                    }}
                   />
                   <span>行数据</span>
                 </Space>
@@ -171,7 +201,11 @@ const RunningInfoPanel: React.FC = memo(() => {
                     </Menu>
                   }
                 >
-                  <Button type="outline" size="mini">
+                  <Button
+                    type="outline"
+                    size="mini"
+                    disabled={runStatus !== RunningStatus.SUCCESS}
+                  >
                     保存到数据集
                   </Button>
                 </Dropdown>
@@ -187,15 +221,12 @@ const RunningInfoPanel: React.FC = memo(() => {
 
             {runStatus === RunningStatus.FAILED && (
               <div className="h-[100px]">
-                <Typography.Text>
-                  有无法执行的语法，请修改后重试
-                </Typography.Text>
+                <Typography.Text>{runError}</Typography.Text>
               </div>
             )}
 
             {runStatus === RunningStatus.SUCCESS && (
               <div className="flex flex-col gap-[8px]">
-                {runLog && <Typography.Text>{runLog}</Typography.Text>}
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border

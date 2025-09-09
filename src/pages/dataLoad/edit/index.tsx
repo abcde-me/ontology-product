@@ -163,6 +163,8 @@ const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
 const Edit = (props) => {
+  console.log(props.detailData, '查看点击编辑传递过来的东西');
+
   const SchedulerRunRef = useRef<HTMLFormElement>(null);
   const form = props.editForm;
   // 载入类型的默认值
@@ -186,6 +188,11 @@ const Edit = (props) => {
     try {
       const res = await getdetailList(connector_id);
       setTableList(res?.data?.table_name || []);
+      console.log(
+        res?.data?.table_name,
+        '查看抽取的表12321321321332111111111111'
+      );
+
       console.log(res, '获取连接器下面的表格');
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
@@ -579,14 +586,16 @@ const Edit = (props) => {
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             rules={[{ required: true, message: '请选择抽取的表' }]}
-            initialValue={props.detailData.table_id}
+            initialValue={props.detailData.table_names}
           >
             <Select
               mode="multiple"
               placeholder="请选择抽取的表"
+              maxTagCount={2}
               style={{ width: '100%', minWidth: 0 }}
               allowClear
               allowCreate
+              disabled={true}
             >
               <Option value="all">全部</Option>
               {talbleList?.map((option) => (

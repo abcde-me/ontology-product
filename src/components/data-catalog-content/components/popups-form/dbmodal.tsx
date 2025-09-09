@@ -1,16 +1,50 @@
 import { Alert, Modal, Tabs } from '@arco-design/web-react';
 import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tables from '../../dbdetail/tables';
 import AutoDefine from '../../dbdetail/auto-define';
 import Details from '../../dbdetail/details';
+import { getDbItemDetail } from '@/api/dataCatalog';
 
-export default function DbModal(props: {
+interface DbModalProps {
   visible: boolean;
   onCancel: () => void;
-}) {
-  const { visible, onCancel } = props;
+  data?: {
+    databaseName: string;
+    tableName: string;
+    path_id: number;
+    table_id: number;
+  } | null;
+}
+
+export default function DbModal(props: DbModalProps) {
+  const { visible, onCancel, data } = props;
   const [activeTab, setActiveTab] = useState('1');
+  const [dataList, setDataList] = useState({});
+  console.log(data?.path_id, '查看点击详情后传递过来的数据ID');
+  const getDataList = async () => {
+    const params = {
+      detail_type:
+        activeTab == '1' ? 'sample' : activeTab == '2' ? 'ddl' : 'loader',
+      database: data ? data.databaseName : '',
+      table: data ? data.tableName : '',
+      path_id: data ? data.path_id : 0,
+      table_id: data ? data.table_id : 0
+    };
+    try {
+      const res = await getDbItemDetail(params);
+      // 调用获取数据的接口
+      console.log(res, '查看接口返回的数据123456789');
+      if (res.data) {
+        setDataList(res.data);
+      }
+    } catch (error) {
+      console.log(error, '查看接口返回的错误');
+    }
+  };
+  useEffect(() => {
+    getDataList();
+  }, [activeTab, data]);
   const renderTabContent = (key: string) => {
     switch (key) {
       case '1':
@@ -21,19 +55,22 @@ export default function DbModal(props: {
               content="仅展示前50行示例数据"
               style={{ margin: '16px 0px' }}
             />
-            <Tables />
+            <Tables
+              dataList={dataList}
+              // tableName={data?.tableName}
+            />
           </div>
         );
       case '2':
         return (
           <div style={{}}>
-            <AutoDefine />
+            <AutoDefine dataList={dataList} />
           </div>
         );
       case '3':
         return (
           <div style={{}}>
-            <Details />
+            <Details dataList={dataList} />
           </div>
         );
       default:

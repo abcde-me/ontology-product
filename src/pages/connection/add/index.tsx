@@ -39,7 +39,7 @@ const add = forwardRef((props: any, ref) => {
       setVisible(true);
       // 添加模式 - 重置表单
       form.resetFields();
-      form.setFieldsValue({ type: 's3', name: '' });
+      form.setFieldsValue({ type: 's3', name: '', sub_type: 'mysql' });
       setStorageType('s3');
     }
   }));
@@ -265,7 +265,7 @@ const add = forwardRef((props: any, ref) => {
                 defaultValue="s3"
                 onChange={(value) => handleStorageTypeChange(value)}
               >
-                <Radio value="s3">对象存储</Radio>
+                <Radio value="s3">对象存储(S3)</Radio>
                 <Radio value="hdfs">HDFS</Radio>
                 <Radio value="db">数据库</Radio>
               </RadioGroup>
@@ -282,7 +282,7 @@ const add = forwardRef((props: any, ref) => {
             {storageType == 's3' ? (
               <div>
                 <FormItem
-                  label="所属系统："
+                  label="region："
                   field="region"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
@@ -427,7 +427,7 @@ const add = forwardRef((props: any, ref) => {
                   labelAlign="right"
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入所属系统名称" />
+                  <Input placeholder="请输入所属系统" />
                 </FormItem>
                 <FormItem
                   label="数据库类型："
@@ -446,7 +446,7 @@ const add = forwardRef((props: any, ref) => {
                         showIcon: true
                       })
                     }
-                    disabled={true}
+                    defaultValue="mysql"
                   >
                     {options.map((option, index) => (
                       <Option key={option.value} value={option.value}>

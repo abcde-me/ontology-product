@@ -96,6 +96,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunResult(res?.data?.run_result ?? '');
         setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
         setRunDuration(res?.data?.run_duration ?? 0);
+        setRunStartTime(new Date(res?.data?.run_end_time) ?? '');
       },
       onError: (error) => {
         setRunStatus(RunningStatus.FAILED);
@@ -145,7 +146,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setEditorContent(fileData.data);
 
             // 更新运行状态
-            setExecid(String(fileData.execid));
+            // setExecid(String(fileData.execid));
 
             // 通知父组件更新标签页内容
             if (onTabContentUpdate) {
@@ -198,7 +199,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       },
       [currentFileId]
     ),
-    { wait: 5000 }
+    { wait: 3000, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
@@ -286,6 +287,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
+        setRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFileId, {
           execid
         });

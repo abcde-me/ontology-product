@@ -60,6 +60,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
+      runStartTime,
+      runDuration,
       handleStopRunCode,
       handleRunCode,
       handleGetRunLog,
@@ -249,6 +251,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           runResult={runResult}
           runLog={runLog}
           runStatus={runStatus}
+          runStartTime={runStartTime}
+          runDuration={runDuration}
           onGetRunLog={handleGetRunLog}
           isPanelOpen={isPanelOpen}
           onPanelStateChange={handlePanelStateChange}
