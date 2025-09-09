@@ -429,7 +429,6 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.db_type)}
             <span>{record.db_type}</span>
           </div>
         )
