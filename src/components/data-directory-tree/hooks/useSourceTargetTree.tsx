@@ -3,13 +3,18 @@ import {
   CatalogRootType,
   DstCatalogItem,
   getCatalogList as getCatalogListApi,
+  getDbItemList as getDbItemListApi,
   SrcCatalogItem,
   getSourceCatalogFileList as getSourceCatalogFileListApi,
   getTargetCatalogFileList as getTargetCatalogFileListApi,
   GetTargetCatalogFileListParams,
   GetSourceCatalogFileListParams,
   GetSourceCatalogFileListItem,
-  GetTargetCatalogFileListItem
+  GetTargetCatalogFileListItem,
+  DbTableListParamss,
+  getDbItemDetail,
+  GetDbItemDetailParams,
+  GetDbItemDetailRes
 } from '@/api/dataCatalog';
 import { useEffect, useState } from 'react';
 
@@ -156,6 +161,13 @@ export const useSourceTargetTree = (dataType) => {
   const [targetCatalogFileList, setTargetCatalogFileList] = useState<
     GetTargetCatalogFileListItem[]
   >([]);
+  // 源目录表列表
+  const [sourceCatalogTableList, setSourceCatalogTableList] = useState<
+    DbTableListParamss[]
+  >([]);
+  // 表详情列表
+  const [sourceCatalogTableDetail, setSourceCatalogTableDetail] =
+    useState<GetDbItemDetailRes | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   // 获取数据目录列表
@@ -282,6 +294,28 @@ export const useSourceTargetTree = (dataType) => {
     return result;
   };
 
+  // 查询源库下的表列表
+  const getSourceCatalogTableList = async (params: DbTableListParamss) => {
+    const res = await getDbItemListApi(params);
+
+    if (res?.status !== 200) {
+      return;
+    }
+
+    setSourceCatalogTableList(res?.data?.list ?? []);
+  };
+
+  // 查询源库下的表详情
+  const getSourceCatalogTableDetail = async (params: GetDbItemDetailParams) => {
+    const res = await getDbItemDetail(params);
+
+    if (res?.status !== 200 || !res?.data?.sample) {
+      return;
+    }
+
+    setSourceCatalogTableDetail(res?.data ?? null);
+  };
+
   useEffect(() => {
     getCatalogList(
       dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target
@@ -291,11 +325,17 @@ export const useSourceTargetTree = (dataType) => {
   return {
     targetCatalogList,
     sourceCatalogList,
-    getCatalogList,
     sourceCatalogFileList,
     targetCatalogFileList,
     currentPage,
+    sourceCatalogTableList,
+    sourceCatalogTableDetail,
+
+    getCatalogList,
     getCatalogFileList,
+    getSourceCatalogTableList,
+    setSourceCatalogTableList,
+    getSourceCatalogTableDetail,
     getNodeHierarchyInfo,
     findFullPathById: (targetId: number) =>
       findFullPathById(targetCatalogList, targetId)
