@@ -1,6 +1,7 @@
 import { Table, Input, Button, Message } from '@arco-design/web-react';
 import React, { useRef, useState } from 'react';
 import { IconSearch, IconCopy } from '@arco-design/web-react/icon';
+import copy from 'copy-to-clipboard';
 const InputSearch = Input.Search;
 import '../index.scss';
 import Pages from '../components/pages';
@@ -246,7 +247,7 @@ export default function AutoDefine(props) {
     const v = String(row?.name || '');
     return v.toLowerCase().includes(nameFilter.toLowerCase());
   });
-  const handCopy = async () => {
+  const handCopy = () => {
     const rawText = dataList?.ddl?.tableInfo;
     let textToCopy = '';
     if (rawText) {
@@ -263,19 +264,12 @@ export default function AutoDefine(props) {
     }
 
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
+      const success = copy(textToCopy);
+      if (success) {
+        Message.success('复制成功');
       } else {
-        const ta = document.createElement('textarea');
-        ta.value = textToCopy;
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
+        Message.error('复制失败');
       }
-      Message.success('复制成功');
     } catch (err) {
       Message.error('复制失败');
     }
