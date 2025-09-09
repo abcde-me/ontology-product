@@ -28,62 +28,62 @@ const taskResult = {
     version: 0,
     tags: [],
     shapes: [
-      {
-        type: 'rectangle',
-        occluded: false,
-        outside: false,
-        z_order: 0,
-        rotation: 0.0,
-        points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
-        id: 28,
-        frame: 0,
-        label_id: 2,
-        group: 0,
-        source: 'manual',
-        attributes: [
-          {
-            spec_id: 1,
-            value: 'opt1'
-          },
-          {
-            spec_id: 2,
-            value: 'opt1,other|dddddd'
-          },
-          {
-            spec_id: 3,
-            value: '1111'
-          }
-        ],
-        elements: []
-      },
-      {
-        type: 'rectangle',
-        occluded: false,
-        outside: false,
-        z_order: 0,
-        rotation: 0.0,
-        points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
-        id: 29,
-        frame: 0,
-        label_id: 2,
-        group: 0,
-        source: 'manual',
-        attributes: [
-          {
-            spec_id: 1,
-            value: 'opt1'
-          },
-          {
-            spec_id: 2,
-            value: 'opt1'
-          },
-          {
-            spec_id: 3,
-            value: ''
-          }
-        ],
-        elements: []
-      }
+      // {
+      //   type: 'rectangle',
+      //   occluded: false,
+      //   outside: false,
+      //   z_order: 0,
+      //   rotation: 0.0,
+      //   points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
+      //   id: 28,
+      //   frame: 0,
+      //   label_id: 2,
+      //   group: 0,
+      //   source: 'manual',
+      //   attributes: [
+      //     {
+      //       spec_id: 1,
+      //       value: 'opt1'
+      //     },
+      //     {
+      //       spec_id: 2,
+      //       value: 'opt1,other|dddddd'
+      //     },
+      //     {
+      //       spec_id: 3,
+      //       value: '1111'
+      //     }
+      //   ],
+      //   elements: []
+      // },
+      // {
+      //   type: 'rectangle',
+      //   occluded: false,
+      //   outside: false,
+      //   z_order: 0,
+      //   rotation: 0.0,
+      //   points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
+      //   id: 29,
+      //   frame: 0,
+      //   label_id: 2,
+      //   group: 0,
+      //   source: 'manual',
+      //   attributes: [
+      //     {
+      //       spec_id: 1,
+      //       value: 'opt1'
+      //     },
+      //     {
+      //       spec_id: 2,
+      //       value: 'opt1'
+      //     },
+      //     {
+      //       spec_id: 3,
+      //       value: ''
+      //     }
+      //   ],
+      //   elements: []
+      // }
     ],
     tracks: []
   }
