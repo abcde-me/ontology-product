@@ -39,7 +39,7 @@ const add = forwardRef((props: any, ref) => {
       setVisible(true);
       // 添加模式 - 重置表单
       form.resetFields();
-      form.setFieldsValue({ type: 's3', name: '' });
+      form.setFieldsValue({ type: 's3', name: '', sub_type: 'mysql' });
       setStorageType('s3');
     }
   }));
@@ -427,7 +427,7 @@ const add = forwardRef((props: any, ref) => {
                   labelAlign="right"
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入所属系统名称" />
+                  <Input placeholder="请输入所属系统" />
                 </FormItem>
                 <FormItem
                   label="数据库类型："
@@ -446,7 +446,7 @@ const add = forwardRef((props: any, ref) => {
                         showIcon: true
                       })
                     }
-                    // disabled={true}
+                    defaultValue="mysql"
                   >
                     {options.map((option, index) => (
                       <Option key={option.value} value={option.value}>
