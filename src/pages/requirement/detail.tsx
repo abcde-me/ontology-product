@@ -47,6 +47,7 @@ import {
   LabelInfoAttributeGroupType,
   LabelShape,
   RequirementTypeMap,
+  RequirementTypeNameMap,
   TeamType,
   TeamTypeMap,
   toolFileType
@@ -438,11 +439,10 @@ export default function RequirementDetail() {
       form1
         .validate()
         .then(() => {
-          // 验证通过，切换到下一步
-          // if (selectedData?.length <= 0) {
-          //   setIsShowDataErrorInfo(true);
-          //   return;
-          // }
+          if (selectedData?.length <= 0) {
+            setIsShowDataErrorInfo(true);
+            return;
+          }
           if (selectedRadio === '') {
             setIsShowErrorInfo(true);
             return;
@@ -450,9 +450,9 @@ export default function RequirementDetail() {
           return true;
         })
         .catch((errorInfo) => {
-          // if (selectedData?.length <= 0) {
-          //   setIsShowDataErrorInfo(true);
-          // }
+          if (selectedData?.length <= 0) {
+            setIsShowDataErrorInfo(true);
+          }
           if (selectedRadio === '') {
             setIsShowErrorInfo(true);
             return;
@@ -497,6 +497,11 @@ export default function RequirementDetail() {
   const removeEmptyArrays = (obj) => {
     return omitBy(obj, (value) => isArray(value) && isEmpty(value));
   };
+  const [text_fl_data, setText_fl_data] = useState([]);
+  const getClassIfyChildData = (data) => {
+    setText_fl_data(data);
+    console.log(annotationTypeContentVal);
+  };
 
   const publish = async () => {
     const newSetLabels = datalist.map((item, index) => {
@@ -525,61 +530,25 @@ export default function RequirementDetail() {
         )
       };
     });
+
     // 发布数据重置
     const new_publishData = {
       name: publishData?.name,
       description: publishData?.description,
       label_type: annotationTypeVal,
-      label_count: 1, //数据量（所有数据集之和）
+      label_count: selectedData?.length, //数据量（所有数据集之和）
       team_type: taskTypeVal,
       label_tool: {
-        label_tool_name: RequirementTypeMap[selectedRadio],
+        label_tool_name: RequirementTypeNameMap[annotationTypeVal],
         label_tool_code: annotationTypeContentCode,
         image_out_of_bounds: 0
       },
       // 配置文件分类标签
-      file_labels:
-        annotationTypeVal === AnnotationTypeStatus.TEXT &&
-        annotationTypeContentVal === AnnotationChildType.ENTITY
-          ? [
-              //文件分类标签配置
-              {
-                attribute_group_name: '', //属性组名称
-                attribute_group_class: 1, //1单选/2多选/3输入框
-                attribute_group_type: 1, //1必选/2非必选
-                file_label_attribute: [
-                  {
-                    attribute_name_cn: '1', //属性中文名称(展示名称)
-                    attribute_name_en: '1', //属性英文名称(存储名称)
-                    input_type: 1 //输入类型：1选项，2输入框
-                  }
-                ]
-              }
-            ]
-          : [],
+      file_labels: text_fl_data,
       label_data_set: selectedData,
       labels: newSetLabels,
       entity_relations:
-        annotationTypeVal === AnnotationTypeStatus.TEXT &&
-        annotationTypeContentVal === AnnotationChildType.ENTITY
-          ? [
-              //文本标签-实体关系
-              {
-                relation_name_cn: '',
-                relation_name_en: '',
-                start_entity_labels: [], //起始标签，标签的存储名称
-                target_entity_labels: [], //目标(结束)标签
-                colour: ''
-              },
-              {
-                relation_name_cn: '',
-                relation_name_en: '',
-                start_entity_labels: [],
-                target_entity_labels: [],
-                colour: ''
-              }
-            ]
-          : [],
+        annotationTypeContentVal === AnnotationTypeContentCode.ENTITY ? [] : [],
       label_operate: [
         //配置标注人员
         {
@@ -590,6 +559,7 @@ export default function RequirementDetail() {
     };
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
+    console.log(obj, 'top ---- 我是提交的数据', text_fl_data);
     // 发布数据
     const res = await publishRequirement(obj);
     if (res.code === 0) {
@@ -597,54 +567,59 @@ export default function RequirementDetail() {
     }
     setLoading(false);
   };
-  // 需求详情查看
-  const getDetail = async () => {
-    try {
-      const res = await getRequirementDetail({
-        requirement_id: Number(requirementId)
-      });
-      if (res.code === 0) {
-        setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
-        form1.setFieldValue('name', res?.data?.name);
-        form1.setFieldValue('description', res?.data?.description);
-        setGetDetailObj(res?.data);
-        setTaskTypeVal(res?.data?.team_type);
-        res?.data?.labels?.map((item) => {
-          form2.setFieldValue(
-            `label_name_cn_${item?.order_num}`,
-            item?.label_name_cn
-          );
-          form2.setFieldValue(
-            `label_name_en_${item?.order_num}`,
-            item?.label_name_en
-          );
-          form2.setFieldValue(
-            `label_shape_${item?.order_num}`,
-            item?.label_shape
-          );
-          form2.setFieldValue(
-            `label_colour_${item?.order_num}`,
-            item?.label_colour
-          );
-          item?.label_info_attribute_groups?.map((group) => {
-            group?.label_info_attribute?.map((attribute) => {
-              form2.setFieldValue(
-                `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
-                attribute?.attribute_name_cn
-              );
-              form2.setFieldValue(
-                `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_en`,
-                attribute?.attribute_name_en
-              );
-            });
-          });
-        });
-        setDatalist(res?.data?.labels);
-      }
-    } catch (error) {}
-  };
+
   useEffect(() => {
     if (type === 'detail') {
+      const getDetail = async () => {
+        try {
+          const res = await getRequirementDetail({
+            requirement_id: Number(requirementId)
+          });
+          if (res.code === 0) {
+            console.log(res?.data?.label_tool?.label_tool_code, 'top', res);
+            const code = res?.data?.label_tool?.label_tool_code;
+            setAnnotationTypeContentCode(
+              res?.data?.label_tool?.label_tool_code
+            );
+            setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
+            form1.setFieldValue('name', res?.data?.name);
+            form1.setFieldValue('description', res?.data?.description);
+            setGetDetailObj(res?.data);
+            setTaskTypeVal(res?.data?.team_type);
+            res?.data?.labels?.map((item) => {
+              form2.setFieldValue(
+                `label_name_cn_${item?.order_num}`,
+                item?.label_name_cn
+              );
+              form2.setFieldValue(
+                `label_name_en_${item?.order_num}`,
+                item?.label_name_en
+              );
+              form2.setFieldValue(
+                `label_shape_${item?.order_num}`,
+                item?.label_shape
+              );
+              form2.setFieldValue(
+                `label_colour_${item?.order_num}`,
+                item?.label_colour
+              );
+              item?.label_info_attribute_groups?.map((group) => {
+                group?.label_info_attribute?.map((attribute) => {
+                  form2.setFieldValue(
+                    `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
+                    attribute?.attribute_name_cn
+                  );
+                  form2.setFieldValue(
+                    `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_en`,
+                    attribute?.attribute_name_en
+                  );
+                });
+              });
+            });
+            setDatalist(res?.data?.labels);
+          }
+        } catch (error) {}
+      };
       getDetail();
     }
   }, [requirementId]);
@@ -675,7 +650,7 @@ export default function RequirementDetail() {
               >
                 标注详情
               </BreadcrumbItem>
-              <BreadcrumbItem>{requirementId}</BreadcrumbItem>
+              <BreadcrumbItem>{getDetailObj?.name || ''}</BreadcrumbItem>
             </Breadcrumb>
           </div>
         )}
@@ -761,11 +736,12 @@ export default function RequirementDetail() {
             getChildTableSelectData={handleChildData}
           />
         </div>
+        {annotationTypeContentVal}
         {/* 工具配置部分 */}
-        {(annotationTypeContentCode ===
+        {(annotationTypeContentVal ===
           AnnotationTypeContentCode.IMAGE_ANNOTATION ||
-          annotationTypeContentCode === AnnotationTypeContentCode.ENTITY ||
-          annotationTypeContentCode ===
+          annotationTypeContentVal === AnnotationTypeContentCode.ENTITY ||
+          annotationTypeContentVal ===
             AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
           <div className="tool-annotation-config">
             <div className="basic-title">标签配置</div>
@@ -786,7 +762,7 @@ export default function RequirementDetail() {
                 required
               >
                 {/* 循环显示内容 */}
-                {annotationTypeContentCode ===
+                {annotationTypeContentVal ===
                   AnnotationTypeContentCode.IMAGE_ANNOTATION && (
                   // annotationTypeContentVal ===
                   // AnnotationChildType.IMAGE_ANNOTATION &&
@@ -1505,16 +1481,20 @@ export default function RequirementDetail() {
                     )}
                   </div>
                 )}
-                {annotationTypeContentCode ===
+                {annotationTypeContentVal ===
                   AnnotationTypeContentCode.ENTITY && (
                   <TextSubstanceComponent
                     type={type}
                     getDetailObj={getDetailObj}
                   />
                 )}
-                {annotationTypeContentCode ===
+                {annotationTypeContentVal ===
                   AnnotationTypeContentCode.TEXT_CLASSIFICATION && (
-                  <Classify type={type} getDetailObj={getDetailObj} />
+                  <Classify
+                    type={type}
+                    getDetailObj={getDetailObj}
+                    getClassIfyData={getClassIfyChildData}
+                  />
                 )}
               </FormItem>
             </Form>
