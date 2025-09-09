@@ -462,6 +462,7 @@ export const ModaForgeResourceEndpoints = {
   sqlExportDatasetRetryApi: PrefixAimdp + '/sql_script/export_task/{id}/retry',
   sqlExportDatasetDetailApi:
     PrefixAimdp + '/sql_script/export_task/{id}/get_sql_info',
+  datasetsOptionsApi: PrefixAimdp + '/datasets/list',
 
   leGetTask: PrefixLabelEngine + '/getTask',
   leGetLabels: PrefixLabelEngine + '/getLabels',
