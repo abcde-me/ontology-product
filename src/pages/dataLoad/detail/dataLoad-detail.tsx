@@ -212,7 +212,9 @@ const DataLoadDetail = () => {
     getdirectorylist();
     getTask_idHan();
   }, []);
-
+  useEffect(() => {
+    getDetailList();
+  }, []);
   const clearHan = async () => {
     try {
       setDetailListLoading(true);

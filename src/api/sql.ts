@@ -744,28 +744,98 @@ export async function getExportSqlResultList(
   params: ExportSqlResultListParams
 ): Promise<ApiRes<ExportSqlResultListData>> {
   return await UAPI.RES.sqlExportDatasetList({}).get(params).inRegion().do();
+
+  // return Promise.resolve({
+  //   "message": "string",
+  //   "data": {
+  //     "items": [
+  //       {
+  //         "id": 5,
+  //         "script_id": 5,
+  //         "script_name": "string",
+  //         "dataset_name": "string",
+  //         "dataset_table_name": "string",
+  //         "export_status": 0,
+  //         "export_start_time": "string",
+  //         "export_end_time": "string",
+  //         "failed_reason": "string"
+  //       },
+  //       {
+  //         "id": 1,
+  //         "script_id": 1,
+  //         "script_name": "string",
+  //         "dataset_name": "string",
+  //         "dataset_table_name": "string",
+  //         "export_status": 1,
+  //         "export_start_time": "string",
+  //         "export_end_time": "string",
+  //         "failed_reason": "string"
+  //       },
+  //       {
+  //         "id": 2,
+  //         "script_id": 1,
+  //         "script_name": "string",
+  //         "dataset_name": "string",
+  //         "dataset_table_name": "string",
+  //         "export_status": 2,
+  //         "export_start_time": "string",
+  //         "export_end_time": "string",
+  //         "failed_reason": "错误原因"
+  //       },
+  //       {
+  //         "id": 3,
+  //         "script_id": 1,
+  //         "script_name": "string",
+  //         "dataset_name": "string",
+  //         "dataset_table_name": "string",
+  //         "export_status": 3,
+  //         "export_start_time": "string",
+  //         "export_end_time": "string",
+  //         "failed_reason": "string"
+  //       }
+  //     ],
+  //     "total": "1",
+  //     "page": "1",
+  //     "page_size": "10"
+  //   },
+  //   "status": 0,
+  //   "code": '0',
+  //   requestId: '0'
+  // })
 }
 
 /** SQL结果导出任务停止 */
-export async function calcelExportSqlTask(id: string): Promise<ApiRes<{}>> {
-  return await UAPI.RES.sqlExportDatasetStopApi({ id: id })
-    .post()
+export async function calcelExportSqlTask(
+  id: number,
+  script_id: number
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.sqlExportDatasetStopApi({
+    item_id: id,
+    script_id: script_id
+  })
+    .put()
     .inRegion()
     .do();
 }
 
-/** SQL结果导出任务停止 */
-export async function retryExportSqlTask(id: string): Promise<ApiRes<{}>> {
-  return await UAPI.RES.sqlExportDatasetRetryApi({ id: id })
-    .post()
+/** SQL结果导出任务重试 */
+export async function retryExportSqlTask(
+  id: number,
+  script_id: number
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.sqlExportDatasetRetryApi({ item_id: id, script_id })
+    .put()
     .inRegion()
     .do();
 }
 
 /** 获取导出任务的SQL详情 */
-export async function getSqlTaskDetail(id: string): Promise<SqlTaskDetailData> {
-  return await UAPI.RES.sqlExportDatasetDetailApi({ id: id })
-    .post()
+export async function getSqlTaskDetail(
+  id: number,
+  script_id: number
+): Promise<ApiRes<SqlTaskDetailData>> {
+  return await UAPI.RES.sqlExportDatasetDetailApi({ item_id: id, script_id })
+    .get()
     .inRegion()
     .do();
 }

@@ -23,6 +23,8 @@
   &__header {
     padding-bottom: 11px;
     background: #fff;
+    height: 22px;
+    box-sizing: content-box;
 
     &-left {
       display: flex;

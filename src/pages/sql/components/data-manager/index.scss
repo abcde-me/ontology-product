@@ -23,4 +23,9 @@
       padding: 0;
     }
   }
+
+  .tab-tree {
+    // 30px,顶部标题
+    height: calc(100% - 30px);
+  }
 }

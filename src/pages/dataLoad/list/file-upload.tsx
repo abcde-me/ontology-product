@@ -71,6 +71,27 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       return false;
     }
 
+    // 检查重名文件
+    const existingFileNames = fileList.map(
+      (existingFile: any) => existingFile.name
+    );
+    if (existingFileNames.includes(file.name)) {
+      Message.error(`未导入成功 "${file.name}"文件重名`);
+      return false;
+    }
+
+    // 检查本次上传列表中的重名文件
+    if (Array.isArray(list)) {
+      const currentUploadNames = list.map((f: any) => f.name);
+      const duplicateCount = currentUploadNames.filter(
+        (name: string) => name === file.name
+      ).length;
+      if (duplicateCount > 1) {
+        Message.error(`未导入成功 "${file.name}"文件重名`);
+        return false;
+      }
+    }
+
     // 检查文件类型
     const isValidFileType =
       /\.(docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(

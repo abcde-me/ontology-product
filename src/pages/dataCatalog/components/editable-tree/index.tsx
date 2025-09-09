@@ -13,11 +13,11 @@ const InputSearch = Input.Search;
 export default function EditableTree() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { treeData, expandedKeys, selectedKey, searchValue } =
+  const { treeData, expandedKeys, selectedTreeKey, searchValue } =
     catalogTreeStore.useGetState([
       'treeData',
       'expandedKeys',
-      'selectedKey',
+      'selectedTreeKey',
       'inputValue'
     ]);
 
@@ -60,7 +60,7 @@ export default function EditableTree() {
           blockNode
           selectable
           expandedKeys={expandedKeys}
-          selectedKeys={[selectedKey]}
+          selectedKeys={[selectedTreeKey]}
           icons={(node) => ({
             switcherIcon: !node.dataRef?.isLastLeaf ? <IconCaretDown /> : null
           })}

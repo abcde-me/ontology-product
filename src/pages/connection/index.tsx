@@ -63,8 +63,8 @@ const STATUS_CONFIG = {
 const TYPE_CONFIG = {
   [ConnectorType.S3]: '对象存储(S3)',
   [ConnectorType.HDFS]: 'HDFS',
-  [ConnectorType.mysql]: '数据库-Mysql',
-  [ConnectorType.postgresql]: '数据库-Postgresql'
+  [ConnectorType.mysql]: '数据库-MySQL',
+  [ConnectorType.postgresql]: '数据库-Postgres'
 };
 
 export default function Connection() {
@@ -237,12 +237,8 @@ export default function Connection() {
           value: ConnectorType.HDFS
         },
         {
-          text: TYPE_CONFIG[ConnectorType.mysql],
-          value: ConnectorType.mysql
-        },
-        {
-          text: TYPE_CONFIG[ConnectorType.postgresql],
-          value: ConnectorType.postgresql
+          text: '数据库',
+          value: 'db'
         }
       ]
     },

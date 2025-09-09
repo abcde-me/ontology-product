@@ -13,7 +13,11 @@ import {
 } from '@arco-design/web-react';
 import { getTagList } from '@/api/datasetManagement';
 import { DATASET_STORAGE_TYPE_LIST } from '../constant';
-import { exportSqlResult, getDatasetsOptions } from '@/api/sql';
+import {
+  exportSqlResult,
+  exportSqlResultVersion,
+  getDatasetsOptions
+} from '@/api/sql';
 import { requiredValidator, tableNameValidator } from '../utils';
 
 const FormItem = Form.Item;
@@ -356,7 +360,10 @@ function DatasetVersionForm(props) {
       setLoading(true);
 
       try {
-        const res = await exportSqlResult(formOrigin.script_id, submitData);
+        const res = await exportSqlResultVersion(
+          formOrigin.script_id,
+          submitData
+        );
 
         if (res.status !== 200) {
           Message.error(res.message || '新版本导出失败！');

@@ -36,6 +36,7 @@ export default function SourceData() {
     catalogTreeStore.setState({
       selectedNodeType: '',
       selectedKey: '',
+      selectedTreeKey: '',
       selectedPath: '',
       selectedParentId: ''
     });
