@@ -483,7 +483,19 @@ export const getUnifiedColumns = (
               display: 'inline-block'
             }}
             onClick={() => {
-              setDetail(record.id, setVisibleDbmodel);
+              // 从路径中获取数据库名
+              const pathParts = selectedFullPath?.split('/') || [];
+              const databaseName = pathParts[pathParts.length - 1] || '';
+              // 把数据传递给 Modal
+              setVisibleDbmodel(true);
+              if (onDbClick) {
+                onDbClick({
+                  databaseName,
+                  tableName: record.table_name,
+                  path_id: selectedParentId ? Number(selectedParentId) : 0, // 使用数据库文件夹(父节点)的ID
+                  table_id: record.table_id
+                });
+              }
             }}
           >
             详情

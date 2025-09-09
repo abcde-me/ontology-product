@@ -35,7 +35,8 @@ export interface CatalogTreeState {
   treeData: TreeDataType[];
   rawTreeData: TreeDataType[];
   expandedKeys: string[];
-  selectedKey: string;
+  selectedKey: string; // 存储实际的数据ID，用于API调用
+  selectedTreeKey: string; // 存储完整的树节点key，用于显示选中样式
   selectedNodeType: string; // 新增：存储选中节点的类型
   selectedParentId: string; // 新增：存储选中节点的父节点ID
   inputRef: React.RefObject<RefInputType>;
@@ -62,7 +63,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         rawTreeData: [],
         expandedKeys: [],
-        selectedKey: '',
+        selectedKey: '', // 实际的数据ID
+        selectedTreeKey: '', // 完整的树节点key
         selectedNodeType: '', // 初始化选中节点类型
         selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
@@ -151,7 +153,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
-        selectedKey: selectedNode?.key || '',
+        selectedKey: selectedNode?.id ? String(selectedNode.id) : '', // 存储实际ID
+        selectedTreeKey: selectedNode?.key || '', // 存储完整的树节点key
         selectedPath: selectedNode?.fullPath || ''
       };
     } catch (err) {

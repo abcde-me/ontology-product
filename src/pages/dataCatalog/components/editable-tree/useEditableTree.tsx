@@ -163,7 +163,8 @@ export function useEditableTree({ catalogTreeStore }) {
       dataRef?.type_name !== 'db'
     ) {
       catalogTreeStore.setState({
-        selectedKey: selectedKeys[0],
+        selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
+        selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
         selectedPath: dataRef?.fullPath,
         selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
         selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
