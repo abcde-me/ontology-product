@@ -122,14 +122,16 @@ const LoadAddModal = (props: propsType) => {
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
-          cancelHan();
           if (type == 'run') {
             history.push(
               `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
             );
           } else {
             Message.success('新建任务成功');
+            // 仅保存时刷新列表页面
+            props.getList(false);
           }
+          cancelHan();
         } else {
           Message.error(res.message);
         }
@@ -163,6 +165,8 @@ const LoadAddModal = (props: propsType) => {
             );
           } else {
             Message.success('新建任务成功');
+            // 仅保存时刷新列表页面
+            props.getList(false);
           }
           cancelHan();
         } else {
@@ -523,6 +527,9 @@ const LoadAddModal = (props: propsType) => {
     null
   );
 
+  // 存储树组件选中的keys
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+
   // 存储上传的文件数据
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
@@ -537,6 +544,8 @@ const LoadAddModal = (props: propsType) => {
     }
   ) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
+    // 更新选中状态
+    setSelectedTreeKeys(selectedKeys);
   };
   // 处理文件删除
   const handleFileDelete = (fileName: string) => {
@@ -599,7 +608,7 @@ const LoadAddModal = (props: propsType) => {
           extra={
             <div className="text-prompt">
               <div>支持中文，英文，数字，下划线</div>
-              <div>名称建议: 连接器connector_1</div>
+              {/* <div>名称建议: 连接器connector_1</div> */}
             </div>
           }
           rules={[
@@ -835,16 +844,29 @@ const LoadAddModal = (props: propsType) => {
           </FormItem>
         ) : (
           <FormItem
-            label="载入位置："
+            label="载入到："
             field="dest_path"
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             rules={[{ required: true, message: '请选择载入位置' }]}
+            extra={
+              sourceType === 'db' ? (
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: '#6E7B8D',
+                    marginTop: '4px'
+                  }}
+                >
+                  注意保存后数据库名称为xxx-aaa
+                </p>
+              ) : null
+            }
           >
             <TreeSelect
               className="db-tree-select"
-              placeholder="Please select ..."
+              placeholder="请选择载入位置"
               allowClear
               dropdownMenuStyle={{
                 maxHeight: 300,
@@ -856,6 +878,7 @@ const LoadAddModal = (props: propsType) => {
                   directoryData={directoryData}
                   onDirectoryDataChange={setDirectoryData}
                   onSelect={handleSelect}
+                  selectedKeys={selectedTreeKeys}
                   onPathChange={(path, nodeId) => {
                     console.log('路径变化:', path, '节点ID:', nodeId);
                     // 存储节点ID用于表单提交

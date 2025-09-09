@@ -17,8 +17,8 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const options = [
-  { text: 'Mysql', value: 'mysql' },
-  { text: 'Postgresql', value: 'postgresql' }
+  { text: 'MySql', value: 'mysql' },
+  { text: 'PostgreSQL', value: 'postgresql' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例

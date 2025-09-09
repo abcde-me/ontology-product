@@ -582,7 +582,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 添加根级目录
   const onCatalogAdd = () => {
-    const name = generateName(directoryData);
+    // const name = generateName(directoryData);
+    const name = '默认名称';
     const newNode = genereteInputNode(name);
 
     // 更新目录数据，将新节点添加到开头
@@ -627,7 +628,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     } else if (dataRef?.title === '数据源' || dataRef?.name === '数据源') {
       typeText = '';
     }
-    const newName = generateName(existingChildren, typeText);
+    // const newName = generateName(existingChildren, typeText);
+    const newName = '默认名称';
 
     // 创建新的输入节点
     const newInputNode = genereteInputNode(newName, node);
