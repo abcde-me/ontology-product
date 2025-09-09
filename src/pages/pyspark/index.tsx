@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useRef } from 'react';
 import { Layout, Tabs } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
@@ -23,6 +23,7 @@ const Python: React.FC = memo(() => {
     ((content: string) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
+  const isEditorFocusedRef = useRef<boolean>(false);
   const {
     fileState,
     directoryTreeRef,
@@ -59,6 +60,7 @@ const Python: React.FC = memo(() => {
 
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
+    isEditorFocusedRef.current = focused;
     setIsEditorFocused(focused);
   };
 
@@ -85,7 +87,7 @@ const Python: React.FC = memo(() => {
             {activeTab === 'data' && (
               <DataManager
                 onInsertContent={insertContentToEditor}
-                isEditorFocused={isEditorFocused}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
               />
             )}
           </TabPane>
@@ -93,7 +95,7 @@ const Python: React.FC = memo(() => {
             {activeTab === 'tools' && (
               <ToolsManager
                 onInsertContent={insertContentToEditor}
-                isEditorFocused={isEditorFocused}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
               />
             )}
           </TabPane>

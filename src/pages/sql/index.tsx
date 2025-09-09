@@ -1,4 +1,4 @@
-import React, { useState, memo, useEffect } from 'react';
+import React, { useState, memo, useEffect, useRef } from 'react';
 import { Layout, Tabs } from '@arco-design/web-react';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
@@ -20,6 +20,11 @@ const defaultActiveTab = 'data';
 
 const SqlIndex: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
+  const [insertContentFunction, setInsertContentFunction] = useState<
+    ((content: string) => void) | null
+  >(null);
+  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
+  const isEditorFocusedRef = useRef<boolean>(false);
   const {
     fileState,
     directoryTreeRef,
@@ -45,35 +50,66 @@ const SqlIndex: React.FC = memo(() => {
     updateTab(tabData);
   };
 
+  // 处理插入内容功能注册
+  const handleInsertContentRegister = (insertFn: (content: string) => void) => {
+    setInsertContentFunction(() => insertFn);
+  };
+
+  // 插入内容到编辑器
+  const insertContentToEditor = (content: string) => {
+    console.log(
+      'insertContentToEditor called with:',
+      content,
+      'isEditorFocused:',
+      isEditorFocusedRef.current
+    );
+    if (insertContentFunction) {
+      insertContentFunction(content);
+    }
+  };
+
+  // 处理编辑器聚焦状态变化
+  const handleEditorFocusChange = (focused: boolean) => {
+    console.log('handleEditorFocusChange focused', focused);
+    isEditorFocusedRef.current = focused;
+    setIsEditorFocused(focused);
+  };
+
   return (
-    <Layout className="notebook-layout">
-      <Sider width={isDasetTab ? '100%' : 300} className="notebook-sider">
+    <Layout className="sql-layout">
+      <Sider width={isDasetTab ? '100%' : 300} className="sql-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="notebook-tabs"
+          className="sql-tabs"
           type="rounded"
         >
           <TabPane key="data" title={<DataIcon />}>
-            <DataManager key="data" />
+            {activeTab === 'data' && (
+              <DataManager
+                key="data"
+                onInsertContent={insertContentToEditor}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
+              />
+            )}
           </TabPane>
           <TabPane key="files" title={<PythonIcon />}>
-            <FileManager
-              key="files"
-              type="files"
-              ref={directoryTreeRef}
-              onFileOpen={openFile}
-            />
+            {activeTab === 'files' && (
+              <FileManager
+                key="files"
+                type="files"
+                ref={directoryTreeRef}
+                onFileOpen={openFile}
+              />
+            )}
           </TabPane>
           <TabPane key="dataset" title={<DasetIcon />}>
-            <DatasetsList />
+            {activeTab === 'dataset' && <DatasetsList />}
           </TabPane>
         </Tabs>
       </Sider>
-      <Content
-        className={`notebook-content ${isDasetTab ? 'hidden' : 'visible'}`}
-      >
+      <Content className={`sql-content ${isDasetTab ? 'hidden' : 'visible'}`}>
         <EditorContent
           fileTabs={fileState.fileTabs}
           activeTab={fileState.activeTab}
@@ -82,6 +118,8 @@ const SqlIndex: React.FC = memo(() => {
           onRemoveTab={removeTab}
           onCreate={handleCreate}
           onActiveUpdate={handleActiveUpdate}
+          onInsertContent={handleInsertContentRegister}
+          onEditorFocusChange={handleEditorFocusChange}
         />
       </Content>
     </Layout>

@@ -29,12 +29,12 @@ interface TreeNodeData {
 // 组件Props接口
 interface ToolsManagerProps {
   onInsertContent?: (content: string) => void;
-  isEditorFocused?: boolean;
+  getIsEditorFocused?: () => boolean;
 }
 
 const ToolsManager: React.FC<ToolsManagerProps> = ({
   onInsertContent,
-  isEditorFocused = false
+  getIsEditorFocused
 }) => {
   const { operatorList, getOperator } = useToolsManager();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -106,9 +106,10 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
 
   // 处理插入按钮点击
   const handleInsertClick = (item: OperatorItem): void => {
+    const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
     console.log('插入算子:', item);
 
-    if (isEditorFocused && onInsertContent) {
+    if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
       onInsertContent(item.sample_code);
     } else {
@@ -225,7 +226,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
                     handleInsertClick(item);
                   }}
                 >
-                  {isEditorFocused ? '插入' : '复制'}
+                  {getIsEditorFocused?.() ? '插入' : '复制'}
                 </Button>
               </div>
             }
