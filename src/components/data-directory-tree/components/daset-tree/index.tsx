@@ -278,7 +278,8 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     >
                       详情
                     </Button>
-                    <Button
+                    {/* 插入按钮，数据集目录不支持插入 */}
+                    {/* <Button
                       type="outline"
                       onClick={(e) =>
                         handleDatasetInsert(
@@ -288,7 +289,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                       }
                     >
                       {isEditorFocused ? '插入' : '复制'}
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               ))

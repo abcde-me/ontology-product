@@ -61,6 +61,10 @@ export interface DatasetListItem {
    * 数据集类型：file、jsonl、table
    */
   storage_type: 'file' | 'jsonl' | 'table';
+  /**
+   * 数据集文件key
+   */
+  file_key?: string;
 }
 
 export interface GetDatasetListRes {
