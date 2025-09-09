@@ -19,6 +19,11 @@
     margin-bottom: 16px;
   }
 
+  .attribute-header-content {
+    display: flex;
+    align-items: center;
+  }
+
   .attribute-list {
     background-color: #f5f9ff;
     padding: 12px;

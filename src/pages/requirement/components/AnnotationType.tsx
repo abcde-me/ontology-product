@@ -1,23 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import './AnnotationType.scss';
+import { AnnotationTypeStatus } from '../type';
 
 const typeList = [
   {
     label: '图片',
-    value: 2
+    value: AnnotationTypeStatus.IMAGE
   },
   {
     label: '文本',
-    value: 1
+    value: AnnotationTypeStatus.TEXT
   },
   {
     label: '音频',
-    value: 3
+    value: AnnotationTypeStatus.AUDIO
   },
   {
     label: '视频',
-    value: 4
+    value: AnnotationTypeStatus.VIDEO
   }
 ];
 const btnPicData = [
@@ -70,7 +71,6 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
 
   // 头部点击事件
   const headerItemClick = (item) => {
-    console.log(item, 'top');
     setSelectedRadio(item.value);
     if (item?.value === 2) {
       setActiveKey('IMAGE_ANNOTATION');

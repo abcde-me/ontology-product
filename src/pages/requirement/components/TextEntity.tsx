@@ -15,7 +15,6 @@ import {
 import './TextEntity.scss';
 import { uuid } from '@/models/utils';
 import { getRandomHexColorStrict } from '../common';
-import { set } from 'lodash';
 // 实体/实体关系 - 组件
 const btnList = [
   {

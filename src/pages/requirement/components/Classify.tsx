@@ -180,6 +180,7 @@ const Classify = (props: ClassifyComponentProps) => {
                       fontSize={18}
                       onClick={() => {
                         // 添加属性逻辑补充 - 在按钮位置(数组开头)添加新属性
+                        // 修改逻辑 - 增加的时候在倒数第二个添加
                         setTextRelations(
                           textRelations.map((group, groupIndex) => {
                             if (groupIndex === index) {
@@ -228,12 +229,45 @@ const Classify = (props: ClassifyComponentProps) => {
                 </div>
                 {item.file_label_attribute?.length > 0 && currentType !== 3 && (
                   <div className="attribute-list">
-                    <div className="attribute-title">
-                      {currentType === 1
-                        ? '单选选项'
-                        : currentType === 2
-                          ? '多选选项'
-                          : ''}
+                    <div className="attribute-header-content">
+                      <div className="attribute-title">
+                        {currentType === 1
+                          ? '单选选项'
+                          : currentType === 2
+                            ? '多选选项'
+                            : ''}
+                      </div>
+                      <Checkbox
+                        style={{ whiteSpace: 'nowrap' }}
+                        // checked={}
+                        onChange={(checked) => {
+                          // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
+                          if (checked) {
+                            const newData = [...textRelations];
+                            newData[index].file_label_attribute.push({
+                              id: uuid(),
+                              order_num:
+                                newData[index].file_label_attribute.length + 1,
+                              attribute_name_cn: '',
+                              attribute_name_en: '',
+                              input_type: 1
+                            });
+                            setTextRelations(newData);
+                            console.log(newData, 'top ---');
+                          } else {
+                            console.log(12, 'top');
+                            // 取消选中的时候删除增加的内容
+                            if (textRelations?.length > 0) {
+                              const newItems = [...textRelations];
+                              console.log(newItems, 'top');
+                              newItems[index]?.file_label_attribute.pop();
+                              setTextRelations(newItems);
+                            }
+                          }
+                        }}
+                      >
+                        支持手动输入
+                      </Checkbox>
                     </div>
                     {item.file_label_attribute?.map((attr, attrIndex) => (
                       <div key={attr.id} className="attribute-item">
@@ -242,10 +276,22 @@ const Classify = (props: ClassifyComponentProps) => {
                             { required: true, message: '请输入选项名称' }
                           ]}
                           label={`选项 ${attr.order_num}`}
+                          disabled={
+                            attrIndex !== 0 &&
+                            attrIndex === item.file_label_attribute?.length - 1
+                              ? true
+                              : false
+                          }
                         >
                           <Input
                             placeholder="用于存储标注结果"
-                            value={attr.attribute_name_cn}
+                            value={
+                              attrIndex !== 0 &&
+                              attrIndex ===
+                                item.file_label_attribute?.length - 1
+                                ? '标准时的输入内容'
+                                : attr.attribute_name_cn
+                            }
                             onChange={(value) => {
                               const newData = [...textRelations];
                               newData[index].file_label_attribute[
@@ -267,7 +313,13 @@ const Classify = (props: ClassifyComponentProps) => {
                         >
                           <Input
                             placeholder="展示在标注页面的名称"
-                            value={attr.attribute_name_en}
+                            value={
+                              attrIndex !== 0 &&
+                              attrIndex ===
+                                item.file_label_attribute?.length - 1
+                                ? '其他'
+                                : attr.attribute_name_en
+                            }
                             onChange={(value) => {
                               const newData = [...textRelations];
                               newData[index].file_label_attribute[
@@ -276,24 +328,6 @@ const Classify = (props: ClassifyComponentProps) => {
                               setTextRelations(newData);
                             }}
                           />
-                        </FormItem>
-                        <FormItem label={null}>
-                          <Checkbox
-                            style={{ whiteSpace: 'nowrap' }}
-                            checked={
-                              item?.file_label_attribute[attrIndex]
-                                .input_type === 1
-                            }
-                            onChange={(checked) => {
-                              handleFieldChange(
-                                index,
-                                'input_type',
-                                checked ? 1 : 2
-                              );
-                            }}
-                          >
-                            可输入文本
-                          </Checkbox>
                         </FormItem>
                         <FormItem label={null}>
                           <IconDelete
