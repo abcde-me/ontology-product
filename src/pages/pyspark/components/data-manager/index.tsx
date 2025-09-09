@@ -51,15 +51,19 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   // 处理数据集插入或复制
   const handleInsertDataset = (dataset: DatasetListItem) => {
     const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
-    console.log('数据集插入:', dataset, isEditorFocusedNow, onInsertContent);
+    console.log('数据集插入:', dataset);
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(dataset.name ?? '');
+      onInsertContent(dataset?.file_key ?? '');
     } else {
-      // 编辑器未聚焦时复制到剪贴板
-      copy(dataset.name ?? '');
-      Message.success('内容复制成功，请粘贴到编辑器');
+      const isSuccess = copy(String(dataset?.file_key ?? ''));
+
+      if (isSuccess) {
+        Message.success('内容复制成功，请粘贴到编辑器');
+      } else {
+        Message.error('内容复制失败');
+      }
     }
   };
 
@@ -70,11 +74,18 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(volume?.name ?? '');
+      onInsertContent(String(volume?.file_id ?? volume?.file_name ?? ''));
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(volume?.name ?? '1111');
-      Message.success('内容复制成功，请粘贴到编辑器');
+      const isSuccess = copy(
+        String(volume?.file_id ?? volume?.file_name ?? '')
+      );
+
+      if (isSuccess) {
+        Message.success('内容复制成功，请粘贴到编辑器');
+      } else {
+        Message.error('内容复制失败');
+      }
     }
   };
 

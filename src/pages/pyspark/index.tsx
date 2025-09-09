@@ -60,6 +60,7 @@ const Python: React.FC = memo(() => {
 
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
+    console.log('handleEditorFocusChange', focused);
     isEditorFocusedRef.current = focused;
     setIsEditorFocused(focused);
   };
