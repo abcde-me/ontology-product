@@ -507,3 +507,111 @@ export interface SqlTaskDetailData {
    */
   sql_content: string;
 }
+
+export interface DatasetsOptionsParams {
+  /**
+   * 页大小
+   */
+  limit?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  /**
+   * 存储方式列表：jsonl、file、table
+   */
+  storage_type_list?: string[];
+  name: string;
+}
+
+export interface DatasetsOptionsDataList {
+  created_at: string;
+  creator_id: string;
+  creator_name: string;
+  /**
+   * 存储库名
+   */
+  database?: string;
+  description: string;
+  /**
+   * 版本生成失败原因
+   */
+  error_reason?: string;
+  id: number;
+  /**
+   * 最新版本文件名称
+   */
+  latest_file_name: string;
+  /**
+   * 最新版本文件路径
+   */
+  latest_file_path: string;
+  /**
+   * 版本大小(字节)
+   */
+  latest_size: number;
+  /**
+   * 最新版本存储表
+   */
+  latest_table?: string;
+  /**
+   * 最新版本ID
+   */
+  latest_version: string;
+  name: string;
+  /**
+   * 权限点列表
+   */
+  perms?: string[];
+  /**
+   * 存储表字段
+   */
+  scheams?: DatasetsOptionsDataScheam[];
+  src: number;
+  /**
+   * 生成模型
+   */
+  src_model: string;
+  /**
+   *
+   * 状态（creating-创建中、create_failed-创建失败、normal-正常、version_updating-版本更新中、version_update_failed-版本更新失败）
+   */
+  status: string;
+  /**
+   * 存储格式：file，jsonl
+   */
+  storage_type: string;
+  /**
+   * 标签名称列表
+   */
+  tag_names: string[];
+  tags: string[];
+  updated_at: string;
+}
+
+export interface DatasetsOptionsDataScheam {
+  /**
+   * 字段中文名
+   */
+  cn_name?: string;
+  /**
+   * 字段名
+   */
+  name?: string;
+}
+
+export interface DatasetsOptionsData {
+  /**
+   * 页大小
+   */
+  limit: number;
+  list: DatasetsOptionsDataList[];
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 总条数
+   */
+  total: number;
+}

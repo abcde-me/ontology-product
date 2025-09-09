@@ -44,7 +44,9 @@ import {
   TableListParams,
   TableListData,
   updateSqlScriptParams,
-  SqlTaskDetailData
+  SqlTaskDetailData,
+  DatasetsOptionsParams,
+  DatasetsOptionsData
 } from '@/types/sqlApi';
 
 /** 查询目标目录文件列表 卷详情 文件列表 */
@@ -766,4 +768,11 @@ export async function getSqlTaskDetail(id: string): Promise<SqlTaskDetailData> {
     .post()
     .inRegion()
     .do();
+}
+
+/** 获取目标数据集 */
+export async function getDatasetsOptions(
+  params: DatasetsOptionsParams
+): Promise<ApiRes<DatasetsOptionsData>> {
+  return await UAPI.RES.datasetsOptionsApi({}).post(params).inRegion().do();
 }
