@@ -32,6 +32,7 @@ import {
 } from '../../types';
 import './index.scss';
 import { formatFileSize } from '@/utils/format';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const { Title, Text } = Typography;
 
@@ -439,15 +440,18 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
     return (
       <div className="source-target-tree__catalog-list max-h-full overflow-y-auto">
-        {generateCatalogTreeData.map((item) => (
-          <div
-            key={item.key}
-            className="source-target-tree__catalog-item"
-            onClick={() => handleCatalogClick(item.data)}
-          >
-            {item.title}
-          </div>
-        ))}
+        {generateCatalogTreeData.map(
+          (item) =>
+            item?.data?.perms.includes(PYSPARK_PERMISSIONS.CAN_DIRECTORY) && (
+              <div
+                key={item.key}
+                className="source-target-tree__catalog-item"
+                onClick={() => handleCatalogClick(item.data)}
+              >
+                {item.title}
+              </div>
+            )
+        )}
       </div>
     );
   };

@@ -107,7 +107,13 @@ export const PYSPARK_PERMISSIONS = {
   CAN_DELETE: 'pyspark:can_delete', // 删除
   CAN_UPDATE: 'pyspark:can_update', // 编辑
   CAN_COPY: 'pyspark:can_copy', // 复制
-  CAN_RENAME: 'pyspark:can_rename' // 重命名
+  CAN_RENAME: 'pyspark:can_rename', // 重命名
+  CAN_EXPORT: 'pyspark:can_export_dataset', // 导出数据集按钮
+  CAN_SEARCH_EXPORTS: 'pyspark:can_search_exports', // 导出列表
+  CAN_EXPORT_STOP: 'pyspark:can_export_stop', // 导出停止
+  CAN_EXPORT_RETRY: 'pyspark:can_export_retry', // 导出重试
+  CAN_EXPORT_PREVIEW: 'pyspark:can_export_preview', // 导出预览
+  CAN_DIRECTORY: 'directory:can_search_dirs' // 数据目录
 } as const;
 
 // 聚合所有权限
