@@ -63,6 +63,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       runStatus,
       runStartTime,
       runDuration,
+      activeKey,
+      setActiveKey,
       handleStopRunCode,
       handleRunCode,
       handleGetRunLog,
@@ -74,7 +76,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       runLog,
       isPanelOpen,
       handlePanelStateChange,
-      execid
+      execid,
+      getPrevRunStatus
     } = useEditor({
       activeTab,
       fileTabs,
@@ -275,6 +278,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         {/* 运行信息面板 */}
         <RunningInfoPanel
           key={currentFileId}
+          activeKey={activeKey}
+          setActiveKey={setActiveKey}
           runResult={runResult}
           runLog={runLog}
           runStatus={runStatus}
@@ -283,6 +288,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           onGetRunLog={handleGetRunLog}
           isPanelOpen={isPanelOpen}
           onPanelStateChange={handlePanelStateChange}
+          getPrevRunStatus={getPrevRunStatus}
         />
 
         {/* 新建数据集弹框 */}
