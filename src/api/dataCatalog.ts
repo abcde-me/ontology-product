@@ -146,6 +146,7 @@ export interface FluffyVolume {
   type_name?: string;
   file_name?: string;
   file_id?: number;
+  file_uuid?: string;
 }
 
 export interface SrcChildren {
