@@ -41,6 +41,7 @@ const SqlIndex: React.FC = memo(() => {
     directoryTreeRef,
     addTab,
     removeTab,
+    removeTabByFileId, // 获取根据文件ID关闭标签页的方法
     switchTab,
     handleCreate,
     updateTab,
@@ -112,6 +113,7 @@ const SqlIndex: React.FC = memo(() => {
                 type="files"
                 ref={directoryTreeRef}
                 onFileOpen={openFile}
+                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
                 externalSelectedKeys={fileManagerSelectedKeys}
               />
             )}

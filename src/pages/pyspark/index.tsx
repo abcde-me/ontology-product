@@ -35,6 +35,7 @@ const Python: React.FC = memo(() => {
     openFile,
     addTab,
     removeTab,
+    removeTabByFileId, // 获取根据文件ID关闭标签页的方法
     switchTab,
     updateTabContent,
     handleCreate
@@ -85,6 +86,7 @@ const Python: React.FC = memo(() => {
               <FileManager
                 type="files"
                 onFileOpen={openFile}
+                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
                 ref={directoryTreeRef}
                 externalSelectedKeys={fileManagerSelectedKeys}
               />

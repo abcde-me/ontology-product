@@ -134,6 +134,19 @@ export const useTabManager = (
     [fileState.fileTabs, fileState.activeTab, onSelectedKeysChange]
   );
 
+  // 根据文件ID关闭标签页
+  const removeTabByFileId = useCallback(
+    (fileId: string) => {
+      const tabToRemove = fileState.fileTabs.find(
+        (tab) => tab.fileId === String(fileId)
+      );
+      if (tabToRemove) {
+        removeTab(tabToRemove.key);
+      }
+    },
+    [fileState.fileTabs, removeTab]
+  );
+
   const switchTab = useCallback(
     (key: string) => {
       // 找到对应的标签页，获取fileId
@@ -195,6 +208,7 @@ export const useTabManager = (
     openFile,
     addTab,
     removeTab,
+    removeTabByFileId, // 导出根据文件ID关闭标签页的方法
     switchTab,
     updateTabContent,
     handleCreate
