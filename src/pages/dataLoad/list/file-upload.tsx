@@ -59,16 +59,25 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
     return token ? token.replace(/"/g, '') : ''; // 移除所有引号
   };
   const checkFile = (file: any, list: any) => {
-    // 检查文件数量 - 只在第一次检测到超出限制时显示提示
-    if (Array.isArray(list) && list?.length > 1000) {
-      if (!hasShownFileCountError) {
-        Message.error('单次最多上传1000个文件');
-        hasShownFileCountError = true;
-        setTimeout(() => {
-          hasShownFileCountError = false;
-        }, 2000);
+    // 检查文件数量
+    const currentFilesCount = fileList.length;
+
+    if (Array.isArray(list)) {
+      // 找到当前文件在本次上传列表中的索引
+      const currentFileIndex = list.findIndex((f) => f === file);
+      // 计算这个文件的总体位置（已有文件数 + 在本次列表中的位置）
+      const filePosition = currentFilesCount + currentFileIndex + 1;
+
+      if (filePosition > 1000) {
+        if (!hasShownFileCountError) {
+          Message.error('单次最多上传1000个文件');
+          hasShownFileCountError = true;
+          setTimeout(() => {
+            hasShownFileCountError = false;
+          }, 2000);
+        }
+        return false;
       }
-      return false;
     }
 
     // 检查重名文件
@@ -106,7 +115,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
 
     // 检查文件大小
     if (file.size > 100 * 1024 * 1024) {
-      Message.error('单文件大小不能超过50M');
+      Message.error('单文件大小不能超过100M');
       return false;
     }
     return true;
