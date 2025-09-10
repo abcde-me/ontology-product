@@ -1,30 +1,20 @@
 import React from 'react';
 import { Modal } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
-import { SCRIPT_CODE } from '../constant';
-import { SqlIndexStore, useSqlIndexStore } from '../store';
-
-const defaultCodeValue = SCRIPT_CODE;
 
 /** 数据库详情 弹框 */
-const ModalScriptDetail = () => {
-  const scriptDetailVisible = useSqlIndexStore(
-    (state: SqlIndexStore) => state.scriptDetailVisible
-  );
+const ModalScriptDetail = (props) => {
+  const { formOrigin, visible, onCancel } = props;
 
-  const closeScriptDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.closeScriptDetail
-  );
-
-  const codeValue = defaultCodeValue;
+  const codeValue = formOrigin.sql_content;
 
   return (
     <Modal
       title="SQL脚本详情"
       style={{ width: 960 }}
-      visible={scriptDetailVisible}
+      visible={visible}
       footer={null}
-      onCancel={closeScriptDetail}
+      onCancel={onCancel}
     >
       <div className="pb-[16px]">
         <CodeMirror value={codeValue} editable={false} height="500px" />
