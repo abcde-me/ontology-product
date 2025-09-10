@@ -131,7 +131,11 @@ export const SQL_PERMISSIONS = {
   CAN_CANCEL_RUN: 'sql_script:can_cancel_run', // 取消运行
   CAN_GET_RUN_RESULT: 'sql_script:can_get_run_result', // 获取运行结果
   CAN_EXPORT_RESULT: 'sql_script:can_export_result', // 导出结果
-  CAN_EXPORT_VERSION_UPDATE: 'sql_script:can_export_version_update' // 导出版本更新
+  CAN_EXPORT_VERSION_UPDATE: 'sql_script:can_export_version_update', // 导出版本更新
+  CAN_EXPORT_TASK_LIST: 'sql_script:can_export_task_list', // 导出任务列表
+  CAN_EXPORT_TASK_STOP: 'sql_script:can_export_task_stop', // 导出任务停止
+  CAN_EXPORT_TASK_RETRY: 'sql_script:can_export_task_retry', // 导出任务重试
+  CAN_EXPORT_GET_SQL_INFO: 'sql_script:can_export_get_sql_info' // 导出任务对应的SQL详情
 } as const;
 
 // 聚合所有权限

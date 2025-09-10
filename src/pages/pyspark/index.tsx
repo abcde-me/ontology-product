@@ -11,6 +11,8 @@ import { useTabManager } from './hooks/useTabManager';
 import './index.scss';
 import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
+import { useHasPermission } from '@/store/userInfoStore';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -92,14 +94,16 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane key="tools" title={<SuanziIcon />}>
-            {activeTab === 'tools' && (
-              <ToolsManager
-                onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
-              />
-            )}
-          </TabPane>
+          {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
+            <TabPane key="tools" title={<SuanziIcon />}>
+              {activeTab === 'tools' && (
+                <ToolsManager
+                  onInsertContent={insertContentToEditor}
+                  getIsEditorFocused={() => isEditorFocusedRef.current}
+                />
+              )}
+            </TabPane>
+          )}
           <TabPane key="daset" title={<DasetIcon />}>
             {isDasetTab && <DatasetsList />}
           </TabPane>

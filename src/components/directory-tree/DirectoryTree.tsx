@@ -46,6 +46,7 @@ import './DirectoryTree.scss';
 import timeFormattig from '@/utils/timeFormatting';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
+import { PermissionWrapper } from '../PermissionGuard';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -551,14 +552,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
-            <Button
-              type="text"
-              size="small"
-              icon={<IconPlus />}
-              onClick={() => startRootCreate(false)}
-            >
-              新建
-            </Button>
+            <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
+              <Button
+                type="text"
+                size="small"
+                icon={<IconPlus />}
+                onClick={() => startRootCreate(false)}
+              >
+                新建
+              </Button>
+            </PermissionWrapper>
           ) : (
             <Dropdown
               trigger="click"
@@ -619,12 +622,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 from === DirectoryTreeFrom.SQL
                   ? SQL_PERMISSIONS
                   : PYSPARK_PERMISSIONS;
-              console.log(
-                nowPermissions,
-                'nowPermissions',
-                node,
-                node.dataRef?.perms?.includes(nowPermissions.CAN_COPY)
-              );
 
               if (isEditing) return null;
 
