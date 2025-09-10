@@ -106,7 +106,7 @@ const DatasetsList: FC = () => {
             value={item.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => handleDatasetDetail(item.id)}
+            handleLink={() => handleDatasetDetail(item.dataset_id)}
           />
         );
       }
