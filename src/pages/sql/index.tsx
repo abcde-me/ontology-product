@@ -10,6 +10,8 @@ import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
 import './index.scss';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -118,9 +120,11 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane key="dataset" title={<DasetIcon />}>
-            {activeTab === 'dataset' && <DatasetsList />}
-          </TabPane>
+          {useHasPermission(SQL_PERMISSIONS.CAN_EXPORT_TASK_LIST) && (
+            <TabPane key="dataset" title={<DasetIcon />}>
+              {activeTab === 'dataset' && <DatasetsList />}
+            </TabPane>
+          )}
         </Tabs>
       </Sider>
       <Content className={`sql-content ${isDasetTab ? 'hidden' : 'visible'}`}>
