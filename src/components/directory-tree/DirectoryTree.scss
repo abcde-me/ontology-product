@@ -1,4 +1,6 @@
 .directory-tree-container {
+  height: 100%;
+
   .arco-tree-node {
     position: relative;
   }
@@ -74,6 +76,11 @@
     .search-result-path {
       max-width: 140px;
     }
+  }
+
+  .directory-tree {
+    height: calc(100% - 40px);
+    overflow-y: auto;
   }
 
   // 空数据状态样式
