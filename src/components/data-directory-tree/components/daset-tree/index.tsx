@@ -44,12 +44,13 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     dasetFileList,
     scheamList,
     currentPage,
+    searchKeyword,
+    setSearchKeyword,
     getDasetList,
     getDasetVersionFile,
     getScheamList
   } = useDasetTree(type);
 
-  const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedFile, setSelectedFile] = useState<
     DatasetVersionFileItem | Scheam | null
   >(null);
@@ -63,9 +64,21 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
 
   // 处理搜索
   const handleSearch = (value: string) => {
-    setSearchKeyword(value);
-    // TODO: 实现搜索功能
-    getDasetList();
+    if (!isFileView) {
+      getDasetList();
+      return;
+    }
+
+    if (type === 'sql') {
+      getScheamList(currentDataset?.id ?? 0);
+    } else {
+      getDasetVersionFile(
+        currentDataset?.id ?? 0,
+        currentDataset?.latest_version ?? '',
+        1,
+        50
+      );
+    }
   };
 
   // 处理返回
@@ -183,10 +196,11 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       {/* 第二部分：搜索框 */}
       <div className="dataset-tree__search">
         <Input.Search
-          placeholder={isFileView ? '搜索当前文件夹' : '输入关键词搜索'}
+          placeholder={'搜索当前文件夹'}
           value={searchKeyword}
-          onChange={setSearchKeyword}
-          onSearch={handleSearch}
+          onChange={(value) => setSearchKeyword(value)}
+          onPressEnter={() => handleSearch(searchKeyword)}
+          onClear={() => handleSearch('')}
           allowClear
           className="dataset-tree__search-input"
         />
