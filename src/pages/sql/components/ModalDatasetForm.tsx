@@ -23,7 +23,11 @@ import { requiredValidator, tableNameValidator } from '../utils';
 const FormItem = Form.Item;
 
 interface ModalDatasetFormProps {
-  formOrigin: {};
+  formOrigin: {
+    execid?: number;
+    script_id?: number;
+    columns?: any;
+  };
   visible: boolean;
   onCancel: () => void;
 }
@@ -31,18 +35,6 @@ interface ModalDatasetFormProps {
 /** 保存为新数据集 弹框 */
 const ModalDatasetForm = (props: ModalDatasetFormProps) => {
   const { formOrigin, visible, onCancel } = props;
-
-  // const datasetFormVisible = useSqlIndexStore(
-  //   (state: SqlIndexStore) => state.datasetFormVisible
-  // );
-
-  // const closeDatasetForm = useSqlIndexStore(
-  //   (state: SqlIndexStore) => state.closeDatasetForm
-  // );
-
-  // const currentRunResult = useSqlIndexStore(
-  //   (state: SqlIndexStore) => state.currentRunResult
-  // );
 
   return (
     <Modal
@@ -53,7 +45,11 @@ const ModalDatasetForm = (props: ModalDatasetFormProps) => {
       footer={null}
     >
       <div className="pb-[16px]">
-        <DatasetForm formOrigin={formOrigin} onCancel={onCancel} />
+        <DatasetForm
+          key={formOrigin.execid}
+          formOrigin={formOrigin}
+          onCancel={onCancel}
+        />
       </div>
     </Modal>
   );
@@ -147,10 +143,11 @@ function DatasetForm(props) {
           return;
         }
 
-        Message.success(res.message || '导出任务已创建！');
+        Message.success('导出任务已创建！');
         form.resetFields();
-        setTableData([]);
+        setTableData(generateTableData(formOrigin.columns));
         setLoading(false);
+        onCancel && onCancel();
       } catch (error) {
         Message.error('数据集导出失败！');
         setLoading(false);
@@ -371,10 +368,11 @@ function DatasetVersionForm(props) {
           return;
         }
 
-        Message.success(res.message || '新版本导出任务已创建！');
+        Message.success('新版本导出任务已创建！');
         form.resetFields();
         selectedOption.current = null;
         setLoading(false);
+        onCancel && onCancel();
       } catch (error) {
         Message.error('新版本导出失败！');
         setLoading(false);

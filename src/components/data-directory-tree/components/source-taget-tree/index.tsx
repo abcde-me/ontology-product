@@ -58,7 +58,14 @@ interface TreeNode {
 }
 
 // 定义当前视图层级
-type ViewLevel = 'catalog' | 'category' | 'volume-db' | 'files';
+type ViewLevel =
+  | 'catalog'
+  | 'category'
+  | 'volume-db'
+  | 'files'
+  | 'db-item'
+  | 'database-tables'
+  | 'table-detail';
 
 const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   type = DataDirectoryTreeFrom.PYTHON,
@@ -80,7 +87,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     getCatalogFileList,
     currentPage,
     getNodeHierarchyInfo,
-    findFullPathById
+    findFullPathById,
+    getSourceCatalogTableList,
+    sourceCatalogTableList,
+    setSourceCatalogTableList,
+    getSourceCatalogTableDetail,
+    sourceCatalogTableDetail
   } = useSourceTargetTree(dataType);
 
   const [searchValue, setSearchValue] = useState('');
@@ -93,6 +105,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const [selectedVolumeOrDb, setSelectedVolumeOrDb] = useState<
     FluffyVolume | Db | null
   >(null);
+  const [selectedDb, setSelectedDb] = useState<Db | null>(null);
+  const [selectedDbItem, setSelectedDbItem] = useState<any | null>(null);
+  const [selectedTable, setSelectedTable] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [breadcrumbPath, setBreadcrumbPath] = useState<string[]>([]);
   // 处理数据卷详情按钮点击
@@ -198,15 +213,16 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
           ...selectedCatalog.children.volume.map((volume: any) => ({
             key: `volume-${volume.id}`,
             title: (
-              <div className="source-target-tree__volume-db-item-content">
-                <IconStorage className="source-target-tree-icon" />
-                <div className="source-target-tree__volume-db-info">
+              <div className="list-item-content">
+                <IconStorage className="list-item-content-icon" />
+                <div className="list-item-content-info">
                   <EllipsisPopover
-                    className="source-target-tree__volume-db-name"
+                    className="list-item-content-info-name"
                     value={volume.name}
+                    preferTypography
                   ></EllipsisPopover>
                 </div>
-                <div className="source-target-tree__volume-db-actions">
+                <div className="list-item-actions">
                   {/* 详情按钮 */}
                   <Button
                     type="text"
@@ -238,32 +254,33 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
           ...selectedCatalog.children.db.map((db: any) => ({
             key: `db-${db.id}`,
             title: (
-              <div className="source-target-tree__volume-db-item-content">
-                <IconStorage className="source-target-tree-icon" />
-                <div className="source-target-tree__volume-db-info">
+              <div className="list-item-content">
+                <IconStorage className="list-item-content-icon" />
+                <div className="list-item-content-info">
                   <EllipsisPopover
-                    className="source-target-tree__volume-db-name"
+                    className="list-item-content-info-name"
                     value={db.name}
+                    preferTypography
                   ></EllipsisPopover>
                 </div>
-                <div className="source-target-tree__volume-db-actions">
-                  {/* 详情按钮 */}
-                  <Button
+                {/* <div className="source-target-tree__volume-db-actions"> */}
+                {/* 详情按钮 */}
+                {/* <Button
                     type="text"
                     size="small"
                     onClick={(e: Event) => handleDbDetail(db, e)}
                   >
                     详情
-                  </Button>
-                  {/* 插入按钮，9.30不支持目录插入 */}
-                  {/* <Button
+                  </Button> */}
+                {/* 插入按钮，9.30不支持目录插入 */}
+                {/* <Button
                     type="outline"
                     size="small"
                     onClick={(e: Event) => handleDbInsert(db, e)}
                   >
                     {isEditorFocused ? '插入' : '复制'}
                   </Button> */}
-                </div>
+                {/* </div> */}
               </div>
             ),
             data: { ...db, type: 'database', parentCatalog: selectedCatalog }
@@ -295,49 +312,125 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     if (!selectedCatalog) return;
 
     setSelectedVolumeOrDb(item);
-    setCurrentViewLevel('files');
-    setBreadcrumbPath([selectedCatalog.name, item.name]);
 
-    // 调用接口获取文件列表
-    setIsLoading(true);
-    try {
-      const rootType =
-        dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
+    // 根据item类型决定下一步操作
+    if (item.type === 'volume') {
+      // 数据卷：直接显示文件列表
+      setCurrentViewLevel('files');
+      setBreadcrumbPath([selectedCatalog.name, selectedCategory, item.name]);
 
-      const params =
-        dataType === 'source'
-          ? {
-              page: 1,
-              page_size: 100,
-              data_path_id: Number(item.id),
-              file_name: '',
-              sort: 'desc' as 'asc' | 'desc'
-            }
-          : {
-              page: 1,
-              limit: 100,
-              full_path: item.full_path || '',
-              sort_field: item.sort_field || '',
-              sort_order: 'desc' as 'asc' | 'desc',
-              path_id: item.id.toString()
-            };
+      // 调用接口获取文件列表
+      setIsLoading(true);
+      try {
+        const rootType =
+          dataType === 'source'
+            ? CatalogRootType.Source
+            : CatalogRootType.Target;
 
-      const test = findFullPathById(item.id.toString());
+        const params =
+          dataType === 'source'
+            ? {
+                page: 1,
+                page_size: 100,
+                data_path_id: Number(item.id),
+                file_name: '',
+                sort: 'desc' as 'asc' | 'desc'
+              }
+            : {
+                page: 1,
+                limit: 100,
+                full_path: item.full_path || '',
+                sort_field: item.sort_field || '',
+                sort_order: 'desc' as 'asc' | 'desc',
+                path_id: item.id.toString()
+              };
 
-      console.log('测试一下拿到的是什么：', test);
-
-      await getCatalogFileList(rootType, params);
-    } catch (error) {
-      console.error('获取文件列表失败:', error);
-    } finally {
-      setIsLoading(false);
+        await getCatalogFileList(rootType, params);
+      } catch (error) {
+        console.error('获取文件列表失败:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (item.type === 'database') {
+      // 数据库：先显示db_item列表
+      setSelectedDb(item);
+      setCurrentViewLevel('db-item');
+      setBreadcrumbPath([selectedCatalog.name, selectedCategory, item.name]);
     }
   };
 
   // 处理文件点击（第三层）
   const handleFileClick = (file: any) => {
-    if (onSelectFile) {
+    if (currentViewLevel === 'database-tables') {
+      // 在数据库表列表中点击表，显示表字段列表
+      handleTableClick(file);
+    } else if (onSelectFile) {
+      // 其他情况调用原有的文件选择逻辑
       onSelectFile(file);
+    }
+  };
+
+  // 处理表点击，显示表字段列表
+  const handleTableClick = async (table: any) => {
+    if (!selectedDb) return;
+
+    setSelectedTable(table);
+    setCurrentViewLevel('table-detail');
+    setBreadcrumbPath([
+      selectedCatalog?.name || '',
+      selectedCategory,
+      selectedDb.name,
+      table.table_name || table.name
+    ]);
+
+    // 调用接口获取表字段列表
+    setIsLoading(true);
+    try {
+      const params = {
+        detail_type: 'sample', // 获取示例信息
+        database: selectedDbItem.name ?? '',
+        table: table.table_name ?? '',
+        path_id: Number(selectedDb.id),
+        table_id: Number(table.table_id)
+      };
+
+      await getSourceCatalogTableDetail(params);
+    } catch (error) {
+      console.error('获取表字段列表失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 处理db_item点击
+  const handleDbItemClick = async (dbItem: any) => {
+    if (!selectedDb) return;
+
+    setCurrentViewLevel('database-tables');
+    setSelectedDbItem(dbItem);
+    setBreadcrumbPath([
+      selectedCatalog?.name || '',
+      selectedCategory,
+      selectedDb.name,
+      dbItem.name
+    ]);
+
+    // 如果没有children.db_item数据，则调用接口获取
+    setIsLoading(true);
+    try {
+      const params = {
+        path_id: Number(selectedDb.id),
+        search: '',
+        page: 1,
+        limit: 100,
+        database: dbItem.name || ''
+      };
+
+      await getSourceCatalogTableList(params);
+    } catch (error) {
+      console.error('获取数据库表列表失败:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -348,6 +441,30 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       if (selectedCatalog) {
         setCurrentViewLevel('volume-db');
         setBreadcrumbPath([selectedCatalog.name, selectedCategory]);
+      }
+    } else if (currentViewLevel === 'table-detail') {
+      // 从表字段列表返回到数据库表列表
+      setCurrentViewLevel('database-tables');
+      setBreadcrumbPath([
+        selectedCatalog?.name || '',
+        selectedCategory,
+        selectedDb?.name || ''
+      ]);
+      setSelectedTable(null);
+    } else if (currentViewLevel === 'database-tables') {
+      // 从数据库表列表返回到db_item列表
+      setCurrentViewLevel('db-item');
+      setBreadcrumbPath([
+        selectedCatalog?.name || '',
+        selectedCategory,
+        selectedDb?.name || ''
+      ]);
+    } else if (currentViewLevel === 'db-item') {
+      // 从db_item列表返回到数据卷/数据库列表
+      if (selectedCatalog) {
+        setCurrentViewLevel('volume-db');
+        setBreadcrumbPath([selectedCatalog.name, selectedCategory]);
+        setSelectedDb(null);
       }
     } else if (currentViewLevel === 'volume-db') {
       // 从数据卷/数据库列表返回到分类列表
@@ -394,6 +511,18 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     } else if (currentViewLevel === 'files') {
       // 第四层：显示面包屑路径
       title = selectedVolumeOrDb?.name || '';
+      showBreadcrumb = true;
+    } else if (currentViewLevel === 'db-item') {
+      // 第四层：显示面包屑路径（db_item列表）
+      title = selectedDb?.name || '';
+      showBreadcrumb = true;
+    } else if (currentViewLevel === 'database-tables') {
+      // 第五层：显示面包屑路径（数据库表列表）
+      title = selectedDbItem?.name || '';
+      showBreadcrumb = true;
+    } else if (currentViewLevel === 'table-detail') {
+      // 第六层：显示面包屑路径（表字段列表）
+      title = selectedTable?.table_name || selectedTable?.name || '';
       showBreadcrumb = true;
     }
 
@@ -483,16 +612,16 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
           ];
 
     return (
-      <div className="source-target-tree__category-list max-h-full overflow-y-auto">
+      <div className="list">
         {categories.map((category) => (
           <div
             key={category.key}
-            className="source-target-tree__category-item"
+            className="list-item"
             onClick={() => handleCategoryClick(category.title)}
           >
-            <div className="source-target-tree__category-item-content">
+            <div className="list-item-content">
               {category.icon}
-              <span className="source-target-tree__category-item-title">
+              <span className="list-item-content-info-name">
                 {category.title}
               </span>
             </div>
@@ -513,11 +642,11 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     }
 
     return (
-      <div className="source-target-tree__volume-db-list max-h-full overflow-y-auto">
+      <div className="list max-h-full overflow-y-auto">
         {generateVolumeDbList.map((item) => (
           <div
+            className="list-item"
             key={item.key}
-            className="source-target-tree__volume-db-item"
             onClick={() => handleVolumeDbClick(item.data)}
           >
             {item.title}
@@ -547,27 +676,27 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     }
 
     return (
-      <div className="source-target-tree__file-list max-h-full overflow-y-auto">
+      <div className="list max-h-full overflow-y-auto">
         {currentFileList.map((file: any) => (
           <div
             key={file.id}
-            className="source-target-tree__file-item"
+            className="list-item"
             onClick={() => handleFileClick(file)}
           >
-            <div className="source-target-tree__file-item-left">
-              <IconFile className="source-target-tree__file-icon" />
-              <div className="source-target-tree__file-info">
+            <div className="list-item-content">
+              <IconFile className="list-item-content-icon" />
+              <div className="list-item-content-info">
                 <EllipsisPopover
-                  className="source-target-tree__file-name"
+                  className="list-item-content-info-name"
                   value={file.file_name || file.name}
                 ></EllipsisPopover>
                 <EllipsisPopover
-                  className="source-target-tree__file-size"
+                  className="list-item-content-info-size"
                   value={formatFileSize(file.file_size || file.size)}
                 ></EllipsisPopover>
               </div>
             </div>
-            <div className="source-target-tree__file-actions">
+            <div className="list-item-actions">
               <Button
                 type="outline"
                 size="small"
@@ -577,6 +706,193 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   } else {
                     handleVolumeInsert(file, e);
                   }
+                }}
+                onMouseDown={(e) => {
+                  // 阻止按钮获得焦点，保持编辑器焦点
+                  e.preventDefault();
+                }}
+              >
+                {isEditorFocused ? '插入' : '复制'}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // 渲染数据库表列表
+  const renderDbItemList = () => {
+    if (!selectedDb?.children?.db_item?.length) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
+        </div>
+      );
+    }
+
+    const dbItems = selectedDb.children.db_item;
+
+    return (
+      <div className="list max-h-full overflow-y-auto">
+        {dbItems.map((dbItem: any) => (
+          <div
+            key={dbItem.id}
+            className="list-item"
+            onClick={() => handleDbItemClick(dbItem)}
+          >
+            <div className="list-item-content">
+              <IconFile className="list-item-content-icon" />
+              <div className="list-item-content-info">
+                <EllipsisPopover
+                  className="list-item-content-info-name"
+                  value={dbItem.name}
+                  preferTypography
+                ></EllipsisPopover>
+                <EllipsisPopover
+                  className="list-item-content-info-size"
+                  value={formatFileSize(dbItem.file_size ?? 0)}
+                ></EllipsisPopover>
+              </div>
+            </div>
+            <div className="list-item-actions">
+              {/* 详情按钮 */}
+              <Button
+                type="text"
+                onClick={(e: Event) => handleDbDetail(dbItem, e)}
+              >
+                详情
+              </Button>
+              {/* 插入按钮 */}
+              <Button
+                type="outline"
+                onClick={(e: Event) => {
+                  handleDbInsert(dbItem, e);
+                }}
+                onMouseDown={(e) => {
+                  // 阻止按钮获得焦点，保持编辑器焦点
+                  e.preventDefault();
+                }}
+              >
+                {isEditorFocused ? '插入' : '复制'}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // 渲染数据库表列表
+  const renderDatabaseTableList = () => {
+    if (isLoading) {
+      return (
+        <div className="source-target-tree__loading-container">
+          <Spin size={24} />
+          <Text type="secondary">加载中...</Text>
+        </div>
+      );
+    }
+
+    if (!sourceCatalogTableList?.length) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
+        </div>
+      );
+    }
+
+    return (
+      <div className="list max-h-full overflow-y-auto">
+        {sourceCatalogTableList.map((table: any) => (
+          <div
+            key={table.id}
+            className="list-item"
+            onClick={() => handleFileClick(table)}
+          >
+            <div className="list-item-content">
+              <IconFile className="list-item-content-icon" />
+              <div className="list-item-content-info">
+                <EllipsisPopover
+                  className="list-item-content-info-name"
+                  value={table.table_name ?? ''}
+                  preferTypography
+                ></EllipsisPopover>
+                <EllipsisPopover
+                  className="list-item-content-info-size"
+                  value={formatFileSize(table.file_size ?? table.size ?? 0)}
+                ></EllipsisPopover>
+              </div>
+            </div>
+            <div className="list-item-actions">
+              {/* 详情按钮 */}
+              <Button
+                type="text"
+                onClick={(e: Event) => handleDbDetail(table, e)}
+              >
+                详情
+              </Button>
+              {/* 插入按钮 */}
+              <Button
+                type="outline"
+                onClick={(e: Event) => {
+                  handleDbInsert(table, e);
+                }}
+                onMouseDown={(e) => {
+                  // 阻止按钮获得焦点，保持编辑器焦点
+                  e.preventDefault();
+                }}
+              >
+                {isEditorFocused ? '插入' : '复制'}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // 渲染表字段列表
+  const renderTableDetailList = () => {
+    if (isLoading) {
+      return (
+        <div className="source-target-tree__loading-container">
+          <Spin size={24} />
+          <Text type="secondary">加载中...</Text>
+        </div>
+      );
+    }
+
+    if (!sourceCatalogTableDetail?.sample?.columns?.length) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
+        </div>
+      );
+    }
+
+    const fields = sourceCatalogTableDetail.sample.columns;
+
+    return (
+      <div className="list max-h-full overflow-y-auto">
+        {fields.map((fileld: string) => (
+          <div key={fileld} className="list-item">
+            <div className="list-item-content">
+              <IconFile className="list-item-content-icon" />
+              <div className="list-item-content-info">
+                <EllipsisPopover
+                  className="list-item-content-info-name"
+                  value={fileld ?? ''}
+                  preferTypography
+                ></EllipsisPopover>
+              </div>
+            </div>
+            <div className="list-item-actions">
+              {/* 插入按钮 */}
+              <Button
+                type="outline"
+                onClick={(e: Event) => {
+                  handleDbInsert({ name: fileld }, e);
                 }}
                 onMouseDown={(e) => {
                   // 阻止按钮获得焦点，保持编辑器焦点
@@ -604,6 +920,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
         return renderVolumeDbList();
       case 'files':
         return renderFileList();
+      case 'db-item':
+        return renderDbItemList();
+      case 'database-tables':
+        return renderDatabaseTableList();
+      case 'table-detail':
+        return renderTableDetailList();
       default:
         return renderCatalogList();
     }
