@@ -62,16 +62,18 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleViewDbDetail = (database: Db) => {
+  const handleViewDbDetail = (database: Db, hierarchyData?: any) => {
     console.log('数据库详情:', database);
+    console.log('层级选择数据:', hierarchyData);
     setSelectedDbId(String(database.id));
     setDbDetailVisible(true);
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: Db) => {
+  const handleDbInsert = (database: Db, hierarchyData?: any) => {
     const isEditorFocused = getIsEditorFocused?.() ?? false;
     console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
+    console.log('层级选择数据:', hierarchyData);
 
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
