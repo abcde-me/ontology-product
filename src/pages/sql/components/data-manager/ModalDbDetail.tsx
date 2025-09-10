@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   DatePicker,
   Form,
@@ -9,19 +9,15 @@ import {
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { getSourceDataFileList } from '@/api/dataCatalog';
+import { DbTableListParamss, getDbItemList } from '@/api/dataCatalog';
 import { formatDateTime } from '../../utils';
-// import { SqlIndexStore, useSqlIndexStore } from '../store';
 
 const FormItem = Form.Item;
 
-// interface ModalTableListProps {
-//     visible?: boolean,
-//     onClose?: () => void
-// }
+const defaultfileTypeList = [{ text: 'mysql', value: 'mysql' }];
 
 /** 数据库详情 弹框 */
-const ModalDbDetail = ({ dbDetailVisible, selectedDbId, closeDbDetail }) => {
+const ModalDbDetail = ({ dbDetailVisible, fromOrigin, closeDbDetail }) => {
   return (
     <Modal
       title="数据库详情"
@@ -31,7 +27,7 @@ const ModalDbDetail = ({ dbDetailVisible, selectedDbId, closeDbDetail }) => {
       onCancel={closeDbDetail}
     >
       <div className="pb-[16px]">
-        <TableList fromId={selectedDbId} />
+        <TableList key={fromOrigin.database} fromOrigin={fromOrigin} />
       </div>
     </Modal>
   );
@@ -40,136 +36,56 @@ const ModalDbDetail = ({ dbDetailVisible, selectedDbId, closeDbDetail }) => {
 export default ModalDbDetail;
 
 const TableList = (props) => {
-  const { fromId } = props;
-
-  const {
-    columns,
-    listData,
-    pagination,
-    loading,
-    handleValuesChange,
-    handleTableChange
-  } = useTableList({ fromId });
-
-  return (
-    <div>
-      <Form
-        autoComplete="off"
-        layout="inline"
-        onValuesChange={handleValuesChange}
-      >
-        <FormItem field="file_name" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入表名搜索" />
-        </FormItem>
-        <FormItem field="datetime_range" style={{ marginRight: 12 }}>
-          <DatePicker.RangePicker
-            showTime={{
-              defaultValue: ['00:00:00', '23:59:59'],
-              format: 'HH:mm:ss'
-            }}
-            format="YYYY-MM-DD HH:mm:ss"
-            onChange={() => {}}
-            onSelect={() => {}}
-            onOk={() => {}}
-            allowClear={true}
-          />
-        </FormItem>
-      </Form>
-      <Table
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
-        columns={columns}
-        data={listData}
-        pagination={pagination}
-        loading={loading}
-        rowKey="id"
-        onChange={handleTableChange}
-        scroll={{ y: 500 }}
-      />
-    </div>
-  );
-};
-
-const defaultfileTypeList = [{ text: 'Mysql', value: 'Mysql' }];
-
-const defaultSearchParams = {
-  page: 1,
-  page_size: 10,
-  file_name: '',
-  data_path_id: 1392
-};
-
-const useTableList = (props) => {
-  const { fromId } = props;
-
-  const [searchParams, setSearchParams] = useState<
-    SourceDataFileQueryParams | any
-  >({ ...defaultSearchParams, fromId });
-
-  const [fileTypeList, setFileTypeList] =
-    useState<{ text: string; value: string }[]>(defaultfileTypeList);
-
-  const [listData, setListData] = useState<ListDataItem[]>([]);
-  const [pagination, setPagination] = useState({
-    sizeCanChange: true,
-    showTotal: true,
-    total: 0,
-    pageSize: 10,
-    current: 1,
-    pageSizeChangeResetCurrent: true
-  });
-  const [loading, setLoading] = useState<boolean>(false);
+  const { fromOrigin } = props;
 
   const columns: TableColumnProps[] = [
     {
       title: 'ID',
-      dataIndex: 'id',
+      dataIndex: 'table_id',
       width: 60
     },
     {
       title: '表名',
-      dataIndex: 'file_name',
+      dataIndex: 'table_name',
       ellipsis: true,
       width: 174,
       render: (_, record) => (
-        <Popover content={record.file_sub_path}>
-          <span>{record.file_name}</span>
+        <Popover content={record.table_name}>
+          <span>{record.table_name}</span>
         </Popover>
       )
     },
     {
       title: '数据库类型',
-      dataIndex: 'file_type',
+      dataIndex: 'db_type',
       width: 150,
-      filters: fileTypeList,
+      filters: defaultfileTypeList,
       render: (_, record) => (
         <div className="flex items-center gap-[6px]">
-          <span>{record.file_type}</span>
+          <span>{record.db_type}</span>
         </div>
       )
     },
     {
       title: '表行数',
       width: 88,
-      dataIndex: 'file_size',
-      render: (_, record) => <div>{record.file_size}</div>
+      dataIndex: 'cnt_rows',
+      render: (_, record) => <div>{record.cnt_rows}</div>
     },
     {
       title: '上传用户',
-      dataIndex: 'upload_user',
+      dataIndex: 'username',
       ellipsis: true,
       width: 100
     },
     {
       title: '载入开始时间',
-      dataIndex: 'task_load_start_time',
+      dataIndex: 'start_loading_time',
       width: 180,
       sorter: true,
 
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.task_load_start_time)
+      render: (_, record) => formatDateTime(record.start_loading_time)
     },
     {
       title: '连接器名称',
@@ -185,109 +101,193 @@ const useTableList = (props) => {
     }
   ];
 
-  useEffect(() => {
-    async function loadListData() {
-      const { pagination, sorter, filters } = searchParams;
-
-      // console.log('loadListData searchParams:', searchParams);
-
-      const targetParams: any = {
-        data_path_id: fromId || 0,
-        page: pagination?.current || 1,
-        page_size: pagination?.pageSize || 10,
-        file_name: searchParams.file_name || '',
-        file_type: sorter?.file_type || [],
-        start: searchParams.datetime_range
-          ? searchParams.datetime_range[0]
-          : undefined,
-        end: searchParams.datetime_range
-          ? searchParams.datetime_range[1]
-          : undefined,
-        sort:
-          filters?.direction == undefined
-            ? ''
-            : filters?.direction == 'ascend'
-              ? 'asc'
-              : 'desc',
-        sort_by: filters?.field == undefined ? '' : filters?.field
-      };
-
-      setLoading(true);
-
-      try {
-        const res = await getSourceDataFileList(targetParams);
-        setPagination((prev) => ({
-          ...prev,
-          current: res.data?.page,
-          pageSize: res.data?.page_size,
-          total: res.data?.total
-        }));
-        setListData(res.data?.items);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        console.error('获取文件列表失败:', error);
-      }
-    }
-
-    setListData([]);
-    loadListData();
-  }, [searchParams, fromId]);
-
-  function handleValuesChange(values: any) {
-    // console.log('Form values changed:', values);
-
-    setSearchParams((prev) => {
-      return {
-        ...prev,
-        ...values
-      };
-    });
-  }
-
-  function handleTableChange(pagination: any, filters: any, sorter: any) {
-    // console.log('Table change:', pagination, filters, sorter);
-
-    setSearchParams((prev) => {
-      return {
-        ...prev,
-        pagination,
-        filters,
-        sorter
-      };
-    });
-  }
-
-  // const handleTableChange = useCallback(onTableChange, []);
-
-  return {
-    handleValuesChange,
-    columns,
+  const {
     listData,
     pagination,
-    handleTableChange,
-    loading
-  };
+    loading,
+    loadData,
+    handleSearchChange,
+    handleTableChange
+  } = useTableList<{}, DbTableListParamss>({
+    initialSearchParams: { ...fromOrigin },
+    onRequest: getDbItemList,
+    formatSearchParams: (values: any) => {
+      const result: any = { ...values };
+      if (values.datetime_range) {
+        delete result.datetime_range;
+        result.start_time = values.datetime_range[0];
+        result.end_time = values.datetime_range[1];
+      }
+      return result;
+    },
+    formatSorter: (sorter: any) => {
+      let result = {};
+      if (sorter.db_type) {
+        result = {
+          db_type: sorter.db_type
+        };
+      }
+      return result;
+    },
+    formatFilter: (filter: any) => {
+      let result = {};
+      if (filter.field === 'start_loading_time') {
+        result = {
+          sort_field: filter?.field == undefined ? '' : filter?.field,
+          sort_order:
+            filter?.direction == undefined
+              ? ''
+              : filter?.direction == 'ascend'
+                ? 'asc'
+                : 'desc'
+        };
+      }
+      return result;
+    }
+  });
+
+  return (
+    <div>
+      <Form
+        autoComplete="off"
+        layout="inline"
+        onValuesChange={(values: any) => handleSearchChange(values)}
+      >
+        <FormItem field="search" style={{ marginRight: 12 }}>
+          <Input.Search allowClear placeholder="输入表名搜索" />
+        </FormItem>
+        <FormItem field="datetime_range" style={{ marginRight: 12 }}>
+          <DatePicker.RangePicker
+            showTime={{
+              defaultValue: ['00:00:00', '23:59:59'],
+              format: 'HH:mm:ss'
+            }}
+            format="YYYY-MM-DD HH:mm:ss"
+            allowClear={true}
+          />
+        </FormItem>
+      </Form>
+      <Table
+        style={{
+          width: '100%',
+          height: '100%'
+        }}
+        columns={columns}
+        data={listData}
+        pagination={pagination}
+        loading={loading}
+        rowKey="table_id"
+        onChange={handleTableChange}
+        scroll={{ y: 500 }}
+      />
+    </div>
+  );
 };
 
-interface SourceDataFileQueryParams {
-  page: number;
-  page_size: number;
-  file_name?: string;
-  data_path_id?: number;
-  start?: string;
-  end?: string;
-  file_type?: Array<string>;
-  sort_field?: string;
-  sort_order?: string;
+import { useEffect, useState } from 'react';
+import { PaginationProps } from '@arco-design/web-react';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+
+interface UseTableListProps<T, U> {
+  onRequest?: (params: U) => Promise<ApiRes<any>>;
+  initialSearchParams?: U;
+  formatFilter?: (filters: Partial<Record<keyof T, string[]>>) => U | {};
+  formatSorter?: (sorter: SorterInfo) => U | {};
+  formatSearchParams?: (values: U) => U | {};
 }
 
-interface ListDataItem {
-  id: number;
-  content: string;
-  type: string;
-  createdAt: string;
-  file: string;
-  workflowId: string;
-  full_path?: string;
-}
+export const useTableList = <T = {}, U = {}>(
+  props: UseTableListProps<T, U>
+) => {
+  const page = 1;
+  const page_size = 10;
+
+  const {
+    onRequest,
+    initialSearchParams,
+    formatFilter,
+    formatSorter,
+    formatSearchParams
+  } = props;
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [listData, setListData] = useState<T[]>();
+
+  const [searchParams, setSearchParams] = useState<U>({
+    ...initialSearchParams,
+    page,
+    limit: page_size
+  } as U);
+
+  const [pagination, setPagination] = useState<PaginationProps>({
+    sizeCanChange: true,
+    showTotal: true,
+    total: 0,
+    pageSize: 10,
+    current: 1,
+    pageSizeChangeResetCurrent: true
+  });
+
+  async function loadData() {
+    setLoading(true);
+
+    try {
+      const res = await onRequest?.(searchParams);
+
+      setPagination((prev) => ({
+        ...prev,
+        current: res?.data?.page,
+        total: res?.data?.total
+      }));
+
+      setListData((res?.data?.list as T[]) || []);
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log('error', error);
+    }
+  }
+
+  useEffect(() => {
+    if (!onRequest) return;
+    loadData();
+  }, [searchParams]);
+
+  function handleSearchChange(values: U) {
+    setSearchParams((prev: any) => {
+      return {
+        ...(formatSearchParams
+          ? formatSearchParams({ ...prev, ...values })
+          : { ...prev, ...values })
+      };
+    });
+  }
+
+  function handleTableChange(
+    pagination: PaginationProps,
+    filters: any,
+    sorter: any
+  ) {
+    setSearchParams((prev) => {
+      return {
+        ...prev,
+        page: pagination.current,
+        limit: pagination.pageSize,
+        ...(formatFilter ? formatFilter(filters) : {}),
+        ...(formatSorter ? formatSorter(sorter) : {})
+      };
+    });
+  }
+
+  return {
+    searchParams,
+    loading,
+    listData,
+    pagination,
+    loadData,
+    handleSearchChange,
+    handleTableChange
+  };
+};
