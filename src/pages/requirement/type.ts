@@ -10,6 +10,12 @@ export const RequirementTypeMap = {
   [RequirementType.Audio]: '音频',
   [RequirementType.Video]: '视频'
 };
+export const RequirementTypeNameMap = {
+  1: '文本',
+  2: '图片',
+  3: '音频',
+  4: '视频'
+};
 export enum RequirementStatus {
   Draft = 1, // 发布中
   Published = 2, // 已发布
@@ -96,7 +102,7 @@ export const TeamTypeMap = {
 // 1 图片 2 文本 3 音频 4 视频
 export const toolFileType = {
   1: ['jpeg', 'jpg', 'png', 'gif'],
-  2: ['txt', 'jsonl'],
+  2: ['txt', 'json'],
   3: ['mp3', 'wma', 'wav', 'flac', 'ape', 'aac'],
   4: [
     'wmv',

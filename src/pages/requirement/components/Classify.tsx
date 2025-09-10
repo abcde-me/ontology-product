@@ -19,6 +19,7 @@ import './Classify.scss';
 interface ClassifyComponentProps {
   type: any;
   getDetailObj: any;
+  getClassIfyData: any;
 }
 // 选项配置 1 单选 2 多选 3 输入框
 const optionConfig = [
@@ -36,7 +37,7 @@ const optionConfig = [
   }
 ];
 const Classify = (props: ClassifyComponentProps) => {
-  const { type, getDetailObj } = props;
+  const { type, getDetailObj, getClassIfyData } = props;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
@@ -75,19 +76,6 @@ const Classify = (props: ClassifyComponentProps) => {
     setTextRelations(newTextRelations);
   };
 
-  const addAttribute = (groupIndex) => {
-    const newData = [...textRelations];
-    const newAttribute = {
-      id: uuid(),
-      order_num: newData[groupIndex].file_label_attribute.length + 1,
-      attribute_name_cn: '',
-      attribute_name_en: '',
-      input_type: 1
-    };
-    newData[groupIndex].file_label_attribute.push(newAttribute);
-    setTextRelations(newData);
-  };
-
   const removeAttribute = (groupIndex, attrIndex) => {
     const newData = [...textRelations];
     newData[groupIndex].file_label_attribute.splice(attrIndex, 1);
@@ -102,13 +90,18 @@ const Classify = (props: ClassifyComponentProps) => {
       setTextRelations(getDetailObj?.file_labels);
     }
   }, [getDetailObj]);
+
+  useEffect(() => {
+    getClassIfyData(textRelations);
+  }, [textRelations]);
+
   return (
     <div className="classify-warp">
       <Form
         form={form}
         disabled={type === 'detail'}
         onValuesChange={(_, val) => {
-          // setPublishData({ ...publishData, val })
+          setTextRelations({ ...textRelations, ...val });
         }}
         layout="inline"
         labelAlign="right"
@@ -117,6 +110,12 @@ const Classify = (props: ClassifyComponentProps) => {
       >
         {textRelations &&
           textRelations.map((item, index) => {
+            console.log(
+              item,
+              index,
+              'top',
+              item.file_label_attribute?.[index]?.input_type
+            );
             return (
               <div className="classify-item" key={index}>
                 <div className="classify-relation-item">
@@ -238,8 +237,15 @@ const Classify = (props: ClassifyComponentProps) => {
                             : ''}
                       </div>
                       <Checkbox
+                        disabled={type === 'detail'}
                         style={{ whiteSpace: 'nowrap' }}
-                        // checked={}
+                        checked={
+                          item.file_label_attribute.some(
+                            (item) => item.input_type === 2
+                          )
+                            ? true
+                            : false
+                        }
                         onChange={(checked) => {
                           // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
                           if (checked) {
@@ -249,17 +255,14 @@ const Classify = (props: ClassifyComponentProps) => {
                               order_num:
                                 newData[index].file_label_attribute.length + 1,
                               attribute_name_cn: '',
-                              attribute_name_en: '',
-                              input_type: 1
+                              attribute_name_en: '其他',
+                              input_type: 2
                             });
                             setTextRelations(newData);
-                            console.log(newData, 'top ---');
                           } else {
-                            console.log(12, 'top');
                             // 取消选中的时候删除增加的内容
                             if (textRelations?.length > 0) {
                               const newItems = [...textRelations];
-                              console.log(newItems, 'top');
                               newItems[index]?.file_label_attribute.pop();
                               setTextRelations(newItems);
                             }
@@ -277,8 +280,12 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                           label={`选项 ${attr.order_num}`}
                           disabled={
-                            attrIndex !== 0 &&
-                            attrIndex === item.file_label_attribute?.length - 1
+                            type === 'detail' ||
+                            (attrIndex !== 0 &&
+                              attrIndex ===
+                                item.file_label_attribute?.length - 1 &&
+                              item?.file_label_attribute[attrIndex]
+                                .input_type === 2)
                               ? true
                               : false
                           }
@@ -288,7 +295,9 @@ const Classify = (props: ClassifyComponentProps) => {
                             value={
                               attrIndex !== 0 &&
                               attrIndex ===
-                                item.file_label_attribute?.length - 1
+                                item.file_label_attribute?.length - 1 &&
+                              item?.file_label_attribute[attrIndex]
+                                .input_type === 2
                                 ? '标准时的输入内容'
                                 : attr.attribute_name_cn
                             }
@@ -316,7 +325,9 @@ const Classify = (props: ClassifyComponentProps) => {
                             value={
                               attrIndex !== 0 &&
                               attrIndex ===
-                                item.file_label_attribute?.length - 1
+                                item.file_label_attribute?.length - 1 &&
+                              item?.file_label_attribute[attrIndex]
+                                .input_type === 2
                                 ? '其他'
                                 : attr.attribute_name_en
                             }
@@ -330,16 +341,18 @@ const Classify = (props: ClassifyComponentProps) => {
                           />
                         </FormItem>
                         <FormItem label={null}>
-                          <IconDelete
-                            className={`${type === 'detail' ? 'disabled-icon' : ''}`}
-                            fontSize={18}
-                            onClick={() => {
-                              if (type !== 'detail') {
-                                removeAttribute(index, attrIndex);
-                                return;
-                              }
-                            }}
-                          />
+                          {item?.file_label_attribute?.length > 1 && (
+                            <IconDelete
+                              className={`${type === 'detail' ? 'disabled-icon' : ''}`}
+                              fontSize={18}
+                              onClick={() => {
+                                if (type !== 'detail') {
+                                  removeAttribute(index, attrIndex);
+                                  return;
+                                }
+                              }}
+                            />
+                          )}
                         </FormItem>
                       </div>
                     ))}

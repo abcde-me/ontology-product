@@ -202,8 +202,7 @@ const menus: MenuModel[] = [
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement',
-        permission: 'organizations:can_search'
+        path: '/tenant/compute/modaforge/requirement'
       },
       {
         title: '任务列表',
@@ -211,8 +210,7 @@ const menus: MenuModel[] = [
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList',
-        permission: 'organizations:can_search'
+        path: '/tenant/compute/modaforge/taskList'
       }
     ]
   }

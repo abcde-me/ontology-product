@@ -26,6 +26,7 @@ import {
   RequirementTypeMap
 } from './type';
 import './index.scss';
+import { isNil, omitBy } from 'lodash';
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -48,17 +49,7 @@ export default function Requirement() {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    name: '',
-    type: '',
-    belong: '',
-    create_by: ''
-  });
-  // 创建人的搜索框清楚按钮
-  const [isClickClearUserName, setIsClickClearUserName] = useState(false);
-  // 创建人查询输入框内容
-  const [userNameValue, setUserNameValue] = useState('');
-
+  const [sortValue, setSortValue]: any = useState({});
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
@@ -80,14 +71,23 @@ export default function Requirement() {
         page_size: number;
         filters: {
           keyword: string;
+          label_type: number | string;
+          status: number | string;
         };
       } = {
         page: current || 1, //第几页
         page_size: pageSize || 10, //每页个数
         filters: {
-          keyword: searchValue
+          keyword: searchValue,
+          label_type: sortValue.label_type,
+          status: sortValue.status
         }
       };
+      const filtered1 = omitBy(
+        params.filters,
+        (value: string | number) => isNil(value) || value === ''
+      );
+      console.log(filtered1, 'top');
       const res = await getAnnotationList(params);
       if (res.code === 0 && res.data) {
         setRequirementData(res.data.result || []);
@@ -122,10 +122,8 @@ export default function Requirement() {
   ) => {
     setCurrent(1);
     const sortdata = {
-      name: filters?.name?.[0] || '',
-      type: filters?.type?.[0] || '',
-      belong: filters?.belong?.[0] || '',
-      create_by: userNameValue
+      status: filters?.status,
+      label_type: filters?.label_type
     };
 
     setSortValue(sortdata);
