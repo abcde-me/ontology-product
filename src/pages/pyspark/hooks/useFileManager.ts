@@ -11,6 +11,7 @@ import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 interface UseFileManagerReturn {
@@ -45,7 +46,7 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen } = options;
+  const { onFileOpen, externalSelectedKeys } = options;
 
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
@@ -337,6 +338,13 @@ export const useFileManager = (
       return [];
     }
   }, []);
+
+  // 监听外部selectedKeys变化，同步到内部状态
+  useEffect(() => {
+    if (externalSelectedKeys) {
+      setSelectedKeys(externalSelectedKeys);
+    }
+  }, [externalSelectedKeys]);
 
   // 组件挂载时获取数据
   useEffect(() => {

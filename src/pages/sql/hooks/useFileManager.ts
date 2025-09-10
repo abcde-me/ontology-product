@@ -14,6 +14,7 @@ import { SqlScriptItem } from '@/types/sqlApi';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 interface UseFileManagerReturn {
@@ -48,7 +49,7 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen } = options;
+  const { onFileOpen, externalSelectedKeys } = options;
 
   // 状态管理
   const [sqlScriptList, setSqlScriptList] = useState<SqlScriptItem[]>([]);
@@ -298,6 +299,7 @@ export const useFileManager = (
           id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,
+          key: String(item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,
@@ -339,6 +341,14 @@ export const useFileManager = (
       return [];
     }
   }, []);
+
+  // 监听外部选中状态变化，同步到内部状态
+  useEffect(() => {
+    console.log('externalSelectedKeys', externalSelectedKeys);
+    if (externalSelectedKeys) {
+      setSelectedKeys(externalSelectedKeys);
+    }
+  }, [externalSelectedKeys]);
 
   // 组件挂载时获取数据
   useEffect(() => {

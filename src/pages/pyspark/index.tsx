@@ -24,6 +24,11 @@ const Python: React.FC = memo(() => {
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+  // 用于同步选中状态到FileManager的回调函数
+  const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
+    string[]
+  >([]);
+
   const {
     fileState,
     directoryTreeRef,
@@ -33,7 +38,7 @@ const Python: React.FC = memo(() => {
     switchTab,
     updateTabContent,
     handleCreate
-  } = useTabManager();
+  } = useTabManager(setFileManagerSelectedKeys);
 
   // 处理标签页内容更新
   const handleTabContentUpdate = (tabKey: string, content: string) => {
@@ -81,6 +86,7 @@ const Python: React.FC = memo(() => {
                 type="files"
                 onFileOpen={openFile}
                 ref={directoryTreeRef}
+                externalSelectedKeys={fileManagerSelectedKeys}
               />
             )}
           </TabPane>

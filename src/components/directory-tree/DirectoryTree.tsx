@@ -594,6 +594,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             selectedKeys={selectedKeys}
             onExpand={setExpandedKeys}
             onSelect={(keys, extra) => {
+              console.log('让我看看这是啥', keys, extra);
               setSelectedKeys(keys);
               onSelect?.(keys, extra);
 

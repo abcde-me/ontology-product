@@ -14,11 +14,13 @@ interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (fileId: string, fileName?: string) => void;
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   onFileOpen,
-  directoryTreeRef
+  directoryTreeRef,
+  externalSelectedKeys
 }) => {
   // 使用文件管理器hook
   const {
@@ -38,7 +40,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     handleBackToParent,
     formatData
   } = useFileManager({
-    onFileOpen
+    onFileOpen,
+    externalSelectedKeys
   });
 
   return (
