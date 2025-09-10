@@ -731,12 +731,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               <div className="list-item-content-info">
                 <EllipsisPopover
                   className="list-item-content-info-name"
-                  value={file.file_name || file.name}
+                  value={file.FileName ?? file.file_name}
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(file.file_size || file.size)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(file.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -792,10 +794,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={dbItem.name}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(dbItem.file_size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(dbItem.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -861,10 +865,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={table.table_name ?? ''}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(table.file_size ?? table.size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(table.file_size ?? table.size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
