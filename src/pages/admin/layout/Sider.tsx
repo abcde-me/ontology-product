@@ -130,7 +130,8 @@ const menus: MenuModel[] = [
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'sql',
-        path: '/tenant/compute/modaforge/sql'
+        path: '/tenant/compute/modaforge/sql',
+        permission: 'sql_script:can_search'
       }
     ]
   },

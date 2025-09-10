@@ -44,7 +44,7 @@ import EllipsisPopover from '../ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
 import timeFormattig from '@/utils/timeFormatting';
-import { PYSPARK_PERMISSIONS } from '@/config/permissions';
+import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 
 // 原始数据接口
@@ -615,14 +615,22 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }}
             renderExtra={(node) => {
               const isEditing = node.dataRef?.showInput;
+              const nowPermissions =
+                from === DirectoryTreeFrom.SQL
+                  ? SQL_PERMISSIONS
+                  : PYSPARK_PERMISSIONS;
+              console.log(
+                nowPermissions,
+                'nowPermissions',
+                node,
+                node.dataRef?.perms?.includes(nowPermissions.CAN_COPY)
+              );
 
               if (isEditing) return null;
 
               return (
                 <div className="directory-tree-extra">
-                  {node.dataRef?.perms?.includes(
-                    PYSPARK_PERMISSIONS.CAN_RENAME
-                  ) && (
+                  {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
                     <Tooltip color="white" content="重命名">
                       <IconEdit
                         className="mr-1 hover:text-[rgb(var(--primary-6))]"
@@ -631,9 +639,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     </Tooltip>
                   )}
                   {node.dataRef?.type !== PythonItemType.Directory &&
-                    node.dataRef?.perms?.includes(
-                      PYSPARK_PERMISSIONS.CAN_COPY
-                    ) && (
+                    node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
                       <Tooltip color="white" content="复制">
                         <IconCopy
                           className="mr-1 hover:text-[rgb(var(--primary-6))]"
@@ -643,9 +649,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         />
                       </Tooltip>
                     )}
-                  {node.dataRef?.perms?.includes(
-                    PYSPARK_PERMISSIONS.CAN_DELETE
-                  ) && (
+                  {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
                     <Tooltip color="white" content="删除">
                       <IconDelete
                         className="hover:text-[rgb(var(--primary-6))]"

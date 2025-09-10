@@ -302,7 +302,8 @@ export const useFileManager = (
           dataRef: {
             name: item.script_name,
             id: item.script_id,
-            type: PythonItemType.Notebook
+            type: PythonItemType.Notebook,
+            perms: item.perms
           }
         };
       }) ?? []

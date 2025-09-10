@@ -113,7 +113,25 @@ export const PYSPARK_PERMISSIONS = {
   CAN_EXPORT_STOP: 'pyspark:can_export_stop', // 导出停止
   CAN_EXPORT_RETRY: 'pyspark:can_export_retry', // 导出重试
   CAN_EXPORT_PREVIEW: 'pyspark:can_export_preview', // 导出预览
-  CAN_DIRECTORY: 'directory:can_search_dirs' // 数据目录
+  CAN_DIRECTORY: 'directory:can_search_dirs', // 数据目录
+  CAN_DATASETS_SEARCH: 'datasets:can_search', // 数据集列表
+  CAN_RETRIEVE_OPERATOR: 'directory:can_retrieve_operator' // 算子库
+} as const;
+
+// SQL权限
+export const SQL_PERMISSIONS = {
+  CAN_CREATE: 'sql_script:can_create', // 创建
+  CAN_DELETE: 'sql_script:can_delete', // 删除
+  CAN_UPDATE: 'sql_script:can_update', // 编辑
+  CAN_COPY: 'sql_script:can_copy', // 复制
+  CAN_RENAME: 'sql_script:can_rename', // 重命名
+  CAN_SEARCH: 'sql_script:can_search', // 菜单权限
+  CAN_GET: 'sql_script:can_get', // 详情
+  CAN_RUN: 'sql_script:can_run', // 运行
+  CAN_CANCEL_RUN: 'sql_script:can_cancel_run', // 取消运行
+  CAN_GET_RUN_RESULT: 'sql_script:can_get_run_result', // 获取运行结果
+  CAN_EXPORT_RESULT: 'sql_script:can_export_result', // 导出结果
+  CAN_EXPORT_VERSION_UPDATE: 'sql_script:can_export_version_update' // 导出版本更新
 } as const;
 
 // 聚合所有权限
@@ -127,7 +145,8 @@ export const ALL_PERMISSIONS = {
   WORKFLOW_TASK: WORKFLOW_TASK_PERMISSIONS,
   DATA_CATALOG: DATA_CATALOG_PERMISSIONS,
   DATA_MANAGEMENT: DATA_MANAGEMENT_PERMISSIONS,
-  PYSPARK: PYSPARK_PERMISSIONS
+  PYSPARK: PYSPARK_PERMISSIONS,
+  SQL: SQL_PERMISSIONS
 } as const;
 
 // 权限检查辅助函数
