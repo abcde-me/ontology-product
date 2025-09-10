@@ -258,6 +258,13 @@ export const getSourceFileTypeList = async (params) => {
 };
 
 // 统一的列配置生成函数
+interface DbClickData {
+  databaseName: string;
+  tableName: string;
+  path_id: number;
+  table_id: number;
+}
+
 export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
@@ -271,17 +278,15 @@ export const getUnifiedColumns = (
   handAllReset?: () => void, // 修改为函数类型而不是数组
   resetPage?: () => void,
   sourceFileTypeFilters?: any[],
-  selectedNodeType?: string
+  selectedNodeType?: string,
+  onDbClick?: (data: DbClickData) => void, // 添加数据库点击回调
+  selectedParentId?: string // 添加父节点ID参数
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
   console.log(selectedNodeType, 'selectedNodeType1232131313');
   // Source表格的卷数据列配置
-  if (
-    tableType === 'source' &&
-    dataType === 'volume' &&
-    (selectedNodeType !== 'db_item' || !selectedNodeType)
-  ) {
+  if (tableType === 'source' && dataType === 'volume') {
     return [
       {
         title: 'ID',
@@ -379,29 +384,41 @@ export const getUnifiedColumns = (
     return [
       {
         title: 'ID',
-        dataIndex: 'id',
+        dataIndex: 'table_id',
         width: 80
       },
       {
         title: '表名',
-        dataIndex: 'file_name',
+        dataIndex: 'table_name',
         className: 'hover-change load-name',
         ellipsis: true,
         width: 200,
         render: (_, record) => (
           <EllipsisPopoverCom
-            value={record.file_name}
+            value={record.table_name}
             isEdit={false}
             isLink
             handleLink={() => {
-              setDetail(record.id, setVisibleDbmodel);
+              // 从路径中获取数据库名
+              const pathParts = selectedFullPath?.split('/') || [];
+              const databaseName = pathParts[pathParts.length - 1] || '';
+              // 把数据传递给 Modal
+              setVisibleDbmodel(true);
+              if (onDbClick) {
+                onDbClick({
+                  databaseName,
+                  tableName: record.table_name,
+                  path_id: selectedParentId ? Number(selectedParentId) : 0, // 使用数据库文件夹(父节点)的ID
+                  table_id: record.table_id
+                });
+              }
             }}
           />
         )
       },
       {
         title: '数据库类型',
-        dataIndex: 'file_type',
+        dataIndex: 'db_type',
         width: 120,
         filters: sourceFileTypeFilters,
         render: (_, record) => (
@@ -412,33 +429,33 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.file_type)}
-            <span>{record.file_type}</span>
+            {getFileIcon(record.db_type)}
+            <span>{record.db_type}</span>
           </div>
         )
       },
       {
         title: '表行数',
         width: 120,
-        dataIndex: 'file_size',
-        render: (_, record) => <div>{formatFileSize(record.file_size)}</div>
+        dataIndex: 'cnt_rows',
+        render: (_, record) => <div>{record.cnt_rows}</div>
       },
       {
         title: '上传用户',
-        dataIndex: 'upload_user',
+        dataIndex: 'username',
         ellipsis: true,
         width: 100
       },
       {
         title: '载入开始时间',
-        dataIndex: 'task_load_start_time',
+        dataIndex: 'start_loading_time',
         width: 180,
         sorter: true,
 
         // sortOrder: 'ascend',
         // sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
         sortDirections: ['ascend' as const, 'descend' as const],
-        render: (_, record) => formatDateTime(record.task_load_start_time)
+        render: (_, record) => formatDateTime(record.start_loading_time)
       },
       {
         title: '连接器名称',
@@ -466,7 +483,19 @@ export const getUnifiedColumns = (
               display: 'inline-block'
             }}
             onClick={() => {
-              setDetail(record.id, setVisibleDbmodel);
+              // 从路径中获取数据库名
+              const pathParts = selectedFullPath?.split('/') || [];
+              const databaseName = pathParts[pathParts.length - 1] || '';
+              // 把数据传递给 Modal
+              setVisibleDbmodel(true);
+              if (onDbClick) {
+                onDbClick({
+                  databaseName,
+                  tableName: record.table_name,
+                  path_id: selectedParentId ? Number(selectedParentId) : 0, // 使用数据库文件夹(父节点)的ID
+                  table_id: record.table_id
+                });
+              }
             }}
           >
             详情
@@ -476,7 +505,7 @@ export const getUnifiedColumns = (
     ];
   }
   // Target表格的卷数据列配置
-  if (tableType === 'target' && dataType === 'volume') {
+  if (tableType === 'target') {
     return [
       {
         title: 'ID',

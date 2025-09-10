@@ -1,6 +1,7 @@
 import { Table, Input, Button, Message } from '@arco-design/web-react';
 import React, { useRef, useState } from 'react';
 import { IconSearch, IconCopy } from '@arco-design/web-react/icon';
+import copy from 'copy-to-clipboard';
 const InputSearch = Input.Search;
 import '../index.scss';
 import Pages from '../components/pages';
@@ -171,11 +172,17 @@ const Datas = [
   '第十四条',
   '第十五条'
 ];
-export default function AutoDefine() {
-  const inputRef = useRef(null);
+export default function AutoDefine(props) {
+  const { dataList } = props;
+  console.log(dataList, 'table组件接收到的dataList');
+  const Datas =
+    dataList && dataList.ddl ? dataList.ddl.tableInfo.split('\n') : [];
+  // 搜索过滤状态，用于根据字段名筛选表格
+  const [nameFilter, setNameFilter] = useState<string>('');
+  const ddlRef = useRef<HTMLDivElement | null>(null);
   const fileType = [
-    { text: 'INTEGER', value: 'INTEGER' },
-    { text: 'VATRCHAR', value: 'VATRCHAR' }
+    { text: 'int', value: 'int' },
+    { text: 'string', value: 'string' }
   ];
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -202,6 +209,23 @@ export default function AutoDefine() {
               allowClear
               placeholder="请输入项目名称搜索"
               style={{ width: 200 }}
+              value={
+                filterKeys && filterKeys[0] !== undefined
+                  ? filterKeys[0]
+                  : nameFilter
+              }
+              onChange={(value: string) => {
+                setFilterKeys(value ? [value] : []);
+                if (!value) {
+                  setNameFilter('');
+                  if (confirm) confirm();
+                }
+              }}
+              onSearch={(val: string) => {
+                const v = val || '';
+                setNameFilter(v);
+                if (confirm) confirm();
+              }}
             />
           </div>
         );
@@ -209,16 +233,46 @@ export default function AutoDefine() {
     },
     {
       title: '类型',
-      dataIndex: 'salary',
+      dataIndex: 'type',
       filters: fileType
     },
     {
       title: '注释',
-      dataIndex: 'address'
+      dataIndex: 'comment'
     }
   ];
+  // 根据 nameFilter 过滤表格数据（不区分大小写）
+  const filteredData = (dataList?.ddl?.columns || []).filter((row) => {
+    if (!nameFilter) return true;
+    const v = String(row?.name || '');
+    return v.toLowerCase().includes(nameFilter.toLowerCase());
+  });
   const handCopy = () => {
-    Message.success('复制成功');
+    const rawText = dataList?.ddl?.tableInfo;
+    let textToCopy = '';
+    if (rawText) {
+      textToCopy = rawText;
+    } else if (ddlRef.current) {
+      // 从容器中提取文本并保留换行
+      textToCopy = Array.from(ddlRef.current.querySelectorAll('li'))
+        .map((li) => li.textContent || '')
+        .join('\n');
+    }
+    if (!textToCopy) {
+      Message.error('没有可复制的内容');
+      return;
+    }
+
+    try {
+      const success = copy(textToCopy);
+      if (success) {
+        Message.success('复制成功');
+      } else {
+        Message.error('复制失败');
+      }
+    } catch (err) {
+      Message.error('复制失败');
+    }
   };
   return (
     <div
@@ -245,6 +299,7 @@ export default function AutoDefine() {
           overflow: 'hidden',
           overflowY: 'auto'
         }}
+        ref={ddlRef}
       >
         <Button
           type="outline"
@@ -296,11 +351,11 @@ export default function AutoDefine() {
       <div>
         <Table
           columns={columns as any}
-          data={data}
+          data={filteredData}
           pagination={false}
           className="table_style"
         />
-        {data.length > 0 && (
+        {/* {data.length > 0 && (
           <div
             style={{
               display: 'flex',
@@ -312,13 +367,13 @@ export default function AutoDefine() {
             <span></span>
             <Pages
               current={currentPage}
-              total={data.length}
+              total={dataList?.ddl?.columns.length || 0}
               pageSize={pageSize}
               onChange={handlePageChange}
               onPageSizeChange={handlePageSizeChange}
             />
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

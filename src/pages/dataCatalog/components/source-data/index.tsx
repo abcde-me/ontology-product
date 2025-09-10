@@ -32,6 +32,14 @@ export default function SourceData() {
 
   const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
+    // 重置selectedNodeType并更新activeTab
+    catalogTreeStore.setState({
+      selectedNodeType: '',
+      selectedKey: '',
+      selectedTreeKey: '',
+      selectedPath: '',
+      selectedParentId: ''
+    });
     catalogTreeStore.getEffect('fetchData')({
       activeTab: value
     });

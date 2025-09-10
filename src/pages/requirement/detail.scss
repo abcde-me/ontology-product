@@ -339,4 +339,10 @@
       padding: 4px !important;
     }
   }
+
+  .is-disabled {
+    cursor: not-allowed;
+    color: #999;
+    opacity: 0.7;
+  }
 }

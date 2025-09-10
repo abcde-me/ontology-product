@@ -18,7 +18,7 @@ interface PropsType {
   change: (state: DataType) => void;
   name: string;
   taskId: number;
-  judmentTaskHan: (taskId: number) => void;
+  judgmentTaskHan: () => void;
 }
 const TableDetail = (props) => {
   const history = useHistory();
@@ -236,6 +236,8 @@ const TableDetail = (props) => {
     });
     if (res.code == '' && res.status == 200) {
       Message.success('操作成功');
+      // 调用父组件的刷新方法来重新获取最新数据
+      props.judgmentTaskHan();
     } else {
       Message.error(res.message);
     }

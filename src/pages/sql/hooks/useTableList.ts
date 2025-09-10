@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { PaginationProps } from '@arco-design/web-react';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
-interface HttpResponse<T> {
-  data: {
-    items: T[];
-    total: number;
-    page: number;
-    page_size: number;
-  };
-}
+// interface HttpResponse<T> {
+//   data: {
+//     items: T[];
+//     total: number;
+//     page: number;
+//     page_size: number;
+//   };
+// }
 
 interface UseTableListProps<T, U> {
-  onRequest?: (params: U) => Promise<HttpResponse<T>>;
+  onRequest?: (params: U) => Promise<ApiRes<any>>;
   initialSearchParams?: U;
   formatFilter?: (filters: Partial<Record<keyof T, string[]>>) => U | {};
   formatSorter?: (sorter: SorterInfo) => U | {};

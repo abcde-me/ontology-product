@@ -3,33 +3,46 @@ import {
   Form,
   Input,
   Link,
+  Message,
   Table,
-  TableColumnProps
+  TableColumnProps,
+  Tooltip
 } from '@arco-design/web-react';
+import { IconInfoCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { getDatasetList } from '@/pages/sql/constant';
 import { useTableList } from '../hooks/useTableList';
 import { useSqlIndexStore, SqlIndexStore } from '../store';
 import ModalScriptDetail from './ModalScriptDetail';
 import ModalDatasetDetail from './data-manager/ModalDatasetDetail';
+import {
+  ExportSqlResultItem,
+  ExportSqlResultListData,
+  ExportSqlResultListParams
+} from '@/types/sqlApi';
+import {
+  calcelExportSqlTask,
+  getExportSqlResultList,
+  getSqlTaskDetail,
+  retryExportSqlTask
+} from '@/api/sql';
 
 const FormItem = Form.Item;
 
-interface DatasetListParams {
-  page?: number;
-  page_size?: number;
-  search_content?: string;
-}
+// interface DatasetListParams {
+//   page?: number;
+//   page_size?: number;
+//   search_content?: string;
+// }
 
-interface DatasetItem {
-  id: number;
-  script_name: string;
-  dataset_name: string;
-  dataset_table_name: string;
-  /** 0: 导出中, 1: 导出成功, 2: 导出失败 */
-  export_status: number;
-  export_start_time: string;
-}
+// interface DatasetItem {
+//   id: number;
+//   script_name: string;
+//   dataset_name: string;
+//   dataset_table_name: string;
+//   /** 0: 导出中, 1: 导出成功, 2: 导出失败 */
+//   export_status: number;
+//   export_start_time: string;
+// }
 
 const DatasetsList: FC = () => {
   const showScriptDetail = useSqlIndexStore(
@@ -50,13 +63,28 @@ const DatasetsList: FC = () => {
     loading,
     handleSearchChange,
     handleTableChange
-  } = useTableList<DatasetItem, DatasetListParams>({
-    onRequest: getDatasetList,
+  } = useTableList<ExportSqlResultItem, ExportSqlResultListParams>({
+    onRequest: getExportSqlResultList,
     formatSorter: (sorter: any) => {
       let result = {};
       if (sorter.export_status) {
         result = {
           export_status: sorter.export_status
+        };
+      }
+      return result;
+    },
+    formatFilter: (filter: any) => {
+      let result = {};
+      if (filter.field === 'export_start_time') {
+        result = {
+          sort_field: filter?.field == undefined ? '' : filter?.field,
+          sort_order:
+            filter?.direction == undefined
+              ? ''
+              : filter?.direction == 'ascend'
+                ? 'asc'
+                : 'desc'
         };
       }
       return result;
@@ -75,7 +103,7 @@ const DatasetsList: FC = () => {
             value={item.script_name}
             isEdit={false}
             isLink
-            handleLink={() => handleScriptDetail(item.id)}
+            handleLink={() => handleScriptDetail(item)}
           />
         );
       }
@@ -120,10 +148,7 @@ const DatasetsList: FC = () => {
             text = '导出中';
             color = '#1890ff';
             actionBtn = (
-              <Link href="#" onClick={() => handleStopTask(item.id)}>
-                {' '}
-                停止{' '}
-              </Link>
+              <Link onClick={() => handleStopTask(item)}> 停止 </Link>
             );
             break;
           case 1:
@@ -134,7 +159,22 @@ const DatasetsList: FC = () => {
             text = '导出失败';
             color = '#ff4d4f';
             actionBtn = (
-              <Link href="#" onClick={() => handleRetryTask(item.id)}>
+              <>
+                <Tooltip content={item.failed_reason}>
+                  <IconInfoCircle />
+                </Tooltip>
+                <Link href="#" onClick={() => handleRetryTask(item)}>
+                  {' '}
+                  重试{' '}
+                </Link>
+              </>
+            );
+            break;
+          case 3:
+            text = '导出终止';
+            color = '#FB923C';
+            actionBtn = (
+              <Link href="#" onClick={() => handleRetryTask(item)}>
                 {' '}
                 重试{' '}
               </Link>
@@ -173,6 +213,10 @@ const DatasetsList: FC = () => {
         {
           text: '导出失败',
           value: 2
+        },
+        {
+          text: '导出终止',
+          value: 3
         }
       ]
     },
@@ -183,20 +227,49 @@ const DatasetsList: FC = () => {
       render: (_, item) => (
         <div className="fontMM">{item.export_start_time}</div>
       ),
-      sorter: (a, b) => a.export_start_time.localeCompare(b.export_start_time)
+      sorter: true
     }
   ];
 
-  function handleStopTask(id: number) {
-    console.log('停止任务', id);
+  async function handleStopTask(item: ExportSqlResultItem) {
+    if (!item.id || !item.script_id) {
+      return;
+    }
+
+    const res = await calcelExportSqlTask(item.id, item.script_id);
+
+    if (res.code == '' && res.status == 200) {
+      Message.success('停止任务成功');
+    } else {
+      Message.error(res.message ?? '停止任务失败');
+    }
   }
 
-  function handleRetryTask(id: number) {
-    console.log('重试任务', id);
+  async function handleRetryTask(item: ExportSqlResultItem) {
+    if (!item.id || !item.script_id) {
+      return;
+    }
+
+    const res = await retryExportSqlTask(item.id, item.script_id);
+
+    if (res.code == '' && res.status == 200) {
+      Message.success('重试任务成功');
+    } else {
+      Message.error(res.message ?? '重试任务失败');
+    }
   }
 
-  function handleScriptDetail(id: number) {
-    showScriptDetail && showScriptDetail();
+  async function handleScriptDetail(item: ExportSqlResultItem) {
+    if (!item.id || !item.script_id) {
+      return;
+    }
+
+    const res = await getSqlTaskDetail(item.id, item.script_id);
+
+    if (res.code == '' && res.status == 200) {
+      console.log('展示详情弹框');
+    }
+    // showScriptDetail && showScriptDetail();
   }
 
   function handleDatasetDetail(id: number) {

@@ -1,6 +1,8 @@
 import React from 'react';
 
-export default function details() {
+export default function details(props) {
+  const { dataList } = props;
+  console.log(dataList, '父组件传递给 Details 的 dataList');
   return (
     <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
       <div
@@ -21,11 +23,21 @@ export default function details() {
       </div>
       <div style={{ marginLeft: '2px', marginTop: '16px', fontSize: '14px' }}>
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-          <li style={{ marginBottom: '16px' }}>创建时间：</li>
-          <li style={{ marginBottom: '16px' }}>最近更新时间：</li>
-          <li style={{ marginBottom: '16px' }}>载入用户：</li>
-          <li style={{ marginBottom: '16px' }}>数据器名称：</li>
-          <li style={{ marginBottom: '16px' }}>数据载入任务：</li>
+          <li style={{ marginBottom: '16px' }}>
+            {dataList?.loader?.created_time}
+          </li>
+          <li style={{ marginBottom: '16px' }}>
+            {dataList?.loader?.updated_time}
+          </li>
+          <li style={{ marginBottom: '16px' }}>
+            {dataList?.loader?.upload_user}
+          </li>
+          <li style={{ marginBottom: '16px' }}>
+            {dataList?.loader?.connector_name}
+          </li>
+          <li style={{ marginBottom: '16px' }}>
+            {dataList?.loader?.load_task_name}
+          </li>
         </ul>
       </div>
     </div>

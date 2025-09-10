@@ -15,7 +15,11 @@ import { connectorDetailType } from '../type';
 // 表单
 const FormItem = Form.Item;
 const Option = Select.Option;
-const options = ['mysql', 'postgresql'];
+// const options = ['mysql', 'postgresql'];
+const options = [
+  { text: 'MySQL', value: 'mysql' },
+  { text: 'PostgreSQL', value: 'postgresql' }
+];
 // 单选
 const RadioGroup = Radio.Group;
 
@@ -39,9 +43,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
   // 跟踪密码是否被修改过
   const [passwordChanged, setPasswordChanged] = React.useState(false);
   // 存储原始密码值用于比较
-  const [originalPassword] = React.useState(
-    props.editObj.config?.password || ''
-  );
+  const [originalPassword] = React.useState('****');
 
   // 暴露密码修改状态给父组件
   useImperativeHandle(ref, () => ({
@@ -79,7 +81,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                 port: props.editObj.config?.port,
                 database: props.editObj.config?.database,
                 user: props.editObj.config?.user,
-                password: props.editObj.config?.password
+                password: '****'
               })
       });
     }
@@ -134,7 +136,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                 setStorageType(value);
               }}
             >
-              <Radio value="s3">对象存储</Radio>
+              <Radio value="s3">对象存储(S3)</Radio>
               <Radio value="hdfs">HDFS</Radio>
               <Radio value="db">数据库</Radio>
             </RadioGroup>
@@ -314,8 +316,8 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                     disabled={true}
                   >
                     {options.map((option, index) => (
-                      <Option key={option} value={option}>
-                        {option}
+                      <Option key={option.value} value={option.value}>
+                        {option.text}
                       </Option>
                     ))}
                   </Select>
@@ -371,11 +373,11 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                   rules={[{ required: true, message: '请输入密码' }]}
-                  initialValue={props.editObj.config?.password}
+                  initialValue="****"
                 >
                   <Input.Password
                     placeholder="请输入"
-                    defaultValue={props.editObj.config?.password}
+                    defaultValue="****"
                     visibilityToggle={false}
                     onChange={(value) => {
                       // 如果输入值与原始密码不同，标记为已修改

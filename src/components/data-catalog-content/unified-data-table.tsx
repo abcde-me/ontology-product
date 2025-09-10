@@ -98,6 +98,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [visibleDbmodel, setVisibleDbmodel] = useState(false); // 数据详情弹框控制
   const [downloadData, setDownloadData] = useState(null); // 下载的数据
   const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
+  const [currentDbDetails, setCurrentDbDetails] = useState<{
+    databaseName: string;
+    tableName: string;
+    path_id: number;
+    table_id: number;
+  } | null>(null); // 当前选中的数据库详情
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
   const [loading, setLoading] = useState(false); // 添加加载状态
   const [fileTypeFilters, setFileTypeFilters] = useState<string[]>([]); // 文件类型筛选条件
@@ -503,7 +509,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       handAllReset,
       resetPage,
       sourceFileTypeFilters,
-      selectedNodeType
+      selectedNodeType,
+      (data) => {
+        setCurrentDbDetails(data); // 存储当前的数据库详情
+      },
+      selectedParentId // 传递父节点ID
     );
   }, [
     tableType,
@@ -534,7 +544,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         handAllReset,
         resetPage,
         sourceFileTypeFilters,
-        selectedNodeType
+        selectedNodeType,
+        (data) => {
+          setCurrentDbDetails(data); // 存储当前的数据库详情
+        },
+        selectedParentId // 传递父节点ID
       );
     }
     return baseColumns;
@@ -749,7 +763,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       {/* 数据详情弹框 */}
       <DbModal
         visible={visibleDbmodel}
-        onCancel={() => setVisibleDbmodel(false)}
+        onCancel={() => {
+          setVisibleDbmodel(false);
+          setCurrentDbDetails(null); // 清除当前数据库详情
+        }}
+        data={currentDbDetails} // 传递当前数据库详情
       />
     </>
   );

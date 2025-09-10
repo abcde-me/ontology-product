@@ -35,7 +35,8 @@ export interface CatalogTreeState {
   treeData: TreeDataType[];
   rawTreeData: TreeDataType[];
   expandedKeys: string[];
-  selectedKey: string;
+  selectedKey: string; // 存储实际的数据ID，用于API调用
+  selectedTreeKey: string; // 存储完整的树节点key，用于显示选中样式
   selectedNodeType: string; // 新增：存储选中节点的类型
   selectedParentId: string; // 新增：存储选中节点的父节点ID
   inputRef: React.RefObject<RefInputType>;
@@ -62,7 +63,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: [],
         rawTreeData: [],
         expandedKeys: [],
-        selectedKey: '',
+        selectedKey: '', // 实际的数据ID
+        selectedTreeKey: '', // 完整的树节点key
         selectedNodeType: '', // 初始化选中节点类型
         selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
@@ -130,12 +132,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       let selectedNode = defaultNode?.children?.[0]?.children?.[0];
 
       if (options?.parent_id && options.id) {
+        // 根据新的key格式查找节点
+        const parentKey = `${activeTab}-catalog-${options.parent_id}`;
         defaultNode =
-          cacheTreeData.find((d) => d.key === options?.parent_id) ||
-          defaultNode;
+          cacheTreeData.find((d) => d.key === parentKey) || defaultNode;
         selectedNode =
-          defaultNode?.children?.[0]?.children?.find((item) => {
-            return item.key === options?.id;
+          defaultNode?.children?.[0]?.children?.find((item: any) => {
+            return item.key.includes(`-${options.id}`);
           }) || selectedNode;
       }
 
@@ -150,7 +153,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
-        selectedKey: selectedNode?.key || '',
+        selectedKey: selectedNode?.id ? String(selectedNode.id) : '', // 存储实际ID
+        selectedTreeKey: selectedNode?.key || '', // 存储完整的树节点key
         selectedPath: selectedNode?.fullPath || ''
       };
     } catch (err) {
@@ -193,7 +197,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         activeKey === 'src' ? ['volume', 'db'] : ['volume'];
 
       supportedTypes.forEach((type) => {
-        const typeKey = `${catalog.id}-${type}`;
+        // 修复key重复问题：加入catalog.id和activeKey确保唯一性
+        const typeKey = `${activeKey}-${catalog.id}-${type}`;
         // 获取该类型下的实际数据，如果没有则使用空数组
         const typeData = catalog.children?.[type] || [];
 
@@ -210,7 +215,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
             return {
               ...item,
               title: item.name,
-              key: String(item.id), // 转换为字符串
+              // 修复key重复问题：确保数据库/数据卷节点key的唯一性
+              key: `${activeKey}-${catalog.id}-${type}-${item.id}`,
               parent_id: catalog.id,
               // 对于数据库类型，始终不是叶子节点；对于数据卷，总是叶子节点
               isLastLeaf: type === 'volume',
@@ -222,7 +228,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                     ? item.children.db_item.map((table) => ({
                         ...table,
                         title: table.name,
-                        key: `${table.id}`,
+                        // 修复key重复问题：确保数据库表key的唯一性
+                        key: `${activeKey}-${catalog.id}-${type}-${item.id}-table-${table.id}`,
                         parent_id: item.id,
                         type: table.type,
                         type_name: 'db_item',
@@ -240,7 +247,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       return {
         ...catalog,
         title: catalog.name,
-        key: String(catalog.id), // 转换为字符串
+        // 修复key重复问题：确保catalog节点key的唯一性
+        key: `${activeKey}-catalog-${catalog.id}`,
         children: childrenArr
       };
     });

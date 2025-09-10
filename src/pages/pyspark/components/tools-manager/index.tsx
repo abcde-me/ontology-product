@@ -225,6 +225,10 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
                     e.stopPropagation();
                     handleInsertClick(item);
                   }}
+                  onMouseDown={(e) => {
+                    // 阻止按钮获得焦点，保持编辑器焦点
+                    e.preventDefault();
+                  }}
                 >
                   {getIsEditorFocused?.() ? '插入' : '复制'}
                 </Button>

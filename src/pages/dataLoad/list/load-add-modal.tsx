@@ -122,14 +122,16 @@ const LoadAddModal = (props: propsType) => {
         };
         const res = await addLoad(formData);
         if (res.code == '' && res.status == 200) {
-          cancelHan();
           if (type == 'run') {
             history.push(
               `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
             );
           } else {
             Message.success('新建任务成功');
+            // 仅保存时刷新列表页面
+            props.getList(false);
           }
+          cancelHan();
         } else {
           Message.error(res.message);
         }
@@ -163,6 +165,8 @@ const LoadAddModal = (props: propsType) => {
             );
           } else {
             Message.success('新建任务成功');
+            // 仅保存时刷新列表页面
+            props.getList(false);
           }
           cancelHan();
         } else {
@@ -229,8 +233,8 @@ const LoadAddModal = (props: propsType) => {
       setDirectoryLoading(true);
       console.log('开始获取目录数据，当前数据源类型:', sourceType);
       const res = await getDirectoryList({
-        root_type: 1,
-        dir_type: sourceType === 'db' ? 3 : undefined
+        root_type: 1
+        // dir_type: sourceType === 'db' ? 3 : undefined
       });
       console.log('API响应:', res);
       if (!res || res.status !== 200) {
@@ -523,6 +527,9 @@ const LoadAddModal = (props: propsType) => {
     null
   );
 
+  // 存储树组件选中的keys
+  const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+
   // 存储上传的文件数据
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
@@ -537,16 +544,51 @@ const LoadAddModal = (props: propsType) => {
     }
   ) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
+    // 更新选中状态
+    setSelectedTreeKeys(selectedKeys);
   };
+  // 处理文件删除
+  const handleFileDelete = (fileName: string) => {
+    setUploadedFiles((prev) => {
+      const updatedFiles = prev.filter((file) => file.name !== fileName);
+      if (updatedFiles.length === 0) {
+        form.setFieldsValue({
+          connector_id: undefined
+        });
+      }
+      return updatedFiles;
+    });
+  };
+
   const handleFileChange = (fileData, blobURL) => {
+    if (Array.isArray(fileData)) {
+      // 如果是清空操作
+      setUploadedFiles([]);
+      if (sourceType === 'local') {
+        form.setFieldsValue({
+          connector_id: undefined
+        });
+      }
+      return;
+    }
+
     console.log(fileData, '这个是上传后的回调');
-    setUploadedFiles((prev) => [...prev, fileData]);
+    if (!fileData) return;
+
+    setUploadedFiles((prev) => {
+      // 检查新文件是否已经存在
+      const isFileExists = prev.some((file) => file.name === fileData.name);
+      if (isFileExists) {
+        return prev;
+      }
+      return [...prev, fileData];
+    });
+
     if (sourceType === 'local') {
       form.setFieldsValue({
         connector_id: 'local_files_uploaded'
       });
     }
-    // 设置表单校验状态 - 只要有文件相关操作就设置表单字
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -566,7 +608,7 @@ const LoadAddModal = (props: propsType) => {
           extra={
             <div className="text-prompt">
               <div>支持中文，英文，数字，下划线</div>
-              <div>名称建议: 连接器connector_1</div>
+              {/* <div>名称建议: 连接器connector_1</div> */}
             </div>
           }
           rules={[
@@ -598,7 +640,7 @@ const LoadAddModal = (props: propsType) => {
           }}
         >
           <RadioGroup>
-            <Radio value="s3">对象存储</Radio>
+            <Radio value="s3">对象存储(S3)</Radio>
             <Radio value="hdfs">HDFS</Radio>
             <Radio value="db">数据库</Radio>
             <Radio value="local">本地文件</Radio>
@@ -642,49 +684,66 @@ const LoadAddModal = (props: propsType) => {
                   ref={selectRef}
                   mode="multiple"
                   maxTagCount={{
-                    count: maxTagCounts,
-                    // showPopover: true,
+                    count: 2,
                     render: (invisibleTagCount) => {
-                      //联调时修改的地方
+                      console.log('maxTagCount render被调用:', {
+                        invisibleTagCount,
+                        formValues: form.getFieldValue('table_name')
+                      });
+
+                      if (invisibleTagCount <= 0) {
+                        return null;
+                      }
+
                       const allTags = form.getFieldValue('table_name') || [];
-                      const remainingTags = allTags.slice(maxTagCounts);
+                      const remainingTags = allTags.slice(2);
+
                       return (
                         <Tooltip
-                          content={remainingTags.map((item, i) => {
-                            return (
-                              <Tag
-                                key={i}
-                                style={{
-                                  height: '24px',
-                                  background: '#E7ECF0',
-                                  color: '#0F172A',
-                                  borderRadius: '2px',
-                                  fontSize: '14px',
-                                  // height: '18px',
-                                  alignItems: 'center',
-                                  margin: '0 2px'
-                                }}
-                              >
-                                {item}
-                                <IconClose
-                                  style={{
-                                    marginLeft: '2px',
-                                    fontSize: '12px'
-                                  }}
-                                  onClick={() => {
-                                    const filteredValue = allTags.filter(
-                                      (tag) => tag !== item
-                                    );
-                                    form.setFieldsValue({
-                                      table_name: filteredValue
-                                    });
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
+                          content={
+                            <div>
+                              {remainingTags.map((item, i) => (
+                                <div key={i} style={{ margin: '4px 0' }}>
+                                  <Tag
+                                    closable
+                                    style={{
+                                      height: '24px',
+                                      background: '#E7ECF0',
+                                      color: '#0F172A',
+                                      borderRadius: '2px',
+                                      fontSize: '14px',
+                                      alignItems: 'center',
+                                      margin: '0 2px'
+                                    }}
+                                    onClose={() => {
+                                      const filteredValue = allTags.filter(
+                                        (tag) => tag !== item
+                                      );
+                                      form.setFieldsValue({
+                                        table_name: filteredValue
+                                      });
+                                    }}
+                                  >
+                                    {item}
+                                  </Tag>
+                                </div>
+                              ))}
+                            </div>
+                          }
                         >
-                          <span>+{invisibleTagCount}</span>
+                          <span
+                            style={{
+                              color: '#1890ff',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              padding: '2px 4px',
+                              // backgroundColor: '#f5f5f5',
+                              borderRadius: '2px'
+                              // border: '1px dashed #d9d9d9'
+                            }}
+                          >
+                            +{invisibleTagCount}
+                          </span>
                         </Tooltip>
                       );
                     }
@@ -692,7 +751,7 @@ const LoadAddModal = (props: propsType) => {
                   placeholder="请选择抽取的表"
                   style={{ width: '100%', minWidth: 0 }}
                   allowClear
-                  allowCreate
+                  // allowCreate
                   onVisibleChange={calculateMaxTagCount}
                 >
                   <Option value="all">全部</Option>
@@ -712,9 +771,22 @@ const LoadAddModal = (props: propsType) => {
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
-            rules={[{ required: true, message: '请选择文件' }]}
+            rules={[
+              {
+                required: true,
+                validator: (value, cb) => {
+                  if (uploadedFiles.length === 0) {
+                    return cb('请选择文件');
+                  }
+                  return cb();
+                }
+              }
+            ]}
           >
-            <Uploads onFileChange={handleFileChange} />
+            <Uploads
+              onFileChange={handleFileChange}
+              onFileDelete={handleFileDelete}
+            />
           </FormItem>
         )}
 
@@ -772,16 +844,29 @@ const LoadAddModal = (props: propsType) => {
           </FormItem>
         ) : (
           <FormItem
-            label="载入位置："
+            label="载入到："
             field="dest_path"
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             rules={[{ required: true, message: '请选择载入位置' }]}
+            extra={
+              sourceType === 'db' ? (
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: '#6E7B8D',
+                    marginTop: '4px'
+                  }}
+                >
+                  注意保存后数据库名称为xxx-aaa
+                </p>
+              ) : null
+            }
           >
             <TreeSelect
               className="db-tree-select"
-              placeholder="Please select ..."
+              placeholder="请选择载入位置"
               allowClear
               dropdownMenuStyle={{
                 maxHeight: 300,
@@ -793,6 +878,7 @@ const LoadAddModal = (props: propsType) => {
                   directoryData={directoryData}
                   onDirectoryDataChange={setDirectoryData}
                   onSelect={handleSelect}
+                  selectedKeys={selectedTreeKeys}
                   onPathChange={(path, nodeId) => {
                     console.log('路径变化:', path, '节点ID:', nodeId);
                     // 存储节点ID用于表单提交

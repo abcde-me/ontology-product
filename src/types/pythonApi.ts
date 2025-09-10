@@ -327,7 +327,7 @@ export interface GetExportDatasetListReq {
   /**
    * 搜索内容
    */
-  file_name?: string;
+  name?: string;
 }
 
 export interface GetExportDatasetListItem {

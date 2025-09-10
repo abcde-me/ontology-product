@@ -1,184 +1,52 @@
-import React from 'react';
-import {
-  Modal,
-  Button,
-  Alert,
-  Tabs,
-  Typography,
-  Table
-} from '@arco-design/web-react';
+import React, { useState, useEffect } from 'react';
+import { Table, Spin } from '@arco-design/web-react';
 
-const columns: any = [
-  {
-    title: 'c_name',
-    dataIndex: 'name'
-  },
-  {
-    title: 'c_address',
-    dataIndex: 'salary'
-  },
-  {
-    title: 'c_nationkey',
-    dataIndex: 'address'
-  },
-  {
-    title: 'c_comment',
-    dataIndex: 'email'
-  }
-];
-const data = [
-  {
-    key: '1',
-    name: 'Jane Doe',
-    salary: 23000,
-    address: '32 Park Road, London',
-    email: 'jane.doe@example.com'
-  },
-  {
-    key: '2',
-    name: 'Alisa Ross',
-    salary: 25000,
-    address: '35 Park Road, London',
-    email: 'alisa.ross@example.com'
-  },
-  {
-    key: '3',
-    name: 'Kevin Sandra',
-    salary: 22000,
-    address: '31 Park Road, London',
-    email: 'kevin.sandra@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  }
-];
-export default function tables() {
+export default function Tables(props) {
+  const { dataList } = props;
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 模拟数据加载完成
+    if (dataList && dataList.sample) {
+      setLoading(false);
+    }
+  }, [dataList]);
+
+  const columns = () => {
+    if (dataList && dataList.sample && dataList.sample.columns) {
+      return dataList.sample.columns.map((item) => ({
+        title: item,
+        dataIndex: item,
+        width: 260
+      }));
+    }
+    return []; // 如果数据不存在，返回空数组
+  };
+
   return (
     <div>
-      <Table columns={columns} data={data} pagination={false} />
+      {loading ? (
+        <Spin
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '20px'
+          }}
+        />
+      ) : (
+        <Table
+          columns={columns()}
+          data={dataList.sample?.data || []}
+          pagination={false}
+          scroll={{ x: '100%' }}
+        />
+      )}
+      {/* <Table 
+          columns={columns()} 
+          data={dataList.sample?.data || []} 
+          pagination={false} 
+          scroll={{ x: '100%' }}
+        /> */}
     </div>
   );
 }
