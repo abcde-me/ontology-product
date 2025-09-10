@@ -11,6 +11,8 @@ import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 interface UseFileManagerReturn {
@@ -45,7 +47,7 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen } = options;
+  const { onFileOpen, onFileDelete, externalSelectedKeys } = options;
 
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
@@ -189,6 +191,8 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
+          // 自动打开文件
+          onFileOpen?.(String(createRes.data.id), createRes.data.name);
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
@@ -266,7 +270,8 @@ export const useFileManager = (
   const handleDelete = useCallback(
     async (node: any) => {
       try {
-        const deleteRes = await deletePythonItem(node?.dataRef?.id);
+        const fileId = node?.dataRef?.id;
+        const deleteRes = await deletePythonItem(fileId);
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes?.message ?? '删除失败');
@@ -274,6 +279,12 @@ export const useFileManager = (
         }
 
         Message.success('删除成功');
+
+        // 如果删除的是文件，关闭对应的标签页
+        if (fileId && onFileDelete) {
+          onFileDelete(fileId);
+        }
+
         // 刷新当前文件夹列表
         await getRawPythonList(currentFolderId);
         return true;
@@ -283,7 +294,7 @@ export const useFileManager = (
         return false;
       }
     },
-    [getRawPythonList, currentFolderId]
+    [getRawPythonList, currentFolderId, onFileDelete]
   );
 
   // 数据格式化函数
@@ -337,6 +348,13 @@ export const useFileManager = (
       return [];
     }
   }, []);
+
+  // 监听外部selectedKeys变化，同步到内部状态
+  useEffect(() => {
+    if (externalSelectedKeys) {
+      setSelectedKeys(externalSelectedKeys);
+    }
+  }, [externalSelectedKeys]);
 
   // 组件挂载时获取数据
   useEffect(() => {

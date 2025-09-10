@@ -15,15 +15,19 @@ export interface FileTab {
 export interface FileState {
   fileTabs: FileTab[];
   activeTab: string;
+  selectedKeys: string[]; // 添加选中状态管理
 }
 
 // 初始状态
 const initialState: FileState = {
   fileTabs: [],
-  activeTab: ''
+  activeTab: '',
+  selectedKeys: []
 };
 
-export const useTabManager = () => {
+export const useTabManager = (
+  onSelectedKeysChange?: (selectedKeys: string[]) => void
+) => {
   const [fileState, setFileState] = useState<FileState>(initialState);
 
   // DirectoryTree 的 ref，用于调用其新建功能
@@ -56,10 +60,14 @@ export const useTabManager = () => {
       setFileState((prev) => ({
         ...prev,
         fileTabs: updatedTabs,
-        activeTab: newTabKey
+        activeTab: newTabKey,
+        selectedKeys: [fileId] // 同步选中状态
       }));
+
+      // 通知FileManager更新选中状态
+      onSelectedKeysChange?.([fileId]);
     },
-    [fileState.fileTabs]
+    [fileState.fileTabs, onSelectedKeysChange]
   );
 
   const addTab = useCallback(
@@ -101,28 +109,64 @@ export const useTabManager = () => {
     (key: string) => {
       const remainingTabs = fileState.fileTabs.filter((tab) => tab.key !== key);
       let newActiveTab = fileState.activeTab;
+      let newSelectedKeys: string[] = [];
 
       // 如果删除的是当前活动标签页，切换到下一个
       if (key === fileState.activeTab && remainingTabs.length > 0) {
         newActiveTab = remainingTabs[0].key;
+        // 获取新活动标签页的fileId
+        const newActiveTabData = remainingTabs[0];
+        if (newActiveTabData.fileId) {
+          newSelectedKeys = [newActiveTabData.fileId];
+        }
       }
 
       setFileState((prev) => ({
         ...prev,
         fileTabs: remainingTabs,
-        activeTab: newActiveTab
+        activeTab: newActiveTab,
+        selectedKeys: newSelectedKeys
       }));
+
+      // 通知FileManager更新选中状态
+      onSelectedKeysChange?.(newSelectedKeys);
     },
-    [fileState.fileTabs, fileState.activeTab]
+    [fileState.fileTabs, fileState.activeTab, onSelectedKeysChange]
   );
 
-  const switchTab = useCallback((key: string) => {
-    // 只切换活动标签页
-    setFileState((prev) => ({
-      ...prev,
-      activeTab: key
-    }));
-  }, []);
+  // 根据文件ID关闭标签页
+  const removeTabByFileId = useCallback(
+    (fileId: string) => {
+      const tabToRemove = fileState.fileTabs.find(
+        (tab) => tab.fileId === String(fileId)
+      );
+      if (tabToRemove) {
+        removeTab(tabToRemove.key);
+      }
+    },
+    [fileState.fileTabs, removeTab]
+  );
+
+  const switchTab = useCallback(
+    (key: string) => {
+      // 找到对应的标签页，获取fileId
+      const targetTab = fileState.fileTabs.find((tab) => tab.key === key);
+      const fileId = targetTab?.fileId;
+
+      // 切换活动标签页并同步选中状态
+      setFileState((prev) => ({
+        ...prev,
+        activeTab: key,
+        selectedKeys: fileId ? [fileId] : []
+      }));
+
+      // 通知FileManager更新选中状态
+      if (fileId) {
+        onSelectedKeysChange?.([fileId]);
+      }
+    },
+    [fileState.fileTabs, onSelectedKeysChange]
+  );
 
   // 更新标签页内容
   const updateTabContent = useCallback((tabKey: string, content: string) => {
@@ -164,6 +208,7 @@ export const useTabManager = () => {
     openFile,
     addTab,
     removeTab,
+    removeTabByFileId, // 导出根据文件ID关闭标签页的方法
     switchTab,
     updateTabContent,
     handleCreate
