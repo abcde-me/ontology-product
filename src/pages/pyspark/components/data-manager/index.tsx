@@ -101,8 +101,9 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleViewDbDetail = (database: Db) => {
+  const handleViewDbDetail = (database: Db, hierarchyData?: any) => {
     console.log('数据库详情:', database);
+    console.log('层级选择数据:', hierarchyData);
     // 这里可以添加显示数据库详情的逻辑
     // 比如打开数据库详情的模态框
   };

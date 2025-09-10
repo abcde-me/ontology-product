@@ -36,8 +36,8 @@ interface DataDirectoryTreeProps {
     volume: FluffyVolume
   ) => void;
   onVolumeInsert?: (volume: FluffyVolume) => void;
-  onViewDbDetail?: (database: Db) => void;
-  onDbInsert?: (database: Db) => void;
+  onViewDbDetail?: (database: Db, hierarchyData?: any) => void;
+  onDbInsert?: (database: Db, hierarchyData?: any) => void;
   onInsertContent?: (content: string) => void;
   getIsEditorFocused?: () => boolean;
 }
@@ -110,13 +110,13 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleDbDetail = (database: Db) => {
-    onViewDbDetail?.(database);
+  const handleDbDetail = (database: Db, hierarchyData?: any) => {
+    onViewDbDetail?.(database, hierarchyData);
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: Db) => {
-    onDbInsert?.(database);
+  const handleDbInsert = (database: Db, hierarchyData?: any) => {
+    onDbInsert?.(database, hierarchyData);
   };
 
   // 根据当前选中的节点渲染对应的组件
