@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Tree, Input, Button, Empty, Message } from '@arco-design/web-react';
+import {
+  Tree,
+  Input,
+  Button,
+  Empty,
+  Message,
+  Spin
+} from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
@@ -36,8 +43,15 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
   onInsertContent,
   getIsEditorFocused
 }) => {
-  const { operatorList, getOperator } = useToolsManager();
-  const [searchValue, setSearchValue] = useState<string>('');
+  const {
+    searchKey,
+    setSearchKey,
+    operatorList,
+    getOperator,
+    handleSearch,
+    loading
+  } = useToolsManager();
+  // const [searchKey, setSearchValue] = useState<string>('');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
@@ -119,40 +133,17 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
     }
   };
 
-  // 根据搜索值过滤算子
-  const filteredOperatorList = useMemo(() => {
-    if (!searchValue.trim()) {
-      return operatorList;
-    }
-
-    return operatorList
-      .map((category) => ({
-        ...category,
-        op_items: category.op_items.filter(
-          (item) =>
-            item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-            item.description
-              .toLowerCase()
-              .includes(searchValue.toLowerCase()) ||
-            item.tags.some((tag) =>
-              tag.toLowerCase().includes(searchValue.toLowerCase())
-            )
-        )
-      }))
-      .filter((category) => category.op_items.length > 0);
-  }, [operatorList, searchValue]);
-
   // 检查是否有数据
   const hasData = useMemo(() => {
     return (
-      filteredOperatorList.length > 0 &&
-      filteredOperatorList.some((category) => category.op_items.length > 0)
+      operatorList.length > 0 &&
+      operatorList.some((category) => category.op_items.length > 0)
     );
-  }, [filteredOperatorList]);
+  }, [operatorList]);
 
   // 构建Tree数据
   const treeData = useMemo(() => {
-    return filteredOperatorList.map((category, categoryIndex) => ({
+    return operatorList.map((category, categoryIndex) => ({
       key: `category-${categoryIndex}`,
       title: (
         <div className="tools-manager__category-header">
@@ -240,13 +231,13 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
         operator: item
       }))
     }));
-  }, [filteredOperatorList, hoveredItem]);
+  }, [operatorList, hoveredItem]);
 
   // 初始化展开所有分类
   React.useEffect(() => {
-    const keys = filteredOperatorList.map((_, index) => `category-${index}`);
+    const keys = operatorList.map((_, index) => `category-${index}`);
     setExpandedKeys(keys);
-  }, [filteredOperatorList]);
+  }, [operatorList]);
 
   // 处理Tree展开/折叠
   const handleExpand = (expandedKeys: string[]) => {
@@ -267,16 +258,22 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
       {/* 搜索框 */}
       <div className="mb-2">
         <Input.Search
-          placeholder="搜索当前文件夹"
-          value={searchValue}
+          placeholder="输入搜索算子"
+          value={searchKey}
           allowClear
-          onChange={setSearchValue}
+          onPressEnter={() => handleSearch(searchKey)}
+          onClear={() => handleSearch('')}
+          onChange={(value) => setSearchKey(value)}
         />
       </div>
 
       {/* Tree组件 */}
       <div className="tools-manager__content">
-        {hasData ? (
+        {loading ? (
+          <div className="tools-manager__loading">
+            <Spin />
+          </div>
+        ) : hasData ? (
           <Tree
             treeData={treeData}
             expandedKeys={expandedKeys}
