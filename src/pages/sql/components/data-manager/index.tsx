@@ -6,6 +6,7 @@ import './index.scss';
 import { Db } from '@/api/dataCatalog';
 import { DataDirectoryTreeFrom } from '@/components/data-directory-tree/types';
 import ModalDbDetail from './ModalDbDetail';
+import ModalDatasetDetail from './ModalDatasetDetail';
 import copy from 'copy-to-clipboard';
 
 const { Title } = Typography;
@@ -21,6 +22,8 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
 }) => {
   const [dbDetailVisible, setDbDetailVisible] = useState(false);
   const [selectedDbId, setSelectedDbId] = useState('');
+  const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
+  const [detailId, setDetailId] = useState('');
 
   const closeDbDetail = () => {
     setDbDetailVisible(false);
@@ -46,6 +49,16 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       copy(dataset?.name ?? '');
       Message.success('内容复制成功，请粘贴到编辑器');
     }
+  };
+
+  const closeDatasetDetail = () => {
+    setDatasetDetailVisible(false);
+  };
+
+  // 处理数据集详情查看
+  const handleViewDatasetDetail = (dataset: DatasetListItem) => {
+    setDetailId(String(dataset.id));
+    setDatasetDetailVisible(true);
   };
 
   // 处理数据库详情查看
@@ -81,6 +94,8 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
           from={DataDirectoryTreeFrom.SQL}
           // 数据集插入
           onInsertDataset={handleInsertDataset}
+          // 数据集详情
+          onViewDatasetDetail={handleViewDatasetDetail}
           // 数据库详情
           onViewDbDetail={handleViewDbDetail}
           // 数据库插入
@@ -88,6 +103,15 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
           getIsEditorFocused={getIsEditorFocused}
         />
       </div>
+
+      {/* 数据集详情 */}
+      {datasetDetailVisible && (
+        <ModalDatasetDetail
+          datasetDetailVisible={datasetDetailVisible}
+          detailId={detailId}
+          closeDatasetDetail={closeDatasetDetail}
+        />
+      )}
 
       {/* 数据库详情 */}
       {dbDetailVisible && (
