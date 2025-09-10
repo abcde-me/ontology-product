@@ -1,4 +1,4 @@
-import React, { useState, memo, useEffect, useRef } from 'react';
+import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
 import { Layout, Tabs } from '@arco-design/web-react';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
@@ -25,16 +25,28 @@ const SqlIndex: React.FC = memo(() => {
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+
+  // 添加状态桥接：用于同步FileManager的选中状态
+  const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
+    string[]
+  >([]);
+
+  // 选中状态变化回调
+  const handleSelectedKeysChange = useCallback((selectedKeys: string[]) => {
+    setFileManagerSelectedKeys(selectedKeys);
+  }, []);
+
   const {
     fileState,
     directoryTreeRef,
     addTab,
     removeTab,
+    removeTabByFileId, // 获取根据文件ID关闭标签页的方法
     switchTab,
     handleCreate,
     updateTab,
     openFile
-  } = useTabManager();
+  } = useTabManager(handleSelectedKeysChange);
 
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
@@ -101,6 +113,8 @@ const SqlIndex: React.FC = memo(() => {
                 type="files"
                 ref={directoryTreeRef}
                 onFileOpen={openFile}
+                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
+                externalSelectedKeys={fileManagerSelectedKeys}
               />
             )}
           </TabPane>

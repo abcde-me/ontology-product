@@ -392,7 +392,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         }
         return n;
       });
-      console.log(newTree, '----', node.dataRef);
       setTreeData(newTree);
       setInputValue(currentName);
       setDefaultName(currentName);
@@ -498,11 +497,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : `删除后，该文件不可恢复`,
         okText: '确定',
         cancelText: '取消',
-        onOk: () => {
+        onOk: async () => {
           try {
-            onDelete?.(node);
+            const result = await onDelete?.(node);
+            // 如果删除失败，不关闭对话框
+            if (result === false) {
+              return false;
+            }
           } catch (e) {
             Message.error('删除失败');
+            return false;
           }
         }
       });

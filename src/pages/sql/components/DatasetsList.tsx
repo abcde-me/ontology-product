@@ -25,24 +25,10 @@ import {
   getSqlTaskDetail,
   retryExportSqlTask
 } from '@/api/sql';
+import { formatFileSize } from '@/utils/format';
+import { formatDateTime } from '../utils';
 
 const FormItem = Form.Item;
-
-// interface DatasetListParams {
-//   page?: number;
-//   page_size?: number;
-//   search_content?: string;
-// }
-
-// interface DatasetItem {
-//   id: number;
-//   script_name: string;
-//   dataset_name: string;
-//   dataset_table_name: string;
-//   /** 0: 导出中, 1: 导出成功, 2: 导出失败 */
-//   export_status: number;
-//   export_start_time: string;
-// }
 
 const DatasetsList: FC = () => {
   const showScriptDetail = useSqlIndexStore(
@@ -61,6 +47,7 @@ const DatasetsList: FC = () => {
     listData,
     pagination,
     loading,
+    loadData,
     handleSearchChange,
     handleTableChange
   } = useTableList<ExportSqlResultItem, ExportSqlResultListParams>({
@@ -119,7 +106,7 @@ const DatasetsList: FC = () => {
             value={item.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => handleDatasetDetail(item.id)}
+            handleLink={() => handleDatasetDetail(item.dataset_id)}
           />
         );
       }
@@ -221,11 +208,19 @@ const DatasetsList: FC = () => {
       ]
     },
     {
+      title: '文件大小',
+      dataIndex: 'size',
+      width: 180,
+      render: (_, item) => (
+        <div className="fontMM">{formatFileSize(item.file_size)}</div>
+      )
+    },
+    {
       title: '操作时间',
       dataIndex: 'export_start_time',
       width: 180,
       render: (_, item) => (
-        <div className="fontMM">{item.export_start_time}</div>
+        <div className="fontMM">{formatDateTime(item.export_start_time)}</div>
       ),
       sorter: true
     }
@@ -240,6 +235,7 @@ const DatasetsList: FC = () => {
 
     if (res.code == '' && res.status == 200) {
       Message.success('停止任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '停止任务失败');
     }
@@ -254,6 +250,7 @@ const DatasetsList: FC = () => {
 
     if (res.code == '' && res.status == 200) {
       Message.success('重试任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '重试任务失败');
     }
