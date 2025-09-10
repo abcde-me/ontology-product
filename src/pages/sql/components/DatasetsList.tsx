@@ -56,7 +56,7 @@ const DatasetsList: FC = () => {
       let result = {};
       if (sorter.export_status) {
         result = {
-          export_status: sorter.export_status
+          export_status: sorter.export_status.join(',')
         };
       }
       return result;

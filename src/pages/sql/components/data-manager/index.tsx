@@ -21,7 +21,7 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   getIsEditorFocused
 }) => {
   const [dbDetailVisible, setDbDetailVisible] = useState(false);
-  const [selectedDbId, setSelectedDbId] = useState('');
+  const [dbFromOrigin, setDbFromOrigin] = useState({});
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
 
@@ -65,7 +65,11 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   const handleViewDbDetail = (database: Db, hierarchyData?: any) => {
     console.log('数据库详情:', database);
     console.log('层级选择数据:', hierarchyData);
-    setSelectedDbId(String(database.id));
+    const searchParams = {
+      database: database.name,
+      path_id: hierarchyData.selectedDb.id
+    };
+    setDbFromOrigin(searchParams);
     setDbDetailVisible(true);
   };
 
@@ -119,7 +123,7 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       {dbDetailVisible && (
         <ModalDbDetail
           dbDetailVisible={dbDetailVisible}
-          selectedDbId={selectedDbId}
+          fromOrigin={dbFromOrigin}
           closeDbDetail={closeDbDetail}
         />
       )}
