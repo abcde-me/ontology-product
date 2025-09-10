@@ -74,11 +74,11 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(String(volume?.file_id ?? volume?.file_name ?? ''));
+      onInsertContent(String(volume?.file_uuid ?? volume?.file_name ?? ''));
     } else {
       // 编辑器未聚焦时复制到剪贴板
       const isSuccess = copy(
-        String(volume?.file_id ?? volume?.file_name ?? '')
+        String(volume?.file_uuid ?? volume?.file_name ?? '')
       );
 
       if (isSuccess) {
@@ -94,7 +94,6 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
     rootType: 'source' | 'target',
     volume: FluffyVolume
   ) => {
-    console.log('数据卷详情:', volume);
     setSelectedVolumn(volume);
     rootType === 'source'
       ? setSourceVolumnDetailVisible(true)
