@@ -32,6 +32,7 @@ import {
 } from '../../types';
 import './index.scss';
 import { formatFileSize } from '@/utils/format';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const { Title, Text } = Typography;
 
@@ -42,8 +43,8 @@ interface SourceTargetTreeProps {
   onSelectFile?: (file: FileData) => void;
   onVolumeDetail?: (volume: FluffyVolume) => void;
   onVolumeInsert?: (volume: FluffyVolume) => void;
-  onDbDetail?: (database: Db) => void;
-  onDbInsert?: (database: Db) => void;
+  onDbDetail?: (database: Db, hierarchyData?: any) => void;
+  onDbInsert?: (database: Db, hierarchyData?: any) => void;
   isEditorFocused?: boolean;
 }
 
@@ -135,21 +136,64 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
       if (onDbDetail) {
-        onDbDetail(database);
+        // 构建层级选择的数据对象
+        const hierarchyData = {
+          selectedCatalog,
+          selectedCategory,
+          selectedVolumeOrDb,
+          selectedDb,
+          selectedDbItem,
+          selectedTable,
+          currentViewLevel,
+          breadcrumbPath
+        };
+        onDbDetail(database, hierarchyData);
       }
     },
-    [onDbDetail]
+    [
+      onDbDetail,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 处理数据库插入按钮点击
   const handleDbInsert = useCallback(
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
+      // 构建层级选择的数据对象
+      const hierarchyData = {
+        selectedCatalog,
+        selectedCategory,
+        selectedVolumeOrDb,
+        selectedDb,
+        selectedDbItem,
+        selectedTable,
+        currentViewLevel,
+        breadcrumbPath
+      };
 
       // 编辑器聚焦时插入内容
-      onDbInsert?.(database);
+      onDbInsert?.(database, hierarchyData);
     },
-    [onDbInsert, isEditorFocused]
+    [
+      onDbInsert,
+      isEditorFocused,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 获取当前目录列表
@@ -575,15 +619,18 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
     return (
       <div className="source-target-tree__catalog-list max-h-full overflow-y-auto">
-        {generateCatalogTreeData.map((item) => (
-          <div
-            key={item.key}
-            className="source-target-tree__catalog-item"
-            onClick={() => handleCatalogClick(item.data)}
-          >
-            {item.title}
-          </div>
-        ))}
+        {generateCatalogTreeData.map(
+          (item) =>
+            item?.data?.perms.includes(PYSPARK_PERMISSIONS.CAN_DIRECTORY) && (
+              <div
+                key={item.key}
+                className="source-target-tree__catalog-item"
+                onClick={() => handleCatalogClick(item.data)}
+              >
+                {item.title}
+              </div>
+            )
+        )}
       </div>
     );
   };
@@ -684,12 +731,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               <div className="list-item-content-info">
                 <EllipsisPopover
                   className="list-item-content-info-name"
-                  value={file.file_name || file.name}
+                  value={file.FileName ?? file.file_name}
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(file.file_size || file.size)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(file.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -745,10 +794,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={dbItem.name}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(dbItem.file_size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(dbItem.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -814,10 +865,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={table.table_name ?? ''}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(table.file_size ?? table.size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(table.file_size ?? table.size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">

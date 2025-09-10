@@ -51,13 +51,18 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   // 处理数据集插入或复制
   const handleInsertDataset = (dataset: DatasetListItem) => {
     const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
+    const fileKey = dataset?.file_key ?? '';
+    if (!fileKey) {
+      Message.warning('内容为空');
+      return;
+    }
     console.log('数据集插入:', dataset);
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(dataset?.file_key ?? '');
+      onInsertContent(fileKey);
     } else {
-      const isSuccess = copy(String(dataset?.file_key ?? ''));
+      const isSuccess = copy(String(fileKey));
 
       if (isSuccess) {
         Message.success('内容复制成功，请粘贴到编辑器');
@@ -70,16 +75,20 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   // 处理数据卷插入或复制
   const handleVolumeInsert = (volume: FluffyVolume) => {
     const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
+    const fileUuid = volume?.file_uuid ?? '';
     console.log('数据卷插入:', volume);
+
+    if (!fileUuid) {
+      Message.warning('内容为空');
+      return;
+    }
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(String(volume?.file_uuid ?? volume?.file_name ?? ''));
+      onInsertContent(String(fileUuid));
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      const isSuccess = copy(
-        String(volume?.file_uuid ?? volume?.file_name ?? '')
-      );
+      const isSuccess = copy(String(fileUuid));
 
       if (isSuccess) {
         Message.success('内容复制成功，请粘贴到编辑器');
@@ -101,8 +110,9 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleViewDbDetail = (database: Db) => {
+  const handleViewDbDetail = (database: Db, hierarchyData?: any) => {
     console.log('数据库详情:', database);
+    console.log('层级选择数据:', hierarchyData);
     // 这里可以添加显示数据库详情的逻辑
     // 比如打开数据库详情的模态框
   };

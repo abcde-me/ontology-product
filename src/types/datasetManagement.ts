@@ -25,6 +25,7 @@ export interface Scheam {
 }
 
 export interface DatasetListItem {
+  perms: Array<string>;
   /**
    * 存储数据库名称
    */

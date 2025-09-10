@@ -8,6 +8,7 @@ import { DataDirectoryTreeFrom } from '@/components/data-directory-tree/types';
 import ModalDbDetail from './ModalDbDetail';
 import ModalDatasetDetail from './ModalDatasetDetail';
 import copy from 'copy-to-clipboard';
+import DbModal from '@/components/data-catalog-content/components/popups-form/dbmodal';
 
 const { Title } = Typography;
 
@@ -21,12 +22,18 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   getIsEditorFocused
 }) => {
   const [dbDetailVisible, setDbDetailVisible] = useState(false);
-  const [selectedDbId, setSelectedDbId] = useState('');
+  const [dbFromOrigin, setDbFromOrigin] = useState({});
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
+  const [tableDetailVisible, setTableDetailVisible] = useState(false);
+  const [tableFromOrigin, setTableFromOrigin] = useState<any>({});
 
   const closeDbDetail = () => {
     setDbDetailVisible(false);
+  };
+
+  const closeTableDetail = () => {
+    setTableDetailVisible(false);
   };
 
   // 处理数据集插入
@@ -62,16 +69,38 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleViewDbDetail = (database: Db) => {
+  const handleViewDbDetail = (database: any, hierarchyData?: any) => {
     console.log('数据库详情:', database);
-    setSelectedDbId(String(database.id));
-    setDbDetailVisible(true);
+    console.log('层级选择数据:', hierarchyData);
+
+    const level = hierarchyData.currentViewLevel;
+
+    if (level === 'db-item') {
+      const searchParams = {
+        database: database.name,
+        path_id: hierarchyData.selectedDb.id
+      };
+      setDbFromOrigin(searchParams);
+      setDbDetailVisible(true);
+    }
+
+    if (level === 'database-tables') {
+      const searchParams = {
+        databaseName: hierarchyData.selectedDbItem.name,
+        path_id: hierarchyData.selectedDb.id,
+        table_id: database.table_id,
+        tableName: database.table_name
+      };
+      setTableFromOrigin(searchParams);
+      setTableDetailVisible(true);
+    }
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: Db) => {
+  const handleDbInsert = (database: Db, hierarchyData?: any) => {
     const isEditorFocused = getIsEditorFocused?.() ?? false;
     console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
+    console.log('层级选择数据:', hierarchyData);
 
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
@@ -117,8 +146,17 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       {dbDetailVisible && (
         <ModalDbDetail
           dbDetailVisible={dbDetailVisible}
-          selectedDbId={selectedDbId}
+          fromOrigin={dbFromOrigin}
           closeDbDetail={closeDbDetail}
+        />
+      )}
+
+      {/* 数据表详情 */}
+      {tableDetailVisible && (
+        <DbModal
+          visible={tableDetailVisible}
+          onCancel={closeTableDetail}
+          data={tableFromOrigin}
         />
       )}
     </div>
