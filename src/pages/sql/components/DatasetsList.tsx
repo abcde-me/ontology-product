@@ -11,14 +11,9 @@ import {
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { useTableList } from '../hooks/useTableList';
-import { useSqlIndexStore, SqlIndexStore } from '../store';
 import ModalScriptDetail from './ModalScriptDetail';
 import ModalDatasetDetail from './data-manager/ModalDatasetDetail';
-import {
-  ExportSqlResultItem,
-  ExportSqlResultListData,
-  ExportSqlResultListParams
-} from '@/types/sqlApi';
+import { ExportSqlResultItem, ExportSqlResultListParams } from '@/types/sqlApi';
 import {
   calcelExportSqlTask,
   getExportSqlResultList,
@@ -32,17 +27,12 @@ import { SQL_PERMISSIONS } from '@/config/permissions';
 const FormItem = Form.Item;
 
 const DatasetsList: FC = () => {
-  const showScriptDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showScriptDetail
-  );
-
-  const showDatasetDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showDatasetDetail
-  );
-
   // 数据集详情Modal状态管理
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
+
+  const [scriptDetailVisible, setScriptDetailVisible] = useState(false);
+  const [scriptFormOrigin, setScriptFormOrigin] = useState({});
 
   const {
     listData,
@@ -269,9 +259,9 @@ const DatasetsList: FC = () => {
     const res = await getSqlTaskDetail(item.id, item.script_id);
 
     if (res.code == '' && res.status == 200) {
-      console.log('展示详情弹框');
+      setScriptFormOrigin({ ...res.data });
+      setScriptDetailVisible(true);
     }
-    // showScriptDetail && showScriptDetail();
   }
 
   function handleDatasetDetail(id: number) {
@@ -282,6 +272,11 @@ const DatasetsList: FC = () => {
   function closeDatasetDetail() {
     setDatasetDetailVisible(false);
     setDetailId('');
+  }
+
+  function closeScriptDetail() {
+    setScriptDetailVisible(false);
+    setScriptFormOrigin({});
   }
 
   return (
@@ -310,7 +305,12 @@ const DatasetsList: FC = () => {
         scroll={{ y: 500 }}
       />
 
-      <ModalScriptDetail />
+      <ModalScriptDetail
+        formOrigin={scriptFormOrigin}
+        visible={scriptDetailVisible}
+        onCancel={closeScriptDetail}
+      />
+
       <ModalDatasetDetail
         detailId={detailId}
         datasetDetailVisible={datasetDetailVisible}
