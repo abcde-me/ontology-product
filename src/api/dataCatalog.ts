@@ -412,6 +412,10 @@ export interface GetTargetCatalogFileListParams {
    */
   file_type?: string[];
   /**
+   * 文件名search
+   */
+  search_name?: string;
+  /**
    * 完整文件路径
    */
   full_path: string;
