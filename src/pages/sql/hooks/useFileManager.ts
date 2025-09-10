@@ -179,7 +179,9 @@ export const useFileManager = (
         setSelectedKeys([String(createRes.data.script_id)]);
 
         // 编辑器自动打开当前脚本
-        onFileOpen && onFileOpen(String(createRes.data.script_id));
+        onFileOpen && onFileOpen(String(createRes.data.script_id), finalName);
+
+        return createRes.data;
 
         // if (createRes.status === 200) {
         //   Message.success('创建成功');
