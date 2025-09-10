@@ -191,6 +191,8 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
+          // 自动打开文件
+          onFileOpen?.(String(createRes.data.id), createRes.data.name);
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
