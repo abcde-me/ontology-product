@@ -57,16 +57,21 @@ const CycleLoadingForm: React.FC<CycleLoadingFormProps> = ({ form }) => {
   const shortcutHan = (value) => {
     if (value == '每天凌晨0点') {
       setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '00:00' });
+      form.setFieldsValue({ cycle: '每日', time: '00:00', day: '*', week: '' });
     } else if (value == '每天中午12点') {
       setFrequencyData('每天');
-      form.setFieldsValue({ cycle: '每日', time: '12:00' });
+      form.setFieldsValue({ cycle: '每日', time: '12:00', day: '*', week: '' });
     } else if (value == '每月一日凌晨0点') {
       setFrequencyData('每月');
       form.setFieldsValue({ cycle: '每月', day: ['1号'], time: '00:00' });
     } else if (value == '每周一上午9点') {
       setFrequencyData('每周');
-      form.setFieldsValue({ cycle: '每周', week: ['周一'], time: '09:00' });
+      form.setFieldsValue({
+        cycle: '每周',
+        week: ['周一'],
+        time: '09:00',
+        day: ''
+      });
     }
   };
 

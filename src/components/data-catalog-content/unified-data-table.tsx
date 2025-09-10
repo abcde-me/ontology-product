@@ -109,6 +109,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [fileTypeFilters, setFileTypeFilters] = useState<string[]>([]); // 文件类型筛选条件
   const [sortField, setSortField] = useState<string>(''); // 排序字段
   const [sortOrder, setSortOrder] = useState<string>(''); // 排序方向 asc/desc
+  const [dbFilterType, setDbFilterType] = useState<string[]>([]); // 数据库类型筛选条件
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -313,7 +314,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
               : searchConditionKeyword || '',
           page: currentPage,
           limit: pageSize,
-          database: databaseName // 使用提取的数据库名称
+          database: databaseName, // 使用提取的数据库名称
+          db_type: dbFilterType
         };
         res = await getDbItemList(dbParams);
         console.log('调用数据库表API，参数:', dbParams);
@@ -648,7 +650,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log('Table changed:', { pagination, filters, sorter, tableType });
+    console.log('Table changed:123456789', {
+      pagination,
+      filters,
+      sorter,
+      tableType
+    });
     let newFileTypes: string[] = [];
     // 处理排序参数
     let newSortField = '';
@@ -680,7 +687,13 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // 设置文件类型筛选条件
     // console.log(`${tableType}表格设置文件类型筛选条件:`, newFileTypes);
     setFileTypeFilters(newFileTypes);
-
+    if (sorter && sorter.db_type && Array.isArray(sorter.db_type)) {
+      setDbFilterType(sorter.db_type);
+    } else if (sorter && typeof sorter.db_type === 'string') {
+      setDbFilterType([sorter.db_type]);
+    } else {
+      setDbFilterType([]);
+    }
     // 当筛选条件变化时，重置到第一页
     if (
       (filters && Object.keys(filters).length > 0) ||

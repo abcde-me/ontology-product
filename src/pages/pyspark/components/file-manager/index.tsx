@@ -13,12 +13,16 @@ const { Title } = Typography;
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   onFileOpen,
-  directoryTreeRef
+  onFileDelete, // 接收删除文件时关闭标签页的回调
+  directoryTreeRef,
+  externalSelectedKeys
 }) => {
   // 使用文件管理器hook
   const {
@@ -38,7 +42,9 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     handleBackToParent,
     formatData
   } = useFileManager({
-    onFileOpen
+    onFileOpen,
+    onFileDelete, // 传递删除文件时关闭标签页的回调
+    externalSelectedKeys
   });
 
   return (

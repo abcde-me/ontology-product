@@ -14,6 +14,8 @@ import { SqlScriptItem } from '@/types/sqlApi';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
+  externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
 interface UseFileManagerReturn {
@@ -48,7 +50,7 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen } = options;
+  const { onFileOpen, onFileDelete, externalSelectedKeys } = options;
 
   // 状态管理
   const [sqlScriptList, setSqlScriptList] = useState<SqlScriptItem[]>([]);
@@ -177,7 +179,9 @@ export const useFileManager = (
         setSelectedKeys([String(createRes.data.script_id)]);
 
         // 编辑器自动打开当前脚本
-        onFileOpen && onFileOpen(String(createRes.data.script_id));
+        onFileOpen && onFileOpen(String(createRes.data.script_id), finalName);
+
+        return createRes.data;
 
         // if (createRes.status === 200) {
         //   Message.success('创建成功');
@@ -270,7 +274,8 @@ export const useFileManager = (
   const handleDelete = useCallback(
     async (node: any) => {
       try {
-        const deleteRes = await deleteSqlScript(node?.dataRef?.id);
+        const fileId = node?.dataRef?.id;
+        const deleteRes = await deleteSqlScript(fileId);
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes.message);
@@ -278,6 +283,12 @@ export const useFileManager = (
         }
 
         Message.success('删除成功');
+
+        // 如果删除的是文件，关闭对应的标签页
+        if (fileId && onFileDelete) {
+          onFileDelete(fileId);
+        }
+
         // 刷新列表
         await getRawSqlScriptList();
         return true;
@@ -287,7 +298,7 @@ export const useFileManager = (
         return false;
       }
     },
-    [getRawSqlScriptList]
+    [getRawSqlScriptList, onFileDelete]
   );
 
   // 数据格式化函数
@@ -298,6 +309,7 @@ export const useFileManager = (
           id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,
+          key: String(item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,
@@ -340,6 +352,14 @@ export const useFileManager = (
       return [];
     }
   }, []);
+
+  // 监听外部选中状态变化，同步到内部状态
+  useEffect(() => {
+    console.log('externalSelectedKeys', externalSelectedKeys);
+    if (externalSelectedKeys) {
+      setSelectedKeys(externalSelectedKeys);
+    }
+  }, [externalSelectedKeys]);
 
   // 组件挂载时获取数据
   useEffect(() => {

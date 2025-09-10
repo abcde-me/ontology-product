@@ -43,8 +43,8 @@ interface SourceTargetTreeProps {
   onSelectFile?: (file: FileData) => void;
   onVolumeDetail?: (volume: FluffyVolume) => void;
   onVolumeInsert?: (volume: FluffyVolume) => void;
-  onDbDetail?: (database: Db) => void;
-  onDbInsert?: (database: Db) => void;
+  onDbDetail?: (database: Db, hierarchyData?: any) => void;
+  onDbInsert?: (database: Db, hierarchyData?: any) => void;
   isEditorFocused?: boolean;
 }
 
@@ -136,21 +136,64 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
       if (onDbDetail) {
-        onDbDetail(database);
+        // 构建层级选择的数据对象
+        const hierarchyData = {
+          selectedCatalog,
+          selectedCategory,
+          selectedVolumeOrDb,
+          selectedDb,
+          selectedDbItem,
+          selectedTable,
+          currentViewLevel,
+          breadcrumbPath
+        };
+        onDbDetail(database, hierarchyData);
       }
     },
-    [onDbDetail]
+    [
+      onDbDetail,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 处理数据库插入按钮点击
   const handleDbInsert = useCallback(
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
+      // 构建层级选择的数据对象
+      const hierarchyData = {
+        selectedCatalog,
+        selectedCategory,
+        selectedVolumeOrDb,
+        selectedDb,
+        selectedDbItem,
+        selectedTable,
+        currentViewLevel,
+        breadcrumbPath
+      };
 
       // 编辑器聚焦时插入内容
-      onDbInsert?.(database);
+      onDbInsert?.(database, hierarchyData);
     },
-    [onDbInsert, isEditorFocused]
+    [
+      onDbInsert,
+      isEditorFocused,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 获取当前目录列表
