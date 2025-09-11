@@ -108,6 +108,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           onChange={handleTabChange}
           className="sql-tabs"
           type="card"
+          justify
           showAddButton
           onAddTab={handleCreatePySpark}
           onDeleteTab={handleCloseTab}
