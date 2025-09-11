@@ -135,7 +135,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         if (res?.status !== 200) {
           setRunStatus(RunningStatus.FAILED);
           cancelGetRunResultPolling();
-          setRunLog(res?.message ?? '获取运行结果失败');
+          setRunError(res?.message ?? '获取运行结果失败');
           setRunResult([]);
           return;
         }
@@ -147,7 +147,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         setRunStatus(res.data?.run_status);
         setRunResult(res.data?.sql_result_lists);
-        setRunLog('');
+        setRunError('');
         setRunDuration(Number(res.data?.run_duration));
         setRunStartTime(new Date(res.data?.run_end_time ?? ''));
       },
@@ -155,7 +155,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult([]);
-        setRunLog('获取运行结果失败');
+        setRunError('获取运行结果失败');
       }
     });
 
@@ -167,6 +167,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunDuration(0);
     setRunResult([]);
     setRunLog('');
+    setRunError('');
     setLastAutoSave('');
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
@@ -253,6 +254,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunStatus(RunningStatus.RUNNING);
     setRunResult([]);
     setRunLog('');
+    setRunError('');
     setExecid('');
     setRunStartTime(new Date());
     setRunDuration(0);
@@ -261,6 +263,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       const res = await runSqlScript(currentFile?.fileId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
+        setRunLog(res.data.warning_msg);
       } else {
         setRunError(res.message);
         throw new Error('运行失败');
