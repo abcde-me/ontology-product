@@ -221,6 +221,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       // 如果没有 fileId 但有内容，直接使用标签页内容
       setEditorContent(currentTab.content);
     }
+
+    () => {
+      handleSaveThrottled.cancel();
+    };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 延时自动保存 - 使用 useCallback 优化
@@ -249,7 +253,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       },
       [currentFileId]
     ),
-    { wait: 3000, trailing: true }
+    { wait: 5000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
