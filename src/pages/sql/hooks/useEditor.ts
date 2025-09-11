@@ -14,7 +14,7 @@ import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 import { formatDateTime } from '../utils';
-import { generateSqlDefaultName } from '../utils/formatDateTime';
+import { generateSqlDefaultName } from '../utils';
 
 export interface UseEditorOptions {
   activeTab?: string;

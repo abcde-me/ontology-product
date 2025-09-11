@@ -102,6 +102,15 @@ const LoadAddModal = (props: propsType) => {
         // 如果选择了"全部"，传递所有可用的表名
         processedTableNames = talbleList;
       }
+
+      // 如果是数据库类型，验证table_names是否为空
+      if (
+        sourceType === 'db' &&
+        (!processedTableNames || processedTableNames.length === 0)
+      ) {
+        Message.error('请选择要抽取的表');
+        return;
+      }
       if (loadVal !== 'once') {
         const valid = await SchedulerRunRef.current?.validate();
         if (!valid) return;
@@ -136,6 +145,15 @@ const LoadAddModal = (props: propsType) => {
           Message.error(res.message);
         }
       } else {
+        // 如果是数据库类型且为单次载入，也需要验证table_names
+        if (
+          sourceType === 'db' &&
+          (!processedTableNames || processedTableNames.length === 0)
+        ) {
+          Message.error('请选择要抽取的表');
+          return;
+        }
+
         const formData = {
           task_name: rest.name,
           connector_id: sourceType === 'local' ? null : rest.connector_id,
@@ -564,19 +582,28 @@ const LoadAddModal = (props: propsType) => {
 
   const handleFileChange = (fileData, blobURL) => {
     if (Array.isArray(fileData)) {
-      // 如果是清空操作
-      setUploadedFiles([]);
+      if (fileData.length === 0) {
+        // 如果是清空操作
+        setUploadedFiles([]);
+        if (sourceType === 'local') {
+          form.setFieldsValue({
+            connector_id: undefined
+          });
+        }
+        return;
+      }
+      console.log(fileData, '这个是多文件上传后的回调');
+      setUploadedFiles(fileData);
+
       if (sourceType === 'local') {
         form.setFieldsValue({
-          connector_id: undefined
+          connector_id: 'local_files_uploaded'
         });
       }
       return;
     }
-
-    console.log(fileData, '这个是上传后的回调');
+    console.log(fileData, '这个是单文件上传后的回调');
     if (!fileData) return;
-
     setUploadedFiles((prev) => {
       // 检查新文件是否已经存在
       const isFileExists = prev.some((file) => file.name === fileData.name);
@@ -678,6 +705,7 @@ const LoadAddModal = (props: propsType) => {
                 wrapperCol={{ span: 19 }}
                 labelAlign="right"
                 rules={[{ required: true, message: '请选择抽取的表' }]}
+                extra={'只能载入public schema的表'}
               >
                 <Select
                   onChange={(value) => {

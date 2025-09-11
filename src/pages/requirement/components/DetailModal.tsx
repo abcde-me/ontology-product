@@ -15,41 +15,41 @@ import {
   Empty
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
-import { format } from 'date-fns';
-import { OperationColumn } from '@ccf2e/arco-material';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
+import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import './DetailModal.scss';
+import { sunburst } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
+interface TreeItem {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name: string;
+  name: string;
+  base_dir: string;
+  children: Record<string, TreeItem[]>; // 子类型映射（如 {volume: [], db: []}）
+  perms?: string[] | null;
+}
 interface DataSourceModalProps {
   fileType: Record<number, string[]>;
   visible: boolean;
   onClose: () => void;
   title?: string;
-  children?: React.ReactNode;
-  getChildTableSelectData: (data: any) => void;
+  type: string | null;
+  getChildTableSelectData: (data: any, key) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
-}
-const TabPane = Tabs.TabPane;
-const style: React.CSSProperties = {
-  textAlign: 'center',
-  marginTop: 20
-};
-// 树节点类型定义（用于Tree组件）
-interface TreeNodeType {
-  title: string;
-  key: string;
-  children?: TreeNodeType[];
-  isLeaf?: boolean;
-  rawData?: any; // 保存原始数据引用
+  getDetailObj: any;
 }
 const DataSourceModal: React.FC<DataSourceModalProps> = ({
   fileType,
   visible,
+  type,
   onClose,
   title = '数据源',
   getChildTableSelectData,
   initialSelectedData = [], // 接收初始数据
-  children
+  getDetailObj
 }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
@@ -58,7 +58,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [sourceFileTypeFilters, setSourceFileTypeFilters] = useState();
   const [selectedRowsContent, setSelectedRowsContent] =
     useState<any[]>(initialSelectedData);
   const [current, setCurrent] = useState(1);
@@ -68,33 +67,45 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [tableLoading, settableLoading] = useState(false);
   const time = Form.useWatch('time', form);
-  // 取树的内容 格式化
-  const transformData = (originalSrc) => {
-    // 递归处理单条数据（支持目录/数据卷）
-    const transformItem = (item) => {
-      const transformed = { ...item };
-      // 替换type_name（如果是数据卷）
-      if (transformed.type_name === 'volume') {
-        transformed.type_name = '数据卷';
-      }
-      // 处理children中的"volume"键为"数据卷"
-      if (transformed.children && transformed.children.volume) {
-        // 递归处理子数据卷
-        transformed.children['数据卷'] = transformed.children.volume.map(
-          (vol) => transformItem(vol)
-        );
-        // 删除原始volume键
-        delete transformed.children.volume;
-      }
-      return transformed;
+
+  const formatCatalogTree = (rawData: any[]): TreeItem[] => {
+    // 递归处理单个节点的子层级
+    const handleChildren = (
+      children: TreeItem['children']
+    ): TreeItem['children'] => {
+      if (!children) return {};
+
+      const newChildren: TreeItem['children'] = {};
+
+      // 遍历所有子类型（如 volume、db、db_item 等）
+      Object.entries(children).forEach(([childType, childItems]) => {
+        // 核心逻辑：将 "volume" 类型替换为 "数据卷" 作为分类名
+        const targetType = childType === 'volume' ? '数据卷' : childType;
+
+        // 递归处理子节点的子层级（确保深层 volume 也能被替换）
+        const formattedItems = childItems.map((item) => ({
+          ...item,
+          // 递归处理当前节点的子节点
+          children: handleChildren(item.children)
+        }));
+
+        // 将处理后的子项挂载到新分类下
+        newChildren[targetType] = formattedItems;
+      });
+
+      return newChildren;
     };
 
-    // 处理整个src数组（目录列表）
-    return originalSrc.map((catalog) => transformItem(catalog));
+    // 处理最外层 catalog 节点
+    return rawData.map((catalog) => ({
+      ...catalog,
+      // 处理每个 catalog 的子层级
+      children: handleChildren(catalog.children)
+    }));
   };
 
   useEffect(() => {
-    let newTreeData: TreeNodeType[] = [];
+    let newTreeData: any[] = [];
     try {
       getCatalogList({
         root_type: 1
@@ -102,48 +113,57 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         if (res.status !== 200) {
           return;
         }
-        newTreeData = transformData(res.data?.src).map((item) => {
+        newTreeData = formatCatalogTree(res.data?.src).map((item) => {
           return item.children
             ? {
                 allowClick: false,
                 title: item.name,
-                key: item.id,
-                children: item?.children?.数据卷?.map((items, index) => {
-                  return {
-                    title: '数据卷',
-                    key: `volume-${items.id}-${index}`,
-                    allowClick: false,
-                    children: [
-                      {
-                        title: items.name,
-                        key: items.id
-                      }
-                    ]
-                  };
-                })
+                key: String(item.id),
+                level: 1,
+                children:
+                  item?.children?.数据卷 && item.children.数据卷.length > 0
+                    ? [
+                        {
+                          level: 2,
+                          title: '数据卷',
+                          key: String(item.id) + '数据卷',
+                          allowClick: false,
+                          children: item.children.数据卷.map((subItem) => ({
+                            title: subItem.name,
+                            key: `${item.id},${item.id}数据卷,${subItem.id}`,
+                            id: subItem?.id,
+                            level: 3
+                          }))
+                        }
+                      ]
+                    : undefined
               }
             : { title: item.name, key: item.id };
         });
+        console.log(newTreeData, 'top');
         setTreeData(newTreeData);
       });
-    } catch (err) {
-      console.log(err, 'err');
-    }
+    } catch (err) {}
   }, [visible]);
 
   // 树的内容
   const renderTreeContent = () => {
     return (
       <div>
+        {getDetailObj?.label_data_set?.[0]?.dir_name}
         {treeData && treeData.length > 0 ? (
           <Tree
+            // defaultExpandedKeys={['572', '572数据卷', '573']}
+            // defaultSelectedKeys={['573']}
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
-            onSelect={(value) => {
-              setCurrent(1);
-              setPageSize(20);
-              setCheckedKeys(value);
+            onSelect={(value, e) => {
+              if (e?.node?.props?.dataRef?.level === 3) {
+                setCurrent(1);
+                setPageSize(10);
+                setCheckedKeys([value[0]?.split(',')?.[0]]);
+              }
             }}
           />
         ) : (
@@ -152,73 +172,42 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       </div>
     );
   };
-  //转换文件大小
-  const formatFileSize = (size: number): string => {
-    if (size < 1024) {
-      return `${size}B`;
-    } else if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(2)}KB`;
-    } else if (size < 1024 * 1024 * 1024) {
-      return `${(size / 1024 / 1024).toFixed(2)}MB`;
-    } else {
-      return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-    }
-  };
   //格式化时间函数
   const formatDateTime = (dateTimeString: string): string => {
-    try {
-      const date = new Date(dateTimeString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
+    if (type === 'detail') {
+      return dayjs(dateTimeString).format('YYYY-MM-DD HH:mm:ss');
+    } else {
+      try {
+        const date = new Date(dateTimeString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
 
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    } catch (error) {
-      return dateTimeString; // 如果格式化失败，返回原字符串
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      } catch (error) {
+        return dateTimeString; // 如果格式化失败，返回原字符串
+      }
     }
-  };
-  // 通用的操作列渲染
-  const renderActionColumn = (_, record) => {
-    const params = record?.perms || [];
-    const config: {
-      label: string;
-      onClick: () => void;
-    }[] = [];
-    if (1) {
-      config.push({
-        label: '详情',
-        onClick: () => {}
-      });
-    }
-
-    return (
-      <OperationColumn
-        row={record}
-        index={0}
-        config={config}
-        extendFont="更多"
-      />
-    );
   };
   const columns = [
     {
       title: '载入开始时间',
-      dataIndex: 'start_time',
+      dataIndex: 'load_start_time',
       width: 180,
       sorter: true,
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.start_time)
+      render: (_, record) => formatDateTime(record.load_start_time)
     },
     {
       title: '载入开始时间',
-      dataIndex: 'end_time',
+      dataIndex: 'load_end_time',
       width: 180,
       sorter: true,
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.end_time)
+      render: (_, record) => formatDateTime(record.load_end_time)
     },
     {
       title: '数据量',
@@ -233,9 +222,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 100
     }
   ];
-  // 获取当前年份
-  const currentYear = new Date().getFullYear();
-
   const searchData = (searchValue) => {
     const loop = (data) => {
       const result: any = [];
@@ -277,12 +263,18 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       sort_by: 'start_time',
       sort: 'asc'
     };
-    const res = await getAnnotationTabledData(sourceParams);
-    if (res.status === 200) {
-      setTableData(res?.data?.items);
-      setCurrent(res?.data?.page);
-      setPageSize(res?.data?.page_size);
-      setTotal(res?.data?.total);
+    try {
+      const res = await getAnnotationTabledData(sourceParams);
+      if (res.status === 200) {
+        setTableData(res?.data?.items);
+        setCurrent(res?.data?.page);
+        setPageSize(res?.data?.page_size);
+        setTotal(res?.data?.total);
+        settableLoading(false);
+      }
+    } catch (error) {
+      settableLoading(false);
+    } finally {
       settableLoading(false);
     }
   };
@@ -293,7 +285,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
   // 处理日期范围变化
   const handleDateChange = (value) => {
-    console.log(value, ' =====');
     setDateRange(value);
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
@@ -312,9 +303,19 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   const getTableSelectContent = () => {
-    getChildTableSelectData(selectedRowsContent);
+    getChildTableSelectData(selectedRowsContent, checkedKeys);
     onClose();
   };
+
+  useEffect(() => {
+    if (type === 'detail') {
+      setTableData(getDetailObj?.label_data_set);
+      setSelectedRowKeys(
+        getDetailObj?.label_data_set &&
+          getDetailObj?.label_data_set?.map((item) => item.id)
+      );
+    }
+  }, [getDetailObj]);
   return (
     <Modal
       title={title}
@@ -327,6 +328,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       style={{ width: '90vw', overflowY: 'auto' }}
       footer={
         <Button
+          disabled={type === 'detail'}
           type="primary"
           onClick={() => {
             getTableSelectContent();
@@ -372,6 +374,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             rowSelection={{
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
+              checkboxProps: (record) => {
+                return {
+                  disabled: type === 'detail'
+                };
+              },
               onChange: (selectedRowKeys, selectedRows) => {
                 // 合并新旧选中数据并处理取消选中
                 const mergedMap = new Map<string, any>();
