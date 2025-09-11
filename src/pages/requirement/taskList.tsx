@@ -19,6 +19,7 @@ import { getAnnotationTaskList } from '@/api/dataAnnotation';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconClockCircle } from '@arco-design/web-react/icon';
+import { RequirementTypeNameMap } from './type';
 import './index.scss';
 
 enum typeCode {
@@ -35,7 +36,7 @@ export default function Requirement() {
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue]: any = useState(null);
   // 初始化任务列表数据
   const [taskData, setTaskData] = useState([]);
   // 当前的第几页
@@ -49,11 +50,7 @@ export default function Requirement() {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    name: '',
-    type: 0,
-    belong: 0
-  });
+  const [sortValue, setSortValue]: any = useState({});
   // 创建人的搜索框清楚按钮
   const [isClickClearUserName, setIsClickClearUserName] = useState(false);
   // 创建人查询输入框内容
@@ -66,7 +63,7 @@ export default function Requirement() {
 
   // 清空搜索框
   useEffect(() => {
-    if (isClickClear && searchValue === '') {
+    if ((isClickClear && searchValue === '') || !searchValue) {
       getList();
       setIsClickClear(false);
     }
@@ -81,17 +78,16 @@ export default function Requirement() {
     try {
       const params: any = {
         page: current, //第几页
-        page_size: pageSize, //每页个数
+        pageSize: pageSize, //每页个数
         filters: {
-          ...sortValue
+          name: searchValue,
+          type: sortValue?.type,
+          belong: sortValue?.belong
         }
       };
       const res = await getAnnotationTaskList(params);
-      console.log(res, '======123');
       if (res.code === 0 && res.data) {
         setTaskData(res?.data?.result || []);
-        setCurrent(res.data?.page);
-        setPageSize(res.data?.page_size);
         setTotal(res.data?.total);
         setLoading(false);
       }
@@ -142,8 +138,8 @@ export default function Requirement() {
       ellipsis: true,
       className: 'hover-change workflow-name',
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover value={record.workflow_name} isEdit={false} isLink />
+        return renderEmptyPlaceholder(record.name) !== '-' ? (
+          <EllipsisPopover value={record.name} isEdit={false} isLink />
         ) : (
           <span>-</span>
         );
@@ -167,7 +163,9 @@ export default function Requirement() {
       dataIndex: 'type',
       width: 100,
       render: (_, record) => {
-        return <div>{record?.type}</div>;
+        return (
+          <div>{record?.type ? RequirementTypeNameMap[record.type] : '-'}</div>
+        );
       },
       filters: [
         {
@@ -294,7 +292,7 @@ export default function Requirement() {
             <InputSearch
               onClear={() => {
                 setCurrent(1);
-                setSearchValue('');
+                setSearchValue(null);
                 setIsClickClear(true);
               }}
               onPressEnter={() => {
