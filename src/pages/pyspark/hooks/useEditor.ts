@@ -44,6 +44,7 @@ interface UseEditorReturn {
   handleStopRunCode: () => void;
   handlePanelStateChange: (isOpen: boolean) => void;
   getPrevRunStatus: () => RunningStatus;
+  handleGetRunResult: () => Promise<void>;
 }
 
 const defaultContent = `
@@ -114,6 +115,33 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
         setRunDuration(res?.data?.run_duration ?? 0);
         setRunStartTime(new Date(res?.data?.run_end_time) ?? '');
+      },
+      onError: (error) => {
+        setRunStatus(RunningStatus.FAILED);
+        cancelGetRunResultPolling();
+        setRunResult(error?.message ?? '获取运行结果失败');
+      }
+    });
+
+  // 轮询获取日志
+  const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
+    useRequest(getRunLog, {
+      pollingInterval: 10000,
+      pollingWhenHidden: false,
+      manual: true,
+      onSuccess: (res) => {
+        if (res?.status !== 200) {
+          setRunStatus(RunningStatus.FAILED);
+          cancelGetRunResultPolling();
+          setRunLog(res?.message ?? '获取日志失败');
+          return;
+        }
+
+        if (res?.data?.log) {
+          cancelGetRunResultPolling();
+        }
+
+        setRunLog(res?.data?.log ?? '');
       },
       onError: (error) => {
         setRunStatus(RunningStatus.FAILED);
@@ -193,6 +221,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       // 如果没有 fileId 但有内容，直接使用标签页内容
       setEditorContent(currentTab.content);
     }
+
+    () => {
+      handleSaveThrottled.cancel();
+    };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 延时自动保存 - 使用 useCallback 优化
@@ -221,7 +253,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       },
       [currentFileId]
     ),
-    { wait: 3000, trailing: true }
+    { wait: 5000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
@@ -286,6 +318,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
   }, [currentFileId, execid]);
 
+  const handleGetRunResult = useCallback(async () => {
+    if (!currentFileId || !execid) {
+      return;
+    }
+    const res = await getRunResult(currentFileId, { execid });
+
+    if (res?.status !== 200) {
+      setRunResult(res.message ?? '获取运行结果失败');
+      return;
+    }
+
+    setRunResult(res?.data?.run_result ?? '');
+  }, [currentFileId, execid]);
+
   // 处理面板状态变化
   const handlePanelStateChange = useCallback((isOpen: boolean) => {
     setIsPanelOpen(isOpen);
@@ -294,7 +340,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
     if (runStatus !== RunningStatus.RUNNING) {
-      console.log('取消轮询');
       cancelGetRunResultPolling();
     }
 
@@ -355,6 +400,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     handleGetRunLog,
     handleStopRunCode,
     handlePanelStateChange,
+    handleGetRunResult,
     getPrevRunStatus
   };
 };

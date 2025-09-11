@@ -68,6 +68,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handleStopRunCode,
       handleRunCode,
       handleGetRunLog,
+      handleGetRunResult,
       lastAutoSave,
       editorContent,
       handleContentChange,
@@ -90,6 +91,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       setModalDatasetVisible,
       childRef
     } = useExportDaset(currentFileId, execid);
+
+    console.log('看一看编辑器卡顿的事情～');
 
     // const myTheme = createTheme({
     //   theme: 'light',
@@ -275,21 +278,24 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           />
         </div>
 
-        {/* 运行信息面板 */}
-        <RunningInfoPanel
-          key={currentFileId}
-          activeKey={activeKey}
-          setActiveKey={setActiveKey}
-          runResult={runResult}
-          runLog={runLog}
-          runStatus={runStatus}
-          runStartTime={runStartTime}
-          runDuration={runDuration}
-          onGetRunLog={handleGetRunLog}
-          isPanelOpen={isPanelOpen}
-          onPanelStateChange={handlePanelStateChange}
-          getPrevRunStatus={getPrevRunStatus}
-        />
+        {/* 运行信息面板 - 只在execid不为空时展示 */}
+        {execid && (
+          <RunningInfoPanel
+            key={currentFileId}
+            activeKey={activeKey}
+            setActiveKey={setActiveKey}
+            runResult={runResult}
+            runLog={runLog}
+            runStatus={runStatus}
+            runStartTime={runStartTime}
+            runDuration={runDuration}
+            onGetRunLog={handleGetRunLog}
+            onGetRunResult={handleGetRunResult}
+            isPanelOpen={isPanelOpen}
+            onPanelStateChange={handlePanelStateChange}
+            getPrevRunStatus={getPrevRunStatus}
+          />
+        )}
 
         {/* 新建数据集弹框 */}
         {modalDatasetVisible && (

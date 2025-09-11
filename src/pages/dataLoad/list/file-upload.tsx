@@ -35,21 +35,20 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
         onFileChange([]);
         return;
       }
+
       // 处理所有上传完成的文件
       const completedFiles = files.filter(
         (file) => file.status === 'done' && file.response && file.response.data
       );
 
+      // 一次性传递所有已完成的文件数据
       if (completedFiles.length > 0) {
-        // 对于每个完成的文件，调用回调
-        completedFiles.forEach((file) => {
-          console.log('文件上传完成:', file.response.data);
-          const blob = new Blob([file.data], {
-            type: file.type || 'application/octet-stream'
-          });
-          const blobURL = URL.createObjectURL(blob);
-          onFileChange(file.response.data, blobURL);
-        });
+        console.log(
+          '所有文件上传完成:',
+          completedFiles.map((f) => f.response.data)
+        );
+        const allFilesData = completedFiles.map((file) => file.response.data);
+        onFileChange(allFilesData);
       }
     }
   };

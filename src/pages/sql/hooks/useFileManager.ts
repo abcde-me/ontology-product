@@ -11,6 +11,7 @@ import {
 import { PythonItemType } from '@/types/pythonApi';
 import timeFormattig from '@/utils/timeFormatting';
 import { SqlScriptItem } from '@/types/sqlApi';
+import { generateSqlDefaultName } from '../utils';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
@@ -61,7 +62,7 @@ export const useFileManager = (
 
   const generateDefaultName = useCallback((node: any) => {
     // 生成默认文件名：SQL查询 + 时间戳
-    return `SQL查询 ${timeFormattig(now())}`;
+    return generateSqlDefaultName(new Date());
   }, []);
 
   // 搜索功能
