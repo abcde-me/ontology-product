@@ -29,12 +29,13 @@ const btnList = [
 interface TextSubstanceComponentProps {
   type: any;
   getDetailObj?: any;
+  getTextEntityData?: any;
 }
 
 // 实体 --  labels
 // 实体关系 --  entity_relations
 const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
-  const { type, getDetailObj } = props;
+  const { type, getDetailObj, getTextEntityData } = props;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
@@ -42,7 +43,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const [entityRelations, setEntityRelations] = useState([
     {
       id: uuid(),
-      order_num: 1, // 排序
+      order_num: 0, // 排序
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
       label_colour: '' //标签颜色（如#FFFFFF）
@@ -52,7 +53,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const [relationRelations, setRelationRelations] = useState([
     {
       id: uuid(),
-      order_num: 1,
+      order_num: 0,
       relation_name_cn: '',
       relation_name_en: '',
       start_entity_labels: [], //标签的醋存储名称
@@ -99,6 +100,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       });
     }
   }, [getDetailObj]);
+
+  useEffect(() => {
+    getTextEntityData(entityRelations, relationRelations);
+  }, [entityRelations, relationRelations]);
   return (
     <div className="text-component-warp">
       <div className="type-header">
@@ -207,7 +212,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   ...entityRelations,
                   {
                     id: uuid(),
-                    order_num: 1, // 排序
+                    order_num: entityRelations?.length + 1, // 排序
                     label_name_cn: '', //展示名称
                     label_name_en: '', //存储名称
                     label_colour: '' //标签颜色（如#FFFFFF）
