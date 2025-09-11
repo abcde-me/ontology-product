@@ -242,6 +242,16 @@ export const useTabManager = (
     []
   );
 
+  // 更新标签页标题的函数
+  const updateTabTitle = useCallback((fileId: string, newTitle: string) => {
+    setFileState((prev) => ({
+      ...prev,
+      fileTabs: prev.fileTabs.map((tab) =>
+        tab.fileId === fileId ? { ...tab, title: newTitle } : tab
+      )
+    }));
+  }, []);
+
   return {
     fileState,
     directoryTreeRef,
@@ -251,6 +261,7 @@ export const useTabManager = (
     removeTabByFileId, // 导出根据文件ID关闭标签页的方法
     switchTab,
     updateTab,
-    handleCreate
+    handleCreate,
+    updateTabTitle // 导出更新标签页标题的函数
   };
 };
