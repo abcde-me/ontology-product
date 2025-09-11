@@ -95,6 +95,7 @@ export async function getTaskResult(taskId: string) {
   //   .do();
   taskResult.task_id = +taskId;
   const taskResultCopy = JSON.parse(JSON.stringify(taskResult));
+  taskResultCopy.result_type = 1;
   if (taskResult.task_id % 2) {
     taskResultCopy.result.shapes.splice(1, 1);
   }
@@ -301,7 +302,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '单选属性',
             attribute_group_class: 1,
-            attribute_group_type: 2,
+            attribute_group_type: 1,
             label_info_attribute: [
               {
                 order_num: 1,
@@ -328,7 +329,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '多选属性',
             attribute_group_class: 2,
-            attribute_group_type: 2,
+            attribute_group_type: 1,
             label_info_attribute: [
               {
                 order_num: 1,
@@ -355,7 +356,7 @@ export async function getLabels(requirementId: string) {
             order_num: 1,
             attribute_group_name: '输入框属性',
             attribute_group_class: 3,
-            attribute_group_type: 2,
+            attribute_group_type: 1,
             label_info_attribute: []
           }
         ]
