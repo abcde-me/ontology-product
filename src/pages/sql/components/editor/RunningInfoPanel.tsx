@@ -48,6 +48,7 @@ const RunningInfoPanel: React.FC = memo(() => {
     runDuration,
     runStartTime,
     runError,
+    runLog,
     size,
     setSize,
     currentFileId,
@@ -237,6 +238,7 @@ const RunningInfoPanel: React.FC = memo(() => {
 
             {runStatus === RunningStatus.SUCCESS && (
               <div className="flex flex-col gap-[8px]">
+                {runLog && <Typography.Text>{runLog}</Typography.Text>}
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border
