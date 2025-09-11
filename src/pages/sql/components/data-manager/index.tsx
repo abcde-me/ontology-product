@@ -48,12 +48,15 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       onInsertContent
     );
 
+    // `库名`.`表名`
+    const copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
+
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(dataset?.name ?? '');
+      onInsertContent(copyText);
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(dataset?.name ?? '');
+      copy(copyText);
       Message.success('内容复制成功，请粘贴到编辑器');
     }
   };
@@ -107,15 +110,18 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
     let copyText = '';
 
     if (level === 'db-item') {
-      copyText = database.name || '';
+      // `库名`
+      copyText = `\`${database.name}\``;
     }
 
     if (level === 'database-tables') {
-      copyText = database.table_name || '';
+      // `表名`
+      copyText = `\`${database.table_name}\``;
     }
 
     if (level === 'table-detail') {
-      copyText = database.name || '';
+      // `字段名`
+      copyText = `\`${database.name}\``;
     }
 
     if (isEditorFocused && onInsertContent) {

@@ -294,17 +294,22 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                       详情
                     </Button>
                     {/* 插入按钮，数据集目录不支持插入 */}
-                    {/* <Button
-                      type="outline"
-                      onClick={(e) =>
-                        handleDatasetInsert(
-                          dataset,
-                          e as unknown as React.MouseEvent<Element, MouseEvent>
-                        )
-                      }
-                    >
-                      {isEditorFocused ? '插入' : '复制'}
-                    </Button> */}
+                    {type === 'sql' && (
+                      <Button
+                        type="outline"
+                        onClick={(e) =>
+                          handleDatasetInsert(
+                            dataset,
+                            e as unknown as React.MouseEvent<
+                              Element,
+                              MouseEvent
+                            >
+                          )
+                        }
+                      >
+                        {isEditorFocused ? '插入' : '复制'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))
