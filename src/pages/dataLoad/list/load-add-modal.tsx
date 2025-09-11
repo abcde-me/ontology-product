@@ -708,6 +708,7 @@ const LoadAddModal = (props: propsType) => {
                 extra={'只能载入public schema的表'}
               >
                 <Select
+                  className="select-tag-style"
                   onChange={(value) => {
                     handAllTagChange(value);
                   }}
