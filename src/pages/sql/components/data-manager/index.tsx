@@ -97,17 +97,33 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: Db, hierarchyData?: any) => {
+  const handleDbInsert = (database: any, hierarchyData?: any) => {
     const isEditorFocused = getIsEditorFocused?.() ?? false;
+
     console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
     console.log('层级选择数据:', hierarchyData);
 
+    const level = hierarchyData.currentViewLevel;
+    let copyText = '';
+
+    if (level === 'db-item') {
+      copyText = database.name || '';
+    }
+
+    if (level === 'database-tables') {
+      copyText = database.table_name || '';
+    }
+
+    if (level === 'table-detail') {
+      copyText = database.name || '';
+    }
+
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(database?.name ?? '');
+      onInsertContent(copyText);
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(database?.name ?? '');
+      copy(copyText);
       Message.success('内容复制成功，请粘贴到编辑器');
     }
   };
