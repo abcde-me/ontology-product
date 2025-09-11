@@ -297,6 +297,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     {type === 'sql' && (
                       <Button
                         type="outline"
+                        onMouseDown={(e) => {
+                          // 阻止按钮获得焦点，保持编辑器焦点
+                          e.preventDefault();
+                        }}
                         onClick={(e) =>
                           handleDatasetInsert(
                             dataset,
