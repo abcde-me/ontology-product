@@ -509,7 +509,14 @@ export default function RequirementDetail() {
       relationRelations
     });
   };
-
+  // 计算总数
+  const getTotal = (dataArr) => {
+    let num = 0;
+    dataArr.map((item) => {
+      num = num + item?.load_num;
+    });
+    return num;
+  };
   const publish = async () => {
     const { entityRelations, relationRelations } = TextEntityDataContent;
     const newSetLabels = datalist.map((item, index) => {
@@ -544,7 +551,7 @@ export default function RequirementDetail() {
       name: publishData?.name,
       description: publishData?.description,
       label_type: annotationTypeVal,
-      label_count: selectedData?.length, //数据量（所有数据集之和）
+      label_count: getTotal(selectedData), //数据量（所有数据集之和）
       team_type: taskTypeVal,
       label_tool: {
         label_tool_name: RequirementTypeNameMap[annotationTypeVal],
@@ -725,7 +732,8 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="data-set-text">
-                  已选数据量：{selectedData.length || getDetailObj?.label_count}
+                  已选数据量：
+                  {getTotal(selectedData) || getDetailObj?.label_count}
                 </div>
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
