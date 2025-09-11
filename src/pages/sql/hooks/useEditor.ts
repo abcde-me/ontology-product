@@ -341,7 +341,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setEditorContent(fileData.script_content);
 
             // 更新运行状态
-            // setExecid(String(fileData.script_execid));
+            setExecid(String(fileData.script_execid));
 
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
