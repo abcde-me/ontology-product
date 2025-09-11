@@ -466,6 +466,7 @@ export const ModaForgeResourceEndpoints = {
   datasetsOptionsApi: PrefixAimdp + '/datasets/list',
 
   leGetTask: PrefixLabelService + '/getTask',
+  leGetTaskById: PrefixLabelService + '/getTaskById',
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult'

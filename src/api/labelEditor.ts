@@ -27,75 +27,75 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
     .do();
 }
 
-const taskResult = {
-  task_id: 1,
-  task_status: 1,
-  update_time: '2025-08-23 09:09:23',
-  result_type: 1,
-  result: {
-    version: 0,
-    tags: [],
-    shapes: [
-      // {
-      //   type: 'rectangle',
-      //   occluded: false,
-      //   outside: false,
-      //   z_order: 0,
-      //   rotation: 0.0,
-      //   points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
-      //   id: 28,
-      //   frame: 0,
-      //   label_id: 2,
-      //   group: 0,
-      //   source: 'manual',
-      //   attributes: [
-      //     {
-      //       spec_id: 1,
-      //       value: 'opt1'
-      //     },
-      //     {
-      //       spec_id: 2,
-      //       value: 'opt1,other|dddddd'
-      //     },
-      //     {
-      //       spec_id: 3,
-      //       value: '1111'
-      //     }
-      //   ],
-      //   elements: []
-      // },
-      // {
-      //   type: 'rectangle',
-      //   occluded: false,
-      //   outside: false,
-      //   z_order: 0,
-      //   rotation: 0.0,
-      //   points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
-      //   id: 29,
-      //   frame: 0,
-      //   label_id: 2,
-      //   group: 0,
-      //   source: 'manual',
-      //   attributes: [
-      //     {
-      //       spec_id: 1,
-      //       value: 'opt1'
-      //     },
-      //     {
-      //       spec_id: 2,
-      //       value: 'opt1'
-      //     },
-      //     {
-      //       spec_id: 3,
-      //       value: ''
-      //     }
-      //   ],
-      //   elements: []
-      // }
-    ],
-    tracks: []
-  }
-};
+// const taskResult = {
+//   task_id: 1,
+//   task_status: 1,
+//   update_time: '2025-08-23 09:09:23',
+//   result_type: 1,
+//   result: {
+//     version: 0,
+//     tags: [],
+//     shapes: [
+//       // {
+//       //   type: 'rectangle',
+//       //   occluded: false,
+//       //   outside: false,
+//       //   z_order: 0,
+//       //   rotation: 0.0,
+//       //   points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
+//       //   id: 28,
+//       //   frame: 0,
+//       //   label_id: 2,
+//       //   group: 0,
+//       //   source: 'manual',
+//       //   attributes: [
+//       //     {
+//       //       spec_id: 1,
+//       //       value: 'opt1'
+//       //     },
+//       //     {
+//       //       spec_id: 2,
+//       //       value: 'opt1,other|dddddd'
+//       //     },
+//       //     {
+//       //       spec_id: 3,
+//       //       value: '1111'
+//       //     }
+//       //   ],
+//       //   elements: []
+//       // },
+//       // {
+//       //   type: 'rectangle',
+//       //   occluded: false,
+//       //   outside: false,
+//       //   z_order: 0,
+//       //   rotation: 0.0,
+//       //   points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
+//       //   id: 29,
+//       //   frame: 0,
+//       //   label_id: 2,
+//       //   group: 0,
+//       //   source: 'manual',
+//       //   attributes: [
+//       //     {
+//       //       spec_id: 1,
+//       //       value: 'opt1'
+//       //     },
+//       //     {
+//       //       spec_id: 2,
+//       //       value: 'opt1'
+//       //     },
+//       //     {
+//       //       spec_id: 3,
+//       //       value: ''
+//       //     }
+//       //   ],
+//       //   elements: []
+//       // }
+//     ],
+//     tracks: []
+//   }
+// };
 export async function getTaskResult(taskId: string) {
   return await UAPI.RES.leGetTaskReuslt({})
     .post({ task_id: taskId })
@@ -144,6 +144,14 @@ export async function getTask(requirementId?: string) {
   //   }
   // };
   // return Promise.resolve({ data: res });
+}
+export async function getTaskDetail(taskId?: string) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leGetTaskById({})
+    .post({ task_id: Number(rId) })
+    .inRegion()
+    .do();
 }
 
 export async function getLabels(requirementId: string) {
@@ -524,14 +532,13 @@ export async function getLabels(requirementId: string) {
   // return Promise.resolve({ data: res });
 }
 
-// 下面为适配CVAT图片，视频标注API
-
+// =================================== 下面为适配CVAT图片，视频标注API ===============================
 export async function saveImgJobAnnotations(
   taskId: string,
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
-  taskResult.result_type = params.has_result;
+  // taskResult.result_type = params.has_result;
   await saveTask(taskId, params);
   return { data: params };
 }
@@ -540,7 +547,7 @@ export async function submitImgJobAnnotations(
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
-  taskResult.result_type = params.has_result;
+  // taskResult.result_type = params.has_result;
   await submitTask(taskId, params);
   return { data: params };
 }
@@ -604,8 +611,8 @@ export async function getImgJobAnnotations(taskId: string) {
   });
 }
 
-export async function getImgJobMeta(requirementId?: string) {
-  const { data: res } = await getTask(requirementId);
+export async function getImgJobMeta(taskId?: string) {
+  const { data: res } = await getTaskDetail(taskId);
 
   const cvatData = {
     chunks_updated_date: toISOStringWithMicroseconds(new Date()),
