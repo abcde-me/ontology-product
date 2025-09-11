@@ -468,7 +468,7 @@ export const ModaForgeResourceEndpoints = {
   leGetTask: PrefixLabelService + '/getTask',
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
-  leGetTaskReuslt: PrefixLabelService + '/getTaskReuslt'
+  leGetTaskReuslt: PrefixLabelService + '/getTaskResult'
 };
 
 /**
