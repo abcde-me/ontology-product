@@ -7,6 +7,8 @@ import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
 import { Db, FluffyVolume } from '@/api/dataCatalog';
 import { DataDirectoryTreeFrom } from './types';
+import { useHasPermission } from '@/store/userInfoStore';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 // 数据目录配置数组
 const directoryItems = [
@@ -56,11 +58,26 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [currentNode, setCurrentNode] = useState('');
 
+  const hasPermissionDirectory = useHasPermission(
+    PYSPARK_PERMISSIONS.CAN_DIRECTORY
+  );
+  const hasPermissionDataset = useHasPermission(
+    PYSPARK_PERMISSIONS.CAN_DATASETS_SEARCH
+  );
+
   // 根据 from 参数动态过滤目录项
   const getFilteredDirectoryItems = () => {
     if (from === DataDirectoryTreeFrom.SQL) {
       // 如果是 SQL，不展示目标数据目录
       return directoryItems.filter((item) => item.id !== 'target');
+    }
+    if (!hasPermissionDirectory) {
+      return directoryItems.filter(
+        (item) => item.id !== 'source' && item.id !== 'target'
+      );
+    }
+    if (!hasPermissionDataset) {
+      return directoryItems.filter((item) => item.id !== 'dataset');
     }
     return directoryItems;
   };

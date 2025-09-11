@@ -1397,7 +1397,13 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                     },
                     {
                       label: '存储格式:',
-                      value: datasetDetail.storage_type || '-'
+                      value: datasetDetail.storage_type
+                        ? datasetDetail.storage_type === StorageType.file
+                          ? '文件'
+                          : datasetDetail.storage_type === StorageType.table
+                            ? '数据库表'
+                            : datasetDetail.storage_type
+                        : '-'
                     }
                   ]}
                   column={1}
