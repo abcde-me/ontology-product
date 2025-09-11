@@ -232,7 +232,7 @@ const AccessDetail = () => {
           </div>
           <div className="task-right">
             <div className="task-right-item" style={{ color: 'black' }}>
-              <div>总文件</div>
+              <div>总数量</div>
               <div className="fontSize">{totalNum}</div>
             </div>
             <div
@@ -261,7 +261,10 @@ const AccessDetail = () => {
           {taskDetail.source_type === 'db' ? '载入详情' : '文件详情'}
         </div>
 
-        <AccessTable records_id={recordsId} />
+        <AccessTable
+          records_id={recordsId}
+          check_type={taskDetail.source_type}
+        />
       </div>
     </div>
   );

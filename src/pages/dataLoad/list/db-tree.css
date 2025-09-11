@@ -25,3 +25,8 @@
     max-width: calc(100% - 50px) !important;
   }
 }
+.select-tag-style {
+  .arco-input-tag-input.arco-input-tag-input-size-default {
+    font-size: 12px !important;
+  }
+}

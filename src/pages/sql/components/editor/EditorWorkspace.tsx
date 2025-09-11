@@ -15,6 +15,7 @@ import { EditorView } from '@codemirror/view';
 import './EditorWorkspace.scss';
 import createTheme from '@uiw/codemirror-themes';
 import { RunningStatus } from '@/types/sqlApi';
+import { tags as t } from '@lezer/highlight';
 
 import RunningInfoPanel from './RunningInfoPanel';
 import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
@@ -51,7 +52,8 @@ const EditorWorkspaceContent: React.FC<{
     editorContent,
     handleContentChange,
     placeholderValue,
-    runResult
+    runResult,
+    execid
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -59,10 +61,25 @@ const EditorWorkspaceContent: React.FC<{
     settings: {
       background: '#ffffff',
       backgroundImage: '',
-      foreground: '#5d00ff',
-      lineHighlight: '#8a91991a'
+      foreground: '#75baff',
+      caret: '#5d00ff',
+      selection: '#036dd626',
+      selectionMatch: '#036dd626',
+      lineHighlight: '#8a91991a',
+      gutterBackground: '#fff',
+      gutterForeground: '#8a919966'
     },
-    styles: []
+    styles: [
+      { tag: t.comment, color: '#6a737d', fontStyle: 'italic' },
+      { tag: t.keyword, color: '#9a42a7', fontWeight: 'bold' },
+      { tag: t.definition(t.typeName), color: '#194a7b' },
+      { tag: t.typeName, color: '#194a7b' },
+      { tag: t.tagName, color: '#008a02' },
+      { tag: t.variableName, color: '#1a00db' },
+      { tag: t.string, color: '#047013' },
+      { tag: t.number, color: '#29a0aa' },
+      { tag: t.bool, color: '#2d2aee' }
+    ]
   });
 
   const handleRunClick = () => {
@@ -184,6 +201,7 @@ const EditorWorkspaceContent: React.FC<{
           value={editorContent}
           onChange={handleContentChange}
           placeholder={placeholderValue}
+          theme={myTheme}
           extensions={[
             sql({ upperCaseKeywords: true }),
             lintGutter(),
@@ -205,7 +223,7 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 运行信息面板 */}
-      <RunningInfoPanel />
+      {execid && <RunningInfoPanel />}
     </div>
   );
 });
