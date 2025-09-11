@@ -439,24 +439,24 @@ export default function RequirementDetail() {
       form1
         .validate()
         .then(() => {
-          if (selectedData?.length <= 0) {
-            setIsShowDataErrorInfo(true);
-            return;
-          }
-          if (selectedRadio === '') {
-            setIsShowErrorInfo(true);
-            return;
-          }
+          // if (selectedData?.length <= 0) {
+          //   setIsShowDataErrorInfo(true);
+          //   return;
+          // }
+          // if (selectedRadio === '') {
+          //   setIsShowErrorInfo(true);
+          //   return;
+          // }
           return true;
         })
         .catch((errorInfo) => {
-          if (selectedData?.length <= 0) {
-            setIsShowDataErrorInfo(true);
-          }
-          if (selectedRadio === '') {
-            setIsShowErrorInfo(true);
-            return;
-          }
+          // if (selectedData?.length <= 0) {
+          //   setIsShowDataErrorInfo(true);
+          // }
+          // if (selectedRadio === '') {
+          //   setIsShowErrorInfo(true);
+          //   return;
+          // }
         }),
       form2
         .validate()
@@ -475,17 +475,17 @@ export default function RequirementDetail() {
         .validate()
         .then(() => {
           // 验证通过，切换到下一步
-          if (taskAssignData?.length === 0) {
-            setIsShowTypeErrorInfo(true);
-            return;
-          }
+          // if (taskAssignData?.length === 0) {
+          //   setIsShowTypeErrorInfo(true);
+          //   return;
+          // }
           return true;
         })
         .catch((errorInfo) => {
-          if (taskAssignData?.length === 0) {
-            setIsShowTypeErrorInfo(true);
-            return;
-          }
+          // if (taskAssignData?.length === 0) {
+          //   setIsShowTypeErrorInfo(true);
+          //   return;
+          // }
         })
     ]);
     // 所有的form 验证都通过调用发布接口
@@ -562,7 +562,8 @@ export default function RequirementDetail() {
       label_operate: [
         //配置标注人员
         {
-          user_id: taskTypeVal === 1 ? taskAssignData : [],
+          user_id: ['85f5c5c1-a21e-48bd-88f8-5a2c78d37fac'],
+          // user_id: taskTypeVal === 1 ? taskAssignData : [],
           org_id: taskTypeVal === 2 ? taskAssignData : []
         }
       ]

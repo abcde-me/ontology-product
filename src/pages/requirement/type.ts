@@ -101,8 +101,8 @@ export const TeamTypeMap = {
 // 标注工具查询表格type类型
 // 1 图片 2 文本 3 音频 4 视频
 export const toolFileType = {
-  1: ['jpeg', 'jpg', 'png', 'gif'],
-  2: ['txt', 'json'],
+  2: ['jpeg', 'jpg', 'png', 'gif'],
+  1: ['txt', 'json'],
   3: ['mp3', 'wma', 'wav', 'flac', 'ape', 'aac'],
   4: [
     'wmv',

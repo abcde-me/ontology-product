@@ -19,6 +19,7 @@ import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import './DetailModal.scss';
+import { sunburst } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 interface TreeItem {
   id: number;
@@ -125,11 +126,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                         {
                           level: 2,
                           title: '数据卷',
-                          key: String(`${item.id} + ${item.name}`),
+                          key: String(item.id) + '数据卷',
                           allowClick: false,
                           children: item.children.数据卷.map((subItem) => ({
                             title: subItem.name,
-                            key: String(subItem.id),
+                            key: `${item.id},${item.id}数据卷,${subItem.id}`,
+                            id: subItem?.id,
                             level: 3
                           }))
                         }
@@ -138,6 +140,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }
             : { title: item.name, key: item.id };
         });
+        console.log(newTreeData, 'top');
         setTreeData(newTreeData);
       });
     } catch (err) {}
@@ -150,8 +153,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         {getDetailObj?.label_data_set?.[0]?.dir_name}
         {treeData && treeData.length > 0 ? (
           <Tree
-            defaultExpandedKeys={['573']}
-            defaultSelectedKeys={['573']}
+            // defaultExpandedKeys={['572', '572数据卷', '573']}
+            // defaultSelectedKeys={['573']}
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
@@ -159,7 +162,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               if (e?.node?.props?.dataRef?.level === 3) {
                 setCurrent(1);
                 setPageSize(10);
-                setCheckedKeys(value);
+                setCheckedKeys([value[0]?.split(',')?.[0]]);
               }
             }}
           />

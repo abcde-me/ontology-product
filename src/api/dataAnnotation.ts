@@ -15,7 +15,7 @@ export async function getAnnotationList(params: {
 // 任务列表获取
 export async function getAnnotationTaskList(params: {
   page: number; // 页码
-  page_size: number; // 每页数量
+  pageSize: number; // 每页数量
   filters: {
     name: string; // 需求名称
     type: number; // 创建人
