@@ -45,6 +45,12 @@
     flex: 1;
   }
 
+  &__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   &__category {
     &-header {
       display: flex;

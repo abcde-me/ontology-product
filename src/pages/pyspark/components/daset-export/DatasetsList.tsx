@@ -22,6 +22,7 @@ import {
 } from '@/types/pythonApi';
 import { formatFileSize } from '@/utils/format';
 import noDataElement from '@/components/no-data';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const FormItem = Form.Item;
 
@@ -97,7 +98,9 @@ const DatasetsList: FC = () => {
           case ExportStatus.Exporting:
             text = '导出中';
             color = '#1890ff';
-            actionBtn = (
+            actionBtn = item.perms?.includes(
+              PYSPARK_PERMISSIONS.CAN_EXPORT_STOP
+            ) && (
               <Link href="#" onClick={() => handleStopTask(item)}>
                 {' '}
                 停止{' '}
@@ -111,7 +114,9 @@ const DatasetsList: FC = () => {
           case ExportStatus.ExportFailed:
             text = '导出失败';
             color = '#ff4d4f';
-            actionBtn = (
+            actionBtn = item.perms?.includes(
+              PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY
+            ) && (
               <Link href="#" onClick={() => handleRetryTask(item)}>
                 {' '}
                 重试{' '}

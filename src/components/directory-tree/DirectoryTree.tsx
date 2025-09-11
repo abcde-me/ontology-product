@@ -44,7 +44,9 @@ import EllipsisPopover from '../ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
 import timeFormattig from '@/utils/timeFormatting';
+import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
+import { PermissionWrapper } from '../PermissionGuard';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -67,6 +69,7 @@ export enum DirectoryTreeFrom {
 export interface DirectoryTreeProps {
   from?: DirectoryTreeFrom;
   data: TreeNodeItem[];
+  isCanCreate?: boolean;
   selectedKeys?: string[]; // 添加外部控制的选中状态
   onSelect?: (
     selectedKeys: string[],
@@ -109,6 +112,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const {
       from = DirectoryTreeFrom.PYTHON,
       data,
+      isCanCreate,
       selectedKeys: externalSelectedKeys,
       onSelect,
       onCreate,
@@ -392,7 +396,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         }
         return n;
       });
-      console.log(newTree, '----', node.dataRef);
       setTreeData(newTree);
       setInputValue(currentName);
       setDefaultName(currentName);
@@ -498,11 +501,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : `删除后，该文件不可恢复`,
         okText: '确定',
         cancelText: '取消',
-        onOk: () => {
+        onOk: async () => {
           try {
-            onDelete?.(node);
+            const result = await onDelete?.(node);
+            // 如果删除失败，不关闭对话框
+            if (result === false) {
+              return false;
+            }
           } catch (e) {
             Message.error('删除失败');
+            return false;
           }
         }
       });
@@ -548,14 +556,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
-            <Button
-              type="text"
-              size="small"
-              icon={<IconPlus />}
-              onClick={() => startRootCreate(false)}
-            >
-              新建
-            </Button>
+            <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
+              <Button
+                type="text"
+                size="small"
+                icon={<IconPlus />}
+                onClick={() => startRootCreate(false)}
+              >
+                新建
+              </Button>
+            </PermissionWrapper>
           ) : (
             <Dropdown
               trigger="click"
@@ -575,9 +585,11 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 </Menu>
               }
             >
-              <Button type="text" size="small" icon={<IconPlus />}>
-                {newButtonText}
-              </Button>
+              {isCanCreate && (
+                <Button type="text" size="small" icon={<IconPlus />}>
+                  {newButtonText}
+                </Button>
+              )}
             </Dropdown>
           )}
         </div>
@@ -610,31 +622,44 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }}
             renderExtra={(node) => {
               const isEditing = node.dataRef?.showInput;
+              const nowPermissions =
+                from === DirectoryTreeFrom.SQL
+                  ? SQL_PERMISSIONS
+                  : PYSPARK_PERMISSIONS;
 
               if (isEditing) return null;
 
               return (
                 <div className="directory-tree-extra">
-                  <Tooltip color="white" content="重命名">
-                    <IconEdit
-                      className="mr-1 hover:text-[rgb(var(--primary-6))]"
-                      onClick={() => handleEdit(node)}
-                    />
-                  </Tooltip>
-                  {node.dataRef?.type !== PythonItemType.Directory && (
-                    <Tooltip color="white" content="复制">
-                      <IconCopy
+                  {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
+                    <Tooltip color="white" content="重命名">
+                      <IconEdit
                         className="mr-1 hover:text-[rgb(var(--primary-6))]"
-                        onClick={() => handleCopy(node as unknown as NodeProps)}
+                        onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
                   )}
-                  <Tooltip color="white" content="删除">
-                    <IconDelete
-                      className="hover:text-[rgb(var(--primary-6))]"
-                      onClick={() => handleDelete(node as unknown as NodeProps)}
-                    />
-                  </Tooltip>
+                  {node.dataRef?.type !== PythonItemType.Directory &&
+                    node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
+                      <Tooltip color="white" content="复制">
+                        <IconCopy
+                          className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                          onClick={() =>
+                            handleCopy(node as unknown as NodeProps)
+                          }
+                        />
+                      </Tooltip>
+                    )}
+                  {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
+                    <Tooltip color="white" content="删除">
+                      <IconDelete
+                        className="hover:text-[rgb(var(--primary-6))]"
+                        onClick={() =>
+                          handleDelete(node as unknown as NodeProps)
+                        }
+                      />
+                    </Tooltip>
+                  )}
                 </div>
               );
             }}

@@ -146,6 +146,7 @@ export interface FluffyVolume {
   type_name?: string;
   file_name?: string;
   file_id?: number;
+  file_uuid?: string;
 }
 
 export interface SrcChildren {
@@ -411,6 +412,10 @@ export interface GetTargetCatalogFileListParams {
    */
   file_type?: string[];
   /**
+   * 文件名search
+   */
+  search_name?: string;
+  /**
    * 完整文件路径
    */
   full_path: string;
@@ -537,6 +542,7 @@ export interface GetDbItemDetailParams {
   database: string;
   table: string;
   path_id: number;
+  table_id: number;
 }
 
 export async function getTargetCatalogFileList(
@@ -1004,6 +1010,46 @@ export async function getDbItemList(params: DbTableListParamss) {
   //     page_size: 100
   //   }
   // });
+}
+
+export interface GetDbItemDetailRes {
+  ddl: Ddl;
+  loader: Loader;
+  request_params: RequestParams;
+  sample: Sample;
+}
+
+export interface Ddl {
+  columns: Column[];
+  tableInfo: string;
+}
+
+export interface Column {
+  comment: string;
+  name: string;
+  type: string;
+}
+
+export interface Loader {
+  connector_id: string;
+  connector_name: string;
+  created_time: string;
+  load_task_id: string;
+  load_task_name: string;
+  updated_time: string;
+  username: string;
+}
+
+export interface RequestParams {
+  database: string;
+  detail_type: string;
+  path_id: number;
+  table: string;
+}
+
+export interface Sample {
+  columns: string[];
+  data: Record<string, string>[];
 }
 
 //查询源库下的表详情

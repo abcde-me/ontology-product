@@ -25,6 +25,7 @@ export interface Scheam {
 }
 
 export interface DatasetListItem {
+  perms: Array<string>;
   /**
    * 存储数据库名称
    */
@@ -103,6 +104,10 @@ export interface DatasetVersionFileParams {
    * 页大小
    */
   page_size?: number;
+  /**
+   * 文件名称
+   */
+  file_name?: string;
 }
 
 export interface DatasetVersionFileItem {

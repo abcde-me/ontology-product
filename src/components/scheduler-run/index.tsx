@@ -150,29 +150,75 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
 
     // 点击快捷选项的回调
     const shortcutHan = (value) => {
+      let newFrequencyData;
+      let formValues;
+      let optionsFormat;
+
       if (value == '每天凌晨0点') {
-        setFrequencyData(CycleValues.PER_DAY);
-        form.setFieldsValue({ cycle: CycleValues.PER_DAY, time: '00:00' });
+        newFrequencyData = CycleValues.PER_DAY;
+        formValues = { cycle: CycleValues.PER_DAY, time: '00:00' };
+        setFrequencyData(newFrequencyData);
+        form.setFieldsValue(formValues);
+        optionsFormat = {
+          minute: '00',
+          hour: '00',
+          date: '*',
+          month: '',
+          week: ''
+        };
       } else if (value == '每天中午12点') {
-        setFrequencyData(CycleValues.PER_DAY);
-        form.setFieldsValue({ cycle: CycleValues.PER_DAY, time: '12:00' });
+        newFrequencyData = CycleValues.PER_DAY;
+        formValues = { cycle: CycleValues.PER_DAY, time: '12:00' };
+        setFrequencyData(newFrequencyData);
+        form.setFieldsValue(formValues);
+        optionsFormat = {
+          minute: '00',
+          hour: '12',
+          date: '*',
+          month: '',
+          week: ''
+        };
       } else if (value == '每月一日凌晨0点') {
-        setFrequencyData(CycleValues.PER_MONTH);
-        form.setFieldsValue({
+        newFrequencyData = CycleValues.PER_MONTH;
+        formValues = {
           cycle: CycleValues.PER_MONTH,
           date: ['1'],
           time: '00:00'
-        });
+        };
+        setFrequencyData(newFrequencyData);
+        form.setFieldsValue(formValues);
+
+        optionsFormat = {
+          minute: '00',
+          hour: '00',
+          date: '1',
+          month: '*',
+          week: ''
+        };
       } else if (value == '每周一上午9点') {
-        setFrequencyData(CycleValues.PER_WEEK);
-        form.setFieldsValue({
+        newFrequencyData = CycleValues.PER_WEEK;
+        formValues = {
           cycle: CycleValues.PER_WEEK,
           date: ['1'],
           time: '09:00'
-        });
+        };
+        setFrequencyData(newFrequencyData);
+        form.setFieldsValue(formValues);
+        optionsFormat = {
+          minute: '00',
+          hour: '09',
+          date: '1',
+          month: '',
+          week: '*'
+        };
       }
 
-      handleValuesChange(null, form.getFieldsValue());
+      // 直接调用 onOptionsChange 传递正确的参数
+      if (optionsFormat) {
+        console.log('快捷方式选择:', value);
+        console.log('生成的参数:', optionsFormat);
+        onOptionsChange(optionsFormat);
+      }
     };
     const [timeFlag, setTimeFlag] = useState(
       getTimeFlagInitialValues(frequencyData, options)

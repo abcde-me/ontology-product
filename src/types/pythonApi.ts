@@ -34,6 +34,7 @@ export interface PythonListItem {
 }
 
 export interface PythonListRes {
+  create_perm: boolean;
   /** 父目录名称 */
   path_name: string;
   /** 父目录id */

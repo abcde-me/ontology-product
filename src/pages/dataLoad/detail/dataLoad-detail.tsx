@@ -205,16 +205,25 @@ const DataLoadDetail = () => {
       console.error('Error:', error);
     }
   };
-  useEffect(() => {
-    getDetailList();
-  }, [current, pageSize, directoryObj]);
+  // 页面初始化时获取基础数据
   useEffect(() => {
     getdirectorylist();
     getTask_idHan();
   }, []);
+
+  // 当分页参数或目录筛选条件变化时重新获取列表
   useEffect(() => {
     getDetailList();
-  }, []);
+  }, [current, pageSize, directoryObj]);
+
+  // 页面首次加载时延迟获取运行历史，确保任务已创建
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getDetailList();
+    }, 1000); // 延迟1秒加载运行历史
+
+    return () => clearTimeout(timer);
+  }, [loadId]);
   const clearHan = async () => {
     try {
       setDetailListLoading(true);

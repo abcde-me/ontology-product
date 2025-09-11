@@ -420,7 +420,8 @@ export const getUnifiedColumns = (
         title: '数据库类型',
         dataIndex: 'db_type',
         width: 120,
-        filters: sourceFileTypeFilters,
+        // filters: sourceFileTypeFilters,
+        filters: [{ text: 'mysql', value: 'mysql' }],
         render: (_, record) => (
           <div
             style={{
@@ -429,7 +430,6 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.db_type)}
             <span>{record.db_type}</span>
           </div>
         )
