@@ -27,7 +27,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
       const dirsArr: Record<string, any>[] = [];
       res.data.dst.forEach((catalog) => {
         // 重置name结构
-        const restData = catalog.children?.volume.map((item) => {
+        const restData = catalog.children?.volume?.map((item) => {
           return {
             ...item,
             parent_name: catalog.name

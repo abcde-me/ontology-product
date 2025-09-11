@@ -64,6 +64,7 @@ const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 interface DatasetDetail {
+  latest_size: number;
   id: number;
   name: string;
   tag_names: string[];
@@ -1140,7 +1141,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
           }
           if (res.data) {
             setContentTableColumnsList(res.data.columns || []);
-            setContentTableData(res.data.list || []);
+            setContentTableData(res.data.data || []);
           }
         })
         .catch((err) => {
@@ -1396,7 +1397,13 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                     },
                     {
                       label: '存储格式:',
-                      value: datasetDetail.storage_type || '-'
+                      value: datasetDetail.storage_type
+                        ? datasetDetail.storage_type === StorageType.file
+                          ? '文件'
+                          : datasetDetail.storage_type === StorageType.table
+                            ? '数据库表'
+                            : datasetDetail.storage_type
+                        : '-'
                     }
                   ]}
                   column={1}
@@ -1455,6 +1462,10 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                           ></EllipsisPopover>
                         </div>
                       )
+                    },
+                    {
+                      label: '文件大小:',
+                      value: formatFileSize(datasetDetail.latest_size) || '-'
                     }
                   ]}
                   column={1}

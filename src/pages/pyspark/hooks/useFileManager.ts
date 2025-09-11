@@ -69,7 +69,7 @@ export const useFileManager = (
           name: searchValue,
           mode: 1,
           page: 1,
-          page_size: 100
+          page_size: 1000
         });
 
         if (res.status === 200) {

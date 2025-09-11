@@ -19,6 +19,8 @@ const { TabPane } = Tabs;
 const { Text } = Typography;
 
 interface RunningInfoPanelProps {
+  activeKey: string;
+  setActiveKey: (key: string) => void;
   runResult: string;
   runLog: string;
   runStatus?: RunningStatus;
@@ -27,6 +29,7 @@ interface RunningInfoPanelProps {
   onGetRunLog?: () => Promise<void>;
   isPanelOpen?: boolean;
   onPanelStateChange?: (isOpen: boolean) => void;
+  getPrevRunStatus?: () => RunningStatus;
 }
 
 const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
@@ -36,11 +39,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     runStatus,
     runStartTime,
     runDuration,
+    activeKey,
+    setActiveKey,
     onGetRunLog,
     isPanelOpen,
-    onPanelStateChange
+    onPanelStateChange,
+    getPrevRunStatus
   }) => {
-    const [activeKey, setActiveKey] = useState<string>('result');
     const [isExpanded, setIsExpanded] = useState(false);
 
     // 监听父组件传递的面板状态变化
@@ -55,24 +60,32 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         runStatus === RunningStatus.SUCCESS ||
         runStatus === RunningStatus.FAILED
       ) {
-        setIsExpanded(true);
-        onPanelStateChange?.(true);
+        // 检查前一个状态，避免在状态重置时误触发
+        const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
 
-        // 根据运行结果自动定位到对应标签页
-        if (runStatus === RunningStatus.SUCCESS) {
-          setActiveKey('result');
-        } else if (runStatus === RunningStatus.FAILED) {
-          setActiveKey('log');
+        // 只有当状态真正从运行中变为完成状态时才执行自动行为
+        // 避免在标签页切换时状态重置导致的误触发
+        if (prevStatus === RunningStatus.RUNNING) {
+          setIsExpanded(true);
+          onPanelStateChange?.(true);
+
+          // 根据运行结果自动定位到对应标签页
+          if (runStatus === RunningStatus.SUCCESS) {
+            setActiveKey('result');
+          } else if (runStatus === RunningStatus.FAILED) {
+            setActiveKey('log');
+            onGetRunLog?.();
+          }
         }
       }
-    }, [runStatus, onPanelStateChange]);
+    }, [runStatus, onPanelStateChange, getPrevRunStatus]);
 
-    // 监听TabPane切换，当切换到log时获取日志
-    useEffect(() => {
-      if (activeKey === 'log' && onGetRunLog) {
+    const handleClickTab = (key: string) => {
+      setActiveKey(key);
+      if (key === 'log' && onGetRunLog) {
         onGetRunLog();
       }
-    }, [activeKey, onGetRunLog]);
+    };
 
     const handlePanelChange = (key: string, keys: string[]) => {
       const newExpanded = keys.length > 0;
@@ -149,7 +162,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
             <div className="panel-content">
               <Tabs
                 activeTab={activeKey}
-                onChange={setActiveKey}
+                onClickTab={handleClickTab}
                 style={{
                   backgroundColor: '#F8FAFD'
                 }}

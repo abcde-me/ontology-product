@@ -440,7 +440,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
           if (!created) {
             // 创建失败，移除临时添加的节点
-            const newTreeData = treeData.filter((item) => !item.isAdd);
+            const newTreeData = treeData.filter(
+              (item) =>
+                !item.isAdd &&
+                !item.showInput &&
+                !item.dataRef.isAdd &&
+                !item.dataRef.showInput
+            );
             setTreeData(newTreeData);
             setInputValue('');
             setDefaultName('');
@@ -454,7 +460,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         } catch (e) {
           Message.error('创建失败');
           // 创建失败，移除临时添加的节点
-          const newTreeData = treeData.filter((item) => !item.isAdd);
+          const newTreeData = treeData.filter(
+            (item) =>
+              !item.isAdd &&
+              !item.showInput &&
+              !item.dataRef.isAdd &&
+              !item.dataRef.showInput
+          );
           setTreeData(newTreeData);
         }
       } else {
@@ -463,7 +475,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
           if (!rename) {
             // 创建失败，移除临时添加的节点
-            const newTreeData = treeData.filter((item) => !item.isAdd);
+            const newTreeData = treeData.filter(
+              (item) =>
+                !item.isAdd &&
+                !item.showInput &&
+                !item.dataRef.isAdd &&
+                !item.dataRef.showInput
+            );
             setTreeData(newTreeData);
             setInputValue('');
             setDefaultName('');
@@ -472,7 +490,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         } catch (e) {
           Message.error('重命名失败');
           // 创建失败，移除临时添加的节点
-          const newTreeData = treeData.filter((item) => !item.isAdd);
+          const newTreeData = treeData.filter(
+            (item) =>
+              !item.isAdd &&
+              !item.showInput &&
+              !item.dataRef.isAdd &&
+              !item.dataRef.showInput
+          );
           setTreeData(newTreeData);
         }
       }
