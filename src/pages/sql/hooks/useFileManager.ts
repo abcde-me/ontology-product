@@ -16,6 +16,7 @@ import { generateSqlDefaultName } from '../utils';
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
+  onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
 
@@ -51,7 +52,8 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen, onFileDelete, externalSelectedKeys } = options;
+  const { onFileOpen, onFileDelete, onFileRename, externalSelectedKeys } =
+    options;
 
   // 状态管理
   const [sqlScriptList, setSqlScriptList] = useState<SqlScriptItem[]>([]);
@@ -225,7 +227,8 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const renameRes = await renameSqlScript(node?.dataRef?.id, {
+        const fileId = node?.dataRef?.id;
+        const renameRes = await renameSqlScript(fileId, {
           script_name: finalName
         });
 
@@ -235,6 +238,12 @@ export const useFileManager = (
         }
 
         Message.success('重命名成功');
+
+        // 如果重命名的是文件，更新对应的标签页标题
+        if (fileId && onFileRename) {
+          onFileRename(String(fileId), finalName);
+        }
+
         // 刷新列表
         await getRawSqlScriptList();
         return renameRes.data;
@@ -244,7 +253,7 @@ export const useFileManager = (
         return null;
       }
     },
-    [getRawSqlScriptList]
+    [getRawSqlScriptList, onFileRename]
   );
 
   // 复制
