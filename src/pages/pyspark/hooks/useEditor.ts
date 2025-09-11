@@ -277,6 +277,18 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    // 运行之前，手动保存文件
+    const saveRes = await savePythonItem(currentFileId, {
+      id: Number(currentFileId),
+      data: editorContent
+    });
+
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
+
+    setLastAutoSave(new Date().toLocaleTimeString());
     setExecid('');
 
     try {

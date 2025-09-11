@@ -249,13 +249,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunStatus(RunningStatus.RUNNING);
-    setRunResult([]);
-    setRunLog('');
-    setRunError('');
+    const saveRes = await updateSqlScript(Number(currentFile?.fileId), {
+      uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+      script_name: currentFile.title ?? '',
+      script_content: editorContent
+    });
+
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
+
+    setLastAutoSave(new Date().toLocaleTimeString());
+
     setExecid('');
-    setRunStartTime(new Date());
-    setRunDuration(0);
 
     try {
       const res = await runSqlScript(currentFile?.fileId ?? '');
@@ -299,6 +306,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!execid || !currentFile?.fileId) {
       return;
     }
+
+    setRunStatus(RunningStatus.RUNNING);
+    setRunResult([]);
+    setRunLog('');
+    setRunError('');
+    setRunStartTime(new Date());
+    setRunDuration(0);
 
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
