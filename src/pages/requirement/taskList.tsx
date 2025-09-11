@@ -19,6 +19,7 @@ import { getAnnotationTaskList } from '@/api/dataAnnotation';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconClockCircle } from '@arco-design/web-react/icon';
+import { openNewPage } from '@/utils/env';
 import './index.scss';
 
 enum typeCode {
@@ -101,16 +102,10 @@ export default function Requirement() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (type: typeCode) => {
-    // 等待跳转页面
-    //     TEXT_ENTITY, 实体关系
-    //     TEXT_CLASSIFICATION, 文件分类
-    //     TEXT_QA, 问答
-    // TEXT_SORT 排序
-    // classification: 分类标注、qa： 问答、ranking：排序、entity-relation： 实体标签
-    // history.push(
-    // `/tenant/compute/modaforge/requirementDetail?kind=${type}`
-    // )
+  const viewDetailWorkflow = (record: Record<string, any>) => {
+    openNewPage(
+      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}`
+    );
   };
 
   // 筛选排序操作
@@ -265,7 +260,7 @@ export default function Requirement() {
             <span
               className="operate-text"
               onClick={() => {
-                viewDetailWorkflow(record.type);
+                viewDetailWorkflow(record);
               }}
             >
               标注

@@ -108,33 +108,36 @@ export async function getTaskResult(taskId: string) {
 export async function getTask(requirementId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
-  // const { data: res } = await UAPI.RES.leGetTask({}).post({requirement_id: rId}).inRegion().do();
-  const res = {
-    task_id: Math.floor(1 + Math.random() * 10),
-    item_path: 'https://temp.im/600x600',
-    item_type: 2,
-    requirement_info: {
-      name: '需求名称' + Math.random(),
-      not_started_num: 123,
-      description: '描述',
-      label_type: 2,
-      label_tool: {
-        label_tool_name: '标注工具名称',
-        label_tool_code: 'aaa',
-        image_out_of_bounds: 1
-      },
-      label_count: 100,
-      usage_scenario: 1
-    },
-    task_info: {
-      pic: {
-        name: 'test.png',
-        width: 600,
-        height: 600
-      }
-    }
-  };
-  return Promise.resolve({ data: { data: res } });
+  return await UAPI.RES.leGetTask({})
+    .post({ requirement_id: Number(rId) })
+    .inRegion()
+    .do();
+  // const res = {
+  //   task_id: Math.floor(1 + Math.random() * 10),
+  //   item_path: 'https://temp.im/600x600',
+  //   item_type: 2,
+  //   requirement_info: {
+  //     name: '需求名称' + Math.random(),
+  //     not_started_num: 123,
+  //     description: '描述',
+  //     label_type: 2,
+  //     label_tool: {
+  //       label_tool_name: '标注工具名称',
+  //       label_tool_code: 'aaa',
+  //       image_out_of_bounds: 1
+  //     },
+  //     label_count: 100,
+  //     usage_scenario: 1
+  //   },
+  //   task_info: {
+  //     pic: {
+  //       name: 'test.png',
+  //       width: 600,
+  //       height: 600
+  //     }
+  //   }
+  // };
+  // return Promise.resolve({ data: res });
 }
 
 export async function getLabels(requirementId: string) {
