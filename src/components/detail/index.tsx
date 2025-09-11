@@ -64,6 +64,7 @@ const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 interface DatasetDetail {
+  latest_size: number;
   id: number;
   name: string;
   tag_names: string[];
@@ -1140,7 +1141,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
           }
           if (res.data) {
             setContentTableColumnsList(res.data.columns || []);
-            setContentTableData(res.data.list || []);
+            setContentTableData(res.data.data || []);
           }
         })
         .catch((err) => {
@@ -1455,6 +1456,10 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                           ></EllipsisPopover>
                         </div>
                       )
+                    },
+                    {
+                      label: '文件大小:',
+                      value: formatFileSize(datasetDetail.latest_size) || '-'
                     }
                   ]}
                   column={1}
