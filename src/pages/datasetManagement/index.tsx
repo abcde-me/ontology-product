@@ -1070,10 +1070,25 @@ const DatasetManagement: React.FC = () => {
     //   Message.warning('请先选择要导出的数据集');
     //   return;
     // }
+    // 过滤掉storage_type为table的数据集
+    const filteredRows = selectedRows.filter(
+      (row) => row.storage_type !== datasetStorageType.table
+    );
+    const filteredRowKeys = filteredRows.map((row) => row.id);
+
+    // 更新选中状态，移除不能导出的数据集
+    setSelectedRows(filteredRows);
+    setSelectedRowKeys(filteredRowKeys);
+
     setDownloadData(null);
     setVisible(true);
-    console.log('批量导出:', selectedRows);
-    // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
+    console.log('批量导出(已过滤table类型):', filteredRows);
+
+    // 如果过滤后有数据被移除，给用户提示
+    const removedCount = selectedRows.length - filteredRows.length;
+    if (removedCount > 0) {
+      Message.info(`已自动过滤 ${removedCount} 个数据库表类型的数据集`);
+    }
   };
   //清除选中状态函数
   const handClear = () => {
