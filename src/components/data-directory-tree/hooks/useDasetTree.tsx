@@ -17,20 +17,43 @@ export const useDasetTree = (type: 'sql' | 'python') => {
     []
   );
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   // 获取数据集数据库字段列表
   const getScheamList = (id: number) => {
-    const res = dasetList.find((item) => item.id === id);
+    console.log('searchKeyword', searchKeyword);
+    console.log(
+      'dasetList',
+      dasetList.find((item) => item.id === id)
+    );
 
-    if (res) {
-      setScheamList(res.scheams ?? []);
+    const dataset = dasetList.find((item) => item.id === id);
+    const scheams = dataset?.scheams ?? [];
+
+    if (searchKeyword.trim() === '') {
+      setScheamList(scheams);
+      return;
     }
+
+    // 搜索字段名、中文名等
+    const filteredScheams = scheams.filter((scheam) => {
+      const searchFields = [scheam.name, scheam.cn_name].filter(
+        Boolean
+      ) as string[];
+
+      return searchFields.some((field) =>
+        field.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    });
+
+    setScheamList(filteredScheams);
   };
 
   // 获取数据集目录列表, sql和python用的一个接口
   const getDasetList = async () => {
     const res = await searchDatasetList({
-      storage_type_list: type === 'sql' ? ['table'] : ['file', 'jsonl']
+      storage_type_list: type === 'sql' ? ['table'] : ['file', 'jsonl'],
+      name: searchKeyword
     });
 
     if (res?.status !== 200) {
@@ -51,7 +74,8 @@ export const useDasetTree = (type: 'sql' | 'python') => {
       id,
       version_id,
       page,
-      page_size
+      page_size,
+      file_name: searchKeyword
     });
 
     if (res?.status !== 200) {
@@ -68,6 +92,8 @@ export const useDasetTree = (type: 'sql' | 'python') => {
 
   return {
     dasetList,
+    searchKeyword,
+    setSearchKeyword,
     getDasetList,
     dasetFileList,
     currentPage,

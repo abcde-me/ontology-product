@@ -15,6 +15,7 @@ import {
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './index.scss';
 import { formatFileSize } from '@/utils/format';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 interface DataSetTreeProps {
   type: 'sql' | 'python';
@@ -44,12 +45,13 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     dasetFileList,
     scheamList,
     currentPage,
+    searchKeyword,
+    setSearchKeyword,
     getDasetList,
     getDasetVersionFile,
     getScheamList
   } = useDasetTree(type);
 
-  const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedFile, setSelectedFile] = useState<
     DatasetVersionFileItem | Scheam | null
   >(null);
@@ -63,9 +65,21 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
 
   // 处理搜索
   const handleSearch = (value: string) => {
-    setSearchKeyword(value);
-    // TODO: 实现搜索功能
-    getDasetList();
+    if (!isFileView) {
+      getDasetList();
+      return;
+    }
+
+    if (type === 'sql') {
+      getScheamList(currentDataset?.id ?? 0);
+    } else {
+      getDasetVersionFile(
+        currentDataset?.id ?? 0,
+        currentDataset?.latest_version ?? '',
+        1,
+        50
+      );
+    }
   };
 
   // 处理返回
@@ -183,10 +197,11 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       {/* 第二部分：搜索框 */}
       <div className="dataset-tree__search">
         <Input.Search
-          placeholder={isFileView ? '搜索当前文件夹' : '输入关键词搜索'}
+          placeholder={'搜索当前文件夹'}
           value={searchKeyword}
-          onChange={setSearchKeyword}
-          onSearch={handleSearch}
+          onChange={(value) => setSearchKeyword(value)}
+          onPressEnter={() => handleSearch(searchKeyword)}
+          onClear={() => handleSearch('')}
           allowClear
           className="dataset-tree__search-input"
         />
@@ -248,38 +263,45 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
           // 数据集列表视图
           <div className="dataset-tree__dataset-list">
             {dasetList.length > 0 ? (
-              dasetList.map((dataset) => (
-                <div
-                  key={dataset.id}
-                  className={`dataset-tree__dataset-item ${selectedDataset?.id === dataset.id ? 'dataset-tree__dataset-item--selected' : ''}`}
-                  onClick={() => handleDatasetClick(dataset)}
-                >
-                  <div className="dataset-tree__dataset-item-left">
-                    <IconFolder className="dataset-tree__dataset-icon" />
-                    <div className="dataset-tree__dataset-info">
-                      <EllipsisPopover
-                        value={dataset.name}
-                        className="dataset-tree__dataset-name"
-                      />
-                      <div className="dataset-tree__dataset-size">
-                        {formatFileSize(Number(dataset.latest_size ?? 0))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="dataset-tree__dataset-actions">
-                    <Button
-                      type="text"
-                      onClick={(e) =>
-                        handleViewDatasetDetail(
-                          dataset,
-                          e as unknown as React.MouseEvent<Element, MouseEvent>
-                        )
-                      }
+              dasetList.map(
+                (dataset) =>
+                  dataset?.perms?.includes(
+                    PYSPARK_PERMISSIONS.CAN_DATASETS_SEARCH
+                  ) && (
+                    <div
+                      key={dataset.id}
+                      className={`dataset-tree__dataset-item ${selectedDataset?.id === dataset.id ? 'dataset-tree__dataset-item--selected' : ''}`}
+                      onClick={() => handleDatasetClick(dataset)}
                     >
-                      详情
-                    </Button>
-                    {/* 插入按钮，数据集目录不支持插入 */}
-                    {/* <Button
+                      <div className="dataset-tree__dataset-item-left">
+                        <IconFolder className="dataset-tree__dataset-icon" />
+                        <div className="dataset-tree__dataset-info">
+                          <EllipsisPopover
+                            value={dataset.name}
+                            className="dataset-tree__dataset-name"
+                          />
+                          <div className="dataset-tree__dataset-size">
+                            {formatFileSize(Number(dataset.latest_size ?? 0))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="dataset-tree__dataset-actions">
+                        <Button
+                          type="text"
+                          onClick={(e) =>
+                            handleViewDatasetDetail(
+                              dataset,
+                              e as unknown as React.MouseEvent<
+                                Element,
+                                MouseEvent
+                              >
+                            )
+                          }
+                        >
+                          详情
+                        </Button>
+                        {/* 插入按钮，数据集目录不支持插入 */}
+                        {/* <Button
                       type="outline"
                       onClick={(e) =>
                         handleDatasetInsert(
@@ -290,9 +312,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     >
                       {isEditorFocused ? '插入' : '复制'}
                     </Button> */}
-                  </div>
-                </div>
-              ))
+                      </div>
+                    </div>
+                  )
+              )
             ) : (
               <Empty description="暂无数据" />
             )}

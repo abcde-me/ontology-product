@@ -445,9 +445,11 @@ export async function getRunLog(
 }
 
 // 获取算子库
-export async function getOperator(): Promise<ApiRes<GetOperatorListItem[]>> {
+export async function getOperator(params: {
+  search_key: string;
+}): Promise<ApiRes<GetOperatorListItem[]>> {
   // TODO: 联调
-  return await UAPI.RES.pythonOperatorApi({}).post({}).inRegion().do();
+  return await UAPI.RES.pythonOperatorApi({}).post(params).inRegion().do();
 
   // return Promise.resolve({
   //   status: 200,

@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 import {
+  Button,
   Form,
   Input,
   Link,
@@ -11,56 +12,34 @@ import {
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { useTableList } from '../hooks/useTableList';
-import { useSqlIndexStore, SqlIndexStore } from '../store';
 import ModalScriptDetail from './ModalScriptDetail';
 import ModalDatasetDetail from './data-manager/ModalDatasetDetail';
-import {
-  ExportSqlResultItem,
-  ExportSqlResultListData,
-  ExportSqlResultListParams
-} from '@/types/sqlApi';
+import { ExportSqlResultItem, ExportSqlResultListParams } from '@/types/sqlApi';
 import {
   calcelExportSqlTask,
   getExportSqlResultList,
   getSqlTaskDetail,
   retryExportSqlTask
 } from '@/api/sql';
+import { formatFileSize } from '@/utils/format';
+import { formatDateTime } from '../utils';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 
 const FormItem = Form.Item;
 
-// interface DatasetListParams {
-//   page?: number;
-//   page_size?: number;
-//   search_content?: string;
-// }
-
-// interface DatasetItem {
-//   id: number;
-//   script_name: string;
-//   dataset_name: string;
-//   dataset_table_name: string;
-//   /** 0: 导出中, 1: 导出成功, 2: 导出失败 */
-//   export_status: number;
-//   export_start_time: string;
-// }
-
 const DatasetsList: FC = () => {
-  const showScriptDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showScriptDetail
-  );
-
-  const showDatasetDetail = useSqlIndexStore(
-    (state: SqlIndexStore) => state.showDatasetDetail
-  );
-
   // 数据集详情Modal状态管理
   const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
   const [detailId, setDetailId] = useState('');
+
+  const [scriptDetailVisible, setScriptDetailVisible] = useState(false);
+  const [scriptFormOrigin, setScriptFormOrigin] = useState({});
 
   const {
     listData,
     pagination,
     loading,
+    loadData,
     handleSearchChange,
     handleTableChange
   } = useTableList<ExportSqlResultItem, ExportSqlResultListParams>({
@@ -69,7 +48,11 @@ const DatasetsList: FC = () => {
       let result = {};
       if (sorter.export_status) {
         result = {
-          export_status: sorter.export_status
+          export_status: sorter.export_status.join(',')
+        };
+      } else {
+        result = {
+          export_status: undefined
         };
       }
       return result;
@@ -119,7 +102,7 @@ const DatasetsList: FC = () => {
             value={item.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => handleDatasetDetail(item.id)}
+            handleLink={() => handleDatasetDetail(item.dataset_id)}
           />
         );
       }
@@ -147,9 +130,9 @@ const DatasetsList: FC = () => {
           case 0:
             text = '导出中';
             color = '#1890ff';
-            actionBtn = (
-              <Link onClick={() => handleStopTask(item)}> 停止 </Link>
-            );
+            actionBtn = item?.perms?.includes(
+              SQL_PERMISSIONS.CAN_EXPORT_TASK_STOP
+            ) && <Link onClick={() => handleStopTask(item)}> 停止 </Link>;
             break;
           case 1:
             text = '导出成功';
@@ -158,7 +141,9 @@ const DatasetsList: FC = () => {
           case 2:
             text = '导出失败';
             color = '#ff4d4f';
-            actionBtn = (
+            actionBtn = item?.perms?.includes(
+              SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
+            ) && (
               <>
                 <Tooltip content={item.failed_reason}>
                   <IconInfoCircle />
@@ -173,7 +158,9 @@ const DatasetsList: FC = () => {
           case 3:
             text = '导出终止';
             color = '#FB923C';
-            actionBtn = (
+            actionBtn = item?.perms?.includes(
+              SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
+            ) && (
               <Link href="#" onClick={() => handleRetryTask(item)}>
                 {' '}
                 重试{' '}
@@ -221,11 +208,19 @@ const DatasetsList: FC = () => {
       ]
     },
     {
+      title: '文件大小',
+      dataIndex: 'size',
+      width: 180,
+      render: (_, item) => (
+        <div className="fontMM">{formatFileSize(item.file_size)}</div>
+      )
+    },
+    {
       title: '操作时间',
       dataIndex: 'export_start_time',
       width: 180,
       render: (_, item) => (
-        <div className="fontMM">{item.export_start_time}</div>
+        <div className="fontMM">{formatDateTime(item.export_start_time)}</div>
       ),
       sorter: true
     }
@@ -240,6 +235,7 @@ const DatasetsList: FC = () => {
 
     if (res.code == '' && res.status == 200) {
       Message.success('停止任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '停止任务失败');
     }
@@ -254,6 +250,7 @@ const DatasetsList: FC = () => {
 
     if (res.code == '' && res.status == 200) {
       Message.success('重试任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '重试任务失败');
     }
@@ -267,9 +264,9 @@ const DatasetsList: FC = () => {
     const res = await getSqlTaskDetail(item.id, item.script_id);
 
     if (res.code == '' && res.status == 200) {
-      console.log('展示详情弹框');
+      setScriptFormOrigin({ ...res.data });
+      setScriptDetailVisible(true);
     }
-    // showScriptDetail && showScriptDetail();
   }
 
   function handleDatasetDetail(id: number) {
@@ -282,6 +279,11 @@ const DatasetsList: FC = () => {
     setDetailId('');
   }
 
+  function closeScriptDetail() {
+    setScriptDetailVisible(false);
+    setScriptFormOrigin({});
+  }
+
   return (
     <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
@@ -292,6 +294,11 @@ const DatasetsList: FC = () => {
       >
         <FormItem field="search_content" style={{ marginRight: 12 }}>
           <Input.Search allowClear placeholder="输入文件名搜索" />
+        </FormItem>
+        <FormItem style={{ marginRight: 12 }}>
+          <Button type="text" onClick={() => loadData()}>
+            手动刷新
+          </Button>
         </FormItem>
       </Form>
       <Table
@@ -308,7 +315,12 @@ const DatasetsList: FC = () => {
         scroll={{ y: 500 }}
       />
 
-      <ModalScriptDetail />
+      <ModalScriptDetail
+        formOrigin={scriptFormOrigin}
+        visible={scriptDetailVisible}
+        onCancel={closeScriptDetail}
+      />
+
       <ModalDatasetDetail
         detailId={detailId}
         datasetDetailVisible={datasetDetailVisible}

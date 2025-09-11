@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
@@ -34,13 +34,16 @@ interface UseEditorReturn {
   runLog: string;
   runResult: string;
   isPanelOpen: boolean;
+  activeKey: string;
 
   // 编辑器操作
+  setActiveKey: (key: string) => void;
   handleContentChange: (value: string) => void;
   handleRunCode: () => Promise<void>;
   handleGetRunLog: () => Promise<void>;
   handleStopRunCode: () => void;
   handlePanelStateChange: (isOpen: boolean) => void;
+  getPrevRunStatus: () => RunningStatus;
 }
 
 const defaultContent = `
@@ -71,6 +74,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [activeKey, setActiveKey] = useState<string>('result');
+
+  // 跟踪前一个 runStatus 状态
+  const prevRunStatusRef = useRef<RunningStatus>(RunningStatus.IDLE);
+
+  // 监听 runStatus 变化，更新前一个状态
+  useEffect(() => {
+    prevRunStatusRef.current = runStatus;
+  }, [runStatus]);
+
+  // 获取前一个 runStatus 状态的函数
+  const getPrevRunStatus = useCallback(() => {
+    return prevRunStatusRef.current;
+  }, []);
 
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFileId = fileTabs.find((tab) => tab.key === activeTab)?.fileId;
@@ -106,7 +123,32 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     });
 
   // 清空编辑器状态的函数
-  const clearEditorState = useCallback(() => {
+  // const clearEditorState = useCallback(() => {
+  //   setRunStatus(RunningStatus.IDLE);
+  //   setExecid('');
+  //   setRunStartTime(null);
+  //   setRunDuration(0);
+  //   setRunLog('');
+  //   setRunResult('');
+  //   setLastAutoSave('');
+  //   setIsPanelOpen(false); // 重置面板状态为关闭
+  //   // 取消正在进行的轮询
+  //   cancelGetRunResultPolling();
+  // }, [cancelGetRunResultPolling]);
+
+  // 监听 activeTab 变化，重新更新编辑器状态
+  useEffect(() => {
+    if (!activeTab || !fileTabs.length) {
+      return;
+    }
+
+    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
+    if (!currentTab) {
+      return;
+    }
+
+    // 标签页切换时重置面板状态为关闭
+    setActiveKey('result');
     setRunStatus(RunningStatus.IDLE);
     setExecid('');
     setRunStartTime(null);
@@ -117,21 +159,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setIsPanelOpen(false); // 重置面板状态为关闭
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
-  }, [cancelGetRunResultPolling]);
-
-  // 监听 activeTab 变化，重新更新编辑器状态
-  useEffect(() => {
-    if (!activeTab || !fileTabs.length) {
-      return;
-    }
-
-    // 标签页切换时重置面板状态为关闭
-    setIsPanelOpen(false);
-
-    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
-    if (!currentTab) {
-      return;
-    }
 
     // 如果有 fileId，重新加载文件内容以获取最新状态
     if (currentTab.fileId) {
@@ -146,7 +173,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setEditorContent(fileData.data);
 
             // 更新运行状态
-            // setExecid(String(fileData.execid));
+            setExecid(String(fileData.execid));
 
             // 通知父组件更新标签页内容
             if (onTabContentUpdate) {
@@ -167,11 +194,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setEditorContent(currentTab.content);
     }
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
-
-  // 当 currentFileId 变化时，重置运行相关状态
-  useEffect(() => {
-    clearEditorState();
-  }, [currentFileId, clearEditorState]);
 
   // 延时自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
@@ -205,12 +227,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      clearEditorState();
       setEditorContent(value);
       // 自动保存
       handleSaveThrottled.run(value);
     },
-    [handleSaveThrottled, clearEditorState]
+    [handleSaveThrottled]
   );
 
   // 运行代码 - 优化依赖项
@@ -224,21 +245,18 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunStatus(RunningStatus.RUNNING);
-    setRunResult('');
     setExecid('');
-    setRunStartTime(new Date());
-    setRunDuration(0);
 
     try {
       const res = await runPythonItem(currentFileId);
-      if (res?.status === 200) {
-        setExecid(res.data.execid);
-      } else {
-        throw new Error('运行失败');
+
+      if (res?.status !== 200) {
+        Message.error(res?.message ?? '运行失败');
+        return;
       }
+
+      setExecid(res.data.execid);
     } catch (error) {
-      setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
   }, [runStatus, currentFileId]);
@@ -300,6 +318,22 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     fetchResult();
   }, [execid]);
 
+  // 当 currentFileId 变化时，重置运行相关状态
+  // useEffect(() => {
+  //   // 标签页切换时重置面板状态为关闭
+  //   setActiveKey('result');
+  //   setRunStatus(RunningStatus.IDLE);
+  //   setExecid('');
+  //   setRunStartTime(null);
+  //   setRunDuration(0);
+  //   setRunLog('');
+  //   setRunResult('');
+  //   setLastAutoSave('');
+  //   setIsPanelOpen(false); // 重置面板状态为关闭
+  //   // 取消正在进行的轮询
+  //   cancelGetRunResultPolling();
+  // }, [currentFileId]);
+
   return {
     // 状态
     editorContent,
@@ -312,12 +346,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     runLog,
     runResult,
     isPanelOpen,
+    activeKey,
+    setActiveKey,
 
     // 操作
     handleContentChange,
     handleRunCode,
     handleGetRunLog,
     handleStopRunCode,
-    handlePanelStateChange
+    handlePanelStateChange,
+    getPrevRunStatus
   };
 };

@@ -32,6 +32,7 @@ import {
 } from '../../types';
 import './index.scss';
 import { formatFileSize } from '@/utils/format';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const { Title, Text } = Typography;
 
@@ -42,8 +43,8 @@ interface SourceTargetTreeProps {
   onSelectFile?: (file: FileData) => void;
   onVolumeDetail?: (volume: FluffyVolume) => void;
   onVolumeInsert?: (volume: FluffyVolume) => void;
-  onDbDetail?: (database: Db) => void;
-  onDbInsert?: (database: Db) => void;
+  onDbDetail?: (database: Db, hierarchyData?: any) => void;
+  onDbInsert?: (database: Db, hierarchyData?: any) => void;
   isEditorFocused?: boolean;
 }
 
@@ -91,7 +92,20 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     sourceCatalogTableList,
     setSourceCatalogTableList,
     getSourceCatalogTableDetail,
-    sourceCatalogTableDetail
+    sourceCatalogTableDetail,
+    isLoading: hookIsLoading,
+    searchKeyword,
+    filteredCatalogList,
+    filteredFileList,
+    filteredTableList,
+    filteredTableColumns,
+    searchCatalog,
+    searchCategory,
+    searchFiles,
+    searchDatabaseTables,
+    searchTableDetail,
+    clearSearch,
+    setSearchKeyword
   } = useSourceTargetTree(dataType);
 
   const [searchValue, setSearchValue] = useState('');
@@ -135,34 +149,97 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
       if (onDbDetail) {
-        onDbDetail(database);
+        // 构建层级选择的数据对象
+        const hierarchyData = {
+          selectedCatalog,
+          selectedCategory,
+          selectedVolumeOrDb,
+          selectedDb,
+          selectedDbItem,
+          selectedTable,
+          currentViewLevel,
+          breadcrumbPath
+        };
+        onDbDetail(database, hierarchyData);
       }
     },
-    [onDbDetail]
+    [
+      onDbDetail,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 处理数据库插入按钮点击
   const handleDbInsert = useCallback(
     (database: Db, event: Event) => {
       event.stopPropagation(); // 阻止事件冒泡，避免触发数据库选择
+      // 构建层级选择的数据对象
+      const hierarchyData = {
+        selectedCatalog,
+        selectedCategory,
+        selectedVolumeOrDb,
+        selectedDb,
+        selectedDbItem,
+        selectedTable,
+        currentViewLevel,
+        breadcrumbPath
+      };
 
       // 编辑器聚焦时插入内容
-      onDbInsert?.(database);
+      onDbInsert?.(database, hierarchyData);
     },
-    [onDbInsert, isEditorFocused]
+    [
+      onDbInsert,
+      isEditorFocused,
+      selectedCatalog,
+      selectedCategory,
+      selectedVolumeOrDb,
+      selectedDb,
+      selectedDbItem,
+      selectedTable,
+      currentViewLevel,
+      breadcrumbPath
+    ]
   );
 
   // 获取当前目录列表
   const currentCatalogList = useMemo(() => {
+    // 如果有搜索关键词，使用过滤后的列表（即使为空也要显示）
+    if (searchKeyword) {
+      return filteredCatalogList;
+    }
     return dataType === 'source' ? sourceCatalogList : targetCatalogList;
-  }, [dataType, sourceCatalogList, targetCatalogList]);
+  }, [
+    dataType,
+    sourceCatalogList,
+    targetCatalogList,
+    searchKeyword,
+    filteredCatalogList
+  ]);
 
   // 获取当前文件列表
   const currentFileList = useMemo(() => {
+    // 如果有搜索关键词，使用过滤后的列表（即使为空也要显示）
+    if (searchKeyword) {
+      return filteredFileList;
+    }
     return dataType === 'source'
       ? sourceCatalogFileList
       : targetCatalogFileList;
-  }, [dataType, sourceCatalogFileList, targetCatalogFileList]);
+  }, [
+    dataType,
+    sourceCatalogFileList,
+    targetCatalogFileList,
+    searchKeyword,
+    filteredFileList
+  ]);
 
   // 生成第一层目录树形数据
   const generateCatalogTreeData = useMemo((): TreeNode[] => {
@@ -486,8 +563,74 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 处理搜索
   const handleSearch = (value: string) => {
+    if (!value.trim()) {
+      // 清空搜索
+      clearSearch();
+      setSearchValue('');
+      // 重新加载当前层级的数据
+      if (currentViewLevel === 'files' && selectedVolumeOrDb) {
+        // 重新加载文件列表
+        handleVolumeDbClick(selectedVolumeOrDb);
+      } else if (
+        currentViewLevel === 'database-tables' &&
+        selectedDbItem &&
+        selectedDb
+      ) {
+        // 重新加载数据库表列表
+        handleDbItemClick(selectedDbItem);
+      } else if (
+        currentViewLevel === 'table-detail' &&
+        selectedTable &&
+        selectedDb
+      ) {
+        // 重新加载表字段列表
+        handleTableClick(selectedTable);
+      }
+      return;
+    }
+
     setSearchValue(value);
-    // 这里可以添加搜索逻辑
+    setSearchKeyword(value);
+
+    // 根据当前层级执行不同的搜索逻辑
+    switch (currentViewLevel) {
+      case 'catalog':
+        searchCatalog(value);
+        break;
+      case 'category':
+        // category层级不需要搜索，直接返回
+        break;
+      case 'volume-db':
+        // volume-db层级搜索在category中处理
+        if (selectedCatalog) {
+          const filteredCatalog = searchCategory(value, selectedCatalog);
+          setSelectedCatalog(filteredCatalog);
+        }
+        break;
+      case 'files':
+        // files层级调用API搜索
+        if (selectedVolumeOrDb) {
+          searchFiles(value, selectedVolumeOrDb);
+        }
+        break;
+      case 'db-item':
+        // db-item层级不需要搜索，直接返回
+        break;
+      case 'database-tables':
+        // database-tables层级调用API搜索
+        if (selectedDbItem && selectedDb) {
+          searchDatabaseTables(value, selectedDbItem, selectedDb);
+        }
+        break;
+      case 'table-detail':
+        // table-detail层级前端搜索字段
+        if (sourceCatalogTableDetail) {
+          searchTableDetail(value, sourceCatalogTableDetail);
+        }
+        break;
+      default:
+        break;
+    }
   };
 
   // 渲染标题部分
@@ -556,7 +699,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       <Input.Search
         placeholder="输入关键词搜索"
         value={searchValue}
-        onChange={handleSearch}
+        onChange={(value) => setSearchValue(value)}
+        onPressEnter={() => handleSearch(searchValue)}
+        onClear={() => {
+          setSearchValue('');
+          handleSearch('');
+        }}
         allowClear
         className="source-target-tree__search-input"
       />
@@ -575,15 +723,18 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
     return (
       <div className="source-target-tree__catalog-list max-h-full overflow-y-auto">
-        {generateCatalogTreeData.map((item) => (
-          <div
-            key={item.key}
-            className="source-target-tree__catalog-item"
-            onClick={() => handleCatalogClick(item.data)}
-          >
-            {item.title}
-          </div>
-        ))}
+        {generateCatalogTreeData.map(
+          (item) =>
+            item?.data?.perms.includes(PYSPARK_PERMISSIONS.CAN_DIRECTORY) && (
+              <div
+                key={item.key}
+                className="source-target-tree__catalog-item"
+                onClick={() => handleCatalogClick(item.data)}
+              >
+                {item.title}
+              </div>
+            )
+        )}
       </div>
     );
   };
@@ -684,12 +835,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               <div className="list-item-content-info">
                 <EllipsisPopover
                   className="list-item-content-info-name"
-                  value={file.file_name || file.name}
+                  value={file.FileName ?? file.file_name}
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(file.file_size || file.size)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(file.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -745,10 +898,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={dbItem.name}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(dbItem.file_size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(dbItem.file_size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -781,7 +936,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 渲染数据库表列表
   const renderDatabaseTableList = () => {
-    if (isLoading) {
+    if (hookIsLoading) {
       return (
         <div className="source-target-tree__loading-container">
           <Spin size={24} />
@@ -790,7 +945,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       );
     }
 
-    if (!sourceCatalogTableList?.length) {
+    // 使用过滤后的表列表或原始列表
+    const tableList = searchKeyword
+      ? filteredTableList
+      : sourceCatalogTableList;
+
+    if (!tableList?.length) {
       return (
         <div className="source-target-tree__empty-container">
           <Empty />
@@ -800,7 +960,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
     return (
       <div className="list max-h-full overflow-y-auto">
-        {sourceCatalogTableList.map((table: any) => (
+        {tableList.map((table: any) => (
           <div
             key={table.id}
             className="list-item"
@@ -814,10 +974,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
                   value={table.table_name ?? ''}
                   preferTypography
                 ></EllipsisPopover>
-                <EllipsisPopover
-                  className="list-item-content-info-size"
-                  value={formatFileSize(table.file_size ?? table.size ?? 0)}
-                ></EllipsisPopover>
+                {dataType === 'source' && (
+                  <EllipsisPopover
+                    className="list-item-content-info-size"
+                    value={formatFileSize(table.file_size ?? table.size ?? 0)}
+                  ></EllipsisPopover>
+                )}
               </div>
             </div>
             <div className="list-item-actions">
@@ -850,7 +1012,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 渲染表字段列表
   const renderTableDetailList = () => {
-    if (isLoading) {
+    if (hookIsLoading) {
       return (
         <div className="source-target-tree__loading-container">
           <Spin size={24} />
@@ -867,18 +1029,21 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       );
     }
 
-    const fields = sourceCatalogTableDetail.sample.columns;
+    // 如果有搜索关键词，使用过滤后的字段列表
+    const fields = searchKeyword
+      ? filteredTableColumns
+      : sourceCatalogTableDetail.sample.columns;
 
     return (
       <div className="list max-h-full overflow-y-auto">
-        {fields.map((fileld: string) => (
-          <div key={fileld} className="list-item">
+        {fields.map((field: string, index: number) => (
+          <div key={`${field}-${index}`} className="list-item">
             <div className="list-item-content">
               <IconFile className="list-item-content-icon" />
               <div className="list-item-content-info">
                 <EllipsisPopover
                   className="list-item-content-info-name"
-                  value={fileld ?? ''}
+                  value={field ?? ''}
                   preferTypography
                 ></EllipsisPopover>
               </div>
@@ -888,7 +1053,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
               <Button
                 type="outline"
                 onClick={(e: Event) => {
-                  handleDbInsert({ name: fileld }, e);
+                  handleDbInsert({ name: field }, e);
                 }}
                 onMouseDown={(e) => {
                   // 阻止按钮获得焦点，保持编辑器焦点

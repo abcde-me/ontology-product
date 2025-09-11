@@ -54,6 +54,7 @@ import {
 import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
+import { formatFileSize } from '@/utils/format';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -74,6 +75,7 @@ const formatDateTime = (dateTimeString: string): string => {
 
 // 数据集类型
 export interface Dataset {
+  latest_size: number;
   id: number;
   name: string;
   description: string;
@@ -298,6 +300,12 @@ const columns = (
     }
   },
   {
+    title: '文件大小',
+    dataIndex: 'latest_size',
+    width: 120,
+    render: (_, record: Dataset) => formatFileSize(record.latest_size || 0)
+  },
+  {
     title: '状态',
     dataIndex: 'status',
     width: 180,
@@ -514,22 +522,23 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) && (
-            <Button
-              type="text"
-              className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-              onClick={() => handleExport(record)}
-              disabled={record.status !== datasetStatus.normal}
-              style={{
-                padding: '0 8px 0 5px',
-                height: '100%',
-                borderTop: 'none',
-                borderBottom: 'none'
-              }}
-            >
-              导出
-            </Button>
-          )}
+          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
+            record.storage_type !== datasetStorageType.table && (
+              <Button
+                type="text"
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                onClick={() => handleExport(record)}
+                disabled={record.status !== datasetStatus.normal}
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
+                导出
+              </Button>
+            )}
           {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
             <Button
               type="text"

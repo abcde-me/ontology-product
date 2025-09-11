@@ -17,7 +17,7 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const options = [
-  { text: 'MySql', value: 'mysql' },
+  { text: 'MySQL', value: 'mysql' },
   { text: 'PostgreSQL', value: 'postgresql' }
 ];
 const add = forwardRef((props: any, ref) => {
@@ -440,12 +440,12 @@ const add = forwardRef((props: any, ref) => {
                 >
                   <Select
                     placeholder="请选择"
-                    onChange={(value) =>
-                      Message.info({
-                        content: `You select ${value}.`,
-                        showIcon: true
-                      })
-                    }
+                    // onChange={(value) =>
+                    //   Message.info({
+                    //     content: `You select ${value}.`,
+                    //     showIcon: true
+                    //   })
+                    // }
                     defaultValue="mysql"
                   >
                     {options.map((option, index) => (

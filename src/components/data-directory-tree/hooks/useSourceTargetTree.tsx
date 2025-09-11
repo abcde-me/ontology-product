@@ -17,6 +17,7 @@ import {
   GetDbItemDetailRes
 } from '@/api/dataCatalog';
 import { useEffect, useState } from 'react';
+import { searchTreeNodes, SEARCH_CONFIGS } from '../utils/treeSearchUtils';
 
 // 扩展的目录项类型，包含full_path
 interface DstCatalogItemWithPath {
@@ -170,6 +171,22 @@ export const useSourceTargetTree = (dataType) => {
     useState<GetDbItemDetailRes | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // 搜索相关状态
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [filteredCatalogList, setFilteredCatalogList] = useState<
+    DstCatalogItemWithPath[] | SrcCatalogItemWithPath[]
+  >([]);
+  const [filteredFileList, setFilteredFileList] = useState<
+    GetSourceCatalogFileListItem[] | GetTargetCatalogFileListItem[]
+  >([]);
+  const [filteredTableList, setFilteredTableList] = useState<
+    DbTableListParamss[]
+  >([]);
+  const [filteredTableColumns, setFilteredTableColumns] = useState<string[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
   // 获取数据目录列表
   const getCatalogList = async (
     root_type: CatalogRootType,
@@ -208,6 +225,7 @@ export const useSourceTargetTree = (dataType) => {
       }
 
       setCurrentPage(res?.data?.page ?? 1);
+      console.log(res?.data?.list, 'res?.data?.list');
       setTargetCatalogFileList(res?.data?.list ?? []);
     } else if (root_type === CatalogRootType.Source) {
       const res = await getSourceCatalogFileListApi(
@@ -219,6 +237,7 @@ export const useSourceTargetTree = (dataType) => {
       }
 
       setCurrentPage(res?.data?.page ?? 1);
+      console.log(res?.data?.items, 'res?.data?.items');
       setSourceCatalogFileList(res?.data?.items ?? []);
     }
   };
@@ -316,6 +335,141 @@ export const useSourceTargetTree = (dataType) => {
     setSourceCatalogTableDetail(res?.data ?? null);
   };
 
+  // 前端搜索方法 - 用于catalog、category、volume-db、db-item、table-detail层级
+  const performFrontendSearch = (
+    keyword: string,
+    data: any[],
+    searchFields: string[]
+  ) => {
+    return searchTreeNodes(keyword, data, searchFields, SEARCH_CONFIGS.BY_NAME);
+  };
+
+  // 搜索catalog层级
+  const searchCatalog = (keyword: string) => {
+    setSearchKeyword(keyword);
+    const currentList =
+      dataType === 'source' ? sourceCatalogList : targetCatalogList;
+    const filtered = performFrontendSearch(keyword, currentList, ['name']);
+    setFilteredCatalogList(filtered);
+  };
+
+  // 搜索category层级 - 这里主要是过滤volume和db
+  const searchCategory = (keyword: string, catalog: any) => {
+    setSearchKeyword(keyword);
+    if (!catalog) return;
+
+    const filteredCatalog = { ...catalog };
+
+    if (catalog.children?.volume) {
+      filteredCatalog.children = {
+        ...catalog.children,
+        volume: performFrontendSearch(keyword, catalog.children.volume, [
+          'name'
+        ])
+      };
+    }
+
+    if (catalog.children?.db) {
+      filteredCatalog.children = {
+        ...filteredCatalog.children,
+        db: performFrontendSearch(keyword, catalog.children.db, ['name'])
+      };
+    }
+
+    return filteredCatalog;
+  };
+
+  // 搜索files层级 - 调用API
+  const searchFiles = async (keyword: string, volumeOrDb: any) => {
+    setSearchKeyword(keyword);
+    setIsLoading(true);
+
+    try {
+      const rootType =
+        dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target;
+
+      const params =
+        dataType === 'source'
+          ? {
+              page: 1,
+              page_size: 100,
+              data_path_id: Number(volumeOrDb.id),
+              file_name: keyword,
+              sort: 'desc' as 'asc' | 'desc'
+            }
+          : {
+              page: 1,
+              limit: 100,
+              full_path: volumeOrDb.full_path || '',
+              sort_field: volumeOrDb.sort_field || '',
+              sort_order: 'desc' as 'asc' | 'desc',
+              path_id: volumeOrDb.id.toString(),
+              search_name: keyword
+            };
+
+      await getCatalogFileList(rootType, params);
+    } catch (error) {
+      console.error('搜索文件失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 搜索database-tables层级 - 调用API
+  const searchDatabaseTables = async (
+    keyword: string,
+    dbItem: any,
+    db: any
+  ) => {
+    setSearchKeyword(keyword);
+    setIsLoading(true);
+
+    try {
+      const params = {
+        path_id: Number(db.id),
+        search: keyword,
+        page: 1,
+        limit: 100,
+        database: dbItem.name || ''
+      };
+
+      await getSourceCatalogTableList(params);
+    } catch (error) {
+      console.error('搜索数据库表失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 搜索table-detail层级 - 前端搜索字段
+  const searchTableDetail = (keyword: string, tableDetail: any) => {
+    setSearchKeyword(keyword);
+    if (!tableDetail?.sample?.columns) return tableDetail;
+
+    // 对于字符串数组，直接过滤
+    const filteredColumns = tableDetail.sample.columns.filter(
+      (column: string) => column.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    setFilteredTableColumns(filteredColumns);
+    return {
+      ...tableDetail,
+      sample: {
+        ...tableDetail.sample,
+        columns: filteredColumns
+      }
+    };
+  };
+
+  // 清空搜索
+  const clearSearch = () => {
+    setSearchKeyword('');
+    setFilteredCatalogList([]);
+    setFilteredFileList([]);
+    setFilteredTableList([]);
+    setFilteredTableColumns([]);
+  };
+
   useEffect(() => {
     getCatalogList(
       dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target
@@ -330,6 +484,12 @@ export const useSourceTargetTree = (dataType) => {
     currentPage,
     sourceCatalogTableList,
     sourceCatalogTableDetail,
+    isLoading,
+    searchKeyword,
+    filteredCatalogList,
+    filteredFileList,
+    filteredTableList,
+    filteredTableColumns,
 
     getCatalogList,
     getCatalogFileList,
@@ -338,6 +498,15 @@ export const useSourceTargetTree = (dataType) => {
     getSourceCatalogTableDetail,
     getNodeHierarchyInfo,
     findFullPathById: (targetId: number) =>
-      findFullPathById(targetCatalogList, targetId)
+      findFullPathById(targetCatalogList, targetId),
+
+    // 搜索相关方法
+    searchCatalog,
+    searchCategory,
+    searchFiles,
+    searchDatabaseTables,
+    searchTableDetail,
+    clearSearch,
+    setSearchKeyword
   };
 };

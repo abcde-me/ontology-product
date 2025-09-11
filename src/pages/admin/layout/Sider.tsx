@@ -121,7 +121,8 @@ const menus: MenuModel[] = [
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'pyspark',
-        path: '/tenant/compute/modaforge/pyspark'
+        path: '/tenant/compute/modaforge/pyspark',
+        permission: 'pyspark:can_search'
       },
       {
         title: 'SQL开发',
@@ -129,7 +130,8 @@ const menus: MenuModel[] = [
           <DataCatalog className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'sql',
-        path: '/tenant/compute/modaforge/sql'
+        path: '/tenant/compute/modaforge/sql',
+        permission: 'sql_script:can_search'
       }
     ]
   },
@@ -202,8 +204,7 @@ const menus: MenuModel[] = [
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement',
-        permission: 'organizations:can_search'
+        path: '/tenant/compute/modaforge/requirement'
       },
       {
         title: '任务列表',
@@ -211,8 +212,7 @@ const menus: MenuModel[] = [
           <OrganMenu className="appforge-sider-icon flex-none text-[20px]" />
         ),
         key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList',
-        permission: 'organizations:can_search'
+        path: '/tenant/compute/modaforge/taskList'
       }
     ]
   }

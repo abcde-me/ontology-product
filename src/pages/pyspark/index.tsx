@@ -11,6 +11,8 @@ import { useTabManager } from './hooks/useTabManager';
 import './index.scss';
 import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
+import { useHasPermission } from '@/store/userInfoStore';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -24,16 +26,22 @@ const Python: React.FC = memo(() => {
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+  // 用于同步选中状态到FileManager的回调函数
+  const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
+    string[]
+  >([]);
+
   const {
     fileState,
     directoryTreeRef,
     openFile,
     addTab,
     removeTab,
+    removeTabByFileId, // 获取根据文件ID关闭标签页的方法
     switchTab,
     updateTabContent,
     handleCreate
-  } = useTabManager();
+  } = useTabManager(setFileManagerSelectedKeys);
 
   // 处理标签页内容更新
   const handleTabContentUpdate = (tabKey: string, content: string) => {
@@ -80,7 +88,9 @@ const Python: React.FC = memo(() => {
               <FileManager
                 type="files"
                 onFileOpen={openFile}
+                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
                 ref={directoryTreeRef}
+                externalSelectedKeys={fileManagerSelectedKeys}
               />
             )}
           </TabPane>
@@ -92,14 +102,16 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane key="tools" title={<SuanziIcon />}>
-            {activeTab === 'tools' && (
-              <ToolsManager
-                onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
-              />
-            )}
-          </TabPane>
+          {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
+            <TabPane key="tools" title={<SuanziIcon />}>
+              {activeTab === 'tools' && (
+                <ToolsManager
+                  onInsertContent={insertContentToEditor}
+                  getIsEditorFocused={() => isEditorFocusedRef.current}
+                />
+              )}
+            </TabPane>
+          )}
           <TabPane key="daset" title={<DasetIcon />}>
             {isDasetTab && <DatasetsList />}
           </TabPane>

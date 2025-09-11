@@ -146,6 +146,7 @@ export interface FluffyVolume {
   type_name?: string;
   file_name?: string;
   file_id?: number;
+  file_uuid?: string;
 }
 
 export interface SrcChildren {
@@ -410,6 +411,10 @@ export interface GetTargetCatalogFileListParams {
    * "md"
    */
   file_type?: string[];
+  /**
+   * 文件名search
+   */
+  search_name?: string;
   /**
    * 完整文件路径
    */

@@ -1,177 +1,10 @@
 import { Table, Input, Button, Message } from '@arco-design/web-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IconSearch, IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 const InputSearch = Input.Search;
 import '../index.scss';
-import Pages from '../components/pages';
 
-const data = [
-  {
-    key: '1',
-    name: 'Jane Doe',
-    salary: 23000,
-    address: '32 Park Road, London',
-    email: 'jane.doe@example.com'
-  },
-  {
-    key: '2',
-    name: 'Alisa Ross',
-    salary: 25000,
-    address: '35 Park Road, London',
-    email: 'alisa.ross@example.com'
-  },
-  {
-    key: '3',
-    name: 'Kevin Sandra',
-    salary: 22000,
-    address: '31 Park Road, London',
-    email: 'kevin.sandra@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com'
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com'
-  }
-];
-const Datas = [
-  '第一条开啊苦啊阿夸开啊夸开开阿凯阿珂开阿克艾克艾克艾克哎卡艾克',
-  '第二条',
-  '第三条',
-  '第四条',
-  '第五条',
-  '第六条',
-  '第七条',
-  '第八条',
-  '第九条',
-  '第十条',
-  '第十一条',
-  '第十二条',
-  '第十三条',
-  '第十四条',
-  '第十五条'
-];
 export default function AutoDefine(props) {
   const { dataList } = props;
   console.log(dataList, 'table组件接收到的dataList');
@@ -180,10 +13,24 @@ export default function AutoDefine(props) {
   // 搜索过滤状态，用于根据字段名筛选表格
   const [nameFilter, setNameFilter] = useState<string>('');
   const ddlRef = useRef<HTMLDivElement | null>(null);
-  const fileType = [
-    { text: 'int', value: 'int' },
-    { text: 'string', value: 'string' }
-  ];
+  const [dbFilterType, setDbFilterType] = useState<
+    { text: string; value: string }[]
+  >([]);
+  const getTypes = (dataList) => {
+    // 提取所有 type，过滤掉空值，去重并格式化为 {text, value}
+    const types = (dataList?.ddl?.columns || [])
+      .map((item) => item.type)
+      .filter((t) => t !== undefined && t !== null && String(t).trim() !== '');
+    const unique = Array.from(new Set(types));
+    const formatted = unique.map((t) => ({
+      text: String(t),
+      value: String(t)
+    }));
+    setDbFilterType(formatted);
+  };
+  useEffect(() => {
+    getTypes(dataList);
+  }, [dataList]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
@@ -234,7 +81,10 @@ export default function AutoDefine(props) {
     {
       title: '类型',
       dataIndex: 'type',
-      filters: fileType
+      filters: dbFilterType,
+      onFilter: (value, record) => {
+        return record.type === value;
+      }
     },
     {
       title: '注释',
@@ -355,25 +205,6 @@ export default function AutoDefine(props) {
           pagination={false}
           className="table_style"
         />
-        {/* {data.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '12px'
-            }}
-          >
-            <span></span>
-            <Pages
-              current={currentPage}
-              total={dataList?.ddl?.columns.length || 0}
-              pageSize={pageSize}
-              onChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </div>
-        )} */}
       </div>
     </div>
   );
