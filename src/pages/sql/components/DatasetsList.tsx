@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react';
 import {
+  Button,
   Form,
   Input,
   Link,
@@ -48,6 +49,10 @@ const DatasetsList: FC = () => {
       if (sorter.export_status) {
         result = {
           export_status: sorter.export_status.join(',')
+        };
+      } else {
+        result = {
+          export_status: undefined
         };
       }
       return result;
@@ -289,6 +294,11 @@ const DatasetsList: FC = () => {
       >
         <FormItem field="search_content" style={{ marginRight: 12 }}>
           <Input.Search allowClear placeholder="输入文件名搜索" />
+        </FormItem>
+        <FormItem style={{ marginRight: 12 }}>
+          <Button type="text" onClick={() => loadData()}>
+            手动刷新
+          </Button>
         </FormItem>
       </Form>
       <Table
