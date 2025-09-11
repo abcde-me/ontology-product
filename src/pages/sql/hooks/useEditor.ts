@@ -225,7 +225,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return null;
       }
     },
-    { wait: 3000, trailing: true }
+    { wait: 5000 }
   );
 
   // 处理内容变化 - 优化依赖项
