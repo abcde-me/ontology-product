@@ -14,16 +14,10 @@ import {
   Message
 } from '@arco-design/web-react';
 import {
-  getCatalogList,
-  getSourceDataFileList,
-  getSourceFileTypeList
-} from '@/api/dataCatalog';
-import { format } from 'date-fns';
-import './IndividualModal.scss';
-import {
   getDepartmentTreeList,
   getIndividualList
 } from '@/api/individualAndDepartment';
+import './IndividualModal.scss';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -61,7 +55,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [sourceFileTypeFilters, setSourceFileTypeFilters] = useState();
   const [selectedRowsContent, setSelectedRowsContent] =
     useState<any[]>(initialSelectedData);
   const [current, setCurrent] = useState(1);
@@ -101,13 +94,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       />
     );
   };
-  useEffect(() => {
-    getSourceFileTypeList({
-      id: checkedKeys
-    }).then((result) => {
-      setSourceFileTypeFilters(result);
-    });
-  }, [checkedKeys]);
   const columns = [
     {
       title: '姓名',

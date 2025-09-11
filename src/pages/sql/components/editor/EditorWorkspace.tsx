@@ -51,7 +51,8 @@ const EditorWorkspaceContent: React.FC<{
     editorContent,
     handleContentChange,
     placeholderValue,
-    runResult
+    runResult,
+    execid
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -205,7 +206,7 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 运行信息面板 */}
-      <RunningInfoPanel />
+      {execid && <RunningInfoPanel />}
     </div>
   );
 });

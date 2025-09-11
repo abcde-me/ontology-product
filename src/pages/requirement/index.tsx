@@ -13,7 +13,6 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -87,7 +86,6 @@ export default function Requirement() {
         params.filters,
         (value: string | number) => isNil(value) || value === ''
       );
-      console.log(filtered1, 'top');
       const res = await getAnnotationList(params);
       if (res.code === 0 && res.data) {
         setRequirementData(res.data.result || []);

@@ -27,6 +27,7 @@ interface RunningInfoPanelProps {
   runStartTime?: Date | null;
   runDuration?: number;
   onGetRunLog?: () => Promise<void>;
+  onGetRunResult?: () => Promise<void>;
   isPanelOpen?: boolean;
   onPanelStateChange?: (isOpen: boolean) => void;
   getPrevRunStatus?: () => RunningStatus;
@@ -42,6 +43,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     activeKey,
     setActiveKey,
     onGetRunLog,
+    onGetRunResult,
     isPanelOpen,
     onPanelStateChange,
     getPrevRunStatus
@@ -84,6 +86,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       setActiveKey(key);
       if (key === 'log' && onGetRunLog) {
         onGetRunLog();
+      } else if (key === 'result' && onGetRunResult) {
+        onGetRunResult();
       }
     };
 

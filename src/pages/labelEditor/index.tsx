@@ -46,7 +46,7 @@ function WorkflowConfig() {
 
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
-    if (!taskInfo.data.data.task_id) {
+    if (!taskInfo.data.task_id) {
       Modal.warning({
         title: '提示信息',
         content: '当前需求已无新任务，点击确定将返回需求列表页',
@@ -73,7 +73,7 @@ function WorkflowConfig() {
   };
 
   const goBack = () => {
-    history.push('/tenant/compute/modaforge/xxxx');
+    history.push('/tenant/compute/modaforge/taskList');
   };
 
   const switchNextTask = () => {
