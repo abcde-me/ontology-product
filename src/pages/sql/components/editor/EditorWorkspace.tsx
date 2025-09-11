@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useEffect } from 'react';
-import { Button, Space } from '@arco-design/web-react';
+import { Button, Message, Space } from '@arco-design/web-react';
 import {
   IconUpload,
   IconSettings,
@@ -74,6 +74,11 @@ const EditorWorkspaceContent: React.FC<{
   };
 
   const handleFormatCode = () => {
+    if (runStatus === RunningStatus.RUNNING) {
+      Message.warning('SQL 正在执行中，暂不支持格式化');
+      return;
+    }
+
     if (editorContent) {
       try {
         const formattedCode = format(editorContent, { language: 'sql' });
