@@ -699,7 +699,7 @@ function handleImgAnnotationIds(params: Record<string, any>) {
 
   const idNums = Array.from(ids).filter(
     (id) => id !== undefined && id !== null
-  );
+  ) as number[];
   let counter = (idNums.length ? Math.max(...idNums) : 0) + 1;
   if (Array.isArray(params.shapes)) {
     params.shapes.forEach((shape) => {
