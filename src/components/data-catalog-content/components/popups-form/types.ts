@@ -19,6 +19,7 @@ export interface SourceDataItem {
   id: number;
   task_load_start_time: string;
   upload_user: string;
+  real_abs_data_path: string;
 }
 
 export interface TargetDataItem {
@@ -36,4 +37,5 @@ export interface TargetDataItem {
   id: number;
   short_content: string;
   updated_at: string;
+  real_full_path: string;
 }
