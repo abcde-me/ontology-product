@@ -66,6 +66,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [tableLoading, settableLoading] = useState(false);
+  const [dir_path, setDir_path] = useState<React.Key[]>(['']);
   const time = Form.useWatch('time', form);
 
   const formatCatalogTree = (rawData: any[]): TreeItem[] => {
@@ -150,12 +151,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const renderTreeContent = () => {
     return (
       <div>
-        {getDetailObj?.label_data_set?.[0]?.dir_name}
         {treeData && treeData.length > 0 ? (
           <Tree
-            // defaultExpandedKeys={['572', '572数据卷', '573']}
-            // defaultSelectedKeys={['573']}
-            autoExpandParent={false}
+            defaultExpandedKeys={getDetailObj?.label_data_set?.[0]?.dir_name.split(
+              ','
+            )}
+            defaultSelectedKeys={[
+              getDetailObj?.label_data_set?.[0]?.dir_name.split(',')?.[2]
+            ]}
             treeData={treeData}
             // checkStrictly={checkStrictly}
             onSelect={(value, e) => {
@@ -163,6 +166,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 setCurrent(1);
                 setPageSize(10);
                 setCheckedKeys([value[0]?.split(',')?.[2]]);
+                setDir_path(value);
               }
             }}
           />
@@ -287,7 +291,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   const getTableSelectContent = () => {
-    getChildTableSelectData(selectedRowsContent, checkedKeys);
+    getChildTableSelectData(selectedRowsContent, dir_path);
     onClose();
   };
 
