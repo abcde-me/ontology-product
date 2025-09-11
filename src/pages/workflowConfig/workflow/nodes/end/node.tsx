@@ -15,7 +15,7 @@ const Node: FC<NodeProps<EndNodeType>> = ({ id, data }) => {
       if (res.status === 200) {
         const resData = res.data.dst.forEach((catalog) => {
           // 重置name结构
-          const restData = catalog.children?.volume.map((item) => {
+          const restData = catalog.children?.volume?.map((item) => {
             return {
               ...item,
               parent_name: catalog.name
