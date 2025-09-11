@@ -263,45 +263,38 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
           // 数据集列表视图
           <div className="dataset-tree__dataset-list">
             {dasetList.length > 0 ? (
-              dasetList.map(
-                (dataset) =>
-                  dataset?.perms?.includes(
-                    PYSPARK_PERMISSIONS.CAN_DATASETS_SEARCH
-                  ) && (
-                    <div
-                      key={dataset.id}
-                      className={`dataset-tree__dataset-item ${selectedDataset?.id === dataset.id ? 'dataset-tree__dataset-item--selected' : ''}`}
-                      onClick={() => handleDatasetClick(dataset)}
-                    >
-                      <div className="dataset-tree__dataset-item-left">
-                        <IconFolder className="dataset-tree__dataset-icon" />
-                        <div className="dataset-tree__dataset-info">
-                          <EllipsisPopover
-                            value={dataset.name}
-                            className="dataset-tree__dataset-name"
-                          />
-                          <div className="dataset-tree__dataset-size">
-                            {formatFileSize(Number(dataset.latest_size ?? 0))}
-                          </div>
-                        </div>
+              dasetList.map((dataset) => (
+                <div
+                  key={dataset.id}
+                  className={`dataset-tree__dataset-item ${selectedDataset?.id === dataset.id ? 'dataset-tree__dataset-item--selected' : ''}`}
+                  onClick={() => handleDatasetClick(dataset)}
+                >
+                  <div className="dataset-tree__dataset-item-left">
+                    <IconFolder className="dataset-tree__dataset-icon" />
+                    <div className="dataset-tree__dataset-info">
+                      <EllipsisPopover
+                        value={dataset.name}
+                        className="dataset-tree__dataset-name"
+                      />
+                      <div className="dataset-tree__dataset-size">
+                        {formatFileSize(Number(dataset.latest_size ?? 0))}
                       </div>
-                      <div className="dataset-tree__dataset-actions">
-                        <Button
-                          type="text"
-                          onClick={(e) =>
-                            handleViewDatasetDetail(
-                              dataset,
-                              e as unknown as React.MouseEvent<
-                                Element,
-                                MouseEvent
-                              >
-                            )
-                          }
-                        >
-                          详情
-                        </Button>
-                        {/* 插入按钮，数据集目录不支持插入 */}
-                        {/* <Button
+                    </div>
+                  </div>
+                  <div className="dataset-tree__dataset-actions">
+                    <Button
+                      type="text"
+                      onClick={(e) =>
+                        handleViewDatasetDetail(
+                          dataset,
+                          e as unknown as React.MouseEvent<Element, MouseEvent>
+                        )
+                      }
+                    >
+                      详情
+                    </Button>
+                    {/* 插入按钮，数据集目录不支持插入 */}
+                    {/* <Button
                       type="outline"
                       onClick={(e) =>
                         handleDatasetInsert(
@@ -312,10 +305,9 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     >
                       {isEditorFocused ? '插入' : '复制'}
                     </Button> */}
-                      </div>
-                    </div>
-                  )
-              )
+                  </div>
+                </div>
+              ))
             ) : (
               <Empty description="暂无数据" />
             )}
