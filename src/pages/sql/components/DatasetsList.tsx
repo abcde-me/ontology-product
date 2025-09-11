@@ -49,6 +49,10 @@ const DatasetsList: FC = () => {
         result = {
           export_status: sorter.export_status.join(',')
         };
+      } else {
+        result = {
+          export_status: undefined
+        };
       }
       return result;
     },
