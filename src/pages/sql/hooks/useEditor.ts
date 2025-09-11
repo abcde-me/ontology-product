@@ -225,15 +225,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return null;
       }
     },
-    { wait: 5000 }
+    { wait: 5000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      clearEditorState();
       setEditorContent(value);
-      handleSaveThrottled.cancel();
       // 自动保存
       handleSaveThrottled.run(value);
     },
@@ -364,6 +362,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
       loadFileContent();
     }
+
+    () => {
+      handleSaveThrottled.cancel();
+    };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 当 currentFileId 变化时，重置运行相关状态
