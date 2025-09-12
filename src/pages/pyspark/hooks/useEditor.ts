@@ -253,12 +253,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       },
       [currentFileId]
     ),
-    { wait: 5000, leading: true, trailing: true }
+    { wait: 30000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
+      console.log('handleContentChange', value);
       setEditorContent(value);
       // 自动保存
       handleSaveThrottled.run(value);
@@ -303,7 +304,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     } catch (error) {
       Message.error('运行失败');
     }
-  }, [runStatus, currentFileId]);
+  }, [runStatus, currentFileId, editorContent]);
 
   // 停止运行
   const handleStopRunCode = async () => {

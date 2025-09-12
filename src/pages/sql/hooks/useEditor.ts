@@ -277,7 +277,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
-  }, [runStatus, currentFile?.fileId]);
+  }, [runStatus, currentFile?.fileId, editorContent]);
 
   // 停止运行
   const handleStopRunCode = async () => {
