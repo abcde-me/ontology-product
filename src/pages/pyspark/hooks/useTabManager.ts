@@ -35,7 +35,7 @@ export const useTabManager = (
 
   // 打开文件 - 只创建或切换到标签页，不请求文件内容
   const openFile = useCallback(
-    (fileId: string, fileName?: string) => {
+    (fileId: string, fileName?: string, perms?: Array<string>) => {
       const newTabKey = `file-${fileId}`;
       const existingTabIndex = fileState.fileTabs.findIndex(
         (tab) => tab.fileId === fileId
@@ -52,7 +52,8 @@ export const useTabManager = (
           title: fileName || `文件 ${fileId}`,
           content: '', // 初始内容为空，由 useEditor 负责加载
           fileId: fileId,
-          lastModified: new Date().toISOString()
+          lastModified: new Date().toISOString(),
+          perms: perms
         };
         updatedTabs = [...fileState.fileTabs, newTab];
       }

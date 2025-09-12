@@ -23,6 +23,7 @@ import RunningInfoPanel from './RunningInfoPanel';
 import { useEditor } from '../../hooks/useEditor';
 import { useExportDaset } from '../../hooks/useExportDaset';
 import DatasetForm from '../daset-export/AddDatasetForm';
+import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -30,6 +31,7 @@ interface NotebookWorkspaceProps {
   currentFileId?: string;
   activeTab?: string;
   fileTabs?: Array<{
+    perms?: Array<string>;
     key: string;
     title: string;
     content: string;
@@ -93,7 +95,11 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     } = useExportDaset(currentFileId, execid);
 
     console.log('看一看编辑器卡顿的事情～');
-
+    const getActiveTabPerms = () => {
+      const now_active =
+        fileTabs?.filter((item) => item.key === activeTab) || [];
+      return now_active[0]?.perms || [];
+    };
     // const myTheme = createTheme({
     //   theme: 'light',
     //   settings: {
@@ -201,33 +207,46 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         <div className="notebook-toolbar">
           <div className="toolbar-left">
             <Space size={12}>
-              <Button
-                type="primary"
-                icon={
-                  runStatus === RunningStatus.RUNNING ? (
-                    <IconStop className="mr-[4px]" />
-                  ) : (
-                    <IconPlayArrow className="mr-[4px]" />
-                  )
-                }
-                disabled={editorContent.trim() === ''}
-                onClick={
-                  runStatus === RunningStatus.RUNNING
-                    ? handleStopRunCode
-                    : () => handleRunCode().catch(console.error)
-                }
-                className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
-              >
-                {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
-              </Button>
-              <Button
-                icon={<IconUpload />}
-                onClick={handleExportDataset}
-                className="h-[26px]"
-                disabled={runStatus !== RunningStatus.SUCCESS}
-              >
-                导出数据集
-              </Button>
+              {((runStatus === RunningStatus.RUNNING &&
+                getActiveTabPerms()?.includes(
+                  PYSPARK_PERMISSIONS.CAN_CANCEL_RUN
+                )) ||
+                (runStatus !== RunningStatus.RUNNING &&
+                  getActiveTabPerms()?.includes(
+                    PYSPARK_PERMISSIONS.CAN_RUN
+                  ))) && (
+                <Button
+                  type="primary"
+                  icon={
+                    runStatus === RunningStatus.RUNNING ? (
+                      <IconStop className="mr-[4px]" />
+                    ) : (
+                      <IconPlayArrow className="mr-[4px]" />
+                    )
+                  }
+                  disabled={editorContent.trim() === ''}
+                  onClick={
+                    runStatus === RunningStatus.RUNNING
+                      ? handleStopRunCode
+                      : () => handleRunCode().catch(console.error)
+                  }
+                  className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
+                >
+                  {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
+                </Button>
+              )}
+              {getActiveTabPerms()?.includes(
+                PYSPARK_PERMISSIONS.CAN_EXPORT
+              ) && (
+                <Button
+                  icon={<IconUpload />}
+                  onClick={handleExportDataset}
+                  className="h-[26px]"
+                  disabled={runStatus !== RunningStatus.SUCCESS}
+                >
+                  导出数据集
+                </Button>
+              )}
               <Button
                 type="text"
                 icon={<IconSettings />}
@@ -250,12 +269,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         </div>
 
         {/* 编辑器区域 */}
-        <div className="editor-container">
+        <div
+          className={`editor-container  ${getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE) ? '' : 'running-code-mirror'}`}
+        >
           <CodeMirror
             ref={editorRef}
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
+            readOnly={
+              !getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)
+            }
             extensions={[
               python(),
               lintGutter(),

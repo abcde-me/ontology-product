@@ -112,9 +112,11 @@ const Python: React.FC = memo(() => {
               )}
             </TabPane>
           )}
-          <TabPane key="daset" title={<DasetIcon />}>
-            {isDasetTab && <DatasetsList />}
-          </TabPane>
+          {useHasPermission(PYSPARK_PERMISSIONS.CAN_SEARCH_EXPORTS) && (
+            <TabPane key="daset" title={<DasetIcon />}>
+              {isDasetTab && <DatasetsList />}
+            </TabPane>
+          )}
         </Tabs>
       </Sider>
       {!isDasetTab && (

@@ -4,6 +4,7 @@ import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import { RunningStatus } from '@/types/pythonApi';
 import './index.scss';
+import { useFileManager } from '../../hooks/useFileManager';
 
 const { TabPane } = Tabs;
 
@@ -14,6 +15,7 @@ interface EditorContentProps {
     title: string;
     content: string;
     fileId?: string;
+    perms?: Array<string>;
   }>;
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -66,6 +68,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       onRemoveTab(key);
     };
 
+    const { isCanCreate } = useFileManager();
+
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {
       return (
@@ -76,7 +80,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onChange={handleTabChange}
             className="notebook-tabs"
             type="card"
-            showAddButton
+            showAddButton={isCanCreate}
             onAddTab={handleCreatePySpark}
             onDeleteTab={handleCloseTab}
             editable
@@ -112,7 +116,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           onChange={handleTabChange}
           className="notebook-tabs"
           type="card"
-          showAddButton
+          showAddButton={isCanCreate}
           onAddTab={handleCreatePySpark}
           onDeleteTab={handleCloseTab}
           editable
