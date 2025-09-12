@@ -65,9 +65,9 @@ function WorkflowConfig() {
         label_type: type,
         label_tool: { label_tool_code: tool }
       }
-    } = taskInfo.data.data;
+    } = taskInfo.data;
 
-    history.push(
+    history.replace(
       `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}&name=${name}&count=${count}`
     );
   };
