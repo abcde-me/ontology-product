@@ -156,6 +156,7 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
 
       childRef.current?.resetForm();
       childRef.current?.setcreateTagDisabled();
+      closeModal();
       // TODO: 补充跳转导出列表的链接
       Message.success('导出任务创建成功，可点击导出列表查看详情');
     } catch {

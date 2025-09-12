@@ -186,7 +186,7 @@ const DatasetsList: FC = () => {
       dataIndex: 'created_at',
       width: 180,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
-      sorter: (a, b) => a.export_start_time.localeCompare(b.export_start_time)
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     }
   ];
 
