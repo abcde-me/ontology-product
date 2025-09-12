@@ -8,7 +8,11 @@ import {
   getImgJobLabels,
   saveImgJobAnnotations,
   submitImgJobAnnotations,
-  getImgJobOverview
+  getImgJobOverview,
+  getTextEditorTask,
+  getTextEditorResult,
+  saveTextEditorResult,
+  getTextEditorLabels
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -106,7 +110,11 @@ function WorkflowConfig() {
             submitImgJobAnnotations,
             getImgJobOverview,
             goBack,
-            switchNextTask
+            switchNextTask,
+            getTextEditorTask,
+            getTextEditorResult,
+            saveTextEditorResult,
+            getTextEditorLabels
           }}
         ></WujieReact>
       )}

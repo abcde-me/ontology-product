@@ -719,3 +719,22 @@ function handleImgAnnotationIds(params: Record<string, any>) {
     });
   }
 }
+// 获取任务
+export async function getTextEditorTask(requirement_id: number) {
+  return UAPI.RES.textGetTask({}).post({ requirement_id }).inRegion().do();
+}
+
+// 文本标注，获取结果
+export async function getTextEditorResult(task_id: number) {
+  return UAPI.RES.textGetTaskResult({}).post({ task_id }).inRegion().do();
+}
+
+// 获取标签
+export async function getTextEditorLabels(requirement_id: number) {
+  return UAPI.RES.textGetLabels({}).post({ requirement_id }).inRegion().do();
+}
+
+// 保存结果
+export async function saveTextEditorResult(params: Record<string, any>) {
+  return UAPI.RES.textSaveTask({}).post(params).inRegion().do();
+}
