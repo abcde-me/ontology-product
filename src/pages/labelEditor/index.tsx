@@ -8,10 +8,16 @@ import {
   getImgJobLabels,
   saveImgJobAnnotations,
   submitImgJobAnnotations,
-  getImgJobOverview
+  getImgJobOverview,
+  getTextEditorTask,
+  getTextEditorResult,
+  saveTextEditorResult,
+  getTextEditorLabels,
+  getTaskDetail
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
+import { TEXT_DATA } from './const';
 
 const { bus } = WujieReact;
 
@@ -68,7 +74,7 @@ function WorkflowConfig() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}&name=${name}&count=${count}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}`
     );
   };
 
@@ -106,7 +112,12 @@ function WorkflowConfig() {
             submitImgJobAnnotations,
             getImgJobOverview,
             goBack,
-            switchNextTask
+            switchNextTask,
+            getTextEditorTask,
+            getTextEditorResult,
+            saveTextEditorResult,
+            getTextEditorLabels,
+            getTaskDetail
           }}
         ></WujieReact>
       )}
