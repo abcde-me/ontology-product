@@ -331,7 +331,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     setRunStatus(RunningStatus.RUNNING);
     setRunResult([]);
-    setRunLog('');
     setRunError('');
     setRunStartTime(new Date());
     setRunDuration(0);
