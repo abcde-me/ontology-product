@@ -33,6 +33,8 @@ import { debounce } from 'lodash-es';
 import getFileIcon from '@/components/file-icon';
 import { getExportFile, getExportJsonl } from '@/api/pyspark';
 import { GetExportFile } from '@/types/pythonApi';
+import { formatFileSize, formatTime } from '@/utils/format';
+import timeFormattig from '@/utils/timeFormatting';
 const { Text } = Typography;
 
 interface Dataset {
@@ -522,9 +524,8 @@ const DatasetForm = React.forwardRef<
   };
 
   const mapselectFiles = (files: any[]) => {
-    return files.map((item) => {
-      return Number(item.split('/').shift());
-    });
+    console.log('files', files);
+    return files.map((item) => item.file_name);
   };
   //提交数据
   const handleSubmit = debounce(() => {
@@ -535,10 +536,7 @@ const DatasetForm = React.forwardRef<
         const formData: Dataset = {
           ...values,
           dataSource,
-          selectedFiles:
-            dataSource === 'connector'
-              ? mapselectFiles(selectedFiles)
-              : undefined, //如果数据源是连接器，则设置选择文件
+          selectedFiles,
           targetDataSource:
             dataSource === 'volume'
               ? values.targetDataSource
@@ -600,13 +598,19 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record?.file_size || '-'}</span>
+      render: (_, record) => (
+        <span>{formatFileSize(record?.file_size) || '-'}</span>
+      )
     },
     {
       title: '创建时间',
       dataIndex: 'file_modify_time', // 使用动态获取的文件类型筛选器
-      width: 134,
-      render: (_, record) => <span>{record?.file_modify_time || '-'}</span>
+      width: 200,
+      render: (_, record) => (
+        <span>
+          {timeFormattig(new Date(record?.file_modify_time).getTime()) || '-'}
+        </span>
+      )
     }
   ];
 
@@ -876,7 +880,10 @@ const DatasetForm = React.forwardRef<
                   rowSelection={{
                     type: 'checkbox',
                     onChange: (selectedRowKeys, selectedRows) => {
-                      setFileIds(selectedRowKeys as string[]);
+                      if (selectedRowKeys.length > 0) {
+                        setSelectedFiles(selectedRowKeys as string[]);
+                      }
+                      // setFileIds(selectedRowKeys as string[]);
                     }
                   }}
                 />
