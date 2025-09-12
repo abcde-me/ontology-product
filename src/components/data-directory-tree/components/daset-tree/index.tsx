@@ -77,7 +77,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
         currentDataset?.id ?? 0,
         currentDataset?.latest_version ?? '',
         1,
-        50
+        1000
       );
     }
   };
@@ -107,7 +107,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       getScheamList(dataset.id);
     } else {
       // Python类型使用getDasetVersionFile
-      await getDasetVersionFile(dataset.id, dataset.latest_version, 1, 50);
+      await getDasetVersionFile(dataset.id, dataset.latest_version, 1, 1000);
     }
   };
 
@@ -238,6 +238,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     <div className="dataset-tree__file-actions">
                       <Button
                         type="outline"
+                        onMouseDown={(e) => {
+                          // 阻止按钮获得焦点，保持编辑器焦点
+                          e.preventDefault();
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDatasetInsert(
@@ -297,6 +301,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     {type === 'sql' && (
                       <Button
                         type="outline"
+                        onMouseDown={(e) => {
+                          // 阻止按钮获得焦点，保持编辑器焦点
+                          e.preventDefault();
+                        }}
                         onClick={(e) =>
                           handleDatasetInsert(
                             dataset,

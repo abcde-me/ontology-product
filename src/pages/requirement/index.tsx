@@ -8,7 +8,8 @@ import {
   Pagination,
   PaginationProps,
   Popover,
-  Table
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -16,7 +17,11 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { IconClockCircle, IconPlus } from '@arco-design/web-react/icon';
+import {
+  IconClockCircle,
+  IconInfoCircle,
+  IconPlus
+} from '@arco-design/web-react/icon';
 import { getAnnotationList } from '@/api/dataAnnotation';
 import {
   RequirementStatus,
@@ -89,8 +94,6 @@ export default function Requirement() {
       const res = await getAnnotationList(params);
       if (res.code === 0 && res.data) {
         setRequirementData(res.data.result || []);
-        setCurrent(res.data.page);
-        setPageSize(res.data.page_size);
         setTotal(res.data?.total);
         setLoading(false);
       } else {
@@ -131,7 +134,39 @@ export default function Requirement() {
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
-
+  // 状态列表内容
+  const StatusContent = (status: RequirementStatus) => {
+    switch (status) {
+      case RequirementStatus.Draft:
+        return (
+          <div className="status-item">
+            <span className="status-draft-icon" />
+            <span className="status-text">发布中</span>
+          </div>
+        );
+      case RequirementStatus.Published:
+        return (
+          <div className="status-item">
+            <span className="status-published-icon" />
+            <span className="status-text">已发布</span>
+          </div>
+        );
+      case RequirementStatus.PublishFailed:
+        return (
+          <div className="status-item">
+            <span className="status-publishFailed-icon" />
+            <span className="status-text">发布失败</span>
+          </div>
+        );
+      case RequirementStatus.Annotated:
+        return (
+          <div className="status-item">
+            <span className="status-annotated-icon" />
+            <span className="status-text">标注完成</span>
+          </div>
+        );
+    }
+  };
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -220,10 +255,7 @@ export default function Requirement() {
       render: (_, record) => {
         console.log(record, record.status);
         return renderEmptyPlaceholder(record.status) !== '-' ? (
-          <EllipsisPopover
-            value={RequirementStatusMap[record.status]}
-            isEdit={false}
-          />
+          StatusContent(record.status)
         ) : (
           <span>-</span>
         );
@@ -250,7 +282,7 @@ export default function Requirement() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 160,
+      width: 220,
       render: (_, record) => (
         <span>
           {record.create_time == '' || record.create_time == null
@@ -264,7 +296,7 @@ export default function Requirement() {
       title: '创建人',
       dataIndex: 'create_by',
       key: `create_by+id`,
-      width: 100,
+      width: 150,
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
@@ -276,13 +308,13 @@ export default function Requirement() {
     {
       title: '操作',
       dataIndex: 'operate',
+      align: 'center',
       fixed: 'right',
       width: 160,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
-          <div style={{ display: 'flex' }}>
-            {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
+          <div style={{ display: 'flex' }} className="option-content">
             <span
               className="operate-text"
               onClick={() => {

@@ -35,6 +35,7 @@ const AccessTable = (props) => {
   const [searchValue, setSearchValue] = useState('');
   const [Judgment, setJudgment] = useState<boolean>(true);
   const type = useParams('type');
+  const { check_type } = props;
   const columns = () => {
     if (type !== 'db') {
       return [
@@ -293,7 +294,7 @@ const AccessTable = (props) => {
       <InputSearch
         onClear={clearHan}
         allowClear
-        placeholder="搜索文件名"
+        placeholder={check_type == 'db' ? '搜索表名' : '搜索文件名'}
         style={{ width: 220, marginLeft: '24px' }}
         onPressEnter={(e) => {
           getRecordingList();

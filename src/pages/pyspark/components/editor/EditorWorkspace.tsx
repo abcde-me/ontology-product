@@ -94,12 +94,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       childRef
     } = useExportDaset(currentFileId, execid);
 
-    console.log('看一看编辑器卡顿的事情～');
     const getActiveTabPerms = () => {
       const now_active =
         fileTabs?.filter((item) => item.key === activeTab) || [];
       return now_active[0]?.perms || [];
     };
+    // console.log('看一看编辑器卡顿的事情～');
+
     // const myTheme = createTheme({
     //   theme: 'light',
     //   settings: {
