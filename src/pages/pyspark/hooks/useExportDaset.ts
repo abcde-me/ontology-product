@@ -126,7 +126,8 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
         pyspark_id: currentFileId ? Number(currentFileId) : 0,
         storage_type: formData.storageType,
         file_names: formData.selectedFiles,
-        tag_names: formData.tags,
+        tag_names: formData.tag_names,
+        description: formData.description,
         pyspark_exec_id: execid ?? ''
       });
 
