@@ -243,36 +243,65 @@ const Edit = (props) => {
         props.detailData.source_type === 'hdfs'
       ) {
         console.log('处理对象存储/HDFS数据');
-        const processedData: any[] = [];
-        for (const item of res.data.src) {
-          if (!item || typeof item !== 'object' || !item.id) {
-            console.warn('跳过无效项目:', item);
-            continue;
+
+        const processTreeData = (
+          data: any[],
+          parentNode: any = null
+        ): any[] => {
+          if (!Array.isArray(data)) {
+            console.warn('processTreeData 接收到非数组数据:', data);
+            return [];
           }
-          const processedItem: any = {
-            value: item.id,
-            label: item.name || `未命名_${item.id}`
-          };
-          if (
-            item.children &&
-            item.children.volume &&
-            Array.isArray(item.children.volume)
-          ) {
-            processedItem.children = [];
-            for (const child of item.children.volume) {
-              if (child && child.id) {
-                processedItem.children.push({
-                  value: child.id,
-                  label: child.name || `未命名_${child.id}`,
-                  type_names: child.type_name
-                });
+
+          const result: any[] = [];
+          for (const item of data) {
+            if (!item || typeof item !== 'object' || !item.id) {
+              console.warn('跳过无效项目:', item);
+              continue;
+            }
+
+            const processedItem: any = {
+              id: item.id,
+              name: item.name,
+              value: item.id,
+              label: item.name || `未命名_${item.id}`,
+              type_name: item.type_name,
+              level: parentNode ? (parentNode.level || 0) + 1 : 0,
+              isExpanded: false,
+              hasChildren: false
+            };
+
+            if (parentNode) {
+              processedItem.parentId = parentNode.id;
+            }
+
+            // 处理children数据
+            if (item.children) {
+              if (Array.isArray(item.children)) {
+                // 如果children是数组，递归处理
+                processedItem.children = processTreeData(
+                  item.children,
+                  processedItem
+                );
+                processedItem.hasChildren = processedItem.children.length > 0;
+              } else if (typeof item.children === 'object') {
+                // 如果children是对象（如{db: [...], volume: [...]}），保留原始结构
+                processedItem.children = item.children;
+                // 检查是否有子数据
+                const hasChildren = Object.values(item.children).some(
+                  (value: any) => Array.isArray(value) && value.length > 0
+                );
+                processedItem.hasChildren = hasChildren;
               }
             }
+
+            result.push(processedItem);
           }
 
-          processedData.push(processedItem);
-        }
+          return result;
+        };
 
+        const processedData = processTreeData(res.data.src);
         console.log('处理后的对象存储数据:', processedData);
         setDirectoryData(processedData);
         return processedData;
@@ -359,15 +388,17 @@ const Edit = (props) => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
       if (
         props.detailData.source_type === 'db' ||
-        props.detailData.source_type === 'local'
+        props.detailData.source_type === 'local' ||
+        props.detailData.source_type === 'hdfs' ||
+        props.detailData.source_type === 's3'
       ) {
-        // 数据库类型使用TreeSelect，需要找到对应的节点ID
+        // 数据库、本地文件、HDFS、S3类型都使用TreeSelect，需要找到对应的节点ID
         const nodeId = findTreeSelectPathById(
           directoryData,
           props.detailData.data_path_id
         );
         if (nodeId) {
-          console.log('数据库类型设置初始值:', nodeId);
+          console.log('设置TreeSelect初始值:', nodeId);
           setSelectedTreeKeys([nodeId]);
           // 构建显示路径
           const displayPath = buildTreeSelectDisplayPath(
@@ -376,12 +407,12 @@ const Edit = (props) => {
           );
           setTreeSelectDisplayValue(displayPath);
           form.setFieldsValue({
-            dest_path: nodeId,
-            dest_path_display: displayPath
+            dest_path_display: displayPath, // 显示完整路径
+            dest_path: nodeId // 隐藏字段保存节点ID
           });
         }
       } else {
-        // 对象存储和HDFS类型使用Cascader
+        // 其他类型使用Cascader（如果还有的话）
         const path = findPathById(directoryData, props.detailData.data_path_id);
         if (path) {
           setInitialPath(path as (string | string[])[]);
@@ -445,15 +476,25 @@ const Edit = (props) => {
       let pathId;
       if (
         props.detailData.source_type === 'db' ||
-        props.detailData.source_type === 'local'
+        props.detailData.source_type === 'local' ||
+        props.detailData.source_type === 'hdfs' ||
+        props.detailData.source_type === 's3'
       ) {
-        // 数据库和本地文件类型：dest_path直接是节点ID
+        // 数据库、本地文件、HDFS、S3类型：dest_path直接是节点ID
         pathId = rest.dest_path;
       } else {
-        // 对象存储和HDFS类型：dest_path是数组，取最后一个元素
+        // 其他类型：dest_path是数组，取最后一个元素
         pathId = Array.isArray(rest.dest_path)
           ? rest.dest_path.at(-1)
           : rest.dest_path;
+      }
+
+      console.log('最终的pathId (将作为dest_path_id传递):', pathId);
+
+      // 验证pathId
+      if (!pathId) {
+        Message.error('请选择载入位置');
+        return;
       }
       if (props.detailData.load_type !== 'once') {
         const valid = await SchedulerRunRef.current?.validate();
@@ -638,95 +679,77 @@ const Edit = (props) => {
             ></SchedulerRun>
           </div>
         ) : null}
-        {props.detailData.source_type !== 'db' &&
-        props.detailData.source_type !== 'local' ? (
-          <FormItem
-            label="载入位置："
-            field="dest_path"
-            labelCol={{ span: 5 }}
-            wrapperCol={{ span: 19 }}
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入位置' }]}
+
+        <FormItem
+          label="载入位置："
+          field="dest_path_display"
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 19 }}
+          labelAlign="right"
+          rules={[{ required: true, message: '请选择载入位置' }]}
+        >
+          <TreeSelect
+            className="db-tree-select"
+            placeholder="Please select ..."
+            allowClear
+            value={treeSelectDisplayValue}
+            onChange={(value) => {
+              // 处理清除选择的情况
+              if (!value) {
+                setSelectedTreeKeys([]);
+                setTreeSelectDisplayValue('');
+                form.setFieldsValue({
+                  dest_path_display: undefined,
+                  dest_path: undefined
+                });
+              }
+            }}
+            dropdownMenuStyle={{
+              maxHeight: 300,
+              padding: 0,
+              overflow: 'hidden' // 防止外层出现滚动条
+            }}
+            dropdownRender={(originNode) => (
+              <ComponentTree
+                directoryData={directoryData}
+                onDirectoryDataChange={setDirectoryData}
+                selectedKeys={selectedTreeKeys}
+                // onSelect={handleSelect}
+                onPathChange={(path, nodeId) => {
+                  console.log('路径变化:', path, '节点ID:', nodeId);
+                  // 更新选中的keys
+                  setSelectedTreeKeys([String(nodeId)]);
+                  // 更新显示值
+                  setTreeSelectDisplayValue(path);
+                  // 设置两个字段：显示字段和隐藏的节点ID字段
+                  form.setFieldsValue({
+                    dest_path_display: path, // 显示完整路径
+                    dest_path: nodeId // 隐藏字段保存节点ID，用作dest_path_id
+                  });
+                  console.log(
+                    '表单字段已设置 - dest_path_display:',
+                    path,
+                    'dest_path:',
+                    nodeId
+                  );
+                }}
+                showAddTree={true}
+                enableRootAdd={true}
+                activeTab="src"
+                onDataRefresh={getdirectoryDataList}
+                dataSourceType={props.detailData.source_type}
+                tableNameNames={props.detailData.table_names}
+              />
+            )}
           >
-            <Cascader
-              placeholder="请输入载入位置"
-              style={{ width: '100%' }}
-              options={directoryData}
-              renderOption={(node, level) => {
-                console.log(node, level);
-                return <EllipsisPopoverCom value={node.label} />;
-              }}
-              showSearch={{ retainInputValueWhileSelect: false }}
-              dropdownMenuClassName="cascader-dropdown"
-              onChange={(value) => {
-                setInitialPath(value);
-                form.setFieldsValue({ dest_path: value });
-              }}
-            />
-          </FormItem>
-        ) : (
-          <>
-            <FormItem
-              label="载入位置："
-              field="dest_path_display"
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-              labelAlign="right"
-              rules={[{ required: true, message: '请选择载入位置' }]}
-            >
-              <TreeSelect
-                className="db-tree-select"
-                placeholder="Please select ..."
-                allowClear
-                value={treeSelectDisplayValue}
-                onChange={(value) => {
-                  // 处理清除选择的情况
-                  if (!value) {
-                    setSelectedTreeKeys([]);
-                    setTreeSelectDisplayValue('');
-                    form.setFieldsValue({
-                      dest_path: undefined,
-                      dest_path_display: undefined
-                    });
-                  }
-                }}
-                dropdownMenuStyle={{
-                  maxHeight: 300,
-                  padding: 0,
-                  overflow: 'hidden' // 防止外层出现滚动条
-                }}
-                dropdownRender={(originNode) => (
-                  <ComponentTree
-                    directoryData={directoryData}
-                    onDirectoryDataChange={setDirectoryData}
-                    selectedKeys={selectedTreeKeys}
-                    // onSelect={handleSelect}
-                    onPathChange={(path, nodeId) => {
-                      console.log('路径变化:', path, '节点ID:', nodeId);
-                      // 更新选中的keys
-                      setSelectedTreeKeys([String(nodeId)]);
-                      // 更新显示值
-                      setTreeSelectDisplayValue(path);
-                      // 存储节点ID用于表单提交和显示值用于验证
-                      form.setFieldsValue({
-                        dest_path: nodeId,
-                        dest_path_display: path
-                      });
-                    }}
-                    showAddTree={true}
-                    enableRootAdd={true}
-                    activeTab="src"
-                    onDataRefresh={getdirectoryDataList}
-                    dataSourceType={props.detailData.source_type}
-                    tableNameNames={props.detailData.table_names}
-                  />
-                )}
-              >
-                {/* {generatorTreeNodes(directoryData)} */}
-              </TreeSelect>
-            </FormItem>
-          </>
-        )}
+            {/* {generatorTreeNodes(directoryData)} */}
+          </TreeSelect>
+        </FormItem>
+
+        {/* 隐藏字段保存节点ID用于后端提交 */}
+        <FormItem field="dest_path" style={{ display: 'none' }}>
+          <Input />
+        </FormItem>
       </Form>
       <div className={Styles.footerBbtnBox}>
         <Button onClick={cancelHan} style={{ marginRight: '20px' }}>
