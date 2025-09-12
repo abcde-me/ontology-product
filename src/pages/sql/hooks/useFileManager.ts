@@ -74,7 +74,7 @@ export const useFileManager = (
         const res = await getSqlScriptList({
           search_content: searchValue,
           page: 1,
-          page_size: 100
+          page_size: 1000
         });
 
         if (res.status === 200) {
@@ -143,7 +143,10 @@ export const useFileManager = (
 
     setIsLoading(true);
     try {
-      const rawSqlScriptListRes = await getSqlScriptList({});
+      const rawSqlScriptListRes = await getSqlScriptList({
+        page: 1,
+        page_size: 1000
+      });
 
       if (rawSqlScriptListRes.status !== 200) {
         Message.error(rawSqlScriptListRes.message);
