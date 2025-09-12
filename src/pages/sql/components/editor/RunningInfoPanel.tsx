@@ -25,7 +25,7 @@ import { RunningStatus } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
 
 import './RunningInfoPanel.scss';
-import { formatDateTime } from '../../utils';
+import { addSortToColumns, formatDateTime } from '../../utils';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -56,6 +56,8 @@ const RunningInfoPanel: React.FC = memo(() => {
     cancelGetRunResultPolling,
     getRunResultPolling
   } = useEditorContext();
+
+  const sortableColumns = addSortToColumns(columns);
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
   useEffect(() => {
@@ -190,7 +192,8 @@ const RunningInfoPanel: React.FC = memo(() => {
                     maxLength={1000}
                     disabled={runStatus !== RunningStatus.SUCCESS}
                     onChange={(value) => setSize(value)}
-                    onPressEnter={() => {
+                    onPressEnter={(event) => {
+                      event.stopPropagation();
                       // 按回车键时触发轮询获取新结果
                       if (execid) {
                         cancelGetRunResultPolling();
@@ -242,9 +245,10 @@ const RunningInfoPanel: React.FC = memo(() => {
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border
-                    columns={columns}
+                    columns={sortableColumns}
                     data={data}
                     pagination={false}
+                    scroll={{ y: 300, x: true }}
                   />
                 ) : (
                   <Empty description="暂无数据" />
