@@ -25,7 +25,7 @@ import { RunningStatus } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
 
 import './RunningInfoPanel.scss';
-import { formatDateTime } from '../../utils';
+import { addSortToColumns, formatDateTime } from '../../utils';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -54,8 +54,12 @@ const RunningInfoPanel: React.FC = memo(() => {
     currentFileId,
     execid,
     cancelGetRunResultPolling,
-    getRunResultPolling
+    getRunResultPolling,
+    resultLoading,
+    loadRunResult
   } = useEditorContext();
+
+  const sortableColumns = addSortToColumns(columns);
 
   // 监听运行状态变化，当开始新运行时重置用户关闭状态
   useEffect(() => {
@@ -190,14 +194,14 @@ const RunningInfoPanel: React.FC = memo(() => {
                     maxLength={1000}
                     disabled={runStatus !== RunningStatus.SUCCESS}
                     onChange={(value) => setSize(value)}
-                    onPressEnter={() => {
+                    onPressEnter={(event) => {
+                      event.stopPropagation();
                       // 按回车键时触发轮询获取新结果
                       if (execid) {
-                        cancelGetRunResultPolling();
-                        getRunResultPolling(currentFileId ?? '', {
-                          script_execid: execid,
-                          size: size
-                        });
+                        // 避异步没更新结束获取不到正确size
+                        setTimeout(() => {
+                          loadRunResult(execid, size);
+                        }, 50);
                       }
                     }}
                   />
@@ -236,15 +240,21 @@ const RunningInfoPanel: React.FC = memo(() => {
               </div>
             )}
 
+            {/* {resultLoading && (
+              <Empty description="查询运行结果中，请等待..." />
+            )} */}
+
             {runStatus === RunningStatus.SUCCESS && (
               <div className="flex flex-col gap-[8px]">
                 {runLog && <Typography.Text>{runLog}</Typography.Text>}
                 {columns.length > 0 && data.length > 0 ? (
                   <Table
                     border
-                    columns={columns}
+                    columns={sortableColumns}
                     data={data}
                     pagination={false}
+                    scroll={{ y: 300, x: true }}
+                    loading={resultLoading}
                   />
                 ) : (
                   <Empty description="暂无数据" />

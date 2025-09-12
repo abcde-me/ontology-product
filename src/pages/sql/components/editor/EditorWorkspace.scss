@@ -85,10 +85,9 @@
       color: #94a3b8;
     }
 
-    // .cm-focused {
-    //   outline: 1px solid var(--primary-primary-6, #007dfa);
-    //   background: var(--background-color-bg-3, #f5f9ff);
-    // }
+    .cm-line {
+      padding: 0 12px;
+    }
 
     .cm-activeLine {
       background-color: unset;
@@ -99,59 +98,7 @@
       padding-top: 3px;
       background-color: unset;
       color: var(--color-text-4);
+      width: 24px;
     }
-
-    // .cm-scroller {
-    //   max-height: 100%;
-    // }
-    // .code-editor {
-    //   height: 100%;
-
-    //   .cm-editor {
-    //     height: 100%;
-    //   }
-
-    //   // .cm-scroller {
-    //   //   font-size: 14px;
-    //   //   line-height: 1.6;
-    //   // }
-
-    //   // .cm-content {
-    //   //   padding: 8px 12px;
-    //   //   font-weight: 400;
-    //   //   font-size: 14px;
-    //   //   line-height: 24px;
-    //   //   color: #0f172a;
-    //   // }
-
-    //   // .cm-line {
-    //   //   padding: 0;
-    //   // }
-
-    //   // .cm-gutters {
-    //   //   background-color: #fff;
-    //   //   border-right: 1px solid transparent;
-    //   //   color: #6e7b8d;
-    //   //   width: 23px;
-    //   // }
-
-    //   // .cm-activeLineGutter {
-    //   //   background-color: #f0f7ff;
-    //   //   color: #0f172a;
-    //   // }
-
-    //   // .cm-activeLine {
-    //   //   background-color: #fff;
-    //   //   color: #0f172a;
-    //   // }
-
-    //   // .cm-selectionBackground {
-    //   //   background-color: #cce7ff;
-    //   // }
-
-    //   // .cm-cursor {
-    //   //   border-left: 2px solid #165dff;
-    //   // }
-    // }
   }
 }

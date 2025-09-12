@@ -44,6 +44,7 @@ export interface UseEditorReturn {
   runResult: RunResult[];
   currentFileId?: string;
   runError: string;
+  resultLoading: boolean;
 
   // 表格数据处理
   columns: Array<{
@@ -61,6 +62,7 @@ export interface UseEditorReturn {
   handleStopRunCode: () => void;
   getRunResultPolling: (id: string, params: any) => void;
   cancelGetRunResultPolling: () => void;
+  loadRunResult: (execid: string, size: string) => void;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -81,6 +83,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [size, setSize] = useState<string>('100');
   const [runLog, setRunLog] = useState<string>('');
   const [runError, setRunError] = useState<string>('');
+  const [resultLoading, setResultLoading] = useState(false);
 
   // 动态生成表格列
   const generateTableColumns = (runResult: RunResult[]) => {
@@ -158,6 +161,25 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunError('获取运行结果失败');
       }
     });
+
+  const loadRunResult = async (execid: string, size: string) => {
+    setResultLoading(true);
+    try {
+      const res = await getRunResultSqlScript(currentFile?.fileId || '', {
+        script_execid: execid,
+        size: size || '100'
+      });
+      if (res?.status === 200) {
+        setRunResult(res.data?.sql_result_lists);
+      } else {
+        setRunResult([]);
+      }
+
+      setResultLoading(false);
+    } catch (error) {
+      setResultLoading(false);
+    }
+  };
 
   // 清空编辑器状态的函数
   const clearEditorState = useCallback(() => {
@@ -249,13 +271,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunStatus(RunningStatus.RUNNING);
-    setRunResult([]);
-    setRunLog('');
-    setRunError('');
+    const saveRes = await updateSqlScript(Number(currentFile?.fileId), {
+      uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+      script_name: currentFile.title ?? '',
+      script_content: editorContent
+    });
+
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
+
+    setLastAutoSave(new Date().toLocaleTimeString());
+
     setExecid('');
-    setRunStartTime(new Date());
-    setRunDuration(0);
 
     try {
       const res = await runSqlScript(currentFile?.fileId ?? '');
@@ -270,7 +299,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
-  }, [runStatus, currentFile?.fileId]);
+  }, [runStatus, currentFile?.fileId, editorContent]);
 
   // 停止运行
   const handleStopRunCode = async () => {
@@ -299,6 +328,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!execid || !currentFile?.fileId) {
       return;
     }
+
+    setRunStatus(RunningStatus.RUNNING);
+    setRunResult([]);
+    setRunError('');
+    setRunStartTime(new Date());
+    setRunDuration(0);
 
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
@@ -387,6 +422,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     runLog,
     currentFileId: currentFile?.fileId,
     runError,
+    resultLoading,
 
     // 表格数据处理
     columns,
@@ -398,6 +434,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     handleRunCode,
     handleStopRunCode,
     getRunResultPolling,
-    cancelGetRunResultPolling
+    cancelGetRunResultPolling,
+    loadRunResult
   };
 };

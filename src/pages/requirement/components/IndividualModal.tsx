@@ -26,19 +26,7 @@ interface DataSourceModalProps {
   children?: React.ReactNode;
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
-}
-const TabPane = Tabs.TabPane;
-const style: React.CSSProperties = {
-  textAlign: 'center',
-  marginTop: 20
-};
-// 树节点类型定义（用于Tree组件）
-interface TreeNodeType {
-  title: string;
-  key: string;
-  children?: TreeNodeType[];
-  isLeaf?: boolean;
-  rawData?: any; // 保存原始数据引用
+  getTreeIds: (data: any) => void;
 }
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
@@ -46,10 +34,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   title = '数据源',
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
-  children
+  getTreeIds
 }) => {
-  const FormItem = Form.Item;
-  const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -159,6 +145,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   // 表格选择内容
   const getTableSelectContent = () => {
     getChildTreeSelectData(selectedRowKeys);
+    getTreeIds(checkedKeys);
     onClose();
   };
   return (

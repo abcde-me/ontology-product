@@ -156,13 +156,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             defaultExpandedKeys={getDetailObj?.label_data_set?.[0]?.dir_name.split(
               ','
             )}
-            defaultSelectedKeys={[
-              getDetailObj?.label_data_set?.[0]?.dir_name.split(',')?.[2]
-            ]}
+            defaultSelectedKeys={[getDetailObj?.label_data_set?.[0]?.dir_name]}
+            autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
             onSelect={(value, e) => {
-              if (e?.node?.props?.dataRef?.level === 3) {
+              if (e?.node?.props?.dataRef?.level === 3 && type !== 'detail') {
                 setCurrent(1);
                 setPageSize(10);
                 setCheckedKeys([value[0]?.split(',')?.[2]]);
@@ -354,7 +353,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
           </div>
           <Table
             ref={tableRef}
-            rowKey="id"
+            rowKey="execution_id"
             columns={columns}
             data={tableData}
             loading={tableLoading}
@@ -362,11 +361,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             rowSelection={{
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
-              checkboxProps: (record) => {
-                return {
-                  disabled: type === 'detail'
-                };
-              },
+              // checkboxProps: (record) => {
+              //   return {
+              //     disabled: type === 'detail'
+              //   };
+              // },
               onChange: (selectedRowKeys, selectedRows) => {
                 // 合并新旧选中数据并处理取消选中
                 const mergedMap = new Map<string, any>();
@@ -381,12 +380,13 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
 
                 // 3. 更新状态
                 const mergedRows = Array.from(mergedMap.values());
-                if (mergedRows.length <= 200) {
-                  setSelectedRowsContent(mergedRows);
-                  setSelectedRowKeys(mergedRows.map((item) => item.id));
-                } else {
-                  Message.error('选中的数量不能超过200条');
-                }
+                console.log(mergedRows, 'top');
+                // if (mergedRows.length <= 200) {
+                setSelectedRowsContent(mergedRows);
+                setSelectedRowKeys(mergedRows.map((item) => item.execution_id));
+                // } else {
+                // Message.error('选中的数量不能超过200条');
+                // }
               }
             }}
           />

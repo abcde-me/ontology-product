@@ -77,7 +77,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
         currentDataset?.id ?? 0,
         currentDataset?.latest_version ?? '',
         1,
-        50
+        1000
       );
     }
   };
@@ -107,7 +107,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       getScheamList(dataset.id);
     } else {
       // Python类型使用getDasetVersionFile
-      await getDasetVersionFile(dataset.id, dataset.latest_version, 1, 50);
+      await getDasetVersionFile(dataset.id, dataset.latest_version, 1, 1000);
     }
   };
 
