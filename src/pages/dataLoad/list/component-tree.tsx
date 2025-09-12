@@ -76,7 +76,7 @@ interface ComponentTreeProps {
   enableRootAdd?: boolean;
   activeTab?: 'src' | 'dest'; // 新增：当前活动标签，用于确定root_type
   onDataRefresh?: () => Promise<TreeNodeData[]>; // 新增：数据刷新回调
-  dataSourceType?: string; // 新增：数据源类型，用于判断是否显示数据源节点
+  dataSourceType?: string; // 新增：数据源类型，用于判断是否显示数据卷节点
   tableNameNames?: string; // 新增：表名
   selectedKeys?: string[]; // 新增：选中的节点keys
 }
@@ -100,12 +100,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     new Map()
   );
 
-  // 数据源节点下的输入框状态
+  // 数据卷节点下的输入框状态
   const [datasourceInputNodes, setDatasourceInputNodes] = useState<
     Map<string, TreeNodeData>
   >(new Map());
 
-  // 处理数据：为每个目录添加"数据库"子节点，为本地文件类型添加"数据源"子节点
+  // 处理数据：为每个目录添加"数据库"子节点，为本地文件类型添加"数据卷"子节点
   const processedDirectoryData = React.useMemo(() => {
     return directoryData.map((item) => {
       if (item.type_name === 'catalog') {
@@ -122,7 +122,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         }
 
         // 为目录节点添加"数据库"子节点
-        if (!hasDbNode && dataSourceType !== 'local') {
+        if (
+          !hasDbNode &&
+          dataSourceType !== 'local' &&
+          dataSourceType !== 'hdfs' &&
+          dataSourceType !== 's3'
+        ) {
           const dbNodeKey = `${item.id}-db`;
           const dbInputNode = dbInputNodes.get(dbNodeKey);
 
@@ -169,13 +174,17 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           childNodes.push(dbNode);
         }
 
-        // 为本地文件类型添加"数据源"子节点
-        if (dataSourceType === 'local') {
+        // 为本地文件类型添加"数据卷"子节点
+        if (
+          dataSourceType === 'local' ||
+          dataSourceType === 'hdfs' ||
+          dataSourceType === 's3'
+        ) {
           let hasDataSourceNode = false;
           if (item.children) {
             if (Array.isArray(item.children)) {
               hasDataSourceNode = item.children.some(
-                (child) => child.name === '数据源' || child.title === '数据源'
+                (child) => child.name === '数据卷' || child.title === '数据卷'
               );
             }
           }
@@ -205,7 +214,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
               }
             }
 
-            // 如果有数据源输入节点，添加到子节点开头
+            // 如果有数据卷输入节点，添加到子节点开头
             if (datasourceInputNode) {
               datasourceNodeChildren = [
                 datasourceInputNode,
@@ -216,13 +225,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             const datasourceNode: TreeNodeData = {
               id: Number(`${item.id}000`),
               key: datasourceNodeKey,
-              name: '数据源',
+              name: '数据卷',
               value: datasourceNodeKey,
-              label: '数据源',
-              title: '数据源',
+              label: '数据卷',
+              title: '数据卷',
               type_name: 'datasource_parent',
               level: (item.level || 0) + 1,
-              isExpanded: datasourceInputNode ? true : false, // 如果有输入节点，展开数据源节点
+              isExpanded: datasourceInputNode ? true : false, // 如果有输入节点，展开数据卷节点
               hasChildren: true,
               isLastLeaf: false,
               showInput: false,
@@ -280,7 +289,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const isDbInput =
       dataRef.parentId && dbInputNodes.has(`${dataRef.parentId}-db`);
 
-    // 检查是否是数据源节点下的输入框
+    // 检查是否是数据卷节点下的输入框
     const isDatasourceInput =
       dataRef.parentId &&
       datasourceInputNodes.has(`${dataRef.parentId}-datasource`);
@@ -294,7 +303,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         newDbInputNodes.delete(dbNodeKey);
         setDbInputNodes(newDbInputNodes);
       } else if (isDatasourceInput) {
-        // 删除数据源输入节点
+        // 删除数据卷输入节点
         const datasourceNodeKey = `${dataRef.parentId}-datasource`;
         const newDatasourceInputNodes = new Map(datasourceInputNodes);
         newDatasourceInputNodes.delete(datasourceNodeKey);
@@ -387,11 +396,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             root_type: root_type
           });
           if (res.status !== 200) {
-            Message.error(res?.message ?? '新建数据源失败');
+            Message.error(res?.message ?? '新建数据卷失败');
             return;
           }
 
-          // 如果是数据源输入框，清理状态
+          // 如果是数据卷输入框，清理状态
           if (isDatasourceInput) {
             const datasourceNodeKey = `${dataRef.parentId}-datasource`;
             const newDatasourceInputNodes = new Map(datasourceInputNodes);
@@ -418,9 +427,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       }
     }
 
-    // 数据库输入框和数据源输入框需要特殊处理刷新逻辑
+    // 数据库输入框和数据卷输入框需要特殊处理刷新逻辑
     if (isDbInput || isDatasourceInput) {
-      // 对于数据库输入框和数据源输入框，刷新数据并清理输入状态
+      // 对于数据库输入框和数据卷输入框，刷新数据并清理输入状态
       if (onDataRefresh) {
         const newTreeData = await onDataRefresh();
         onDirectoryDataChange(newTreeData);
@@ -477,8 +486,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       nodeData?.type_name === 'db_parent' ||
       nodeData?.type_name === 'datasource_parent'
     ) {
-      console.log('数据库节点或数据源节点不可选中');
-      return; // 阻止选中数据库节点和数据源节点
+      console.log('数据库节点或数据卷节点不可选中');
+      return; // 阻止选中数据库节点和数据卷节点
     }
 
     // 调用原始的onSelect回调
@@ -495,7 +504,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       );
       const fullPath = pathArray
         ? pathArray.join('/') +
-          (dataSourceType !== 'local' ? '/' + tableNameNames : '') // 非本地文件类型才拼接表名
+          (dataSourceType === 'db' ? '/' + tableNameNames : '') // 只有数据库类型才拼接表名
         : nodeData?.name || '';
 
       // 传递路径和节点ID
@@ -531,8 +540,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       if (node.dataRef.title === '数据库' || node.dataRef.name === '数据库') {
         nodeTypeName = 'db_item';
       } else if (
-        node.dataRef.title === '数据源' ||
-        node.dataRef.name === '数据源'
+        node.dataRef.title === '数据卷' ||
+        node.dataRef.name === '数据卷'
       ) {
         nodeTypeName = 'datasource_item';
       } else {
@@ -564,7 +573,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           newNode.parentId = node.dataRef?.id;
         }
       } else if (node.dataRef?.type_name === 'datasource_parent') {
-        // 数据源节点的key格式是 "${item.id}-datasource"，提取纯数字部分
+        // 数据卷节点的key格式是 "${item.id}-datasource"，提取纯数字部分
         const key = node.dataRef?.key || node.dataRef?.id;
         if (typeof key === 'string' && key.includes('-datasource')) {
           newNode.parentId = Number(key.replace('-datasource', ''));
@@ -625,7 +634,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     let typeText = '';
     if (dataRef?.title === '数据库' || dataRef?.name === '数据库') {
       typeText = '';
-    } else if (dataRef?.title === '数据源' || dataRef?.name === '数据源') {
+    } else if (dataRef?.title === '数据卷' || dataRef?.name === '数据卷') {
       typeText = '';
     }
     // const newName = generateName(existingChildren, typeText);
@@ -637,7 +646,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     // 递归更新 processedDirectoryData，在指定节点下添加新的子节点
     const updateDirectoryData = (data: TreeNodeData[]): TreeNodeData[] => {
       return data.map((item) => {
-        // 对于数据库节点和数据源节点，需要特殊处理ID匹配逻辑
+        // 对于数据库节点和数据卷节点，需要特殊处理ID匹配逻辑
         let isTargetNode = false;
         if (dataRef?.type_name === 'db_parent') {
           // 数据库节点：比较key或者从key中提取的ID
@@ -648,7 +657,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
               targetKey.includes('-db') &&
               item.id === Number(targetKey.replace('-db', '')));
         } else if (dataRef?.type_name === 'datasource_parent') {
-          // 数据源节点：比较key或者从key中提取的ID
+          // 数据卷节点：比较key或者从key中提取的ID
           const targetKey = dataRef?.key || dataRef?.id;
           isTargetNode =
             item.key === targetKey ||
@@ -695,18 +704,18 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
       console.log('数据库节点添加子项，dbNodeKey:', dbNodeKey);
     } else if (dataRef?.type_name === 'datasource_parent') {
-      // 数据源节点下的添加：添加到datasourceInputNodes状态中
+      // 数据卷节点下的添加：添加到datasourceInputNodes状态中
       const datasourceNodeKey = dataRef?.key || `${dataRef?.id}-datasource`;
       const newDatasourceInputNodes = new Map(datasourceInputNodes);
       newDatasourceInputNodes.set(datasourceNodeKey, newInputNode);
       setDatasourceInputNodes(newDatasourceInputNodes);
 
-      // 确保数据源节点展开
+      // 确保数据卷节点展开
       if (!expandedKeys.includes(datasourceNodeKey)) {
         setExpandedKeys([...expandedKeys, datasourceNodeKey]);
       }
 
-      console.log('数据源节点添加子项，datasourceNodeKey:', datasourceNodeKey);
+      console.log('数据卷节点添加子项，datasourceNodeKey:', datasourceNodeKey);
     } else {
       const updatedData = updateDirectoryData(processedDirectoryData);
       const originalFormatData = updatedData.map((item) => {
@@ -797,17 +806,17 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     perms = dataRef?.perms ? dataRef.perms : perms;
     // 只有当前节点被悬浮时才显示新建按钮
     const isCurrentNodeHovered = hoverNode && hoverNode.id === dataRef?.id;
-    // 只有标题为"数据库"或"数据源"的节点才能添加子节点
+    // 只有标题为"数据库"或"数据卷"的节点才能添加子节点
     const canAddChildren =
       dataRef?.title === '数据库' ||
       dataRef?.name === '数据库' ||
-      dataRef?.title === '数据源' ||
-      dataRef?.name === '数据源';
+      dataRef?.title === '数据卷' ||
+      dataRef?.name === '数据卷';
 
     return (
       !dataRef?.showInput && (
         <div className={'flex items-center justify-between'} style={{}}>
-          {/* 只在"数据库"或"数据源"父节点显示新建按钮，只在悬浮时显示 */}
+          {/* 只在"数据库"或"数据卷"父节点显示新建按钮，只在悬浮时显示 */}
           {canAddChildren && isCurrentNodeHovered && (
             <Tooltip color="white" content="新建">
               <div

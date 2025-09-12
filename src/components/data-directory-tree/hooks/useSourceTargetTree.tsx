@@ -392,14 +392,14 @@ export const useSourceTargetTree = (dataType) => {
         dataType === 'source'
           ? {
               page: 1,
-              page_size: 100,
+              page_size: 1000,
               data_path_id: Number(volumeOrDb.id),
               file_name: keyword,
               sort: 'desc' as 'asc' | 'desc'
             }
           : {
               page: 1,
-              limit: 100,
+              limit: 1000,
               full_path: volumeOrDb.full_path || '',
               sort_field: volumeOrDb.sort_field || '',
               sort_order: 'desc' as 'asc' | 'desc',

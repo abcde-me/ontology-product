@@ -100,11 +100,34 @@ export const useTableList = <T = {}, U = {}>(
     });
   }
 
+  async function loadData() {
+    setLoading(true);
+
+    try {
+      const res = await onRequest?.(searchParams);
+
+      setPagination((prev) => ({
+        ...prev,
+        current: res?.data?.page,
+        pageSize: res?.data?.page_size,
+        total: res?.data?.total
+      }));
+
+      setListData((res?.data?.items as T[]) || []);
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log('error', error);
+    }
+  }
+
   return {
     searchParams,
     loading,
     listData,
     pagination,
+    loadData,
     handleSearchChange,
     handleTableChange
   };

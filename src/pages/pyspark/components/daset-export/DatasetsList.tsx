@@ -6,7 +6,8 @@ import {
   Message,
   PaginationProps,
   Table,
-  TableColumnProps
+  TableColumnProps,
+  Tooltip
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import {
@@ -23,6 +24,7 @@ import {
 import { formatFileSize } from '@/utils/format';
 import noDataElement from '@/components/no-data';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
+import { IconInfoCircle } from '@arco-design/web-react/icon';
 
 const FormItem = Form.Item;
 
@@ -31,6 +33,7 @@ const DatasetsList: FC = () => {
     listData,
     pagination,
     loading,
+    loadData,
     handleSearchChange,
     handleTableChange
   } = useTableList<GetExportDatasetListItem, GetExportDatasetListReq>({
@@ -117,10 +120,9 @@ const DatasetsList: FC = () => {
             actionBtn = item.perms?.includes(
               PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY
             ) && (
-              <Link href="#" onClick={() => handleRetryTask(item)}>
-                {' '}
-                重试{' '}
-              </Link>
+              <Tooltip content={item.err_reason}>
+                <IconInfoCircle />
+              </Tooltip>
             );
             break;
           case ExportStatus.ExportTerminated:
@@ -186,7 +188,7 @@ const DatasetsList: FC = () => {
       dataIndex: 'created_at',
       width: 180,
       render: (_, item) => <div className="fontMM">{item.created_at}</div>,
-      sorter: (a, b) => a.export_start_time.localeCompare(b.export_start_time)
+      sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     }
   ];
 
@@ -197,6 +199,7 @@ const DatasetsList: FC = () => {
 
     if (res.code == '' && res.status == 200) {
       Message.success('停止任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '停止任务失败');
     }
@@ -208,6 +211,7 @@ const DatasetsList: FC = () => {
     });
     if (res.code == '' && res.status == 200) {
       Message.success('重试任务成功');
+      loadData();
     } else {
       Message.error(res.message ?? '重试任务失败');
     }

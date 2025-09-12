@@ -72,7 +72,7 @@ interface LabelInfoAttributeGroup {
   label_info_attribute: LabelInfoAttribute[];
 }
 interface LabelData {
-  id: string;
+  label_id: string;
   label_name_cn: string;
   label_name_en: string;
   label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
@@ -108,6 +108,8 @@ export default function RequirementDetail() {
   const [selectedData, setSelectedData]: any = useState([]);
   // 任务分配选中的数据
   const [taskAssignData, setTaskAssignData]: any = useState([]);
+  // 选项部门数据内容
+  const [departmentIds, setDepartmentIds] = useState([]);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 标签和属性
@@ -146,6 +148,9 @@ export default function RequirementDetail() {
       setIsShowTypeErrorInfo(false);
     }
     // setPublishData({ ...publishData, label_count: taskAssignData.length })
+  };
+  const getChildTreeIds = (data) => {
+    setDepartmentIds(data);
   };
   // 显示标注类型 以及 类型内容
   const [annotationTypeVal, setAnnotationTypeVal] = useState(
@@ -266,7 +271,7 @@ export default function RequirementDetail() {
   const generateInitialData = (): LabelData[] => {
     return [
       {
-        id: uuidV4(),
+        label_id: uuidV4(),
         label_name_cn: '',
         label_name_en: '',
         label_shape: LabelShape.RECTANGLE,
@@ -339,7 +344,7 @@ export default function RequirementDetail() {
     // 创建最后一个元素的深拷贝，避免引用冲突
     const lastItem = _.cloneDeep(arr[arr.length - 1]);
     // 生成全新的唯一ID
-    lastItem.id = uuidV4() + new Date().getTime();
+    lastItem.label_id = uuidV4() + new Date().getTime();
     lastItem.attribute_id = uuidV4();
     lastItem.label_colour = getRandomHexColorStrict();
     // 重置属性组（如果需要全新开始）
@@ -559,21 +564,32 @@ export default function RequirementDetail() {
         image_out_of_bounds: 0
       },
       // 配置文件分类标签
-      file_labels: text_fl_data,
+      file_labels:
+        annotationTypeContentCode ===
+        AnnotationTypeContentCode.TEXT_CLASSIFICATION
+          ? text_fl_data
+          : [],
       label_data_set: selectedData,
       labels:
         annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
           ? entityRelations
-          : newSetLabels,
-      entity_relations: relationRelations,
-      label_operate: [
+          : annotationTypeContentCode !== AnnotationTypeContentCode.QA &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.TEXT_SORT &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.TEXT_CLASSIFICATION
+            ? newSetLabels
+            : [],
+      entity_relations:
+        annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
+          ? relationRelations
+          : [],
+      label_operate:
         //配置标注人员
         {
-          user_id: ['85f5c5c1-a21e-48bd-88f8-5a2c78d37fac'],
-          // user_id: taskTypeVal === 1 ? taskAssignData : [],
-          org_id: taskTypeVal === 2 ? taskAssignData : []
+          user_id: taskTypeVal === 1 ? taskAssignData : [],
+          org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
-      ]
     };
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
@@ -687,22 +703,22 @@ export default function RequirementDetail() {
             }}
           >
             <FormItem
-              label="需求名称"
+              label="需求名称:"
               field="name"
               rules={[{ required: true, message: '请输入需求名称', max: 50 }]}
             >
-              <Input placeholder="请输入需求名称" style={{ width: 643 }} />
+              <Input placeholder="请输入需求名称" style={{ width: 800 }} />
             </FormItem>
             <FormItem
-              label="描述说明"
+              label="描述说明:"
               field="description"
               rules={[{ required: true, message: '请输入描述内容', max: 200 }]}
             >
-              <TextArea placeholder="请输入描述内容" style={{ width: 643 }} />
+              <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
             </FormItem>
             <div className="basic-title">任务配置</div>
             <FormItem
-              label="标注类型"
+              label="标注类型:"
               required
               className="annotation-tool"
               field="label_type"
@@ -720,11 +736,10 @@ export default function RequirementDetail() {
                 getChildAnnotationType={getAnnotationType}
               />
             </FormItem>
-            <FormItem field="dataset" label="标注数据" required>
+            <FormItem field="dataset" label="标注数据:" required>
               <div className="data-content-set">
                 <Button
                   // disabled={type === 'detail'}
-                  type="primary"
                   onClick={() => {
                     setModalVisible(true);
                   }}
@@ -769,15 +784,19 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
+              style={{
+                marginLeft: '-18px'
+              }}
               layout="inline"
-              labelAlign="right"
-              labelCol={{ flex: 'none' }}
-              wrapperCol={{ flex: 1 }}
+              labelCol={{
+                span: 1
+              }}
             >
               <FormItem
                 field="label_info_attribute_groups"
-                label="标签和属性"
+                label="标签和属性:"
                 required
+                className="label_info_attribute_groups_content"
               >
                 {/* 循环显示内容 */}
                 {annotationTypeContentVal ===
@@ -875,6 +894,7 @@ export default function RequirementDetail() {
                                   <Select
                                     placeholder="请选择形状"
                                     value={item.label_shape}
+                                    defaultValue={1}
                                     onChange={(val: any) => {
                                       updateNestedValue(
                                         [labelIndex, 'label_shape'],
@@ -1049,13 +1069,13 @@ export default function RequirementDetail() {
                                               3 && (
                                               <IconPlus
                                                 style={{
+                                                  fontSize: 25,
                                                   cursor:
                                                     type === 'detail'
                                                       ? 'not-allowed'
                                                       : 'pointer'
                                                 }}
                                                 className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
-                                                fontSize={16}
                                                 onClick={() => {
                                                   if (type !== 'detail') {
                                                     addAttribute(
@@ -1070,7 +1090,7 @@ export default function RequirementDetail() {
                                               ?.length > 1 && (
                                               <IconDelete
                                                 className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                                fontSize={16}
+                                                fontSize={26}
                                                 onClick={() => {
                                                   // 删除当前属性组
                                                   if (type !== 'detail') {
@@ -1336,19 +1356,19 @@ export default function RequirementDetail() {
                                   >
                                     必须标注
                                   </Checkbox>
-                                  {attrGroup.attribute_group_class !== 3 && (
-                                    <IconPlus
-                                      fontSize={16}
-                                      className="ml-2"
-                                      onClick={() => {
-                                        addAttributeT(labelIndex);
-                                      }}
-                                    />
-                                  )}
+                                  {/* {attrGroup.attribute_group_class !== 3 && (
+                                          <IconPlus
+                                            fontSize={25}
+                                            className="ml-2"
+                                            onClick={() => {
+                                              addAttributeT(labelIndex);
+                                            }}
+                                          />
+                                        )} */}
                                   {
                                     <IconDelete
                                       className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                      fontSize={16}
+                                      fontSize={25}
                                       onClick={() => {
                                         // 删除当前属性组
                                         if (type !== 'detail') {
@@ -1553,7 +1573,7 @@ export default function RequirementDetail() {
                   message: '请选择类型'
                 }
               ]}
-              label={taskTypeVal === 2 ? '选择部门' : '选择个人'}
+              label={taskTypeVal === 2 ? '选择部门:' : '选择个人:'}
               disabled={type === 'detail'}
             >
               <div className="btn-content-text">
@@ -1597,6 +1617,7 @@ export default function RequirementDetail() {
             }}
             title="选择个人"
             getChildTreeSelectData={handleChildTreeSelectData}
+            getTreeIds={getChildTreeIds}
           />
         )}
         <div className="btn-content">

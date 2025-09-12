@@ -92,7 +92,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       childRef
     } = useExportDaset(currentFileId, execid);
 
-    console.log('看一看编辑器卡顿的事情～');
+    // console.log('看一看编辑器卡顿的事情～');
 
     // const myTheme = createTheme({
     //   theme: 'light',

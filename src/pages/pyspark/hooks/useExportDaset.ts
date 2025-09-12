@@ -126,7 +126,8 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
         pyspark_id: currentFileId ? Number(currentFileId) : 0,
         storage_type: formData.storageType,
         file_names: formData.selectedFiles,
-        tag_names: formData.tags,
+        tag_names: formData.tag_names,
+        description: formData.description,
         pyspark_exec_id: execid ?? ''
       });
 
@@ -156,6 +157,7 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
 
       childRef.current?.resetForm();
       childRef.current?.setcreateTagDisabled();
+      closeModal();
       // TODO: 补充跳转导出列表的链接
       Message.success('导出任务创建成功，可点击导出列表查看详情');
     } catch {

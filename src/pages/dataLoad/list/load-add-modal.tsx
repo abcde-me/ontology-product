@@ -82,7 +82,12 @@ const LoadAddModal = (props: propsType) => {
 
       const { time, day, cycle, ...rest } = formValues;
       let pathId;
-      if (sourceType === 'db' || sourceType === 'local') {
+      if (
+        sourceType === 'db' ||
+        sourceType === 'local' ||
+        sourceType === 'hdfs' ||
+        sourceType === 's3'
+      ) {
         pathId = selectedNodeId;
         if (!pathId) {
           Message.error('请选择载入位置');
@@ -279,36 +284,61 @@ const LoadAddModal = (props: propsType) => {
 
       if (sourceType === 's3' || sourceType === 'hdfs') {
         console.log('处理对象存储/HDFS数据');
-        const processedData: any[] = [];
-        for (const item of res.data.src) {
-          if (!item || typeof item !== 'object' || !item.id) {
-            console.warn('跳过无效项目:', item);
-            continue;
+
+        const processTreeData = (
+          data: any[],
+          parentNode: any = null
+        ): any[] => {
+          if (!Array.isArray(data)) {
+            console.warn('processTreeData 接收到非数组数据:', data);
+            return [];
           }
-          const processedItem: any = {
-            value: item.id,
-            label: item.name || `未命名_${item.id}`
-          };
-          if (
-            item.children &&
-            item.children.volume &&
-            Array.isArray(item.children.volume)
-          ) {
-            processedItem.children = [];
-            for (const child of item.children.volume) {
-              if (child && child.id) {
-                processedItem.children.push({
-                  value: child.id,
-                  label: child.name || `未命名_${child.id}`,
-                  type_names: child.type_name
-                });
+
+          const result: any[] = [];
+          for (const item of data) {
+            if (!item || typeof item !== 'object' || !item.id) {
+              console.warn('跳过无效项目:', item);
+              continue;
+            }
+
+            const processedItem: any = {
+              id: item.id,
+              name: item.name,
+              value: item.id,
+              label: item.name || `未命名_${item.id}`,
+              type_name: item.type_name,
+              level: parentNode ? (parentNode.level || 0) + 1 : 0,
+              isExpanded: false,
+              hasChildren: false
+            };
+
+            if (parentNode) {
+              processedItem.parentId = parentNode.id;
+            }
+            // 处理children数据
+            if (item.children) {
+              if (Array.isArray(item.children)) {
+                // 如果children是数组，递归处理
+                processedItem.children = processTreeData(
+                  item.children,
+                  processedItem
+                );
+                processedItem.hasChildren = processedItem.children.length > 0;
+              } else if (typeof item.children === 'object') {
+                // 如果children是对象（如{db: [...], volume: [...]}），保留原始结构
+                processedItem.children = item.children;
+                // 检查是否有子数据
+                const hasChildren = Object.values(item.children).some(
+                  (value: any) => Array.isArray(value) && value.length > 0
+                );
+                processedItem.hasChildren = hasChildren;
               }
             }
+            result.push(processedItem);
           }
-
-          processedData.push(processedItem);
-        }
-
+          return result;
+        };
+        const processedData = processTreeData(res.data.src);
         console.log('处理后的对象存储数据:', processedData);
         setDirectoryData(processedData);
         return processedData;
@@ -851,87 +881,63 @@ const LoadAddModal = (props: propsType) => {
             ></SchedulerRun>
           </div>
         ) : null}
-        {sourceType === 's3' || sourceType === 'hdfs' ? (
-          <FormItem
-            label="载入位置："
-            field="dest_path"
-            labelCol={{ span: 5 }}
-            wrapperCol={{ span: 19 }}
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入位置' }]}
+        <FormItem
+          label="载入到："
+          field="dest_path"
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 19 }}
+          labelAlign="right"
+          rules={[{ required: true, message: '请选择载入位置' }]}
+          extra={
+            sourceType === 'db' ? (
+              <p
+                style={{
+                  fontSize: '12px',
+                  color: '#6E7B8D',
+                  marginTop: '4px'
+                }}
+              >
+                注意保存后数据库名称为xxx-aaa
+              </p>
+            ) : null
+          }
+        >
+          <TreeSelect
+            className="db-tree-select"
+            placeholder="请选择载入位置"
+            allowClear
+            dropdownMenuStyle={{
+              maxHeight: 300,
+              padding: 0,
+              overflow: 'hidden' // 防止外层出现滚动条
+            }}
+            dropdownRender={(originNode) => (
+              <ComponentTree
+                directoryData={directoryData}
+                onDirectoryDataChange={setDirectoryData}
+                onSelect={handleSelect}
+                selectedKeys={selectedTreeKeys}
+                onPathChange={(path, nodeId) => {
+                  console.log('路径变化:', path, '节点ID:', nodeId);
+                  // 存储节点ID用于表单提交
+                  setSelectedNodeId(nodeId || null);
+                  // 设置表单显示值为路径
+                  form.setFieldsValue({
+                    dest_path: path
+                  });
+                }}
+                showAddTree={true}
+                enableRootAdd={true}
+                activeTab="src"
+                onDataRefresh={handleDataRefresh}
+                dataSourceType={sourceType}
+                tableNameNames={tableNames}
+              />
+            )}
           >
-            <Cascader
-              expandTrigger="hover"
-              placeholder={directoryLoading ? '加载中...' : '请输入载入位置'}
-              style={{ width: '100%' }}
-              options={Array.isArray(directoryData) ? directoryData : []}
-              renderOption={(item) => {
-                return <EllipsisPopoverCom value={item.label} />;
-              }}
-              showSearch={{ retainInputValueWhileSelect: false }}
-              dropdownMenuClassName="cascader-dropdown"
-              loading={directoryLoading}
-            />
-          </FormItem>
-        ) : (
-          <FormItem
-            label="载入到："
-            field="dest_path"
-            labelCol={{ span: 5 }}
-            wrapperCol={{ span: 19 }}
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入位置' }]}
-            extra={
-              sourceType === 'db' ? (
-                <p
-                  style={{
-                    fontSize: '12px',
-                    color: '#6E7B8D',
-                    marginTop: '4px'
-                  }}
-                >
-                  注意保存后数据库名称为xxx-aaa
-                </p>
-              ) : null
-            }
-          >
-            <TreeSelect
-              className="db-tree-select"
-              placeholder="请选择载入位置"
-              allowClear
-              dropdownMenuStyle={{
-                maxHeight: 300,
-                padding: 0,
-                overflow: 'hidden' // 防止外层出现滚动条
-              }}
-              dropdownRender={(originNode) => (
-                <ComponentTree
-                  directoryData={directoryData}
-                  onDirectoryDataChange={setDirectoryData}
-                  onSelect={handleSelect}
-                  selectedKeys={selectedTreeKeys}
-                  onPathChange={(path, nodeId) => {
-                    console.log('路径变化:', path, '节点ID:', nodeId);
-                    // 存储节点ID用于表单提交
-                    setSelectedNodeId(nodeId || null);
-                    // 设置表单显示值为路径
-                    form.setFieldsValue({
-                      dest_path: path
-                    });
-                  }}
-                  showAddTree={true}
-                  enableRootAdd={true}
-                  activeTab="src"
-                  onDataRefresh={handleDataRefresh}
-                  dataSourceType={sourceType}
-                  tableNameNames={tableNames}
-                />
-              )}
-            >
-              {/* {generatorTreeNodes(directoryData)} */}
-            </TreeSelect>
-          </FormItem>
-        )}
+            {/* {generatorTreeNodes(directoryData)} */}
+          </TreeSelect>
+        </FormItem>
       </Form>
       <div className={Styles.footerBbtnBox}>
         <Button onClick={cancelHan} style={{ marginRight: '8px' }}>
