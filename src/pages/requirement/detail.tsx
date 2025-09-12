@@ -72,7 +72,7 @@ interface LabelInfoAttributeGroup {
   label_info_attribute: LabelInfoAttribute[];
 }
 interface LabelData {
-  id: string;
+  label_id: string;
   label_name_cn: string;
   label_name_en: string;
   label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
@@ -108,6 +108,8 @@ export default function RequirementDetail() {
   const [selectedData, setSelectedData]: any = useState([]);
   // 任务分配选中的数据
   const [taskAssignData, setTaskAssignData]: any = useState([]);
+  // 选项部门数据内容
+  const [departmentIds, setDepartmentIds] = useState([]);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 标签和属性
@@ -146,6 +148,9 @@ export default function RequirementDetail() {
       setIsShowTypeErrorInfo(false);
     }
     // setPublishData({ ...publishData, label_count: taskAssignData.length })
+  };
+  const getChildTreeIds = (data) => {
+    setDepartmentIds(data);
   };
   // 显示标注类型 以及 类型内容
   const [annotationTypeVal, setAnnotationTypeVal] = useState(
@@ -266,7 +271,7 @@ export default function RequirementDetail() {
   const generateInitialData = (): LabelData[] => {
     return [
       {
-        id: uuidV4(),
+        label_id: uuidV4(),
         label_name_cn: '',
         label_name_en: '',
         label_shape: LabelShape.RECTANGLE,
@@ -339,7 +344,7 @@ export default function RequirementDetail() {
     // 创建最后一个元素的深拷贝，避免引用冲突
     const lastItem = _.cloneDeep(arr[arr.length - 1]);
     // 生成全新的唯一ID
-    lastItem.id = uuidV4() + new Date().getTime();
+    lastItem.label_id = uuidV4() + new Date().getTime();
     lastItem.attribute_id = uuidV4();
     lastItem.label_colour = getRandomHexColorStrict();
     // 重置属性组（如果需要全新开始）
@@ -559,21 +564,32 @@ export default function RequirementDetail() {
         image_out_of_bounds: 0
       },
       // 配置文件分类标签
-      file_labels: text_fl_data,
+      file_labels:
+        annotationTypeContentCode ===
+        AnnotationTypeContentCode.TEXT_CLASSIFICATION
+          ? text_fl_data
+          : [],
       label_data_set: selectedData,
       labels:
         annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
           ? entityRelations
-          : newSetLabels,
-      entity_relations: relationRelations,
-      label_operate: [
+          : annotationTypeContentCode !== AnnotationTypeContentCode.QA &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.TEXT_SORT &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.TEXT_CLASSIFICATION
+            ? newSetLabels
+            : [],
+      entity_relations:
+        annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
+          ? relationRelations
+          : [],
+      label_operate:
         //配置标注人员
         {
-          user_id: ['85f5c5c1-a21e-48bd-88f8-5a2c78d37fac'],
-          // user_id: taskTypeVal === 1 ? taskAssignData : [],
-          org_id: taskTypeVal === 2 ? taskAssignData : []
+          user_id: taskTypeVal === 1 ? taskAssignData : [],
+          org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
-      ]
     };
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
@@ -1597,6 +1613,7 @@ export default function RequirementDetail() {
             }}
             title="选择个人"
             getChildTreeSelectData={handleChildTreeSelectData}
+            getTreeIds={getChildTreeIds}
           />
         )}
         <div className="btn-content">
