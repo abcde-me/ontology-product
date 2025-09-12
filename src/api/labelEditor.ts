@@ -626,7 +626,13 @@ export async function getImgJobMeta(taskId?: string) {
       {
         width: res.task_info.pic.width,
         height: res.task_info.pic.height,
-        url: 'https://temp.im/600x600', // res.item_path,
+        url:
+          process.env.NODE_ENV === 'development'
+            ? res.item_path.replace(
+                'http://10.1.4.73:9002',
+                'http://61.182.98.8:38093'
+              )
+            : res.item_path, // 'https://temp.im/600x600',
         name: res.task_info.pic.name,
         related_files: 0,
         has_related_context: false
@@ -734,6 +740,9 @@ function handleImgAnnotationIds(params: Record<string, any>) {
     });
   }
 }
+
+// ========================================== 文本标注API =================================
+
 // 获取任务
 export async function getTextEditorTask(requirement_id: number) {
   return UAPI.RES.leGetTask({}).post({ requirement_id }).inRegion().do();
