@@ -48,12 +48,15 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       onInsertContent
     );
 
+    // `库名`.`表名`
+    const copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
+
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(dataset?.name ?? '');
+      onInsertContent(copyText);
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(dataset?.name ?? '');
+      copy(copyText);
       Message.success('内容复制成功，请粘贴到编辑器');
     }
   };
@@ -97,17 +100,36 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: Db, hierarchyData?: any) => {
+  const handleDbInsert = (database: any, hierarchyData?: any) => {
     const isEditorFocused = getIsEditorFocused?.() ?? false;
+
     console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
     console.log('层级选择数据:', hierarchyData);
 
+    const level = hierarchyData.currentViewLevel;
+    let copyText = '';
+
+    if (level === 'db-item') {
+      // `库名`
+      copyText = `\`${database.name}\``;
+    }
+
+    if (level === 'database-tables') {
+      // `表名`
+      copyText = `\`${database.table_name}\``;
+    }
+
+    if (level === 'table-detail') {
+      // `字段名`
+      copyText = `\`${database.name}\``;
+    }
+
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(database?.name ?? '');
+      onInsertContent(copyText);
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      copy(database?.name ?? '');
+      copy(copyText);
       Message.success('内容复制成功，请粘贴到编辑器');
     }
   };

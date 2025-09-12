@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
-import { getLoadRecord, reTryLoad } from '@/api/loadApi';
+import { getLoadRecord, reTryLoad, getLoad } from '@/api/loadApi';
 import { RunState, RunStateType } from '../list/list';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
@@ -18,6 +18,7 @@ const AccessDetail = () => {
   const recordsId = useParams('execution_id');
   const name = useParams('name');
   const [arressDetail, setArressDetail] = useState<any>({});
+  const [taskDetail, setTaskDetail] = useState<any>({}); // 添加任务详情状态
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   // 返回上一层的函数
@@ -31,6 +32,14 @@ const AccessDetail = () => {
       setLoading(true);
       const res = await getLoadRecord(recordsId);
       setArressDetail(res.data);
+
+      // 获取任务详情（包含source_type）
+      if (res.data.task_id) {
+        const taskRes = await getLoad(res.data.task_id);
+        console.log('getLoad response:', taskRes.data); // 添加调试信息
+        setTaskDetail(taskRes.data);
+      }
+
       if (res.code == '' && res.status == 200) {
         setTotalNum(res.data.success_files + res.data.failed_files);
       }
@@ -190,7 +199,7 @@ const AccessDetail = () => {
             margin: '15px 0px'
           }}
         >
-          任务信息
+          {taskDetail.source_type === 'db' ? '运行信息' : '任务信息'}
         </div>
         <div className="task-box">
           <div className="task-left">
@@ -223,7 +232,7 @@ const AccessDetail = () => {
           </div>
           <div className="task-right">
             <div className="task-right-item" style={{ color: 'black' }}>
-              <div>总文件</div>
+              <div>总数量</div>
               <div className="fontSize">{totalNum}</div>
             </div>
             <div
@@ -249,10 +258,13 @@ const AccessDetail = () => {
             margin: '15px 0px 15px 24px'
           }}
         >
-          文件详情
+          {taskDetail.source_type === 'db' ? '载入详情' : '文件详情'}
         </div>
 
-        <AccessTable records_id={recordsId} />
+        <AccessTable
+          records_id={recordsId}
+          check_type={taskDetail.source_type}
+        />
       </div>
     </div>
   );

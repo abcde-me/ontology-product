@@ -123,7 +123,6 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
-export const PrefixLabelEngine = '/label-engine/api/v1';
 export const PrefixLabelService = '/label-service/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
@@ -466,15 +465,11 @@ export const ModaForgeResourceEndpoints = {
     PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/get_sql_info',
   datasetsOptionsApi: PrefixAimdp + '/datasets/list',
 
-  leGetTask: PrefixLabelEngine + '/getTask',
-  leGetLabels: PrefixLabelEngine + '/getLabels',
-  leSaveTask: PrefixLabelEngine + '/saveTask',
-  leGetTaskReuslt: PrefixLabelEngine + '/getTaskReuslt',
-
-  textGetTask: PrefixLabelService + '/getTask',
-  textGetLabels: PrefixLabelService + '/getLabels',
-  textSaveTask: PrefixLabelService + '/saveTask',
-  textGetTaskResult: PrefixLabelService + '/getTaskResult'
+  leGetTask: PrefixLabelService + '/getTask',
+  leGetTaskById: PrefixLabelService + '/getTaskById',
+  leGetLabels: PrefixLabelService + '/getLabels',
+  leSaveTask: PrefixLabelService + '/saveTask',
+  leGetTaskReuslt: PrefixLabelService + '/getTaskResult'
 };
 
 /**

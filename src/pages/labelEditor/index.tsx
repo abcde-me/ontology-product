@@ -12,10 +12,12 @@ import {
   getTextEditorTask,
   getTextEditorResult,
   saveTextEditorResult,
-  getTextEditorLabels
+  getTextEditorLabels,
+  getTaskDetail
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
+import { TEXT_DATA } from './const';
 
 const { bus } = WujieReact;
 
@@ -50,7 +52,7 @@ function WorkflowConfig() {
 
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
-    if (!taskInfo.data.data.task_id) {
+    if (!taskInfo.data.task_id) {
       Modal.warning({
         title: '提示信息',
         content: '当前需求已无新任务，点击确定将返回需求列表页',
@@ -69,15 +71,15 @@ function WorkflowConfig() {
         label_type: type,
         label_tool: { label_tool_code: tool }
       }
-    } = taskInfo.data.data;
+    } = taskInfo.data;
 
-    history.push(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}&name=${name}&count=${count}`
+    history.replace(
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}`
     );
   };
 
   const goBack = () => {
-    history.push('/tenant/compute/modaforge/xxxx');
+    history.push('/tenant/compute/modaforge/taskList');
   };
 
   const switchNextTask = () => {
@@ -114,7 +116,8 @@ function WorkflowConfig() {
             getTextEditorTask,
             getTextEditorResult,
             saveTextEditorResult,
-            getTextEditorLabels
+            getTextEditorLabels,
+            getTaskDetail
           }}
         ></WujieReact>
       )}

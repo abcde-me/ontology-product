@@ -126,10 +126,10 @@ export default function RequirementDetail() {
   }, [selectedRadio, selectedData]);
   // 基础配置
 
-  const handleChildData = (data: any) => {
+  const handleChildData = (data: any, key) => {
     const newSetDataContent = data.map((item) => {
       return {
-        dir_name: 'car_images/train',
+        dir_name: String(key),
         load_start_time: convertToUTCFormat(item?.start_time),
         load_end_time: convertToUTCFormat(item?.end_time),
         load_num: item?.load_num,
@@ -500,24 +500,39 @@ export default function RequirementDetail() {
   const [text_fl_data, setText_fl_data] = useState([]);
   const getClassIfyChildData = (data) => {
     setText_fl_data(data);
-    console.log(annotationTypeContentVal);
   };
-
+  const [TextEntityDataContent, setTextEntityDataContent]: any = useState({});
+  // entityRelations = 实体关系内容  relationRelations = 关系标签内容
+  const getTextFlChildData = (entityRelations, relationRelations) => {
+    setTextEntityDataContent({
+      entityRelations,
+      relationRelations
+    });
+  };
+  // 计算总数
+  const getTotal = (dataArr) => {
+    let num = 0;
+    dataArr.map((item) => {
+      num = num + item?.load_num;
+    });
+    return num;
+  };
   const publish = async () => {
+    const { entityRelations, relationRelations } = TextEntityDataContent;
     const newSetLabels = datalist.map((item, index) => {
       return {
         ...item,
-        order_num: index,
+        order_num: datalist?.length + 1,
         label_info_attribute_groups: item.label_info_attribute_groups.map(
           (group) => {
             return {
               ...group,
-              order_num: index,
+              order_num: item?.label_info_attribute_groups?.length + 1,
               label_info_attribute: group.label_info_attribute.map(
                 (attribute) => {
                   return {
                     ...attribute,
-                    order_num: index,
+                    order_num: group?.label_info_attribute?.length + 1,
                     attribute_name_en: attribute.attribute_name_en.replace(
                       /\s+/g,
                       '_'
@@ -536,7 +551,7 @@ export default function RequirementDetail() {
       name: publishData?.name,
       description: publishData?.description,
       label_type: annotationTypeVal,
-      label_count: selectedData?.length, //数据量（所有数据集之和）
+      label_count: getTotal(selectedData), //数据量（所有数据集之和）
       team_type: taskTypeVal,
       label_tool: {
         label_tool_name: RequirementTypeNameMap[annotationTypeVal],
@@ -546,13 +561,16 @@ export default function RequirementDetail() {
       // 配置文件分类标签
       file_labels: text_fl_data,
       label_data_set: selectedData,
-      labels: newSetLabels,
-      entity_relations:
-        annotationTypeContentVal === AnnotationTypeContentCode.ENTITY ? [] : [],
+      labels:
+        annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
+          ? entityRelations
+          : newSetLabels,
+      entity_relations: relationRelations,
       label_operate: [
         //配置标注人员
         {
-          user_id: taskTypeVal === 1 ? taskAssignData : [],
+          user_id: ['85f5c5c1-a21e-48bd-88f8-5a2c78d37fac'],
+          // user_id: taskTypeVal === 1 ? taskAssignData : [],
           org_id: taskTypeVal === 2 ? taskAssignData : []
         }
       ]
@@ -576,8 +594,6 @@ export default function RequirementDetail() {
             requirement_id: Number(requirementId)
           });
           if (res.code === 0) {
-            console.log(res?.data?.label_tool?.label_tool_code, 'top', res);
-            const code = res?.data?.label_tool?.label_tool_code;
             setAnnotationTypeContentCode(
               res?.data?.label_tool?.label_tool_code
             );
@@ -707,7 +723,7 @@ export default function RequirementDetail() {
             <FormItem field="dataset" label="标注数据" required>
               <div className="data-content-set">
                 <Button
-                  disabled={type === 'detail'}
+                  // disabled={type === 'detail'}
                   type="primary"
                   onClick={() => {
                     setModalVisible(true);
@@ -716,7 +732,8 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="data-set-text">
-                  已选数据量：{selectedData.length || getDetailObj?.label_count}
+                  已选数据量：
+                  {getTotal(selectedData) || getDetailObj?.label_count}
                 </div>
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
@@ -729,14 +746,15 @@ export default function RequirementDetail() {
           <DataSourceModal
             fileType={toolFileType[Number(annotationTypeVal)]}
             visible={modalVisible}
+            type={type}
             onClose={() => {
               setModalVisible(false);
             }}
             title="数据集合"
             getChildTableSelectData={handleChildData}
+            getDetailObj={getDetailObj}
           />
         </div>
-        {annotationTypeContentVal}
         {/* 工具配置部分 */}
         {(annotationTypeContentVal ===
           AnnotationTypeContentCode.IMAGE_ANNOTATION ||
@@ -1067,21 +1085,20 @@ export default function RequirementDetail() {
                                           </div>
                                         </FormItem>
                                         {/* 选项内容区域 */}
+                                        <div className="attribute-group-info-title">
+                                          {1 === attrGroup.attribute_group_class
+                                            ? '单选选项'
+                                            : 2 ===
+                                                attrGroup.attribute_group_class
+                                              ? '多选选项'
+                                              : ''}
+                                        </div>
                                         {attrGroup?.label_info_attribute.map(
                                           (attr, attrIndex) => (
                                             <div
                                               key={attr.label_info_id}
                                               className="attribute-group-info-item"
                                             >
-                                              <div className="attribute-group-info-title">
-                                                {1 ===
-                                                attrGroup.attribute_group_class
-                                                  ? '单选选项'
-                                                  : 2 ===
-                                                      attrGroup.attribute_group_class
-                                                    ? '多选选项'
-                                                    : ''}
-                                              </div>
                                               {(1 ===
                                                 attrGroup.attribute_group_class ||
                                                 2 ===
@@ -1486,6 +1503,7 @@ export default function RequirementDetail() {
                   <TextSubstanceComponent
                     type={type}
                     getDetailObj={getDetailObj}
+                    getTextEntityData={getTextFlChildData}
                   />
                 )}
                 {annotationTypeContentVal ===

@@ -14,7 +14,7 @@ import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 import { formatDateTime } from '../utils';
-import { generateSqlDefaultName } from '../utils/formatDateTime';
+import { generateSqlDefaultName } from '../utils';
 
 export interface UseEditorOptions {
   activeTab?: string;
@@ -225,15 +225,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return null;
       }
     },
-    { wait: 3000, trailing: true }
+    { wait: 5000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      clearEditorState();
       setEditorContent(value);
-      handleSaveThrottled.cancel();
       // 自动保存
       handleSaveThrottled.run(value);
     },
@@ -251,13 +249,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunStatus(RunningStatus.RUNNING);
-    setRunResult([]);
-    setRunLog('');
-    setRunError('');
+    const saveRes = await updateSqlScript(Number(currentFile?.fileId), {
+      uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+      script_name: currentFile.title ?? '',
+      script_content: editorContent
+    });
+
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
+
+    setLastAutoSave(new Date().toLocaleTimeString());
+
     setExecid('');
-    setRunStartTime(new Date());
-    setRunDuration(0);
 
     try {
       const res = await runSqlScript(currentFile?.fileId ?? '');
@@ -302,6 +307,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    setRunStatus(RunningStatus.RUNNING);
+    setRunResult([]);
+    setRunLog('');
+    setRunError('');
+    setRunStartTime(new Date());
+    setRunDuration(0);
+
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
@@ -343,7 +355,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setEditorContent(fileData.script_content);
 
             // 更新运行状态
-            // setExecid(String(fileData.script_execid));
+            setExecid(String(fileData.script_execid));
 
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
@@ -364,6 +376,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
       loadFileContent();
     }
+
+    () => {
+      handleSaveThrottled.cancel();
+    };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 当 currentFileId 变化时，重置运行相关状态

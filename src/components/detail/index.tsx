@@ -696,7 +696,9 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
         contentTableColumnsList.map((item) => ({
           title: `${item.name}(${item.cn_name})`,
           dataIndex: item.name,
-          key: item.name
+          key: item.name,
+          width: 400,
+          render: (_, record) => <EllipsisPopover value={record[item.name]} />
         }))
       );
     }
@@ -1768,6 +1770,7 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
                 columns={contentTableColumns}
                 data={contentTableData}
                 pagination={false}
+                scroll={{ x: '100%' }}
                 rowKey="id"
               />
             </TabPane>
