@@ -122,6 +122,10 @@
   .sortable-item-content {
     display: flex;
     align-items: center;
+
+    .arco-form-layout-inline {
+      margin-right: 10px;
+    }
   }
 
   .sortable-item-input {
@@ -287,7 +291,7 @@
   }
 
   .labe-and-attribute-warp {
-    min-width: 900px;
+    width: 800px;
     border: 1px solid #cbd5e1;
     border-radius: 4px;
 
@@ -344,5 +348,11 @@
     cursor: not-allowed;
     color: #999;
     opacity: 0.7;
+  }
+
+  .tool-annotation-config {
+    .arco-form .arco-form-item > .arco-form-label-item {
+      padding-right: 5px;
+    }
   }
 }

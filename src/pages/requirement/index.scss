@@ -16,7 +16,7 @@
     padding-bottom: 16px;
   }
 
-  .arco-table-tr>th {
+  .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;
   }
 
@@ -27,7 +27,6 @@
   .operate-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
-    margin-right: 16px;
   }
 
   .operate-text:hover {
@@ -76,20 +75,54 @@
     background: #f7f7f9;
     color: #6e7b8d;
   }
-}
 
-.workflow-list-modal-title {
-  font-weight: 500;
-  font-size: 16px;
-  height: 24px;
-}
+  .option-content {
+    justify-content: center;
+  }
 
-.workflow-list-modal-content {
-  font-weight: 400;
-  font-size: 14px;
-  color: #1d2129;
-  height: 22px;
-  margin: 10px 0 0 28px;
+  .status-text {
+    font-size: 12px;
+    line-height: 20px;
+    margin-left: 8px;
+    margin-right: 4px;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-draft-icon {
+    width: 8px;
+    height: 8px;
+    background: #007dfa;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-published-icon {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-publishFailed-icon {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-annotated-icon {
+    width: 8px;
+    height: 8px;
+    background: #e3e3e3;
+    border-radius: 50%;
+    display: inline-block;
+  }
 }
 
 .arco-modal-footer .arco-btn-secondary:focus {

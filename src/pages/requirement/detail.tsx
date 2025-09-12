@@ -703,22 +703,22 @@ export default function RequirementDetail() {
             }}
           >
             <FormItem
-              label="需求名称"
+              label="需求名称:"
               field="name"
               rules={[{ required: true, message: '请输入需求名称', max: 50 }]}
             >
-              <Input placeholder="请输入需求名称" style={{ width: 643 }} />
+              <Input placeholder="请输入需求名称" style={{ width: 800 }} />
             </FormItem>
             <FormItem
-              label="描述说明"
+              label="描述说明:"
               field="description"
               rules={[{ required: true, message: '请输入描述内容', max: 200 }]}
             >
-              <TextArea placeholder="请输入描述内容" style={{ width: 643 }} />
+              <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
             </FormItem>
             <div className="basic-title">任务配置</div>
             <FormItem
-              label="标注类型"
+              label="标注类型:"
               required
               className="annotation-tool"
               field="label_type"
@@ -736,11 +736,10 @@ export default function RequirementDetail() {
                 getChildAnnotationType={getAnnotationType}
               />
             </FormItem>
-            <FormItem field="dataset" label="标注数据" required>
+            <FormItem field="dataset" label="标注数据:" required>
               <div className="data-content-set">
                 <Button
                   // disabled={type === 'detail'}
-                  type="primary"
                   onClick={() => {
                     setModalVisible(true);
                   }}
@@ -785,15 +784,19 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
+              style={{
+                marginLeft: '-18px'
+              }}
               layout="inline"
-              labelAlign="right"
-              labelCol={{ flex: 'none' }}
-              wrapperCol={{ flex: 1 }}
+              labelCol={{
+                span: 1
+              }}
             >
               <FormItem
                 field="label_info_attribute_groups"
-                label="标签和属性"
+                label="标签和属性:"
                 required
+                className="label_info_attribute_groups_content"
               >
                 {/* 循环显示内容 */}
                 {annotationTypeContentVal ===
@@ -891,6 +894,7 @@ export default function RequirementDetail() {
                                   <Select
                                     placeholder="请选择形状"
                                     value={item.label_shape}
+                                    defaultValue={1}
                                     onChange={(val: any) => {
                                       updateNestedValue(
                                         [labelIndex, 'label_shape'],
@@ -1065,13 +1069,13 @@ export default function RequirementDetail() {
                                               3 && (
                                               <IconPlus
                                                 style={{
+                                                  fontSize: 25,
                                                   cursor:
                                                     type === 'detail'
                                                       ? 'not-allowed'
                                                       : 'pointer'
                                                 }}
                                                 className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
-                                                fontSize={16}
                                                 onClick={() => {
                                                   if (type !== 'detail') {
                                                     addAttribute(
@@ -1086,7 +1090,7 @@ export default function RequirementDetail() {
                                               ?.length > 1 && (
                                               <IconDelete
                                                 className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                                fontSize={16}
+                                                fontSize={26}
                                                 onClick={() => {
                                                   // 删除当前属性组
                                                   if (type !== 'detail') {
@@ -1352,19 +1356,19 @@ export default function RequirementDetail() {
                                   >
                                     必须标注
                                   </Checkbox>
-                                  {attrGroup.attribute_group_class !== 3 && (
-                                    <IconPlus
-                                      fontSize={16}
-                                      className="ml-2"
-                                      onClick={() => {
-                                        addAttributeT(labelIndex);
-                                      }}
-                                    />
-                                  )}
+                                  {/* {attrGroup.attribute_group_class !== 3 && (
+                                          <IconPlus
+                                            fontSize={25}
+                                            className="ml-2"
+                                            onClick={() => {
+                                              addAttributeT(labelIndex);
+                                            }}
+                                          />
+                                        )} */}
                                   {
                                     <IconDelete
                                       className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                      fontSize={16}
+                                      fontSize={25}
                                       onClick={() => {
                                         // 删除当前属性组
                                         if (type !== 'detail') {
@@ -1569,7 +1573,7 @@ export default function RequirementDetail() {
                   message: '请选择类型'
                 }
               ]}
-              label={taskTypeVal === 2 ? '选择部门' : '选择个人'}
+              label={taskTypeVal === 2 ? '选择部门:' : '选择个人:'}
               disabled={type === 'detail'}
             >
               <div className="btn-content-text">
