@@ -232,19 +232,19 @@ export default function Requirement() {
       ),
       sorter: true
     },
-    {
-      title: '创建人',
-      dataIndex: 'user_name',
-      key: `user_name+id`,
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
+    // {
+    //   title: '创建人',
+    //   dataIndex: 'creator',
+    //   key: `user_name+id`,
+    //   width: 100,
+    //   ellipsis: true,
+    //   render: (_, record) => (
+    //     <EllipsisPopover
+    //       value={renderEmptyPlaceholder(record.creator)}
+    //       isEdit={false}
+    //     />
+    //   )
+    // },
     {
       title: '操作',
       dataIndex: 'operate',
