@@ -4,3 +4,8 @@ export const TEXT_DATA = {
   TEXT_QA: 'qa',
   TEXT_SORT: 'ranking'
 };
+
+export const LabelTypeMap = {
+  '1': 'text',
+  '2': 'image'
+};
