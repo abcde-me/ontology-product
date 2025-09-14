@@ -51,16 +51,28 @@ export const useDasetTree = (type: 'sql' | 'python') => {
 
   // 获取数据集目录列表, sql和python用的一个接口
   const getDasetList = async () => {
-    const res = await searchDatasetList({
+    const targetParams: any = {
       storage_type_list: type === 'sql' ? ['table'] : ['file', 'jsonl'],
       name: searchKeyword
-    });
+    };
+
+    // TODO: 借口未生效 周一调试生效后放开注释
+    // if (type === 'sql') {
+    //   targetParams['name'] = undefined;
+    //   targetParams['search_name_lastest_table'] = searchKeyword;
+    // }
+
+    const res = await searchDatasetList(targetParams);
 
     if (res?.status !== 200) {
       return;
     }
 
-    setDasetList(res?.data?.list ?? []);
+    if (type === 'sql') {
+      setDasetList(formatSqlDatasetList(res.data.list ?? []));
+    } else {
+      setDasetList(res?.data?.list ?? []);
+    }
   };
 
   // 获取数据集单个目录下的文件列表，python用
@@ -102,3 +114,10 @@ export const useDasetTree = (type: 'sql' | 'python') => {
     getScheamList
   };
 };
+
+function formatSqlDatasetList(list: DatasetListItem[]) {
+  return list.map((item) => ({
+    ...item,
+    name: `${item.name}(${item.latest_table})`
+  }));
+}
