@@ -212,6 +212,11 @@ export const useTabManager = (
     []
   );
 
+  // 检查是否有标签页打开
+  const hasOpenTabs = useCallback(() => {
+    return fileState.fileTabs.length > 0;
+  }, [fileState.fileTabs.length]);
+
   return {
     fileState,
     directoryTreeRef,
@@ -222,6 +227,7 @@ export const useTabManager = (
     switchTab,
     updateTabContent,
     updateTabTitle, // 导出更新标签页标题的方法
-    handleCreate
+    handleCreate,
+    hasOpenTabs // 导出检查是否有标签页打开的方法
   };
 };
