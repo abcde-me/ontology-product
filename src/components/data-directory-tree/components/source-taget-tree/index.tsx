@@ -123,6 +123,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [breadcrumbPath, setBreadcrumbPath] = useState<string[]>([]);
+  // 用于存储搜索时的临时过滤catalog，避免污染原始数据
+  const [tempFilteredCatalog, setTempFilteredCatalog] =
+    useState<CatalogData | null>(null);
   // 处理数据卷详情按钮点击
   const handleVolumeDetail = useCallback(
     (volume: FluffyVolume, event: Event) => {
@@ -212,6 +215,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 获取当前目录列表
   const currentCatalogList = useMemo(() => {
     // 如果有搜索关键词，使用过滤后的列表（即使为空也要显示）
+    console.log('currentCatalogList', searchKeyword, filteredCatalogList);
     if (searchKeyword) {
       return filteredCatalogList;
     }
@@ -270,7 +274,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     title: React.ReactNode;
     data: any;
   }> => {
-    if (!selectedCatalog || !selectedCategory) return [];
+    // 使用临时过滤的catalog或原始catalog
+    const catalogToUse = tempFilteredCatalog || selectedCatalog;
+    if (!catalogToUse || !selectedCategory) return [];
 
     const items: Array<{
       key: string;
@@ -282,11 +288,11 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     if (selectedCategory === '数据卷') {
       // 只显示数据卷
       if (
-        selectedCatalog.children?.volume &&
-        selectedCatalog.children.volume.length > 0
+        catalogToUse.children?.volume &&
+        catalogToUse.children.volume.length > 0
       ) {
         items.push(
-          ...selectedCatalog.children.volume.map((volume: any) => ({
+          ...catalogToUse.children.volume.map((volume: any) => ({
             key: `volume-${volume.id}`,
             title: (
               <div className="list-item-content">
@@ -322,12 +328,9 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       }
     } else if (selectedCategory === '数据库') {
       // 只显示数据库
-      if (
-        selectedCatalog.children?.db &&
-        selectedCatalog.children.db.length > 0
-      ) {
+      if (catalogToUse.children?.db && catalogToUse.children.db.length > 0) {
         items.push(
-          ...selectedCatalog.children.db.map((db: any) => ({
+          ...catalogToUse.children.db.map((db: any) => ({
             key: `db-${db.id}`,
             title: (
               <div className="list-item-content">
@@ -366,7 +369,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     }
 
     return items;
-  }, [selectedCatalog, selectedCategory, handleVolumeDetail, handleDbDetail]);
+  }, [
+    selectedCatalog,
+    selectedCategory,
+    tempFilteredCatalog,
+    handleVolumeDetail,
+    handleDbDetail
+  ]);
 
   // 处理目录点击（第一层）
   const handleCatalogClick = (catalog: any) => {
@@ -407,14 +416,14 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
           dataType === 'source'
             ? {
                 page: 1,
-                page_size: 100,
+                page_size: 1000,
                 data_path_id: Number(item.id),
                 file_name: '',
                 sort: 'desc' as 'asc' | 'desc'
               }
             : {
                 page: 1,
-                limit: 100,
+                limit: 1000,
                 full_path: item.full_path || '',
                 sort_field: item.sort_field || '',
                 sort_order: 'desc' as 'asc' | 'desc',
@@ -498,7 +507,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
         path_id: Number(selectedDb.id),
         search: '',
         page: 1,
-        limit: 100,
+        limit: 1000,
         database: dbItem.name || ''
       };
 
@@ -563,34 +572,13 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 处理搜索
   const handleSearch = (value: string) => {
-    if (!value.trim()) {
-      // 清空搜索
-      clearSearch();
-      setSearchValue('');
-      // 重新加载当前层级的数据
-      if (currentViewLevel === 'files' && selectedVolumeOrDb) {
-        // 重新加载文件列表
-        handleVolumeDbClick(selectedVolumeOrDb);
-      } else if (
-        currentViewLevel === 'database-tables' &&
-        selectedDbItem &&
-        selectedDb
-      ) {
-        // 重新加载数据库表列表
-        handleDbItemClick(selectedDbItem);
-      } else if (
-        currentViewLevel === 'table-detail' &&
-        selectedTable &&
-        selectedDb
-      ) {
-        // 重新加载表字段列表
-        handleTableClick(selectedTable);
-      }
-      return;
-    }
-
     setSearchValue(value);
     setSearchKeyword(value);
+
+    // 如果搜索值为空，清空临时过滤状态
+    if (value.trim() === '') {
+      setTempFilteredCatalog(null);
+    }
 
     // 根据当前层级执行不同的搜索逻辑
     switch (currentViewLevel) {
@@ -604,7 +592,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
         // volume-db层级搜索在category中处理
         if (selectedCatalog) {
           const filteredCatalog = searchCategory(value, selectedCatalog);
-          setSelectedCatalog(filteredCatalog);
+          setTempFilteredCatalog(filteredCatalog);
         }
         break;
       case 'files':

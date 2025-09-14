@@ -10,8 +10,13 @@ import {
 import { Message } from '@arco-design/web-react';
 import React from 'react';
 import { exportDataset } from '@/api/pyspark';
+import { StorageType } from '@/types/pythonApi';
 
-export const useExportDaset = (currentFileId?: string, execid?: string) => {
+export const useExportDaset = (
+  currentFileId?: string,
+  execid?: string,
+  onSwitchToExportList?: () => void
+) => {
   // Modal相关状态
   const [modalDatasetVisible, setModalDatasetVisible] =
     React.useState<boolean>(false);
@@ -99,28 +104,37 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
     //       : basePath;
     //   fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
     // }
-    const submitData = {
-      name: formData.name,
-      description: formData.description,
-      tag_names: formData.tags || [],
-      storage_type: formData.storageType,
-      src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
-      src_extra:
-        formData.dataSource === 'volume'
-          ? {
-              // path: fullPath,
-              path_id: formData.targetDataSource?.[1]?.[1] ?? '',
-              path_file_ids: formData.path_file_ids || []
-            }
-          : {
-              connector_id: parseInt(formData?.targetDataSource) || 0,
-              connector_file_ids: formData?.selectedFiles || []
-            }
-    };
+    // const submitData = {
+    //   name: formData.name,
+    //   description: formData.description,
+    //   tag_names: formData.tags || [],
+    //   storage_type: formData.storageType,
+    //   src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
+    //   src_extra:
+    //     formData.dataSource === 'volume'
+    //       ? {
+    //           // path: fullPath,
+    //           path_id: formData.targetDataSource?.[1]?.[1] ?? '',
+    //           path_file_ids: formData.path_file_ids || []
+    //         }
+    //       : {
+    //           connector_id: parseInt(formData?.targetDataSource) || 0,
+    //           connector_file_ids: formData?.selectedFiles || []
+    //         }
+    // };
 
-    console.log('提交数据:', submitData);
+    // console.log('提交数据:', submitData);
 
     try {
+      console.log('formData', formData.storageType, formData.selectedFiles);
+      if (
+        formData.storageType === StorageType.File &&
+        formData.selectedFiles.length === 0
+      ) {
+        Message.error('请选择文件！');
+        return;
+      }
+
       const createDatasetRes = await exportDataset({
         name: formData.name,
         pyspark_id: currentFileId ? Number(currentFileId) : 0,
@@ -158,8 +172,27 @@ export const useExportDaset = (currentFileId?: string, execid?: string) => {
       childRef.current?.resetForm();
       childRef.current?.setcreateTagDisabled();
       closeModal();
-      // TODO: 补充跳转导出列表的链接
-      Message.success('导出任务创建成功，可点击导出列表查看详情');
+      // 显示带链接的成功消息
+      Message.success({
+        content: React.createElement(
+          'span',
+          null,
+          '导出任务创建成功，可点击',
+          React.createElement(
+            'a',
+            {
+              href: '#',
+              onClick: (e: React.MouseEvent) => {
+                e.preventDefault();
+                onSwitchToExportList?.();
+              },
+              style: { color: '#1890ff', textDecoration: 'none' }
+            },
+            '导出列表'
+          ),
+          '查看详情'
+        )
+      });
     } catch {
       Message.error('数据集创建失败！');
     }

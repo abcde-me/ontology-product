@@ -90,7 +90,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handleSubmit,
       setModalDatasetVisible,
       childRef
-    } = useExportDaset(currentFileId, execid);
+    } = useExportDaset(currentFileId, execid, () => {
+      // 切换到导出列表tab
+      if (onSidebarTabChange) {
+        onSidebarTabChange('daset');
+      }
+    });
 
     // console.log('看一看编辑器卡顿的事情～');
 

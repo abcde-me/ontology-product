@@ -17,6 +17,7 @@ import {
   GetDbItemDetailRes
 } from '@/api/dataCatalog';
 import { useEffect, useState } from 'react';
+import { cloneDeep } from 'lodash-es';
 import { searchTreeNodes, SEARCH_CONFIGS } from '../utils/treeSearchUtils';
 
 // 扩展的目录项类型，包含full_path
@@ -358,11 +359,12 @@ export const useSourceTargetTree = (dataType) => {
     setSearchKeyword(keyword);
     if (!catalog) return;
 
-    const filteredCatalog = { ...catalog };
+    // 使用lodash深拷贝catalog，避免修改原始数据
+    const filteredCatalog = cloneDeep(catalog);
 
     if (catalog.children?.volume) {
       filteredCatalog.children = {
-        ...catalog.children,
+        ...filteredCatalog.children,
         volume: performFrontendSearch(keyword, catalog.children.volume, [
           'name'
         ])
@@ -429,7 +431,7 @@ export const useSourceTargetTree = (dataType) => {
         path_id: Number(db.id),
         search: keyword,
         page: 1,
-        limit: 100,
+        limit: 1000,
         database: dbItem.name || ''
       };
 
