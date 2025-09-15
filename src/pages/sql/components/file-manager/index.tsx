@@ -12,7 +12,11 @@ const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
-  onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileOpen?: (
+    fileId: string,
+    fileName?: string,
+    perms?: Array<string>
+  ) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
