@@ -186,6 +186,7 @@ export const useSourceTargetTree = (dataType) => {
   const [filteredTableColumns, setFilteredTableColumns] = useState<string[]>(
     []
   );
+  const [filteredDbItemList, setFilteredDbItemList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // 获取数据目录列表
@@ -443,6 +444,25 @@ export const useSourceTargetTree = (dataType) => {
     }
   };
 
+  // 搜索db-item层级 - 前端搜索
+  const searchDbItem = (keyword: string, dbItemList: any[]) => {
+    setSearchKeyword(keyword);
+    if (!dbItemList || dbItemList.length === 0) {
+      setFilteredDbItemList([]);
+      return [];
+    }
+
+    // 如果搜索关键词为空，清空过滤列表
+    if (!keyword.trim()) {
+      setFilteredDbItemList([]);
+      return [];
+    }
+
+    const filtered = performFrontendSearch(keyword, dbItemList, ['name']);
+    setFilteredDbItemList(filtered);
+    return filtered;
+  };
+
   // 搜索table-detail层级 - 前端搜索字段
   const searchTableDetail = (keyword: string, tableDetail: any) => {
     setSearchKeyword(keyword);
@@ -470,6 +490,7 @@ export const useSourceTargetTree = (dataType) => {
     setFilteredFileList([]);
     setFilteredTableList([]);
     setFilteredTableColumns([]);
+    setFilteredDbItemList([]);
   };
 
   useEffect(() => {
@@ -492,6 +513,7 @@ export const useSourceTargetTree = (dataType) => {
     filteredFileList,
     filteredTableList,
     filteredTableColumns,
+    filteredDbItemList,
 
     getCatalogList,
     getCatalogFileList,
@@ -507,6 +529,7 @@ export const useSourceTargetTree = (dataType) => {
     searchCategory,
     searchFiles,
     searchDatabaseTables,
+    searchDbItem,
     searchTableDetail,
     clearSearch,
     setSearchKeyword
