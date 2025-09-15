@@ -832,17 +832,17 @@ const LoadAddModal = (props: propsType) => {
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
             labelAlign="right"
-            rules={[
-              {
-                required: true,
-                validator: (value, cb) => {
-                  if (uploadedFiles.length === 0) {
-                    return cb('请选择文件');
-                  }
-                  return cb();
-                }
-              }
-            ]}
+            // rules={[
+            //   {
+            //     required: true,
+            //     validator: (value, cb) => {
+            //       if (uploadedFiles.length === 0) {
+            //         return cb('请选择文件');
+            //       }
+            //       return cb();
+            //     }
+            //   }
+            // ]}
           >
             <Uploads
               onFileChange={handleFileChange}
