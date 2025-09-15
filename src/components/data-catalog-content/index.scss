@@ -144,12 +144,19 @@
 /* 可滚动内容区域 */
 .scrollable-content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: auto;
   padding: 0;
   /* 自定义滚动条样式 */
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* 表格包装器样式 */
+.table-wrapper {
+  width: 100%;
+  min-width: max-content;
+  max-height: 490;
+  overflow: auto;
 }
 
 .detailModal .arco-table-custom-filter {
