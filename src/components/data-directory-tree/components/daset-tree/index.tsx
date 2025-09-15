@@ -189,7 +189,9 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             onClick={handleBack}
           />
           <span className="dataset-tree__title">
-            {isFileView ? currentPath : '数据集'}
+            <EllipsisPopover
+              value={isFileView ? currentPath : '数据集'}
+            ></EllipsisPopover>
           </span>
         </div>
       </div>
