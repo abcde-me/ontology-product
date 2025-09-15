@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { getSqlScriptDetail, openPythonItem } from '@/api/sql';
+import { getSqlScriptDetail } from '@/api/sql';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 import { formatDateTime } from '../utils';
 import { generateSqlDefaultName } from '../utils/formatDateTime';
