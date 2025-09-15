@@ -165,6 +165,8 @@ const Python: React.FC = memo(() => {
             onSidebarTabChange={setActiveTab}
             onInsertContent={handleInsertContentRegister}
             onEditorFocusChange={handleEditorFocusChange}
+            refreshDirectory={refreshDirectory}
+            selectFile={selectFile}
           />
         </Content>
       )}

@@ -26,6 +26,8 @@ interface EditorContentProps {
   onSidebarTabChange?: (tabKey: 'files' | 'tools' | 'data' | 'daset') => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
+  refreshDirectory?: () => Promise<void>;
+  selectFile?: (fileId: string) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -39,7 +41,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onTabContentUpdate,
     onSidebarTabChange,
     onInsertContent,
-    onEditorFocusChange
+    onEditorFocusChange,
+    refreshDirectory,
+    selectFile
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -48,8 +52,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       onTabChange(key);
     };
 
-    // 创建 PySpark 文件（等同于 DirectoryTree 的新建功能）
-    const handleCreatePySpark = () => {
+    // 创建 PySpark 文件（与标签页新建逻辑一致，但固定使用根目录）
+    const handleCreatePySpark = async () => {
       if (!onCreate) {
         Message.error('创建功能未配置');
         return;
@@ -58,8 +62,22 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       try {
         // 生成默认文件名
         const defaultName = `新建PySpark_${Date.now()}`;
-        // 调用父组件的创建逻辑，传递默认文件名
-        onCreate(defaultName, {}); // 传递默认文件名和空对象作为参数
+
+        // 调用父组件的创建逻辑，传递默认文件名和根目录信息
+        const result = await onCreate(defaultName, { id: '0' }); // 固定使用根目录ID为'0'
+
+        // 如果创建成功，刷新目录并选中新文件
+        if (result && result.id) {
+          // 刷新目录列表
+          if (refreshDirectory) {
+            await refreshDirectory();
+          }
+
+          // 选中新创建的文件
+          if (selectFile) {
+            selectFile(String(result.id));
+          }
+        }
       } catch (error) {
         console.error('创建 PySpark 文件失败:', error);
         Message.error('创建失败');
