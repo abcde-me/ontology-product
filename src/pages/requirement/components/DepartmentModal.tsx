@@ -151,7 +151,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         <>
           <Button
             onClick={() => {
-              oncancel;
+              onClose();
             }}
           >
             取消

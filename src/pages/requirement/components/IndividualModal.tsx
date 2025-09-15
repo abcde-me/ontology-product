@@ -159,14 +159,23 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       className="fulscreen-modal"
       style={{ width: '90vw', overflowY: 'auto' }}
       footer={
-        <Button
-          type="primary"
-          onClick={() => {
-            getTableSelectContent();
-          }}
-        >
-          确定
-        </Button>
+        <>
+          <Button
+            onClick={() => {
+              onClose();
+            }}
+          >
+            取消
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              getTableSelectContent();
+            }}
+          >
+            确定
+          </Button>
+        </>
       }
     >
       <div className="fullscreen-modal-content">

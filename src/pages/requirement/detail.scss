@@ -179,13 +179,18 @@
     align-items: center;
   }
 
+  .attribute-group-header-content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
   .attribute-group-info-title {
     font-family: PingFang SC;
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
     letter-spacing: 0%;
-    margin-bottom: 8px;
   }
 
   .attribute-info-item {
