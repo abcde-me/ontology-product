@@ -111,7 +111,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                   return knowledgeBaseNameCheck({
                     knowledgeName: value,
                     userId: userInfo?.id || '',
-                    dsWorkflowId: dsWorkflowId || ''
+                    dsWorkflowId: Number(dsWorkflowId)
                   }).then((res) => {
                     if (res.data && res.msg === 'success') {
                       setKnowledgeBaseName(value);
