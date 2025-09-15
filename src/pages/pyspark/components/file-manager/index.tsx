@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { Typography } from '@arco-design/web-react';
 import { PythonListItem } from '@/types/pythonApi';
 import './index.scss';
@@ -22,6 +22,7 @@ interface NotebookTabContentProps {
   hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
   externalSelectedKeys?: string[]; // 外部传入的选中状态
+  onCurrentFolderChange?: (folderId: string) => void; // 添加当前文件夹变化的回调
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
@@ -30,13 +31,15 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   onFileRename, // 接收重命名文件时更新标签页标题的回调
   hasOpenTabs, // 接收检查是否有标签页打开的回调
   directoryTreeRef,
-  externalSelectedKeys
+  externalSelectedKeys,
+  onCurrentFolderChange // 接收当前文件夹变化的回调
 }) => {
   // 使用文件管理器hook
   const {
     pythonList,
     isCanCreate,
     selectedKeys,
+    currentFolderId,
     handleSearch,
     handleNew,
     handleTreeSelect,
@@ -48,7 +51,9 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     // handleFileSelect,
     handleFolderClick,
     handleBackToParent,
-    formatData
+    formatData,
+    refreshDirectory,
+    selectFile
   } = useFileManager({
     onFileOpen,
     onFileDelete, // 传递删除文件时关闭标签页的回调
@@ -56,6 +61,27 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     hasOpenTabs, // 传递检查是否有标签页打开的回调
     externalSelectedKeys
   });
+
+  // 监听当前文件夹ID变化，通知父组件
+  React.useEffect(() => {
+    if (onCurrentFolderChange && currentFolderId) {
+      onCurrentFolderChange(currentFolderId);
+    }
+  }, [currentFolderId, onCurrentFolderChange]);
+
+  // 暴露方法给父组件
+  useImperativeHandle(
+    directoryTreeRef,
+    () => ({
+      startRootCreate: (isFolder = true) => {
+        // 这里可以调用 DirectoryTree 的 startRootCreate 方法
+        // 由于我们使用的是 DirectoryTree 组件，这个方法会通过 ref 传递
+      },
+      refresh: refreshDirectory,
+      selectFile: selectFile
+    }),
+    [refreshDirectory, selectFile]
+  );
 
   return (
     <div className="python-tab-content sider-container">

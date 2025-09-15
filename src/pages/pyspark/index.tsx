@@ -13,6 +13,7 @@ import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
+import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -31,6 +32,28 @@ const Python: React.FC = memo(() => {
     string[]
   >([]);
 
+  // 用于获取当前文件夹ID的状态
+  const [currentFolderId, setCurrentFolderId] = useState<string>('0');
+
+  // FileManager 的引用
+  const fileManagerRef = useRef<DirectoryTreeRef>(null);
+
+  // 刷新目录的方法
+  const refreshDirectory = async () => {
+    if (fileManagerRef.current) {
+      // 通过 ref 调用 DirectoryTree 的刷新方法
+      await fileManagerRef.current.refresh?.();
+    }
+  };
+
+  // 选中文件的方法
+  const selectFile = (fileId: string) => {
+    if (fileManagerRef.current) {
+      // 通过 ref 调用 DirectoryTree 的选中方法
+      fileManagerRef.current.selectFile?.(fileId);
+    }
+  };
+
   const {
     fileState,
     directoryTreeRef,
@@ -43,7 +66,12 @@ const Python: React.FC = memo(() => {
     updateTabTitle, // 获取更新标签页标题的方法
     handleCreate,
     hasOpenTabs // 获取检查是否有标签页打开的方法
-  } = useTabManager(setFileManagerSelectedKeys);
+  } = useTabManager(
+    setFileManagerSelectedKeys,
+    () => currentFolderId,
+    refreshDirectory,
+    selectFile
+  );
 
   // 处理标签页内容更新
   const handleTabContentUpdate = (tabKey: string, content: string) => {
@@ -93,8 +121,9 @@ const Python: React.FC = memo(() => {
                 onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
                 onFileRename={updateTabTitle} // 传递重命名文件时更新标签页标题的回调
                 hasOpenTabs={hasOpenTabs} // 传递检查是否有标签页打开的回调
-                ref={directoryTreeRef}
+                ref={fileManagerRef}
                 externalSelectedKeys={fileManagerSelectedKeys}
+                onCurrentFolderChange={setCurrentFolderId} // 传递当前文件夹变化的回调
               />
             )}
           </TabPane>

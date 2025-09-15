@@ -56,8 +56,10 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       }
 
       try {
-        // 调用父组件的创建逻辑
-        onCreate('', {}); // 传递空字符串和空对象作为默认参数
+        // 生成默认文件名
+        const defaultName = `新建PySpark_${Date.now()}`;
+        // 调用父组件的创建逻辑，传递默认文件名
+        onCreate(defaultName, {}); // 传递默认文件名和空对象作为参数
       } catch (error) {
         console.error('创建 PySpark 文件失败:', error);
         Message.error('创建失败');
