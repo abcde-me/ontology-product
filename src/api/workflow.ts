@@ -132,7 +132,7 @@ export async function scriptingBenchCancel(
 export async function knowledgeBaseNameCheck(params: {
   knowledgeName: string;
   userId: string;
-  dsWorkflowId: string;
+  dsWorkflowId: number;
 }) {
   return await UAPI.RES.knowledgeBaseNameCheck({}).post(params).inRegion().do();
 }
