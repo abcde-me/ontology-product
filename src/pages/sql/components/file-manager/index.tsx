@@ -80,7 +80,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
           }
           onSearch={handleSearch}
           formatData={formatData}
-          placeholder="搜索当前文件夹"
+          placeholder="输入搜索文件"
           newButtonText="新建"
         />
       </div>

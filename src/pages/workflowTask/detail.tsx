@@ -192,7 +192,7 @@ export default function WorkflowTaskDetail() {
         //     (res.data.base_info.run_status === TaskRunStatus.fail ||
         //       res.data.base_info.run_status === TaskRunStatus.stop ||
         //       index > firstZeroIndex) &&
-        //     item.status === 0
+        //       item.status === 0
         //       ? { ...item, status: 3 }
         //       : item
         // );
