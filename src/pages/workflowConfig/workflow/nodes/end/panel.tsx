@@ -16,7 +16,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const FormItem = Form.Item;
   const Option = Select.Option;
   const searchParams = new URLSearchParams(location.search);
-  const dsWorkflowId = searchParams.get('ds_workflow_id');
+  const workflow_uuid = searchParams.get('workflow_uuid');
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
   const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
@@ -111,7 +111,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                   return knowledgeBaseNameCheck({
                     knowledgeName: value,
                     userId: userInfo?.id || '',
-                    dsWorkflowId: Number(dsWorkflowId)
+                    dsWorkflowUuid: workflow_uuid || ''
                   }).then((res) => {
                     if (
                       res.data &&
