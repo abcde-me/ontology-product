@@ -10,7 +10,11 @@ import {
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
-  onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileOpen?: (
+    fileId: string,
+    fileName?: string,
+    perms?: Array<string>
+  ) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
@@ -128,7 +132,7 @@ export const useFileManager = (
             'ID:',
             dataRef.id
           );
-          onFileOpen(String(dataRef.id), dataRef.name);
+          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
         }
       }
     },
@@ -203,7 +207,11 @@ export const useFileManager = (
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
           // 自动打开文件
-          onFileOpen?.(String(createRes.data.id), createRes.data.name);
+          onFileOpen?.(
+            String(createRes.data.id),
+            createRes.data.name,
+            createRes.data.perms
+          );
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
@@ -392,7 +400,7 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(firstFile.id)]);
-          onFileOpen(String(firstFile.id), firstFile.name);
+          onFileOpen(String(firstFile.id), firstFile.name, firstFile.perms);
         }
       }
     });

@@ -45,7 +45,7 @@ export const useTabManager = (
 
   // 文件操作
   const openFile = useCallback(
-    (fileId: string, fileName?: string) => {
+    (fileId: string, fileName?: string, perms?: Array<string>) => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -83,7 +83,8 @@ export const useTabManager = (
             title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
             content: '', // 初始内容为空，由 useEditor 加载
             fileId: fileId,
-            lastModified: new Date().toISOString()
+            lastModified: new Date().toISOString(),
+            perms: perms
           };
           updatedTabs = [...fileState.fileTabs, newTab];
         }

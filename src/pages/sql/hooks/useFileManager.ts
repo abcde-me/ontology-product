@@ -14,7 +14,11 @@ import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
 
 interface UseFileManagerOptions {
-  onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileOpen?: (
+    fileId: string,
+    fileName?: string,
+    perms?: Array<string>
+  ) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
@@ -125,7 +129,7 @@ export const useFileManager = (
             'ID:',
             dataRef.id
           );
-          onFileOpen(String(dataRef.id), dataRef.name);
+          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
         }
       }
     },
@@ -185,7 +189,12 @@ export const useFileManager = (
         setSelectedKeys([String(createRes.data.script_id)]);
 
         // 编辑器自动打开当前脚本
-        onFileOpen && onFileOpen(String(createRes.data.script_id), finalName);
+        onFileOpen &&
+          onFileOpen(
+            String(createRes.data.script_id),
+            finalName,
+            createRes.data.perms
+          );
 
         return createRes.data;
 

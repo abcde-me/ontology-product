@@ -17,6 +17,7 @@ export enum PythonItemType {
 }
 
 export interface PythonListItem {
+  perms: Array<string>;
   /** 项目标识 */
   id: number;
   /** 名称（文件或文件夹） */
@@ -39,6 +40,8 @@ export interface PythonListRes {
   path_name: string;
   /** 父目录id */
   path_id: number;
+  /** 权限 */
+  perms: Array<string>;
   /** 列表项 */
   items: PythonListItem[];
   /** 总数 */

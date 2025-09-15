@@ -12,7 +12,11 @@ const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
-  onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileOpen?: (
+    fileId: string,
+    fileName?: string,
+    perms?: Array<string>
+  ) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
@@ -76,7 +80,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
           }
           onSearch={handleSearch}
           formatData={formatData}
-          placeholder="搜索当前文件夹"
+          placeholder="输入搜索文件"
           newButtonText="新建"
         />
       </div>

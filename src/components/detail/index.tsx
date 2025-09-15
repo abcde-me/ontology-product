@@ -313,12 +313,6 @@ const contentFileColumns = [
     render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
   },
   {
-    title: '创建时间',
-    dataIndex: 'created_at',
-    width: 180,
-    render: (_, record) => <span>{formatDate(record.created_at)}</span>
-  },
-  {
     title: '修改时间',
     dataIndex: 'file_modify_time',
     width: 180,
