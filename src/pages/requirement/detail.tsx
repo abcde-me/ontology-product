@@ -210,8 +210,12 @@ export default function RequirementDetail() {
    * @param {number} labelIndex - 要删除的标签索引
    */
   const deleteLabel = (labelIndex) => {
-    const newDatalist = datalist.filter((_, index) => index !== labelIndex);
-    setDatalist(newDatalist);
+    // 使用函数式更新确保获取到最新的状态
+    setDatalist((prevDatalist) => {
+      const newDatalist = [...prevDatalist];
+      newDatalist.splice(labelIndex, 1);
+      return newDatalist;
+    });
   };
 
   const updateField = (path, value) => {
@@ -840,7 +844,7 @@ export default function RequirementDetail() {
                       <div className="attribute-content">
                         {datalist &&
                           datalist?.map((item, labelIndex) => (
-                            <div className="sortable-item" key={labelIndex}>
+                            <div className="sortable-item" key={item?.label_id}>
                               <div className="sortable-item-content">
                                 <FormItem
                                   label="标注名称:"
@@ -1696,8 +1700,8 @@ export default function RequirementDetail() {
                 <div className="text-content">
                   已选：
                   {taskAssignData.length ||
-                    getDetailObj?.label_operate?.[0].user_id?.length ||
-                    getDetailObj?.label_operate?.[0].org_id?.length}
+                    getDetailObj?.label_operate?.[0]?.user_id?.length ||
+                    getDetailObj?.label_operate?.[0]?.org_id?.length}
                 </div>
               </div>
             </FormItem>
