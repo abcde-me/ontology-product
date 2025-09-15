@@ -848,7 +848,7 @@ export default function RequirementDetail() {
                               <div className="sortable-item-content">
                                 <FormItem
                                   label="标注名称:"
-                                  field={`label_name_cn_${labelIndex}`}
+                                  field={`label_name_cn_${item?.label_id}`}
                                   rules={[
                                     {
                                       required: true,
@@ -877,7 +877,7 @@ export default function RequirementDetail() {
                                   />
                                 </FormItem>
                                 <FormItem
-                                  field={`label_name_en_${labelIndex}`}
+                                  field={`label_name_en_${item?.label_id}`}
                                   label={
                                     <div>
                                       展示名称
@@ -904,7 +904,9 @@ export default function RequirementDetail() {
                                     value={item.label_name_en}
                                   />
                                 </FormItem>
-                                <FormItem field={`label_shape_${labelIndex}`}>
+                                <FormItem
+                                  field={`label_shape_${item?.label_id}`}
+                                >
                                   <Select
                                     placeholder="请选择形状"
                                     value={item.label_shape}
@@ -953,7 +955,9 @@ export default function RequirementDetail() {
                                     ))}
                                   </Select>
                                 </FormItem>
-                                <FormItem field={`label_colour_${labelIndex}`}>
+                                <FormItem
+                                  field={`label_colour_${item?.label_id}`}
+                                >
                                   <ColorPicker
                                     defaultValue={item?.label_colour}
                                     onChange={(val: any) => {
@@ -986,11 +990,11 @@ export default function RequirementDetail() {
                                   (attrGroup, groupIndex) => {
                                     return (
                                       <div
-                                        key={`${labelIndex}_${groupIndex}`}
+                                        key={`${item?.label_id}_${groupIndex}`}
                                         className="attribute-group-item"
                                       >
                                         <FormItem
-                                          field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
+                                          field={`label_info_attribute_groups_${item?.label_id}_${groupIndex}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                           required
                                           disabled={type === 'detail'}
                                           label="属性组件名称:"
