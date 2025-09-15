@@ -314,7 +314,7 @@ export default function RequirementDetail() {
     // 创建数据的深拷贝，避免直接修改原数据
     // 深拷贝
     const newData = _.cloneDeep(isTemp ? templateData : datalist);
-
+    console.log(newData, 'newData --- +++', isTemp);
     // 遍历路径找到目标位置并更新值
     let current: any = newData;
     for (let i = 0; i < path.length; i++) {
@@ -376,18 +376,28 @@ export default function RequirementDetail() {
   };
 
   // 为指定属性组添加属性
-  const addAttribute = (labelIndex: number, groupIndex?: number) => {
+  const addAttribute = (labelIndex: number, groupIndex?: number, type?) => {
     const newAttribute: LabelInfoAttribute = {
       label_info_id: uuidV4(),
       attribute_name_cn: '新属性',
       attribute_name_en: 'new_attribute',
-      input_type: 1
+      input_type: type || 1
     };
 
     // 获取当前属性并添加新属性
     const currentAttributes =
       datalist[labelIndex].label_info_attribute_groups[groupIndex as number]
         .label_info_attribute;
+    // 修改为在倒数第二个位置增加新属性
+    let updatedAttributes;
+    if (currentAttributes.length >= 1) {
+      // 当数组长度大于等于1时，在倒数第二个位置插入
+      updatedAttributes = [...currentAttributes];
+      updatedAttributes.splice(-1, 0, newAttribute);
+    } else {
+      // 当数组为空时，直接添加到末尾
+      updatedAttributes = [newAttribute];
+    }
 
     updateNestedValue(
       [
@@ -396,7 +406,7 @@ export default function RequirementDetail() {
         groupIndex as number,
         'label_info_attribute'
       ],
-      [...currentAttributes, newAttribute]
+      updatedAttributes
     );
   };
 
@@ -979,7 +989,7 @@ export default function RequirementDetail() {
                                           field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`}
                                           required
                                           disabled={type === 'detail'}
-                                          label="属性组件名称"
+                                          label="属性组件名称:"
                                         >
                                           <div className="group-items">
                                             <Input
@@ -1063,7 +1073,7 @@ export default function RequirementDetail() {
                                                 );
                                               }}
                                             >
-                                              必须标注
+                                              必须标注11
                                             </Checkbox>
                                             {attrGroup.attribute_group_class !==
                                               3 && (
@@ -1078,6 +1088,7 @@ export default function RequirementDetail() {
                                                 className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
                                                 onClick={() => {
                                                   if (type !== 'detail') {
+                                                    // 修改增加逻辑 往倒数第二个增加
                                                     addAttribute(
                                                       labelIndex,
                                                       groupIndex
@@ -1105,13 +1116,71 @@ export default function RequirementDetail() {
                                           </div>
                                         </FormItem>
                                         {/* 选项内容区域 */}
-                                        <div className="attribute-group-info-title">
-                                          {1 === attrGroup.attribute_group_class
-                                            ? '单选选项'
-                                            : 2 ===
-                                                attrGroup.attribute_group_class
-                                              ? '多选选项'
-                                              : ''}
+                                        <div className="attribute-group-header-content">
+                                          <div className="attribute-group-info-title">
+                                            {1 ===
+                                            attrGroup.attribute_group_class
+                                              ? '单选选项'
+                                              : 2 ===
+                                                  attrGroup.attribute_group_class
+                                                ? '多选选项'
+                                                : ''}
+                                          </div>
+                                          <Checkbox
+                                            disabled={type === 'detail'}
+                                            style={{ whiteSpace: 'nowrap' }}
+                                            checked={
+                                              attrGroup.label_info_attribute.some(
+                                                (item) => item.input_type === 2
+                                              )
+                                                ? true
+                                                : false
+                                            }
+                                            onChange={(checked) => {
+                                              // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
+                                              if (checked) {
+                                                const newData = [...datalist];
+                                                console.log(
+                                                  newData,
+                                                  'top - new'
+                                                );
+                                                newData[
+                                                  labelIndex
+                                                ].label_info_attribute_groups?.[
+                                                  groupIndex
+                                                ]?.label_info_attribute.push({
+                                                  label_info_id: uuidV4(),
+                                                  attribute_name_cn: '',
+                                                  attribute_name_en: '其他',
+                                                  input_type: 2
+                                                });
+                                                setDatalist(newData);
+                                              } else {
+                                                // 取消选中的时候删除增加的内容
+                                                const newItems = [...datalist];
+                                                console.log(
+                                                  newItems,
+                                                  'top - newItems'
+                                                );
+                                                if (
+                                                  newItems[labelIndex]
+                                                    .label_info_attribute_groups?.[
+                                                    groupIndex
+                                                  ]?.label_info_attribute
+                                                    .length > 1
+                                                ) {
+                                                  newItems[
+                                                    labelIndex
+                                                  ].label_info_attribute_groups?.[
+                                                    groupIndex
+                                                  ]?.label_info_attribute.pop();
+                                                  setDatalist(newItems);
+                                                }
+                                              }
+                                            }}
+                                          >
+                                            支持手动输入
+                                          </Checkbox>
                                         </div>
                                         {attrGroup?.label_info_attribute.map(
                                           (attr, attrIndex) => (
@@ -1133,12 +1202,37 @@ export default function RequirementDetail() {
                                                           '请输入选项名称'
                                                       }
                                                     ]}
-                                                    label={`选项${attrIndex + 1}`}
+                                                    label={`选项${attrIndex + 1}:`}
+                                                    disabled={
+                                                      type === 'detail' ||
+                                                      (attrIndex ===
+                                                        attrGroup
+                                                          .label_info_attribute
+                                                          ?.length -
+                                                          1 &&
+                                                        attrGroup
+                                                          ?.label_info_attribute[
+                                                          attrIndex
+                                                        ].input_type === 2)
+                                                        ? true
+                                                        : false
+                                                    }
                                                   >
                                                     <Input
                                                       type="text"
                                                       value={
-                                                        attr.attribute_name_cn
+                                                        attrIndex !== 0 &&
+                                                        attrIndex ===
+                                                          attrGroup
+                                                            ?.label_info_attribute
+                                                            ?.length -
+                                                            1 &&
+                                                        attrGroup
+                                                          .label_info_attribute[
+                                                          attrIndex
+                                                        ].input_type === 2
+                                                          ? '标准时的输入内容'
+                                                          : attr.attribute_name_cn
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
@@ -1162,6 +1256,7 @@ export default function RequirementDetail() {
                                                         <Tooltip content="展示在标注页面的名称">
                                                           <IconQuestionCircle />
                                                         </Tooltip>
+                                                        :
                                                       </div>
                                                     }
                                                     field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
@@ -1170,7 +1265,18 @@ export default function RequirementDetail() {
                                                       placeholder="展示在标注页面的名称"
                                                       type="text"
                                                       value={
-                                                        attr.attribute_name_en
+                                                        attrIndex !== 0 &&
+                                                        attrIndex ===
+                                                          attrGroup
+                                                            ?.label_info_attribute
+                                                            ?.length -
+                                                            1 &&
+                                                        attrGroup
+                                                          ?.label_info_attribute[
+                                                          attrIndex
+                                                        ].input_type === 2
+                                                          ? '其他'
+                                                          : attr.attribute_name_en
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
@@ -1292,7 +1398,7 @@ export default function RequirementDetail() {
                             >
                               <FormItem
                                 required
-                                label="属性组件名称"
+                                label="属性组件名称:"
                                 disabled={type === 'detail'}
                               >
                                 <div className="group-items">
@@ -1404,7 +1510,7 @@ export default function RequirementDetail() {
                                         attrGroup.attribute_group_class) && (
                                       <div className="attribute-info-item">
                                         <FormItem
-                                          label={`选项${attrIndex + 1}`}
+                                          label={`选项${attrIndex + 1}:`}
                                         >
                                           <Input
                                             type="text"
@@ -1426,11 +1532,11 @@ export default function RequirementDetail() {
                                         <FormItem
                                           label={
                                             <div>
-                                              展示名称{' '}
+                                              展示名称
                                               <Tooltip content="展示在标注页面的名称">
-                                                {' '}
                                                 <IconQuestionCircle />
                                               </Tooltip>
+                                              :
                                             </div>
                                           }
                                         >
