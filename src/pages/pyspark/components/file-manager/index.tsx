@@ -19,6 +19,7 @@ interface NotebookTabContentProps {
   ) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
+  hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
   externalSelectedKeys?: string[]; // 外部传入的选中状态
 }
@@ -27,6 +28,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   onFileOpen,
   onFileDelete, // 接收删除文件时关闭标签页的回调
   onFileRename, // 接收重命名文件时更新标签页标题的回调
+  hasOpenTabs, // 接收检查是否有标签页打开的回调
   directoryTreeRef,
   externalSelectedKeys
 }) => {
@@ -51,6 +53,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     onFileOpen,
     onFileDelete, // 传递删除文件时关闭标签页的回调
     onFileRename, // 传递重命名文件时更新标签页标题的回调
+    hasOpenTabs, // 传递检查是否有标签页打开的回调
     externalSelectedKeys
   });
 

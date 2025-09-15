@@ -41,7 +41,8 @@ const Python: React.FC = memo(() => {
     switchTab,
     updateTabContent,
     updateTabTitle, // 获取更新标签页标题的方法
-    handleCreate
+    handleCreate,
+    hasOpenTabs // 获取检查是否有标签页打开的方法
   } = useTabManager(setFileManagerSelectedKeys);
 
   // 处理标签页内容更新
@@ -91,6 +92,7 @@ const Python: React.FC = memo(() => {
                 onFileOpen={openFile}
                 onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
                 onFileRename={updateTabTitle} // 传递重命名文件时更新标签页标题的回调
+                hasOpenTabs={hasOpenTabs} // 传递检查是否有标签页打开的回调
                 ref={directoryTreeRef}
                 externalSelectedKeys={fileManagerSelectedKeys}
               />

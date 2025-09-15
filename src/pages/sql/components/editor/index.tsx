@@ -44,6 +44,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
     // 创建 PySpark 文件（等同于 DirectoryTree 的新建功能）
     const handleCreatePySpark = () => {
+      // 检查标签页数量限制
+      if (fileTabs.length >= 20) {
+        Message.error('最多只能打开20个标签页，请先关闭一些标签页');
+        return;
+      }
+
       if (!onCreate) {
         Message.error('创建功能未配置');
         return;

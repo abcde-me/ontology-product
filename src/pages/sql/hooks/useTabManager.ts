@@ -70,6 +70,13 @@ export const useTabManager = (
           onSelectedKeysChange && onSelectedKeysChange([fileId]);
           return;
         } else {
+          // 检查标签页数量限制
+          if (fileState.fileTabs.length >= 20) {
+            Message.error('最多只能打开20个标签页，请先关闭一些标签页');
+            setFileState((prev) => ({ ...prev, isLoading: false }));
+            return;
+          }
+
           // 创建新标签页（内容由 useEditor 负责加载）
           const newTab = {
             key: newTabKey,
@@ -109,6 +116,12 @@ export const useTabManager = (
 
   const addTab = useCallback(
     (newFileInfo?: any) => {
+      // 检查标签页数量限制
+      if (fileState.fileTabs.length >= 20) {
+        Message.error('最多只能打开20个标签页，请先关闭一些标签页');
+        return;
+      }
+
       let newTabKey: string;
       let newTabTitle: string;
       let newFileId: string | undefined;
