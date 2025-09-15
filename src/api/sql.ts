@@ -364,176 +364,176 @@ export async function getDatasetList(
 //   //   .do();
 // }
 
-// 文件/目录创建
-export async function createPythonItem(
-  params: CreatePythonItemReq
-): Promise<ApiRes<CreatePythonItemRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonCreateApi({}).post(params).inRegion().do();
+// // 文件/目录创建
+// export async function createPythonItem(
+//   params: CreatePythonItemReq
+// ): Promise<ApiRes<CreatePythonItemRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonCreateApi({}).post(params).inRegion().do();
 
-  // Mock implementation per spec
-  const now = '2025-08-18 14:00';
-  const later = '2025-08-18 15:00';
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      id: 2201,
-      name: '加载数据.ipynb',
-      type: PythonItemType.Notebook,
-      path: '/数据集',
-      path_id: 1002,
-      created: now,
-      last_modified: later
-    }
-  });
-}
+//   // Mock implementation per spec
+//   const now = '2025-08-18 14:00';
+//   const later = '2025-08-18 15:00';
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       id: 2201,
+//       name: '加载数据.ipynb',
+//       type: PythonItemType.Notebook,
+//       path: '/数据集',
+//       path_id: 1002,
+//       created: now,
+//       last_modified: later
+//     }
+//   });
+// }
 
 // 文件/目录重命名
-export async function renamePythonItem(
-  id: string,
-  params: RenamePythonItemReq
-): Promise<ApiRes<RenamePythonItemRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonRenameApi({ pyspark_id: id })
-  //   .put(params)
-  //   .inRegion()
-  //   .do();
+// export async function renamePythonItem(
+//   id: string,
+//   params: RenamePythonItemReq
+// ): Promise<ApiRes<RenamePythonItemRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonRenameApi({ pyspark_id: id })
+//   //   .put(params)
+//   //   .inRegion()
+//   //   .do();
 
-  // Mock implementation per spec
-  const targetId = Number(id) || params.id;
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      id: targetId
-    }
-  });
-}
+//   // Mock implementation per spec
+//   const targetId = Number(id) || params.id;
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       id: targetId
+//     }
+//   });
+// }
 
 // 文件/目录删除
-export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonDeleteApi({ pyspark_id: id })
-  // .delete({})
-  // .inRegion()
-  // .do();
+// export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonDeleteApi({ pyspark_id: id })
+//   // .delete({})
+//   // .inRegion()
+//   // .do();
 
-  // Mock implementation per spe
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: null
-  });
-}
+//   // Mock implementation per spe
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: null
+//   });
+// }
 
 // 复制文件
-export async function copyPythonItem(
-  id: string,
-  params: CopyPythonItemReq
-): Promise<ApiRes<CopyPythonItemRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.pythonCopyApi({ pyspark_id: id })
-  //   .post(params)
-  //   .inRegion()
-  //   .do();
+// export async function copyPythonItem(
+//   id: string,
+//   params: CopyPythonItemReq
+// ): Promise<ApiRes<CopyPythonItemRes>> {
+//   // TODO: 联调
+//   // return await UAPI.RES.pythonCopyApi({ pyspark_id: id })
+//   //   .post(params)
+//   //   .inRegion()
+//   //   .do();
 
-  // Mock implementation per spe
-  const now = '2025-08-18 14:00';
-  const later = '2025-08-18 15:00';
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'OK',
-    requestId: '1',
-    data: {
-      id: 2201,
-      path_id: 1002,
-      name: '加载数据.ipynb',
-      type: PythonItemType.Notebook,
-      path: '/数据集',
-      created: now,
-      last_modified: later
-    }
-  });
-}
+//   // Mock implementation per spe
+//   const now = '2025-08-18 14:00';
+//   const later = '2025-08-18 15:00';
+//   return Promise.resolve({
+//     status: 200,
+//     code: '',
+//     message: 'OK',
+//     requestId: '1',
+//     data: {
+//       id: 2201,
+//       path_id: 1002,
+//       name: '加载数据.ipynb',
+//       type: PythonItemType.Notebook,
+//       path: '/数据集',
+//       created: now,
+//       last_modified: later
+//     }
+//   });
+// }
 
 // 打开文件
-export async function openPythonItem(
-  id: string
-): Promise<ApiRes<OpenPythonItemRes>> {
-  // TODO: 联调
-  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
-    .get({})
-    .inRegion()
-    .do();
+// export async function openPythonItem(
+//   id: string
+// ): Promise<ApiRes<OpenPythonItemRes>> {
+//   // TODO: 联调
+//   return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
+//     .get({})
+//     .inRegion()
+//     .do();
 
-  // Mock implementation per spe
-  // return Promise.resolve({
-  //   status: 200,
-  //   code: '',
-  //   message: 'OK',
-  //   requestId: '1',
-  //   data: {
-  //     execid: 1,
-  //     running_status: 1,
-  //     data: `# Python文件代码内容示例
-  //     import pandas as pd
-  //     import numpy as np
-  //     import matplotlib.pyplot as plt
+//   // Mock implementation per spe
+//   // return Promise.resolve({
+//   //   status: 200,
+//   //   code: '',
+//   //   message: 'OK',
+//   //   requestId: '1',
+//   //   data: {
+//   //     execid: 1,
+//   //     running_status: 1,
+//   //     data: `# Python文件代码内容示例
+//   //     import pandas as pd
+//   //     import numpy as np
+//   //     import matplotlib.pyplot as plt
 
-  //     # 数据加载
-  //     def load_data():
-  //     """加载示例数据"""
-  //     data = pd.DataFrame({
-  //         'x': np.random.randn(100),
-  //         'y': np.random.randn(100)
-  //     })
-  //     return data
+//   //     # 数据加载
+//   //     def load_data():
+//   //     """加载示例数据"""
+//   //     data = pd.DataFrame({
+//   //         'x': np.random.randn(100),
+//   //         'y': np.random.randn(100)
+//   //     })
+//   //     return data
 
-  //     # 数据处理
-  //     def process_data(df):
-  //     """处理数据"""
-  //     df['z'] = df['x'] + df['y']
-  //     return df
+//   //     # 数据处理
+//   //     def process_data(df):
+//   //     """处理数据"""
+//   //     df['z'] = df['x'] + df['y']
+//   //     return df
 
-  //     # 数据可视化
-  //     def visualize_data(df):
-  //     """可视化数据"""
-  //     plt.figure(figsize=(10, 6))
-  //     plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
-  //     plt.colorbar(label='z value')
-  //     plt.xlabel('X values')
-  //     plt.ylabel('Y values')
-  //     plt.title('Data Visualization')
-  //     plt.show()
+//   //     # 数据可视化
+//   //     def visualize_data(df):
+//   //     """可视化数据"""
+//   //     plt.figure(figsize=(10, 6))
+//   //     plt.scatter(df['x'], df['y'], c=df['z'], cmap='viridis')
+//   //     plt.colorbar(label='z value')
+//   //     plt.xlabel('X values')
+//   //     plt.ylabel('Y values')
+//   //     plt.title('Data Visualization')
+//   //     plt.show()
 
-  //     # 主函数
-  //     if __name__ == "__main__":
-  //     # 加载数据
-  //     df = load_data()
-  //     print("数据加载完成，共", len(df), "行")
+//   //     # 主函数
+//   //     if __name__ == "__main__":
+//   //     # 加载数据
+//   //     df = load_data()
+//   //     print("数据加载完成，共", len(df), "行")
 
-  //     # 处理数据
-  //     df = process_data(df)
-  //     print("数据处理完成")
+//   //     # 处理数据
+//   //     df = process_data(df)
+//   //     print("数据处理完成")
 
-  //     # 显示统计信息
-  //     print("\\n数据统计信息:")
-  //     print(df.describe())
+//   //     # 显示统计信息
+//   //     print("\\n数据统计信息:")
+//   //     print(df.describe())
 
-  //     # 可视化数据
-  //     visualize_data(df)
-  //     print("数据可视化完成")`
-  //   }
-  // });
-}
+//   //     # 可视化数据
+//   //     visualize_data(df)
+//   //     print("数据可视化完成")`
+//   //   }
+//   // });
+// }
 
 // 修改（保存）文件
 // export async function savePythonItem(
