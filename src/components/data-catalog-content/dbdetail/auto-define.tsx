@@ -54,7 +54,7 @@ export default function AutoDefine(props) {
           <div className="arco-table-custom-filter">
             <InputSearch
               allowClear
-              placeholder="请输入项目名称搜索"
+              placeholder="请输入字段名搜索"
               style={{ width: 200 }}
               value={
                 filterKeys && filterKeys[0] !== undefined
