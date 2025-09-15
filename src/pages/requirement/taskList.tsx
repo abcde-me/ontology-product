@@ -94,6 +94,8 @@ export default function Requirement() {
       }
     } catch (error) {
       setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 

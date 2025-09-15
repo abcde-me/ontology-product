@@ -76,9 +76,9 @@ export enum LabelShape {
   /** 特征点 */
   POINT = 4,
   /** 椭圆 */
-  ELLIPSE = 5,
-  /** 立方体 */
-  CUBE = 6
+  ELLIPSE = 5
+  // /** 立方体 */
+  // CUBE = 6
 }
 
 export enum LabelInfoAttributeGroupType {
