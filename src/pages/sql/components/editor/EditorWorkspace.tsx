@@ -20,6 +20,8 @@ import { tags as t } from '@lezer/highlight';
 import RunningInfoPanel from './RunningInfoPanel';
 import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -40,6 +42,12 @@ const EditorWorkspaceContent: React.FC<{
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [lastCursorPosition, setLastCursorPosition] = React.useState<number>(0);
   const [isEditorFocused, setIsEditorFocused] = React.useState<boolean>(false);
+
+  const hasRunPermission = useHasPermission(SQL_PERMISSIONS.CAN_RUN);
+  const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.CAN_UPDATE);
+  const hasCancelRunPermission = useHasPermission(
+    SQL_PERMISSIONS.CAN_CANCEL_RUN
+  );
 
   // 从 Context 获取编辑器状态
   const {
@@ -157,21 +165,25 @@ const EditorWorkspaceContent: React.FC<{
       <div className="sql-toolbar">
         <div className="toolbar-left">
           <Space size={12}>
-            <Button
-              type="primary"
-              icon={
-                runStatus === RunningStatus.RUNNING ? (
-                  <IconStop className="mr-[4px]" />
-                ) : (
-                  <IconPlayArrow className="mr-[4px]" />
-                )
-              }
-              disabled={editorContent?.trim() === ''}
-              onClick={handleRunClick}
-              className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
-            >
-              {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
-            </Button>
+            {((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
+              (hasCancelRunPermission &&
+                runStatus === RunningStatus.RUNNING)) && (
+              <Button
+                type="primary"
+                icon={
+                  runStatus === RunningStatus.RUNNING ? (
+                    <IconStop className="mr-[4px]" />
+                  ) : (
+                    <IconPlayArrow className="mr-[4px]" />
+                  )
+                }
+                disabled={editorContent?.trim() === ''}
+                onClick={handleRunClick}
+                className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
+              >
+                {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
+              </Button>
+            )}
 
             <Button
               type="text"
@@ -195,12 +207,15 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 编辑器区域 */}
-      <div className="editor-container">
+      <div
+        className={`editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
+      >
         <CodeMirror
           ref={editorRef}
           value={editorContent}
           onChange={handleContentChange}
           placeholder={placeholderValue}
+          readOnly={!hasUpdatePermission}
           theme={myTheme}
           extensions={[
             sql({ upperCaseKeywords: true }),

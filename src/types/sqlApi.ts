@@ -175,6 +175,7 @@ export interface CreateSqlScriptParams {
 }
 
 export interface CreateSqlScriptData {
+  perms: Array<string>;
   script_id: string;
 }
 
