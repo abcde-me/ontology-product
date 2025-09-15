@@ -113,7 +113,10 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                     userId: userInfo?.id || '',
                     dsWorkflowId: Number(dsWorkflowId)
                   }).then((res) => {
-                    if (res.data && res.msg === 'success') {
+                    if (
+                      res.data &&
+                      (res.msg === 'success' || res.msg === '成功')
+                    ) {
                       setKnowledgeBaseName(value);
                       // 校验通过保存名称
                       onValuesChange(formData, dataSource);
