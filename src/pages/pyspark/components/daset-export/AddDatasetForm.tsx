@@ -880,10 +880,10 @@ const DatasetForm = React.forwardRef<
                   rowSelection={{
                     type: 'checkbox',
                     onChange: (selectedRowKeys, selectedRows) => {
-                      if (selectedRowKeys.length > 0) {
-                        setSelectedFiles(selectedRowKeys as string[]);
-                      }
-                      // setFileIds(selectedRowKeys as string[]);
+                      // if (selectedRowKeys.length > 0) {
+                      //   setSelectedFiles(selectedRowKeys as string[]);
+                      // }
+                      setSelectedFiles(selectedRowKeys as string[]);
                     }
                   }}
                 />

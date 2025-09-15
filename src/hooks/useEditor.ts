@@ -39,7 +39,7 @@ export const useEditor = () => {
 
   // 文件操作
   const openFile = useCallback(
-    async (fileId: string, fileName?: string) => {
+    async (fileId: string, fileName?: string, perms?: Array<string>) => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -82,7 +82,8 @@ export const useEditor = () => {
             fileTabs: updatedTabs,
             currentFileId: fileId,
             activeTab: newTabKey,
-            isLoading: false
+            isLoading: false,
+            perms: perms
           }));
         }
       } catch (error) {

@@ -172,7 +172,11 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                 }}
               >
                 <TabPane key="result" title="结果">
-                  <div className="run-result-content">{runResult}</div>
+                  <div className="run-result-content">
+                    {runStatus === RunningStatus.RUNNING
+                      ? '输出信息中'
+                      : runResult}
+                  </div>
                 </TabPane>
 
                 <TabPane key="log" title="日志">

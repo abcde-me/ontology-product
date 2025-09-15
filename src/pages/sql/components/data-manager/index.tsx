@@ -37,7 +37,7 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据集插入
-  const handleInsertDataset = (dataset: DatasetListItem) => {
+  const handleInsertDataset = (dataset: any) => {
     const isEditorFocused = getIsEditorFocused?.() ?? false;
     console.log(
       '数据集插入:',
@@ -48,8 +48,15 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
       onInsertContent
     );
 
-    // `库名`.`表名`
-    const copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
+    let copyText = '';
+
+    if (dataset.cn_name) {
+      // `字段名`
+      copyText = `\`${dataset.latest_table}\`.\`${dataset.name}\``;
+    } else {
+      // `库名`.`表名`
+      copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
+    }
 
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
@@ -121,7 +128,7 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
 
     if (level === 'table-detail') {
       // `字段名`
-      copyText = `\`${database.name}\``;
+      copyText = `\`${hierarchyData?.selectedTable?.table_name}\`.\`${database.name}\``;
     }
 
     if (isEditorFocused && onInsertContent) {

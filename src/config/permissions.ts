@@ -108,6 +108,8 @@ export const PYSPARK_PERMISSIONS = {
   CAN_UPDATE: 'pyspark:can_update', // 编辑
   CAN_COPY: 'pyspark:can_copy', // 复制
   CAN_RENAME: 'pyspark:can_rename', // 重命名
+  CAN_RUN: 'pyspark:can_run', // 运行
+  CAN_CANCEL_RUN: 'pyspark:can_cancel_run', // 停止运行
   CAN_EXPORT: 'pyspark:can_export_dataset', // 导出数据集按钮
   CAN_SEARCH_EXPORTS: 'pyspark:can_search_exports', // 导出列表
   CAN_EXPORT_STOP: 'pyspark:can_export_stop', // 导出停止

@@ -10,10 +10,15 @@ import {
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 
 interface UseFileManagerOptions {
-  onFileOpen?: (fileId: string, fileName?: string) => void;
+  onFileOpen?: (
+    fileId: string,
+    fileName?: string,
+    perms?: Array<string>
+  ) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
+  hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
 }
 
 interface UseFileManagerReturn {
@@ -49,8 +54,13 @@ interface UseFileManagerReturn {
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
-  const { onFileOpen, onFileDelete, onFileRename, externalSelectedKeys } =
-    options;
+  const {
+    onFileOpen,
+    onFileDelete,
+    onFileRename,
+    externalSelectedKeys,
+    hasOpenTabs
+  } = options;
 
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
@@ -122,7 +132,7 @@ export const useFileManager = (
             'ID:',
             dataRef.id
           );
-          onFileOpen(String(dataRef.id), dataRef.name);
+          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
         }
       }
     },
@@ -197,7 +207,11 @@ export const useFileManager = (
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
           // 自动打开文件
-          onFileOpen?.(String(createRes.data.id), createRes.data.name);
+          onFileOpen?.(
+            String(createRes.data.id),
+            createRes.data.name,
+            createRes.data.perms
+          );
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
@@ -371,8 +385,8 @@ export const useFileManager = (
   // 组件挂载时获取数据
   useEffect(() => {
     getRawPythonList().then((items) => {
-      // 只有在根目录且列表加载完成后，才自动打开第一个文件（如果存在且编辑器中无文件打开）
-      if (items.length > 0 && onFileOpen) {
+      // 只有在根目录且列表加载完成后，且没有标签页打开的情况下，才自动打开第一个文件
+      if (items.length > 0 && onFileOpen && hasOpenTabs && !hasOpenTabs()) {
         const firstFile = items.find(
           (item) => item.type !== PythonItemType.Directory
         );
@@ -386,7 +400,7 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(firstFile.id)]);
-          onFileOpen(String(firstFile.id), firstFile.name);
+          onFileOpen(String(firstFile.id), firstFile.name, firstFile.perms);
         }
       }
     });

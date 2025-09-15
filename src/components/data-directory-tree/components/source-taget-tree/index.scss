@@ -50,12 +50,12 @@
         .list-item-content-info-name {
           max-width: 140px; // 默认1个按钮时的最大宽度
         }
+      }
 
-        // 当有2个按钮时，名称宽度更小
-        &:has(.list-item-actions:nth-child(2)) {
-          .list-item-content-info-name {
-            max-width: 88px; // 2个按钮时的最大宽度
-          }
+      // 当有2个按钮时，名称宽度更小
+      &:has(.list-item-actions:has(> *:nth-child(2))) {
+        .list-item-content-info-name {
+          max-width: 88px; // 2个按钮时的最大宽度
         }
       }
     }
@@ -80,6 +80,7 @@
         &-name {
           font-size: 14px;
           font-weight: 400;
+          max-width: 196px; // 非hover态时最大宽度196px
           color: var(--color-text-2);
         }
 

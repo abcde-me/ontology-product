@@ -23,9 +23,9 @@ export function searchTreeNodes<T = any>(
 ): T[] {
   const { caseSensitive = false, exactMatch = false } = options;
 
-  if (!keyword.trim()) {
-    return [];
-  }
+  // if (!keyword.trim()) {
+  //   return [];
+  // }
 
   const searchKeyword = caseSensitive ? keyword : keyword.toLowerCase();
 

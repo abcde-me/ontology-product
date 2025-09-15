@@ -4,6 +4,8 @@ import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import { FileTab } from '../../hooks/useTabManager';
 import './index.scss';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 const { TabPane } = Tabs;
 
@@ -33,6 +35,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
+
+    const hasCreatePermission = useHasPermission(SQL_PERMISSIONS.CAN_CREATE);
 
     const handleTabChange = (key: string) => {
       onTabChange(key);
@@ -74,7 +78,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onChange={handleTabChange}
             className="sql-tabs"
             type="card"
-            showAddButton
+            showAddButton={hasCreatePermission}
             onAddTab={handleCreatePySpark}
             onDeleteTab={handleCloseTab}
             editable
@@ -115,7 +119,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           className="sql-tabs"
           type="card"
           justify
-          showAddButton
+          showAddButton={hasCreatePermission}
           onAddTab={handleCreatePySpark}
           onDeleteTab={handleCloseTab}
           editable
