@@ -56,11 +56,10 @@ export const useDasetTree = (type: 'sql' | 'python') => {
       name: searchKeyword
     };
 
-    // TODO: 借口未生效 周一调试生效后放开注释
-    // if (type === 'sql') {
-    //   targetParams['name'] = undefined;
-    //   targetParams['search_name_lastest_table'] = searchKeyword;
-    // }
+    if (type === 'sql') {
+      targetParams['name'] = undefined;
+      targetParams['search_name_latest_table'] = searchKeyword;
+    }
 
     const res = await searchDatasetList(targetParams);
 
