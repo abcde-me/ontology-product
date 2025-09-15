@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { createPythonItem } from '@/api/pyspark';
+import { PythonItemType } from '@/types/pythonApi';
 
 // 文件标签页类型
 export interface FileTab {
@@ -26,7 +28,10 @@ const initialState: FileState = {
 };
 
 export const useTabManager = (
-  onSelectedKeysChange?: (selectedKeys: string[]) => void
+  onSelectedKeysChange?: (selectedKeys: string[]) => void,
+  getCurrentFolderId?: () => string, // 添加获取当前文件夹ID的回调
+  refreshDirectory?: () => Promise<void>, // 刷新目录的方法
+  selectFile?: (fileId: string) => void // 选中文件的方法
 ) => {
   const [fileState, setFileState] = useState<FileState>(initialState);
 
@@ -194,23 +199,64 @@ export const useTabManager = (
   // 从 FileManager 获取创建文件的函数
   const handleCreate = useCallback(
     (finalName: string, node?: any): Promise<any> => {
-      return new Promise((resolve) => {
+      return new Promise(async (resolve) => {
         try {
-          // 直接调用 DirectoryTree 的新建 PySpark 功能
-          if (directoryTreeRef.current) {
-            directoryTreeRef.current.startRootCreate(false); // false 表示创建文件，不是文件夹
-            resolve(null); // 返回 null，因为 DirectoryTree 会自己处理创建逻辑
-          } else {
+          // 获取当前文件夹ID，如果没有则使用根目录
+          const currentFolderId = getCurrentFolderId?.() || '0';
+
+          const createRes = await createPythonItem({
+            path_id: Number(currentFolderId),
+            type: PythonItemType.Notebook,
+            name: finalName
+          });
+
+          if (createRes.status !== 200) {
+            Message.error(createRes?.message ?? '创建失败');
             resolve(null);
+            return;
           }
+
+          Message.success('创建成功');
+
+          // 如果是创建的文件（不是文件夹），自动在编辑器中打开
+          if (
+            createRes.data &&
+            createRes.data.type !== PythonItemType.Directory
+          ) {
+            console.log(
+              '✅ 新建文件成功，自动打开文件:',
+              createRes.data.name,
+              'ID:',
+              createRes.data.id
+            );
+
+            // 刷新目录列表
+            if (refreshDirectory) {
+              await refreshDirectory();
+            }
+
+            // 选中新创建的文件
+            if (selectFile) {
+              selectFile(String(createRes.data.id));
+            }
+
+            // 自动打开文件
+            openFile(
+              String(createRes.data.id),
+              createRes.data.name,
+              createRes.data.perms
+            );
+          }
+
+          resolve(createRes.data);
         } catch (error) {
-          console.error('调用新建功能失败:', error);
-          Message.error('调用新建功能失败');
+          console.error('创建失败:', error);
+          Message.error('创建失败');
           resolve(null);
         }
       });
     },
-    []
+    [getCurrentFolderId, openFile]
   );
 
   // 检查是否有标签页打开

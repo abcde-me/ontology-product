@@ -49,6 +49,10 @@ interface UseFileManagerReturn {
   // 工具函数
   getRawPythonList: (folderId?: string) => Promise<PythonListItem[]>;
   formatData: (data: unknown[]) => any[];
+
+  // 新增方法
+  refreshDirectory: () => Promise<void>; // 刷新当前目录
+  selectFile: (fileId: string) => void; // 选中指定文件
 }
 
 export const useFileManager = (
@@ -382,6 +386,16 @@ export const useFileManager = (
     }
   }, [externalSelectedKeys]);
 
+  // 刷新当前目录
+  const refreshDirectory = useCallback(async () => {
+    await getRawPythonList(currentFolderId);
+  }, [getRawPythonList, currentFolderId]);
+
+  // 选中指定文件
+  const selectFile = useCallback((fileId: string) => {
+    setSelectedKeys([fileId]);
+  }, []);
+
   // 组件挂载时获取数据
   useEffect(() => {
     getRawPythonList().then((items) => {
@@ -430,6 +444,10 @@ export const useFileManager = (
 
     // 工具函数
     getRawPythonList,
-    formatData
+    formatData,
+
+    // 新增方法
+    refreshDirectory,
+    selectFile
   };
 };

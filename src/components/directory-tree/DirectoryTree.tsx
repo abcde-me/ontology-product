@@ -59,6 +59,8 @@ export type TreeNodeItem = Partial<PythonListItem> & {
 // 暴露给父组件的方法接口
 export interface DirectoryTreeRef {
   startRootCreate: (isFolder?: boolean) => void;
+  refresh: () => Promise<void>; // 刷新目录列表
+  selectFile: (fileId: string) => void; // 选中指定文件
 }
 
 export enum DirectoryTreeFrom {
@@ -168,15 +170,40 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setTreeData(formattedData);
     }, [data]);
 
+    // 刷新当前目录
+    const refreshCurrentDirectory = useCallback(async () => {
+      try {
+        if (currentFolderId && onFolderClick) {
+          const newData = await onFolderClick(currentFolderId);
+          const formattedData = formatTreeData(newData as any[]);
+          setTreeData(formattedData);
+        } else if (onBackToParent) {
+          // 如果在根目录，使用 onBackToParent 刷新
+          const newData = await onBackToParent('0');
+          const formattedData = formatTreeData(newData as any[]);
+          setTreeData(formattedData);
+        }
+      } catch (error) {
+        console.error('刷新目录失败:', error);
+      }
+    }, [currentFolderId, onFolderClick, onBackToParent, formatTreeData]);
+
+    // 选中指定文件
+    const selectFileById = useCallback((fileId: string) => {
+      setSelectedKeys([fileId]);
+    }, []);
+
     // 暴露方法给父组件
     useImperativeHandle(
       ref,
       () => ({
         startRootCreate: (isFolder = true) => {
           startRootCreate(isFolder);
-        }
+        },
+        refresh: refreshCurrentDirectory,
+        selectFile: selectFileById
       }),
-      []
+      [refreshCurrentDirectory, selectFileById]
     );
 
     // 处理文件夹点击下钻
