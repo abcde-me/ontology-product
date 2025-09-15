@@ -122,8 +122,8 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
     }
 
     if (level === 'database-tables') {
-      // `表名`
-      copyText = `\`${database.table_name}\``;
+      // `库名.表名`
+      copyText = `\`${hierarchyData?.selectedDbItem?.name}\`.\`${database.table_name}\``;
     }
 
     if (level === 'table-detail') {
