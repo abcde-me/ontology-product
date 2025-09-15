@@ -288,7 +288,7 @@ const add = forwardRef((props: any, ref) => {
                   wrapperCol={{ span: 19 }}
                   labelAlign="right"
                 >
-                  <Input placeholder="请输入所属系统名称" />
+                  <Input placeholder="请输入服务端所在地域" />
                 </FormItem>
                 <FormItem
                   label="Endpoint："
