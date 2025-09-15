@@ -64,20 +64,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
         const defaultName = `新建PySpark_${Date.now()}`;
 
         // 调用父组件的创建逻辑，传递默认文件名和根目录信息
-        const result = await onCreate(defaultName, { id: '0' }); // 固定使用根目录ID为'0'
-
-        // 如果创建成功，刷新目录并选中新文件
-        if (result && result.id) {
-          // 刷新目录列表
-          if (refreshDirectory) {
-            await refreshDirectory();
-          }
-
-          // 选中新创建的文件
-          if (selectFile) {
-            selectFile(String(result.id));
-          }
-        }
+        // handleCreate 方法内部已经包含了刷新目录、选中文件和打开文件的逻辑
+        await onCreate(defaultName, { id: '0' }); // 固定使用根目录ID为'0'
       } catch (error) {
         console.error('创建 PySpark 文件失败:', error);
         Message.error('创建失败');
