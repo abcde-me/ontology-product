@@ -48,10 +48,10 @@ enum TaskRunStatus {
 
 // 枚举节点运行状态
 enum NodeRunStatus {
-  running = 0,
+  wait = 0,
   completeSuccess = 1,
   completeFail = 2,
-  wait = 3
+  running = 3
 }
 
 // 枚举节点类型
@@ -184,19 +184,19 @@ export default function WorkflowTaskDetail() {
           res.data.result_info.task_type === NodeType.audio;
         setIsParseNode(isParse);
         // 将节点状态列表第一个运行中后面的状态都改为未开始
-        const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
-          (item: { status: number }) => item.status === 0
-        );
-        const updatedData = res.data.result_info.task_type_list.map(
-          (item: { status: number }, index: number) =>
-            (res.data.base_info.run_status === TaskRunStatus.fail ||
-              res.data.base_info.run_status === TaskRunStatus.stop ||
-              index > firstZeroIndex) &&
-            item.status === 0
-              ? { ...item, status: 3 }
-              : item
-        );
-        setNodeData(updatedData);
+        // const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
+        //   (item: { status: number }) => item.status === 0
+        // );
+        // const updatedData = res.data.result_info.task_type_list.map(
+        //   (item: { status: number }, index: number) =>
+        //     (res.data.base_info.run_status === TaskRunStatus.fail ||
+        //       res.data.base_info.run_status === TaskRunStatus.stop ||
+        //       index > firstZeroIndex) &&
+        //     item.status === 0
+        //       ? { ...item, status: 3 }
+        //       : item
+        // );
+        setNodeData(res.data.result_info.task_type_list);
         if (isParse) {
           setParseNodeData(res.data.result_info.data_parse);
           setPagination({
