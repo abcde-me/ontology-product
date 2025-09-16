@@ -99,10 +99,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     filteredFileList,
     filteredTableList,
     filteredTableColumns,
+    filteredDbItemList,
     searchCatalog,
     searchCategory,
     searchFiles,
     searchDatabaseTables,
+    searchDbItem,
     searchTableDetail,
     clearSearch,
     setSearchKeyword
@@ -215,7 +217,6 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 获取当前目录列表
   const currentCatalogList = useMemo(() => {
     // 如果有搜索关键词，使用过滤后的列表（即使为空也要显示）
-    console.log('currentCatalogList', searchKeyword, filteredCatalogList);
     if (searchKeyword) {
       return filteredCatalogList;
     }
@@ -380,6 +381,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 处理目录点击（第一层）
   const handleCatalogClick = (catalog: any) => {
     setSelectedCatalog(catalog);
+    setTempFilteredCatalog(null);
     setCurrentViewLevel('category');
     setBreadcrumbPath([catalog.name]);
   };
@@ -387,6 +389,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
   // 处理分类点击（第二层）
   const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);
+    setTempFilteredCatalog(null);
     setCurrentViewLevel('volume-db');
     setBreadcrumbPath([selectedCatalog?.name || '', category]);
   };
@@ -397,6 +400,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     if (!selectedCatalog) return;
 
     setSelectedVolumeOrDb(item);
+    setTempFilteredCatalog(null);
 
     // 根据item类型决定下一步操作
     if (item.type === 'volume') {
@@ -460,6 +464,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     if (!selectedDb) return;
 
     setSelectedTable(table);
+    setTempFilteredCatalog(null);
     setCurrentViewLevel('table-detail');
     setBreadcrumbPath([
       selectedCatalog?.name || '',
@@ -493,6 +498,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
     setCurrentViewLevel('database-tables');
     setSelectedDbItem(dbItem);
+    setTempFilteredCatalog(null);
     setBreadcrumbPath([
       selectedCatalog?.name || '',
       selectedCategory,
@@ -521,6 +527,12 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
 
   // 返回上级目录
   const handleBack = () => {
+    // 清空搜索状态
+    clearSearch();
+    setSearchValue('');
+    // 清空临时过滤状态
+    setTempFilteredCatalog(null);
+
     if (currentViewLevel === 'files') {
       // 从文件列表返回到数据卷/数据库列表
       if (selectedCatalog) {
@@ -602,7 +614,10 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
         }
         break;
       case 'db-item':
-        // db-item层级不需要搜索，直接返回
+        // db-item层级前端搜索
+        if (selectedDb?.children?.db_item) {
+          searchDbItem(value, selectedDb.children.db_item);
+        }
         break;
       case 'database-tables':
         // database-tables层级调用API搜索
@@ -865,7 +880,18 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       );
     }
 
-    const dbItems = selectedDb.children.db_item;
+    // 如果有搜索关键词，使用过滤后的列表，否则使用原始列表
+    const dbItems = searchKeyword
+      ? filteredDbItemList
+      : selectedDb.children.db_item;
+
+    if (dbItems.length === 0) {
+      return (
+        <div className="source-target-tree__empty-container">
+          <Empty />
+        </div>
+      );
+    }
 
     return (
       <div className="list max-h-full overflow-y-auto">
@@ -931,9 +957,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
     }
 
     // 使用过滤后的表列表或原始列表
-    const tableList = searchKeyword
-      ? filteredTableList
-      : sourceCatalogTableList;
+    const tableList = sourceCatalogTableList;
 
     if (!tableList?.length) {
       return (
@@ -947,7 +971,7 @@ const SourceTargetTree: React.FC<SourceTargetTreeProps> = ({
       <div className="list max-h-full overflow-y-auto">
         {tableList.map((table: any) => (
           <div
-            key={table.id}
+            key={table.table_id}
             className="list-item"
             onClick={() => handleFileClick(table)}
           >

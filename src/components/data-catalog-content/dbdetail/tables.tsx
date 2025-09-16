@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Spin } from '@arco-design/web-react';
-
+import React, { useState, useEffect, useMemo } from 'react';
+import { Table, Spin, Typography } from '@arco-design/web-react';
+import { get } from 'lodash-es';
 export default function Tables(props) {
   const { dataList } = props;
   const [loading, setLoading] = useState(true);
@@ -22,21 +22,25 @@ export default function Tables(props) {
   // };
   useEffect(() => {
     // 模拟数据加载完成
-    if (dataList && dataList.sample) {
+    if (dataList && dataList?.sample) {
       setLoading(false);
     }
   }, [dataList]);
 
-  const columns = () => {
-    if (dataList && dataList.sample && dataList.sample.columns) {
-      return dataList.sample.columns.map((item) => ({
-        title: item,
-        dataIndex: item,
-        width: 260
-      }));
-    }
-    return []; // 如果数据不存在，返回空数组
-  };
+  const tableColumns = useMemo(() => {
+    return get(dataList, 'sample.columns', []).map((item) => ({
+      title: item,
+      dataIndex: item,
+      width: 260,
+      render: (_, record) => {
+        return (
+          <Typography.Ellipsis rows={3} showTooltip expandable={false}>
+            {record[item]}
+          </Typography.Ellipsis>
+        );
+      }
+    }));
+  }, [dataList]);
 
   return (
     <div>
@@ -50,10 +54,9 @@ export default function Tables(props) {
         />
       ) : (
         <Table
-          columns={columns()}
+          columns={tableColumns}
           data={dataList.sample?.data.slice(0, 50) || []}
           pagination={false}
-          scroll={{ x: '100%' }}
         />
       )}
       {/* <Table 

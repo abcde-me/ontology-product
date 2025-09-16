@@ -28,12 +28,7 @@ export const useDasetTree = (type: 'sql' | 'python') => {
     );
 
     const dataset = dasetList.find((item) => item.id === id);
-    const scheams = (dataset?.scheams ?? []).map((item) => {
-      return {
-        ...item,
-        latest_table: dataset?.latest_table
-      };
-    });
+    const scheams = dataset?.scheams ?? [];
 
     if (searchKeyword.trim() === '') {
       setScheamList(scheams);
