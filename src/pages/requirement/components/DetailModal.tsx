@@ -182,19 +182,17 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const columns = [
     {
       title: '载入开始时间',
-      dataIndex: 'load_start_time',
+      dataIndex: 'start_time',
       width: 180,
       sorter: true,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.load_start_time)
+      sortDirections: ['ascend' as const, 'descend' as const]
     },
     {
-      title: '载入开始时间',
-      dataIndex: 'load_end_time',
+      title: '载入结束时间',
+      dataIndex: 'end_time',
       width: 180,
       sorter: true,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (_, record) => formatDateTime(record.load_end_time)
+      sortDirections: ['ascend' as const, 'descend' as const]
     },
     {
       title: '数据量',
@@ -376,7 +374,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   .forEach((item) => mergedMap.set(item.id, item));
 
                 // 2. 添加当前页新选中数据
-                selectedRows.forEach((item) => mergedMap.set(item.id, item));
+                selectedRows.forEach((item: any) =>
+                  mergedMap.set(item.id, item)
+                );
 
                 // 3. 更新状态
                 const mergedRows = Array.from(mergedMap.values());

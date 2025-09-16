@@ -13,7 +13,8 @@ import {
   Image,
   Dropdown,
   Menu,
-  ColorPicker
+  ColorPicker,
+  Message
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -111,6 +112,9 @@ export default function RequirementDetail() {
   const [getDetailObj, setGetDetailObj]: any = useState({});
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
+  const [TextEntityDataContent, setTextEntityDataContent]: any = useState({});
+  const [formType, setFormType]: any = useState({});
+  const [text_fl_data, setText_fl_data] = useState([]);
   useEffect(() => {
     if (selectedRadio !== '') {
       setIsShowErrorInfo(false);
@@ -435,9 +439,32 @@ export default function RequirementDetail() {
       }
     }
   };
-
+  // 有必填信息没输入
+  const errorInfoContent = () => {
+    return Message.error('请输入必填信息');
+  };
   const stepNext = async () => {
+    const { formText, formLabel } = TextEntityDataContent;
+    console.log(formLabel, 'formLabel');
     const result = await Promise.all([
+      formType
+        .validate()
+        .then((val) => {
+          console.log(val, 'formType');
+          return true;
+        })
+        .catch((errorInfo) => {
+          return false;
+        }),
+      formLabel
+        .validate()
+        .then((val) => {
+          console.log(val, 'totpotptop');
+          return true;
+        })
+        .catch((errorInfo) => {
+          return false;
+        }),
       form1
         .validate()
         .then(() => {
@@ -459,6 +486,7 @@ export default function RequirementDetail() {
             setIsShowErrorInfo(true);
             return;
           }
+          return false;
         }),
       form2
         .validate()
@@ -494,21 +522,30 @@ export default function RequirementDetail() {
     if (result.every((item) => item === true)) {
       publish();
     } else {
+      errorInfoContent();
     }
   };
   const removeEmptyArrays = (obj) => {
     return omitBy(obj, (value) => isArray(value) && isEmpty(value));
   };
-  const [text_fl_data, setText_fl_data] = useState([]);
-  const getClassIfyChildData = (data) => {
+
+  const getClassIfyChildData = (data, formClassify) => {
+    setFormType(formClassify);
     setText_fl_data(data);
   };
-  const [TextEntityDataContent, setTextEntityDataContent]: any = useState({});
   // entityRelations = 实体关系内容  relationRelations = 关系标签内容
-  const getTextFlChildData = (entityRelations, relationRelations) => {
+  const getTextFlChildData = (
+    entityRelations,
+    relationRelations,
+    formText,
+    formLabel,
+    formClassify
+  ) => {
     setTextEntityDataContent({
       entityRelations,
-      relationRelations
+      relationRelations,
+      formText,
+      formLabel
     });
   };
   // 计算总数
