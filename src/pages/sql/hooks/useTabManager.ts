@@ -11,6 +11,7 @@ export interface FileTab {
   title: string;
   content: string;
   fileId?: string;
+  scriptId?: string;
   lastModified?: string;
   hasRun?: boolean;
 }
@@ -18,6 +19,7 @@ export interface FileTab {
 // 文件状态类型
 export interface FileState {
   currentFileId: string | null;
+  currentScriptId: string | null;
   fileTabs: FileTab[];
   activeTab: string;
   isLoading: boolean;
@@ -28,6 +30,7 @@ export interface FileState {
 // 初始状态
 const initialState: FileState = {
   currentFileId: null,
+  currentScriptId: null,
   fileTabs: [],
   activeTab: '',
   isLoading: false,
@@ -45,12 +48,16 @@ export const useTabManager = (
 
   // 文件操作
   const openFile = useCallback(
-    (fileId: string, fileName?: string, perms?: Array<string>) => {
+    (
+      fileId: string,
+      scriptId: string,
+      fileName?: string,
+      perms?: Array<string>
+    ) => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         // 创建或更新标签页
-        const newTabKey = `file-${fileId}`;
         const existingTabIndex = fileState.fileTabs.findIndex(
           (tab) => tab.fileId === fileId
         );
@@ -61,7 +68,8 @@ export const useTabManager = (
           setFileState((prev) => ({
             ...prev,
             currentFileId: fileId,
-            activeTab: newTabKey,
+            currentScriptId: scriptId,
+            activeTab: fileId,
             selectedKeys: [fileId], // 同步选中状态
             isLoading: false
           }));
@@ -79,10 +87,11 @@ export const useTabManager = (
 
           // 创建新标签页（内容由 useEditor 负责加载）
           const newTab = {
-            key: newTabKey,
+            key: fileId,
             title: fileName || `文件 ${fileId}`, // 使用传入的文件名或默认名称
             content: '', // 初始内容为空，由 useEditor 加载
             fileId: fileId,
+            scriptId: scriptId,
             lastModified: new Date().toISOString(),
             perms: perms
           };
@@ -93,7 +102,8 @@ export const useTabManager = (
           ...prev,
           fileTabs: updatedTabs,
           currentFileId: fileId,
-          activeTab: newTabKey,
+          currentScriptId: scriptId,
+          activeTab: fileId,
           selectedKeys: [fileId], // 同步选中状态
           isLoading: false
         }));
@@ -125,23 +135,28 @@ export const useTabManager = (
       let newTabKey: string;
       let newTabTitle: string;
       let newFileId: string | undefined;
+      let newScriptId: string | undefined;
 
       if (newFileInfo) {
         // 如果有新文件信息，使用文件信息创建标签页
-        newTabKey = `file-${newFileInfo.id}`;
+        newTabKey = newFileInfo.fileId;
         newTabTitle = newFileInfo.name;
-        newFileId = String(newFileInfo.id);
+        newFileId = newFileInfo.fileId;
+        newScriptId = newFileInfo.scriptId;
       } else {
         // 否则创建临时标签页
         const tempStr = generateSqlDefaultName(new Date());
-        newTabKey = tempStr;
+        const tempId = `${Date.now()}`;
+        newTabKey = tempId;
         newTabTitle = tempStr;
-        newFileId = undefined;
+        newFileId = tempId;
+        newScriptId = undefined;
       }
 
       const newTab = {
         key: newTabKey,
         title: newTabTitle,
+        scriptId: newScriptId,
         content: '',
         fileId: newFileId,
         lastModified: undefined,
@@ -152,7 +167,8 @@ export const useTabManager = (
         ...prev,
         fileTabs: [...prev.fileTabs, newTab],
         activeTab: newTab.key,
-        currentFileId: newFileId || null // 更新currentFileId
+        currentFileId: newFileId || null, // 更新currentFileId
+        currentScriptId: newScriptId || null
       }));
     },
     [fileState.fileTabs.length]
@@ -164,6 +180,7 @@ export const useTabManager = (
       let newActiveTab = fileState.activeTab;
       let newSelectedKeys: string[] = [];
       let newCurrentFileId: string | null = null;
+      let newCurrentScriptId: string | null = null;
 
       // 如果删除的是当前活动标签页，切换到下一个
       if (key === fileState.activeTab && remainingTabs.length > 0) {
@@ -173,6 +190,7 @@ export const useTabManager = (
           ? [remainingTabs[0].fileId]
           : [];
         newCurrentFileId = remainingTabs[0].fileId || null;
+        newCurrentScriptId = remainingTabs[0].scriptId || null;
       }
 
       setFileState((prev) => ({
@@ -180,6 +198,7 @@ export const useTabManager = (
         fileTabs: remainingTabs,
         activeTab: newActiveTab,
         currentFileId: newCurrentFileId, // 更新currentFileId
+        currentScriptId: newCurrentScriptId,
         selectedKeys: newSelectedKeys
       }));
 
@@ -208,6 +227,7 @@ export const useTabManager = (
         // 找到对应的标签页，获取其fileId
         const targetTab = prev.fileTabs.find((tab) => tab.key === key);
         const fileId = targetTab?.fileId;
+        const scriptId = targetTab?.scriptId;
         const newSelectedKeys = fileId ? [fileId] : [];
 
         // 通知外部组件更新选中状态
@@ -216,6 +236,7 @@ export const useTabManager = (
         return {
           ...prev,
           activeTab: key,
+          currentScriptId: scriptId || null,
           currentFileId: fileId || null, // 更新currentFileId
           selectedKeys: newSelectedKeys
         };
@@ -226,7 +247,6 @@ export const useTabManager = (
 
   const updateTab = useCallback(
     (tabData: FileTab) => {
-      console.log('222222', tabData);
       setFileState((prev) => {
         const key = tabData.key;
         const newFileTabs = prev.fileTabs.map((item) => {
@@ -237,10 +257,6 @@ export const useTabManager = (
             };
           }
           return item;
-        });
-        console.log('444444', {
-          ...prev,
-          fileTabs: newFileTabs
         });
         return {
           ...prev,

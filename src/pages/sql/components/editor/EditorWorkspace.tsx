@@ -27,11 +27,14 @@ interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
+  currentScriptId?: string;
   hasRun?: boolean;
   tabKey?: string;
   onActiveUpdate?: (tabData: FileTab) => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
+  refreshDirectory?: () => void;
+  selectFile?: (fileId: string) => void;
 }
 
 // 内部组件，使用 EditorContext
@@ -249,11 +252,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     content,
     fileName,
     currentFileId,
+    currentScriptId,
     hasRun,
     onActiveUpdate,
     tabKey,
     onInsertContent,
-    onEditorFocusChange
+    onEditorFocusChange,
+    refreshDirectory,
+    selectFile
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -262,12 +268,18 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           key: tabKey || 'default',
           title: fileName,
           content: content,
-          fileId: currentFileId
+          fileId: currentFileId,
+          scriptId: currentScriptId
         }
       ],
       onTabUpdate: (
         tabKey: string,
-        updates: { content?: string; fileId?: string; title?: string }
+        updates: {
+          content?: string;
+          fileId?: string;
+          scriptId?: string;
+          title?: string;
+        }
       ) => {
         if (onActiveUpdate) {
           onActiveUpdate({
@@ -275,10 +287,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             title: updates.title || fileName,
             content: updates.content || content,
             fileId: updates.fileId || currentFileId,
+            scriptId: updates.scriptId || currentScriptId,
             hasRun
           });
         }
-      }
+      },
+      refreshDirectory,
+      selectFile
     };
 
     return (

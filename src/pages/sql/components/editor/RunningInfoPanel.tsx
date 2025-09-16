@@ -52,6 +52,7 @@ const RunningInfoPanel: React.FC = memo(() => {
     size,
     setSize,
     currentFileId,
+    currentScriptId,
     execid,
     cancelGetRunResultPolling,
     getRunResultPolling,
@@ -108,7 +109,8 @@ const RunningInfoPanel: React.FC = memo(() => {
   const handleMenuClick = (key: string) => {
     setFormOrigin({
       columns: columns,
-      script_id: currentFileId,
+      script_id: currentScriptId,
+      script_file_id: currentFileId,
       execid: execid
     });
 

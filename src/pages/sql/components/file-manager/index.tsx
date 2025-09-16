@@ -14,6 +14,7 @@ interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (
     fileId: string,
+    scriptId: string,
     fileName?: string,
     perms?: Array<string>
   ) => void;

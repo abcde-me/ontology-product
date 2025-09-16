@@ -39,7 +39,9 @@ const DatasetsList: FC = () => {
   } = useTableList<GetExportDatasetListItem, GetExportDatasetListReq>({
     onRequest: getExportDatasetList,
     formatFilter: (filters: any) => {
-      let result = {};
+      let result: any = {
+        status: undefined
+      };
       if (filters.status) {
         result = {
           status: filters.status
@@ -48,7 +50,10 @@ const DatasetsList: FC = () => {
       return result;
     },
     formatSorter: (sorter: any) => {
-      let result = {};
+      let result: any = {
+        sort_field: undefined,
+        sort_order: undefined
+      };
       if (sorter.field && sorter.direction) {
         result = {
           sort_field: sorter.field,

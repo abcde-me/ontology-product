@@ -167,6 +167,7 @@ export interface DatasetListParams {
 }
 
 export interface CreateSqlScriptParams {
+  script_file_id?: string;
   script_content?: string;
   script_desc?: string;
   script_name: string;
@@ -177,6 +178,7 @@ export interface CreateSqlScriptParams {
 export interface CreateSqlScriptData {
   perms: Array<string>;
   script_id: string;
+  script_file_id: string;
 }
 
 export interface SqlScriptListParams {
