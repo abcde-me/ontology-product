@@ -28,6 +28,8 @@ import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHistory } from 'react-router';
+import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
+import getLabelByValue from '@/utils/getLabelByValue';
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -422,7 +424,16 @@ const DataLoadDetail = () => {
                 数据源类型：
               </div>
               <div style={{ fontSize: '14px' }}>
-                {listDetail && listDetail.source_type}
+                {/* {listDetail && listDetail.source_type} */}
+                {listDetail?.source_type == TYPE_CONFIG[ConnectorType.S3].value
+                  ? TYPE_CONFIG[ConnectorType.S3].text
+                  : listDetail?.source_type ==
+                      TYPE_CONFIG[ConnectorType.HDFS].value
+                    ? TYPE_CONFIG[ConnectorType.HDFS].text
+                    : listDetail?.source_type ==
+                        TYPE_CONFIG[ConnectorType.DB].value
+                      ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, listDetail?.sub_type || '')}`
+                      : TYPE_CONFIG[ConnectorType.Local].text}
               </div>
             </div>
             <div
@@ -446,9 +457,13 @@ const DataLoadDetail = () => {
                   maxWidth: '400px'
                 }}
               >
-                {listDetail && (
+                {listDetail &&
+                listDetail?.source_type ===
+                  TYPE_CONFIG[ConnectorType.Local].value ? (
+                  <span>本地上传</span>
+                ) : (
                   <EllipsisPopoverCom
-                    value={listDetail.connector_name}
+                    value={listDetail?.connector_name}
                     isEdit={false}
                   />
                 )}

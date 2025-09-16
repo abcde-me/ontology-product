@@ -7,6 +7,8 @@ import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
 import copy from 'copy-to-clipboard';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import { DATABASE_TYPE_ENUM, ConnectorType, TYPE_CONFIG } from '../config';
+import getLabelByValue from '@/utils/getLabelByValue';
 const ModalDetail = (props) => {
   // 默认显示对象为空
   const [DetailData, setDetailData] = useState<connectorDetailType | null>(
@@ -106,8 +108,9 @@ const ModalDetail = (props) => {
                     <span className="label">数据源类型:</span>
                     <span className="value">
                       {DetailData?.type !== 'db'
-                        ? DetailData?.type
-                        : `数据库-${capitalizeFirstLetter(DetailData?.sub_type)}`}
+                        ? (DetailData?.type && TYPE_CONFIG[DetailData.type]) ||
+                          '未知类型'
+                        : TYPE_CONFIG[DetailData?.sub_type]}
                     </span>
                   </div>
                   <div className="info-item">
@@ -325,11 +328,17 @@ const ModalDetail = (props) => {
                         <div className="info-item">
                           <span className="label">数据库类型:</span>
                           <span className="value">
-                            {DetailData?.sub_type}
+                            {getLabelByValue(
+                              DATABASE_TYPE_ENUM,
+                              DetailData?.sub_type || ''
+                            )}
                             <Tooltip
                               position="tl"
                               trigger="hover"
-                              content={DetailData?.sub_type}
+                              content={getLabelByValue(
+                                DATABASE_TYPE_ENUM,
+                                DetailData?.sub_type || ''
+                              )}
                             >
                               <IconCopy
                                 className="set-mouse"
