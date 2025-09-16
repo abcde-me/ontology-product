@@ -135,7 +135,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       }}
       tip={
         <>
-          单次上传文件总量不超过10个文件，单个文件最大不超过100M
+          单次上传文件总量不超过1000个文件，单个文件最大不超过100M
           不支持文件夹及压缩包，只支持上传部分文件类型
           <Tooltip
             content={

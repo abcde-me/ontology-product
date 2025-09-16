@@ -8,6 +8,8 @@ export type EndNodeType = CommonNodeType & {
   outputs: Variable[];
   target_path_id: number;
   target_path_name: string;
+  isKnowledgeBaseNameValid: boolean;
+  knowledge_base_name_msg: string;
   is_embedding: boolean;
   knowledge_base_name: string;
   dataSource: Array<any>;
@@ -20,5 +22,7 @@ export type EndNodeType = CommonNodeType & {
     target_path_name: string;
     is_embedding: boolean;
     knowledge_base_name: string;
+    isKnowledgeBaseNameValid: boolean;
+    knowledge_base_name_msg: string;
   };
 };

@@ -29,8 +29,9 @@ import {
   RequirementType,
   RequirementTypeMap
 } from './type';
-import './index.scss';
 import { isNil, omitBy } from 'lodash';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import './index.scss';
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -73,6 +74,7 @@ export default function Requirement() {
       const params: {
         page: number;
         page_size: number;
+        order: string;
         filters: {
           keyword: string;
           label_type: number | string;
@@ -81,6 +83,7 @@ export default function Requirement() {
       } = {
         page: current || 1, //第几页
         page_size: pageSize || 10, //每页个数
+        order: sortValue.order,
         filters: {
           keyword: searchValue,
           label_type: sortValue.label_type,
@@ -119,12 +122,20 @@ export default function Requirement() {
   // 筛选排序操作
   const handleTableChange = (
     _pagination: PaginationProps,
+    sorter: SorterInfo,
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
+    console.log(sorter, 'top');
     const sortdata = {
       status: filters?.status,
-      label_type: filters?.label_type
+      label_type: filters?.label_type,
+      order:
+        sorter.direction === undefined
+          ? 'desc'
+          : sorter.direction === 'ascend'
+            ? 'asc'
+            : 'desc'
     };
 
     setSortValue(sortdata);
@@ -390,7 +401,7 @@ export default function Requirement() {
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
-          handleTableChange(pagination, filters)
+          handleTableChange(pagination, sorter as SorterInfo, filters)
         }
       />
       {/* 分页 */}

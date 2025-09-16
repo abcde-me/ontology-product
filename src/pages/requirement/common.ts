@@ -106,12 +106,12 @@ export const shapeOptions = [
     icon: ellipse,
     value: 5,
     label: '椭圆'
-  },
-  {
-    icon: cube,
-    value: 6,
-    label: '立方体'
   }
+  // {
+  //   icon: cube,
+  //   value: 6,
+  //   label: '立方体'
+  // }
 ];
 
 export const getRandomHexColorStrict = () => {

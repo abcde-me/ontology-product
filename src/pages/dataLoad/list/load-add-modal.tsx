@@ -674,7 +674,7 @@ const LoadAddModal = (props: propsType) => {
             {
               validator: (value, cb) => {
                 if (!value || value.trim() === '') {
-                  return cb('请输入连接器名称');
+                  return cb('请输入任务名称');
                 }
                 if (validateName(value).isValid == false) {
                   return cb(validateName(value).errorMessage);
@@ -713,7 +713,7 @@ const LoadAddModal = (props: propsType) => {
               labelCol={{ span: 5 }}
               wrapperCol={{ span: 19 }}
               labelAlign="right"
-              rules={[{ required: true, message: '请输入任务名称' }]}
+              rules={[{ required: true, message: '请选择连接器' }]}
             >
               <Select
                 placeholder="请选择连接器"
@@ -858,7 +858,7 @@ const LoadAddModal = (props: propsType) => {
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
           labelAlign="right"
-          rules={[{ required: true, message: '请选择数据源类型' }]}
+          rules={[{ required: true, message: '请选择载入形式' }]}
         >
           <RadioGroup
             onChange={(val) => {

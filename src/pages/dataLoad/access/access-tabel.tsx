@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
 import { useParams } from '@/utils/url';
 import './index.css';
-import { RunState } from '../list/list';
+import { RunState } from '../config';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 const InputSearch = Input.Search;

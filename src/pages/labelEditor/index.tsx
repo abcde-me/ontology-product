@@ -8,23 +8,26 @@ import {
   getImgJobLabels,
   saveImgJobAnnotations,
   submitImgJobAnnotations,
-  getImgJobOverview
+  getImgJobOverview,
+  getTextEditorTask,
+  getTextEditorResult,
+  saveTextEditorResult,
+  getTextEditorLabels,
+  getTaskDetail
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
+import { TEXT_DATA, LabelTypeMap } from './const';
 
 const { bus } = WujieReact;
 
-const LabelTypeMap = {
-  '1': 'text',
-  '2': 'image'
-};
-function WorkflowConfig() {
+function LabelEditorPage() {
   const [loading, setLoading] = useState(true);
   const taskId = useParams('tId');
   const requirementId = useParams('rId');
   const labelType = useParams('type');
   const labelTool = useParams('tool');
+  const toolKind = useParams('kind');
   const reqName = useParams('name');
   const taskCount = useParams('count');
   const [labelUrl, setLabelUrl] = useState('');
@@ -34,7 +37,7 @@ function WorkflowConfig() {
     const init = async () => {
       if (taskId) {
         setLabelUrl(
-          `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&tool=${labelTool}&name=${reqName}&count=${taskCount}`
+          `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}`
         );
         setLoading(false);
       } else {
@@ -42,7 +45,7 @@ function WorkflowConfig() {
       }
     };
     init();
-  }, [taskId, requirementId, labelType, labelTool, reqName, history]);
+  }, [taskId, requirementId, labelType, toolKind, labelTool, reqName]);
 
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
@@ -68,7 +71,7 @@ function WorkflowConfig() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&tool=${tool}&name=${name}&count=${count}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}`
     );
   };
 
@@ -94,10 +97,11 @@ function WorkflowConfig() {
         <WujieReact
           width="100%"
           height="100%"
-          name={`labeleditor`}
+          name="labeleditor"
           url={labelUrl}
           sync={true}
           alive={true}
+          loading={null}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,
@@ -106,7 +110,12 @@ function WorkflowConfig() {
             submitImgJobAnnotations,
             getImgJobOverview,
             goBack,
-            switchNextTask
+            switchNextTask,
+            getTextEditorTask,
+            getTextEditorResult,
+            saveTextEditorResult,
+            getTextEditorLabels,
+            getTaskDetail
           }}
         ></WujieReact>
       )}
@@ -114,4 +123,4 @@ function WorkflowConfig() {
   );
 }
 
-export default WorkflowConfig;
+export default LabelEditorPage;
