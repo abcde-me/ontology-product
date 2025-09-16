@@ -296,7 +296,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     <div className="entity-relation-item" key={item.id}>
                       <FormItem
                         style={{ paddingLeft: 16 }}
-                        field="relation_name_cn"
+                        field={`relation_name_cn + ${item?.id}`}
                         label="关系名称"
                         rules={[{ required: true, message: '请输入标签名称' }]}
                       >

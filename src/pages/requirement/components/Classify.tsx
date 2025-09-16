@@ -122,7 +122,7 @@ const Classify = (props: ClassifyComponentProps) => {
                   <FormItem
                     style={{ paddingLeft: 16 }}
                     label="属性名称"
-                    field="attribute_group_name"
+                    field={`attribute_group_name + ${item?.id}`}
                     rules={[{ required: true, message: '请输入属性名称' }]}
                   >
                     <Input
