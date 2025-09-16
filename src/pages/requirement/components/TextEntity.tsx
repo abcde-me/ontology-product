@@ -46,7 +46,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       order_num: 0, // 排序
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
-      label_colour: '' //标签颜色（如#FFFFFF）
+      label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
     }
   ]);
   // 关系标签内容
@@ -215,7 +215,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     order_num: entityRelations?.length + 1, // 排序
                     label_name_cn: '', //展示名称
                     label_name_en: '', //存储名称
-                    label_colour: '' //标签颜色（如#FFFFFF）
+                    label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
                   }
                 ]);
               }
