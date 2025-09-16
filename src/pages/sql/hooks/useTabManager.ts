@@ -238,7 +238,6 @@ export const useTabManager = (
           }
           return item;
         });
-        console.log('333333', newFileTabs);
         console.log('444444', {
           ...prev,
           fileTabs: newFileTabs
