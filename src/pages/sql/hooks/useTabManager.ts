@@ -247,7 +247,6 @@ export const useTabManager = (
 
   const updateTab = useCallback(
     (tabData: FileTab) => {
-      console.log('222222', tabData);
       setFileState((prev) => {
         const key = tabData.key;
         const newFileTabs = prev.fileTabs.map((item) => {
@@ -258,10 +257,6 @@ export const useTabManager = (
             };
           }
           return item;
-        });
-        console.log('444444', {
-          ...prev,
-          fileTabs: newFileTabs
         });
         return {
           ...prev,

@@ -222,7 +222,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             if (onTabUpdate && currentFile) {
               onTabUpdate(currentFile.key, {
                 content,
-                fileId: String(res.data.script_file_id),
+                fileId: currentFile.fileId,
                 scriptId: String(res.data.script_id),
                 title: currentFile.title // 保持原有标题
               });
