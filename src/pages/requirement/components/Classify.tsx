@@ -38,7 +38,7 @@ const optionConfig = [
 ];
 const Classify = (props: ClassifyComponentProps) => {
   const { type, getDetailObj, getClassIfyData } = props;
-  const [form] = Form.useForm();
+  const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
   // 当前选择类型
@@ -92,13 +92,13 @@ const Classify = (props: ClassifyComponentProps) => {
   }, [getDetailObj]);
 
   useEffect(() => {
-    getClassIfyData(textRelations);
+    getClassIfyData(textRelations, formClassify);
   }, [textRelations]);
 
   return (
     <div className="classify-warp">
       <Form
-        form={form}
+        form={formClassify}
         disabled={type === 'detail'}
         onValuesChange={(_, val) => {
           setTextRelations({ ...textRelations, ...val });
@@ -122,6 +122,7 @@ const Classify = (props: ClassifyComponentProps) => {
                   <FormItem
                     style={{ paddingLeft: 16 }}
                     label="属性名称"
+                    field="attribute_group_name"
                     rules={[{ required: true, message: '请输入属性名称' }]}
                   >
                     <Input
@@ -275,6 +276,7 @@ const Classify = (props: ClassifyComponentProps) => {
                     {item.file_label_attribute?.map((attr, attrIndex) => (
                       <div key={attr.id} className="attribute-item">
                         <FormItem
+                          field="attribute_name_cn"
                           rules={[
                             { required: true, message: '请输入选项名称' }
                           ]}

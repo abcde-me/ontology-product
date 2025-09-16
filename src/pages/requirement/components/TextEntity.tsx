@@ -36,7 +36,8 @@ interface TextSubstanceComponentProps {
 // 实体关系 --  entity_relations
 const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const { type, getDetailObj, getTextEntityData } = props;
-  const [form] = Form.useForm();
+  const [formText] = Form.useForm();
+  const [formLabel] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
   // 实体标签内容
@@ -63,8 +64,19 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   ]);
   // 选中的标签类型
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
+  const [filterArrState, setFilterArrState] = useState<
+    Array<{
+      label_name_cn: string;
+    }>
+  >([]);
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
+    console.log('handleFieldChange', formText.getFieldsValue());
+    const filterArr = formText
+      .getFieldsValue()
+      ?.entityRelations?.filter((item, i) => i !== index);
+    setFilterArrState(filterArr);
+    console.log(filterArr, 'filterArr');
     const newData = [...entityRelations];
     newData[index][field] = value;
     setEntityRelations(newData);
@@ -96,13 +108,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       getDetailObj?.entity_relations?.forEach((item) => {
-        form.setFieldValue('start_entity_labels', item.start_entity_labels);
+        formText.setFieldValue('start_entity_labels', item.start_entity_labels);
       });
     }
   }, [getDetailObj]);
 
   useEffect(() => {
-    getTextEntityData(entityRelations, relationRelations);
+    getTextEntityData(entityRelations, relationRelations, formText, formLabel);
   }, [entityRelations, relationRelations]);
   return (
     <div className="text-component-warp">
@@ -125,7 +137,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         })}
       </div>
       <Form
-        form={form}
+        form={formText}
         disabled={type === 'detail'}
         onValuesChange={(_, val) => {
           // setPublishData({ ...publishData, val })
@@ -142,8 +154,47 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
                   style={{ paddingLeft: 16 }}
-                  label="标签名称"
-                  rules={[{ required: true, message: '请输入标签名称' }]}
+                  label="标签名称1221"
+                  field={`entityRelations.${index}.label_name_cn`}
+                  // rules={[{ required: true, message: '请输入标签名称' }]}
+                  rules={[
+                    {
+                      required: true,
+                      validateTrigger: 'onBlur',
+                      validator: (value, callback) => {
+                        console.log(
+                          value,
+                          formText.getFieldsValue(),
+                          'top',
+                          entityRelations
+                        );
+                        console.log(
+                          filterArrState?.some((item) => {
+                            console.log(
+                              item,
+                              value,
+                              item === value.toString(),
+                              'item'
+                            );
+
+                            return item?.label_name_cn === value.toString();
+                          }),
+                          'top-------1-23'
+                        );
+                        if (!value) {
+                          callback('请输入标签名称');
+                        } else if (
+                          filterArrState?.some((item) => {
+                            return item?.label_name_cn === value.toString();
+                          })
+                        ) {
+                          callback('标签名称不能重复');
+                        } else {
+                          callback();
+                        }
+                      }
+                    }
+                  ]}
                 >
                   <Input
                     placeholder="请输入标签名称"
@@ -231,7 +282,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         <div className="relation-content">
           <div className="relation-content-body">
             <Form
-              form={form}
+              form={formLabel}
               disabled={type === 'detail'}
               onValuesChange={(_, val) => {}}
               layout="inline"
@@ -245,6 +296,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     <div className="entity-relation-item" key={item.id}>
                       <FormItem
                         style={{ paddingLeft: 16 }}
+                        field="relation_name_cn"
                         label="关系名称"
                         rules={[{ required: true, message: '请输入标签名称' }]}
                       >
@@ -303,6 +355,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <div className="tag-content">
                           <FormItem
                             style={{ paddingLeft: 16 }}
+                            field="start_entity_labels"
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
