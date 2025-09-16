@@ -122,7 +122,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
-        <FormItem
+        {/* <FormItem
           label="图片嵌入模型："
           field="pic_emb_model_id"
           labelAlign="left"
@@ -135,7 +135,7 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
               </Option>
             ))}
           </Select>
-        </FormItem>
+        </FormItem> */}
       </Form>
     </div>
   );
