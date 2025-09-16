@@ -293,7 +293,7 @@ const DatasetsList: FC = () => {
         onValuesChange={handleSearchChange}
       >
         <FormItem field="search_content" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入文件名搜索" />
+          <Input.Search allowClear placeholder="输入数据集名称搜索" />
         </FormItem>
         <FormItem style={{ marginRight: 12 }}>
           <Button type="text" onClick={() => loadData()}>
