@@ -228,9 +228,9 @@ export const useTabManager = (
     (tabData: FileTab) => {
       console.log('222222', tabData);
       setFileState((prev) => {
-        const title = tabData.title;
+        const key = tabData.key;
         const newFileTabs = prev.fileTabs.map((item) => {
-          if (item.title === title) {
+          if (item.key === key) {
             return {
               ...item,
               ...tabData
