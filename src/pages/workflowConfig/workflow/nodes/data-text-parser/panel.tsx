@@ -171,7 +171,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem> */}
-        <FormItem
+        {/* <FormItem
           label="文本嵌入模型："
           field="text_emb_model_id"
           labelAlign="left"
@@ -184,7 +184,7 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
               </Option>
             ))}
           </Select>
-        </FormItem>
+        </FormItem> */}
       </Form>
     </div>
   );
