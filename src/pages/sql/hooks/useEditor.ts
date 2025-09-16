@@ -8,7 +8,8 @@ import {
   runSqlScript,
   getRunResultSqlScript,
   runCancelSqlScript,
-  getSqlScriptDetail
+  getSqlScriptDetail,
+  getRunLogSqlScript
 } from '@/api/sql';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -72,6 +73,7 @@ export interface UseEditorReturn {
   getRunResultPolling: (id: string, params: any) => void;
   cancelGetRunResultPolling: () => void;
   loadRunResult: (execid: string, size: string) => void;
+  handleGetRunLog: () => Promise<void>;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -196,6 +198,20 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
   };
 
+  // 获取运行日志
+  const handleGetRunLog = useCallback(async () => {
+    if (!currentFile?.fileId || !execid) {
+      return;
+    }
+    const res = await getRunLogSqlScript(currentFile?.fileId, {
+      script_execid: execid
+    });
+
+    if (res?.status === 200) {
+      setRunLog(res.data.run_log);
+    }
+  }, [currentFile?.fileId, execid]);
+
   // 清空编辑器状态的函数
   const clearEditorState = useCallback(() => {
     setRunStatus(RunningStatus.IDLE);
@@ -318,7 +334,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       const res = await runSqlScript(currentFile?.scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
-        setRunLog(res.data.warning_msg);
       } else {
         setRunError(res.message);
         throw new Error('运行失败');
@@ -455,7 +470,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     currentScriptId: currentFile?.scriptId,
     runError,
     resultLoading,
-
     // 表格数据处理
     columns,
     data,
@@ -467,6 +481,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     handleStopRunCode,
     getRunResultPolling,
     cancelGetRunResultPolling,
-    loadRunResult
+    loadRunResult,
+    handleGetRunLog
   };
 };

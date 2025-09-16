@@ -703,6 +703,17 @@ export async function getRunResultSqlScript(
     .do();
 }
 
+/** 获取SQL脚本运行日志 */
+export async function getRunLogSqlScript(
+  id: string,
+  params: { script_execid: string }
+): Promise<ApiRes<any>> {
+  return await UAPI.RES.sqlRunLogApi({ script_id: id })
+    .get(params)
+    .inRegion()
+    .do();
+}
+
 /** 获取脚本详情 */
 export async function getSqlScriptDetail(
   id: string
