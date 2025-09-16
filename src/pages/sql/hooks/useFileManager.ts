@@ -18,6 +18,7 @@ import { validateName } from '@/utils/valiate';
 interface UseFileManagerOptions {
   onFileOpen?: (
     fileId: string,
+    scriptId: string,
     fileName?: string,
     perms?: Array<string>
   ) => void;
@@ -132,9 +133,15 @@ export const useFileManager = (
             '📁 点击文件，自动打开:',
             dataRef.name,
             'ID:',
-            dataRef.id
+            dataRef.id,
+            dataRef.script_id
           );
-          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
+          onFileOpen(
+            String(dataRef.id),
+            String(dataRef.script_id),
+            dataRef.name,
+            dataRef.perms
+          );
         }
       }
     },
@@ -182,8 +189,10 @@ export const useFileManager = (
           return;
         }
 
+        const scriptFileId = String(Date.now());
         const createRes = await createSqlScript({
           uid: userInfo?.id ?? '',
+          script_file_id: scriptFileId,
           script_name: finalName
         });
 
@@ -198,11 +207,12 @@ export const useFileManager = (
         await getRawSqlScriptList();
 
         // 设置选中状态
-        setSelectedKeys([String(createRes.data.script_id)]);
+        setSelectedKeys([scriptFileId]);
 
         // 编辑器自动打开当前脚本
         onFileOpen &&
           onFileOpen(
+            scriptFileId,
             String(createRes.data.script_id),
             finalName,
             createRes.data.perms
@@ -311,14 +321,16 @@ export const useFileManager = (
     return (
       data?.map((item: any) => {
         return {
-          id: item.script_id,
+          id: String(Number(item.script_file_id) || item.script_id),
+          script_id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,
-          key: String(item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
+          key: String(Number(item.script_file_id) || item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,
-            id: item.script_id,
+            id: String(Number(item.script_file_id) || item.script_id),
+            script_id: item.script_id,
             type: PythonItemType.Notebook,
             perms: item.perms
           }
@@ -334,7 +346,7 @@ export const useFileManager = (
         const res = await getSqlScriptList({
           search_content: searchValue,
           page: 1,
-          page_size: 100
+          page_size: 1000
         });
         return res?.data?.items ?? [];
       } catch (error) {
@@ -349,7 +361,10 @@ export const useFileManager = (
   // 返回父级处理
   const handleBackToParent = useCallback(async (parentId: string) => {
     try {
-      const res = await getSqlScriptList({});
+      const res = await getSqlScriptList({
+        page: 1,
+        page_size: 1000
+      });
       return res?.data?.items || [];
     } catch (error) {
       console.error('返回父级失败:', error);

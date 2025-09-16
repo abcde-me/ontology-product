@@ -89,6 +89,9 @@ export const useTableList = <T = {}, U = {}>(
     sorter: any,
     filters: any
   ) {
+    console.log('pagination', pagination);
+    console.log('sorter', sorter);
+    console.log('filters', filters);
     setSearchParams((prev) => {
       return {
         ...prev,

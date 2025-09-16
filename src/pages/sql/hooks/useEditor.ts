@@ -23,11 +23,19 @@ export interface UseEditorOptions {
     title: string;
     content: string;
     fileId?: string;
+    scriptId?: string;
   }>;
   onTabUpdate?: (
     tabKey: string,
-    updates: { content?: string; fileId?: string; title?: string }
+    updates: {
+      content?: string;
+      fileId?: string;
+      title?: string;
+      scriptId?: string;
+    }
   ) => void;
+  refreshDirectory?: () => void;
+  selectFile?: (fileId: string) => void;
 }
 
 export interface UseEditorReturn {
@@ -43,6 +51,7 @@ export interface UseEditorReturn {
   runLog: string;
   runResult: RunResult[];
   currentFileId?: string;
+  currentScriptId?: string;
   runError: string;
   resultLoading: boolean;
 
@@ -68,7 +77,13 @@ export interface UseEditorReturn {
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
-  const { activeTab, fileTabs = [], onTabUpdate } = options;
+  const {
+    activeTab,
+    fileTabs = [],
+    onTabUpdate,
+    refreshDirectory,
+    selectFile
+  } = options;
 
   const userInfo = useUserInfo();
   // 状态管理
@@ -165,7 +180,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const loadRunResult = async (execid: string, size: string) => {
     setResultLoading(true);
     try {
-      const res = await getRunResultSqlScript(currentFile?.fileId || '', {
+      const res = await getRunResultSqlScript(currentFile?.scriptId || '', {
         script_execid: execid,
         size: size || '100'
       });
@@ -198,23 +213,35 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 延时自动保存 - 使用 useCallback 优化
   const handleSaveThrottled = useThrottleFn(
     async (content: string) => {
-      if (!currentFile?.fileId) {
+      if (!currentFile?.scriptId) {
         try {
           const res = await createSqlScript({
             uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
             script_name:
               currentFile?.title ?? generateSqlDefaultName(new Date()),
+            script_file_id: currentFile?.fileId ?? '',
             script_content: content
           });
 
           if (res?.status === 200) {
             setLastAutoSave(new Date().toLocaleTimeString());
 
+            // 调用 refreshDirectory 方法，更新左侧目录
+            if (typeof refreshDirectory === 'function') {
+              refreshDirectory();
+            }
+
+            // 调用 selectFile 方法，选中文件
+            if (typeof selectFile === 'function') {
+              selectFile(currentFile?.fileId ?? String(res.data.script_id));
+            }
+
             // 更新脚本ID到标签页
             if (onTabUpdate && currentFile) {
               onTabUpdate(currentFile.key, {
                 content,
-                fileId: String(res.data.script_id),
+                fileId: currentFile.fileId,
+                scriptId: String(res.data.script_id),
                 title: currentFile.title // 保持原有标题
               });
             }
@@ -232,7 +259,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       }
 
       try {
-        const res = await updateSqlScript(Number(currentFile?.fileId), {
+        const res = await updateSqlScript(Number(currentFile?.scriptId), {
           uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
           script_name: currentFile.title ?? '',
           script_content: content
@@ -267,12 +294,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    if (!currentFile?.fileId) {
+    if (!currentFile?.scriptId) {
       Message.error('请先保存文件');
       return;
     }
 
-    const saveRes = await updateSqlScript(Number(currentFile?.fileId), {
+    const saveRes = await updateSqlScript(Number(currentFile?.scriptId), {
       uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
       script_name: currentFile.title ?? '',
       script_content: editorContent
@@ -288,7 +315,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setExecid('');
 
     try {
-      const res = await runSqlScript(currentFile?.fileId ?? '');
+      const res = await runSqlScript(currentFile?.scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
         setRunLog(res.data.warning_msg);
@@ -300,11 +327,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setRunStatus(RunningStatus.FAILED);
       Message.error('运行失败');
     }
-  }, [runStatus, currentFile?.fileId, editorContent]);
+  }, [runStatus, currentFile?.scriptId, editorContent]);
 
   // 停止运行
   const handleStopRunCode = async () => {
-    const res = await runCancelSqlScript(currentFile?.fileId ?? '', {
+    const res = await runCancelSqlScript(currentFile?.scriptId ?? '', {
       script_execid: execid
     });
 
@@ -326,7 +353,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       cancelGetRunResultPolling();
     }
 
-    if (!execid || !currentFile?.fileId) {
+    if (!execid || !currentFile?.scriptId) {
       return;
     }
 
@@ -340,7 +367,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     const fetchResult = () => {
       try {
         setRunStatus(RunningStatus.RUNNING);
-        getRunResultPolling(currentFile?.fileId ?? '', {
+        getRunResultPolling(currentFile?.scriptId ?? '', {
           script_execid: execid,
           size: size
         });
@@ -365,10 +392,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     // 如果有 fileId，重新加载文件内容以获取最新状态
-    if (currentTab.fileId) {
+    if (currentTab.scriptId) {
       const loadFileContent = async () => {
         try {
-          const response = await getSqlScriptDetail(currentTab.fileId!);
+          const response = await getSqlScriptDetail(currentTab.scriptId!);
 
           if (response.status === 200 && response.data) {
             const fileData = response.data;
@@ -383,7 +410,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             if (onTabUpdate) {
               onTabUpdate(currentTab.key, {
                 content: fileData.script_content,
-                fileId: String(fileData.script_id),
+                fileId: String(currentTab.fileId),
+                scriptId: String(fileData.script_id),
                 title: currentTab.title
               });
             }
@@ -407,7 +435,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {
     clearEditorState();
-  }, [currentFile?.fileId, clearEditorState]);
+  }, [currentFile?.scriptId, clearEditorState]);
 
   return {
     // 状态
@@ -422,6 +450,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     size,
     runLog,
     currentFileId: currentFile?.fileId,
+    currentScriptId: currentFile?.scriptId,
     runError,
     resultLoading,
 
