@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
 import styles from './style.module.css';
 import NoDataEmpty from '@/components/NoDataEmpty';
@@ -537,8 +537,12 @@ const renderStatusTag = (
   return statusWithTooltip;
 };
 
-const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
-  const { isHideEdit, detailId } = props;
+const DatasetDetail = (props: {
+  isHideEdit: boolean;
+  detailId: string;
+  datasetDetailVisible?: boolean;
+}) => {
+  const { isHideEdit, detailId, datasetDetailVisible } = props;
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
@@ -1071,6 +1075,11 @@ const DatasetDetail = (props: { isHideEdit: boolean; detailId: string }) => {
         Message.success('刷新失败');
       });
   };
+  useEffect(() => {
+    if (!datasetDetailVisible) {
+      setDatasetDetail(null);
+    }
+  }, [datasetDetailVisible]);
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
