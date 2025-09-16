@@ -137,6 +137,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
                 content={tab.content}
                 fileName={tab.title || '未命名文件'}
                 currentFileId={tab.fileId}
+                currentScriptId={tab.scriptId}
                 hasRun={tab.hasRun}
                 tabKey={tab.key}
                 onActiveUpdate={handleActiveUpdate}

@@ -18,6 +18,7 @@ import { validateName } from '@/utils/valiate';
 interface UseFileManagerOptions {
   onFileOpen?: (
     fileId: string,
+    scriptId: string,
     fileName?: string,
     perms?: Array<string>
   ) => void;
@@ -132,9 +133,15 @@ export const useFileManager = (
             '📁 点击文件，自动打开:',
             dataRef.name,
             'ID:',
-            dataRef.id
+            dataRef.id,
+            dataRef.script_id
           );
-          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
+          onFileOpen(
+            String(dataRef.id),
+            String(dataRef.script_id),
+            dataRef.name,
+            dataRef.perms
+          );
         }
       }
     },
@@ -203,6 +210,7 @@ export const useFileManager = (
         // 编辑器自动打开当前脚本
         onFileOpen &&
           onFileOpen(
+            String(createRes.data.script_file_id),
             String(createRes.data.script_id),
             finalName,
             createRes.data.perms
@@ -311,14 +319,16 @@ export const useFileManager = (
     return (
       data?.map((item: any) => {
         return {
-          id: item.script_id,
+          id: item.script_file_id || item.script_id,
+          script_id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,
-          key: String(item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
+          key: String(item.script_file_id || item.script_id), // ✅ 添加key属性，Tree组件需要这个来管理选中状态
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,
-            id: item.script_id,
+            id: item.script_file_id || item.script_id,
+            script_id: item.script_id,
             type: PythonItemType.Notebook,
             perms: item.perms
           }

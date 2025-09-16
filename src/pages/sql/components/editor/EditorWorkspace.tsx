@@ -27,6 +27,7 @@ interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
   currentFileId?: string;
+  currentScriptId?: string;
   hasRun?: boolean;
   tabKey?: string;
   onActiveUpdate?: (tabData: FileTab) => void;
@@ -249,6 +250,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     content,
     fileName,
     currentFileId,
+    currentScriptId,
     hasRun,
     onActiveUpdate,
     tabKey,
@@ -262,12 +264,18 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           key: tabKey || 'default',
           title: fileName,
           content: content,
-          fileId: currentFileId
+          fileId: currentFileId,
+          scriptId: currentScriptId
         }
       ],
       onTabUpdate: (
         tabKey: string,
-        updates: { content?: string; fileId?: string; title?: string }
+        updates: {
+          content?: string;
+          fileId?: string;
+          scriptId?: string;
+          title?: string;
+        }
       ) => {
         if (onActiveUpdate) {
           onActiveUpdate({
@@ -275,6 +283,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             title: updates.title || fileName,
             content: updates.content || content,
             fileId: updates.fileId || currentFileId,
+            scriptId: updates.scriptId || currentScriptId,
             hasRun
           });
         }
