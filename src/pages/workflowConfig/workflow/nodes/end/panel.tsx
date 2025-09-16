@@ -20,6 +20,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
   const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
+  const [knowledgeBaseNameValid, setKnowledgeBaseNameValid] = useState(true);
   const [knowledgeBaseName, setKnowledgeBaseName] = useState(
     inputs?.knowledge_base_name || ''
   );
@@ -40,6 +41,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
       setDataSource(dirsArr);
     });
   }, []);
+
+  // 初始化时名称已回退为上一次输入合法名称，将名称校验设为true
+  useEffect(() => {
+    onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
+  }, []);
+
   console.log(dataSource, 'dataSource===');
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
@@ -51,7 +58,14 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         disabled={readOnly}
         wrapperCol={{ span: 24 }}
         onValuesChange={(_, v: any) => {
-          onValuesChange({ ...v, knowledge_base_name: '' }, dataSource);
+          onValuesChange(
+            {
+              ...v,
+              knowledge_base_name: knowledgeBaseName || '',
+              isKnowledgeBaseNameValid: knowledgeBaseNameValid
+            },
+            dataSource
+          );
         }}
         initialValues={{
           target_path_id: inputs?.target_path_id,
@@ -118,12 +132,22 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                       (res.msg === 'success' || res.msg === '成功')
                     ) {
                       setKnowledgeBaseName(value);
+                      setKnowledgeBaseNameValid(true);
                       // 校验通过保存名称
-                      onValuesChange(formData, dataSource);
+                      onValuesChange(
+                        { ...formData, isKnowledgeBaseNameValid: true },
+                        dataSource
+                      );
                     } else {
                       // 校验未通过名称重置为之前名称
+                      setKnowledgeBaseNameValid(false);
                       onValuesChange(
-                        { ...formData, knowledge_base_name: knowledgeBaseName },
+                        {
+                          ...formData,
+                          isKnowledgeBaseNameValid: false,
+                          knowledge_base_name: knowledgeBaseName,
+                          knowledge_base_name_msg: res.msg
+                        },
                         dataSource
                       );
                       callback(res.msg);
