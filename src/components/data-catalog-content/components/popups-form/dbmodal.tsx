@@ -49,16 +49,18 @@ export default function DbModal(props: DbModalProps) {
     switch (key) {
       case '1':
         return (
-          <div style={{}}>
+          <div style={{ width: '100%' }}>
             <Alert
               type="info"
               content="仅展示前50行示例数据"
               style={{ margin: '16px 0px' }}
             />
-            <Tables
-              dataList={dataList}
-              // tableName={data?.tableName}
-            />
+            <div className="table-wrapper">
+              <Tables
+                dataList={dataList}
+                // tableName={data?.tableName}
+              />
+            </div>
           </div>
         );
       case '2':

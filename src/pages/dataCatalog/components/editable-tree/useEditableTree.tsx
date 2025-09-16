@@ -21,6 +21,7 @@ import {
   addCatalog,
   addVolume,
   deleteVolume,
+  deleteTable,
   renameCatalog,
   addDb,
   getDbItemList
@@ -233,30 +234,49 @@ export function useEditableTree({ catalogTreeStore }) {
   };
 
   // 删除目录 or 卷 or 数据库表
-  const handleDelete = async (node: NodeProps) => {
+  const handleDelete = async (node: NodeProps, type: string) => {
     const { _key, dataRef } = node;
 
     if (!_key || !dataRef?.type) {
       Message.error('删除失败，请稍后重试');
       return;
     }
-
     let newTreeData: TreeDataType[] = [...treeData];
-
-    const res = await deleteVolume(dataRef?.id, {
-      root_type: RootTypeEnum[activeTab]
-    });
+    let res: Partial<ApiRes<any>> = {};
+    if (type === 'db_item') {
+      const params = {
+        path_id: dataRef?.parent_id,
+        database: dataRef?.name,
+        tables: []
+      };
+      res = await deleteTable(params);
+    } else if (type === 'directory') {
+      res = await deleteVolume(dataRef?.id, {
+        root_type: RootTypeEnum[activeTab]
+      });
+    }
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
       Message.success('删除成功!');
+
+      // 清除表格相关的选中状态，避免显示已删除节点的数据
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData,
+        selectedKey: '', // 清除选中的节点ID
+        selectedTreeKey: '', // 清除选中的树节点key
+        selectedPath: '', // 清除选中节点的路径
+        selectedNodeType: '', // 清除选中节点的类型
+        selectedParentId: '' // 清除选中节点的父节点ID
+      });
     } else {
       Message.error(res?.message ?? '删除失败，请稍后重试');
-    }
 
-    catalogTreeStore.setState({
-      treeData: newTreeData,
-      rawTreeData: newTreeData
-    });
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData
+      });
+    }
   };
 
   const focusAndSelectInput = () => {
@@ -444,7 +464,7 @@ export function useEditableTree({ catalogTreeStore }) {
                         content: '删除后不可恢复',
                         async onOk() {
                           try {
-                            await handleDelete(node);
+                            await handleDelete(node, 'db_item');
                           } catch (apiError: any) {
                             Message.error(
                               '删除失败: ' + (apiError.message || '请稍后重试')
@@ -488,7 +508,7 @@ export function useEditableTree({ catalogTreeStore }) {
                               '删除后，该目录下所有内容将被删除，不可恢复',
                             async onOk() {
                               try {
-                                await handleDelete(node);
+                                await handleDelete(node, 'directory');
                               } catch (apiError: any) {
                                 Message.error(
                                   '删除失败: ' +

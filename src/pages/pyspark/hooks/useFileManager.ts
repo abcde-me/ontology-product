@@ -8,6 +8,7 @@ import {
   copyPythonItem
 } from '@/api/pyspark';
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
+import { validateName } from '@/utils/valiate';
 
 interface UseFileManagerOptions {
   onFileOpen?: (
@@ -49,6 +50,10 @@ interface UseFileManagerReturn {
   // 工具函数
   getRawPythonList: (folderId?: string) => Promise<PythonListItem[]>;
   formatData: (data: unknown[]) => any[];
+
+  // 新增方法
+  refreshDirectory: () => Promise<void>; // 刷新当前目录
+  selectFile: (fileId: string) => void; // 选中指定文件
 }
 
 export const useFileManager = (
@@ -178,6 +183,13 @@ export const useFileManager = (
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return null;
+        }
+
         const createRes = await createPythonItem({
           path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
           type: node?.dataRef?.type,
@@ -382,6 +394,16 @@ export const useFileManager = (
     }
   }, [externalSelectedKeys]);
 
+  // 刷新当前目录
+  const refreshDirectory = useCallback(async () => {
+    await getRawPythonList(currentFolderId);
+  }, [getRawPythonList, currentFolderId]);
+
+  // 选中指定文件
+  const selectFile = useCallback((fileId: string) => {
+    setSelectedKeys([fileId]);
+  }, []);
+
   // 组件挂载时获取数据
   useEffect(() => {
     getRawPythonList().then((items) => {
@@ -430,6 +452,10 @@ export const useFileManager = (
 
     // 工具函数
     getRawPythonList,
-    formatData
+    formatData,
+
+    // 新增方法
+    refreshDirectory,
+    selectFile
   };
 };

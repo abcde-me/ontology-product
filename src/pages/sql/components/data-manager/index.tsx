@@ -52,7 +52,7 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
 
     if (dataset.cn_name) {
       // `字段名`
-      copyText = `\`${dataset.latest_table}\`.\`${dataset.name}\``;
+      copyText = `\`${dataset.name}\``;
     } else {
       // `库名`.`表名`
       copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
@@ -122,13 +122,13 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
     }
 
     if (level === 'database-tables') {
-      // `表名`
-      copyText = `\`${database.table_name}\``;
+      // `库名.表名`
+      copyText = `\`${hierarchyData?.selectedDbItem?.name}\`.\`${database.table_name}\``;
     }
 
     if (level === 'table-detail') {
       // `字段名`
-      copyText = `\`${hierarchyData?.selectedTable?.table_name}\`.\`${database.name}\``;
+      copyText = `\`${database.name}\``;
     }
 
     if (isEditorFocused && onInsertContent) {

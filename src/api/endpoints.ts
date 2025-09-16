@@ -167,6 +167,7 @@ export const ResourceEndpointsV2 = {
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
   dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/directory/delete-table', //删除数据库表
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
