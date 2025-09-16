@@ -183,6 +183,9 @@ const LoadAddModal = (props: propsType) => {
         const res = await addLoad(formData);
         if (res.code === '' && res.status === 200) {
           if (type == 'run') {
+            Message.success(
+              '大量数据载入会影响数据源库，尽力避免业务作业期间操作'
+            );
             history.push(
               `/tenant/compute/modaforge/dataLoad/detail?task_id=${res.data}`
             );
