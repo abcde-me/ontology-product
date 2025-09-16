@@ -21,7 +21,7 @@ import { TEXT_DATA, LabelTypeMap } from './const';
 
 const { bus } = WujieReact;
 
-function WorkflowConfig() {
+function LabelEditorPage() {
   const [loading, setLoading] = useState(true);
   const taskId = useParams('tId');
   const requirementId = useParams('rId');
@@ -123,4 +123,4 @@ function WorkflowConfig() {
   );
 }
 
-export default WorkflowConfig;
+export default LabelEditorPage;

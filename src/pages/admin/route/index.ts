@@ -185,6 +185,13 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/labelEditor',
     component: React.lazy(async () => import('../../labelEditor')),
     children: []
+  },
+  // 运营中心页面
+  {
+    name: 'operationCenter',
+    key: '/tenant/compute/modaforge/operationCenter',
+    component: React.lazy(async () => import('../../operationCenter')),
+    children: []
   }
 ];
 
