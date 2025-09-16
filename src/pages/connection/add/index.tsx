@@ -508,7 +508,7 @@ const add = forwardRef((props: any, ref) => {
                   rules={[{ required: true, message: '请输入密码' }]}
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入" />
+                  <Input.Password placeholder="请输入" />
                 </FormItem>
               </div>
             )}
