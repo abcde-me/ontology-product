@@ -79,5 +79,16 @@ module.exports = function (app) {
         on: {}
       })
     );
+    app.use(
+      ['/operationcenter', '/user-space', '/auth-center'],
+      createProxyMiddleware({
+        target: 'http://localhost:9040',
+        pathRewrite: (path, req) => req.baseUrl + path,
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        on: {}
+      })
+    );
   }
 };
