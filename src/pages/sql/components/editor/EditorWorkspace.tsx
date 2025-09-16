@@ -33,6 +33,8 @@ interface NotebookWorkspaceProps {
   onActiveUpdate?: (tabData: FileTab) => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
+  refreshDirectory?: () => void;
+  selectFile?: (fileId: string) => void;
 }
 
 // 内部组件，使用 EditorContext
@@ -255,7 +257,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onActiveUpdate,
     tabKey,
     onInsertContent,
-    onEditorFocusChange
+    onEditorFocusChange,
+    refreshDirectory,
+    selectFile
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -287,7 +291,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             hasRun
           });
         }
-      }
+      },
+      refreshDirectory,
+      selectFile
     };
 
     return (

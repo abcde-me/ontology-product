@@ -19,6 +19,8 @@ interface EditorContentProps {
   onActiveUpdate?: (tabData: any) => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
+  refreshDirectory?: () => void;
+  selectFile?: (fileId: string) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -31,7 +33,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onCreate,
     onActiveUpdate,
     onInsertContent,
-    onEditorFocusChange
+    onEditorFocusChange,
+    refreshDirectory,
+    selectFile
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -143,6 +147,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
                 onActiveUpdate={handleActiveUpdate}
                 onInsertContent={onInsertContent}
                 onEditorFocusChange={onEditorFocusChange}
+                refreshDirectory={refreshDirectory}
+                selectFile={selectFile}
               />
             </TabPane>
           ))}

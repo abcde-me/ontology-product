@@ -85,9 +85,22 @@ const SqlIndex: React.FC = memo(() => {
 
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
-    console.log('handleEditorFocusChange focused', focused);
     isEditorFocusedRef.current = focused;
     setIsEditorFocused(focused);
+  };
+
+  // 刷新目录的函数
+  const handleRefreshDirectory = useCallback(async () => {
+    if (directoryTreeRef.current?.refresh) {
+      await directoryTreeRef.current.refresh();
+    }
+  }, []);
+
+  // 选中文件的方法
+  const selectFile = (fileId: string) => {
+    if (directoryTreeRef.current?.selectFile) {
+      directoryTreeRef.current.selectFile(fileId);
+    }
   };
 
   return (
@@ -140,6 +153,8 @@ const SqlIndex: React.FC = memo(() => {
           onActiveUpdate={handleActiveUpdate}
           onInsertContent={handleInsertContentRegister}
           onEditorFocusChange={handleEditorFocusChange}
+          refreshDirectory={handleRefreshDirectory}
+          selectFile={selectFile}
         />
       </Content>
     </Layout>

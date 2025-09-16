@@ -34,6 +34,8 @@ export interface UseEditorOptions {
       scriptId?: string;
     }
   ) => void;
+  refreshDirectory?: () => void;
+  selectFile?: (fileId: string) => void;
 }
 
 export interface UseEditorReturn {
@@ -75,7 +77,13 @@ export interface UseEditorReturn {
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
-  const { activeTab, fileTabs = [], onTabUpdate } = options;
+  const {
+    activeTab,
+    fileTabs = [],
+    onTabUpdate,
+    refreshDirectory,
+    selectFile
+  } = options;
 
   const userInfo = useUserInfo();
   // 状态管理
@@ -217,6 +225,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
           if (res?.status === 200) {
             setLastAutoSave(new Date().toLocaleTimeString());
+
+            // 调用 refreshDirectory 方法，更新左侧目录
+            if (typeof refreshDirectory === 'function') {
+              refreshDirectory();
+            }
+
+            // 调用 selectFile 方法，选中文件
+            if (typeof selectFile === 'function') {
+              selectFile(currentFile?.fileId ?? String(res.data.script_id));
+            }
 
             // 更新脚本ID到标签页
             if (onTabUpdate && currentFile) {

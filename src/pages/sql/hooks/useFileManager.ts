@@ -189,8 +189,10 @@ export const useFileManager = (
           return;
         }
 
+        const scriptFileId = String(Date.now());
         const createRes = await createSqlScript({
           uid: userInfo?.id ?? '',
+          script_file_id: scriptFileId,
           script_name: finalName
         });
 
@@ -205,12 +207,12 @@ export const useFileManager = (
         await getRawSqlScriptList();
 
         // 设置选中状态
-        setSelectedKeys([String(createRes.data.script_id)]);
+        setSelectedKeys([scriptFileId]);
 
         // 编辑器自动打开当前脚本
         onFileOpen &&
           onFileOpen(
-            String(createRes.data.script_file_id),
+            scriptFileId,
             String(createRes.data.script_id),
             finalName,
             createRes.data.perms
@@ -344,7 +346,7 @@ export const useFileManager = (
         const res = await getSqlScriptList({
           search_content: searchValue,
           page: 1,
-          page_size: 100
+          page_size: 1000
         });
         return res?.data?.items ?? [];
       } catch (error) {
@@ -359,7 +361,10 @@ export const useFileManager = (
   // 返回父级处理
   const handleBackToParent = useCallback(async (parentId: string) => {
     try {
-      const res = await getSqlScriptList({});
+      const res = await getSqlScriptList({
+        page: 1,
+        page_size: 1000
+      });
       return res?.data?.items || [];
     } catch (error) {
       console.error('返回父级失败:', error);
