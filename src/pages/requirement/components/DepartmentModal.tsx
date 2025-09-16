@@ -2,66 +2,32 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Button,
-  Typography,
-  Tabs,
   Tree,
   Form,
   Input,
-  DatePicker,
-  Table,
-  Popover,
-  Pagination,
-  Message,
   Empty
 } from '@arco-design/web-react';
-import {
-  getCatalogList,
-  getSourceDataFileList,
-  getSourceFileTypeList
-} from '@/api/dataCatalog';
-import { format } from 'date-fns';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { OperationColumn } from '@ccf2e/arco-material';
-import getFileIcon from '@/components/file-icon';
-import './DepartmentModal.scss';
 import { getDepartmentTreeList } from '@/api/individualAndDepartment';
-
+import './DepartmentModal.scss';
 interface DataSourceModalProps {
   visible: boolean;
   onClose: () => void;
   title?: string;
-  children?: React.ReactNode;
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
 }
 
-// 树节点类型定义（用于Tree组件）
-interface TreeNodeType {
-  title: string;
-  key: string;
-  children?: TreeNodeType[];
-  isLeaf?: boolean;
-  rawData?: any; // 保存原始数据引用
-}
 const DepartmentModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
   title = '数据源',
-  getChildTreeSelectData,
-  children
+  getChildTreeSelectData
 }) => {
   const FormItem = Form.Item;
-  const [form] = Form.useForm();
-  const tableRef = useRef<any>(null);
   const [activeTab, setActiveTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
-  const [originalTreeData, setOriginalTreeData] = useState<any>([]); // 添加原始数据状态
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [sourceFileTypeFilters, setSourceFileTypeFilters] = useState();
-  const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(10);
   // 取树的内容 格式化
   const transformData = (originalSrc) => {
     // 递归处理单条数据（支持目录/数据卷）
@@ -120,6 +86,65 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
     return loop(treeData);
+  };
+
+  /**
+   * 递归查找节点，根据节点层级返回所有最深层id
+   * @param {Array} array - 要搜索的数组
+   * @param {*} targetId - 要查找的id值
+   * @returns {Array|null} - 找到的所有最深层id数组或null
+   */
+  const findAllLeafNodeIds = (array, targetId) => {
+    // 遍历当前层级的每个元素
+    for (const item of array) {
+      // 如果当前元素的id匹配目标id
+      if (item.id === targetId) {
+        // 收集该节点下所有叶子节点的ID
+        return collectAllLeafIds([item]);
+      }
+
+      // 如果当前元素有children，递归查找
+      if (
+        item.children &&
+        Array.isArray(item.children) &&
+        item.children.length > 0
+      ) {
+        const result = findAllLeafNodeIds(item.children, targetId);
+        if (result !== null) {
+          return result;
+        }
+      }
+    }
+
+    // 未找到对应id
+    return null;
+  };
+
+  /**
+   * 辅助函数：查找所有最深层的id
+   * @param {Array} array - 要搜索的数组
+   * @returns {Array} - 所有最深层的id数组
+   */
+  const collectAllLeafIds = (nodes) => {
+    const leafIds: string[] = [];
+
+    for (const node of nodes) {
+      // 检查是否有有效的子节点
+      const hasChildren =
+        node.children &&
+        Array.isArray(node.children) &&
+        node.children.length > 0;
+
+      if (hasChildren) {
+        // 有子节点，递归处理子节点
+        leafIds.push(...collectAllLeafIds(node.children));
+      } else {
+        // 没有子节点，是叶子节点，收集ID
+        leafIds.push(node.id);
+      }
+    }
+
+    return leafIds;
   };
 
   useEffect(() => {
@@ -199,14 +224,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
               );
             }}
             treeData={treeData}
-            // checkStrictly={checkStrictly}
-            onSelect={(value) => {
-              setCurrent(1);
-              setPageSize(10);
-            }}
             onCheck={(key, val) => {
-              console.log(key, val, '=====');
-              setCheckedKeys(key);
+              // console.log(key, '=====top', findAllLeafNodeIds(treeData, key[0]), key[0]);
+              setCheckedKeys(findAllLeafNodeIds(treeData, key[0]));
             }}
           />
         ) : (
