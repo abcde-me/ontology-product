@@ -80,6 +80,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 跟踪前一个 runStatus 状态
   const prevRunStatusRef = useRef<RunningStatus>(RunningStatus.IDLE);
 
+  // 跟踪前一个 activeTab 状态，用于检测变化
+  const prevActiveTabRef = useRef<string | undefined>(activeTab);
+
   // 监听 runStatus 变化，更新前一个状态
   useEffect(() => {
     prevRunStatusRef.current = runStatus;
@@ -150,22 +153,49 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       }
     });
 
-  // 清空编辑器状态的函数
-  // const clearEditorState = useCallback(() => {
-  //   setRunStatus(RunningStatus.IDLE);
-  //   setExecid('');
-  //   setRunStartTime(null);
-  //   setRunDuration(0);
-  //   setRunLog('');
-  //   setRunResult('');
-  //   setLastAutoSave('');
-  //   setIsPanelOpen(false); // 重置面板状态为关闭
-  //   // 取消正在进行的轮询
-  //   cancelGetRunResultPolling();
-  // }, [cancelGetRunResultPolling]);
+  const handleActiveTabChange = async () => {
+    console.log('handleActiveTabChange', prevActiveTabRef.current, activeTab);
+    // 如果 activeTab 发生变化，且不是初始化
+    if (
+      prevActiveTabRef.current !== undefined &&
+      prevActiveTabRef.current !== activeTab &&
+      prevActiveTabRef.current
+    ) {
+      // 保存前一个标签页的内容
+      const prevTab = fileTabs.find(
+        (tab) => tab.key === prevActiveTabRef.current
+      );
+      if (prevTab?.fileId && editorContent.trim() !== '') {
+        try {
+          console.log('标签页切换前保存内容:', prevActiveTabRef.current);
+          const saveRes = await savePythonItem(prevTab.fileId, {
+            id: Number(prevTab.fileId),
+            data: editorContent
+          });
+
+          if (saveRes?.status === 200) {
+            console.log('标签页切换前保存成功');
+            // 通知父组件更新标签页内容
+            // if (onTabContentUpdate) {
+            //   onTabContentUpdate(prevActiveTabRef.current, editorContent);
+            // }
+          } else {
+            console.warn('标签页切换前保存失败:', saveRes?.message);
+          }
+        } catch (error) {
+          console.error('标签页切换前保存出错:', error);
+        }
+      }
+    }
+
+    // 更新前一个 activeTab 引用
+    prevActiveTabRef.current = activeTab;
+  };
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
+    handleActiveTabChange();
+
     if (!activeTab || !fileTabs.length) {
       return;
     }
@@ -242,7 +272,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           });
 
           if (res?.status === 200) {
-            setLastAutoSave(new Date().toLocaleTimeString());
+            setLastAutoSave(
+              res?.data?.last_modified ?? new Date().toLocaleTimeString()
+            );
             return res.data;
           }
           return null;
