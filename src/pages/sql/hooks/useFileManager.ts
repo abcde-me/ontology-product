@@ -12,6 +12,8 @@ import { PythonItemType } from '@/types/pythonApi';
 import timeFormattig from '@/utils/timeFormatting';
 import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
+import { useUserInfo } from '@/store/userInfoStore';
+import { validateName } from '@/utils/valiate';
 
 interface UseFileManagerOptions {
   onFileOpen?: (
@@ -51,11 +53,14 @@ interface UseFileManagerReturn {
   // 工具函数
   getRawSqlScriptList: () => Promise<void>;
   formatData: (data: unknown[]) => any[];
+  refreshDirectory: () => Promise<void>; // 刷新目录
+  selectFile: (fileId: string) => void; // 选中文件
 }
 
 export const useFileManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
+  const userInfo = useUserInfo();
   const { onFileOpen, onFileDelete, onFileRename, externalSelectedKeys } =
     options;
 
@@ -170,8 +175,15 @@ export const useFileManager = (
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return;
+        }
+
         const createRes = await createSqlScript({
-          uid: '',
+          uid: userInfo?.id ?? '',
           script_name: finalName
         });
 
@@ -197,35 +209,6 @@ export const useFileManager = (
           );
 
         return createRes.data;
-
-        // if (createRes.status === 200) {
-        //   Message.success('创建成功');
-        //   // 刷新列表
-        //   await getRawSqlScriptList();
-
-        //   // 如果是创建的文件（不是文件夹），自动在编辑器中打开
-        //   if (
-        //     createRes.data &&
-        //     createRes.data.type !== PythonItemType.Directory &&
-        //     onFileOpen
-        //   ) {
-        //     console.log(
-        //       '✅ 新建文件成功，自动打开文件:',
-        //       createRes.data.name,
-        //       'ID:',
-        //       createRes.data.id
-        //     );
-
-        //   } else if (
-        //     createRes.data &&
-        //     createRes.data.type === PythonItemType.Directory
-        //   ) {
-        //     console.log('✅ 新建文件夹成功:', createRes.data.name);
-        //   }
-
-        //   return createRes.data;
-        // }
-        // return null;
       } catch (error) {
         console.error('创建失败:', error);
         Message.error('创建失败');
@@ -383,6 +366,16 @@ export const useFileManager = (
     }
   }, [externalSelectedKeys]);
 
+  // 刷新当前目录
+  const refreshDirectory = useCallback(async () => {
+    await getRawSqlScriptList();
+  }, [getRawSqlScriptList]);
+
+  // 选中指定文件
+  const selectFile = useCallback((fileId: string) => {
+    setSelectedKeys([String(fileId)]);
+  }, []);
+
   // 组件挂载时获取数据
   useEffect(() => {
     getRawSqlScriptList();
@@ -411,6 +404,8 @@ export const useFileManager = (
 
     // 工具函数
     getRawSqlScriptList,
-    formatData
+    formatData,
+    refreshDirectory,
+    selectFile
   };
 };

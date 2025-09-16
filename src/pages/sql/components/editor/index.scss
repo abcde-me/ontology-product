@@ -29,6 +29,10 @@
   .sql-tabs {
     height: 100%;
 
+    &.empty-tabs {
+      height: unset;
+    }
+
     .arco-tabs-header-nav {
       background-color: #e7ecf0;
 

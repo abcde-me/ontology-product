@@ -8,6 +8,7 @@ import {
   copyPythonItem
 } from '@/api/pyspark';
 import { PythonListItem, PythonItemType } from '@/types/pythonApi';
+import { validateName } from '@/utils/valiate';
 
 interface UseFileManagerOptions {
   onFileOpen?: (
@@ -182,6 +183,13 @@ export const useFileManager = (
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return null;
+        }
+
         const createRes = await createPythonItem({
           path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
           type: node?.dataRef?.type,
