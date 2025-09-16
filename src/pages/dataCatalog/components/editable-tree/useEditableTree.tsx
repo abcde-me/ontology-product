@@ -258,14 +258,25 @@ export function useEditableTree({ catalogTreeStore }) {
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
       Message.success('删除成功!');
+
+      // 清除表格相关的选中状态，避免显示已删除节点的数据
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData,
+        selectedKey: '', // 清除选中的节点ID
+        selectedTreeKey: '', // 清除选中的树节点key
+        selectedPath: '', // 清除选中节点的路径
+        selectedNodeType: '', // 清除选中节点的类型
+        selectedParentId: '' // 清除选中节点的父节点ID
+      });
     } else {
       Message.error(res?.message ?? '删除失败，请稍后重试');
-    }
 
-    catalogTreeStore.setState({
-      treeData: newTreeData,
-      rawTreeData: newTreeData
-    });
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData
+      });
+    }
   };
 
   const focusAndSelectInput = () => {
