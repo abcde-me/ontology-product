@@ -421,7 +421,10 @@ export const getUnifiedColumns = (
         dataIndex: 'db_type',
         width: 120,
         // filters: sourceFileTypeFilters,
-        filters: [{ text: 'mysql', value: 'mysql' }],
+        filters: [
+          { text: 'mysql', value: 'mysql' },
+          { text: 'postgresql', value: 'postgresql' }
+        ],
         render: (_, record) => (
           <div
             style={{
