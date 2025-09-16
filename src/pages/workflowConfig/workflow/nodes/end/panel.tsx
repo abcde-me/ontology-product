@@ -47,7 +47,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
   }, []);
 
-  console.log(dataSource, 'dataSource===');
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form

@@ -17,18 +17,11 @@ import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success
 import noDataElement from '@/components/no-data';
 import { getAnnotationTaskList } from '@/api/dataAnnotation';
 import { useUserInfo } from '@/store/userInfoStore';
-import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from './type';
 import './index.scss';
-
-enum typeCode {
-  TEXT_ENTITY = 'entity', // 实体关系
-  TEXT_CLASSIFICATION = 'classification', // 文本分类
-  TEXT_QA = 'qa', // 问答
-  TEXT_SORT = 'ranking' // 排序
-}
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -80,6 +73,7 @@ export default function Requirement() {
       const params: any = {
         page: current, //第几页
         pageSize: pageSize, //每页个数
+        order: sortValue?.order,
         filters: {
           name: searchValue,
           type: sortValue?.type,
@@ -109,13 +103,20 @@ export default function Requirement() {
   // 筛选排序操作
   const handleTableChange = (
     _pagination: PaginationProps,
+    sorter: SorterInfo,
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
     const sortdata: any = {
       name: '',
       type: filters?.type,
-      belong: filters?.belong
+      belong: filters?.belong,
+      order:
+        sorter.direction === undefined
+          ? 'desc'
+          : sorter.direction === 'ascend'
+            ? 'asc'
+            : 'desc'
     };
 
     setSortValue(sortdata);
@@ -316,7 +317,7 @@ export default function Requirement() {
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
-          handleTableChange(pagination, filters)
+          handleTableChange(pagination, sorter as SorterInfo, filters)
         }
       />
       {/* 分页 */}
