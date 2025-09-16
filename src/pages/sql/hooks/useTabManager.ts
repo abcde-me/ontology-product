@@ -128,7 +128,7 @@ export const useTabManager = (
 
       if (newFileInfo) {
         // 如果有新文件信息，使用文件信息创建标签页
-        newTabKey = `notebook-${newFileInfo.id}`;
+        newTabKey = `file-${newFileInfo.id}`;
         newTabTitle = newFileInfo.name;
         newFileId = String(newFileInfo.id);
       } else {
@@ -226,10 +226,11 @@ export const useTabManager = (
 
   const updateTab = useCallback(
     (tabData: FileTab) => {
+      console.log('222222', tabData);
       setFileState((prev) => {
-        const key = tabData.key;
+        const title = tabData.title;
         const newFileTabs = prev.fileTabs.map((item) => {
-          if (item.key === key) {
+          if (item.title === title) {
             return {
               ...item,
               ...tabData
@@ -237,8 +238,14 @@ export const useTabManager = (
           }
           return item;
         });
+        console.log('333333', newFileTabs);
+        console.log('444444', {
+          ...prev,
+          fileTabs: newFileTabs
+        });
         return {
           ...prev,
+          activeTab: tabData.key,
           fileTabs: newFileTabs
         };
       });
