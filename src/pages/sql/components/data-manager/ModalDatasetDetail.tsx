@@ -18,7 +18,11 @@ const ModalDatasetDetail = ({
       onCancel={closeDatasetDetail}
     >
       <div className="my-dataset-detail pb-[16px]">
-        <DatasetDetail isHideEdit={true} detailId={detailId} />
+        <DatasetDetail
+          isHideEdit={true}
+          detailId={detailId}
+          datasetDetailVisible={datasetDetailVisible}
+        />
       </div>
     </Modal>
   );
