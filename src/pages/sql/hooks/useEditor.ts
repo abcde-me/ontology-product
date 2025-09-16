@@ -202,7 +202,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         try {
           const res = await createSqlScript({
             uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name: generateSqlDefaultName(new Date()),
+            script_name:
+              currentFile?.title ?? generateSqlDefaultName(new Date()),
             script_content: content
           });
 
@@ -213,7 +214,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             if (onTabUpdate && currentFile) {
               onTabUpdate(currentFile.key, {
                 content,
-                fileId: res.data.script_id,
+                fileId: String(res.data.script_id),
                 title: currentFile.title // 保持原有标题
               });
             }

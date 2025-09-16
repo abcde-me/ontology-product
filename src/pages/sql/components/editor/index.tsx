@@ -76,7 +76,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           <Tabs
             activeTab={activeTab}
             onChange={handleTabChange}
-            className="sql-tabs"
+            className="sql-tabs empty-tabs"
             type="card"
             showAddButton={hasCreatePermission}
             onAddTab={handleCreatePySpark}
