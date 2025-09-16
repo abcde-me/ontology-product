@@ -42,6 +42,10 @@ export default function Tables(props) {
     }));
   }, [dataList]);
 
+  const tableData = useMemo(() => {
+    return (get(dataList, 'sample.data', []) || []).slice(0, 50);
+  }, [dataList]);
+
   return (
     <div>
       {loading ? (
@@ -53,11 +57,7 @@ export default function Tables(props) {
           }}
         />
       ) : (
-        <Table
-          columns={tableColumns}
-          data={dataList.sample?.data.slice(0, 50) || []}
-          pagination={false}
-        />
+        <Table columns={tableColumns} data={tableData} pagination={false} />
       )}
       {/* <Table 
           columns={columns()} 

@@ -613,6 +613,11 @@ export async function deleteVolume(
     .do();
   return res;
 }
+// 删除库表
+export async function deleteTable(data) {
+  const res = await UAPI.RES.tableDeleteApi({}).post(data).inRegion().do();
+  return res;
+}
 // 重命名目录
 export async function renameCatalog(id: string, params: any) {
   const res = await UAPI.RES.catalogRenameApi({ catalogId: id })

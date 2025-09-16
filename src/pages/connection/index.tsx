@@ -28,6 +28,7 @@ import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
+import { ConnectorType, TYPE_CONFIG } from './config';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
@@ -37,14 +38,6 @@ const InputSearch = Input.Search;
 enum ConnectionStatus {
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected'
-}
-
-// 连接器类型枚举
-enum ConnectorType {
-  S3 = 's3',
-  HDFS = 'hdfs',
-  mysql = 'mysql',
-  postgresql = 'postgresql'
 }
 
 // 状态显示配置
@@ -57,14 +50,6 @@ const STATUS_CONFIG = {
     text: '已断开',
     color: '#EF4444'
   }
-};
-
-// 类型显示配置
-const TYPE_CONFIG = {
-  [ConnectorType.S3]: '对象存储(S3)',
-  [ConnectorType.HDFS]: 'HDFS',
-  [ConnectorType.mysql]: '数据库-MySQL',
-  [ConnectorType.postgresql]: '数据库-Postgres'
 };
 
 export default function Connection() {
