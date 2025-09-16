@@ -24,6 +24,7 @@ import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import getLabelByValue from '@/utils/getLabelByValue';
 // 图标组件定义
 const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
 const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
@@ -265,6 +266,19 @@ interface DbClickData {
   table_id: number;
 }
 
+export const DATABASE_TYPE_ENUM = [
+  {
+    label: 'MySQL',
+    text: 'MySQL',
+    value: 'mysql'
+  },
+  {
+    label: 'PostgreSQL',
+    text: 'PostgreSQL',
+    value: 'postgresql'
+  }
+];
+
 export const getUnifiedColumns = (
   tableType: 'source' | 'target',
   dataType: 'volume' | 'database',
@@ -353,7 +367,7 @@ export const getUnifiedColumns = (
         width: 160,
         render: (_, record) => (
           <EllipsisPopover
-            value={record.connector_name}
+            value={record.connector_name || '本地上传'}
             isEdit={false}
             preferTypography
           />
@@ -420,11 +434,7 @@ export const getUnifiedColumns = (
         title: '数据库类型',
         dataIndex: 'db_type',
         width: 120,
-        // filters: sourceFileTypeFilters,
-        filters: [
-          { text: 'mysql', value: 'mysql' },
-          { text: 'postgresql', value: 'postgresql' }
-        ],
+        filters: DATABASE_TYPE_ENUM,
         render: (_, record) => (
           <div
             style={{
@@ -433,7 +443,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            <span>{record.db_type}</span>
+            <span>{getLabelByValue(DATABASE_TYPE_ENUM, record?.db_type)}</span>
           </div>
         )
       },
@@ -467,7 +477,7 @@ export const getUnifiedColumns = (
         width: 160,
         render: (_, record) => (
           <EllipsisPopover
-            value={record.connector_name}
+            value={record.connector_name || '本地上传'}
             isEdit={false}
             preferTypography
           />

@@ -46,6 +46,7 @@ interface Connector {
 
 // 任务信息类型
 export interface TaskInfo {
+  sub_type?: string;
   connector_id: number;
   connector_name: string;
   created_at: string;

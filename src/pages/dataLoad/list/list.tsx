@@ -23,73 +23,17 @@ import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/mod
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
-export enum RunState {
-  SUCCEED = 'succeed',
-  FAILED = 'failed',
-  RUNNING = 'running',
-  STOPPED = 'stopped'
-}
+import getLabelByValue from '@/utils/getLabelByValue';
+import {
+  RunState,
+  RunStateType,
+  Load,
+  LoadType,
+  ConnectorType,
+  TYPE_CONFIG,
+  DATABASE_TYPE_ENUM
+} from '../config';
 
-export const RunStateType = {
-  [RunState.SUCCEED]: {
-    text: '运行成功',
-    value: 'succeed',
-    color: '#10B981'
-  },
-  [RunState.FAILED]: {
-    text: '运行失败',
-    value: 'failed',
-    color: '#EF4444'
-  },
-  [RunState.RUNNING]: {
-    text: '运行中',
-    value: 'running',
-    color: '#007DFA'
-  },
-  [RunState.STOPPED]: {
-    text: '运行停止',
-    value: 'stopped',
-    color: '#94A3B8'
-  }
-};
-export enum Load {
-  ONCE = 'once',
-  CRON = 'cron'
-}
-export const LoadType = {
-  [Load.ONCE]: {
-    text: '单次载入',
-    value: 'once'
-  },
-  [Load.CRON]: {
-    text: '周期载入',
-    value: 'cron'
-  }
-};
-enum ConnectorType {
-  S3 = 's3',
-  HDFS = 'hdfs',
-  DB = 'db',
-  Local = 'local'
-}
-const TYPE_CONFIG = {
-  [ConnectorType.S3]: {
-    text: '对象存储(S3)',
-    value: 's3'
-  },
-  [ConnectorType.HDFS]: {
-    text: 'HDFS',
-    value: 'hdfs'
-  },
-  [ConnectorType.DB]: {
-    text: '数据库',
-    value: 'db'
-  },
-  [ConnectorType.Local]: {
-    text: '本地文件',
-    value: 'local'
-  }
-};
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
@@ -191,17 +135,6 @@ export default function DataLoad() {
       title: '数据源类型',
       width: 170,
       dataIndex: 'source_type',
-      render: (_, item) => (
-        <span>
-          {item.source_type == TYPE_CONFIG[ConnectorType.S3].value
-            ? TYPE_CONFIG[ConnectorType.S3].text
-            : item.source_type == TYPE_CONFIG[ConnectorType.HDFS].value
-              ? TYPE_CONFIG[ConnectorType.HDFS].text
-              : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
-                ? `${TYPE_CONFIG[ConnectorType.DB].text}-${item.sub_type || ''}`
-                : TYPE_CONFIG[ConnectorType.Local].text}
-        </span>
-      ),
       filters: [
         {
           text: TYPE_CONFIG[ConnectorType.HDFS].text,
@@ -219,7 +152,18 @@ export default function DataLoad() {
           text: TYPE_CONFIG[ConnectorType.Local].text,
           value: TYPE_CONFIG[ConnectorType.Local].value
         }
-      ]
+      ],
+      render: (_, item) => (
+        <span>
+          {item.source_type == TYPE_CONFIG[ConnectorType.S3].value
+            ? TYPE_CONFIG[ConnectorType.S3].text
+            : item.source_type == TYPE_CONFIG[ConnectorType.HDFS].value
+              ? TYPE_CONFIG[ConnectorType.HDFS].text
+              : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
+                ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, item?.sub_type || '')}`
+                : TYPE_CONFIG[ConnectorType.Local].text}
+        </span>
+      )
     },
     {
       title: '连接器名称',
@@ -227,7 +171,9 @@ export default function DataLoad() {
       ellipsis: true,
       width: 230,
       render: (_, item) => {
-        return (
+        return item?.source_type === ConnectorType.Local ? (
+          <span>本地上传</span>
+        ) : (
           <EllipsisPopoverCom
             value={item.connector_name}
             isEdit={false}

@@ -209,6 +209,7 @@ const RunningInfoPanel: React.FC = memo(() => {
                 </Space>
                 <Dropdown
                   position="br"
+                  disabled={runStatus !== RunningStatus.SUCCESS}
                   droplist={
                     <Menu onClickMenuItem={handleMenuClick}>
                       <Menu.Item key="1">保存为新数据集</Menu.Item>

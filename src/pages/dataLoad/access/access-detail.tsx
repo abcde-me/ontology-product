@@ -5,7 +5,7 @@ import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
 import { getLoadRecord, reTryLoad, getLoad } from '@/api/loadApi';
-import { RunState, RunStateType } from '../list/list';
+import { RunState, RunStateType } from '../config';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';

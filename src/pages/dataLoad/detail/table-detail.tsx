@@ -1,5 +1,5 @@
 import { Message, Modal, Popover, Table } from '@arco-design/web-react';
-import { RunState, RunStateType } from '../list/list';
+import { RunState, RunStateType } from '../config';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import { useHistory } from 'react-router-dom';
