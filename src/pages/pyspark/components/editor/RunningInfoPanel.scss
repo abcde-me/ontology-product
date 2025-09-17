@@ -9,6 +9,11 @@
   .panel-content {
     border-radius: 4px;
     overflow: hidden;
+
+    .arco-tabs-header-nav {
+      background-color: #f8fafd !important;
+      // border-bottom: 1px solid var(--LineLine-color-border-2, #e2e8f0);
+    }
   }
 
   .run-result-content,

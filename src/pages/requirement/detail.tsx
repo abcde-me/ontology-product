@@ -447,24 +447,27 @@ export default function RequirementDetail() {
     const { formText, formLabel } = TextEntityDataContent;
     console.log(formLabel, 'formLabel');
     const result = await Promise.all([
-      formType
-        .validate()
-        .then((val) => {
-          console.log(val, 'formType');
-          return true;
-        })
-        .catch((errorInfo) => {
-          return false;
-        }),
-      formLabel
-        .validate()
-        .then((val) => {
-          console.log(val, 'totpotptop');
-          return true;
-        })
-        .catch((errorInfo) => {
-          return false;
-        }),
+      annotationTypeContentVal ===
+        AnnotationTypeContentCode.TEXT_CLASSIFICATION &&
+        formType
+          ?.validate()
+          .then((val) => {
+            console.log(val, 'formType');
+            return true;
+          })
+          .catch((errorInfo) => {
+            return false;
+          }),
+      formLabel &&
+        formLabel
+          .validate()
+          .then((val) => {
+            console.log(val, 'totpotptop');
+            return true;
+          })
+          .catch((errorInfo) => {
+            return false;
+          }),
       form1
         .validate()
         .then(() => {
@@ -739,14 +742,37 @@ export default function RequirementDetail() {
             <FormItem
               label="需求名称:"
               field="name"
-              rules={[{ required: true, message: '请输入需求名称', max: 50 }]}
+              rules={[
+                {
+                  required: true,
+                  max: 50,
+                  validator: (value, callback) => {
+                    if (!value) {
+                      callback('请输入需求名称');
+                    } else if (value?.length > 50) {
+                      callback('需求名称不能超过50个字符');
+                    }
+                    return true;
+                  }
+                }
+              ]}
             >
               <Input placeholder="请输入需求名称" style={{ width: 800 }} />
             </FormItem>
             <FormItem
               label="描述说明:"
               field="description"
-              rules={[{ required: true, message: '请输入描述内容', max: 200 }]}
+              rules={[
+                {
+                  max: 200,
+                  validator: (value, callback) => {
+                    if (value?.length > 200) {
+                      callback('描述说明不能超过200个字符');
+                    }
+                    return true;
+                  }
+                }
+              ]}
             >
               <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
             </FormItem>
@@ -872,7 +898,22 @@ export default function RequirementDetail() {
                                   rules={[
                                     {
                                       required: true,
-                                      message: '请输入标注展示名称'
+                                      validator: (value, callback) => {
+                                        // 检查是否有重复的标注名称（排除当前项）
+                                        const isDuplicate = datalist.some(
+                                          (otherItem, otherIndex) =>
+                                            otherIndex !== labelIndex &&
+                                            otherItem.label_name_cn === value &&
+                                            value.trim() !== ''
+                                        );
+                                        if (!value) {
+                                          callback('请输入标注展示名称');
+                                        } else if (isDuplicate) {
+                                          callback('标注名称不能重复');
+                                        } else {
+                                          callback();
+                                        }
+                                      }
                                     }
                                   ]}
                                   style={{ padding: 0 }}
@@ -886,10 +927,6 @@ export default function RequirementDetail() {
                                         [labelIndex, 'label_name_cn'],
                                         val
                                       );
-                                      // updateNestedValue(
-                                      //   [labelIndex, 'label_name_cn'],
-                                      //   val
-                                      // );
                                     }}
                                     className="sortable-item-input"
                                     placeholder="请输入标注展示名称"
@@ -1017,7 +1054,40 @@ export default function RequirementDetail() {
                                           field={`label_info_attribute_groups_${item?.label_id}_${groupIndex}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                           required
                                           disabled={type === 'detail'}
-                                          label="属性组件名称:"
+                                          label="属性名称:"
+                                          rules={[
+                                            {
+                                              required: true,
+                                              message: '请输入属性名称',
+                                              validator: (value, callback) => {
+                                                if (!value)
+                                                  return Promise.resolve();
+                                                // 检查同组内是否有重复的属性名称
+                                                const hasDuplicate =
+                                                  item?.label_info_attribute_groups?.some(
+                                                    (
+                                                      otherGroup: any,
+                                                      otherIndex: number
+                                                    ) => {
+                                                      // 排除当前正在编辑的属性组
+                                                      return (
+                                                        otherIndex !==
+                                                          groupIndex &&
+                                                        otherGroup.attribute_group_name ===
+                                                          value
+                                                      );
+                                                    }
+                                                  );
+                                                if (!value)
+                                                  return Promise.resolve();
+                                                if (hasDuplicate) {
+                                                  callback('属性名称不能重复');
+                                                } else {
+                                                  callback();
+                                                }
+                                              }
+                                            }
+                                          ]}
                                         >
                                           <div className="group-items">
                                             <Input
@@ -1227,7 +1297,42 @@ export default function RequirementDetail() {
                                                       {
                                                         required: true,
                                                         message:
-                                                          '请输入选项名称'
+                                                          '请输入选项名称',
+                                                        validator: (
+                                                          value,
+                                                          callback
+                                                        ) => {
+                                                          if (!value)
+                                                            return Promise.resolve();
+                                                          // 检查同组内是否有重复的选项名称
+                                                          const hasDuplicate =
+                                                            attrGroup?.label_info_attribute?.some(
+                                                              (
+                                                                otherAttr: any,
+                                                                otherIndex: number
+                                                              ) => {
+                                                                // 排除当前正在编辑的选项
+                                                                return (
+                                                                  otherIndex !==
+                                                                    attrIndex &&
+                                                                  otherAttr.attribute_name_cn ===
+                                                                    value
+                                                                );
+                                                              }
+                                                            );
+                                                          if (!value) {
+                                                            callback(
+                                                              '请输入选项名称'
+                                                            );
+                                                          } else if (
+                                                            hasDuplicate
+                                                          ) {
+                                                            callback(
+                                                              '选项名称不能重复'
+                                                            );
+                                                          }
+                                                          return Promise.resolve();
+                                                        }
                                                       }
                                                     ]}
                                                     label={`选项${attrIndex + 1}:`}
