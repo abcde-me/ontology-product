@@ -255,7 +255,8 @@ export const useTableList = <T = {}, U = {}>(
       setPagination((prev) => ({
         ...prev,
         current: res?.data?.page,
-        total: res?.data?.total
+        total: res?.data?.total,
+        pageSize: res?.data?.limit
       }));
 
       setListData((res?.data?.list as T[]) || []);
