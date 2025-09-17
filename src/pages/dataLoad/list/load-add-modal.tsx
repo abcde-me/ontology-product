@@ -493,7 +493,10 @@ const LoadAddModal = (props: propsType) => {
         console.log('useEffect: 数据源类型变化，重新加载数据', sourceType);
         // 获取连接器列表
         if (sourceType) {
-          const res = await getConnectionList({ type: sourceType });
+          const res = await getConnectionList({
+            type: sourceType,
+            status: 'connected'
+          });
           if (!cancelled && res.data && res.data.items) {
             const newConnectName = res.data.items.map((item) => ({
               key: item.id,
