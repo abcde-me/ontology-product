@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useRequest, useThrottleFn } from 'ahooks';
+import { useAsyncEffect, useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
 import {
   runPythonItem,
@@ -193,8 +193,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   };
 
   // 监听 activeTab 变化，重新更新编辑器状态
-  useEffect(() => {
-    handleActiveTabChange();
+  useAsyncEffect(async () => {
+    await handleActiveTabChange();
 
     if (!activeTab || !fileTabs.length) {
       return;
@@ -285,7 +285,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       },
       [currentFileId]
     ),
-    { wait: 30000, leading: true, trailing: true }
+    { wait: 5000, leading: true, trailing: true }
   );
 
   // 处理内容变化 - 优化依赖项
