@@ -102,7 +102,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
 
     // 检查文件类型
     const isValidFileType =
-      /\.(docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
+      /\.(doc|docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
         file.name
       );
     if (!isValidFileType) {
