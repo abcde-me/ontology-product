@@ -123,7 +123,37 @@ const Classify = (props: ClassifyComponentProps) => {
                     style={{ paddingLeft: 16 }}
                     label="属性名称"
                     field={`attribute_group_name + ${item?.id}`}
-                    rules={[{ required: true, message: '请输入属性名称' }]}
+                    rules={[
+                      {
+                        required: true,
+                        validateTrigger: ['onChange', 'onBlur'],
+                        validator: (value, callback) => {
+                          // 检查内容是否为空或只包含空格
+                          if (!value || value.trim() === '') {
+                            callback('请输入属性名称');
+                          } else {
+                            // 排除当前项，检查同组其他项是否有相同的属性名称
+                            const trimmedValue = value.trim();
+                            const hasDuplicate = textRelations.some(
+                              (otherItem, otherIndex) => {
+                                return (
+                                  otherIndex !== index &&
+                                  otherItem.attribute_group_name &&
+                                  otherItem.attribute_group_name.trim() ===
+                                    trimmedValue
+                                );
+                              }
+                            );
+
+                            if (hasDuplicate) {
+                              callback('属性名称不能重复');
+                            } else {
+                              callback();
+                            }
+                          }
+                        }
+                      }
+                    ]}
                   >
                     <Input
                       placeholder="请输入属性名称"
@@ -276,9 +306,38 @@ const Classify = (props: ClassifyComponentProps) => {
                     {item.file_label_attribute?.map((attr, attrIndex) => (
                       <div key={attr.id} className="attribute-item">
                         <FormItem
-                          field="attribute_name_cn"
+                          field={`attribute_name_cn_${attr.id}`}
                           rules={[
-                            { required: true, message: '请输入选项名称' }
+                            {
+                              required: true,
+                              validateTrigger: ['onChange', 'onBlur'],
+                              validator: (value, callback) => {
+                                // 检查内容是否为空或只包含空格
+                                if (!value || value.trim() === '') {
+                                  callback('请输入选项名称');
+                                } else {
+                                  // 排除当前项，检查同组其他项是否有相同的选项名称
+                                  const trimmedValue = value.trim();
+                                  const hasDuplicate =
+                                    item.file_label_attribute.some(
+                                      (otherAttr, otherAttrIndex) => {
+                                        return (
+                                          otherAttrIndex !== attrIndex &&
+                                          otherAttr.attribute_name_cn &&
+                                          otherAttr.attribute_name_cn.trim() ===
+                                            trimmedValue
+                                        );
+                                      }
+                                    );
+
+                                  if (hasDuplicate) {
+                                    callback('选项名称不能重复');
+                                  } else {
+                                    callback();
+                                  }
+                                }
+                              }
+                            }
                           ]}
                           label={`选项 ${attr.order_num}`}
                           disabled={

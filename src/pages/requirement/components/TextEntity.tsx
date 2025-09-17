@@ -71,12 +71,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   >([]);
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
-    console.log('handleFieldChange', formText.getFieldsValue());
     const filterArr = formText
       .getFieldsValue()
       ?.entityRelations?.filter((item, i) => i !== index);
     setFilterArrState(filterArr);
-    console.log(filterArr, 'filterArr');
     const newData = [...entityRelations];
     newData[index][field] = value;
     setEntityRelations(newData);
@@ -107,8 +105,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     if (type === 'detail') {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
-      getDetailObj?.entity_relations?.forEach((item) => {
-        formText.setFieldValue('start_entity_labels', item.start_entity_labels);
+      // 修复起始标签内容设置
+      getDetailObj?.entity_relations?.forEach((item, index) => {
+        formText.setFieldValue(
+          `start_entity_labels + ${item.id}`,
+          item.start_entity_labels
+        );
       });
     }
   }, [getDetailObj]);
@@ -154,43 +156,38 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
                   style={{ paddingLeft: 16 }}
-                  label="标签名称1221"
+                  label="标签名称"
                   field={`entityRelations.${index}.label_name_cn`}
                   // rules={[{ required: true, message: '请输入标签名称' }]}
                   rules={[
                     {
                       required: true,
-                      validateTrigger: 'onBlur',
+                      validateTrigger: ['onChange'],
                       validator: (value, callback) => {
-                        console.log(
-                          value,
-                          formText.getFieldsValue(),
-                          'top',
-                          entityRelations
-                        );
-                        console.log(
-                          filterArrState?.some((item) => {
-                            console.log(
-                              item,
-                              value,
-                              item === value.toString(),
-                              'item'
-                            );
-
-                            return item?.label_name_cn === value.toString();
-                          }),
-                          'top-------1-23'
-                        );
-                        if (!value) {
+                        if (!value || value.trim() === '') {
                           callback('请输入标签名称');
-                        } else if (
-                          filterArrState?.some((item) => {
-                            return item?.label_name_cn === value.toString();
-                          })
-                        ) {
-                          callback('标签名称不能重复');
                         } else {
-                          callback();
+                          // 检查filterArrState是否有值，如果没有则直接使用formText中的值
+                          const currentFilterArr =
+                            filterArrState?.length > 0
+                              ? filterArrState
+                              : formText
+                                  .getFieldsValue()
+                                  ?.entityRelations?.filter(
+                                    (item, i) => i !== index
+                                  );
+
+                          if (
+                            currentFilterArr?.some((item) => {
+                              return (
+                                item?.label_name_cn === value.toString().trim()
+                              );
+                            })
+                          ) {
+                            callback('标签名称不能重复');
+                          } else {
+                            callback();
+                          }
                         }
                       }
                     }
@@ -298,7 +295,33 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         style={{ paddingLeft: 16 }}
                         field={`relation_name_cn + ${item?.id}`}
                         label="关系名称"
-                        rules={[{ required: true, message: '请输入标签名称' }]}
+                        rules={[
+                          {
+                            required: true,
+                            validateTrigger: ['onChange'],
+                            validator: (value, callback) => {
+                              // 检查是否与同组内其他关系名称重复
+                              const isDuplicate = relationRelations.some(
+                                (otherItem, otherIndex) => {
+                                  // 排除当前项
+                                  return (
+                                    otherIndex !== index &&
+                                    otherItem.relation_name_cn === value &&
+                                    value.trim() !== ''
+                                  );
+                                }
+                              );
+                              if (!value || !value.trim()) {
+                                callback('请输入关系名称');
+                                return;
+                              } else if (isDuplicate) {
+                                callback('关系名称不能重复');
+                              } else {
+                                callback();
+                              }
+                            }
+                          }
+                        ]}
                       >
                         <Input
                           placeholder="用于储存标注结果"
@@ -355,7 +378,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <div className="tag-content">
                           <FormItem
                             style={{ paddingLeft: 16 }}
-                            field="start_entity_labels"
+                            field={`start_entity_labels + ${item?.id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
@@ -388,7 +411,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                                 })}
                             </Select>
                           </FormItem>
-                          <FormItem label="目标标签:" style={{ padding: 0 }}>
+                          <FormItem
+                            label="目标标签:"
+                            style={{ padding: 0 }}
+                            field={`target_entity_labels + ${item?.id}`}
+                          >
                             <Select
                               mode="multiple"
                               allowClear
