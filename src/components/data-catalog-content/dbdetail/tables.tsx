@@ -28,7 +28,7 @@ export default function Tables(props) {
   }, [dataList]);
 
   const tableColumns = useMemo(() => {
-    return get(dataList, 'sample.columns', []).map((item) => ({
+    return (get(dataList, 'sample.columns', []) || []).map((item) => ({
       title: item,
       dataIndex: item,
       width: 260,
