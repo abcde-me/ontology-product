@@ -13,7 +13,7 @@ import {
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
-import { formatDateTime } from '../utils';
+import timeFormattig from '@/utils/timeFormatting';
 import { generateSqlDefaultName } from '../utils';
 
 export interface UseEditorOptions {
@@ -224,7 +224,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           });
 
           if (res?.status === 200) {
-            setLastAutoSave(new Date().toLocaleTimeString());
+            setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
 
             // 调用 refreshDirectory 方法，更新左侧目录
             if (typeof refreshDirectory === 'function') {
@@ -266,7 +266,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         });
 
         if (res?.status === 200) {
-          setLastAutoSave(new Date().toLocaleTimeString());
+          setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
           return res.data;
         }
         return null;
@@ -310,7 +310,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setLastAutoSave(new Date().toLocaleTimeString());
+    setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
 
     setExecid('');
 
@@ -405,6 +405,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
             // 更新运行状态
             setExecid(String(fileData.script_execid));
+
+            setLastAutoSave(timeFormattig(new Date(response.data.update_time)));
 
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
