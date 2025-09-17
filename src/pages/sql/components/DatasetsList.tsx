@@ -285,7 +285,7 @@ const DatasetsList: FC = () => {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
+    <div className="flex h-full flex-col overflow-y-auto p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
       <Form
         autoComplete="off"

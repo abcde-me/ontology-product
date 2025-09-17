@@ -143,6 +143,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
         {/* 工作区 */}
         <div className="main-workspace">
           <EditorWorkspace
+            key={activeTabData.key}
             content={activeTabData.content}
             fileName={activeTabData.title || '未命名文件'}
             currentFileId={activeTabData.fileId}

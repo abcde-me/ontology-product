@@ -57,6 +57,31 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
     const token = localStorage.getItem('loginToken');
     return token ? token.replace(/"/g, '') : ''; // 移除所有引号
   };
+  // 检查文件类型的公共方法（不显示错误信息）
+  const checkFileType = (file: any) => {
+    const isValidFileType =
+      /\.(doc|docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
+        file.name
+      );
+    return isValidFileType;
+  };
+
+  // 处理拖拽事件
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+
+    // 检查拖拽的文件类型（不显示单个错误信息）
+    const invalidFiles = files.filter((file: any) => !checkFileType(file));
+    if (invalidFiles.length > 0) {
+      // 只显示一次错误提示
+      Message.error(
+        '只能上传 .doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
+      );
+      return false;
+    }
+  };
+
   const checkFile = (file: any, list: any) => {
     // 检查文件数量
     const currentFilesCount = fileList.length;
@@ -101,14 +126,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
     }
 
     // 检查文件类型
-    const isValidFileType =
-      /\.(docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
-        file.name
-      );
-    if (!isValidFileType) {
-      Message.error(
-        '只能上传 .doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
-      );
+    if (!checkFileType(file)) {
       return false;
     }
 
@@ -128,6 +146,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       beforeUpload={(file, list) => checkFile(file, list)}
       action="/api/aimdp/v1/load_tasks/upload"
       onChange={handleUploadChange}
+      onDrop={handleDrop}
       headers={{
         Authorization: getToken(),
         'X-Auth-Validate': 'true',

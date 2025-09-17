@@ -407,6 +407,11 @@ function DatasetVersionForm(props) {
               options={options}
               allowClear
               showSearch
+              filterOption={(inputValue, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(inputValue.toLowerCase()) >= 0
+              }
               onChange={handleSelectChange}
             ></Select>
           </FormItem>
@@ -452,6 +457,6 @@ function generateTableData(
   return rawColumns.map((col, idx) => ({
     key: idx,
     name: col.dataIndex,
-    c_name: col.title
+    c_name: '无'
   }));
 }

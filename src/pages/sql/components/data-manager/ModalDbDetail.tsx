@@ -11,10 +11,23 @@ import {
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { DbTableListParamss, getDbItemList } from '@/api/dataCatalog';
 import { formatDateTime } from '../../utils';
+import getLabelByValue from '@/utils/getLabelByValue';
+import dayjs from 'dayjs';
 
 const FormItem = Form.Item;
 
-const defaultfileTypeList = [{ text: 'mysql', value: 'mysql' }];
+const defaultfileTypeList = [
+  {
+    label: 'MySQL',
+    text: 'MySQL',
+    value: 'mysql'
+  },
+  {
+    label: 'PostgreSQL',
+    text: 'PostgreSQL',
+    value: 'postgresql'
+  }
+];
 
 /** 数据库详情 弹框 */
 const ModalDbDetail = ({ dbDetailVisible, fromOrigin, closeDbDetail }) => {
@@ -62,7 +75,7 @@ const TableList = (props) => {
       filters: defaultfileTypeList,
       render: (_, record) => (
         <div className="flex items-center gap-[6px]">
-          <span>{record.db_type}</span>
+          <span>{getLabelByValue(defaultfileTypeList, record.db_type)}</span>
         </div>
       )
     },
@@ -113,10 +126,14 @@ const TableList = (props) => {
     onRequest: getDbItemList,
     formatSearchParams: (values: any) => {
       const result: any = { ...values };
-      if (values.datetime_range) {
+      if (values.datetime_range && values.datetime_range.length === 2) {
         delete result.datetime_range;
-        result.start_time = values.datetime_range[0];
-        result.end_time = values.datetime_range[1];
+        result.start_time = dayjs(values.datetime_range[0]).format();
+        result.end_time = dayjs(values.datetime_range[1]).format();
+      } else {
+        delete result.datetime_range;
+        delete result.start_time;
+        delete result.end_time;
       }
       return result;
     },
@@ -238,7 +255,8 @@ export const useTableList = <T = {}, U = {}>(
       setPagination((prev) => ({
         ...prev,
         current: res?.data?.page,
-        total: res?.data?.total
+        total: res?.data?.total,
+        pageSize: res?.data?.limit
       }));
 
       setListData((res?.data?.list as T[]) || []);
