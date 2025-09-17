@@ -232,8 +232,9 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
+        const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const renameRes = await renameSqlScript(fileId, {
+        const renameRes = await renameSqlScript(scriptId, {
           script_name: finalName
         });
 
@@ -249,13 +250,14 @@ export const useFileManager = (
           onFileRename(String(fileId), finalName);
         }
 
-        // 刷新列表
-        await getRawSqlScriptList();
         return renameRes.data;
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
         return null;
+      } finally {
+        // 成狗/失败都刷新列表,防止节点丢失
+        await getRawSqlScriptList();
       }
     },
     [getRawSqlScriptList, onFileRename]
@@ -265,7 +267,7 @@ export const useFileManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript(node?.dataRef?.id);
+        const copyRes = await copySqlScript(node?.dataRef?.script_id);
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
@@ -289,8 +291,9 @@ export const useFileManager = (
   const handleDelete = useCallback(
     async (node: any) => {
       try {
+        const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const deleteRes = await deleteSqlScript(fileId);
+        const deleteRes = await deleteSqlScript(scriptId);
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes.message);
