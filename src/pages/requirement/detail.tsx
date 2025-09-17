@@ -746,6 +746,7 @@ export default function RequirementDetail() {
                 {
                   required: true,
                   max: 50,
+                  validateTrigger: ['onChange', 'onBlur'],
                   validator: (value, callback) => {
                     if (!value) {
                       callback('请输入需求名称');
@@ -1171,7 +1172,7 @@ export default function RequirementDetail() {
                                                 );
                                               }}
                                             >
-                                              必须标注11
+                                              必须标注
                                             </Checkbox>
                                             {attrGroup.attribute_group_class !==
                                               3 && (

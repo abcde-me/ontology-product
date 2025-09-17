@@ -158,11 +158,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   style={{ paddingLeft: 16 }}
                   label="标签名称"
                   field={`entityRelations.${index}.label_name_cn`}
-                  // rules={[{ required: true, message: '请输入标签名称' }]}
                   rules={[
                     {
                       required: true,
-                      validateTrigger: ['onChange'],
+                      validateTrigger: ['onChange', 'onBlur'],
                       validator: (value, callback) => {
                         if (!value || value.trim() === '') {
                           callback('请输入标签名称');
