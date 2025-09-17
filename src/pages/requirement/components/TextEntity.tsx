@@ -107,7 +107,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
       getDetailObj?.entity_relations?.forEach((item, index) => {
-        form.setFieldValue(
+        formText.setFieldValue(
           `start_entity_labels + ${item.id}`,
           item.start_entity_labels
         );
