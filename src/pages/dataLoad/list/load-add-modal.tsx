@@ -818,7 +818,9 @@ const LoadAddModal = (props: propsType) => {
                   // allowCreate
                   onVisibleChange={calculateMaxTagCount}
                 >
-                  <Option value="all">全部</Option>
+                  {(talbleList || []).length > 0 && (
+                    <Option value="all">全部</Option>
+                  )}
                   {talbleList?.map((option) => (
                     <Option key={option} value={option}>
                       {option}
