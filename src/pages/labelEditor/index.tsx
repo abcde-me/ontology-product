@@ -101,7 +101,7 @@ function LabelEditorPage() {
           url={labelUrl}
           sync={true}
           alive={true}
-          loading={null}
+          loading={document.createElement('span') as any}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,

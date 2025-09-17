@@ -1455,8 +1455,7 @@ const DatasetDetail = (props: {
                       value: (
                         <div
                           style={{
-                            gap: '8px',
-                            width: getwidth()
+                            gap: '8px'
                           }}
                         >
                           <EllipsisPopover
