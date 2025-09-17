@@ -206,6 +206,15 @@ const RunningInfoPanel: React.FC = memo(() => {
                         }, 50);
                       }
                     }}
+                    onBlur={() => {
+                      // 失去焦点时也触发查询
+                      if (execid) {
+                        // 避异步没更新结束获取不到正确size
+                        setTimeout(() => {
+                          loadRunResult(execid, size);
+                        }, 50);
+                      }
+                    }}
                   />
                   <span>行数据</span>
                 </Space>
