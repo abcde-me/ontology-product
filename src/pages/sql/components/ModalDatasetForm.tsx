@@ -407,6 +407,11 @@ function DatasetVersionForm(props) {
               options={options}
               allowClear
               showSearch
+              filterOption={(inputValue, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(inputValue.toLowerCase()) >= 0
+              }
               onChange={handleSelectChange}
             ></Select>
           </FormItem>
