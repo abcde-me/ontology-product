@@ -489,12 +489,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   );
 
   useEffect(() => {
-    getSourceFileTypeList({
-      id: selectedKey
-    }).then((result) => {
-      setSourceFileTypeFilters(result);
-    });
-  }, [selectedKey]);
+    if (!!selectedKey && dataType === 'volume') {
+      getSourceFileTypeList({
+        id: selectedKey
+      }).then((result) => {
+        setSourceFileTypeFilters(result);
+      });
+    }
+  }, [selectedKey, dataType]);
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
