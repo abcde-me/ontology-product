@@ -179,6 +179,7 @@ export interface CreateSqlScriptData {
   perms: Array<string>;
   script_id: string;
   script_file_id: string;
+  update_time: string;
 }
 
 export interface SqlScriptListParams {

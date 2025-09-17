@@ -43,7 +43,9 @@ export default function DbModal(props: DbModalProps) {
     }
   };
   useEffect(() => {
-    getDataList();
+    if (!!data?.databaseName) {
+      getDataList();
+    }
   }, [activeTab, data]);
   const renderTabContent = (key: string) => {
     switch (key) {
