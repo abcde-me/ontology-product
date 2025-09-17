@@ -309,7 +309,7 @@ const ModalDetail = (props) => {
                         <div className="info-item">
                           <span className="label">所属系统:</span>
                           <span className="value">
-                            {DetailData?.config?.system}
+                            {DetailData?.config?.system || '-'}
                             {DetailData?.config?.system && (
                               <Tooltip
                                 position="tl"

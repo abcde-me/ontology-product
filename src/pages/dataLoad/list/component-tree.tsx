@@ -633,12 +633,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     );
     let typeText = '';
     if (dataRef?.title === '数据库' || dataRef?.name === '数据库') {
-      typeText = '';
+      typeText = '数据库';
     } else if (dataRef?.title === '数据卷' || dataRef?.name === '数据卷') {
-      typeText = '';
+      typeText = '数据卷';
     }
-    // const newName = generateName(existingChildren, typeText);
-    const newName = '默认名称';
+    const newName = generateName(existingChildren, typeText);
+    // const newName = '默认名称';
 
     // 创建新的输入节点
     const newInputNode = genereteInputNode(newName, node);
