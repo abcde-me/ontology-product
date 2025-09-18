@@ -312,7 +312,11 @@ const DatasetsList: FC = () => {
         loading={loading}
         rowKey="id"
         onChange={handleTableChange}
-        scroll={{ y: 500 }}
+        scroll={{
+          y: 500,
+          x: 'max-content'
+        }}
+        tableLayoutFixed={false}
       />
 
       <ModalScriptDetail
