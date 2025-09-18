@@ -375,7 +375,7 @@ const Classify = (props: ClassifyComponentProps) => {
                         <FormItem
                           label={
                             <div>
-                              展示名称{' '}
+                              展示名称
                               <Tooltip content="展示在标注页面的名称">
                                 <IconQuestionCircle />
                               </Tooltip>
@@ -384,15 +384,7 @@ const Classify = (props: ClassifyComponentProps) => {
                         >
                           <Input
                             placeholder="展示在标注页面的名称"
-                            value={
-                              attrIndex !== 0 &&
-                              attrIndex ===
-                                item.file_label_attribute?.length - 1 &&
-                              item?.file_label_attribute[attrIndex]
-                                .input_type === 2
-                                ? '其他'
-                                : attr.attribute_name_en
-                            }
+                            value={attr.attribute_name_en}
                             onChange={(value) => {
                               const newData = [...textRelations];
                               newData[index].file_label_attribute[

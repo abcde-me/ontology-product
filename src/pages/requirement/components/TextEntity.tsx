@@ -51,16 +51,16 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     }
   ]);
   // 关系标签内容
-  const [relationRelations, setRelationRelations] = useState([
-    {
-      relation_id: uuid(),
-      order_num: 0,
-      relation_name_cn: '',
-      relation_name_en: '',
-      start_entity_labels: [], //标签的醋存储名称
-      target_entity_labels: [],
-      colour: getRandomHexColorStrict()
-    }
+  const [relationRelations, setRelationRelations]: any = useState([
+    // {
+    //   relation_id: uuid(),
+    //   order_num: 0,
+    //   relation_name_cn: '',
+    //   relation_name_en: '',
+    //   start_entity_labels: [], //标签的醋存储名称
+    //   target_entity_labels: [],
+    //   colour: getRandomHexColorStrict()
+    // }
   ]);
   // 选中的标签类型
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
@@ -82,7 +82,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
 
   // 处理关系标签字段变更
   const handleRelationFieldChange = (index, field, value) => {
-    const newData = [...relationRelations];
+    const newData: any = [...relationRelations];
     newData[index][field] = value;
     setRelationRelations(newData);
   };
