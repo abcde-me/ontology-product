@@ -559,6 +559,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             if (result === false) {
               return false;
             }
+            // 删除成功后重新加载文件列表
+            handleSearchClear();
           } catch (e) {
             Message.error('删除失败');
             return false;
