@@ -1,4 +1,4 @@
-.source-tree {
+.pyspark-source-tree {
   width: 100%;
   height: 100%;
   display: flex;
@@ -7,7 +7,7 @@
   border-radius: 8px;
   overflow: hidden;
 
-  .source-tree__content .source-tree__content-tree {
+  .pyspark-source-tree__content .pyspark-source-tree__content-tree {
     .arco-tree-node {
       position: relative;
       align-items: center;
@@ -26,21 +26,21 @@
       &:hover {
         background-color: var(--color-bg-5);
 
-        .source-tree__node-title {
+        .pyspark-source-tree__node-title {
           color: var(--primary-6);
         }
 
-        .source-tree__node-title-file,
-        .source-tree__node-size-file {
+        .pyspark-source-tree__node-title-file,
+        .pyspark-source-tree__node-size-file {
           max-width: 40px;
         }
 
-        .source-tree__node-title-volume_item,
-        .source-tree__node-size-volume_item {
+        .pyspark-source-tree__node-title-volume_item,
+        .pyspark-source-tree__node-size-volume_item {
           max-width: 70px;
         }
 
-        .source-tree__node-actions {
+        .pyspark-source-tree__node-actions {
           opacity: 1;
           visibility: visible;
         }

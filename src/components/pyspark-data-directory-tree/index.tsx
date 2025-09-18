@@ -168,7 +168,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     }
   };
 
-  return <div className="data-directory-tree">{renderContent()}</div>;
+  return <div className="pyspark-data-directory-tree">{renderContent()}</div>;
 };
 
 export default DataDirectoryTree;

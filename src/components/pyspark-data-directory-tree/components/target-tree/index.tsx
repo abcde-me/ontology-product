@@ -95,20 +95,20 @@ const SourceTree: React.FC<SourceTreeProps> = ({
   );
 
   return (
-    <div className="target-tree">
+    <div className="pyspark-target-tree">
       {/* 第一部分：标题导航 */}
-      <div className="target-tree__header">
-        <div className="target-tree__header-left">
+      <div className="pyspark-target-tree__header">
+        <div className="pyspark-target-tree__header-left">
           <IconArrowLeft
-            className="target-tree__back-icon"
+            className="pyspark-target-tree__back-icon"
             onClick={handleBack}
           />
-          <span className="target-tree__title">目标数据目录</span>
+          <span className="pyspark-target-tree__title">目标数据目录</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className="target-tree__search">
+      <div className="pyspark-target-tree__search">
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -118,12 +118,12 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className="target-tree__search-input"
+          className="pyspark-target-tree__search-input"
         />
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="target-tree__content">
+      <div className="pyspark-target-tree__content">
         {treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
@@ -134,7 +134,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             expandedKeys={expandedKeys}
             onExpand={setExpandedKeys}
             treeData={treeDataFiltered}
-            className="target-tree__content-tree"
+            className="pyspark-target-tree__content-tree"
             icons={(props) => {
               const nodeType = props.dataRef?.type;
               const isExpandable = [
@@ -153,10 +153,10 @@ const SourceTree: React.FC<SourceTreeProps> = ({
               const isFile = nodeData?.type === 'file';
 
               return (
-                <div className="target-tree__node">
-                  <div className="target-tree__node-info">
+                <div className="pyspark-target-tree__node">
+                  <div className="pyspark-target-tree__node-info">
                     <EllipsisPopover
-                      className={`target-tree__node-title target-tree__node-title-${nodeData?.type}`}
+                      className={`pyspark-target-tree__node-title pyspark-target-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
@@ -165,7 +165,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {/* {(nodeData?.type === 'file' ||
                       nodeData?.type === 'volume_item') && (
                         <EllipsisPopover
-                          className={`target-tree__node-size target-tree__node-size-${nodeData?.type}`}
+                          className={`pyspark-target-tree__node-size pyspark-target-tree__node-size-${nodeData?.type}`}
                           value={
                             nodeData?.type === 'file'
                               ? formatFileSize(Number(nodeData?.file_size ?? 0))
@@ -174,11 +174,11 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                         />
                       )} */}
                   </div>
-                  <div className="target-tree__node-actions">
+                  <div className="pyspark-target-tree__node-actions">
                     {isVolumeItem && (
                       <Button
                         type="text"
-                        className="target-tree__detail-btn"
+                        className="pyspark-target-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
@@ -187,7 +187,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {isFile && (
                       <Button
                         type="outline"
-                        className="target-tree__insert-btn"
+                        className="pyspark-target-tree__insert-btn"
                         onClick={(e) => handleInsertClick(e, nodeData)}
                         onMouseDown={(e) => {
                           // 阻止按钮获得焦点，保持编辑器焦点
