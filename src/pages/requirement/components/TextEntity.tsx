@@ -44,7 +44,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const [entityRelations, setEntityRelations] = useState([
     {
       label_id: uuid(),
-      order_num: 0, // 排序
+      order_num: 1, // 排序
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
       label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
@@ -118,6 +118,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   useEffect(() => {
     getTextEntityData(entityRelations, relationRelations, formText, formLabel);
   }, [entityRelations, relationRelations]);
+  const renderItemVal = (item, index) => {
+    formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+  };
   return (
     <div className="text-component-warp">
       <div className="type-header">
@@ -141,9 +144,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       <Form
         form={formText}
         disabled={type === 'detail'}
-        onValuesChange={(_, val) => {
-          // setPublishData({ ...publishData, val })
-        }}
         layout="inline"
         labelAlign="right"
         labelCol={{ flex: 'none' }}
@@ -152,12 +152,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         {selectedSubstanceValue === 1 &&
           entityRelations &&
           entityRelations.map((item, index) => {
+            renderItemVal(item, index);
             return (
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8 }}
                   label="标签名称"
-                  field={`entityRelations.${index}.label_name_cn`}
+                  field={`label_name_cn${index}`}
                   rules={[
                     {
                       required: true,
