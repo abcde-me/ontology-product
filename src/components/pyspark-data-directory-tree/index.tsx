@@ -138,10 +138,18 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
           <DataCollection
             onBack={handleBack}
             onViewDatasetDetail={handleDatasetDetail}
+            onInsertDataset={handleDatasetInsert}
+            onInsertContent={handleDatasetInsert}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
           />
         );
       case 'source':
-        return <SourceTree />;
+        return (
+          <SourceTree
+            onBack={handleBack}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
+          />
+        );
       case 'target':
         return <TargetTree />;
       default:

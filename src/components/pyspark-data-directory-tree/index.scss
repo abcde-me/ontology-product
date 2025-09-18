@@ -2,7 +2,7 @@
   height: 100%;
 
   .arco-tree-node {
-    padding: 0;
+    // padding: 0;
 
     &-title {
       padding: 7px 0;
@@ -11,8 +11,8 @@
       align-items: center;
     }
 
-    &-switcher {
-      width: 0;
-    }
+    // &-switcher {
+    //   width: 0;
+    // }
   }
 }
