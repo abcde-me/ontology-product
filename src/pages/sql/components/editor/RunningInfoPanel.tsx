@@ -57,7 +57,8 @@ const RunningInfoPanel: React.FC = memo(() => {
     cancelGetRunResultPolling,
     getRunResultPolling,
     resultLoading,
-    loadRunResult
+    loadRunResult,
+    handleGetRunLog
   } = useEditorContext();
 
   const sortableColumns = addSortToColumns(columns);
@@ -121,6 +122,15 @@ const RunningInfoPanel: React.FC = memo(() => {
     }
   };
 
+  const handleClickTab = (key: string) => {
+    setActiveKey(key);
+    if (key === 'log' && handleGetRunLog) {
+      handleGetRunLog();
+    } else if (key === 'result' && loadRunResult) {
+      loadRunResult(execid, size);
+    }
+  };
+
   const renderRunStatus = (status?: RunningStatus) => {
     if (status === RunningStatus.RUNNING) {
       return (
@@ -166,7 +176,7 @@ const RunningInfoPanel: React.FC = memo(() => {
   };
 
   return (
-    <div className="running-info-panel">
+    <div className="sql-running-info-panel">
       <Collapse
         activeKey={isExpanded ? ['1'] : []}
         onChange={handlePanelChange}
@@ -242,37 +252,46 @@ const RunningInfoPanel: React.FC = memo(() => {
           name="1"
         >
           <div className="panel-content">
-            {runStatus === RunningStatus.RUNNING && (
-              <Empty description="正在运行中，请等待..." />
-            )}
+            <Tabs
+              activeTab={activeKey}
+              onClickTab={handleClickTab}
+              style={{
+                backgroundColor: '#F8FAFD'
+              }}
+            >
+              <TabPane key="result" title="结果">
+                <div className="run-result-content">
+                  {runStatus === RunningStatus.RUNNING && (
+                    <Empty description="正在运行中，请等待..." />
+                  )}
 
-            {runStatus === RunningStatus.FAILED && (
-              <div className="h-[100px]">
-                <Typography.Text>{runError}</Typography.Text>
-              </div>
-            )}
-
-            {/* {resultLoading && (
-              <Empty description="查询运行结果中，请等待..." />
-            )} */}
-
-            {runStatus === RunningStatus.SUCCESS && (
-              <div className="flex flex-col gap-[8px]">
-                {runLog && <Typography.Text>{runLog}</Typography.Text>}
-                {columns.length > 0 && data.length > 0 ? (
-                  <Table
-                    border
-                    columns={sortableColumns}
-                    data={data}
-                    pagination={false}
-                    scroll={{ y: 300, x: true }}
-                    loading={resultLoading}
-                  />
-                ) : (
-                  <Empty description="暂无数据" />
-                )}
-              </div>
-            )}
+                  {runStatus === RunningStatus.FAILED && (
+                    <div className="h-[100px]">
+                      <Typography.Text>{runError}</Typography.Text>
+                    </div>
+                  )}
+                  {runStatus === RunningStatus.SUCCESS && (
+                    <div className="run-result-table">
+                      {columns.length > 0 && data.length > 0 ? (
+                        <Table
+                          border
+                          columns={sortableColumns}
+                          data={data}
+                          pagination={false}
+                          scroll={{ y: 240, x: true }}
+                          loading={resultLoading}
+                        />
+                      ) : (
+                        <Empty description="暂无数据" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </TabPane>
+              <TabPane key="log" title="日志">
+                <div className="runlog-content">{runLog}</div>
+              </TabPane>
+            </Tabs>
           </div>
         </CollapseItem>
       </Collapse>
