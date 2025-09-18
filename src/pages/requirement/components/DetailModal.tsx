@@ -30,6 +30,7 @@ interface TreeItem {
   base_dir: string;
   children: Record<string, TreeItem[]>; // 子类型映射（如 {volume: [], db: []}）
   perms?: string[] | null;
+  execution_id?: string;
 }
 interface DataSourceModalProps {
   fileType: Record<number, string[]>;
@@ -141,7 +142,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }
             : { title: item.name, key: item.id };
         });
-        console.log(newTreeData, 'top');
         setTreeData(newTreeData);
       });
     } catch (err) {}
@@ -380,7 +380,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
 
                 // 3. 更新状态
                 const mergedRows = Array.from(mergedMap.values());
-                console.log(mergedRows, 'top');
                 // if (mergedRows.length <= 200) {
                 setSelectedRowsContent(mergedRows);
                 setSelectedRowKeys(mergedRows.map((item) => item.execution_id));
