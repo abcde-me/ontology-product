@@ -46,14 +46,14 @@ const Classify = (props: ClassifyComponentProps) => {
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
-      id: uuid(),
+      attribute_id: uuid(),
       order_num: 1,
       attribute_group_name: '', //属性组名称
       attribute_group_class: 1, //1单选/2多选/3输入框
       attribute_group_type: 2, //1必选/2非必选
       file_label_attribute: [
         {
-          id: uuid(),
+          attribute_id: uuid(),
           order_num: 1, //排序
           attribute_name_cn: '', //属性中文名称(展示名称)
           attribute_name_en: '', //属性英文名称(存储名称)
@@ -110,19 +110,13 @@ const Classify = (props: ClassifyComponentProps) => {
       >
         {textRelations &&
           textRelations.map((item, index) => {
-            console.log(
-              item,
-              index,
-              'top',
-              item.file_label_attribute?.[index]?.input_type
-            );
             return (
               <div className="classify-item" key={index}>
                 <div className="classify-relation-item">
                   <FormItem
                     style={{ paddingLeft: 16 }}
                     label="属性名称"
-                    field={`attribute_group_name + ${item?.id}`}
+                    field={`attribute_group_name + ${item?.attribute_id}`}
                     rules={[
                       {
                         required: true,
@@ -219,7 +213,7 @@ const Classify = (props: ClassifyComponentProps) => {
                                 file_label_attribute: [
                                   // 新属性插入到数组开头
                                   {
-                                    id: uuid(),
+                                    attribute_id: uuid(),
                                     // 保持排序值从1开始
                                     order_num: 1,
                                     attribute_name_cn: '',
@@ -282,10 +276,10 @@ const Classify = (props: ClassifyComponentProps) => {
                           if (checked) {
                             const newData = [...textRelations];
                             newData[index].file_label_attribute.push({
-                              id: uuid(),
+                              attribute_id: uuid(),
                               order_num:
                                 newData[index].file_label_attribute.length + 1,
-                              attribute_name_cn: '',
+                              attribute_name_cn: '标注时的输入内容',
                               attribute_name_en: '其他',
                               input_type: 2
                             });
@@ -304,9 +298,9 @@ const Classify = (props: ClassifyComponentProps) => {
                       </Checkbox>
                     </div>
                     {item.file_label_attribute?.map((attr, attrIndex) => (
-                      <div key={attr.id} className="attribute-item">
+                      <div key={attr.attribute_id} className="attribute-item">
                         <FormItem
-                          field={`attribute_name_cn_${attr.id}`}
+                          field={`attribute_name_cn_${attr.attribute_id}`}
                           rules={[
                             {
                               required: true,
@@ -359,7 +353,7 @@ const Classify = (props: ClassifyComponentProps) => {
                                 item.file_label_attribute?.length - 1 &&
                               item?.file_label_attribute[attrIndex]
                                 .input_type === 2
-                                ? '标准时的输入内容'
+                                ? '标注时的输入内容'
                                 : attr.attribute_name_cn
                             }
                             onChange={(value) => {
@@ -426,7 +420,7 @@ const Classify = (props: ClassifyComponentProps) => {
                       // 在按钮的位置添加新数据，不在最后一行添加
                       // 修复：在当前位置插入新数据而非添加到数组末尾
                       const newItem = {
-                        id: uuid(),
+                        attribute_id: uuid(),
                         order_num: 1,
                         attribute_group_name: '', //属性组名称
                         attribute_group_class: 1, //1单选/2多选/3输入框

@@ -133,7 +133,7 @@ export default function RequirementDetail() {
         load_end_time: convertToUTCFormat(item?.end_time),
         load_num: item?.load_num,
         create_by: item?.upload_user,
-        run_id: String(item?.data_path_id)
+        run_id: String(item?.execution_id)
       };
     });
     setSelectedData(newSetDataContent);
@@ -466,32 +466,27 @@ export default function RequirementDetail() {
     return Message.error('请输入必填信息');
   };
   const stepNext = async () => {
-    const { formLabel } = TextEntityDataContent;
-    console.log(formLabel, 'formLabel');
+    const { formText, formLabel } = TextEntityDataContent;
     const result = await Promise.all([
       annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
         ? formType
             ?.validate()
             .then((val) => {
-              console.log(val, 'formType');
               return true;
             })
             .catch((errorInfo) => {
               return false;
             })
         : true,
-      annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
-        ? formLabel &&
-          formLabel
-            .validate()
-            .then((val) => {
-              console.log(val, 'totpotptop');
-              return true;
-            })
-            .catch((errorInfo) => {
-              return false;
-            })
-        : true,
+      formLabel &&
+        formLabel
+          .validate()
+          .then((val) => {
+            return true;
+          })
+          .catch((errorInfo) => {
+            return false;
+          }),
       form1
         .validate()
         .then(() => {
@@ -545,7 +540,7 @@ export default function RequirementDetail() {
           }
         })
     ]);
-    console.log(result, 'result top');
+    console.log(result, 'top -result');
     // 所有的form 验证都通过调用发布接口
     if (result.every((item) => item === true)) {
       publish();
@@ -565,12 +560,13 @@ export default function RequirementDetail() {
   const getTextFlChildData = (
     entityRelations,
     relationRelations,
-    formLabel,
-    formClassify
+    formText,
+    formLabel
   ) => {
     setTextEntityDataContent({
       entityRelations,
       relationRelations,
+      formText,
       formLabel
     });
   };
@@ -1078,45 +1074,54 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            required
                                             field={`label_info_attribute_groups_${item?.label_id}_${groupIndex}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={type === 'detail'}
                                             label="属性名称:"
                                             rules={[
                                               {
-                                                // required: true
-                                                //   validateTrigger: ['onChange', 'onBlur'],
-                                                //   validator: (value, callback) => {
-                                                //     // 只有当用户输入了内容时，才检查是否有重复
-                                                //     if (value) {
-                                                //       // 检查同组内是否有重复的属性名称
-                                                //       const hasDuplicate =
-                                                //         item?.label_info_attribute_groups?.some(
-                                                //           (
-                                                //             otherGroup: any,
-                                                //             otherIndex: number
-                                                //           ) => {
-                                                //             // 排除当前正在编辑的属性组
-                                                //             return (
-                                                //               otherIndex !==
-                                                //               groupIndex &&
-                                                //               otherGroup.attribute_group_name ===
-                                                //               value
-                                                //             );
-                                                //           }
-                                                //         );
-                                                //       if (hasDuplicate) {
-                                                //         callback('属性名称不能重复');
-                                                //       } else {
-                                                //         callback();
-                                                //       }
-                                                //     } else if (!value) {
-                                                //       callback('请输入属性组名称');
-                                                //     } else {
-                                                //       // 如果没有输入内容，直接验证通过
-                                                //       callback();
-                                                //     }
-                                                //   }
+                                                required: true,
+                                                validateTrigger: [
+                                                  'onChange',
+                                                  'onBlur'
+                                                ],
+                                                validator: (
+                                                  value,
+                                                  callback
+                                                ) => {
+                                                  // 只有当用户输入了内容时，才检查是否有重复
+                                                  if (value) {
+                                                    // 检查同组内是否有重复的属性名称
+                                                    const hasDuplicate =
+                                                      item?.label_info_attribute_groups?.some(
+                                                        (
+                                                          otherGroup: any,
+                                                          otherIndex: number
+                                                        ) => {
+                                                          // 排除当前正在编辑的属性组
+                                                          return (
+                                                            otherIndex !==
+                                                              groupIndex &&
+                                                            otherGroup.attribute_group_name ===
+                                                              value
+                                                          );
+                                                        }
+                                                      );
+                                                    if (hasDuplicate) {
+                                                      callback(
+                                                        '属性名称不能重复'
+                                                      );
+                                                    } else {
+                                                      callback();
+                                                    }
+                                                  } else if (!value) {
+                                                    callback(
+                                                      '请输入属性组名称'
+                                                    );
+                                                  } else {
+                                                    // 如果没有输入内容，直接验证通过
+                                                    callback();
+                                                  }
+                                                }
                                               }
                                             ]}
                                           >
@@ -1300,10 +1305,6 @@ export default function RequirementDetail() {
                                               // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
                                               if (checked) {
                                                 const newData = [...datalist];
-                                                console.log(
-                                                  newData,
-                                                  'top - new'
-                                                );
                                                 newData[
                                                   labelIndex
                                                 ].label_info_attribute_groups?.[
@@ -1318,10 +1319,6 @@ export default function RequirementDetail() {
                                               } else {
                                                 // 取消选中的时候删除增加的内容
                                                 const newItems = [...datalist];
-                                                console.log(
-                                                  newItems,
-                                                  'top - newItems'
-                                                );
                                                 if (
                                                   newItems[labelIndex]
                                                     .label_info_attribute_groups?.[
