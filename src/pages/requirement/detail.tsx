@@ -478,15 +478,16 @@ export default function RequirementDetail() {
               return false;
             })
         : true,
-      formLabel &&
-        formLabel
-          .validate()
-          .then((val) => {
-            return true;
-          })
-          .catch((errorInfo) => {
-            return false;
-          }),
+      annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
+        ? formLabel
+            .validate()
+            .then((val) => {
+              return true;
+            })
+            .catch((errorInfo) => {
+              return false;
+            })
+        : true,
       form1
         .validate()
         .then(() => {
@@ -1106,6 +1107,11 @@ export default function RequirementDetail() {
                                                           );
                                                         }
                                                       );
+                                                    console.log(
+                                                      value,
+                                                      'top',
+                                                      hasDuplicate
+                                                    );
                                                     if (hasDuplicate) {
                                                       callback(
                                                         '属性名称不能重复'
@@ -1125,159 +1131,149 @@ export default function RequirementDetail() {
                                               }
                                             ]}
                                           >
-                                            <div className="group-items">
-                                              <Input
-                                                width={400}
-                                                height={32}
-                                                disabled={type === 'detail'}
-                                                value={
-                                                  attrGroup.attribute_group_name
-                                                }
-                                                onChange={(val: any) => {
-                                                  updateNestedValue(
-                                                    [
-                                                      labelIndex,
-                                                      'label_info_attribute_groups',
-                                                      groupIndex,
-                                                      'attribute_group_name'
-                                                    ],
-                                                    val
-                                                  );
-                                                }}
-                                                placeholder="请输入属性组名称"
-                                              />
-                                            </div>
+                                            <Input
+                                              width={400}
+                                              height={32}
+                                              disabled={type === 'detail'}
+                                              value={
+                                                attrGroup.attribute_group_name
+                                              }
+                                              onChange={(val: any) => {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'attribute_group_name'
+                                                  ],
+                                                  val
+                                                );
+                                              }}
+                                              placeholder="请输入属性组名称"
+                                            />
                                           </FormItem>
                                           <FormItem
                                             label={null}
                                             style={{ marginRight: 0 }}
                                           >
-                                            <div className="group-items">
-                                              <Select
-                                                disabled={type === 'detail'}
-                                                className="ml-2 mr-2"
-                                                style={{
-                                                  width: 100,
-                                                  height: 32
-                                                }}
-                                                value={
-                                                  attrGroup.attribute_group_class
+                                            <Select
+                                              disabled={type === 'detail'}
+                                              className="ml-2 mr-2"
+                                              style={{
+                                                width: 100,
+                                                height: 32
+                                              }}
+                                              value={
+                                                attrGroup.attribute_group_class
+                                              }
+                                              onChange={(value) => {
+                                                // 切换到输入框的时候 清空对应属性组的选项
+                                                if (parseInt(value) === 3) {
+                                                  updateNestedValue(
+                                                    [
+                                                      labelIndex,
+                                                      'label_info_attribute_groups',
+                                                      groupIndex,
+                                                      'label_info_attribute'
+                                                    ],
+                                                    []
+                                                  );
                                                 }
-                                                onChange={(value) => {
-                                                  // 切换到输入框的时候 清空对应属性组的选项
-                                                  if (parseInt(value) === 3) {
-                                                    updateNestedValue(
-                                                      [
-                                                        labelIndex,
-                                                        'label_info_attribute_groups',
-                                                        groupIndex,
-                                                        'label_info_attribute'
-                                                      ],
-                                                      []
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'attribute_group_class'
+                                                  ],
+                                                  parseInt(value)
+                                                );
+                                              }}
+                                            >
+                                              <Option key={1} value={1}>
+                                                单选
+                                              </Option>
+                                              <Option key={2} value={2}>
+                                                多选
+                                              </Option>
+                                              <Option key={3} value={3}>
+                                                输入框
+                                              </Option>
+                                            </Select>
+                                          </FormItem>
+                                          <FormItem
+                                            label={null}
+                                            style={{ marginRight: 0 }}
+                                          >
+                                            <Checkbox
+                                              disabled={type === 'detail'}
+                                              style={{ whiteSpace: 'nowrap' }}
+                                              checked={
+                                                attrGroup.attribute_group_type ===
+                                                1
+                                              }
+                                              onChange={(checked) => {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'attribute_group_type'
+                                                  ],
+                                                  checked ? 1 : 2
+                                                );
+                                              }}
+                                            >
+                                              必须标注
+                                            </Checkbox>
+                                          </FormItem>
+                                          <FormItem
+                                            label={null}
+                                            style={{ marginRight: 0 }}
+                                          >
+                                            {attrGroup.attribute_group_class !==
+                                              3 && (
+                                              <IconPlus
+                                                style={{
+                                                  fontSize: 16,
+                                                  cursor:
+                                                    type === 'detail'
+                                                      ? 'not-allowed'
+                                                      : 'pointer'
+                                                }}
+                                                className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
+                                                onClick={() => {
+                                                  if (type !== 'detail') {
+                                                    // 修改增加逻辑 往倒数第二个增加
+                                                    addAttribute(
+                                                      labelIndex,
+                                                      groupIndex
                                                     );
                                                   }
-                                                  updateNestedValue(
-                                                    [
-                                                      labelIndex,
-                                                      'label_info_attribute_groups',
-                                                      groupIndex,
-                                                      'attribute_group_class'
-                                                    ],
-                                                    parseInt(value)
-                                                  );
                                                 }}
-                                              >
-                                                <Option key={1} value={1}>
-                                                  单选
-                                                </Option>
-                                                <Option key={2} value={2}>
-                                                  多选
-                                                </Option>
-                                                <Option key={3} value={3}>
-                                                  输入框
-                                                </Option>
-                                              </Select>
-                                            </div>
+                                              />
+                                            )}
                                           </FormItem>
                                           <FormItem
                                             label={null}
                                             style={{ marginRight: 0 }}
                                           >
-                                            <div className="group-items">
-                                              <Checkbox
-                                                disabled={type === 'detail'}
-                                                style={{ whiteSpace: 'nowrap' }}
-                                                checked={
-                                                  attrGroup.attribute_group_type ===
-                                                  1
-                                                }
-                                                onChange={(checked) => {
-                                                  updateNestedValue(
-                                                    [
+                                            {item?.label_info_attribute_groups
+                                              ?.length > 1 && (
+                                              <IconDelete
+                                                className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                                fontSize={16}
+                                                onClick={() => {
+                                                  // 删除当前属性组
+                                                  if (type !== 'detail') {
+                                                    deleteAttributeGroup(
                                                       labelIndex,
-                                                      'label_info_attribute_groups',
-                                                      groupIndex,
-                                                      'attribute_group_type'
-                                                    ],
-                                                    checked ? 1 : 2
-                                                  );
+                                                      groupIndex
+                                                    );
+                                                  }
                                                 }}
-                                              >
-                                                必须标注
-                                              </Checkbox>
-                                            </div>
-                                          </FormItem>
-                                          <FormItem
-                                            label={null}
-                                            style={{ marginRight: 0 }}
-                                          >
-                                            <div className="group-items">
-                                              {attrGroup.attribute_group_class !==
-                                                3 && (
-                                                <IconPlus
-                                                  style={{
-                                                    fontSize: 16,
-                                                    cursor:
-                                                      type === 'detail'
-                                                        ? 'not-allowed'
-                                                        : 'pointer'
-                                                  }}
-                                                  className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
-                                                  onClick={() => {
-                                                    if (type !== 'detail') {
-                                                      // 修改增加逻辑 往倒数第二个增加
-                                                      addAttribute(
-                                                        labelIndex,
-                                                        groupIndex
-                                                      );
-                                                    }
-                                                  }}
-                                                />
-                                              )}
-                                            </div>
-                                          </FormItem>
-                                          <FormItem
-                                            label={null}
-                                            style={{ marginRight: 0 }}
-                                          >
-                                            <div className="group-items">
-                                              {item?.label_info_attribute_groups
-                                                ?.length > 1 && (
-                                                <IconDelete
-                                                  className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                                  fontSize={16}
-                                                  onClick={() => {
-                                                    // 删除当前属性组
-                                                    if (type !== 'detail') {
-                                                      deleteAttributeGroup(
-                                                        labelIndex,
-                                                        groupIndex
-                                                      );
-                                                    }
-                                                  }}
-                                                />
-                                              )}
-                                            </div>
+                                              />
+                                            )}
                                           </FormItem>
                                         </div>
                                         {/* 选项内容区域 */}
@@ -1311,7 +1307,8 @@ export default function RequirementDetail() {
                                                   groupIndex
                                                 ]?.label_info_attribute.push({
                                                   label_info_id: uuidV4(),
-                                                  attribute_name_cn: '',
+                                                  attribute_name_cn:
+                                                    '标准时的输入内容',
                                                   attribute_name_en: '其他',
                                                   input_type: 2
                                                 });
@@ -1410,17 +1407,31 @@ export default function RequirementDetail() {
                                                         : false
                                                     }
                                                   >
+                                                    {console.log(
+                                                      attrIndex !== 0,
+                                                      attrIndex ===
+                                                        attrGroup
+                                                          .label_info_attribute
+                                                          ?.length -
+                                                          1,
+                                                      attrGroup
+                                                        ?.label_info_attribute[
+                                                        attrIndex
+                                                      ].input_type === 2,
+                                                      'top ----'
+                                                    )}
                                                     <Input
                                                       type="text"
+                                                      placeholder="请输入选项名称"
                                                       value={
                                                         attrIndex !== 0 &&
                                                         attrIndex ===
                                                           attrGroup
-                                                            ?.label_info_attribute
+                                                            .label_info_attribute
                                                             ?.length -
                                                             1 &&
                                                         attrGroup
-                                                          .label_info_attribute[
+                                                          ?.label_info_attribute[
                                                           attrIndex
                                                         ].input_type === 2
                                                           ? '标准时的输入内容'
@@ -1468,7 +1479,7 @@ export default function RequirementDetail() {
                                                           attrIndex
                                                         ].input_type === 2
                                                           ? '其他'
-                                                          : attr.attribute_name_en
+                                                          : '2'
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
