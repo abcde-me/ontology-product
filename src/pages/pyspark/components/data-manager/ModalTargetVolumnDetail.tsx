@@ -21,6 +21,7 @@ import {
   getTargetDataFileList,
   getTargetFileTypeList
 } from '@/api/dataCatalog';
+import timeFormattig from '@/utils/timeFormatting';
 
 const FormItem = Form.Item;
 
@@ -207,7 +208,8 @@ const useTableList = (props) => {
       dataIndex: 'generated_at',
       width: 180,
       sorter: true,
-      render: (_, record) => formatTime(record.generated_at)
+      render: (_, record) =>
+        timeFormattig(new Date(record?.generated_at).getTime())
     },
     {
       title: '原文件类型',
