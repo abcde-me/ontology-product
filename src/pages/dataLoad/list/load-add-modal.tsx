@@ -564,6 +564,11 @@ const LoadAddModal = (props: propsType) => {
   useEffect(() => {
     if (connectorId) {
       getConnectorDetailList(connectorId);
+      if (sourceType === 'db') {
+        form.setFieldsValue({
+          table_name: undefined
+        });
+      }
     }
   }, [connectorId]);
   // 创建 MutationObserver 监听 DOM 变化
@@ -655,6 +660,7 @@ const LoadAddModal = (props: propsType) => {
       });
     }
   };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
