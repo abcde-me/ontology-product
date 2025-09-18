@@ -951,13 +951,15 @@ const LoadAddModal = (props: propsType) => {
         <Button onClick={cancelHan} style={{ marginRight: '8px' }}>
           取消
         </Button>
-        <Button
-          onClick={() => handleSubmit('keep')}
-          disabled={loading}
-          style={{ marginRight: '8px' }}
-        >
-          仅保存
-        </Button>
+        {sourceType !== 'local' && (
+          <Button
+            onClick={() => handleSubmit('keep')}
+            disabled={loading}
+            style={{ marginRight: '8px' }}
+          >
+            仅保存
+          </Button>
+        )}
         <Button
           onClick={() => handleSubmit('run')}
           type="primary"
