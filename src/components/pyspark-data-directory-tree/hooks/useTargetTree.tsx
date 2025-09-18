@@ -267,8 +267,10 @@ export const useTargetTree = () => {
       data.forEach((item) => {
         if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
           result.push({ ...item });
-          // 如果当前节点匹配，需要展开其所有父节点
-          expandedKeys.push(item.key);
+          // 如果当前节点匹配，需要展开其所有父节点，但volume_item类型不需要展开，因为是异步节点
+          if (item.type !== 'volume_item') {
+            expandedKeys.push(item.key);
+          }
         } else if (item.children) {
           const filterData = loop(item.children);
 

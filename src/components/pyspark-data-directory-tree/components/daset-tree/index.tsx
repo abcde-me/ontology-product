@@ -37,8 +37,14 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   onInsertContent
 }) => {
   // 使用合并后的 hook
-  const { treeData, expandedKeys, setExpandedKeys, handleSearch, loadMore } =
-    useDatasetTree();
+  const {
+    treeData,
+    expandedKeys,
+    setExpandedKeys,
+    handleSearch,
+    loadMore,
+    searchKeyword
+  } = useDatasetTree();
 
   // 处理返回
   const handleBack = useCallback(() => {
@@ -64,21 +70,45 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     onInsertDataset?.(nodeData.data);
   }, []);
 
+  // 高亮显示搜索关键词
+  const highlightSearchKeyword = useCallback(
+    (text: string, keyword: string) => {
+      if (!keyword) return text;
+
+      const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+      if (index === -1) return text;
+
+      const prefix = text.substr(0, index);
+      const suffix = text.substr(index + keyword.length);
+      return (
+        <span>
+          {prefix}
+          <span style={{ color: 'var(--color-primary-light-4)' }}>
+            {text.substr(index, keyword.length)}
+          </span>
+          {suffix}
+        </span>
+      );
+    },
+    []
+  );
+
   return (
-    <div className="dataset-tree">
+    <div className="pyspark-dataset-tree">
       {/* 第一部分：标题导航 */}
-      <div className="dataset-tree__header">
-        <div className="dataset-tree__header-left">
+      <div className="pyspark-dataset-tree__header">
+        <div className="pyspark-dataset-tree__header-left">
           <IconArrowLeft
-            className="dataset-tree__back-icon"
+            className="pyspark-dataset-tree__back-icon"
             onClick={handleBack}
           />
-          <span className="dataset-tree__title">数据集</span>
+          <span className="pyspark-dataset-tree__title">数据集</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className="dataset-tree__search">
+      <div className="pyspark-dataset-tree__search">
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -88,12 +118,12 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className="dataset-tree__search-input"
+          className="pyspark-dataset-tree__search-input"
         />
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="dataset-tree__content">
+      <div className="pyspark-dataset-tree__content">
         {treeData.length === 0 ? (
           <Empty />
         ) : (
@@ -115,21 +145,24 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
               const isFile = nodeData?.type === 'file';
 
               return (
-                <div className="dataset-tree__node">
-                  <div className="dataset-tree__node-info">
+                <div className="pyspark-dataset-tree__node">
+                  <div className="pyspark-dataset-tree__node-info">
                     <EllipsisPopover
-                      className={`dataset-tree__node-title ${isDataset ? 'dataset-tree__node-title-dataset' : 'dataset-tree__node-title-file'}`}
-                      value={nodeData?.title ?? ''}
+                      className={`pyspark-dataset-tree__node-title ${isDataset ? 'pyspark-dataset-tree__node-title-dataset' : 'pyspark-dataset-tree__node-title-file'}`}
+                      value={highlightSearchKeyword(
+                        String(nodeData?.title ?? ''),
+                        searchKeyword
+                      )}
                     />
-                    <div className="dataset-tree__node-size">
+                    <div className="pyspark-dataset-tree__node-size">
                       {formatFileSize(Number(nodeData?.latest_size ?? 0))}
                     </div>
                   </div>
-                  <div className="dataset-tree__node-actions">
+                  <div className="pyspark-dataset-tree__node-actions">
                     {isDataset && (
                       <Button
                         type="text"
-                        className="dataset-tree__detail-btn"
+                        className="pyspark-dataset-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
@@ -138,7 +171,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     {isFile && (
                       <Button
                         type="outline"
-                        className="dataset-tree__insert-btn"
+                        className="pyspark-dataset-tree__insert-btn"
                         onClick={(e) => handleInsertClick(e, nodeData)}
                         onMouseDown={(e) => {
                           // 阻止按钮获得焦点，保持编辑器焦点

@@ -47,7 +47,9 @@ export const useDatasetTree = ({
   const getDasetList = async (keyword?: string) => {
     const targetParams: any = {
       storage_type_list: ['file', 'jsonl'],
-      name: keyword
+      name: keyword,
+      page: 1,
+      limit: 1000
     };
 
     const res = await searchDatasetList(targetParams);

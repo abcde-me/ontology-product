@@ -617,7 +617,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             onSearch={handleSearchEnter}
             onClear={handleSearchClear}
             allowClear
-            loading={isSearching}
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
