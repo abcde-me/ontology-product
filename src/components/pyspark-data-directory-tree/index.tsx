@@ -112,30 +112,15 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     onVolumeInsert?.(volume);
   };
 
-  // 处理数据库详情查看
-  const handleDbDetail = (database: Db, hierarchyData?: any) => {
-    onViewDbDetail?.(database, hierarchyData);
-  };
-
-  // 处理数据库插入
-  const handleDbInsert = (database: Db, hierarchyData?: any) => {
-    onDbInsert?.(database, hierarchyData);
-  };
-
-  // 统一的插入处理函数
-  const handleUnifiedInsert = (data: any, type: 'content' | 'dataset') => {
-    if (type === 'content') {
-      // 处理内容插入
-      onInsertContent?.(data);
-    } else if (type === 'dataset') {
-      // 处理数据集插入
-      onVolumeInsert?.(data);
-    }
-  };
-
   // 处理源数据详情查看
   const handleSourceDetail = (volume: FluffyVolume) => {
     onViewVolumeDetail?.('source', volume);
+  };
+
+  // 处理目标数据详情查看
+  const handleTargetDetail = (volume: FluffyVolume) => {
+    console.log('目标数据详情:', volume);
+    onViewVolumeDetail?.('target', volume);
   };
 
   // 根据当前选中的节点渲染对应的组件
@@ -161,7 +146,14 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
           />
         );
       case 'target':
-        return <TargetTree />;
+        return (
+          <TargetTree
+            onBack={handleBack}
+            onViewTargetDetail={handleTargetDetail}
+            onInsert={handleVolumeInsert}
+            isEditorFocused={getIsEditorFocused?.() ?? false}
+          />
+        );
       default:
         return (
           <Tree
