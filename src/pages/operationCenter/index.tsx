@@ -28,7 +28,7 @@ function OperationCenterPage() {
           url={pageUrl}
           sync={true}
           alive={true}
-          loading={null}
+          loading={document.createElement('span') as any}
           props={{
             embedBySingleApp: true,
             appName: 'modaforge'

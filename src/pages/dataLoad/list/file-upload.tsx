@@ -60,7 +60,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
   // 检查文件类型的公共方法（不显示错误信息）
   const checkFileType = (file: any) => {
     const isValidFileType =
-      /\.(doc|docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
+      /\.(doc|docx|ppt|pptx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
         file.name
       );
     return isValidFileType;
@@ -76,7 +76,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
     if (invalidFiles.length > 0) {
       // 只显示一次错误提示
       Message.error(
-        '只能上传 .doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
+        '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
       );
       return false;
     }
@@ -142,7 +142,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       drag
       className="upload-file"
       multiple
-      accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
+      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
       beforeUpload={(file, list) => checkFile(file, list)}
       action="/api/aimdp/v1/load_tasks/upload"
       onChange={handleUploadChange}

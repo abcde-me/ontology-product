@@ -43,7 +43,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   // 实体标签内容
   const [entityRelations, setEntityRelations] = useState([
     {
-      id: uuid(),
+      label_id: uuid(),
       order_num: 0, // 排序
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
@@ -53,7 +53,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   // 关系标签内容
   const [relationRelations, setRelationRelations] = useState([
     {
-      id: uuid(),
+      relation_id: uuid(),
       order_num: 0,
       relation_name_cn: '',
       relation_name_en: '',
@@ -258,7 +258,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 setEntityRelations([
                   ...entityRelations,
                   {
-                    id: uuid(),
+                    label_id: uuid(),
                     order_num: entityRelations?.length + 1, // 排序
                     label_name_cn: '', //展示名称
                     label_name_en: '', //存储名称
@@ -289,10 +289,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
               {relationRelations &&
                 relationRelations.map((item, index) => {
                   return (
-                    <div className="entity-relation-item" key={item.id}>
+                    <div
+                      className="entity-relation-item"
+                      key={item.relation_id}
+                    >
                       <FormItem
                         style={{ paddingLeft: 16 }}
-                        field={`relation_name_cn + ${item?.id}`}
+                        field={`relation_name_cn + ${item?.relation_id}`}
                         label="关系名称"
                         rules={[
                           {
@@ -377,7 +380,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <div className="tag-content">
                           <FormItem
                             style={{ paddingLeft: 16 }}
-                            field={`start_entity_labels + ${item?.id}`}
+                            field={`start_entity_labels + ${item?.relation_id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
@@ -413,7 +416,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           <FormItem
                             label="目标标签:"
                             style={{ padding: 0 }}
-                            field={`target_entity_labels + ${item?.id}`}
+                            field={`target_entity_labels + ${item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"
@@ -455,7 +458,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 setRelationRelations([
                   ...relationRelations,
                   {
-                    id: uuid(),
+                    relation_id: uuid(),
                     order_num: relationRelations.length + 1,
                     relation_name_cn: '',
                     relation_name_en: '',

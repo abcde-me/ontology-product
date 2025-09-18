@@ -454,6 +454,7 @@ export const ModaForgeResourceEndpoints = {
   sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
   sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
   sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
+  sqlRunLogApi: PrefixAimdp + '/sql_script/{script_id}/get_run_log',
   sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
   sqlExportDatasetVersion:
     PrefixAimdp + '/sql_script/{script_id}/export_version_update',

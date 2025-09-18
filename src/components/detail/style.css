@@ -409,3 +409,21 @@
   width: 100%;
   max-width: 100%;
 }
+
+/* Table滚动容器样式 - 占满父容器并添加滚动条 */
+.table-scroll-container {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  max-height: calc(100vh - 560px); /* 根据实际布局调整高度 */
+  overflow-x: auto; /* 横向滚动由外层容器处理 */
+  overflow-y: auto; /* 竖向滚动也由外层处理 */
+  position: relative;
+}
+
+/* 确保table占满容器宽度并能横向扩展 */
+.table-scroll-container .arco-table {
+  width: 100%;
+  min-width: max-content; /* 确保table能够横向扩展 */
+  height: 100%;
+}

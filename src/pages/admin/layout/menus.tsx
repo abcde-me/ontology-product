@@ -1,4 +1,5 @@
 import React from 'react';
+import { isWujie } from '@/utils/env';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
@@ -17,6 +18,7 @@ export type MenuModel = {
   children?: MenuModel[];
   className?: string;
   type?: string;
+  external?: boolean;
   permission?: string; // 添加权限字段
 };
 
@@ -25,6 +27,7 @@ export const filterMenusByPermissions = (
   userPermissions: string[] = []
 ): MenuModel[] => {
   return menus
+    .filter((m) => (isWujie ? !m.external : true))
     .map((menu) => {
       // 如果是分组菜单，递归过滤子菜单
       if (menu.children && menu.children.length > 0) {
@@ -163,6 +166,7 @@ export const menus: MenuModel[] = [
     type: 'itemGroup',
     title: '平台管理',
     key: 'mgmtGroup',
+    external: true,
     children: [
       {
         title: '组织管理',
@@ -183,6 +187,7 @@ export const menus: MenuModel[] = [
 ];
 
 /*
+集成到AI平台不显示运营中心菜单
 嵌入运营中心页面示例
 path: '/tenant/compute/modaforge/operationCenter?url=' + encodeURIComponent('/operationcenter/tenant/compute/operationcenter/organization'),
 path: '/tenant/compute/modaforge/operationCenter?url=' + encodeURIComponent('/operationcenter/tenant/compute/operationcenter/user'),
