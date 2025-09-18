@@ -21,7 +21,7 @@ const TabPane = Tabs.TabPane;
 type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('data');
+  const [activeTab, setActiveTab] = useState<TabKey>('files');
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
