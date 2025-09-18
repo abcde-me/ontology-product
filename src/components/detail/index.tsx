@@ -1768,13 +1768,14 @@ const DatasetDetail = (props: {
           ) : (
             // 数据库表数据内容
             <TabPane key="content" title="数据内容">
-              <Table
-                columns={contentTableColumns}
-                data={contentTableData}
-                pagination={false}
-                scroll={{ x: '100%' }}
-                rowKey="id"
-              />
+              <div className="table-scroll-container">
+                <Table
+                  columns={contentTableColumns}
+                  data={contentTableData}
+                  pagination={false}
+                  rowKey="id"
+                />
+              </div>
             </TabPane>
           )}
           <TabPane key="version" title="版本历史">
