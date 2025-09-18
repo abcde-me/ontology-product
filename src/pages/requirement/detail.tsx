@@ -1163,6 +1163,15 @@ export default function RequirementDetail() {
                                                 attrGroup.attribute_group_class
                                               }
                                               onChange={(value) => {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'attribute_group_class'
+                                                  ],
+                                                  parseInt(value)
+                                                );
                                                 // 切换到输入框的时候 清空对应属性组的选项
                                                 if (parseInt(value) === 3) {
                                                   updateNestedValue(
@@ -1175,15 +1184,6 @@ export default function RequirementDetail() {
                                                     []
                                                   );
                                                 }
-                                                updateNestedValue(
-                                                  [
-                                                    labelIndex,
-                                                    'label_info_attribute_groups',
-                                                    groupIndex,
-                                                    'attribute_group_class'
-                                                  ],
-                                                  parseInt(value)
-                                                );
                                               }}
                                             >
                                               <Option key={1} value={1}>

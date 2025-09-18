@@ -171,6 +171,20 @@ const Classify = (props: ClassifyComponentProps) => {
                           'attribute_group_class',
                           value
                         );
+                        // 切换到输入框的时候情况选项内容
+                        if (value === 3) {
+                          setTextRelations(
+                            textRelations.map((group, groupIndex) => {
+                              if (groupIndex === index) {
+                                return {
+                                  ...group,
+                                  file_label_attribute: []
+                                };
+                              }
+                              return group;
+                            })
+                          );
+                        }
                       }}
                     >
                       {optionConfig?.map((item) => {
