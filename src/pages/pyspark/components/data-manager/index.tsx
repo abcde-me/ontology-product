@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Message, Typography } from '@arco-design/web-react';
-import DataDirectoryTree from '@/components/data-directory-tree';
+import DataDirectoryTree from '@/components/pyspark-data-directory-tree';
 import ModalDatasetDetail from './ModalDatasetDetail';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
