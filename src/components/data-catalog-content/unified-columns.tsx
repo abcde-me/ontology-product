@@ -332,7 +332,7 @@ export const getUnifiedColumns = (
               gap: '6px'
             }}
           >
-            {getFileIcon(record.file_type)}
+            {getFileIcon(record.file_type?.toLowerCase())}
             <span>{record.file_type}</span>
           </div>
         )
