@@ -488,6 +488,11 @@ const LoadAddModal = (props: propsType) => {
   useEffect(() => {
     let cancelled = false;
 
+    // 数据源变化时， 清空载入位置
+    form.setFieldsValue({
+      dest_path: undefined
+    });
+
     const loadData = async () => {
       try {
         console.log('useEffect: 数据源类型变化，重新加载数据', sourceType);
