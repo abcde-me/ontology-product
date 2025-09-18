@@ -524,7 +524,6 @@ const DatasetForm = React.forwardRef<
   };
 
   const mapselectFiles = (files: any[]) => {
-    console.log('files', files);
     return files.map((item) => item.file_name);
   };
   //提交数据
