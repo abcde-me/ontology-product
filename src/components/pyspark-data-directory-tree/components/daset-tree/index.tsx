@@ -101,7 +101,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             loadMore={loadMore}
             showLine
             blockNode
-            selectable
+            selectable={false}
             treeData={treeData}
             expandedKeys={expandedKeys}
             onExpand={setExpandedKeys}

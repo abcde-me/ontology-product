@@ -37,7 +37,14 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
   onInsertDataset,
   onInsertContent
 }) => {
-  const { treeData, setTreeData, handleSearch } = useSourceTree();
+  const {
+    treeDataFiltered,
+    handleSearch,
+    expandedKeys,
+    setExpandedKeys,
+    loadMore,
+    searchKeyword
+  } = useSourceTree();
 
   // 处理返回
   const handleBack = useCallback(() => {
@@ -62,6 +69,30 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
     // 这里可以添加插入逻辑
     onInsertDataset?.(nodeData.data);
   }, []);
+
+  // 高亮显示搜索关键词
+  const highlightSearchKeyword = useCallback(
+    (text: string, keyword: string) => {
+      if (!keyword) return text;
+
+      const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+      if (index === -1) return text;
+
+      const prefix = text.substr(0, index);
+      const suffix = text.substr(index + keyword.length);
+      return (
+        <span>
+          {prefix}
+          <span style={{ color: 'var(--color-primary-light-4)' }}>
+            {text.substr(index, keyword.length)}
+          </span>
+          {suffix}
+        </span>
+      );
+    },
+    []
+  );
 
   return (
     <div className="dataset-tree">
@@ -93,38 +124,49 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
 
       {/* 第三部分：列表 */}
       <div className="dataset-tree__content">
-        {treeData.length === 0 ? (
+        {treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
           <Tree
-            // loadMore={loadMore}
+            loadMore={loadMore}
             showLine
             blockNode
-            selectable
-            treeData={treeData}
-            icons={(props) => ({
-              switcherIcon:
-                props.dataRef?.type === 'dataset' ? <IconCaretDown /> : null,
-              dragIcon: <IconCaretRight />
-            })}
+            selectable={false}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            treeData={treeDataFiltered}
+            className="dataset-tree__content-tree"
+            icons={(props) => {
+              const nodeType = props.dataRef?.type;
+              const isExpandable = [
+                'dataset',
+                'catalog',
+                'volume',
+                'volume_item'
+              ].includes(nodeType);
+              return {
+                switcherIcon: isExpandable ? <IconCaretDown /> : null,
+                dragIcon: <IconCaretRight />
+              };
+            }}
             renderTitle={(props) => {
               const nodeData = props.dataRef;
-              const isDataset = nodeData?.type === 'dataset';
+              const isVolumeItem = nodeData?.type === 'volume_item';
               const isFile = nodeData?.type === 'file';
 
               return (
                 <div className="dataset-tree__node">
                   <div className="dataset-tree__node-info">
                     <EllipsisPopover
-                      className={`dataset-tree__node-title ${isDataset ? 'dataset-tree__node-title-dataset' : 'dataset-tree__node-title-file'}`}
-                      value={nodeData?.title ?? ''}
+                      className={`dataset-tree__node-title`}
+                      value={highlightSearchKeyword(
+                        String(nodeData?.title ?? ''),
+                        searchKeyword
+                      )}
                     />
-                    <div className="dataset-tree__node-size">
-                      {formatFileSize(Number(nodeData?.latest_size ?? 0))}
-                    </div>
                   </div>
                   <div className="dataset-tree__node-actions">
-                    {isDataset && (
+                    {isVolumeItem && (
                       <Button
                         type="text"
                         className="dataset-tree__detail-btn"
@@ -133,7 +175,7 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
                         详情
                       </Button>
                     )}
-                    {isFile && (
+                    {(isFile || isVolumeItem) && (
                       <Button
                         type="outline"
                         className="dataset-tree__insert-btn"
