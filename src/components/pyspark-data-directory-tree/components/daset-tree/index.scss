@@ -1,4 +1,4 @@
-.dataset-tree {
+.pyspark-dataset-tree {
   width: 100%;
   height: 100%;
   display: flex;
@@ -104,16 +104,16 @@
     padding-left: 4px;
 
     &:hover {
-      .dataset-tree__node-title {
+      .pyspark-dataset-tree__node-title {
         max-width: 136px;
         color: #007dfa;
       }
 
-      .dataset-tree__node-title-file {
+      .pyspark-dataset-tree__node-title-file {
         max-width: 116px;
       }
 
-      .dataset-tree__node-actions {
+      .pyspark-dataset-tree__node-actions {
         opacity: 1;
         visibility: visible;
       }
