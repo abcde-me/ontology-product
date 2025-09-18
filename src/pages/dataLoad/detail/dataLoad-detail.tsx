@@ -70,6 +70,8 @@ const DataLoadDetail = () => {
   const [total, setTotal] = useState(0);
   // 搜索框的状态
   const [searchValue, setSearchValue] = useState('');
+  // 新建任务loading状态
+  const [newTaskLoading, setNewTaskLoading] = useState(false);
   // 判断任务中是否存在运行的任务
   const handlePageChange = (page) => {
     setCurrent(page);
@@ -192,11 +194,13 @@ const DataLoadDetail = () => {
   };
   // 点击新建运行
   const runningHan = async () => {
+    setNewTaskLoading(true);
     try {
       const res = await runLoad({
         task_id: Number(loadId)
+      }).finally(() => {
+        setNewTaskLoading(false);
       });
-      console.log(res);
       if (res.code == '' && res.status == '200') {
         Message.success(`已成功发起载入任务${listDetail?.name}`);
         judgmentTask();
@@ -572,6 +576,7 @@ const DataLoadDetail = () => {
                 type="primary"
                 icon={<IconPlus />}
                 disabled={runningFlag ? true : false}
+                loading={newTaskLoading}
                 onClick={() => {
                   runningHan();
                 }}
