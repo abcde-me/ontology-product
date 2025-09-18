@@ -26,6 +26,7 @@ import { useAsyncEffect } from 'ahooks';
 export interface TreeNodeData {
   key: string;
   title: string;
+  file_size?: number;
   id?: number;
   icon?: React.ReactNode;
   children?: TreeNodeData[];
@@ -36,11 +37,6 @@ export interface TreeNodeData {
 }
 
 export const useSourceTree = () => {
-  // 源数据
-  const [sourceCatalogList, setSourceCatalogList] = useState<SrcCatalogItem[]>(
-    []
-  );
-
   // 树数据
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
   const [treeDataFiltered, setTreeDataFiltered] = useState<TreeNodeData[]>([]);
@@ -125,6 +121,7 @@ export const useSourceTree = () => {
         icon: <VolumeFileIcon />,
         isLeaf: true,
         type: 'file',
+        file_size: file.file_size,
         data: {
           ...file,
           type: 'file'

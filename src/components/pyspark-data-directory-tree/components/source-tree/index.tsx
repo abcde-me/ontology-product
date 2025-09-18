@@ -19,23 +19,22 @@ import './index.scss';
 import { A } from '@svgdotjs/svg.js';
 import { formatFileSize } from '@/utils/format';
 import { useSourceTree } from '../../hooks/useSourceTree';
+import { FluffyVolume } from '@/api/dataCatalog';
 
 const { Title } = Typography;
 
-interface DataSetTreeProps {
+interface SourceTreeProps {
   isEditorFocused?: boolean;
   onBack?: () => void;
-  onViewDatasetDetail?: (dataset: DatasetListItem) => void;
-  onInsertDataset?: (dataset: DatasetListItem) => void;
-  onInsertContent?: (dataset: DatasetListItem) => void;
+  onViewSourceDetail?: (volume: any) => void;
+  onInsert?: (data: any) => void;
 }
 
-const SourceTree: React.FC<DataSetTreeProps> = ({
+const SourceTree: React.FC<SourceTreeProps> = ({
   isEditorFocused = false,
   onBack,
-  onViewDatasetDetail,
-  onInsertDataset,
-  onInsertContent
+  onViewSourceDetail,
+  onInsert
 }) => {
   const {
     treeDataFiltered,
@@ -55,20 +54,21 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
   const handleDetailClick = useCallback(
     (e: any, nodeData: any) => {
       e.stopPropagation();
-      if (nodeData?.type === 'dataset' && nodeData?.data) {
-        onViewDatasetDetail?.(nodeData.data);
+      if (nodeData?.type === 'volume_item' && nodeData?.data) {
+        onViewSourceDetail?.(nodeData.data);
       }
     },
-    [onViewDatasetDetail]
+    [onViewSourceDetail]
   );
 
   // 处理插入按钮点击
-  const handleInsertClick = useCallback((e: any, nodeData: any) => {
-    e.stopPropagation();
-    console.log('Insert clicked for:', nodeData);
-    // 这里可以添加插入逻辑
-    onInsertDataset?.(nodeData.data);
-  }, []);
+  const handleInsertClick = useCallback(
+    (e: any, nodeData: any) => {
+      e.stopPropagation();
+      onInsert?.(nodeData?.data ?? {});
+    },
+    [onInsert]
+  );
 
   // 高亮显示搜索关键词
   const highlightSearchKeyword = useCallback(
@@ -95,20 +95,20 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
   );
 
   return (
-    <div className="dataset-tree">
+    <div className="source-tree">
       {/* 第一部分：标题导航 */}
-      <div className="dataset-tree__header">
-        <div className="dataset-tree__header-left">
+      <div className="source-tree__header">
+        <div className="source-tree__header-left">
           <IconArrowLeft
-            className="dataset-tree__back-icon"
+            className="source-tree__back-icon"
             onClick={handleBack}
           />
-          <span className="dataset-tree__title">源数据目录</span>
+          <span className="source-tree__title">源数据目录</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className="dataset-tree__search">
+      <div className="source-tree__search">
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -118,12 +118,12 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className="dataset-tree__search-input"
+          className="source-tree__search-input"
         />
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="dataset-tree__content">
+      <div className="source-tree__content">
         {treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
@@ -131,15 +131,13 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
             loadMore={loadMore}
             showLine
             blockNode
-            selectable={false}
             expandedKeys={expandedKeys}
             onExpand={setExpandedKeys}
             treeData={treeDataFiltered}
-            className="dataset-tree__content-tree"
+            className="source-tree__content-tree"
             icons={(props) => {
               const nodeType = props.dataRef?.type;
               const isExpandable = [
-                'dataset',
                 'catalog',
                 'volume',
                 'volume_item'
@@ -155,30 +153,41 @@ const SourceTree: React.FC<DataSetTreeProps> = ({
               const isFile = nodeData?.type === 'file';
 
               return (
-                <div className="dataset-tree__node">
-                  <div className="dataset-tree__node-info">
+                <div className="source-tree__node">
+                  <div className="source-tree__node-info">
                     <EllipsisPopover
-                      className={`dataset-tree__node-title`}
+                      className={`source-tree__node-title source-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
                       )}
                     />
+                    {(nodeData?.type === 'file' ||
+                      nodeData?.type === 'volume_item') && (
+                      <EllipsisPopover
+                        className={`source-tree__node-size source-tree__node-size-${nodeData?.type}`}
+                        value={
+                          nodeData?.type === 'file'
+                            ? formatFileSize(Number(nodeData?.file_size ?? 0))
+                            : formatFileSize(Number(nodeData?.latest_size ?? 0))
+                        }
+                      />
+                    )}
                   </div>
-                  <div className="dataset-tree__node-actions">
+                  <div className="source-tree__node-actions">
                     {isVolumeItem && (
                       <Button
                         type="text"
-                        className="dataset-tree__detail-btn"
+                        className="source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
                       </Button>
                     )}
-                    {(isFile || isVolumeItem) && (
+                    {isFile && (
                       <Button
                         type="outline"
-                        className="dataset-tree__insert-btn"
+                        className="source-tree__insert-btn"
                         onClick={(e) => handleInsertClick(e, nodeData)}
                         onMouseDown={(e) => {
                           // 阻止按钮获得焦点，保持编辑器焦点

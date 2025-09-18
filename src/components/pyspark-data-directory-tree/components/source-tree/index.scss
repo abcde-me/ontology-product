@@ -1,4 +1,4 @@
-.dataset-tree {
+.source-tree {
   width: 100%;
   height: 100%;
   display: flex;
@@ -7,60 +7,40 @@
   border-radius: 8px;
   overflow: hidden;
 
-  .dataset-tree__content .dataset-tree__content-tree {
+  .source-tree__content .source-tree__content-tree {
     .arco-tree-node {
       position: relative;
       align-items: center;
       padding-left: 4px;
 
+      // 去除选中时的高亮
       &.arco-tree-node-selected {
         background-color: transparent;
+        color: var(--color-text-2);
 
-        .arco-tree-node-title {
-          background-color: var(--color-bg-5);
+        .arco-tree-node-switcher {
+          color: var(--color-text-2);
         }
       }
-      // background-color: transparent;
-
-      // .arco-tree-node-title {
-      //   background-color: var(--color-bg-5);
-      // }
-
-      // .tree-icon,
-      // .whitespace-nowrap {
-      //   color: #007dfa;
-      // }
-
-      // &:active {
-      //   background-color: transparent;
-
-      //   .dataset-tree__node-title {
-      //     max-width: 136px;
-      //     color: #007dfa;
-      //     // background-color: var(--color-bg-5);
-      //   }
-      // }
 
       &:hover {
-        // background-color: transparent;
+        background-color: var(--color-bg-5);
 
-        // .arco-tree-node-title {
-        //   background-color: var(--color-bg-5) !important;
-        //   font-weight: 500 !important;
-        //   color: #007dfa !important;
-        // }
+        .source-tree__node-title {
+          color: var(--primary-6);
+        }
 
-        // .dataset-tree__node-title {
-        //   max-width: 136px;
-        //   color: #007dfa;
-        //   background-color: var(--color-bg-5);
-        // }
+        .source-tree__node-title-file,
+        .source-tree__node-size-file {
+          max-width: 40px;
+        }
 
-        // .dataset-tree__node-title-file {
-        //   max-width: 116px;
-        // }
+        .source-tree__node-title-volume_item,
+        .source-tree__node-size-volume_item {
+          max-width: 70px;
+        }
 
-        .dataset-tree__node-actions {
+        .source-tree__node-actions {
           opacity: 1;
           visibility: visible;
         }
@@ -138,11 +118,7 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 175px;
-
-      &-file {
-        max-width: 150px;
-      }
+      max-width: 196px;
     }
 
     &-size {
