@@ -754,9 +754,17 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
     const TitleText = title;
-
     return (
-      <Tooltip color="white" content={!subLeafKeys[dataRef?.type] ? title : ''}>
+      <Tooltip
+        color="white"
+        content={
+          hasDataBaseNode(dataRef)
+            ? '该目录已存在数据库，请新建或选择其他目录'
+            : !subLeafKeys[dataRef?.type]
+              ? title
+              : ''
+        }
+      >
         <div
           className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
           style={{ maxWidth: '150px' }}
@@ -865,6 +873,41 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return true;
   };
 
+  /**
+   * 检查节点是否为数据库节点且包含数据库子项
+   * @param item - 树节点数据，可以是 TreeNodeData 或 TreeDataType 类型
+   * @returns 如果是包含子项的数据库节点返回 true，否则返回 false
+   */
+  const hasDataBaseNode = (
+    item: TreeNodeData | TreeDataType | null | undefined
+  ): boolean => {
+    // 空值检查
+    if (!item) {
+      return false;
+    }
+
+    // 类型保护：确保节点有 type_name 属性
+    const nodeData = item as TreeNodeData;
+    if (nodeData.type_name !== 'db') {
+      return false;
+    }
+
+    // 获取子节点数据
+    const children = (item as any).children;
+    if (!children) {
+      return false;
+    }
+
+    // 检查是否有数据库子项
+    // 支持两种数据结构：
+    // 1. children.db_item 数组形式
+    // 2. children 直接是数组形式
+    const hasDbItems = Boolean(children.db_item?.length);
+    const hasArrayChildren = Array.isArray(children) && children.length > 0;
+
+    return hasDbItems || hasArrayChildren;
+  };
+
   // 生成树节点
   const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
     if (!Array.isArray(treeData)) {
@@ -886,6 +929,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             {...rest}
             dataRef={item}
             title={item.name}
+            disabled={hasDataBaseNode(item)}
             // selectable={!isDbNode}
           >
             {hasChildren ? generatorTreeNodes(children) : null}
