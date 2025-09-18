@@ -44,23 +44,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const [entityRelations, setEntityRelations] = useState([
     {
       label_id: uuid(),
-      order_num: 0, // 排序
+      order_num: 1, // 排序
       label_name_cn: '', //展示名称
       label_name_en: '', //存储名称
       label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
     }
   ]);
   // 关系标签内容
-  const [relationRelations, setRelationRelations] = useState([
-    {
-      relation_id: uuid(),
-      order_num: 0,
-      relation_name_cn: '',
-      relation_name_en: '',
-      start_entity_labels: [], //标签的醋存储名称
-      target_entity_labels: [],
-      colour: getRandomHexColorStrict()
-    }
+  const [relationRelations, setRelationRelations]: any = useState([
+    // {
+    //   relation_id: uuid(),
+    //   order_num: 0,
+    //   relation_name_cn: '',
+    //   relation_name_en: '',
+    //   start_entity_labels: [], //标签的醋存储名称
+    //   target_entity_labels: [],
+    //   colour: getRandomHexColorStrict()
+    // }
   ]);
   // 选中的标签类型
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
@@ -82,7 +82,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
 
   // 处理关系标签字段变更
   const handleRelationFieldChange = (index, field, value) => {
-    const newData = [...relationRelations];
+    const newData: any = [...relationRelations];
     newData[index][field] = value;
     setRelationRelations(newData);
   };
@@ -118,6 +118,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   useEffect(() => {
     getTextEntityData(entityRelations, relationRelations, formText, formLabel);
   }, [entityRelations, relationRelations]);
+  const renderItemVal = (item, index) => {
+    formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+  };
   return (
     <div className="text-component-warp">
       <div className="type-header">
@@ -141,9 +144,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       <Form
         form={formText}
         disabled={type === 'detail'}
-        onValuesChange={(_, val) => {
-          // setPublishData({ ...publishData, val })
-        }}
         layout="inline"
         labelAlign="right"
         labelCol={{ flex: 'none' }}
@@ -152,12 +152,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         {selectedSubstanceValue === 1 &&
           entityRelations &&
           entityRelations.map((item, index) => {
+            renderItemVal(item, index);
             return (
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
-                  style={{ paddingLeft: 16 }}
+                  style={{ paddingLeft: 16, marginRight: 8 }}
                   label="标签名称"
-                  field={`entityRelations.${index}.label_name_cn`}
+                  field={`label_name_cn${index}`}
                   rules={[
                     {
                       required: true,
@@ -210,7 +211,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       </Tooltip>
                     </div>
                   }
-                  style={{ padding: 0 }}
+                  style={{ padding: 0, marginRight: 8 }}
                 >
                   <Input
                     placeholder="请输入展示名称"
@@ -223,7 +224,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     }}
                   />
                 </FormItem>
-                <FormItem label={null}>
+                <FormItem label={null} style={{ marginRight: 8 }}>
                   <ColorPicker
                     defaultValue={item.label_colour}
                     showPreset
@@ -294,7 +295,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       key={item.relation_id}
                     >
                       <FormItem
-                        style={{ paddingLeft: 16 }}
+                        style={{ paddingLeft: 16, marginRight: 8 }}
                         field={`relation_name_cn + ${item?.relation_id}`}
                         label="关系名称"
                         rules={[
@@ -347,7 +348,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             </Tooltip>
                           </div>
                         }
-                        style={{ padding: 0 }}
+                        style={{ padding: 0, marginRight: 8 }}
                       >
                         <Input
                           placeholder="展示在标注页面的名称"
@@ -362,7 +363,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           }}
                         />
                       </FormItem>
-                      <FormItem label={null}>
+                      <FormItem label={null} style={{ marginRight: 8 }}>
                         {relationRelations?.length > 1 && (
                           <IconDelete
                             fontSize={18}
@@ -379,7 +380,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <div className="tag-title">标签对</div>
                         <div className="tag-content">
                           <FormItem
-                            style={{ paddingLeft: 16 }}
+                            style={{ paddingLeft: 16, marginRight: 8 }}
                             field={`start_entity_labels + ${item?.relation_id}`}
                             label="起始标签:"
                             rules={[
@@ -415,7 +416,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           </FormItem>
                           <FormItem
                             label="目标标签:"
-                            style={{ padding: 0 }}
+                            style={{ padding: 0, marginRight: 8 }}
                             field={`target_entity_labels + ${item?.relation_id}`}
                           >
                             <Select
