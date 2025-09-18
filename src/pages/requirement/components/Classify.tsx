@@ -345,17 +345,10 @@ const Classify = (props: ClassifyComponentProps) => {
                               : false
                           }
                         >
+                          {console.log(attr.attribute_name_cn)}
                           <Input
                             placeholder="用于存储标注结果"
-                            value={
-                              attrIndex !== 0 &&
-                              attrIndex ===
-                                item.file_label_attribute?.length - 1 &&
-                              item?.file_label_attribute[attrIndex]
-                                .input_type === 2
-                                ? '标注时的输入内容'
-                                : attr.attribute_name_cn
-                            }
+                            value={attr.attribute_name_cn}
                             onChange={(value) => {
                               const newData = [...textRelations];
                               newData[index].file_label_attribute[

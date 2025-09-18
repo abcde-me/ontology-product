@@ -155,7 +155,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
             return (
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
-                  style={{ paddingLeft: 16 }}
+                  style={{ paddingLeft: 16, marginRight: 8 }}
                   label="标签名称"
                   field={`entityRelations.${index}.label_name_cn`}
                   rules={[
@@ -210,7 +210,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       </Tooltip>
                     </div>
                   }
-                  style={{ padding: 0 }}
+                  style={{ padding: 0, marginRight: 8 }}
                 >
                   <Input
                     placeholder="请输入展示名称"
@@ -223,7 +223,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     }}
                   />
                 </FormItem>
-                <FormItem label={null}>
+                <FormItem label={null} style={{ marginRight: 8 }}>
                   <ColorPicker
                     defaultValue={item.label_colour}
                     showPreset
@@ -294,7 +294,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       key={item.relation_id}
                     >
                       <FormItem
-                        style={{ paddingLeft: 16 }}
+                        style={{ paddingLeft: 16, marginRight: 8 }}
                         field={`relation_name_cn + ${item?.relation_id}`}
                         label="关系名称"
                         rules={[
@@ -347,7 +347,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             </Tooltip>
                           </div>
                         }
-                        style={{ padding: 0 }}
+                        style={{ padding: 0, marginRight: 8 }}
                       >
                         <Input
                           placeholder="展示在标注页面的名称"
@@ -362,7 +362,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           }}
                         />
                       </FormItem>
-                      <FormItem label={null}>
+                      <FormItem label={null} style={{ marginRight: 8 }}>
                         {relationRelations?.length > 1 && (
                           <IconDelete
                             fontSize={18}
@@ -379,7 +379,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <div className="tag-title">标签对</div>
                         <div className="tag-content">
                           <FormItem
-                            style={{ paddingLeft: 16 }}
+                            style={{ paddingLeft: 16, marginRight: 8 }}
                             field={`start_entity_labels + ${item?.relation_id}`}
                             label="起始标签:"
                             rules={[
@@ -415,7 +415,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           </FormItem>
                           <FormItem
                             label="目标标签:"
-                            style={{ padding: 0 }}
+                            style={{ padding: 0, marginRight: 8 }}
                             field={`target_entity_labels + ${item?.relation_id}`}
                           >
                             <Select
