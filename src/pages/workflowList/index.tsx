@@ -418,7 +418,7 @@ export default function WorkflowList() {
             setSearchValue(value);
           }}
           onPressEnter={() => {
-            getList();
+            current !== 1 ? setCurrent(1) : getList();
           }}
           onClear={() => {
             setCurrent(1);
@@ -451,7 +451,6 @@ export default function WorkflowList() {
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
-          // @ts-expect-error
           handleTableChange(pagination, sorter, filters)
         }
       />

@@ -246,7 +246,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
           placeholder="输入搜索算子"
           value={searchKey}
           allowClear
-          onPressEnter={() => handleSearch(searchKey)}
+          onSearch={() => handleSearch(searchKey)}
           onClear={() => handleSearch('')}
           onChange={(value) => setSearchKey(value)}
         />
