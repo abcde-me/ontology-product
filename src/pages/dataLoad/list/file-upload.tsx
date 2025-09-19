@@ -11,8 +11,17 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
 
+  // 标准化文件名用于同名比较（将后缀转为小写）
+  const normalizeFileNameForComparison = (fileName: string) => {
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex === -1) return fileName;
+
+    const baseName = fileName.substring(0, lastDotIndex);
+    const extension = fileName.substring(lastDotIndex + 1).toLowerCase();
+    return baseName + '.' + extension;
+  };
+
   const handleUploadChange = (files: any) => {
-    console.log(files, 'files666');
     const prevLength = fileList.length;
     setFileList(files);
 
@@ -59,9 +68,10 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
   };
   // 检查文件类型的公共方法（不显示错误信息）
   const checkFileType = (file: any) => {
+    const fileName = file.name || '';
     const isValidFileType =
-      /\.(doc|docx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
-        file.name
+      /\.(doc|docx|ppt|pptx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
+        fileName
       );
     return isValidFileType;
   };
@@ -76,7 +86,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
     if (invalidFiles.length > 0) {
       // 只显示一次错误提示
       Message.error(
-        '只能上传 .doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
+        '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
       );
       return false;
     }
@@ -104,20 +114,23 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       }
     }
 
-    // 检查重名文件
-    const existingFileNames = fileList.map(
-      (existingFile: any) => existingFile.name
+    // 检查重名文件（忽略后缀大小写）
+    const normalizedCurrentFileName = normalizeFileNameForComparison(file.name);
+    const existingFileNames = fileList.map((existingFile: any) =>
+      normalizeFileNameForComparison(existingFile.name)
     );
-    if (existingFileNames.includes(file.name)) {
+    if (existingFileNames.includes(normalizedCurrentFileName)) {
       Message.error(`未导入成功 "${file.name}"文件重名`);
       return false;
     }
 
-    // 检查本次上传列表中的重名文件
+    // 检查本次上传列表中的重名文件（忽略后缀大小写）
     if (Array.isArray(list)) {
-      const currentUploadNames = list.map((f: any) => f.name);
+      const currentUploadNames = list.map((f: any) =>
+        normalizeFileNameForComparison(f.name)
+      );
       const duplicateCount = currentUploadNames.filter(
-        (name: string) => name === file.name
+        (name: string) => name === normalizedCurrentFileName
       ).length;
       if (duplicateCount > 1) {
         Message.error(`未导入成功 "${file.name}"文件重名`);
@@ -142,8 +155,10 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       drag
       className="upload-file"
       multiple
-      accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
-      beforeUpload={(file, list) => checkFile(file, list)}
+      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
+      beforeUpload={(file, list) => {
+        return checkFile(file, list);
+      }}
       action="/api/aimdp/v1/load_tasks/upload"
       onChange={handleUploadChange}
       onDrop={handleDrop}

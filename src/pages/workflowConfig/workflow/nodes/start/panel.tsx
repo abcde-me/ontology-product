@@ -454,7 +454,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
               />
             </FormItem>
           </div>
-          <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
+          {/* <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
             <div className="flex h-[22px] items-center gap-x-[8px]">
               <FormItem
                 field="data_category[4].enabled"
@@ -528,7 +528,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 )}
               </div>
             )}
-          </div>
+          </div> */}
         </FormItem>
       </Form>
     </div>

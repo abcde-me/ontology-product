@@ -47,6 +47,7 @@ import timeFormattig from '@/utils/timeFormatting';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
+import { debounce } from 'lodash-es';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -384,6 +385,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       handleSearch(value);
     };
 
+    // 使用防抖处理输入事件
+    const debouncedSearch = useCallback(debounce(handleSearch, 500), [
+      handleSearch
+    ]);
+
+    // 输入变化时触发搜索
+    const handleInputChange = (value: string) => {
+      setSearchValue(value);
+      debouncedSearch(value);
+    };
+
     // 处理搜索框清空
     const handleSearchClear = () => {
       setSearchValue('');
@@ -559,6 +571,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             if (result === false) {
               return false;
             }
+            // 删除成功后重新加载文件列表
+            handleSearchClear();
           } catch (e) {
             Message.error('删除失败');
             return false;
@@ -599,11 +613,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
-            onChange={setSearchValue}
+            onChange={handleInputChange}
             onSearch={handleSearchEnter}
             onClear={handleSearchClear}
             allowClear
-            loading={isSearching}
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (

@@ -1,14 +1,9 @@
 // 数据集详情
 .my-dataset-detail {
-  .arco-table-container {
-    max-height: 500px;
+  .table-scroll-container {
+    max-height: 500px; // 在modal中限制高度
+    overflow-x: auto;
     overflow-y: auto;
-    // tbody {
-    //   // display: flex;
-    //   // flex-direction: column;
-    //   max-height: 310px;
-    //   overflow-y: auto;
-    // }
   }
 
   .dataset-detail {

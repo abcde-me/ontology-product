@@ -126,7 +126,6 @@ export default function Requirement() {
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
-    console.log(sorter, 'top');
     const sortdata = {
       status: filters?.status,
       label_type: filters?.label_type,
@@ -264,7 +263,6 @@ export default function Requirement() {
       dataIndex: 'status',
       width: 100,
       render: (_, record) => {
-        console.log(record, record.status);
         return renderEmptyPlaceholder(record.status) !== '-' ? (
           StatusContent(record.status)
         ) : (

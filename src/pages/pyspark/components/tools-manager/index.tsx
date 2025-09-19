@@ -14,6 +14,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
+import SuziIcon from '@/assets/python/suanzi-icon.svg';
 
 // 算子图标映射类型
 type OperatorIconMap = Record<string, string>;
@@ -94,24 +95,6 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
     return colorMap[name] || '#607D8B';
   };
 
-  // 获取算子描述（根据图片中的实际描述）
-  const getOperatorDescription = (
-    name: string,
-    originalDesc: string
-  ): string => {
-    const descMap: OperatorDescMap = {
-      文本解析算子: '解析文本文件,支持OCR和文本...',
-      图片解析算子: '解析图片文件,生成图片描述和...',
-      音频解析算子: '解析音频文件,进行语音转文本',
-      去重处理算子: '删除数据中的重复记录',
-      数据验证算子: '验证数据的完整性和格式',
-      通用场景增强算子: '生成通用场景的训练数据',
-      去重算子: '删除数据中的重复记录'
-    };
-
-    return descMap[name] || originalDesc;
-  };
-
   // 处理详情按钮点击
   const handleDetailClick = (item: OperatorItem): void => {
     setToolDetailVisible(true);
@@ -163,11 +146,13 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
             onMouseLeave={() => setHoveredItem(null)}
           >
             {/* 算子图标 */}
+
             <div
               className="tools-manager__operator-icon"
               style={{ backgroundColor: getOperatorIconBgColor(item.name) }}
             >
-              {getOperatorIcon(item.name)}
+              {/* {getOperatorIcon(item.name)} */}
+              <SuziIcon />
             </div>
 
             {/* 算子信息 */}
@@ -184,7 +169,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
               </div>
               <div className="tools-manager__operator-description">
                 <EllipsisPopover
-                  value={getOperatorDescription(item.name, item.description)}
+                  value={item.description}
                   className="tools-manager__operator-desc"
                   ellipsis={{
                     rows: 1,
@@ -261,7 +246,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
           placeholder="输入搜索算子"
           value={searchKey}
           allowClear
-          onPressEnter={() => handleSearch(searchKey)}
+          onSearch={() => handleSearch(searchKey)}
           onClear={() => handleSearch('')}
           onChange={(value) => setSearchKey(value)}
         />
@@ -269,11 +254,27 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
 
       {/* Tree组件 */}
       <div className="tools-manager__content">
-        {loading ? (
+        {/* {loading ? (
           <div className="tools-manager__loading">
             <Spin />
           </div>
         ) : hasData ? (
+          <Tree
+            treeData={treeData}
+            expandedKeys={expandedKeys}
+            selectedKeys={[]}
+            onExpand={handleExpand}
+            onSelect={handleSelect}
+            showLine={false}
+            blockNode={true}
+            className="tools-manager__tree"
+          />
+        ) : (
+          <Empty description="暂无数据" />
+        )}
+      </div> */}
+
+        {hasData ? (
           <Tree
             treeData={treeData}
             expandedKeys={expandedKeys}

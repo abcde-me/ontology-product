@@ -456,6 +456,10 @@ export interface GetTargetCatalogFileListItem {
   /**
    * 文件名
    */
+  FileName: string;
+  /**
+   * 文件名
+   */
   file_name: string;
   /**
    * 文件类型

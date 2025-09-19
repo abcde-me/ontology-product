@@ -50,6 +50,7 @@ import {
 } from './type';
 
 import './detail.scss';
+import { group } from 'console';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -990,7 +991,7 @@ export default function RequirementDetail() {
                                   <Select
                                     placeholder="请选择形状"
                                     value={item.label_shape}
-                                    defaultValue={1}
+                                    defaultValue={[1]}
                                     onChange={(val: any) => {
                                       updateNestedValue(
                                         [labelIndex, 'label_shape'],
@@ -1020,7 +1021,7 @@ export default function RequirementDetail() {
                                       );
                                     }}
                                   >
-                                    {shapeOptions.map((option, index) => (
+                                    {shapeOptions.map((option) => (
                                       <Option
                                         key={option.label}
                                         value={option.value}
@@ -1029,7 +1030,7 @@ export default function RequirementDetail() {
                                           width={20}
                                           src={option?.icon}
                                           alt="lamp"
-                                        />{' '}
+                                        />
                                         {option.label}
                                       </Option>
                                     ))}
@@ -1107,11 +1108,6 @@ export default function RequirementDetail() {
                                                           );
                                                         }
                                                       );
-                                                    console.log(
-                                                      value,
-                                                      'top',
-                                                      hasDuplicate
-                                                    );
                                                     if (hasDuplicate) {
                                                       callback(
                                                         '属性名称不能重复'
@@ -1167,6 +1163,15 @@ export default function RequirementDetail() {
                                                 attrGroup.attribute_group_class
                                               }
                                               onChange={(value) => {
+                                                updateNestedValue(
+                                                  [
+                                                    labelIndex,
+                                                    'label_info_attribute_groups',
+                                                    groupIndex,
+                                                    'attribute_group_class'
+                                                  ],
+                                                  parseInt(value)
+                                                );
                                                 // 切换到输入框的时候 清空对应属性组的选项
                                                 if (parseInt(value) === 3) {
                                                   updateNestedValue(
@@ -1179,15 +1184,6 @@ export default function RequirementDetail() {
                                                     []
                                                   );
                                                 }
-                                                updateNestedValue(
-                                                  [
-                                                    labelIndex,
-                                                    'label_info_attribute_groups',
-                                                    groupIndex,
-                                                    'attribute_group_class'
-                                                  ],
-                                                  parseInt(value)
-                                                );
                                               }}
                                             >
                                               <Option key={1} value={1}>
@@ -1300,7 +1296,8 @@ export default function RequirementDetail() {
                                             onChange={(checked) => {
                                               // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
                                               if (checked) {
-                                                const newData = [...datalist];
+                                                const newData =
+                                                  _.cloneDeep(datalist);
                                                 newData[
                                                   labelIndex
                                                 ].label_info_attribute_groups?.[
@@ -1315,7 +1312,8 @@ export default function RequirementDetail() {
                                                 setDatalist(newData);
                                               } else {
                                                 // 取消选中的时候删除增加的内容
-                                                const newItems = [...datalist];
+                                                const newItems =
+                                                  _.cloneDeep(datalist);
                                                 if (
                                                   newItems[labelIndex]
                                                     .label_info_attribute_groups?.[
@@ -1408,34 +1406,13 @@ export default function RequirementDetail() {
                                                     }
                                                   >
                                                     {console.log(
-                                                      attrIndex !== 0,
-                                                      attrIndex ===
-                                                        attrGroup
-                                                          .label_info_attribute
-                                                          ?.length -
-                                                          1,
-                                                      attrGroup
-                                                        ?.label_info_attribute[
-                                                        attrIndex
-                                                      ].input_type === 2,
-                                                      'top ----'
+                                                      attr?.attribute_name_cn
                                                     )}
                                                     <Input
                                                       type="text"
                                                       placeholder="请输入选项名称"
                                                       value={
-                                                        attrIndex !== 0 &&
-                                                        attrIndex ===
-                                                          attrGroup
-                                                            .label_info_attribute
-                                                            ?.length -
-                                                            1 &&
-                                                        attrGroup
-                                                          ?.label_info_attribute[
-                                                          attrIndex
-                                                        ].input_type === 2
-                                                          ? '标准时的输入内容'
-                                                          : attr.attribute_name_cn
+                                                        attr.attribute_name_cn
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
@@ -1464,22 +1441,14 @@ export default function RequirementDetail() {
                                                     }
                                                     field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
                                                   >
+                                                    {console.log(
+                                                      attr?.attribute_name_en
+                                                    )}
                                                     <Input
                                                       placeholder="展示在标注页面的名称"
                                                       type="text"
                                                       value={
-                                                        attrIndex !== 0 &&
-                                                        attrIndex ===
-                                                          attrGroup
-                                                            ?.label_info_attribute
-                                                            ?.length -
-                                                            1 &&
-                                                        attrGroup
-                                                          ?.label_info_attribute[
-                                                          attrIndex
-                                                        ].input_type === 2
-                                                          ? '其他'
-                                                          : '2'
+                                                        attr.attribute_name_en
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
