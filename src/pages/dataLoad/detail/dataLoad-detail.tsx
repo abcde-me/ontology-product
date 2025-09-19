@@ -145,10 +145,10 @@ const DataLoadDetail = () => {
 
   const judgmentTask = () => {
     getDetailList();
-    const boo = detailList?.findIndex(
-      (item) => item.status == 'succeed' || item.status == 'stopping'
-    );
-    setRunningFlag(boo == -1 ? false : true);
+    // const boo = detailList?.findIndex(
+    //   (item) => item.status == 'succeed' || item.status == 'stopping'
+    // );
+    // setRunningFlag(boo == -1 ? false : true);
   };
   // 5s轮询一次
   useInterval(judgmentTask, 5000);
