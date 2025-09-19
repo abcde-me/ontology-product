@@ -682,7 +682,10 @@ export async function getImgJobLabels(requirementId?: string) {
           attr.attribute_group_class === 3
             ? ['']
             : attr.label_info_attribute.map((la) => la.attribute_name_cn),
-        keys: attr.label_info_attribute.map((la) => la.attribute_name_en)
+        keys:
+          attr.attribute_group_class === 3
+            ? ['']
+            : attr.label_info_attribute.map((la) => la.attribute_name_en)
       });
     }
     labels.push(labelTpl);
