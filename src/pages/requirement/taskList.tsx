@@ -291,8 +291,13 @@ export default function Requirement() {
                 setSearchValue(null);
                 setIsClickClear(true);
               }}
+              onSearch={() => {
+                getList();
+                setCurrent(1);
+              }}
               onPressEnter={() => {
                 getList();
+                setCurrent(1);
               }}
               onChange={(val) => {
                 setSearchValue(val);
