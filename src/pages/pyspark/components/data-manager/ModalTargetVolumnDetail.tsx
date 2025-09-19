@@ -81,18 +81,6 @@ const FileList = (props) => {
     handleTableChange
   } = useTableList({ volumn });
 
-  // 在组件挂载后移除输入框焦点
-  useEffect(() => {
-    if (inputRef.current) {
-      // 延迟执行，确保输入框已经渲染并获得焦点
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.blur();
-        }
-      }, 100);
-    }
-  }, []);
-
   return (
     <div>
       <Form autoComplete="off" layout="inline">
