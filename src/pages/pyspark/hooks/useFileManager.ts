@@ -255,8 +255,6 @@ export const useFileManager = (
 
         if (renameRes.status !== 200) {
           Message.error(renameRes?.message ?? '重命名失败');
-          // 失败也刷新当前文件夹列表，防止节点丢失
-          await getRawPythonList(currentFolderId);
           return null;
         }
 
@@ -273,8 +271,6 @@ export const useFileManager = (
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
-        // 失败也刷新当前文件夹列表，防止节点丢失
-        await getRawPythonList(currentFolderId);
         return null;
       }
     },
