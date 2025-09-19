@@ -10,7 +10,7 @@ import {
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
-import { getTargetFileTypeList } from '@/api/dataCatalog';
+import { getSourceFileTypeList } from '@/api/dataCatalog';
 import { getSourceDataFileList } from '@/api/dataCatalog';
 
 const FormItem = Form.Item;
@@ -153,7 +153,7 @@ const useTableList = (props) => {
     showTotal: true,
     total: 0,
     pageSize: 10,
-    pageSizeOptions: [10, 20, 50, 100],
+    sizeOptions: [10, 20, 50, 100],
     current: 1,
     pageSizeChangeResetCurrent: true
   });
@@ -227,20 +227,20 @@ const useTableList = (props) => {
   useEffect(() => {
     async function loadFileTypeList() {
       try {
-        const res = await getTargetFileTypeList();
-        if (
-          res &&
-          res.data &&
-          res.data.dst_file_type &&
-          Array.isArray(res.data.dst_file_type)
-        ) {
-          const result = res.data.dst_file_type.map((type) => ({
+        const res = await getSourceFileTypeList({
+          id: fromId
+        });
+
+        if (res?.status !== 200 || !Array.isArray(res?.data)) {
+          return;
+        }
+
+        setFileTypeList(
+          res.data.map((type) => ({
             text: type,
             value: type
-          }));
-
-          setFileTypeList((prev) => [...prev, ...result]);
-        }
+          }))
+        );
       } catch (error) {
         console.error('获取文件类型列表失败:', error);
       }
@@ -258,20 +258,14 @@ const useTableList = (props) => {
         page: pagination?.current || 1,
         page_size: pagination?.pageSize || 10,
         file_name: searchParams.file_name || '',
-        file_type: sorter?.file_type || [],
+        file_type: searchParams.file_type || [],
         start: searchParams.datetime_range
           ? searchParams.datetime_range[0]
           : undefined,
         end: searchParams.datetime_range
           ? searchParams.datetime_range[1]
           : undefined,
-        sort:
-          filters?.direction == undefined
-            ? ''
-            : filters?.direction == 'ascend'
-              ? 'asc'
-              : 'desc',
-        sort_by: filters?.field == undefined ? '' : filters?.field
+        sort: searchParams.sort
       };
 
       setLoading(true);
@@ -307,13 +301,21 @@ const useTableList = (props) => {
     });
   }
 
-  function handleTableChange(pagination: any, filters: any, sorter: any) {
+  function handleTableChange(pagination: any, sorter: any, filters: any) {
     setSearchParams((prev) => {
       return {
         ...prev,
         pagination,
-        ...(filters ? filters : {}),
-        ...(sorter ? sorter : {})
+        ...(filters
+          ? {
+              file_type: filters.file_type
+            }
+          : {}),
+        ...(sorter
+          ? {
+              sort: sorter.direction === 'ascend' ? 'asc' : 'desc'
+            }
+          : {})
       };
     });
   }

@@ -181,7 +181,7 @@ const useTableList = (props) => {
     showTotal: true,
     total: 0,
     pageSize: 10,
-    pageSizeOptions: [10, 20, 50, 100],
+    sizeOptions: [10, 20, 50, 100],
     current: 1,
     pageSizeChangeResetCurrent: true
   });
@@ -247,7 +247,7 @@ const useTableList = (props) => {
           value: type
         }));
 
-        setFileTypeList((prev) => [...prev, ...result]);
+        setFileTypeList(result);
       } catch (error) {
         console.error('获取文件类型列表失败:', error);
       }
