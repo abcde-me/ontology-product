@@ -105,8 +105,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       children: handleChildren(catalog.children)
     }));
   };
-
-  useEffect(() => {
+  const getTreeDataList = () => {
     let newTreeData: any[] = [];
     try {
       getCatalogList({
@@ -122,10 +121,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 title: item.name,
                 key: String(item.id),
                 level: 1,
+                disabled: true,
                 children:
                   item?.children?.数据卷 && item.children.数据卷.length > 0
                     ? [
                         {
+                          disabled: true,
                           level: 2,
                           title: '数据卷',
                           key: String(item.id) + '数据卷',
@@ -145,6 +146,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         setTreeData(newTreeData);
       });
     } catch (err) {}
+  };
+  useEffect(() => {
+    getTreeDataList();
   }, [visible]);
 
   // 树的内容
@@ -331,6 +335,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               placeholder="请输入名称搜索"
               onChange={(value) => {
                 setSearchValue(value);
+              }}
+              onPressEnter={() => {
+                getTreeDataList();
               }}
             />
           </div>

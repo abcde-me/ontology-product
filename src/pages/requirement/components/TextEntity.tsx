@@ -296,7 +296,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     >
                       <FormItem
                         style={{ paddingLeft: 16, marginRight: 8 }}
-                        field={`relation_name_cn + ${item?.relation_id}`}
+                        field={`relation_name_en${item?.relation_id}`}
                         label="关系名称"
                         rules={[
                           {
@@ -309,7 +309,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                                   // 排除当前项
                                   return (
                                     otherIndex !== index &&
-                                    otherItem.relation_name_cn === value &&
+                                    otherItem.relation_name_en === value &&
                                     value.trim() !== ''
                                   );
                                 }
@@ -329,11 +329,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <Input
                           placeholder="用于储存标注结果"
                           style={{ width: 260 }}
-                          value={item.relation_name_cn}
+                          value={item.relation_name_en}
                           onChange={(value) => {
                             handleRelationFieldChange(
                               index,
-                              'relation_name_cn',
+                              'relation_name_en',
                               value
                             );
                           }}
@@ -353,11 +353,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         <Input
                           placeholder="展示在标注页面的名称"
                           style={{ width: 250 }}
-                          value={item.relation_name_en}
+                          value={item.relation_name_cn}
                           onChange={(value) => {
                             handleRelationFieldChange(
                               index,
-                              'relation_name_en',
+                              'relation_name_cn',
                               value
                             );
                           }}
@@ -402,6 +402,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value={item?.start_entity_labels}
                             >
                               {entityRelations &&
+                                entityRelations?.length > 0 &&
                                 entityRelations?.map((item) => {
                                   return (
                                     <Option
@@ -434,6 +435,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value={item?.target_entity_labels}
                             >
                               {entityRelations &&
+                                entityRelations?.length > 0 &&
                                 entityRelations.map((option, index) => (
                                   <Option
                                     disabled={!option.label_name_en}
