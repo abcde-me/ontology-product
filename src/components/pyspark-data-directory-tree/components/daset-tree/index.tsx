@@ -133,6 +133,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             blockNode
             treeData={treeData}
             expandedKeys={expandedKeys}
+            className="pyspark-dataset-tree__content-tree"
             onExpand={setExpandedKeys}
             icons={(props) => ({
               switcherIcon:
