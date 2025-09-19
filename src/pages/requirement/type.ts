@@ -68,13 +68,13 @@ export enum AnnotationTypeContentCode {
 
 export enum LabelShape {
   /** 矩形 */
-  RECTANGLE = 1,
+  RECTANGLE = 3,
   /** 多边形 */
-  POLYGON = 2,
+  POLYGON = 4,
   /** 线段 */
-  SEGMENT = 3,
+  SEGMENT = 2,
   /** 特征点 */
-  POINT = 4,
+  POINT = 1,
   /** 椭圆 */
   ELLIPSE = 5
   // /** 立方体 */
