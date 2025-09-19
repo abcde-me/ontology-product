@@ -70,6 +70,10 @@ export interface GetCatalogListParams {
    * 搜索关键字
    */
   search?: string;
+  /**
+   * 获取卷大小
+   */
+  fetch_volume_size?: boolean;
 }
 
 export interface PurpleVolume {
@@ -147,6 +151,9 @@ export interface FluffyVolume {
   file_name?: string;
   file_id?: number;
   file_uuid?: string;
+  extends?: {
+    volume_size?: number;
+  };
 }
 
 export interface SrcChildren {

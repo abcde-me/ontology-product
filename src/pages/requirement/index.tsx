@@ -90,10 +90,6 @@ export default function Requirement() {
           status: sortValue.status
         }
       };
-      const filtered1 = omitBy(
-        params.filters,
-        (value: string | number) => isNil(value) || value === ''
-      );
       const res = await getAnnotationList(params);
       if (res.code === 0 && res.data) {
         setRequirementData(res.data.result || []);
@@ -360,8 +356,13 @@ export default function Requirement() {
                 setSearchValue('');
                 setIsClickClear(true);
               }}
+              onSearch={() => {
+                getList();
+                setCurrent(1);
+              }}
               onPressEnter={() => {
                 getList();
+                setCurrent(1);
               }}
               onChange={(val) => {
                 setSearchValue(val);
