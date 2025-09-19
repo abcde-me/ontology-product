@@ -109,6 +109,8 @@ export interface OpenPythonItemRes {
   running_status: RunningStatus;
   /** Python文件代码内容 */
   data: string;
+  /** 最后修改时间 */
+  last_modified: string;
 }
 export interface SavePythonItemReq {
   /** 文件id */
