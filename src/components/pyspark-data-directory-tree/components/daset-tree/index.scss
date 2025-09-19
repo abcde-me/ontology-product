@@ -48,6 +48,60 @@
   }
 
   // 第三部分：列表
+  .pyspark-dataset-tree__content
+    .pyspark-dataset-tree__content-tree
+    .arco-tree-node {
+    position: relative;
+    align-items: center;
+    padding-left: 4px;
+
+    // 去除选中时的高亮
+    &.arco-tree-node-selected {
+      background-color: transparent;
+      color: var(--color-text-2);
+      font-weight: 400;
+
+      .arco-tree-node-switcher {
+        color: var(--color-text-2);
+      }
+
+      .arco-tree-node-title {
+        background-color: transparent;
+      }
+    }
+
+    &:hover {
+      background-color: var(--color-bg-5);
+      color: #007dfa;
+
+      // .arco-tree-node-title {
+      //   background-color: var(--color-bg-5);
+      // }
+
+      .pyspark-dataset-tree__node-title {
+        max-width: 136px;
+        color: #007dfa;
+      }
+
+      .pyspark-dataset-tree__node-title-file {
+        max-width: 116px;
+      }
+
+      .pyspark-dataset-tree__node-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &-title-text {
+      flex-grow: 1;
+    }
+
+    &-custom-icon {
+      margin-right: 4px;
+    }
+  }
+
   &__node {
     display: flex;
     align-items: center;
@@ -96,36 +150,6 @@
     justify-content: space-between;
     width: 100%;
     position: relative;
-  }
-
-  .arco-tree-node {
-    position: relative;
-    align-items: center;
-    padding-left: 4px;
-
-    &:hover {
-      .pyspark-dataset-tree__node-title {
-        max-width: 136px;
-        color: #007dfa;
-      }
-
-      .pyspark-dataset-tree__node-title-file {
-        max-width: 116px;
-      }
-
-      .pyspark-dataset-tree__node-actions {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-
-    &-title-text {
-      flex-grow: 1;
-    }
-
-    &-custom-icon {
-      margin-right: 4px;
-    }
   }
 
   // 空状态
