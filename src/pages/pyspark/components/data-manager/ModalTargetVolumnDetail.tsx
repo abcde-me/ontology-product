@@ -81,18 +81,6 @@ const FileList = (props) => {
     handleTableChange
   } = useTableList({ volumn });
 
-  // 在组件挂载后移除输入框焦点
-  useEffect(() => {
-    if (inputRef.current) {
-      // 延迟执行，确保输入框已经渲染并获得焦点
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.blur();
-        }
-      }, 100);
-    }
-  }, []);
-
   return (
     <div>
       <Form autoComplete="off" layout="inline">
@@ -193,7 +181,7 @@ const useTableList = (props) => {
     showTotal: true,
     total: 0,
     pageSize: 10,
-    pageSizeOptions: [10, 20, 50, 100],
+    sizeOptions: [10, 20, 50, 100],
     current: 1,
     pageSizeChangeResetCurrent: true
   });
@@ -259,7 +247,7 @@ const useTableList = (props) => {
           value: type
         }));
 
-        setFileTypeList((prev) => [...prev, ...result]);
+        setFileTypeList(result);
       } catch (error) {
         console.error('获取文件类型列表失败:', error);
       }
