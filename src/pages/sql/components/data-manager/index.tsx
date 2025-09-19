@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Message, Typography } from '@arco-design/web-react';
-import DataDirectoryTree from '@/components/data-directory-tree';
+import DataDirectoryTree from '@/components/sql-data-directory-tree';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
 import { Db } from '@/api/dataCatalog';
-import { DataDirectoryTreeFrom } from '@/components/data-directory-tree/types';
+import { DataDirectoryTreeFrom } from '@/components/sql-data-directory-tree/types';
 import ModalDbDetail from './ModalDbDetail';
 import ModalDatasetDetail from './ModalDatasetDetail';
 import copy from 'copy-to-clipboard';
@@ -37,25 +37,16 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据集插入
-  const handleInsertDataset = (dataset: any) => {
+  const handleInsertDataset = (nodeData: any) => {
+    console.log(nodeData);
     const isEditorFocused = getIsEditorFocused?.() ?? false;
-    console.log(
-      '数据集插入:',
-      dataset,
-      'isEditorFocused:',
-      isEditorFocused,
-      'onInsertContent:',
-      onInsertContent
-    );
-
     let copyText = '';
-
-    if (dataset.cn_name) {
+    if (nodeData.type === 'dataset') {
+      copyText = `\`${nodeData?.data?.database}\`.\`${nodeData?.data?.latest_table}\``;
+    }
+    if (nodeData.type === 'scheam') {
       // `字段名`
-      copyText = `\`${dataset.name}\``;
-    } else {
-      // `库名`.`表名`
-      copyText = `\`${dataset.database}\`.\`${dataset.latest_table}\``;
+      copyText = `\`${nodeData.title}\``;
     }
 
     if (isEditorFocused && onInsertContent) {
