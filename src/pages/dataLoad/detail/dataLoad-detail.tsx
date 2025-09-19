@@ -355,7 +355,11 @@ const DataLoadDetail = () => {
               >
                 {listDetail && (
                   <EllipsisPopoverCom
-                    value={listDetail.data_path_name}
+                    value={
+                      listDetail?.source_type === 'db'
+                        ? listDetail?.data_path_name + '/' + listDetail?.db_name
+                        : listDetail?.data_path_name
+                    }
                     isEdit={false}
                   />
                 )}
