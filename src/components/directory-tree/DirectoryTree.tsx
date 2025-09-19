@@ -483,8 +483,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               (item) =>
                 !item.isAdd &&
                 !item.showInput &&
-                !item.dataRef.isAdd &&
-                !item.dataRef.showInput
+                !item.dataRef?.isAdd &&
+                !item.dataRef?.showInput
             );
             setTreeData(newTreeData);
             setInputValue('');
@@ -513,14 +513,18 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           const rename = await onRename?.(finalName, node);
 
           if (!rename) {
-            // 创建失败，移除临时添加的节点
-            const newTreeData = treeData.filter(
-              (item) =>
-                !item.isAdd &&
-                !item.showInput &&
-                !item.dataRef.isAdd &&
-                !item.dataRef.showInput
-            );
+            // 重命名失败，重置输入框状态
+            const newTreeData = treeData.map((item) => {
+              if (String(item?.id) === String(node.dataRef?.id)) {
+                return {
+                  ...item,
+                  showInput: false,
+                  isAdd: false,
+                  dataRef: { ...item.dataRef, showInput: false, isAdd: false }
+                };
+              }
+              return item;
+            });
             setTreeData(newTreeData);
             setInputValue('');
             setDefaultName('');
@@ -528,15 +532,21 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           }
         } catch (e) {
           Message.error('重命名失败');
-          // 创建失败，移除临时添加的节点
-          const newTreeData = treeData.filter(
-            (item) =>
-              !item.isAdd &&
-              !item.showInput &&
-              !item.dataRef.isAdd &&
-              !item.dataRef.showInput
-          );
+          // 重命名失败，重置输入框状态
+          const newTreeData = treeData.map((item) => {
+            if (String(item?.id) === String(node.dataRef?.id)) {
+              return {
+                ...item,
+                showInput: false,
+                isAdd: false,
+                dataRef: { ...item.dataRef, showInput: false, isAdd: false }
+              };
+            }
+            return item;
+          });
           setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
         }
       }
 
@@ -572,7 +582,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               return false;
             }
             // 删除成功后重新加载文件列表
-            handleSearchClear();
+            // handleSearchClear();
           } catch (e) {
             Message.error('删除失败');
             return false;

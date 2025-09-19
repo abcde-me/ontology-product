@@ -10,6 +10,8 @@ import {
   stopRunPythonItem,
   getRunLog
 } from '@/api/pyspark';
+import { formatTime } from '@/utils/format';
+import timeFormattig from '@/utils/timeFormatting';
 
 interface UseEditorOptions {
   activeTab?: string;
@@ -230,6 +232,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 更新编辑器内容
             setEditorContent(fileData.data);
 
+            setLastAutoSave(response?.data?.last_modified);
+
             // 更新运行状态
             setExecid(String(fileData.execid));
 
@@ -273,7 +277,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
           if (res?.status === 200) {
             setLastAutoSave(
-              res?.data?.last_modified ?? new Date().toLocaleTimeString()
+              res?.data?.last_modified ?? timeFormattig(new Date())
             );
             return res.data;
           }
@@ -321,7 +325,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setLastAutoSave(new Date().toLocaleTimeString());
+    setLastAutoSave(saveRes.data.last_modified ?? timeFormattig(new Date()));
     setExecid('');
 
     try {
