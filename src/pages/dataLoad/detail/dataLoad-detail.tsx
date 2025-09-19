@@ -30,6 +30,8 @@ import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHistory } from 'react-router';
 import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
+import { useInterval } from '@/utils/useInterval';
+
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -148,6 +150,9 @@ const DataLoadDetail = () => {
     );
     setRunningFlag(boo == -1 ? false : true);
   };
+  // 5s轮询一次
+  useInterval(judgmentTask, 5000);
+
   // 停止中的过程
   const StopeJudgmentTask = async () => {
     try {
