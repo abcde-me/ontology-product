@@ -138,6 +138,12 @@ const EditorWorkspaceContent: React.FC<{
   const insertContentAtCursor = useCallback((contentToInsert: string) => {
     if (!editorRef.current?.view) return;
 
+    // 检查权限
+    if (!hasUpdatePermission) {
+      Message.warning('没有编辑权限，无法插入内容');
+      return;
+    }
+
     const view = editorRef.current.view;
     const currentPos = view.state.selection.main.head;
 

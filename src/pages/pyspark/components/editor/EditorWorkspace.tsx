@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useEffect } from 'react';
-import { Button, Space } from '@arco-design/web-react';
+import { Button, Message, Space } from '@arco-design/web-react';
 import {
   IconUpload,
   IconSettings,
@@ -182,6 +182,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     // 插入内容到光标位置
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
       if (!editorRef.current?.view) return;
+
+      // 检查权限
+      if (!getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)) {
+        Message.warning('没有编辑权限，无法插入内容');
+        return;
+      }
 
       const view = editorRef.current.view;
       const currentPos = view.state.selection.main.head;
