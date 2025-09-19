@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   DatePicker,
   Form,
@@ -66,6 +66,7 @@ export default ModalVolumnDetail;
 const FileList = (props) => {
   const { volumn } = props;
   const [searchType, setSearchType] = useState('content');
+  const inputRef = useRef<any>(null);
 
   const handleSearchTypeChange = (value) => {
     setSearchType(value);
@@ -79,6 +80,18 @@ const FileList = (props) => {
     handleValuesChange,
     handleTableChange
   } = useTableList({ volumn });
+
+  // 在组件挂载后移除输入框焦点
+  useEffect(() => {
+    if (inputRef.current) {
+      // 延迟执行，确保输入框已经渲染并获得焦点
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.blur();
+        }
+      }, 100);
+    }
+  }, []);
 
   return (
     <div>
@@ -101,6 +114,7 @@ const FileList = (props) => {
               </Select.Option>
             </Select>
             <Input.Search
+              ref={inputRef}
               onSearch={(value) => {
                 if (searchType === 'content') {
                   handleValuesChange({ search_content: value, search_id: '' });
