@@ -70,27 +70,25 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库详情查看
-  const handleViewDbDetail = (database: any, hierarchyData?: any) => {
-    console.log('数据库详情:', database);
-    console.log('层级选择数据:', hierarchyData);
+  const handleViewDbDetail = (nodeData: any) => {
+    console.log('数据库详情:', nodeData);
+    const { type } = nodeData?.data;
 
-    const level = hierarchyData.currentViewLevel;
-
-    if (level === 'db-item') {
+    if (type === 'db_item') {
       const searchParams = {
-        database: database.name,
-        path_id: hierarchyData.selectedDb.id
+        database: nodeData?.data?.name,
+        path_id: nodeData?.data?.parentDB?.id
       };
       setDbFromOrigin(searchParams);
       setDbDetailVisible(true);
     }
 
-    if (level === 'database-tables') {
+    if (type === 'table') {
       const searchParams = {
-        databaseName: hierarchyData.selectedDbItem.name,
-        path_id: hierarchyData.selectedDb.id,
-        table_id: database.table_id,
-        tableName: database.table_name
+        databaseName: nodeData?.data?.parentDBItem?.name,
+        path_id: nodeData?.data?.parentDBItem?.parentDB?.id,
+        table_id: nodeData?.data?.table_id,
+        tableName: nodeData?.data?.table_name
       };
       setTableFromOrigin(searchParams);
       setTableDetailVisible(true);
@@ -98,30 +96,23 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   // 处理数据库插入
-  const handleDbInsert = (database: any, hierarchyData?: any) => {
+  const handleDbInsert = (data: any) => {
+    console.log(data, 'nodeData');
     const isEditorFocused = getIsEditorFocused?.() ?? false;
-
-    console.log('数据库插入:', database, 'isEditorFocused:', isEditorFocused);
-    console.log('层级选择数据:', hierarchyData);
-
-    const level = hierarchyData.currentViewLevel;
+    const { type } = data;
     let copyText = '';
-
-    if (level === 'db-item') {
-      // `库名`
-      copyText = `\`${database.name}\``;
+    // 库
+    if (type === 'db_item') {
+      copyText = `\`${data?.name}\``;
     }
-
-    if (level === 'database-tables') {
-      // `库名.表名`
-      copyText = `\`${hierarchyData?.selectedDbItem?.name}\`.\`${database.table_name}\``;
+    // 表
+    if (type === 'table') {
+      copyText = `\`${data?.parentDBItem?.name}\`.\`${data?.table_name}\``;
     }
-
-    if (level === 'table-detail') {
-      // `字段名`
-      copyText = `\`${database.name}\``;
+    // 字段
+    if (type === 'column') {
+      copyText = `\`${data.name}\``;
     }
-
     if (isEditorFocused && onInsertContent) {
       // 编辑器聚焦时插入内容
       onInsertContent(copyText);
@@ -140,7 +131,6 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
 
       <div className="tab-tree sider-container">
         <DataDirectoryTree
-          from={DataDirectoryTreeFrom.SQL}
           // 数据集插入
           onInsertDataset={handleInsertDataset}
           // 数据集详情
