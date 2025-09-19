@@ -245,6 +245,9 @@ export const useFileManager = (
 
         Message.success('重命名成功');
 
+        // 刷新列表
+        await getRawSqlScriptList();
+
         // 如果重命名的是文件，更新对应的标签页标题
         if (fileId && onFileRename) {
           onFileRename(String(fileId), finalName);
@@ -255,9 +258,6 @@ export const useFileManager = (
         console.error('重命名失败:', error);
         Message.error('重命名失败');
         return null;
-      } finally {
-        // 成狗/失败都刷新列表,防止节点丢失
-        await getRawSqlScriptList();
       }
     },
     [getRawSqlScriptList, onFileRename]
@@ -267,7 +267,9 @@ export const useFileManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript(node?.dataRef?.script_id);
+        const copyRes = await copySqlScript(node?.dataRef?.script_id, {
+          script_file_id: Date.now().toString()
+        });
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
