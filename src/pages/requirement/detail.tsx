@@ -53,6 +53,8 @@ import {
 import './detail.scss';
 import { group } from 'console';
 import datasetList from '../workflowConfig/workflow/nodes/knowledge-retrieval/components/dataset-list';
+import { G } from '@svgdotjs/svg.js';
+import { gradientDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -130,7 +132,7 @@ export default function RequirementDetail() {
   // 基础配置
 
   const handleChildData = (data: any, key) => {
-    const newSetDataContent = data.map((item) => {
+    const newSetDataContent = data?.map((item) => {
       return {
         dir_name: String(key),
         load_start_time: convertToUTCFormat(item?.start_time),
@@ -244,7 +246,7 @@ export default function RequirementDetail() {
 
               // 清除属性组中的所有属性字段
               if (group.label_info_attribute) {
-                group.label_info_attribute.forEach((_, attrIndex) => {
+                group.label_info_attribute?.forEach((_, attrIndex) => {
                   form1.resetFields(
                     `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`
                   );
@@ -280,79 +282,22 @@ export default function RequirementDetail() {
    * @param {number} groupIndex - 要删除的属性组索引
    */
   // 删除属性组函数的完整修复
-  const deleteAttributeGroup = (labelId, groupIndex) => {
+  const deleteAttributeGroup = (attribute_id, groupIndex) => {
     // 查找对应的labelIndex
-    const labelIndex = datalist.findIndex((item) => item.label_id === labelId);
-
-    if (labelIndex !== -1) {
-      // 关键修复1: 先获取当前数据的快照，确保删除的是正确的数据
-      const updatedDatalist = _.cloneDeep(datalist);
-      const currentGroups =
-        getNestedValue(updatedDatalist, [
-          labelIndex,
-          'label_info_attribute_groups'
-        ]) || [];
-
-      // 关键修复2: 使用splice方法直接删除指定索引的元素
-      const newGroups = [...currentGroups];
-      newGroups.splice(groupIndex, 1);
-
-      // 关键修复3: 使用updateNestedValue替代updateField，确保完整更新状态
-      updateNestedValue([labelIndex, 'label_info_attribute_groups'], newGroups);
-
-      // 清除表单中与该属性组相关的所有字段
-      // 关键修复4: 同时使用labelId和labelIndex两种方式清除表单，确保兼容性
-      // 使用labelIndex方式
-      form1.resetFields(
-        `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`
-      );
-      form1.resetFields(
-        `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_class`
-      );
-      form1.resetFields(
-        `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_type`
-      );
-
-      // 额外使用labelId方式（可能是实际绑定的方式）
-      form1.resetFields(
-        `label_info_attribute_groups_${labelId}_${groupIndex}_attribute_group_name`
-      );
-      form1.resetFields(
-        `label_info_attribute_groups_${labelId}_${groupIndex}_attribute_group_class`
-      );
-      form1.resetFields(
-        `label_info_attribute_groups_${labelId}_${groupIndex}_attribute_group_type`
-      );
-
-      // 额外清除属性组中可能存在的所有属性字段
-      const deletedGroup = currentGroups[groupIndex];
-      if (deletedGroup?.label_info_attribute) {
-        deletedGroup.label_info_attribute.forEach((_, attrIndex) => {
-          // 同样同时使用两种方式清除
-          // 使用labelIndex方式
-          form1.resetFields(
-            `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`
-          );
-          form1.resetFields(
-            `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`
-          );
-          form1.resetFields(
-            `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`
-          );
-
-          // 使用labelId方式
-          form1.resetFields(
-            `label_info_attribute_groups_${labelId}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`
-          );
-          form1.resetFields(
-            `label_info_attribute_groups_${labelId}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`
-          );
-          form1.resetFields(
-            `label_info_attribute_groups_${labelId}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`
-          );
-        });
-      }
-    }
+    const newData = datalist?.[0]?.label_info_attribute_groups?.filter(
+      (item) => item?.attribute_id !== attribute_id
+    );
+    const labelIndex = datalist.findIndex(
+      (item) => item.label_id === attribute_id
+    );
+    setDatalist(
+      datalist?.map((item) => {
+        return {
+          ...item,
+          label_info_attribute_groups: newData
+        };
+      })
+    );
   };
   /**
    * 删除属性
@@ -490,9 +435,9 @@ export default function RequirementDetail() {
           // 为属性组中的每个属性生成新ID，但保留所有属性值
           if (
             group.label_info_attribute &&
-            group.label_info_attribute.length > 0
+            group.label_info_attribute?.length > 0
           ) {
-            newGroup.label_info_attribute = group.label_info_attribute.map(
+            newGroup.label_info_attribute = group.label_info_attribute?.map(
               (attr) => {
                 const newAttr = { ...attr };
                 newAttr.label_info_id = uuidV4();
@@ -729,7 +674,7 @@ export default function RequirementDetail() {
             return {
               ...group,
               order_num: item?.label_info_attribute_groups?.length + 1,
-              label_info_attribute: group.label_info_attribute.map(
+              label_info_attribute: group.label_info_attribute?.map(
                 (attribute) => {
                   return {
                     ...attribute,
@@ -1178,7 +1123,7 @@ export default function RequirementDetail() {
                                       );
                                     }}
                                   >
-                                    {shapeOptions.map((option) => (
+                                    {shapeOptions?.map((option) => (
                                       <Option
                                         key={option.value}
                                         value={option.value}
@@ -1436,7 +1381,7 @@ export default function RequirementDetail() {
                                                 // 删除当前属性组
                                                 if (type !== 'detail') {
                                                   deleteAttributeGroup(
-                                                    item.label_id,
+                                                    attrGroup.attribute_id,
                                                     groupIndex
                                                   );
                                                 }
@@ -1460,7 +1405,7 @@ export default function RequirementDetail() {
                                               disabled={type === 'detail'}
                                               style={{ whiteSpace: 'nowrap' }}
                                               checked={
-                                                attrGroup.label_info_attribute.some(
+                                                attrGroup.label_info_attribute?.some(
                                                   (item) =>
                                                     item.input_type === 2
                                                 )
@@ -1510,7 +1455,7 @@ export default function RequirementDetail() {
                                             </Checkbox>
                                           </div>
                                         )}
-                                        {attrGroup?.label_info_attribute.map(
+                                        {attrGroup?.label_info_attribute?.map(
                                           (attr, attrIndex) => (
                                             <div
                                               key={attr.label_info_id}
@@ -1698,7 +1643,7 @@ export default function RequirementDetail() {
                                     droplist={
                                       <Menu>
                                         {templateData?.length > 0 &&
-                                          templateData.map(
+                                          templateData?.map(
                                             (TempItem, index) => (
                                               <Menu.Item
                                                 // 如果当前标签已经选择了模版，就不能再次选择
@@ -1747,7 +1692,7 @@ export default function RequirementDetail() {
                     {activeTab ===
                       LabelInfoAttributeGroupType.TEMPLATE_ATTRIBUTE && (
                       <div className="attribute-content">
-                        {templateData.map((attrGroup, labelIndex) => (
+                        {templateData?.map((attrGroup, labelIndex) => (
                           <div className="sortable-item" key={labelIndex}>
                             <div
                               key={labelIndex}
@@ -1878,7 +1823,7 @@ export default function RequirementDetail() {
                                       // 点击icon添加一个选项，选项插入是同组最后一项
                                       if (type !== 'detail') {
                                         setTemplateData(
-                                          templateData.map((g) => {
+                                          templateData?.map((g) => {
                                             if (
                                               g.attribute_id ===
                                               attrGroup.attribute_id
@@ -1936,7 +1881,7 @@ export default function RequirementDetail() {
                                     ? '多选选项'
                                     : ''}
                               </div>
-                              {attrGroup.label_info_attribute.map(
+                              {attrGroup.label_info_attribute?.map(
                                 (attr, attrIndex) => (
                                   <div
                                     key={attr.label_info_id}
@@ -2013,8 +1958,8 @@ export default function RequirementDetail() {
                                             }}
                                           />
                                         </FormItem>
-                                        {attrGroup.label_info_attribute.length >
-                                          1 && (
+                                        {attrGroup.label_info_attribute
+                                          ?.length > 1 && (
                                           <IconDelete
                                             className={`${type === 'detail' ? 'is-disabled' : ''}`}
                                             fontSize={16}
@@ -2022,7 +1967,7 @@ export default function RequirementDetail() {
                                               // 删除当前属性组中的选项
                                               if (type !== 'detail') {
                                                 setTemplateData(
-                                                  templateData.map((label) =>
+                                                  templateData?.map((label) =>
                                                     label.attribute_id ===
                                                     attrGroup.attribute_id
                                                       ? {

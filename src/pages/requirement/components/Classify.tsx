@@ -428,7 +428,11 @@ const Classify = (props: ClassifyComponentProps) => {
                     };
                     // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
                     const newTextRelations = [...textRelations];
-                    newTextRelations.splice(index, 0, newItem);
+                    newTextRelations.splice(
+                      textRelations?.length || 0,
+                      0,
+                      newItem
+                    );
                     // 更新排序值
                     newTextRelations.forEach((item, i) => {
                       item.order_num = i + 1;
