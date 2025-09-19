@@ -30,6 +30,8 @@ import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHistory } from 'react-router';
 import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
+import { useInterval } from '@/utils/useInterval';
+
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -143,11 +145,14 @@ const DataLoadDetail = () => {
 
   const judgmentTask = () => {
     getDetailList();
-    const boo = detailList?.findIndex(
-      (item) => item.status == 'succeed' || item.status == 'stopping'
-    );
-    setRunningFlag(boo == -1 ? false : true);
+    // const boo = detailList?.findIndex(
+    //   (item) => item.status == 'succeed' || item.status == 'stopping'
+    // );
+    // setRunningFlag(boo == -1 ? false : true);
   };
+  // 5s轮询一次
+  useInterval(judgmentTask, 5000);
+
   // 停止中的过程
   const StopeJudgmentTask = async () => {
     try {
@@ -355,7 +360,11 @@ const DataLoadDetail = () => {
               >
                 {listDetail && (
                   <EllipsisPopoverCom
-                    value={listDetail.data_path_name}
+                    value={
+                      listDetail?.source_type === 'db'
+                        ? listDetail?.data_path_name + '/' + listDetail?.db_name
+                        : listDetail?.data_path_name
+                    }
                     isEdit={false}
                   />
                 )}

@@ -108,7 +108,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           <div className="empty-content-area">
             <NoData
               description="暂无数据"
-              btnText="新建PySpark文件"
+              btnText={isCanCreate ? '新建PySpark文件' : ''}
               handleBtn={handleCreatePySpark}
             />
           </div>

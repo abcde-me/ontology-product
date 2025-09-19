@@ -401,10 +401,13 @@ const Edit = (props) => {
           console.log('设置TreeSelect初始值:', nodeId);
           setSelectedTreeKeys([nodeId]);
           // 构建显示路径
-          const displayPath = buildTreeSelectDisplayPath(
+          let displayPath = buildTreeSelectDisplayPath(
             directoryData,
             props.detailData.data_path_id
           );
+          props.detailData.source_type === 'db'
+            ? (displayPath = displayPath + '/' + props.detailData.db_name)
+            : null;
           setTreeSelectDisplayValue(displayPath);
           form.setFieldsValue({
             dest_path_display: displayPath, // 显示完整路径
@@ -506,7 +509,8 @@ const Edit = (props) => {
             type: 1,
             cycle_text: obj
           },
-          dest_path_id: pathId
+          dest_path_id: pathId,
+          db_name: props.detailData?.db_name
         };
         console.log(formData);
         const res = await editLoad(formData);
@@ -530,7 +534,8 @@ const Edit = (props) => {
               week: ''
             }
           },
-          dest_path_id: pathId
+          dest_path_id: pathId,
+          db_name: props.detailData?.db_name
         };
         const res = await editLoad(formData);
         if (res.code == '' && res.status == 200) {
@@ -738,7 +743,7 @@ const Edit = (props) => {
                 activeTab="src"
                 onDataRefresh={getdirectoryDataList}
                 dataSourceType={props.detailData.source_type}
-                tableNameNames={props.detailData.table_names}
+                tableNameNames={props.detailData.db_name}
               />
             )}
           >
