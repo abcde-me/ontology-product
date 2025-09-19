@@ -17,7 +17,10 @@ const ModalDatasetDetail = ({
       footer={null}
       onCancel={closeDatasetDetail}
     >
-      <div className="my-dataset-detail pb-[16px]">
+      <div
+        style={{ maxHeight: '700px', overflowY: 'auto' }}
+        className="my-dataset-detail"
+      >
         <DatasetDetail isHideEdit={true} detailId={detailId} />
       </div>
     </Modal>

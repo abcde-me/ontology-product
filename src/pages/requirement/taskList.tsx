@@ -189,15 +189,13 @@ export default function Requirement() {
       dataIndex: 'belong',
       width: 100,
       render: (_, record) =>
-        record.belong ? (
-          <div className="publish-part published">
-            <Success11Icon className="mr-[6px] size-[16px]" />
-            <span>已上线</span>
+        record.belong === 1 ? (
+          <div className="belong-item">
+            <span>个人</span>
           </div>
         ) : (
-          <div className="publish-part not-published">
-            <IconClockCircle className="mr-[6px] size-[16px]" />
-            <span>未上线</span>
+          <div className="belong-item">
+            <span>部门</span>
           </div>
         ),
       filters: [
@@ -206,7 +204,7 @@ export default function Requirement() {
           value: 1
         },
         {
-          text: '组织',
+          text: '部门',
           value: 2
         }
       ]
