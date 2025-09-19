@@ -46,7 +46,8 @@ import {
   updateSqlScriptParams,
   SqlTaskDetailData,
   DatasetsOptionsParams,
-  DatasetsOptionsData
+  DatasetsOptionsData,
+  CopySqlScriptReq
 } from '@/types/sqlApi';
 
 /** 查询目标目录文件列表 卷详情 文件列表 */
@@ -723,9 +724,13 @@ export async function getSqlScriptDetail(
 
 /** SQL脚本复制 */
 export async function copySqlScript(
-  id: string
+  id: string,
+  params: CopySqlScriptReq
 ): Promise<ApiRes<CreateSqlScriptData>> {
-  return await UAPI.RES.sqlCopyApi({ script_id: id }).post().inRegion().do();
+  return await UAPI.RES.sqlCopyApi({ script_id: id })
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 /** SQL执行结果导出到新数据集 */
