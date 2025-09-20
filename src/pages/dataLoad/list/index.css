@@ -2,12 +2,15 @@
   .arco-timepicker-container {
     width: 430px !important;
   }
+
   .arco-table-tr > th {
     background-color: rgb(245, 249, 255) !important;
   }
+
   .arco-timepicker-list {
     width: 50% !important;
   }
+
   /* .jump-a {
     max-width: 160px !important;
     white-space: nowrap !important;
@@ -26,6 +29,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   .text-ellipsis {
     display: inline-block;
     max-width: 200px;
@@ -33,7 +37,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  tbody .hover-change .ellipsis-text {
+
+  tbody .ellipsis-text {
     color: #1e293b;
   }
 
@@ -43,14 +48,15 @@
   }
 
   tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
-    color: rgba(67, 141, 251, 1);
+    color: rgba(67, 141, 251, 100%);
   }
 
   tbody .arco-table-tr .txt:hover {
-    color: rgba(67, 141, 251, 1);
+    color: rgba(67, 141, 251, 100%);
     cursor: pointer;
   }
 }
+
 .arco-cascader-list-item-label {
   white-space: nowrap; /* 禁止换行 */
   overflow: hidden; /* 隐藏溢出内容 */
@@ -58,12 +64,14 @@
   max-width: 212px;
   font-size: 14px;
 }
+
 /* .cascader-dropdown .arco-cascader-list-wrapper {
  
 } */
 tbody .load-name .ellipsis-text {
   font-weight: 600;
 }
+
 .text-prompt {
   color: #6e7b8d;
   font-size: 12px;
