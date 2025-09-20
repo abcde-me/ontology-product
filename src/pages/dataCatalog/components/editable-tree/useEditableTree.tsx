@@ -70,14 +70,14 @@ export function useEditableTree({ catalogTreeStore }) {
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const set = new Set(data.map((item) => item.name));
-      let x = data.length + 1;
-      let name = `${baseName}${x}`;
+      // const set = new Set(data.map((item) => item.name));
+      // let x = data.length + 1;
+      const name = `${baseName}_${Date.now()}`;
 
-      while (set.has(name)) {
-        x++;
-        name = `${baseName}${x}`;
-      }
+      // while (set.has(name)) {
+      //   x++;
+      //   name = `${baseName}${x}`;
+      // }
 
       return name;
     },

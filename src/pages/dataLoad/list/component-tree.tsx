@@ -516,16 +516,16 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   const generateName = useCallback(
     (data: TreeNodeData[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const set = new Set(
-        data.map((item) => item.name || item.label || item.title)
-      );
-      let x = data.length + 1;
-      let name = `${baseName}${x}`;
+      // const set = new Set(
+      //   data.map((item) => item.name || item.label || item.title)
+      // );
+      // let x = data.length + 1;
+      const name = `${baseName}_${Date.now()}`;
 
-      while (set.has(name)) {
-        x++;
-        name = `${baseName}${x}`;
-      }
+      // while (set.has(name)) {
+      //   x++;
+      //   name = `${baseName}${x}`;
+      // }
 
       return name;
     },
@@ -592,7 +592,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 添加根级目录
   const onCatalogAdd = () => {
     // const name = generateName(directoryData);
-    const name = `源目录${directoryData?.length || '1'}`;
+    const name = `源目录_${Date.now()}`;
+    // const name = `源目录${directoryData?.length || '1'}`;
     const newNode = genereteInputNode(name);
 
     // 更新目录数据，将新节点添加到开头
