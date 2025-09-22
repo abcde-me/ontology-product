@@ -198,14 +198,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       dataIndex: 'start_time',
       width: 180,
       sorter: true,
-      sortDirections: ['ascend' as const, 'descend' as const]
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
     },
     {
       title: '载入结束时间',
       dataIndex: 'end_time',
       width: 180,
       sorter: true,
-      sortDirections: ['ascend' as const, 'descend' as const]
+      sortDirections: ['ascend' as const, 'descend' as const],
+      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
     },
     {
       title: '数据量',
