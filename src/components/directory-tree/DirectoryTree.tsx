@@ -629,7 +629,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
-            onChange={handleInputChange}
+            onChange={(value) => setSearchValue(value)}
             onSearch={handleSearchEnter}
             onClear={handleSearchClear}
             allowClear
