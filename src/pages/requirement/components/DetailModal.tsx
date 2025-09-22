@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import './DetailModal.scss';
 import { sunburst } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { t } from 'mobx-state-tree';
 
 interface TreeItem {
   id: number;
@@ -164,6 +165,21 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
+            renderTitle={(node) => {
+              console.log(node, '123');
+              return (
+                <div
+                  style={{
+                    width: '300px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {node.title}
+                </div>
+              );
+            }}
             onSelect={(value, e) => {
               if (e?.node?.props?.dataRef?.level === 3 && type !== 'detail') {
                 setCurrent(1);

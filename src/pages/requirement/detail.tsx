@@ -413,56 +413,124 @@ export default function RequirementDetail() {
     isTemp ? setTemplateData(newData) : setDatalist(newData);
   };
 
+  // 添加新标签 - 修复版本
+  const addNewLabel = () => {
+    // 使用函数式更新确保基于最新状态进行操作
+    setDatalist((prevDatalist) => {
+      // 检查数组是否为空
+      if (!Array.isArray(prevDatalist) || prevDatalist.length === 0) {
+        // 如果为空，创建一个初始标签
+        return [...prevDatalist, generateInitialData()[0]];
+      }
+
+      // 获取最后一个标签的深拷贝
+      const lastLabel = _.cloneDeep(prevDatalist[prevDatalist.length - 1]);
+      console.log(lastLabel, 'lastLabel');
+      // 生成全新的唯一ID
+      lastLabel.label_id = uuidV4() + new Date().getTime();
+      lastLabel.label_colour = getRandomHexColorStrict();
+
+      // 确保完整保留所有属性组和属性
+      if (
+        lastLabel.label_info_attribute_groups &&
+        lastLabel.label_info_attribute_groups.length > 0
+      ) {
+        lastLabel.label_info_attribute_groups =
+          lastLabel.label_info_attribute_groups.map((group) => {
+            const newGroup = _.cloneDeep(group);
+            newGroup.attribute_id = uuidV4();
+
+            // 为每个属性生成新ID
+            if (
+              newGroup.label_info_attribute &&
+              newGroup.label_info_attribute.length > 0
+            ) {
+              newGroup.label_info_attribute = newGroup.label_info_attribute.map(
+                (attr) => {
+                  const newAttr = _.cloneDeep(attr);
+                  newAttr.label_info_id = uuidV4();
+                  return newAttr;
+                }
+              );
+            }
+
+            return newGroup;
+          });
+      }
+
+      // 将新标签添加到数组末尾
+      return [...prevDatalist, lastLabel];
+    });
+  };
+
+  // 增强 getLastItem 函数的健壮性
   const getLastItem = (arr) => {
     // 先校验：确保输入是数组且非空
     if (!Array.isArray(arr) || arr.length === 0) {
       return null;
     }
-    // 创建最后一个元素的深拷贝，避免引用冲突
-    const lastItem = _.cloneDeep(arr[arr.length - 1]);
-    // 生成全新的唯一ID
-    lastItem.label_id = uuidV4() + new Date().getTime();
-    lastItem.attribute_id = uuidV4();
-    lastItem.label_colour = getRandomHexColorStrict();
 
-    // 修复：完整保留上一个标签的属性组结构和内容
-    if (
-      lastItem.label_info_attribute_groups &&
-      lastItem.label_info_attribute_groups.length > 0
-    ) {
-      lastItem.label_info_attribute_groups =
-        lastItem.label_info_attribute_groups.map((group) => {
-          // 为属性组生成新ID，但保留所有其他属性值
-          const newGroup = { ...group };
-          newGroup.attribute_id = uuidV4();
+    try {
+      // 创建最后一个元素的深拷贝，避免引用冲突
+      const lastItem = _.cloneDeep(arr[arr.length - 1]);
+      // 生成全新的唯一ID
+      lastItem.label_id = uuidV4() + new Date().getTime();
+      lastItem.label_colour = getRandomHexColorStrict();
 
-          // 为属性组中的每个属性生成新ID，但保留所有属性值
-          if (
-            group.label_info_attribute &&
-            group.label_info_attribute?.length > 0
-          ) {
-            newGroup.label_info_attribute = group.label_info_attribute?.map(
-              (attr) => {
-                const newAttr = { ...attr };
-                newAttr.label_info_id = uuidV4();
-                return newAttr;
-              }
-            );
-          }
+      // 移除不需要的属性
+      delete lastItem.attribute_id; // 这个属性可能不属于LabelData结构
 
-          return newGroup;
-        });
-    } else {
-      // 如果没有属性组，则设为空数组
-      lastItem.label_info_attribute_groups = [];
+      // 修复：完整保留上一个标签的属性组结构和内容
+      if (
+        lastItem.label_info_attribute_groups &&
+        Array.isArray(lastItem.label_info_attribute_groups)
+      ) {
+        lastItem.label_info_attribute_groups =
+          lastItem.label_info_attribute_groups.map((group) => {
+            // 为属性组生成新ID，但保留所有其他属性值
+            const newGroup = _.cloneDeep(group);
+            newGroup.attribute_id = uuidV4();
+
+            // 为属性组中的每个属性生成新ID，但保留所有属性值
+            if (
+              group.label_info_attribute &&
+              Array.isArray(group.label_info_attribute)
+            ) {
+              newGroup.label_info_attribute = group.label_info_attribute.map(
+                (attr) => {
+                  const newAttr = _.cloneDeep(attr);
+                  newAttr.label_info_id = uuidV4();
+
+                  // 确保属性名称被正确复制
+                  if (attr.attribute_name_cn) {
+                    newAttr.attribute_name_cn = attr.attribute_name_cn;
+                  }
+                  if (attr.attribute_name_en) {
+                    newAttr.attribute_name_en = attr.attribute_name_en;
+                  }
+
+                  return newAttr;
+                }
+              );
+            } else {
+              // 确保label_info_attribute是数组类型
+              newGroup.label_info_attribute = [];
+            }
+
+            return newGroup;
+          });
+      } else {
+        // 如果没有属性组，则设为空数组
+        lastItem.label_info_attribute_groups = [];
+      }
+
+      // 返回新创建的元素
+      return lastItem;
+    } catch (error) {
+      console.error('复制标签时出错:', error);
+      // 出错时返回初始数据
+      return generateInitialData()[0];
     }
-
-    // 返回新创建的元素
-    return lastItem;
-  };
-  // 添加新标签
-  const addNewLabel = () => {
-    setDatalist([...datalist, getLastItem(datalist)]);
   };
 
   // 为指定标签添加属性组
@@ -1175,6 +1243,7 @@ export default function RequirementDetail() {
                               {item?.label_info_attribute_groups?.length > 0 &&
                                 item?.label_info_attribute_groups?.map(
                                   (attrGroup, groupIndex) => {
+                                    console.log(attrGroup, 'attrGroup -- top');
                                     return (
                                       <div
                                         key={`${item?.label_id}_${groupIndex}`}
