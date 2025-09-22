@@ -1,5 +1,5 @@
 import React, { useState, memo, useRef } from 'react';
-import { Layout, Tabs } from '@arco-design/web-react';
+import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
@@ -113,7 +113,22 @@ const Python: React.FC = memo(() => {
           className="pyspark-tabs"
           type="rounded"
         >
-          <TabPane key="files" title={<PythonIcon />}>
+          <TabPane
+            key="files"
+            title={
+              <Popover content="PySpark文件" position="right">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <PythonIcon />
+                </div>
+              </Popover>
+            }
+          >
             {activeTab === 'files' && (
               <FileManager
                 type="files"
@@ -127,7 +142,22 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane key="data" title={<DataIcon />}>
+          <TabPane
+            key="data"
+            title={
+              <Popover content="数据目录" position="right">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <DataIcon />
+                </div>
+              </Popover>
+            }
+          >
             {activeTab === 'data' && (
               <DataManager
                 onInsertContent={insertContentToEditor}
@@ -136,7 +166,22 @@ const Python: React.FC = memo(() => {
             )}
           </TabPane>
           {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
-            <TabPane key="tools" title={<SuanziIcon />}>
+            <TabPane
+              key="tools"
+              title={
+                <Popover content="算子库" position="right">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <SuanziIcon />
+                  </div>
+                </Popover>
+              }
+            >
               {activeTab === 'tools' && (
                 <ToolsManager
                   onInsertContent={insertContentToEditor}
@@ -146,7 +191,22 @@ const Python: React.FC = memo(() => {
             </TabPane>
           )}
           {useHasPermission(PYSPARK_PERMISSIONS.CAN_SEARCH_EXPORTS) && (
-            <TabPane key="daset" title={<DasetIcon />}>
+            <TabPane
+              key="daset"
+              title={
+                <Popover content="数据集导出任务" position="right">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <DasetIcon />
+                  </div>
+                </Popover>
+              }
+            >
               {isDasetTab && <DatasetsList />}
             </TabPane>
           )}
