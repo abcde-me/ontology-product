@@ -2,16 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Button,
-  Typography,
-  Tabs,
   Tree,
   Form,
   Input,
   DatePicker,
   Table,
-  Popover,
   Pagination,
-  Message,
   Empty
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
@@ -19,9 +15,6 @@ import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import './DetailModal.scss';
-import { sunburst } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import { t } from 'mobx-state-tree';
-
 interface TreeItem {
   id: number;
   parent_id: number;
