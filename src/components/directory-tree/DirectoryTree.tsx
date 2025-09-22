@@ -472,8 +472,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
 
     const handleEditFinish = async (node) => {
-      const finalName = inputValue.trim() || defaultName;
       if (node.dataRef?.isAdd) {
+        const finalName = inputValue.trim() || defaultName;
         try {
           const created = await onCreate?.(finalName, node);
 
@@ -509,6 +509,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           setTreeData(newTreeData);
         }
       } else {
+        const finalName = inputValue.trim();
+        if (finalName === '') {
+          Message.error('重命名名称不能为空');
+          return;
+        }
+
         try {
           const rename = await onRename?.(finalName, node);
 
@@ -623,7 +629,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
-            onChange={handleInputChange}
+            onChange={(value) => setSearchValue(value)}
             onSearch={handleSearchEnter}
             onClear={handleSearchClear}
             allowClear
