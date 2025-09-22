@@ -124,6 +124,25 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '数据标注',
+    key: 'labelMgmt',
+    children: [
+      {
+        title: '需求管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'requirement',
+        path: '/tenant/compute/modaforge/requirement'
+      },
+      {
+        title: '任务列表',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'taskList',
+        path: '/tenant/compute/modaforge/taskList'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '数据管理',
     key: 'DataManagement',
     children: [
@@ -140,25 +159,6 @@ export const menus: MenuModel[] = [
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
         permission: 'datasets:can_search'
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '数据标注',
-    key: 'labelMgmt',
-    children: [
-      {
-        title: '需求管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement'
-      },
-      {
-        title: '任务列表',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList'
       }
     ]
   },

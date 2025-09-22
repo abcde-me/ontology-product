@@ -281,23 +281,27 @@ export default function RequirementDetail() {
    * @param {number} labelIndex - 标签索引
    * @param {number} groupIndex - 要删除的属性组索引
    */
-  // 删除属性组函数的完整修复
   const deleteAttributeGroup = (attribute_id, groupIndex) => {
-    // 查找对应的labelIndex
-    const newData = datalist?.[0]?.label_info_attribute_groups?.filter(
-      (item) => item?.attribute_id !== attribute_id
-    );
-    const labelIndex = datalist.findIndex(
-      (item) => item.label_id === attribute_id
-    );
-    setDatalist(
-      datalist?.map((item) => {
-        return {
-          ...item,
-          label_info_attribute_groups: newData
-        };
-      })
-    );
+    setDatalist((prevData) => {
+      // 创建数据的深拷贝，避免直接修改原数据
+      const newData = _.cloneDeep(prevData);
+
+      // 遍历每个标签项
+      newData.forEach((label, labelIndex) => {
+        // 查找当前标签中是否包含要删除的属性组
+        const attributeGroups = label.label_info_attribute_groups || [];
+        const groupToDeleteIndex = attributeGroups.findIndex(
+          (group) => group && group.attribute_id === attribute_id
+        );
+        // 如果找到匹配的属性组，则删除它
+        if (groupToDeleteIndex !== -1) {
+          // 从数组中删除该属性组
+          attributeGroups.splice(groupToDeleteIndex, 1);
+        }
+      });
+
+      return newData;
+    });
   };
   /**
    * 删除属性
@@ -485,22 +489,21 @@ export default function RequirementDetail() {
       label_info_id: uuidV4(),
       attribute_name_cn: '',
       attribute_name_en: '',
-      input_type: type || 1
+      input_type: 1
     };
-
     // 获取当前属性并添加新属性
     const currentAttributes =
       datalist[labelIndex].label_info_attribute_groups[groupIndex as number]
         .label_info_attribute;
-    // 修改为在倒数第二个位置增加新属性
-    let updatedAttributes;
-    if (currentAttributes.length >= 1) {
-      // 当数组长度大于等于1时，在倒数第二个位置插入
-      updatedAttributes = [...currentAttributes];
+
+    const updatedAttributes = [...currentAttributes];
+
+    if (type === 2 && updatedAttributes.length >= 1) {
+      // 当type为2且数组长度大于等于1时，在倒数第二个位置插入
       updatedAttributes.splice(-1, 0, newAttribute);
     } else {
-      // 当数组为空时，直接添加到末尾
-      updatedAttributes = [newAttribute];
+      // 当type为1或其他情况时，添加到最后一个位置
+      updatedAttributes.push(newAttribute);
     }
 
     updateNestedValue(
@@ -517,7 +520,6 @@ export default function RequirementDetail() {
   //  属性模版名字点击
   const handleTemplateClick = (attributeGroupName: any, labelIndex: number) => {
     // 同组标签如果选择一个模版就不能二次选择
-    console.log(datalist, templateData, 'top--- tttttt');
     if (
       attributeGroupName === '' ||
       attributeGroupName === undefined ||
@@ -625,7 +627,6 @@ export default function RequirementDetail() {
           }
         })
     ]);
-    console.log(result, 'top -result');
     // 所有的form 验证都通过调用发布接口
     if (result.every((item) => item === true)) {
       publish();
@@ -1088,6 +1089,7 @@ export default function RequirementDetail() {
                                 </FormItem>
                                 <FormItem
                                   field={`label_shape_${item?.label_id}`}
+                                  initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
                                 >
                                   <Select
                                     placeholder="请选择形状"
@@ -1180,7 +1182,7 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            field={`label_info_attribute_groups_${item?.label_id}_${groupIndex}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            field={`label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={type === 'detail'}
                                             label="属性名称:"
                                             rules={[
@@ -1361,9 +1363,20 @@ export default function RequirementDetail() {
                                                 onClick={() => {
                                                   if (type !== 'detail') {
                                                     // 修改增加逻辑 往倒数第二个增加
+                                                    console.log(
+                                                      attrGroup.label_info_attribute,
+                                                      'label_info_attribute',
+                                                      attrGroup
+                                                    );
                                                     addAttribute(
                                                       labelIndex,
-                                                      groupIndex
+                                                      groupIndex,
+                                                      attrGroup
+                                                        .label_info_attribute?.[
+                                                        attrGroup
+                                                          .label_info_attribute
+                                                          ?.length - 1
+                                                      ]?.input_type
                                                     );
                                                   }
                                                 }}
