@@ -44,7 +44,7 @@ module.exports = function (app) {
       ['/api/auth/v1'],
       createProxyMiddleware(
         addProxy({
-          target: 'http://61.182.98.8:38054/api/auth/v1'
+          target: 'http://61.182.98.8:38079/api/auth/v1'
         })
       )
     );

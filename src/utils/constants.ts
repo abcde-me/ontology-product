@@ -5,3 +5,10 @@ export const LabelShapMap = {
   4: 'polygon',
   5: 'ellipse'
 };
+
+export const EmptyImgLabelResult = {
+  version: 0,
+  tags: [],
+  shapes: [],
+  tracks: []
+};
