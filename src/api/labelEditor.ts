@@ -1,6 +1,7 @@
+import { cloneDeep } from 'lodash-es';
 import UAPI from '@/api';
 import { toISOStringWithMicroseconds } from '@/utils/timeFormatting';
-import { LabelShapMap } from '@/utils/constants';
+import { LabelShapMap, EmptyImgLabelResult } from '@/utils/constants';
 
 export async function saveTask(taskId: string, params: Record<string, any>) {
   console.log('saveTask', taskId, params);
@@ -548,7 +549,12 @@ export async function submitImgJobAnnotations(
 ) {
   handleImgAnnotationIds(params);
   // taskResult.result_type = params.has_result;
-  await submitTask(taskId, params);
+  await submitTask(
+    taskId,
+    !params.has_result
+      ? { ...params, ...cloneDeep(EmptyImgLabelResult) }
+      : params
+  );
   return { data: params };
 }
 
@@ -596,12 +602,7 @@ export async function getImgJobOverview(taskId: string) {
 
 export async function getImgJobAnnotations(taskId: string) {
   const result = await getTaskResult(taskId);
-  const annotations = result.data.result ?? {
-    version: 0,
-    tags: [],
-    shapes: [],
-    tracks: []
-  };
+  const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
   return Promise.resolve({
     data: {
       ...annotations,
@@ -682,7 +683,10 @@ export async function getImgJobLabels(requirementId?: string) {
           attr.attribute_group_class === 3
             ? ['']
             : attr.label_info_attribute.map((la) => la.attribute_name_cn),
-        keys: attr.label_info_attribute.map((la) => la.attribute_name_en)
+        keys:
+          attr.attribute_group_class === 3
+            ? ['']
+            : attr.label_info_attribute.map((la) => la.attribute_name_en)
       });
     }
     labels.push(labelTpl);

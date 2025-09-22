@@ -52,7 +52,7 @@ function LabelEditorPage() {
     if (!taskInfo.data.task_id) {
       Modal.warning({
         title: '提示信息',
-        content: '当前需求已无新任务，点击确定将返回需求列表页',
+        content: '当前需求已无新任务，点击确定将返回任务列表页',
         afterClose: () => {
           goBack();
         }
@@ -84,9 +84,7 @@ function LabelEditorPage() {
   };
 
   useEffect(() => {
-    // 由于是alive模式，更改labelUrl并不会导致wujie子应用刷新页面，所以需要手工刷新
     if (taskId && labelUrl && labelUrl.includes(`/task/${taskId}?`)) {
-      // 由于需要子应用内部刷新页面，所以去掉子应用前缀
       bus.$emit('refresh', labelUrl.replace('/labeleditor', ''));
     }
   }, [taskId, labelUrl]);
