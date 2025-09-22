@@ -200,10 +200,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 获取运行日志
   const handleGetRunLog = useCallback(async () => {
-    if (!currentFile?.fileId || !execid) {
+    if (!currentFile?.scriptId || !execid) {
       return;
     }
-    const res = await getRunLogSqlScript(currentFile?.fileId, {
+    const res = await getRunLogSqlScript(currentFile?.scriptId || '', {
       script_execid: execid
     });
 
