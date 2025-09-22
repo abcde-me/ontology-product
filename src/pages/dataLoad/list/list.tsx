@@ -40,7 +40,7 @@ export default function DataLoad() {
   const columns = [
     {
       title: '载入任务名称',
-      className: 'hover-change load-name',
+      className: 'hover-change',
       width: 300,
       ellipsis: true,
       render: (_, text) => (
@@ -187,7 +187,7 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
-      className: 'hover-change',
+      // className: 'hover-change',
       width: 200,
       ellipsis: true,
       render: (_, item) => {
@@ -197,12 +197,12 @@ export default function DataLoad() {
               <EllipsisPopoverCom
                 value={item.data_path_name}
                 isEdit={false}
-                isLink
-                handleLink={() => {
-                  history.push(
-                    `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-                  );
-                }}
+                // isLink
+                // handleLink={() => {
+                //   history.push(
+                //     `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
+                //   );
+                // }}
               />
             ) : (
               '-'

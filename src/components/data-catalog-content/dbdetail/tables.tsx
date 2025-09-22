@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Spin, Typography } from '@arco-design/web-react';
 import { get } from 'lodash-es';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+
 export default function Tables(props) {
   const { dataList } = props;
   const [loading, setLoading] = useState(true);
@@ -34,9 +36,13 @@ export default function Tables(props) {
       width: 260,
       render: (_, record) => {
         return (
-          <Typography.Ellipsis rows={3} showTooltip expandable={false}>
-            {record[item]}
-          </Typography.Ellipsis>
+          <EllipsisPopover
+            value={record[item]}
+            preferTypography
+            ellipsis={{
+              rows: 3
+            }}
+          />
         );
       }
     }));
