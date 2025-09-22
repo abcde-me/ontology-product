@@ -302,10 +302,10 @@ const DatasetsList: FC = () => {
         </FormItem>
       </Form>
       <Table
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
+        // style={{
+        //   width: '100%',
+        //   height: '100%'
+        // }}
         columns={columns}
         data={listData}
         pagination={pagination}
@@ -313,7 +313,7 @@ const DatasetsList: FC = () => {
         rowKey="id"
         onChange={handleTableChange}
         scroll={{
-          y: 500,
+          // y: 500,
           x: 'max-content'
         }}
       />
