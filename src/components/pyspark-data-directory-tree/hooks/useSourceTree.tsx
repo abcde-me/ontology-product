@@ -8,14 +8,7 @@ import {
   SrcCatalogItem,
   getSourceCatalogFileList as getSourceCatalogFileListApi,
   getTargetCatalogFileList as getTargetCatalogFileListApi,
-  GetTargetCatalogFileListParams,
-  GetSourceCatalogFileListParams,
-  GetSourceCatalogFileListItem,
-  GetTargetCatalogFileListItem,
-  DbTableListParamss,
-  getDbItemDetail,
-  GetDbItemDetailParams,
-  GetDbItemDetailRes
+  GetSourceCatalogFileListItem
 } from '@/api/dataCatalog';
 import { IconFolder } from '@arco-design/web-react/icon';
 import VolumeFileIcon from '../assets/volumn-file-icon.svg';
@@ -53,7 +46,12 @@ export const useSourceTree = () => {
     root_type: CatalogRootType = CatalogRootType.Source,
     dir_type: CatalogItemType = CatalogItemType.Volume
   ) => {
-    const res = await getCatalogListApi({ root_type, search, dir_type });
+    const res = await getCatalogListApi({
+      root_type,
+      search,
+      dir_type,
+      fetch_volume_size: true
+    });
 
     if (res?.status !== 200) {
       return [];
@@ -87,6 +85,7 @@ export const useSourceTree = () => {
             isLeaf: false,
             icon: <VolumeIcon />,
             type: 'volume_item',
+            latest_size: volume?.extends?.volume_size ?? 0,
             data: {
               ...volume,
               type: 'volume',

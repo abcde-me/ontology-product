@@ -63,12 +63,14 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   );
 
   // 处理插入按钮点击
-  const handleInsertClick = useCallback((e: any, nodeData: any) => {
-    e.stopPropagation();
-    console.log('Insert clicked for:', nodeData);
-    // 这里可以添加插入逻辑
-    onInsertDataset?.(nodeData.data);
-  }, []);
+  const handleInsertClick = useCallback(
+    (e: any, nodeData: any) => {
+      e.stopPropagation();
+      // 这里可以添加插入逻辑
+      onInsertDataset?.(nodeData.data);
+    },
+    [onInsertDataset]
+  );
 
   // 高亮显示搜索关键词
   const highlightSearchKeyword = useCallback(

@@ -84,22 +84,22 @@ export const numberToChinese = (num: number) => {
 export const shapeOptions = [
   {
     icon: rectangle,
-    value: 1,
+    value: 3,
     label: '矩形'
   },
   {
     icon: polygon,
-    value: 2,
+    value: 4,
     label: '多边形'
   },
   {
     icon: lineSegment,
-    value: 3,
+    value: 2,
     label: '线段'
   },
   {
     icon: point,
-    value: 4,
+    value: 1,
     label: '特征点'
   },
   {

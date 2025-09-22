@@ -67,19 +67,20 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
 
   // 根据 from 参数动态过滤目录项
   const getFilteredDirectoryItems = () => {
+    let filteredItems = directoryItems;
     if (from === DataDirectoryTreeFrom.SQL) {
       // 如果是 SQL，不展示目标数据目录
-      return directoryItems.filter((item) => item.id !== 'target');
+      filteredItems = filteredItems.filter((item) => item.id !== 'target');
     }
     if (!hasPermissionDirectory) {
-      return directoryItems.filter(
+      filteredItems = filteredItems.filter(
         (item) => item.id !== 'source' && item.id !== 'target'
       );
     }
     if (!hasPermissionDataset) {
-      return directoryItems.filter((item) => item.id !== 'dataset');
+      filteredItems = filteredItems.filter((item) => item.id !== 'dataset');
     }
-    return directoryItems;
+    return filteredItems;
   };
 
   // 转换为 Tree 组件需要的数据格式

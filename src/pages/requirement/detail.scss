@@ -184,6 +184,25 @@
     align-items: center;
   }
 
+  .attribute-content-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .attribute-content-right {
+    background-color: #e7ecf0;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0%;
+    margin-left: 8px;
+    color: #0f172a;
+  }
+
   .attribute-group-header-content {
     display: flex;
     align-items: center;

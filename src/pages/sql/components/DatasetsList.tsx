@@ -316,7 +316,6 @@ const DatasetsList: FC = () => {
           y: 500,
           x: 'max-content'
         }}
-        tableLayoutFixed={false}
       />
 
       <ModalScriptDetail
