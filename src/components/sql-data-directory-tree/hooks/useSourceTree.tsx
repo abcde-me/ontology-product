@@ -10,6 +10,7 @@ import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 import { useAsyncEffect } from 'ahooks';
 import React, { useCallback, useEffect, useState } from 'react';
 import { default as DbIcon } from '../assets/db-icon.svg';
+import { default as DbItemIcon } from '../assets/db-db_item-icon.svg';
 import { default as DbTableIcon } from '../assets/db-table-icon.svg';
 import { default as DbColumnIcon } from '../assets/db-column-icon.svg';
 
@@ -88,7 +89,7 @@ export const useSourceTree = () => {
                 id: dbItem.id,
                 title: dbItem.name ?? '',
                 isLeaf: false,
-                icon: <DbIcon />,
+                icon: <DbItemIcon />,
                 type: 'db_item',
                 data: {
                   ...dbItem,
