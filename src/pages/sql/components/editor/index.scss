@@ -5,29 +5,9 @@
   background-color: #fff;
   border-left: 1px solid #e2e8f0;
 
-  .arco-tabs-content {
-    padding-top: 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    // height: calc(100vh - 60px); // 减去标签页头部的高度
-
-    .arco-tabs-content-item {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tab-pane-content {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-  }
-
   .sql-tabs {
-    height: 100%;
+    // 标签页不占用flex空间，只显示标签头
+    flex: none;
 
     &.empty-tabs {
       height: unset;
@@ -39,6 +19,11 @@
       &::before {
         background-color: transparent;
       }
+    }
+
+    // 隐藏标签页内容区域，因为我们使用独立工作区
+    .arco-tabs-content {
+      display: none;
     }
   }
 
@@ -66,6 +51,13 @@
       display: flex;
       align-items: center;
     }
+  }
+
+  .sql-main-workspace {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   // 无数据状态下的内容区域样式

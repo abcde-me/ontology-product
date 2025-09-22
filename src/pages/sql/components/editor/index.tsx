@@ -122,7 +122,6 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           onChange={handleTabChange}
           className="sql-tabs"
           type="card"
-          justify
           showAddButton={hasCreatePermission}
           onAddTab={handleCreatePySpark}
           onDeleteTab={handleCloseTab}
@@ -133,26 +132,29 @@ const EditorContent: React.FC<EditorContentProps> = memo(
               key={tab.key}
               title={tab.title}
               closable={fileTabs.length > 1}
-              className="tab-pane-content"
             >
               {/* 标签页内容为空，实际内容在工作区 */}
-              <EditorWorkspace
-                key={tab.key} // 使用tab.key作为key，确保每个tab有独立的组件实例
-                content={tab.content}
-                fileName={tab.title || '未命名文件'}
-                currentFileId={tab.fileId}
-                currentScriptId={tab.scriptId}
-                hasRun={tab.hasRun}
-                tabKey={tab.key}
-                onActiveUpdate={handleActiveUpdate}
-                onInsertContent={onInsertContent}
-                onEditorFocusChange={onEditorFocusChange}
-                refreshDirectory={refreshDirectory}
-                selectFile={selectFile}
-              />
             </TabPane>
           ))}
         </Tabs>
+
+        {/* 工作区 */}
+        <div className="sql-main-workspace">
+          <EditorWorkspace
+            key={activeTabData.key} // 使用activeTabData.key作为key，确保组件正确更新
+            content={activeTabData.content}
+            fileName={activeTabData.title || '未命名文件'}
+            currentFileId={activeTabData.fileId}
+            currentScriptId={activeTabData.scriptId}
+            hasRun={activeTabData.hasRun}
+            tabKey={activeTabData.key}
+            onActiveUpdate={handleActiveUpdate}
+            onInsertContent={onInsertContent}
+            onEditorFocusChange={onEditorFocusChange}
+            refreshDirectory={refreshDirectory}
+            selectFile={selectFile}
+          />
+        </div>
       </div>
     );
   }
