@@ -83,6 +83,22 @@ function LabelEditorPage() {
     getAvailableTask();
   };
 
+  const saveTaskWrapper = async (...args: any[]) => {
+    const result = await args[args.length - 1](...args.slice(0, -1));
+    if (result.code === 600) {
+      Message.clear();
+      Modal.warning({
+        title: '提示信息',
+        content: result.message,
+        afterClose: () => {
+          goBack();
+        }
+      });
+      throw new Error(result.message);
+    }
+    return result;
+  };
+
   useEffect(() => {
     if (taskId && labelUrl && labelUrl.includes(`/task/${taskId}?`)) {
       bus.$emit('refresh', labelUrl.replace('/labeleditor', ''));
@@ -104,16 +120,21 @@ function LabelEditorPage() {
             getImgJobMeta,
             getImgJobAnnotations,
             getImgJobLabels,
-            saveImgJobAnnotations,
-            submitImgJobAnnotations,
+            saveImgJobAnnotations: (...args) =>
+              saveTaskWrapper(...args, saveImgJobAnnotations),
+            submitImgJobAnnotations: (...args) =>
+              saveTaskWrapper(...args, submitImgJobAnnotations),
             getImgJobOverview,
-            goBack,
-            switchNextTask,
+
             getTextEditorTask,
             getTextEditorResult,
-            saveTextEditorResult,
+            saveTextEditorResult: (...args) =>
+              saveTaskWrapper(...args, saveTextEditorResult),
             getTextEditorLabels,
-            getTaskDetail
+            getTaskDetail,
+
+            goBack,
+            switchNextTask
           }}
         ></WujieReact>
       )}
