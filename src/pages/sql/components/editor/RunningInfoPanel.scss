@@ -54,7 +54,7 @@
   .arco-tabs-content {
     padding: 0;
     max-height: 308px;
-    overflow-y: auto;
+    overflow: hidden; // 移除外层滚动条，由内部内容控制
   }
 
   .arco-collapse-item-header-title {

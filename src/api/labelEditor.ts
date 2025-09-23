@@ -665,6 +665,11 @@ export async function getImgJobLabels(requirementId?: string) {
       attributes: [] as any[]
     };
 
+    label.label_info_attribute_groups = Array.isArray(
+      label.label_info_attribute_groups
+    )
+      ? label.label_info_attribute_groups
+      : [];
     for (let j = 0; j < label.label_info_attribute_groups.length; j++) {
       const attr = label.label_info_attribute_groups[j];
       labelTpl.attributes.push({

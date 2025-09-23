@@ -64,7 +64,10 @@ const EditorWorkspaceContent: React.FC<{
     handleContentChange,
     placeholderValue,
     runResult,
-    execid
+    execid,
+    isPanelOpen,
+    handlePanelStateChange,
+    getPrevRunStatus
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -247,7 +250,13 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 运行信息面板 */}
-      {execid && <RunningInfoPanel />}
+      {execid && (
+        <RunningInfoPanel
+          isPanelOpen={isPanelOpen}
+          onPanelStateChange={handlePanelStateChange}
+          getPrevRunStatus={getPrevRunStatus}
+        />
+      )}
     </div>
   );
 });
