@@ -93,7 +93,7 @@ UAPI_CONFIG.addResponseInterceptor(
           console.error(errorMsg);
         }
         // return Promise.reject(errorMsg);
-        return Promise.resolve(errorMsg);
+        return res;
       }
     }
   },
