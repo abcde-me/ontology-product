@@ -779,7 +779,7 @@ export default function RequirementDetail() {
                 );
                 group?.label_info_attribute?.map((attribute) => {
                   form2.setFieldValue(
-                    `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
+                    `label_info_attribute_groups_${item?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
                   form2.setFieldValue(
@@ -1182,10 +1182,6 @@ export default function RequirementDetail() {
                                   )}
                                 </FormItem>
                               </div>
-                              {console.log(
-                                item?.label_info_attribute_groups,
-                                'top ---- '
-                              )}
                               {item?.label_info_attribute_groups?.length > 0 &&
                                 item?.label_info_attribute_groups?.map(
                                   (attrGroup, groupIndex) => {
@@ -1509,7 +1505,7 @@ export default function RequirementDetail() {
                                                   attrGroup.attribute_group_class) && (
                                                 <div className="attribute-info-item">
                                                   <FormItem
-                                                    field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`}
+                                                    field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attr?.label_info_id}_attribute_name_cn`}
                                                     rules={[
                                                       {
                                                         required: true,
