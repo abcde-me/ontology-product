@@ -1,5 +1,6 @@
 .requirement-detail {
   padding: 10px;
+  overflow-x: hidden;
 
   .arco-breadcrumb-item > .arco-icon {
     color: #000000;
@@ -21,7 +22,7 @@
     background-color: #fff;
     border-radius: 15px;
     padding-top: 24px;
-    padding-left: 36px;
+    padding-left: 24px;
     margin-top: 16px;
   }
 
@@ -30,11 +31,13 @@
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
-    margin-left: -12px;
+    // margin-left: -12px;
     margin-bottom: 16px;
   }
 
   .basic-configuration {
+    min-width: 1300px;
+
     .table-container {
       margin-left: 77px;
     }
@@ -388,5 +391,9 @@
     .arco-form .arco-form-item > .arco-form-label-item {
       padding-right: 5px;
     }
+  }
+
+  .task-configuration-content {
+    min-width: 1300px;
   }
 }
