@@ -1,6 +1,17 @@
 .pyspark-data-directory-tree {
   height: 100%;
 
+  .tree-content {
+    .arco-tree-node-indent {
+      display: none;
+    }
+
+    .arco-tree-node-switcher {
+      width: 0;
+      display: none;
+    }
+  }
+
   .arco-tree-node {
     // padding: 0;
 
@@ -9,6 +20,10 @@
       font-size: 14px;
       display: flex;
       align-items: center;
+    }
+
+    .arco-tree-node-custom-icon {
+      margin-right: 4px;
     }
 
     // &-switcher {
