@@ -329,14 +329,14 @@ export default function Requirement() {
             >
               详情
             </span>
-            {/* <span
+            {/* {record?.status === RequirementStatus.Annotated && <span
               className="operate-text"
               onClick={() => {
 
               }}
             >
               下载结果
-            </span> */}
+            </span>} */}
           </div>
         );
       }
