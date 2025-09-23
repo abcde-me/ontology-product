@@ -216,7 +216,7 @@ const useTableList = (props) => {
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.connector_name}
+          value={record.connector_id === 0 ? '本地上传' : record.connector_name}
           isEdit={false}
           preferTypography
         />
