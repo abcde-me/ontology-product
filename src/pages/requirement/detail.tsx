@@ -779,7 +779,7 @@ export default function RequirementDetail() {
                 );
                 group?.label_info_attribute?.map((attribute) => {
                   form2.setFieldValue(
-                    `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
+                    `label_info_attribute_groups_${item?.id}_${group?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
                   form2.setFieldValue(
@@ -1195,11 +1195,6 @@ export default function RequirementDetail() {
                                         className="attribute-group-item"
                                       >
                                         <div className="attribute-group-content-item">
-                                          {console.log(
-                                            attrGroup?.isTemp === true,
-                                            attrGroup,
-                                            'attrGroup?.isTemp === true'
-                                          )}
                                           <FormItem
                                             field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={
@@ -1511,13 +1506,10 @@ export default function RequirementDetail() {
                                               key={attr.label_info_id}
                                               className="attribute-group-info-item"
                                             >
-                                              {(1 ===
-                                                attrGroup.attribute_group_class ||
-                                                2 ===
-                                                  attrGroup.attribute_group_class) && (
+                                              {true && (
                                                 <div className="attribute-info-item">
                                                   <FormItem
-                                                    field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`}
+                                                    field={`label_info_attribute_groups_${type === 'detail' ? item?.id : item?.label_id}_attribute_name_cn`}
                                                     rules={[
                                                       {
                                                         required: true,
@@ -1529,34 +1521,42 @@ export default function RequirementDetail() {
                                                           value,
                                                           callback
                                                         ) => {
-                                                          // 检查同组内是否有重复的选项名称
-                                                          const hasDuplicate =
-                                                            attrGroup?.label_info_attribute?.some(
-                                                              (
-                                                                otherAttr: any,
-                                                                otherIndex: number
-                                                              ) => {
-                                                                // 排除当前正在编辑的选项
-                                                                return (
-                                                                  otherIndex !==
-                                                                    attrIndex &&
-                                                                  otherAttr.attribute_name_cn ===
-                                                                    value
-                                                                );
+                                                          return new Promise(
+                                                            (
+                                                              resolve,
+                                                              reject
+                                                            ) => {
+                                                              if (!value) {
+                                                                reject(
+                                                                  '请输入选项名称'
+                                                                ); // 失败用 reject
+                                                              } else {
+                                                                const hasDuplicate =
+                                                                  attrGroup?.label_info_attribute?.some(
+                                                                    (
+                                                                      otherAttr: any,
+                                                                      otherIndex: number
+                                                                    ) => {
+                                                                      return (
+                                                                        otherIndex !==
+                                                                          attrIndex &&
+                                                                        otherAttr?.attribute_name_cn ===
+                                                                          value
+                                                                      );
+                                                                    }
+                                                                  );
+                                                                if (
+                                                                  hasDuplicate
+                                                                ) {
+                                                                  reject(
+                                                                    '选项名称不能重复'
+                                                                  );
+                                                                } else {
+                                                                  callback(); // 成功用 resolve
+                                                                }
                                                               }
-                                                            );
-                                                          if (!value) {
-                                                            callback(
-                                                              '请输入选项名称'
-                                                            );
-                                                          } else if (
-                                                            hasDuplicate
-                                                          ) {
-                                                            callback(
-                                                              '选项名称不能重复'
-                                                            );
-                                                          }
-                                                          return Promise.resolve();
+                                                            }
+                                                          );
                                                         }
                                                       }
                                                     ]}
@@ -1587,7 +1587,7 @@ export default function RequirementDetail() {
                                                       value={
                                                         attr.attribute_name_cn
                                                       }
-                                                      onChange={(val) =>
+                                                      onChange={(val) => {
                                                         updateNestedValue(
                                                           [
                                                             labelIndex,
@@ -1598,14 +1598,14 @@ export default function RequirementDetail() {
                                                             'attribute_name_cn'
                                                           ],
                                                           val
-                                                        )
-                                                      }
+                                                        );
+                                                      }}
                                                     />
                                                   </FormItem>
                                                   <FormItem
                                                     label={
                                                       <div>
-                                                        展示名称11
+                                                        展示名称
                                                         <Tooltip content="展示在标注页面的名称">
                                                           <IconQuestionCircle />
                                                         </Tooltip>
