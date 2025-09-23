@@ -1195,9 +1195,17 @@ export default function RequirementDetail() {
                                         className="attribute-group-item"
                                       >
                                         <div className="attribute-group-content-item">
+                                          {console.log(
+                                            attrGroup?.isTemp === true,
+                                            attrGroup,
+                                            'attrGroup?.isTemp === true'
+                                          )}
                                           <FormItem
-                                            field={`label_info_attribute_groups_${type === 'detail' ? item?.id : item?.label_id}_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
-                                            disabled={type === 'detail'}
+                                            field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            disabled={
+                                              type === 'detail' ||
+                                              attrGroup?.isTemp === true
+                                            }
                                             label="属性名称:"
                                             rules={[
                                               {
@@ -1250,7 +1258,6 @@ export default function RequirementDetail() {
                                             <Input
                                               width={400}
                                               height={32}
-                                              disabled={type === 'detail'}
                                               value={
                                                 attrGroup.attribute_group_name
                                               }
@@ -1278,7 +1285,10 @@ export default function RequirementDetail() {
                                               'top'
                                             )}
                                             <Select
-                                              disabled={type === 'detail'}
+                                              disabled={
+                                                type === 'detail' ||
+                                                attrGroup?.isTemp === true
+                                              }
                                               className="ml-2 mr-2"
                                               style={{
                                                 width: 100,
@@ -1338,7 +1348,10 @@ export default function RequirementDetail() {
                                             style={{ marginRight: 0 }}
                                           >
                                             <Checkbox
-                                              disabled={type === 'detail'}
+                                              disabled={
+                                                type === 'detail' ||
+                                                attrGroup?.isTemp === true
+                                              }
                                               style={{ whiteSpace: 'nowrap' }}
                                               checked={
                                                 attrGroup.attribute_group_type ===
@@ -1373,15 +1386,16 @@ export default function RequirementDetail() {
                                                       ? 'not-allowed'
                                                       : 'pointer'
                                                 }}
-                                                className={`icon-wrapper ml-2 ${type === 'detail' ? 'icon-disabled' : ''}`}
+                                                className={`icon-wrapper ml-2 ${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
                                                 onClick={() => {
+                                                  if (
+                                                    type === 'detail' ||
+                                                    attrGroup?.isTemp === true
+                                                  ) {
+                                                    return;
+                                                  }
                                                   if (type !== 'detail') {
                                                     // 修改增加逻辑 往倒数第二个增加
-                                                    console.log(
-                                                      attrGroup.label_info_attribute,
-                                                      'label_info_attribute',
-                                                      attrGroup
-                                                    );
                                                     addAttribute(
                                                       labelIndex,
                                                       groupIndex,
@@ -1406,6 +1420,12 @@ export default function RequirementDetail() {
                                               fontSize={16}
                                               onClick={() => {
                                                 // 删除当前属性组
+                                                if (
+                                                  type === 'detail' ||
+                                                  attrGroup?.isTemp === true
+                                                ) {
+                                                  return;
+                                                }
                                                 if (type !== 'detail') {
                                                   deleteAttributeGroup(
                                                     attrGroup.attribute_id,
@@ -1429,7 +1449,10 @@ export default function RequirementDetail() {
                                                   : ''}
                                             </div>
                                             <Checkbox
-                                              disabled={type === 'detail'}
+                                              disabled={
+                                                type === 'detail' ||
+                                                attrGroup?.isTemp === true
+                                              }
                                               style={{ whiteSpace: 'nowrap' }}
                                               checked={
                                                 attrGroup.label_info_attribute?.some(
@@ -1540,6 +1563,8 @@ export default function RequirementDetail() {
                                                     label={`选项${attrIndex + 1}:`}
                                                     disabled={
                                                       type === 'detail' ||
+                                                      attrGroup?.isTemp ===
+                                                        true ||
                                                       (attrIndex ===
                                                         attrGroup
                                                           .label_info_attribute
@@ -1580,7 +1605,7 @@ export default function RequirementDetail() {
                                                   <FormItem
                                                     label={
                                                       <div>
-                                                        展示名称
+                                                        展示名称11
                                                         <Tooltip content="展示在标注页面的名称">
                                                           <IconQuestionCircle />
                                                         </Tooltip>
@@ -1597,6 +1622,11 @@ export default function RequirementDetail() {
                                                       type="text"
                                                       value={
                                                         attr.attribute_name_en
+                                                      }
+                                                      disabled={
+                                                        type === 'detail' ||
+                                                        attrGroup?.isTemp ===
+                                                          true
                                                       }
                                                       onChange={(val) =>
                                                         updateNestedValue(
@@ -1617,10 +1647,17 @@ export default function RequirementDetail() {
                                                     .label_info_attribute
                                                     .length > 1 && (
                                                     <IconDelete
-                                                      className={`${type === 'detail' ? 'is-disabled' : ''}`}
+                                                      className={`${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
                                                       fontSize={16}
                                                       onClick={() => {
                                                         // 删除当前属性组
+                                                        if (
+                                                          type === 'detail' ||
+                                                          attrGroup?.isTemp ===
+                                                            true
+                                                        ) {
+                                                          return;
+                                                        }
                                                         if (type !== 'detail') {
                                                           deleteAttribute(
                                                             labelIndex,
@@ -1671,25 +1708,35 @@ export default function RequirementDetail() {
                                       <Menu>
                                         {templateData?.length > 0 &&
                                           templateData?.map(
-                                            (TempItem, index) => (
-                                              <Menu.Item
-                                                // 如果当前标签已经选择了模版，就不能再次选择
-                                                disabled={
-                                                  datalist[labelIndex]
-                                                    ?.label_info_attribute_groups
-                                                    ?.length > 0
-                                                }
-                                                onClick={() => {
-                                                  handleTemplateClick(
-                                                    TempItem?.attribute_group_name,
-                                                    labelIndex
-                                                  );
-                                                }}
-                                                key={String(index)}
-                                              >
-                                                {TempItem.attribute_group_name}
-                                              </Menu.Item>
-                                            )
+                                            (TempItem, index) => {
+                                              return (
+                                                <Menu.Item
+                                                  // 如果当前标签已经选择了模版，就不能再次选择
+                                                  disabled={
+                                                    datalist[
+                                                      labelIndex
+                                                    ]?.label_info_attribute_groups?.find(
+                                                      (item) =>
+                                                        item?.attribute_group_name ===
+                                                        TempItem?.attribute_group_name
+                                                    )
+                                                      ? true
+                                                      : false
+                                                  }
+                                                  onClick={() => {
+                                                    handleTemplateClick(
+                                                      TempItem?.attribute_group_name,
+                                                      labelIndex
+                                                    );
+                                                  }}
+                                                  key={String(index)}
+                                                >
+                                                  {
+                                                    TempItem.attribute_group_name
+                                                  }
+                                                </Menu.Item>
+                                              );
+                                            }
                                           )}
                                         <Menu.Item
                                           onClick={() => {
@@ -1728,7 +1775,7 @@ export default function RequirementDetail() {
                               <div className="attribute-group-name">
                                 <FormItem
                                   style={{ marginRight: 0 }}
-                                  field={`attribute_group_name${attrGroup?.id}`}
+                                  field={`attribute_group_name_${attrGroup?.id}`}
                                   label="属性组件名称:"
                                   disabled={type === 'detail'}
                                   rules={[
@@ -1736,21 +1783,35 @@ export default function RequirementDetail() {
                                       required: true,
                                       validateTrigger: ['onChange', 'onBlur'],
                                       validator: (value, callback) => {
-                                        // 检查是否与其他属性组件名称重复（排除当前项）
+                                        // 检查是否与其他属性组件名称重复（排除当前项，只检查同组内）
                                         const trimmedValue = value.trim();
-                                        const hasDuplicate = templateData.some(
-                                          (otherGroup, otherIndex) => {
-                                            return (
-                                              otherIndex !== labelIndex && // 排除当前项
-                                              otherGroup.attribute_group_name &&
-                                              otherGroup.attribute_group_name.trim() ===
-                                                trimmedValue
-                                            );
-                                          }
-                                        );
+                                        const sameGroupItems =
+                                          templateData.filter((item) => {
+                                            return true; // 暂时返回所有项，需要替换为实际的分组逻辑
+                                          });
+
+                                        // 在同组内检查重复（排除当前项）
+                                        const hasDuplicateInGroup =
+                                          sameGroupItems.some(
+                                            (otherGroup, otherIndex) => {
+                                              // 找出otherGroup在原始templateData中的索引
+                                              const originalIndex =
+                                                templateData.findIndex(
+                                                  (item) => item === otherGroup
+                                                );
+
+                                              return (
+                                                originalIndex !== labelIndex && // 排除当前项
+                                                otherGroup.attribute_group_name &&
+                                                otherGroup.attribute_group_name.trim() ===
+                                                  trimmedValue
+                                              );
+                                            }
+                                          );
+
                                         if (!trimmedValue || !value) {
                                           return callback('请输入属性组件名称');
-                                        } else if (hasDuplicate) {
+                                        } else if (hasDuplicateInGroup) {
                                           return callback(
                                             '属性组件名称不能重复'
                                           );
@@ -1927,6 +1988,7 @@ export default function RequirementDetail() {
                                                 'onBlur'
                                               ],
                                               validator: (value, callback) => {
+                                                // 同组下面选项不能重复
                                                 if (!value)
                                                   return callback(
                                                     '请输入选项名称'
@@ -2030,6 +2092,7 @@ export default function RequirementDetail() {
                                 attribute_group_name: '',
                                 attribute_group_class: 1,
                                 attribute_group_type: 1,
+                                isTemp: true,
                                 label_info_attribute: [
                                   {
                                     label_info_id: uuidV4(),
