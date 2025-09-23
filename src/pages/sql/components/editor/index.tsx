@@ -46,8 +46,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       onTabChange(key);
     };
 
-    // 创建 PySpark 文件（等同于 DirectoryTree 的新建功能）
-    const handleCreatePySpark = () => {
+    // 创建 SQL查询文件（等同于 DirectoryTree 的新建功能）
+    const handleCreateSqlQuery = () => {
       // 检查标签页数量限制
       if (fileTabs.length >= 20) {
         Message.error('最多只能打开20个标签页，请先关闭一些标签页');
@@ -63,7 +63,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
         // 调用父组件的创建逻辑
         onCreate('', {}); // 传递空字符串和空对象作为默认参数
       } catch (error) {
-        console.error('创建 PySpark 文件失败:', error);
+        console.error('创建 SQL查询文件失败:', error);
         Message.error('创建失败');
       }
     };
@@ -83,7 +83,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             className="sql-tabs empty-tabs"
             type="card"
             showAddButton={hasCreatePermission}
-            onAddTab={handleCreatePySpark}
+            onAddTab={handleCreateSqlQuery}
             onDeleteTab={handleCloseTab}
             editable
           >
@@ -102,8 +102,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           <div className="empty-content-area">
             <NoData
               description="暂无数据"
-              btnText="新建PySpark文件"
-              handleBtn={handleCreatePySpark}
+              btnText="新建SQL查询"
+              handleBtn={handleCreateSqlQuery}
             />
           </div>
         </div>
@@ -123,7 +123,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           className="sql-tabs"
           type="card"
           showAddButton={hasCreatePermission}
-          onAddTab={handleCreatePySpark}
+          onAddTab={handleCreateSqlQuery}
           onDeleteTab={handleCloseTab}
           editable
         >

@@ -637,14 +637,21 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           />
           {from === DirectoryTreeFrom.SQL ? (
             <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
-              <Button
+              {/* <Button
                 type="text"
                 size="small"
                 icon={<IconPlus />}
                 onClick={() => startRootCreate(false)}
               >
                 新建
-              </Button>
+              </Button> */}
+              <div
+                className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
+                onClick={() => startRootCreate(false)}
+              >
+                <IconPlus className="mr-2" />
+                新建
+              </div>
             </PermissionWrapper>
           ) : (
             <Dropdown
@@ -721,7 +728,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   )}
                   {node.dataRef?.type !== PythonItemType.Directory &&
                     node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
-                      <Tooltip color="white" content="复制">
+                      <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
                           className="mr-1 hover:text-[rgb(var(--primary-6))]"
                           onClick={() =>

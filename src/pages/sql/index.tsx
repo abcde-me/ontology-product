@@ -1,5 +1,5 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
-import { Layout, Tabs } from '@arco-design/web-react';
+import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import DataIcon from '@/assets/python/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
@@ -104,7 +104,7 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   return (
-    <Layout className="sql-layout">
+    <Layout className="sql-page-layout">
       <Sider width={isDasetTab ? '100%' : 300} className="sql-sider">
         <Tabs
           activeTab={activeTab}
@@ -113,7 +113,14 @@ const SqlIndex: React.FC = memo(() => {
           className="sql-tabs"
           type="rounded"
         >
-          <TabPane key="data" title={<DataIcon />}>
+          <TabPane
+            key="data"
+            title={
+              <Popover content="源数据" position="right">
+                <DataIcon />
+              </Popover>
+            }
+          >
             {activeTab === 'data' && (
               <DataManager
                 key="data"
@@ -122,7 +129,14 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane key="files" title={<PythonIcon />}>
+          <TabPane
+            key="files"
+            title={
+              <Popover content="SQL脚本列表" position="right">
+                <PythonIcon />
+              </Popover>
+            }
+          >
             {activeTab === 'files' && (
               <FileManager
                 key="files"
@@ -136,7 +150,14 @@ const SqlIndex: React.FC = memo(() => {
             )}
           </TabPane>
           {useHasPermission(SQL_PERMISSIONS.CAN_EXPORT_TASK_LIST) && (
-            <TabPane key="dataset" title={<DasetIcon />}>
+            <TabPane
+              key="dataset"
+              title={
+                <Popover content="数据集导出任务" position="right">
+                  <DasetIcon />
+                </Popover>
+              }
+            >
               {activeTab === 'dataset' && <DatasetsList />}
             </TabPane>
           )}

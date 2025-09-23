@@ -112,6 +112,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
       default:
         return (
           <Tree
+            className={'sql-data-directory-tree-catalogue'}
             treeData={treeData}
             selectedKeys={selectedKeys}
             onSelect={handleSelect}

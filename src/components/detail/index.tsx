@@ -385,7 +385,8 @@ const versionColumns: any[] = [
   },
   {
     title: '更变记录',
-    width: 470,
+    minWidth: 100,
+    maxWidth: 470,
     dataIndex: 'description',
     render: (description: string) => {
       return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
@@ -1774,6 +1775,7 @@ const DatasetDetail = (props: {
                   data={contentTableData}
                   pagination={false}
                   rowKey="id"
+                  border={false}
                 />
               </div>
             </TabPane>

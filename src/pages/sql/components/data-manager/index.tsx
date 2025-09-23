@@ -124,9 +124,9 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   };
 
   return (
-    <div className="python-tab-content">
+    <div className="sql-tab-content">
       <div className="tab-header">
-        <Title className="tab-title">数据目录</Title>
+        <Title className="tab-title">源数据</Title>
       </div>
 
       <div className="tab-tree sider-container">

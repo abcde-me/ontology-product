@@ -55,13 +55,16 @@ const TableList = (props) => {
     {
       title: 'ID',
       dataIndex: 'table_id',
-      width: 60
+      width: 80
     },
     {
       title: '表名',
       dataIndex: 'table_name',
       ellipsis: true,
       width: 174,
+      bodyCellStyle: {
+        fontWeight: 600
+      },
       render: (_, record) => (
         <Popover content={record.table_name}>
           <span>{record.table_name}</span>
