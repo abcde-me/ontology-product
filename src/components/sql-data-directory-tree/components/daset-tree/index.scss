@@ -76,12 +76,12 @@
       //   background-color: var(--color-bg-5);
       // }
 
-      .sql-dataset-tree__node-title {
+      .sql-dataset-tree__node-title:not(.sql-dataset-tree__node-title-scheam) {
         max-width: 136px;
         color: #007dfa;
       }
 
-      .sql-dataset-tree__node-title-file {
+      .sql-dataset-tree__node-title-dataset {
         max-width: 116px;
       }
 

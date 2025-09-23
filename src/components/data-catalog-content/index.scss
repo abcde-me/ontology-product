@@ -85,6 +85,19 @@
 .arco-table-tr:hover .hover-change .ellipsis-text:hover {
   color: rgba(67, 141, 251, 1);
 }
+// TODO 待优化
+.hover-change_normal .ellipsis-text {
+  color: #1e293b;
+}
+
+.arco-table-tr:hover .hover-change_normal .ellipsis-text {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
+}
+
+.arco-table-tr:hover .hover-change_normal .ellipsis-text:hover {
+  color: rgba(67, 141, 251, 1);
+}
 
 //新建的数据库弹窗样式
 /* 弹窗头部样式 */

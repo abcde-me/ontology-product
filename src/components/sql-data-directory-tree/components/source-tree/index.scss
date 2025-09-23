@@ -27,7 +27,7 @@
       &:hover {
         background-color: var(--color-bg-5);
 
-        .sql-source-tree__node-title {
+        .sql-source-tree__node-title:not(.sql-source-tree__node-title-column) {
           color: var(--primary-6);
         }
 

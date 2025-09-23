@@ -31,6 +31,24 @@
     border-radius: 0;
   }
 
+  // 标签页文本样式统一管理
+  .arco-tabs .arco-tabs-header-nav-card {
+    .arco-tabs-header-title-text {
+      color: #1e293b;
+      font-weight: 400;
+      transition:
+        color 0.2s ease,
+        font-weight 0.2s ease;
+    }
+
+    // 激活状态和hover状态保持一致的样式
+    .arco-tabs-header-title-active .arco-tabs-header-title-text,
+    .arco-tabs-header-title:hover .arco-tabs-header-title-text {
+      color: #1e293b;
+      font-weight: 400;
+    }
+  }
+
   .main-toolbar {
     height: 60px;
     background-color: #fff;

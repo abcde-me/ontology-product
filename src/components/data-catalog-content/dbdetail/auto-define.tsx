@@ -203,6 +203,7 @@ export default function AutoDefine(props) {
           columns={columns as any}
           data={filteredData}
           pagination={false}
+          border={false}
           className="table_style"
         />
       </div>

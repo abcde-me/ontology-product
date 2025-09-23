@@ -33,7 +33,7 @@ export default function Tables(props) {
     return (get(dataList, 'sample.columns', []) || []).map((item) => ({
       title: item,
       dataIndex: item,
-      width: 260,
+      maxWidth: 260,
       render: (_, record) => {
         return (
           <EllipsisPopover
