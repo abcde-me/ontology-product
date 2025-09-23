@@ -51,10 +51,6 @@ import {
 } from './type';
 
 import './detail.scss';
-import { group } from 'console';
-import datasetList from '../workflowConfig/workflow/nodes/knowledge-retrieval/components/dataset-list';
-import { G } from '@svgdotjs/svg.js';
-import { gradientDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -413,7 +409,7 @@ export default function RequirementDetail() {
     isTemp ? setTemplateData(newData) : setDatalist(newData);
   };
 
-  // 添加新标签 - 修复版本
+  // 添加新标签
   const addNewLabel = () => {
     // 使用函数式更新确保基于最新状态进行操作
     setDatalist((prevDatalist) => {
@@ -425,9 +421,8 @@ export default function RequirementDetail() {
 
       // 获取最后一个标签的深拷贝
       const lastLabel = _.cloneDeep(prevDatalist[prevDatalist.length - 1]);
-      console.log(lastLabel, 'lastLabel');
       // 生成全新的唯一ID
-      lastLabel.label_id = uuidV4() + new Date().getTime();
+      lastLabel.label_id = uuidV4();
       lastLabel.label_colour = getRandomHexColorStrict();
 
       // 确保完整保留所有属性组和属性
@@ -439,7 +434,6 @@ export default function RequirementDetail() {
           lastLabel.label_info_attribute_groups.map((group) => {
             const newGroup = _.cloneDeep(group);
             newGroup.attribute_id = uuidV4();
-
             // 为每个属性生成新ID
             if (
               newGroup.label_info_attribute &&
@@ -458,81 +452,14 @@ export default function RequirementDetail() {
           });
       }
 
+      // 创建新的标签列表
+      const newDatalist = [...prevDatalist, lastLabel];
+
       // 将新标签添加到数组末尾
-      return [...prevDatalist, lastLabel];
+      console.log(newDatalist, ' newDatalist');
+      return newDatalist;
     });
   };
-
-  // 增强 getLastItem 函数的健壮性
-  const getLastItem = (arr) => {
-    // 先校验：确保输入是数组且非空
-    if (!Array.isArray(arr) || arr.length === 0) {
-      return null;
-    }
-
-    try {
-      // 创建最后一个元素的深拷贝，避免引用冲突
-      const lastItem = _.cloneDeep(arr[arr.length - 1]);
-      // 生成全新的唯一ID
-      lastItem.label_id = uuidV4() + new Date().getTime();
-      lastItem.label_colour = getRandomHexColorStrict();
-
-      // 移除不需要的属性
-      delete lastItem.attribute_id; // 这个属性可能不属于LabelData结构
-
-      // 修复：完整保留上一个标签的属性组结构和内容
-      if (
-        lastItem.label_info_attribute_groups &&
-        Array.isArray(lastItem.label_info_attribute_groups)
-      ) {
-        lastItem.label_info_attribute_groups =
-          lastItem.label_info_attribute_groups.map((group) => {
-            // 为属性组生成新ID，但保留所有其他属性值
-            const newGroup = _.cloneDeep(group);
-            newGroup.attribute_id = uuidV4();
-
-            // 为属性组中的每个属性生成新ID，但保留所有属性值
-            if (
-              group.label_info_attribute &&
-              Array.isArray(group.label_info_attribute)
-            ) {
-              newGroup.label_info_attribute = group.label_info_attribute.map(
-                (attr) => {
-                  const newAttr = _.cloneDeep(attr);
-                  newAttr.label_info_id = uuidV4();
-
-                  // 确保属性名称被正确复制
-                  if (attr.attribute_name_cn) {
-                    newAttr.attribute_name_cn = attr.attribute_name_cn;
-                  }
-                  if (attr.attribute_name_en) {
-                    newAttr.attribute_name_en = attr.attribute_name_en;
-                  }
-
-                  return newAttr;
-                }
-              );
-            } else {
-              // 确保label_info_attribute是数组类型
-              newGroup.label_info_attribute = [];
-            }
-
-            return newGroup;
-          });
-      } else {
-        // 如果没有属性组，则设为空数组
-        lastItem.label_info_attribute_groups = [];
-      }
-
-      // 返回新创建的元素
-      return lastItem;
-    } catch (error) {
-      console.error('复制标签时出错:', error);
-      // 出错时返回初始数据
-      return generateInitialData()[0];
-    }
-  };
-
   // 为指定标签添加属性组
   const addAttributeGroup = (labelIndex: number) => {
     const newGroup: LabelInfoAttributeGroup = {
@@ -830,22 +757,26 @@ export default function RequirementDetail() {
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
               form2.setFieldValue(
-                `label_name_cn_${item?.order_num}`,
+                `label_name_cn_${item?.label_id}`,
                 item?.label_name_cn
               );
               form2.setFieldValue(
-                `label_name_en_${item?.order_num}`,
+                `label_name_en_${item?.label_id}`,
                 item?.label_name_en
               );
               form2.setFieldValue(
-                `label_shape_${item?.order_num}`,
+                `label_shape_${item?.label_id}`,
                 item?.label_shape
               );
               form2.setFieldValue(
-                `label_colour_${item?.order_num}`,
+                `label_colour_${item?.label_id}`,
                 item?.label_colour
               );
               item?.label_info_attribute_groups?.map((group) => {
+                form2.setFieldValue(
+                  `label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`,
+                  group?.attribute_group_name
+                );
                 group?.label_info_attribute?.map((attribute) => {
                   form2.setFieldValue(
                     `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_cn`,
@@ -908,8 +839,14 @@ export default function RequirementDetail() {
             onValuesChange={(_, val) => {
               setPublishData({ ...publishData, ...val });
             }}
+            style={{
+              marginLeft: '20px',
+              marginRight: 'auto'
+            }}
+            layout="horizontal"
             labelCol={{
-              span: 1
+              span: 1,
+              offset: 0
             }}
           >
             <FormItem
@@ -950,7 +887,9 @@ export default function RequirementDetail() {
             >
               <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
             </FormItem>
-            <div className="basic-title">任务配置</div>
+            <div className="basic-title" style={{ marginLeft: '-20px' }}>
+              任务配置
+            </div>
             <FormItem
               label="标注类型:"
               required
@@ -982,7 +921,7 @@ export default function RequirementDetail() {
                 </Button>
                 <div className="data-set-text">
                   已选数据量：
-                  {getTotal(selectedData) || getDetailObj?.label_count}
+                  {getTotal(selectedData) || getDetailObj?.label_count || 0}
                 </div>
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
@@ -1019,11 +958,13 @@ export default function RequirementDetail() {
                 setPublishData({ ...publishData, val });
               }}
               style={{
-                marginLeft: '-18px'
+                marginLeft: '0',
+                marginRight: 'auto'
               }}
               layout="inline"
               labelCol={{
-                span: 1
+                span: 1,
+                offset: 0
               }}
             >
               <FormItem
@@ -1056,7 +997,7 @@ export default function RequirementDetail() {
                         >
                           标签
                         </div>
-                        <div
+                        {/* 这期不做 <div
                           className="attribute-content-right"
                           onClick={() => {
                             console.log('跳转预览页面');
@@ -1064,7 +1005,7 @@ export default function RequirementDetail() {
                         >
                           预览
                           <IconSwap />
-                        </div>
+                        </div> */}
                       </div>
                       <div
                         className={[
@@ -1075,7 +1016,7 @@ export default function RequirementDetail() {
                           setActiveTab(2);
                         }}
                       >
-                        模版标签属性
+                        标签模版属性
                       </div>
                     </div>
                     {/* 原有的标签部分内容 */}
@@ -1085,6 +1026,7 @@ export default function RequirementDetail() {
                           datalist?.map((item, labelIndex) => (
                             <div className="sortable-item" key={item?.label_id}>
                               <div className="sortable-item-content">
+                                {console.log(`label_name_cn_${item?.label_id}`)}
                                 <FormItem
                                   label="标注名称:"
                                   field={`label_name_cn_${item?.label_id}`}
@@ -1240,10 +1182,18 @@ export default function RequirementDetail() {
                                   )}
                                 </FormItem>
                               </div>
+                              {console.log(
+                                item?.label_info_attribute_groups,
+                                'top ---- '
+                              )}
                               {item?.label_info_attribute_groups?.length > 0 &&
                                 item?.label_info_attribute_groups?.map(
                                   (attrGroup, groupIndex) => {
-                                    console.log(attrGroup, 'attrGroup -- top');
+                                    console.log(
+                                      attrGroup,
+                                      'attrGroup -- top',
+                                      `label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`
+                                    );
                                     return (
                                       <div
                                         key={`${item?.label_id}_${groupIndex}`}
@@ -1251,7 +1201,7 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            field={`label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            field={`label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={type === 'detail'}
                                             label="属性名称:"
                                             rules={[
@@ -1915,9 +1865,7 @@ export default function RequirementDetail() {
                                                 label_info_attribute: [
                                                   ...g.label_info_attribute,
                                                   {
-                                                    label_info_id:
-                                                      g.label_info_attribute
-                                                        .length + 1,
+                                                    label_info_id: uuidV4(),
                                                     attribute_group_class:
                                                       attrGroup.attribute_group_class,
                                                     attribute_group_type:
@@ -2135,8 +2083,13 @@ export default function RequirementDetail() {
             onValuesChange={(_, val) => {
               setPublishData({ ...publishData, val });
             }}
+            style={{
+              marginLeft: '20px',
+              marginRight: 'auto'
+            }}
             labelCol={{
-              span: 1
+              span: 1,
+              offset: 0
             }}
           >
             <FormItem
