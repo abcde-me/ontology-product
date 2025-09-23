@@ -1415,10 +1415,7 @@ export default function RequirementDetail() {
                                               fontSize={16}
                                               onClick={() => {
                                                 // 删除当前属性组
-                                                if (
-                                                  type === 'detail' ||
-                                                  attrGroup?.isTemp === true
-                                                ) {
+                                                if (type === 'detail') {
                                                   return;
                                                 }
                                                 if (type !== 'detail') {
