@@ -81,7 +81,8 @@ export default function Requirement() {
         }
       };
       const res = await getAnnotationTaskList(params);
-      if (res.code === 0 && res.data) {
+      if (res.code === 0) {
+        console.log(res?.data?.result, 'top----');
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
         setLoading(false);
