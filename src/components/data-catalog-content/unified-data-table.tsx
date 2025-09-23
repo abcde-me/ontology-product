@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle
 } from 'react';
 import { Modal, Tabs, Typography } from '@arco-design/web-react';
+import dayjs from 'dayjs';
 import {
   getTargetDataFileList,
   getSourceDataFileList,
@@ -249,12 +250,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
       const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
-      const params = {
+      const params: any = {
         full_path: selectedFullPath, // 使用选中的完整路径
         page: currentPage,
         limit: pageSize,
-        start_time: startTime || '',
-        end_time: endTime || '',
         search_content:
           searchConditionType === '数据内容' ? searchConditionKeyword : '',
         search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
@@ -264,16 +263,30 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       };
 
+      // 只有当时间存在时才添加时间参数
+      if (startTime) {
+        params.start_time = startTime;
+      }
+      if (endTime) {
+        params.end_time = endTime;
+      }
+
       // 源数据表参数
-      const sourceParams = {
+      const sourceParams: any = {
         page: currentPage,
         page_size: pageSize,
         file_name: searchValue || '',
         data_path_id: Number(selectedKey) // 优先使用选中ID 后期改成selectedKey
-        // start: startTime, //后期改成startTime
-        // end: endTime, //后期改成endTime
         // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
       };
+
+      // 只有当时间存在时才添加时间参数，并转换为ISO字符串
+      if (startTime) {
+        sourceParams.start = startTime;
+      }
+      if (endTime) {
+        sourceParams.end = endTime;
+      }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
 
@@ -286,12 +299,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       if (validFileTypes.length > 0) {
         newParams.file_type = validFileTypes;
         newSourceParams.file_type = validFileTypes;
-      }
-      if (startTime) {
-        newSourceParams.start = startTime;
-      }
-      if (endTime) {
-        newSourceParams.end = endTime;
       }
       let res;
       console.log(tableType, '查看tableType11111111');
@@ -306,7 +313,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
             databaseName = pathParts[pathParts.length - 1];
           }
         }
-        const dbParams = {
+        const dbParams: any = {
           path_id: Number(selectedParentId || selectedKey), // 使用父节点ID（数据库ID），如果没有则使用selectedKey
           search:
             tableType === 'source'
@@ -317,6 +324,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           database: databaseName, // 使用提取的数据库名称
           db_type: dbFilterType
         };
+
+        // 只有当时间存在时才添加时间参数，并转换为ISO字符串
+        if (startTime) {
+          dbParams.start_time = dayjs(startTime).toISOString();
+        }
+        if (endTime) {
+          dbParams.end_time = dayjs(endTime).toISOString();
+        }
         res = await getDbItemList(dbParams);
         console.log('调用数据库表API，参数:', dbParams);
       } else if (tableType === 'target') {

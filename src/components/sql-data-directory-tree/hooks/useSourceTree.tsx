@@ -320,7 +320,6 @@ export const useSourceTree = () => {
   useEffect(() => {
     if (!searchKeyword.trim()) {
       setTreeDataFiltered(treeData);
-      // 清空搜索时，保持当前的展开状态
     } else {
       const { filteredData, expandedKeys } = searchData(
         searchKeyword,
@@ -335,7 +334,14 @@ export const useSourceTree = () => {
       });
     }
   }, [searchKeyword, treeData, searchData]);
-  console.log(treeDataFiltered, 'treeDataFiltered');
+
+  useEffect(() => {
+    // 清空搜索时，收起所有节点
+    if (!searchKeyword.trim()) {
+      setExpandedKeys([]);
+    }
+  }, [searchKeyword]);
+
   return {
     treeDataFiltered,
     setTreeData,
