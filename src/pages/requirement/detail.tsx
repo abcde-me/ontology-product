@@ -774,9 +774,8 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  // label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`
-                  `label_info_attribute_groups_${item?.label_id}_${group?.attribute_id}_attribute_group_name`,
-                  group?._attribute_group_name
+                  `label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`,
+                  group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
                   form2.setFieldValue(
@@ -840,8 +839,14 @@ export default function RequirementDetail() {
             onValuesChange={(_, val) => {
               setPublishData({ ...publishData, ...val });
             }}
+            style={{
+              marginLeft: '20px',
+              marginRight: 'auto'
+            }}
+            layout="horizontal"
             labelCol={{
-              span: 1
+              span: 1,
+              offset: 0
             }}
           >
             <FormItem
@@ -882,7 +887,9 @@ export default function RequirementDetail() {
             >
               <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
             </FormItem>
-            <div className="basic-title">任务配置</div>
+            <div className="basic-title" style={{ marginLeft: '-20px' }}>
+              任务配置
+            </div>
             <FormItem
               label="标注类型:"
               required
@@ -951,11 +958,13 @@ export default function RequirementDetail() {
                 setPublishData({ ...publishData, val });
               }}
               style={{
-                marginLeft: '-18px'
+                marginLeft: '0',
+                marginRight: 'auto'
               }}
               layout="inline"
               labelCol={{
-                span: 1
+                span: 1,
+                offset: 0
               }}
             >
               <FormItem
@@ -1192,7 +1201,7 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            field={`label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            field={`label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={type === 'detail'}
                                             label="属性名称:"
                                             rules={[
@@ -2074,8 +2083,13 @@ export default function RequirementDetail() {
             onValuesChange={(_, val) => {
               setPublishData({ ...publishData, val });
             }}
+            style={{
+              marginLeft: '20px',
+              marginRight: 'auto'
+            }}
             labelCol={{
-              span: 1
+              span: 1,
+              offset: 0
             }}
           >
             <FormItem
