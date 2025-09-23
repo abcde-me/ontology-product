@@ -774,7 +774,7 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  `label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`,
+                  `label_info_attribute_groups_${item?.id}_${item?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
@@ -1023,7 +1023,7 @@ export default function RequirementDetail() {
                     {activeTab === LabelInfoAttributeGroupType.LABEL && (
                       <div className="attribute-content">
                         {datalist &&
-                          datalist?.map((item, labelIndex) => (
+                          datalist?.map((item: any, labelIndex) => (
                             <div className="sortable-item" key={item?.label_id}>
                               <div className="sortable-item-content">
                                 {console.log(`label_name_cn_${item?.label_id}`)}
@@ -1189,11 +1189,6 @@ export default function RequirementDetail() {
                               {item?.label_info_attribute_groups?.length > 0 &&
                                 item?.label_info_attribute_groups?.map(
                                   (attrGroup, groupIndex) => {
-                                    console.log(
-                                      attrGroup,
-                                      'attrGroup -- top',
-                                      `label_info_attribute_groups_${item?.label_id}_${attrGroup?.attribute_id}_attribute_group_name`
-                                    );
                                     return (
                                       <div
                                         key={`${item?.label_id}_${groupIndex}`}
@@ -1201,7 +1196,7 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            field={`label_info_attribute_groups_${item?.label_name_cn}_${item?.label_name_en}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            field={`label_info_attribute_groups_${type === 'detail' ? item?.id : item?.label_id}_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={type === 'detail'}
                                             label="属性名称:"
                                             rules={[

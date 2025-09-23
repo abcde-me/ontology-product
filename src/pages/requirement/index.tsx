@@ -313,22 +313,30 @@ export default function Requirement() {
     {
       title: '操作',
       dataIndex: 'operate',
-      align: 'center',
+      align: 'left',
       fixed: 'right',
       width: 160,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
-          <div style={{ display: 'flex' }} className="option-content">
+          <div style={{ marginLeft: 4 }} className="option-content">
             <span
               className="operate-text"
+              style={{ marginRight: 8 }}
               onClick={() => {
                 viewDetailWorkflow(record.id);
               }}
             >
               详情
             </span>
-            {/* )} */}
+            {/* <span
+              className="operate-text"
+              onClick={() => {
+
+              }}
+            >
+              下载结果
+            </span> */}
           </div>
         );
       }
