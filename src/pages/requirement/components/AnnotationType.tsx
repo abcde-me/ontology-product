@@ -26,9 +26,9 @@ const btnPicData = [
 ];
 const btnTextData = [
   { key: 1, value: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
-  { key: 2, value: 2, label: '文本分类', code: 'TEXT_CLASSIFICATION' },
+  { key: 2, value: 2, label: '分类', code: 'TEXT_CLASSIFICATION' },
   { key: 3, value: 3, label: '问答', code: 'TEXT_QA' },
-  { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT' }
+  { key: 4, value: 4, label: '排序', code: 'TEXT_SORT' }
 ];
 interface AnnotationTypeProps {
   isDisabled: boolean;

@@ -9,7 +9,8 @@ import {
   Space,
   Table,
   Tabs,
-  Typography
+  Typography,
+  Popover
 } from '@arco-design/web-react';
 import { useEditorContext } from '../../contexts/EditorContext';
 import {
@@ -173,7 +174,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       if (status === RunningStatus.RUNNING) {
         return (
           <div className="run-status">
-            <span className="mr-4">运行中</span>
+            <span className="mr-4 text-[14px]">运行中</span>
             <IconLoading style={{ color: '#007DFA' }} />
           </div>
         );
@@ -182,9 +183,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         return (
           <Space>
             <div className="run-status">
-              <span className="mr-4">运行成功</span>
+              <span className="mr-4 text-[14px]">运行成功</span>
               <RunSuccessIcon className="mr-[8px]" />
-              <span>
+              <span className="text-[14px]">
                 {formatDateTime(runStartTime || '')}（
                 {runDuration < 1000
                   ? `${runDuration}ms`
@@ -198,9 +199,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       if (status === RunningStatus.FAILED) {
         return (
           <div className="run-status">
-            <span className="mr-4">运行失败</span>
+            <span className="mr-4 text-[14px]">运行失败</span>
             <RunFailedIcon className="mr-[8px]" />
-            <span>
+            <span className="text-[14px]">
               {formatDateTime(runStartTime || '')}（
               {runDuration < 1000
                 ? `${runDuration}ms`
@@ -220,7 +221,33 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           onChange={handlePanelChange}
           triggerRegion="icon"
           expandIconPosition="left"
-          expandIcon={isExpanded ? <IconDown /> : <IconUp />}
+          expandIcon={
+            isExpanded ? (
+              <Popover content="收起" position="top">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <IconDown />
+                </div>
+              </Popover>
+            ) : (
+              <Popover content="展开" position="top">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <IconUp />
+                </div>
+              </Popover>
+            )
+          }
           style={{
             border: 'none'
           }}
@@ -234,57 +261,59 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </Text>
                   {renderRunStatus(runStatus)}
                 </div>
-                <div className="flex items-center gap-[12px]">
-                  <Space>
-                    <span>展示</span>
-                    <Input
-                      style={{ width: 52, height: 22 }}
-                      size="mini"
-                      value={String(size)}
-                      maxLength={1000}
+                {runStatus !== RunningStatus.RUNNING && (
+                  <div className="flex items-center gap-[12px]">
+                    <Space>
+                      <span>展示</span>
+                      <Input
+                        style={{ width: 52, height: 22 }}
+                        size="mini"
+                        value={String(size)}
+                        maxLength={1000}
+                        disabled={runStatus !== RunningStatus.SUCCESS}
+                        onChange={(value) => setSize(value)}
+                        onPressEnter={(event) => {
+                          event.stopPropagation();
+                          // 按回车键时触发轮询获取新结果
+                          if (execid) {
+                            // 避异步没更新结束获取不到正确size
+                            setTimeout(() => {
+                              loadRunResult(execid, size);
+                            }, 50);
+                          }
+                        }}
+                        onBlur={() => {
+                          // 失去焦点时也触发查询
+                          if (execid) {
+                            // 避异步没更新结束获取不到正确size
+                            setTimeout(() => {
+                              loadRunResult(execid, size);
+                            }, 50);
+                          }
+                        }}
+                      />
+                      <span>行数据</span>
+                    </Space>
+                    <Dropdown
+                      position="br"
                       disabled={runStatus !== RunningStatus.SUCCESS}
-                      onChange={(value) => setSize(value)}
-                      onPressEnter={(event) => {
-                        event.stopPropagation();
-                        // 按回车键时触发轮询获取新结果
-                        if (execid) {
-                          // 避异步没更新结束获取不到正确size
-                          setTimeout(() => {
-                            loadRunResult(execid, size);
-                          }, 50);
-                        }
-                      }}
-                      onBlur={() => {
-                        // 失去焦点时也触发查询
-                        if (execid) {
-                          // 避异步没更新结束获取不到正确size
-                          setTimeout(() => {
-                            loadRunResult(execid, size);
-                          }, 50);
-                        }
-                      }}
-                    />
-                    <span>行数据</span>
-                  </Space>
-                  <Dropdown
-                    position="br"
-                    disabled={runStatus !== RunningStatus.SUCCESS}
-                    droplist={
-                      <Menu onClickMenuItem={handleMenuClick}>
-                        <Menu.Item key="1">保存为新数据集</Menu.Item>
-                        <Menu.Item key="2">保存为新版本</Menu.Item>
-                      </Menu>
-                    }
-                  >
-                    <Button
-                      type="outline"
-                      size="mini"
-                      disabled={runStatus !== RunningStatus.SUCCESS}
+                      droplist={
+                        <Menu onClickMenuItem={handleMenuClick}>
+                          <Menu.Item key="1">保存为新数据集</Menu.Item>
+                          <Menu.Item key="2">保存为新版本</Menu.Item>
+                        </Menu>
+                      }
                     >
-                      保存到数据集
-                    </Button>
-                  </Dropdown>
-                </div>
+                      <Button
+                        type="outline"
+                        size="mini"
+                        disabled={runStatus !== RunningStatus.SUCCESS}
+                      >
+                        保存到数据集
+                      </Button>
+                    </Dropdown>
+                  </div>
+                )}
               </div>
             }
             name="1"
@@ -312,7 +341,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       <div className="run-result-table">
                         {columns.length > 0 && data.length > 0 ? (
                           <Table
-                            border
+                            border={false}
                             columns={sortableColumns}
                             data={data}
                             pagination={false}
