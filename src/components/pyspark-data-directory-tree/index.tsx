@@ -158,6 +158,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
       default:
         return (
           <Tree
+            className="tree-content"
             treeData={treeData}
             selectedKeys={selectedKeys}
             onSelect={handleSelect}

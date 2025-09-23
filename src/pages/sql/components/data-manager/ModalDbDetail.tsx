@@ -126,15 +126,34 @@ const TableList = (props) => {
     onRequest: getDbItemList,
     formatSearchParams: (values: any) => {
       const result: any = { ...values };
-      if (values.datetime_range && values.datetime_range.length === 2) {
+
+      // 处理日期时间范围
+      if ('datetime_range' in values) {
+        // 删除 datetime_range 字段，因为后端不需要这个字段
         delete result.datetime_range;
-        result.start_time = dayjs(values.datetime_range[0]).format();
-        result.end_time = dayjs(values.datetime_range[1]).format();
-      } else {
-        delete result.datetime_range;
-        delete result.start_time;
-        delete result.end_time;
+
+        const dateRange = values.datetime_range;
+
+        if (dateRange && Array.isArray(dateRange) && dateRange.length === 2) {
+          // 验证两个日期都存在且有效
+          const startDate = dateRange[0];
+          const endDate = dateRange[1];
+
+          if (startDate && endDate) {
+            result.start_time = dayjs(startDate).format();
+            result.end_time = dayjs(endDate).format();
+          } else {
+            // 如果日期无效，清除时间字段
+            delete result.start_time;
+            delete result.end_time;
+          }
+        } else {
+          // 如果 datetime_range 为空数组、null 或 undefined，清除时间字段
+          delete result.start_time;
+          delete result.end_time;
+        }
       }
+
       return result;
     },
     formatSorter: (sorter: any) => {
