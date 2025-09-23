@@ -114,8 +114,10 @@ const EditorWorkspaceContent: React.FC<{
       try {
         const formattedCode = format(editorContent, { language: 'sql' });
         handleContentChange(formattedCode);
+        Message.success('格式化成功');
       } catch (e) {
         console.error(e);
+        Message.error('格式化失败');
       }
     }
   };
@@ -191,7 +193,7 @@ const EditorWorkspaceContent: React.FC<{
                 }
                 disabled={editorContent?.trim() === ''}
                 onClick={handleRunClick}
-                className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
+                className={`h-[26px] ${runStatus === RunningStatus.RUNNING ? 'btn-running' : ''}`}
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
               </Button>
@@ -227,7 +229,7 @@ const EditorWorkspaceContent: React.FC<{
           value={editorContent}
           onChange={handleContentChange}
           placeholder={placeholderValue}
-          readOnly={!hasUpdatePermission}
+          readOnly={!hasUpdatePermission || runStatus === RunningStatus.RUNNING}
           theme={myTheme}
           extensions={[
             sql({ upperCaseKeywords: true }),

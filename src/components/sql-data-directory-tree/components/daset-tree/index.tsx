@@ -135,7 +135,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                 <div className="sql-dataset-tree__node">
                   <div className="sql-dataset-tree__node-info">
                     <EllipsisPopover
-                      className={`sql-dataset-tree__node-title ${isDataset ? 'sql-dataset-tree__node-title-dataset' : 'sql-dataset-tree__node-title-file'}`}
+                      className={`sql-dataset-tree__node-title ${isScheam ? 'sql-dataset-tree__node-title-scheam' : 'sql-dataset-tree__node-title-dataset'}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
@@ -150,6 +150,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                   <div className="sql-dataset-tree__node-actions">
                     {isDataset && (
                       <Button
+                        style={{ fontWeight: 600 }}
                         type="text"
                         className="sql-dataset-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}

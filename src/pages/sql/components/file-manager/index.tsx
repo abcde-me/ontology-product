@@ -56,7 +56,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   });
 
   return (
-    <div className="python-tab-content">
+    <div className="sql-tab-content">
       <div className="tab-header">
         <Title className="tab-title">SQL脚本列表</Title>
       </div>
