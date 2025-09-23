@@ -401,9 +401,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setSearchValue('');
       setIsSearchMode(false);
       setSearchResults([]);
-      // 恢复原始树数据
-      const formattedData = formatTreeData(data);
-      setTreeData(formattedData);
     };
 
     const startRootCreate = (isFolder = true) => {
@@ -631,7 +628,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             value={searchValue}
             onChange={(value) => setSearchValue(value)}
             onSearch={handleSearchEnter}
-            onClear={handleSearchClear}
+            onClear={() => {
+              handleSearchClear();
+              refreshCurrentDirectory();
+            }}
             allowClear
             style={{ height: '32px' }}
           />
