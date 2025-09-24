@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import { Tabs, Message } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { RunningStatus } from '@/types/pythonApi';
 import './index.scss';
 import { useFileManager } from '../../hooks/useFileManager';
@@ -96,7 +97,17 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             {fileTabs.map((tab) => (
               <TabPane
                 key={tab.key}
-                title={tab.title}
+                title={
+                  <EllipsisPopover
+                    value={tab.title}
+                    // preferTypography
+                    className="tab-title-ellipsis"
+                    ellipsis={{
+                      rows: 1,
+                      showTooltip: true
+                    }}
+                  />
+                }
                 closable={fileTabs.length > 1}
               >
                 {/* 标签页内容为空，实际内容在工作区 */}
@@ -132,7 +143,17 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           {fileTabs.map((tab) => (
             <TabPane
               key={tab.key}
-              title={tab.title}
+              title={
+                <EllipsisPopover
+                  value={tab.title}
+                  // preferTypography
+                  className="tab-title-ellipsis"
+                  // ellipsis={{
+                  //   rows: 1,
+                  //   showTooltip: true
+                  // }}
+                />
+              }
               closable={fileTabs.length > 1}
             >
               {/* 标签页内容为空，实际内容在工作区 */}

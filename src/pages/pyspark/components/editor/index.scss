@@ -12,6 +12,28 @@
       &::before {
         background-color: transparent;
       }
+
+      .arco-tabs-header-title {
+        color: var(--color-text-2);
+
+        &:hover {
+          font-weight: 400;
+        }
+      }
+
+      .arco-tabs-header-title-text {
+        color: var(--color-text-2);
+      }
+
+      .arco-tabs-header-title-active {
+        font-weight: 400;
+      }
+    }
+
+    // 标签页标题样式
+    .tab-title-ellipsis {
+      max-width: 200px;
+      // display: inline-block;
     }
   }
 
