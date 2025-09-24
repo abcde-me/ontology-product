@@ -5,8 +5,6 @@ import {
   Form,
   Input,
   Radio,
-  Tabs,
-  Typography,
   Select,
   Checkbox,
   Tooltip,
@@ -53,6 +51,7 @@ import {
 
 import './detail.scss';
 import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
+import { is } from 'immer/dist/internal';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -1180,6 +1179,7 @@ export default function RequirementDetail() {
                                       <Option
                                         key={option.value}
                                         value={option.value}
+                                        className="label_shape_options"
                                       >
                                         <Image
                                           width={20}
@@ -1916,7 +1916,7 @@ export default function RequirementDetail() {
                                       disabled={type === 'detail'}
                                       className="btn-add-template-attribute btn-add"
                                     >
-                                      <IconPlus style={{ color: '#1E293B' }} />
+                                      <IconPlus />
                                       添加模版属性
                                     </Button>
                                   </Dropdown>
