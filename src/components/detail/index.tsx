@@ -1789,6 +1789,7 @@ const DatasetDetail = (props: {
                 noDataElement={noDataElement({ description: '暂无数据' })}
                 scroll={{ x: 'max-content' }}
                 border={false}
+                rowKey="version_id"
               />
             ) : (
               ''
