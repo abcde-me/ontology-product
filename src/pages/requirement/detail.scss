@@ -36,7 +36,7 @@
   }
 
   .basic-configuration {
-    min-width: 1300px;
+    min-width: 1700px;
 
     .table-container {
       margin-left: 77px;
@@ -119,7 +119,7 @@
   }
 
   .sortable-item {
-    padding: 0 16px 16px 16px;
+    padding: 0 16px 24px 16px;
   }
 
   .sortable-item-content {
@@ -127,14 +127,14 @@
     align-items: center;
 
     .arco-form-layout-inline {
-      margin-right: 10px;
+      margin-right: 8px;
+      margin-bottom: 16px;
     }
   }
 
   .sortable-item-input {
     width: 150px;
     height: 30px;
-    margin-right: 10px;
   }
 
   .label-content {
@@ -174,12 +174,21 @@
     padding-left: 12px;
     padding-right: 12px;
     padding-top: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .attribute-group-content-item {
     display: flex;
     align-items: center;
+
+    .arco-form-layout-inline {
+      margin-right: 8px;
+      margin-bottom: 16px;
+    }
+
+    .arco-checkbox {
+      padding-left: 0;
+    }
   }
 
   .group-items {
@@ -223,6 +232,15 @@
   .attribute-info-item {
     display: flex;
     align-items: center;
+
+    .arco-form-label-item {
+      color: #6e7b8d !important;
+    }
+
+    .arco-form-layout-inline {
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
   }
 
   .label-config {
@@ -339,14 +357,13 @@
       .attribute-header-text {
         flex: 1;
         text-align: center;
-        padding: 12px 0;
+        height: 32px;
         cursor: pointer;
         border-bottom: 1px solid #cbd5e1;
         border-right: 1px solid #cbd5e1;
         font-family: PingFang SC;
-        font-weight: 500;
         font-size: 14px;
-        line-height: 22px;
+        line-height: 32px;
         letter-spacing: 0%;
 
         &:last-child {
@@ -358,6 +375,7 @@
         border-radius: 4px 4px 0 0;
         border-bottom: none;
         color: #007dfa;
+        font-weight: 500;
       }
     }
 
@@ -375,12 +393,6 @@
     }
   }
 
-  .attribute-content {
-    .arco-form-label-item {
-      padding: 4px !important;
-    }
-  }
-
   .is-disabled {
     cursor: not-allowed;
     color: #999;
@@ -394,6 +406,47 @@
   }
 
   .task-configuration-content {
-    min-width: 1300px;
+    min-width: 1700px;
+  }
+
+  .arco-textarea-wrapper {
+    width: min-content;
+  }
+
+  .btn-add {
+    color: #1e293b !important;
+    font-family: PingFang SC;
+    font-weight: 600;
+    font-style: Semibold;
+    font-size: 14px;
+    line-height: 22px;
+    vertical-align: middle;
+    border-color: #cbd5e1 !important;
+  }
+
+  .color-content {
+    width: 60px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+
+    .arco-color-picker {
+      background-color: transparent;
+    }
+
+    .color-icon {
+      font-size: 16px;
+      margin-left: 5px;
+      color: #1e293b;
+    }
+  }
+
+  .icon-wrapper:hover {
+    color: #007dfa;
+    cursor: pointer;
+    font-size: 16px;
   }
 }

@@ -19,6 +19,7 @@ import {
 import {
   IconArrowLeft,
   IconDelete,
+  IconDown,
   IconPlus,
   IconQuestionCircle,
   IconSwap
@@ -39,7 +40,7 @@ import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty } from 'lodash';
+import _, { omitBy, isArray, isEmpty, min } from 'lodash';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -51,6 +52,7 @@ import {
 } from './type';
 
 import './detail.scss';
+import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -783,7 +785,7 @@ export default function RequirementDetail() {
                     attribute?.attribute_name_cn
                   );
                   form2.setFieldValue(
-                    `label_info_attribute_groups_${item?.order_num}_${group?.order_num}_label_info_attribute_${attribute?.order_num}_attribute_name_en`,
+                    `label_info_attribute_groups_${item?.id}_attribute_name_en`,
                     attribute?.attribute_name_en
                   );
                 });
@@ -801,7 +803,7 @@ export default function RequirementDetail() {
       <div className="head-breadcrumb-box">
         {type === 'create' ? (
           <div>
-            <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
+            <Breadcrumb style={{ fontSize: 20 }}>
               <BreadcrumbItem
                 onClick={() => history.goBack()}
                 className={'breadcrumb-text'}
@@ -816,7 +818,7 @@ export default function RequirementDetail() {
               style={{ cursor: 'pointer', fontSize: '14px' }}
               onClick={() => history.goBack()}
             />
-            <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
+            <Breadcrumb style={{ fontSize: 20 }}>
               <BreadcrumbItem
                 onClick={() => history.goBack()}
                 className={'breadcrumb-text'}
@@ -868,11 +870,19 @@ export default function RequirementDetail() {
                 }
               ]}
             >
-              <Input placeholder="请输入需求名称" style={{ width: 800 }} />
+              <Input
+                placeholder="请输入需求名称"
+                style={{ width: 800 }}
+                showWordLimit
+                maxLength={50}
+              />
             </FormItem>
             <FormItem
               label="描述说明:"
               field="description"
+              style={{
+                marginBottom: 24
+              }}
               rules={[
                 {
                   max: 200,
@@ -885,7 +895,12 @@ export default function RequirementDetail() {
                 }
               ]}
             >
-              <TextArea placeholder="请输入描述内容" style={{ width: 800 }} />
+              <TextArea
+                placeholder="请输入描述内容"
+                style={{ width: 800 }}
+                showWordLimit
+                maxLength={200}
+              />
             </FormItem>
             <div className="basic-title" style={{ marginLeft: '-20px' }}>
               任务配置
@@ -909,7 +924,12 @@ export default function RequirementDetail() {
                 getChildAnnotationType={getAnnotationType}
               />
             </FormItem>
-            <FormItem field="dataset" label="标注数据:" required>
+            <FormItem
+              field="dataset"
+              label="标注数据:"
+              required
+              style={{ marginBottom: 24 }}
+            >
               <div className="data-content-set">
                 <Button
                   // disabled={type === 'detail'}
@@ -917,7 +937,7 @@ export default function RequirementDetail() {
                     setModalVisible(true);
                   }}
                 >
-                  选择
+                  选择数据
                 </Button>
                 <div className="data-set-text">
                   已选数据量：
@@ -938,7 +958,7 @@ export default function RequirementDetail() {
             onClose={() => {
               setModalVisible(false);
             }}
-            title="数据集合"
+            title="选择数据"
             getChildTableSelectData={handleChildData}
             getDetailObj={getDetailObj}
           />
@@ -950,7 +970,6 @@ export default function RequirementDetail() {
           annotationTypeContentVal ===
             AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
           <div className="tool-annotation-config">
-            <div className="basic-title">标签配置</div>
             <Form
               form={form2}
               disabled={type === 'detail'}
@@ -959,7 +978,8 @@ export default function RequirementDetail() {
               }}
               style={{
                 marginLeft: '0',
-                marginRight: 'auto'
+                marginRight: 'auto',
+                marginBottom: 24
               }}
               layout="inline"
               labelCol={{
@@ -1002,10 +1022,10 @@ export default function RequirementDetail() {
                           onClick={() => {
                             console.log('跳转预览页面');
                           }}
-                        >
+                          >
                           预览
                           <IconSwap />
-                        </div> */}
+                          </div> */}
                       </div>
                       <div
                         className={[
@@ -1028,7 +1048,7 @@ export default function RequirementDetail() {
                               <div className="sortable-item-content">
                                 {console.log(`label_name_cn_${item?.label_id}`)}
                                 <FormItem
-                                  label="标注名称:"
+                                  label="标签名称:"
                                   field={`label_name_cn_${item?.label_id}`}
                                   rules={[
                                     {
@@ -1056,7 +1076,7 @@ export default function RequirementDetail() {
                                 >
                                   <Input
                                     style={{
-                                      minWidth: 206
+                                      minWidth: 200
                                     }}
                                     onChange={(val: any) => {
                                       updateNestedValue(
@@ -1065,7 +1085,7 @@ export default function RequirementDetail() {
                                       );
                                     }}
                                     className="sortable-item-input"
-                                    placeholder="请输入标注展示名称"
+                                    placeholder="用于储存标注结果"
                                     value={item.label_name_cn}
                                   />
                                 </FormItem>
@@ -1075,16 +1095,37 @@ export default function RequirementDetail() {
                                     <div>
                                       展示名称
                                       <Tooltip content="展示在标注页面的名称">
-                                        <IconQuestionCircle />
+                                        <IconQuestionCircle
+                                          style={{ color: '#6E7B8D' }}
+                                        />
                                       </Tooltip>
                                       :
                                     </div>
                                   }
                                   style={{ padding: 0 }}
+                                  rules={[
+                                    {
+                                      validateTrigger: ['onChange', 'onBlur'],
+                                      validator: (value, callback) => {
+                                        // 检查是否有重复的展示名称（排除当前项）
+                                        const isDuplicate = datalist.some(
+                                          (otherItem, otherIndex) =>
+                                            otherIndex !== labelIndex &&
+                                            otherItem.label_name_en === value &&
+                                            value.trim() !== ''
+                                        );
+                                        if (isDuplicate) {
+                                          callback('展示名称不能重复');
+                                        } else {
+                                          callback();
+                                        }
+                                      }
+                                    }
+                                  ]}
                                 >
                                   <Input
                                     style={{
-                                      minWidth: 196
+                                      minWidth: 190
                                     }}
                                     onChange={(val: any) => {
                                       updateNestedValue(
@@ -1093,7 +1134,7 @@ export default function RequirementDetail() {
                                       );
                                     }}
                                     className="sortable-item-input"
-                                    placeholder="请输入结果存储名称"
+                                    placeholder="展示在标注页面的名称"
                                     value={item.label_name_en}
                                   />
                                 </FormItem>
@@ -1110,14 +1151,14 @@ export default function RequirementDetail() {
                                         parseInt(val)
                                       );
                                     }}
-                                    style={{ width: 100, height: 32 }}
+                                    style={{ width: 110, height: 32 }}
                                     renderFormat={(option, value) => {
                                       return (
                                         <span>
                                           <Image
                                             width={20}
                                             style={{
-                                              marginRight: 8,
+                                              marginRight: 4,
                                               pointerEvents: 'none'
                                             }}
                                             src={
@@ -1144,7 +1185,8 @@ export default function RequirementDetail() {
                                           width={20}
                                           src={option?.icon}
                                           style={{
-                                            pointerEvents: 'none'
+                                            pointerEvents: 'none',
+                                            marginRight: 4
                                           }}
                                         />
                                         {option.label}
@@ -1155,30 +1197,33 @@ export default function RequirementDetail() {
                                 <FormItem
                                   field={`label_colour_${item?.label_id}`}
                                 >
-                                  <ColorPicker
-                                    defaultValue={item?.label_colour}
-                                    onChange={(val: any) => {
-                                      updateNestedValue(
-                                        [labelIndex, 'label_colour'],
-                                        val
-                                      );
-                                    }}
-                                    showPreset
-                                  />
+                                  <div className="color-content">
+                                    <ColorPicker
+                                      defaultValue={item?.label_colour}
+                                      onChange={(val: any) => {
+                                        updateNestedValue(
+                                          [labelIndex, 'label_colour'],
+                                          val
+                                        );
+                                      }}
+                                      showPreset
+                                    />
+                                    <IconDown className="color-icon" />
+                                  </div>
                                 </FormItem>
                                 <FormItem>
                                   {datalist.length > 1 && (
-                                    <IconDelete
-                                      className={
-                                        type === 'detail' ? 'is-disabled' : ''
-                                      }
-                                      fontSize={16}
-                                      onClick={() => {
-                                        if (type !== 'detail') {
-                                          deleteLabel(labelIndex);
-                                        }
-                                      }}
-                                    />
+                                    <Tooltip content="删除">
+                                      <IconDelete
+                                        className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                        fontSize={16}
+                                        onClick={() => {
+                                          if (type !== 'detail') {
+                                            deleteLabel(labelIndex);
+                                          }
+                                        }}
+                                      />
+                                    </Tooltip>
                                   )}
                                 </FormItem>
                               </div>
@@ -1247,8 +1292,10 @@ export default function RequirementDetail() {
                                             ]}
                                           >
                                             <Input
-                                              width={400}
-                                              height={32}
+                                              style={{
+                                                width: 422,
+                                                backgroundColor: '#fff'
+                                              }}
                                               value={
                                                 attrGroup.attribute_group_name
                                               }
@@ -1263,7 +1310,7 @@ export default function RequirementDetail() {
                                                   val
                                                 );
                                               }}
-                                              placeholder="请输入属性组名称"
+                                              placeholder="请输入名称"
                                             />
                                           </FormItem>
                                           <FormItem
@@ -1280,7 +1327,7 @@ export default function RequirementDetail() {
                                                 type === 'detail' ||
                                                 attrGroup?.isTemp === true
                                               }
-                                              className="ml-2 mr-2"
+                                              className="mr-2"
                                               style={{
                                                 width: 100,
                                                 height: 32
@@ -1343,7 +1390,10 @@ export default function RequirementDetail() {
                                                 type === 'detail' ||
                                                 attrGroup?.isTemp === true
                                               }
-                                              style={{ whiteSpace: 'nowrap' }}
+                                              style={{
+                                                whiteSpace: 'nowrap',
+                                                fontSize: 14
+                                              }}
                                               checked={
                                                 attrGroup.attribute_group_type ===
                                                 1
@@ -1369,59 +1419,67 @@ export default function RequirementDetail() {
                                           >
                                             {attrGroup.attribute_group_class !==
                                               3 && (
-                                              <IconPlus
-                                                style={{
-                                                  fontSize: 16,
-                                                  cursor:
-                                                    type === 'detail'
-                                                      ? 'not-allowed'
-                                                      : 'pointer'
-                                                }}
-                                                className={`icon-wrapper ml-2 ${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
-                                                onClick={() => {
-                                                  if (
-                                                    type === 'detail' ||
-                                                    attrGroup?.isTemp === true
-                                                  ) {
-                                                    return;
-                                                  }
-                                                  if (type !== 'detail') {
-                                                    // 修改增加逻辑 往倒数第二个增加
-                                                    addAttribute(
-                                                      labelIndex,
-                                                      groupIndex,
-                                                      attrGroup
-                                                        .label_info_attribute?.[
+                                              <Tooltip content="添加选项">
+                                                <IconPlus
+                                                  style={{
+                                                    marginLeft: 8,
+                                                    fontSize: 16,
+                                                    cursor:
+                                                      type === 'detail'
+                                                        ? 'not-allowed'
+                                                        : 'pointer'
+                                                  }}
+                                                  className={`icon-wrapper ${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
+                                                  onClick={() => {
+                                                    if (
+                                                      type === 'detail' ||
+                                                      attrGroup?.isTemp === true
+                                                    ) {
+                                                      return;
+                                                    }
+                                                    if (type !== 'detail') {
+                                                      // 修改增加逻辑 往倒数第二个增加
+                                                      addAttribute(
+                                                        labelIndex,
+                                                        groupIndex,
                                                         attrGroup
-                                                          .label_info_attribute
-                                                          ?.length - 1
-                                                      ]?.input_type
-                                                    );
-                                                  }
-                                                }}
-                                              />
+                                                          .label_info_attribute?.[
+                                                          attrGroup
+                                                            .label_info_attribute
+                                                            ?.length - 1
+                                                        ]?.input_type
+                                                      );
+                                                    }
+                                                  }}
+                                                />
+                                              </Tooltip>
                                             )}
                                           </FormItem>
                                           <FormItem
                                             label={null}
                                             style={{ marginRight: 0 }}
                                           >
-                                            <IconDelete
-                                              className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                              fontSize={16}
-                                              onClick={() => {
-                                                // 删除当前属性组
-                                                if (type === 'detail') {
-                                                  return;
-                                                }
-                                                if (type !== 'detail') {
-                                                  deleteAttributeGroup(
-                                                    attrGroup.attribute_id,
-                                                    groupIndex
-                                                  );
-                                                }
-                                              }}
-                                            />
+                                            <Tooltip content="删除">
+                                              <IconDelete
+                                                className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                                style={{
+                                                  marginLeft: 8
+                                                }}
+                                                fontSize={16}
+                                                onClick={() => {
+                                                  // 删除当前属性组
+                                                  if (type === 'detail') {
+                                                    return;
+                                                  }
+                                                  if (type !== 'detail') {
+                                                    deleteAttributeGroup(
+                                                      attrGroup.attribute_id,
+                                                      groupIndex
+                                                    );
+                                                  }
+                                                }}
+                                              />
+                                            </Tooltip>
                                           </FormItem>
                                         </div>
                                         {/* 选项内容区域 */}
@@ -1441,7 +1499,10 @@ export default function RequirementDetail() {
                                                 type === 'detail' ||
                                                 attrGroup?.isTemp === true
                                               }
-                                              style={{ whiteSpace: 'nowrap' }}
+                                              style={{
+                                                whiteSpace: 'nowrap',
+                                                fontSize: 14
+                                              }}
                                               checked={
                                                 attrGroup.label_info_attribute?.some(
                                                   (item) =>
@@ -1462,10 +1523,35 @@ export default function RequirementDetail() {
                                                   ]?.label_info_attribute.push({
                                                     label_info_id: uuidV4(),
                                                     attribute_name_cn:
-                                                      '标准时的输入内容',
+                                                      '标注时的输入内容',
                                                     attribute_name_en: '其他',
                                                     input_type: 2
                                                   });
+                                                  // 把选项组最后一个的选项名称和展示名称的内重置
+                                                  const updatedAttrGroup =
+                                                    newData[labelIndex]
+                                                      ?.label_info_attribute_groups?.[
+                                                      groupIndex
+                                                    ];
+                                                  const lastIndex =
+                                                    updatedAttrGroup
+                                                      ?.label_info_attribute
+                                                      ?.length - 1;
+                                                  const lastAttr =
+                                                    updatedAttrGroup
+                                                      ?.label_info_attribute?.[
+                                                      lastIndex
+                                                    ];
+                                                  if (lastAttr?.label_info_id) {
+                                                    form2?.setFieldValue(
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
+                                                      '标注时的输入内容'
+                                                    );
+                                                    form2?.setFieldValue(
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
+                                                      '其他'
+                                                    );
+                                                  }
                                                   setDatalist(newData);
                                                 } else {
                                                   // 取消选中的时候删除增加的内容，复选框恢复到未选中
@@ -1505,6 +1591,15 @@ export default function RequirementDetail() {
                                                   attrGroup.attribute_group_class) && (
                                                 <div className="attribute-info-item">
                                                   <FormItem
+                                                    label={
+                                                      <div
+                                                        style={{
+                                                          color: '#6E7B8D'
+                                                        }}
+                                                      >
+                                                        选项{attrIndex + 1}：
+                                                      </div>
+                                                    }
                                                     field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attr?.label_info_id}_attribute_name_cn`}
                                                     rules={[
                                                       {
@@ -1543,39 +1638,52 @@ export default function RequirementDetail() {
                                                             callback(
                                                               '选项名称不能重复'
                                                             );
+                                                          } else {
+                                                            callback();
                                                           }
-                                                          return Promise.resolve();
                                                         }
                                                       }
                                                     ]}
-                                                    label={`选项${attrIndex + 1}:`}
                                                     disabled={
                                                       type === 'detail' ||
                                                       attrGroup?.isTemp ===
                                                         true ||
-                                                      (attrIndex ===
-                                                        attrGroup
-                                                          .label_info_attribute
-                                                          ?.length -
-                                                          1 &&
-                                                        attrGroup
-                                                          ?.label_info_attribute[
-                                                          attrIndex
-                                                        ].input_type === 2)
+                                                      attrGroup
+                                                        ?.label_info_attribute[
+                                                        attrIndex
+                                                      ].input_type === 2
                                                         ? true
                                                         : false
                                                     }
                                                   >
-                                                    {console.log(
-                                                      attr?.attribute_name_cn
-                                                    )}
                                                     <Input
+                                                      disabled={
+                                                        type === 'detail' ||
+                                                        attrGroup?.isTemp ===
+                                                          true ||
+                                                        attrGroup
+                                                          ?.label_info_attribute[
+                                                          attrIndex
+                                                        ].input_type === 2
+                                                          ? true
+                                                          : false
+                                                      }
                                                       type="text"
-                                                      placeholder="请输入选项名称"
+                                                      placeholder="用于储存标注结果"
                                                       value={
                                                         attr.attribute_name_cn
                                                       }
-                                                      onChange={(val) =>
+                                                      style={{
+                                                        width: 290,
+                                                        backgroundColor:
+                                                          attrGroup
+                                                            ?.label_info_attribute[
+                                                            attrIndex
+                                                          ].input_type === 2
+                                                            ? '#e2e8f0'
+                                                            : '#fff'
+                                                      }}
+                                                      onChange={(val) => {
                                                         updateNestedValue(
                                                           [
                                                             labelIndex,
@@ -1586,26 +1694,86 @@ export default function RequirementDetail() {
                                                             'attribute_name_cn'
                                                           ],
                                                           val
-                                                        )
-                                                      }
+                                                        );
+                                                      }}
                                                     />
                                                   </FormItem>
                                                   <FormItem
                                                     label={
-                                                      <div>
-                                                        展示名称
+                                                      <div
+                                                        style={{
+                                                          marginRight: 3,
+                                                          color: '#6E7B8D'
+                                                        }}
+                                                      >
+                                                        <span
+                                                          style={{
+                                                            marginRight: 2
+                                                          }}
+                                                        >
+                                                          展示名称
+                                                        </span>
                                                         <Tooltip content="展示在标注页面的名称">
-                                                          <IconQuestionCircle />
+                                                          <IconQuestionCircle
+                                                            style={{
+                                                              color: '#6E7B8D'
+                                                            }}
+                                                          />
                                                         </Tooltip>
                                                         :
                                                       </div>
                                                     }
-                                                    field={`label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`}
+                                                    rules={[
+                                                      {
+                                                        validateTrigger: [
+                                                          'onChange',
+                                                          'onBlur'
+                                                        ],
+                                                        validator: (
+                                                          value,
+                                                          callback
+                                                        ) => {
+                                                          // 检查同组内是否有重复的展示名称
+                                                          const hasDuplicate =
+                                                            attrGroup?.label_info_attribute?.some(
+                                                              (
+                                                                otherAttr: any,
+                                                                otherIndex: number
+                                                              ) => {
+                                                                // 排除当前正在编辑的选项
+                                                                return (
+                                                                  otherIndex !==
+                                                                    attrIndex &&
+                                                                  otherAttr.attribute_name_en?.trim() ===
+                                                                    value?.trim() &&
+                                                                  value.trim() !==
+                                                                    ''
+                                                                );
+                                                              }
+                                                            );
+                                                          if (!value) {
+                                                            callback(
+                                                              '请输入展示名称'
+                                                            );
+                                                          } else if (
+                                                            hasDuplicate
+                                                          ) {
+                                                            callback(
+                                                              '展示名称不能重复'
+                                                            );
+                                                          } else {
+                                                            callback();
+                                                          }
+                                                        }
+                                                      }
+                                                    ]}
+                                                    field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attr?.label_info_id}_attribute_name_en`}
                                                   >
-                                                    {console.log(
-                                                      attr?.attribute_name_en
-                                                    )}
                                                     <Input
+                                                      style={{
+                                                        width: 268,
+                                                        backgroundColor: '#fff'
+                                                      }}
                                                       placeholder="展示在标注页面的名称"
                                                       type="text"
                                                       value={
@@ -1634,27 +1802,34 @@ export default function RequirementDetail() {
                                                   {attrGroup
                                                     .label_info_attribute
                                                     .length > 1 && (
-                                                    <IconDelete
-                                                      className={`${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
-                                                      fontSize={16}
-                                                      onClick={() => {
-                                                        // 删除当前属性组
-                                                        if (
-                                                          type === 'detail' ||
-                                                          attrGroup?.isTemp ===
-                                                            true
-                                                        ) {
-                                                          return;
-                                                        }
-                                                        if (type !== 'detail') {
-                                                          deleteAttribute(
-                                                            labelIndex,
-                                                            groupIndex,
-                                                            attrIndex
-                                                          );
-                                                        }
-                                                      }}
-                                                    />
+                                                    <FormItem>
+                                                      <Tooltip content="删除">
+                                                        <IconDelete
+                                                          className={`icon-wrapper ${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
+                                                          fontSize={16}
+                                                          onClick={() => {
+                                                            // 删除当前属性组
+                                                            if (
+                                                              type ===
+                                                                'detail' ||
+                                                              attrGroup?.isTemp ===
+                                                                true
+                                                            ) {
+                                                              return;
+                                                            }
+                                                            if (
+                                                              type !== 'detail'
+                                                            ) {
+                                                              deleteAttribute(
+                                                                labelIndex,
+                                                                groupIndex,
+                                                                attrIndex
+                                                              );
+                                                            }
+                                                          }}
+                                                        />
+                                                      </Tooltip>
+                                                    </FormItem>
                                                   )}
                                                 </div>
                                               )}
@@ -1739,9 +1914,9 @@ export default function RequirementDetail() {
                                   >
                                     <Button
                                       disabled={type === 'detail'}
-                                      type="secondary"
+                                      className="btn-add-template-attribute btn-add"
                                     >
-                                      <IconPlus />
+                                      <IconPlus style={{ color: '#1E293B' }} />
                                       添加模版属性
                                     </Button>
                                   </Dropdown>
@@ -1756,181 +1931,145 @@ export default function RequirementDetail() {
                       <div className="attribute-content">
                         {templateData?.map((attrGroup, labelIndex) => (
                           <div className="sortable-item" key={labelIndex}>
-                            <div
-                              key={labelIndex}
-                              className="attribute-group-item-template"
-                            >
-                              <div className="attribute-group-name">
-                                <FormItem
-                                  style={{ marginRight: 0 }}
-                                  field={`attribute_group_name_${attrGroup?.id}`}
-                                  label="属性组件名称:"
-                                  disabled={type === 'detail'}
-                                  rules={[
-                                    {
-                                      required: true,
-                                      validateTrigger: ['onChange', 'onBlur'],
-                                      validator: (value, callback) => {
-                                        // 检查是否与其他属性组件名称重复（排除当前项，只检查同组内）
-                                        const trimmedValue = value.trim();
-                                        const sameGroupItems =
-                                          templateData.filter((item) => {
-                                            return true; // 暂时返回所有项，需要替换为实际的分组逻辑
-                                          });
+                            <div className="attribute-group-name">
+                              <FormItem
+                                style={{ marginRight: 0 }}
+                                field={`attribute_group_name_${attrGroup?.attribute_id}`}
+                                label="属性名称:"
+                                disabled={type === 'detail'}
+                                rules={[
+                                  {
+                                    required: true,
+                                    validateTrigger: ['onChange', 'onBlur'],
+                                    validator: (value, callback) => {
+                                      // 在同组内检查重复（排除当前项）
+                                      const hasDuplicateInGroup =
+                                        templateData.some(
+                                          (otherGroup, otherIndex) => {
+                                            // 排除当前项并检查名称是否重复
+                                            return (
+                                              otherIndex !== labelIndex && // 正确排除当前项
+                                              otherGroup.attribute_group_name &&
+                                              otherGroup.attribute_group_name.trim() ===
+                                                value.trim()
+                                            );
+                                          }
+                                        );
 
-                                        // 在同组内检查重复（排除当前项）
-                                        const hasDuplicateInGroup =
-                                          sameGroupItems.some(
-                                            (otherGroup, otherIndex) => {
-                                              // 找出otherGroup在原始templateData中的索引
-                                              const originalIndex =
-                                                templateData.findIndex(
-                                                  (item) => item === otherGroup
-                                                );
-
-                                              return (
-                                                originalIndex !== labelIndex && // 排除当前项
-                                                otherGroup.attribute_group_name &&
-                                                otherGroup.attribute_group_name.trim() ===
-                                                  trimmedValue
-                                              );
-                                            }
-                                          );
-
-                                        if (!trimmedValue || !value) {
-                                          return callback('请输入属性组件名称');
-                                        } else if (hasDuplicateInGroup) {
-                                          return callback(
-                                            '属性组件名称不能重复'
-                                          );
-                                        }
-
-                                        // 验证通过
-                                        callback();
+                                      if (!value) {
+                                        return callback('请输入属性名称');
+                                      } else if (hasDuplicateInGroup) {
+                                        return callback('属性名称不能重复');
                                       }
+
+                                      // 验证通过
+                                      callback();
                                     }
-                                  ]}
-                                >
-                                  <div className="group-items">
-                                    <Input
-                                      disabled={type === 'detail'}
-                                      width={400}
-                                      height={32}
-                                      value={attrGroup.attribute_group_name}
-                                      onChange={(val: any) => {
-                                        updateNestedValue(
-                                          [labelIndex, 'attribute_group_name'],
-                                          val,
-                                          true
-                                        );
-                                      }}
-                                      placeholder="请输入属性组名称"
-                                    />
-                                  </div>
-                                </FormItem>
-                                <FormItem
-                                  style={{ marginRight: 0 }}
-                                  label={null}
-                                >
-                                  <div className="group-items">
-                                    <Select
-                                      className="ml-2 mr-2"
-                                      style={{ width: 100, height: 32 }}
-                                      value={attrGroup.attribute_group_class}
-                                      onChange={(value) => {
-                                        // 更新组件类型（单选/多选/输入框）
-                                        if (parseInt(value) === 3) {
-                                          updateNestedValue(
-                                            [
-                                              labelIndex,
-                                              'label_info_attribute'
-                                            ],
-                                            [],
-                                            true
-                                          );
-                                        }
-                                        updateNestedValue(
-                                          [labelIndex, 'attribute_group_class'],
-                                          parseInt(value),
-                                          true
-                                        );
-                                      }}
-                                    >
-                                      <Option key={1} value={1}>
-                                        单选
-                                      </Option>
-                                      <Option key={2} value={2}>
-                                        多选
-                                      </Option>
-                                      <Option key={3} value={3}>
-                                        输入框
-                                      </Option>
-                                    </Select>
-                                  </div>
-                                </FormItem>
-                                <FormItem
-                                  style={{ marginRight: 0 }}
-                                  label={null}
-                                >
-                                  <Checkbox
-                                    style={{ whiteSpace: 'nowrap' }}
-                                    checked={
-                                      attrGroup.attribute_group_type === 1
-                                    }
-                                    onChange={(checked) => {
+                                  }
+                                ]}
+                              >
+                                <Input
+                                  disabled={type === 'detail'}
+                                  style={{
+                                    width: 446,
+                                    height: 32
+                                  }}
+                                  value={attrGroup.attribute_group_name}
+                                  onChange={(val: any) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'attribute_group_name'],
+                                      val,
+                                      true
+                                    );
+                                  }}
+                                  placeholder="请输入名称"
+                                />
+                              </FormItem>
+                              <FormItem style={{ marginRight: 0 }} label={null}>
+                                <Select
+                                  className="ml-2 mr-2"
+                                  style={{ width: 100, height: 32 }}
+                                  value={attrGroup.attribute_group_class}
+                                  onChange={(value) => {
+                                    // 更新组件类型（单选/多选/输入框）
+                                    if (parseInt(value) === 3) {
                                       updateNestedValue(
-                                        [labelIndex, 'attribute_group_type'],
-                                        checked ? 1 : 2,
+                                        [labelIndex, 'label_info_attribute'],
+                                        [],
                                         true
                                       );
-                                    }}
-                                  >
-                                    必须标注
-                                  </Checkbox>
-                                </FormItem>
-                                <FormItem
-                                  style={{ marginRight: 0 }}
-                                  label={null}
+                                    }
+                                    updateNestedValue(
+                                      [labelIndex, 'attribute_group_class'],
+                                      parseInt(value),
+                                      true
+                                    );
+                                  }}
                                 >
-                                  <IconPlus
-                                    className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
-                                    fontSize={16}
-                                    onClick={() => {
-                                      // 点击icon添加一个选项，选项插入是同组最后一项
-                                      if (type !== 'detail') {
-                                        setTemplateData(
-                                          templateData?.map((g) => {
-                                            if (
-                                              g.attribute_id ===
-                                              attrGroup.attribute_id
-                                            ) {
-                                              return {
-                                                ...g,
-                                                label_info_attribute: [
-                                                  ...g.label_info_attribute,
-                                                  {
-                                                    label_info_id: uuidV4(),
-                                                    attribute_group_class:
-                                                      attrGroup.attribute_group_class,
-                                                    attribute_group_type:
-                                                      attrGroup.attribute_group_type
-                                                  }
-                                                ]
-                                              };
-                                            }
-                                            return g;
-                                          })
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </FormItem>
-                                <FormItem
-                                  style={{ marginRight: 0 }}
-                                  label={null}
+                                  <Option key={1} value={1}>
+                                    单选
+                                  </Option>
+                                  <Option key={2} value={2}>
+                                    多选
+                                  </Option>
+                                  <Option key={3} value={3}>
+                                    输入框
+                                  </Option>
+                                </Select>
+                              </FormItem>
+                              <FormItem style={{ marginRight: 0 }} label={null}>
+                                <Checkbox
+                                  style={{ whiteSpace: 'nowrap' }}
+                                  checked={attrGroup.attribute_group_type === 1}
+                                  onChange={(checked) => {
+                                    updateNestedValue(
+                                      [labelIndex, 'attribute_group_type'],
+                                      checked ? 1 : 2,
+                                      true
+                                    );
+                                  }}
                                 >
+                                  必须标注
+                                </Checkbox>
+                              </FormItem>
+                              <FormItem style={{ marginRight: 0 }} label={null}>
+                                <IconPlus
+                                  className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                  fontSize={16}
+                                  onClick={() => {
+                                    // 点击icon添加一个选项，选项插入是同组最后一项
+                                    if (type !== 'detail') {
+                                      setTemplateData(
+                                        templateData?.map((g) => {
+                                          if (
+                                            g.attribute_id ===
+                                            attrGroup.attribute_id
+                                          ) {
+                                            return {
+                                              ...g,
+                                              label_info_attribute: [
+                                                ...g.label_info_attribute,
+                                                {
+                                                  label_info_id: uuidV4(),
+                                                  attribute_group_class:
+                                                    attrGroup.attribute_group_class,
+                                                  attribute_group_type:
+                                                    attrGroup.attribute_group_type
+                                                }
+                                              ]
+                                            };
+                                          }
+                                          return g;
+                                        })
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormItem>
+                              <FormItem style={{ marginRight: 0 }} label={null}>
+                                <Tooltip content="删除">
                                   <IconDelete
-                                    className={`ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                    className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
                                     fontSize={16}
                                     onClick={() => {
                                       // 删除当前属性组
@@ -1945,8 +2084,13 @@ export default function RequirementDetail() {
                                       }
                                     }}
                                   />
-                                </FormItem>
-                              </div>
+                                </Tooltip>
+                              </FormItem>
+                            </div>
+                            <div
+                              key={labelIndex}
+                              className="attribute-group-item-template"
+                            >
                               {/* 选项内容区域 */}
                               <div className="attribute-group-info-title">
                                 {1 === attrGroup.attribute_group_class
@@ -1968,6 +2112,7 @@ export default function RequirementDetail() {
                                         <FormItem
                                           field={`attribute_name_cn${attr?.label_info_id}`}
                                           label={`选项${attrIndex + 1}:`}
+                                          style={{ color: 'red' }}
                                           rules={[
                                             {
                                               required: true,
@@ -1977,10 +2122,34 @@ export default function RequirementDetail() {
                                               ],
                                               validator: (value, callback) => {
                                                 // 同组下面选项不能重复
-                                                if (!value)
+                                                if (!value) {
                                                   return callback(
                                                     '请输入选项名称'
                                                   );
+                                                }
+                                                // 检查同组内其他选项是否有重复的名称
+                                                const duplicateFound =
+                                                  attrGroup.label_info_attribute.some(
+                                                    (otherAttr, otherIndex) => {
+                                                      // 排除当前项自身
+                                                      return (
+                                                        otherIndex !==
+                                                          attrIndex &&
+                                                        otherAttr.attribute_name_cn &&
+                                                        otherAttr.attribute_name_cn.trim() ===
+                                                          value.trim()
+                                                      );
+                                                    }
+                                                  );
+                                                if (!value) {
+                                                  callback('请输入选项');
+                                                } else if (duplicateFound) {
+                                                  return callback(
+                                                    '选项名称不能重复'
+                                                  );
+                                                }
+
+                                                callback();
                                               }
                                             }
                                           ]}
@@ -1988,6 +2157,10 @@ export default function RequirementDetail() {
                                           <Input
                                             type="text"
                                             value={attr.attribute_name_cn}
+                                            style={{
+                                              width: 290,
+                                              height: 32
+                                            }}
                                             onChange={(val) =>
                                               updateNestedValue(
                                                 [
@@ -2003,19 +2176,63 @@ export default function RequirementDetail() {
                                           />
                                         </FormItem>
                                         <FormItem
+                                          field={`attribute_name_en${attr?.label_info_id}`}
                                           label={
                                             <div>
                                               展示名称
                                               <Tooltip content="展示在标注页面的名称">
-                                                <IconQuestionCircle />
+                                                <IconQuestionCircle
+                                                  style={{ color: '#6E7B8D' }}
+                                                />
                                               </Tooltip>
                                               :
                                             </div>
                                           }
+                                          rules={[
+                                            {
+                                              validateTrigger: [
+                                                'onChange',
+                                                'onBlur'
+                                              ],
+                                              validator: (value, callback) => {
+                                                // 同组下面展示名称不能重复
+                                                if (!value) {
+                                                  return callback(
+                                                    '请输入展示名称'
+                                                  );
+                                                }
+                                                // 检查同组内其他选项是否有重复的展示名称
+                                                const duplicateFound =
+                                                  attrGroup.label_info_attribute.some(
+                                                    (otherAttr, otherIndex) => {
+                                                      // 排除当前项自身
+                                                      return (
+                                                        otherIndex !==
+                                                          attrIndex &&
+                                                        otherAttr.attribute_name_en &&
+                                                        otherAttr.attribute_name_en.trim() ===
+                                                          value.trim()
+                                                      );
+                                                    }
+                                                  );
+                                                if (duplicateFound) {
+                                                  return callback(
+                                                    '展示名称不能重复'
+                                                  );
+                                                }
+
+                                                callback();
+                                              }
+                                            }
+                                          ]}
                                         >
                                           <Input
                                             placeholder="展示在标注页面的名称"
                                             type="text"
+                                            style={{
+                                              width: 290,
+                                              height: 32
+                                            }}
                                             value={attr.attribute_name_en}
                                             onChange={(val: any) => {
                                               // 使用labelIndex和isTemp=true来更新模板数据
@@ -2035,31 +2252,33 @@ export default function RequirementDetail() {
                                         </FormItem>
                                         {attrGroup.label_info_attribute
                                           ?.length > 1 && (
-                                          <IconDelete
-                                            className={`${type === 'detail' ? 'is-disabled' : ''}`}
-                                            fontSize={16}
-                                            onClick={() => {
-                                              // 删除当前属性组中的选项
-                                              if (type !== 'detail') {
-                                                setTemplateData(
-                                                  templateData?.map((label) =>
-                                                    label.attribute_id ===
-                                                    attrGroup.attribute_id
-                                                      ? {
-                                                          ...label,
-                                                          label_info_attribute:
-                                                            label.label_info_attribute.filter(
-                                                              (g) =>
-                                                                g.label_info_id !==
-                                                                attr.label_info_id
-                                                            )
-                                                        }
-                                                      : label
-                                                  )
-                                                );
-                                              }
-                                            }}
-                                          />
+                                          <Tooltip content="删除">
+                                            <IconDelete
+                                              className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                              onClick={() => {
+                                                // 删除当前属性组中的选项
+                                                if (type !== 'detail') {
+                                                  setTemplateData(
+                                                    templateData?.map(
+                                                      (label) =>
+                                                        label.attribute_id ===
+                                                        attrGroup.attribute_id
+                                                          ? {
+                                                              ...label,
+                                                              label_info_attribute:
+                                                                label.label_info_attribute.filter(
+                                                                  (g) =>
+                                                                    g.label_info_id !==
+                                                                    attr.label_info_id
+                                                                )
+                                                            }
+                                                          : label
+                                                    )
+                                                  );
+                                                }
+                                              }}
+                                            />
+                                          </Tooltip>
                                         )}
                                       </div>
                                     )}
@@ -2070,7 +2289,7 @@ export default function RequirementDetail() {
                           </div>
                         ))}
                         <Button
-                          className="add-template-btn"
+                          className="add-template-btn btn-add"
                           disabled={type === 'detail'}
                           onClick={() => {
                             setTemplateData([

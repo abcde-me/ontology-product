@@ -12,6 +12,16 @@ export async function getAnnotationList(params: {
   return await UAPI.RES.getAnnotationListApi({}).post(params).inRegion().do();
 }
 
+// 标注下载结果
+export async function getAnnotationDownload(params: {
+  requirement_id: number; // 需求id
+}) {
+  return await UAPI.RES.getAnnotationDownloadApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
 // 任务列表获取
 export async function getAnnotationTaskList(params: {
   page: number; // 页码
