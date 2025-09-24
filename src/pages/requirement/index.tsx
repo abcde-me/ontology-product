@@ -3,13 +3,9 @@ import {
   Button,
   Form,
   Input,
-  Message,
-  Modal,
   Pagination,
   PaginationProps,
-  Popover,
-  Table,
-  Tooltip
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -17,19 +13,9 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import {
-  IconClockCircle,
-  IconInfoCircle,
-  IconPlus
-} from '@arco-design/web-react/icon';
-import { getAnnotationList } from '@/api/dataAnnotation';
-import {
-  RequirementStatus,
-  RequirementStatusMap,
-  RequirementType,
-  RequirementTypeMap
-} from './type';
-import { isNil, omitBy } from 'lodash';
+import { IconPlus } from '@arco-design/web-react/icon';
+import { getAnnotationList, getAnnotationDownload } from '@/api/dataAnnotation';
+import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import './index.scss';
 
@@ -329,14 +315,32 @@ export default function Requirement() {
             >
               详情
             </span>
-            {/* {record?.status === RequirementStatus.Annotated && <span
-              className="operate-text"
-              onClick={() => {
-
-              }}
-            >
-              下载结果
-            </span>} */}
+            {record?.status === RequirementStatus.Annotated && (
+              <span
+                className="operate-text"
+                onClick={() => {
+                  // setLoading(true)
+                  // try {
+                  //   getAnnotationDownload({ requirement_id: record.id }).then((res) => {
+                  //     if (res.code === 0) {
+                  //       // const a = document.createElement('a');
+                  //       // a.href = res?.data?.download_url;
+                  //       // a.download = res?.data?.download_url; // 设置下载文件名
+                  //       // document.body.appendChild(a);
+                  //       // a.click();
+                  //     }
+                  //   }).catch(() => {
+                  //   }).finally(() => {
+                  //     setLoading(false)
+                  //   });
+                  // } catch {
+                  //   setLoading(false)
+                  // }
+                }}
+              >
+                下载结果
+              </span>
+            )}
           </div>
         );
       }
@@ -356,7 +360,7 @@ export default function Requirement() {
             required: (_, { label }) => `必须填写 ${label}`
           }}
         >
-          <FormItem label="需求名称:" field="name">
+          <FormItem label={null} field="name" style={{ margin: 0 }}>
             <InputSearch
               onClear={() => {
                 setCurrent(1);

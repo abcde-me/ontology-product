@@ -393,6 +393,8 @@ export const ModaForgeResourceEndpoints = {
   getRequirementDetailApi: PrefixLabelService + '/requirements/query',
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/requirements/list',
+  // 标注下载结果
+  getAnnotationDownloadApi: PrefixLabelService + '/requirements/resultDownload',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容

@@ -41,7 +41,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   visible,
   type,
   onClose,
-  title = '数据源',
+  title = '选择数据',
   getChildTableSelectData,
   initialSelectedData = [], // 接收初始数据
   getDetailObj
@@ -325,17 +325,26 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       escToExit={false}
       maskClosable={false}
       className="fullscreen-modal"
-      style={{ width: '90vw', overflowY: 'auto' }}
+      style={{ width: '960px', overflowY: 'auto' }}
       footer={
-        <Button
-          disabled={type === 'detail'}
-          type="primary"
-          onClick={() => {
-            getTableSelectContent();
-          }}
-        >
-          确定
-        </Button>
+        <>
+          <Button
+            onClick={() => {
+              onClose();
+            }}
+          >
+            取消
+          </Button>
+          <Button
+            disabled={type === 'detail'}
+            type="primary"
+            onClick={() => {
+              getTableSelectContent();
+            }}
+          >
+            确定
+          </Button>
+        </>
       }
     >
       <div className="fullscreen-modal-content">
@@ -425,7 +434,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               total={total}
               showJumper
               sizeCanChange
-              style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+              style={{
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginRight: '12px'
+              }}
             />
           )}
         </div>
