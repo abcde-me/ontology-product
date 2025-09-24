@@ -26,6 +26,7 @@ interface RunningInfoPanelProps {
   runStatus?: RunningStatus;
   runStartTime?: Date | null;
   runDuration?: number;
+  hasFetchedResult?: boolean;
   onGetRunLog?: () => Promise<void>;
   onGetRunResult?: () => Promise<void>;
   isPanelOpen?: boolean;
@@ -40,6 +41,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     runStatus,
     runStartTime,
     runDuration,
+    hasFetchedResult,
     activeKey,
     setActiveKey,
     onGetRunLog,
@@ -173,9 +175,27 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
               >
                 <TabPane key="result" title="结果">
                   <div className="run-result-content">
-                    {runStatus === RunningStatus.RUNNING
-                      ? '开始输出...'
-                      : runResult}
+                    {(() => {
+                      // 如果有结果内容，直接显示
+                      if (runResult && runResult.trim() !== '') {
+                        return runResult;
+                      }
+
+                      // 没有结果时，根据是否已获取过结果和运行状态显示相应提示
+                      if (!hasFetchedResult) {
+                        // 还没有调用过 getRunResult，显示开始输出
+                        return '开始输出...';
+                      } else {
+                        // 已经调用过 getRunResult 但结果为空
+                        if (runStatus === RunningStatus.SUCCESS) {
+                          return '运行成功，暂无输出结果';
+                        } else if (runStatus === RunningStatus.FAILED) {
+                          return '运行失败，请查看日志获取详细信息';
+                        } else {
+                          return '暂无运行结果';
+                        }
+                      }
+                    })()}
                   </div>
                 </TabPane>
 

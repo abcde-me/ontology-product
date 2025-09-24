@@ -12,8 +12,8 @@ import {
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
-import { format } from 'date-fns';
 import dayjs from 'dayjs';
+import noDataElement from '@/components/no-data';
 import './DetailModal.scss';
 interface TreeItem {
   id: number;
@@ -159,7 +159,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             treeData={treeData}
             // checkStrictly={checkStrictly}
             renderTitle={(node) => {
-              console.log(node, '123');
               return (
                 <div
                   style={{
@@ -197,7 +196,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       title: '载入开始时间',
       dataIndex: 'start_time',
       width: 180,
-      sorter: true,
+      sorter: (a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
       render: (text) => (type === 'detail' ? formatDateTime(text) : text)
     },
@@ -205,7 +204,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       title: '载入结束时间',
       dataIndex: 'end_time',
       width: 180,
-      sorter: true,
+      sorter: (a, b) => dayjs(a.end_time).unix() - dayjs(b.end_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
       render: (text) => (type === 'detail' ? formatDateTime(text) : text)
     },
@@ -256,9 +255,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     const sourceParams: any = {
       page: current,
       page_size: pageSize,
-      data_path_id: Number(checkedKeys), // 优先使用选中ID 后期改成selectedKey
-      start: dateRange[0], //后期改成startTime
-      end: dateRange[1], //后期改成endTime
+      data_path_id: Number(checkedKeys),
+      // start: dateRange[0], //后期改成startTime
+      // end: dateRange[1], //后期改成endTime
       file_type: fileType, // 使用筛选条件中的文件类型
       sort_by: 'start_time',
       sort: 'asc'
@@ -290,16 +289,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     if (value && value.length === 2) {
       const [start, end] = value;
       // 格式化日期为 YYYY-MM-DD（确保与数据格式一致）
-      const startStr = format(start, 'yyyy-MM-dd');
-      const endStr = format(end, 'yyyy-MM-dd');
-      // 筛选数据：createTime 在 [startStr, endStr] 之间
       const filteredData = tableData.filter((item) => {
-        return item.createTime >= startStr && item.createTime <= endStr;
+        return (
+          item.start_time >= start + ' 00:00:00' &&
+          item.end_time <= end + ' 23:59:59'
+        );
       });
       setTableData(filteredData);
     } else if (value === null || value === undefined || value === '') {
       // 清空日期选择时，恢复原始数据
-      setTableData(tableData);
+      getTableData();
     }
   };
   const getTableSelectContent = () => {
@@ -312,7 +311,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       setTableData(getDetailObj?.label_data_set);
       setSelectedRowKeys(
         getDetailObj?.label_data_set &&
-          getDetailObj?.label_data_set?.map((item) => item.id)
+          getDetailObj?.label_data_set?.map((item) => item.execution_id) // 改为使用 execution_id
       );
     }
   }, [getDetailObj]);
@@ -325,7 +324,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       escToExit={false}
       maskClosable={false}
       className="fullscreen-modal"
-      style={{ width: '960px', overflowY: 'auto' }}
+      style={{ width: '960px', height: '800px', overflowY: 'auto' }}
       footer={
         <>
           <Button
@@ -371,6 +370,10 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   <DatePicker.RangePicker
                     onChange={handleDateChange}
                     style={{ width: 350 }}
+                    onClear={() => {
+                      setDateRange([]);
+                      getTableData();
+                    }}
                   />
                 </FormItem>
               </div>
@@ -383,36 +386,34 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             data={tableData}
             loading={tableLoading}
             pagination={false}
+            border={false}
+            style={{
+              height: 'calc(100% - 82px)'
+            }}
+            noDataElement={noDataElement({
+              description: '暂无数据'
+            })}
             rowSelection={{
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
-              // checkboxProps: (record) => {
-              //   return {
-              //     disabled: type === 'detail'
-              //   };
-              // },
               onChange: (selectedRowKeys, selectedRows) => {
                 // 合并新旧选中数据并处理取消选中
                 const mergedMap = new Map<string, any>();
 
-                // 1. 保留仍处于选中状态的现有数据
+                // 1. 保留仍处于选中状态的现有数据 - 使用 execution_id 进行过滤
                 selectedRowsContent
-                  .filter((item) => selectedRowKeys.includes(item.id))
-                  .forEach((item) => mergedMap.set(item.id, item));
+                  .filter((item) => selectedRowKeys.includes(item.execution_id))
+                  .forEach((item) => mergedMap.set(item.execution_id, item));
 
-                // 2. 添加当前页新选中数据
+                // 2. 添加当前页新选中数据 - 使用 execution_id 作为 key
                 selectedRows.forEach((item: any) =>
-                  mergedMap.set(item.id, item)
+                  mergedMap.set(item.execution_id, item)
                 );
 
                 // 3. 更新状态
                 const mergedRows = Array.from(mergedMap.values());
-                // if (mergedRows.length <= 200) {
                 setSelectedRowsContent(mergedRows);
                 setSelectedRowKeys(mergedRows.map((item) => item.execution_id));
-                // } else {
-                // Message.error('选中的数量不能超过200条');
-                // }
               }
             }}
           />
