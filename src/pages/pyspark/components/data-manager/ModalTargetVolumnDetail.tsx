@@ -12,6 +12,7 @@ import {
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
+import './ModalTargetVolumnDetail.scss';
 // import { getTargetFileTypeList } from '@/api/dataCatalog';
 // import { getSourceDataFileList } from '@/api/dataCatalog';
 import { formatTime } from '@/utils/format';
@@ -82,7 +83,7 @@ const FileList = (props) => {
   } = useTableList({ volumn });
 
   return (
-    <div>
+    <div className="pyspark-modal-target-volumn-detail">
       <Form autoComplete="off" layout="inline">
         <FormItem
           field="['file_name', 'search_type']"
@@ -164,6 +165,45 @@ const defaultSearchParams = {
   file_name: ''
 };
 
+// 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
+const WorkflowIdCell = ({ record }) => {
+  // 添加空值检查
+  const extras = record?.extras || {};
+
+  return (
+    <div className="unified-columns-wrapper">
+      <div className="unified-columns">
+        <span className="unified-columns-label">原文件:&nbsp;</span>
+        <span className="unified-columns-content unified-columns-file">
+          {extras.file_name ?? '无文件名'}
+        </span>
+      </div>
+      <div className="unified-columns">
+        <span className="unified-columns-label unified-columns-workflow">
+          工作流ID:&nbsp;
+        </span>
+        <span className="unified-columns-content" style={{ maxWidth: 170 }}>
+          {extras.workflow_uuid ? (
+            <>
+              <a
+                className="jump-workflow"
+                target="_blank"
+                rel="noreferrer"
+                href={`/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
+              >
+                {extras.workflow_uuid}
+              </a>
+              <span className="jump-workflow-icon"></span>
+            </>
+          ) : (
+            '-'
+          )}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const useTableList = (props) => {
   const { volumn } = props;
   const [searchParams, setSearchParams] = useState<
@@ -196,7 +236,7 @@ const useTableList = (props) => {
       title: '数据内容',
       dataIndex: 'short_content',
       ellipsis: true,
-      width: 300,
+      width: 230,
       render: (_, record) => (
         <EllipsisPopover
           value={record.short_content}
@@ -212,6 +252,12 @@ const useTableList = (props) => {
       sorter: true,
       render: (_, record) =>
         timeFormattig(new Date(record?.generated_at).getTime())
+    },
+    {
+      title: '其他信息',
+      dataIndex: 'workflowId',
+      width: 300,
+      render: (_, record) => <WorkflowIdCell record={record} />
     },
     {
       title: '原文件类型',
