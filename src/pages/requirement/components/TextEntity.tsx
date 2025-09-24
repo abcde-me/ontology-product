@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import {
   IconDelete,
+  IconDown,
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
@@ -225,13 +226,16 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   />
                 </FormItem>
                 <FormItem label={null} style={{ marginRight: 8 }}>
-                  <ColorPicker
-                    defaultValue={item.label_colour}
-                    showPreset
-                    onChange={(value) => {
-                      handleFieldChange(index, 'label_colour', value);
-                    }}
-                  />
+                  <div className="color-content">
+                    <ColorPicker
+                      defaultValue={item.label_colour}
+                      showPreset
+                      onChange={(value) => {
+                        handleFieldChange(index, 'label_colour', value);
+                      }}
+                    />
+                    <IconDown className="color-icon" />
+                  </div>
                 </FormItem>
                 <FormItem label={null}>
                   {entityRelations?.length > 1 && (

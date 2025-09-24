@@ -171,7 +171,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       escToExit={false}
       maskClosable={false}
       className="dataSource-modal"
-      style={{ width: '90vw', height: '80vh' }}
+      style={{ width: '920px', height: '800px' }}
       footer={
         <>
           <Button
@@ -211,7 +211,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             checkable
             autoExpandParent={false}
             style={{
-              height: '60vh',
+              height: '592px',
               overflowY: 'auto'
             }}
             renderTitle={({ title }: any) => {

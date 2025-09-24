@@ -157,7 +157,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       escToExit={false}
       maskClosable={false}
       className="fulscreen-modal"
-      style={{ width: '90vw', overflowY: 'auto' }}
+      style={{ width: '960px', height: '800px' }}
       footer={
         <>
           <Button
