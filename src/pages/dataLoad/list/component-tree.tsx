@@ -483,11 +483,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const nodeData = selectedNode.props.dataRef as TreeNodeData;
 
     if (
+      nodeData?.type_name === 'catalog' ||
       nodeData?.type_name === 'db_parent' ||
       nodeData?.type_name === 'datasource_parent'
     ) {
-      console.log('数据库节点或数据卷节点不可选中');
-      return; // 阻止选中数据库节点和数据卷节点
+      console.log('数据库节点或数据卷节点或目录节点不可选中');
+      return; // 阻止选中数据库节点和数据卷节点或目录节点
     }
 
     // 调用原始的onSelect回调
