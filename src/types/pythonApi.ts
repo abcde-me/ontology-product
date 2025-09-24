@@ -111,6 +111,8 @@ export interface OpenPythonItemRes {
   data: string;
   /** 最后修改时间 */
   last_modified: string;
+  /** 运行状态：-1未运行 0失败 1成功 2运行中 */
+  run_status: RunningStatus;
 }
 export interface SavePythonItemReq {
   /** 文件id */
