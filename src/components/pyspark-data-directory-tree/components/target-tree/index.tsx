@@ -162,6 +162,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                         String(nodeData?.title ?? ''),
                         searchKeyword
                       )}
+                      preferTypography
                     />
                     {/* {(nodeData?.type === 'file' ||
                       nodeData?.type === 'volume_item') && (

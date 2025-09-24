@@ -66,7 +66,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       getRunResultPolling,
       resultLoading,
       loadRunResult,
-      handleGetRunLog
+      handleGetRunLog,
+      lastScriptRunStatus
     } = useEditorContext();
 
     const sortableColumns = addSortToColumns(columns);
@@ -171,6 +172,18 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     };
 
     const renderRunStatus = (status?: RunningStatus) => {
+      if (
+        status === RunningStatus.RUNNING &&
+        (lastScriptRunStatus === RunningStatus.SUCCESS ||
+          lastScriptRunStatus === RunningStatus.FAILED)
+      ) {
+        return (
+          <div className="run-status">
+            <span className="mr-4 text-[14px]">结果加载中</span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
+      }
       if (status === RunningStatus.RUNNING) {
         return (
           <div className="run-status">

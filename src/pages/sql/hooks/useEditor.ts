@@ -55,7 +55,7 @@ export interface UseEditorReturn {
   currentScriptId?: string;
   runError: string;
   resultLoading: boolean;
-
+  lastScriptRunStatus: RunningStatus;
   // 表格数据处理
   columns: Array<{
     title: string;
@@ -109,7 +109,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runError, setRunError] = useState<string>('');
   const [resultLoading, setResultLoading] = useState(false);
-
+  // 新增脚本最后执行结果
+  const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
+    RunningStatus.IDLE
+  );
   // 面板状态管理
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
 
@@ -252,6 +255,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunLog('');
     setRunError('');
     setLastAutoSave('');
+    setLastScriptRunStatus(RunningStatus.IDLE);
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
   }, [cancelGetRunResultPolling]);
@@ -387,6 +391,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     cancelGetRunResultPolling();
     updateRunStatus(RunningStatus.IDLE);
+    // 将该面板的最后状态也设置为未运行
+    setLastScriptRunStatus(RunningStatus.IDLE);
   };
 
   // 获取运行日志
@@ -444,7 +450,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
           if (response.status === 200 && response.data) {
             const fileData = response.data;
-
+            setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
             setEditorContent(fileData.script_content);
 
@@ -503,7 +509,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 表格数据处理
     columns,
     data,
-
+    lastScriptRunStatus,
     // 操作
     setSize,
     handleContentChange,
