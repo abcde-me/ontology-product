@@ -55,6 +55,7 @@
   .file-name {
     max-width: 200px;
     overflow: hidden;
+    font-weight: 400;
   }
 
   // 搜索结果路径样式 - 非 hover 态最大宽度 200px
@@ -79,7 +80,7 @@
   }
 
   .directory-tree {
-    height: calc(100% - 40px);
+    height: calc(100% - 50px);
     overflow-y: auto;
   }
 

@@ -12,6 +12,44 @@
       position: relative;
       align-items: center;
       padding-left: 4px;
+      width: 100%;
+
+      &:hover {
+        background-color: transparent;
+      }
+
+      .arco-tree-node-title {
+        width: 227px;
+        flex-basis: 227px;
+        flex-shrink: 0;
+
+        .pyspark-target-tree__node-title {
+          width: 196px;
+        }
+
+        &:hover {
+          background-color: var(--color-bg-5);
+
+          .pyspark-target-tree__node-title {
+            color: var(--primary-6);
+          }
+
+          .pyspark-target-tree__node-title-file,
+          .pyspark-target-tree__node-size-file {
+            width: 120px;
+          }
+
+          .pyspark-target-tree__node-title-volume_item,
+          .pyspark-target-tree__node-size-volume_item {
+            width: 120px;
+          }
+
+          .pyspark-target-tree__node-actions {
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+      }
 
       // 去除选中时的高亮
       &.arco-tree-node-selected {
@@ -20,29 +58,6 @@
 
         .arco-tree-node-switcher {
           color: var(--color-text-2);
-        }
-      }
-
-      &:hover {
-        background-color: var(--color-bg-5);
-
-        .pyspark-target-tree__node-title {
-          color: var(--primary-6);
-        }
-
-        .pyspark-target-tree__node-title-file,
-        .pyspark-target-tree__node-size-file {
-          max-width: 40px;
-        }
-
-        .pyspark-target-tree__node-title-volume_item,
-        .pyspark-target-tree__node-size-volume_item {
-          max-width: 70px;
-        }
-
-        .pyspark-target-tree__node-actions {
-          opacity: 1;
-          visibility: visible;
         }
       }
 
@@ -118,7 +133,8 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 196px;
+      // width:
+      // will-change: width;
     }
 
     &-size {
