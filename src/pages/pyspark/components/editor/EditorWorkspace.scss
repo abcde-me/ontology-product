@@ -99,6 +99,10 @@
       color: var(--color-text-4);
       width: 24px;
     }
+
+    .cm-gutter.cm-gutter-lint {
+      width: 0;
+    }
   }
 
   .running-code-mirror {
