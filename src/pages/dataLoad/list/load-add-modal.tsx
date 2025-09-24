@@ -598,6 +598,8 @@ const LoadAddModal = (props: propsType) => {
 
   // 存储上传的文件数据
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  // TreeSelect 下拉框显示状态
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   // 保留handleSelect作为ComponentTree的回调
   const handleSelect = (
@@ -925,6 +927,8 @@ const LoadAddModal = (props: propsType) => {
             className="db-tree-select"
             placeholder="请选择载入位置"
             allowClear
+            popupVisible={dropdownVisible}
+            onVisibleChange={setDropdownVisible}
             dropdownMenuStyle={{
               maxHeight: 300,
               padding: 0,
@@ -944,6 +948,8 @@ const LoadAddModal = (props: propsType) => {
                   form.setFieldsValue({
                     dest_path: path
                   });
+                  // 选择完成后关闭下拉框
+                  setDropdownVisible(false);
                 }}
                 showAddTree={true}
                 enableRootAdd={true}
