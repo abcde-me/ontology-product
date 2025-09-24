@@ -86,7 +86,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       return (
         <span>
           {prefix}
-          <span style={{ color: 'var(--color-primary-light-4)' }}>
+          <span style={{ color: '#007DFA' }}>
             {text.substr(index, keyword.length)}
           </span>
           {suffix}
@@ -117,6 +117,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             handleSearch(value);
           }}
           onClear={() => {
+            // setExpandedKeys([]);
             handleSearch('');
           }}
           allowClear
