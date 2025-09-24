@@ -8,6 +8,8 @@ import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
+import PasparkMenu from '@/assets/sider/pyspark.svg';
+import SqlMenu from '@/assets/sider/sql.svg';
 
 export type MenuModel = {
   title: string;
@@ -108,14 +110,14 @@ export const menus: MenuModel[] = [
     children: [
       {
         title: 'PySpark开发',
-        icon: <DataCatalog className={iconClass} />,
+        icon: <PasparkMenu className={iconClass} />,
         key: 'pyspark',
         path: '/tenant/compute/modaforge/pyspark',
         permission: 'pyspark:can_search'
       },
       {
         title: 'SQL开发',
-        icon: <DataCatalog className={iconClass} />,
+        icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
         permission: 'sql_script:can_search'

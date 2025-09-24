@@ -55,8 +55,10 @@
 
         .arco-tabs-header-nav-rounded .arco-tabs-header-title {
           padding: 0px;
-          // border-radius: 4px;
+          border-radius: 4px;
           margin-top: 12px;
+          width: 28px;
+          height: 28px;
 
           &:first-of-type {
             margin-top: 0px;
