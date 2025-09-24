@@ -693,7 +693,7 @@ const DatasetDetail = (props: {
     if (contentTableColumnsList.length > 0) {
       setContentTableColumns(
         contentTableColumnsList.map((item) => ({
-          title: `${item.name}(${item.cn_name})`,
+          title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
           dataIndex: item.name,
           key: item.name,
           width: 400,
