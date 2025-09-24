@@ -277,7 +277,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                 {runStatus !== RunningStatus.RUNNING && (
                   <div className="flex items-center gap-[12px]">
                     <Space>
-                      <span>展示</span>
+                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                        展示
+                      </span>
                       <Input
                         style={{ width: 52, height: 22 }}
                         size="mini"
@@ -305,7 +307,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                           }
                         }}
                       />
-                      <span>行数据</span>
+                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                        行数据
+                      </span>
                     </Space>
                     <Dropdown
                       position="br"
@@ -320,6 +324,11 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       <Button
                         type="outline"
                         size="mini"
+                        style={{
+                          fontSize: '14px',
+                          color: '#1E293B',
+                          fontWeight: 600
+                        }}
                         disabled={runStatus !== RunningStatus.SUCCESS}
                       >
                         保存到数据集
