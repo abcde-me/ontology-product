@@ -37,6 +37,7 @@ interface UseEditorReturn {
   runResult: string;
   isPanelOpen: boolean;
   activeKey: string;
+  hasFetchedResult: boolean;
 
   // 编辑器操作
   setActiveKey: (key: string) => void;
@@ -77,6 +78,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState<string>('result');
 
   // 跟踪前一个 runStatus 状态
@@ -109,6 +111,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           setRunStatus(RunningStatus.FAILED);
           cancelGetRunResultPolling();
           setRunResult(res?.message ?? '获取运行结果失败');
+          setHasFetchedResult(true);
           return;
         }
 
@@ -120,11 +123,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
         setRunDuration(res?.data?.run_duration ?? 0);
         setRunStartTime(new Date(res?.data?.run_end_time) ?? '');
+
+        if (res?.data?.run_status !== RunningStatus.RUNNING) {
+          setHasFetchedResult(true);
+        }
       },
       onError: (error) => {
         setRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult(error?.message ?? '获取运行结果失败');
+        setHasFetchedResult(true);
       }
     });
 
@@ -237,6 +245,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 更新运行状态
             setExecid(String(fileData.execid));
 
+            setRunStatus(response?.data?.run_status ?? RunningStatus.IDLE);
+
             // 通知父组件更新标签页内容
             if (onTabContentUpdate) {
               onTabContentUpdate(currentTab.key, fileData.data);
@@ -295,7 +305,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      console.log('handleContentChange', value);
       setEditorContent(value);
       // 自动保存
       handleSaveThrottled.run(value);
@@ -325,8 +334,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    setRunStatus(RunningStatus.RUNNING);
+    setRunResult('');
     setLastAutoSave(saveRes.data.last_modified ?? timeFormattig(new Date()));
     setExecid('');
+    setHasFetchedResult(false);
 
     try {
       const res = await runPythonItem(currentFileId);
@@ -399,7 +411,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
-        setRunStatus(RunningStatus.RUNNING);
+        // setRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFileId, {
           execid
         });
@@ -442,6 +454,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     isPanelOpen,
     activeKey,
     setActiveKey,
+    hasFetchedResult,
 
     // 操作
     handleContentChange,
