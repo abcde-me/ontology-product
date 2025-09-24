@@ -348,6 +348,8 @@ export interface SqlScriptDetailData {
    * 更新时间
    */
   update_time: string;
+  // 运行状态
+  run_status: RunningStatus;
 }
 
 export interface ExportSqlResultField {

@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useEffect } from 'react';
-import { Button, Message, Space } from '@arco-design/web-react';
+import { Button, Message, Space, Spin } from '@arco-design/web-react';
 import {
   IconUpload,
   IconSettings,
@@ -67,7 +67,8 @@ const EditorWorkspaceContent: React.FC<{
     execid,
     isPanelOpen,
     handlePanelStateChange,
-    getPrevRunStatus
+    getPrevRunStatus,
+    lastScriptRunStatus
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -221,34 +222,51 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 编辑器区域 */}
+
       <div
         className={`editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
       >
-        <CodeMirror
-          ref={editorRef}
-          value={editorContent}
-          onChange={handleContentChange}
-          placeholder={placeholderValue}
-          readOnly={!hasUpdatePermission || runStatus === RunningStatus.RUNNING}
-          theme={myTheme}
-          extensions={[
-            sql({ upperCaseKeywords: true }),
-            lintGutter(),
-            EditorView.updateListener.of((update) => {
-              if (update.selectionSet) {
-                handleCursorChange(update.view);
-              }
-              if (update.focusChanged) {
-                handleFocusChange(update.view.hasFocus);
-              }
-            })
-          ]}
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: false
+        <Spin
+          style={{
+            width: '100%',
+            height: '100%'
           }}
-          className="code-editor"
-        />
+          tip={
+            lastScriptRunStatus === RunningStatus.SUCCESS ||
+            lastScriptRunStatus === RunningStatus.FAILED
+              ? '结果加载中...'
+              : '运行中...'
+          }
+          loading={runStatus === RunningStatus.RUNNING}
+        >
+          <CodeMirror
+            ref={editorRef}
+            value={editorContent}
+            onChange={handleContentChange}
+            placeholder={placeholderValue}
+            readOnly={
+              !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+            }
+            theme={myTheme}
+            extensions={[
+              sql({ upperCaseKeywords: true }),
+              lintGutter(),
+              EditorView.updateListener.of((update) => {
+                if (update.selectionSet) {
+                  handleCursorChange(update.view);
+                }
+                if (update.focusChanged) {
+                  handleFocusChange(update.view.hasFocus);
+                }
+              })
+            ]}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false
+            }}
+            className="code-editor"
+          />
+        </Spin>
       </div>
 
       {/* 运行信息面板 */}
