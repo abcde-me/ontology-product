@@ -80,7 +80,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       isPanelOpen,
       handlePanelStateChange,
       execid,
-      getPrevRunStatus
+      getPrevRunStatus,
+      hasFetchedResult
     } = useEditor({
       activeTab,
       fileTabs,
@@ -325,6 +326,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             runStatus={runStatus}
             runStartTime={runStartTime}
             runDuration={runDuration}
+            hasFetchedResult={hasFetchedResult}
             onGetRunLog={handleGetRunLog}
             onGetRunResult={handleGetRunResult}
             isPanelOpen={isPanelOpen}

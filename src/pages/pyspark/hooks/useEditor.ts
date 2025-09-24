@@ -37,6 +37,7 @@ interface UseEditorReturn {
   runResult: string;
   isPanelOpen: boolean;
   activeKey: string;
+  hasFetchedResult: boolean;
 
   // 编辑器操作
   setActiveKey: (key: string) => void;
@@ -77,6 +78,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState<string>('result');
 
   // 跟踪前一个 runStatus 状态
@@ -109,6 +111,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           setRunStatus(RunningStatus.FAILED);
           cancelGetRunResultPolling();
           setRunResult(res?.message ?? '获取运行结果失败');
+          setHasFetchedResult(true);
           return;
         }
 
@@ -120,11 +123,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
         setRunDuration(res?.data?.run_duration ?? 0);
         setRunStartTime(new Date(res?.data?.run_end_time) ?? '');
+
+        if (res?.data?.run_status !== RunningStatus.RUNNING) {
+          setHasFetchedResult(true);
+        }
       },
       onError: (error) => {
         setRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult(error?.message ?? '获取运行结果失败');
+        setHasFetchedResult(true);
       }
     });
 
@@ -329,6 +337,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunStatus(RunningStatus.RUNNING);
     setLastAutoSave(saveRes.data.last_modified ?? timeFormattig(new Date()));
     setExecid('');
+    setHasFetchedResult(false);
 
     try {
       const res = await runPythonItem(currentFileId);
@@ -444,6 +453,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     isPanelOpen,
     activeKey,
     setActiveKey,
+    hasFetchedResult,
 
     // 操作
     handleContentChange,
