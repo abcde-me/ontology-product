@@ -111,13 +111,13 @@ function DatasetForm(props) {
   const handleSubmit = () => {
     form.validate().then(async (values) => {
       // 校验每一行的字段中文名
-      const emptyIndex = tableData.findIndex(
-        (item) => !item.c_name || !item.c_name.trim()
-      );
-      if (emptyIndex !== -1) {
-        Message.error(`第${emptyIndex + 1}行的字段中文名不能为空`);
-        return;
-      }
+      // const emptyIndex = tableData.findIndex(
+      //   (item) => !item.c_name || !item.c_name.trim()
+      // );
+      // if (emptyIndex !== -1) {
+      //   Message.error(`第${emptyIndex + 1}行的字段中文名不能为空`);
+      //   return;
+      // }
 
       // 将表格数据转换为 fields 数组格式
       const fields = tableData.map((item) => ({
@@ -276,7 +276,7 @@ function DatasetForm(props) {
           data={tableData}
           rowKey="id"
           pagination={false}
-          scroll={{ y: 400 }}
+          scroll={{ y: 286 }}
         />
       </div>
       <div className="mt-[16px] flex justify-end gap-[12px]">
@@ -457,6 +457,6 @@ function generateTableData(
   return rawColumns.map((col, idx) => ({
     key: idx,
     name: col.dataIndex,
-    c_name: '无'
+    c_name: ''
   }));
 }
