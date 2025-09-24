@@ -335,6 +335,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     setRunStatus(RunningStatus.RUNNING);
+    setRunResult('');
     setLastAutoSave(saveRes.data.last_modified ?? timeFormattig(new Date()));
     setExecid('');
     setHasFetchedResult(false);
