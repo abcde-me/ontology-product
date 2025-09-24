@@ -54,42 +54,47 @@
     position: relative;
     align-items: center;
     padding-left: 4px;
+    width: 100%;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    .arco-tree-node-title {
+      width: 227px;
+      flex-basis: 227px;
+      flex-shrink: 0;
+
+      .pyspark-dataset-tree__node-title {
+        color: var(--primary-primary-6);
+        width: 196px;
+      }
+
+      &:hover {
+        background-color: var(--color-bg-5);
+
+        .pyspark-dataset-tree__node-title {
+          color: var(--primary-primary-6);
+        }
+
+        .pyspark-dataset-tree__node-title-file {
+          width: 120px;
+        }
+
+        .pyspark-dataset-tree__node-actions {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+    }
 
     // 去除选中时的高亮
     &.arco-tree-node-selected {
       background-color: transparent;
       color: var(--color-text-2);
-      font-weight: 400;
 
       .arco-tree-node-switcher {
         color: var(--color-text-2);
-      }
-
-      .arco-tree-node-title {
-        background-color: transparent;
-      }
-    }
-
-    &:hover {
-      background-color: var(--color-bg-5);
-      color: #007dfa;
-
-      // .arco-tree-node-title {
-      //   background-color: var(--color-bg-5);
-      // }
-
-      .pyspark-dataset-tree__node-title {
-        max-width: 136px;
-        color: #007dfa;
-      }
-
-      .pyspark-dataset-tree__node-title-file {
-        max-width: 116px;
-      }
-
-      .pyspark-dataset-tree__node-actions {
-        opacity: 1;
-        visibility: visible;
       }
     }
 
@@ -115,16 +120,16 @@
       flex-direction: column;
     }
 
-    &-title {
-      flex-grow: 1;
-      color: var(--color-text-2);
-      font-size: 14px;
-      max-width: 175px;
+    // &-title {
+    //   flex-grow: 1;
+    //   color: var(--color-text-2);
+    //   font-size: 14px;
+    //   max-width: 175px;
 
-      &-file {
-        max-width: 150px;
-      }
-    }
+    //   &-file {
+    //     max-width: 150px;
+    //   }
+    // }
 
     &-size {
       font-size: 12px;

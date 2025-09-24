@@ -12,38 +12,74 @@
       position: relative;
       align-items: center;
       padding-left: 4px;
+      width: 100%;
 
-      // 去除选中时的高亮
-      &.arco-tree-node-selected {
+      &:hover {
         background-color: transparent;
-        color: var(--color-text-2);
-        font-weight: 400;
+      }
 
-        .arco-tree-node-switcher {
-          color: var(--color-text-2);
+      .arco-tree-node-title {
+        width: 227px;
+        flex-basis: 227px;
+        flex-shrink: 0;
+
+        .pyspark-source-tree__node-title {
+          width: 196px;
+        }
+
+        &:hover {
+          background-color: var(--color-bg-5);
+
+          .pyspark-source-tree__node-title {
+            color: var(--primary-6);
+          }
+
+          .pyspark-source-tree__node-title-file,
+          .pyspark-source-tree__node-size-file {
+            width: 120px;
+          }
+
+          .pyspark-source-tree__node-title-volume_item,
+          .pyspark-source-tree__node-size-volume_item {
+            width: 120px;
+          }
+
+          .pyspark-source-tree__node-actions {
+            opacity: 1;
+            visibility: visible;
+          }
         }
       }
 
-      &:hover {
-        background-color: var(--color-bg-5);
+      // &:hover {
+      //   background-color: var(--color-bg-5);
 
-        .pyspark-source-tree__node-title {
-          color: var(--primary-6);
-        }
+      //   .pyspark-source-tree__node-title {
+      //     color: var(--primary-6);
+      //   }
 
-        .pyspark-source-tree__node-title-file,
-        .pyspark-source-tree__node-size-file {
-          max-width: 40px;
-        }
+      //   .pyspark-source-tree__node-title-file,
+      //   .pyspark-source-tree__node-size-file {
+      //     max-width: 40px;
+      //   }
 
-        .pyspark-source-tree__node-title-volume_item,
-        .pyspark-source-tree__node-size-volume_item {
-          max-width: 70px;
-        }
+      //   .pyspark-source-tree__node-title-volume_item,
+      //   .pyspark-source-tree__node-size-volume_item {
+      //     max-width: 70px;
+      //   }
 
-        .pyspark-source-tree__node-actions {
-          opacity: 1;
-          visibility: visible;
+      //   .pyspark-source-tree__node-actions {
+      //     opacity: 1;
+      //     visibility: visible;
+      //   }
+      // }
+
+      &.arco-tree-node-selected {
+        background-color: transparent;
+        color: var(--color-text-2);
+
+        .arco-tree-node-switcher {
+          color: var(--color-text-2);
         }
       }
 
