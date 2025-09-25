@@ -50,18 +50,15 @@ interface UseEditorReturn {
   handleGetRunResult: () => Promise<void>;
 }
 
-const defaultContent = `
-  🎉 欢迎使用多模态数据治理平台
-     ⚡️快速开始
-    这里是您的笔记本工作区，您可以在这里进行数据分析和处理工作。
-
-    💡 使用指南
-  创建新笔记本 - 在左侧文件面板点击"+ 笔记本"创建您的专属笔记本
-  添加单元格   点击下方按钮添加代码或文档单元格
-  导入数据源 - 在左侧"开发工具"中选择数据源并导入
-  使用算子库 - 从算子库中选择预制的数据处理算子
- 
-    🚀 开始您的数据治理之旅！
+const defaultContent = `🎉 欢迎使用多模态数据治理平台
+⚡️ 快速开始
+这里是您的PySpark编辑区，您可以在这里进行数据分析和处理工作。
+💡 使用指南
+创建pyspark脚本 － 在左侧文件面板点击"+新建pyspark"创建代码脚本
+导入数据源 － 在左侧"数据目录"中选择数据源并导入
+使用算子库 － 从算子库中选择预制的数据处理算子
+导出数据集 － 运行后可点击导出数据集按钮创建
+🚀 开始您的数据治理之旅！
 `;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
