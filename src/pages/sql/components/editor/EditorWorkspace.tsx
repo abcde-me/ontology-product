@@ -5,7 +5,8 @@ import {
   IconSettings,
   IconPlayArrow,
   IconStop,
-  IconMenu
+  IconMenu,
+  IconCaretRight
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
@@ -190,7 +191,7 @@ const EditorWorkspaceContent: React.FC<{
                   runStatus === RunningStatus.RUNNING ? (
                     <IconStop className="mr-[4px]" />
                   ) : (
-                    <IconPlayArrow className="mr-[4px]" />
+                    <IconCaretRight className="mr-[4px]" />
                   )
                 }
                 disabled={editorContent?.trim() === ''}
