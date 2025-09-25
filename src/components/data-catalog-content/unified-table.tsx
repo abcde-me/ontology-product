@@ -131,11 +131,6 @@ const UnifiedTable = forwardRef(
       onChange: (selectedRowKeys: React.Key[], selectedRows: RecordType[]) => {
         setSelectedRowKeys(selectedRowKeys);
         setSelectedRows(selectedRows);
-        console.log(
-          `UnifiedTable - selectedRowKeys: ${selectedRowKeys}`,
-          'selectedRows: ',
-          selectedRows
-        );
         // 调用外部传入的选择变化回调函数
         onSelectionChange?.(selectedRowKeys, selectedRows);
       },
