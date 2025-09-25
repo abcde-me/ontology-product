@@ -686,17 +686,17 @@ const DatasetForm = React.forwardRef<
                     预览：
                   </span>{' '}
                   {storageType === StorageType.File
-                    ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                    ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表'
                     : storageType === StorageType.Jsonl
-                      ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
-                      : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
+                      ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据'
+                      : '数据表格式数据集支持数据预览，显示表格结构和前50行数据'}
                 </span>
               ) : (
                 <span style={{ fontSize: '14px' }}>
                   <span style={{ fontWeight: '500', color: '#000' }}>
                     预览：
                   </span>
-                  请先选择目标数据目录卷/卷
+                  无jsonl文件
                 </span>
               )}
             </div>
