@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
+import './ModalScriptDetail.scss';
 
 /** 数据库详情 弹框 */
 const ModalScriptDetail = (props) => {
@@ -17,7 +18,12 @@ const ModalScriptDetail = (props) => {
       onCancel={onCancel}
     >
       <div className="pb-[16px]">
-        <CodeMirror value={codeValue} editable={false} height="500px" />
+        <CodeMirror
+          value={codeValue}
+          editable={false}
+          height="500px"
+          className="sql-detail-code-mirror"
+        />
       </div>
     </Modal>
   );
