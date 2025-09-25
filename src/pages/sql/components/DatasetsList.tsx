@@ -24,6 +24,7 @@ import {
 import { formatFileSize } from '@/utils/format';
 import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
+import RefreshButton from '@/components/refreshButton';
 
 const FormItem = Form.Item;
 
@@ -298,9 +299,7 @@ const DatasetsList: FC = () => {
           <Input.Search allowClear placeholder="输入数据集搜索" />
         </FormItem>
         <FormItem style={{ marginRight: 12 }}>
-          <Button type="text" onClick={() => loadData()}>
-            手动刷新
-          </Button>
+          <RefreshButton onClick={() => loadData()}></RefreshButton>
         </FormItem>
       </Form>
       <Table
