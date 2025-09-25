@@ -13,11 +13,6 @@ import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 // 数据目录配置数组
 const directoryItems = [
   {
-    id: 'dataset',
-    label: '数据集',
-    icon: 'folder'
-  },
-  {
     id: 'source',
     label: '源数据目录',
     icon: 'folder'
@@ -25,6 +20,11 @@ const directoryItems = [
   {
     id: 'target',
     label: '目标数据目录',
+    icon: 'folder'
+  },
+  {
+    id: 'dataset',
+    label: '数据集',
     icon: 'folder'
   }
 ];
