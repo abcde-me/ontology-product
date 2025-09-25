@@ -185,7 +185,12 @@ const DatasetsList: FC = () => {
       dataIndex: 'size',
       width: 180,
       render: (_, item) => (
-        <div className="fontMM">{formatFileSize(item.size)}</div>
+        <div className="fontMM">
+          {item.status === ExportStatus.ExportFailed ||
+          item.status === ExportStatus.ExportTerminated
+            ? '-'
+            : formatFileSize(item.size)}
+        </div>
       )
     },
     {
@@ -237,7 +242,7 @@ const DatasetsList: FC = () => {
         <FormItem field="file_name" style={{ marginRight: 12 }}>
           <Input.Search
             allowClear
-            placeholder="输入文件名搜索"
+            placeholder="输入数据集名称搜索"
             onSearch={(value) => {
               handleSearchChange({ name: value });
             }}

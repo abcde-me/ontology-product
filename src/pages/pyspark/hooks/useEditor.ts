@@ -37,6 +37,7 @@ interface UseEditorReturn {
   runResult: string;
   isPanelOpen: boolean;
   activeKey: string;
+  hasFetchedResult: boolean;
 
   // 编辑器操作
   setActiveKey: (key: string) => void;
@@ -49,18 +50,15 @@ interface UseEditorReturn {
   handleGetRunResult: () => Promise<void>;
 }
 
-const defaultContent = `
-  🎉 欢迎使用多模态数据治理平台
-     ⚡️快速开始
-    这里是您的笔记本工作区，您可以在这里进行数据分析和处理工作。
-
-    💡 使用指南
-  创建新笔记本 - 在左侧文件面板点击"+ 笔记本"创建您的专属笔记本
-  添加单元格   点击下方按钮添加代码或文档单元格
-  导入数据源 - 在左侧"开发工具"中选择数据源并导入
-  使用算子库 - 从算子库中选择预制的数据处理算子
- 
-    🚀 开始您的数据治理之旅！
+const defaultContent = `🎉 欢迎使用多模态数据治理平台
+⚡️ 快速开始
+这里是您的PySpark编辑区，您可以在这里进行数据分析和处理工作。
+💡 使用指南
+创建pyspark脚本 － 在左侧文件面板点击"+新建pyspark"创建代码脚本
+导入数据源 － 在左侧"数据目录"中选择数据源并导入
+使用算子库 － 从算子库中选择预制的数据处理算子
+导出数据集 － 运行后可点击导出数据集按钮创建
+🚀 开始您的数据治理之旅！
 `;
 
 export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
@@ -77,6 +75,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState<string>('result');
 
   // 跟踪前一个 runStatus 状态
@@ -109,6 +108,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           setRunStatus(RunningStatus.FAILED);
           cancelGetRunResultPolling();
           setRunResult(res?.message ?? '获取运行结果失败');
+          setHasFetchedResult(true);
           return;
         }
 
@@ -120,11 +120,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunStatus(res?.data?.run_status ?? RunningStatus.IDLE);
         setRunDuration(res?.data?.run_duration ?? 0);
         setRunStartTime(new Date(res?.data?.run_end_time) ?? '');
+
+        if (res?.data?.run_status !== RunningStatus.RUNNING) {
+          setHasFetchedResult(true);
+        }
       },
       onError: (error) => {
         setRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult(error?.message ?? '获取运行结果失败');
+        setHasFetchedResult(true);
       }
     });
 
@@ -237,6 +242,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 更新运行状态
             setExecid(String(fileData.execid));
 
+            setRunStatus(response?.data?.run_status ?? RunningStatus.IDLE);
+
             // 通知父组件更新标签页内容
             if (onTabContentUpdate) {
               onTabContentUpdate(currentTab.key, fileData.data);
@@ -295,7 +302,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
-      console.log('handleContentChange', value);
       setEditorContent(value);
       // 自动保存
       handleSaveThrottled.run(value);
@@ -325,8 +331,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    setRunStatus(RunningStatus.RUNNING);
+    setRunResult('');
     setLastAutoSave(saveRes.data.last_modified ?? timeFormattig(new Date()));
     setExecid('');
+    setHasFetchedResult(false);
 
     try {
       const res = await runPythonItem(currentFileId);
@@ -399,7 +408,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
-        setRunStatus(RunningStatus.RUNNING);
+        // setRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFileId, {
           execid
         });
@@ -442,6 +451,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     isPanelOpen,
     activeKey,
     setActiveKey,
+    hasFetchedResult,
 
     // 操作
     handleContentChange,

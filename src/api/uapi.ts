@@ -386,7 +386,6 @@ for (const key in modaForgeResEndpoints) {
 UAPI_CONFIG.addRequestInterceptor((config) => {
   // 严格校验逻辑
   const rawToken = getLoginToken();
-  // console.log('cleanToken', rawToken);
 
   // 1. 类型检查
   if (typeof rawToken !== 'string') return config;

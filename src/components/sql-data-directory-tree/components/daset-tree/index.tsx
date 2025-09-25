@@ -1,7 +1,7 @@
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { DatasetListItem } from '@/types/datasetManagement';
 import { formatFileSize } from '@/utils/format';
-import { Button, Empty, Input, Tree } from '@arco-design/web-react';
+import { Button, Empty, Input, Tree, Spin } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconCaretDown,
@@ -31,7 +31,8 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     expandedKeys,
     setExpandedKeys,
     handleSearch,
-    searchKeyword
+    searchKeyword,
+    treeDataLoading
   } = useDatasetTree();
 
   // 处理返回
@@ -71,7 +72,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       return (
         <span>
           {prefix}
-          <span style={{ color: 'var(--color-primary-light-4)' }}>
+          <span style={{ color: '#007DFA' }}>
             {text.substr(index, keyword.length)}
           </span>
           {suffix}
@@ -110,8 +111,12 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="sql-dataset-tree__content">
-        {treeData.length === 0 ? (
+      <div
+        className={`sql-dataset-tree__content ${treeDataLoading ? 'sql-dataset-tree__content--loading' : ''}`}
+      >
+        {treeDataLoading ? (
+          <Spin tip="加载中"></Spin>
+        ) : treeData.length === 0 ? (
           <Empty />
         ) : (
           <Tree

@@ -45,6 +45,13 @@
     padding-top: 8px;
     height: calc(100% - 64px);
     overflow-y: auto;
+
+    // 加载状态时的居中样式
+    &--loading {
+      display: flex;
+      justify-content: center;
+      padding-top: 140px;
+    }
   }
 
   // 第三部分：列表
@@ -72,17 +79,13 @@
       background-color: var(--color-bg-5);
       color: #007dfa;
 
-      // .arco-tree-node-title {
-      //   background-color: var(--color-bg-5);
-      // }
-
-      .sql-dataset-tree__node-title:not(.sql-dataset-tree__node-title-scheam) {
-        max-width: 136px;
+      .sql-dataset-tree__node-title-dataset {
         color: #007dfa;
+        max-width: 70px;
       }
 
-      .sql-dataset-tree__node-title-dataset {
-        max-width: 116px;
+      .sql-dataset-tree__node-title-scheam {
+        max-width: 80px;
       }
 
       .sql-dataset-tree__node-actions {
@@ -117,11 +120,7 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 175px;
-
-      &-file {
-        max-width: 150px;
-      }
+      max-width: 160px;
     }
 
     &-size {

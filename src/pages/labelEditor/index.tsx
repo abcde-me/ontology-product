@@ -17,6 +17,7 @@ import {
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
+import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 import { TEXT_DATA, LabelTypeMap } from './const';
 
 const { bus } = WujieReact;
@@ -50,10 +51,22 @@ function LabelEditorPage() {
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
     if (!taskInfo.data.task_id) {
-      Modal.warning({
-        title: '提示信息',
-        content: '当前需求已无新任务，点击确定将返回任务列表页',
-        afterClose: () => {
+      Modal.destroyAll();
+      Modal.info({
+        escToExit: false,
+        maskClosable: false,
+        title: '当前需求已无新任务',
+        content: (
+          <span style={{ fontSize: '14px', color: '#1E293B' }}>
+            点击确定将返回需求列表页
+          </span>
+        ),
+        icon: (
+          <IconExclamationCircleFill
+            style={{ color: '#007DFA', fontSize: '20px' }}
+          />
+        ),
+        onOk: () => {
           goBack();
         }
       });
@@ -87,10 +100,22 @@ function LabelEditorPage() {
     const result = await args[args.length - 1](...args.slice(0, -1));
     if (result.code === 600) {
       Message.clear();
-      Modal.warning({
+      Modal.destroyAll();
+      Modal.info({
+        escToExit: false,
+        maskClosable: false,
         title: '提示信息',
-        content: result.message,
-        afterClose: () => {
+        content: (
+          <span style={{ fontSize: '14px', color: '#1E293B' }}>
+            {result.message}
+          </span>
+        ),
+        icon: (
+          <IconExclamationCircleFill
+            style={{ color: '#007DFA', fontSize: '20px' }}
+          />
+        ),
+        onOk: () => {
           goBack();
         }
       });

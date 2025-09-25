@@ -65,7 +65,7 @@ module.exports = function (app) {
         addProxy({
           // 需要通过VPN访问
           // http://10.1.4.73:30432/label-service/api/v1
-          target: 'http://61.182.98.8:38081/label-service/api/v1'
+          target: 'http://61.182.98.8:38079/label-service/api/v1'
         })
       )
     );

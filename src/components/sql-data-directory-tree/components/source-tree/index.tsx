@@ -1,6 +1,6 @@
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { formatFileSize } from '@/utils/format';
-import { Button, Empty, Input, Tree } from '@arco-design/web-react';
+import { Button, Empty, Input, Tree, Spin } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconCaretDown,
@@ -29,7 +29,8 @@ const SourceTree: React.FC<SourceTreeProps> = ({
     expandedKeys,
     setExpandedKeys,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    treeDataLoading
   } = useSourceTree();
 
   // 处理返回
@@ -75,7 +76,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
           {prefix}
           <span
             style={{
-              color: 'var(--color-primary-light-4)'
+              color: '#007DFA'
             }}
           >
             {matchedText}
@@ -116,8 +117,12 @@ const SourceTree: React.FC<SourceTreeProps> = ({
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="sql-source-tree__content">
-        {treeDataFiltered.length === 0 ? (
+      <div
+        className={`sql-source-tree__content ${treeDataLoading ? 'sql-source-tree__content--loading' : ''}`}
+      >
+        {treeDataLoading ? (
+          <Spin tip="加载中..."></Spin>
+        ) : treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
           <Tree
@@ -153,19 +158,17 @@ const SourceTree: React.FC<SourceTreeProps> = ({
 
               return (
                 <div className="sql-source-tree__node">
-                  <div className="sql-source-tree__node-info">
-                    <EllipsisPopover
-                      className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
-                      value={highlightSearchKeyword(
-                        String(nodeData?.title ?? ''),
-                        searchKeyword
-                      )}
-                    />
-                  </div>
+                  <EllipsisPopover
+                    className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
+                    value={highlightSearchKeyword(
+                      String(nodeData?.title ?? ''),
+                      searchKeyword
+                    )}
+                  />
                   <div className="sql-source-tree__node-actions">
                     {showDetailBtn && (
                       <Button
-                        style={{ fontWeight: 600 }}
+                        style={{ fontWeight: 600, margin: '0 2px', padding: 0 }}
                         type="text"
                         className="sql-source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}

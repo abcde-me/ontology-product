@@ -26,32 +26,40 @@ export const useDatasetTree = () => {
   const [dasetList, setDasetList] = useState<DatasetListItem[]>([]);
 
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [treeDataLoading, setTreeDataLoading] = useState(false);
 
   // 树状态管理
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
 
   // 获取数据集目录列表
-  const getDataSetList = async (keyword?: string) => {
-    const dataSetParams: any = {
-      storage_type_list: ['table'],
-      page: 1,
-      limit: 1000
-    };
-    if (!!keyword) {
-      dataSetParams['search_name_latest_table'] = keyword;
-    } else {
-      delete dataSetParams['search_name_latest_table'];
+  const getDataSetList = async (keyword?: string, showLoading = true) => {
+    if (showLoading) {
+      setTreeDataLoading(true);
     }
+    try {
+      const dataSetParams: any = {
+        storage_type_list: ['table'],
+        page: 1,
+        limit: 1000
+      };
+      if (!!keyword) {
+        dataSetParams['search_name_latest_table'] = keyword;
+      } else {
+        delete dataSetParams['search_name_latest_table'];
+      }
 
-    const res = await searchDatasetList(dataSetParams);
+      const res = await searchDatasetList(dataSetParams);
 
-    if (res?.status !== 200) {
-      return;
+      if (res?.status !== 200) {
+        return;
+      }
+
+      // 只更新数据集列表，不直接覆盖 treeData
+      setDasetList(res?.data?.list ?? []);
+    } finally {
+      setTreeDataLoading(false);
     }
-
-    // 只更新数据集列表，不直接覆盖 treeData
-    setDasetList(res?.data?.list ?? []);
   };
 
   // 将数据集列表转换为树
@@ -94,7 +102,9 @@ export const useDatasetTree = () => {
 
   // 初始化加载数据集列表
   useEffect(() => {
-    getDataSetList(searchKeyword);
+    // 如果有搜索关键词，则不显示loading（搜索时不加载）
+    // 如果没有搜索关键词，则显示loading（初始加载）
+    getDataSetList(searchKeyword, !searchKeyword);
   }, [searchKeyword]);
 
   return {
@@ -103,6 +113,7 @@ export const useDatasetTree = () => {
     searchKeyword,
     setSearchKeyword,
     getDataSetList,
+    treeDataLoading,
 
     // 树状态相关
     expandedKeys,

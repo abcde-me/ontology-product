@@ -24,6 +24,7 @@ import {
 import { formatFileSize } from '@/utils/format';
 import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
+import RefreshButton from '@/components/refreshButton';
 
 const FormItem = Form.Item;
 
@@ -289,7 +290,7 @@ const DatasetsList: FC = () => {
     <div className="flex h-full flex-col overflow-y-auto p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
       <Form
-        className="mb-[12px]"
+        className="mb-[8px]"
         autoComplete="off"
         layout="inline"
         onValuesChange={handleSearchChange}
@@ -298,9 +299,7 @@ const DatasetsList: FC = () => {
           <Input.Search allowClear placeholder="输入数据集搜索" />
         </FormItem>
         <FormItem style={{ marginRight: 12 }}>
-          <Button type="text" onClick={() => loadData()}>
-            手动刷新
-          </Button>
+          <RefreshButton onClick={() => loadData()}></RefreshButton>
         </FormItem>
       </Form>
       <Table
