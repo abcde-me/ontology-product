@@ -153,7 +153,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     return keys.map((key) => ({
       title: key,
       dataIndex: key,
-      width: 150,
+      width: 240,
       ellipsis: true
     }));
   };
