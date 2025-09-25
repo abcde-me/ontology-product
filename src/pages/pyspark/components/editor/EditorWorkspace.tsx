@@ -380,11 +380,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         )}
 
         {/* 示例代码弹窗 */}
-        <ExampleCodeModal
-          visible={exampleModalVisible}
-          onCancel={handleCloseExampleModal}
-          onCopyCode={handleCopyExampleCode}
-        />
+        {exampleModalVisible && (
+          <ExampleCodeModal
+            visible={exampleModalVisible}
+            onCancel={handleCloseExampleModal}
+            onCopyCode={handleCopyExampleCode}
+          />
+        )}
       </div>
     );
   }
