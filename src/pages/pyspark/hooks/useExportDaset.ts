@@ -127,13 +127,14 @@ export const useExportDaset = (
 
     try {
       console.log('formData', formData.storageType, formData.selectedFiles);
-      if (
-        formData.storageType === StorageType.File &&
-        formData.selectedFiles.length === 0
-      ) {
-        Message.error('请选择文件！');
-        return;
-      }
+      // 统一接口校验
+      // if (
+      //   formData.storageType === StorageType.File &&
+      //   formData.selectedFiles.length === 0
+      // ) {
+      //   Message.error('请选择文件！');
+      //   return;
+      // }
 
       const createDatasetRes = await exportDataset({
         name: formData.name,
