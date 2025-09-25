@@ -31,9 +31,16 @@
   color: #86909c;
 }
 
-.dropdownMenuSelect
+.dropdownMenuSelect {
   :global(.arco-select-option-wrapper .arco-select-highlight) {
-  color: #007dfa;
+    color: #007dfa;
+  }
+}
+
+.dropdownSelect {
+  :global(.arco-input-tag-input) {
+    width: 100% !important;
+  }
 }
 
 /* 数据类型指示器（可选功能） */

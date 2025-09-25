@@ -185,7 +185,12 @@ const DatasetsList: FC = () => {
       dataIndex: 'size',
       width: 180,
       render: (_, item) => (
-        <div className="fontMM">{formatFileSize(item.size)}</div>
+        <div className="fontMM">
+          {item.status === ExportStatus.ExportFailed ||
+          item.status === ExportStatus.ExportTerminated
+            ? '-'
+            : formatFileSize(item.size)}
+        </div>
       )
     },
     {
