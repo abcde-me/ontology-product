@@ -366,7 +366,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
           <div className="content-table-form">
             <Form className="form-option" autoComplete="off" layout="inline">
               <div className="form-inputs">
-                <FormItem field="time">
+                <FormItem field="time" style={{ marginLeft: 12 }}>
                   <DatePicker.RangePicker
                     onChange={handleDateChange}
                     style={{ width: 350 }}
