@@ -5,7 +5,8 @@ import {
   IconSettings,
   IconPlayArrow,
   IconStop,
-  IconMenu
+  IconMenu,
+  IconCaretRight
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
@@ -22,6 +23,7 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -189,7 +191,7 @@ const EditorWorkspaceContent: React.FC<{
                   runStatus === RunningStatus.RUNNING ? (
                     <IconStop className="mr-[4px]" />
                   ) : (
-                    <IconPlayArrow className="mr-[4px]" />
+                    <IconCaretRight className="mr-[4px]" />
                   )
                 }
                 disabled={editorContent?.trim() === ''}
@@ -202,9 +204,9 @@ const EditorWorkspaceContent: React.FC<{
 
             <Button
               type="text"
-              icon={<IconMenu />}
+              icon={<SQLFormatIcon className="fromat-icon" />}
               onClick={handleFormatCode}
-              className="h-[26px]"
+              className="fromat-icon_btn h-[26px]"
             >
               格式化
             </Button>
