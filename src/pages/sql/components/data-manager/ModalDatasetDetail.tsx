@@ -12,7 +12,7 @@ const ModalDatasetDetail = ({
   return (
     <Modal
       title="数据集详情"
-      style={{ width: 960 }}
+      style={{ width: 960, height: 660 }}
       visible={datasetDetailVisible}
       footer={null}
       onCancel={closeDatasetDetail}
