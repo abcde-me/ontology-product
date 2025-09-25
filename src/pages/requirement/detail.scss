@@ -223,7 +223,14 @@
   .attribute-group-header-content {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .attribute-group-info-title-temp {
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
   }
 
   .attribute-group-info-title {
@@ -244,7 +251,7 @@
 
     .arco-form-layout-inline {
       margin-right: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
   }
 
@@ -327,7 +334,6 @@
   }
 
   .add-template-btn {
-    margin-top: 12px;
     margin-left: 12px;
     margin-bottom: 16px;
   }
@@ -342,6 +348,7 @@
       font-size: 14px;
       line-height: 22px;
       margin-left: 8px;
+      color: #6e7b8d;
     }
   }
 
@@ -454,4 +461,37 @@
     cursor: pointer;
     font-size: 16px;
   }
+
+  .fz14 {
+    font-size: 14px;
+  }
+}
+
+.menu-item-create {
+  display: flex;
+  align-items: center;
+
+  .menu-item-create-icon {
+    font-size: 16px;
+    margin-right: 5px;
+    color: #007dfa;
+  }
+
+  .menu-item-create-text {
+    color: #007dfa;
+    font-size: 14px;
+  }
+
+  .radio-group-task {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.menu-item-content {
+  font-size: 14px;
+}
+
+.menu-item-content-active:hover {
+  color: #007dfa;
 }
