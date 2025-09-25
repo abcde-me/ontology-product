@@ -158,19 +158,17 @@ const SourceTree: React.FC<SourceTreeProps> = ({
 
               return (
                 <div className="sql-source-tree__node">
-                  <div className="sql-source-tree__node-info">
-                    <EllipsisPopover
-                      className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
-                      value={highlightSearchKeyword(
-                        String(nodeData?.title ?? ''),
-                        searchKeyword
-                      )}
-                    />
-                  </div>
+                  <EllipsisPopover
+                    className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
+                    value={highlightSearchKeyword(
+                      String(nodeData?.title ?? ''),
+                      searchKeyword
+                    )}
+                  />
                   <div className="sql-source-tree__node-actions">
                     {showDetailBtn && (
                       <Button
-                        style={{ fontWeight: 600 }}
+                        style={{ fontWeight: 600, margin: '0 2px', padding: 0 }}
                         type="text"
                         className="sql-source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
