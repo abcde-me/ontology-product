@@ -1,6 +1,6 @@
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { formatFileSize } from '@/utils/format';
-import { Button, Empty, Input, Tree } from '@arco-design/web-react';
+import { Button, Empty, Input, Tree, Spin } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconCaretDown,
@@ -29,7 +29,8 @@ const SourceTree: React.FC<SourceTreeProps> = ({
     expandedKeys,
     setExpandedKeys,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    treeDataLoading
   } = useSourceTree();
 
   // 处理返回
@@ -116,8 +117,12 @@ const SourceTree: React.FC<SourceTreeProps> = ({
       </div>
 
       {/* 第三部分：列表 */}
-      <div className="sql-source-tree__content">
-        {treeDataFiltered.length === 0 ? (
+      <div
+        className={`sql-source-tree__content ${treeDataLoading ? 'sql-source-tree__content--loading' : ''}`}
+      >
+        {treeDataLoading ? (
+          <Spin tip="加载中..."></Spin>
+        ) : treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
           <Tree

@@ -33,7 +33,7 @@ export const useSourceTree = () => {
   const [treeDataFiltered, setTreeDataFiltered] = useState<TreeNodeData[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-
+  const [treeDataLoading, setTreeDataLoading] = useState(false);
   const handleSearch = (value: string) => {
     setSearchKeyword(value);
   };
@@ -44,7 +44,14 @@ export const useSourceTree = () => {
     root_type: CatalogRootType = CatalogRootType.Source,
     dir_type: CatalogItemType = CatalogItemType.Database
   ) => {
-    const res = await getCatalogListApi({ root_type, search, dir_type });
+    setTreeDataLoading(true);
+    const res = await getCatalogListApi({
+      root_type,
+      search,
+      dir_type
+    }).finally(() => {
+      setTreeDataLoading(false);
+    });
 
     if (res?.status !== 200) {
       return [];
@@ -349,6 +356,7 @@ export const useSourceTree = () => {
     setExpandedKeys,
     handleSearch,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    treeDataLoading
   };
 };

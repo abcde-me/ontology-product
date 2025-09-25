@@ -52,11 +52,6 @@ export default function DbModal(props: DbModalProps) {
       case '1':
         return (
           <div style={{ width: '100%' }}>
-            <Alert
-              type="info"
-              content="仅展示前50行示例数据"
-              style={{ margin: '16px 0px' }}
-            />
             <div className="table-wrapper">
               <Tables
                 dataList={dataList}
@@ -110,6 +105,15 @@ export default function DbModal(props: DbModalProps) {
               ))}
             </Tabs>
           </div>
+
+          {/* 固定的Alert提示信息 - 仅在示例数据tab显示 */}
+          {activeTab === '1' && (
+            <Alert
+              type="info"
+              content="仅展示前50行示例数据"
+              style={{ margin: '16px 0px' }}
+            />
+          )}
 
           {/* 可滚动的内容区域 */}
           <div className="scrollable-content">

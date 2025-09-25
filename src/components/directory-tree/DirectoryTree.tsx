@@ -646,10 +646,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 新建
               </Button> */}
               <div
-                className="flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
+                className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
                 onClick={() => startRootCreate(false)}
               >
-                <IconPlus className="mr-2" />
+                <IconPlus className="mr-1" />
                 新建
               </div>
             </PermissionWrapper>
