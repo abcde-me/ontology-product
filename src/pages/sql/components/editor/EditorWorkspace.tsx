@@ -22,6 +22,7 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -202,9 +203,9 @@ const EditorWorkspaceContent: React.FC<{
 
             <Button
               type="text"
-              icon={<IconMenu />}
+              icon={<SQLFormatIcon className="fromat-icon" />}
               onClick={handleFormatCode}
-              className="h-[26px]"
+              className="fromat-icon_btn h-[26px]"
             >
               格式化
             </Button>
