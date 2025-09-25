@@ -316,8 +316,54 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       disabled={runStatus !== RunningStatus.SUCCESS}
                       droplist={
                         <Menu onClickMenuItem={handleMenuClick}>
-                          <Menu.Item key="1">保存为新数据集</Menu.Item>
-                          <Menu.Item key="2">保存为新版本</Menu.Item>
+                          <Menu.Item key="1" style={{ height: 'auto' }}>
+                            <div style={{ padding: '7px 12px' }}>
+                              <div
+                                style={{
+                                  fontSize: '14px',
+                                  fontWeight: 600,
+                                  lineHeight: '22px',
+                                  color: '#0F172A',
+                                  marginBottom: '4px'
+                                }}
+                              >
+                                保存为新数据集
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: '12px',
+                                  lineHeight: '18px',
+                                  color: '#334155'
+                                }}
+                              >
+                                适用于字段变更或使用场景差异较大等场景
+                              </div>
+                            </div>
+                          </Menu.Item>
+                          <Menu.Item key="2" style={{ height: 'auto' }}>
+                            <div style={{ padding: '7px 12px' }}>
+                              <div
+                                style={{
+                                  fontSize: '14px',
+                                  fontWeight: 600,
+                                  lineHeight: '22px',
+                                  color: '#0F172A',
+                                  marginBottom: '4px'
+                                }}
+                              >
+                                保存为新版本
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: '12px',
+                                  lineHeight: '18px',
+                                  color: '#334155'
+                                }}
+                              >
+                                已存在数据集且字段不变
+                              </div>
+                            </div>
+                          </Menu.Item>
                         </Menu>
                       }
                     >
