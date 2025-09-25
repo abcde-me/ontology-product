@@ -31,7 +31,20 @@
           color: var(--primary-6);
         }
 
+        .sql-source-tree__node-title-db_item {
+          max-width: 70px;
+        }
+
+        .sql-source-tree__node-title-table {
+          max-width: 60px;
+        }
+
+        .sql-source-tree__node-title-column {
+          width: 80px;
+        }
+
         .sql-source-tree__node-actions {
+          width: auto;
           opacity: 1;
           visibility: visible;
         }
@@ -105,51 +118,13 @@
     justify-content: space-between;
     width: 100%;
     position: relative;
-
-    &-info {
-      display: flex;
-      align-items: start;
-      flex-direction: column;
-      flex: 1;
-      min-width: 0; // 允许 flex 子元素缩小到内容大小以下
-    }
+    // max-width: 210px;
 
     &-title {
-      flex-grow: 1;
+      flex: 1;
       color: var(--color-text-2);
       font-size: 14px;
-
-      // 不同节点类型的自适应宽度设置
-      &.sql-source-tree__node-title-column {
-        min-width: 120px;
-        max-width: 160px;
-        flex: 1;
-      }
-
-      &.sql-source-tree__node-title-table {
-        min-width: 140px;
-        max-width: 180px;
-        flex: 1;
-      }
-
-      &.sql-source-tree__node-title-db_item {
-        min-width: 135px;
-        max-width: 175px;
-        flex: 1;
-      }
-
-      &.sql-source-tree__node-title-catalog,
-      &.sql-source-tree__node-title-db_group,
-      &.sql-source-tree__node-title-db {
-        min-width: 180px;
-        max-width: 196px;
-        flex: 1;
-      }
-    }
-
-    &-size {
-      font-size: 12px;
-      color: var(--color-text-4);
+      max-width: 186px;
     }
 
     &-actions {
@@ -157,10 +132,8 @@
       align-items: center;
       opacity: 0;
       visibility: hidden;
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
+      width: 0;
+      overflow: hidden;
     }
   }
 
