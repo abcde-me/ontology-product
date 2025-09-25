@@ -76,7 +76,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
           {prefix}
           <span
             style={{
-              color: 'var(--color-primary-light-4)'
+              color: '#007DFA'
             }}
           >
             {matchedText}
