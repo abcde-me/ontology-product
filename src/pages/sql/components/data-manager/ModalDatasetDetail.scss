@@ -1,9 +1,15 @@
 // 数据集详情
 .my-dataset-detail {
+  .arco-tabs-content {
+    min-height: unset;
+  }
   .table-scroll-container {
-    max-height: 500px; // 在modal中限制高度
-    overflow-x: auto;
-    overflow-y: auto;
+    max-height: 310px; // 在modal中限制高度
+    overflow: hidden;
+    &:hover {
+      overflow-x: auto;
+      overflow-y: auto;
+    }
   }
 
   .dataset-detail {

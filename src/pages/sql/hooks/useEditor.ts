@@ -153,7 +153,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     return keys.map((key) => ({
       title: key,
       dataIndex: key,
-      width: 150,
+      width: 240,
       ellipsis: true
     }));
   };
@@ -370,11 +370,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setExecid(res.data.script_execid);
       } else {
         setRunError(res.message);
-        throw new Error('运行失败');
+        Message.error(res.message);
       }
     } catch (error) {
       updateRunStatus(RunningStatus.FAILED);
-      Message.error('运行失败');
     }
   }, [runStatus, currentFile?.scriptId, editorContent]);
 

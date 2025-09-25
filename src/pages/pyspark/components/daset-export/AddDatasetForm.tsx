@@ -319,10 +319,7 @@ const DatasetForm = React.forwardRef<
       setTargetDataSourceOptions(
         convertToCascaderOptions(res?.data?.dst ?? [])
       );
-    }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
-    // setTargetDataSourceOptions(
-    //   convertToCascaderOptions(cstargetDataSourceData)
-    // ); //测试数据
+    });
 
     //连接器
     // TODO: ts错误
@@ -330,13 +327,11 @@ const DatasetForm = React.forwardRef<
     getConnectorList({ scope: 1 }).then((res) => {
       setConnectorList(convertToSelectOptions(res?.data?.items ?? []));
     });
-    // setConnectorList(convertToSelectOptions(csconnectorList));//测试数据
 
     //标签
     getTagList().then((res) => {
       setTagList(convertTotagSelectOptions(res.data));
     });
-    // setTagList(convertTotagSelectOptions(tagOptions)); //测试数据
   }, []);
 
   // 处理数据来源变化
@@ -376,87 +371,6 @@ const DatasetForm = React.forwardRef<
     form.setFieldValue('connector', undefined);
     form.setFieldValue('selectedFiles', []);
   };
-
-  // 处理目标数据源选择
-  // const handleTargetDataSourceChange = (
-  //   value: string | (string | string[])[]
-  // ) => {
-  //   if (dataSource === 'volume') {
-  //     console.log('选择的值:', value);
-  //     setTargetData(value);
-
-  //     // 判断是一级目录还是二级目录
-  //     if (Array.isArray(value) && Array.isArray(value[0])) {
-  //       // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
-
-  //       // const catalogpath = value?.[0]?.[0];
-  //       // const catalogId = value?.[0]?.[1];
-  //       const selectedItem = value?.[1]?.[0];
-  //       // const basePath = String(catalogpath?.[0]?.[0]??'');
-  //       // const formattedPath =
-  //       //   basePath.length > 1 && basePath.endsWith('/')
-  //       //     ? `${basePath}/`
-  //       //     : basePath;
-  //       // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
-  //       if (selectedItem == undefined) {
-  //         setPreviewColumns([]);
-  //         Message.warning('请选择二级目录！');
-  //         return;
-  //       }
-  //       // getVolumePreviewData(path);
-  //       getVolumePreviewData(
-  //         value?.[1]?.[1],
-  //         '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
-  //       );
-  //     } else if (Array.isArray(value) && value.length === 2) {
-  //       return;
-  //     }
-  //   }
-  // };
-
-  // 处理连接器选择
-  // const handleConnectorChange = (value: string) => {
-  //   console.log('选择的连接器ID:', value);
-  //   setSelectedConnector(value);
-  //   form.setFieldValue('connector', value);
-  //   // 清除之前的文件选择
-  //   setSelectedFiles([]);
-  //   setConnectorFileInformation([]);
-  //   form.setFieldValue('selectedFiles', []);
-  //   // 获取连接器文件信息
-  //   getConnectorFileInformationfun(
-  //     value,
-  //     storageType === StorageType.File ||
-  //       storageType === StorageType.DataBaseTable
-  //       ? ''
-  //       : 'jsonl'
-  //   );
-  // };
-
-  // 模拟连接器文件数据
-  // const getConnectorFileInformationfun = (id: string, type?: string) => {
-  //   getConnectorFileList({ connector_id: id, type: type })
-  //     .then((res) => {
-  //       // 判断接口返回状态
-  //       if (res.stat !== 0 && !res.code) {
-  //         // 有业务结果且无错误
-  //         if (res.data && Array.isArray(res.data.files)) {
-  //           setConnectorFileInformation(res.data.files);
-  //         } else {
-  //           setConnectorFileInformation([]);
-  //           console.warn('文件列表为空或格式不正确');
-  //         }
-  //       } else {
-  //         // 无业务结果或接口返回错误
-  //         console.error('获取文件列表失败:', res.msg);
-  //         setConnectorFileInformation([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('请求文件列表出错:', error);
-  //       setConnectorFileInformation([]);
-  //     });
-  // }; //查询指定连接器加载成功的文件信息
 
   const stringifyFirstLevelValues = (obj) => {
     return obj.map((item) => {
@@ -518,9 +432,6 @@ const DatasetForm = React.forwardRef<
         setPreviewFileData(res?.data ?? []);
       });
     }
-
-    // setPreviewData(csmockPreviewData);
-    // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
   };
 
   const mapselectFiles = (files: any[]) => {
@@ -542,7 +453,6 @@ const DatasetForm = React.forwardRef<
               : values.connector, //数据目录卷用targetDataSource，连接器用connector
           path_file_ids: fileIds
         };
-        // setIscreateTagDisabled(true);
 
         setCanSubmit(false);
         await onSubmit(formData);
@@ -558,11 +468,6 @@ const DatasetForm = React.forwardRef<
   }, 500);
 
   const fileColumns = [
-    // {
-    //   title: '文件ID',
-    //   dataIndex: 'id',
-    //   width: 80
-    // },
     {
       title: '文件名',
       dataIndex: 'file_name',
@@ -623,17 +528,8 @@ const DatasetForm = React.forwardRef<
       maskClosable={false}
       unmountOnExit={true}
       className={styles.modalWrapper}
-      // unmountOnExit={true}
     >
-      <div
-        style={
-          {
-            // maxHeight: '600px',
-            // overflowY: 'auto',
-            // paddingRight: '8px'
-          }
-        }
-      >
+      <div>
         <Form
           form={form}
           autoComplete="off"
@@ -672,6 +568,9 @@ const DatasetForm = React.forwardRef<
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
             />
+            <div style={{ fontSize: '12px', color: '#6E7B8D', marginTop: 4 }}>
+              文件将以原始格式导出，保持数据完整性
+            </div>
           </Form.Item>
           <div className="formSelect">
             <FormItem
@@ -680,12 +579,13 @@ const DatasetForm = React.forwardRef<
               rules={[{ required: false, message: '请选择至少一个标签' }]}
             >
               <Select
-                placeholder="请输入或选择标签"
+                placeholder="请选择或添加自定义标签"
                 mode="multiple"
                 options={tagList}
+                className={styles.dropdownSelect}
                 dropdownMenuClassName={styles.dropdownMenuSelect}
                 allowCreate
-                // style={{ marginLeft: 10 }}
+                style={{ width: '100%' }}
                 maxTagCount={{
                   count: 10,
                   render: (invisibleTagCount) => {
@@ -736,28 +636,13 @@ const DatasetForm = React.forwardRef<
             // }
           >
             <Input.TextArea
-              placeholder="这里输入对数据集的描述和说明信息"
+              style={{ minHeight: 74 }}
+              placeholder="可以描述数据集的用途、特点或其他相关信息"
               rows={1}
               maxLength={500}
               showWordLimit
-              // style={{ marginLeft: 10 }}
             />
           </FormItem>
-          {/* <FormItem
-            label="数据来源"
-            field="dataSource"
-            rules={[{ required: true, message: '请选择数据来源' }]}
-            initialValue="volume"
-          >
-            <Radio.Group
-              value={dataSource}
-              onChange={handleDataSourceChange}
-            // style={{ marginLeft: 10 }}
-            >
-              <Radio value="volume">数据目录卷</Radio>
-              <Radio value="connector">连接器</Radio>
-            </Radio.Group>
-          </FormItem> */}
           <FormItem
             label="数据集类型"
             field="storageType"
@@ -774,11 +659,9 @@ const DatasetForm = React.forwardRef<
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
-              {/* <Radio value={StorageType.DataBaseTable}>数据库表</Radio> */}
             </Radio.Group>
           </FormItem>
 
-          {/* {dataSource === 'volume' && ( */}
           <div
             style={{
               border: '#CBD5E1 1px solid',
@@ -787,45 +670,10 @@ const DatasetForm = React.forwardRef<
               gap: '16px',
               marginLeft: 28,
               overflow: 'hidden'
-              // display: 'flex',
-              // flexDirection: 'column'
             }}
           >
-            {/* <FormItem
-              label="选择目标数据目录/卷"
-              field="targetDataSource"
-              rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-            >
-              <Cascader
-                placeholder="请选择"
-                //@ts-expect-error
-                renderFormat={(labels, selectedOptions) => {
-                  const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
-                  return (
-                    <div>
-                      <EllipsisPopover value={value}></EllipsisPopover>
-                    </div>
-                  );
-                }}
-                options={targetDataSourceOptions}
-                onChange={handleTargetDataSourceChange}
-                expandTrigger="hover"
-                dropdownMenuColumnStyle={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '400px',
-                  display: 'inline-block',
-                  verticalAlign: 'middle'
-                }}
-                dropdownMenuClassName="showData"
-              />
-            </FormItem> */}
             <div
               style={{
-                // marginLeft: 20,
                 marginTop: 0,
                 fontSize: '12px',
                 color: '#86909c',
@@ -834,26 +682,27 @@ const DatasetForm = React.forwardRef<
             >
               {previewData || previewFileData ? (
                 <span style={{ fontSize: '14px' }}>
-                  <span style={{ fontWeight: '500', color: '#000' }}>预览</span>{' '}
+                  <span style={{ fontWeight: '500', color: '#000' }}>
+                    预览：
+                  </span>{' '}
                   {storageType === StorageType.File
-                    ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                    ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表'
                     : storageType === StorageType.Jsonl
-                      ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'
-                      : '数据表格式数据集支持数据预览，显示表格结构和前50行数据：'}
+                      ? '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据'
+                      : '数据表格式数据集支持数据预览，显示表格结构和前50行数据'}
                 </span>
               ) : (
                 <span style={{ fontSize: '14px' }}>
                   <span style={{ fontWeight: '500', color: '#000' }}>
                     预览：
                   </span>
-                  请先选择目标数据目录卷/卷
+                  无jsonl文件
                 </span>
               )}
             </div>
             {previewData ? (
               <div className={styles.previewContainer}>
                 <Table
-                  // style={{border:null}}
                   border={false}
                   className={styles.previewTable}
                   columns={previewColumns}
@@ -879,9 +728,6 @@ const DatasetForm = React.forwardRef<
                   rowSelection={{
                     type: 'checkbox',
                     onChange: (selectedRowKeys, selectedRows) => {
-                      // if (selectedRowKeys.length > 0) {
-                      //   setSelectedFiles(selectedRowKeys as string[]);
-                      // }
                       setSelectedFiles(selectedRowKeys as string[]);
                     }
                   }}
@@ -889,195 +735,6 @@ const DatasetForm = React.forwardRef<
               </>
             ) : null}
           </div>
-          {/* )} */}
-
-          {/* {dataSource === 'connector' && (
-            <div
-              style={{
-                border: '#CBD5E1 1px solid',
-                borderRadius: '4px',
-                padding: '16px',
-                gap: '16px',
-                marginLeft: 28,
-                overflow: 'hidden'
-              }}
-            >
-              <FormItem
-                label="选择连接器"
-                field="connector"
-                rules={[{ required: true, message: '请选择连接器' }]}
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 20 }}
-              >
-                <Select
-                  placeholder="请选择连接器"
-                  options={connectorList}
-                  // style={{ marginLeft: 10 }}
-                  onChange={handleConnectorChange}
-                  value={selectedConnector || undefined}
-                />
-              </FormItem>
-
-              <FormItem
-                label="选择数据文件"
-                field="selectedFiles"
-                rules={[{ required: true, message: '请选择至少一个文件' }]}
-                labelCol={{ span: 4 }}
-                className="form-item-select-files"
-                wrapperCol={{ span: 20 }}
-                extra={
-                  storageType === StorageType.File ||
-                    storageType === StorageType.DataBaseTable ? (
-                    ''
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: '14px',
-                        color: '#86909c'
-                      }}
-                    >
-                      目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                    </span>
-                  )
-                }
-              >
-                <Tooltip
-                  content={!selectedConnector ? '请先选择连接器' : ''}
-                  disabled={!!selectedConnector}
-                >
-                  <div>
-                    <Select
-                      placeholder={
-                        !selectedConnector
-                          ? '请先选数据文件'
-                          : '请选择要使用的文件'
-                      }
-                      mode="multiple"
-                      // options={connectorFileInformation}
-                      disabled={!selectedConnector}
-                      onChange={(values) => {
-                        // labelInValue 为 true 时，values 是对象数组
-                        const fileValues = values.map(
-                          (v: OptionInfo) => v.value
-                        );
-                        setSelectedFiles(fileValues);
-                        form.setFieldValue('selectedFiles', fileValues);
-                      }}
-                      value={selectedFiles}
-                      style={{ width: '100%' }}
-                      labelInValue
-                      renderFormat={(option: OptionInfo | null) => {
-                        const value =
-                          String(option?.value ?? '')
-                            .split('/')
-                            .pop() || '';
-                        return (
-                          <Tooltip content={value}>
-                            <div
-                              style={{
-                                display: 'inline-block',
-                                maxWidth: 200,
-                                overflow: 'hidden',
-                                whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis',
-                                verticalAlign: 'middle'
-                              }}
-                            >
-                              {value}
-                            </div>
-                          </Tooltip>
-                        );
-                      }}
-                      maxTagCount={{
-                        count: 3,
-                        render: (invisibleTagCount) => {
-                          // 从当前表单值获取完整的标签列表
-                          const allTags =
-                            form.getFieldValue('selectedFiles') || [];
-                          const remainingTags = allTags.slice(3);
-                          const remainingLabels = remainingTags.map((s, i) => {
-                            return (
-                              <Tag
-                                key={i}
-                                style={{
-                                  background: '#E7ECF0',
-                                  color: '#0F172A',
-                                  // borderRadius: '16px',
-                                  fontSize: '12px',
-                                  // height: '18px',
-                                  alignItems: 'center',
-                                  margin: '0 2px'
-                                }}
-                              >
-                                <Tooltip content={s.trim().split('/').pop()}>
-                                  <div
-                                    style={{
-                                      display: 'inline-block',
-                                      maxWidth: 200,
-                                      overflow: 'hidden',
-                                      whiteSpace: 'nowrap',
-                                      textOverflow: 'ellipsis',
-                                      verticalAlign: 'middle'
-                                    }}
-                                  >
-                                    {s.trim().split('/').pop()}
-                                  </div>
-                                </Tooltip>
-                              </Tag>
-                            );
-                          });
-                          return (
-                            <Tooltip
-                              style={{ width: 'auto' }}
-                              content={<Space wrap>{remainingLabels}</Space>}
-                            >
-                              <span>+{invisibleTagCount}</span>
-                            </Tooltip>
-                          );
-                        }
-                      }}
-                      filterOption={(inputValue, option) => {
-                        const newvalue = option.props.value.split('/').pop();
-                        return newvalue.includes(inputValue);
-                      }}
-                      onSearch={(value) => {
-                        setInputValue(value);
-                      }}
-                    >
-                      {connectorFileInformation.map((item, index) => (
-                        <Option
-                          key={index}
-                          value={item.file_id + '/' + item.name}
-                        >
-                          <div
-                            style={{
-                              fontFamily: 'Arial, sans-serif',
-                              fontSize: '14px',
-                              color: '#4E5969',
-                              lineHeight: '1.8',
-                              margin: '10px'
-                            }}
-                          >
-                            <div>{highlight(item.name, inputValue)}</div>
-                            <div style={{ color: '#6E7B8D', fontSize: '14px' }}>
-                              <Space size={12}>
-                                <span>
-                                  所属文件：{itemPathDisplay(item.sub_path)}
-                                </span>
-                                <span>
-                                  修改时间：{formatDateTime(item.last_modified)}
-                                </span>
-                              </Space>
-                            </div>
-                          </div>
-                        </Option>
-                      ))}
-                    </Select>
-                  </div>
-                </Tooltip>
-              </FormItem>
-            </div>
-          )} */}
 
           <FormItem wrapperCol={{ span: 24 }}>
             <div
@@ -1087,8 +744,6 @@ const DatasetForm = React.forwardRef<
                 alignItems: 'center',
                 gap: '12px',
                 marginTop: '24px'
-                // paddingTop: '20px',
-                // borderTop: '1px solid #f0f0f0'
               }}
             >
               <Button onClick={onCancel}>取消</Button>

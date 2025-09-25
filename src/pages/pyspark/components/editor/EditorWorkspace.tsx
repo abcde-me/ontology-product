@@ -1,4 +1,4 @@
-import React, { useRef, memo, useCallback, useEffect } from 'react';
+import React, { useRef, memo, useCallback, useEffect, useState } from 'react';
 import { Button, Message, Space } from '@arco-design/web-react';
 import {
   IconUpload,
@@ -23,7 +23,11 @@ import RunningInfoPanel from './RunningInfoPanel';
 import { useEditor } from '../../hooks/useEditor';
 import { useExportDaset } from '../../hooks/useExportDaset';
 import DatasetForm from '../daset-export/AddDatasetForm';
+import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
+import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
+import ExampleIcon from '@/assets/python/example.svg';
+import copy from 'copy-to-clipboard';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -60,6 +64,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       React.useState<number>(0);
     const [isEditorFocused, setIsEditorFocused] =
       React.useState<boolean>(false);
+    const [exampleModalVisible, setExampleModalVisible] =
+      useState<boolean>(false);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -160,6 +166,24 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       // 切换到左侧tools菜单
       if (onSidebarTabChange) {
         onSidebarTabChange('tools');
+      }
+    };
+
+    const handleShowExampleCode = () => {
+      setExampleModalVisible(true);
+    };
+
+    const handleCloseExampleModal = () => {
+      setExampleModalVisible(false);
+    };
+
+    const handleCopyExampleCode = (exampleCode: string) => {
+      const isSuccess = copy(exampleCode);
+      if (isSuccess) {
+        Message.success('复制成功');
+        setExampleModalVisible(false);
+      } else {
+        Message.error('复制失败，请重新复制');
       }
     };
 
@@ -264,9 +288,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 type="text"
                 icon={<IconSettings />}
                 onClick={handleCallOperator}
-                className="h-[26px]"
+                className="h-[22px]"
               >
                 调用算子
+              </Button>
+              <Button
+                type="text"
+                icon={<ExampleIcon />}
+                className="h-[22px]"
+                onClick={handleShowExampleCode}
+              >
+                示例代码
               </Button>
             </Space>
           </div>
@@ -344,6 +376,15 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             onSubmit={handleSubmit}
             onCancel={handleCancelDatasetModal}
             ref={childRef}
+          />
+        )}
+
+        {/* 示例代码弹窗 */}
+        {exampleModalVisible && (
+          <ExampleCodeModal
+            visible={exampleModalVisible}
+            onCancel={handleCloseExampleModal}
+            onCopyCode={handleCopyExampleCode}
           />
         )}
       </div>

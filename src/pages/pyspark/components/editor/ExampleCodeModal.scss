@@ -1,0 +1,18 @@
+.example-code-modal {
+  .example-intro {
+    height: 664px;
+    padding: 8px 16px;
+    background-color: #f8fafd;
+    box-sizing: border-box;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .modal-footer {
+    margin: 20px 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}

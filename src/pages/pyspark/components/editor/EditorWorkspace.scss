@@ -28,6 +28,11 @@
         color: #438dfb;
         border-color: #438dfb;
       }
+
+      .suanzi-entry,
+      .example-entry {
+        color: var(--color-text-1);
+      }
     }
 
     .toolbar-right {

@@ -12,12 +12,14 @@ const ModalDatasetDetail = ({
   return (
     <Modal
       title="数据集详情"
-      style={{ width: 960 }}
+      style={{ width: 960, height: 686 }}
       visible={datasetDetailVisible}
       footer={null}
       onCancel={closeDatasetDetail}
     >
       <div className="my-dataset-detail pb-[16px]">
+        {/* TODO 先给个占位吧 */}
+        <div className="h-[20px]"></div>
         <DatasetDetail
           isHideEdit={true}
           detailId={detailId}
