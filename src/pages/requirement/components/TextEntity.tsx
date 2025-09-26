@@ -138,10 +138,32 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.entity_relations?.forEach((item, index) => {
+      getDetailObj?.labels?.forEach((item, index) => {
         formText.setFieldValue(
-          `start_entity_labels + ${item.id}`,
+          `label_name_en${item.order_num}`,
+          item.label_name_en
+        );
+        formText.setFieldValue(
+          `label_name_cn${item.order_num}`,
+          item.label_name_cn
+        );
+      });
+      getDetailObj?.entity_relations?.forEach((item, index) => {
+        formLabel.setFieldValue(
+          `relation_name_en${item.order_num}`,
+          item.relation_name_en
+        );
+        formLabel.setFieldValue(
+          `relation_name_cn${item.order_num}`,
+          item.relation_name_cn
+        );
+        formLabel.setFieldValue(
+          `start_entity_labels${item.order_num}`,
           item.start_entity_labels
+        );
+        formLabel.setFieldValue(
+          `target_entity_labels${item.order_num}`,
+          item.target_entity_labels
         );
       });
     }
@@ -190,7 +212,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8, marginBottom: 0 }}
                   label="标签名称:"
-                  field={`label_name_en${item?.label_id}`}
+                  field={`label_name_en${type === 'detail' ? item?.order_num : item?.label_id}`}
                   rules={[
                     {
                       required: true,
@@ -250,7 +272,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     </div>
                   }
                   style={{ padding: 0, marginRight: 8, marginBottom: 0 }}
-                  field={`label_name_cn${item?.label_id}`}
+                  field={`label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`}
                   rules={[
                     {
                       validateTrigger: ['onChange', 'onBlur'],
@@ -298,6 +320,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 >
                   <div className="color-content">
                     <ColorPicker
+                      disabled={type === 'detail'}
                       defaultValue={item.label_colour}
                       showPreset
                       onChange={(value) => {
@@ -377,7 +400,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     >
                       <FormItem
                         style={{ paddingLeft: 16, marginRight: 8 }}
-                        field={`relation_name_en${item?.relation_id}`}
+                        field={`relation_name_en${type === 'detail' ? item?.order_num : item?.relation_id}`}
                         label="关系名称:"
                         rules={[
                           {
@@ -432,14 +455,14 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               }
                             >
                               <IconQuestionCircle
-                                style={{ color: '#6E7B8D' }}
+                                style={{ color: '#6E7B8D', marginLeft: 3 }}
                               />
                               :
                             </Tooltip>
                           </div>
                         }
                         style={{ padding: 0, marginRight: 8 }}
-                        field={`relation_name_cn${item?.relation_id}`}
+                        field={`relation_name_cn${type === 'detail' ? item?.order_num : item?.relation_id}`}
                         rules={[
                           {
                             validateTrigger: ['onChange'],
@@ -506,7 +529,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
-                            field={`start_entity_labels + ${item?.relation_id}`}
+                            field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
@@ -556,7 +579,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
-                            field={`target_entity_labels + ${item?.relation_id}`}
+                            field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"

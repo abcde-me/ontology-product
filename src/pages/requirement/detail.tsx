@@ -798,7 +798,7 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  `label_info_attribute_groups_${item?.id}_${item?.id}_attribute_group_name`,
+                  `label_info_attribute_groups_${item?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
@@ -962,7 +962,7 @@ export default function RequirementDetail() {
                   选择数据
                 </Button>
                 <div className="data-set-text">
-                  已选数据量
+                  已选数据量{' '}
                   {getTotal(selectedData) || getDetailObj?.label_count || 0}
                 </div>
               </div>
@@ -2549,7 +2549,7 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="text-content">
-                  已选
+                  已选{' '}
                   {type === 'detail'
                     ? getDetailObj?.label_operate?.user_id?.length ||
                       getDetailObj?.label_operate?.org_id?.length
