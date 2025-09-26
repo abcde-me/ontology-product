@@ -724,7 +724,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
                     <Tooltip color="white" content="重命名">
                       <IconEdit
-                        className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
@@ -733,7 +733,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
                       <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
-                          className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                           onClick={() =>
                             handleCopy(node as unknown as NodeProps)
                           }
@@ -743,7 +743,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
                     <Tooltip color="white" content="删除">
                       <IconDelete
-                        className="hover:text-[rgb(var(--primary-6))]"
+                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() =>
                           handleDelete(node as unknown as NodeProps)
                         }
