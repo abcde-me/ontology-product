@@ -116,7 +116,7 @@ const Python: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="PySpark文件" position="right">
+              <Popover content="PySpark文件" position="left">
                 <div
                   style={{
                     display: 'flex',
@@ -145,7 +145,7 @@ const Python: React.FC = memo(() => {
           <TabPane
             key="data"
             title={
-              <Popover content="数据目录" position="right">
+              <Popover content="数据目录" position="left">
                 <div
                   style={{
                     display: 'flex',
@@ -169,7 +169,7 @@ const Python: React.FC = memo(() => {
             <TabPane
               key="tools"
               title={
-                <Popover content="算子库" position="right">
+                <Popover content="算子库" position="left">
                   <div
                     style={{
                       display: 'flex',
@@ -194,7 +194,7 @@ const Python: React.FC = memo(() => {
             <TabPane
               key="daset"
               title={
-                <Popover content="数据集导出任务" position="right">
+                <Popover content="数据集导出任务" position="left">
                   <div
                     style={{
                       display: 'flex',
