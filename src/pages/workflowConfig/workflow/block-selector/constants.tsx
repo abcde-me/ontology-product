@@ -121,11 +121,11 @@ export const BLOCKS: Block[] = [
     type: BlockEnum.Enhancement,
     title: '数据增强'
   },
-  // {
-  //   classification: BlockClassificationEnum.Default,
-  //   type: BlockEnum.Customize,
-  //   title: '自定义代码'
-  // },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Customize,
+    title: '自定义代码'
+  },
   {
     classification: BlockClassificationEnum.Default,
     type: BlockEnum.End,
