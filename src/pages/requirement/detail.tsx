@@ -550,11 +550,11 @@ export default function RequirementDetail() {
         ) {
           newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
             form2.setFieldValue(
-              `label_info_attribute_groups_${attribute?.attribute_id}_attribute_name_cn`,
+              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
               attribute.attribute_name_cn
             );
             form2.setFieldValue(
-              `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_attribute_name_en`,
+              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
               attribute.attribute_name_en
             );
             form2.setFieldValue(
@@ -1234,6 +1234,7 @@ export default function RequirementDetail() {
                                 >
                                   <div className="color-content">
                                     <ColorPicker
+                                      disabled={type === 'detail'}
                                       defaultValue={item?.label_colour}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1250,7 +1251,7 @@ export default function RequirementDetail() {
                                   {datalist.length > 1 && (
                                     <Tooltip content="删除">
                                       <IconDelete
-                                        className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                        className={`${type === 'detail' ? 'is-disabled' : 'icon-wrapper'}`}
                                         fontSize={16}
                                         onClick={() => {
                                           if (type !== 'detail') {
@@ -1272,7 +1273,7 @@ export default function RequirementDetail() {
                                       >
                                         <div className="attribute-group-content-item">
                                           <FormItem
-                                            field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                            field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                             disabled={
                                               type === 'detail' ||
                                               attrGroup?.isTemp === true
@@ -1904,7 +1905,11 @@ export default function RequirementDetail() {
                               <div className="btn-content-items">
                                 <Button
                                   disabled={type === 'detail'}
-                                  className="btn-add-label btn-add"
+                                  className={
+                                    type === 'detail'
+                                      ? 'btn-add-label'
+                                      : 'btn-add'
+                                  }
                                   style={{ marginRight: 16 }}
                                   onClick={() => {
                                     addNewLabel();
@@ -1915,7 +1920,11 @@ export default function RequirementDetail() {
                                 </Button>
                                 <Button
                                   disabled={type === 'detail'}
-                                  className="btn-add-attribute btn-add"
+                                  className={
+                                    type === 'detail'
+                                      ? 'btn-add-attribute'
+                                      : 'btn-add'
+                                  }
                                   style={{ marginRight: 16 }}
                                   onClick={() => {
                                     addAttributeGroup(labelIndex);
@@ -1954,8 +1963,8 @@ export default function RequirementDetail() {
                                                   style={{ fontSize: 14 }}
                                                   content={
                                                     isDis
-                                                      ? ''
-                                                      : '一个标签下不能重复选择属性组'
+                                                      ? '一个标签下不能重复选择属性组'
+                                                      : ''
                                                   }
                                                   key={String(index)}
                                                 >
@@ -2040,7 +2049,7 @@ export default function RequirementDetail() {
                           >
                             <div className="attribute-group-name">
                               <FormItem
-                                style={{ marginRight: 0, marginBottom: 16 }}
+                                style={{ marginRight: 0, marginBottom: 0 }}
                                 field={`attribute_group_name_${attrGroup?.attribute_id}`}
                                 label="属性名称:"
                                 disabled={type === 'detail'}
@@ -2093,7 +2102,7 @@ export default function RequirementDetail() {
                                 />
                               </FormItem>
                               <FormItem
-                                style={{ marginRight: 0, marginBottom: 16 }}
+                                style={{ marginRight: 0, marginBottom: 0 }}
                                 label={null}
                               >
                                 <Select
@@ -2127,10 +2136,7 @@ export default function RequirementDetail() {
                                   </Option>
                                 </Select>
                               </FormItem>
-                              <FormItem
-                                style={{ marginRight: 0, marginBottom: 16 }}
-                                label={null}
-                              >
+                              <FormItem style={{ marginRight: 0 }} label={null}>
                                 <Checkbox
                                   style={{ whiteSpace: 'nowrap' }}
                                   checked={attrGroup.attribute_group_type === 1}
@@ -2146,7 +2152,7 @@ export default function RequirementDetail() {
                                 </Checkbox>
                               </FormItem>
                               <FormItem
-                                style={{ marginRight: 0, marginBottom: 16 }}
+                                style={{ marginRight: 0, marginBottom: 0 }}
                                 label={null}
                               >
                                 <Tooltip content="添加属性">
@@ -2184,7 +2190,10 @@ export default function RequirementDetail() {
                                   />
                                 </Tooltip>
                               </FormItem>
-                              <FormItem style={{ marginRight: 0 }} label={null}>
+                              <FormItem
+                                style={{ marginRight: 0, marginBottom: 0 }}
+                                label={null}
+                              >
                                 <Tooltip content="删除">
                                   <IconDelete
                                     className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}

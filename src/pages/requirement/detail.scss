@@ -231,6 +231,7 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
+    margin-bottom: 12px;
   }
 
   .attribute-group-info-title {
@@ -326,6 +327,7 @@
   .attribute-group-item-template {
     padding: 12px 12px 0 12px;
     background-color: #f5f9ff;
+    margin-top: 16px;
   }
 
   .attribute-group-name {
@@ -407,7 +409,7 @@
 
   .is-disabled {
     cursor: not-allowed;
-    color: #999;
+    color: #94a3b8;
     opacity: 0.7;
   }
 
@@ -426,7 +428,7 @@
   }
 
   .btn-add {
-    color: #1e293b !important;
+    color: #1e293b;
     font-family: PingFang SC;
     font-weight: 600;
     font-style: Semibold;
