@@ -9,6 +9,7 @@ import React, {
 import {
   Button,
   Dropdown,
+  Empty,
   Input,
   Menu,
   Message,
@@ -48,7 +49,7 @@ import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
-
+import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -141,6 +142,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [folderStack, setFolderStack] = useState<
       Array<{ id: string; name: string }>
     >([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     // 搜索相关状态
     const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
@@ -169,7 +171,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     useEffect(() => {
       const formattedData = formatTreeData(data);
       setTreeData(formattedData);
+      setLoading(false);
     }, [data]);
+
+    useEffect(() => {
+      setLoading(true);
+    }, []);
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
@@ -681,11 +688,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           )}
         </div>
 
-        {treeData.length === 0 ? (
+        {loading ? (
           <div className="mt-[110px] flex flex-col items-center">
             <Spin size={26} />
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
+        ) : treeData.length === 0 ? (
+          <Empty />
         ) : (
           <Tree
             className="directory-tree"
@@ -761,6 +770,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               // 根据节点类型选择图标
               const icon = isFolder ? (
                 <FolderIcon className="mr-2 h-4 w-4" />
+              ) : from === DirectoryTreeFrom.SQL ? (
+                <SQLFileIcon className="mr-2 h-4 w-4" />
               ) : (
                 <FileIcon className="mr-2 h-4 w-4" />
               );

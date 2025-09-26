@@ -84,7 +84,38 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   // 处理关系标签字段变更
   const handleRelationFieldChange = (index, field, value) => {
     const newData: any = [...relationRelations];
+    const currentRelation = newData[index];
+    const oldValue = currentRelation[field];
+    // 更新当前字段值
     newData[index][field] = value;
+    // 如果是起始标签变化，需要检查并清理目标标签中可能存在的相同选项
+    if (field === 'start_entity_labels') {
+      // 获取目标标签中选中的、同时也在起始标签中选中的选项
+      const overlappingValues = currentRelation.target_entity_labels.filter(
+        (targetValue) => value.includes(targetValue)
+      );
+      // 如果有重叠的值，从目标标签中移除这些值
+      if (overlappingValues.length > 0) {
+        newData[index].target_entity_labels =
+          currentRelation.target_entity_labels.filter(
+            (targetValue) => !value.includes(targetValue)
+          );
+      }
+    }
+    // 如果是目标标签变化，需要检查并清理起始标签中可能存在的相同选项
+    if (field === 'target_entity_labels') {
+      // 获取起始标签中选中的、同时也在目标标签中选中的选项
+      const overlappingValues = currentRelation.start_entity_labels.filter(
+        (startValue) => value.includes(startValue)
+      );
+      // 如果有重叠的值，从起始标签中移除这些值
+      if (overlappingValues.length > 0) {
+        newData[index].start_entity_labels =
+          currentRelation.start_entity_labels.filter(
+            (startValue) => !value.includes(startValue)
+          );
+      }
+    }
     setRelationRelations(newData);
   };
 
@@ -107,10 +138,32 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.entity_relations?.forEach((item, index) => {
+      getDetailObj?.labels?.forEach((item, index) => {
         formText.setFieldValue(
-          `start_entity_labels + ${item.id}`,
+          `label_name_en${item.order_num}`,
+          item.label_name_en
+        );
+        formText.setFieldValue(
+          `label_name_cn${item.order_num}`,
+          item.label_name_cn
+        );
+      });
+      getDetailObj?.entity_relations?.forEach((item, index) => {
+        formLabel.setFieldValue(
+          `relation_name_en${item.order_num}`,
+          item.relation_name_en
+        );
+        formLabel.setFieldValue(
+          `relation_name_cn${item.order_num}`,
+          item.relation_name_cn
+        );
+        formLabel.setFieldValue(
+          `start_entity_labels${item.order_num}`,
           item.start_entity_labels
+        );
+        formLabel.setFieldValue(
+          `target_entity_labels${item.order_num}`,
+          item.target_entity_labels
         );
       });
     }
@@ -159,7 +212,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8, marginBottom: 0 }}
                   label="标签名称:"
-                  field={`label_name_en${item?.label_id}`}
+                  field={`label_name_en${type === 'detail' ? item?.order_num : item?.label_id}`}
                   rules={[
                     {
                       required: true,
@@ -211,12 +264,15 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           </div>
                         }
                       >
-                        <IconQuestionCircle style={{ color: '#6E7B8D' }} />:
+                        <IconQuestionCircle
+                          style={{ color: '#6E7B8D', marginLeft: 3 }}
+                        />
+                        :
                       </Tooltip>
                     </div>
                   }
                   style={{ padding: 0, marginRight: 8, marginBottom: 0 }}
-                  field={`label_name_cn${item?.label_id}`}
+                  field={`label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`}
                   rules={[
                     {
                       validateTrigger: ['onChange', 'onBlur'],
@@ -264,6 +320,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 >
                   <div className="color-content">
                     <ColorPicker
+                      disabled={type === 'detail'}
                       defaultValue={item.label_colour}
                       showPreset
                       onChange={(value) => {
@@ -343,7 +400,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     >
                       <FormItem
                         style={{ paddingLeft: 16, marginRight: 8 }}
-                        field={`relation_name_en${item?.relation_id}`}
+                        field={`relation_name_en${type === 'detail' ? item?.order_num : item?.relation_id}`}
                         label="关系名称:"
                         rules={[
                           {
@@ -398,14 +455,14 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               }
                             >
                               <IconQuestionCircle
-                                style={{ color: '#6E7B8D' }}
+                                style={{ color: '#6E7B8D', marginLeft: 3 }}
                               />
                               :
                             </Tooltip>
                           </div>
                         }
                         style={{ padding: 0, marginRight: 8 }}
-                        field={`relation_name_cn${item?.relation_id}`}
+                        field={`relation_name_cn${type === 'detail' ? item?.order_num : item?.relation_id}`}
                         rules={[
                           {
                             validateTrigger: ['onChange'],
@@ -472,7 +529,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
-                            field={`start_entity_labels + ${item?.relation_id}`}
+                            field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
@@ -493,16 +550,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value={item?.start_entity_labels}
                             >
                               {entityRelations &&
-                                entityRelations?.map((item) => {
-                                  if (!item?.label_name_cn) {
+                                entityRelations?.map((option) => {
+                                  if (!option?.label_name_en) {
                                     return null;
                                   }
+                                  const isDisabled =
+                                    item?.target_entity_labels?.includes(
+                                      option.label_name_en
+                                    );
                                   return (
                                     <Option
-                                      key={item.label_name_cn}
-                                      value={item.label_name_cn}
+                                      disabled={
+                                        !option.label_name_en || isDisabled
+                                      }
+                                      key={option.label_name_en}
+                                      value={option.label_name_en}
                                     >
-                                      {item.label_name_cn}
+                                      {option.label_name_en}
                                     </Option>
                                   );
                                 })}
@@ -515,12 +579,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
-                            field={`target_entity_labels + ${item?.relation_id}`}
+                            field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"
                               allowClear
-                              placeholder="请选择起始标签"
+                              placeholder="请选择目标标签"
                               style={{ width: 276 }}
                               onChange={(value) => {
                                 handleRelationFieldChange(
@@ -534,16 +598,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               {entityRelations &&
                                 entityRelations?.length > 0 &&
                                 entityRelations?.map((option, index) => {
-                                  if (!option?.label_name_cn) {
+                                  if (!option?.label_name_en) {
                                     return null;
                                   }
+                                  // 检查当前选项是否在起始标签中被选中，如果是则禁用
+                                  const isDisabled =
+                                    item?.start_entity_labels?.includes(
+                                      option.label_name_en
+                                    );
                                   return (
                                     <Option
-                                      disabled={!option.label_name_cn}
-                                      key={option.label_name_cn}
-                                      value={option.label_name_cn}
+                                      disabled={
+                                        !option.label_name_en || isDisabled
+                                      }
+                                      key={option.label_name_en}
+                                      value={option.label_name_en}
                                     >
-                                      {option.label_name_cn}
+                                      {option.label_name_en}
                                     </Option>
                                   );
                                 })}

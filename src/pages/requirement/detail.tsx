@@ -798,7 +798,7 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  `label_info_attribute_groups_${item?.id}_${item?.id}_attribute_group_name`,
+                  `label_info_attribute_groups_${item?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
@@ -962,7 +962,7 @@ export default function RequirementDetail() {
                   选择数据
                 </Button>
                 <div className="data-set-text">
-                  已选数据量
+                  已选数据量{' '}
                   {getTotal(selectedData) || getDetailObj?.label_count || 0}
                 </div>
               </div>
@@ -1081,7 +1081,7 @@ export default function RequirementDetail() {
                                         const isDuplicate = datalist.some(
                                           (otherItem, otherIndex) =>
                                             otherIndex !== labelIndex &&
-                                            otherItem.label_name_cn === value &&
+                                            otherItem.label_name_en === value &&
                                             value.trim() !== ''
                                         );
                                         if (!value) {
@@ -1141,11 +1141,15 @@ export default function RequirementDetail() {
                                     {
                                       validateTrigger: ['onChange', 'onBlur'],
                                       validator: (value, callback) => {
+                                        if (!value) {
+                                          callback('请输入标注展示名称');
+                                          return;
+                                        }
                                         // 检查是否有重复的展示名称（排除当前项）
                                         const isDuplicate = datalist.some(
                                           (otherItem, otherIndex) =>
                                             otherIndex !== labelIndex &&
-                                            otherItem.label_name_en === value &&
+                                            otherItem.label_name_cn === value &&
                                             value.trim() !== ''
                                         );
                                         if (isDuplicate) {
@@ -1591,11 +1595,11 @@ export default function RequirementDetail() {
                                                     ];
                                                   if (lastAttr?.label_info_id) {
                                                     form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
                                                       '标注时的输入内容'
                                                     );
                                                     form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
                                                       '其他'
                                                     );
                                                   }
@@ -1727,7 +1731,12 @@ export default function RequirementDetail() {
                                                         width: 290,
                                                         backgroundColor:
                                                           type === 'detail' ||
-                                                          attrGroup?.isTemp
+                                                          attrGroup?.isTemp ||
+                                                          (type !== 'detail' &&
+                                                            attrGroup
+                                                              ?.label_info_attribute[
+                                                              attrIndex
+                                                            ].input_type === 2)
                                                             ? '#e2e8f0'
                                                             : '#fff'
                                                       }}
@@ -2544,7 +2553,7 @@ export default function RequirementDetail() {
                   选择
                 </Button>
                 <div className="text-content">
-                  已选
+                  已选{' '}
                   {type === 'detail'
                     ? getDetailObj?.label_operate?.user_id?.length ||
                       getDetailObj?.label_operate?.org_id?.length
