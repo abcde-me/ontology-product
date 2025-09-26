@@ -174,7 +174,11 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                   <div className="sql-source-tree__node-actions">
                     {showDetailBtn && (
                       <Button
-                        style={{ fontWeight: 600, margin: '0 2px', padding: 0 }}
+                        style={{
+                          fontWeight: 600,
+                          margin: '0 8px 0 2px',
+                          padding: 0
+                        }}
                         type="text"
                         className="sql-source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
