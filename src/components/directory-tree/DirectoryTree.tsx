@@ -9,6 +9,7 @@ import React, {
 import {
   Button,
   Dropdown,
+  Empty,
   Input,
   Menu,
   Message,
@@ -141,6 +142,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [folderStack, setFolderStack] = useState<
       Array<{ id: string; name: string }>
     >([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     // 搜索相关状态
     const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
@@ -169,7 +171,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     useEffect(() => {
       const formattedData = formatTreeData(data);
       setTreeData(formattedData);
+      setLoading(false);
     }, [data]);
+
+    useEffect(() => {
+      setLoading(true);
+    }, []);
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
@@ -681,11 +688,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           )}
         </div>
 
-        {treeData.length === 0 ? (
+        {loading ? (
           <div className="mt-[110px] flex flex-col items-center">
             <Spin size={26} />
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
+        ) : treeData.length === 0 ? (
+          <Empty />
         ) : (
           <Tree
             className="directory-tree"
