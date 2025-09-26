@@ -37,6 +37,17 @@
     font-weight: 500;
     color: var(--color-text-2);
   }
+
+  .arco-tabs-header-scroll:hover {
+    .arco-tabs-header-title-active {
+      .arco-tabs-header-title-text {
+        color: #007dfa;
+      }
+    }
+    .arco-tabs-header-title-text {
+      color: #1e293b;
+    }
+  }
   // ---以上左侧目录通用样式---
 
   .arco-tabs-header-title {
