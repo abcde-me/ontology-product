@@ -667,8 +667,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     }
                   }}
                 >
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                   <Menu.Item key="file">新建PySpark</Menu.Item>
+                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                 </Menu>
               }
             >
