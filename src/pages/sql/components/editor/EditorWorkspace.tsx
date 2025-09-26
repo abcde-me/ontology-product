@@ -1,29 +1,23 @@
-import React, { useRef, memo, useCallback, useEffect } from 'react';
+import { RunningStatus } from '@/types/sqlApi';
 import { Button, Message, Space, Spin } from '@arco-design/web-react';
-import {
-  IconUpload,
-  IconSettings,
-  IconPlayArrow,
-  IconStop,
-  IconMenu,
-  IconCaretRight
-} from '@arco-design/web-react/icon';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import { IconCaretRight } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
-import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
-import './EditorWorkspace.scss';
-import createTheme from '@uiw/codemirror-themes';
-import { RunningStatus } from '@/types/sqlApi';
 import { tags as t } from '@lezer/highlight';
+import createTheme from '@uiw/codemirror-themes';
+import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { format } from 'sql-formatter';
+import './EditorWorkspace.scss';
 
-import RunningInfoPanel from './RunningInfoPanel';
-import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
-import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
+import { FileTab } from '../../hooks/useTabManager';
+import RunningInfoPanel from './RunningInfoPanel';
 
 interface NotebookWorkspaceProps {
   content: string;
