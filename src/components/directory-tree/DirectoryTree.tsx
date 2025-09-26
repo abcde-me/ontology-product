@@ -49,7 +49,7 @@ import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
-
+import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -770,6 +770,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               // 根据节点类型选择图标
               const icon = isFolder ? (
                 <FolderIcon className="mr-2 h-4 w-4" />
+              ) : from === DirectoryTreeFrom.SQL ? (
+                <SQLFileIcon className="mr-2 h-4 w-4" />
               ) : (
                 <FileIcon className="mr-2 h-4 w-4" />
               );
