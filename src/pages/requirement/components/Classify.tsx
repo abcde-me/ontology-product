@@ -87,10 +87,24 @@ const Classify = (props: ClassifyComponentProps) => {
   };
   useEffect(() => {
     if (type === 'detail') {
+      getDetailObj?.file_labels?.map((item, index) => {
+        formClassify.setFieldValue(
+          `attribute_group_name${item?.id}`,
+          item?.attribute_group_name
+        );
+        // 设置选项内容
+        item?.file_label_attribute?.map((group) => {
+          formClassify.setFieldValue(
+            `attribute_name_en_${group?.order_num}`,
+            group?.attribute_name_en
+          );
+          formClassify.setFieldValue(
+            `attribute_name_cn_${group?.order_num}`,
+            group?.attribute_name_cn
+          );
+        });
+      });
       setTextRelations(getDetailObj?.file_labels);
-      // getDetailObj?.file_labels?.map((item, index) => {
-      //   formClassify.setFieldValue(`attribute_group_name${index}`, item?.attribute_group_name)
-      // })
     }
   }, [getDetailObj]);
 
@@ -332,11 +346,11 @@ const Classify = (props: ClassifyComponentProps) => {
                         支持手动输入
                       </Checkbox>
                     </div>
-                    {item.file_label_attribute?.map((attr, attrIndex) => (
+                    {item.file_label_attribute?.map((attr: any, attrIndex) => (
                       <div key={attr.attribute_id} className="attribute-item">
                         {console.log(attr.attribute_name_en)}
                         <FormItem
-                          field={`attribute_name_en_${attr.attribute_id}`}
+                          field={`attribute_name_en_${type === 'detail' ? attr?.order_num : attr.attribute_id}`}
                           style={{ padding: 0, marginRight: 8 }}
                           rules={[
                             {
@@ -400,7 +414,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           />
                         </FormItem>
                         <FormItem
-                          field={`attribute_name_cn_${attr.attribute_id}`}
+                          field={`attribute_name_cn_${type === 'detail' ? attr?.order_num : attr.attribute_id}`}
                           style={{ padding: 0, marginRight: 8 }}
                           label={
                             <div style={{ color: '#6E7B8D' }}>

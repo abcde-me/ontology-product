@@ -64,7 +64,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       console.log(err, 'err');
     }
   }, [visible]);
-
   // 树的内容
   const renderTreeContent = () => {
     return (
@@ -172,7 +171,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     <Modal
       title={title}
       visible={visible}
-      onCancel={onClose}
+      onCancel={() => {
+        onClose();
+      }}
       alignCenter={true}
       escToExit={false}
       maskClosable={false}

@@ -402,7 +402,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
                     {runStatus === RunningStatus.FAILED && (
                       <div className="h-[100px]">
-                        <Typography.Text>{runError}</Typography.Text>
+                        <Typography.Text>
+                          {runError || '运行失败！'}
+                        </Typography.Text>
                       </div>
                     )}
                     {runStatus === RunningStatus.SUCCESS && (
