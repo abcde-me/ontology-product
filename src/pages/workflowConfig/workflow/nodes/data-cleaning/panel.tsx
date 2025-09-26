@@ -67,7 +67,6 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       inputs?.case_uniformity
     ].some(Boolean);
   };
-  console.log(form.getFieldValue('data_standardization'), 'top123');
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
