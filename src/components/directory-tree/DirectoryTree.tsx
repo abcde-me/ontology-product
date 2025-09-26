@@ -13,9 +13,9 @@ import {
   Menu,
   Message,
   Modal,
+  Spin,
   Tooltip,
-  Tree,
-  Empty
+  Tree
 } from '@arco-design/web-react';
 import type {
   NodeInstance,
@@ -682,7 +682,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         </div>
 
         {treeData.length === 0 ? (
-          <Empty />
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
         ) : (
           <Tree
             className="directory-tree"
