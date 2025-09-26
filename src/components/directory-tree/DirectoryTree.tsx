@@ -13,9 +13,9 @@ import {
   Menu,
   Message,
   Modal,
+  Spin,
   Tooltip,
-  Tree,
-  Empty
+  Tree
 } from '@arco-design/web-react';
 import type {
   NodeInstance,
@@ -667,8 +667,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     }
                   }}
                 >
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                   <Menu.Item key="file">新建PySpark</Menu.Item>
+                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                 </Menu>
               }
             >
@@ -682,7 +682,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         </div>
 
         {treeData.length === 0 ? (
-          <Empty />
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
         ) : (
           <Tree
             className="directory-tree"
@@ -721,7 +724,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
                     <Tooltip color="white" content="重命名">
                       <IconEdit
-                        className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
@@ -730,7 +733,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
                       <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
-                          className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                           onClick={() =>
                             handleCopy(node as unknown as NodeProps)
                           }
@@ -740,7 +743,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
                     <Tooltip color="white" content="删除">
                       <IconDelete
-                        className="hover:text-[rgb(var(--primary-6))]"
+                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() =>
                           handleDelete(node as unknown as NodeProps)
                         }
