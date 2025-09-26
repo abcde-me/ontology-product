@@ -10,6 +10,8 @@ import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
 import PasparkMenu from '@/assets/sider/pyspark.svg';
 import SqlMenu from '@/assets/sider/sql.svg';
+import AnnotationTask from '@/assets/sider/annotationTask.svg';
+import RequirementManagement from '@/assets/sider/requirementManagement.svg';
 
 export type MenuModel = {
   title: string;
@@ -131,13 +133,13 @@ export const menus: MenuModel[] = [
     children: [
       {
         title: '需求管理',
-        icon: <OrganMenu className={iconClass} />,
+        icon: <RequirementManagement className={iconClass} />,
         key: 'requirement',
         path: '/tenant/compute/modaforge/requirement'
       },
       {
-        title: '任务列表',
-        icon: <OrganMenu className={iconClass} />,
+        title: '标注任务',
+        icon: <AnnotationTask className={iconClass} />,
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList'
       }

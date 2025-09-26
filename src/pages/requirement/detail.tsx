@@ -1081,7 +1081,7 @@ export default function RequirementDetail() {
                                         const isDuplicate = datalist.some(
                                           (otherItem, otherIndex) =>
                                             otherIndex !== labelIndex &&
-                                            otherItem.label_name_cn === value &&
+                                            otherItem.label_name_en === value &&
                                             value.trim() !== ''
                                         );
                                         if (!value) {
@@ -1141,11 +1141,15 @@ export default function RequirementDetail() {
                                     {
                                       validateTrigger: ['onChange', 'onBlur'],
                                       validator: (value, callback) => {
+                                        if (!value) {
+                                          callback('请输入标注展示名称');
+                                          return;
+                                        }
                                         // 检查是否有重复的展示名称（排除当前项）
                                         const isDuplicate = datalist.some(
                                           (otherItem, otherIndex) =>
                                             otherIndex !== labelIndex &&
-                                            otherItem.label_name_en === value &&
+                                            otherItem.label_name_cn === value &&
                                             value.trim() !== ''
                                         );
                                         if (isDuplicate) {
