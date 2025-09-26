@@ -115,7 +115,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
         className={`sql-dataset-tree__content ${treeDataLoading ? 'sql-dataset-tree__content--loading' : ''}`}
       >
         {treeDataLoading ? (
-          <Spin tip="加载中"></Spin>
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
         ) : treeData.length === 0 ? (
           <Empty />
         ) : (

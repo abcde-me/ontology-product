@@ -17,7 +17,7 @@ interface DataManagerProps {
   getIsEditorFocused?: () => boolean;
 }
 
-const PythonTabContent: React.FC<DataManagerProps> = ({
+const SQLTabContent: React.FC<DataManagerProps> = ({
   onInsertContent,
   getIsEditorFocused
 }) => {
@@ -71,7 +71,6 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
 
   // 处理数据库详情查看
   const handleViewDbDetail = (nodeData: any) => {
-    console.log('数据库详情:', nodeData);
     const { type } = nodeData?.data;
 
     if (type === 'db_item') {
@@ -173,4 +172,4 @@ const PythonTabContent: React.FC<DataManagerProps> = ({
   );
 };
 
-export default PythonTabContent;
+export default SQLTabContent;

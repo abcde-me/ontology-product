@@ -22,6 +22,7 @@ import {
 } from '@arco-design/web-react/icon';
 import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import SaveToDasetIcon from '@/assets/sql/save-to-daset.svg';
 import { RunningStatus } from '@/types/sqlApi';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
 
@@ -277,7 +278,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                 {runStatus !== RunningStatus.RUNNING && (
                   <div className="flex items-center gap-[12px]">
                     <Space>
-                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                      <span
+                        style={{
+                          fontSize: '14px',
+                          color: '#0F172A',
+                          fontWeight: 400
+                        }}
+                      >
                         展示
                       </span>
                       <Input
@@ -307,7 +314,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                           }
                         }}
                       />
-                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                      <span
+                        style={{
+                          fontSize: '14px',
+                          color: '#0F172A',
+                          fontWeight: 400
+                        }}
+                      >
                         行数据
                       </span>
                     </Space>
@@ -370,6 +383,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       <Button
                         type="outline"
                         size="mini"
+                        icon={<SaveToDasetIcon />}
                         style={{
                           fontSize: '14px',
                           color: '#1E293B',
