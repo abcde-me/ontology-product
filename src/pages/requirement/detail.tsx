@@ -1591,11 +1591,11 @@ export default function RequirementDetail() {
                                                     ];
                                                   if (lastAttr?.label_info_id) {
                                                     form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
                                                       '标注时的输入内容'
                                                     );
                                                     form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
+                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
                                                       '其他'
                                                     );
                                                   }
@@ -1727,7 +1727,12 @@ export default function RequirementDetail() {
                                                         width: 290,
                                                         backgroundColor:
                                                           type === 'detail' ||
-                                                          attrGroup?.isTemp
+                                                          attrGroup?.isTemp ||
+                                                          (type !== 'detail' &&
+                                                            attrGroup
+                                                              ?.label_info_attribute[
+                                                              attrIndex
+                                                            ].input_type === 2)
                                                             ? '#e2e8f0'
                                                             : '#fff'
                                                       }}
