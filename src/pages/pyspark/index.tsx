@@ -105,7 +105,7 @@ const Python: React.FC = memo(() => {
 
   return (
     <Layout className="pyspark-layout">
-      <Sider width={isDasetTab ? '100%' : 300} className="pyspark-sider">
+      <Sider width={isDasetTab ? '100%' : 360} className="pyspark-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
