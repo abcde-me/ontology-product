@@ -81,11 +81,11 @@
 
       .sql-dataset-tree__node-title-dataset {
         color: #007dfa;
-        max-width: 70px;
+        max-width: 130px;
       }
 
       .sql-dataset-tree__node-title-scheam {
-        max-width: 80px;
+        max-width: 150px;
       }
 
       .sql-dataset-tree__node-actions {
@@ -120,7 +120,7 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 160px;
+      max-width: 220px;
     }
 
     &-size {
