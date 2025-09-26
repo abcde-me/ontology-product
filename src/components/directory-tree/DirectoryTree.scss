@@ -39,6 +39,7 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.12s ease;
+    color: rgba(30, 41, 59, 1);
   }
 
   .arco-tree-node:hover .directory-tree-extra {
