@@ -137,18 +137,20 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             renderTitle={(props) => {
               const nodeData = props.dataRef;
               const isDataset = nodeData?.type === 'dataset';
-              const isScheam = nodeData?.type === 'scheam';
 
               return (
                 <div className="sql-dataset-tree__node">
                   <div className="sql-dataset-tree__node-info">
-                    <EllipsisPopover
-                      className={`sql-dataset-tree__node-title ${isScheam ? 'sql-dataset-tree__node-title-scheam' : 'sql-dataset-tree__node-title-dataset'}`}
-                      value={highlightSearchKeyword(
-                        String(nodeData?.title ?? ''),
-                        searchKeyword
-                      )}
-                    />
+                    <div
+                      className={`sql-dataset-tree__node-title sql-dataset-tree__node-title-${nodeData?.type}`}
+                    >
+                      <EllipsisPopover
+                        value={highlightSearchKeyword(
+                          String(nodeData?.title ?? ''),
+                          searchKeyword
+                        )}
+                      />
+                    </div>
                     {isDataset && (
                       <div className="sql-dataset-tree__node-size">
                         {formatFileSize(Number(nodeData?.latest_size ?? 0))}
@@ -158,7 +160,11 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                   <div className="sql-dataset-tree__node-actions">
                     {isDataset && (
                       <Button
-                        style={{ fontWeight: 600 }}
+                        style={{
+                          fontWeight: 600,
+                          margin: '0 8px 0 2px',
+                          padding: 0
+                        }}
                         type="text"
                         className="sql-dataset-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
