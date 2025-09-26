@@ -2,14 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Button,
-  Typography,
-  Tabs,
   Tree,
-  Form,
   Input,
-  DatePicker,
   Table,
-  Popover,
   Pagination,
   Message
 } from '@arco-design/web-react';
@@ -17,6 +12,13 @@ import {
   getDepartmentTreeList,
   getIndividualList
 } from '@/api/individualAndDepartment';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
+import {
+  IconCaretDown,
+  IconDown,
+  IconDragArrow
+} from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
 
 interface DataSourceModalProps {
@@ -31,7 +33,7 @@ interface DataSourceModalProps {
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
-  title = '数据源',
+  title = '请选个人',
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
   getTreeIds
@@ -62,12 +64,14 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       console.log(err, 'err');
     }
   }, [visible]);
-
   // 树的内容
   const renderTreeContent = () => {
     return (
       <Tree
         showLine
+        icons={{
+          switcherIcon: <IconCaretDown />
+        }}
         autoExpandParent={false}
         treeData={treeData}
         // checkStrictly={checkStrictly}
@@ -80,6 +84,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       />
     );
   };
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
+  };
   const columns = [
     {
       title: '姓名',
@@ -90,7 +97,13 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     {
       title: '账号ID',
       dataIndex: 'tenant_id',
-      width: 80
+      width: 80,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.tenant_id)}
+          isEdit={false}
+        />
+      )
     }
   ];
 
@@ -130,13 +143,19 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       size: pageSize,
       organization_id: checkedKeys[0] || ''
     };
-    const res = await getIndividualList({ ...sourceParams });
-    console.log(res?.data.data, 'res======132');
-    if (res.success) {
-      setTableData(res?.data.data);
-      setCurrent(res?.data?.page);
-      setPageSize(res?.data?.size);
-      setTotal(res?.data?.total);
+    try {
+      const res = await getIndividualList({ ...sourceParams });
+      console.log(res?.data.data, 'res======132');
+      if (res.success) {
+        setTableData(res?.data.data);
+        setTotal(res?.data?.total);
+      } else {
+        setTableData([]);
+        setTotal(0);
+      }
+    } catch {
+      setTableData([]);
+      setTotal(0);
     }
   };
   useEffect(() => {
@@ -152,12 +171,14 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     <Modal
       title={title}
       visible={visible}
-      onCancel={onClose}
+      onCancel={() => {
+        onClose();
+      }}
       alignCenter={true}
       escToExit={false}
       maskClosable={false}
       className="fulscreen-modal"
-      style={{ width: '90vw', overflowY: 'auto' }}
+      style={{ width: '1000px', height: '800px' }}
       footer={
         <>
           <Button
@@ -183,7 +204,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           <div>
             <Input
               type="text"
-              placeholder="请输入名称搜索"
+              placeholder="请输入部门搜索"
               onChange={(value) => {
                 setSearchValue(value);
               }}
@@ -195,9 +216,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           <Table
             ref={tableRef}
             rowKey="id"
+            border={false}
             columns={columns}
             data={tableData}
             pagination={false}
+            noDataElement={noDataElement({ description: '暂无数据' })}
             rowSelection={{
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
@@ -242,7 +265,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               total={total}
               showJumper
               sizeCanChange
-              style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+              style={{
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginRight: '16px'
+              }}
             />
           )}
         </div>

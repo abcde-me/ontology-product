@@ -55,7 +55,7 @@ export interface UseEditorReturn {
   currentScriptId?: string;
   runError: string;
   resultLoading: boolean;
-
+  lastScriptRunStatus: RunningStatus;
   // 表格数据处理
   columns: Array<{
     title: string;
@@ -74,6 +74,11 @@ export interface UseEditorReturn {
   cancelGetRunResultPolling: () => void;
   loadRunResult: (execid: string, size: string) => void;
   handleGetRunLog: () => Promise<void>;
+
+  // 面板状态管理
+  isPanelOpen: boolean;
+  handlePanelStateChange: (isOpen: boolean) => void;
+  getPrevRunStatus: () => RunningStatus;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -92,6 +97,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
+  const [prevRunStatus, setPrevRunStatus] = useState<RunningStatus>(
+    RunningStatus.IDLE
+  ); // 添加前一个运行状态跟踪
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
   const [runDuration, setRunDuration] = useState<number>(0);
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
@@ -101,6 +109,31 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runLog, setRunLog] = useState<string>('');
   const [runError, setRunError] = useState<string>('');
   const [resultLoading, setResultLoading] = useState(false);
+  // 新增脚本最后执行结果
+  const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
+    RunningStatus.IDLE
+  );
+  // 面板状态管理
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+
+  // 获取前一个运行状态的函数
+  const getPrevRunStatus = useCallback(() => {
+    return prevRunStatus;
+  }, [prevRunStatus]);
+
+  // 更新运行状态的包装函数
+  const updateRunStatus = useCallback(
+    (newStatus: RunningStatus) => {
+      setPrevRunStatus(runStatus);
+      setRunStatus(newStatus);
+    },
+    [runStatus]
+  );
+
+  // 面板状态变化处理
+  const handlePanelStateChange = useCallback((isOpen: boolean) => {
+    setIsPanelOpen(isOpen);
+  }, []);
 
   // 动态生成表格列
   const generateTableColumns = (runResult: RunResult[]) => {
@@ -120,7 +153,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     return keys.map((key) => ({
       title: key,
       dataIndex: key,
-      width: 150,
+      width: 240,
       ellipsis: true
     }));
   };
@@ -153,7 +186,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
-          setRunStatus(RunningStatus.FAILED);
+          updateRunStatus(RunningStatus.FAILED);
           cancelGetRunResultPolling();
           setRunError(res?.message ?? '获取运行结果失败');
           setRunResult([]);
@@ -165,14 +198,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           cancelGetRunResultPolling();
         }
 
-        setRunStatus(res.data?.run_status);
+        updateRunStatus(res.data?.run_status);
         setRunResult(res.data?.sql_result_lists);
         setRunError('');
         setRunDuration(Number(res.data?.run_duration));
         setRunStartTime(new Date(res.data?.run_end_time ?? ''));
       },
       onError: (error) => {
-        setRunStatus(RunningStatus.FAILED);
+        updateRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult([]);
         setRunError('获取运行结果失败');
@@ -200,10 +233,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 获取运行日志
   const handleGetRunLog = useCallback(async () => {
-    if (!currentFile?.fileId || !execid) {
+    if (!currentFile?.scriptId || !execid) {
       return;
     }
-    const res = await getRunLogSqlScript(currentFile?.fileId, {
+    const res = await getRunLogSqlScript(currentFile?.scriptId || '', {
       script_execid: execid
     });
 
@@ -214,7 +247,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 清空编辑器状态的函数
   const clearEditorState = useCallback(() => {
-    setRunStatus(RunningStatus.IDLE);
+    updateRunStatus(RunningStatus.IDLE);
     setExecid('');
     setRunStartTime(null);
     setRunDuration(0);
@@ -222,6 +255,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunLog('');
     setRunError('');
     setLastAutoSave('');
+    setLastScriptRunStatus(RunningStatus.IDLE);
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
   }, [cancelGetRunResultPolling]);
@@ -336,11 +370,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setExecid(res.data.script_execid);
       } else {
         setRunError(res.message);
-        throw new Error('运行失败');
+        Message.error(res.message);
       }
     } catch (error) {
-      setRunStatus(RunningStatus.FAILED);
-      Message.error('运行失败');
+      updateRunStatus(RunningStatus.FAILED);
     }
   }, [runStatus, currentFile?.scriptId, editorContent]);
 
@@ -356,7 +389,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     cancelGetRunResultPolling();
-    setRunStatus(RunningStatus.IDLE);
+    updateRunStatus(RunningStatus.IDLE);
+    // 将该面板的最后状态也设置为未运行
+    setLastScriptRunStatus(RunningStatus.IDLE);
   };
 
   // 获取运行日志
@@ -372,7 +407,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunStatus(RunningStatus.RUNNING);
+    updateRunStatus(RunningStatus.RUNNING);
     setRunResult([]);
     setRunError('');
     setRunStartTime(new Date());
@@ -381,14 +416,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
-        setRunStatus(RunningStatus.RUNNING);
+        updateRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFile?.scriptId ?? '', {
           script_execid: execid,
           size: size
         });
       } catch (error) {
         console.error('获取运行结果失败:', error);
-        setRunStatus(RunningStatus.FAILED);
+        updateRunStatus(RunningStatus.FAILED);
       }
     };
 
@@ -414,7 +449,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
           if (response.status === 200 && response.data) {
             const fileData = response.data;
-
+            setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
             setEditorContent(fileData.script_content);
 
@@ -473,7 +508,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 表格数据处理
     columns,
     data,
-
+    lastScriptRunStatus,
     // 操作
     setSize,
     handleContentChange,
@@ -482,6 +517,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     getRunResultPolling,
     cancelGetRunResultPolling,
     loadRunResult,
-    handleGetRunLog
+    handleGetRunLog,
+
+    // 面板状态管理
+    isPanelOpen,
+    handlePanelStateChange,
+    getPrevRunStatus
   };
 };

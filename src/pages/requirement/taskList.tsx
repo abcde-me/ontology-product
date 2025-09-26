@@ -81,7 +81,8 @@ export default function Requirement() {
         }
       };
       const res = await getAnnotationTaskList(params);
-      if (res.code === 0 && res.data) {
+      if (res.code === 0) {
+        console.log(res?.data?.result, 'top----');
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
         setLoading(false);
@@ -132,7 +133,7 @@ export default function Requirement() {
     {
       title: '所属需求名称',
       dataIndex: 'name',
-      width: 280,
+      width: 300,
       ellipsis: true,
       className: 'hover-change workflow-name',
       render: (_, record) => {
@@ -146,7 +147,7 @@ export default function Requirement() {
     {
       title: '需求ID',
       dataIndex: 'id',
-      width: 80,
+      width: 100,
       render: (_, record) => {
         return renderEmptyPlaceholder(record.id) !== '-' ? (
           <EllipsisPopover value={record.id} isEdit={false} />
@@ -159,7 +160,7 @@ export default function Requirement() {
     {
       title: '类型',
       dataIndex: 'type',
-      width: 100,
+      width: 174,
       render: (_, record) => {
         return (
           <div>{record?.type ? RequirementTypeNameMap[record.type] : '-'}</div>
@@ -185,9 +186,9 @@ export default function Requirement() {
       ]
     },
     {
-      title: '所属',
+      title: '所属部门/个人',
       dataIndex: 'belong',
-      width: 100,
+      width: 174,
       render: (_, record) =>
         record.belong === 1 ? (
           <div className="belong-item">
@@ -214,7 +215,7 @@ export default function Requirement() {
       // task_total	任务总数
       title: '未领取/总任务量',
       dataIndex: 'task_total', // Changed from 'user_name' to unique dataIndex
-      width: 100,
+      width: 160,
       ellipsis: true,
       render: (_, record) => (
         <div>{`${record?.not_started_num}/${record?.task_total}`}</div>
@@ -223,7 +224,7 @@ export default function Requirement() {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 160,
+      width: 200,
       render: (_, record) => (
         <span>
           {record.create_time == '' || record.create_time == null
@@ -250,7 +251,7 @@ export default function Requirement() {
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
-      width: 160,
+      width: 75,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
@@ -284,7 +285,7 @@ export default function Requirement() {
             required: (_, { label }) => `必须填写 ${label}`
           }}
         >
-          <FormItem field="name">
+          <FormItem field="name" style={{ marginBottom: 0 }}>
             <InputSearch
               onClear={() => {
                 setCurrent(1);
@@ -302,7 +303,7 @@ export default function Requirement() {
               onChange={(val) => {
                 setSearchValue(val);
               }}
-              placeholder="请输入需求名称/创建人"
+              placeholder="请输入任务名称"
               allowClear
             />
           </FormItem>
@@ -314,7 +315,7 @@ export default function Requirement() {
         data={taskData}
         pagination={false}
         noDataElement={noDataElement({
-          description: '暂无需求'
+          description: '暂无任务'
           // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
         })}
         rowKey="id"

@@ -8,7 +8,7 @@
   }
 
   .panel-content {
-    border-radius: 4px;
+    // border-radius: 4px;
     overflow: hidden;
 
     .arco-tabs-header-nav {
@@ -20,15 +20,11 @@
     padding: 12px;
   }
 
-  .run-result-table {
-    padding: 12px;
-  }
-
   .runlog-content {
     white-space: pre-wrap;
     word-break: break-word;
     padding: 12px;
-    max-height: 276px;
+    max-height: 308px;
     overflow-y: auto;
 
     // 自定义滚动条样式
@@ -54,7 +50,7 @@
   .arco-tabs-content {
     padding: 0;
     max-height: 308px;
-    overflow-y: auto;
+    overflow: hidden; // 移除外层滚动条，由内部内容控制
   }
 
   .arco-collapse-item-header-title {
@@ -77,7 +73,7 @@
   .run-status {
     display: inline-flex;
     align-items: center;
-    font-size: 12px;
+    font-size: 14px;
     color: #64748b;
 
     .mr-4 {

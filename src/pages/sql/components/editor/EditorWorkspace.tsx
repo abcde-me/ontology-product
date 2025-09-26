@@ -1,27 +1,23 @@
-import React, { useRef, memo, useCallback, useEffect } from 'react';
-import { Button, Message, Space } from '@arco-design/web-react';
-import {
-  IconUpload,
-  IconSettings,
-  IconPlayArrow,
-  IconStop,
-  IconMenu
-} from '@arco-design/web-react/icon';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import { RunningStatus } from '@/types/sqlApi';
+import { Button, Message, Space, Spin } from '@arco-design/web-react';
+import { IconCaretRight } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
-import { format } from 'sql-formatter';
 import { lintGutter } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
-import './EditorWorkspace.scss';
-import createTheme from '@uiw/codemirror-themes';
-import { RunningStatus } from '@/types/sqlApi';
 import { tags as t } from '@lezer/highlight';
+import createTheme from '@uiw/codemirror-themes';
+import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { format } from 'sql-formatter';
+import './EditorWorkspace.scss';
 
-import RunningInfoPanel from './RunningInfoPanel';
-import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
+import { FileTab } from '../../hooks/useTabManager';
+import RunningInfoPanel from './RunningInfoPanel';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -64,7 +60,11 @@ const EditorWorkspaceContent: React.FC<{
     handleContentChange,
     placeholderValue,
     runResult,
-    execid
+    execid,
+    isPanelOpen,
+    handlePanelStateChange,
+    getPrevRunStatus,
+    lastScriptRunStatus
   } = useEditorContext();
 
   const myTheme = createTheme({
@@ -111,8 +111,10 @@ const EditorWorkspaceContent: React.FC<{
       try {
         const formattedCode = format(editorContent, { language: 'sql' });
         handleContentChange(formattedCode);
+        Message.success('格式化成功');
       } catch (e) {
         console.error(e);
+        Message.error('格式化失败');
       }
     }
   };
@@ -183,12 +185,12 @@ const EditorWorkspaceContent: React.FC<{
                   runStatus === RunningStatus.RUNNING ? (
                     <IconStop className="mr-[4px]" />
                   ) : (
-                    <IconPlayArrow className="mr-[4px]" />
+                    <IconCaretRight className="mr-[4px]" />
                   )
                 }
                 disabled={editorContent?.trim() === ''}
                 onClick={handleRunClick}
-                className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
+                className={`h-[26px] ${runStatus === RunningStatus.RUNNING ? 'btn-running' : ''}`}
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
               </Button>
@@ -196,9 +198,9 @@ const EditorWorkspaceContent: React.FC<{
 
             <Button
               type="text"
-              icon={<IconMenu />}
+              icon={<SQLFormatIcon className="fromat-icon" />}
               onClick={handleFormatCode}
-              className="h-[26px]"
+              className="fromat-icon_btn h-[26px]"
             >
               格式化
             </Button>
@@ -216,38 +218,61 @@ const EditorWorkspaceContent: React.FC<{
       </div>
 
       {/* 编辑器区域 */}
+
       <div
         className={`editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
       >
-        <CodeMirror
-          ref={editorRef}
-          value={editorContent}
-          onChange={handleContentChange}
-          placeholder={placeholderValue}
-          readOnly={!hasUpdatePermission}
-          theme={myTheme}
-          extensions={[
-            sql({ upperCaseKeywords: true }),
-            lintGutter(),
-            EditorView.updateListener.of((update) => {
-              if (update.selectionSet) {
-                handleCursorChange(update.view);
-              }
-              if (update.focusChanged) {
-                handleFocusChange(update.view.hasFocus);
-              }
-            })
-          ]}
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: false
+        <Spin
+          style={{
+            width: '100%',
+            height: '100%'
           }}
-          className="code-editor"
-        />
+          tip={
+            lastScriptRunStatus === RunningStatus.SUCCESS ||
+            lastScriptRunStatus === RunningStatus.FAILED
+              ? '结果加载中...'
+              : '运行中...'
+          }
+          loading={runStatus === RunningStatus.RUNNING}
+        >
+          <CodeMirror
+            ref={editorRef}
+            value={editorContent}
+            onChange={handleContentChange}
+            placeholder={placeholderValue}
+            readOnly={
+              !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+            }
+            theme={myTheme}
+            extensions={[
+              sql({ upperCaseKeywords: true }),
+              lintGutter(),
+              EditorView.updateListener.of((update) => {
+                if (update.selectionSet) {
+                  handleCursorChange(update.view);
+                }
+                if (update.focusChanged) {
+                  handleFocusChange(update.view.hasFocus);
+                }
+              })
+            ]}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false
+            }}
+            className="code-editor"
+          />
+        </Spin>
       </div>
 
       {/* 运行信息面板 */}
-      {execid && <RunningInfoPanel />}
+      {execid && (
+        <RunningInfoPanel
+          isPanelOpen={isPanelOpen}
+          onPanelStateChange={handlePanelStateChange}
+          getPrevRunStatus={getPrevRunStatus}
+        />
+      )}
     </div>
   );
 });

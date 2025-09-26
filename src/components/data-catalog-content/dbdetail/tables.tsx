@@ -35,15 +35,7 @@ export default function Tables(props) {
       dataIndex: item,
       width: 260,
       render: (_, record) => {
-        return (
-          <EllipsisPopover
-            value={record[item]}
-            preferTypography
-            ellipsis={{
-              rows: 3
-            }}
-          />
-        );
+        return <EllipsisPopover value={record[item]} preferTypography />;
       }
     }));
   }, [dataList]);
@@ -63,7 +55,12 @@ export default function Tables(props) {
           }}
         />
       ) : (
-        <Table columns={tableColumns} data={tableData} pagination={false} />
+        <Table
+          columns={tableColumns}
+          data={tableData}
+          pagination={false}
+          border={false}
+        />
       )}
       {/* <Table 
           columns={columns()} 

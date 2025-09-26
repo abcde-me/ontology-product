@@ -9,13 +9,14 @@ import React, {
 import {
   Button,
   Dropdown,
+  Empty,
   Input,
   Menu,
   Message,
   Modal,
+  Spin,
   Tooltip,
-  Tree,
-  Empty
+  Tree
 } from '@arco-design/web-react';
 import type {
   NodeInstance,
@@ -48,7 +49,7 @@ import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
-
+import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -141,6 +142,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [folderStack, setFolderStack] = useState<
       Array<{ id: string; name: string }>
     >([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     // 搜索相关状态
     const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
@@ -169,7 +171,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     useEffect(() => {
       const formattedData = formatTreeData(data);
       setTreeData(formattedData);
+      setLoading(false);
     }, [data]);
+
+    useEffect(() => {
+      setLoading(true);
+    }, []);
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
@@ -637,14 +644,21 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           />
           {from === DirectoryTreeFrom.SQL ? (
             <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
-              <Button
+              {/* <Button
                 type="text"
                 size="small"
                 icon={<IconPlus />}
                 onClick={() => startRootCreate(false)}
               >
                 新建
-              </Button>
+              </Button> */}
+              <div
+                className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
+                onClick={() => startRootCreate(false)}
+              >
+                <IconPlus className="mr-1" />
+                新建
+              </div>
             </PermissionWrapper>
           ) : (
             <Dropdown
@@ -660,8 +674,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     }
                   }}
                 >
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                   <Menu.Item key="file">新建PySpark</Menu.Item>
+                  <Menu.Item key="folder">新建文件夹</Menu.Item>
                 </Menu>
               }
             >
@@ -674,7 +688,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           )}
         </div>
 
-        {treeData.length === 0 ? (
+        {loading ? (
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
+        ) : treeData.length === 0 ? (
           <Empty />
         ) : (
           <Tree
@@ -714,16 +733,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
                     <Tooltip color="white" content="重命名">
                       <IconEdit
-                        className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
                   )}
                   {node.dataRef?.type !== PythonItemType.Directory &&
                     node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
-                      <Tooltip color="white" content="复制">
+                      <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
-                          className="mr-1 hover:text-[rgb(var(--primary-6))]"
+                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                           onClick={() =>
                             handleCopy(node as unknown as NodeProps)
                           }
@@ -733,7 +752,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
                     <Tooltip color="white" content="删除">
                       <IconDelete
-                        className="hover:text-[rgb(var(--primary-6))]"
+                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() =>
                           handleDelete(node as unknown as NodeProps)
                         }
@@ -751,6 +770,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               // 根据节点类型选择图标
               const icon = isFolder ? (
                 <FolderIcon className="mr-2 h-4 w-4" />
+              ) : from === DirectoryTreeFrom.SQL ? (
+                <SQLFileIcon className="mr-2 h-4 w-4" />
               ) : (
                 <FileIcon className="mr-2 h-4 w-4" />
               );

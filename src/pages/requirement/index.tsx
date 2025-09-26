@@ -3,13 +3,9 @@ import {
   Button,
   Form,
   Input,
-  Message,
-  Modal,
   Pagination,
   PaginationProps,
-  Popover,
-  Table,
-  Tooltip
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -17,19 +13,9 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import {
-  IconClockCircle,
-  IconInfoCircle,
-  IconPlus
-} from '@arco-design/web-react/icon';
-import { getAnnotationList } from '@/api/dataAnnotation';
-import {
-  RequirementStatus,
-  RequirementStatusMap,
-  RequirementType,
-  RequirementTypeMap
-} from './type';
-import { isNil, omitBy } from 'lodash';
+import { IconPlus } from '@arco-design/web-react/icon';
+import { getAnnotationList, getAnnotationDownload } from '@/api/dataAnnotation';
+import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import './index.scss';
 
@@ -154,7 +140,7 @@ export default function Requirement() {
         return (
           <div className="status-item">
             <span className="status-published-icon" />
-            <span className="status-text">已发布</span>
+            <span className="status-text">发布成功</span>
           </div>
         );
       case RequirementStatus.PublishFailed:
@@ -271,7 +257,7 @@ export default function Requirement() {
           value: RequirementStatus.Draft
         },
         {
-          text: '已发布',
+          text: '发布成功',
           value: RequirementStatus.Published
         },
         {
@@ -313,22 +299,49 @@ export default function Requirement() {
     {
       title: '操作',
       dataIndex: 'operate',
-      align: 'center',
+      align: 'left',
       fixed: 'right',
-      width: 160,
+      width: 130,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
-          <div style={{ display: 'flex' }} className="option-content">
+          <div style={{ marginLeft: 4 }} className="option-content">
             <span
               className="operate-text"
+              style={{ marginRight: 8 }}
               onClick={() => {
                 viewDetailWorkflow(record.id);
               }}
             >
               详情
             </span>
-            {/* )} */}
+            {record?.status === RequirementStatus.Annotated ||
+              (record?.status === RequirementStatus.Published && (
+                <span
+                  className="operate-text"
+                  onClick={() => {
+                    setLoading(true);
+                    try {
+                      getAnnotationDownload({ requirement_id: record.id })
+                        .then((res) => {
+                          if (res.code === 0) {
+                            const a = document.createElement('a');
+                            a.href = res?.data?.download_url;
+                            document.body.appendChild(a);
+                            a.click();
+                          }
+                          setLoading(false);
+                        })
+                        .catch(() => {})
+                        .finally(() => {});
+                    } catch {
+                      setLoading(false);
+                    }
+                  }}
+                >
+                  下载结果
+                </span>
+              ))}
           </div>
         );
       }
@@ -337,18 +350,19 @@ export default function Requirement() {
 
   return (
     <div className="requirement">
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>需求管理</h1>
+      <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: 16 }}>
+        需求管理
+      </h1>
       <div className="requirement-form">
         <Form
           form={form}
           autoComplete="off"
-          style={{ marginTop: '16px' }}
           layout="inline"
           validateMessages={{
             required: (_, { label }) => `必须填写 ${label}`
           }}
         >
-          <FormItem label="需求名称:" field="name">
+          <FormItem label={null} field="name" style={{ margin: 0 }}>
             <InputSearch
               onClear={() => {
                 setCurrent(1);

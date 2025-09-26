@@ -1,10 +1,11 @@
+import { cloneDeep } from 'lodash-es';
 import UAPI from '@/api';
 import { toISOStringWithMicroseconds } from '@/utils/timeFormatting';
-import { LabelShapMap } from '@/utils/constants';
+import { LabelShapMap, EmptyImgLabelResult } from '@/utils/constants';
 
 export async function saveTask(taskId: string, params: Record<string, any>) {
   console.log('saveTask', taskId, params);
-  await UAPI.RES.leSaveTask({})
+  return UAPI.RES.leSaveTask({})
     .post({
       task_id: taskId,
       save_type: 1,
@@ -16,7 +17,7 @@ export async function saveTask(taskId: string, params: Record<string, any>) {
 }
 export async function submitTask(taskId: string, params: Record<string, any>) {
   console.log('submitTask', taskId, params);
-  await UAPI.RES.leSaveTask({})
+  return UAPI.RES.leSaveTask({})
     .post({
       task_id: taskId,
       save_type: 2,
@@ -27,89 +28,11 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
     .do();
 }
 
-// const taskResult = {
-//   task_id: 1,
-//   task_status: 1,
-//   update_time: '2025-08-23 09:09:23',
-//   result_type: 1,
-//   result: {
-//     version: 0,
-//     tags: [],
-//     shapes: [
-//       // {
-//       //   type: 'rectangle',
-//       //   occluded: false,
-//       //   outside: false,
-//       //   z_order: 0,
-//       //   rotation: 0.0,
-//       //   points: [123.6142578125, 169.185546875, 308, 252.70000000000073],
-//       //   id: 28,
-//       //   frame: 0,
-//       //   label_id: 2,
-//       //   group: 0,
-//       //   source: 'manual',
-//       //   attributes: [
-//       //     {
-//       //       spec_id: 1,
-//       //       value: 'opt1'
-//       //     },
-//       //     {
-//       //       spec_id: 2,
-//       //       value: 'opt1,other|dddddd'
-//       //     },
-//       //     {
-//       //       spec_id: 3,
-//       //       value: '1111'
-//       //     }
-//       //   ],
-//       //   elements: []
-//       // },
-//       // {
-//       //   type: 'rectangle',
-//       //   occluded: false,
-//       //   outside: false,
-//       //   z_order: 0,
-//       //   rotation: 0.0,
-//       //   points: [113.6142578125, 179.185546875, 318, 262.70000000000073],
-//       //   id: 29,
-//       //   frame: 0,
-//       //   label_id: 2,
-//       //   group: 0,
-//       //   source: 'manual',
-//       //   attributes: [
-//       //     {
-//       //       spec_id: 1,
-//       //       value: 'opt1'
-//       //     },
-//       //     {
-//       //       spec_id: 2,
-//       //       value: 'opt1'
-//       //     },
-//       //     {
-//       //       spec_id: 3,
-//       //       value: ''
-//       //     }
-//       //   ],
-//       //   elements: []
-//       // }
-//     ],
-//     tracks: []
-//   }
-// };
 export async function getTaskResult(taskId: string) {
   return await UAPI.RES.leGetTaskReuslt({})
     .post({ task_id: taskId })
     .inRegion()
     .do();
-  // taskResult.task_id = +taskId;
-  // const taskResultCopy = JSON.parse(JSON.stringify(taskResult));
-  // taskResultCopy.result_type = 1;
-  // if (taskResult.task_id % 2) {
-  //   taskResultCopy.result.shapes.splice(1, 1);
-  // }
-  // return Promise.resolve({
-  //   data: taskResultCopy
-  // });
 }
 export async function getTask(requirementId?: string) {
   const searchParams = new URLSearchParams(location.search);
@@ -118,32 +41,6 @@ export async function getTask(requirementId?: string) {
     .post({ requirement_id: Number(rId) })
     .inRegion()
     .do();
-  // const res = {
-  //   task_id: Math.floor(1 + Math.random() * 10),
-  //   item_path: 'https://temp.im/600x600',
-  //   item_type: 2,
-  //   requirement_info: {
-  //     name: '需求名称' + Math.random(),
-  //     not_started_num: 123,
-  //     description: '描述',
-  //     label_type: 2,
-  //     label_tool: {
-  //       label_tool_name: '标注工具名称',
-  //       label_tool_code: 'aaa',
-  //       image_out_of_bounds: 1
-  //     },
-  //     label_count: 100,
-  //     usage_scenario: 1
-  //   },
-  //   task_info: {
-  //     pic: {
-  //       name: 'test.png',
-  //       width: 600,
-  //       height: 600
-  //     }
-  //   }
-  // };
-  // return Promise.resolve({ data: res });
 }
 export async function getTaskDetail(taskId?: string) {
   const searchParams = new URLSearchParams(location.search);
@@ -159,377 +56,6 @@ export async function getLabels(requirementId: string) {
     .post({ requirement_id: +requirementId })
     .inRegion()
     .do();
-  // const idx = Math.floor(1 + Math.random() * 100);
-  // const res = {
-  //   file_labels: [],
-  //   labels: [
-  //     {
-  //       id: 1,
-  //       order_num: 1,
-  //       label_name_cn: '点标签1',
-  //       label_name_en: '',
-  //       label_shape: 1,
-  //       label_colour: '#FFFFFF',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 2,
-  //           order_num: 1,
-  //           attribute_group_name: '多选属性',
-  //           attribute_group_class: 2,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 3,
-  //           order_num: 1,
-  //           attribute_group_name: '输入框属性',
-  //           attribute_group_class: 3,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: []
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 2,
-  //       order_num: 2,
-  //       label_name_cn: '线标签1',
-  //       label_name_en: '',
-  //       label_shape: 2,
-  //       label_colour: '#FF0000',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 21,
-  //       order_num: 2,
-  //       label_name_cn: '线标签2',
-  //       label_name_en: '',
-  //       label_shape: 2,
-  //       label_colour: '#FFFF00',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 3,
-  //       order_num: 3,
-  //       label_name_cn: '矩形标签1',
-  //       label_name_en: '',
-  //       label_shape: 3,
-  //       label_colour: '#00FF00',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 2,
-  //           order_num: 1,
-  //           attribute_group_name: '多选属性',
-  //           attribute_group_class: 2,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 3,
-  //           order_num: 1,
-  //           attribute_group_name: '输入框属性',
-  //           attribute_group_class: 3,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: []
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 31,
-  //       order_num: 31,
-  //       label_name_cn: '矩形标签2',
-  //       label_name_en: '',
-  //       label_shape: 3,
-  //       label_colour: '#00FFFF',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 2,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 2,
-  //           order_num: 1,
-  //           attribute_group_name: '多选属性',
-  //           attribute_group_class: 2,
-  //           attribute_group_type: 2,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           id: 3,
-  //           order_num: 1,
-  //           attribute_group_name: '输入框属性',
-  //           attribute_group_class: 3,
-  //           attribute_group_type: 2,
-  //           label_info_attribute: []
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 4,
-  //       order_num: 4,
-  //       label_name_cn: '多边形标签1',
-  //       label_name_en: '',
-  //       label_shape: 4,
-  //       label_colour: '#0000FF',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       id: 5,
-  //       order_num: 5,
-  //       label_name_cn: '椭圆形标签1',
-  //       label_name_en: '',
-  //       label_shape: 5,
-  //       label_colour: '#FF00FF',
-  //       label_info_attribute_groups: [
-  //         {
-  //           id: 1,
-  //           order_num: 1,
-  //           attribute_group_name: '单选属性',
-  //           attribute_group_class: 1,
-  //           attribute_group_type: 1,
-  //           label_info_attribute: [
-  //             {
-  //               order_num: 1,
-  //               attribute_name_cn: '选项1',
-  //               attribute_name_en: 'opt1',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 2,
-  //               attribute_name_cn: '选项2',
-  //               attribute_name_en: 'opt2',
-  //               input_type: 1
-  //             },
-  //             {
-  //               order_num: 3,
-  //               attribute_name_cn: '其他',
-  //               attribute_name_en: 'other',
-  //               input_type: 2
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     }
-  //   ]
-  // };
-  // return Promise.resolve({ data: res });
 }
 
 // =================================== 下面为适配CVAT图片，视频标注API ===============================
@@ -538,18 +64,21 @@ export async function saveImgJobAnnotations(
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
-  // taskResult.result_type = params.has_result;
-  await saveTask(taskId, params);
-  return { data: params };
+  const result = await saveTask(taskId, params);
+  return { ...result, data: params };
 }
 export async function submitImgJobAnnotations(
   taskId: string,
   params: Record<string, any>
 ) {
   handleImgAnnotationIds(params);
-  // taskResult.result_type = params.has_result;
-  await submitTask(taskId, params);
-  return { data: params };
+  const result = await submitTask(
+    taskId,
+    !params.has_result
+      ? { ...params, ...cloneDeep(EmptyImgLabelResult) }
+      : params
+  );
+  return { ...result, data: params };
 }
 
 export async function getImgJobOverview(taskId: string) {
@@ -596,12 +125,7 @@ export async function getImgJobOverview(taskId: string) {
 
 export async function getImgJobAnnotations(taskId: string) {
   const result = await getTaskResult(taskId);
-  const annotations = result.data.result ?? {
-    version: 0,
-    tags: [],
-    shapes: [],
-    tracks: []
-  };
+  const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
   return Promise.resolve({
     data: {
       ...annotations,
@@ -664,6 +188,11 @@ export async function getImgJobLabels(requirementId?: string) {
       attributes: [] as any[]
     };
 
+    label.label_info_attribute_groups = Array.isArray(
+      label.label_info_attribute_groups
+    )
+      ? label.label_info_attribute_groups
+      : [];
     for (let j = 0; j < label.label_info_attribute_groups.length; j++) {
       const attr = label.label_info_attribute_groups[j];
       labelTpl.attributes.push({
@@ -682,7 +211,10 @@ export async function getImgJobLabels(requirementId?: string) {
           attr.attribute_group_class === 3
             ? ['']
             : attr.label_info_attribute.map((la) => la.attribute_name_cn),
-        keys: attr.label_info_attribute.map((la) => la.attribute_name_en)
+        keys:
+          attr.attribute_group_class === 3
+            ? ['']
+            : attr.label_info_attribute.map((la) => la.attribute_name_en)
       });
     }
     labels.push(labelTpl);

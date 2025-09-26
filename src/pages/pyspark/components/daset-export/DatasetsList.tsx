@@ -246,7 +246,7 @@ const DatasetsList: FC = () => {
         <FormItem field="file_name" style={{ marginRight: 12 }}>
           <Input.Search
             allowClear
-            placeholder="输入文件名搜索"
+            placeholder="输入数据集名称搜索"
             onSearch={(value) => {
               handleSearchChange({ name: value });
             }}

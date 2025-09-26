@@ -24,6 +24,7 @@ import {
 import { formatFileSize } from '@/utils/format';
 import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
+import RefreshButton from '@/components/refreshButton';
 
 const FormItem = Form.Item;
 
@@ -78,6 +79,7 @@ const DatasetsList: FC = () => {
     {
       title: 'SQL脚本名称',
       dataIndex: 'script_name',
+      className: 'hover-change',
       width: 230,
       render: (_, item) => {
         return (
@@ -94,6 +96,7 @@ const DatasetsList: FC = () => {
     {
       title: '数据集名称',
       dataIndex: 'dataset_name',
+      className: 'hover-change_normal',
       width: 230,
       render: (_, item) => {
         return (
@@ -129,18 +132,18 @@ const DatasetsList: FC = () => {
         switch (item.export_status) {
           case 0:
             text = '导出中';
-            color = '#1890ff';
+            color = '#007DFA';
             actionBtn = item?.perms?.includes(
               SQL_PERMISSIONS.CAN_EXPORT_TASK_STOP
-            ) && <Link onClick={() => handleStopTask(item)}> 停止 </Link>;
+            ) && <Link onClick={() => handleStopTask(item)}> 终止 </Link>;
             break;
           case 1:
             text = '导出成功';
-            color = '#52c41a';
+            color = '#10B981';
             break;
           case 2:
             text = '导出失败';
-            color = '#ff4d4f';
+            color = '#EF4444';
             actionBtn = item?.perms?.includes(
               SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
             ) && (
@@ -179,8 +182,7 @@ const DatasetsList: FC = () => {
                 width: '8px',
                 height: '8px',
                 backgroundColor: color,
-                borderRadius: '50%',
-                marginRight: '5px'
+                borderRadius: '50%'
               }}
             ></div>
             <span>{text}</span>
@@ -288,24 +290,23 @@ const DatasetsList: FC = () => {
     <div className="flex h-full flex-col overflow-y-auto p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
       <Form
+        className="mb-[8px]"
         autoComplete="off"
         layout="inline"
         onValuesChange={handleSearchChange}
       >
         <FormItem field="search_content" style={{ marginRight: 12 }}>
-          <Input.Search allowClear placeholder="输入数据集名称搜索" />
+          <Input.Search allowClear placeholder="输入数据集搜索" />
         </FormItem>
         <FormItem style={{ marginRight: 12 }}>
-          <Button type="text" onClick={() => loadData()}>
-            手动刷新
-          </Button>
+          <RefreshButton onClick={() => loadData()}></RefreshButton>
         </FormItem>
       </Form>
       <Table
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
+        // style={{
+        //   width: '100%',
+        //   height: '100%'
+        // }}
         columns={columns}
         data={listData}
         pagination={pagination}
@@ -313,9 +314,10 @@ const DatasetsList: FC = () => {
         rowKey="id"
         onChange={handleTableChange}
         scroll={{
-          y: 500,
+          // y: 500,
           x: 'max-content'
         }}
+        border={false}
       />
 
       <ModalScriptDetail

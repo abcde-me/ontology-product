@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import './AnnotationType.scss';
 import { AnnotationTypeStatus } from '../type';
+import { Tooltip } from '@arco-design/web-react';
 
 const typeList = [
   {
@@ -26,9 +27,9 @@ const btnPicData = [
 ];
 const btnTextData = [
   { key: 1, value: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
-  { key: 2, value: 2, label: '文本分类', code: 'TEXT_CLASSIFICATION' },
+  { key: 2, value: 2, label: '分类', code: 'TEXT_CLASSIFICATION' },
   { key: 3, value: 3, label: '问答', code: 'TEXT_QA' },
-  { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT' }
+  { key: 4, value: 4, label: '排序', code: 'TEXT_SORT' }
 ];
 interface AnnotationTypeProps {
   isDisabled: boolean;
@@ -95,11 +96,20 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                 item.value > 2 ? 'disabled-div' : ''
               ].join(' ')}
               onClick={() => {
+                if (item?.value > 2) {
+                  return;
+                }
                 headerItemClick(item);
               }}
               key={item.value}
             >
-              {item.label}
+              {item?.value > 2 ? (
+                <Tooltip content="功能开发中，敬请期待">
+                  <div>{item?.label}</div>
+                </Tooltip>
+              ) : (
+                item.label
+              )}
             </div>
           );
         })}

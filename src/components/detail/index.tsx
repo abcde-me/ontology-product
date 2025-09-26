@@ -385,7 +385,8 @@ const versionColumns: any[] = [
   },
   {
     title: '更变记录',
-    width: 470,
+    minWidth: 100,
+    maxWidth: 470,
     dataIndex: 'description',
     render: (description: string) => {
       return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
@@ -692,7 +693,7 @@ const DatasetDetail = (props: {
     if (contentTableColumnsList.length > 0) {
       setContentTableColumns(
         contentTableColumnsList.map((item) => ({
-          title: `${item.name}(${item.cn_name})`,
+          title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
           dataIndex: item.name,
           key: item.name,
           width: 400,
@@ -1774,6 +1775,7 @@ const DatasetDetail = (props: {
                   data={contentTableData}
                   pagination={false}
                   rowKey="id"
+                  border={false}
                 />
               </div>
             </TabPane>
@@ -1787,6 +1789,7 @@ const DatasetDetail = (props: {
                 noDataElement={noDataElement({ description: '暂无数据' })}
                 scroll={{ x: 'max-content' }}
                 border={false}
+                rowKey="version_id"
               />
             ) : (
               ''

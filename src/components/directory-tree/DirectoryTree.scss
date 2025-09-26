@@ -39,6 +39,7 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.12s ease;
+    color: rgba(30, 41, 59, 1);
   }
 
   .arco-tree-node:hover .directory-tree-extra {
@@ -51,26 +52,26 @@
     margin-right: 0;
   }
 
-  // 文件名样式 - 非 hover 态最大宽度 200px
+  // 文件名样式 - 非 hover 态最大宽度 260px
   .file-name {
-    max-width: 200px;
+    max-width: 260px;
     overflow: hidden;
     font-weight: 400;
   }
 
-  // 搜索结果路径样式 - 非 hover 态最大宽度 200px
+  // 搜索结果路径样式 - 非 hover 态最大宽度 260px
   .search-result-path {
     font-size: 12px;
     color: #6e7b8d;
     line-height: 18px;
-    max-width: 200px;
+    max-width: 260px;
     overflow: hidden;
   }
 
-  // hover 态样式 - 最大宽度 140px
+  // hover 态样式 - 最大宽度 200px
   .arco-tree-node:hover {
     .file-name {
-      max-width: 140px;
+      max-width: 200px;
       color: #007dfa;
     }
 
@@ -80,7 +81,7 @@
   }
 
   .directory-tree {
-    height: calc(100% - 40px);
+    height: calc(100% - 50px);
     overflow-y: auto;
   }
 

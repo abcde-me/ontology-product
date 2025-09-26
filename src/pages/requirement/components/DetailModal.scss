@@ -1,22 +1,29 @@
 .fullscreen-modal {
   .fullscreen-modal-content {
-    position: relative;
     display: flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
   }
 
   .content-tree {
-    margin-right: 16px;
-    max-height: 600px;
-    position: sticky;
-    top: 0;
-    z-index: 20;
+    height: 650px;
     width: 20%;
     overflow-y: scroll;
     scrollbar-width: none;
     scrollbar-gutter: stable;
+    padding-top: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: 16px;
+    border-right: 1px solid #e2e8f0;
+    position: relative;
 
     &::-webkit-scrollbar {
       display: none;
+    }
+
+    .arco-tree-node {
+      width: 300px;
     }
   }
 
@@ -29,13 +36,37 @@
 
   .content-table {
     flex: 1;
-    max-height: 600px;
+    height: 592px;
     overflow-y: scroll;
     scrollbar-width: none;
     scrollbar-gutter: auto;
+    padding-top: 12px;
+    padding-bottom: 16px;
 
     &::-webkit-scrollbar {
       display: none;
+    }
+
+    .arco-table-content-inner,
+    .data-catalog-left-box {
+      scrollbar-gutter: auto;
+    }
+
+    // 表单部分只占用所需高度
+    .content-table-form {
+      flex-shrink: 0; // 不缩小
+    }
+
+    // 让 Table 组件占据剩余空间
+    .arco-table {
+      flex: 1; // 占据剩余空间
+      display: flex;
+      flex-direction: column;
+    }
+
+    .arco-table-content {
+      flex: 1;
+      overflow-y: auto; // 表格内容区域可滚动
     }
   }
 
@@ -47,5 +78,9 @@
 
   .form-inputs {
     display: flex;
+
+    .arco-form-layout-inline {
+      margin-bottom: 12px;
+    }
   }
 }

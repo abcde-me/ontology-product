@@ -184,6 +184,8 @@ const Edit = (props) => {
     useState<string>('');
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
+  // TreeSelect 下拉框显示状态
+  const [dropdownVisible, setDropdownVisible] = useState(false);
   const getTableList = async (connector_id: string) => {
     try {
       const res = await getdetailList(connector_id);
@@ -697,6 +699,8 @@ const Edit = (props) => {
             className="db-tree-select"
             placeholder="Please select ..."
             allowClear
+            popupVisible={dropdownVisible}
+            onVisibleChange={setDropdownVisible}
             value={treeSelectDisplayValue}
             onChange={(value) => {
               // 处理清除选择的情况
@@ -737,6 +741,8 @@ const Edit = (props) => {
                     'dest_path:',
                     nodeId
                   );
+                  // 选择完成后关闭下拉框
+                  setDropdownVisible(false);
                 }}
                 showAddTree={true}
                 enableRootAdd={true}

@@ -28,38 +28,13 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   const [treeData, setTreeData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  // 取树的内容 格式化
-  const transformData = (originalSrc) => {
-    // 递归处理单条数据（支持目录/数据卷）
-    const transformItem = (item) => {
-      const transformed = { ...item };
-      // 替换type_name（如果是数据卷）
-      if (transformed.type_name === 'volume') {
-        transformed.type_name = '数据卷';
-      }
-      // 处理children中的"volume"键为"数据卷"
-      if (transformed.children && transformed.children.volume) {
-        // 递归处理子数据卷
-        transformed.children['数据卷'] = transformed.children.volume.map(
-          (vol) => transformItem(vol)
-        );
-        // 删除原始volume键
-        delete transformed.children.volume;
-      }
-      return transformed;
-    };
-
-    // 处理整个src数组（目录列表）
-    return originalSrc.map((catalog) => transformItem(catalog));
-  };
 
   useEffect(() => {
     // let newTreeData: TreeNodeType[] = [];
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          console.log(res?.data, 'res');
-          setTreeData(res.data);
+          setTreeData(res?.data || []);
         })
         .catch((err) => {
           console.error(err);
@@ -86,38 +61,6 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
     return loop(treeData);
-  };
-
-  /**
-   * 递归查找节点，根据节点层级返回所有最深层id
-   * @param {Array} array - 要搜索的数组
-   * @param {*} targetId - 要查找的id值
-   * @returns {Array|null} - 找到的所有最深层id数组或null
-   */
-  const findAllLeafNodeIds = (array, targetId) => {
-    // 遍历当前层级的每个元素
-    for (const item of array) {
-      // 如果当前元素的id匹配目标id
-      if (item.id === targetId) {
-        // 收集该节点下所有叶子节点的ID
-        return collectAllLeafIds([item]);
-      }
-
-      // 如果当前元素有children，递归查找
-      if (
-        item.children &&
-        Array.isArray(item.children) &&
-        item.children.length > 0
-      ) {
-        const result = findAllLeafNodeIds(item.children, targetId);
-        if (result !== null) {
-          return result;
-        }
-      }
-    }
-
-    // 未找到对应id
-    return null;
   };
 
   /**
@@ -171,7 +114,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       escToExit={false}
       maskClosable={false}
       className="dataSource-modal"
-      style={{ width: '90vw', height: '80vh' }}
+      style={{ width: '800px', height: '800px' }}
       footer={
         <>
           <Button
@@ -192,8 +135,8 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         </>
       }
     >
-      <div className="dataSource-modal-content">
-        <div>
+      <div className="department-modal-content">
+        <div className="department-modal-search">
           <Input
             type="text"
             allowClear
@@ -208,10 +151,12 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         </div>
         {treeData && treeData?.length > 0 ? (
           <Tree
+            selectable={false}
             checkable
+            checkedStrategy="child"
             autoExpandParent={false}
             style={{
-              height: '60vh',
+              height: '592px',
               overflowY: 'auto'
             }}
             renderTitle={({ title }: any) => {
@@ -225,8 +170,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             }}
             treeData={treeData}
             onCheck={(key, val) => {
-              // console.log(key, '=====top', findAllLeafNodeIds(treeData, key[0]), key[0]);
-              setCheckedKeys(findAllLeafNodeIds(treeData, key[0]));
+              setCheckedKeys(key);
             }}
           />
         ) : (

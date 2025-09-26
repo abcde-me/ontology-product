@@ -568,9 +568,6 @@ const DatasetForm = React.forwardRef<
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
             />
-            <div style={{ fontSize: '12px', color: '#6E7B8D', marginTop: 4 }}>
-              文件将以原始格式导出，保持数据完整性
-            </div>
           </Form.Item>
           <div className="formSelect">
             <FormItem

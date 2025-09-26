@@ -1,0 +1,26 @@
+.sql-data-directory-tree {
+  height: 100%;
+
+  .arco-tree-node {
+    &-title {
+      padding: 7px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+  }
+  .sql-data-directory-tree-catalogue {
+    .arco-tree-node-indent {
+      display: none;
+    }
+
+    .arco-tree-node-switcher {
+      width: 0;
+      display: none;
+    }
+  }
+
+  .arco-tree-node-custom-icon {
+    margin-right: 4px;
+  }
+}

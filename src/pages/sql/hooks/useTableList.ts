@@ -43,6 +43,7 @@ export const useTableList = <T = {}, U = {}>(
     pageSize: 10,
     current: 1,
     pageSizeChangeResetCurrent: true
+    // showJumper: true
   });
 
   async function loadData() {
