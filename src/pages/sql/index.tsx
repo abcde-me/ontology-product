@@ -105,7 +105,7 @@ const SqlIndex: React.FC = memo(() => {
 
   return (
     <Layout className="sql-page-layout">
-      <Sider width={isDasetTab ? '100%' : 300} className="sql-sider">
+      <Sider width={isDasetTab ? '100%' : 360} className="sql-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
