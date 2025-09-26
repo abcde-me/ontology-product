@@ -319,23 +319,23 @@ export default function Requirement() {
               <span
                 className="operate-text"
                 onClick={() => {
-                  // setLoading(true)
-                  // try {
-                  //   getAnnotationDownload({ requirement_id: record.id }).then((res) => {
-                  //     if (res.code === 0) {
-                  //       // const a = document.createElement('a');
-                  //       // a.href = res?.data?.download_url;
-                  //       // a.download = res?.data?.download_url; // 设置下载文件名
-                  //       // document.body.appendChild(a);
-                  //       // a.click();
-                  //     }
-                  //   }).catch(() => {
-                  //   }).finally(() => {
-                  //     setLoading(false)
-                  //   });
-                  // } catch {
-                  //   setLoading(false)
-                  // }
+                  setLoading(true);
+                  try {
+                    getAnnotationDownload({ requirement_id: record.id })
+                      .then((res) => {
+                        if (res.code === 0) {
+                          const a = document.createElement('a');
+                          a.href = res?.data?.download_url;
+                          document.body.appendChild(a);
+                          a.click();
+                        }
+                        setLoading(false);
+                      })
+                      .catch(() => {})
+                      .finally(() => {});
+                  } catch {
+                    setLoading(false);
+                  }
                 }}
               >
                 下载结果
