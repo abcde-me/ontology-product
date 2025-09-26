@@ -67,6 +67,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
       inputs?.case_uniformity
     ].some(Boolean);
   };
+  console.log(form.getFieldValue('data_standardization'), 'top123');
   return (
     <div className="wk-node-panel-content code-panel-content date-cleaning-panel mt-[16px]">
       <Form
@@ -118,6 +119,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 uncheckedText="关"
                 checked={form.getFieldValue('data_standardization')}
                 style={{ margin: 0, width: 'auto' }}
+                onChange={(checked) => {
+                  if (!checked) {
+                    form.setFieldsValue({
+                      unicode: false,
+                      traditional_to_simplified: false,
+                      case_uniformity: false
+                    });
+                  }
+                }}
               />
             </FormItem>
             <span className="date-switch-text">数据标准化</span>
