@@ -34,6 +34,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { openNewPage } from '@/utils/env';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptingNode from './components/scripting-node';
+import cn from 'classnames';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -217,7 +218,7 @@ export default function WorkflowTaskDetail() {
   const getTaskDetailTopDom = () => {
     return (
       <div
-        className="running-box"
+        className={cn('running-box')}
         style={
           taskDetailData.run_status === TaskRunStatus.success
             ? { backgroundColor: '#ECFDF5', border: '1px solid #10B981' }
@@ -233,10 +234,10 @@ export default function WorkflowTaskDetail() {
         }
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div className="running-item">
-            <span className="item-title">状态</span>
+          <div className={cn('running-item')}>
+            <span className={cn('running-item-title')}>状态</span>
             {taskDetailData.run_status === TaskRunStatus.success ? (
-              <div className="item-content-box">
+              <div className={cn('item-content-box')}>
                 <IconCheckCircleFill
                   style={{
                     color: '#10B981',
@@ -245,10 +246,10 @@ export default function WorkflowTaskDetail() {
                     height: 16
                   }}
                 />
-                <span className="item-content">运行成功</span>
+                <span className={cn('item-content')}>运行成功</span>
               </div>
             ) : taskDetailData.run_status === TaskRunStatus.fail ? (
-              <div className="item-content-box">
+              <div className={cn('item-content-box')}>
                 <IconCloseCircleFill
                   style={{
                     color: '#EF4444',
@@ -257,7 +258,7 @@ export default function WorkflowTaskDetail() {
                     height: 16
                   }}
                 />
-                <span className="item-content">运行失败</span>
+                <span className={cn('item-content')}>运行失败</span>
                 {taskDetailData.perms &&
                   taskDetailData.perms.includes(
                     WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE
@@ -270,12 +271,12 @@ export default function WorkflowTaskDetail() {
                         handleRetryWorkflow(taskId!);
                       }}
                     >
-                      <span className="operate-text">重试</span>
+                      <span className={cn('operate-text')}>重试</span>
                     </Popconfirm>
                   )}
               </div>
             ) : taskDetailData.run_status === TaskRunStatus.running ? (
-              <div className="item-content-box">
+              <div className={cn('item-content-box')}>
                 <IconLoading
                   style={{
                     color: '#007DFA',
@@ -284,7 +285,7 @@ export default function WorkflowTaskDetail() {
                     height: 16
                   }}
                 />
-                <span className="item-content">运行中</span>
+                <span className={cn('item-content')}>运行中</span>
                 {taskDetailData.perms &&
                   taskDetailData.perms.includes(
                     WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE
@@ -297,12 +298,12 @@ export default function WorkflowTaskDetail() {
                         handleStopWorkflow(taskId!);
                       }}
                     >
-                      <span className="operate-text">停止</span>
+                      <span className={cn('operate-text')}>停止</span>
                     </Popconfirm>
                   )}
               </div>
             ) : (
-              <div className="item-content-box">
+              <div className={cn('item-content-box')}>
                 <IconExclamationCircleFill
                   style={{
                     color: '#6E7B8D',
@@ -311,34 +312,34 @@ export default function WorkflowTaskDetail() {
                     height: 16
                   }}
                 />
-                <span className="item-content">已停止</span>
+                <span className={cn('item-content')}>已停止</span>
               </div>
             )}
           </div>
-          <div className="running-item">
-            <span className="item-title">总用时</span>
-            <div className="item-content-box">
-              <span className="item-content">
+          <div className={cn('running-item')}>
+            <span className={cn('running-item-title')}>总用时</span>
+            <div className={cn('item-content-box')}>
+              <span className={cn('item-content')}>
                 {taskDetailData?.time_size === ''
                   ? '-'
                   : (taskDetailData?.time_size ?? '-')}
               </span>
             </div>
           </div>
-          <div className="running-item">
-            <span className="item-title">开始时间</span>
-            <div className="item-content-box">
-              <span className="item-content">
+          <div className={cn('running-item')}>
+            <span className={cn('running-item-title')}>开始时间</span>
+            <div className={cn('item-content-box')}>
+              <span className={cn('item-content')}>
                 {taskDetailData?.start_time === ''
                   ? '-'
                   : (taskDetailData?.start_time ?? '-')}
               </span>
             </div>
           </div>
-          <div className="running-item">
-            <span className="item-title">结束时间</span>
-            <div className="item-content-box">
-              <span className="item-content">
+          <div className={cn('running-item')}>
+            <span className={cn('running-item-title')}>结束时间</span>
+            <div className={cn('item-content-box')}>
+              <span className={cn('item-content')}>
                 {taskDetailData?.end_time === ''
                   ? '-'
                   : (taskDetailData?.end_time ?? '-')}
@@ -347,7 +348,7 @@ export default function WorkflowTaskDetail() {
           </div>
         </div>
         {taskDetailData.run_status === TaskRunStatus.fail ? (
-          <span className="fail-tip">{taskDetailData.error_msg}</span>
+          <span className={cn('fail-tip')}>{taskDetailData.error_msg}</span>
         ) : (
           <></>
         )}
@@ -448,7 +449,7 @@ export default function WorkflowTaskDetail() {
   // 获取作业内容区域dom
   const getTaskContentDom = () => {
     return (
-      <div className="work-region">
+      <div className={cn('work-region')}>
         <Tabs
           key="card"
           tabPosition={'left'}
@@ -566,8 +567,8 @@ export default function WorkflowTaskDetail() {
   };
 
   return (
-    <div className="workflow-task-detail">
-      <div className="head-breadcrumb-box">
+    <div className={cn('workflow-task-detail')}>
+      <div className={cn('head-breadcrumb-box')}>
         <IconArrowLeft
           style={{ cursor: 'pointer', fontSize: '14px' }}
           onClick={() => history.goBack()}
@@ -577,7 +578,7 @@ export default function WorkflowTaskDetail() {
             onClick={() =>
               history.push('/tenant/compute/modaforge/workflowTask')
             }
-            className={'breadcrumb-text'}
+            className={cn('breadcrumb-text')}
           >
             作业详情
           </BreadcrumbItem>
@@ -587,8 +588,8 @@ export default function WorkflowTaskDetail() {
       {/* 详情顶部状态区域 */}
       {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
-      <div className="topology-diagram">
-        <div className="workflow-name" onClick={handleClickWorkflow}>
+      <div className={cn('topology-diagram')}>
+        <div className={cn('workflow-name')} onClick={handleClickWorkflow}>
           {workflowName}
         </div>
         <Workflow setHeight={true} />

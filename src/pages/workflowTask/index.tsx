@@ -15,6 +15,7 @@ import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import cn from 'classnames';
 
 const InputSearch = Input.Search;
 
@@ -167,7 +168,7 @@ export default function WorkflowTask() {
       dataIndex: 'id',
       width: 80,
       ellipsis: true,
-      className: 'hover-change',
+      className: cn('hover-change'),
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.id)}
@@ -277,7 +278,7 @@ export default function WorkflowTask() {
       dataIndex: 'source_path',
       width: 200,
       ellipsis: true,
-      className: 'hover-change',
+      className: cn('hover-change'),
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.source_path)}
@@ -298,7 +299,7 @@ export default function WorkflowTask() {
       dataIndex: 'target_path',
       width: 200,
       ellipsis: true,
-      className: 'hover-change',
+      className: cn('hover-change'),
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.target_path)}
@@ -339,7 +340,7 @@ export default function WorkflowTask() {
       fixed: 'right',
       render: (_, record) => (
         <span
-          className="operate-text"
+          className={cn('operate-text')}
           onClick={() =>
             handleToTaskDeatil(
               record?.id ?? '',
@@ -356,7 +357,7 @@ export default function WorkflowTask() {
   ];
 
   return (
-    <div className="workflow-task">
+    <div className={cn('workflow-task')}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>作业</h1>
       <div
         style={{
@@ -368,7 +369,7 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            className="task-select"
+            className={cn('task-select')}
             style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}

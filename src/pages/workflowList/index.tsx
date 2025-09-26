@@ -26,6 +26,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
+import cn from 'classnames';
 
 const InputSearch = Input.Search;
 
@@ -138,10 +139,12 @@ export default function WorkflowList() {
   ) => {
     Modal.confirm({
       title: (
-        <span className="workflow-list-modal-title">确认删除工作流吗？</span>
+        <span className={cn('workflow-list-modal-title')}>
+          确认删除工作流吗？
+        </span>
       ),
       content: (
-        <div className="workflow-list-modal-content">
+        <div className={cn('workflow-list-modal-content')}>
           删除该工作流后，工作流中的内容将全部清除。
         </div>
       ),
@@ -206,7 +209,7 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name',
       width: 280,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: cn('hover-change workflow-name'),
       render: (_, record) => {
         return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
           <EllipsisPopover
@@ -245,13 +248,13 @@ export default function WorkflowList() {
       width: 100,
       render: (_, record) =>
         record.is_online ? (
-          <div className="publish-part published">
-            <Success11Icon className="mr-[6px] size-[16px]" />
+          <div className={cn('publish-part published')}>
+            <Success11Icon className={cn('mr-[6px] size-[16px]')} />
             <span>已上线</span>
           </div>
         ) : (
-          <div className="publish-part not-published">
-            <IconClockCircle className="mr-[6px] size-[16px]" />
+          <div className={cn('publish-part not-published')}>
+            <IconClockCircle className={cn('mr-[6px] size-[16px]')} />
             <span>未上线</span>
           </div>
         ),
@@ -271,7 +274,7 @@ export default function WorkflowList() {
       dataIndex: 'source_path',
       width: 280,
       ellipsis: true,
-      className: 'hover-change',
+      className: cn('hover-change'),
       render: (_, record) => {
         return renderEmptyPlaceholder(record.source_path) !== '-' ? (
           <EllipsisPopover
@@ -296,7 +299,7 @@ export default function WorkflowList() {
       dataIndex: 'target_path',
       width: 280,
       ellipsis: true,
-      className: 'hover-change',
+      className: cn('hover-change'),
       render: (_, record) => {
         return renderEmptyPlaceholder(record.target_path) !== '-' ? (
           <EllipsisPopover
@@ -352,7 +355,7 @@ export default function WorkflowList() {
           <div style={{ display: 'flex' }}>
             {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && (
               <span
-                className="operate-text"
+                className={cn('operate-text')}
                 onClick={() => {
                   viewDetailWorkflow(
                     record.workflow_uuid,
@@ -365,7 +368,7 @@ export default function WorkflowList() {
             )}
             {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_COPY) && (
               <span
-                className="operate-text"
+                className={cn('operate-text')}
                 onClick={() => {
                   handleCloneWorkflow(record.workflow_uuid);
                 }}
@@ -381,9 +384,10 @@ export default function WorkflowList() {
                 disabled={!record.is_online}
               >
                 <span
-                  className={
-                    record.is_online ? 'disabled-text' : 'operate-text'
-                  }
+                  className={cn({
+                    'disabled-text': record.is_online,
+                    'operate-text': !record.is_online
+                  })}
                   onClick={() =>
                     handleDelete(record.workflow_uuid, record.workflow_version)
                   }
@@ -399,7 +403,7 @@ export default function WorkflowList() {
   ];
 
   return (
-    <div className="workflow">
+    <div className={cn('workflow')}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>工作流</h1>
       <div
         style={{
