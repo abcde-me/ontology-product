@@ -174,6 +174,10 @@ const DatasetsList: FC = () => {
         {
           text: '导出失败',
           value: ExportStatus.ExportFailed
+        },
+        {
+          text: '导出终止',
+          value: ExportStatus.ExportTerminated
         }
       ],
       onFilter: (value, record) => {
