@@ -1,9 +1,9 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
-import DataIcon from '@/assets/python/data-left-menu.svg';
+import DataIcon from '@/assets/sql/data-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
-import PythonIcon from '@/assets/python/python-left-menu.svg';
-import DasetIcon from '@/assets/python/daset-left-menu.svg';
+import SQLIcon from '@/assets/sql/sql-left-menu.svg';
+import DasetIcon from '@/assets/sql/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
@@ -117,7 +117,7 @@ const SqlIndex: React.FC = memo(() => {
             key="data"
             title={
               <Popover content="源数据" position="right">
-                <DataIcon />
+                <DataIcon className="sql-menu-icon" />
               </Popover>
             }
           >
@@ -133,7 +133,7 @@ const SqlIndex: React.FC = memo(() => {
             key="files"
             title={
               <Popover content="SQL脚本列表" position="right">
-                <PythonIcon />
+                <SQLIcon className="sql-menu-icon" />
               </Popover>
             }
           >
@@ -154,7 +154,7 @@ const SqlIndex: React.FC = memo(() => {
               key="dataset"
               title={
                 <Popover content="数据集导出任务" position="right">
-                  <DasetIcon />
+                  <DasetIcon className="sql-menu-icon" />
                 </Popover>
               }
             >
