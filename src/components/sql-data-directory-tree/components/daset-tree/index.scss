@@ -121,6 +121,10 @@
       color: var(--color-text-2);
       font-size: 14px;
       max-width: 220px;
+
+      &-scheam {
+        max-width: 180px;
+      }
     }
 
     &-size {
