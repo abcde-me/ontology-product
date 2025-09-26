@@ -3,8 +3,8 @@ import { Button, Message, Space } from '@arco-design/web-react';
 import {
   IconUpload,
   IconSettings,
-  IconPlayArrow,
-  IconStop
+  IconStop,
+  IconPlayArrowFill
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -258,7 +258,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                     runStatus === RunningStatus.RUNNING ? (
                       <IconStop className="mr-[4px]" />
                     ) : (
-                      <IconPlayArrow className="mr-[4px]" />
+                      <IconPlayArrowFill className="mr-[4px]" />
                     )
                   }
                   disabled={editorContent.trim() === ''}
