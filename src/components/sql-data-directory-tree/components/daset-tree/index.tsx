@@ -142,13 +142,17 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
               return (
                 <div className="sql-dataset-tree__node">
                   <div className="sql-dataset-tree__node-info">
-                    <EllipsisPopover
+                    <div
                       className={`sql-dataset-tree__node-title ${isScheam ? 'sql-dataset-tree__node-title-scheam' : 'sql-dataset-tree__node-title-dataset'}`}
-                      value={highlightSearchKeyword(
-                        String(nodeData?.title ?? ''),
-                        searchKeyword
-                      )}
-                    />
+                    >
+                      <EllipsisPopover
+                        // className={`sql-dataset-tree__node-title ${isScheam ? 'sql-dataset-tree__node-title-scheam' : 'sql-dataset-tree__node-title-dataset'}`}
+                        value={highlightSearchKeyword(
+                          String(nodeData?.title ?? ''),
+                          searchKeyword
+                        )}
+                      />
+                    </div>
                     {isDataset && (
                       <div className="sql-dataset-tree__node-size">
                         {formatFileSize(Number(nodeData?.latest_size ?? 0))}

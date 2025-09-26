@@ -165,7 +165,6 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
                   >
                     <EllipsisPopover
-                      // className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
