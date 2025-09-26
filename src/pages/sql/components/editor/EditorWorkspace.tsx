@@ -198,9 +198,9 @@ const EditorWorkspaceContent: React.FC<{
 
             <Button
               type="text"
-              icon={<SQLFormatIcon className="fromat-icon" />}
+              icon={<SQLFormatIcon />}
               onClick={handleFormatCode}
-              className="fromat-icon_btn h-[26px]"
+              className="h-[26px]"
             >
               格式化
             </Button>
