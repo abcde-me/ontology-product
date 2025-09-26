@@ -36,15 +36,14 @@
         }
 
         .sql-source-tree__node-title-table {
-          max-width: 60px;
+          max-width: 50px;
         }
 
         .sql-source-tree__node-title-column {
-          width: 80px;
+          max-width: 50px;
         }
 
         .sql-source-tree__node-actions {
-          width: auto;
           opacity: 1;
           visibility: visible;
         }
@@ -118,13 +117,28 @@
     justify-content: space-between;
     width: 100%;
     position: relative;
-    // max-width: 210px;
 
     &-title {
       flex: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 186px;
+      max-width: 150px;
+
+      &-catalog {
+        max-width: 250px;
+      }
+
+      &-db {
+        max-width: 170px;
+      }
+
+      &-table {
+        max-width: 130px;
+      }
+
+      &-column {
+        max-width: 100px;
+      }
     }
 
     &-actions {
@@ -132,8 +146,10 @@
       align-items: center;
       opacity: 0;
       visibility: hidden;
-      width: 0;
-      overflow: hidden;
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 
