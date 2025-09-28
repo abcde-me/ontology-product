@@ -40,7 +40,7 @@ const ModalDatasetForm = (props: ModalDatasetFormProps) => {
   return (
     <Modal
       title="保存为新数据集"
-      style={{ width: 636 }}
+      style={{ width: 660 }}
       visible={visible}
       onCancel={onCancel}
       footer={null}
@@ -176,12 +176,12 @@ function DatasetForm(props) {
             rules={[
               {
                 validator(value, cb) {
-                  return requiredValidator(value, cb, '请输入中文名称');
+                  return requiredValidator(value, cb, '请输入数据集名称');
                 }
               }
             ]}
           >
-            <Input allowClear placeholder="请输入中文名称" />
+            <Input allowClear placeholder="请输入数据集名称" />
           </FormItem>
           <FormItem
             field="strage_type"
@@ -274,7 +274,7 @@ function DatasetForm(props) {
           data={tableData}
           rowKey="key"
           pagination={false}
-          scroll={{ y: 286 }}
+          scroll={{ y: 243 }}
           border={false}
         />
       </div>

@@ -8,7 +8,8 @@ import {
   DatePicker,
   Table,
   Pagination,
-  Empty
+  Empty,
+  Tooltip
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
@@ -129,7 +130,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                             title: subItem.name,
                             key: `${item.id},${item.id}数据卷,${subItem.id}`,
                             id: subItem?.id,
-                            level: 3
+                            level: 3,
+                            disabled: type === 'detail'
                           }))
                         }
                       ]
@@ -148,9 +150,10 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   // 树的内容
   const renderTreeContent = () => {
     return (
-      <div>
+      <div className="arco-tree">
         {treeData && treeData.length > 0 ? (
           <Tree
+            blockNode={true}
             defaultExpandedKeys={getDetailObj?.label_data_set?.[0]?.dir_name.split(
               ','
             )}
@@ -158,17 +161,18 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
-            renderTitle={(node) => {
+            renderTitle={(node: any) => {
               return (
                 <div
                   style={{
-                    width: '300px',
+                    width: node?.childrenData?.length > 0 ? '170px' : '120px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    color: '#0F172A'
                   }}
                 >
-                  {node.title}
+                  <Tooltip content={node.title}>{node.title}</Tooltip>
                 </div>
               );
             }}
@@ -178,6 +182,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 setPageSize(10);
                 setCheckedKeys([value[0]?.split(',')?.[2]]);
                 setDir_path(value);
+                getChildTableSelectData(selectedRowsContent, value);
               }
             }}
           />
@@ -302,7 +307,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   const getTableSelectContent = () => {
-    getChildTableSelectData(selectedRowsContent, dir_path);
     onClose();
   };
 
@@ -325,30 +329,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="fullscreen-modal"
       style={{ width: '960px', height: '800px', overflowY: 'auto' }}
-      footer={
-        <>
-          <Button
-            onClick={() => {
-              onClose();
-            }}
-          >
-            取消
-          </Button>
-          <Button
-            disabled={type === 'detail'}
-            type="primary"
-            onClick={() => {
-              getTableSelectContent();
-            }}
-          >
-            确定
-          </Button>
-        </>
-      }
+      footer={null}
     >
-      <div className="fullscreen-modal-content">
+      <div className="department-modal-content">
         <div className="content-tree">
-          <div>
+          <div className="search-input">
             <Input
               type="text"
               placeholder="请输入名称搜索"
@@ -394,6 +379,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               description: '暂无数据'
             })}
             rowSelection={{
+              checkboxProps: () => {
+                return {
+                  disabled: type === 'detail'
+                };
+              },
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
               onChange: (selectedRowKeys, selectedRows) => {
@@ -414,6 +404,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 const mergedRows = Array.from(mergedMap.values());
                 setSelectedRowsContent(mergedRows);
                 setSelectedRowKeys(mergedRows.map((item) => item.execution_id));
+                getChildTableSelectData(mergedRows, dir_path);
               }
             }}
           />
