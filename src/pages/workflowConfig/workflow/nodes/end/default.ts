@@ -38,7 +38,7 @@ const nodeDefault: NodeDefault<EndNodeType> = {
     }
     if (payload.target_path_id === undefined) {
       isValid = true;
-      errorMessages = '数据目标目录未配置';
+      errorMessages = '目标数据目录未配置';
     }
     return {
       isValid,
