@@ -1,5 +1,20 @@
-.department-modal-content {
-  .department-modal-search {
-    margin-bottom: 8px;
+.departmentModal-content {
+  .arco-tree-node-title {
+    color: #0f172a !important;
+  }
+
+  .arco-tree-node-selected .arco-tree-node-title,
+  .arco-tree-node-selected .arco-tree-node-title:hover {
+    color: #0f172a !important;
+    background-color: transparent !important;
+  }
+
+  .arco-tree-node-title:hover,
+  .arco-tree-node:hover {
+    background-color: transparent !important;
+  }
+
+  .arco-tree-node.arco-tree-node-selected {
+    background-color: transparent !important;
   }
 }
