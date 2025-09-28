@@ -5,7 +5,6 @@ import NoData from '@/components/no-data';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { RunningStatus } from '@/types/pythonApi';
 import './index.scss';
-import { useFileManager } from '../../hooks/useFileManager';
 
 const { TabPane } = Tabs;
 
@@ -29,6 +28,7 @@ interface EditorContentProps {
   onEditorFocusChange?: (isFocused: boolean) => void;
   refreshDirectory?: () => Promise<void>;
   selectFile?: (fileId: string) => void;
+  isCanCreate?: boolean; // 添加创建权限属性
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -44,7 +44,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onInsertContent,
     onEditorFocusChange,
     refreshDirectory,
-    selectFile
+    selectFile,
+    isCanCreate = true // 添加 isCanCreate 参数，默认值为 true
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -77,7 +78,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
       onRemoveTab(key);
     };
 
-    const { isCanCreate } = useFileManager();
+    // isCanCreate 现在通过 props 传入
 
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {

@@ -180,6 +180,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
+      setLoading(true);
       try {
         if (currentFolderId && onFolderClick) {
           const newData = await onFolderClick(currentFolderId);
@@ -193,6 +194,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         }
       } catch (error) {
         console.error('刷新目录失败:', error);
+      } finally {
+        setLoading(false);
       }
     }, [currentFolderId, onFolderClick, onBackToParent, formatTreeData]);
 
@@ -225,6 +228,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       const isFolder = meta?.type === PythonItemType.Directory || hasChildren;
 
       if (isFolder && onFolderClick) {
+        setLoading(true);
         try {
           const np = props as NodeProps;
           const folderId: string = meta?.id
@@ -255,6 +259,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           setExpandedKeys([]);
         } catch (error) {
           Message.error('进入文件夹失败');
+        } finally {
+          setLoading(false);
         }
       }
     };
@@ -266,6 +272,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       newStack: Array<{ id: string; name: string }>
     ) => {
       handleSearchClear();
+      setLoading(true);
       try {
         // 更新文件夹栈
         setFolderStack(newStack);
@@ -286,35 +293,33 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         setExpandedKeys([]);
       } catch (error) {
         Message.error('跳转到文件夹失败');
+      } finally {
+        setLoading(false);
       }
     };
 
     // 处理返回上级目录
     const handleBackToParent = async () => {
       handleSearchClear();
-      // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
-      if (folderStack.length === 0 && currentFolderId && currentFolderName) {
-        setCurrentFolderId('');
-        setCurrentFolderName('');
-        // 重新请求根目录数据
-        if (onBackToParent) {
-          try {
+      setLoading(true);
+      try {
+        // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
+        if (folderStack.length === 0 && currentFolderId && currentFolderName) {
+          setCurrentFolderId('');
+          setCurrentFolderName('');
+          // 重新请求根目录数据
+          if (onBackToParent) {
             const newData = await onBackToParent('0');
             const formattedData = formatTreeData(newData as any[]);
             setTreeData(formattedData);
-          } catch (error) {
-            Message.error('返回根目录失败');
-            return;
           }
+          setSelectedKeys([]);
+          setExpandedKeys([]);
+          return;
         }
-        setSelectedKeys([]);
-        setExpandedKeys([]);
-        return;
-      }
 
-      if (folderStack.length === 0) return;
+        if (folderStack.length === 0) return;
 
-      try {
         const parentFolder = folderStack[folderStack.length - 1];
         const newStack = folderStack.slice(0, -1);
 
@@ -345,6 +350,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         setExpandedKeys([]);
       } catch (error) {
         Message.error('返回上级目录失败');
+      } finally {
+        setLoading(false);
       }
     };
 
