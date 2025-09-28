@@ -123,6 +123,13 @@
     border-radius: 50%;
     display: inline-block;
   }
+
+  .workflow-name-content {
+    width: 268px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .arco-modal-footer .arco-btn-secondary:focus {

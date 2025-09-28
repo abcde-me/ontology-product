@@ -118,6 +118,26 @@ export default function RequirementDetail() {
   const [formType, setFormType]: any = useState({});
   const [text_fl_data, setText_fl_data] = useState([]);
   const [groupClassVal, setGroupClassVal] = useState(1);
+
+  // 生成初始示例数据
+  const generateInitialData = (): LabelData[] => {
+    return [
+      {
+        label_id: uuidV4(),
+        label_name_cn: '',
+        label_name_en: '',
+        label_shape: LabelShape.RECTANGLE,
+        label_colour: getRandomHexColorStrict(),
+        label_info_attribute_groups: []
+      }
+    ];
+  };
+
+  // 初始化状态
+  const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
+  // 模版数据存储
+  const [templateData, setTemplateData] = useState<any[]>([]);
+
   useEffect(() => {
     if (selectedRadio !== '') {
       setIsShowErrorInfo(false);
@@ -126,6 +146,45 @@ export default function RequirementDetail() {
       setIsShowDataErrorInfo(false);
     }
   }, [selectedRadio, selectedData]);
+  // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
+  useEffect(() => {
+    if (activeTab === 1) {
+      // 深拷贝当前的 templateData 来触发更新
+      const updatedTemplateData = _.cloneDeep(templateData);
+      setTemplateData(updatedTemplateData);
+    }
+  }, [activeTab]);
+
+  // 添加新的useEffect来同步模板更新到标签
+  useEffect(() => {
+    // 当templateData更新时，检查并更新所有使用了该模板的标签属性组
+    const updatedDatalist = _.cloneDeep(templateData);
+    // 遍历每个标签
+    // 遍历标签中的每个属性组
+    updatedDatalist.forEach((attrGroup: any, groupIndex: any) => {
+      form2.setFieldValue(
+        `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
+        attrGroup.attribute_group_name
+      );
+
+      // 如果新组有属性，也需要设置这些属性的表单字段
+      if (
+        attrGroup.label_info_attribute &&
+        attrGroup.label_info_attribute.length > 0
+      ) {
+        attrGroup.label_info_attribute.forEach((attribute, attrIndex) => {
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
+            attribute.attribute_name_cn
+          );
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
+            attribute.attribute_name_en
+          );
+        });
+      }
+    });
+  }, [templateData]);
   // 基础配置
 
   const handleChildData = (data: any, key) => {
@@ -341,44 +400,6 @@ export default function RequirementDetail() {
     );
   };
 
-  // 生成初始示例数据
-  const generateInitialData = (): LabelData[] => {
-    return [
-      {
-        label_id: uuidV4(),
-        label_name_cn: '',
-        label_name_en: '',
-        label_shape: LabelShape.RECTANGLE,
-        label_colour: getRandomHexColorStrict(),
-        label_info_attribute_groups: [
-          {
-            attribute_id: uuidV4(),
-            attribute_group_name: '',
-            attribute_group_class: 1,
-            attribute_group_type: 1,
-            label_info_attribute: [
-              {
-                label_info_id: uuidV4(),
-                attribute_name_cn: '',
-                attribute_name_en: '',
-                input_type: 1
-              }
-            ]
-          }
-        ]
-      }
-    ];
-  };
-
-  // 初始化状态
-  const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
-  // 模版数据存储
-  const [templateData, setTemplateData] = useState<any[]>([]);
-  /**
-   * 修复后的通用修改方法 - 可以修改任意层级的任意字段
-   * @param path 路径数组，格式如: [datalist索引, '字段名', 数组索引, '字段名', ...]
-   * @param value 要设置的新值
-   */
   const updateNestedValue = (
     path: (string | number)[],
     value: any,
@@ -405,7 +426,6 @@ export default function RequirementDetail() {
       }
       current = current[key];
     }
-    console.log(newData, 'top ------‘12321321231');
     // 更新状态
     isTemp ? setTemplateData(newData) : setDatalist(newData);
   };
@@ -455,9 +475,7 @@ export default function RequirementDetail() {
 
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
-
       // 将新标签添加到数组末尾
-      console.log(newDatalist, ' newDatalist');
       return newDatalist;
     });
   };
@@ -512,7 +530,48 @@ export default function RequirementDetail() {
       updatedAttributes
     );
   };
+  // 模版的内容放到标注中
+  const tempDataToLabel = (labelIndex: number, attributeGroupName: string) => {
+    // 通过属性组名称查找对应的模板数据
+    const selectedTemplate = templateData.find(
+      (template) => template.attribute_group_name === attributeGroupName
+    );
+    if (selectedTemplate) {
+      // 深拷贝选中的模板，确保包含完整的label_info_attribute内容
+      const newGroup = _.cloneDeep(selectedTemplate);
+      // 获取当前属性组并添加新组
+      const currentGroups = datalist[labelIndex].label_info_attribute_groups;
+      updateNestedValue(
+        [labelIndex, 'label_info_attribute_groups'],
+        [...currentGroups, newGroup]
+      );
+      form2.setFieldValue(
+        `label_info_attribute_groups_${newGroup.attribute_id}_attribute_group_name`,
+        newGroup.attribute_group_name
+      );
 
+      // 如果新组有属性，也需要设置这些属性的表单字段
+      if (
+        newGroup.label_info_attribute &&
+        newGroup.label_info_attribute.length > 0
+      ) {
+        newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
+            attribute.attribute_name_cn
+          );
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
+            attribute.attribute_name_en
+          );
+          form2.setFieldValue(
+            `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_input_type`,
+            attribute.input_type
+          );
+        });
+      }
+    }
+  };
   //  属性模版名字点击
   const handleTemplateClick = (attributeGroupName: any, labelIndex: number) => {
     // 同组标签如果选择一个模版就不能二次选择
@@ -523,47 +582,7 @@ export default function RequirementDetail() {
     ) {
       setActiveTab(2);
     } else {
-      // 通过属性组名称查找对应的模板数据
-      const selectedTemplate = templateData.find(
-        (template) => template.attribute_group_name === attributeGroupName
-      );
-      console.log(selectedTemplate, 'selectedTemplate', datalist);
-      if (selectedTemplate) {
-        // 深拷贝选中的模板，确保包含完整的label_info_attribute内容
-        const newGroup = _.cloneDeep(selectedTemplate);
-
-        // 获取当前属性组并添加新组
-        const currentGroups = datalist[labelIndex].label_info_attribute_groups;
-        updateNestedValue(
-          [labelIndex, 'label_info_attribute_groups'],
-          [...currentGroups, newGroup]
-        );
-        form2.setFieldValue(
-          `label_info_attribute_groups_${newGroup.attribute_id}_attribute_group_name`,
-          newGroup.attribute_group_name
-        );
-
-        // 如果新组有属性，也需要设置这些属性的表单字段
-        if (
-          newGroup.label_info_attribute &&
-          newGroup.label_info_attribute.length > 0
-        ) {
-          newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-            form2.setFieldValue(
-              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
-              attribute.attribute_name_cn
-            );
-            form2.setFieldValue(
-              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
-              attribute.attribute_name_en
-            );
-            form2.setFieldValue(
-              `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_input_type`,
-              attribute.input_type
-            );
-          });
-        }
-      }
+      tempDataToLabel(labelIndex, attributeGroupName);
     }
   };
   // 有必填信息没输入
@@ -837,7 +856,7 @@ export default function RequirementDetail() {
         ) : (
           <div>
             <IconArrowLeft
-              style={{ cursor: 'pointer', fontSize: '14px' }}
+              style={{ cursor: 'pointer', fontSize: '14px', marginRight: 12 }}
               onClick={() => history.goBack()}
             />
             <Breadcrumb style={{ fontSize: 20 }}>
@@ -845,7 +864,7 @@ export default function RequirementDetail() {
                 onClick={() => history.goBack()}
                 className={'breadcrumb-text'}
               >
-                标注详情
+                需求管理
               </BreadcrumbItem>
               <BreadcrumbItem>{getDetailObj?.name || ''}</BreadcrumbItem>
             </Breadcrumb>
@@ -959,7 +978,7 @@ export default function RequirementDetail() {
                     setModalVisible(true);
                   }}
                 >
-                  选择数据
+                  {type === 'detail' ? '查看已选' : '选择数据'}
                 </Button>
                 <div className="data-set-text">
                   已选数据量{' '}
@@ -1380,7 +1399,6 @@ export default function RequirementDetail() {
                                                 attrGroup.attribute_group_class
                                               }
                                               onChange={(value) => {
-                                                console.log(value, '===== top');
                                                 setGroupClassVal(value);
                                                 updateNestedValue(
                                                   [
@@ -1912,21 +1930,23 @@ export default function RequirementDetail() {
                                   }
                                 )}
                               <div className="btn-content-items">
-                                <Button
-                                  disabled={type === 'detail'}
-                                  className={
-                                    type === 'detail'
-                                      ? 'btn-add-label'
-                                      : 'btn-add'
-                                  }
-                                  style={{ marginRight: 16 }}
-                                  onClick={() => {
-                                    addNewLabel();
-                                  }}
-                                >
-                                  <IconPlus />
-                                  添加标签
-                                </Button>
+                                {labelIndex === datalist?.length - 1 && (
+                                  <Button
+                                    disabled={type === 'detail'}
+                                    className={
+                                      type === 'detail'
+                                        ? 'btn-add-label'
+                                        : 'btn-add'
+                                    }
+                                    style={{ marginRight: 16 }}
+                                    onClick={() => {
+                                      addNewLabel();
+                                    }}
+                                  >
+                                    <IconPlus />
+                                    添加标签
+                                  </Button>
+                                )}
                                 <Button
                                   disabled={type === 'detail'}
                                   className={
@@ -2397,37 +2417,42 @@ export default function RequirementDetail() {
                                             }}
                                           />
                                         </FormItem>
-                                        {attrGroup.label_info_attribute
-                                          ?.length > 1 && (
-                                          <Tooltip content="删除">
-                                            <IconDelete
-                                              className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
-                                              fontSize={16}
-                                              onClick={() => {
-                                                // 删除当前属性组中的选项
-                                                if (type !== 'detail') {
-                                                  setTemplateData(
-                                                    templateData?.map(
-                                                      (label) =>
-                                                        label.attribute_id ===
-                                                        attrGroup.attribute_id
-                                                          ? {
-                                                              ...label,
-                                                              label_info_attribute:
-                                                                label.label_info_attribute.filter(
-                                                                  (g) =>
-                                                                    g.label_info_id !==
-                                                                    attr.label_info_id
-                                                                )
-                                                            }
-                                                          : label
-                                                    )
-                                                  );
-                                                }
-                                              }}
-                                            />
-                                          </Tooltip>
-                                        )}
+                                        <FormItem
+                                          label={null}
+                                          style={{ margin: 0 }}
+                                        >
+                                          {attrGroup.label_info_attribute
+                                            ?.length > 1 && (
+                                            <Tooltip content="删除">
+                                              <IconDelete
+                                                className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                                fontSize={16}
+                                                onClick={() => {
+                                                  // 删除当前属性组中的选项
+                                                  if (type !== 'detail') {
+                                                    setTemplateData(
+                                                      templateData?.map(
+                                                        (label) =>
+                                                          label.attribute_id ===
+                                                          attrGroup.attribute_id
+                                                            ? {
+                                                                ...label,
+                                                                label_info_attribute:
+                                                                  label.label_info_attribute.filter(
+                                                                    (g) =>
+                                                                      g.label_info_id !==
+                                                                      attr.label_info_id
+                                                                  )
+                                                              }
+                                                            : label
+                                                      )
+                                                    );
+                                                  }
+                                                }}
+                                              />
+                                            </Tooltip>
+                                          )}
+                                        </FormItem>
                                       </div>
                                     </div>
                                   )
@@ -2543,14 +2568,13 @@ export default function RequirementDetail() {
             >
               <div className="btn-content-text">
                 <Button
-                  disabled={type === 'detail'}
                   onClick={() => {
                     taskTypeVal === 2
                       ? setDepartmentModalVisible(true)
                       : setIndividualModalVisible(true);
                   }}
                 >
-                  选择
+                  {type === 'detail' ? '查看已选' : '选择'}
                 </Button>
                 <div className="text-content">
                   已选{' '}
@@ -2574,6 +2598,8 @@ export default function RequirementDetail() {
             }}
             title="选择部门"
             getChildTreeSelectData={handleChildTreeSelectData}
+            getDetailObj={getDetailObj}
+            type={type}
           />
         ) : (
           <IndividualModal
@@ -2584,28 +2610,32 @@ export default function RequirementDetail() {
             title="选择个人"
             getChildTreeSelectData={handleChildTreeSelectData}
             getTreeIds={getChildTreeIds}
+            getDetailObj={getDetailObj}
+            type={type}
           />
         )}
-        <div className="btn-content">
-          <Button
-            onClick={() => {
-              stepNext();
-            }}
-            disabled={type === 'detail'}
-            style={{ marginRight: 8 }}
-            type="primary"
-          >
-            确认
-          </Button>
-          <Button
-            type="secondary"
-            onClick={() => {
-              history.goBack();
-            }}
-          >
-            取消
-          </Button>
-        </div>
+        {type !== 'detail' && (
+          <div className="btn-content">
+            <Button
+              onClick={() => {
+                stepNext();
+              }}
+              disabled={type === 'detail'}
+              style={{ marginRight: 8 }}
+              type="primary"
+            >
+              确认
+            </Button>
+            <Button
+              type="secondary"
+              onClick={() => {
+                history.goBack();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

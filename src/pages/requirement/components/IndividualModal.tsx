@@ -29,6 +29,8 @@ interface DataSourceModalProps {
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getTreeIds: (data: any) => void;
+  getDetailObj: any;
+  type: any;
 }
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
@@ -36,7 +38,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   title = '请选个人',
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
-  getTreeIds
+  getTreeIds,
+  getDetailObj,
+  type
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
@@ -50,6 +54,15 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const [total, setTotal] = useState(10);
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  useEffect(() => {
+    if (getDetailObj) {
+      setSelectedRowKeys(
+        getDetailObj?.label_data_set &&
+          getDetailObj?.label_data_set?.map((item) => item.execution_id) // 改为使用 execution_id
+      );
+    }
+  }, [getDetailObj]);
   useEffect(() => {
     try {
       getDepartmentTreeList({})
@@ -199,7 +212,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         </>
       }
     >
-      <div className="fullscreen-modal-content">
+      <div className="individual-modal-content">
         <div className="content-tree">
           <div>
             <Input
@@ -222,6 +235,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
             pagination={false}
             noDataElement={noDataElement({ description: '暂无数据' })}
             rowSelection={{
+              checkboxProps: (record) => {
+                return {
+                  disabled: type === 'detail'
+                };
+              },
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
               onChange: (selectedRowKeys: any, selectedRows: any) => {
