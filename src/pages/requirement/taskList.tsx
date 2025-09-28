@@ -8,7 +8,8 @@ import {
   Pagination,
   PaginationProps,
   Popover,
-  Table
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -20,8 +21,8 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from './type';
-import './index.scss';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import './index.scss';
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -138,7 +139,7 @@ export default function Requirement() {
       className: 'hover-change workflow-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
-          <EllipsisPopover value={record.name} isEdit={false} isLink />
+          <Tooltip content={record?.name}>{record?.name}</Tooltip>
         ) : (
           <span>-</span>
         );
