@@ -123,10 +123,6 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     }
   }, [searchValue]);
 
-  const getTableSelectContent = () => {
-    getChildTreeSelectData(checkedKeys);
-    onClose();
-  };
   const findParentIds = (treeNodes, targetIds) => {
     const allIds = [...targetIds];
     const targetSet = new Set(targetIds);
@@ -171,30 +167,10 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="dataSource-modal"
       style={{ width: '800px', height: '800px' }}
-      footer={
-        <>
-          <Button
-            onClick={() => {
-              onClose();
-            }}
-          >
-            取消
-          </Button>
-          {type !== 'detail' && (
-            <Button
-              type="primary"
-              onClick={() => {
-                getTableSelectContent();
-              }}
-            >
-              确定
-            </Button>
-          )}
-        </>
-      }
+      footer={null}
     >
-      <div className="department-modal-content">
-        <div className="department-modal-search">
+      <div className="departmentModal-content">
+        <div className="departmentModal-search">
           <Input
             type="text"
             allowClear
@@ -209,7 +185,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         </div>
         {treeData && treeData?.length > 0 ? (
           <Tree
-            selectable={false}
+            // selectable={false}
             checkable
             checkedStrategy="child"
             defaultCheckedKeys={
@@ -237,6 +213,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             treeData={treeData}
             onCheck={(key, val) => {
               setCheckedKeys(key);
+              getChildTreeSelectData(key);
             }}
           />
         ) : (

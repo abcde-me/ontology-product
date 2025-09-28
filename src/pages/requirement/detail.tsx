@@ -486,7 +486,20 @@ export default function RequirementDetail() {
       attribute_group_name: '',
       attribute_group_class: 1,
       attribute_group_type: 1,
-      label_info_attribute: []
+      label_info_attribute: [
+        {
+          label_info_id: uuidV4(),
+          attribute_name_cn: '',
+          attribute_name_en: '',
+          input_type: 1
+        },
+        {
+          label_info_id: uuidV4(),
+          attribute_name_cn: '',
+          attribute_name_en: '',
+          input_type: 1
+        }
+      ]
     };
 
     // 获取当前属性组并添加新组
@@ -1949,11 +1962,10 @@ export default function RequirementDetail() {
                                 )}
                                 <Button
                                   disabled={type === 'detail'}
-                                  className={
-                                    type === 'detail'
-                                      ? 'btn-add-attribute'
-                                      : 'btn-add'
-                                  }
+                                  className={[
+                                    'btn-add-default',
+                                    type === 'detail' ? '' : 'btn-add'
+                                  ].join(' ')}
                                   style={{ marginRight: 16 }}
                                   onClick={() => {
                                     addAttributeGroup(labelIndex);
@@ -2055,7 +2067,7 @@ export default function RequirementDetail() {
                                   >
                                     <Button
                                       disabled={type === 'detail'}
-                                      className="btn-add-template-attribute btn-add"
+                                      className="btn-add-template-attribute btn-add-default btn-add"
                                     >
                                       <IconPlus />
                                       添加模版属性
@@ -2265,7 +2277,7 @@ export default function RequirementDetail() {
                                     >
                                       <div className="attribute-info-item">
                                         <FormItem
-                                          field={`attribute_name_cn${attr?.label_info_id}`}
+                                          field={`attribute_name_en${attr?.label_info_id}`}
                                           label={`选项${attrIndex + 1}:`}
                                           style={{ color: 'red' }}
                                           rules={[
@@ -2290,8 +2302,8 @@ export default function RequirementDetail() {
                                                       return (
                                                         otherIndex !==
                                                           attrIndex &&
-                                                        otherAttr.attribute_name_cn &&
-                                                        otherAttr.attribute_name_cn.trim() ===
+                                                        otherAttr.attribute_name_en &&
+                                                        otherAttr.attribute_name_en.trim() ===
                                                           value.trim()
                                                       );
                                                     }
@@ -2311,10 +2323,15 @@ export default function RequirementDetail() {
                                         >
                                           <Input
                                             type="text"
-                                            value={attr.attribute_name_cn}
+                                            value={attr.attribute_name_en}
                                             style={{
                                               width: 290,
-                                              height: 32
+                                              height: 32,
+                                              backgroundColor:
+                                                type === 'detail' ||
+                                                attrGroup?.isTemp
+                                                  ? '#e2e8f0'
+                                                  : '#fff'
                                             }}
                                             onChange={(val) =>
                                               updateNestedValue(
@@ -2322,7 +2339,7 @@ export default function RequirementDetail() {
                                                   labelIndex,
                                                   'label_info_attribute',
                                                   attrIndex,
-                                                  'attribute_name_cn'
+                                                  'attribute_name_en'
                                                 ],
                                                 val,
                                                 true
@@ -2331,7 +2348,7 @@ export default function RequirementDetail() {
                                           />
                                         </FormItem>
                                         <FormItem
-                                          field={`attribute_name_en${attr?.label_info_id}`}
+                                          field={`attribute_name_cn${attr?.label_info_id}`}
                                           label={
                                             <div>
                                               <span
@@ -2376,8 +2393,8 @@ export default function RequirementDetail() {
                                                       return (
                                                         otherIndex !==
                                                           attrIndex &&
-                                                        otherAttr.attribute_name_en &&
-                                                        otherAttr.attribute_name_en.trim() ===
+                                                        otherAttr.attribute_name_cn &&
+                                                        otherAttr.attribute_name_cn.trim() ===
                                                           value.trim()
                                                       );
                                                     }
@@ -2398,9 +2415,14 @@ export default function RequirementDetail() {
                                             type="text"
                                             style={{
                                               width: 290,
-                                              height: 32
+                                              height: 32,
+                                              backgroundColor:
+                                                type === 'detail' ||
+                                                attrGroup?.isTemp
+                                                  ? '#e2e8f0'
+                                                  : '#fff'
                                             }}
-                                            value={attr.attribute_name_en}
+                                            value={attr.attribute_name_cn}
                                             onChange={(val: any) => {
                                               // 使用labelIndex和isTemp=true来更新模板数据
                                               updateNestedValue(
@@ -2408,7 +2430,7 @@ export default function RequirementDetail() {
                                                   labelIndex, // 保持使用labelIndex，因为这是在templateData.map循环中
                                                   'label_info_attribute',
                                                   attrIndex,
-                                                  'attribute_name_en'
+                                                  'attribute_name_cn'
                                                 ],
                                                 val,
                                                 true // 添加isTemp=true参数，确保更新的是模板数据

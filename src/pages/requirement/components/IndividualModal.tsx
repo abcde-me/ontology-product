@@ -6,7 +6,8 @@ import {
   Input,
   Table,
   Pagination,
-  Message
+  Message,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   getDepartmentTreeList,
@@ -67,8 +68,36 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          console.log(res?.data, 'res');
-          setTreeData(res.data);
+          const newTreeDateList = res?.data?.map((item) => {
+            return item?.children
+              ? {
+                  allowClick: false,
+                  title: item.name,
+                  key: String(item.id),
+                  level: 1,
+                  disabled: true,
+                  children: item?.children?.map((item_level2) => {
+                    return {
+                      disabled: true,
+                      level: 2,
+                      title: item_level2?.name,
+                      key: item_level2?.id,
+                      allowClick: false,
+                      children: item_level2?.children?.map((subItem) => {
+                        return {
+                          disabled: type === 'detail',
+                          level: 3,
+                          title: subItem?.name,
+                          key: subItem?.id,
+                          allowClick: false
+                        };
+                      })
+                    };
+                  })
+                }
+              : { title: item.name, key: item.id };
+          });
+          setTreeData(newTreeDateList);
         })
         .catch((err) => {
           console.error(err);
@@ -81,18 +110,33 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const renderTreeContent = () => {
     return (
       <Tree
-        showLine
+        blockNode={true}
         icons={{
           switcherIcon: <IconCaretDown />
         }}
         autoExpandParent={false}
         treeData={treeData}
-        // checkStrictly={checkStrictly}
+        renderTitle={(node: any) => {
+          return (
+            <div
+              style={{
+                width: node?.childrenData?.length > 0 ? '170px' : '120px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                color: '#0F172A'
+              }}
+            >
+              <Tooltip content={node.title}>{node.title}</Tooltip>
+            </div>
+          );
+        }}
         onSelect={(value) => {
           console.log(value);
           setCurrent(1);
           setPageSize(10);
           setCheckedKeys(value);
+          getTreeIds(value);
         }}
       />
     );
@@ -175,11 +219,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     getTableData();
   }, [checkedKeys, current, pageSize]);
   // 表格选择内容
-  const getTableSelectContent = () => {
-    getChildTreeSelectData(selectedRowKeys);
-    getTreeIds(checkedKeys);
-    onClose();
-  };
+
   return (
     <Modal
       title={title}
@@ -192,25 +232,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="fulscreen-modal"
       style={{ width: '1000px', height: '800px' }}
-      footer={
-        <>
-          <Button
-            onClick={() => {
-              onClose();
-            }}
-          >
-            取消
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              getTableSelectContent();
-            }}
-          >
-            确定
-          </Button>
-        </>
-      }
+      footer={null}
     >
       <div className="individual-modal-content">
         <div className="content-tree">
@@ -259,6 +281,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                 if (mergedRows.length <= 200) {
                   setSelectedRowsContent(mergedRows);
                   setSelectedRowKeys(mergedRows.map((item) => item.id));
+                  getChildTreeSelectData(mergedRows.map((item) => item.id));
                 } else {
                   Message.error('选中的数量不能超过200条');
                 }
