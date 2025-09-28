@@ -63,7 +63,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [tableLoading, settableLoading] = useState(false);
   const [dir_path, setDir_path] = useState<React.Key[]>(['']);
-  const time = Form.useWatch('time', form);
+  const [treeNodeName, setTreeNodeName] = useState('');
 
   const formatCatalogTree = (rawData: any[]): TreeItem[] => {
     // 递归处理单个节点的子层级
@@ -176,13 +176,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 </div>
               );
             }}
-            onSelect={(value, e) => {
+            onSelect={(value, e: any) => {
               if (e?.node?.props?.dataRef?.level === 3 && type !== 'detail') {
                 setCurrent(1);
                 setPageSize(10);
                 setCheckedKeys([value[0]?.split(',')?.[2]]);
                 setDir_path(value);
                 getChildTableSelectData(selectedRowsContent, value);
+                setTreeNodeName(e?.node?.props?.dataRef?.title);
               }
             }}
           />
@@ -349,20 +350,17 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         </div>
         <div className="content-table">
           <div className="content-table-form">
-            <Form className="form-option" autoComplete="off" layout="inline">
-              <div className="form-inputs">
-                <FormItem field="time" style={{ marginLeft: 12 }}>
-                  <DatePicker.RangePicker
-                    onChange={handleDateChange}
-                    style={{ width: 350 }}
-                    onClear={() => {
-                      setDateRange([]);
-                      getTableData();
-                    }}
-                  />
-                </FormItem>
-              </div>
-            </Form>
+            <div className="tree-node-name">{treeNodeName}</div>
+            <div className="form-option">
+              <DatePicker.RangePicker
+                onChange={handleDateChange}
+                style={{ width: 350 }}
+                onClear={() => {
+                  setDateRange([]);
+                  getTableData();
+                }}
+              />
+            </div>
           </div>
           <Table
             ref={tableRef}
