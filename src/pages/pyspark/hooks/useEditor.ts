@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useAsyncEffect, useRequest, useThrottleFn } from 'ahooks';
+import {
+  useAsyncEffect,
+  useRequest,
+  useThrottleFn,
+  useDebounceFn
+} from 'ahooks';
 import { RunningStatus } from '@/types/pythonApi';
 import {
   runPythonItem,
@@ -48,6 +53,9 @@ interface UseEditorReturn {
   handlePanelStateChange: (isOpen: boolean) => void;
   getPrevRunStatus: () => RunningStatus;
   handleGetRunResult: () => Promise<void>;
+
+  // 防抖版本的按钮点击函数
+  debouncedButtonClick: () => void;
 }
 
 const defaultContent = `🎉 欢迎使用多模态数据治理平台
@@ -352,7 +360,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [runStatus, currentFileId, editorContent]);
 
   // 停止运行
-  const handleStopRunCode = async () => {
+  const handleStopRunCode = useCallback(async () => {
     const res = await stopRunPythonItem(currentFileId ?? '', { execid });
 
     if (res?.status !== 200 || Number(res?.code) !== 0) {
@@ -362,7 +370,23 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     cancelGetRunResultPolling();
     setRunStatus(RunningStatus.IDLE);
-  };
+    setHasFetchedResult(true);
+  }, [currentFileId, execid, cancelGetRunResultPolling]);
+
+  // 统一的按钮点击处理函数（带防抖）
+  const handleButtonClick = useCallback(() => {
+    if (runStatus === RunningStatus.RUNNING) {
+      handleStopRunCode();
+    } else {
+      handleRunCode().catch(console.error);
+    }
+  }, [runStatus, handleStopRunCode, handleRunCode]);
+
+  const { run: debouncedButtonClick } = useDebounceFn(handleButtonClick, {
+    wait: 1000, // 1秒防抖
+    leading: true, // 立即执行第一次调用
+    trailing: false // 不执行最后一次调用
+  });
 
   // 获取运行日志
   const handleGetRunLog = useCallback(async () => {
@@ -460,6 +484,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     handleStopRunCode,
     handlePanelStateChange,
     handleGetRunResult,
-    getPrevRunStatus
+    getPrevRunStatus,
+
+    // 防抖版本的按钮点击函数
+    debouncedButtonClick
   };
 };

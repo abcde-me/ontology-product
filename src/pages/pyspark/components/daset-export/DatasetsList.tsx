@@ -25,6 +25,7 @@ import { formatFileSize } from '@/utils/format';
 import noDataElement from '@/components/no-data';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
+import ModalDatasetDetail from '../data-manager/ModalDatasetDetail';
 
 const FormItem = Form.Item;
 
@@ -64,6 +65,20 @@ const DatasetsList: FC = () => {
     }
   });
 
+  // 数据集详情Modal状态管理
+  const [datasetDetailVisible, setDatasetDetailVisible] = useState(false);
+  const [detailId, setDetailId] = useState('');
+
+  function handleDatasetDetail(id: number) {
+    setDetailId(id.toString());
+    setDatasetDetailVisible(true);
+  }
+
+  function closeDatasetDetail() {
+    setDatasetDetailVisible(false);
+    setDetailId('');
+  }
+
   const columns: TableColumnProps[] = [
     {
       title: 'PySpark文件名称',
@@ -89,6 +104,8 @@ const DatasetsList: FC = () => {
             className="text-[var(--color-text-2)]"
             value={item.dataset_name}
             isEdit={false}
+            isLink={true}
+            handleLink={() => handleDatasetDetail(item.dataset_id || 0)}
           />
         );
       }
@@ -152,8 +169,7 @@ const DatasetsList: FC = () => {
                 width: '8px',
                 height: '8px',
                 backgroundColor: color,
-                borderRadius: '50%',
-                marginRight: '5px'
+                borderRadius: '50%'
               }}
             ></div>
             <span>{text}</span>
@@ -270,6 +286,14 @@ const DatasetsList: FC = () => {
         scroll={{ y: 500 }}
         noDataElement={noDataElement({ description: '暂无数据' })}
       />
+
+      {datasetDetailVisible && (
+        <ModalDatasetDetail
+          detailId={detailId}
+          datasetDetailVisible={datasetDetailVisible}
+          closeDatasetDetail={closeDatasetDetail}
+        />
+      )}
     </div>
   );
 };
