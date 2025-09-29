@@ -332,7 +332,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       style={{ width: '960px', height: '800px', overflowY: 'auto' }}
       footer={null}
     >
-      <div className="department-modal-content">
+      <div className="detail-modal-content">
         <div className="content-tree">
           <div className="search-input">
             <Input

@@ -169,8 +169,8 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       style={{ width: '800px', height: '800px' }}
       footer={null}
     >
-      <div className="departmentModal-content">
-        <div className="departmentModal-search">
+      <div className="department-modal-content">
+        <div className="department-modal-search">
           <Input
             type="text"
             allowClear
