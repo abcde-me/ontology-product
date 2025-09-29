@@ -88,7 +88,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handlePanelStateChange,
       execid,
       getPrevRunStatus,
-      hasFetchedResult
+      hasFetchedResult,
+      debouncedButtonClick
     } = useEditor({
       activeTab,
       fileTabs,
@@ -263,11 +264,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                     )
                   }
                   disabled={editorContent.trim() === ''}
-                  onClick={
-                    runStatus === RunningStatus.RUNNING
-                      ? handleStopRunCode
-                      : () => handleRunCode().catch(console.error)
-                  }
+                  onClick={debouncedButtonClick}
                   className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
