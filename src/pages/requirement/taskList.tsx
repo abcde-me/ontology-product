@@ -304,7 +304,7 @@ export default function Requirement() {
               onChange={(val) => {
                 setSearchValue(val);
               }}
-              placeholder="请输入任务名称"
+              placeholder="输入任务名称搜索"
               allowClear
             />
           </FormItem>

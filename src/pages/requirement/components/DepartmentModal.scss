@@ -1,6 +1,10 @@
 .department-modal-content {
   .arco-tree-node-title {
     color: #0f172a !important;
+    width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .arco-tree-node-selected .arco-tree-node-title,

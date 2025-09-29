@@ -2,6 +2,16 @@
   padding: 10px;
   overflow-x: hidden;
 
+  .arco-checkbox-text {
+    margin-left: 4px;
+  }
+
+  .attribute-group-name-label {
+    .arco-form-item-symbol {
+      width: 7px;
+    }
+  }
+
   .arco-breadcrumb-item > .arco-icon {
     color: #000000;
     cursor: pointer;
@@ -38,6 +48,11 @@
     line-height: 24px;
     // margin-left: -12px;
     margin-bottom: 16px;
+  }
+
+  .label-shape-options {
+    display: flex;
+    align-items: center;
   }
 
   .basic-configuration {

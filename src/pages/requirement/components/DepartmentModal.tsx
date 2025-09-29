@@ -5,7 +5,8 @@ import {
   Tree,
   Form,
   Input,
-  Empty
+  Empty,
+  Tooltip
 } from '@arco-design/web-react';
 import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 import './DepartmentModal.scss';
@@ -198,14 +199,17 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                 : undefined
             }
             style={{
+              width: '300px',
               height: '592px',
-              overflowY: 'auto'
+              overflowY: 'auto',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
             renderTitle={({ title }: any) => {
               return (
                 <span>
                   <span style={{ width: '300px', whiteSpace: 'nowrap' }}>
-                    {title}
+                    <Tooltip content={title}>{title}</Tooltip>
                   </span>
                 </span>
               );
