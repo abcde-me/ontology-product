@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import './index.css';
 import {
   Typography,
@@ -1095,6 +1095,15 @@ const DatasetManagement: React.FC = () => {
     setSelectedRowKeys([]);
     setSelectedRows([]);
   };
+  // 批量导出，未选择或只选中数据库表类型时禁用
+  const batchExportDisabled = useMemo(
+    () =>
+      selectedRows.filter(
+        (row: Dataset) => row.storage_type !== datasetStorageType.table
+      ).length === 0,
+    [selectedRows]
+  );
+
   return (
     <div
       style={{
@@ -1197,7 +1206,7 @@ const DatasetManagement: React.FC = () => {
               <Button
                 icon={<IconDownload />}
                 className={styles.batchExportBtn}
-                disabled={selectedRowKeys.length === 0}
+                disabled={batchExportDisabled}
                 onClick={handleBatchExport}
               >
                 批量导出
