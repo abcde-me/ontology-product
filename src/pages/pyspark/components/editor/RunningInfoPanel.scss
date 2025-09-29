@@ -29,6 +29,10 @@
     overflow-y: auto;
   }
 
+  .arco-collapse {
+    border-radius: 0;
+  }
+
   .arco-collapse-item-header-icon-down {
     transform: rotate(0deg);
   }
@@ -45,7 +49,7 @@
   .run-status {
     display: inline-flex;
     align-items: center;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--color-text-4);
 
     .mr-4 {
