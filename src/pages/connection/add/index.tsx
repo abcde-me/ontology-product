@@ -8,7 +8,6 @@ import {
   Select
 } from '@arco-design/web-react';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import '../index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 import { Connection } from '../type';
 import { filterValues } from '@/api/filterValues';
@@ -174,7 +173,7 @@ const add = forwardRef((props: any, ref) => {
   };
   // 输入框onchange的正则校验
   return (
-    <div>
+    <>
       <Modal
         style={{ width: '760px' }}
         title={
@@ -221,20 +220,20 @@ const add = forwardRef((props: any, ref) => {
           </div>
         }
       >
-        <div className="modal-overlay">
+        <>
           <Form
             style={{ width: 700 }}
             autoComplete="off"
             form={form}
             disabled={loading}
+            colon={'：'}
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
           >
             <FormItem
-              label="连接器名称："
+              label="连接器名称"
               required
               field="name"
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-              labelAlign="right"
               rules={[
                 {
                   validator: (value, cb) => {
@@ -253,12 +252,9 @@ const add = forwardRef((props: any, ref) => {
               <Input placeholder="请输入" />
             </FormItem>
             <FormItem
-              label="连接器类型："
+              label="连接器类型"
               field="type"
               rules={[{ required: true, message: '请选择类型' }]}
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-              labelAlign="right"
               initialValue="s3"
             >
               <RadioGroup
@@ -281,63 +277,45 @@ const add = forwardRef((props: any, ref) => {
             </span>
             {storageType == 's3' ? (
               <div>
-                <FormItem
-                  label="region："
-                  field="region"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
-                >
+                <FormItem label="region" field="region">
                   <Input placeholder="请输入服务端所在地域" />
                 </FormItem>
                 <FormItem
-                  label="Endpoint："
+                  label="Endpoint"
                   field="endpoint"
                   rules={[{ required: true, message: '请输入Endpoint' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey lD："
+                  label="AccessKey ID"
                   field="access_key"
-                  rules={[{ required: true, message: '请输入AccessKey lD' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入AccessKey ID' }]}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey Secret："
+                  label="AccessKey Secret"
                   field="secret_key"
                   rules={[
                     { required: true, message: '请输入AccessKey Secret' }
                   ]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 {/* <FormItem
-                  label="区域："
+                  label="区域"
                   field="region"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  
                 >
                   <Input placeholder="请输入" />
                 </FormItem> */}
                 <FormItem
-                  label="文件路径："
+                  label="文件路径"
                   field="path"
                   rules={[{ required: true, message: '请输入文件路径' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="<桶名>/<文件夹路径>或<桶名>" />
                 </FormItem>
@@ -345,20 +323,14 @@ const add = forwardRef((props: any, ref) => {
             ) : storageType == 'hdfs' ? (
               <div>
                 <FormItem
-                  label="Host："
+                  label="Host"
                   rules={[{ required: true, message: '请输入Host' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="host"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="Port："
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  label="Port"
                   field="port"
                   required
                   rules={[
@@ -382,21 +354,15 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   initialValue={'root'}
-                  label="用户名："
+                  label="用户名"
                   rules={[{ required: true, message: '请输入用户名' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="user"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="目录路径："
+                  label="目录路径"
                   required
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="path"
                   rules={[
                     {
@@ -420,21 +386,15 @@ const add = forwardRef((props: any, ref) => {
             ) : (
               <div>
                 <FormItem
-                  label="所属系统："
+                  label="所属系统"
                   field="system"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入所属系统" />
                 </FormItem>
                 <FormItem
-                  label="数据库类型："
+                  label="数据库类型"
                   field="sub_type"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请选择数据库类型' }]}
                   disabled={inputDisabled}
                 >
@@ -456,55 +416,40 @@ const add = forwardRef((props: any, ref) => {
                   </Select>
                 </FormItem>
                 <FormItem
-                  label="主机名："
+                  label="主机名"
                   field="host"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请输入主机名' }]}
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入，如localhost，10.2.2.1" />
                 </FormItem>
                 <FormItem
-                  label="端口："
+                  label="端口"
                   field="port"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请输入端口' }]}
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入，如3306" />
                 </FormItem>
                 <FormItem
-                  label="数据库名："
+                  label="数据库名"
                   field="database"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请输入数据库名' }]}
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="用户名："
+                  label="用户名"
                   field="user"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请输入用户名' }]}
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="密码："
+                  label="密码"
                   field="password"
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   rules={[{ required: true, message: '请输入密码' }]}
                   disabled={inputDisabled}
                 >
@@ -513,9 +458,9 @@ const add = forwardRef((props: any, ref) => {
               </div>
             )}
           </Form>
-        </div>
+        </>
       </Modal>
-    </div>
+    </>
   );
 });
 export default add;
