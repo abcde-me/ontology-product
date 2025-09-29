@@ -2327,11 +2327,7 @@ export default function RequirementDetail() {
                                             style={{
                                               width: 290,
                                               height: 32,
-                                              backgroundColor:
-                                                type === 'detail' ||
-                                                attrGroup?.isTemp
-                                                  ? '#e2e8f0'
-                                                  : '#fff'
+                                              backgroundColor: '#fff'
                                             }}
                                             onChange={(val) =>
                                               updateNestedValue(
@@ -2416,11 +2412,7 @@ export default function RequirementDetail() {
                                             style={{
                                               width: 290,
                                               height: 32,
-                                              backgroundColor:
-                                                type === 'detail' ||
-                                                attrGroup?.isTemp
-                                                  ? '#e2e8f0'
-                                                  : '#fff'
+                                              backgroundColor: '#fff'
                                             }}
                                             value={attr.attribute_name_cn}
                                             onChange={(val: any) => {
