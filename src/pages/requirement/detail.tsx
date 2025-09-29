@@ -788,11 +788,15 @@ export default function RequirementDetail() {
     setLoading(true);
     console.log(obj, 'top ---- 我是提交的数据', text_fl_data);
     // 发布数据
-    const res = await publishRequirement(obj);
-    if (res.code === 0) {
-      history.goBack();
+    try {
+      const res = await publishRequirement(obj);
+      if (res.code === 0) {
+        history.goBack();
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -1502,7 +1506,7 @@ export default function RequirementDetail() {
                                                   type === 'detail' ||
                                                   attrGroup?.isTemp === true
                                                     ? ''
-                                                    : '展示名称'
+                                                    : '添加选项'
                                                 }
                                               >
                                                 <IconPlus
@@ -2486,6 +2490,10 @@ export default function RequirementDetail() {
                           className={[
                             type === 'detail' ? '' : 'btn-add-default btn-add'
                           ].join(' ')}
+                          style={{
+                            marginLeft: 16,
+                            marginBottom: 16
+                          }}
                           disabled={type === 'detail'}
                           onClick={() => {
                             setTemplateData([
@@ -2646,6 +2654,7 @@ export default function RequirementDetail() {
               disabled={type === 'detail'}
               style={{ marginRight: 8 }}
               type="primary"
+              loading={loading}
             >
               确认
             </Button>

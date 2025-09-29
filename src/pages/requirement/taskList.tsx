@@ -189,7 +189,7 @@ export default function Requirement() {
     {
       title: '所属部门/个人',
       dataIndex: 'belong',
-      width: 174,
+      width: 160,
       render: (_, record) =>
         record.belong === 1 ? (
           <div className="belong-item">

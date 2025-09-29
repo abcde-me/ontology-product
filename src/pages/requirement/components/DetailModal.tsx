@@ -163,17 +163,19 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             // checkStrictly={checkStrictly}
             renderTitle={(node: any) => {
               return (
-                <div
-                  style={{
-                    width: node?.childrenData?.length > 0 ? '170px' : '120px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    color: '#0F172A'
-                  }}
-                >
-                  <Tooltip content={node.title}>{node.title}</Tooltip>
-                </div>
+                <Tooltip content={node.title}>
+                  <div
+                    style={{
+                      width: node?.childrenData?.length > 0 ? '170px' : '120px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      color: '#0F172A'
+                    }}
+                  >
+                    {node.title}
+                  </div>
+                </Tooltip>
               );
             }}
             onSelect={(value, e: any) => {
