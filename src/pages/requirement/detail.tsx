@@ -2202,11 +2202,11 @@ export default function RequirementDetail() {
                                   必须标注
                                 </Checkbox>
                               </FormItem>
-                              <FormItem
-                                style={{ marginRight: 0, marginBottom: 0 }}
-                                label={null}
-                              >
-                                <Tooltip content="添加选项">
+                              {attrGroup.attribute_group_class !== 3 && (
+                                <FormItem
+                                  style={{ marginRight: 0, marginBottom: 0 }}
+                                  label={null}
+                                >
                                   <IconPlus
                                     className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
                                     fontSize={16}
@@ -2239,8 +2239,8 @@ export default function RequirementDetail() {
                                       }
                                     }}
                                   />
-                                </Tooltip>
-                              </FormItem>
+                                </FormItem>
+                              )}
                               <FormItem
                                 style={{ marginRight: 0, marginBottom: 0 }}
                                 label={null}
