@@ -148,14 +148,14 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
-        <FormItem label="后处理与校验：" field="after_proc" labelAlign="left">
+        {/* <FormItem label="后处理与校验：" field="after_proc" labelAlign="left">
           <Checkbox.Group
             options={[
               { label: '使用大模型进行错别字校验', value: 1 },
               { label: '文字标准化', value: 2 }
             ]}
           />
-        </FormItem>
+        </FormItem> */}
       </Form>
     </div>
   );
