@@ -13,6 +13,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle
 } from '@codemirror/language';
+import createPythonLinter from '../../utils/createPythonLinter';
 import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import './EditorWorkspace.scss';
@@ -328,6 +329,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             extensions={[
               python(),
               lintGutter(),
+              createPythonLinter({
+                checkSyntax: true,
+                checkStyle: true,
+                checkImports: true,
+                checkIndentation: true
+              }),
               syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
               EditorView.updateListener.of((update) => {
                 if (update.selectionSet) {
