@@ -1968,8 +1968,9 @@ export default function RequirementDetail() {
                                 <Button
                                   disabled={type === 'detail'}
                                   className={[
-                                    'btn-add-default',
-                                    type === 'detail' ? '' : 'btn-add'
+                                    type === 'detail'
+                                      ? ''
+                                      : 'btn-add-default btn-add'
                                   ].join(' ')}
                                   style={{ marginRight: 16 }}
                                   onClick={() => {
@@ -2482,7 +2483,9 @@ export default function RequirementDetail() {
                           </div>
                         ))}
                         <Button
-                          className="add-template-btn btn-add"
+                          className={[
+                            type === 'detail' ? '' : 'btn-add-default btn-add'
+                          ].join(' ')}
                           disabled={type === 'detail'}
                           onClick={() => {
                             setTemplateData([
