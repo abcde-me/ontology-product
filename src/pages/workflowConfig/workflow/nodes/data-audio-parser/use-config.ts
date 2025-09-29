@@ -52,13 +52,13 @@ const useConfig = (id: string, payload: AudioParserNodeType) => {
         )
           ? ''
           : `${fields.activity_mode_num}`;
-        (draft.activity_mode = fields.activity_mode),
+        ((draft.activity_mode = fields.activity_mode),
           (draft.is_open_multi_conv = fields.vad_options.includes('conv')
             ? 2
             : 1),
-          (draft.vad_options = fields.vad_options);
+          (draft.vad_options = fields.vad_options));
         draft.audio_model_id = fields.audio_model_id;
-        draft.after_proc = fields.after_proc;
+        // draft.after_proc = fields.after_proc;
       });
       console.log('...handleFiledsChange', fields, newInputs);
       setInputs(newInputs);
