@@ -320,10 +320,19 @@ $spacing-9: 24px;
   font-weight: 500 !important;
 }
 
+.arco-table {
+  .arco-table-tr {
+    .arco-table-checkbox {
+      // 去除表格头部选中框和内容选中框不能左对齐的问题
+      padding-left: 0;
+    }
+  }
+}
+
 .arco-table-content-inner,
 .data-catalog-left-box {
-  /* 始终为滚动条预留空间 */
-  scrollbar-gutter: stable;
+  /* 去除滚动条预留空间，否则表格默认会多出滚动条的宽度 */
+  scrollbar-gutter: auto;
   // background: transparent;
 }
 
@@ -356,12 +365,6 @@ $spacing-9: 24px;
   .arco-alert-content {
     font-size: 14px;
   }
-}
-
-// table-no-data
-.arco-table-no-data {
-  // TODO: fix 和表格的无数据冲突
-  // width: 100% !important;
 }
 
 // popover
