@@ -788,11 +788,15 @@ export default function RequirementDetail() {
     setLoading(true);
     console.log(obj, 'top ---- 我是提交的数据', text_fl_data);
     // 发布数据
-    const res = await publishRequirement(obj);
-    if (res.code === 0) {
-      history.goBack();
+    try {
+      const res = await publishRequirement(obj);
+      if (res.code === 0) {
+        history.goBack();
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -1224,7 +1228,7 @@ export default function RequirementDetail() {
                                     style={{ width: 110, height: 32 }}
                                     renderFormat={(option, value) => {
                                       return (
-                                        <span>
+                                        <span className="label-shape-options">
                                           <Image
                                             width={20}
                                             style={{
@@ -1237,11 +1241,13 @@ export default function RequirementDetail() {
                                               )?.icon
                                             }
                                           />
-                                          {
-                                            shapeOptions.find(
-                                              (opt) => opt.value === value
-                                            )?.label
-                                          }
+                                          <span>
+                                            {
+                                              shapeOptions.find(
+                                                (opt) => opt.value === value
+                                              )?.label
+                                            }
+                                          </span>
                                         </span>
                                       );
                                     }}
@@ -1314,6 +1320,7 @@ export default function RequirementDetail() {
                                               type === 'detail' ||
                                               attrGroup?.isTemp === true
                                             }
+                                            className="attribute-group-name-label"
                                             label="属性名称:"
                                             rules={[
                                               {
@@ -1499,12 +1506,12 @@ export default function RequirementDetail() {
                                                   type === 'detail' ||
                                                   attrGroup?.isTemp === true
                                                     ? ''
-                                                    : '展示名称'
+                                                    : '添加选项'
                                                 }
                                               >
                                                 <IconPlus
                                                   style={{
-                                                    marginLeft: 8,
+                                                    marginLeft: 12,
                                                     fontSize: 16,
                                                     cursor:
                                                       type === 'detail'
@@ -1545,7 +1552,7 @@ export default function RequirementDetail() {
                                               <IconDelete
                                                 className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
                                                 style={{
-                                                  marginLeft: 8
+                                                  marginLeft: 12
                                                 }}
                                                 fontSize={16}
                                                 onClick={() => {
@@ -1583,7 +1590,8 @@ export default function RequirementDetail() {
                                               }
                                               style={{
                                                 whiteSpace: 'nowrap',
-                                                fontSize: 14
+                                                fontSize: 14,
+                                                marginLeft: 5
                                               }}
                                               checked={
                                                 attrGroup.label_info_attribute?.some(
@@ -1814,7 +1822,8 @@ export default function RequirementDetail() {
                                                         >
                                                           <IconQuestionCircle
                                                             style={{
-                                                              color: '#6E7B8D'
+                                                              color: '#6E7B8D',
+                                                              marginRight: 2
                                                             }}
                                                           />
                                                         </Tooltip>
@@ -1963,8 +1972,9 @@ export default function RequirementDetail() {
                                 <Button
                                   disabled={type === 'detail'}
                                   className={[
-                                    'btn-add-default',
-                                    type === 'detail' ? '' : 'btn-add'
+                                    type === 'detail'
+                                      ? ''
+                                      : 'btn-add-default btn-add'
                                   ].join(' ')}
                                   style={{ marginRight: 16 }}
                                   onClick={() => {
@@ -2059,7 +2069,7 @@ export default function RequirementDetail() {
                                         >
                                           <IconPlus className="menu-item-create-icon" />
                                           <span className="menu-item-create-text">
-                                            创建属性模版
+                                            创建模板属性
                                           </span>
                                         </Menu.Item>
                                       </Menu>
@@ -2196,7 +2206,7 @@ export default function RequirementDetail() {
                                 style={{ marginRight: 0, marginBottom: 0 }}
                                 label={null}
                               >
-                                <Tooltip content="添加属性">
+                                <Tooltip content="添加选项">
                                   <IconPlus
                                     className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
                                     fontSize={16}
@@ -2323,6 +2333,7 @@ export default function RequirementDetail() {
                                         >
                                           <Input
                                             type="text"
+                                            placeholder="用于存储标注结果"
                                             value={attr.attribute_name_en}
                                             style={{
                                               width: 290,
@@ -2476,7 +2487,13 @@ export default function RequirementDetail() {
                           </div>
                         ))}
                         <Button
-                          className="add-template-btn btn-add"
+                          className={[
+                            type === 'detail' ? '' : 'btn-add-default btn-add'
+                          ].join(' ')}
+                          style={{
+                            marginLeft: 16,
+                            marginBottom: 16
+                          }}
                           disabled={type === 'detail'}
                           onClick={() => {
                             setTemplateData([
@@ -2637,6 +2654,7 @@ export default function RequirementDetail() {
               disabled={type === 'detail'}
               style={{ marginRight: 8 }}
               type="primary"
+              loading={loading}
             >
               确认
             </Button>
