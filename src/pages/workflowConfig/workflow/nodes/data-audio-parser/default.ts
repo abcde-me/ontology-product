@@ -18,8 +18,8 @@ const nodeDefault: NodeDefault<AudioParserNodeType> = {
     activity_mode_num: '',
     is_open_multi_conv: 1,
     vad_options: ['vad', 'conv'],
-    audio_model_id: '',
-    after_proc: []
+    audio_model_id: ''
+    // after_proc: []
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
