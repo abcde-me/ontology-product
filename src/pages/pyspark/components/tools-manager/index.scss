@@ -5,10 +5,12 @@
 
   .arco-tree-node:hover {
     background-color: transparent;
+    cursor: unset;
   }
 
   .arco-tree-node-title:hover {
     background-color: transparent;
+    color: var(--color-text-2);
   }
 
   .arco-tree-node-is-leaf {
@@ -36,6 +38,7 @@
     .arco-tree-node-title {
       margin-left: -24px;
       padding: 6px 8px;
+      cursor: unset;
     }
   }
 

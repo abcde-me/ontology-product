@@ -104,8 +104,8 @@ const DatasetsList: FC = () => {
             className="text-[var(--color-text-2)]"
             value={item.dataset_name}
             isEdit={false}
-            isLink={false}
-            // handleLink={() => handleDatasetDetail(item.id)}
+            isLink={true}
+            handleLink={() => handleDatasetDetail(item.dataset_id || 0)}
           />
         );
       }
