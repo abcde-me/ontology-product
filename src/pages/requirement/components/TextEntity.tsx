@@ -13,9 +13,9 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import './TextEntity.scss';
 import { uuid } from '@/models/utils';
 import { getRandomHexColorStrict } from '../common';
+import './TextEntity.scss';
 // 实体/实体关系 - 组件
 const btnList = [
   {
@@ -174,6 +174,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   }, [entityRelations, relationRelations]);
   const renderItemVal = (item, index) => {
     formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+  };
+  const renderNotFoundContent = () => {
+    return (
+      <div className="not-found-content">
+        <div className="not-found-text">请先创建实体标签</div>
+      </div>
+    );
   };
   return (
     <div className="text-component-warp">
@@ -540,6 +547,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               allowClear
                               placeholder="请选择起始标签"
                               style={{ width: 260 }}
+                              notFoundContent={renderNotFoundContent()}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
@@ -585,6 +593,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               mode="multiple"
                               allowClear
                               placeholder="请选择目标标签"
+                              notFoundContent={renderNotFoundContent()}
                               style={{ width: 276 }}
                               onChange={(value) => {
                                 handleRelationFieldChange(

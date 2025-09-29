@@ -15,6 +15,18 @@ import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
 import SuziIcon from '@/assets/python/suanzi-icon.svg';
+// import SuziSave from '@/assets/python/suanzi-save.svg';
+// import SuziClean from '@/assets/python/suanzi-clean.svg';
+// import SuziImport from '@/assets/python/suanzi-import.svg';
+// import SuziExport from '@/assets/python/suanzi-export.svg';
+// import SuziDelete from '@/assets/python/suanzi-delete.svg';
+// import SuziEdit from '@/assets/python/suanzi-edit.svg';
+// import SuziAdd from '@/assets/python/suanzi-add.svg';
+// import SuziCopy from '@/assets/python/suanzi-copy.svg';
+// import SuziPaste from '@/assets/python/suanzi-paste.svg';
+// import SuziRun from '@/assets/python/suanzi-run.svg';
+// import SuziStop from '@/assets/python/suanzi-stop.svg';
+// import SuziRestart from '@/assets/python/suanzi-restart.svg';
 
 // 算子图标映射类型
 type OperatorIconMap = Record<string, string>;
