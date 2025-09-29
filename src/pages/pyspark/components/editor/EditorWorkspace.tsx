@@ -3,7 +3,6 @@ import { Button, Message, Space } from '@arco-design/web-react';
 import {
   IconUpload,
   IconSettings,
-  IconStop,
   IconPlayArrowFill
 } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
@@ -28,6 +27,7 @@ import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import ExampleIcon from '@/assets/python/example.svg';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
 
 interface NotebookWorkspaceProps {

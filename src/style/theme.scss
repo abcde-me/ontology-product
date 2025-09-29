@@ -322,8 +322,8 @@ $spacing-9: 24px;
 
 .arco-table-content-inner,
 .data-catalog-left-box {
-  /* 始终为滚动条预留空间 */
-  scrollbar-gutter: stable;
+  /* 去除滚动条预留空间，否则表格默认会多出滚动条的宽度 */
+  scrollbar-gutter: auto;
   // background: transparent;
 }
 
