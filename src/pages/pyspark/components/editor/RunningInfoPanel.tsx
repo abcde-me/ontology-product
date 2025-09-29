@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Collapse, Tabs, Typography } from '@arco-design/web-react';
+import { Collapse, Tabs, Typography, Popover } from '@arco-design/web-react';
 import {
   IconDown,
   IconUp,
@@ -51,6 +51,25 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     getPrevRunStatus
   }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // 自定义expandIcon组件，包含popover功能
+    const CustomExpandIcon = () => {
+      const getPopoverContent = () => {
+        if (isExpanded) {
+          return '收起';
+        } else {
+          return '展开';
+        }
+      };
+
+      return (
+        <Popover content={getPopoverContent()} position="top" trigger="hover">
+          <div className="custom-expand-icon">
+            {isExpanded ? <IconDown /> : <IconUp />}
+          </div>
+        </Popover>
+      );
+    };
 
     // 监听父组件传递的面板状态变化
     useEffect(() => {
@@ -149,7 +168,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
           expandIconPosition="left"
-          expandIcon={isExpanded ? <IconDown /> : <IconUp />}
+          expandIcon={<CustomExpandIcon />}
           style={{
             border: 'none'
           }}
@@ -169,6 +188,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
               <Tabs
                 activeTab={activeKey}
                 onClickTab={handleClickTab}
+                destroyOnHide
                 style={{
                   backgroundColor: '#F8FAFD'
                 }}
