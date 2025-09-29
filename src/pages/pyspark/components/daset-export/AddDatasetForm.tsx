@@ -223,7 +223,9 @@ const DatasetForm = React.forwardRef<
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
-  const [storageType, setStorageType] = useState<StorageType>(StorageType.File);
+  const [storageType, setStorageType] = useState<StorageType>(
+    StorageType.Jsonl
+  );
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     null
   ); //选择的连接器ID
@@ -270,7 +272,7 @@ const DatasetForm = React.forwardRef<
       form.setFieldValue('name', '');
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
-      setStorageType(StorageType.File); //重置数据集类型
+      setStorageType(StorageType.Jsonl); //重置数据集类型
       setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
       setConnectorFileInformation([]); //重置连接器文件信息
@@ -279,7 +281,7 @@ const DatasetForm = React.forwardRef<
       setIsPreviewFile(false);
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
-      form.setFieldValue('storageType', StorageType.File);
+      form.setFieldValue('storageType', StorageType.Jsonl);
       setIscreateTagDisabled(false);
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
@@ -644,7 +646,7 @@ const DatasetForm = React.forwardRef<
             label="数据集类型"
             field="storageType"
             rules={[{ required: true, message: '请选择数据集类型' }]}
-            initialValue="file"
+            initialValue={StorageType.Jsonl}
             extra={
               storageType === StorageType.File
                 ? '文件格式：支持各种文件类型，如图片、音频、视频等'
@@ -654,8 +656,8 @@ const DatasetForm = React.forwardRef<
             }
           >
             <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
-              <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
+              <Radio value={StorageType.File}>文件</Radio>
             </Radio.Group>
           </FormItem>
 
