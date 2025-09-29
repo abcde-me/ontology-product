@@ -10,7 +10,6 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import './index.css';
 import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail/detail-modal';
 import Add from './add';
@@ -245,19 +244,19 @@ export default function Connection() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 180,
-      render: (_, item) => <div className="fontMM">{item.created_at}</div>,
+      render: (_, item) => <div className="text-[14px]">{item.created_at}</div>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at)
     },
     {
       title: '更新时间',
       width: 180,
       dataIndex: 'updated_at',
-      render: (_, item) => <div className="fontMM">{item.updated_at}</div>,
+      render: (_, item) => <div className="text-[14px]">{item.updated_at}</div>,
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at)
     },
     {
       title: '操作',
-      width: 130,
+      width: 140,
       fixed: 'right',
       render: (_, record) => {
         const perms = record?.perms || [];
@@ -440,7 +439,7 @@ export default function Connection() {
   return (
     <div
       style={{
-        minHeight: 'calc(100% - 30px)',
+        minHeight: 'calc(100% - 40px)',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
@@ -519,7 +518,12 @@ export default function Connection() {
           total={pagination.total}
           showJumper
           sizeCanChange
-          style={{ marginBottom: '20px' }}
+          style={{
+            display: 'flex',
+            justifyContent: 'end',
+            marginBottom: '20px',
+            marginRight: '20px'
+          }}
         />
       )}
 
@@ -540,7 +544,7 @@ export default function Connection() {
       </Modal>
       <Add ref={addandsetchildRef} getListHan={getlist} />
       <Modal
-        style={{ width: '700px' }}
+        style={{ width: '760px' }}
         title={
           <div style={{ fontWeight: '500', fontSize: '16px' }}>编辑连接器</div>
         }
