@@ -1004,7 +1004,7 @@ export default function RequirementDetail() {
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
                 <div className="data-error-info error-info-text">
-                  请选择数据集合
+                  请选择数据
                 </div>
               )}
             </FormItem>
