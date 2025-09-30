@@ -1,11 +1,12 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Tree,
   Input,
   Button,
   Space,
   Typography,
-  Empty
+  Empty,
+  Spin
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import {
@@ -43,7 +44,8 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
     setExpandedKeys,
     handleSearch,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    loading
   } = useDatasetTree();
 
   // 处理返回
@@ -127,7 +129,12 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
 
       {/* 第三部分：列表 */}
       <div className="pyspark-dataset-tree__content">
-        {treeData.length === 0 ? (
+        {loading ? (
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
+        ) : treeData.length === 0 ? (
           <Empty />
         ) : (
           <Tree
