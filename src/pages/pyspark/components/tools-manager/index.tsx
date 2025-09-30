@@ -272,27 +272,12 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
 
       {/* Tree组件 */}
       <div className="tools-manager__content">
-        {/* {loading ? (
-          <div className="tools-manager__loading">
-            <Spin />
+        {loading ? (
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
         ) : hasData ? (
-          <Tree
-            treeData={treeData}
-            expandedKeys={expandedKeys}
-            selectedKeys={[]}
-            onExpand={handleExpand}
-            onSelect={handleSelect}
-            showLine={false}
-            blockNode={true}
-            className="tools-manager__tree"
-          />
-        ) : (
-          <Empty description="暂无数据" />
-        )}
-      </div> */}
-
-        {hasData ? (
           <Tree
             treeData={treeData}
             expandedKeys={expandedKeys}
