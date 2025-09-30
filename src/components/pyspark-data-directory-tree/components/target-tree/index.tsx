@@ -1,11 +1,12 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Tree,
   Input,
   Button,
   Space,
   Typography,
-  Empty
+  Empty,
+  Spin
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import {
@@ -42,7 +43,8 @@ const SourceTree: React.FC<SourceTreeProps> = ({
     expandedKeys,
     setExpandedKeys,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    loading
   } = useTargetTree();
 
   // 处理返回
@@ -125,7 +127,12 @@ const SourceTree: React.FC<SourceTreeProps> = ({
 
       {/* 第三部分：列表 */}
       <div className="pyspark-target-tree__content">
-        {treeDataFiltered.length === 0 ? (
+        {loading ? (
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
+        ) : treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
           <Tree
@@ -165,16 +172,16 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                       preferTypography
                     />
                     {/* {(nodeData?.type === 'file' ||
-                      nodeData?.type === 'volume_item') && (
-                        <EllipsisPopover
-                          className={`pyspark-target-tree__node-size pyspark-target-tree__node-size-${nodeData?.type}`}
-                          value={
-                            nodeData?.type === 'file'
-                              ? formatFileSize(Number(nodeData?.file_size ?? 0))
-                              : formatFileSize(Number(nodeData?.latest_size ?? 0))
-                          }
-                        />
-                      )} */}
+                        nodeData?.type === 'volume_item') && (
+                          <EllipsisPopover
+                            className={`pyspark-target-tree__node-size pyspark-target-tree__node-size-${nodeData?.type}`}
+                            value={
+                              nodeData?.type === 'file'
+                                ? formatFileSize(Number(nodeData?.file_size ?? 0))
+                                : formatFileSize(Number(nodeData?.latest_size ?? 0))
+                            }
+                          />
+                        )} */}
                   </div>
                   <div className="pyspark-target-tree__node-actions">
                     {isVolumeItem && (
