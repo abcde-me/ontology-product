@@ -696,8 +696,14 @@ const DatasetDetail = (props: {
           title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
           dataIndex: item.name,
           key: item.name,
-          width: 400,
-          render: (_, record) => <EllipsisPopover value={record[item.name]} />
+          width: contentTableColumnsList.length > 4 ? 260 : 200,
+          render: (_, record) => (
+            <div
+              style={{ width: contentTableColumnsList.length > 4 ? 240 : 190 }}
+            >
+              <EllipsisPopover value={record[item.name]} />
+            </div>
+          )
         }))
       );
     }
