@@ -42,6 +42,7 @@ export const useDatasetTree = ({
   // 树状态管理
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // 获取数据集目录列表
   const getDasetList = async (keyword?: string) => {
@@ -189,7 +190,10 @@ export const useDatasetTree = ({
 
   // 初始化加载数据集列表
   useEffect(() => {
-    getDasetList(searchKeyword);
+    setLoading(true);
+    getDasetList(searchKeyword).finally(() => {
+      setLoading(false);
+    });
   }, [searchKeyword]);
 
   return {
@@ -205,6 +209,7 @@ export const useDatasetTree = ({
     expandedKeys,
     setExpandedKeys,
     treeData,
+    loading,
 
     // 树交互相关
     handleSearch,
