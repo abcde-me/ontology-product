@@ -115,7 +115,6 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
           <div className="code-editor-container">
             <Button
               type="outline"
-              size="small"
               icon={<IconCopy />}
               onClick={handleCopyCode}
               className="copy-button"

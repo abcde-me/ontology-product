@@ -61,13 +61,13 @@
     }
 
     .arco-tree-node-title {
-      width: 227px;
-      flex-basis: 227px;
+      width: 267px;
+      flex-basis: 267px;
       flex-shrink: 0;
 
       .pyspark-dataset-tree__node-title {
         color: var(--primary-primary-6);
-        width: 196px;
+        width: 236px;
       }
 
       &:hover {
@@ -75,10 +75,11 @@
 
         .pyspark-dataset-tree__node-title {
           color: var(--primary-primary-6);
+          width: 196px;
         }
 
         .pyspark-dataset-tree__node-title-file {
-          width: 120px;
+          width: 180px;
         }
 
         .pyspark-dataset-tree__node-actions {

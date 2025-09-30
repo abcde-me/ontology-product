@@ -14,19 +14,14 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
+import SuziRead from '@/assets/python/suanzi-read.svg';
+import SuziQiePian from '@/assets/python/suanzi-qiepian.svg';
+import SuziVideo from '@/assets/python/suanzi-video.svg';
+import SuziClean from '@/assets/python/suanzi-clean.svg';
+import SuziStrong from '@/assets/python/suanzi-strong.svg';
+import SuziVector from '@/assets/python/suanzi-xiangliang.svg';
+import SuziSave from '@/assets/python/suanzi-save.svg';
 import SuziIcon from '@/assets/python/suanzi-icon.svg';
-// import SuziSave from '@/assets/python/suanzi-save.svg';
-// import SuziClean from '@/assets/python/suanzi-clean.svg';
-// import SuziImport from '@/assets/python/suanzi-import.svg';
-// import SuziExport from '@/assets/python/suanzi-export.svg';
-// import SuziDelete from '@/assets/python/suanzi-delete.svg';
-// import SuziEdit from '@/assets/python/suanzi-edit.svg';
-// import SuziAdd from '@/assets/python/suanzi-add.svg';
-// import SuziCopy from '@/assets/python/suanzi-copy.svg';
-// import SuziPaste from '@/assets/python/suanzi-paste.svg';
-// import SuziRun from '@/assets/python/suanzi-run.svg';
-// import SuziStop from '@/assets/python/suanzi-stop.svg';
-// import SuziRestart from '@/assets/python/suanzi-restart.svg';
 
 // 算子图标映射类型
 type OperatorIconMap = Record<string, string>;
@@ -52,6 +47,33 @@ interface ToolsManagerProps {
   getIsEditorFocused?: () => boolean;
 }
 
+enum OperatorCatalogId {
+  /** 读取解析 */
+  READ_PARSING = 0,
+  /** 分片分块 */
+  CHUNK_PROCESSING = 1,
+  /** 音视频处理 */
+  VIDEO_PROCESSING = 2,
+  /** 数据清洗 */
+  DATA_CLEANING = 3,
+  /** 数据增强 */
+  DATA_AUGMENTATION = 4,
+  /** 向量化 */
+  VECTORIZATION = 5,
+  /** 数据保存 */
+  DATA_SAVING = 6
+}
+
+const ICON_MAP = {
+  [OperatorCatalogId.READ_PARSING]: <SuziRead></SuziRead>,
+  [OperatorCatalogId.CHUNK_PROCESSING]: <SuziQiePian></SuziQiePian>,
+  [OperatorCatalogId.VIDEO_PROCESSING]: <SuziVideo></SuziVideo>,
+  [OperatorCatalogId.DATA_CLEANING]: <SuziClean></SuziClean>,
+  [OperatorCatalogId.DATA_AUGMENTATION]: <SuziStrong></SuziStrong>,
+  [OperatorCatalogId.VECTORIZATION]: <SuziVector></SuziVector>,
+  [OperatorCatalogId.DATA_SAVING]: <SuziSave></SuziSave>
+};
+
 const ToolsManager: React.FC<ToolsManagerProps> = ({
   onInsertContent,
   getIsEditorFocused
@@ -75,21 +97,6 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
 
   const closeToolDetail = () => {
     setToolDetailVisible(false);
-  };
-
-  // 获取算子图标
-  const getOperatorIcon = (name: string): string => {
-    const iconMap: OperatorIconMap = {
-      文本解析算子: '📄',
-      图片解析算子: '🖼️',
-      音频解析算子: '🎵',
-      去重处理算子: '🔄',
-      数据验证算子: '✅',
-      通用场景增强算子: '📈',
-      去重算子: '🔄'
-    };
-
-    return iconMap[name] || '⚙️';
   };
 
   // 获取算子图标背景色
@@ -163,8 +170,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
               className="tools-manager__operator-icon"
               style={{ backgroundColor: getOperatorIconBgColor(item.name) }}
             >
-              {/* {getOperatorIcon(item.name)} */}
-              <SuziIcon />
+              {ICON_MAP[category.catalog_id] || <SuziIcon />}
             </div>
 
             {/* 算子信息 */}
