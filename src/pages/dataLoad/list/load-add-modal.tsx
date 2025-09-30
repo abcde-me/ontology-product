@@ -918,7 +918,7 @@ const LoadAddModal = (props: propsType) => {
                   marginTop: '4px'
                 }}
               >
-                注意保存后数据库名称为xxx-aaa
+                {`注意保存后数据库名称为${!!tableNames ? tableNames : 'xxx-aaa'}`}
               </p>
             ) : null
           }
