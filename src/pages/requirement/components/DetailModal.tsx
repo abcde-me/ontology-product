@@ -332,7 +332,17 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="fullscreen-modal"
       style={{ width: '960px', height: '800px', overflowY: 'auto' }}
-      footer={null}
+      closeIcon={null}
+      footer={
+        <Button
+          onClick={() => {
+            onClose();
+          }}
+          type="primary"
+        >
+          确定
+        </Button>
+      }
     >
       <div className="detail-modal-content">
         <div className="content-tree">
