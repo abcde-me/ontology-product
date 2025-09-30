@@ -8,7 +8,7 @@ import {
 } from '@/api/dataCatalog';
 import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 import { useAsyncEffect } from 'ahooks';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { default as DbIcon } from '../assets/db-icon.svg';
 import { default as DbItemIcon } from '../assets/db-db_item-icon.svg';
 import { default as DbTableIcon } from '../assets/db-table-icon.svg';
@@ -27,13 +27,39 @@ export interface TreeNodeData {
   type: 'catalog' | 'db_group' | 'db' | 'db_item' | 'table' | 'column';
 }
 
+/**
+ * 递归更新树节点的工具函数
+ * @param nodes 树节点数组
+ * @param targetKey 目标节点的key
+ * @param children 新的子节点
+ * @returns 更新后的树节点数组
+ */
+const updateTreeNodeChildren = (
+  nodes: TreeNodeData[],
+  targetKey: string,
+  children: TreeNodeData[]
+): TreeNodeData[] => {
+  return nodes.map((node) => {
+    if (node.key === targetKey) {
+      return { ...node, children };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: updateTreeNodeChildren(node.children, targetKey, children)
+      };
+    }
+    return node;
+  });
+};
+
 export const useSourceTree = () => {
-  // 树数据
+  // 树数据状态
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
-  const [treeDataFiltered, setTreeDataFiltered] = useState<TreeNodeData[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [treeDataLoading, setTreeDataLoading] = useState(false);
+
   const handleSearch = (value: string) => {
     setSearchKeyword(value);
   };
@@ -125,9 +151,9 @@ export const useSourceTree = () => {
     []
   );
 
-  // 将文件列表转换为树节点
+  // 将表列表转换为树节点
   const convertTableToTreeNode = useCallback(
-    (table, parentDBItem): TreeNodeData => {
+    (table: any, parentDBItem: any): TreeNodeData => {
       return {
         key: `table-${table.table_id}`,
         id: table.table_id,
@@ -145,11 +171,12 @@ export const useSourceTree = () => {
     []
   );
 
-  // 处理加载更多（预留接口）
+  // 处理懒加载节点
   const loadMore = useCallback(
     async (node: NodeInstance): Promise<void> => {
       const nodeData = node.props.dataRef as TreeNodeData;
 
+      // 加载数据表
       if (nodeData.type === 'db_item') {
         try {
           const res = await getDbItemListApi({
@@ -161,46 +188,24 @@ export const useSourceTree = () => {
           });
 
           const tables = res?.data?.list || [];
-          if (tables.length > 0) {
-            const children = tables.map((table) =>
-              convertTableToTreeNode(table, nodeData.data)
-            );
-            setTreeData((prevTreeData) => {
-              // 递归查找并插入children
-              const updateNode = (nodes: TreeNodeData[]): TreeNodeData[] =>
-                nodes.map((n) => {
-                  if (n.key === nodeData.key) {
-                    return { ...n, children };
-                  }
-                  if (n.children) {
-                    return { ...n, children: updateNode(n.children) };
-                  }
-                  return n;
-                });
-              return updateNode(prevTreeData);
-            });
-          } else {
-            // 没有表时也要设置children为空数组，避免重复请求
-            setTreeData((prevTreeData) => {
-              const updateNode = (nodes: TreeNodeData[]): TreeNodeData[] =>
-                nodes.map((n) => {
-                  if (n.key === nodeData.key) {
-                    return { ...n, children: [] };
-                  }
-                  if (n.children) {
-                    return { ...n, children: updateNode(n.children) };
-                  }
-                  return n;
-                });
-              return updateNode(prevTreeData);
-            });
-          }
-        } catch (e) {
-          console.log('数据表加载失败...');
+          const children = tables.map((table) =>
+            convertTableToTreeNode(table, nodeData.data)
+          );
+
+          setTreeData((prevTreeData) =>
+            updateTreeNodeChildren(prevTreeData, nodeData.key, children)
+          );
+        } catch (error) {
+          console.error('数据表加载失败:', error);
+          // 设置空数组避免重复请求
+          setTreeData((prevTreeData) =>
+            updateTreeNodeChildren(prevTreeData, nodeData.key, [])
+          );
         }
         return;
       }
 
+      // 加载表字段
       if (nodeData.type === 'table') {
         try {
           const res = await getDbItemDetail({
@@ -214,65 +219,35 @@ export const useSourceTree = () => {
           const columns = res?.data?.sample?.columns || [];
           const data = res?.data?.sample?.data || [];
 
-          if (columns.length > 0) {
-            // 构建字段节点
-            const fieldNodes: TreeNodeData[] = columns.map((col) => ({
-              key: `table-${nodeData.data.table_id}-column-${col}`,
-              title: col,
-              isLeaf: true,
-              icon: <DbColumnIcon />,
+          const fieldNodes: TreeNodeData[] = columns.map((col) => ({
+            key: `table-${nodeData.data.table_id}-column-${col}`,
+            title: col,
+            isLeaf: true,
+            icon: <DbColumnIcon />,
+            type: 'column',
+            data: {
               type: 'column',
-              data: {
-                type: 'column',
-                name: col,
-                sample: data.length > 0 ? data[0][col] : undefined,
-                parentTable: nodeData.data
-              }
-            }));
+              name: col,
+              sample: data.length > 0 ? data[0][col] : undefined,
+              parentTable: nodeData.data
+            }
+          }));
 
-            setTreeData((prevTreeData) => {
-              const updateNode = (nodes: TreeNodeData[]): TreeNodeData[] =>
-                nodes.map((n) => {
-                  if (n.key === nodeData.key) {
-                    return { ...n, children: fieldNodes };
-                  }
-                  if (n.children) {
-                    return { ...n, children: updateNode(n.children) };
-                  }
-                  return n;
-                });
-              return updateNode(prevTreeData);
-            });
-          } else {
-            // 没有字段时也要设置children为空数组，避免重复请求
-            setTreeData((prevTreeData) => {
-              const updateNode = (nodes: TreeNodeData[]): TreeNodeData[] =>
-                nodes.map((n) => {
-                  if (n.key === nodeData.key) {
-                    return { ...n, children: [] };
-                  }
-                  if (n.children) {
-                    return { ...n, children: updateNode(n.children) };
-                  }
-                  return n;
-                });
-              return updateNode(prevTreeData);
-            });
-          }
-        } catch (e) {
-          console.log('数据列加载失败...');
+          setTreeData((prevTreeData) =>
+            updateTreeNodeChildren(prevTreeData, nodeData.key, fieldNodes)
+          );
+        } catch (error) {
+          console.error('数据列加载失败:', error);
+          // 设置空数组避免重复请求
+          setTreeData((prevTreeData) =>
+            updateTreeNodeChildren(prevTreeData, nodeData.key, [])
+          );
         }
         return;
       }
     },
-    [getDbItemListApi, convertTableToTreeNode]
+    [convertTableToTreeNode]
   );
-
-  const filterTreeData = useCallback((treeData: TreeNodeData[]) => {
-    return treeData.filter((item) => {
-      return item.type !== 'db_item';
-    });
-  }, []);
 
   // 树组件搜索功能：递归过滤树形数据并返回匹配的节点和需要展开的节点
   const searchData = useCallback(
@@ -316,34 +291,32 @@ export const useSourceTree = () => {
     []
   );
 
+  // 初始化加载数据
   useAsyncEffect(async () => {
     const catalogList = await getCatalogList();
     const newTreeData = catalogList.map(convertSourceCatalogToTreeNode);
-    console.log(newTreeData, 'newTreeData');
     setTreeData(newTreeData);
   }, []);
 
-  // 搜索功能：根据输入值过滤树数据
-  useEffect(() => {
+  // 使用 useMemo 优化过滤后的树数据计算
+  const treeDataFiltered = useMemo(() => {
     if (!searchKeyword.trim()) {
-      setTreeDataFiltered(treeData);
-    } else {
-      const { filteredData, expandedKeys } = searchData(
-        searchKeyword,
-        treeData
-      );
-      setTreeDataFiltered(filteredData);
-      // 搜索时自动展开匹配的节点路径
-      setExpandedKeys((prevKeys) => {
-        // 合并之前的展开状态和搜索匹配的展开状态
-        const newKeys = [...new Set([...prevKeys, ...expandedKeys])];
-        return newKeys;
-      });
+      return treeData;
     }
+    const { filteredData, expandedKeys: newExpandedKeys } = searchData(
+      searchKeyword,
+      treeData
+    );
+    // 搜索时自动展开匹配的节点路径
+    setExpandedKeys((prevKeys) => {
+      const mergedKeys = [...new Set([...prevKeys, ...newExpandedKeys])];
+      return mergedKeys;
+    });
+    return filteredData;
   }, [searchKeyword, treeData, searchData]);
 
+  // 清空搜索时，收起所有节点
   useEffect(() => {
-    // 清空搜索时，收起所有节点
     if (!searchKeyword.trim()) {
       setExpandedKeys([]);
     }
