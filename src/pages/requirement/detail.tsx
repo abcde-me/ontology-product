@@ -605,9 +605,9 @@ export default function RequirementDetail() {
   const stepNext = async () => {
     const { formText, formLabel } = TextEntityDataContent;
     const result = await Promise.all([
-      annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
-        ? formType
-            ?.validate()
+      annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
+        ? formText
+            .validate()
             .then((val) => {
               return true;
             })
@@ -617,6 +617,16 @@ export default function RequirementDetail() {
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formLabel
+            .validate()
+            .then((val) => {
+              return true;
+            })
+            .catch((errorInfo) => {
+              return false;
+            })
+        : true,
+      annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
+        ? formType
             .validate()
             .then((val) => {
               return true;
