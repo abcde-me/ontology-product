@@ -554,7 +554,8 @@ export default function Eltable() {
             style={{
               cursor: hasSelectedRows ? 'pointer' : 'not-allowed'
             }}
-            disabled={!hasSelectedRows}
+            // 数据库类型暂不支持导出，过滤掉数据库类型
+            disabled={!hasSelectedRows || selectedNodeType === 'db_item'}
             onClick={() => {
               handleExport();
             }}

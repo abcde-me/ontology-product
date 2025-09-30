@@ -151,7 +151,11 @@ const FormComponent: React.FC<FormProps> = ({
     try {
       const res = await getConnectionList({});
       if (res && res.data) {
-        setConnectorList(res.data.items);
+        // 数据库表不支持导出，过滤掉数据库类型连接器
+        const connectorList = (res.data?.items || []).filter(
+          (item) => item.type !== 'db'
+        );
+        setConnectorList(connectorList);
       } else {
         setConnectorList([]);
         Message.error('获取连接器列表失败：数据格式异常');
