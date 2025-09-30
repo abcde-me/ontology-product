@@ -1134,7 +1134,7 @@ const DatasetManagement: React.FC = () => {
         >
           数据集管理
         </h1>
-        <div
+        {/* <div
           style={{
             color: '#334155',
             margin: '0px',
@@ -1142,7 +1142,7 @@ const DatasetManagement: React.FC = () => {
           }}
         >
           管理用于模型精调和训练的数据集
-        </div>
+        </div> */}
       </div>
       <div className={styles.searchToolbar}>
         <Input.Group compact>
