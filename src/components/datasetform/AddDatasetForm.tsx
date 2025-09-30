@@ -78,14 +78,13 @@ const FormItem = Form.Item;
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
   return dataSourceData.map((catalog) => ({
-    label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
+    label: catalog.name,
     // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            label: <EllipsisPopover value={volume.name}></EllipsisPopover>,
-            // label: volume.name,
+            label: volume.name,
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -790,7 +789,7 @@ const DatasetForm = React.forwardRef<
                   placeholder="请选择"
                   //@ts-expect-error
                   renderFormat={(labels, selectedOptions) => {
-                    const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
+                    const value = `${labels.join(' / ')}`;
                     return (
                       <div>
                         <EllipsisPopover value={value}></EllipsisPopover>
@@ -800,6 +799,16 @@ const DatasetForm = React.forwardRef<
                   options={targetDataSourceOptions}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"
+                  showSearch={{
+                    retainInputValue: true
+                  }}
+                  renderOption={(node, _level) => {
+                    return (
+                      <div>
+                        <EllipsisPopover value={node.label} />
+                      </div>
+                    );
+                  }}
                   dropdownMenuColumnStyle={{
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
