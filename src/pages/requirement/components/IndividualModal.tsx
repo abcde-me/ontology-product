@@ -153,11 +153,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     },
     {
       title: '账号ID',
-      dataIndex: 'tenant_id',
+      dataIndex: 'id',
       width: 327,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.tenant_id)}
+          value={renderEmptyPlaceholder(record.id)}
           isEdit={false}
         />
       )

@@ -546,7 +546,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               mode="multiple"
                               allowClear
                               placeholder="请选择起始标签"
-                              style={{ width: 260 }}
+                              style={{
+                                width: 260,
+                                backgroundColor:
+                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                              }}
                               notFoundContent={renderNotFoundContent()}
                               onChange={(value) => {
                                 handleRelationFieldChange(

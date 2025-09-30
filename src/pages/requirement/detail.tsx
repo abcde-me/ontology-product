@@ -1582,7 +1582,7 @@ export default function RequirementDetail() {
                                           </FormItem>
                                         </div>
                                         {/* 选项内容区域 */}
-                                        {groupClassVal !== 3 && (
+                                        {/* {groupClassVal !== 3 && (
                                           <div className="attribute-group-header-content">
                                             <div className="attribute-group-info-title">
                                               {1 ===
@@ -1678,7 +1678,7 @@ export default function RequirementDetail() {
                                               支持手动输入
                                             </Checkbox>
                                           </div>
-                                        )}
+                                        )} */}
                                         {attrGroup?.label_info_attribute?.map(
                                           (attr, attrIndex) => (
                                             <div
