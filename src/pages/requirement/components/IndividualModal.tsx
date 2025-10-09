@@ -2,21 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Button,
-  Typography,
-  Tabs,
   Tree,
-  Form,
   Input,
-  DatePicker,
   Table,
-  Popover,
   Pagination,
-  Message
+  Message,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   getDepartmentTreeList,
   getIndividualList
 } from '@/api/individualAndDepartment';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
+import {
+  IconCaretDown,
+  IconDown,
+  IconDragArrow
+} from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
 
 interface DataSourceModalProps {
@@ -27,14 +30,18 @@ interface DataSourceModalProps {
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getTreeIds: (data: any) => void;
+  getDetailObj: any;
+  type: any;
 }
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
-  title = '数据源',
+  title = '请选个人',
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
-  getTreeIds
+  getTreeIds,
+  getDetailObj,
+  type
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
@@ -48,12 +55,49 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const [total, setTotal] = useState(10);
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  useEffect(() => {
+    if (getDetailObj) {
+      setSelectedRowKeys(
+        getDetailObj?.label_data_set &&
+          getDetailObj?.label_data_set?.map((item) => item.execution_id) // 改为使用 execution_id
+      );
+    }
+  }, [getDetailObj]);
   useEffect(() => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          console.log(res?.data, 'res');
-          setTreeData(res.data);
+          const newTreeDateList = res?.data?.map((item) => {
+            return item?.children
+              ? {
+                  allowClick: false,
+                  title: item.name,
+                  key: String(item.id),
+                  level: 1,
+                  disabled: true,
+                  children: item?.children?.map((item_level2) => {
+                    return {
+                      disabled: true,
+                      level: 2,
+                      title: item_level2?.name,
+                      key: item_level2?.id,
+                      allowClick: false,
+                      children: item_level2?.children?.map((subItem) => {
+                        return {
+                          disabled: type === 'detail',
+                          level: 3,
+                          title: subItem?.name,
+                          key: subItem?.id,
+                          allowClick: false
+                        };
+                      })
+                    };
+                  })
+                }
+              : { title: item.name, key: item.id };
+          });
+          setTreeData(newTreeDateList);
         })
         .catch((err) => {
           console.error(err);
@@ -62,35 +106,61 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       console.log(err, 'err');
     }
   }, [visible]);
-
   // 树的内容
   const renderTreeContent = () => {
     return (
       <Tree
-        showLine
+        blockNode={true}
+        icons={{
+          switcherIcon: <IconCaretDown />
+        }}
         autoExpandParent={false}
         treeData={treeData}
-        // checkStrictly={checkStrictly}
+        renderTitle={(node: any) => {
+          return (
+            <div
+              style={{
+                width: node?.childrenData?.length > 0 ? '170px' : '120px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                color: '#0F172A'
+              }}
+            >
+              <Tooltip content={node.title}>{node.title}</Tooltip>
+            </div>
+          );
+        }}
         onSelect={(value) => {
           console.log(value);
           setCurrent(1);
           setPageSize(10);
           setCheckedKeys(value);
+          getTreeIds(value);
         }}
       />
     );
+  };
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
   };
   const columns = [
     {
       title: '姓名',
       dataIndex: 'username',
       ellipsis: true,
-      width: 100
+      width: 327
     },
     {
       title: '账号ID',
-      dataIndex: 'tenant_id',
-      width: 80
+      dataIndex: 'id',
+      width: 327,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.id)}
+          isEdit={false}
+        />
+      )
     }
   ];
 
@@ -130,60 +200,56 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       size: pageSize,
       organization_id: checkedKeys[0] || ''
     };
-    const res = await getIndividualList({ ...sourceParams });
-    console.log(res?.data.data, 'res======132');
-    if (res.success) {
-      setTableData(res?.data.data);
-      setCurrent(res?.data?.page);
-      setPageSize(res?.data?.size);
-      setTotal(res?.data?.total);
+    try {
+      const res = await getIndividualList({ ...sourceParams });
+      console.log(res?.data.data, 'res======132');
+      if (res.success) {
+        setTableData(res?.data.data);
+        setTotal(res?.data?.total);
+      } else {
+        setTableData([]);
+        setTotal(0);
+      }
+    } catch {
+      setTableData([]);
+      setTotal(0);
     }
   };
   useEffect(() => {
     getTableData();
   }, [checkedKeys, current, pageSize]);
   // 表格选择内容
-  const getTableSelectContent = () => {
-    getChildTreeSelectData(selectedRowKeys);
-    getTreeIds(checkedKeys);
-    onClose();
-  };
+
   return (
     <Modal
       title={title}
       visible={visible}
-      onCancel={onClose}
+      onCancel={() => {
+        onClose();
+      }}
       alignCenter={true}
       escToExit={false}
       maskClosable={false}
       className="fulscreen-modal"
-      style={{ width: '90vw', overflowY: 'auto' }}
+      style={{ width: '1000px', height: '800px' }}
+      closeIcon={null}
       footer={
-        <>
-          <Button
-            onClick={() => {
-              onClose();
-            }}
-          >
-            取消
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              getTableSelectContent();
-            }}
-          >
-            确定
-          </Button>
-        </>
+        <Button
+          onClick={() => {
+            onClose();
+          }}
+          type="primary"
+        >
+          确定
+        </Button>
       }
     >
-      <div className="fullscreen-modal-content">
+      <div className="individual-modal-content">
         <div className="content-tree">
           <div>
             <Input
               type="text"
-              placeholder="请输入名称搜索"
+              placeholder="请输入部门搜索"
               onChange={(value) => {
                 setSearchValue(value);
               }}
@@ -195,10 +261,17 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           <Table
             ref={tableRef}
             rowKey="id"
+            border={false}
             columns={columns}
             data={tableData}
             pagination={false}
+            noDataElement={noDataElement({ description: '暂无数据' })}
             rowSelection={{
+              checkboxProps: (record) => {
+                return {
+                  disabled: type === 'detail'
+                };
+              },
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
               onChange: (selectedRowKeys: any, selectedRows: any) => {
@@ -218,6 +291,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                 if (mergedRows.length <= 200) {
                   setSelectedRowsContent(mergedRows);
                   setSelectedRowKeys(mergedRows.map((item) => item.id));
+                  getChildTreeSelectData(mergedRows.map((item) => item.id));
                 } else {
                   Message.error('选中的数量不能超过200条');
                 }
@@ -242,7 +316,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               total={total}
               showJumper
               sizeCanChange
-              style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+              style={{
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginRight: '16px'
+              }}
             />
           )}
         </div>

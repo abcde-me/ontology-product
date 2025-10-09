@@ -79,17 +79,13 @@
       background-color: var(--color-bg-5);
       color: #007dfa;
 
-      // .arco-tree-node-title {
-      //   background-color: var(--color-bg-5);
-      // }
-
-      .sql-dataset-tree__node-title:not(.sql-dataset-tree__node-title-scheam) {
-        max-width: 136px;
+      .sql-dataset-tree__node-title-dataset {
         color: #007dfa;
+        max-width: 130px;
       }
 
-      .sql-dataset-tree__node-title-dataset {
-        max-width: 116px;
+      .sql-dataset-tree__node-title-scheam {
+        max-width: 150px;
       }
 
       .sql-dataset-tree__node-actions {
@@ -124,10 +120,10 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 175px;
+      max-width: 220px;
 
-      &-file {
-        max-width: 150px;
+      &-scheam {
+        max-width: 180px;
       }
     }
 

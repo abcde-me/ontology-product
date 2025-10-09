@@ -696,8 +696,20 @@ const DatasetDetail = (props: {
           title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
           dataIndex: item.name,
           key: item.name,
-          width: 400,
-          render: (_, record) => <EllipsisPopover value={record[item.name]} />
+          width: contentTableColumnsList.length > 4 ? 260 : 200,
+          render: (_, record) => (
+            // TODO: 待优化，父页面是modal还是page， EllipsisPopover 需要详细看下
+            <div
+              style={{
+                width:
+                  contentTableColumnsList.length > 4
+                    ? 228
+                    : `calc(('100%' / ${contentTableColumnsList.length}) - 40)`
+              }}
+            >
+              <EllipsisPopover value={record[item.name]} preferTypography />
+            </div>
+          )
         }))
       );
     }

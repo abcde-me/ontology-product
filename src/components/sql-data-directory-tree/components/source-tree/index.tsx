@@ -76,7 +76,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
           {prefix}
           <span
             style={{
-              color: 'var(--color-primary-light-4)'
+              color: '#007DFA'
             }}
           >
             {matchedText}
@@ -121,7 +121,10 @@ const SourceTree: React.FC<SourceTreeProps> = ({
         className={`sql-source-tree__content ${treeDataLoading ? 'sql-source-tree__content--loading' : ''}`}
       >
         {treeDataLoading ? (
-          <Spin tip="加载中..."></Spin>
+          <div className="mt-[110px] flex flex-col items-center">
+            <Spin size={26} />
+            <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
+          </div>
         ) : treeDataFiltered.length === 0 ? (
           <Empty />
         ) : (
@@ -158,9 +161,10 @@ const SourceTree: React.FC<SourceTreeProps> = ({
 
               return (
                 <div className="sql-source-tree__node">
-                  <div className="sql-source-tree__node-info">
+                  <div
+                    className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
+                  >
                     <EllipsisPopover
-                      className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
@@ -170,7 +174,11 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                   <div className="sql-source-tree__node-actions">
                     {showDetailBtn && (
                       <Button
-                        style={{ fontWeight: 600 }}
+                        style={{
+                          fontWeight: 600,
+                          margin: '0 8px 0 2px',
+                          padding: 0
+                        }}
                         type="text"
                         className="sql-source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}

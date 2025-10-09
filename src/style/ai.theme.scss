@@ -1,28 +1,28 @@
 /******** fontSize *******/
-@font-size-body-3: 14px;
+$font-size-body-3: 14px;
 
 /******** fontWeight ********/
-@font-weight-400: 400;
-@font-weight-600: 600;
+$font-weight-400: 400;
+$font-weight-600: 600;
 
 /*********** border ***********/
-@border-radius-medium: 4px;
+$border-radius-medium: 4px;
 
 /*********** size ***********/
-@size-4: 16px;
+$size-4: 16px;
 
 /*********** spacing ***********/
 
-@spacing-none: 0;
-@spacing-1: 2px;
-@spacing-2: 4px;
-@spacing-3: 6px;
-@spacing-4: 8px;
-@spacing-5: 10px;
-@spacing-6: 12px;
-@spacing-7: 16px;
-@spacing-8: 20px;
-@spacing-9: 24px;
+$spacing-none: 0;
+$spacing-1: 2px;
+$spacing-2: 4px;
+$spacing-3: 6px;
+$spacing-4: 8px;
+$spacing-5: 10px;
+$spacing-6: 12px;
+$spacing-7: 16px;
+$spacing-8: 20px;
+$spacing-9: 24px;
 
 // TODO: 应该再抽离中间层，用于场景定义，需要与视觉设计师一起共创
 // @font-weight-normal: @font-weight-400;
@@ -30,11 +30,11 @@
 
 /******** btn ********/
 .arco-btn-size-default {
-  font-size: @font-size-body-3;
+  font-size: $font-size-body-3;
 }
 
 .arco-btn-text {
-  font-weight: @font-weight-400;
+  font-weight: $font-weight-400;
 }
 
 /******** table ********/
@@ -51,23 +51,23 @@
 }
 
 .arco-table-th {
-  font-weight: @font-weight-600;
+  font-weight: $font-weight-600;
 }
 
 .arco-table .arco-table-th-item {
-  font-size: @font-size-body-3;
+  font-size: $font-size-body-3;
 }
 
 .arco-table-td {
-  font-size: @font-size-body-3;
+  font-size: $font-size-body-3;
   padding: 12px;
 }
 
 /******** pagination ********/
 .arco-pagination-item {
-  font-size: @font-size-body-3;
+  font-size: $font-size-body-3;
   color: var(--color-text-2);
-  font-weight: @font-weight-600;
+  font-weight: $font-weight-600;
 }
 
 .arco-pagination-item-active {
@@ -86,7 +86,7 @@
 }
 
 .arco-tree-node-title {
-  font-size: @font-size-body-3;
+  font-size: $font-size-body-3;
 }
 
 .arco-tree-node-title:hover {
@@ -97,15 +97,16 @@
   background-color: var(--color-bg-3);
 }
 
+// TODO: 当前平台树选中字重均为400， 先修改为400
 .arco-tree-node-selected .arco-tree-node-title,
 .arco-tree-node-selected .arco-tree-node-title:hover {
-  font-size: @font-size-body-3;
-  font-weight: @font-weight-600;
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
 }
 
 /******** form ********/
-.arco-form .arco-form-item>.arco-form-label-item {
-  padding-right: @size-4;
+.arco-form .arco-form-item > .arco-form-label-item {
+  padding-right: $size-4;
 }
 
 .arco-input:focus,
@@ -133,8 +134,8 @@
 }
 
 .arco-link {
-  font-size: @font-size-body-3;
-  font-weight: @font-weight-400;
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
 }
 
 .arco-menu-vertical .arco-menu-group-title {
@@ -473,12 +474,12 @@
 }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked+.arco-radio-button::before {
+.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
   opacity: 1;
 }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked+.arco-radio-button::before {
+.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
   opacity: 1;
 }
 
@@ -540,7 +541,7 @@
 
 .ai-tree {
   .arco-tree-node {
-    border-radius: @border-radius-medium;
+    border-radius: $border-radius-medium;
     position: relative;
   }
 
@@ -556,7 +557,8 @@
     display: inline-block;
   }
 
-  .ai-node-title-inner {}
+  .ai-node-title-inner {
+  }
 
   .ai-node-value {
     position: absolute;
@@ -600,7 +602,7 @@
   flex-direction: column;
   box-sizing: content-box;
   width: 318px;
-  padding-block: @spacing-8;
+  padding-block: $spacing-8;
   border-right: 1px solid var(--color-border-2);
   overflow: hidden;
 }
@@ -608,12 +610,12 @@
 .ai-page-content-left-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-inline: @spacing-9;
+  padding-inline: $spacing-9;
 }
 
 .ai-page-content-right {
-  padding-inline: @spacing-9;
-  padding-block: @spacing-8;
+  padding-inline: $spacing-9;
+  padding-block: $spacing-8;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -625,7 +627,7 @@
 }
 
 .ai-page-title {
-  padding-bottom: @spacing-8;
+  padding-bottom: $spacing-8;
   color: var(--color-text-1);
   font-size: 20px;
   font-style: normal;
@@ -634,15 +636,15 @@
 }
 
 .ai-page-title.px {
-  padding-inline: @spacing-9;
+  padding-inline: $spacing-9;
 }
 
-.ai-page-subtitle {}
+.ai-page-subtitle {
+}
 
 /******** Popover 弹窗箭头去除 className="no-arrow-popover" ********/
 
 .no-arrow-popover {
-
   .arco-trigger-arrow,
   .arco-popover-arrow {
     display: none;

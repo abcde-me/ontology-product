@@ -1,0 +1,8 @@
+// ModalDatasetForm 组件样式
+
+.modal-dataset-form {
+  // 设置 arco-table-header 的 overflow-y 为 hidden
+  .arco-table-header {
+    overflow-y: hidden !important;
+  }
+}

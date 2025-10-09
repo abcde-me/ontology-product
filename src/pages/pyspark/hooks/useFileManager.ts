@@ -90,6 +90,7 @@ export const useFileManager = (
         });
 
         if (res.status === 200) {
+          setIsCanCreate(res?.data?.create_perm ?? false);
           return res.data?.items ?? [];
         }
         return [];
@@ -362,6 +363,7 @@ export const useFileManager = (
           page: 1,
           page_size: 20
         });
+        setIsCanCreate(res?.data?.create_perm ?? false);
         return res?.data?.items ?? [];
       } catch (error) {
         console.error('获取文件夹内容失败:', error);
@@ -377,8 +379,8 @@ export const useFileManager = (
     try {
       // 更新当前文件夹ID
       setCurrentFolderId(parentId || '0');
-
       const res = await getPythonList(String(parentId || ''), {} as any);
+      setIsCanCreate(res?.data?.create_perm ?? false);
       return res?.data?.items || [];
     } catch (error) {
       console.error('返回父级失败:', error);

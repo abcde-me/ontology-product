@@ -1,14 +1,12 @@
-.fullscreen-modal-content {
+.individual-modal-content {
   display: flex;
-
-  .fullscreen-modal-content {
-    position: relative;
-    display: flex;
-  }
+  position: relative;
+  border: 1px solid #cbd5e1;
+  height: 650px;
+  border-radius: 4px;
 
   .content-tree {
-    margin-right: 16px;
-    max-height: 600px;
+    max-height: 650px;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -16,6 +14,10 @@
     overflow-y: scroll;
     scrollbar-width: none;
     scrollbar-gutter: stable;
+    border-right: 1px solid #cbd5e1;
+    padding-top: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
 
     &::-webkit-scrollbar {
       display: none;
@@ -38,6 +40,10 @@
 
     &::-webkit-scrollbar {
       display: none;
+    }
+
+    .arco-table-content-scroll .arco-table-content-inner {
+      scrollbar-gutter: auto;
     }
   }
 

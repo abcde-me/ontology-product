@@ -140,7 +140,7 @@ export default function Requirement() {
         return (
           <div className="status-item">
             <span className="status-published-icon" />
-            <span className="status-text">已发布</span>
+            <span className="status-text">发布成功</span>
           </div>
         );
       case RequirementStatus.PublishFailed:
@@ -257,7 +257,7 @@ export default function Requirement() {
           value: RequirementStatus.Draft
         },
         {
-          text: '已发布',
+          text: '发布成功',
           value: RequirementStatus.Published
         },
         {
@@ -301,7 +301,7 @@ export default function Requirement() {
       dataIndex: 'operate',
       align: 'left',
       fixed: 'right',
-      width: 160,
+      width: 130,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
@@ -315,27 +315,28 @@ export default function Requirement() {
             >
               详情
             </span>
-            {record?.status === RequirementStatus.Annotated && (
+            {(record?.status === RequirementStatus.Annotated ||
+              record?.status === RequirementStatus.Published) && (
               <span
                 className="operate-text"
                 onClick={() => {
-                  // setLoading(true)
-                  // try {
-                  //   getAnnotationDownload({ requirement_id: record.id }).then((res) => {
-                  //     if (res.code === 0) {
-                  //       // const a = document.createElement('a');
-                  //       // a.href = res?.data?.download_url;
-                  //       // a.download = res?.data?.download_url; // 设置下载文件名
-                  //       // document.body.appendChild(a);
-                  //       // a.click();
-                  //     }
-                  //   }).catch(() => {
-                  //   }).finally(() => {
-                  //     setLoading(false)
-                  //   });
-                  // } catch {
-                  //   setLoading(false)
-                  // }
+                  setLoading(true);
+                  try {
+                    getAnnotationDownload({ requirement_id: record.id })
+                      .then((res) => {
+                        if (res.code === 0) {
+                          const a = document.createElement('a');
+                          a.href = res?.data?.download_url;
+                          document.body.appendChild(a);
+                          a.click();
+                        }
+                        setLoading(false);
+                      })
+                      .catch(() => {})
+                      .finally(() => {});
+                  } catch {
+                    setLoading(false);
+                  }
                 }}
               >
                 下载结果
@@ -349,12 +350,13 @@ export default function Requirement() {
 
   return (
     <div className="requirement">
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>需求管理</h1>
+      <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: 16 }}>
+        需求管理
+      </h1>
       <div className="requirement-form">
         <Form
           form={form}
           autoComplete="off"
-          style={{ marginTop: '16px' }}
           layout="inline"
           validateMessages={{
             required: (_, { label }) => `必须填写 ${label}`

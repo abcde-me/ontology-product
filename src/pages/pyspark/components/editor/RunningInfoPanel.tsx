@@ -1,12 +1,21 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Collapse, Tabs, Typography } from '@arco-design/web-react';
+import {
+  Collapse,
+  Tabs,
+  Typography,
+  Popover,
+  Message,
+  Button
+} from '@arco-design/web-react';
 import {
   IconDown,
   IconUp,
   IconLoading,
   IconCheckCircle,
-  IconCloseCircle
+  IconCloseCircle,
+  IconCopy
 } from '@arco-design/web-react/icon';
+import copy from 'copy-to-clipboard';
 import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/pythonApi';
@@ -51,6 +60,25 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     getPrevRunStatus
   }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // 自定义expandIcon组件，包含popover功能
+    const CustomExpandIcon = () => {
+      const getPopoverContent = () => {
+        if (isExpanded) {
+          return '收起';
+        } else {
+          return '展开';
+        }
+      };
+
+      return (
+        <Popover content={getPopoverContent()} position="top" trigger="hover">
+          <div className="custom-expand-icon">
+            {isExpanded ? <IconDown /> : <IconUp />}
+          </div>
+        </Popover>
+      );
+    };
 
     // 监听父组件传递的面板状态变化
     useEffect(() => {
@@ -98,6 +126,29 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       setIsExpanded(newExpanded);
       onPanelStateChange?.(newExpanded);
     };
+
+    // 复制内容到剪贴板
+    const handleCopyContent = (content: string) => {
+      const success = copy(content);
+      if (success) {
+        Message.success('复制成功');
+      } else {
+        Message.error('复制失败');
+      }
+    };
+
+    // 复制按钮组件
+    const CopyButton = ({ content }: { content: string }) => (
+      <Button
+        type="outline"
+        icon={<IconCopy />}
+        onClick={() => handleCopyContent(content)}
+        className="copy-button"
+        title="复制代码"
+      >
+        复制代码
+      </Button>
+    );
 
     // 格式化时间显示
     const formatTimeInfo = (startTime?: Date | null, duration?: number) => {
@@ -149,7 +200,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
           expandIconPosition="left"
-          expandIcon={isExpanded ? <IconDown /> : <IconUp />}
+          expandIcon={<CustomExpandIcon />}
           style={{
             border: 'none'
           }}
@@ -166,43 +217,56 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
             name="1"
           >
             <div className="panel-content">
-              <Tabs
-                activeTab={activeKey}
-                onClickTab={handleClickTab}
-                style={{
-                  backgroundColor: '#F8FAFD'
-                }}
-              >
-                <TabPane key="result" title="结果">
-                  <div className="run-result-content">
-                    {(() => {
-                      // 如果有结果内容，直接显示
-                      if (runResult && runResult.trim() !== '') {
-                        return runResult;
-                      }
-
-                      // 没有结果时，根据是否已获取过结果和运行状态显示相应提示
-                      if (!hasFetchedResult) {
-                        // 还没有调用过 getRunResult，显示开始输出
-                        return '开始输出...';
-                      } else {
-                        // 已经调用过 getRunResult 但结果为空
-                        if (runStatus === RunningStatus.SUCCESS) {
-                          return '运行成功，暂无输出结果';
-                        } else if (runStatus === RunningStatus.FAILED) {
-                          return '运行失败，请查看日志获取详细信息';
-                        } else {
-                          return '暂无运行结果';
+              <div className="tabs-container">
+                <Tabs
+                  activeTab={activeKey}
+                  onClickTab={handleClickTab}
+                  destroyOnHide
+                  style={{
+                    backgroundColor: '#F8FAFD'
+                  }}
+                >
+                  <TabPane key="result" title="结果">
+                    <div className="run-result-content tab-content-wrapper">
+                      {(() => {
+                        // 如果有结果内容，直接显示
+                        if (runResult && runResult.trim() !== '') {
+                          return runResult;
                         }
-                      }
-                    })()}
-                  </div>
-                </TabPane>
 
-                <TabPane key="log" title="日志">
-                  <div className="runlog-content">{runLog}</div>
-                </TabPane>
-              </Tabs>
+                        // 没有结果时，根据是否已获取过结果和运行状态显示相应提示
+                        if (!hasFetchedResult) {
+                          // 还没有调用过 getRunResult，显示开始输出
+                          return '开始输出...';
+                        } else {
+                          // 已经调用过 getRunResult 但结果为空
+                          if (runStatus === RunningStatus.SUCCESS) {
+                            return '运行成功，暂无输出结果';
+                          } else if (runStatus === RunningStatus.FAILED) {
+                            return '运行失败，请查看日志获取详细信息';
+                          } else {
+                            return '暂无运行结果';
+                          }
+                        }
+                      })()}
+                    </div>
+                  </TabPane>
+
+                  <TabPane key="log" title="日志">
+                    <div className="runlog-content tab-content-wrapper">
+                      {runLog}
+                    </div>
+                  </TabPane>
+                </Tabs>
+
+                {/* 复制按钮放在滚动容器外部 */}
+                {activeKey === 'result' &&
+                  runResult &&
+                  runResult.trim() !== '' && <CopyButton content={runResult} />}
+                {activeKey === 'log' && runLog && runLog.trim() !== '' && (
+                  <CopyButton content={runLog} />
+                )}
+              </div>
             </div>
           </CollapseItem>
         </Collapse>

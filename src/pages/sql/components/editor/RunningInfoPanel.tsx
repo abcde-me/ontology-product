@@ -1,4 +1,7 @@
-import React, { useState, useEffect, memo } from 'react';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
+import SaveToDasetIcon from '@/assets/sql/save-to-daset.svg';
+import { RunningStatus } from '@/types/sqlApi';
 import {
   Button,
   Collapse,
@@ -6,27 +9,25 @@ import {
   Empty,
   Input,
   Menu,
+  Message,
+  Popover,
   Space,
   Table,
   Tabs,
-  Typography,
-  Popover
+  Typography
 } from '@arco-design/web-react';
-import { useEditorContext } from '../../contexts/EditorContext';
 import {
+  IconCopy,
   IconDown,
-  IconUp,
   IconLoading,
-  IconCheckCircle,
-  IconCloseCircle
+  IconUp
 } from '@arco-design/web-react/icon';
-import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
-import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
-import { RunningStatus } from '@/types/sqlApi';
-import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
-
-import './RunningInfoPanel.scss';
+import copy from 'copy-to-clipboard';
+import React, { memo, useEffect, useState } from 'react';
+import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
+import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
+import './RunningInfoPanel.scss';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -227,6 +228,29 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       return null;
     };
 
+    // 复制内容到剪贴板
+    const handleCopyContent = (content: string) => {
+      const success = copy(content);
+      if (success) {
+        Message.success('复制成功');
+      } else {
+        Message.error('复制失败');
+      }
+    };
+
+    // 复制按钮组件
+    const CopyButton = ({ content }: { content: string }) => (
+      <Button
+        type="secondary"
+        icon={<IconCopy />}
+        onClick={() => handleCopyContent(content)}
+        className="sql-copy-button"
+        title="复制代码"
+      >
+        复制代码
+      </Button>
+    );
+
     return (
       <div className="sql-running-info-panel">
         <Collapse
@@ -277,7 +301,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                 {runStatus !== RunningStatus.RUNNING && (
                   <div className="flex items-center gap-[12px]">
                     <Space>
-                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                      <span
+                        style={{
+                          fontSize: '14px',
+                          color: '#0F172A',
+                          fontWeight: 400
+                        }}
+                      >
                         展示
                       </span>
                       <Input
@@ -307,7 +337,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                           }
                         }}
                       />
-                      <span style={{ fontSize: '14px', color: '#0F172A' }}>
+                      <span
+                        style={{
+                          fontSize: '14px',
+                          color: '#0F172A',
+                          fontWeight: 400
+                        }}
+                      >
                         行数据
                       </span>
                     </Space>
@@ -370,6 +406,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       <Button
                         type="outline"
                         size="mini"
+                        icon={<SaveToDasetIcon />}
                         style={{
                           fontSize: '14px',
                           color: '#1E293B',
@@ -402,7 +439,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
                     {runStatus === RunningStatus.FAILED && (
                       <div className="h-[100px]">
-                        <Typography.Text>{runError}</Typography.Text>
+                        <Typography.Text>
+                          {runError || '运行失败！'}
+                        </Typography.Text>
                       </div>
                     )}
                     {runStatus === RunningStatus.SUCCESS && (
@@ -427,6 +466,10 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   <div className="runlog-content">{runLog}</div>
                 </TabPane>
               </Tabs>
+              {/* 复制按钮放在滚动容器外部 */}
+              {activeKey === 'log' && runLog && runLog.trim() !== '' && (
+                <CopyButton content={runLog} />
+              )}
             </div>
           </CollapseItem>
         </Collapse>

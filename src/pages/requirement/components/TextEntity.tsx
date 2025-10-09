@@ -9,12 +9,13 @@ import {
 } from '@arco-design/web-react';
 import {
   IconDelete,
+  IconDown,
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import './TextEntity.scss';
 import { uuid } from '@/models/utils';
 import { getRandomHexColorStrict } from '../common';
+import './TextEntity.scss';
 // 实体/实体关系 - 组件
 const btnList = [
   {
@@ -83,7 +84,38 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   // 处理关系标签字段变更
   const handleRelationFieldChange = (index, field, value) => {
     const newData: any = [...relationRelations];
+    const currentRelation = newData[index];
+    const oldValue = currentRelation[field];
+    // 更新当前字段值
     newData[index][field] = value;
+    // 如果是起始标签变化，需要检查并清理目标标签中可能存在的相同选项
+    if (field === 'start_entity_labels') {
+      // 获取目标标签中选中的、同时也在起始标签中选中的选项
+      const overlappingValues = currentRelation.target_entity_labels.filter(
+        (targetValue) => value.includes(targetValue)
+      );
+      // 如果有重叠的值，从目标标签中移除这些值
+      if (overlappingValues.length > 0) {
+        newData[index].target_entity_labels =
+          currentRelation.target_entity_labels.filter(
+            (targetValue) => !value.includes(targetValue)
+          );
+      }
+    }
+    // 如果是目标标签变化，需要检查并清理起始标签中可能存在的相同选项
+    if (field === 'target_entity_labels') {
+      // 获取起始标签中选中的、同时也在目标标签中选中的选项
+      const overlappingValues = currentRelation.start_entity_labels.filter(
+        (startValue) => value.includes(startValue)
+      );
+      // 如果有重叠的值，从起始标签中移除这些值
+      if (overlappingValues.length > 0) {
+        newData[index].start_entity_labels =
+          currentRelation.start_entity_labels.filter(
+            (startValue) => !value.includes(startValue)
+          );
+      }
+    }
     setRelationRelations(newData);
   };
 
@@ -106,10 +138,32 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.entity_relations?.forEach((item, index) => {
+      getDetailObj?.labels?.forEach((item, index) => {
         formText.setFieldValue(
-          `start_entity_labels + ${item.id}`,
+          `label_name_en${item.order_num}`,
+          item.label_name_en
+        );
+        formText.setFieldValue(
+          `label_name_cn${item.order_num}`,
+          item.label_name_cn
+        );
+      });
+      getDetailObj?.entity_relations?.forEach((item, index) => {
+        formLabel.setFieldValue(
+          `relation_name_en${item.order_num}`,
+          item.relation_name_en
+        );
+        formLabel.setFieldValue(
+          `relation_name_cn${item.order_num}`,
+          item.relation_name_cn
+        );
+        formLabel.setFieldValue(
+          `start_entity_labels${item.order_num}`,
           item.start_entity_labels
+        );
+        formLabel.setFieldValue(
+          `target_entity_labels${item.order_num}`,
+          item.target_entity_labels
         );
       });
     }
@@ -120,6 +174,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   }, [entityRelations, relationRelations]);
   const renderItemVal = (item, index) => {
     formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+  };
+  const renderNotFoundContent = () => {
+    return (
+      <div className="not-found-content">
+        <div className="not-found-text">请先创建实体标签</div>
+      </div>
+    );
   };
   return (
     <div className="text-component-warp">
@@ -156,34 +217,31 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
             return (
               <div className="entity-relation-item" key={item.order_num}>
                 <FormItem
-                  style={{ paddingLeft: 16, marginRight: 8 }}
-                  label="标签名称"
-                  field={`label_name_cn${index}`}
+                  style={{ paddingLeft: 16, marginRight: 8, marginBottom: 0 }}
+                  label="标签名称:"
+                  field={`label_name_en${type === 'detail' ? item?.order_num : item?.label_id}`}
                   rules={[
                     {
                       required: true,
                       validateTrigger: ['onChange', 'onBlur'],
                       validator: (value, callback) => {
+                        // 1. 判断同组内不能为空
                         if (!value || value.trim() === '') {
                           callback('请输入标签名称');
                         } else {
-                          // 检查filterArrState是否有值，如果没有则直接使用formText中的值
-                          const currentFilterArr =
-                            filterArrState?.length > 0
-                              ? filterArrState
-                              : formText
-                                  .getFieldsValue()
-                                  ?.entityRelations?.filter(
-                                    (item, i) => i !== index
-                                  );
+                          const trimmedValue = value.toString().trim();
+                          // 2. 判断同组内不能有重复内容
+                          // 获取当前组内所有其他标签（排除当前正在编辑的标签）
+                          const otherEntities = entityRelations.filter(
+                            (_, i) => i !== index
+                          );
 
-                          if (
-                            currentFilterArr?.some((item) => {
-                              return (
-                                item?.label_name_cn === value.toString().trim()
-                              );
-                            })
-                          ) {
+                          // 检查是否有重复的标签名称
+                          const hasDuplicate = otherEntities.some(
+                            (item) => item?.label_name_en === trimmedValue
+                          );
+
+                          if (hasDuplicate) {
                             callback('标签名称不能重复');
                           } else {
                             callback();
@@ -196,9 +254,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   <Input
                     placeholder="请输入标签名称"
                     style={{ width: 260 }}
-                    value={item.label_name_cn}
+                    value={item.label_name_en}
                     onChange={(value) => {
-                      handleFieldChange(index, 'label_name_cn', value);
+                      handleFieldChange(index, 'label_name_en', value);
                     }}
                   />
                 </FormItem>
@@ -206,44 +264,97 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   label={
                     <div>
                       展示名称
-                      <Tooltip content="展示在标注页面的名称">
-                        <IconQuestionCircle />
+                      <Tooltip
+                        content={
+                          <div style={{ fontSize: 14 }}>
+                            展示在标注页面的名称
+                          </div>
+                        }
+                      >
+                        <IconQuestionCircle
+                          style={{ color: '#6E7B8D', marginLeft: 3 }}
+                        />
+                        :
                       </Tooltip>
                     </div>
                   }
-                  style={{ padding: 0, marginRight: 8 }}
+                  style={{ padding: 0, marginRight: 8, marginBottom: 0 }}
+                  field={`label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`}
+                  rules={[
+                    {
+                      validateTrigger: ['onChange', 'onBlur'],
+                      validator: (value, callback) => {
+                        // 1. 判断同组内不能为空
+                        if (!value || value.trim() === '') {
+                          callback('请输入属性名称');
+                        } else {
+                          const trimmedValue = value.toString().trim();
+                          // 2. 判断同组内不能有重复内容
+                          // 获取当前组内所有其他标签（排除当前正在编辑的标签）
+                          const otherEntities = entityRelations.filter(
+                            (_, i) => i !== index
+                          );
+
+                          // 检查是否有重复的标签名称
+                          const hasDuplicate = otherEntities.some(
+                            (item) => item?.label_name_cn === trimmedValue
+                          );
+
+                          if (hasDuplicate) {
+                            callback('属性名称不能重复');
+                          } else {
+                            callback();
+                          }
+                        }
+                      }
+                    }
+                  ]}
                 >
                   <Input
                     placeholder="请输入展示名称"
                     style={{ width: 250 }}
-                    value={item.label_name_en}
+                    value={item.label_name_cn}
                     onChange={(value) => {
                       // 保存当前项的order_num用于精准匹配
                       const currentOrderNum = item.order_num;
-                      handleFieldChange(index, 'label_name_en', value);
+                      handleFieldChange(index, 'label_name_cn', value);
                     }}
                   />
                 </FormItem>
-                <FormItem label={null} style={{ marginRight: 8 }}>
-                  <ColorPicker
-                    defaultValue={item.label_colour}
-                    showPreset
-                    onChange={(value) => {
-                      handleFieldChange(index, 'label_colour', value);
-                    }}
-                  />
-                </FormItem>
-                <FormItem label={null}>
-                  {entityRelations?.length > 1 && (
-                    <IconDelete
-                      fontSize={18}
-                      className={type === 'detail' ? 'is-disabled' : ''}
-                      onClick={() => {
-                        if (type !== 'detail') {
-                          removeArrayItem(index);
-                        }
+                <FormItem
+                  label={null}
+                  style={{ marginRight: 8, marginBottom: 0 }}
+                >
+                  <div className="color-content">
+                    <ColorPicker
+                      disabled={type === 'detail'}
+                      defaultValue={item.label_colour}
+                      showPreset
+                      onChange={(value) => {
+                        handleFieldChange(index, 'label_colour', value);
                       }}
                     />
+                    <IconDown className="color-icon" />
+                  </div>
+                </FormItem>
+                <FormItem
+                  label={null}
+                  style={{ marginRight: 8, marginBottom: 0 }}
+                >
+                  {entityRelations?.length > 1 && (
+                    <Tooltip content={type === 'detail' ? '' : '删除'}>
+                      <IconDelete
+                        fontSize={18}
+                        className={
+                          type === 'detail' ? 'is-disabled' : 'icon-content'
+                        }
+                        onClick={() => {
+                          if (type !== 'detail') {
+                            removeArrayItem(index);
+                          }
+                        }}
+                      />
+                    </Tooltip>
                   )}
                 </FormItem>
               </div>
@@ -251,7 +362,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           })}
       </Form>
       {selectedSubstanceValue === 1 && (
-        <div className="add-btn">
+        <div className="add-btn" style={{ marginTop: 16 }}>
           <Button
             disabled={type === 'detail'}
             onClick={() => {
@@ -296,8 +407,8 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     >
                       <FormItem
                         style={{ paddingLeft: 16, marginRight: 8 }}
-                        field={`relation_name_en${item?.relation_id}`}
-                        label="关系名称"
+                        field={`relation_name_en${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                        label="关系名称:"
                         rules={[
                           {
                             required: true,
@@ -328,7 +439,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       >
                         <Input
                           placeholder="用于储存标注结果"
-                          style={{ width: 260 }}
+                          style={{ width: 294 }}
                           value={item.relation_name_en}
                           onChange={(value) => {
                             handleRelationFieldChange(
@@ -343,16 +454,50 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         label={
                           <div>
                             展示名称
-                            <Tooltip content="展示在标注页面的名称">
-                              <IconQuestionCircle />
+                            <Tooltip
+                              content={
+                                <div style={{ fontSize: 14 }}>
+                                  展示在标注页面的名称
+                                </div>
+                              }
+                            >
+                              <IconQuestionCircle
+                                style={{ color: '#6E7B8D', marginLeft: 3 }}
+                              />
+                              :
                             </Tooltip>
                           </div>
                         }
                         style={{ padding: 0, marginRight: 8 }}
+                        field={`relation_name_cn${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                        rules={[
+                          {
+                            validateTrigger: ['onChange'],
+                            validator: (value, callback) => {
+                              const isDuplicate = relationRelations.some(
+                                (otherItem, otherIndex) => {
+                                  return (
+                                    otherIndex !== index &&
+                                    otherItem.relation_name_cn === value &&
+                                    value.trim() !== ''
+                                  );
+                                }
+                              );
+                              if (!value || !value.trim()) {
+                                callback('请输入展示名称');
+                                return;
+                              } else if (isDuplicate) {
+                                callback('展示名称不能重复');
+                              } else {
+                                callback();
+                              }
+                            }
+                          }
+                        ]}
                       >
                         <Input
                           placeholder="展示在标注页面的名称"
-                          style={{ width: 250 }}
+                          style={{ width: 284 }}
                           value={item.relation_name_cn}
                           onChange={(value) => {
                             handleRelationFieldChange(
@@ -365,23 +510,33 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
                         {relationRelations?.length > 1 && (
-                          <IconDelete
-                            fontSize={18}
-                            className={type === 'detail' ? 'is-disabled' : ''}
-                            onClick={() => {
-                              if (type !== 'detail') {
-                                removeRelationArrayItem(index);
+                          <Tooltip content={type === 'detail' ? '' : '删除'}>
+                            <IconDelete
+                              fontSize={18}
+                              className={
+                                type === 'detail'
+                                  ? 'is-disabled'
+                                  : 'icon-content'
                               }
-                            }}
-                          />
+                              onClick={() => {
+                                if (type !== 'detail') {
+                                  removeRelationArrayItem(index);
+                                }
+                              }}
+                            />
+                          </Tooltip>
                         )}
                       </FormItem>
                       <div className="relation-tag">
                         <div className="tag-title">标签对</div>
                         <div className="tag-content">
                           <FormItem
-                            style={{ paddingLeft: 16, marginRight: 8 }}
-                            field={`start_entity_labels + ${item?.relation_id}`}
+                            style={{
+                              paddingLeft: 0,
+                              marginRight: 8,
+                              marginBottom: 0
+                            }}
+                            field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请输入标签名称' }
@@ -391,7 +546,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               mode="multiple"
                               allowClear
                               placeholder="请选择起始标签"
-                              style={{ width: 154 }}
+                              style={{
+                                width: 260,
+                                backgroundColor:
+                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                              }}
+                              notFoundContent={renderNotFoundContent()}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
@@ -402,14 +562,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value={item?.start_entity_labels}
                             >
                               {entityRelations &&
-                                entityRelations?.length > 0 &&
-                                entityRelations?.map((item) => {
+                                entityRelations?.map((option) => {
+                                  if (!option?.label_name_en) {
+                                    return null;
+                                  }
+                                  const isDisabled =
+                                    item?.target_entity_labels?.includes(
+                                      option.label_name_en
+                                    );
                                   return (
                                     <Option
-                                      key={item.label_name_en}
-                                      value={item.label_name_en}
+                                      disabled={
+                                        !option.label_name_en || isDisabled
+                                      }
+                                      key={option.label_name_en}
+                                      value={option.label_name_en}
                                     >
-                                      {item.label_name_en}
+                                      {option.label_name_en}
                                     </Option>
                                   );
                                 })}
@@ -417,14 +586,19 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           </FormItem>
                           <FormItem
                             label="目标标签:"
-                            style={{ padding: 0, marginRight: 8 }}
-                            field={`target_entity_labels + ${item?.relation_id}`}
+                            style={{
+                              padding: 0,
+                              marginRight: 8,
+                              marginBottom: 0
+                            }}
+                            field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"
                               allowClear
-                              placeholder="请选择起始标签"
-                              style={{ width: 154 }}
+                              placeholder="请选择目标标签"
+                              notFoundContent={renderNotFoundContent()}
+                              style={{ width: 276 }}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
@@ -436,15 +610,27 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             >
                               {entityRelations &&
                                 entityRelations?.length > 0 &&
-                                entityRelations.map((option, index) => (
-                                  <Option
-                                    disabled={!option.label_name_en}
-                                    key={option.label_name_en}
-                                    value={option.label_name_en}
-                                  >
-                                    {option.label_name_en}
-                                  </Option>
-                                ))}
+                                entityRelations?.map((option, index) => {
+                                  if (!option?.label_name_en) {
+                                    return null;
+                                  }
+                                  // 检查当前选项是否在起始标签中被选中，如果是则禁用
+                                  const isDisabled =
+                                    item?.start_entity_labels?.includes(
+                                      option.label_name_en
+                                    );
+                                  return (
+                                    <Option
+                                      disabled={
+                                        !option.label_name_en || isDisabled
+                                      }
+                                      key={option.label_name_en}
+                                      value={option.label_name_en}
+                                    >
+                                      {option.label_name_en}
+                                    </Option>
+                                  );
+                                })}
                             </Select>
                           </FormItem>
                         </div>

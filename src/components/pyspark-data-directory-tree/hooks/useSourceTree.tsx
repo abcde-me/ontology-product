@@ -35,6 +35,7 @@ export const useSourceTree = () => {
   const [treeDataFiltered, setTreeDataFiltered] = useState<TreeNodeData[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = (value: string) => {
     setSearchKeyword(value);
@@ -235,9 +236,14 @@ export const useSourceTree = () => {
   };
 
   useAsyncEffect(async () => {
-    const catalogList = await getCatalogList();
-    const newTreeData = catalogList.map(convertSourceCatalogToTreeNode);
-    setTreeData(newTreeData);
+    setLoading(true);
+    try {
+      const catalogList = await getCatalogList();
+      const newTreeData = catalogList.map(convertSourceCatalogToTreeNode);
+      setTreeData(newTreeData);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // 搜索功能：根据输入值过滤树数据
@@ -266,6 +272,7 @@ export const useSourceTree = () => {
     setExpandedKeys,
     handleSearch,
     loadMore,
-    searchKeyword
+    searchKeyword,
+    loading
   };
 };

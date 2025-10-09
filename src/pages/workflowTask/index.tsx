@@ -200,7 +200,7 @@ export default function WorkflowTask() {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: 110,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -318,7 +318,7 @@ export default function WorkflowTask() {
     {
       title: '开始时间',
       dataIndex: 'start_time',
-      width: 170,
+      width: 180,
       render: (_, record) => (
         <span>{renderEmptyPlaceholder(record.start_time)}</span>
       ),
@@ -327,7 +327,7 @@ export default function WorkflowTask() {
     {
       title: '结束时间',
       dataIndex: 'end_time',
-      width: 170,
+      width: 180,
       render: (_, record) => (
         <span>{renderEmptyPlaceholder(record.end_time)}</span>
       ),
