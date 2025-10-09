@@ -55,6 +55,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             }
             return {
               ...item,
+              actionOnClick: 'check',
               disableCheckbox: type === 'detail' ? true : false
             };
           });
@@ -197,6 +198,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         {treeData && treeData?.length > 0 ? (
           <Tree
             // selectable={false}
+            actionOnClick="check"
             checkable
             checkedStrategy="child"
             defaultCheckedKeys={
