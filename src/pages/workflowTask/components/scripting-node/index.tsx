@@ -1,4 +1,5 @@
 import React from 'react';
+import cn from 'classnames';
 import './index.scss';
 
 export default function DataCleaningNode(props: {
@@ -15,7 +16,7 @@ export default function DataCleaningNode(props: {
   const { dataSource, status } = props;
 
   return (
-    <div className="task-scripting-node">
+    <div className={cn('task-scripting-node')}>
       <div
         style={{
           display: 'flex',
@@ -24,26 +25,26 @@ export default function DataCleaningNode(props: {
           overflow: 'hidden'
         }}
       >
-        <div className="item-box">
-          <span className="item-title">加载数据</span>
-          <span className="item-content">
+        <div className={cn('item-box')}>
+          <span className={cn('item-title')}>加载数据</span>
+          <span className={cn('item-content')}>
             {status === 0 && dataSource?.input_file_num === 0
               ? '--'
               : `${dataSource?.input_file_num}个文件 / ${dataSource?.input_file_size}`}
           </span>
         </div>
-        <div className="item-box">
-          <span className="item-title">保存数据</span>
-          <span className="item-content">
+        <div className={cn('item-box')}>
+          <span className={cn('item-title')}>保存数据</span>
+          <span className={cn('item-content')}>
             {status === 0 && dataSource?.output_file_num === 0
               ? '--'
               : `${dataSource?.output_file_num}个文件 / ${dataSource?.output_file_size}`}
           </span>
         </div>
       </div>
-      <div className="running-detail">运行详情：</div>
+      <div className={cn('running-detail')}>运行详情：</div>
       <div
-        className="running-detail-content-box"
+        className={cn('running-detail-content-box')}
         style={{
           whiteSpace: 'pre-wrap',
           fontSize: '14px',
