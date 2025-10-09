@@ -3,6 +3,14 @@
 
   .arco-tree-node {
     position: relative;
+    border-radius: 2px;
+    padding-left: 4px;
+
+    .arco-tree-node-title {
+      padding-right: 0px;
+      padding-left: 0px;
+      margin-left: 0px;
+    }
   }
 
   .directory-tree-nav {
