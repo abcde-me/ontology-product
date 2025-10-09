@@ -168,7 +168,17 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="dataSource-modal"
       style={{ width: '800px', height: '800px' }}
-      footer={null}
+      closeIcon={null}
+      footer={
+        <Button
+          onClick={() => {
+            onClose();
+          }}
+          type="primary"
+        >
+          确定
+        </Button>
+      }
     >
       <div className="department-modal-content">
         <div className="department-modal-search">

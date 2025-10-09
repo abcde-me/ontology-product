@@ -153,11 +153,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     },
     {
       title: '账号ID',
-      dataIndex: 'tenant_id',
+      dataIndex: 'id',
       width: 327,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.tenant_id)}
+          value={renderEmptyPlaceholder(record.id)}
           isEdit={false}
         />
       )
@@ -232,7 +232,17 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="fulscreen-modal"
       style={{ width: '1000px', height: '800px' }}
-      footer={null}
+      closeIcon={null}
+      footer={
+        <Button
+          onClick={() => {
+            onClose();
+          }}
+          type="primary"
+        >
+          确定
+        </Button>
+      }
     >
       <div className="individual-modal-content">
         <div className="content-tree">

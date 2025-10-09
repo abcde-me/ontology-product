@@ -605,9 +605,9 @@ export default function RequirementDetail() {
   const stepNext = async () => {
     const { formText, formLabel } = TextEntityDataContent;
     const result = await Promise.all([
-      annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
-        ? formType
-            ?.validate()
+      annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
+        ? formText
+            .validate()
             .then((val) => {
               return true;
             })
@@ -617,6 +617,16 @@ export default function RequirementDetail() {
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formLabel
+            .validate()
+            .then((val) => {
+              return true;
+            })
+            .catch((errorInfo) => {
+              return false;
+            })
+        : true,
+      annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
+        ? formType
             .validate()
             .then((val) => {
               return true;
@@ -1004,7 +1014,7 @@ export default function RequirementDetail() {
               </div>
               {selectedData?.length <= 0 && isShowDataErrorInfo && (
                 <div className="data-error-info error-info-text">
-                  请选择数据集合
+                  请选择数据
                 </div>
               )}
             </FormItem>
@@ -1572,7 +1582,7 @@ export default function RequirementDetail() {
                                           </FormItem>
                                         </div>
                                         {/* 选项内容区域 */}
-                                        {groupClassVal !== 3 && (
+                                        {/* {groupClassVal !== 3 && (
                                           <div className="attribute-group-header-content">
                                             <div className="attribute-group-info-title">
                                               {1 ===
@@ -1668,7 +1678,7 @@ export default function RequirementDetail() {
                                               支持手动输入
                                             </Checkbox>
                                           </div>
-                                        )}
+                                        )} */}
                                         {attrGroup?.label_info_attribute?.map(
                                           (attr, attrIndex) => (
                                             <div
@@ -2202,11 +2212,11 @@ export default function RequirementDetail() {
                                   必须标注
                                 </Checkbox>
                               </FormItem>
-                              <FormItem
-                                style={{ marginRight: 0, marginBottom: 0 }}
-                                label={null}
-                              >
-                                <Tooltip content="添加选项">
+                              {attrGroup.attribute_group_class !== 3 && (
+                                <FormItem
+                                  style={{ marginRight: 0, marginBottom: 0 }}
+                                  label={null}
+                                >
                                   <IconPlus
                                     className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
                                     fontSize={16}
@@ -2239,8 +2249,8 @@ export default function RequirementDetail() {
                                       }
                                     }}
                                   />
-                                </Tooltip>
-                              </FormItem>
+                                </FormItem>
+                              )}
                               <FormItem
                                 style={{ marginRight: 0, marginBottom: 0 }}
                                 label={null}
