@@ -1,10 +1,6 @@
 import React, { useRef, memo, useCallback, useEffect, useState } from 'react';
 import { Button, Message, Space } from '@arco-design/web-react';
-import {
-  IconUpload,
-  IconSettings,
-  IconPlayArrowFill
-} from '@arco-design/web-react/icon';
+import { IconUpload, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { lintGutter } from '@codemirror/lint';
@@ -27,6 +23,7 @@ import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import ExampleIcon from '@/assets/python/example.svg';
+import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
 
@@ -284,7 +281,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
               )}
               <Button
                 type="text"
-                icon={<IconSettings />}
+                icon={<SuanZiIcon />}
                 onClick={handleCallOperator}
                 className="h-[22px]"
               >
