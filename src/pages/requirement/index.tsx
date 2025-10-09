@@ -315,33 +315,33 @@ export default function Requirement() {
             >
               详情
             </span>
-            {record?.status === RequirementStatus.Annotated ||
-              (record?.status === RequirementStatus.Published && (
-                <span
-                  className="operate-text"
-                  onClick={() => {
-                    setLoading(true);
-                    try {
-                      getAnnotationDownload({ requirement_id: record.id })
-                        .then((res) => {
-                          if (res.code === 0) {
-                            const a = document.createElement('a');
-                            a.href = res?.data?.download_url;
-                            document.body.appendChild(a);
-                            a.click();
-                          }
-                          setLoading(false);
-                        })
-                        .catch(() => {})
-                        .finally(() => {});
-                    } catch {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  下载结果
-                </span>
-              ))}
+            {(record?.status === RequirementStatus.Annotated ||
+              record?.status === RequirementStatus.Published) && (
+              <span
+                className="operate-text"
+                onClick={() => {
+                  setLoading(true);
+                  try {
+                    getAnnotationDownload({ requirement_id: record.id })
+                      .then((res) => {
+                        if (res.code === 0) {
+                          const a = document.createElement('a');
+                          a.href = res?.data?.download_url;
+                          document.body.appendChild(a);
+                          a.click();
+                        }
+                        setLoading(false);
+                      })
+                      .catch(() => {})
+                      .finally(() => {});
+                  } catch {
+                    setLoading(false);
+                  }
+                }}
+              >
+                下载结果
+              </span>
+            )}
           </div>
         );
       }
