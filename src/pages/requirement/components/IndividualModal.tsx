@@ -74,12 +74,12 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                   allowClick: false,
                   title: item.name,
                   key: String(item.id),
+                  disabled: type === 'detail',
                   level: 1,
-                  disabled: true,
                   children: item?.children?.map((item_level2) => {
                     return {
-                      disabled: true,
                       level: 2,
+                      disabled: type === 'detail',
                       title: item_level2?.name,
                       key: item_level2?.id,
                       allowClick: false,
@@ -202,7 +202,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     };
     try {
       const res = await getIndividualList({ ...sourceParams });
-      console.log(res?.data.data, 'res======132');
       if (res.success) {
         setTableData(res?.data.data);
         setTotal(res?.data?.total);

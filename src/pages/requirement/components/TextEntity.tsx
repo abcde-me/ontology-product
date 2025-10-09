@@ -539,7 +539,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                             label="起始标签:"
                             rules={[
-                              { required: true, message: '请输入标签名称' }
+                              { required: true, message: '请选择起始标签' }
                             ]}
                           >
                             <Select
@@ -591,6 +591,16 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
+                            rules={[
+                              {
+                                validator: (value, callback) => {
+                                  if (!value || value.length === 0) {
+                                    callback('请选择目标标签');
+                                  }
+                                  callback();
+                                }
+                              }
+                            ]}
                             field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                           >
                             <Select
@@ -598,7 +608,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               allowClear
                               placeholder="请选择目标标签"
                               notFoundContent={renderNotFoundContent()}
-                              style={{ width: 276 }}
+                              style={{
+                                width: 276,
+                                backgroundColor:
+                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                              }}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
