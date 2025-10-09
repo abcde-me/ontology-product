@@ -50,8 +50,6 @@ import {
 } from './type';
 
 import './detail.scss';
-import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
-import { is } from 'immer/dist/internal';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -449,7 +447,7 @@ export default function RequirementDetail() {
       // 确保完整保留所有属性组和属性
       if (
         lastLabel.label_info_attribute_groups &&
-        lastLabel.label_info_attribute_groups.length > 0
+        Array.isArray(lastLabel.label_info_attribute_groups)
       ) {
         lastLabel.label_info_attribute_groups =
           lastLabel.label_info_attribute_groups.map((group) => {
@@ -458,6 +456,7 @@ export default function RequirementDetail() {
             // 为每个属性生成新ID
             if (
               newGroup.label_info_attribute &&
+              Array.isArray(newGroup.label_info_attribute) &&
               newGroup.label_info_attribute.length > 0
             ) {
               newGroup.label_info_attribute = newGroup.label_info_attribute.map(
@@ -475,6 +474,37 @@ export default function RequirementDetail() {
 
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
+      newDatalist?.map((item) => {
+        form2.setFieldValue(
+          `label_name_cn_${item?.label_id}`,
+          item?.label_name_cn
+        );
+        form2.setFieldValue(
+          `label_name_en_${item?.label_id}`,
+          item?.label_name_en
+        );
+        form2.setFieldValue(`label_shape_${item?.label_id}`, item?.label_shape);
+        form2.setFieldValue(
+          `label_colour_${item?.label_id}`,
+          item?.label_colour
+        );
+        item?.label_info_attribute_groups?.map((group) => {
+          form2.setFieldValue(
+            `label_info_attribute_groups_${group?.attribute_id}_attribute_group_name`,
+            group?.attribute_group_name
+          );
+          group?.label_info_attribute?.map((attribute) => {
+            form2.setFieldValue(
+              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
+              attribute?.attribute_name_cn
+            );
+            form2.setFieldValue(
+              `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
+              attribute?.attribute_name_en
+            );
+          });
+        });
+      });
       // 将新标签添加到数组末尾
       return newDatalist;
     });
@@ -801,6 +831,7 @@ export default function RequirementDetail() {
     try {
       const res = await publishRequirement(obj);
       if (res.code === 0) {
+        Message.success('创建成功');
         history.goBack();
       }
       setLoading(false);
@@ -827,19 +858,16 @@ export default function RequirementDetail() {
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
               form2.setFieldValue(
-                `label_name_cn_${item?.label_id}`,
+                `label_name_cn_${item?.id}`,
                 item?.label_name_cn
               );
               form2.setFieldValue(
-                `label_name_en_${item?.label_id}`,
+                `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
+              form2.setFieldValue(`label_shape_${item?.id}`, item?.label_shape);
               form2.setFieldValue(
-                `label_shape_${item?.label_id}`,
-                item?.label_shape
-              );
-              form2.setFieldValue(
-                `label_colour_${item?.label_id}`,
+                `label_colour_${item?.id}`,
                 item?.label_colour
               );
               item?.label_info_attribute_groups?.map((group) => {
@@ -849,11 +877,11 @@ export default function RequirementDetail() {
                 );
                 group?.label_info_attribute?.map((attribute) => {
                   form2.setFieldValue(
-                    `label_info_attribute_groups_${item?.id}_attribute_name_cn`,
+                    `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
                   form2.setFieldValue(
-                    `label_info_attribute_groups_${item?.id}_attribute_name_en`,
+                    `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
                     attribute?.attribute_name_en
                   );
                 });
@@ -1114,10 +1142,9 @@ export default function RequirementDetail() {
                           datalist?.map((item: any, labelIndex) => (
                             <div className="sortable-item" key={item?.label_id}>
                               <div className="sortable-item-content">
-                                {console.log(`label_name_cn_${item?.label_id}`)}
                                 <FormItem
                                   label="标签名称:"
-                                  field={`label_name_en_${item?.label_id}`}
+                                  field={`label_name_en_${type === 'detail' ? item?.id : item?.label_id}`}
                                   rules={[
                                     {
                                       required: true,
@@ -1158,7 +1185,7 @@ export default function RequirementDetail() {
                                   />
                                 </FormItem>
                                 <FormItem
-                                  field={`label_name_cn_${item?.label_id}`}
+                                  field={`label_name_cn_${type === 'detail' ? item?.id : item?.label_id}`}
                                   label={
                                     <div>
                                       <span
@@ -1223,7 +1250,7 @@ export default function RequirementDetail() {
                                   />
                                 </FormItem>
                                 <FormItem
-                                  field={`label_shape_${item?.label_id}`}
+                                  field={`label_shape_${type === 'detail' ? item?.id : item?.label_id}`}
                                   initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
                                 >
                                   <Select
@@ -1282,7 +1309,7 @@ export default function RequirementDetail() {
                                   </Select>
                                 </FormItem>
                                 <FormItem
-                                  field={`label_colour_${item?.label_id}`}
+                                  field={`label_colour_${type === 'detail' ? item?.id : item?.label_id}`}
                                 >
                                   <div className="color-content">
                                     <ColorPicker
@@ -1703,7 +1730,7 @@ export default function RequirementDetail() {
                                                         选项{attrIndex + 1}：
                                                       </div>
                                                     }
-                                                    field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attr?.label_info_id}_attribute_name_en`}
+                                                    field={`label_info_attribute_groups_${type === 'detail' ? attr?.id : attr?.label_info_id}_attribute_name_en`}
                                                     rules={[
                                                       {
                                                         required: true,
@@ -1884,7 +1911,7 @@ export default function RequirementDetail() {
                                                         }
                                                       }
                                                     ]}
-                                                    field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attr?.label_info_id}_attribute_name_cn`}
+                                                    field={`label_info_attribute_groups_${type === 'detail' ? attr?.id : attr?.label_info_id}_attribute_name_cn`}
                                                   >
                                                     <Input
                                                       style={{

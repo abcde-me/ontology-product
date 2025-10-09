@@ -276,8 +276,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       const res = await getAnnotationTabledData(sourceParams);
       if (res.status === 200) {
         setTableData(res?.data?.items);
-        setCurrent(res?.data?.page);
-        setPageSize(res?.data?.page_size);
         setTotal(res?.data?.total);
         settableLoading(false);
       }
@@ -355,6 +353,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               onChange={(value) => {
                 setSearchValue(value);
               }}
+              allowClear={true}
+              onClear={() => {
+                setSearchValue('');
+                getTreeDataList();
+              }}
               onPressEnter={() => {
                 getTreeDataList();
               }}
@@ -384,9 +387,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             loading={tableLoading}
             pagination={false}
             border={false}
-            style={{
-              height: 'calc(100% - 82px)'
-            }}
             noDataElement={noDataElement({
               description: '暂无数据'
             })}

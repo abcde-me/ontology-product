@@ -48,6 +48,15 @@
       background-color: #f5f9ff;
       padding: 12px;
       margin: 8px 16px 16px 16px;
+
+      .arco-select-size-default.arco-select-multiple
+        .arco-input-tag-has-placeholder
+        input,
+      .arco-select-size-default.arco-select-multiple
+        .arco-input-tag-has-placeholder
+        .arco-input-tag-input-mirror {
+        width: 200px !important;
+      }
     }
   }
 
@@ -103,4 +112,5 @@
   color: #7f8c9f;
   padding: 2px 8px;
   font-size: 14px;
+  width: 100%;
 }
