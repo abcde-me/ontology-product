@@ -1,24 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
   Form,
   Input,
-  Message,
-  Modal,
   Pagination,
   PaginationProps,
-  Popover,
   Table,
   Tooltip
 } from '@arco-design/web-react';
-import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import { getAnnotationTaskList } from '@/api/dataAnnotation';
 import { useUserInfo } from '@/store/userInfoStore';
-import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -27,7 +20,6 @@ import './index.scss';
 export default function Requirement() {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
-  const history = useHistory();
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
@@ -46,10 +38,6 @@ export default function Requirement() {
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue]: any = useState({});
-  // 创建人的搜索框清楚按钮
-  const [isClickClearUserName, setIsClickClearUserName] = useState(false);
-  // 创建人查询输入框内容
-  const [userNameValue, setUserNameValue] = useState('');
 
   // 组件初始化
   useEffect(() => {
@@ -62,11 +50,7 @@ export default function Requirement() {
       getList();
       setIsClickClear(false);
     }
-    if (isClickClearUserName && userNameValue === '') {
-      getList();
-      setIsClickClearUserName(false);
-    }
-  }, [isClickClear, isClickClearUserName]);
+  }, [isClickClear]);
 
   const getList = async () => {
     setLoading(true);
@@ -83,7 +67,6 @@ export default function Requirement() {
       };
       const res = await getAnnotationTaskList(params);
       if (res.code === 0) {
-        console.log(res?.data?.result, 'top----');
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
         setLoading(false);
@@ -235,19 +218,6 @@ export default function Requirement() {
       ),
       sorter: true
     },
-    // {
-    //   title: '创建人',
-    //   dataIndex: 'creator',
-    //   key: `user_name+id`,
-    //   width: 100,
-    //   ellipsis: true,
-    //   render: (_, record) => (
-    //     <EllipsisPopover
-    //       value={renderEmptyPlaceholder(record.creator)}
-    //       isEdit={false}
-    //     />
-    //   )
-    // },
     {
       title: '操作',
       dataIndex: 'operate',

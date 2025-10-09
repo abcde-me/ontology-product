@@ -116,12 +116,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 title: item.name,
                 key: String(item.id),
                 level: 1,
-                disabled: true,
+                actionOnClick: 'expand',
                 children:
                   item?.children?.数据卷 && item.children.数据卷.length > 0
                     ? [
                         {
-                          disabled: true,
+                          actionOnClick: 'expand',
                           level: 2,
                           title: '数据卷',
                           key: String(item.id) + '数据卷',
@@ -131,7 +131,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                             key: `${item.id},${item.id}数据卷,${subItem.id}`,
                             id: subItem?.id,
                             level: 3,
-                            disabled: type === 'detail'
+                            disabled: type === 'detail',
+                            actionOnClick: 'select'
                           }))
                         }
                       ]
@@ -153,6 +154,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       <div className="arco-tree">
         {treeData && treeData.length > 0 ? (
           <Tree
+            actionOnClick={['select', 'expand']}
             blockNode={true}
             defaultExpandedKeys={getDetailObj?.label_data_set?.[0]?.dir_name.split(
               ','
