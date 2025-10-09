@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { EndNodeType } from './types';
@@ -8,7 +8,7 @@ import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
 import './end.scss';
-
+import { getWorkflowList } from '@/api/workflowList';
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const userInfo = useUserInfo();
   const { readOnly, inputs, onValuesChange } = useConfig(id, data);
@@ -41,7 +41,35 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
       setDataSource(dirsArr);
     });
   }, []);
+  // 查询已被占用的目标目录id
+  const usedCatalogIds = useCallback(async () => {
+    if (!userInfo) return [];
+    const params = {
+      uid: userInfo?.id || '',
+      search_content: '',
+      page: 1,
+      page_size: 1000,
+      run_cycle: '',
+      sort: ''
+    };
+    const res = await getWorkflowList(params);
+    if (res.status === 200 && res.data) {
+      return (res.data?.list || []).map((i) => i.target_path_id);
+    }
+    return [];
+  }, [userInfo]);
+  // 过滤掉已被占用的目标目录
+  const [filteredDataSource, setFilteredDataSource] = useState<any[]>([]);
 
+  useEffect(() => {
+    const filterData = async () => {
+      const usedIds = await usedCatalogIds();
+      setFilteredDataSource(dataSource.filter((i) => !usedIds.includes(i.id)));
+    };
+    if (dataSource.length > 0) {
+      filterData();
+    }
+  }, [dataSource, userInfo]);
   // 初始化时名称已回退为上一次输入合法名称，将名称校验设为true
   useEffect(() => {
     onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
@@ -88,7 +116,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
               return option?.props?.children?.includes(inputValue);
             }}
           >
-            {dataSource.map((option) => (
+            {filteredDataSource.map((option) => (
               <Option key={option.id} value={option.id}>
                 {`${option.parent_name}/${option.name}`}
               </Option>
