@@ -16,6 +16,32 @@
     }
   }
 
+  .tabs-container {
+    position: relative;
+
+    .copy-button {
+      position: absolute;
+      top: 48px;
+      right: 12px;
+      height: 24px;
+      padding: 0 12px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 10;
+      background-color: #fff;
+
+      &:hover {
+        background-color: #fff !important;
+      }
+    }
+
+    &:hover .copy-button {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
   .run-result-content,
   .runlog-content {
     white-space: pre-wrap;
@@ -23,9 +49,11 @@
     padding: 12px;
   }
 
+  // .tab-content-wrapper 不再需要特殊样式，因为复制按钮现在在外部
+
   .arco-tabs-content {
     padding: 0;
-    max-height: 308px;
+    height: 308px;
     overflow-y: auto;
   }
 
