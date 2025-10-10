@@ -54,7 +54,9 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     };
     const res = await getWorkflowList(params);
     if (res.status === 200 && res.data) {
-      return (res.data?.list || []).map((i) => i.target_path_id);
+      return (res.data?.list || [])
+        .filter((i) => i.workflow_uuid !== workflow_uuid)
+        .map((i) => i.target_path_id);
     }
     return [];
   }, [userInfo]);
@@ -64,7 +66,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   useEffect(() => {
     const filterData = async () => {
       const usedIds = await usedCatalogIds();
-      setFilteredDataSource(dataSource.filter((i) => !usedIds.includes(i.id)));
+      setFilteredDataSource(dataSource.filter((i) => !usedIds.includes(i)));
     };
     if (dataSource.length > 0) {
       filterData();
