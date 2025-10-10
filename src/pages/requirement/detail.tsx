@@ -475,14 +475,6 @@ export default function RequirementDetail() {
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
       newDatalist?.map((item) => {
-        form2.setFieldValue(
-          `label_name_cn_${item?.label_id}`,
-          item?.label_name_cn
-        );
-        form2.setFieldValue(
-          `label_name_en_${item?.label_id}`,
-          item?.label_name_en
-        );
         form2.setFieldValue(`label_shape_${item?.label_id}`, item?.label_shape);
         form2.setFieldValue(
           `label_colour_${item?.label_id}`,
