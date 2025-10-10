@@ -243,7 +243,7 @@ export default function Requirement() {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: 130,
       render: (_, record) => {
         return renderEmptyPlaceholder(record.status) !== '-' ? (
           StatusContent(record.status)

@@ -59,8 +59,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   useEffect(() => {
     if (getDetailObj) {
       setSelectedRowKeys(
-        getDetailObj?.label_data_set &&
-          getDetailObj?.label_data_set?.map((item) => item.execution_id) // 改为使用 execution_id
+        getDetailObj?.label_operate &&
+          getDetailObj?.label_operate?.user_id?.map((item) => item)
       );
     }
   }, [getDetailObj]);
