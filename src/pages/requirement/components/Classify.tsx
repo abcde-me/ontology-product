@@ -552,42 +552,46 @@ const Classify = (props: ClassifyComponentProps) => {
                     ))}
                   </div>
                 )}
-              <div className="add-btn">
-                <Button
-                  disabled={type === 'detail'}
-                  onClick={() => {
-                    // 在按钮的位置添加新数据，不在最后一行添加
-                    // 修复：在当前位置插入新数据而非添加到数组末尾
-                    const newItem = {
-                      attribute_id: uuid(),
-                      order_num: 1,
-                      attribute_group_name: '', //属性组名称
-                      attribute_group_class: 1, //1单选/2多选/3输入框
-                      attribute_group_type: 2, //1必选/2非必选
-                      file_label_attribute: []
-                    };
-                    // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
-                    const newTextRelations = [...textRelations];
-                    newTextRelations.splice(
-                      textRelations?.length || 0,
-                      0,
-                      newItem
-                    );
-                    // 更新排序值
-                    newTextRelations.forEach((item, i) => {
-                      item.order_num = i + 1;
-                    });
-                    setTextRelations(newTextRelations);
-                  }}
-                >
-                  <IconPlus
-                    className={`${type === 'detail' ? 'disabled-icon' : ''}`}
-                  />
-                  添加属性
-                </Button>
-              </div>
             </div>
           ))}
+        <div className="add-btn">
+          <Button
+            disabled={type === 'detail'}
+            onClick={() => {
+              // 在按钮的位置添加新数据，不在最后一行添加
+              // 修复：在当前位置插入新数据而非添加到数组末尾
+              const newItem = {
+                attribute_id: uuid(),
+                order_num: 1,
+                attribute_group_name: '', //属性组名称
+                attribute_group_class: 1, //1单选/2多选/3输入框
+                attribute_group_type: 2, //1必选/2非必选
+                file_label_attribute: [
+                  {
+                    attribute_id: uuid(),
+                    order_num: 1, // 后面统一重新计算order_num
+                    attribute_name_cn: '',
+                    attribute_name_en: '',
+                    input_type: 1
+                  }
+                ]
+              };
+              // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
+              const newTextRelations = [...textRelations];
+              newTextRelations.splice(textRelations?.length || 0, 0, newItem);
+              // 更新排序值
+              newTextRelations.forEach((item, i) => {
+                item.order_num = i + 1;
+              });
+              setTextRelations(newTextRelations);
+            }}
+          >
+            <IconPlus
+              className={`${type === 'detail' ? 'disabled-icon' : ''}`}
+            />
+            添加属性
+          </Button>
+        </div>
       </Form>
     </div>
   );
