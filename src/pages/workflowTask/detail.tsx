@@ -234,7 +234,7 @@ export default function WorkflowTaskDetail() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div className="running-item">
-            <span className="running-item-title">状态</span>
+            <span className="item-title">状态</span>
             {taskDetailData.run_status === TaskRunStatus.success ? (
               <div className="item-content-box">
                 <IconCheckCircleFill
@@ -316,7 +316,7 @@ export default function WorkflowTaskDetail() {
             )}
           </div>
           <div className="running-item">
-            <span className="running-item-title">总用时</span>
+            <span className="item-title">总用时</span>
             <div className="item-content-box">
               <span className="item-content">
                 {taskDetailData?.time_size === ''
@@ -326,7 +326,7 @@ export default function WorkflowTaskDetail() {
             </div>
           </div>
           <div className="running-item">
-            <span className="running-item-title">开始时间</span>
+            <span className="item-title">开始时间</span>
             <div className="item-content-box">
               <span className="item-content">
                 {taskDetailData?.start_time === ''
@@ -336,7 +336,7 @@ export default function WorkflowTaskDetail() {
             </div>
           </div>
           <div className="running-item">
-            <span className="running-item-title">结束时间</span>
+            <span className="item-title">结束时间</span>
             <div className="item-content-box">
               <span className="item-content">
                 {taskDetailData?.end_time === ''
