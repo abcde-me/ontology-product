@@ -328,10 +328,29 @@ const Classify = (props: ClassifyComponentProps) => {
                               attribute_id: uuid(),
                               order_num:
                                 newData[index].file_label_attribute.length + 1,
-                              attribute_name_cn: '标注时的输入内容',
-                              attribute_name_en: '其他',
+                              attribute_name_cn: '其他',
+                              attribute_name_en: '标注时的输入内容',
                               input_type: 2
                             });
+                            const lastIndex =
+                              newData[index].file_label_attribute.length - 1;
+                            const newAttribute =
+                              newData[index].file_label_attribute[lastIndex];
+                            if (newAttribute.input_type === 2) {
+                              console.log('top', newAttribute);
+                              const attributeId =
+                                type === 'detail'
+                                  ? newAttribute.order_num
+                                  : newAttribute.attribute_id;
+                              formClassify?.setFieldValue(
+                                `attribute_name_en_${attributeId}`,
+                                '标注时的输入内容'
+                              );
+                              formClassify?.setFieldValue(
+                                `attribute_name_cn_${attributeId}`,
+                                '其他'
+                              );
+                            }
                             setTextRelations(newData);
                           } else {
                             // 取消选中的时候删除增加的内容
