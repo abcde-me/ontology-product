@@ -22,10 +22,10 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const Option = Select.Option;
   const TextArea = Input.TextArea;
   const appScenarios: { [key: string]: string } = {
-    tongyong: '通用',
+    tongyong: '问答对生成',
     fenlei: '文本分类',
     tiqu: '文本提取',
-    shengcheng: '文本生成',
+    shengcheng: '文本扩写',
     duolong: '多轮回答'
   };
 
@@ -40,7 +40,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
     return {
       ...data,
       app_scenarios: {
-        name: app_scenarios?.name ?? '通用',
+        name: app_scenarios?.name ?? '问答对生成',
         type: app_scenarios?.type ?? 'tongyong',
         option: {
           sample_num: app_scenarios_option?.sample_num ?? 10,
@@ -136,7 +136,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               onChange={handleSelectChange}
             >
               <Option key="tongyong" value="tongyong">
-                通用
+                问答对生成
               </Option>
               <Option key="fenlei" value="fenlei">
                 文本分类
@@ -145,7 +145,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 文本提取
               </Option>
               <Option key="shengcheng" value="shengcheng">
-                文本生成
+                文本扩写
               </Option>
               <Option key="duolong" value="duolong">
                 多轮回答
