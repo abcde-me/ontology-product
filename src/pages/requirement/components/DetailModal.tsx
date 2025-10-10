@@ -386,7 +386,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
           </div>
           <Table
             ref={tableRef}
-            rowKey="id"
+            rowKey="execution_id"
             columns={columns}
             data={tableData}
             loading={tableLoading}
