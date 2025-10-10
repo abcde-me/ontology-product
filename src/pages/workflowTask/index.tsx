@@ -74,7 +74,7 @@ export default function WorkflowTask() {
   const getList = async () => {
     setLoading(true);
     try {
-      const params = {
+      const params: any = {
         uid: userInfo?.id,
         search_value: searchSelectValue === 'task_id' ? searchValue : '',
         instance_name: searchSelectValue === 'task_id' ? '' : searchValue,

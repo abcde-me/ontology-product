@@ -10,6 +10,7 @@ import './style/theme.scss';
 import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { ProjectProvider } from './context/ProjectContext';
 import {
   ConfigProvider,
   Layout,
@@ -151,7 +152,9 @@ function Index() {
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
-            <App />
+            <ProjectProvider>
+              <App />
+            </ProjectProvider>
           </GlobalContext.Provider>
         </Provider>
       </ConfigProvider>

@@ -68,7 +68,7 @@ export default function WorkflowList() {
   const getList = async () => {
     setLoading(true);
     try {
-      const params = {
+      const params: any = {
         uid: userInfo?.id,
         search_content: searchValue,
         page: current, //第几页

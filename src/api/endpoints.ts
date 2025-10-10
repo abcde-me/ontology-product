@@ -235,10 +235,16 @@ export const ResourceEndpointsV2 = {
   workflowPublishDetail: PrefixV2 + '/apps/{appId}/workflows/{workflowId}',
   workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
 };
-
+const API_PREFIX = '/ceai';
+export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
 // 多模态数据治理平台接口
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
+  // 登录
+  Login: PrefixUserSpace + '/Login',
+  Logout: PrefixUserSpace + '/Logout',
+  GetUser: PrefixUserSpace + '/GetUser',
+  ListProject: PrefixUserSpace + '/ListProject',
   // 新建工作流
   createWorkflow: PrefixAimdp + '/workflow/info',
   // 编辑工作流

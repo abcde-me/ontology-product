@@ -36,7 +36,9 @@ function LayoutWithSider({ children }) {
 
   // 根据用户权限过滤菜单
   const filteredMenus = useMemo(() => {
+    console.log('userInfo', userInfo);
     const userPermissions = userInfo?.perms || [];
+    console.log('userPermissions', userPermissions, menus);
     return filterMenusByPermissions(menus, userPermissions);
   }, [userInfo?.perms]);
 
@@ -102,6 +104,7 @@ function LayoutWithSider({ children }) {
   );
 
   const getMenu = (data: typeof menus) => {
+    console.log('data', data);
     return data.map((item) => {
       if (!item.children || item.children.length === 0)
         return (

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { getMe } from '@/api/user';
+import { GetUser } from '@/api/modules/user';
+import { User } from '@/pages/user/types';
+import { isRequestSuccess } from '@/api/utils';
 
 // 用户信息类型定义
 export interface UserInfo {
@@ -17,7 +19,7 @@ export interface UserInfo {
 
 // Store 状态类型定义
 interface UserInfoState {
-  userInfo: UserInfo | null;
+  userInfo: User | null;
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean; // 标记是否已经初始化过
@@ -28,7 +30,7 @@ interface UserInfoActions {
   // 获取用户信息
   fetchUserInfo: () => Promise<void>;
   // 更新用户信息
-  updateUserInfo: (userInfo: Partial<UserInfo>) => void;
+  updateUserInfo: (userInfo: Partial<User>) => void;
   // 设置加载状态
   setLoading: (loading: boolean) => void;
   // 设置错误信息
@@ -64,16 +66,15 @@ export const useUserInfoStore = create<UserInfoStore>()(
         try {
           set({ isLoading: true, error: null });
 
-          const response = await getMe();
+          const response = await GetUser({});
 
-          if (response.success) {
+          if (isRequestSuccess(response)) {
             set({
               userInfo: response.data,
               isLoading: false,
               error: null,
               isInitialized: true
             });
-            console.log('User info fetched successfully:', response.data);
           } else {
             // 当 success 为 false 时，记录错误信息
             // 权限相关的跳转已经在请求拦截器中统一处理

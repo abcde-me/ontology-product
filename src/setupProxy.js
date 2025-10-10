@@ -23,7 +23,13 @@ const addProxy = (options) => {
     ...options
   };
 };
-
+const targets = {
+  test: 'http://110.154.34.22:38883',
+  dev: 'http://10.252.216.16:9040',
+  qa: 'http://10.252.216.13:9040',
+  prod: 'http://10.252.216.19:9040'
+};
+const currentTarget = targets['dev'];
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 module.exports = function (app) {
   if (process.env.SINGLE_APP === 'true') {
@@ -40,6 +46,23 @@ module.exports = function (app) {
       ); // Allowed headers
       res.sendStatus(200);
     });
+    app.use(
+      ['/ceai'],
+      createProxyMiddleware({
+        target: currentTarget,
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        pathRewrite: (path, req) => {
+          // todo 待删除 test
+          if (currentTarget === targets['test']) {
+            return path;
+          }
+
+          return req.baseUrl + req.url;
+        }
+      })
+    );
     app.use(
       ['/api/auth/v1'],
       createProxyMiddleware(

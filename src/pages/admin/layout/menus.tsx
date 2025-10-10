@@ -52,9 +52,9 @@ export const filterMenusByPermissions = (
       }
 
       // 如果菜单需要权限且用户没有该权限，则过滤掉
-      if (menu.permission && !userPermissions.includes(menu.permission)) {
-        return null;
-      }
+      // if (menu.permission && !userPermissions.includes(menu.permission)) {
+      //   return null;
+      // }
 
       return menu;
     })

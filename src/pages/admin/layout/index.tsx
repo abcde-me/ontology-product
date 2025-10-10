@@ -39,10 +39,10 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   // 身份验证超时管理：
   // 开发环境：token有效期1分钟，剩余30秒时续约
   // 生产环境：token有效期60分钟，剩余30分钟时续约
-  useAuthTimeout({
-    renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
-    renewEndpoint: '/api/auth/v1/renew'
-  });
+  // useAuthTimeout({
+  //   renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
+  //   renewEndpoint: '/api/auth/v1/renew'
+  // });
 
   // 获取用户信息 - 在 layout 初始化时调用
   React.useEffect(() => {

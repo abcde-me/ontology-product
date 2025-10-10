@@ -15,15 +15,29 @@ UAPI_CONFIG.setDefaultConfig({
  * UAPI请求拦截器（示例）
  */
 UAPI_CONFIG.addRequestInterceptor(
-  (config) => {
+  (config: any) => {
     const consolePluginToken = localStorage.getItem('console_token');
-    // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
-    if (config.headers && !config.headers?.['x-auth-validate'])
+    if (!config.headers['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
-    if (consolePluginToken && config.headers)
+    if (consolePluginToken)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
-    config.headers && (config.headers['Content-Type'] = 'application/json');
+    config.headers['Content-Type'] = 'application/json';
+
+    // todo 临时调试
+    // if (process.env.NODE_ENV === 'development') {
+    // config.headers['x-ceai-user-id'] = 'user-gqj121nu';
+    // config.headers['x-ceai-user-organization-id'] = 'org-1urn9m93';
+    // }
+    // 自动为所有请求加上项目id参数
+    // const projectId = getCurrentProjectId();
+    // if (projectId) {
+    //   if (config.method === 'get' || config.method === 'GET') {
+    //     config.params = { ...config.params, id: projectId };
+    //   } else if (config.data && typeof config.data === 'object') {
+    //     config.data = { ...config.data, id: projectId };
+    //   }
+    // }
     return config;
   },
   (error) => {
@@ -37,9 +51,8 @@ UAPI_CONFIG.addRequestInterceptor(
 UAPI_CONFIG.addResponseInterceptor(
   (response) => {
     const res = response.data;
-
-    if (response.status == 401) {
-      logout(res.data.content);
+    if (response.status == 401 || res?.status == 401) {
+      logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
       // 兼容没有code和message的接口
       if (
@@ -74,12 +87,12 @@ UAPI_CONFIG.addResponseInterceptor(
         'SUCCESS',
         'success',
         200,
-        'AIAP.DraftWorkflowNotFound',
-        'AIMDP.WorkflowDraftNotFound'
+        'AIAP.DraftWorkflowNotFound'
       ];
       if (
         successCode.includes(res.code) ||
         successCode.includes(res.status) ||
+        successCode.includes(res.statusCode) ||
         successCode.includes(res.message)
       ) {
         if (res.data === undefined) {
@@ -92,8 +105,7 @@ UAPI_CONFIG.addResponseInterceptor(
           Message.error(errorMsg);
           console.error(errorMsg);
         }
-        // return Promise.reject(errorMsg);
-        return res;
+        return Promise.reject(errorMsg);
       }
     }
   },
@@ -130,8 +142,7 @@ UAPI_CONFIG.addResponseInterceptor(
         console.log('code 500: ', code);
         const errorMsg = error.response.data.message || error.message;
         errorMsg && Message.error(errorMsg) && console.error(errorMsg);
-        return Promise.resolve(error);
-        // return Promise.reject(error);
+        return Promise.reject(error);
       }
     } else if (!(code === 0 && error?.message === 'canceled')) {
       Message.error({
@@ -139,8 +150,7 @@ UAPI_CONFIG.addResponseInterceptor(
         duration: 5000
       });
     }
-    return Promise.resolve(error);
-    // return Promise.reject(error);
+    return Promise.reject(error);
   }
 );
 

@@ -523,7 +523,7 @@ export default function WorkflowTaskDetail() {
 
   // 运行失败状态下重试操作
   const handleRetryWorkflow = async (id: string) => {
-    const params = {
+    const params: any = {
       id: id,
       uid: userInfo?.id
     };
@@ -542,7 +542,7 @@ export default function WorkflowTaskDetail() {
 
   // 进行中状态下停止操作
   const handleStopWorkflow = async (id: string) => {
-    const params = {
+    const params: any = {
       id: id,
       uid: userInfo?.id
     };

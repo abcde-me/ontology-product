@@ -1,16 +1,22 @@
-import { useLogoInfo } from '@/utils/swr';
-import { logout, removeLoginToken } from '@/utils/env';
 import { Dropdown, Menu, Tooltip, Link } from '@arco-design/web-react';
-import React, { type CSSProperties, useCallback } from 'react';
+import React, {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
+import { Select } from '@arco-design/web-react';
+import { useProject } from '@/context/ProjectContext';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
 import { usePathChange } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
-import { openNewPage } from '@/utils/env';
-import { PrefixV2 } from '@/api/endpoints';
-import axios from 'axios';
-import { getToken } from '@/utils/request';
+import { handlePathName } from '@/hooks/use-path-change';
+import { logout } from '@/utils/env';
+import { ListProject } from '@/api/modules/project';
+
+// import { getDocContent } from '@/api/datasetsV2';
 
 export default function Header({
   className,
@@ -19,23 +25,29 @@ export default function Header({
   className?: string;
   style?: CSSProperties;
 }) {
-  const { data } = useLogoInfo();
+  // const { data } = useLogoInfo();
+  const data = {
+    logoPic: HeaderLogo
+  };
   const { pushPath } = usePathChange();
+  const [projects, setProjects] = useState<any[]>([]);
+  const { projectId, setProjectId } = useProject();
 
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
-  console.log('userInfo', userInfo);
   const { clearUserInfo } = useUserInfoStore();
 
   const logoutAction = useCallback(() => {
-    removeLoginToken();
+    // 清除本地存储的 token
+    localStorage.removeItem('loginToken');
+    localStorage.removeItem('console_token');
 
     // 清除全局用户信息
     clearUserInfo();
 
     // 跳转到登录页面
     logout();
-  }, [pushPath, clearUserInfo]);
+  }, [clearUserInfo]);
 
   const onClickUserDropdown = useCallback(
     (action) => {
@@ -44,7 +56,7 @@ export default function Header({
           logoutAction();
           break;
         case 'account':
-          pushPath('/tenant/compute/modaforge/userinfo');
+          pushPath(handlePathName('/userinfo'));
           break;
         default:
           break;
@@ -53,25 +65,25 @@ export default function Header({
     [logoutAction, pushPath]
   );
 
-  const goHelp = () => {
-    openNewPage('/modaforge/assets/多模态数据治理平台 - 用户手册.pdf');
-    // const url = `${PrefixV2}/files/browser/api-demo`;
-    // axios
-    //   .get(url, {
-    //     responseType: 'arraybuffer',
-    //     // @ts-ignore
-    //     headers: { ...getToken() }
-    //   })
-    //   .then((res) => {
-    //     // 转换pdf
-    //     try {
-    //       const blob = new Blob([res.data], { type: 'application/pdf' });
-    //       const docURL = URL.createObjectURL(blob);
-    //       window.open(docURL, '_blank');
-    //     } catch {
-    //       // Message.error('无法加载PDF文件，请检查文件结构或文件完整性');
-    //     }
-    //   });
+  const goHelp = async () => {
+    // const res = await getDocContent('file-ea3d6713-147b-4b33-8488-59ddb9be4a0a');
+    // const blob = new Blob([res], { type: 'application/pdf' });
+    // const docURL = URL.createObjectURL(blob);
+    // window.open(docURL, '_blank');
+  };
+
+  useEffect(() => {
+    ListProject({}).then((res) => {
+      const list = res?.data?.result || [];
+      setProjects(list);
+      if (list.length && !projectId) {
+        setProjectId(list[0].id);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo]);
+  const handleProjectChange = (id: string) => {
+    setProjectId(id);
   };
 
   return (
@@ -90,7 +102,19 @@ export default function Header({
         </div>
       </a>
       <div className="flex items-center gap-x-[16px]">
-        <Tooltip content="查看用户手册">
+        <Select
+          style={{ width: 180, marginRight: 16 }}
+          value={projectId}
+          onChange={handleProjectChange}
+          placeholder="选择项目"
+        >
+          {projects.map((item) => (
+            <Select.Option key={item.id} value={item.id}>
+              {item.name}
+            </Select.Option>
+          ))}
+        </Select>
+        <Tooltip content="下载帮助文档">
           <Link
             href="#"
             icon={
@@ -111,19 +135,19 @@ export default function Header({
                     <IconUser />
                   </div>
                   <span className="text-[14px]/[20px] text-[#151B26]">
-                    {userInfo?.username}
+                    {userInfo?.name}
                   </span>
                 </div>
                 <div className="rounded-[4px] border-[1px] border-[#CBD5E1] px-[8px] text-[12px]/[20px] text-[#6E7B8D]">
-                  {userInfo?.role}
+                  {userInfo?.roles[0]?.name}
                 </div>
               </Menu.Item>
-              {!userInfo?.is_super_admin && (
+              {userInfo?.organization?.id !== '' && (
                 <Menu.Item
                   key="org"
                   className="flex h-[24px] items-center bg-[#E7ECF0] px-[12px] text-[14px]/[20px] text-[#151B26] hover:bg-[#E7ECF0]"
                 >
-                  组织：{userInfo?.organization}
+                  组织：{userInfo?.organization?.name}
                 </Menu.Item>
               )}
 
