@@ -89,8 +89,10 @@
   }
 
   .directory-tree {
-    height: calc(100% - 50px);
+    height: calc(100% - var(--directory-nav-height, 40px));
     overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   // 空数据状态样式
