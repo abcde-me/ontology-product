@@ -251,27 +251,62 @@ const Classify = (props: ClassifyComponentProps) => {
                             // 只修改当前属性组（通过index定位），不影响其他组
                             const currentGroup = newTextRelations[index];
 
-                            // 为当前属性组添加新选项
+                            // 检查当前属性组中是否有input_type为2的属性
+                            const hasInputType2 =
+                              currentGroup.file_label_attribute?.some(
+                                (attr) => attr.input_type === 2
+                              );
+                            // 创建新属性
+                            const newAttribute = {
+                              attribute_id: uuid(),
+                              order_num: 0, // 后面统一重新计算order_num
+                              attribute_name_cn: '',
+                              attribute_name_en: '',
+                              input_type: 1
+                            };
+
+                            let updatedAttributes: any = [];
+                            const existingAttributes =
+                              currentGroup.file_label_attribute || [];
+
+                            if (hasInputType2) {
+                              // 如果有input_type为2的属性，新属性插入到倒数第二个位置
+                              // 先找到最后一个input_type为2的属性的位置
+                              const lastInputType2Index = existingAttributes
+                                .map((attr, idx) => ({ idx, attr }))
+                                .filter((item) => item.attr.input_type === 2)
+                                .map((item) => item.idx)
+                                .pop();
+
+                              // 在最后一个input_type为2的属性前面（倒数第二个位置）插入新属性
+                              updatedAttributes = [
+                                ...existingAttributes.slice(
+                                  0,
+                                  lastInputType2Index
+                                ),
+                                newAttribute,
+                                ...existingAttributes.slice(lastInputType2Index)
+                              ];
+                            } else {
+                              // 如果没有input_type为2的属性，新属性插入到最后一个位置
+                              updatedAttributes = [
+                                ...existingAttributes,
+                                newAttribute
+                              ];
+                            }
+
+                            // 重新计算所有属性的order_num
+                            updatedAttributes = updatedAttributes.map(
+                              (attr, idx) => ({
+                                ...attr,
+                                order_num: idx + 1
+                              })
+                            );
+
+                            // 更新属性组
                             newTextRelations[index] = {
                               ...currentGroup,
-                              file_label_attribute: [
-                                // 新属性插入到数组开头
-                                {
-                                  attribute_id: uuid(),
-                                  // 保持排序值从1开始
-                                  order_num: 1,
-                                  attribute_name_cn: '',
-                                  attribute_name_en: '',
-                                  input_type: 1
-                                },
-                                // 原有属性排序值+1
-                                ...(
-                                  currentGroup.file_label_attribute || []
-                                ).map((attr) => ({
-                                  ...attr,
-                                  order_num: attr.order_num + 1
-                                }))
-                              ]
+                              file_label_attribute: updatedAttributes
                             };
 
                             // 更新状态
