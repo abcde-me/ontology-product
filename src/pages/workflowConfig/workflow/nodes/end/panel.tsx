@@ -64,7 +64,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   useEffect(() => {
     const filterData = async () => {
       const usedIds = await usedCatalogIds();
-      setFilteredDataSource(dataSource.filter((i) => !usedIds.includes(i.id)));
+      setFilteredDataSource(dataSource.filter((i) => !usedIds.includes(i)));
     };
     if (dataSource.length > 0) {
       filterData();
