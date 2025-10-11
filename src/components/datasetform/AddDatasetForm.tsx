@@ -397,7 +397,13 @@ const DatasetForm = React.forwardRef<
         // getVolumePreviewData(path);
         getVolumePreviewData(
           value?.[1]?.[1],
-          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+          value?.[0]?.[0] === '/'
+            ? '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+            : value?.[0]?.[0] +
+                '/dst/' +
+                value?.[0]?.[1] +
+                '/volume/' +
+                value?.[1]?.[0]
         );
       } else if (Array.isArray(value) && value.length === 2) {
         return;

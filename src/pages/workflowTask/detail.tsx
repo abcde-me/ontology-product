@@ -155,7 +155,7 @@ export default function WorkflowTaskDetail() {
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
     if (taskId && activeNode) getNodeDetail();
-  }, [activeNode && isChangeTab, sortValue]);
+  }, [activeNode && isChangeTab, sortValue, taskDetailData.run_status]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
