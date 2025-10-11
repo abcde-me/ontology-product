@@ -147,11 +147,19 @@
   top: 170px !important;
 
   .arco-popover-content {
+    height: calc(100vh - 180px) !important;
     max-height: 900px !important;
   }
 
   .arco-popover-arrow {
     top: 22.8px !important;
+    right: -5px !important;
+    background: transparent !important; /* 移除背景色 */
+    border: none !important; /* 移除原来的边框 */
+    /* 使用边框创建三角形 */
+    border-left: 8px solid transparent !important;
+    border-right: 8px solid #fff !important;
+    border-bottom: 8px solid transparent !important;
   }
 
   .custom-markdown {
