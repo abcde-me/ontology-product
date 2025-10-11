@@ -23,22 +23,6 @@
     .toolbar-left {
       display: flex;
       align-items: center;
-
-      .btn-running {
-        background-color: #fff;
-        color: #438dfb;
-        border-color: #438dfb;
-      }
-
-      .fromat-icon_btn {
-        svg {
-          width: 14px;
-          height: 14px;
-        }
-        &:hover svg path {
-          stroke: #438dfb;
-        }
-      }
     }
 
     .toolbar-right {

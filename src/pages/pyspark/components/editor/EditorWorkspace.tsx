@@ -1,11 +1,6 @@
 import React, { useRef, memo, useCallback, useEffect, useState } from 'react';
 import { Button, Message, Space } from '@arco-design/web-react';
-import {
-  IconUpload,
-  IconSettings,
-  IconPlayArrow,
-  IconStop
-} from '@arco-design/web-react/icon';
+import { IconUpload, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { lintGutter } from '@codemirror/lint';
@@ -13,6 +8,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle
 } from '@codemirror/language';
+import createPythonLinter from '../../utils/createPythonLinter';
 import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import './EditorWorkspace.scss';
@@ -27,6 +23,8 @@ import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import ExampleIcon from '@/assets/python/example.svg';
+import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
 
 interface NotebookWorkspaceProps {
@@ -87,7 +85,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       handlePanelStateChange,
       execid,
       getPrevRunStatus,
-      hasFetchedResult
+      hasFetchedResult,
+      debouncedButtonClick
     } = useEditor({
       activeTab,
       fileTabs,
@@ -258,15 +257,11 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                     runStatus === RunningStatus.RUNNING ? (
                       <IconStop className="mr-[4px]" />
                     ) : (
-                      <IconPlayArrow className="mr-[4px]" />
+                      <IconPlayArrowFill className="mr-[4px]" />
                     )
                   }
                   disabled={editorContent.trim() === ''}
-                  onClick={
-                    runStatus === RunningStatus.RUNNING
-                      ? handleStopRunCode
-                      : () => handleRunCode().catch(console.error)
-                  }
+                  onClick={debouncedButtonClick}
                   className={`h-[26px]${runStatus === RunningStatus.RUNNING ? ' btn-running' : ''}`}
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
@@ -286,7 +281,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
               )}
               <Button
                 type="text"
-                icon={<IconSettings />}
+                icon={<SuanZiIcon />}
                 onClick={handleCallOperator}
                 className="h-[22px]"
               >
@@ -328,6 +323,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             extensions={[
               python(),
               lintGutter(),
+              createPythonLinter({
+                checkSyntax: true,
+                checkStyle: true,
+                checkImports: true,
+                checkIndentation: true
+              }),
               syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
               EditorView.updateListener.of((update) => {
                 if (update.selectionSet) {

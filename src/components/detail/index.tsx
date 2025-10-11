@@ -100,7 +100,7 @@ const countWidth = (count: number) => {
   if (count > 4) {
     return '400px';
   } else {
-    return `${viewportWidth / count}px`;
+    return `${100 / count}%`; // 等宽分布
   }
 };
 
@@ -156,7 +156,7 @@ const generateArcoColumns = (
         );
       } else {
         return (
-          <div style={{ width: cellWidth }}>
+          <div style={{ width: '100%' }}>
             {/* {header === 'name' ? ( */}
             <EllipsisPopover
               preferTypography
@@ -696,8 +696,20 @@ const DatasetDetail = (props: {
           title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
           dataIndex: item.name,
           key: item.name,
-          width: 400,
-          render: (_, record) => <EllipsisPopover value={record[item.name]} />
+          width: contentTableColumnsList.length > 4 ? 260 : 200,
+          render: (_, record) => (
+            // TODO: 待优化，父页面是modal还是page， EllipsisPopover 需要详细看下
+            <div
+              style={{
+                width:
+                  contentTableColumnsList.length > 4
+                    ? 228
+                    : `calc(('100%' / ${contentTableColumnsList.length}) - 40)`
+              }}
+            >
+              <EllipsisPopover value={record[item.name]} preferTypography />
+            </div>
+          )
         }))
       );
     }
@@ -1733,7 +1745,7 @@ const DatasetDetail = (props: {
                           description: '暂无数据'
                         })}
                         pagination={false}
-                        scroll={{ x: 'max-content' }}
+                        // scroll={{ x: 'max-content' }}
                         border={false}
                       />
                     </>

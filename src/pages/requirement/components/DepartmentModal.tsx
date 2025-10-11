@@ -5,7 +5,8 @@ import {
   Tree,
   Form,
   Input,
-  Empty
+  Empty,
+  Tooltip
 } from '@arco-design/web-react';
 import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 import './DepartmentModal.scss';
@@ -14,27 +15,51 @@ interface DataSourceModalProps {
   onClose: () => void;
   title?: string;
   getChildTreeSelectData: (data: any) => void;
-  initialSelectedData?: any[]; // 添加初始选中数据参数
+  getDetailObj: any;
+  type: any;
 }
 
 const DepartmentModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
   title = '数据源',
-  getChildTreeSelectData
+  getChildTreeSelectData,
+  getDetailObj,
+  type
 }) => {
   const FormItem = Form.Item;
   const [activeTab, setActiveTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [checkedKeysDetail, setCheckedKeysDetail] = useState<string[]>([]);
 
   useEffect(() => {
-    // let newTreeData: TreeNodeType[] = [];
+    if (getDetailObj && type === 'detail') {
+      setCheckedKeysDetail(getDetailObj?.label_operate?.org_id || []);
+    }
+  }, [getDetailObj]);
+  useEffect(() => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          setTreeData(res?.data || []);
+          // 每个层级增加一个属性
+          const newTreeData = res?.data?.map((item) => {
+            if (item.children) {
+              item.children.forEach((child) => {
+                child.disableCheckbox = type === 'detail' ? true : false;
+                child?.children?.forEach((childChild) => {
+                  childChild.disableCheckbox = type === 'detail' ? true : false;
+                });
+              });
+            }
+            return {
+              ...item,
+              actionOnClick: 'check',
+              disableCheckbox: type === 'detail' ? true : false
+            };
+          });
+          setTreeData(newTreeData || []);
         })
         .catch((err) => {
           console.error(err);
@@ -92,7 +117,6 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
 
   useEffect(() => {
     if (!searchValue) {
-      console.log(1, treeData);
       setTreeData(treeData);
     } else {
       const result = searchData(searchValue, treeData);
@@ -101,9 +125,39 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     }
   }, [searchValue]);
 
-  const getTableSelectContent = () => {
-    getChildTreeSelectData(checkedKeys);
-    onClose();
+  const findParentIds = (treeNodes, targetIds) => {
+    const allIds = [...targetIds];
+    const targetSet = new Set(targetIds);
+
+    // 递归查找父节点
+    const traverse = (nodes, parentIds = []) => {
+      for (const node of nodes) {
+        const currentParentIds = [...parentIds];
+
+        // 如果当前节点的任何子节点在目标ID列表中，或者当前节点本身在目标ID列表中
+        const hasSelectedChild =
+          node.children &&
+          node.children.some(
+            (child) =>
+              targetSet.has(child.id) ||
+              (child.children &&
+                child.children.some((c) => targetSet.has(c.id)))
+          );
+
+        if (hasSelectedChild || targetSet.has(node.id)) {
+          if (!allIds.includes(node.id)) {
+            allIds.push(node.id);
+          }
+        }
+
+        if (node.children) {
+          traverse(node.children, currentParentIds);
+        }
+      }
+    };
+
+    traverse(treeNodes);
+    return allIds;
   };
   return (
     <Modal
@@ -115,24 +169,16 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       maskClosable={false}
       className="dataSource-modal"
       style={{ width: '800px', height: '800px' }}
+      closeIcon={null}
       footer={
-        <>
-          <Button
-            onClick={() => {
-              onClose();
-            }}
-          >
-            取消
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              getTableSelectContent();
-            }}
-          >
-            确定
-          </Button>
-        </>
+        <Button
+          onClick={() => {
+            onClose();
+          }}
+          type="primary"
+        >
+          确定
+        </Button>
       }
     >
       <div className="department-modal-content">
@@ -151,19 +197,31 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         </div>
         {treeData && treeData?.length > 0 ? (
           <Tree
-            selectable={false}
+            // selectable={false}
+            actionOnClick="check"
             checkable
             checkedStrategy="child"
+            defaultCheckedKeys={
+              type === 'detail' ? checkedKeysDetail : undefined
+            }
             autoExpandParent={false}
+            defaultExpandedKeys={
+              type === 'detail'
+                ? findParentIds(treeData, checkedKeysDetail)
+                : undefined
+            }
             style={{
+              width: '300px',
               height: '592px',
-              overflowY: 'auto'
+              overflowY: 'auto',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
             renderTitle={({ title }: any) => {
               return (
                 <span>
                   <span style={{ width: '300px', whiteSpace: 'nowrap' }}>
-                    {title}
+                    <Tooltip content={title}>{title}</Tooltip>
                   </span>
                 </span>
               );
@@ -171,6 +229,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             treeData={treeData}
             onCheck={(key, val) => {
               setCheckedKeys(key);
+              getChildTreeSelectData(key);
             }}
           />
         ) : (

@@ -19,6 +19,7 @@ import {
   getDatasetsOptions
 } from '@/api/sql';
 import { requiredValidator, tableNameValidator } from '../utils';
+import './ModalDatasetForm.scss';
 
 const FormItem = Form.Item;
 
@@ -39,7 +40,7 @@ const ModalDatasetForm = (props: ModalDatasetFormProps) => {
   return (
     <Modal
       title="保存为新数据集"
-      style={{ width: 636 }}
+      style={{ width: 660 }}
       visible={visible}
       onCancel={onCancel}
       footer={null}
@@ -175,12 +176,12 @@ function DatasetForm(props) {
             rules={[
               {
                 validator(value, cb) {
-                  return requiredValidator(value, cb, '请输入中文名称');
+                  return requiredValidator(value, cb, '请输入数据集名称');
                 }
               }
             ]}
           >
-            <Input allowClear placeholder="请输入中文名称" />
+            <Input allowClear placeholder="请输入数据集名称" />
           </FormItem>
           <FormItem
             field="strage_type"
@@ -268,15 +269,13 @@ function DatasetForm(props) {
           <span className="text-[14px] font-[600]">来源信息</span>
         </div>
         <Table
-          style={{
-            width: '100%',
-            height: '100%'
-          }}
+          className="modal-dataset-form"
           columns={columns}
           data={tableData}
-          rowKey="id"
+          rowKey="key"
           pagination={false}
-          scroll={{ y: 286 }}
+          scroll={{ y: 243 }}
+          border={false}
         />
       </div>
       <div className="mt-[16px] flex justify-end gap-[12px]">

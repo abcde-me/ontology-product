@@ -19,12 +19,17 @@
       }
 
       .arco-tree-node-title {
-        width: 227px;
-        flex-basis: 227px;
-        flex-shrink: 0;
-
         .pyspark-target-tree__node-title {
-          width: 196px;
+          width: 250px;
+        }
+
+        .pyspark-target-tree__node-title-volume_item {
+          width: 170px;
+        }
+
+        .pyspark-target-tree__node-title-file,
+        .pyspark-target-tree__node-size-file {
+          width: 150px;
         }
 
         &:hover {
@@ -36,12 +41,12 @@
 
           .pyspark-target-tree__node-title-file,
           .pyspark-target-tree__node-size-file {
-            width: 120px;
+            width: 116px;
           }
 
           .pyspark-target-tree__node-title-volume_item,
           .pyspark-target-tree__node-size-volume_item {
-            width: 120px;
+            width: 146px;
           }
 
           .pyspark-target-tree__node-actions {

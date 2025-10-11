@@ -118,6 +118,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 uncheckedText="关"
                 checked={form.getFieldValue('data_standardization')}
                 style={{ margin: 0, width: 'auto' }}
+                onChange={(checked) => {
+                  if (!checked) {
+                    form.setFieldsValue({
+                      unicode: false,
+                      traditional_to_simplified: false,
+                      case_uniformity: false
+                    });
+                  }
+                }}
               />
             </FormItem>
             <span className="date-switch-text">数据标准化</span>
@@ -486,7 +495,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataDeduplicateAfter}
                   </span>

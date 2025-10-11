@@ -2,6 +2,16 @@
   padding: 10px;
   overflow-x: hidden;
 
+  .arco-checkbox-text {
+    margin-left: 4px;
+  }
+
+  .attribute-group-name-label {
+    .arco-form-item-symbol {
+      width: 7px;
+    }
+  }
+
   .arco-breadcrumb-item > .arco-icon {
     color: #000000;
     cursor: pointer;
@@ -38,6 +48,11 @@
     line-height: 24px;
     // margin-left: -12px;
     margin-bottom: 16px;
+  }
+
+  .label-shape-options {
+    display: flex;
+    align-items: center;
   }
 
   .basic-configuration {
@@ -124,12 +139,12 @@
   }
 
   .sortable-item {
-    padding: 0 16px 24px 16px;
+    padding: 0 16px 16px 16px;
   }
 
   .sortable-item-content {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 
     .arco-form-layout-inline {
       margin-right: 8px;
@@ -184,7 +199,7 @@
 
   .attribute-group-content-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 
     .arco-form-layout-inline {
       margin-right: 8px;
@@ -244,7 +259,7 @@
 
   .attribute-info-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 
     .arco-form-label-item {
       color: #6e7b8d !important;
@@ -332,7 +347,7 @@
 
   .attribute-group-name {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
   }
 
   .add-template-btn {
@@ -466,6 +481,15 @@
 
   .fz14 {
     font-size: 14px;
+  }
+
+  .label-btn {
+    margin-left: 16px;
+    margin-bottom: 16px;
+  }
+
+  .btn-add-default {
+    color: #1e293b !important;
   }
 }
 

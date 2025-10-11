@@ -13,9 +13,9 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import './TextEntity.scss';
 import { uuid } from '@/models/utils';
 import { getRandomHexColorStrict } from '../common';
+import './TextEntity.scss';
 // 实体/实体关系 - 组件
 const btnList = [
   {
@@ -174,6 +174,13 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   }, [entityRelations, relationRelations]);
   const renderItemVal = (item, index) => {
     formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+  };
+  const renderNotFoundContent = () => {
+    return (
+      <div className="not-found-content">
+        <div className="not-found-text">请先创建实体标签</div>
+      </div>
+    );
   };
   return (
     <div className="text-component-warp">
@@ -532,14 +539,19 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                             label="起始标签:"
                             rules={[
-                              { required: true, message: '请输入标签名称' }
+                              { required: true, message: '请选择起始标签' }
                             ]}
                           >
                             <Select
                               mode="multiple"
                               allowClear
                               placeholder="请选择起始标签"
-                              style={{ width: 260 }}
+                              style={{
+                                width: 260,
+                                backgroundColor:
+                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                              }}
+                              notFoundContent={renderNotFoundContent()}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
@@ -579,13 +591,28 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
+                            rules={[
+                              {
+                                validator: (value, callback) => {
+                                  if (!value || value.length === 0) {
+                                    callback('请选择目标标签');
+                                  }
+                                  callback();
+                                }
+                              }
+                            ]}
                             field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"
                               allowClear
                               placeholder="请选择目标标签"
-                              style={{ width: 276 }}
+                              notFoundContent={renderNotFoundContent()}
+                              style={{
+                                width: 276,
+                                backgroundColor:
+                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                              }}
                               onChange={(value) => {
                                 handleRelationFieldChange(
                                   index,
