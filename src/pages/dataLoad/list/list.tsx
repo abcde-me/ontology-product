@@ -508,7 +508,7 @@ export default function DataLoad() {
         )}
       </div>
       <Modal
-        style={{ width: '600px' }}
+        style={{ width: '680px' }}
         title="创建数据载入任务"
         visible={visible}
         onOk={() => setVisible(false)}

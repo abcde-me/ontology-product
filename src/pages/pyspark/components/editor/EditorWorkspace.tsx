@@ -310,7 +310,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         {/* 编辑器区域 */}
         <div
-          className={`editor-container ${getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE) ? '' : 'running-code-mirror'}`}
+          className={`pyspark-editor-container ${getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE) ? '' : 'running-code-mirror'}`}
         >
           <CodeMirror
             ref={editorRef}

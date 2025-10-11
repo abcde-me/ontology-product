@@ -54,7 +54,11 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     };
     const res = await getWorkflowList(params);
     if (res.status === 200 && res.data) {
-      return (res.data?.list || []).map((i) => i.target_path_id);
+      return (res.data?.list || [])
+        .filter(
+          (i) => i?.workflow_uuid !== workflow_uuid && !!i?.target_path_id
+        )
+        .map((i) => i.target_path_id);
     }
     return [];
   }, [userInfo]);
