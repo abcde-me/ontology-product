@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './index.scss';
 import { Pagination, PaginationProps, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -8,6 +7,7 @@ import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { FileType } from '@/utils/type';
+import './index.scss';
 
 // 枚举文件状态
 enum FileStatus {

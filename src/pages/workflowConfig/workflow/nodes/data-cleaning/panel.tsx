@@ -495,7 +495,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataDeduplicateAfter}
                   </span>

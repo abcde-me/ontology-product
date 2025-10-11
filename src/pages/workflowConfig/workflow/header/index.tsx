@@ -36,7 +36,7 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
-import './index.scss';
+import styles from './index.module.scss';
 import { useShallow } from 'zustand/react/shallow';
 import { getQueryParams, useParams } from '@/utils/url';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
@@ -284,18 +284,23 @@ const Header: FC = () => {
   };
 
   return (
-    <div className="app-workflow-page-header absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3">
-      <div className="left-part">
+    <div
+      className={
+        styles['app-workflow-page-header'] +
+        ' absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3'
+      }
+    >
+      <div className={styles['left-part']}>
         <div
-          className="back-icon"
+          className={styles['back-icon']}
           onClick={() => history.push('/tenant/compute/modaforge/workflowList')}
         >
           <BackIcon className="size-[16px]" />
         </div>
-        <div className="app-info">
+        <div className={styles['app-info']}>
           {editing ? (
             <Input
-              className="app-name--editing"
+              className={styles['app-name--editing']}
               ref={inputRef}
               value={workflowName}
               onChange={handleWorkflowNameChange}
@@ -303,9 +308,9 @@ const Header: FC = () => {
               onPressEnter={() => handlePressEnter(workflowName)}
             />
           ) : (
-            <div className="app-name">
+            <div className={styles['app-name']}>
               <Typography.Paragraph
-                className="app-name-text"
+                className={styles['app-name-text']}
                 style={{ maxWidth: '700px' }}
                 ellipsis={{ cssEllipsis: true, rows: 1, showTooltip: true }}
               >
@@ -316,7 +321,10 @@ const Header: FC = () => {
                   WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE
                 ) && (
                   <Popover trigger="hover" content="编辑">
-                    <div className="eidt-icon" onClick={handleEdit}></div>
+                    <div
+                      className={styles['edit-icon']}
+                      onClick={handleEdit}
+                    ></div>
                   </Popover>
                 )}
             </div>
@@ -327,7 +335,7 @@ const Header: FC = () => {
       {headerOperationDisplay &&
         workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_OPERATION) && (
           <>
-            <div className="right-part">
+            <div className={styles['right-part']}>
               <TaskOperation
                 {...{
                   workflowStatus: appDetail?.is_online ?? IsOnline.offline,

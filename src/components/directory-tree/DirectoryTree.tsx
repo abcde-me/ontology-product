@@ -609,7 +609,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
 
     return (
-      <div className="directory-tree-container">
+      <div
+        className="directory-tree-container"
+        style={
+          currentFolderName
+            ? ({
+                ['--directory-nav-height' as any]: '69px'
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         {/* 导航栏 - 当有当前文件夹名称时显示（包括从根目录进入的第一个文件夹） */}
         {currentFolderName && (
           <div className="directory-tree-nav flex items-center">
