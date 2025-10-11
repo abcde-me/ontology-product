@@ -220,7 +220,7 @@ const EditorWorkspaceContent: React.FC<{
       {/* 编辑器区域 */}
 
       <div
-        className={`editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
+        className={`sql-editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
       >
         <Spin
           style={{

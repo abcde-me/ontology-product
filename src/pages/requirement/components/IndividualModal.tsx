@@ -64,7 +64,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       );
     }
   }, [getDetailObj]);
-  useEffect(() => {
+  const getTreeData = () => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
@@ -105,6 +105,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {
       console.log(err, 'err');
     }
+  };
+  useEffect(() => {
+    getTreeData();
   }, [visible]);
   // 树的内容
   const renderTreeContent = () => {
@@ -132,7 +135,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           );
         }}
         onSelect={(value) => {
-          console.log(value);
           setCurrent(1);
           setPageSize(10);
           setCheckedKeys(value);
@@ -215,7 +217,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    getTableData();
+    if (checkedKeys?.length > 0) {
+      getTableData();
+    }
   }, [checkedKeys, current, pageSize]);
   // 表格选择内容
 
@@ -251,6 +255,13 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               placeholder="请输入部门搜索"
               onChange={(value) => {
                 setSearchValue(value);
+              }}
+              allowClear
+              onClear={() => {
+                getTreeData();
+              }}
+              onPressEnter={() => {
+                getTreeData();
               }}
             />
           </div>

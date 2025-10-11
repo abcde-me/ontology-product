@@ -1,27 +1,27 @@
-@import 'preflight.css';
-@tailwind base;
+/* @import 'preflight.css'; */
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 @import './themes/light.css';
 @import './themes/manual-light.css';
 
-@import '../components/button/index.css';
+/* @import '../components/button/index.css';
 @import '../components/action-button/index.css';
-@import '../components/modal/index.css';
+@import '../components/modal/index.css'; */
 
-@layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
+/* @layer utilities { */
+/* Hide scrollbar for Chrome, Safari and Opera */
+/* .no-scrollbar::-webkit-scrollbar {
     display: none;
-  }
+  } */
 
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
+/* Hide scrollbar for IE, Edge and Firefox */
+/* .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-}
+} */
 
 html {
   color-scheme: light;
@@ -35,7 +35,7 @@ html[data-changing-theme] * {
   transition: none !important;
 }
 
-:root {
+/* :root {
   --max-width: 1100px;
   --border-radius: 12px;
   --font-mono:
@@ -76,7 +76,7 @@ html[data-changing-theme] * {
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135;
-}
+} */
 
 /* @media (prefers-color-scheme: dark) {
   :root {
