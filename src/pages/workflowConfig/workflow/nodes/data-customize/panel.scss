@@ -1,5 +1,6 @@
 .wk-data-customize-panel-content {
   min-height: calc(100% - 150px);
+  position: relative;
 
   .arco-form-item {
     margin-bottom: unset;
@@ -11,6 +12,22 @@
 
   .arco-collapse-item-content-box {
     background-color: #f8fafd;
+  }
+
+  .arco-form .arco-form-item > .arco-form-label-item {
+    padding: unset;
+  }
+
+  .wk-customize-running-result-collapse {
+    position: fixed;
+    border: unset;
+    width: 562px;
+    bottom: 10px;
+    right: 31px;
+    .arco-collapse-item-content-box {
+      height: 360px;
+      overflow: auto;
+    }
   }
 }
 

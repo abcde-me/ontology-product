@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Button,
   Collapse,
   Form,
@@ -234,14 +235,14 @@ const Panel = ({ id, data, parentRef }) => {
     isRunning ? run() : cancel();
   }, [isRunning]);
 
-  useEffect(() => {
-    if (resultData && parentRef.current) {
-      parentRef.current.scrollTo({
-        top: parentRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, [resultData]);
+  // useEffect(() => {
+  //   if (resultData && parentRef.current) {
+  //     parentRef.current.scrollTo({
+  //       top: parentRef.current.scrollHeight,
+  //       behavior: 'smooth'
+  //     });
+  //   }
+  // }, [resultData]);
 
   const myTheme = createTheme({
     theme: 'light',
@@ -363,7 +364,23 @@ const Panel = ({ id, data, parentRef }) => {
         layout="vertical"
       >
         <FormItem
-          label="Python脚本:"
+          label={
+            <div className="flex w-full items-center justify-between">
+              <span>Python脚本:</span>
+              <Popover
+                trigger="click"
+                title={
+                  <span className="font-[600] leading-[22px] text-[#0F172A]">
+                    读取数据使用说明
+                  </span>
+                }
+                position="left"
+                content={<div>123</div>}
+              >
+                <span className="cursor-pointer text-[#007DFA]">查看示例</span>
+              </Popover>
+            </div>
+          }
           field="script_content"
           labelAlign="left"
           required
@@ -392,33 +409,6 @@ const Panel = ({ id, data, parentRef }) => {
                 >
                   {isRunning ? '终止运行' : '测试运行'}
                 </Button>
-                {isRunning ? (
-                  <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
-                    <span>运行中</span>
-                    <Spin size={14} className="ml-[4px]" />
-                    <span className="ml-[8px]">{runningTime}s</span>
-                  </div>
-                ) : (
-                  (runningStatus === RunningStatus.Failed ||
-                    runningStatus === RunningStatus.Success ||
-                    runningStatus === RunningStatus.Stopped) && (
-                    <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
-                      <span>
-                        {runningStatus === RunningStatus.Failed
-                          ? '运行失败'
-                          : runningStatus === RunningStatus.Success
-                            ? '运行成功'
-                            : '运行终止'}
-                      </span>
-                      {runningStatus === RunningStatus.Failed ? (
-                        <IconCloseCircleFill className="ml-[4px] text-[#EF4444]" />
-                      ) : runningStatus === RunningStatus.Success ? (
-                        <IconCheckCircleFill className="ml-[4px] text-[#10B981]" />
-                      ) : null}
-                      <span className="ml-[8px]">{`${startTime} (${runningTime}s)`}</span>
-                    </div>
-                  )
-                )}
               </div>
               <Popover content={<span>全屏</span>}>
                 <IconExpand
@@ -445,47 +435,62 @@ const Panel = ({ id, data, parentRef }) => {
             </div>
           </div>
         </FormItem>
-        {resultData && (
+        {(isRunning || resultData) && (
           <Collapse
             defaultActiveKey="running_result"
             style={{ maxWidth: 1180 }}
+            className="wk-customize-running-result-collapse"
           >
             <CollapseItem
-              header="运行结果"
+              header={
+                <div className="flex items-center">
+                  <span>运行结果</span>
+                  {isRunning ? (
+                    <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
+                      <span>运行中</span>
+                      <Spin size={14} className="ml-[4px]" />
+                      <span className="ml-[8px]">{runningTime}s</span>
+                    </div>
+                  ) : (
+                    (runningStatus === RunningStatus.Failed ||
+                      runningStatus === RunningStatus.Success ||
+                      runningStatus === RunningStatus.Stopped) && (
+                      <div className="ml-[8px] flex items-center leading-[30px] text-[#6E7B8D]">
+                        <span>
+                          {runningStatus === RunningStatus.Failed
+                            ? '运行失败'
+                            : runningStatus === RunningStatus.Success
+                              ? '运行成功'
+                              : '运行终止'}
+                        </span>
+                        {runningStatus === RunningStatus.Failed ? (
+                          <IconCloseCircleFill className="ml-[4px] text-[#EF4444]" />
+                        ) : runningStatus === RunningStatus.Success ? (
+                          <IconCheckCircleFill className="ml-[4px] text-[#10B981]" />
+                        ) : null}
+                        <span className="ml-[8px]">{`${startTime} (${runningTime}s)`}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              }
               name="running_result"
               ref={resultRef}
             >
               {runningStatus === 'failed' ? (
-                <Tabs defaultActiveTab="1">
-                  <TabPane key="1" title="结果">
-                    <Typography.Paragraph>
-                      <div
-                        style={{
-                          whiteSpace: 'pre-wrap',
-                          fontSize: '14px',
-                          lineHeight: '24px',
-                          color: '#1E293B'
-                        }}
-                      >
-                        {resultData}
-                      </div>
-                    </Typography.Paragraph>
-                  </TabPane>
-                  <TabPane key="2" title="报错">
-                    <Typography.Paragraph>
-                      <div
-                        style={{
-                          whiteSpace: 'pre-wrap',
-                          fontSize: '14px',
-                          lineHeight: '24px',
-                          color: '#1E293B'
-                        }}
-                      >
-                        {failMsg}
-                      </div>
-                    </Typography.Paragraph>
-                  </TabPane>
-                </Tabs>
+                <div>
+                  <div
+                    style={{
+                      whiteSpace: 'pre-wrap',
+                      fontSize: '14px',
+                      lineHeight: '24px',
+                      color: '#1E293B'
+                    }}
+                  >
+                    {resultData}
+                  </div>
+                  <Alert type="error" content={failMsg} />
+                </div>
               ) : (
                 <div
                   style={{
