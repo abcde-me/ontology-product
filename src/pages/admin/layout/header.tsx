@@ -14,7 +14,7 @@ import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout } from '@/utils/env';
-import { ListProject } from '@/api/modules/project';
+import { ListProject, ResourcePermissionActions } from '@/api/modules/project';
 
 // import { getDocContent } from '@/api/datasetsV2';
 
@@ -84,7 +84,30 @@ export default function Header({
   }, [userInfo]);
   const handleProjectChange = (id: string) => {
     setProjectId(id);
+    ResourcePermissionActions({ projectId: id }).then((res) => {
+      console.log('ResourcePermissionActions', res);
+      // const actions = res?.data?.actions || [];
+      // const perms = actions.map((item) => item.action);
+      // // 更新用户信息中的权限
+      // useUserInfoStore.setState((state) => ({
+      //   userInfo: {
+      //     ...state.userInfo,
+      //     perms
+      //   }
+      // }));
+    });
   };
+
+  const mockProjects = [
+    {
+      id: 'proj-17yg792j',
+      name: '项目一'
+    },
+    {
+      id: 'proj-b52i4jkm',
+      name: '项目二'
+    }
+  ];
 
   return (
     <div
@@ -108,7 +131,7 @@ export default function Header({
           onChange={handleProjectChange}
           placeholder="选择项目"
         >
-          {projects.map((item) => (
+          {mockProjects.map((item) => (
             <Select.Option key={item.id} value={item.id}>
               {item.name}
             </Select.Option>
