@@ -141,3 +141,37 @@
     min-height: calc(100vh - 170px) !important;
   }
 }
+
+.custom-popover {
+  max-width: 562px !important;
+  top: 170px !important;
+
+  .arco-popover-content {
+    max-height: 900px !important;
+  }
+
+  .arco-popover-arrow {
+    top: 22.8px !important;
+  }
+
+  .custom-markdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: stretch;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+
+    h1 {
+      font-weight: 600;
+      line-height: 22px;
+    }
+
+    blockquote {
+      background-color: #f8fafd;
+      padding: 12px;
+    }
+  }
+}

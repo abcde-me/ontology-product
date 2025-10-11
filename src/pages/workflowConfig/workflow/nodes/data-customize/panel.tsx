@@ -37,6 +37,7 @@ import {
 import './panel.scss';
 import { useParams } from '@/utils/url';
 import Cookies from 'js-cookie';
+import ReactMarkdown from 'react-markdown';
 
 const FormItem = Form.Item;
 
@@ -72,6 +73,7 @@ const Panel = ({ id, data, parentRef }) => {
   const [failMsg, setFailMsg] = useState('');
   const [placeholderValue, setPlaceholderValue] = useState('');
   const [runningBenchId, setRunningBenchId] = useState('');
+  const [readmeContent, setReadmeContent] = useState('');
 
   useEffect(() => {
     const getScriptingInfo = async () => {
@@ -93,13 +95,14 @@ const Panel = ({ id, data, parentRef }) => {
       const templateRes = await getScriptingTemplate(workflow_uuid, id);
       if (templateRes.data.script_template) {
         setPlaceholderValue(templateRes.data.script_template);
-        if (value === '') {
-          setValue(templateRes.data.script_template);
-          handleValueChange({
-            ...inputs,
-            script_content: templateRes.data.script_template
-          });
-        }
+        setReadmeContent(templateRes.data.script_template_md);
+        // if (value === '') {
+        // setValue(templateRes.data.script_template);
+        //   handleValueChange({
+        //     ...inputs,
+        //     script_content: templateRes.data.script_template
+        //   });
+        // }
       }
     };
     getScriptingInfo();
@@ -369,13 +372,13 @@ const Panel = ({ id, data, parentRef }) => {
               <span>Python脚本:</span>
               <Popover
                 trigger="click"
-                title={
-                  <span className="font-[600] leading-[22px] text-[#0F172A]">
-                    读取数据使用说明
-                  </span>
+                position="lb"
+                className="custom-popover"
+                content={
+                  <ReactMarkdown className="custom-markdown">
+                    {readmeContent}
+                  </ReactMarkdown>
                 }
-                position="left"
-                content={<div>123</div>}
               >
                 <span className="cursor-pointer text-[#007DFA]">查看示例</span>
               </Popover>
@@ -423,7 +426,7 @@ const Panel = ({ id, data, parentRef }) => {
               <CodeMirror
                 value={value}
                 theme={myTheme}
-                // placeholder={placeholderValue}
+                placeholder={placeholderValue}
                 extensions={[python()]}
                 onChange={onChange}
                 readOnly={isRunning || readOnly}
