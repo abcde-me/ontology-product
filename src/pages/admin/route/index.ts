@@ -1,7 +1,6 @@
 import * as React from 'react';
 import auth, { AuthParams } from '@/utils/authentication';
 import { useEffect, useMemo, useState } from 'react';
-import { Redirect } from 'react-router';
 
 export type IRoute = AuthParams & {
   name: string;
@@ -18,13 +17,6 @@ export type IRoute = AuthParams & {
 
 // om 运维、tenant 运营、portal 租户
 export const routes: IRoute[] = [
-  // 主页
-  {
-    name: 'home',
-    key: '/tenant/compute/modaforge/home',
-    component: React.lazy(async () => import('../../home')),
-    children: []
-  },
   // 连接器
   {
     name: 'connection',
@@ -73,7 +65,7 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../workflowList')),
     children: []
   },
-  // Notebook
+  // Pyspark
   {
     name: 'pyspark',
     key: '/tenant/compute/modaforge/pyspark',

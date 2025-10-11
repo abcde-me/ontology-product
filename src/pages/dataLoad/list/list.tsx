@@ -4,12 +4,9 @@ import {
   Message,
   Modal,
   Pagination,
-  Popconfirm,
-  Popover,
-  Table,
-  Tooltip
+  Table
 } from '@arco-design/web-react';
-import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useMemo, useState } from 'react';
 import Styles from './index.module.css';
 import { ITableData } from './type';
@@ -19,7 +16,6 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
@@ -264,22 +260,7 @@ export default function DataLoad() {
       }
     }
   ] as any;
-  const [data, setData] = useState<ITableData[]>([
-    // {
-    //   task_id: '1',
-    //   connector_id: '1',
-    //   connector_name: '中科院大数据库任务1',
-    //   name: '1234',
-    //   source_type: 'hdfs',
-    //   load_type: 'once',
-    //   status: 'succeed',
-    //   data_path_id: '2',
-    //   data_path_name: '1234',
-    //   creator: '111',
-    //   created_at: '1234',
-    //   last_run_time: '1234'
-    // }
-  ]);
+  const [data, setData] = useState<ITableData[]>([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -322,7 +303,6 @@ export default function DataLoad() {
         ...loadSiftObject
       });
       if (res.message == 'ok') {
-        console.log(res.data.items);
         setData(res.data.items);
         setLoadTotal(res.data.total);
       }
@@ -333,9 +313,6 @@ export default function DataLoad() {
     }
   };
   const loadSiftHan = (sorter, filters) => {
-    console.log(filters);
-    console.log(sorter);
-
     const newSiftObj = {
       status: filters.status == undefined ? [] : filters.status,
       load_type: filters.load_type == undefined ? [] : filters.load_type,
