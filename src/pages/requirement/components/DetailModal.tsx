@@ -9,7 +9,8 @@ import {
   Table,
   Pagination,
   Empty,
-  Tooltip
+  Tooltip,
+  Spin
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
@@ -64,7 +65,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [tableLoading, settableLoading] = useState(false);
   const [dir_path, setDir_path] = useState<React.Key[]>(['']);
   const [treeNodeName, setTreeNodeName] = useState('');
-
+  const [treeLoading, setTreeLoading] = useState(false);
   const formatCatalogTree = (rawData: any[]): TreeItem[] => {
     // 递归处理单个节点的子层级
     const handleChildren = (
@@ -103,9 +104,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const getTreeDataList = () => {
     let newTreeData: any[] = [];
     try {
+      setTreeLoading(true);
       getCatalogList({
         root_type: 1
       }).then((res) => {
+        setTreeLoading(false);
         if (res.status !== 200) {
           return;
         }
@@ -192,7 +195,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             }}
           />
         ) : (
-          <Empty description="暂无数据" />
+          <div className="empty-content">
+            <Empty description="暂无数据" />
+          </div>
         )}
       </div>
     );
@@ -363,7 +368,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }}
             />
           </div>
-          {renderTreeContent()}
+          <Spin loading={treeLoading}>{renderTreeContent()}</Spin>
         </div>
         <div className="content-table">
           <div className="content-table-form">
