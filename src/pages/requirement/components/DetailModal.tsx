@@ -38,6 +38,9 @@ interface DataSourceModalProps {
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getDetailObj: any;
 }
+
+const InputSearch = Input.Search;
+
 const DataSourceModal: React.FC<DataSourceModalProps> = ({
   fileType,
   visible,
@@ -354,7 +357,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       <div className="detail-modal-content">
         <div className="content-tree">
           <div className="search-input">
-            <Input
+            <InputSearch
               type="text"
               placeholder="请输入名称搜索"
               onChange={(value) => {
@@ -362,10 +365,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }}
               allowClear={true}
               onClear={() => {
-                setSearchValue('');
-                getTreeDataList();
-              }}
-              onPressEnter={() => {
                 getTreeDataList();
               }}
             />

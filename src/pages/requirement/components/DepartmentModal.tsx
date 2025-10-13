@@ -18,7 +18,7 @@ interface DataSourceModalProps {
   getDetailObj: any;
   type: any;
 }
-
+const InputSearch = Input.Search;
 const DepartmentModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
@@ -187,14 +187,11 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     >
       <div className="department-modal-content">
         <div className="department-modal-search">
-          <Input
+          <InputSearch
             type="text"
             allowClear
             placeholder="请输入名称搜索"
             onClear={() => {
-              getTreeData();
-            }}
-            onPressEnter={() => {
               getTreeData();
             }}
             onChange={(value) => {
