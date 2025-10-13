@@ -39,7 +39,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       setCheckedKeysDetail(getDetailObj?.label_operate?.org_id || []);
     }
   }, [getDetailObj]);
-  useEffect(() => {
+  const getTreeData = () => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
@@ -67,6 +67,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {
       console.log(err, 'err');
     }
+  };
+  useEffect(() => {
+    getTreeData();
   }, [activeTab, visible]);
 
   const searchData = (searchValue, treeData) => {
@@ -188,7 +191,10 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             allowClear
             placeholder="请输入名称搜索"
             onClear={() => {
-              setTreeData(treeData);
+              getTreeData();
+            }}
+            onPressEnter={() => {
+              getTreeData();
             }}
             onChange={(value) => {
               setSearchValue(value);
