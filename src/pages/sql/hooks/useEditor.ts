@@ -54,6 +54,7 @@ export interface UseEditorReturn {
   currentFileId?: string;
   currentScriptId?: string;
   runError: string;
+  runWarning: string;
   resultLoading: boolean;
   lastScriptRunStatus: RunningStatus;
   // 表格数据处理
@@ -108,6 +109,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [size, setSize] = useState<string>('100');
   const [runLog, setRunLog] = useState<string>('');
   const [runError, setRunError] = useState<string>('');
+  const [runWarning, setRunWarning] = useState<string>('');
   const [resultLoading, setResultLoading] = useState(false);
   // 新增脚本最后执行结果
   const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
@@ -254,6 +256,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunResult([]);
     setRunLog('');
     setRunError('');
+    setRunWarning('');
     // setLastAutoSave('');
     setLastScriptRunStatus(RunningStatus.IDLE);
     // 取消正在进行的轮询
@@ -370,6 +373,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       const res = await runSqlScript(currentFile?.scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
+        if (res.data?.warning_msg) {
+          setRunWarning(res.data.warning_msg);
+        }
       } else {
         setRunError(res.message);
         Message.error(res.message);
@@ -506,6 +512,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     currentFileId: currentFile?.fileId,
     currentScriptId: currentFile?.scriptId,
     runError,
+    runWarning,
     resultLoading,
     // 表格数据处理
     columns,
