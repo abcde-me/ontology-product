@@ -254,7 +254,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunResult([]);
     setRunLog('');
     setRunError('');
-    setLastAutoSave('');
+    // setLastAutoSave('');
     setLastScriptRunStatus(RunningStatus.IDLE);
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
