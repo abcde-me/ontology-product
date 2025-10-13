@@ -52,6 +52,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -144,6 +145,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             : { title: item.name, key: item.id };
         });
         setTreeData(newTreeData);
+        setOriginalTreeData(newTreeData);
       });
     } catch (err) {}
   };
@@ -236,7 +238,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 100
     }
   ];
-  const searchData = (searchValue) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -253,14 +255,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
 
-    return loop(treeData);
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
-    if (!searchValue || searchValue === '') {
-      setTreeData(treeData);
+    if (!searchValue) {
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
