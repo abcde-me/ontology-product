@@ -1,16 +1,29 @@
+# ARG GLOBAL_BUILD_BASEIMAGE=image.cestc.cn/ccos/nginx124-cclinux2209-consoleplugin:20231122
+# FROM ${GLOBAL_BUILD_BASEIMAGE}
+
+# COPY ./nginx/nginx-config.conf /etc/nginx/conf.d/
+# COPY ./nginx/nginx.conf /etc/nginx/
+# COPY ./nginx/mime.types /etc/nginx/
+
+# RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
+# # ！！！注意，最后一步必须是复制产物，流水线只能拿出最后一个layer做为产物的压缩包
+# COPY ./dist /usr/share/nginx/html/modaforge
+
+# # 设置默认执行用户
+# RUN useradd -u 1000 apps
+# # USER apps
+
+# EXPOSE 80
+
 ARG GLOBAL_BUILD_BASEIMAGE=image.cestc.cn/ccos/nginx124-cclinux2209-consoleplugin:20231122
 FROM ${GLOBAL_BUILD_BASEIMAGE}
 
-COPY ./nginx/nginx-config.conf /etc/nginx/conf.d/
+COPY ./nginx/nginx-config.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/nginx.conf /etc/nginx/
 COPY ./nginx/mime.types /etc/nginx/
 
 RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
 # ！！！注意，最后一步必须是复制产物，流水线只能拿出最后一个layer做为产物的压缩包
 COPY ./dist /usr/share/nginx/html/modaforge
+EXPOSE 80
 
-# 设置默认执行用户
-RUN useradd -u 1000 apps
-# USER apps
-
-EXPOSE 9030
