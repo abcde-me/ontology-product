@@ -625,13 +625,18 @@ export default function RequirementDetail() {
     return Message.error('请输入必填信息');
   };
   const stepNext = async () => {
-    const { formText, formLabel } = TextEntityDataContent;
+    const { formText, formLabel, entityRelations, relationRelations } =
+      TextEntityDataContent;
     const result = await Promise.all([
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formText
             .validate()
             .then((val) => {
-              return true;
+              const entityRelationsFlag = entityRelations.every(
+                (item) =>
+                  item?.label_name_en !== '' && item?.label_name_cn !== ''
+              );
+              return entityRelationsFlag;
             })
             .catch((errorInfo) => {
               return false;
@@ -641,7 +646,15 @@ export default function RequirementDetail() {
         ? formLabel
             .validate()
             .then((val) => {
-              return true;
+              const relationRelationsFlag = relationRelations.every(
+                (item) =>
+                  item?.relation_name_en !== '' &&
+                  item?.relation_name_cn !== '' &&
+                  (item?.start_entity_labels || []).length > 0 &&
+                  (item?.target_entity_labels || []).length > 0
+              );
+
+              return relationRelationsFlag;
             })
             .catch((errorInfo) => {
               return false;
