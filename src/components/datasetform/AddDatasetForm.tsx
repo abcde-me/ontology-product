@@ -374,6 +374,7 @@ const DatasetForm = React.forwardRef<
   ) => {
     if (dataSource === 'volume') {
       console.log('选择的值:', value);
+      setCurrent(1);
       setTargetData(value);
 
       // 判断是一级目录还是二级目录
@@ -479,7 +480,13 @@ const DatasetForm = React.forwardRef<
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
-      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+      targetData?.[0]?.[0] === '/'
+        ? '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+        : targetData?.[0]?.[0] +
+            '/dst/' +
+            targetData?.[0]?.[1] +
+            '/volume/' +
+            targetData?.[1]?.[0]
     );
   }, [current, pageSize]);
 
