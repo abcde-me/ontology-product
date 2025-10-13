@@ -365,6 +365,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setExecid('');
 
     try {
+      // 将上一次运行结果置为未运行， 重新获取结果
+      setLastScriptRunStatus(RunningStatus.IDLE);
       const res = await runSqlScript(currentFile?.scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
