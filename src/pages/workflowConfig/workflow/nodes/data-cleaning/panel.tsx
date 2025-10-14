@@ -92,7 +92,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           mg_duplicate: inputs?.mg_duplicate_checkbox,
-          mg_duplicate_ngram: inputs?.mg_duplicate_ngram || 0.5
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
