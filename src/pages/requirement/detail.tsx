@@ -878,7 +878,7 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  `label_info_attribute_groups_${item?.id}_attribute_group_name`,
+                  `label_info_attribute_groups_${group?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
@@ -1412,7 +1412,7 @@ export default function RequirementDetail() {
                                         >
                                           <div className="attribute-group-content-item">
                                             <FormItem
-                                              field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                              field={`label_info_attribute_groups_${type === 'detail' ? attrGroup?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                               disabled={
                                                 type === 'detail' ||
                                                 attrGroup?.isTemp === true
