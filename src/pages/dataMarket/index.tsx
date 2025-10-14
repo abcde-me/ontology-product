@@ -328,17 +328,17 @@ export default function DataMarket() {
       ellipsis: true,
       className: 'hover-change data-market-name',
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
+        return (
           <EllipsisPopover
             value={record.dataset_name}
             isEdit={false}
             isLink
             handleLink={() => {
-              console.log(record);
+              history.push(
+                `/tenant/compute/modaforge/dataMarketDetail/${record.id}`
+              );
             }}
           />
-        ) : (
-          <span>-</span>
         );
       }
     },
