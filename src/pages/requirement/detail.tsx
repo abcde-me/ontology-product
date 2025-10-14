@@ -335,24 +335,20 @@ export default function RequirementDetail() {
    * @param {number} labelIndex - 标签索引
    * @param {number} groupIndex - 要删除的属性组索引
    */
-  const deleteAttributeGroup = (attribute_id, groupIndex) => {
+  const deleteAttributeGroup = (labelIndex, groupIndex) => {
     setDatalist((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
       const newData = _.cloneDeep(prevData);
 
-      // 遍历每个标签项
-      newData.forEach((label, labelIndex) => {
-        // 查找当前标签中是否包含要删除的属性组
-        const attributeGroups = label.label_info_attribute_groups || [];
-        const groupToDeleteIndex = attributeGroups.findIndex(
-          (group) => group && group.attribute_id === attribute_id
-        );
-        // 如果找到匹配的属性组，则删除它
-        if (groupToDeleteIndex !== -1) {
-          // 从数组中删除该属性组
-          attributeGroups.splice(groupToDeleteIndex, 1);
-        }
-      });
+      // 只在指定的标签中删除指定的属性组
+      if (
+        newData[labelIndex] &&
+        newData[labelIndex].label_info_attribute_groups
+      ) {
+        const attributeGroups = newData[labelIndex].label_info_attribute_groups;
+        // 删除指定索引的属性组
+        attributeGroups.splice(groupIndex, 1);
+      }
 
       return newData;
     });
@@ -1645,7 +1641,7 @@ export default function RequirementDetail() {
                                                     }
                                                     if (type !== 'detail') {
                                                       deleteAttributeGroup(
-                                                        attrGroup.attribute_id,
+                                                        labelIndex,
                                                         groupIndex
                                                       );
                                                     }
