@@ -319,6 +319,35 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       const currentOrderNum = item.order_num;
                       handleFieldChange(index, 'label_name_cn', value);
                     }}
+                    onFocus={(e: any) => {
+                      // 从 entityRelations 中获取最新的值
+                      const currentItem = entityRelations[index];
+                      // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
+                      if (
+                        !currentItem.label_name_cn?.trim() &&
+                        currentItem.label_name_en?.trim()
+                      ) {
+                        // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
+                        const fieldName = `label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`;
+                        // 更新数据状态
+                        handleFieldChange(
+                          index,
+                          'label_name_cn',
+                          currentItem.label_name_en
+                        );
+                        // 更新表单字段
+                        formText.setFieldValue(
+                          fieldName,
+                          currentItem.label_name_en
+                        );
+                        // 使用 setTimeout 确保值更新后再选中
+                        setTimeout(() => {
+                          e.target.select();
+                        }, 0);
+                      } else {
+                        e.target.select();
+                      }
+                    }}
                   />
                 </FormItem>
                 <FormItem
