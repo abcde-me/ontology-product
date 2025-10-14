@@ -286,7 +286,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       validator: (value, callback) => {
                         // 1. 判断同组内不能为空
                         if (!value || value.trim() === '') {
-                          callback('请输入属性名称');
+                          callback('请输入展示名称');
                         } else {
                           const trimmedValue = value.toString().trim();
                           // 2. 判断同组内不能有重复内容
@@ -301,7 +301,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           );
 
                           if (hasDuplicate) {
-                            callback('属性名称不能重复');
+                            callback('展示名称不能重复');
                           } else {
                             callback();
                           }
@@ -363,7 +363,22 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         handleFieldChange(index, 'label_colour', value);
                       }}
                     />
-                    <IconDown className="color-icon" />
+                    <IconDown
+                      className="color-icon"
+                      onClick={(e) => {
+                        if (type !== 'detail') {
+                          e.stopPropagation();
+                          const trigger =
+                            e.currentTarget.parentElement?.querySelector(
+                              '.arco-color-picker-preview'
+                            ) as HTMLElement;
+                          trigger?.click();
+                        }
+                      }}
+                      style={{
+                        cursor: type === 'detail' ? 'not-allowed' : 'pointer'
+                      }}
+                    />
                   </div>
                 </FormItem>
                 <FormItem
