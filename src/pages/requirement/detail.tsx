@@ -443,6 +443,9 @@ export default function RequirementDetail() {
       // 生成全新的唯一ID
       lastLabel.label_id = uuidV4();
       lastLabel.label_colour = getRandomHexColorStrict();
+      // 清空标签名称和展示名称，让用户重新输入
+      lastLabel.label_name_en = '';
+      lastLabel.label_name_cn = '';
 
       // 确保完整保留所有属性组和属性
       if (
@@ -1256,6 +1259,35 @@ export default function RequirementDetail() {
                                           [labelIndex, 'label_name_cn'],
                                           val
                                         );
+                                      }}
+                                      onFocus={(e: any) => {
+                                        // 从 datalist 中获取最新的值
+                                        const currentItem =
+                                          datalist[labelIndex];
+                                        // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
+                                        if (
+                                          !currentItem.label_name_cn?.trim() &&
+                                          currentItem.label_name_en?.trim()
+                                        ) {
+                                          // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
+                                          const fieldName = `label_name_cn_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          // 更新数据状态
+                                          updateNestedValue(
+                                            [labelIndex, 'label_name_cn'],
+                                            currentItem.label_name_en
+                                          );
+                                          // 更新表单字段，使用 currentItem 的值
+                                          form2.setFieldValue(
+                                            fieldName,
+                                            currentItem.label_name_en
+                                          );
+                                          // 使用 setTimeout 确保值更新后再选中
+                                          setTimeout(() => {
+                                            e.target.select();
+                                          }, 0);
+                                        } else {
+                                          e.target.select();
+                                        }
                                       }}
                                       className="sortable-item-input"
                                       placeholder="展示在标注页面的名称"
