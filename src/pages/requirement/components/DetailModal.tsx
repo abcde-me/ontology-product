@@ -374,16 +374,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         <div className="content-table">
           <div className="content-table-form">
             <div className="tree-node-name">{treeNodeName}</div>
-            <div className="form-option">
-              <DatePicker.RangePicker
-                onChange={handleDateChange}
-                style={{ width: 350 }}
-                onClear={() => {
-                  setDateRange([]);
-                  getTableData();
-                }}
-              />
-            </div>
+            <DatePicker.RangePicker
+              onChange={handleDateChange}
+              style={{ width: 350 }}
+              onClear={() => {
+                setDateRange([]);
+                getTableData();
+              }}
+            />
+            {/* <div className="form-option">
+            </div> */}
           </div>
           <Table
             ref={tableRef}

@@ -19,6 +19,7 @@ import { validateName } from '@/utils/valiate';
 import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import ComponentTree from '../list/component-tree';
+import { isNumber } from 'lodash-es';
 
 // 定义目录数据类型
 interface DirectoryItem {
@@ -742,7 +743,10 @@ const Edit = (props) => {
                     nodeId
                   );
                   // 选择完成后关闭下拉框
-                  setDropdownVisible(false);
+                  // 初始节点id是一个字符串， 生成成功后是number类型
+                  if (isNumber(nodeId)) {
+                    setDropdownVisible(false);
+                  }
                 }}
                 showAddTree={true}
                 enableRootAdd={true}
