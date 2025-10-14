@@ -45,8 +45,24 @@ body.scroller-hover *:hover::-webkit-scrollbar-thumb:hover {
 } */
 
 *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Firefox 默认隐藏滚动条 */
+* {
+  scrollbar-width: none;
+}
+
+/* hover 时显示滚动条（WebKit） */
+*:hover::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+}
+
+/* hover 时显示滚动条（Firefox） */
+*:hover {
+  scrollbar-width: thin;
 }
 
 *:hover::-webkit-scrollbar-thumb {
