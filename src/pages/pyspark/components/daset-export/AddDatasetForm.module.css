@@ -37,12 +37,6 @@
   }
 }
 
-.dropdownSelect {
-  :global(.arco-input-tag-input) {
-    width: 100% !important;
-  }
-}
-
 /* 数据类型指示器（可选功能） */
 .dataTypeIndicator {
   display: inline-block;
