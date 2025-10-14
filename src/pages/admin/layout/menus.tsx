@@ -4,6 +4,7 @@ import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import DataMarket from '@/assets/sider/dataset-management.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -163,6 +164,12 @@ export const menus: MenuModel[] = [
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
         permission: 'datasets:can_search'
+      },
+      {
+        title: '数据集市',
+        icon: <DataMarket className={iconClass} />,
+        key: 'dataMarket',
+        path: '/tenant/compute/modaforge/dataMarket'
       }
     ]
   },

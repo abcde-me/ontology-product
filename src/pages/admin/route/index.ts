@@ -159,6 +159,13 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../datasetManagement')),
     children: []
   },
+  // 数据集市
+  {
+    name: 'dataMarket',
+    key: '/tenant/compute/modaforge/dataMarket',
+    component: React.lazy(async () => import('../../dataMarket')),
+    children: []
+  },
   // 数据标注 - 需求管理
   {
     name: 'requirement',
