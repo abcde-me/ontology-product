@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosRequestHeaders } from 'axios';
 import * as pdfjsLib from 'pdfjs-dist';
 import 'pdfjs-dist/build/pdf.worker.entry';
 import { PrefixV2 } from '@/api/endpoints';
@@ -39,7 +39,7 @@ const DocumentCloud = (props) => {
           .get(url, {
             signal: abortController.signal,
             responseType: 'arraybuffer',
-            headers: { ...getToken() }
+            headers: { ...getToken() } as AxiosRequestHeaders
           })
           .then(async (res) => {
             // 转换pdf
@@ -113,8 +113,8 @@ const DocumentCloud = (props) => {
       const width = x2 - x1;
       const height = y2 - y1;
       const container = containerRef.current;
-      const targetOffset = targetCanvaslistnum.offsetTop - container.offsetTop;
-      container.scrollTo({ top: targetOffset, behavior: 'smooth' });
+      const targetOffset = targetCanvaslistnum.offsetTop - container!.offsetTop;
+      container!.scrollTo({ top: targetOffset, behavior: 'smooth' });
 
       const ctx = targetCanvas.getContext('2d')!;
 
