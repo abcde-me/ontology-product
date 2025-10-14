@@ -1364,7 +1364,25 @@ export default function RequirementDetail() {
                                         }}
                                         showPreset
                                       />
-                                      <IconDown className="color-icon" />
+                                      <IconDown
+                                        className="color-icon"
+                                        onClick={(e) => {
+                                          if (type !== 'detail') {
+                                            e.stopPropagation();
+                                            const trigger =
+                                              e.currentTarget.parentElement?.querySelector(
+                                                '.arco-color-picker-preview'
+                                              ) as HTMLElement;
+                                            trigger?.click();
+                                          }
+                                        }}
+                                        style={{
+                                          cursor:
+                                            type === 'detail'
+                                              ? 'not-allowed'
+                                              : 'pointer'
+                                        }}
+                                      />
                                     </div>
                                   </FormItem>
                                   <FormItem>

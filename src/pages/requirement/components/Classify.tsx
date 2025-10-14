@@ -455,7 +455,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           }
                         >
                           <Input
-                            style={{ width: 290 }}
+                            style={{ width: 290, backgroundColor: '#fff' }}
                             placeholder="用于存储标注结果"
                             value={attr.attribute_name_en}
                             onChange={(value) => {
@@ -520,7 +520,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                         >
                           <Input
-                            style={{ width: 268 }}
+                            style={{ width: 268, backgroundColor: '#fff' }}
                             placeholder="展示在标注页面的名称"
                             value={attr.attribute_name_cn}
                             onChange={(value) => {
