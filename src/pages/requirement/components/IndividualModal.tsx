@@ -66,41 +66,76 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         getDetailObj?.label_operate &&
           getDetailObj?.label_operate?.user_id?.map((item) => item)
       );
+      setCheckedKeys(
+        getDetailObj?.label_operate &&
+          getDetailObj?.label_operate?.org_id?.map((item) => item)
+      );
     }
   }, [getDetailObj]);
+  // 递归处理部门树数据，支持任意层级
+  const processTreeData = (data: any[], level = 1): any[] => {
+    return (
+      data?.map((item) => {
+        const baseItem = {
+          allowClick: false,
+          title: item.name,
+          key: String(item.id),
+          disabled: type === 'detail',
+          level: level,
+          perms: item.perms
+        };
+
+        // 如果有子级数据，递归处理
+        if (item?.children && item.children.length > 0) {
+          return {
+            ...baseItem,
+            children: processTreeData(item.children, level + 1)
+          };
+        }
+
+        // 没有子级数据，直接返回基础项
+        return baseItem;
+      }) || []
+    );
+  };
+
+  // 递归过滤掉perms为null的节点，只保留有权限数据的节点
+  const filterTreeDataByPerms = (data: any[]): any[] => {
+    const result: any[] = [];
+
+    data?.forEach((item) => {
+      // 如果当前节点有权限数据，保留该节点
+      if (item.perms && item.perms.length > 0) {
+        const filteredItem = { ...item };
+        // 如果有子节点，递归过滤子节点
+        if (item.children && item.children.length > 0) {
+          const filteredChildren = filterTreeDataByPerms(item.children);
+          filteredItem.children = filteredChildren;
+        }
+        result.push(filteredItem);
+      } else if (item.children && item.children.length > 0) {
+        // 如果当前节点没有权限数据，但有子节点，递归处理子节点
+        const filteredChildren = filterTreeDataByPerms(item.children);
+        // 将过滤后的子节点直接添加到结果中（提升层级）
+        result.push(...filteredChildren);
+      }
+      // 既没有权限数据，也没有子节点的节点被忽略
+    });
+
+    return result;
+  };
+
   const getTreeData = () => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          const newTreeDateList = res?.data?.map((item) => {
-            return item?.children
-              ? {
-                  allowClick: false,
-                  title: item.name,
-                  key: String(item.id),
-                  disabled: type === 'detail',
-                  level: 1,
-                  children: item?.children?.map((item_level2) => {
-                    return {
-                      level: 2,
-                      disabled: type === 'detail',
-                      title: item_level2?.name,
-                      key: item_level2?.id,
-                      allowClick: false,
-                      children: item_level2?.children?.map((subItem) => {
-                        return {
-                          disabled: type === 'detail',
-                          level: 3,
-                          title: subItem?.name,
-                          key: subItem?.id,
-                          allowClick: false
-                        };
-                      })
-                    };
-                  })
-                }
-              : { title: item.name, key: item.id };
-          });
+          let newTreeDateList = processTreeData(res?.data || []);
+
+          if (type === 'create') {
+            // 删除所有perms为null的节点
+            newTreeDateList = filterTreeDataByPerms(newTreeDateList);
+          }
+
           setTreeData(newTreeDateList);
           setOriginalTreeData(newTreeDateList);
         })

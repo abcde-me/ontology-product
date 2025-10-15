@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Breadcrumb,
   Button,
@@ -90,6 +90,7 @@ export default function RequirementDetail() {
   const type = useParams('type');
   const requirementId = useParams('id') as string;
   const history = useHistory();
+  const userInfo = useUserInfo();
   const [selectedRadio, setSelectedRadio] = useState('');
   const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
   const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
@@ -130,6 +131,13 @@ export default function RequirementDetail() {
       }
     ];
   };
+
+  // 创建需求，角色=开发者、用户时，禁止勾选 个人
+  const isShowPersonal = useMemo(() => {
+    return (
+      !['Developer', 'User'].includes(userInfo?.role || '') && type === 'create'
+    );
+  }, [userInfo, type]);
 
   // 初始化状态
   const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
@@ -2817,6 +2825,7 @@ export default function RequirementDetail() {
                     部门
                   </Radio>
                   <Radio
+                    disabled={!isShowPersonal}
                     style={{ display: 'flex', alignItems: 'center' }}
                     value={1}
                   >
