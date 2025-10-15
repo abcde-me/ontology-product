@@ -493,7 +493,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               validator: (value, callback) => {
                                 // 检查内容是否为空或只包含空格
                                 if (!value || value.trim() === '') {
-                                  callback('请输入选项名称');
+                                  callback('请输入展示名称');
                                 } else {
                                   // 排除当前项，检查同组其他项是否有相同的选项名称
                                   const trimmedValue = value.trim();
@@ -510,7 +510,7 @@ const Classify = (props: ClassifyComponentProps) => {
                                     );
 
                                   if (hasDuplicate) {
-                                    callback('选项名称不能重复');
+                                    callback('展示名称不能重复');
                                   } else {
                                     callback();
                                   }
