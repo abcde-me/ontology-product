@@ -256,7 +256,7 @@ const DatasetsList: FC = () => {
   // }
 
   return (
-    <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
+    <div className="flex h-full flex-col overflow-y-auto p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
       <Form autoComplete="off" layout="inline">
         <FormItem field="file_name" style={{ marginRight: 12 }}>
@@ -273,10 +273,10 @@ const DatasetsList: FC = () => {
         </FormItem>
       </Form>
       <Table
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
+        // style={{
+        //   width: '100%',
+        //   height: '100%'
+        // }}
         columns={columns}
         data={listData}
         pagination={pagination}
