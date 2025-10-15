@@ -176,13 +176,21 @@ export const menus: MenuModel[] = [
         title: '组织管理',
         icon: <OrganMenu className={iconClass} />,
         key: 'orgMgmt',
-        path: '/tenant/compute/modaforge/organization',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/organization'
+          ),
         permission: 'organizations:can_search'
       },
       {
         title: '用户管理',
         icon: <MemberMenu className={iconClass} />,
-        path: '/tenant/compute/modaforge/member',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/user'
+          ),
         key: 'userMgmt',
         permission: 'users:can_search'
       }

@@ -1,6 +1,7 @@
 import UAPI_CONFIG from './uapi';
 import { logout, isSingleApp } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
+import { getCurrentProjectId } from '@/context/ProjectContext';
 
 const isNil = (o) => o === undefined || o === null;
 
@@ -30,14 +31,36 @@ UAPI_CONFIG.addRequestInterceptor(
     // config.headers['x-ceai-user-organization-id'] = 'org-1urn9m93';
     // }
     // 自动为所有请求加上项目id参数
-    // const projectId = getCurrentProjectId();
-    // if (projectId) {
-    //   if (config.method === 'get' || config.method === 'GET') {
-    //     config.params = { ...config.params, id: projectId };
-    //   } else if (config.data && typeof config.data === 'object') {
-    //     config.data = { ...config.data, id: projectId };
-    //   }
-    // }
+    const projectId = getCurrentProjectId();
+
+    // 跳过项目相关的API请求（避免循环依赖）
+    const skipUrls = ['/api/project/org', '/api/auth/', '/login', '/logout'];
+    const shouldSkip = skipUrls.some((url) => config.url?.includes(url));
+
+    if (!shouldSkip && projectId && projectId.length > 0) {
+      console.log(
+        'API拦截器为请求添加项目ID:',
+        projectId[projectId.length - 1],
+        'URL:',
+        config.url
+      );
+      if (config.data && typeof config.data === 'object') {
+        config.data = { ...config.data, id: projectId[projectId.length - 1] };
+      } else if (config.method?.toLowerCase() === 'get' && config.params) {
+        // 对于GET请求，将项目ID添加到params中
+        config.params = {
+          ...config.params,
+          id: projectId[projectId.length - 1]
+        };
+      }
+    } else {
+      console.log(
+        '跳过添加项目ID参数 - URL:',
+        config.url,
+        'projectId:',
+        projectId
+      );
+    }
     return config;
   },
   (error) => {

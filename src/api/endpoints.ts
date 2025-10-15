@@ -245,7 +245,7 @@ export const ModaForgeResourceEndpoints = {
   Login: PrefixUserSpace + '/Login',
   Logout: PrefixUserSpace + '/Logout',
   GetUser: PrefixUserSpace + '/GetUser',
-  ListProject: PrefixUserSpace + '/GetProjOrgTree',
+  GetProjOrg: PrefixUserSpace + '/GetProjOrg',
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流

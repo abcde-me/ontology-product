@@ -7,19 +7,12 @@ import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
 import './style/theme.scss';
-import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
+import React, { useEffect, Suspense, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ProjectProvider } from './context/ProjectContext';
-import {
-  ConfigProvider,
-  Layout,
-  Spin,
-  Dropdown,
-  Menu
-} from '@arco-design/web-react';
+import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
-import { IconUser } from '@arco-design/web-react/icon';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
