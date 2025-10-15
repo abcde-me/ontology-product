@@ -286,7 +286,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       validator: (value, callback) => {
                         // 1. 判断同组内不能为空
                         if (!value || value.trim() === '') {
-                          callback('请输入属性名称');
+                          callback('请输入展示名称');
                         } else {
                           const trimmedValue = value.toString().trim();
                           // 2. 判断同组内不能有重复内容
@@ -301,7 +301,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           );
 
                           if (hasDuplicate) {
-                            callback('属性名称不能重复');
+                            callback('展示名称不能重复');
                           } else {
                             callback();
                           }
@@ -319,6 +319,35 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       const currentOrderNum = item.order_num;
                       handleFieldChange(index, 'label_name_cn', value);
                     }}
+                    onFocus={(e: any) => {
+                      // 从 entityRelations 中获取最新的值
+                      const currentItem = entityRelations[index];
+                      // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
+                      if (
+                        !currentItem.label_name_cn?.trim() &&
+                        currentItem.label_name_en?.trim()
+                      ) {
+                        // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
+                        const fieldName = `label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`;
+                        // 更新数据状态
+                        handleFieldChange(
+                          index,
+                          'label_name_cn',
+                          currentItem.label_name_en
+                        );
+                        // 更新表单字段
+                        formText.setFieldValue(
+                          fieldName,
+                          currentItem.label_name_en
+                        );
+                        // 使用 setTimeout 确保值更新后再选中
+                        setTimeout(() => {
+                          e.target.select();
+                        }, 0);
+                      } else {
+                        e.target.select();
+                      }
+                    }}
                   />
                 </FormItem>
                 <FormItem
@@ -334,7 +363,22 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         handleFieldChange(index, 'label_colour', value);
                       }}
                     />
-                    <IconDown className="color-icon" />
+                    <IconDown
+                      className="color-icon"
+                      onClick={(e) => {
+                        if (type !== 'detail') {
+                          e.stopPropagation();
+                          const trigger =
+                            e.currentTarget.parentElement?.querySelector(
+                              '.arco-color-picker-preview'
+                            ) as HTMLElement;
+                          trigger?.click();
+                        }
+                      }}
+                      style={{
+                        cursor: type === 'detail' ? 'not-allowed' : 'pointer'
+                      }}
+                    />
                   </div>
                 </FormItem>
                 <FormItem

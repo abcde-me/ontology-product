@@ -149,6 +149,11 @@
     .arco-form-layout-inline {
       margin-right: 8px;
       margin-bottom: 16px;
+
+      &.arco-form-item-error,
+      &.arco-form-item-status-error {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -204,6 +209,11 @@
     .arco-form-layout-inline {
       margin-right: 8px;
       margin-bottom: 16px;
+
+      &.arco-form-item-error,
+      &.arco-form-item-status-error {
+        margin-bottom: 0;
+      }
     }
 
     .arco-checkbox {
@@ -268,6 +278,11 @@
     .arco-form-layout-inline {
       margin-right: 8px;
       margin-bottom: 12px;
+
+      &.arco-form-item-error,
+      &.arco-form-item-status-error {
+        margin-bottom: 0;
+      }
     }
   }
 
