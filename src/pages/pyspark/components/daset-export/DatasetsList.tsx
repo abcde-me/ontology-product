@@ -113,7 +113,7 @@ const DatasetsList: FC = () => {
     {
       title: '导出状态',
       dataIndex: 'status',
-      width: 130,
+      width: 140,
       render: (_, item) => {
         let text = '未知状态';
         let color = '#999999';
