@@ -1,4 +1,10 @@
-import { Dropdown, Menu, Tooltip, Link } from '@arco-design/web-react';
+import {
+  Dropdown,
+  Menu,
+  Tooltip,
+  Link,
+  Cascader
+} from '@arco-design/web-react';
 import React, {
   type CSSProperties,
   useCallback,
@@ -9,12 +15,14 @@ import { Select } from '@arco-design/web-react';
 import { useProject } from '@/context/ProjectContext';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
+import { ProjectIdKey } from '@/utils/const';
+import { setLocalStorage, getLocalStorage } from '@/utils/storage';
 import { usePathChange } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout } from '@/utils/env';
-import { ListProject, ResourcePermissionActions } from '@/api/modules/project';
+import { GetProjOrg, ResourcePermissionActions } from '@/api/modules/project';
 
 // import { getDocContent } from '@/api/datasetsV2';
 
@@ -73,41 +81,61 @@ export default function Header({
   };
 
   useEffect(() => {
-    ListProject({}).then((res) => {
-      const list = res?.data?.result || [];
-      setProjects(list);
-      if (list.length && !projectId) {
-        setProjectId(list[0].id);
+    const list = async () => {
+      try {
+        const { data: result } = await GetProjOrg({});
+        setProjects(result);
+
+        if (
+          result.length &&
+          result[0].projectList &&
+          result[0].projectList.length
+        ) {
+          // 检查当前是否已有有效的项目ID
+          if (projectId.length === 2) {
+            const org = result.find((r: any) => r.id === projectId[0]);
+            if (
+              org &&
+              org.projectList.find((p: any) => p.id === projectId[1])
+            ) {
+              console.log('当前项目ID有效，无需重新设置:', projectId);
+              return;
+            }
+          }
+
+          // 检查本地存储的项目ID
+          const pId = getLocalStorage<string[]>(ProjectIdKey);
+          if (Array.isArray(pId) && pId.length === 2) {
+            const org = result.find((r: any) => r.id === pId[0]);
+            if (org && org.projectList.find((p: any) => p.id === pId[1])) {
+              console.log('使用本地存储的项目ID:', pId);
+              setProjectId(pId);
+              return;
+            }
+          }
+
+          // 设置默认项目ID
+          const defaultPId = [result[0].id, result[0].projectList[0].id];
+          console.log('设置默认项目ID:', defaultPId);
+          setLocalStorage(ProjectIdKey, defaultPId);
+          setProjectId(defaultPId);
+        }
+      } catch (error) {
+        console.error('获取项目列表失败:', error);
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInfo]);
-  const handleProjectChange = (id: string) => {
-    setProjectId(id);
-    ResourcePermissionActions({ projectId: id }).then((res) => {
-      console.log('ResourcePermissionActions', res);
-      // const actions = res?.data?.actions || [];
-      // const perms = actions.map((item) => item.action);
-      // // 更新用户信息中的权限
-      // useUserInfoStore.setState((state) => ({
-      //   userInfo: {
-      //     ...state.userInfo,
-      //     perms
-      //   }
-      // }));
+    };
+    list();
+  }, [setProjectId]);
+  const changeProject = (value: string[]) => {
+    setLocalStorage(ProjectIdKey, value);
+    setProjectId(value);
+    console.log('project changed:', value, projectId);
+    ResourcePermissionActions({
+      projectId: value[1]
+    }).then((res) => {
+      console.log('res', res);
     });
   };
-
-  const mockProjects = [
-    {
-      id: 'proj-17yg792j',
-      name: '项目一'
-    },
-    {
-      id: 'proj-b52i4jkm',
-      name: '项目二'
-    }
-  ];
 
   return (
     <div
@@ -117,26 +145,46 @@ export default function Header({
       )}
       style={style}
     >
-      <a href="/" className="flex items-center">
-        <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
-        <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
-        <div className="text-[16px] leading-[22px] text-white">
-          多模态数据治理平台
+      <div className="flex h-full items-center">
+        <a href="/" className="flex items-center">
+          <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
+          <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
+          <div className="text-[16px] leading-[22px] text-white">
+            多模态数据治理平台
+          </div>
+        </a>
+        <div className="project-selector ml-[24px] flex items-center">
+          <Cascader
+            placeholder="请选择项目"
+            bordered={false}
+            style={{
+              width: 160,
+              backgroundColor: '#FFFFFF33',
+              borderRadius: 4
+            }}
+            dropdownMenuClassName="project-selector-dropdown"
+            fieldNames={{
+              label: 'title',
+              value: 'id',
+              children: 'projectList'
+            }}
+            options={projects}
+            showSearch
+            filterOption={(input, node) => {
+              return (
+                node.value.toLowerCase().indexOf(input.toLowerCase()) > -1 ||
+                node.label.toLowerCase().indexOf(input.toLowerCase()) > -1
+              );
+            }}
+            value={projectId}
+            onChange={(value) => {
+              changeProject(value as string[]);
+            }}
+          ></Cascader>
         </div>
-      </a>
+      </div>
+
       <div className="flex items-center gap-x-[16px]">
-        <Select
-          style={{ width: 180, marginRight: 16 }}
-          value={projectId}
-          onChange={handleProjectChange}
-          placeholder="选择项目"
-        >
-          {mockProjects.map((item) => (
-            <Select.Option key={item.id} value={item.id}>
-              {item.name}
-            </Select.Option>
-          ))}
-        </Select>
         <Tooltip content="下载帮助文档">
           <Link
             href="#"

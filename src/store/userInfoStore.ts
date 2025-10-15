@@ -66,7 +66,7 @@ export const useUserInfoStore = create<UserInfoStore>()(
         try {
           set({ isLoading: true, error: null });
 
-          const response = await GetUser({});
+          const response = await GetUser();
 
           if (isRequestSuccess(response)) {
             set({

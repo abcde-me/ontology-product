@@ -8,6 +8,6 @@ export function Logout() {
   return UAPI.RES.Logout({}).post().inRegion().do();
 }
 // 获取用户信息
-export function GetUser(params) {
-  return UAPI.RES.GetUser({}).post(params).inRegion().do();
+export function GetUser() {
+  return UAPI.RES.GetUser({}).post().inRegion().do();
 }

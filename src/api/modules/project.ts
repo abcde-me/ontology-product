@@ -1,8 +1,8 @@
 import UAPI from '@/api';
 
 // 列出项目
-export function ListProject(params) {
-  return UAPI.RES.ListProject({}).post(params).inRegion().do();
+export function GetProjOrg(params) {
+  return UAPI.RES.GetProjOrg({}).post(params).inRegion().do();
 }
 
 // 项目下的资源权限
