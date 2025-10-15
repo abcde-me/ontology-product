@@ -11,11 +11,7 @@ import {
   IconCloseCircleFill,
   IconDelete,
   IconDownload,
-  IconDriveFile,
-  IconEdit,
-  IconLeft,
-  IconLoading,
-  IconMore
+  IconLoading
 } from '@arco-design/web-react/icon';
 import DocDisplay from '../docDisplay/index';
 import DemoForm from '../../../components/From/index';
@@ -27,12 +23,9 @@ import {
   Input,
   Message,
   Modal,
-  Pagination,
   Radio,
-  Spin,
   Switch,
-  Tooltip,
-  Upload
+  Tooltip
 } from '@arco-design/web-react';
 import { get } from 'lodash';
 import { useLocation } from 'react-router-dom';
@@ -41,20 +34,16 @@ import {
   deletedocEditList,
   deletedocsublevel,
   editDocsublevel,
-  getDocContent,
   getdocDetail,
   getdocIndex,
   getdocSegmentation,
   getdocumentList,
-  patchknowledgeBasePolicy,
-  postdocEditList,
   postdocumentList,
   putdocSwitch,
   putdocSwitchSegmentation,
   putknowledgeBaseList
 } from '@/api/datasetsV2';
 import { GetknowGetPolicyElement, GetknowGetPolicy } from '@/api/tabElements';
-import Iconpdf from '@/assets/file/pdf.svg';
 import brother from '../brother';
 import { PrefixV2 } from '@/api/endpoints';
 import { getToken } from '@/utils/request';
@@ -62,10 +51,8 @@ import DOCV2 from '@/assets/file/DOCV2.svg';
 import PDFV2 from '@/assets/file/PDFV2.svg';
 import TXTV2 from '@/assets/file/TXTV2.svg';
 import XLSXV2 from '@/assets/file/XLSXV2.svg';
-import EditPng from '@/assets/file/edit.png';
 import FileTree from '../HierarchyTree/index';
 import CSVV2 from '@/assets/file/CSVV2.svg';
-import MarkdownBase from '@/components/markdownBase';
 import TextTruncate from '../TextTruncate';
 import TagContent from '../tagContent';
 import TagTree from '@/pages/dataMarket/components/components/TagTree';
@@ -73,9 +60,6 @@ import useTagEment from '../../../../store/useTagEment';
 
 function PageContentTrue(props) {
   const messType = useRef(false);
-  const uploadUrl = `${PrefixV2}/files/upload`;
-  const location = useLocation();
-  const RadioGroup = Radio.Group;
   const [contentloading, setcontentloading] = useState(false);
   const InputSearch = Input.Search;
   const childRef: any = useRef();
@@ -84,7 +68,6 @@ function PageContentTrue(props) {
   const tablePageRef: any = useRef();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [checkedManage, setCheckedManage] = useState(false);
-  const [checkedChild, setcheckedChild] = useState(true);
   const [editManageVisible, seteditManageVisible] = useState(false); //切片配置
   const [editChildVisible, seteditChildVisible] = useState(false); //切片编辑
   const [addfileVisible, setaddfileVisible] = useState(false);
@@ -96,13 +79,12 @@ function PageContentTrue(props) {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [segmentationlist, setsegmentationlist] = useState<any>([]);
   const { detailsdata, onInit } = props;
-  const { id, process_rule, app_count } = detailsdata || {};
+  const { id, app_count } = detailsdata || {};
   const filedetail = useRef<any>();
   const [text, setText] = useState('');
   const [contentTagList, setContentTagList] = useState([]);
   const [typeSublevel, settypeSublevel] = useState<any>({});
   const [valueSublevel, setvalueSublevel] = useState('');
-  const [valueSublevelType, setvalueSublevelType] = useState('');
   const [documentid, setdocumentid] = useState('');
   const [segmentationlistId, setsegmentationlistId] = useState('');
   const [sonTreeData1, setSonTreeData1] = useState<any>({});
@@ -117,15 +99,12 @@ function PageContentTrue(props) {
   });
   const paginationRef = useRef(pagination);
   const [positionbox, setpositionbox] = useState({});
-  const [divWH, setdivWH] = useState({});
   const [DocDisplayType, setDocDisplayType] = useState(true);
   const [typepage, settypepage] = useState(true);
   const [textTagList, setTextTagList] = useState([]);
   const [switchType, setSwitchType] = useState(false);
   const [switchList, setSwitchList] = useState([]);
   const {
-    treeTagList,
-    PolicyVisiable,
     onSwitchTag,
     onSwitchTagVisible,
     onHandTreeTag,
@@ -139,7 +118,6 @@ function PageContentTrue(props) {
   });
   useEffect(() => {
     SearchSublevel(valueSublevel);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valueSublevel]);
 
   useEffect(() => {
@@ -150,12 +128,10 @@ function PageContentTrue(props) {
     brother.on('setSonTreeData', (item) => {
       setSonTreeData1(item.catalog_content);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -182,7 +158,6 @@ function PageContentTrue(props) {
       }
     };
     performAsyncOperations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileList]);
 
   useEffect(() => {
@@ -193,7 +168,6 @@ function PageContentTrue(props) {
     }, 500);
 
     return () => clearTimeout(timer); // 清理定时器
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   useEffect(() => {
@@ -226,7 +200,6 @@ function PageContentTrue(props) {
       };
       apirequst();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFileId]);
   useEffect(() => {
     if (id) {
@@ -239,8 +212,6 @@ function PageContentTrue(props) {
         clearInterval(intervalId);
       };
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // 空数组意味着只在组件挂载时执行一次
   useEffect(() => {
     paginationRef.current = pagination;
@@ -253,8 +224,6 @@ function PageContentTrue(props) {
         clearInterval(intervalId);
       };
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFileId, pagination]); // 空数组意味着只在组件挂载时执行一次
 
   const init = async (tp?) => {
@@ -559,7 +528,6 @@ function PageContentTrue(props) {
   };
   const submitEditManage = () => {
     childRef2.current.submitEditFromOnM();
-    // seteditManageVisible(false);
   };
   const submitaddfile = () => {
     childRef.current.submitaddfile();
@@ -732,16 +700,12 @@ function PageContentTrue(props) {
       ...prevPagination,
       page: 1,
       content: valueSublevel
-      // title:valueSublevelType == 'title'?valueSublevel:'',
-      // content: valueSublevelType !== 'title'?valueSublevel:''
     }));
 
     funcdocSegmentation({
       ...pagination,
       page: 1,
       content: valueSublevel
-      // title:valueSublevelType == 'title'?valueSublevel:'',
-      // content: valueSublevelType !== 'title'?valueSublevel:''
     });
   };
   const handlePaginationChange = (page, pageSize) => {
@@ -778,10 +742,7 @@ function PageContentTrue(props) {
   };
   const funcSegmentationTree = (e) => {
     console.log(e, 'e');
-
-    // setvalueSublevelType(e.type)
     setsegmentationlistId(e.id);
-    // setvalueSublevel(e.title);
     setpositionbox(e.position_bbox);
   };
   const funDeleteDoc = (e, file) => {
@@ -805,24 +766,19 @@ function PageContentTrue(props) {
   const FunSubmitAddfile = async (filevalue) => {
     try {
       const {
-        name,
-        description,
         parseTacticsV,
-        selectedOptionV,
         sliceOverlapLengthV,
         sublevelTacticsV,
         sliceLengthV,
         spreadsheet_schema,
         uploadfileV,
         logotypeV,
-        uploadiconV,
         expressionV,
         regularPositionV,
         tagText,
         docTagText
       } = filevalue;
       const param = {
-        // original_document_id: "document-xxx",
         data_source: {
           type: 'upload_file', // 固定写死，表明通过文件上传
           info_list: {
@@ -976,7 +932,6 @@ function PageContentTrue(props) {
                   }}
                 >
                   <div className="flex items-center py-2">
-                    {/* <div>{file.name.slice(-3) == 'pdf'?}</div> */}
                     <div className="flex h-[16px] w-[16px] items-center justify-center">
                       {item.name.slice(-3) == 'pdf' ? (
                         <PDFV2 />
@@ -991,13 +946,6 @@ function PageContentTrue(props) {
                       )}
                     </div>
                     <div className=" h-[20px] w-[100px] overflow-hidden text-ellipsis whitespace-nowrap px-2 leading-[20px]">
-                      {/* <Tooltip
-                        position="tr"
-                        trigger="hover"
-                        content={item.name}
-                      >
-                        {item.name}
-                      </Tooltip> */}
                       {item.name}
                     </div>
 

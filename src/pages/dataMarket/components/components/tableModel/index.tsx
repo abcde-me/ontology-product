@@ -185,13 +185,6 @@ const TableModel = ({ user_columns, editsliceSubmit }, ref) => {
       >
         <Table
           className={'classTableModelTable'}
-          //   pagination={{
-          //     current: pagination.page,
-          //     pageSize: pagination.limit,
-          //     total: pagination.total
-          //   }}
-          // onChange={onChangeTable}
-          // noDataElement={ <NoDataEmpty />}
           columns={columnsdata}
           data={listData}
           scroll={{ x: true }}

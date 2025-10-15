@@ -1,10 +1,4 @@
-import {
-  TreeSelect,
-  Checkbox,
-  Divider,
-  Input,
-  Button
-} from '@arco-design/web-react';
+import { TreeSelect, Divider, Button } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import useTagEment from '../../../store/useTagEment';
@@ -14,7 +8,6 @@ const TagTree = (props) => {
   const { value, onChange } = props;
   const {
     treeTagList,
-    toTreeTagList,
     docTagLiist,
     tagListArr,
     onTagVisible,
@@ -38,7 +31,6 @@ const TagTree = (props) => {
       const processedValue = processSelectedValues(ids);
       onChange(processedValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [treeTagList]);
 
   const onTreeSelect = (newValue) => {

@@ -1,11 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import TextTruncate from '../TextTruncate';
-import { Empty, Tooltip, Tree } from '@arco-design/web-react';
-import {
-  IconArrowLeft,
-  IconCaretDown,
-  IconCaretRight
-} from '@arco-design/web-react/icon';
+import React, { useEffect, useState } from 'react';
+import { Empty, Tree } from '@arco-design/web-react';
 import './index.less';
 import brother from '../brother';
 import { apiHierarchicalCatalog } from '@/api/datasetsV2';
@@ -13,8 +7,8 @@ import { apiHierarchicalCatalog } from '@/api/datasetsV2';
 interface FileTreeProps {
   documentid?: string;
   datasetid?: string;
-  segmentationlistId;
   funcSegmentationTree;
+  segmentationlistId;
 }
 
 const FileTree: React.FC<FileTreeProps> = ({
@@ -51,7 +45,6 @@ const FileTree: React.FC<FileTreeProps> = ({
         clearInterval(intervalId);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentid, datasetid]);
 
   const initTree = async () => {
@@ -138,16 +131,6 @@ const FileTree: React.FC<FileTreeProps> = ({
       <div className=" font-[PingFangSC-Medium] text-base font-medium leading-6 text-[#151b26]">
         目录
       </div>
-      {/* <div
-        className="mt-[8px] cursor-pointer text-sm font-normal leading-[36px] text-[#1E293B]"
-        onClick={oncTitle}
-      >
-        <TextTruncate
-          text={itemData.title}
-          clientHeight={1}
-          typeTooltip={true}
-        ></TextTruncate>
-      </div> */}
       <div className=" overflow-y-auto">
         {newTree.length > 0 ? (
           <Tree
@@ -184,7 +167,6 @@ const FileTree: React.FC<FileTreeProps> = ({
                     fontSize: '12px'
                   }}
                 >
-                  {/* <Tooltip content={titleStr} position="top"> */}
                   <span
                     style={{
                       maxWidth: `${dynamicMaxWidth - 20}px`,
@@ -200,7 +182,6 @@ const FileTree: React.FC<FileTreeProps> = ({
                   >
                     {titleStr}
                   </span>
-                  {/* </Tooltip> */}
                 </div>
               );
             }}

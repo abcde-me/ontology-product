@@ -1,8 +1,6 @@
 import {
   TreeSelect,
-  Checkbox,
   Divider,
-  Input,
   Button,
   Switch,
   Form,
@@ -29,8 +27,6 @@ const SwitchTag = (props) => {
     onHandSwitchTreeTag
   } = useTagEment();
   const [switchValue, setSwitchValue] = useState(false);
-  //   const [tagTree, setTagTree] = useState<any>();
-  //   const [loading, setLoading] = useState(false);
 
   // 初始化：如果表单未提供值，则写入默认值
   useEffect(() => {

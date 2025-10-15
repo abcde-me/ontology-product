@@ -1,15 +1,8 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './index.less';
-import { IconDriveFile, IconLeft, IconMore } from '@arco-design/web-react/icon';
+import { IconDriveFile } from '@arco-design/web-react/icon';
 import {
   Button,
-  Empty,
   Input,
   Message,
   Modal,
@@ -46,7 +39,6 @@ function PageContentFalse(props) {
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(0); // 默认选中第一行
   const [loading1, setLoading1] = useState(false);
   const [loading2, setLoading2] = useState(false);
-  const [loading3, setLoading3] = useState(false);
   const [editChildVisible, seteditChildVisible] = useState(false);
   const [value, setValue] = useState('');
   const [pagination, setPagination] = useState<any>({
@@ -73,7 +65,6 @@ function PageContentFalse(props) {
   };
   useEffect(() => {
     init({ ...pagination });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
   useEffect(() => {
     if (recordList.length > 0) {
@@ -165,22 +156,6 @@ function PageContentFalse(props) {
         page: 1
       });
       setLoading1(false);
-      // const url = ` ${PrefixV2}/datasets/${id}/hit-testing`;
-      // axios
-      //   .post(url, params, {
-      //     headers: { ...getToken() },
-      //     timeout: 120000
-      //   })
-      //   .then(async (res) => {
-      //     init({
-      //       ...pagination,
-      //       page: 1
-      //     });
-      //     setLoading1(false);
-      //   })
-      //   .catch(() => {
-      //     setLoading1(false);
-      //   });
     } catch {
       setLoading1(false);
     }
@@ -316,17 +291,6 @@ function PageContentFalse(props) {
         </div>
       </div>
       <div className="rightContent">
-        {/* <div className="rightContent-SQL">
-          <div className="SQL-title">SQL查询</div>
-          <div className="SQL-content">
-            <div className="content-header">SQL</div>
-            <div className="content-content"></div>
-          </div>
-          <div className="SQL-content">
-            <div className="content-header">结果</div>
-            <div className="content-content"></div>
-          </div>
-        </div> */}
         <div className="rightContent-hit">
           <div className="rightContent-header">
             <div className="header-left">
@@ -347,7 +311,7 @@ function PageContentFalse(props) {
           <div className="rightContent-scoll">
             {/* <Empty /> */}
             {segmentationlist.length > 0 ? (
-              segmentationlist.map((e, index) => {
+              segmentationlist.map((e: any, index) => {
                 return (
                   <div key={index} className="segmentation-box">
                     <div className="segmentation-header">

@@ -15,10 +15,8 @@ import {
   IconDelete,
   IconEdit
 } from '@arco-design/web-react/icon';
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TextTruncate from '../TextTruncate';
-import { debounce } from 'lodash';
-// import './index.less';
 import brother from '../brother';
 import { apiHierarchicalCatalogEdit } from '@/api/datasetsV2';
 import TagContent from '../tagContent';
@@ -74,7 +72,6 @@ const FileSublevel: React.FC<FileSublevel> = ({
         messType.current = false;
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -85,7 +82,6 @@ const FileSublevel: React.FC<FileSublevel> = ({
       );
       scrollToTop(index);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentationlistId]);
 
   // 用来让某个 div 滑动到顶部的函数
@@ -182,21 +178,6 @@ const FileSublevel: React.FC<FileSublevel> = ({
                           clientHeight={2}
                         ></TextTruncate>
                       )}
-                      {/* (
-                        e.tags.map((tag, tagIndex) => {
-                          return (
-                            <div key={tagIndex}>
-                              {tag.values.map((value, valueIndex) => {
-                                return (
-                                  <TextTruncate
-                                    key={valueIndex}
-                                    text={value}
-                                    clientHeight={2}
-                                  ></TextTruncate>
-                                );
-                              })}
-                            </div>
-                          ); */}
                     </div>
                   ) : null
                 ) : null}

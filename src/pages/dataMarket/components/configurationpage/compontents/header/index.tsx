@@ -1,11 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './index.less';
-import {
-  IconDriveFile,
-  IconEdit,
-  IconLeft,
-  IconMore
-} from '@arco-design/web-react/icon';
+import { IconEdit, IconLeft } from '@arco-design/web-react/icon';
 import { Radio, Tooltip } from '@arco-design/web-react';
 import BaseListIcon from '@/assets/baselist.png';
 import { useHistory } from 'react-router-dom';

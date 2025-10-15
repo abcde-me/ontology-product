@@ -1,12 +1,9 @@
 import {
   Button,
-  Empty,
   Input,
-  Link,
   Message,
   Modal,
   Radio,
-  Space,
   Switch,
   TableColumnProps,
   Tooltip
@@ -36,11 +33,9 @@ const TabelPage = (props, ref) => {
   const {
     segmentationlist,
     segment_count,
-    docOperation,
     tabelPageradioFun,
     pagination,
     handlePaginationChange,
-    onInit,
     tabelPageonclick,
     filedetail,
     detailsdata,
@@ -51,8 +46,6 @@ const TabelPage = (props, ref) => {
   const InputSearch = Input.Search;
   const tabelModelref: any = useRef();
   const structureModelref: any = useRef();
-  const [loading1, setloading1] = useState(false);
-  const [apidata, setapidata] = useState({});
   const [optionlist, setoptionlist] = useState([]);
   const [tabelheader, settabelheader] = useState<TableColumnProps[]>([]);
   const [user_columns, setuser_columns] = useState([]);
@@ -90,18 +83,14 @@ const TabelPage = (props, ref) => {
         if (listData.length > 0) {
           FuncTabelHeader(listData); //tabeltitle
         }
-        // console.log(listData, 'listData');
-
         setoptionlist(listData);
       } else {
         setoptionlist([]);
       }
     };
     FuncTabel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentationlist]);
   const FuncTabelHeader = (value) => {
-    setloading1(true);
     const element = document.querySelector('.ClassTabelPage_content');
     const rect = element?.getBoundingClientRect();
     const Page_content_Width = rect?.width || 0;
@@ -164,10 +153,6 @@ const TabelPage = (props, ref) => {
       })
       .filter((e) => e !== null);
     const columns2 = [
-      // {
-      //   title: '',
-      //   dataIndex: '1'
-      // },
       {
         dataIndex: 'enabled',
         title: '启用',
@@ -195,15 +180,10 @@ const TabelPage = (props, ref) => {
         render: (_, record, index) => {
           const perms = record.list_api_user_perms?.perms || [];
           const config = [] as any;
-
-          // if (perms.includes('dataset:can_get')) {
           config.push({
             label: '编辑',
             onClick: () => editslice(record, 'edit', index)
           });
-          // }
-
-          // if (perms.includes('dataset:can_delete')) {
           config.push({
             label: '删除',
             onClick: () => doDelete(record)
@@ -222,12 +202,6 @@ const TabelPage = (props, ref) => {
                 删除
               </Button>
             </div>
-            // <OperationColumn
-            //   row={record}
-            //   index={index}
-            //   config={config}
-            //   extendFont="更多"
-            // />
           );
         }
       }
@@ -236,7 +210,6 @@ const TabelPage = (props, ref) => {
 
     setuser_columns(columns1);
     settabelheader(columnsdata);
-    setloading1(false);
   };
   useImperativeHandle(ref, () => ({
     editTableStructure: () => {
@@ -372,7 +345,6 @@ const TabelPage = (props, ref) => {
       <div className="ClassTabelPage_content">
         {optionlist.length > 0 ? (
           <Table
-            // loading={loading1}
             pagination={{
               current: pagination.page,
               pageSize: pagination.limit,

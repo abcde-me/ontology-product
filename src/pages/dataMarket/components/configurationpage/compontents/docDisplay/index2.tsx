@@ -32,7 +32,7 @@ const PdfViewer = ({
         headers: {
           ...getToken(),
           Range: `bytes=${currentStart}-${currentEnd}`
-        },
+        } as any,
         responseType: 'arraybuffer'
       });
 
@@ -81,12 +81,10 @@ const PdfViewer = ({
     if (documentid) {
       loadPdf();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentid]);
 
   useEffect(() => {
     renderPdf();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdfData, pageNumber]);
 
   return (
@@ -106,7 +104,7 @@ const PdfViewer = ({
         <button
           onClick={() =>
             setPageNumber(
-              pageNumber < (numPages || 1) ? pageNumber + 1 : numPages
+              pageNumber < (numPages || 1) ? pageNumber + 1 : numPages!
             )
           }
         >

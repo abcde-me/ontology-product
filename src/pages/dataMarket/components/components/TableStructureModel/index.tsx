@@ -1,6 +1,5 @@
 import React, {
   forwardRef,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState
@@ -8,7 +7,6 @@ import React, {
 import './index.less';
 import { Message, Modal } from '@arco-design/web-react';
 import FromTable from '../FromTable';
-import { postdocumentList } from '@/api/datasetsV2';
 
 const TableStructureModel = (
   { filedetail, detailsdata, funChildStructure },

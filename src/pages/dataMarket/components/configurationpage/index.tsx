@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import './index.less';
-import { IconDriveFile, IconLeft, IconMore } from '@arco-design/web-react/icon';
 import { Radio } from '@arco-design/web-react';
 import Header from './compontents/header/index';
 import PageContentTrue from './compontents/fileSegmentation/index';
@@ -25,8 +24,6 @@ function ConfigurationPage(props) {
   const init = async (id) => {
     if (!id) return;
     try {
-      // const hitTestdata = await postHitTest(id);
-
       const documentList = await getknowledgeBaseDetails(id); //知识库详情
 
       setdetailsdata(documentList.data);

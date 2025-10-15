@@ -1,16 +1,10 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef
-} from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import './index.less';
 import { useHistory } from 'react-router-dom';
 import { debounce } from 'lodash-es';
 import {
   Form,
   Input,
-  Button,
   Select,
   Checkbox,
   Radio,
@@ -26,24 +20,17 @@ import Ridioright from '@/assets/ridioright.svg';
 import Check from '@/assets/check.svg';
 import { useLocation } from 'react-router-dom';
 import {
-  IconCheck,
-  IconCheckCircle,
   IconCheckCircleFill,
   IconCloseCircleFill,
   IconDelete,
   IconFile,
   IconFilePdf,
   IconImage,
-  IconQuestionCircle,
-  IconUpload
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { useState } from 'react';
 import { get } from 'lodash';
-import {
-  getdatasetstree,
-  getknowledgeBaseRootTree,
-  getknowledgeBaseRootTreeChild
-} from '@/api/datasetsV2';
+import { getdatasetstree } from '@/api/datasetsV2';
 import { PrefixV2 } from '@/api/endpoints';
 import { getToken } from '@/utils/request';
 import BaseListIcon from '@/assets/baselist.png';
@@ -102,7 +89,6 @@ function DemoForm(props, ref) {
 
   const RadioGroup = Radio.Group;
   const { Option } = Select;
-  const location = useLocation();
   const [optionsCascader, setoptionsCascader] = useState([]); //知识库目录
   const [upfiletype, setupfiletype] = useState('text');
   const { name = '', description = '', process_rule = {} } = detailsdata || {};
@@ -112,7 +98,6 @@ function DemoForm(props, ref) {
   const [formvalues, setformvalues] = useState<any>({});
   const [staturules1, setstaturules1] = useState<any>('');
   const [staturules2, setstaturules2] = useState<any>('');
-  const [staturules3, setstaturules3] = useState<any>('');
   const [fileList, setFileList] = useState<any>([]);
   const {
     switchTag,
@@ -120,19 +105,12 @@ function DemoForm(props, ref) {
     onHandTreeTag,
     onSwitchTagVisible,
     onSwitchTag,
-    onHandSwitchTreeTag,
-    treeTagList
+    onHandSwitchTreeTag
   } = useTagEment();
 
   const upfilehandleChange = (e) => {
     setFileList([]);
     setupfiletype(e);
-    // if (e == 'tabel') {
-    //   form.setFieldsValue({
-    //     parseTacticsV: ['text_ocr'],
-    //     sublevelTacticsV: 'split_by_row'
-    //   });
-    // }
   };
   // 初始状态计算函数
   const calculateInitialState = () => {
@@ -197,7 +175,6 @@ function DemoForm(props, ref) {
 
   useEffect(() => {
     setinitFromValue(calculateInitialState());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailsdata, typemodel]);
 
   // 当 initFromValue 更新时同步到表单
@@ -205,7 +182,6 @@ function DemoForm(props, ref) {
     if (form) {
       form.setFieldsValue(initFromValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initFromValue]);
   const traverseAndTransform = (node) => {
     // 检查当前节点是否包含 'childs' 属性
@@ -232,7 +208,6 @@ function DemoForm(props, ref) {
       } catch {}
     };
     initialize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const CheckboxOne = [
     {
@@ -262,11 +237,6 @@ function DemoForm(props, ref) {
       title: '通用格式文本常见切分方法',
       placeholder: '经评测可在多数⽂档上获得较佳的检索效果。'
     },
-    // {
-    //   value: 'custom',
-    //   name: '自定义切片',
-    //   placeholder: '按标识符、切片长度等对文档切分'
-    // }
     {
       value: 'split_by_chunk',
       name: '按常⻅标识符切分',
@@ -552,7 +522,6 @@ function DemoForm(props, ref) {
   const renderUploadList = (filesList: any, props: any) => (
     <div className="mt-5 flex flex-col gap-2">
       {filesList.map((e: any, index: any) => {
-        // console.log(filesList, 'filesList')
         const code = e?.response?.code || null;
         const bgColorClass =
           e.status === 'uploading'
@@ -845,10 +814,6 @@ function DemoForm(props, ref) {
                                   >
                                     {e.title}
                                   </Tooltip>
-                                  {/* <TextTruncate
-                                    text={e.title}
-                                    clientHeight={2}
-                                  /> */}
                                 </div>
                               </div>
                             </Space>
@@ -891,10 +856,6 @@ function DemoForm(props, ref) {
                                   >
                                     {e.title}
                                   </Tooltip>
-                                  {/* <TextTruncate
-                                    text={e.title}
-                                    clientHeight={2}
-                                  /> */}
                                 </div>
                               </div>
                             </Space>

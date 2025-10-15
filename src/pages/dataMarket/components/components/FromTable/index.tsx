@@ -11,10 +11,6 @@ import {
   Table,
   Tooltip
 } from '@arco-design/web-react';
-import {
-  IconInfoCircle,
-  IconQuestionCircle
-} from '@arco-design/web-react/icon';
 import React, {
   forwardRef,
   useEffect,
@@ -22,7 +18,6 @@ import React, {
   useState
 } from 'react';
 import './index.less';
-import { render } from '@headlessui/react/dist/utils/render';
 import {
   apiTableConfiguration,
   apiTableHeaderConfiguration
@@ -146,7 +141,6 @@ const FromTable = (props, ref) => {
       };
       inittabel();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [optionslist]);
   useEffect(() => {
     if (FimsetFieldsValue) {
@@ -178,25 +172,13 @@ const FromTable = (props, ref) => {
       };
       onDataChange(columns);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [optionslist, tabeldata]);
-  // useEffect(() => {
-  //   if (optionslist.valueinput1 >= optionslist.valueinput2) {
-  //     setoptionslist({
-  //       ...optionslist,
-  //       valueinput2: optionslist.valueinput1 + 1
-  //     });
-  //   }
-  // }, [optionslist, optionslist.valueinput1]);
 
   const columns = [
     {
       title: '列',
       dataIndex: 'key',
       width: 50
-      // render(i, app) {
-      //   return i
-      // }
     },
     {
       title: (

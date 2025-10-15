@@ -39,7 +39,7 @@ const DocumentCloud = (props) => {
           .get(url, {
             signal: abortController.signal,
             responseType: 'arraybuffer',
-            headers: { ...getToken() }
+            headers: { ...getToken() } as any
           })
           .then(async (res) => {
             // 转换pdf
@@ -74,7 +74,6 @@ const DocumentCloud = (props) => {
       loadDocContent();
     }
     return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentid]);
   //点击高亮
   useEffect(() => {
@@ -83,7 +82,6 @@ const DocumentCloud = (props) => {
 
       goToPage(positionbox);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [positionbox]);
   const goToPage = (value) => {
     //清空所有
@@ -112,7 +110,7 @@ const DocumentCloud = (props) => {
       const [x1, y1, x2, y2] = newObj[key];
       const width = x2 - x1;
       const height = y2 - y1;
-      const container = containerRef.current;
+      const container = containerRef.current!;
       const targetOffset = targetCanvaslistnum.offsetTop - container.offsetTop;
       container.scrollTo({ top: targetOffset, behavior: 'smooth' });
 
@@ -170,7 +168,6 @@ const DocumentCloud = (props) => {
       busyPageSet.delete(pageNum); // 解除标记当前页面的渲染状态
       // setloadingfile(false);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scale]
   );
   useEffect(() => {
@@ -197,8 +194,6 @@ const DocumentCloud = (props) => {
         currentPage = totalPages + 1; // 结束时更新 currentPage，防止继续渲染
       };
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPages, Pages, pdfDocRef.current]);
 
   return (
