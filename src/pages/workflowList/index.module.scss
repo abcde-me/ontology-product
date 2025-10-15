@@ -7,11 +7,11 @@
   border-radius: 10px;
   min-height: calc(100% - 30px);
 
-  .arco-table-tr > th {
+  :global(.arco-table-tr) > th {
     background-color: rgb(245, 249, 255) !important;
   }
 
-  .arco-pagination-total-text {
+  :global(.arco-pagination-total-text) {
     line-height: 32px;
   }
 
