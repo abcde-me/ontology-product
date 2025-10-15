@@ -251,27 +251,62 @@ const Classify = (props: ClassifyComponentProps) => {
                             // 只修改当前属性组（通过index定位），不影响其他组
                             const currentGroup = newTextRelations[index];
 
-                            // 为当前属性组添加新选项
+                            // 检查当前属性组中是否有input_type为2的属性
+                            const hasInputType2 =
+                              currentGroup.file_label_attribute?.some(
+                                (attr) => attr.input_type === 2
+                              );
+                            // 创建新属性
+                            const newAttribute = {
+                              attribute_id: uuid(),
+                              order_num: 0, // 后面统一重新计算order_num
+                              attribute_name_cn: '',
+                              attribute_name_en: '',
+                              input_type: 1
+                            };
+
+                            let updatedAttributes: any = [];
+                            const existingAttributes =
+                              currentGroup.file_label_attribute || [];
+
+                            if (hasInputType2) {
+                              // 如果有input_type为2的属性，新属性插入到倒数第二个位置
+                              // 先找到最后一个input_type为2的属性的位置
+                              const lastInputType2Index = existingAttributes
+                                .map((attr, idx) => ({ idx, attr }))
+                                .filter((item) => item.attr.input_type === 2)
+                                .map((item) => item.idx)
+                                .pop();
+
+                              // 在最后一个input_type为2的属性前面（倒数第二个位置）插入新属性
+                              updatedAttributes = [
+                                ...existingAttributes.slice(
+                                  0,
+                                  lastInputType2Index
+                                ),
+                                newAttribute,
+                                ...existingAttributes.slice(lastInputType2Index)
+                              ];
+                            } else {
+                              // 如果没有input_type为2的属性，新属性插入到最后一个位置
+                              updatedAttributes = [
+                                ...existingAttributes,
+                                newAttribute
+                              ];
+                            }
+
+                            // 重新计算所有属性的order_num
+                            updatedAttributes = updatedAttributes.map(
+                              (attr, idx) => ({
+                                ...attr,
+                                order_num: idx + 1
+                              })
+                            );
+
+                            // 更新属性组
                             newTextRelations[index] = {
                               ...currentGroup,
-                              file_label_attribute: [
-                                // 新属性插入到数组开头
-                                {
-                                  attribute_id: uuid(),
-                                  // 保持排序值从1开始
-                                  order_num: 1,
-                                  attribute_name_cn: '',
-                                  attribute_name_en: '',
-                                  input_type: 1
-                                },
-                                // 原有属性排序值+1
-                                ...(
-                                  currentGroup.file_label_attribute || []
-                                ).map((attr) => ({
-                                  ...attr,
-                                  order_num: attr.order_num + 1
-                                }))
-                              ]
+                              file_label_attribute: updatedAttributes
                             };
 
                             // 更新状态
@@ -328,10 +363,29 @@ const Classify = (props: ClassifyComponentProps) => {
                               attribute_id: uuid(),
                               order_num:
                                 newData[index].file_label_attribute.length + 1,
-                              attribute_name_cn: '标注时的输入内容',
-                              attribute_name_en: '其他',
+                              attribute_name_cn: '其他',
+                              attribute_name_en: '标注时的输入内容',
                               input_type: 2
                             });
+                            const lastIndex =
+                              newData[index].file_label_attribute.length - 1;
+                            const newAttribute =
+                              newData[index].file_label_attribute[lastIndex];
+                            if (newAttribute.input_type === 2) {
+                              console.log('top', newAttribute);
+                              const attributeId =
+                                type === 'detail'
+                                  ? newAttribute.order_num
+                                  : newAttribute.attribute_id;
+                              formClassify?.setFieldValue(
+                                `attribute_name_en_${attributeId}`,
+                                '标注时的输入内容'
+                              );
+                              formClassify?.setFieldValue(
+                                `attribute_name_cn_${attributeId}`,
+                                '其他'
+                              );
+                            }
                             setTextRelations(newData);
                           } else {
                             // 取消选中的时候删除增加的内容
@@ -401,7 +455,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           }
                         >
                           <Input
-                            style={{ width: 290 }}
+                            style={{ width: 290, backgroundColor: '#fff' }}
                             placeholder="用于存储标注结果"
                             value={attr.attribute_name_en}
                             onChange={(value) => {
@@ -439,7 +493,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               validator: (value, callback) => {
                                 // 检查内容是否为空或只包含空格
                                 if (!value || value.trim() === '') {
-                                  callback('请输入选项名称');
+                                  callback('请输入展示名称');
                                 } else {
                                   // 排除当前项，检查同组其他项是否有相同的选项名称
                                   const trimmedValue = value.trim();
@@ -456,7 +510,7 @@ const Classify = (props: ClassifyComponentProps) => {
                                     );
 
                                   if (hasDuplicate) {
-                                    callback('选项名称不能重复');
+                                    callback('展示名称不能重复');
                                   } else {
                                     callback();
                                   }
@@ -466,7 +520,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                         >
                           <Input
-                            style={{ width: 268 }}
+                            style={{ width: 268, backgroundColor: '#fff' }}
                             placeholder="展示在标注页面的名称"
                             value={attr.attribute_name_cn}
                             onChange={(value) => {
@@ -498,42 +552,46 @@ const Classify = (props: ClassifyComponentProps) => {
                     ))}
                   </div>
                 )}
-              <div className="add-btn">
-                <Button
-                  disabled={type === 'detail'}
-                  onClick={() => {
-                    // 在按钮的位置添加新数据，不在最后一行添加
-                    // 修复：在当前位置插入新数据而非添加到数组末尾
-                    const newItem = {
-                      attribute_id: uuid(),
-                      order_num: 1,
-                      attribute_group_name: '', //属性组名称
-                      attribute_group_class: 1, //1单选/2多选/3输入框
-                      attribute_group_type: 2, //1必选/2非必选
-                      file_label_attribute: []
-                    };
-                    // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
-                    const newTextRelations = [...textRelations];
-                    newTextRelations.splice(
-                      textRelations?.length || 0,
-                      0,
-                      newItem
-                    );
-                    // 更新排序值
-                    newTextRelations.forEach((item, i) => {
-                      item.order_num = i + 1;
-                    });
-                    setTextRelations(newTextRelations);
-                  }}
-                >
-                  <IconPlus
-                    className={`${type === 'detail' ? 'disabled-icon' : ''}`}
-                  />
-                  添加属性
-                </Button>
-              </div>
             </div>
           ))}
+        <div className="add-btn">
+          <Button
+            disabled={type === 'detail'}
+            onClick={() => {
+              // 在按钮的位置添加新数据，不在最后一行添加
+              // 修复：在当前位置插入新数据而非添加到数组末尾
+              const newItem = {
+                attribute_id: uuid(),
+                order_num: 1,
+                attribute_group_name: '', //属性组名称
+                attribute_group_class: 1, //1单选/2多选/3输入框
+                attribute_group_type: 2, //1必选/2非必选
+                file_label_attribute: [
+                  {
+                    attribute_id: uuid(),
+                    order_num: 1, // 后面统一重新计算order_num
+                    attribute_name_cn: '',
+                    attribute_name_en: '',
+                    input_type: 1
+                  }
+                ]
+              };
+              // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
+              const newTextRelations = [...textRelations];
+              newTextRelations.splice(textRelations?.length || 0, 0, newItem);
+              // 更新排序值
+              newTextRelations.forEach((item, i) => {
+                item.order_num = i + 1;
+              });
+              setTextRelations(newTextRelations);
+            }}
+          >
+            <IconPlus
+              className={`${type === 'detail' ? 'disabled-icon' : ''}`}
+            />
+            添加属性
+          </Button>
+        </div>
       </Form>
     </div>
   );

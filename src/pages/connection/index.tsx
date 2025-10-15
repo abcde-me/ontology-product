@@ -202,7 +202,7 @@ export default function Connection() {
     },
     {
       title: '数据源类型',
-      width: 140,
+      width: 170,
       dataIndex: 'type',
       render: (_, item) => (
         <div>

@@ -5,4 +5,9 @@
   .arco-table-header {
     overflow-y: hidden !important;
   }
+
+  // 修复多选 Select 组件 placeholder 显示不完全的问题
+  .arco-select-size-default.arco-select-multiple input {
+    min-width: 130px;
+  }
 }

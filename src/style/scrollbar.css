@@ -38,3 +38,39 @@ body.scroller-hover *:hover::-webkit-scrollbar-thumb:active,
 body.scroller-hover *:hover::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-border-1);
 }
+
+/* 让该容器成为滚动容器 */
+/* .scroll-container {
+  overflow-y: auto;
+} */
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Firefox 默认隐藏滚动条 */
+* {
+  scrollbar-width: none;
+}
+
+/* hover 时显示滚动条（WebKit） */
+*:hover::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* hover 时显示滚动条（Firefox） */
+*:hover {
+  scrollbar-width: thin;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  border-radius: 1em;
+  background-color: rgba(50, 50, 50, 0.3);
+}
+
+*:hover::-webkit-scrollbar-track {
+  border-radius: 1em;
+  background-color: rgba(50, 50, 50, 0.1);
+}

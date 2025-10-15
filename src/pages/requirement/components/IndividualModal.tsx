@@ -33,6 +33,9 @@ interface DataSourceModalProps {
   getDetailObj: any;
   type: any;
 }
+
+const InputSearch = Input.Search;
+
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
@@ -45,6 +48,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -59,45 +63,81 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   useEffect(() => {
     if (getDetailObj) {
       setSelectedRowKeys(
-        getDetailObj?.label_data_set &&
-          getDetailObj?.label_data_set?.map((item) => item.execution_id) // 改为使用 execution_id
+        getDetailObj?.label_operate &&
+          getDetailObj?.label_operate?.user_id?.map((item) => item)
+      );
+      setCheckedKeys(
+        getDetailObj?.label_operate &&
+          getDetailObj?.label_operate?.org_id?.map((item) => item)
       );
     }
   }, [getDetailObj]);
-  useEffect(() => {
+  // 递归处理部门树数据，支持任意层级
+  const processTreeData = (data: any[], level = 1): any[] => {
+    return (
+      data?.map((item) => {
+        const baseItem = {
+          allowClick: false,
+          title: item.name,
+          key: String(item.id),
+          disabled: type === 'detail',
+          level: level,
+          perms: item.perms
+        };
+
+        // 如果有子级数据，递归处理
+        if (item?.children && item.children.length > 0) {
+          return {
+            ...baseItem,
+            children: processTreeData(item.children, level + 1)
+          };
+        }
+
+        // 没有子级数据，直接返回基础项
+        return baseItem;
+      }) || []
+    );
+  };
+
+  // 递归过滤掉perms为null的节点，只保留有权限数据的节点
+  const filterTreeDataByPerms = (data: any[]): any[] => {
+    const result: any[] = [];
+
+    data?.forEach((item) => {
+      // 如果当前节点有权限数据，保留该节点
+      if (item.perms && item.perms.length > 0) {
+        const filteredItem = { ...item };
+        // 如果有子节点，递归过滤子节点
+        if (item.children && item.children.length > 0) {
+          const filteredChildren = filterTreeDataByPerms(item.children);
+          filteredItem.children = filteredChildren;
+        }
+        result.push(filteredItem);
+      } else if (item.children && item.children.length > 0) {
+        // 如果当前节点没有权限数据，但有子节点，递归处理子节点
+        const filteredChildren = filterTreeDataByPerms(item.children);
+        // 将过滤后的子节点直接添加到结果中（提升层级）
+        result.push(...filteredChildren);
+      }
+      // 既没有权限数据，也没有子节点的节点被忽略
+    });
+
+    return result;
+  };
+
+  const getTreeData = () => {
     try {
       getDepartmentTreeList({})
         .then((res) => {
-          const newTreeDateList = res?.data?.map((item) => {
-            return item?.children
-              ? {
-                  allowClick: false,
-                  title: item.name,
-                  key: String(item.id),
-                  disabled: type === 'detail',
-                  level: 1,
-                  children: item?.children?.map((item_level2) => {
-                    return {
-                      level: 2,
-                      disabled: type === 'detail',
-                      title: item_level2?.name,
-                      key: item_level2?.id,
-                      allowClick: false,
-                      children: item_level2?.children?.map((subItem) => {
-                        return {
-                          disabled: type === 'detail',
-                          level: 3,
-                          title: subItem?.name,
-                          key: subItem?.id,
-                          allowClick: false
-                        };
-                      })
-                    };
-                  })
-                }
-              : { title: item.name, key: item.id };
-          });
+          let newTreeDateList = processTreeData(res?.data || []);
+
+          if (type === 'create') {
+            // 删除所有perms为null的节点
+            newTreeDateList = filterTreeDataByPerms(newTreeDateList);
+          }
+
           setTreeData(newTreeDateList);
+          setOriginalTreeData(newTreeDateList);
         })
         .catch((err) => {
           console.error(err);
@@ -105,6 +145,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {
       console.log(err, 'err');
     }
+  };
+  useEffect(() => {
+    getTreeData();
   }, [visible]);
   // 树的内容
   const renderTreeContent = () => {
@@ -132,7 +175,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           );
         }}
         onSelect={(value) => {
-          console.log(value);
           setCurrent(1);
           setPageSize(10);
           setCheckedKeys(value);
@@ -164,7 +206,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   ];
 
-  const searchData = (searchValue) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -181,14 +223,14 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
 
-    return loop(treeData);
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
-    if (!searchValue || searchValue === '') {
-      setTreeData(treeData);
+    if (!searchValue) {
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
@@ -215,7 +257,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    getTableData();
+    if (checkedKeys?.length > 0) {
+      getTableData();
+    }
   }, [checkedKeys, current, pageSize]);
   // 表格选择内容
 
@@ -246,11 +290,15 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       <div className="individual-modal-content">
         <div className="content-tree">
           <div>
-            <Input
+            <InputSearch
               type="text"
               placeholder="请输入部门搜索"
               onChange={(value) => {
                 setSearchValue(value);
+              }}
+              allowClear
+              onClear={() => {
+                getTreeData();
               }}
             />
           </div>

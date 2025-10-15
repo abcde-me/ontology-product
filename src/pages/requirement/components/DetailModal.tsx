@@ -9,7 +9,8 @@ import {
   Table,
   Pagination,
   Empty,
-  Tooltip
+  Tooltip,
+  Spin
 } from '@arco-design/web-react';
 import { getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
@@ -37,6 +38,9 @@ interface DataSourceModalProps {
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getDetailObj: any;
 }
+
+const InputSearch = Input.Search;
+
 const DataSourceModal: React.FC<DataSourceModalProps> = ({
   fileType,
   visible,
@@ -51,6 +55,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -64,7 +69,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const [tableLoading, settableLoading] = useState(false);
   const [dir_path, setDir_path] = useState<React.Key[]>(['']);
   const [treeNodeName, setTreeNodeName] = useState('');
-
+  const [treeLoading, setTreeLoading] = useState(false);
   const formatCatalogTree = (rawData: any[]): TreeItem[] => {
     // 递归处理单个节点的子层级
     const handleChildren = (
@@ -103,9 +108,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const getTreeDataList = () => {
     let newTreeData: any[] = [];
     try {
+      setTreeLoading(true);
       getCatalogList({
         root_type: 1
       }).then((res) => {
+        setTreeLoading(false);
         if (res.status !== 200) {
           return;
         }
@@ -141,6 +148,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             : { title: item.name, key: item.id };
         });
         setTreeData(newTreeData);
+        setOriginalTreeData(newTreeData);
       });
     } catch (err) {}
   };
@@ -192,7 +200,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             }}
           />
         ) : (
-          <Empty description="暂无数据" />
+          <div className="empty-content">
+            <Empty description="暂无数据" />
+          </div>
         )}
       </div>
     );
@@ -231,7 +241,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 100
     }
   ];
-  const searchData = (searchValue) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -248,14 +258,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
 
-    return loop(treeData);
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
-    if (!searchValue || searchValue === '') {
-      setTreeData(treeData);
+    if (!searchValue) {
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
@@ -347,7 +357,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       <div className="detail-modal-content">
         <div className="content-tree">
           <div className="search-input">
-            <Input
+            <InputSearch
               type="text"
               placeholder="请输入名称搜索"
               onChange={(value) => {
@@ -355,29 +365,25 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }}
               allowClear={true}
               onClear={() => {
-                setSearchValue('');
-                getTreeDataList();
-              }}
-              onPressEnter={() => {
                 getTreeDataList();
               }}
             />
           </div>
-          {renderTreeContent()}
+          <Spin loading={treeLoading}>{renderTreeContent()}</Spin>
         </div>
         <div className="content-table">
           <div className="content-table-form">
             <div className="tree-node-name">{treeNodeName}</div>
-            <div className="form-option">
-              <DatePicker.RangePicker
-                onChange={handleDateChange}
-                style={{ width: 350 }}
-                onClear={() => {
-                  setDateRange([]);
-                  getTableData();
-                }}
-              />
-            </div>
+            <DatePicker.RangePicker
+              onChange={handleDateChange}
+              style={{ width: 350 }}
+              onClear={() => {
+                setDateRange([]);
+                getTableData();
+              }}
+            />
+            {/* <div className="form-option">
+            </div> */}
           </div>
           <Table
             ref={tableRef}

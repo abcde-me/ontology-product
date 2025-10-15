@@ -21,7 +21,7 @@
       position: sticky;
       top: 0;
       z-index: 30;
-      padding: 16px 12px 8px 12px;
+      padding: 16px 12px 8px 0px;
     }
 
     .arco-tree-node {
@@ -32,10 +32,12 @@
     }
 
     .arco-tree {
+      width: 220px;
       scrollbar-gutter: auto;
       padding-left: 4px;
       padding-right: 4px;
       overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 
@@ -48,7 +50,7 @@
 
   .content-table {
     flex: 1;
-    height: 592px;
+    height: 650px;
     overflow-y: scroll;
     scrollbar-width: none;
     scrollbar-gutter: auto;
@@ -70,6 +72,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 12px;
     }
 
     .tree-node-name {

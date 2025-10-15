@@ -345,7 +345,7 @@ export default function WorkflowList() {
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
-      width: 160,
+      width: 165,
       render: (_, record) => {
         const perms = record.perms || [];
         return (

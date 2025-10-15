@@ -14,7 +14,8 @@ import {
   Space,
   Table,
   Tabs,
-  Typography
+  Typography,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconCopy,
@@ -57,6 +58,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       runDuration,
       runStartTime,
       runError,
+      runWarning,
       runLog,
       size,
       setSize,
@@ -245,9 +247,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         icon={<IconCopy />}
         onClick={() => handleCopyContent(content)}
         className="sql-copy-button"
-        title="复制代码"
       >
-        复制代码
+        复制
       </Button>
     );
 
@@ -310,33 +311,39 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       >
                         展示
                       </span>
-                      <Input
-                        style={{ width: 52, height: 22 }}
-                        size="mini"
-                        value={String(size)}
-                        maxLength={1000}
+                      {/* 同产品沟通，930版本仅增加提示， 暂不限制 */}
+                      <Tooltip
+                        content="最多展示1000行数据"
                         disabled={runStatus !== RunningStatus.SUCCESS}
-                        onChange={(value) => setSize(value)}
-                        onPressEnter={(event) => {
-                          event.stopPropagation();
-                          // 按回车键时触发轮询获取新结果
-                          if (execid) {
-                            // 避异步没更新结束获取不到正确size
-                            setTimeout(() => {
-                              loadRunResult(execid, size);
-                            }, 50);
-                          }
-                        }}
-                        onBlur={() => {
-                          // 失去焦点时也触发查询
-                          if (execid) {
-                            // 避异步没更新结束获取不到正确size
-                            setTimeout(() => {
-                              loadRunResult(execid, size);
-                            }, 50);
-                          }
-                        }}
-                      />
+                      >
+                        <Input
+                          style={{ width: 52, height: 22 }}
+                          size="mini"
+                          value={String(size)}
+                          maxLength={1000}
+                          disabled={runStatus !== RunningStatus.SUCCESS}
+                          onChange={(value) => setSize(value)}
+                          onPressEnter={(event) => {
+                            event.stopPropagation();
+                            // 按回车键时触发轮询获取新结果
+                            if (execid) {
+                              // 避异步没更新结束获取不到正确size
+                              setTimeout(() => {
+                                loadRunResult(execid, size);
+                              }, 50);
+                            }
+                          }}
+                          onBlur={() => {
+                            // 失去焦点时也触发查询
+                            if (execid) {
+                              // 避异步没更新结束获取不到正确size
+                              setTimeout(() => {
+                                loadRunResult(execid, size);
+                              }, 50);
+                            }
+                          }}
+                        />
+                      </Tooltip>
                       <span
                         style={{
                           fontSize: '14px',
@@ -445,20 +452,27 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       </div>
                     )}
                     {runStatus === RunningStatus.SUCCESS && (
-                      <div className="run-result-table">
-                        {columns.length > 0 && data.length > 0 ? (
-                          <Table
-                            border={false}
-                            columns={sortableColumns}
-                            data={data}
-                            pagination={false}
-                            scroll={{ y: 240, x: true }}
-                            loading={resultLoading}
-                          />
-                        ) : (
-                          <Empty description="暂无数据" />
-                        )}
-                      </div>
+                      <>
+                        <div className="mb-[8px]">
+                          {runWarning && (
+                            <Typography.Text>{runWarning}</Typography.Text>
+                          )}
+                        </div>
+                        <div className="run-result-table">
+                          {columns.length > 0 && data.length > 0 ? (
+                            <Table
+                              border={false}
+                              columns={sortableColumns}
+                              data={data}
+                              pagination={false}
+                              scroll={{ y: 240, x: true }}
+                              loading={resultLoading}
+                            />
+                          ) : (
+                            <Empty description="暂无数据" />
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </TabPane>
