@@ -31,6 +31,7 @@ import Uploads from './file-upload';
 import ComponentTree from './component-tree';
 import './db-tree.css';
 import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
+import { isNumber } from 'lodash-es';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -949,7 +950,10 @@ const LoadAddModal = (props: propsType) => {
                     dest_path: path
                   });
                   // 选择完成后关闭下拉框
-                  setDropdownVisible(false);
+                  // 初始节点id是一个字符串， 生成成功后是number类型
+                  if (isNumber(nodeId)) {
+                    setDropdownVisible(false);
+                  }
                 }}
                 showAddTree={true}
                 enableRootAdd={true}
