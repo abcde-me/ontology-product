@@ -37,6 +37,15 @@
   }
 }
 
+.dropdownSelect {
+  /* 修复多选 Select 组件 placeholder 显示不完全的问题 */
+  :global(.arco-input-tag-inner) {
+    input {
+      min-width: 200px;
+    }
+  }
+}
+
 /* 数据类型指示器（可选功能） */
 .dataTypeIndicator {
   display: inline-block;
