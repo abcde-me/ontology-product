@@ -1,0 +1,105 @@
+.data-market {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 20px 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  min-height: calc(100% - 30px);
+
+  .arco-table-tr > th {
+    background-color: rgb(245, 249, 255) !important;
+  }
+
+  .arco-pagination-total-text {
+    line-height: 32px;
+  }
+
+  .operate-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+    margin-right: 16px;
+  }
+
+  .operate-text:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  .disabled-text {
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  tbody .data-market-name .ellipsis-text {
+    font-weight: 600;
+  }
+
+  tbody .hover-change .ellipsis-text {
+    color: #1e293b;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  .publish-part {
+    width: 75px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .published {
+    background: #dbf4ee;
+    color: #0ab58d;
+  }
+
+  .not-published {
+    background: #f7f7f9;
+    color: #6e7b8d;
+  }
+
+  .operate-btn {
+    background: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    height: 32px;
+  }
+
+  .operate-btn .arco-btn-secondary.arco-btn-disabled {
+    border: 1px solid #94a3b8;
+  }
+
+  .operate-btn:disabled {
+    color: #c9cdd4;
+    border-color: #e5e6eb;
+    background: #f7f8fa;
+  }
+}
+
+.data-market-list-modal-title {
+  font-weight: 500;
+  font-size: 16px;
+  height: 24px;
+}
+
+.data-market-list-modal-content {
+  font-weight: 400;
+  font-size: 14px;
+  color: #1d2129;
+  height: 22px;
+  margin: 10px 0 0 28px;
+}
+
+.arco-modal-footer .arco-btn-secondary:focus {
+  box-shadow: none;
+}

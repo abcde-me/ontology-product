@@ -509,7 +509,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         />
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
-                        {relationRelations?.length > 1 && (
+                        {relationRelations?.length > 0 && (
                           <Tooltip content={type === 'detail' ? '' : '删除'}>
                             <IconDelete
                               fontSize={18}

@@ -57,6 +57,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       runDuration,
       runStartTime,
       runError,
+      runWarning,
       runLog,
       size,
       setSize,
@@ -245,9 +246,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         icon={<IconCopy />}
         onClick={() => handleCopyContent(content)}
         className="sql-copy-button"
-        title="复制代码"
       >
-        复制代码
+        复制
       </Button>
     );
 
@@ -445,20 +445,27 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       </div>
                     )}
                     {runStatus === RunningStatus.SUCCESS && (
-                      <div className="run-result-table">
-                        {columns.length > 0 && data.length > 0 ? (
-                          <Table
-                            border={false}
-                            columns={sortableColumns}
-                            data={data}
-                            pagination={false}
-                            scroll={{ y: 240, x: true }}
-                            loading={resultLoading}
-                          />
-                        ) : (
-                          <Empty description="暂无数据" />
-                        )}
-                      </div>
+                      <>
+                        <div className="mb-[8px]">
+                          {runWarning && (
+                            <Typography.Text>{runWarning}</Typography.Text>
+                          )}
+                        </div>
+                        <div className="run-result-table">
+                          {columns.length > 0 && data.length > 0 ? (
+                            <Table
+                              border={false}
+                              columns={sortableColumns}
+                              data={data}
+                              pagination={false}
+                              scroll={{ y: 240, x: true }}
+                              loading={resultLoading}
+                            />
+                          ) : (
+                            <Empty description="暂无数据" />
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </TabPane>

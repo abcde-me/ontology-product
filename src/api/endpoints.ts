@@ -233,7 +233,31 @@ export const ResourceEndpointsV2 = {
   workflowBlockConfig:
     PrefixV2 + '/apps/{appId}/workflows/default-workflow-block-configs',
   workflowPublishDetail: PrefixV2 + '/apps/{appId}/workflows/{workflowId}',
-  workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
+  workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters',
+
+  // 知识库标签管理增删改查
+  knowGetTagElement: PrefixV2 + `/tag/list`,
+  knowCreateTagElement: PrefixV2 + `/tag/create`,
+  knowEditTagElement: PrefixV2 + `/tag/{tag_id}`,
+  knowDelTagElement: PrefixV2 + `/tag/delete`,
+  KnowUploadTagElement: PrefixV2 + `/tag/update`,
+  // 判断知识库是否所有的文档的标签都已经生成
+  KnowGetPolicyElement: PrefixV2 + `/datasets/check_tag`,
+  // 获取知识库策略配置
+  knowGetPolicy:
+    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/tag-rule`,
+  //知识库层级 - 目录
+  HierarchicalCatalog:
+    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/catalogs`,
+  //知识库层级 - 目录编辑
+  HierarchicalCatalogEdit:
+    PrefixV2 +
+    `/datasets/{dataset_id}/documents/{document_id}/catalog/edit-catalog`,
+  //创建知识库sheet信息与默认表头获取
+  TableConfiguration: PrefixV2 + `/spreadsheet/info`,
+  //知识库表头信息获取
+  TableHeaderConfiguration: PrefixV2 + `/spreadsheet/headers`,
+  datasetstree: PrefixV2 + '/dataset_contents/tree'
 };
 
 // 多模态数据治理平台接口

@@ -60,6 +60,10 @@ export async function getknowledgeBaseDetails(id: string, params: any = {}) {
 export async function getdocumentList(dataset_id: string, params: any = {}) {
   return UAPI.RES.documentList({ dataset_id }).get(params).inRegion().do();
 }
+//知识库文档列表接口
+export async function postdocumentList(dataset_id: string, params: any = {}) {
+  return UAPI.RES.documentList({ dataset_id }).post(params).inRegion().do();
+}
 // 知识库策略配置， patch请求
 export async function patchknowledgeBasePolicy(id: string, params: any = {}) {
   return UAPI.RES.knowledgeBaseList({ id }).patch(params).inRegion().do();
@@ -175,4 +179,36 @@ export async function getDocContent(file_id: string) {
   const response = await UAPI.RES.docContent({ file_id }).get().inRegion().do();
 
   return response;
+}
+//知识库层级目录接口
+export function apiHierarchicalCatalog(
+  dataset_id: string,
+  document_id: string
+) {
+  return UAPI.RES.HierarchicalCatalog({ dataset_id, document_id })
+    .get()
+    .inRegion()
+    .do();
+}
+//知识库层级目录编辑接口
+export async function apiHierarchicalCatalogEdit(
+  dataset_id: string,
+  document_id: string,
+  params: any
+) {
+  return UAPI.RES.HierarchicalCatalogEdit({ dataset_id, document_id })
+    .put(params)
+    .inRegion()
+    .do();
+}
+//知识库sheet信息与默认表头获取
+export function apiTableConfiguration(params: any) {
+  return UAPI.RES.TableConfiguration({}).get(params).inRegion().do();
+}
+//知识库表头信息获取
+export function apiTableHeaderConfiguration(params: any) {
+  return UAPI.RES.TableHeaderConfiguration({}).get(params).inRegion().do();
+}
+export function getdatasetstree(Id?: string, params: any = {}) {
+  return UAPI.RES.datasetstree({ Id }).get().inRegion().do();
 }

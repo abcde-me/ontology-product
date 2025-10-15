@@ -33,6 +33,9 @@ interface DataSourceModalProps {
   getDetailObj: any;
   type: any;
 }
+
+const InputSearch = Input.Search;
+
 const IndividualModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
@@ -45,6 +48,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -98,6 +102,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               : { title: item.name, key: item.id };
           });
           setTreeData(newTreeDateList);
+          setOriginalTreeData(newTreeDateList);
         })
         .catch((err) => {
           console.error(err);
@@ -166,7 +171,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   ];
 
-  const searchData = (searchValue) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -183,14 +188,14 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
 
-    return loop(treeData);
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
-    if (!searchValue || searchValue === '') {
-      setTreeData(treeData);
+    if (!searchValue) {
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
@@ -250,7 +255,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       <div className="individual-modal-content">
         <div className="content-tree">
           <div>
-            <Input
+            <InputSearch
               type="text"
               placeholder="请输入部门搜索"
               onChange={(value) => {
@@ -258,9 +263,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               }}
               allowClear
               onClear={() => {
-                getTreeData();
-              }}
-              onPressEnter={() => {
                 getTreeData();
               }}
             />

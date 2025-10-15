@@ -71,6 +71,7 @@ interface DatasetFormProps {
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
+  isDataMarket?: boolean;
 }
 
 const FormItem = Form.Item;
@@ -211,7 +212,7 @@ const DatasetForm = React.forwardRef<
   { resetForm: () => void },
   DatasetFormProps
 >((props, ref) => {
-  const { visible, onSubmit, onCancel } = props;
+  const { visible, onSubmit, onCancel, isDataMarket = false } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -254,6 +255,17 @@ const DatasetForm = React.forwardRef<
   const [total, setTotal] = useState(10);
   // 使用 useRef 来标记是否是首次渲染
   const isInitialMount = useRef(true);
+  //场景分类选项
+  const sceneTypeOptions = [
+    {
+      label: 'nlp',
+      value: 'nlp'
+    },
+    {
+      label: 'gan',
+      value: 'gan'
+    }
+  ];
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -397,7 +409,13 @@ const DatasetForm = React.forwardRef<
         // getVolumePreviewData(path);
         getVolumePreviewData(
           value?.[1]?.[1],
-          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+          value?.[0]?.[0] === '/'
+            ? '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+            : value?.[0]?.[0] +
+                '/dst/' +
+                value?.[0]?.[1] +
+                '/volume/' +
+                value?.[1]?.[0]
         );
       } else if (Array.isArray(value) && value.length === 2) {
         return;
@@ -473,7 +491,13 @@ const DatasetForm = React.forwardRef<
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
-      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+      targetData?.[0]?.[0] === '/'
+        ? '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+        : targetData?.[0]?.[0] +
+            '/dst/' +
+            targetData?.[0]?.[1] +
+            '/volume/' +
+            targetData?.[1]?.[0]
     );
   }, [current, pageSize]);
 
@@ -764,6 +788,15 @@ const DatasetForm = React.forwardRef<
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
             </Radio.Group>
           </FormItem>
+          {isDataMarket && (
+            <FormItem
+              label="场景分类"
+              field="sceneType"
+              rules={[{ required: true, message: '请选择场景分类' }]}
+            >
+              <Select placeholder="请选择场景分类" options={sceneTypeOptions} />
+            </FormItem>
+          )}
 
           {dataSource === 'volume' && (
             <div
