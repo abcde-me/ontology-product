@@ -156,149 +156,32 @@ export default function RequirementDetail() {
   // 添加新的useEffect来同步模板更新到标签
   useEffect(() => {
     // 当templateData更新时，检查并更新所有使用了该模板的标签属性组
-    if (
-      templateData &&
-      templateData.length > 0 &&
-      datalist &&
-      datalist.length > 0
-    ) {
-      // 使用函数式状态更新，一次性更新所有数据
-      setDatalist((prevDatalist) => {
-        const newDatalist = _.cloneDeep(prevDatalist);
-        let hasChanges = false;
+    const updatedDatalist = _.cloneDeep(templateData);
+    // 遍历每个标签
+    // 遍历标签中的每个属性组
+    updatedDatalist.forEach((attrGroup: any, groupIndex: any) => {
+      form2.setFieldValue(
+        `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
+        attrGroup.attribute_group_name
+      );
 
-        // 遍历datalist中的每个标签
-        newDatalist.forEach((labelItem, labelIndex) => {
-          if (
-            labelItem.label_info_attribute_groups &&
-            labelItem.label_info_attribute_groups.length > 0
-          ) {
-            // 遍历每个标签的属性组
-            labelItem.label_info_attribute_groups.forEach(
-              (attrGroup, groupIndex) => {
-                // 通过多种方式查找对应的模板
-                let matchingTemplate = templateData.find(
-                  (template) => template.attribute_id === attrGroup.attribute_id
-                );
-
-                // 如果通过ID没找到，尝试通过名称匹配
-                if (!matchingTemplate) {
-                  matchingTemplate = templateData.find(
-                    (template) =>
-                      template.attribute_group_name ===
-                      attrGroup.attribute_group_name
-                  );
-                }
-
-                // 如果还没找到，尝试通过属性内容匹配（用于复制的标签）
-                if (
-                  !matchingTemplate &&
-                  attrGroup.label_info_attribute &&
-                  attrGroup.label_info_attribute.length > 0
-                ) {
-                  matchingTemplate = templateData.find((template) => {
-                    if (
-                      !template.label_info_attribute ||
-                      template.label_info_attribute.length !==
-                        attrGroup.label_info_attribute.length
-                    ) {
-                      return false;
-                    }
-                    // 比较属性的中文名和英文名是否匹配
-                    return template.label_info_attribute.every(
-                      (tplAttr, idx) => {
-                        const groupAttr = attrGroup.label_info_attribute[idx];
-                        return (
-                          tplAttr.attribute_name_cn ===
-                            groupAttr.attribute_name_cn &&
-                          tplAttr.attribute_name_en ===
-                            groupAttr.attribute_name_en
-                        );
-                      }
-                    );
-                  });
-                }
-
-                if (matchingTemplate) {
-                  hasChanges = true;
-
-                  // 更新属性组名称
-                  attrGroup.attribute_group_name =
-                    matchingTemplate.attribute_group_name;
-                  attrGroup.attribute_group_class =
-                    matchingTemplate.attribute_group_class;
-                  attrGroup.attribute_group_type =
-                    matchingTemplate.attribute_group_type;
-
-                  // 更新属性数据，保留原有的label_info_id
-                  if (
-                    Array.isArray(matchingTemplate.label_info_attribute) &&
-                    Array.isArray(attrGroup.label_info_attribute)
-                  ) {
-                    attrGroup.label_info_attribute =
-                      matchingTemplate.label_info_attribute.map(
-                        (tplAttr, idx) => {
-                          const existAttr = attrGroup.label_info_attribute[idx];
-                          return {
-                            ...tplAttr,
-                            label_info_id:
-                              existAttr?.label_info_id || tplAttr.label_info_id,
-                            input_type:
-                              tplAttr.input_type ?? existAttr?.input_type ?? 1
-                          };
-                        }
-                      );
-                  }
-
-                  // 更新表单字段
-                  form2.setFieldValue(
-                    `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
-                    attrGroup.attribute_group_name
-                  );
-
-                  // 更新属性的表单字段
-                  if (
-                    attrGroup.label_info_attribute &&
-                    attrGroup.label_info_attribute.length > 0
-                  ) {
-                    attrGroup.label_info_attribute.forEach(
-                      (attribute, attrIndex) => {
-                        const fieldId = attribute.label_info_id;
-
-                        // 更新两种可能的字段命名格式
-                        form2.setFieldValue(
-                          `label_info_attribute_groups_${fieldId}_attribute_name_cn`,
-                          attribute.attribute_name_cn
-                        );
-                        form2.setFieldValue(
-                          `label_info_attribute_groups_${fieldId}_attribute_name_en`,
-                          attribute.attribute_name_en
-                        );
-                        form2.setFieldValue(
-                          `attribute_name_cn${fieldId}`,
-                          attribute.attribute_name_cn
-                        );
-                        form2.setFieldValue(
-                          `attribute_name_en${fieldId}`,
-                          attribute.attribute_name_en
-                        );
-                        form2.setFieldValue(
-                          `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`,
-                          attribute.input_type
-                        );
-                      }
-                    );
-                  }
-                }
-              }
-            );
-          }
+      // 如果新组有属性，也需要设置这些属性的表单字段
+      if (
+        attrGroup.label_info_attribute &&
+        attrGroup.label_info_attribute.length > 0
+      ) {
+        attrGroup.label_info_attribute.forEach((attribute, attrIndex) => {
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
+            attribute.attribute_name_cn
+          );
+          form2.setFieldValue(
+            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
+            attribute.attribute_name_en
+          );
         });
-
-        // 只有在有变化时才返回新数据
-        return hasChanges ? newDatalist : prevDatalist;
-      });
-    }
+      }
+    });
   }, [templateData]);
   // 基础配置
 
