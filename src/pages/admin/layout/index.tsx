@@ -17,13 +17,23 @@ import { withSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { usePermission } from '@/context/PermissionContext';
 import { Page403 } from '@/pages/errorPages';
+import { Spin } from '@arco-design/web-react';
 
 type LayoutPageProps = {
   history: any;
 };
 // 带权限检查的路由组件
 const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
-  const { hasPermission } = usePermission();
+  const { hasPermission, isLoading, isInitialized } = usePermission();
+
+  // 如果权限还在加载中，显示全屏居中的加载状态
+  if (isLoading || !isInitialized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spin />
+      </div>
+    );
+  }
 
   // 如果路由没有权限要求，直接渲染
   if (!route.permission) {

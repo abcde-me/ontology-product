@@ -16,6 +16,7 @@ interface PermissionContextType {
   permissions: string[];
   permissionData: PermissionData | null;
   isLoading: boolean;
+  isInitialized: boolean; // 新增：是否已完成初始化
   setPermissions: (permissions: string[]) => void;
   setPermissionData: (data: PermissionData) => void;
   hasPermission: (permission: string | null) => boolean;
@@ -36,6 +37,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // 权限检查函数
   const checkPermission = (permission: string | null): boolean => {
@@ -65,12 +67,14 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
     setPermissionData(data);
     setPermissions(data.actions || []);
     setIsLoading(false);
+    setIsInitialized(true); // 标记为已初始化
     console.log('权限数据已更新:', data);
   };
 
   // 设置权限列表
   const handleSetPermissions = (newPermissions: string[]) => {
     setPermissions(newPermissions);
+    setIsInitialized(true); // 标记为已初始化
     console.log('权限列表已更新:', newPermissions);
   };
 
@@ -78,6 +82,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
     permissions,
     permissionData,
     isLoading,
+    isInitialized,
     setPermissions: handleSetPermissions,
     setPermissionData: handleSetPermissionData,
     hasPermission: checkPermission,

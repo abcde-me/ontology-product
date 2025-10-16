@@ -17,7 +17,12 @@ export const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
   children,
   fallback = null
 }) => {
-  const { hasPermission } = usePermission();
+  const { hasPermission, isLoading, isInitialized } = usePermission();
+
+  // 权限加载中时，不显示任何内容，避免闪烁
+  if (isLoading || !isInitialized) {
+    return <>{fallback}</>;
+  }
 
   if (!hasPermission(permission)) {
     return <>{fallback}</>;
@@ -90,7 +95,22 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
   children,
   disableWhenNoPermission = false // 默认为隐藏模式
 }) => {
-  const { hasPermission } = usePermission();
+  const { hasPermission, isLoading, isInitialized } = usePermission();
+
+  // 权限加载中时，根据模式决定显示方式
+  if (isLoading || !isInitialized) {
+    if (disableWhenNoPermission) {
+      // 禁用模式：显示但禁用按钮
+      return React.cloneElement(children, {
+        ...children.props,
+        disabled: true
+      });
+    } else {
+      // 隐藏模式：不显示按钮
+      return null;
+    }
+  }
+
   const hasAccess = hasPermission(permission);
 
   // 没有权限时的处理

@@ -32,13 +32,17 @@ const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
   // 从权限Context获取权限数据
-  const { permissions } = usePermission();
+  const { permissions, isLoading, isInitialized } = usePermission();
 
   // 根据用户权限过滤菜单
   const filteredMenus = useMemo(() => {
+    // 如果权限还在加载中，返回空菜单避免闪烁
+    if (isLoading || !isInitialized) {
+      return [];
+    }
     console.log('使用新权限系统过滤菜单, permissions:', permissions);
     return filterMenusByPermissions(menus, permissions);
-  }, [permissions]);
+  }, [permissions, isLoading, isInitialized]);
 
   const [collapsed, setCollapsed] = useState(false);
   const [showMenus, setShowMenus] = useState(filteredMenus);
