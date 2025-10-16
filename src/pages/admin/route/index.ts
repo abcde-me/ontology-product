@@ -167,11 +167,13 @@ export const routes: IRoute[] = [
     name: 'requirement',
     key: '/tenant/compute/modaforge/requirement',
     component: React.lazy(async () => import('../../requirement')),
+    permission: ROUTE_PERMISSIONS.requirement,
     children: [
       {
         name: 'requirementDetail',
         key: '/tenant/compute/modaforge/requirementDetail',
-        component: React.lazy(async () => import('../../requirement/detail'))
+        component: React.lazy(async () => import('../../requirement/detail')),
+        permission: ROUTE_PERMISSIONS.requirementDetail
       }
     ]
   },
@@ -180,6 +182,7 @@ export const routes: IRoute[] = [
     name: 'taskList',
     key: '/tenant/compute/modaforge/taskList',
     component: React.lazy(async () => import('../../requirement/taskList')),
+    permission: ROUTE_PERMISSIONS.taskList,
     children: []
   },
   // 标注工具页面

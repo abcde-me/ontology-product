@@ -85,7 +85,7 @@ export const PERMISSIONS = {
 
   // 需求管理相关权限
   REQUIREMENT: {
-    LIST: 'aimdp-manager:requirement:read:list',
+    LIST: 'aimdp-manager:label_service:read:get_req_list',
     GET: 'aimdp-manager:requirement:read:get',
     CREATE: 'aimdp-manager:requirement:manage:create',
     MODIFY: 'aimdp-manager:requirement:manage:modify',
@@ -94,7 +94,7 @@ export const PERMISSIONS = {
 
   // 标注任务相关权限
   ANNOTATION_TASK: {
-    LIST: 'aimdp-manager:annotation_task:read:list',
+    LIST: 'aimdp-manager:label_service:read:get_task_list',
     GET: 'aimdp-manager:annotation_task:read:get',
     CREATE: 'aimdp-manager:annotation_task:manage:create',
     MODIFY: 'aimdp-manager:annotation_task:manage:modify',

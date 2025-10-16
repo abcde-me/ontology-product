@@ -15,10 +15,30 @@ import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
 import { withSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
+import { usePermission } from '@/context/PermissionContext';
+import { Page403 } from '@/pages/errorPages';
 
 type LayoutPageProps = {
   history: any;
 };
+// 带权限检查的路由组件
+const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
+  const { hasPermission } = usePermission();
+
+  // 如果路由没有权限要求，直接渲染
+  if (!route.permission) {
+    return <route.component />;
+  }
+
+  // 检查权限
+  if (hasPermission(route.permission)) {
+    return <route.component />;
+  }
+
+  // 无权限时显示403页面
+  return <Page403 />;
+};
+
 const LayoutPage: React.FC<LayoutPageProps> = () => {
   const { t } = useTranslation('plugin__console-plugin-aidp');
   const { sidebarIsReady } = useSelector((state: any) => {
@@ -119,7 +139,7 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
                   <Route
                     key={route.key}
                     path={route.key}
-                    component={route.component}
+                    render={() => <PermissionRoute route={route} />}
                   />
                 );
               })}

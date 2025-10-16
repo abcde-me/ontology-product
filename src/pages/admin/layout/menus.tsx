@@ -183,8 +183,8 @@ export const menus: MenuModel[] = [
           '/tenant/compute/modaforge/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/organization'
-          ),
-        permission: PERMISSIONS.ORGANIZATION.LIST
+          )
+        // permission: PERMISSIONS.ORGANIZATION.LIST
       },
       {
         title: '用户管理',
@@ -194,8 +194,8 @@ export const menus: MenuModel[] = [
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/user'
           ),
-        key: 'userMgmt',
-        permission: PERMISSIONS.USER.LIST
+        key: 'userMgmt'
+        // permission: PERMISSIONS.USER.LIST
       }
     ]
   }
