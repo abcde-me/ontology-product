@@ -12,7 +12,6 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import styles from './index.module.scss';
 import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
 import {
@@ -26,6 +25,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
+import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
 
