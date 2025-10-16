@@ -76,7 +76,7 @@
     overflow: hidden;
   }
 
-  // hover 态样式 - 最大宽度 200px
+  // hover 态样式 - 最大宽度 200px，只有文字变色，图标不变色
   .arco-tree-node:hover {
     .file-name {
       max-width: 200px;
@@ -85,6 +85,27 @@
 
     .search-result-path {
       max-width: 140px;
+    }
+
+    // hover时图标保持原色，不跟随文字变色
+    svg {
+      color: var(--color-text-2) !important;
+    }
+  }
+
+  // 选中状态样式 - 图标和文字都变色
+  .arco-tree-node.arco-tree-node-selected {
+    .file-name {
+      color: #007dfa;
+    }
+
+    .search-result-path {
+      color: #007dfa;
+    }
+
+    // 选中时图标也变色
+    svg {
+      color: #007dfa !important;
     }
   }
 
