@@ -226,7 +226,6 @@ export default function Requirement() {
       render: (_, record) => {
         return (
           <div style={{ display: 'flex' }}>
-            {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
             <span
               className="operate-text"
               onClick={() => {
@@ -235,7 +234,6 @@ export default function Requirement() {
             >
               标注
             </span>
-            {/* )} */}
           </div>
         );
       }
@@ -286,7 +284,6 @@ export default function Requirement() {
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无任务'
-          // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
         })}
         rowKey="id"
         loading={loading}
