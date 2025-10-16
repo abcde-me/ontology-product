@@ -34,12 +34,16 @@
     color: #1e293b;
   }
 
-  :global(tbody) .arco-table-tr:hover .hover-change :global(.ellipsis-text) {
+  :global(tbody)
+    :global(.arco-table-tr):hover
+    .hover-change
+    :global(.ellipsis-text) {
     color: rgb(0, 125, 250);
     cursor: pointer;
   }
 
-  :global(.arco-table-tr):hover
+  :global(tbody)
+    :global(.arco-table-tr):hover
     :global(.hover-change)
     :global(.ellipsis-text):hover {
     color: rgba(67, 141, 251, 1);
@@ -81,6 +85,6 @@
   margin: 10px 0 0 28px;
 }
 
-.arco-modal-footer .arco-btn-secondary:focus {
+:global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
   box-shadow: none;
 }
