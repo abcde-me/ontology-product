@@ -26,7 +26,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
     (payload: CodeNodeType) => {
       const newInputs = produce(inputRef.current, (draft: any) => {
         draft.type = 'cleaning';
-        draft.title = '数据清洗节点';
+        draft.title = '数据清洗';
         draft.data_standardization = payload.data_standardization;
         draft.threshold = payload.threshold;
         draft.threshold_switch = payload.threshold_switch;
