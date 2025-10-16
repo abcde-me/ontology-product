@@ -224,7 +224,6 @@ export default function Requirement() {
       fixed: 'right',
       width: 75,
       render: (_, record) => {
-        const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
             {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}

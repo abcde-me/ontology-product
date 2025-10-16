@@ -1,10 +1,8 @@
 import {
   Button,
-  Cascader,
   Form,
   Input,
   Message,
-  Popover,
   Radio,
   Select,
   TreeSelect
@@ -13,11 +11,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { editLoad, getDirectoryList } from '@/api/loadApi';
-import { getConnectionList, getdetailList } from '@/api/connectionApi';
+import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
-import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import ComponentTree from '../list/component-tree';
 
 // 定义目录数据类型
@@ -26,15 +22,6 @@ interface DirectoryItem {
   label: string;
   children?: DirectoryItem[];
 }
-// 定义cron类型
-interface CronType {
-  date: string;
-  hour: string;
-  minute: string;
-  month: string;
-  week: string;
-}
-
 // 添加根据ID构建级联路径的函数
 function findPathById(
   data: DirectoryItem[],
@@ -176,7 +163,6 @@ const Edit = (props) => {
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
   const [directoryData, setDirectoryData] = useState([]) as any;
-  const [directoryLoading, setDirectoryLoading] = useState(false);
   // TreeSelect选中的keys
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   // TreeSelect显示的值（路径）
@@ -190,12 +176,6 @@ const Edit = (props) => {
     try {
       const res = await getdetailList(connector_id);
       setTableList(res?.data?.table_name || []);
-      console.log(
-        res?.data?.table_name,
-        '查看抽取的表12321321321332111111111111'
-      );
-
-      console.log(res, '获取连接器下面的表格');
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
     }
@@ -208,16 +188,10 @@ const Edit = (props) => {
   }, []);
   async function getdirectoryDataList() {
     try {
-      setDirectoryLoading(true);
-      console.log(
-        '开始获取目录数据，当前数据源类型:',
-        props.detailData.source_type
-      );
       const res = await getDirectoryList({
         root_type: 1,
         dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
-      console.log('API响应:', res);
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
         setDirectoryData([]);
@@ -238,14 +212,11 @@ const Edit = (props) => {
         setDirectoryData([]);
         return [];
       }
-      console.log('原始目录数据:', res.data.src);
 
       if (
         props.detailData.source_type === 's3' ||
         props.detailData.source_type === 'hdfs'
       ) {
-        console.log('处理对象存储/HDFS数据');
-
         const processTreeData = (
           data: any[],
           parentNode: any = null
@@ -382,7 +353,6 @@ const Edit = (props) => {
       }
       return [];
     } finally {
-      setDirectoryLoading(false);
     }
   }
   // 根据data_path_id构建路径
@@ -476,7 +446,7 @@ const Edit = (props) => {
     try {
       setLoading(true);
       const formValues = await form.validate();
-      const { time, day, cycle, ...rest } = formValues;
+      const { ...rest } = formValues;
       // 处理不同数据源类型的路径ID获取
       let pathId;
       if (
@@ -718,7 +688,7 @@ const Edit = (props) => {
               padding: 0,
               overflow: 'hidden' // 防止外层出现滚动条
             }}
-            dropdownRender={(originNode) => (
+            dropdownRender={() => (
               <ComponentTree
                 directoryData={directoryData}
                 onDirectoryDataChange={setDirectoryData}

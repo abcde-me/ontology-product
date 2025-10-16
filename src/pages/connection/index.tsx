@@ -2,15 +2,13 @@ import {
   Input,
   Message,
   Pagination,
-  Popconfirm,
   Table,
   Button,
   Modal,
-  Form,
-  Tooltip
+  Form
 } from '@arco-design/web-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
+import React, { useEffect, useRef, useState } from 'react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail/detail-modal';
 import Add from './add';
 import {
@@ -19,7 +17,7 @@ import {
   updataConnectionList
 } from '@/api/connectionApi';
 import Edit, { EditRef } from './edit';
-import { ConnectionType, connectorDetailType } from './type';
+import { connectorDetailType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -31,7 +29,6 @@ import { ConnectorType, TYPE_CONFIG } from './config';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
-const InputSearch = Input.Search;
 
 // 连接器状态枚举
 enum ConnectionStatus {

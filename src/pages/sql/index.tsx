@@ -1,7 +1,6 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import DataIcon from '@/assets/sql/data-left-menu.svg';
-import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import SQLIcon from '@/assets/sql/sql-left-menu.svg';
 import DasetIcon from '@/assets/sql/daset-left-menu.svg';
 import FileManager from './components/file-manager';
@@ -25,7 +24,6 @@ const SqlIndex: React.FC = memo(() => {
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
-  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
 
   // 添加状态桥接：用于同步FileManager的选中状态
@@ -86,7 +84,6 @@ const SqlIndex: React.FC = memo(() => {
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
     isEditorFocusedRef.current = focused;
-    setIsEditorFocused(focused);
   };
 
   // 刷新目录的函数

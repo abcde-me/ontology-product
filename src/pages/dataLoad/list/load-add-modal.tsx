@@ -1,6 +1,5 @@
 import {
   Button,
-  Cascader,
   Form,
   Input,
   Message,
@@ -8,29 +7,18 @@ import {
   Select,
   Tooltip,
   Tag,
-  Divider,
   TreeSelect
 } from '@arco-design/web-react';
-import { IconArchive, IconClose } from '@arco-design/web-react/icon';
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  ReactNode
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
-import { dataLodaAddForm } from '../type';
 import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
-import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import Uploads from './file-upload';
 import ComponentTree from './component-tree';
 import './db-tree.css';
-import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -41,15 +29,6 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 // 下拉框实例
 const Option = Select.Option;
-
-const options = [
-  'Beijing',
-  'Shanghai',
-  'Guangzhou',
-  'Shenzhen',
-  'Chengdu',
-  'Wuhan'
-];
 
 interface propsType {
   hideModalHan: () => void;
@@ -69,18 +48,14 @@ const LoadAddModal = (props: propsType) => {
   const [expression, setExpression] = useState({});
   //切换数据源类型
   const [sourceType, setSourceType] = useState('s3');
-  // 动态计算最大标签数量
-  const [maxTagCounts, setMaxTagCount] = useState(3);
   const [tableNames, setTableNames] = useState('');
   // 提交表单时的校验逻辑
   const handleSubmit = async (type: string) => {
     const formValues = await form.validate();
-    console.log(formValues, 'formValues12321321');
     try {
       setLoading(true);
-      console.log(formValues, 'formValues12321321');
 
-      const { time, day, cycle, ...rest } = formValues;
+      const { ...rest } = formValues;
       let pathId;
       if (
         sourceType === 'db' ||
@@ -211,7 +186,7 @@ const LoadAddModal = (props: propsType) => {
     props.hideModalHan();
   };
   // 默认的类型
-  const [typeValue, setTypeValue] = useState('s3');
+  const [typeValue] = useState('s3');
   // 载入类型的默认值
   const [loadVal, setLoadVal] = useState('once');
   // 切换载入类型的函数
@@ -252,17 +227,12 @@ const LoadAddModal = (props: propsType) => {
     }
   };
   const [directoryData, setDirectoryData] = useState<any[]>([]);
-  const [directoryLoading, setDirectoryLoading] = useState(false);
 
   async function getdirectoryDataList() {
     try {
-      setDirectoryLoading(true);
-      console.log('开始获取目录数据，当前数据源类型:', sourceType);
       const res = await getDirectoryList({
         root_type: 1
-        // dir_type: sourceType === 'db' ? 3 : undefined
       });
-      console.log('API响应:', res);
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
         setDirectoryData([]);
@@ -283,11 +253,8 @@ const LoadAddModal = (props: propsType) => {
         setDirectoryData([]);
         return [];
       }
-      console.log('原始目录数据:', res.data.src);
 
       if (sourceType === 's3' || sourceType === 'hdfs') {
-        console.log('处理对象存储/HDFS数据');
-
         const processTreeData = (
           data: any[],
           parentNode: any = null
@@ -342,12 +309,9 @@ const LoadAddModal = (props: propsType) => {
           return result;
         };
         const processedData = processTreeData(res.data.src);
-        console.log('处理后的对象存储数据:', processedData);
         setDirectoryData(processedData);
         return processedData;
       } else {
-        console.log('处理数据库/本地文件类型数据');
-
         const processTreeData = (
           data: any[],
           parentNode: any = null
@@ -420,7 +384,6 @@ const LoadAddModal = (props: propsType) => {
       }
       return [];
     } finally {
-      setDirectoryLoading(false);
     }
   }
 
@@ -429,30 +392,6 @@ const LoadAddModal = (props: propsType) => {
     console.log('ComponentTree 请求数据刷新');
     return await getdirectoryDataList();
   };
-  // 计算响应式标签数量的函数
-  const calculateMaxTagCount = useCallback(() => {
-    try {
-      if (selectRef.current && selectRef.current.dom) {
-        const selectElement = selectRef.current.dom;
-        const width = selectElement.offsetWidth || selectElement.clientWidth;
-        if (width > 0) {
-          // 根据宽度计算可显示的标签数量
-          const tagWidth = 80;
-          const inputSpace = 120;
-          const availableWidth = width - inputSpace;
-          const calculatedCount = Math.max(
-            1,
-            Math.floor(availableWidth / tagWidth)
-          );
-          setMaxTagCount(calculatedCount);
-        }
-      }
-    } catch (error) {
-      console.warn('计算标签数量时出错:', error);
-      // 使用默认值
-      setMaxTagCount(3);
-    }
-  }, []);
   //选中全部标签
   const handAllTagChange = (value) => {
     if (value.includes('all')) {
@@ -531,18 +470,6 @@ const LoadAddModal = (props: propsType) => {
     };
   }, [sourceType]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      calculateMaxTagCount();
-    };
-    window.addEventListener('resize', handleResize);
-    setTimeout(calculateMaxTagCount, 100);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [calculateMaxTagCount]);
-
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
   //拼接路径的表名
@@ -602,15 +529,7 @@ const LoadAddModal = (props: propsType) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   // 保留handleSelect作为ComponentTree的回调
-  const handleSelect = (
-    selectedKeys: string[],
-    extra: {
-      selected: boolean;
-      selectedNodes: NodeInstance[];
-      node: NodeInstance;
-      e: Event;
-    }
-  ) => {
+  const handleSelect = (selectedKeys: string[]) => {
     console.log('handleSelect called in load-add-modal', selectedKeys);
     // 更新选中状态
     setSelectedTreeKeys(selectedKeys);
@@ -628,7 +547,7 @@ const LoadAddModal = (props: propsType) => {
     });
   };
 
-  const handleFileChange = (fileData, blobURL) => {
+  const handleFileChange = (fileData) => {
     if (Array.isArray(fileData)) {
       if (fileData.length === 0) {
         // 如果是清空操作
@@ -739,7 +658,7 @@ const LoadAddModal = (props: propsType) => {
                 showSearch
                 filterOption={filterOption}
               >
-                {connectName.map((option, index) => (
+                {connectName.map((option) => (
                   <Option key={option.key} value={option.key}>
                     {option.label}
                   </Option>
@@ -831,8 +750,6 @@ const LoadAddModal = (props: propsType) => {
                   placeholder="请选择抽取的表"
                   style={{ width: '100%', minWidth: 0 }}
                   allowClear
-                  // allowCreate
-                  onVisibleChange={calculateMaxTagCount}
                 >
                   {(talbleList || []).length > 0 && (
                     <Option value="all">全部</Option>
@@ -934,7 +851,7 @@ const LoadAddModal = (props: propsType) => {
               padding: 0,
               overflow: 'hidden' // 防止外层出现滚动条
             }}
-            dropdownRender={(originNode) => (
+            dropdownRender={() => (
               <ComponentTree
                 directoryData={directoryData}
                 onDirectoryDataChange={setDirectoryData}

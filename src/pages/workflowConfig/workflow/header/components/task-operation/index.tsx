@@ -1,19 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  useState
-} from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useKeyPress } from 'ahooks';
-import { getKeyboardKeyCodeBySystem } from '@/pages/workflowConfig/workflow/utils';
 import { Button, Modal } from '@arco-design/web-react';
-import {
-  useStore,
-  useStore as useTaskStore
-} from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
 import { TaskOperationProps, ModelAndParameter } from '../../types';
@@ -27,14 +15,11 @@ import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
 
 dayjs.extend(relativeTime);
 
-const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
-
 const AppPublisher = ({
   workflowStatus,
   cycleText,
   onOperate
 }: TaskOperationProps) => {
-  const [published, setPublished] = useState(false);
   const [newCycleText, setNewCycleText] = useState(cycleText);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;

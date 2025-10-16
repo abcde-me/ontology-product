@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import { Table, Input } from '@arco-design/web-react';
 import { useNodes, type Node } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
@@ -41,8 +40,6 @@ function FileList({
     limit: 5,
     total: 0
   });
-  const [searchers, setSearchers] = useState<Record<string, any>>({});
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const columns: any[] = [
     {
@@ -74,7 +71,7 @@ function FileList({
           setTimeout(() => inputRef.current?.focus(), 150);
         }
       },
-      render(col, record) {
+      render(col) {
         return (
           <>
             <EllipsisPopover value={col} isEdit={false} preferTypography />
@@ -94,7 +91,7 @@ function FileList({
     {
       title: '文件大小',
       dataIndex: 'file_size',
-      render(col, record) {
+      render(col) {
         return <>{formatFileSize(+col)}</>;
       }
     },
@@ -219,7 +216,7 @@ function FileList({
       rowSelection={{
         selectedRowKeys,
         checkAll: !readOnly,
-        checkboxProps: (record) => {
+        checkboxProps: () => {
           return {
             disabled: readOnly
           };

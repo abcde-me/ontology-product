@@ -65,17 +65,8 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   ]);
   // 选中的标签类型
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
-  const [filterArrState, setFilterArrState] = useState<
-    Array<{
-      label_name_cn: string;
-    }>
-  >([]);
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
-    const filterArr = formText
-      .getFieldsValue()
-      ?.entityRelations?.filter((item, i) => i !== index);
-    setFilterArrState(filterArr);
     const newData = [...entityRelations];
     newData[index][field] = value;
     setEntityRelations(newData);
@@ -85,7 +76,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const handleRelationFieldChange = (index, field, value) => {
     const newData: any = [...relationRelations];
     const currentRelation = newData[index];
-    const oldValue = currentRelation[field];
     // 更新当前字段值
     newData[index][field] = value;
     // 如果是起始标签变化，需要检查并清理目标标签中可能存在的相同选项
@@ -138,7 +128,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.labels?.forEach((item, index) => {
+      getDetailObj?.labels?.forEach((item) => {
         formText.setFieldValue(
           `label_name_en${item.order_num}`,
           item.label_name_en
@@ -148,7 +138,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           item.label_name_cn
         );
       });
-      getDetailObj?.entity_relations?.forEach((item, index) => {
+      getDetailObj?.entity_relations?.forEach((item) => {
         formLabel.setFieldValue(
           `relation_name_en${item.order_num}`,
           item.relation_name_en
@@ -315,8 +305,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     style={{ width: 250 }}
                     value={item.label_name_cn}
                     onChange={(value) => {
-                      // 保存当前项的order_num用于精准匹配
-                      const currentOrderNum = item.order_num;
                       handleFieldChange(index, 'label_name_cn', value);
                     }}
                   />
@@ -392,7 +380,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
             <Form
               form={formLabel}
               disabled={type === 'detail'}
-              onValuesChange={(_, val) => {}}
+              onValuesChange={() => {}}
               layout="inline"
               labelAlign="right"
               labelCol={{ flex: 'none' }}
@@ -624,7 +612,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             >
                               {entityRelations &&
                                 entityRelations?.length > 0 &&
-                                entityRelations?.map((option, index) => {
+                                entityRelations?.map((option) => {
                                   if (!option?.label_name_en) {
                                     return null;
                                   }

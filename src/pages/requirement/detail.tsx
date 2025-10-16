@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Breadcrumb,
   Button,
@@ -20,12 +20,10 @@ import {
   IconDelete,
   IconDown,
   IconPlus,
-  IconQuestionCircle,
-  IconSwap
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
-import { useUserInfo } from '@/store/userInfoStore';
 import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
 import { DepartmentModal } from './components/DepartmentModal';
 import { IndividualModal } from './components/IndividualModal';
@@ -39,7 +37,7 @@ import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty, min } from 'lodash';
+import _, { omitBy, isArray, isEmpty } from 'lodash';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -159,7 +157,7 @@ export default function RequirementDetail() {
     const updatedDatalist = _.cloneDeep(templateData);
     // 遍历每个标签
     // 遍历标签中的每个属性组
-    updatedDatalist.forEach((attrGroup: any, groupIndex: any) => {
+    updatedDatalist.forEach((attrGroup: any) => {
       form2.setFieldValue(
         `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
         attrGroup.attribute_group_name
@@ -170,7 +168,7 @@ export default function RequirementDetail() {
         attrGroup.label_info_attribute &&
         attrGroup.label_info_attribute.length > 0
       ) {
-        attrGroup.label_info_attribute.forEach((attribute, attrIndex) => {
+        attrGroup.label_info_attribute.forEach((attribute) => {
           form2.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
             attribute.attribute_name_cn
@@ -335,13 +333,13 @@ export default function RequirementDetail() {
    * @param {number} labelIndex - 标签索引
    * @param {number} groupIndex - 要删除的属性组索引
    */
-  const deleteAttributeGroup = (attribute_id, groupIndex) => {
+  const deleteAttributeGroup = (attribute_id) => {
     setDatalist((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
       const newData = _.cloneDeep(prevData);
 
       // 遍历每个标签项
-      newData.forEach((label, labelIndex) => {
+      newData.forEach((label) => {
         // 查找当前标签中是否包含要删除的属性组
         const attributeGroups = label.label_info_attribute_groups || [];
         const groupToDeleteIndex = attributeGroups.findIndex(
@@ -630,30 +628,30 @@ export default function RequirementDetail() {
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formText
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formLabel
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
         ? formType
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -670,7 +668,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (selectedData?.length <= 0) {
             setIsShowDataErrorInfo(true);
           }
@@ -682,16 +680,16 @@ export default function RequirementDetail() {
         }),
       form2
         .validate()
-        .then((val) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       form2Child
         .validate()
-        .then((value) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       // 任务验证
       form3
         .validate()
@@ -703,7 +701,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (taskAssignData?.length === 0) {
             setIsShowTypeErrorInfo(true);
             return;
@@ -750,7 +748,7 @@ export default function RequirementDetail() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-    const newSetLabels = datalist.map((item, index) => {
+    const newSetLabels = datalist.map((item) => {
       return {
         ...item,
         order_num: datalist?.length + 1,
@@ -1600,8 +1598,7 @@ export default function RequirementDetail() {
                                                     }
                                                     if (type !== 'detail') {
                                                       deleteAttributeGroup(
-                                                        attrGroup.attribute_id,
-                                                        groupIndex
+                                                        attrGroup.attribute_id
                                                       );
                                                     }
                                                   }}

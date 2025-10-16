@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Button,
   Tree,
-  Form,
   Input,
   Empty,
   Tooltip
@@ -27,10 +26,8 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   getDetailObj,
   type
 }) => {
-  const FormItem = Form.Item;
-  const [activeTab, setActiveTab] = useState('src');
+  const [activeTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
-  const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [checkedKeysDetail, setCheckedKeysDetail] = useState<string[]>([]);
 
@@ -89,33 +86,6 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
     return loop(treeData);
-  };
-
-  /**
-   * 辅助函数：查找所有最深层的id
-   * @param {Array} array - 要搜索的数组
-   * @returns {Array} - 所有最深层的id数组
-   */
-  const collectAllLeafIds = (nodes) => {
-    const leafIds: string[] = [];
-
-    for (const node of nodes) {
-      // 检查是否有有效的子节点
-      const hasChildren =
-        node.children &&
-        Array.isArray(node.children) &&
-        node.children.length > 0;
-
-      if (hasChildren) {
-        // 有子节点，递归处理子节点
-        leafIds.push(...collectAllLeafIds(node.children));
-      } else {
-        // 没有子节点，是叶子节点，收集ID
-        leafIds.push(node.id);
-      }
-    }
-
-    return leafIds;
   };
 
   useEffect(() => {
@@ -233,8 +203,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
               );
             }}
             treeData={treeData}
-            onCheck={(key, val) => {
-              setCheckedKeys(key);
+            onCheck={(key) => {
               getChildTreeSelectData(key);
             }}
           />

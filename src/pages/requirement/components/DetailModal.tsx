@@ -3,7 +3,6 @@ import {
   Modal,
   Button,
   Tree,
-  Form,
   Input,
   DatePicker,
   Table,
@@ -48,8 +47,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   initialSelectedData = [], // 接收初始数据
   getDetailObj
 }) => {
-  const FormItem = Form.Item;
-  const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -294,10 +291,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     settableLoading(true);
     getTableData();
   }, [checkedKeys, current, pageSize]);
-  const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
   // 处理日期范围变化
   const handleDateChange = (value) => {
-    setDateRange(value);
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
       const [start, end] = value;
@@ -313,9 +308,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       // 清空日期选择时，恢复原始数据
       getTableData();
     }
-  };
-  const getTableSelectContent = () => {
-    onClose();
   };
 
   useEffect(() => {
@@ -378,7 +370,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 onChange={handleDateChange}
                 style={{ width: 350 }}
                 onClear={() => {
-                  setDateRange([]);
                   getTableData();
                 }}
               />

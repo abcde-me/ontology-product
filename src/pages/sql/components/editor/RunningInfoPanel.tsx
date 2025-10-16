@@ -63,8 +63,6 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       currentFileId,
       currentScriptId,
       execid,
-      cancelGetRunResultPolling,
-      getRunResultPolling,
       resultLoading,
       loadRunResult,
       handleGetRunLog,

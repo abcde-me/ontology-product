@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/sqlApi';
@@ -204,7 +204,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunDuration(Number(res.data?.run_duration));
         setRunStartTime(new Date(res.data?.run_end_time ?? ''));
       },
-      onError: (error) => {
+      onError: () => {
         updateRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult([]);
