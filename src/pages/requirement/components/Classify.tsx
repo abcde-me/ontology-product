@@ -134,6 +134,7 @@ const Classify = (props: ClassifyComponentProps) => {
                   style={{ paddingLeft: 16, marginRight: 8 }}
                   label="属性名称:"
                   field={`attribute_group_name${item?.attribute_id}`}
+                  className="classify-relation-item_group_name"
                   rules={[
                     {
                       required: true,
