@@ -2,7 +2,7 @@ import UAPI from '@/api';
 
 // 获取连接器的列表
 export async function getConnectionList(params) {
-  return await UAPI.RES.getConnection({}).get(params).inRegion().do();
+  return await UAPI.RES.getConnection({}).post(params).inRegion().do();
 }
 // 添加的api
 export async function addconnectionList(params) {

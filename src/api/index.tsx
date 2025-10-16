@@ -45,12 +45,15 @@ UAPI_CONFIG.addRequestInterceptor(
         config.url
       );
       if (config.data && typeof config.data === 'object') {
-        config.data = { ...config.data, id: projectId[projectId.length - 1] };
+        config.data = {
+          ...config.data,
+          project_id: projectId[projectId.length - 1]
+        };
       } else if (config.method?.toLowerCase() === 'get' && config.params) {
         // 对于GET请求，将项目ID添加到params中
         config.params = {
           ...config.params,
-          id: projectId[projectId.length - 1]
+          project_id: projectId[projectId.length - 1]
         };
       }
     } else {

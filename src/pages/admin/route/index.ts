@@ -1,6 +1,7 @@
 import * as React from 'react';
 import auth, { AuthParams } from '@/utils/authentication';
 import { useEffect, useMemo, useState } from 'react';
+import { ROUTE_PERMISSIONS } from '@/config/newPermissions';
 
 export type IRoute = AuthParams & {
   name: string;
@@ -13,6 +14,8 @@ export type IRoute = AuthParams & {
   component?: React.FC<any>;
   level?: number;
   sub?: boolean;
+  // 新权限字段
+  permission?: string | null;
 };
 
 // om 运维、tenant 运营、portal 租户
@@ -22,6 +25,7 @@ export const routes: IRoute[] = [
     name: 'connection',
     key: '/tenant/compute/modaforge/connection',
     component: React.lazy(async () => import('../../connection')),
+    permission: ROUTE_PERMISSIONS.connection,
     children: []
   },
   // 数据载入
@@ -29,25 +33,29 @@ export const routes: IRoute[] = [
     name: 'dataLoad',
     key: '/tenant/compute/modaforge/dataLoad', //临时修改../../dataLoad/index
     component: React.lazy(async () => import('../../dataLoad')),
+    permission: ROUTE_PERMISSIONS.dataLoad,
     children: [
       {
         name: 'dataLoadList',
         key: '/tenant/compute/modaforge/dataLoad/list',
-        component: React.lazy(async () => import('../../dataLoad/list/list'))
+        component: React.lazy(async () => import('../../dataLoad/list/list')),
+        permission: ROUTE_PERMISSIONS.dataLoadList
       },
       {
         name: 'dataLoadDetail',
         key: '/tenant/compute/modaforge/dataLoad/detail',
         component: React.lazy(
           async () => import('../../dataLoad/detail/dataLoad-detail')
-        )
+        ),
+        permission: ROUTE_PERMISSIONS.dataLoadDetail
       },
       {
         name: 'accessLodaDetail',
         key: '/tenant/compute/modaforge/dataLoad/access',
         component: React.lazy(
           async () => import('../../dataLoad/access/access-detail')
-        )
+        ),
+        permission: ROUTE_PERMISSIONS.accessLodaDetail
       }
     ]
   },
@@ -56,6 +64,7 @@ export const routes: IRoute[] = [
     name: 'sql',
     key: '/tenant/compute/modaforge/sql',
     component: React.lazy(async () => import('../../sql')),
+    permission: ROUTE_PERMISSIONS.sql,
     children: []
   },
   // 工作流
@@ -63,6 +72,7 @@ export const routes: IRoute[] = [
     name: 'workflowList',
     key: '/tenant/compute/modaforge/workflowList',
     component: React.lazy(async () => import('../../workflowList')),
+    permission: ROUTE_PERMISSIONS.workflowList,
     children: []
   },
   // Pyspark
@@ -70,6 +80,7 @@ export const routes: IRoute[] = [
     name: 'pyspark',
     key: '/tenant/compute/modaforge/pyspark',
     component: React.lazy(async () => import('../../pyspark')),
+    permission: ROUTE_PERMISSIONS.pyspark,
     children: []
   },
   // 创建工作流
@@ -231,8 +242,70 @@ export const generatePermission = (role: string) => {
   return result;
 };
 
-const useRoute = (userPermission): [IRoute[], string] => {
-  const filterRoute = (routes: IRoute[], arr = []): IRoute[] => {
+// 新的权限路由Hook，基于新权限系统
+export const usePermissionRoute = (
+  userPermissions: string[]
+): [IRoute[], string] => {
+  const filterRoute = (routes: IRoute[], arr: IRoute[] = []): IRoute[] => {
+    if (!routes.length) {
+      return [];
+    }
+
+    for (const route of routes) {
+      const { permission } = route;
+      let visible = true;
+
+      // 检查新权限系统
+      if (permission) {
+        visible = userPermissions.includes(permission);
+      }
+
+      // 如果没有权限要求，则默认可见（如登录页等）
+      if (permission === null || permission === undefined) {
+        visible = true;
+      }
+
+      if (!visible) {
+        continue;
+      }
+
+      if (route.children && route.children.length) {
+        const newRoute = { ...route, children: [] };
+        filterRoute(route.children, newRoute.children);
+        // 如果有子路由或者父路由本身可见，则添加
+        if (newRoute.children.length || !permission) {
+          arr.push(newRoute);
+        }
+      } else {
+        arr.push({ ...route });
+      }
+    }
+
+    return arr;
+  };
+
+  const [permissionRoute, setPermissionRoute] = useState<IRoute[]>(routes);
+
+  useEffect(() => {
+    const newRoutes = filterRoute(routes);
+    setPermissionRoute(newRoutes);
+  }, [userPermissions]);
+
+  const defaultRoute = useMemo(() => {
+    const first = permissionRoute[0];
+    if (first) {
+      const firstRoute = first?.children?.[0]?.key || first.key;
+      return firstRoute;
+    }
+    return '';
+  }, [permissionRoute]);
+
+  return [permissionRoute, defaultRoute];
+};
+
+// 保留原有的useRoute以兼容旧代码
+const useRoute = (userPermission: any): [IRoute[], string] => {
+  const filterRoute = (routes: IRoute[], arr: any[] = []): IRoute[] => {
     if (!routes.length) {
       return [];
     }
@@ -250,13 +323,9 @@ const useRoute = (userPermission): [IRoute[], string] => {
         const newRoute = { ...route, children: [] };
         filterRoute(route.children, newRoute.children);
         if (newRoute.children.length) {
-          // TODO: ts错误
-          // @ts-expect-error
           arr.push(newRoute);
         }
       } else {
-        // TODO: ts错误
-        // @ts-expect-error
         arr.push({ ...route });
       }
     }

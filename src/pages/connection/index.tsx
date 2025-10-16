@@ -24,10 +24,10 @@ import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import { PermissionWrapper } from '@/components/PermissionGuard';
-import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import { ConnectorType, TYPE_CONFIG } from './config';
+import { PERMISSIONS } from '@/config/newPermissions';
+import { Permission, PermissionButton } from '@/components/Permission';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
@@ -261,19 +261,19 @@ export default function Connection() {
       render: (_, record) => {
         const perms = record?.perms || [];
         const config = [] as any;
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
+        if (perms.includes(PERMISSIONS.CONNECTOR.GET)) {
           config.push({
             label: '详情',
             onClick: () => viewDetailHan(record.id)
           });
         }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
+        if (perms.includes(PERMISSIONS.CONNECTOR.MODIFY)) {
           config.push({
             label: '编辑',
             onClick: () => editFormHandle(record)
           });
         }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
+        if (perms.includes(PERMISSIONS.CONNECTOR.DELETE)) {
           config.push({
             label: '删除',
             onClick: () => delModalHan(record.id)
@@ -475,7 +475,8 @@ export default function Connection() {
             clearHan();
           }}
         />
-        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
+
+        <PermissionButton permission={PERMISSIONS.CONNECTOR.CREATE}>
           <Button
             type="primary"
             icon={<IconPlus />}
@@ -485,7 +486,7 @@ export default function Connection() {
           >
             创建连接器
           </Button>
-        </PermissionWrapper>
+        </PermissionButton>
       </div>
       <Table
         border={false}

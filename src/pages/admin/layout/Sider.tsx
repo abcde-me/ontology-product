@@ -12,9 +12,9 @@ import {
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useUserInfo } from '@/store/userInfoStore';
 import { getFlatRoutes, routes } from '../route';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
+import { usePermission } from '@/context/PermissionContext';
 import './sider.scss';
 
 const MenuItem = Menu.Item;
@@ -31,16 +31,14 @@ const hideSidebarPaths = [
 const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
-  // 从全局 store 获取用户信息
-  const userInfo = useUserInfo();
+  // 从权限Context获取权限数据
+  const { permissions } = usePermission();
 
   // 根据用户权限过滤菜单
   const filteredMenus = useMemo(() => {
-    console.log('userInfo', userInfo);
-    const userPermissions = userInfo?.perms || [];
-    console.log('userPermissions', userPermissions, menus);
-    return filterMenusByPermissions(menus, userPermissions);
-  }, [userInfo?.perms]);
+    console.log('使用新权限系统过滤菜单, permissions:', permissions);
+    return filterMenusByPermissions(menus, permissions);
+  }, [permissions]);
 
   const [collapsed, setCollapsed] = useState(false);
   const [showMenus, setShowMenus] = useState(filteredMenus);

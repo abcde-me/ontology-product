@@ -1,5 +1,6 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
+import { PERMISSIONS } from '@/config/newPermissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
@@ -52,9 +53,9 @@ export const filterMenusByPermissions = (
       }
 
       // 如果菜单需要权限且用户没有该权限，则过滤掉
-      // if (menu.permission && !userPermissions.includes(menu.permission)) {
-      //   return null;
-      // }
+      if (menu.permission && !userPermissions.includes(menu.permission)) {
+        return null;
+      }
 
       return menu;
     })
@@ -73,14 +74,14 @@ export const menus: MenuModel[] = [
         icon: <Connection className={iconClass} />,
         key: 'connection',
         path: '/tenant/compute/modaforge/connection',
-        permission: 'connectors:can_search'
+        permission: PERMISSIONS.CONNECTOR.LIST
       },
       {
         title: '数据载入',
         icon: <DataLoad className={iconClass} />,
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad',
-        permission: 'dataloader:can_search'
+        permission: PERMISSIONS.DATA_LOADER.LIST
       }
     ]
   },
@@ -94,14 +95,14 @@ export const menus: MenuModel[] = [
         icon: <WorkflowList className={iconClass} />,
         key: 'workflowList',
         path: '/tenant/compute/modaforge/workflowList',
-        permission: 'workflow:can_search'
+        permission: PERMISSIONS.WORKFLOW.LIST
       },
       {
         title: '作业',
         icon: <WorkflowTask className={iconClass} />,
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask',
-        permission: 'workflowInstance:can_search'
+        permission: PERMISSIONS.WORKFLOW.LIST
       }
     ]
   },
@@ -115,14 +116,14 @@ export const menus: MenuModel[] = [
         icon: <PasparkMenu className={iconClass} />,
         key: 'pyspark',
         path: '/tenant/compute/modaforge/pyspark',
-        permission: 'pyspark:can_search'
+        permission: PERMISSIONS.PYSPARK.LIST
       },
       {
         title: 'SQL开发',
         icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
-        permission: 'sql_script:can_search'
+        permission: PERMISSIONS.SQL_SCRIPT.LIST
       }
     ]
   },
@@ -135,13 +136,15 @@ export const menus: MenuModel[] = [
         title: '需求管理',
         icon: <RequirementManagement className={iconClass} />,
         key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement'
+        path: '/tenant/compute/modaforge/requirement',
+        permission: PERMISSIONS.REQUIREMENT.LIST
       },
       {
         title: '标注任务',
         icon: <AnnotationTask className={iconClass} />,
         key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList'
+        path: '/tenant/compute/modaforge/taskList',
+        permission: PERMISSIONS.ANNOTATION_TASK.LIST
       }
     ]
   },
@@ -155,14 +158,14 @@ export const menus: MenuModel[] = [
         icon: <DataCatalog className={iconClass} />,
         key: 'dataCatalog',
         path: '/tenant/compute/modaforge/dataCatalog',
-        permission: 'directory:can_search_dirs'
+        permission: PERMISSIONS.DIRECTORY.LIST
       },
       {
         title: '数据集管理',
         icon: <DatasetManagement className={iconClass} />,
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
-        permission: 'datasets:can_search'
+        permission: PERMISSIONS.DATASET.LIST
       }
     ]
   },
@@ -181,7 +184,7 @@ export const menus: MenuModel[] = [
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/organization'
           ),
-        permission: 'organizations:can_search'
+        permission: PERMISSIONS.ORGANIZATION.LIST
       },
       {
         title: '用户管理',
@@ -192,7 +195,7 @@ export const menus: MenuModel[] = [
             '/operationcenter/tenant/compute/operationcenter/user'
           ),
         key: 'userMgmt',
-        permission: 'users:can_search'
+        permission: PERMISSIONS.USER.LIST
       }
     ]
   }
