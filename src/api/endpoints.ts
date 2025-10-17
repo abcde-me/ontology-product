@@ -300,7 +300,7 @@ export const ModaForgeResourceEndpoints = {
 
   //数据目录
   //获取数据目录
-  catalogListApi: PrefixAimdp + '/directory',
+  catalogListApi: PrefixAimdp + '/ListDirectory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
@@ -347,7 +347,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取连接器数据列表
   getConnection: PrefixAimdp + '/ListConnectors',
   // 新建连接器数据
-  addconnection: PrefixAimdp + '/connectors',
+  addconnection: PrefixAimdp + '/CreateConnector',
   // 删除连接器数据
   delconnection: PrefixAimdp + '/connectors/{connector_id}',
   // 修改连接器数据
@@ -358,7 +358,7 @@ export const ModaForgeResourceEndpoints = {
   // 数据载入接口
 
   // 获取数据载入列表
-  getLoadListApi: PrefixAimdp + '/load_tasks_page',
+  getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
   addLoadApi: PrefixAimdp + '/load_tasks',
   //数据载入上传文件

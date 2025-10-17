@@ -188,7 +188,7 @@ export async function getCatalogList(
   param: GetCatalogListParams
 ): Promise<ApiRes<GetCatalogListRes>> {
   // TODO: 联调
-  return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
 
   // mock data
   // return Promise.resolve({
