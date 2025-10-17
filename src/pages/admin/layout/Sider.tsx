@@ -68,13 +68,22 @@ function LayoutWithSider({ children }) {
           const path = activePaths.find((path) =>
             location.pathname.startsWith(path ?? '')
           );
-          if (path) return [menu.key];
+          if (path) {
+            // 如果有查询参数匹配器，使用它来进一步判断
+            if (menu.queryParamMatcher) {
+              if (menu.queryParamMatcher(location.search)) {
+                return [menu.key];
+              }
+            } else {
+              return [menu.key];
+            }
+          }
         }
       }
       return null;
     };
     return findMatch(showMenus);
-  }, [location.pathname, showMenus]);
+  }, [location.pathname, location.search, showMenus]);
 
   const [openKeys, setopenKeys] = useState(actives || []);
 

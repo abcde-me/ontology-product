@@ -7,99 +7,98 @@
 export const PERMISSIONS = {
   // 连接器相关权限
   CONNECTOR: {
-    LIST: 'aimdp-manager:connector:read:list',
-    GET: 'aimdp-manager:connector:read:get',
-    CREATE: 'aimdp-manager:connector:manage:create',
-    MODIFY: 'aimdp-manager:connector:manage:modify',
-    DELETE: 'aimdp-manager:connector:manage:delete'
+    LIST: 'aimdp-manager:connector:read:list', // 列表
+    GET: 'aimdp-manager:connector:read:get', // 详情
+    CREATE: 'aimdp-manager:connector:manage:create', // 创建
+    MODIFY: 'aimdp-manager:connector:manage:modify', // 修改
+    DELETE: 'aimdp-manager:connector:manage:delete' // 删除
   },
 
   // 数据载入相关权限
   DATA_LOADER: {
-    LIST: 'aimdp-manager:data_loader:read:list',
-    GET: 'aimdp-manager:data_loader:read:get',
-    CREATE: 'aimdp-manager:data_loader:manage:create',
-    MODIFY: 'aimdp-manager:data_loader:manage:modify',
-    DELETE: 'aimdp-manager:data_loader:manage:delete',
-    RUN: 'aimdp-manager:data_loader:manage:run'
+    LIST: 'aimdp-manager:data_loader:read:list', // 列表
+    GET: 'aimdp-manager:data_loader:read:get', // 详情
+    CREATE: 'aimdp-manager:data_loader:manage:create', // 创建
+    MODIFY: 'aimdp-manager:data_loader:manage:modify', // 修改
+    DELETE: 'aimdp-manager:data_loader:manage:delete', // 删除
+    RUN: 'aimdp-manager:data_loader:manage:run' // 运行
   },
 
   // SQL脚本相关权限
   SQL_SCRIPT: {
-    LIST: 'aimdp-manager:sql_script:read:list',
-    GET: 'aimdp-manager:sql_script:read:get',
-    CREATE: 'aimdp-manager:sql_script:manage:create',
-    MODIFY: 'aimdp-manager:sql_script:manage:modify',
-    DELETE: 'aimdp-manager:sql_script:manage:delete',
-    RUN: 'aimdp-manager:sql_script:manage:run',
-    EXPORT: 'aimdp-manager:sql_script:manage:export'
+    LIST: 'aimdp-manager:sql_script:read:list', // 列表
+    GET: 'aimdp-manager:sql_script:read:get', // 详情
+    CREATE: 'aimdp-manager:sql_script:manage:create', // 创建
+    MODIFY: 'aimdp-manager:sql_script:manage:modify', // 修改
+    DELETE: 'aimdp-manager:sql_script:manage:delete', // 删除
+    RUN: 'aimdp-manager:sql_script:manage:run', // 运行
+    EXPORT: 'aimdp-manager:sql_script:manage:export' // 导出
   },
 
   // 工作流相关权限
   WORKFLOW: {
-    LIST: 'aimdp-manager:workflow:read:list',
-    GET: 'aimdp-manager:workflow:read:get',
-    CREATE: 'aimdp-manager:workflow:manage:create',
-    MODIFY: 'aimdp-manager:workflow:manage:modify',
-    DELETE: 'aimdp-manager:workflow:manage:delete',
-    RUN: 'aimdp-manager:workflow:manage:run'
+    LIST: 'aimdp-manager:workflow:read:list', // 列表
+    GET: 'aimdp-manager:workflow:read:get', // 详情
+    CREATE: 'aimdp-manager:workflow:manage:create', // 创建
+    MODIFY: 'aimdp-manager:workflow:manage:modify', // 修改
+    DELETE: 'aimdp-manager:workflow:manage:delete', // 删除
+    RUN: 'aimdp-manager:workflow:manage:run' // 运行
   },
 
   // PySpark相关权限
   PYSPARK: {
-    LIST: 'aimdp-manager:pyspark:read:list',
-    GET: 'aimdp-manager:pyspark:read:get',
-    CREATE: 'aimdp-manager:pyspark:manage:create',
-    MODIFY: 'aimdp-manager:pyspark:manage:modify',
-    DELETE: 'aimdp-manager:pyspark:manage:delete',
-    RUN: 'aimdp-manager:pyspark:manage:run',
-    EXPORT: 'aimdp-manager:pyspark:manage:export'
+    LIST: 'aimdp-manager:pyspark:read:list', // 列表
+    GET: 'aimdp-manager:pyspark:read:get', // 详情
+    CREATE: 'aimdp-manager:pyspark:manage:create', // 创建
+    MODIFY: 'aimdp-manager:pyspark:manage:modify', // 修改
+    DELETE: 'aimdp-manager:pyspark:manage:delete', // 删除
+    RUN: 'aimdp-manager:pyspark:manage:run', // 运行
+    EXPORT: 'aimdp-manager:pyspark:manage:export' // 导出
   },
 
   // 数据集相关权限
   DATASET: {
-    LIST: 'aimdp-manager:dataset:read:list',
-    GET: 'aimdp-manager:dataset:read:get',
-    CREATE: 'aimdp-manager:dataset:manage:create',
-    MODIFY: 'aimdp-manager:dataset:manage:modify',
-    DELETE: 'aimdp-manager:dataset:manage:delete'
+    LIST: 'aimdp-manager:dataset:read:list', // 列表
+    GET: 'aimdp-manager:dataset:read:get', // 详情
+    CREATE: 'aimdp-manager:dataset:manage:create', // 创建
+    MODIFY: 'aimdp-manager:dataset:manage:modify', // 修改
+    DELETE: 'aimdp-manager:dataset:manage:delete' // 删除
   },
 
-  // 目录相关权限
+  // 数据目录相关权限
   DIRECTORY: {
-    LIST: 'aimdp-manager:directory:read:list',
-    GET: 'aimdp-manager:directory:read:get',
-    CREATE: 'aimdp-manager:directory:manage:create',
-    MODIFY: 'aimdp-manager:directory:manage:modify',
-    DELETE: 'aimdp-manager:directory:manage:delete'
+    LIST: 'aimdp-manager:directory:read:list', // 列表
+    GET: 'aimdp-manager:directory:read:get', // 详情
+    CREATE: 'aimdp-manager:directory:manage:create', // 创建
+    MODIFY: 'aimdp-manager:directory:manage:modify', // 修改
+    DELETE: 'aimdp-manager:directory:manage:delete' // 删除
   },
 
   // 标签相关权限
   TAG: {
-    LIST: 'aimdp-manager:tag:read:list',
-    GET: 'aimdp-manager:tag:read:get',
-    CREATE: 'aimdp-manager:tag:manage:create',
-    MODIFY: 'aimdp-manager:tag:manage:modify',
-    DELETE: 'aimdp-manager:tag:manage:delete'
+    LIST: 'aimdp-manager:tag:read:list', // 列表
+    GET: 'aimdp-manager:tag:read:get', // 详情
+    CREATE: 'aimdp-manager:tag:manage:create', // 创建
+    MODIFY: 'aimdp-manager:tag:manage:modify', // 修改
+    DELETE: 'aimdp-manager:tag:manage:delete' // 删除
   },
 
-  // 需求管理相关权限
+  // 标注-需求管理相关权限
   REQUIREMENT: {
-    LIST: 'aimdp-manager:label_service:read:get_req_list',
-    GET: 'aimdp-manager:requirement:read:get',
-    CREATE: 'aimdp-manager:requirement:manage:create',
-    MODIFY: 'aimdp-manager:requirement:manage:modify',
-    DELETE: 'aimdp-manager:requirement:manage:delete'
+    LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 列表
+    GET: 'aimdp-manager:label_req_manager:read:get_req', // 详情
+    CREATE: 'aimdp-manager:label_req_manager:manage:create', // 创建
+    DOWNLOAD: 'aimdp-manager:label_req_manager:manage:req_result_download' // 下载
   },
 
   // 标注任务相关权限
   ANNOTATION_TASK: {
-    LIST: 'aimdp-manager:label_service:read:get_task_list',
-    GET: 'aimdp-manager:annotation_task:read:get',
-    CREATE: 'aimdp-manager:annotation_task:manage:create',
-    MODIFY: 'aimdp-manager:annotation_task:manage:modify',
-    DELETE: 'aimdp-manager:annotation_task:manage:delete',
-    ASSIGN: 'aimdp-manager:annotation_task:manage:assign'
+    LIST: 'aimdp-manager:label_task:read:get_task_list', // 列表
+    GET: 'aimdp-manager:label_task:read:get_task_by_id', // 标注任务详情
+    RESULT: 'aimdp-manager:label_task:read:get_task_result', // 标注任务结果
+    LABEL: 'aimdp-manager:label_task:read:get_label', // 获取标签
+    TASK: 'aimdp-manager:label_task:read:get_task', // 获取一个标注任务
+    SAVE: 'aimdp-manager:label_task:manage:save_task_result' // 保存任务
   },
 
   // 组织管理相关权限

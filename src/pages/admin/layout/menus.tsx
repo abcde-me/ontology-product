@@ -25,6 +25,7 @@ export type MenuModel = {
   type?: string;
   external?: boolean;
   permission?: string; // 添加权限字段
+  queryParamMatcher?: (search: string) => boolean; // 用于匹配查询参数
 };
 
 export const filterMenusByPermissions = (
@@ -183,7 +184,12 @@ export const menus: MenuModel[] = [
           '/tenant/compute/modaforge/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/organization'
-          )
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('organization') ?? false;
+        }
         // permission: PERMISSIONS.ORGANIZATION.LIST
       },
       {
@@ -194,7 +200,12 @@ export const menus: MenuModel[] = [
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/user'
           ),
-        key: 'userMgmt'
+        key: 'userMgmt',
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('user') ?? false;
+        }
         // permission: PERMISSIONS.USER.LIST
       }
     ]
