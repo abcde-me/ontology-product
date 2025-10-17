@@ -117,12 +117,12 @@ export const ResourceEndpoints = {
   logoInfo: '/api/menu/v1/ex/logo/info'
 };
 // todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
-
+const API_PREFIX = '/ceai';
 // 研发环境部署
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdp = '/api/aimdp/v1';
+export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
 export const PrefixLabelService = '/label-service/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
@@ -235,7 +235,7 @@ export const ResourceEndpointsV2 = {
   workflowPublishDetail: PrefixV2 + '/apps/{appId}/workflows/{workflowId}',
   workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
 };
-const API_PREFIX = '/ceai';
+
 export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
 export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 // 多模态数据治理平台接口
@@ -300,7 +300,7 @@ export const ModaForgeResourceEndpoints = {
 
   //数据目录
   //获取数据目录
-  catalogListApi: PrefixAimdp + '/directory',
+  catalogListApi: PrefixAimdp + '/ListDirectory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
@@ -345,9 +345,9 @@ export const ModaForgeResourceEndpoints = {
   // 连接器接口
 
   // 获取连接器数据列表
-  getConnection: PrefixAimdp + '/connectors',
+  getConnection: PrefixAimdp + '/ListConnectors',
   // 新建连接器数据
-  addconnection: PrefixAimdp + '/connectors',
+  addconnection: PrefixAimdp + '/CreateConnector',
   // 删除连接器数据
   delconnection: PrefixAimdp + '/connectors/{connector_id}',
   // 修改连接器数据
@@ -358,7 +358,7 @@ export const ModaForgeResourceEndpoints = {
   // 数据载入接口
 
   // 获取数据载入列表
-  getLoadListApi: PrefixAimdp + '/load_tasks_page',
+  getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
   addLoadApi: PrefixAimdp + '/load_tasks',
   //数据载入上传文件

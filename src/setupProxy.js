@@ -71,16 +71,16 @@ module.exports = function (app) {
         })
       )
     );
-    app.use(
-      ['/api/aimdp/v1'],
-      createProxyMiddleware(
-        addProxy({
-          // 需要通过VPN访问
-          // http://10.1.4.73:31183/api/aimdp/v1
-          target: 'http://61.182.98.8:38084/api/aimdp/v1'
-        })
-      )
-    );
+    // app.use(
+    //   ['/api/aimdp/v1'],
+    //   createProxyMiddleware(
+    //     addProxy({
+    //       // 需要通过VPN访问
+    //       // http://10.1.4.73:31183/api/aimdp/v1
+    //       target: 'http://61.182.98.8:38084/api/aimdp/v1'
+    //     })
+    //   )
+    // );
     // 数据标注服务
     app.use(
       ['/label-service/api/v1'],

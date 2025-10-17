@@ -17,13 +17,13 @@ import { RequirementTypeNameMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import './index.scss';
 
-export default function Requirement() {
+function TaskList() {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
-  const [searchValue, setSearchValue]: any = useState(null);
+  const [searchValue, setSearchValue] = useState<any>(null);
   // 初始化任务列表数据
   const [taskData, setTaskData] = useState([]);
   // 当前的第几页
@@ -37,7 +37,7 @@ export default function Requirement() {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue]: any = useState({});
+  const [sortValue, setSortValue] = useState<any>({});
 
   // 组件初始化
   useEffect(() => {
@@ -318,3 +318,5 @@ export default function Requirement() {
     </div>
   );
 }
+
+export default TaskList;

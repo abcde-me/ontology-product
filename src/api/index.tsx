@@ -45,12 +45,15 @@ UAPI_CONFIG.addRequestInterceptor(
         config.url
       );
       if (config.data && typeof config.data === 'object') {
-        config.data = { ...config.data, id: projectId[projectId.length - 1] };
+        config.data = {
+          ...config.data,
+          projectID: projectId[projectId.length - 1]
+        };
       } else if (config.method?.toLowerCase() === 'get' && config.params) {
         // 对于GET请求，将项目ID添加到params中
         config.params = {
           ...config.params,
-          id: projectId[projectId.length - 1]
+          projectID: projectId[projectId.length - 1]
         };
       }
     } else {
@@ -75,6 +78,7 @@ UAPI_CONFIG.addResponseInterceptor(
   (response) => {
     const res = response.data;
     if (response.status == 401 || res?.status == 401) {
+      console.error('API返回401错误:', response.config?.url, res);
       logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
       // 兼容没有code和message的接口
@@ -155,6 +159,12 @@ UAPI_CONFIG.addResponseInterceptor(
     }
     if (code) {
       if (code === 401 || code === 402) {
+        console.error(
+          'API错误401/402:',
+          error.response?.config?.url,
+          error.response?.data
+        );
+        // 临时注释，用于调试
         logout(error.response.data?.data?.content);
       } else if (code === 403) {
         // 临时在这里全局加一下，实际需要按业务捕获

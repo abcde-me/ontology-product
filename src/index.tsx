@@ -11,6 +11,7 @@ import React, { useEffect, Suspense, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ProjectProvider } from './context/ProjectContext';
+import { PermissionProvider } from './context/PermissionContext';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
@@ -146,7 +147,9 @@ function Index() {
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
             <ProjectProvider>
-              <App />
+              <PermissionProvider>
+                <App />
+              </PermissionProvider>
             </ProjectProvider>
           </GlobalContext.Provider>
         </Provider>

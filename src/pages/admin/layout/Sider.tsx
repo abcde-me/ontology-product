@@ -12,9 +12,9 @@ import {
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useUserInfo } from '@/store/userInfoStore';
 import { getFlatRoutes, routes } from '../route';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
+import { usePermission } from '@/context/PermissionContext';
 import './sider.scss';
 
 const MenuItem = Menu.Item;
@@ -31,16 +31,18 @@ const hideSidebarPaths = [
 const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
-  // 从全局 store 获取用户信息
-  const userInfo = useUserInfo();
+  // 从权限Context获取权限数据
+  const { permissions, isLoading, isInitialized } = usePermission();
 
   // 根据用户权限过滤菜单
   const filteredMenus = useMemo(() => {
-    console.log('userInfo', userInfo);
-    const userPermissions = userInfo?.perms || [];
-    console.log('userPermissions', userPermissions, menus);
-    return filterMenusByPermissions(menus, userPermissions);
-  }, [userInfo?.perms]);
+    // 如果权限还在加载中，返回空菜单避免闪烁
+    if (isLoading || !isInitialized) {
+      return [];
+    }
+    console.log('使用新权限系统过滤菜单, permissions:', permissions);
+    return filterMenusByPermissions(menus, permissions);
+  }, [permissions, isLoading, isInitialized]);
 
   const [collapsed, setCollapsed] = useState(false);
   const [showMenus, setShowMenus] = useState(filteredMenus);
@@ -66,13 +68,22 @@ function LayoutWithSider({ children }) {
           const path = activePaths.find((path) =>
             location.pathname.startsWith(path ?? '')
           );
-          if (path) return [menu.key];
+          if (path) {
+            // 如果有查询参数匹配器，使用它来进一步判断
+            if (menu.queryParamMatcher) {
+              if (menu.queryParamMatcher(location.search)) {
+                return [menu.key];
+              }
+            } else {
+              return [menu.key];
+            }
+          }
         }
       }
       return null;
     };
     return findMatch(showMenus);
-  }, [location.pathname, showMenus]);
+  }, [location.pathname, location.search, showMenus]);
 
   const [openKeys, setopenKeys] = useState(actives || []);
 
