@@ -770,9 +770,9 @@ const DatasetForm = React.forwardRef<
             </Radio.Group>
           </FormItem>
           <FormItem
-            label="数据集类型"
+            label="格式类型"
             field="storageType"
-            rules={[{ required: true, message: '请选择数据集类型' }]}
+            rules={[{ required: true, message: '请选择格式类型' }]}
             initialValue="file"
             extra={
               storageType === StorageType.File

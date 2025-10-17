@@ -590,6 +590,60 @@ const DatasetDetail = (props: {
 
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
   const locatio = useLocation();
+  const [isHiddenBaseInfo, setIsHiddenBaseInfo] = React.useState(false); // 基础信息是否隐藏
+  const lastScrollTop = React.useRef(0);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const isAnimating = React.useRef(false); // 状态锁，防止频繁切换
+
+  useEffect(() => {
+    const container = document.querySelector('.layout-detail');
+    if (!container) return;
+    const handleScroll = (event) => {
+      const currentScrollTop = container.scrollTop;
+
+      // 清除之前的定时器
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      // 设置新的定时器，100ms后执行
+      timeoutRef.current = setTimeout(() => {
+        if (
+          container.scrollTop > 20 &&
+          !isHiddenBaseInfo &&
+          !isAnimating.current
+        ) {
+          isAnimating.current = true;
+          setIsHiddenBaseInfo(true);
+          setTimeout(() => {
+            isAnimating.current = false;
+          }, 300);
+        } else if (
+          currentScrollTop === 0 &&
+          isHiddenBaseInfo &&
+          !isAnimating.current
+        ) {
+          isAnimating.current = true;
+          setIsHiddenBaseInfo(false);
+          setTimeout(() => {
+            isAnimating.current = false;
+          }, 300);
+          event.preventDefault();
+        }
+        lastScrollTop.current = currentScrollTop;
+      }, 100);
+    };
+
+    // 监听滚轮事件
+    container.addEventListener('scroll', handleScroll, { passive: false });
+
+    // 在组件卸载时移除监听器
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [isHiddenBaseInfo]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -1266,7 +1320,7 @@ const DatasetDetail = (props: {
       {/* 数据集详情面板 */}
       <Card className="basic-info-card" bordered={false}>
         {/* 基本信息区域 */}
-        {datasetDetail && (
+        {datasetDetail && !isHiddenBaseInfo && (
           <>
             {/* 标题区域 */}
             {!isHideEdit && (
@@ -1332,7 +1386,72 @@ const DatasetDetail = (props: {
                       )
                     },
                     {
-                      label: '标签:',
+                      label: '创建时间:',
+                      value: formatDate(datasetDetail.created_at) || '-'
+                    },
+                    {
+                      label: '更新时间:',
+                      value: formatDate(datasetDetail.updated_at) || '-'
+                    },
+                    {
+                      label: '描述说明:',
+                      value: (
+                        <div
+                          style={{
+                            gap: '8px'
+                          }}
+                        >
+                          <EllipsisPopover
+                            preferTypography
+                            value={datasetDetail.description || '-'}
+                            isEdit={false}
+                            className="dataset-detail-description"
+                          ></EllipsisPopover>
+                        </div>
+                      )
+                    }
+                    // {
+                    //   label: '生成模型:',
+                    //   value: datasetDetail.src_model || '-'
+                    // },
+                  ]}
+                  column={1}
+                  labelStyle={{
+                    width: 80,
+                    fontWeight: 'normal',
+                    color: '#1E293B'
+                  }}
+                  valueStyle={{
+                    color: '#333333',
+                    fontWeight: 'normal'
+                  }}
+                />
+              </div>
+
+              <div ref={rightDescriptionsRef}>
+                <Descriptions
+                  data={[
+                    // {
+                    //   label: '当前版本:',
+                    //   value: (
+                    //     <span
+                    //       style={{
+                    //         display: 'flex',
+                    //         alignItems: 'center',
+                    //         gap: '8px'
+                    //       }}
+                    //     >
+                    //       <span>{datasetDetail.latest_version}</span>
+                    //       <span className="version-tag">最新版本</span>
+                    //     </span>
+                    //   )
+                    // },
+                    {
+                      label: '创建人:',
+                      value: datasetDetail.creator_name || '-'
+                    },
+                    {
+                      label: '数据集标签:',
                       value: datasetDetail.tag_names?.length ? (
                         <div
                           style={{
@@ -1406,14 +1525,6 @@ const DatasetDetail = (props: {
                       )
                     },
                     {
-                      label: '创建人:',
-                      value: datasetDetail.creator_name || '-'
-                    },
-                    {
-                      label: '生成模型:',
-                      value: datasetDetail.src_model || '-'
-                    },
-                    {
                       label: '存储格式:',
                       value: datasetDetail.storage_type
                         ? datasetDetail.storage_type === StorageType.file
@@ -1423,67 +1534,10 @@ const DatasetDetail = (props: {
                             : datasetDetail.storage_type
                         : '-'
                     }
-                  ]}
-                  column={1}
-                  labelStyle={{
-                    width: 80,
-                    fontWeight: 'normal',
-                    color: '#1E293B'
-                  }}
-                  valueStyle={{
-                    color: '#333333',
-                    fontWeight: 'normal'
-                  }}
-                />
-              </div>
-
-              <div ref={rightDescriptionsRef}>
-                <Descriptions
-                  data={[
-                    {
-                      label: '当前版本:',
-                      value: (
-                        <span
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                          }}
-                        >
-                          <span>{datasetDetail.latest_version}</span>
-                          <span className="version-tag">最新版本</span>
-                        </span>
-                      )
-                    },
-                    {
-                      label: '创建时间:',
-                      value: formatDate(datasetDetail.created_at) || '-'
-                    },
-                    {
-                      label: '更新时间:',
-                      value: formatDate(datasetDetail.updated_at) || '-'
-                    },
-                    {
-                      label: '描述说明:',
-                      value: (
-                        <div
-                          style={{
-                            gap: '8px'
-                          }}
-                        >
-                          <EllipsisPopover
-                            preferTypography
-                            value={datasetDetail.description || '-'}
-                            isEdit={false}
-                            className="dataset-detail-description"
-                          ></EllipsisPopover>
-                        </div>
-                      )
-                    },
-                    {
-                      label: '文件大小:',
-                      value: formatFileSize(datasetDetail.latest_size) || '-'
-                    }
+                    // {
+                    //   label: '文件大小:',
+                    //   value: formatFileSize(datasetDetail.latest_size) || '-'
+                    // }
                   ]}
                   column={1}
                   labelStyle={{
@@ -1563,7 +1617,7 @@ const DatasetDetail = (props: {
           }}
         >
           {datasetDetail?.storage_type === StorageType.file ? (
-            <TabPane key="content" title="数据内容">
+            <TabPane key="content" title="文件列表">
               <Table
                 columns={contentFileColumns}
                 data={contentFileData}
@@ -1599,7 +1653,7 @@ const DatasetDetail = (props: {
               </div>
             </TabPane>
           ) : datasetDetail?.storage_type === StorageType.jsonl ? (
-            <TabPane key="content" title="数据内容">
+            <TabPane key="content" title="文件列表">
               {/* 搜索系统 */}
               <div
                 className="search-section"
@@ -1780,7 +1834,7 @@ const DatasetDetail = (props: {
             </TabPane>
           ) : (
             // 数据库表数据内容
-            <TabPane key="content" title="数据内容">
+            <TabPane key="content" title="文件列表">
               <div className="table-scroll-container">
                 <Table
                   columns={contentTableColumns}
@@ -1792,7 +1846,11 @@ const DatasetDetail = (props: {
               </div>
             </TabPane>
           )}
-          <TabPane key="version" title="版本历史">
+          <TabPane key="hittest" title="命中测试">
+            <div>命中测试</div>
+          </TabPane>
+          <TabPane key="element" title="元素搜索"></TabPane>
+          <TabPane key="version" title="变更记录">
             {activeTab === 'version' ? (
               <Table
                 columns={versionColumns}

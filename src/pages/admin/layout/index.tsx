@@ -109,7 +109,7 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
       <Bread />
       <Layout.Content className="flex-auto overflow-auto">
         <div
-          className="h-full overflow-auto text-[var(--color-text-2)]"
+          className="layout-detail h-full overflow-auto text-[var(--color-text-2)]"
           data-user-loaded
         >
           <SWRConfig value={{ revalidateOnFocus: false }}>
