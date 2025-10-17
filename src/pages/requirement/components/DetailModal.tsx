@@ -296,6 +296,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
+    if (type === 'detail') {
+      return;
+    }
     settableLoading(true);
     getTableData();
   }, [checkedKeys, current, pageSize]);
