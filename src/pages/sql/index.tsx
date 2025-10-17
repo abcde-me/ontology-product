@@ -9,7 +9,7 @@ import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
-import './index.scss';
+import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 
@@ -104,20 +104,20 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   return (
-    <Layout className="sql-page-layout">
-      <Sider width={isDasetTab ? '100%' : 360} className="sql-sider">
+    <Layout className={styles['sql-page-layout']}>
+      <Sider width={isDasetTab ? '100%' : 360} className={styles['sql-sider']}>
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="sql-tabs"
+          className={styles['sql-tabs']}
           type="rounded"
         >
           <TabPane
             key="data"
             title={
               <Popover content="源数据" position="left">
-                <DataIcon className="sql-menu-icon" />
+                <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -133,7 +133,7 @@ const SqlIndex: React.FC = memo(() => {
             key="files"
             title={
               <Popover content="SQL脚本列表" position="left">
-                <SQLIcon className="sql-menu-icon" />
+                <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -154,7 +154,7 @@ const SqlIndex: React.FC = memo(() => {
               key="dataset"
               title={
                 <Popover content="数据集导出任务" position="left">
-                  <DasetIcon className="sql-menu-icon" />
+                  <DasetIcon className={styles['sql-menu-icon']} />
                 </Popover>
               }
             >
@@ -163,7 +163,9 @@ const SqlIndex: React.FC = memo(() => {
           )}
         </Tabs>
       </Sider>
-      <Content className={`sql-content ${isDasetTab ? 'hidden' : 'visible'}`}>
+      <Content
+        className={`${styles['sql-content']} ${isDasetTab ? styles.hidden : styles.visible}`}
+      >
         <EditorContent
           fileTabs={fileState.fileTabs}
           activeTab={fileState.activeTab}

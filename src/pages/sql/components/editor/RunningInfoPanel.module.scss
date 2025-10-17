@@ -12,9 +12,10 @@
     overflow: hidden;
     position: relative;
 
-    .arco-tabs-header-nav {
+    :global(.arco-tabs-header-nav) {
       background-color: #f8fafd !important;
     }
+
     .sql-copy-button {
       position: absolute;
       top: 48px;
@@ -48,47 +49,28 @@
     padding: 12px;
     max-height: 308px;
     overflow-y: auto;
-
-    // 自定义滚动条样式
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 3px;
-
-      &:hover {
-        background: #a8a8a8;
-      }
-    }
   }
 
-  .arco-tabs-content {
+  :global(.arco-tabs-content) {
     padding: 0;
     max-height: 308px;
     overflow: hidden; // 移除外层滚动条，由内部内容控制
   }
 
-  .arco-collapse-item-header-title {
+  :global(.arco-collapse-item-header-title) {
     width: 100%;
   }
 
-  .arco-collapse-item-header-icon-down {
+  :global(.arco-collapse-item-header-icon-down) {
     transform: rotate(0deg);
   }
 
-  .arco-collapse-item-header {
+  :global(.arco-collapse-item-header) {
     border: none;
     border-top: 1px solid #e2e8f0;
   }
 
-  .arco-collapse-item-content-box {
+  :global(.arco-collapse-item-content-box) {
     padding: 0 12px 12px;
   }
 

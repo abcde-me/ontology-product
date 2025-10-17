@@ -1,0 +1,18 @@
+.sql-data-directory-tree {
+  height: 100%;
+
+  .sql-data-directory-tree-catalogue {
+    :global(.arco-tree-node-indent) {
+      display: none;
+    }
+
+    :global(.arco-tree-node-switcher) {
+      width: 0;
+      display: none;
+    }
+  }
+
+  :global(.arco-tree-node-custom-icon) {
+    margin-right: 4px;
+  }
+}

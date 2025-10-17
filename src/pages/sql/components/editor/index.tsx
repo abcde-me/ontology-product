@@ -3,7 +3,7 @@ import { Tabs, Message } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import { FileTab } from '../../hooks/useTabManager';
-import './index.scss';
+import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 
@@ -75,12 +75,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {
       return (
-        <div className="sql-main-content">
+        <div className={styles['sql-main-content']}>
           {/* 头部标签页区域 - 即使没有内容也保留 */}
           <Tabs
             activeTab={activeTab}
             onChange={handleTabChange}
-            className="sql-tabs empty-tabs"
+            className={`${styles['sql-tabs']} ${styles['empty-tabs']}`}
             type="card"
             showAddButton={hasCreatePermission}
             onAddTab={handleCreateSqlQuery}
@@ -99,7 +99,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           </Tabs>
 
           {/* 无数据状态显示区域 */}
-          <div className="empty-content-area">
+          <div className={styles['empty-content-area']}>
             <NoData
               description="暂无数据"
               btnText="新建SQL查询"
@@ -115,12 +115,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     }
 
     return (
-      <div className="sql-main-content">
+      <div className={styles['sql-main-content']}>
         {/* 头部标签页区域 */}
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
-          className="sql-tabs"
+          className={styles['sql-tabs']}
           type="card"
           showAddButton={hasCreatePermission}
           onAddTab={handleCreateSqlQuery}
@@ -139,7 +139,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
         </Tabs>
 
         {/* 工作区 */}
-        <div className="sql-main-workspace">
+        <div className={styles['sql-main-workspace']}>
           <EditorWorkspace
             key={activeTabData.key} // 使用activeTabData.key作为key，确保组件正确更新
             content={activeTabData.content}
