@@ -55,7 +55,6 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
-import { title } from 'process';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
