@@ -154,7 +154,7 @@ export const ROUTE_PERMISSIONS = {
   requirement: PERMISSIONS.REQUIREMENT.LIST,
   requirementDetail: PERMISSIONS.REQUIREMENT.GET,
   taskList: PERMISSIONS.ANNOTATION_TASK.LIST,
-  labelEditor: PERMISSIONS.ANNOTATION_TASK.MODIFY,
+  // labelEditor: PERMISSIONS.ANNOTATION_TASK.MODIFY,
 
   // 管理相关
   apiKey: null, // API密钥管理可能不需要特殊权限
