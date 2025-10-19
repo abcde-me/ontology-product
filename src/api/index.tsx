@@ -1,9 +1,18 @@
 import UAPI_CONFIG from './uapi';
 import { logout, isSingleApp } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
-import { getCurrentProjectId } from '@/context/ProjectContext';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const isNil = (o) => o === undefined || o === null;
+
+const excludeUrl = [
+  '/ceai/user-space/api/v1/GetUser',
+  '/ceai/user-space/api/v1/GetProjOrg',
+  '/ceai/auth-center/api/v1/GetResourcePermissionActions',
+  '/ceai/user-space/api/v1/Login',
+  '/ceai/user-space/api/v1/GetUserInfo',
+  '/ceai/user-space/api/v1/Logout'
+];
 
 // UAPI默认配置(配置项和Axios配置项兼容)（示例）
 UAPI_CONFIG.setDefaultConfig({
@@ -16,53 +25,29 @@ UAPI_CONFIG.setDefaultConfig({
  * UAPI请求拦截器（示例）
  */
 UAPI_CONFIG.addRequestInterceptor(
-  (config: any) => {
+  (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
+    const projectId = useUserInfoStore.getState().projectId;
+    // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
-    if (!config.headers['x-auth-validate'])
+    if (config.headers && !config.headers?.['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
-    if (consolePluginToken)
+    if (consolePluginToken && config.headers)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
-    config.headers['Content-Type'] = 'application/json';
+    config.headers && (config.headers['Content-Type'] = 'application/json');
+    const shouldExclude = config.url && excludeUrl.includes(config.url);
+    // 统一添加的公共参数（例如：设备信息、用户 Token 等）
 
-    // todo 临时调试
-    // if (process.env.NODE_ENV === 'development') {
-    // config.headers['x-ceai-user-id'] = 'user-gqj121nu';
-    // config.headers['x-ceai-user-organization-id'] = 'org-1urn9m93';
-    // }
-    // 自动为所有请求加上项目id参数
-    const projectId = getCurrentProjectId();
-
-    // 跳过项目相关的API请求（避免循环依赖）
-    const skipUrls = ['/api/project/org', '/api/auth/', '/login', '/logout'];
-    const shouldSkip = skipUrls.some((url) => config.url?.includes(url));
-
-    if (!shouldSkip && projectId && projectId.length > 0) {
-      console.log(
-        'API拦截器为请求添加项目ID:',
-        projectId[projectId.length - 1],
-        'URL:',
-        config.url
-      );
-      if (config.data && typeof config.data === 'object') {
-        config.data = {
-          ...config.data,
-          projectID: projectId[projectId.length - 1]
-        };
-      } else if (config.method?.toLowerCase() === 'get' && config.params) {
-        // 对于GET请求，将项目ID添加到params中
-        config.params = {
-          ...config.params,
-          projectID: projectId[projectId.length - 1]
-        };
-      }
+    const commonParams = {
+      projectID: !shouldExclude ? projectId[1] : undefined
+    };
+    // 合并原有参数和公共参数
+    if (config.data) {
+      // 如果已有请求体，合并参数
+      config.data = { ...commonParams, ...config.data };
     } else {
-      console.log(
-        '跳过添加项目ID参数 - URL:',
-        config.url,
-        'projectId:',
-        projectId
-      );
+      // 如果没有请求体，直接赋值
+      config.data = commonParams;
     }
     return config;
   },

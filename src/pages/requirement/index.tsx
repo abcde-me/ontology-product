@@ -12,15 +12,14 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
-import { Permission, PermissionButton } from '@/components/Permission';
-import { PERMISSIONS } from '@/config/newPermissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { getAnnotationList, getAnnotationDownload } from '@/api/dataAnnotation';
 import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import './index.scss';
 
-function Requirement() {
+export default function Requirement() {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const history = useHistory();
@@ -41,7 +40,7 @@ function Requirement() {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState<any>({});
+  const [sortValue, setSortValue]: any = useState({});
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
@@ -387,7 +386,7 @@ function Requirement() {
             />
           </FormItem>
         </Form>
-        <Permission permission={PERMISSIONS.REQUIREMENT.CREATE}>
+        <PermissionWrapper>
           <Button
             type="primary"
             onClick={handleCreateWorkflow}
@@ -395,7 +394,7 @@ function Requirement() {
           >
             <IconPlus /> 创建需求
           </Button>
-        </Permission>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}
@@ -441,5 +440,3 @@ function Requirement() {
     </div>
   );
 }
-
-export default Requirement;

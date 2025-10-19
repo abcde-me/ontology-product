@@ -10,10 +10,9 @@ import './style/theme.scss';
 import React, { useEffect, Suspense, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ProjectProvider } from './context/ProjectContext';
-import { PermissionProvider } from './context/PermissionContext';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
+import { useHistory } from 'react-router-dom';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -41,7 +40,10 @@ import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
-import { isInFrame } from './utils/env';
+import { isInFrame, isWujie } from './utils/env';
+import { useUserInfoStore } from './store/userInfoStore';
+import { usePermission } from '@/hooks';
+import { menus } from '@/pages/admin/layout/menus';
 
 initI18n();
 
@@ -65,7 +67,50 @@ function App() {
     (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
   );
   const location = useLocation();
+  const history = useHistory();
   const { pushPath } = usePathChange();
+
+  const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
+    useUserInfoStore();
+  const { createPermissionFilter, setUserPermissions } = usePermission();
+
+  useEffect(() => {
+    if (
+      projectId &&
+      !window.location.pathname.includes('/tenant/compute/modaforge/login')
+    ) {
+      let finalMenus = [...menus];
+      if (!userActions.isAdmin) {
+        finalMenus = createPermissionFilter(menus);
+      }
+      setUserMenus(finalMenus);
+
+      history.push(
+        finalMenus.find((item) => item.children)?.children?.[0]?.path as string
+      );
+    }
+  }, [projectId, userActions.actions, userActions.isAdmin]);
+
+  useEffect(() => {
+    // 集成环境，会隐藏自身header，但默认会有projectId，需要再这里初始化一次
+    if (isWujie && projectId) {
+      console.log('eeee');
+      setUserPermissions(projectId[1]);
+    }
+  }, [projectId]);
+
+  const switchProject = (pId: string[]) => {
+    console.log('Wujie ProjectId', pId);
+    setProjectId(pId);
+  };
+
+  useEffect(() => {
+    (window as any).$wujie?.bus.$on('switchProject', switchProject);
+
+    return () => {
+      (window as any).$wujie?.bus.$off('switchProject', switchProject);
+    };
+  }, []);
 
   const hidden = useMemo(
     () =>
@@ -146,11 +191,7 @@ function Index() {
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
-            <ProjectProvider>
-              <PermissionProvider>
-                <App />
-              </PermissionProvider>
-            </ProjectProvider>
+            <App />
           </GlobalContext.Provider>
         </Provider>
       </ConfigProvider>

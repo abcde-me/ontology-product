@@ -1,6 +1,17 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
-import { PERMISSIONS } from '@/config/newPermissions';
+import {
+  CONNECTION_PERMISSIONS,
+  DATA_LOAD_PERMISSIONS,
+  WORKFLOW_LIST_PERMISSIONS,
+  WORKFLOW_TASK_PERMISSIONS,
+  DATA_CATALOG_PERMISSIONS,
+  DATA_MANAGEMENT_PERMISSIONS,
+  PYSPARK_PERMISSIONS,
+  SQL_PERMISSIONS,
+  REQUIREMENT_PERMISSIONS,
+  ANNOTATION_TASK_PERMISSIONS
+} from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
@@ -75,14 +86,14 @@ export const menus: MenuModel[] = [
         icon: <Connection className={iconClass} />,
         key: 'connection',
         path: '/tenant/compute/modaforge/connection',
-        permission: PERMISSIONS.CONNECTOR.LIST
+        permission: CONNECTION_PERMISSIONS.LIST
       },
       {
         title: '数据载入',
         icon: <DataLoad className={iconClass} />,
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad',
-        permission: PERMISSIONS.DATA_LOADER.LIST
+        permission: DATA_LOAD_PERMISSIONS.LIST
       }
     ]
   },
@@ -96,14 +107,14 @@ export const menus: MenuModel[] = [
         icon: <WorkflowList className={iconClass} />,
         key: 'workflowList',
         path: '/tenant/compute/modaforge/workflowList',
-        permission: PERMISSIONS.WORKFLOW.LIST
+        permission: WORKFLOW_LIST_PERMISSIONS.LIST
       },
       {
         title: '作业',
         icon: <WorkflowTask className={iconClass} />,
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask',
-        permission: PERMISSIONS.WORKFLOW.LIST
+        permission: WORKFLOW_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -117,14 +128,14 @@ export const menus: MenuModel[] = [
         icon: <PasparkMenu className={iconClass} />,
         key: 'pyspark',
         path: '/tenant/compute/modaforge/pyspark',
-        permission: PERMISSIONS.PYSPARK.LIST
+        permission: PYSPARK_PERMISSIONS.LIST
       },
       {
         title: 'SQL开发',
         icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
-        permission: PERMISSIONS.SQL_SCRIPT.LIST
+        permission: SQL_PERMISSIONS.LIST
       }
     ]
   },
@@ -138,14 +149,14 @@ export const menus: MenuModel[] = [
         icon: <RequirementManagement className={iconClass} />,
         key: 'requirement',
         path: '/tenant/compute/modaforge/requirement',
-        permission: PERMISSIONS.REQUIREMENT.LIST
+        permission: REQUIREMENT_PERMISSIONS.LIST
       },
       {
         title: '标注任务',
         icon: <AnnotationTask className={iconClass} />,
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList',
-        permission: PERMISSIONS.ANNOTATION_TASK.LIST
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -159,14 +170,14 @@ export const menus: MenuModel[] = [
         icon: <DataCatalog className={iconClass} />,
         key: 'dataCatalog',
         path: '/tenant/compute/modaforge/dataCatalog',
-        permission: PERMISSIONS.DIRECTORY.LIST
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       },
       {
         title: '数据集管理',
         icon: <DatasetManagement className={iconClass} />,
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
-        permission: PERMISSIONS.DATASET.LIST
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   },

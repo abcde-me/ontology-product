@@ -13,14 +13,12 @@ import React, {
   useState
 } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useProject } from '@/context/ProjectContext';
-import { usePermission } from '@/context/PermissionContext';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
 import { ProjectIdKey } from '@/utils/const';
 import { setLocalStorage, getLocalStorage } from '@/utils/storage';
-import { usePathChange } from '@/hooks';
+import { usePathChange, usePermission } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
@@ -60,60 +58,21 @@ export default function Header({
     logoPic: HeaderLogo
   };
   const { pushPath } = usePathChange();
-  const [projects, setProjects] = useState<any[]>([]);
-  const { projectId, setProjectId } = useProject();
-  const { setPermissionData } = usePermission();
   const history = useHistory();
   const isMountedRef = useRef(true);
 
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
-  const { clearUserInfo } = useUserInfoStore();
-
+  const { clearUserInfo, setUserActions, projectId, setProjectId } =
+    useUserInfoStore();
+  const { setUserPermissions } = usePermission();
+  const [projects, setProjects] = useState<Record<string, any>[]>([]);
   // 组件卸载时的清理
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
-
-  // 获取项目权限
-  const fetchProjectPermissions = async (
-    projectId: string,
-    shouldNavigate = false
-  ) => {
-    try {
-      const res = await ResourcePermissionActions({
-        projectId: projectId,
-        platforms: ['aimdp-manager']
-      });
-      console.log('获取到权限数据:', res);
-      if (res?.data && isMountedRef.current) {
-        setPermissionData(res.data);
-
-        // 如果需要导航且有权限数据，跳转到第一个有权限的菜单
-        if (shouldNavigate && res.data.actions && res.data.actions.length > 0) {
-          const firstMenuPath = getFirstAvailableMenuPath(res.data.actions);
-          if (firstMenuPath) {
-            console.log('跳转到第一个有权限的菜单:', firstMenuPath);
-
-            // 强制刷新页面组件：如果是相同路径，添加时间戳参数强制刷新
-            const currentPath = history.location.pathname;
-            if (currentPath === firstMenuPath) {
-              console.log('相同路径，强制刷新组件');
-              // 添加时间戳参数强制React Router重新渲染组件
-              const refreshPath = `${firstMenuPath}?refresh=${Date.now()}`;
-              history.replace(refreshPath);
-            } else {
-              history.push(firstMenuPath);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('获取权限失败:', error);
-    }
-  };
 
   const logoutAction = useCallback(() => {
     // 清除本地存储的 token
@@ -142,81 +101,45 @@ export default function Header({
     },
     [logoutAction, pushPath]
   );
+  useEffect(() => {
+    const list = async () => {
+      const { data: result } = await GetProjOrg({});
+      setProjects(result);
+
+      if (result.length) {
+        const pId = getLocalStorage<string[]>(ProjectIdKey);
+        if (Array.isArray(pId)) {
+          const org = result.find((r) => r.id === pId[0]);
+          if (org && org.projectList.find((p) => p.id === pId[1])) {
+            setProjectId(pId);
+            return;
+          }
+        }
+
+        const defaultPId = [result[0].id, result[0].projectList[0].id];
+        setLocalStorage(ProjectIdKey, defaultPId);
+        setProjectId(defaultPId);
+      }
+    };
+    list();
+  }, []);
+
+  React.useEffect(() => {
+    if (projectId) {
+      setUserPermissions(projectId[1]);
+    }
+  }, [projectId[1]]);
+
+  const changeProject = (value: string[]) => {
+    setLocalStorage(ProjectIdKey, value);
+    setProjectId(value);
+  };
 
   const goHelp = async () => {
     // const res = await getDocContent('file-ea3d6713-147b-4b33-8488-59ddb9be4a0a');
     // const blob = new Blob([res], { type: 'application/pdf' });
     // const docURL = URL.createObjectURL(blob);
     // window.open(docURL, '_blank');
-  };
-
-  useEffect(() => {
-    const list = async () => {
-      try {
-        const { data: result } = await GetProjOrg({});
-        if (!isMountedRef.current) return;
-        setProjects(result);
-
-        if (
-          result.length &&
-          result[0].projectList &&
-          result[0].projectList.length
-        ) {
-          // 检查当前是否已有有效的项目ID
-          if (projectId.length === 2) {
-            const org = result.find((r: any) => r.id === projectId[0]);
-            if (
-              org &&
-              org.projectList.find((p: any) => p.id === projectId[1])
-            ) {
-              console.log('当前项目ID有效，重新获取权限数据:', projectId);
-              // 即使项目ID有效，也要重新获取权限数据以确保数据是最新的
-              await fetchProjectPermissions(projectId[1]);
-              console.log('权限数据获取完成 - 当前项目ID有效分支');
-              return;
-            }
-          }
-
-          // 检查本地存储的项目ID
-          const pId = getLocalStorage<string[]>(ProjectIdKey);
-          if (Array.isArray(pId) && pId.length === 2) {
-            const org = result.find((r: any) => r.id === pId[0]);
-            if (org && org.projectList.find((p: any) => p.id === pId[1])) {
-              console.log('使用本地存储的项目ID:', pId);
-              if (!isMountedRef.current) return;
-              setProjectId(pId);
-
-              // 重新获取权限数据（页面刷新时确保权限数据是最新的）
-              await fetchProjectPermissions(pId[1]);
-              console.log('权限数据获取完成 - 本地存储项目ID分支');
-              return;
-            }
-          }
-
-          // 设置默认项目ID
-          const defaultPId = [result[0].id, result[0].projectList[0].id];
-          console.log('设置默认项目ID:', defaultPId);
-          setLocalStorage(ProjectIdKey, defaultPId);
-          if (!isMountedRef.current) return;
-          setProjectId(defaultPId);
-
-          // 获取默认项目的权限
-          await fetchProjectPermissions(defaultPId[1]);
-          console.log('www');
-        }
-      } catch (error) {
-        console.error('获取项目列表失败:', error);
-      }
-    };
-    list();
-  }, [setProjectId]);
-  const changeProject = async (value: string[]) => {
-    setLocalStorage(ProjectIdKey, value);
-    setProjectId(value);
-    console.log('project changed:', value, projectId);
-
-    // 获取新项目的权限并跳转到第一个有权限的菜单
-    await fetchProjectPermissions(value[1], true);
   };
 
   return (
@@ -259,7 +182,7 @@ export default function Header({
               );
             }}
             value={projectId}
-            onChange={(value) => {
+            onChange={(value, option) => {
               changeProject(value as string[]);
             }}
           ></Cascader>
