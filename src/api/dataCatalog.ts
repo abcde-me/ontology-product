@@ -560,7 +560,10 @@ export async function getTargetCatalogFileList(
   param: GetTargetCatalogFileListParams
 ): Promise<ApiRes<GetTargetCatalogFileListRes>> {
   // TODO: 联调
-  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.targetDataFileListApi({})
+    .post({ ...param })
+    .inRegion()
+    .do();
 
   // mock data
   // return Promise.resolve({
@@ -736,7 +739,7 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
   });
 
   return await UAPI.RES.targetDataFileDeleteApi({})
-    .delete()
+    .post()
     .withConfig({
       params: queryParams
     })
@@ -746,19 +749,22 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
 
 //查询源数据文件列表
 export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
-  return await UAPI.RES.sourceDataFileListApi({}).post(params).inRegion().do();
+  return await UAPI.RES.sourceDataFileListApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
 }
 //删除源数据目录单个文件
 export async function deleteSourceFile(id: string) {
-  return await UAPI.RES.sourceDataFileDeleteApi({ file_id: id })
-    .delete()
+  return await UAPI.RES.sourceDataFileDeleteApi({})
+    .post({ file_id: id })
     .inRegion()
     .do();
 }
 //批量删除源数据文件
 export async function deleteSourceFileBatch(params: any) {
   return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
-    .delete(params)
+    .post({ ...params })
     .inRegion()
     .do();
 }
@@ -770,8 +776,8 @@ export async function getCatalogPreview(param: any = {}) {
 
 //删除目录文件接口
 export async function deleteFileById(id: string, params: any = {}) {
-  return await UAPI.RES.fileDeleteApi({ file_id: id }) //暂定只传一个id，后面再添加其他参数
-    .delete(params)
+  return await UAPI.RES.fileDeleteApi({}) //暂定只传一个id，后面再添加其他参数
+    .post({ ...params, file_id: id })
     .inRegion()
     .do();
 }
