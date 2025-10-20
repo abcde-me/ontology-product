@@ -7,7 +7,7 @@ import {
   Button,
   Modal,
   Form,
-  Tooltip
+  Space
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
@@ -259,33 +259,50 @@ export default function Connection() {
       width: 140,
       fixed: 'right',
       render: (_, record) => {
-        const perms = record?.perms || [];
-        const config = [] as any;
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
-          config.push({
-            label: '详情',
-            onClick: () => viewDetailHan(record.id)
-          });
-        }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
-          config.push({
-            label: '编辑',
-            onClick: () => editFormHandle(record)
-          });
-        }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
-          config.push({
-            label: '删除',
-            onClick: () => delModalHan(record.id)
-          });
-        }
+        // const perms = record?.perms || [];
+        // const config = [] as any;
+        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
+        //   config.push({
+        //     label: <div>1</div>,
+        //     onClick: () => viewDetailHan(record.id)
+        //   });
+        // }
+        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
+        //   config.push({
+        //     label: '编辑',
+        //     onClick: () => editFormHandle(record)
+        //   });
+        // }
+        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
+        //   config.push({
+        //     label: '删除',
+        //     onClick: () => delModalHan(record.id)
+        //   });
+        // }
         return (
-          <OperationColumn
-            row={record}
-            config={config}
-            index={0}
-            extendFont="操作"
-          />
+          <Space>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_GET}>
+              <Button type="text" onClick={() => viewDetailHan(record.id)}>
+                详情
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_UPDATE}>
+              <Button type="text" onClick={() => editFormHandle(record)}>
+                编辑
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_DELETE}>
+              <Button type="text" onClick={() => delModalHan(record.id)}>
+                删除
+              </Button>
+            </PermissionWrapper>
+          </Space>
+          // <OperationColumn
+          //   row={record}
+          //   config={config}
+          //   index={0}
+          //   extendFont="操作"
+          // />
         );
       }
     }
@@ -325,7 +342,7 @@ export default function Connection() {
 
   // 点击删除按钮执行的方法
   const DeleteMethod = async (id) => {
-    const res = await delconnectionList(id);
+    const res = await delconnectionList({ id });
     if (res.code == '' && res.status == 200) {
       Message.success({
         content: '删除成功'
@@ -475,7 +492,7 @@ export default function Connection() {
             clearHan();
           }}
         />
-        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CREATE}>
+        <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_CREATE}>
           <Button
             type="primary"
             icon={<IconPlus />}

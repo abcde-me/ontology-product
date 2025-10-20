@@ -39,8 +39,8 @@ export const ORGANIZATION_PERMISSIONS = {
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:connector:manage:create',
-  CAN_DELETE: 'caimdp-manager:connector:manage:delete',
-  CAN_UPDATE: 'connectors:can_update',
+  CAN_DELETE: 'aimdp-manager:connector:manage:delete',
+  CAN_UPDATE: 'aimdp-manager:connector:manage:modify',
   CAN_GET: 'aimdp-manager:connector:read:get',
 
   LIST: 'aimdp-manager:connector:read:list', // 菜单权限
@@ -49,7 +49,7 @@ export const CONNECTION_PERMISSIONS = {
 
 // 数据载入相关权限
 export const DATA_LOAD_PERMISSIONS = {
-  CAN_CREATE: 'dataloader:can_create',
+  CAN_CREATE: 'aimdp-manager:data_loader:manage:create',
   CAN_DETELE: 'dataloader:can_delete',
   CAN_UPDATE: 'dataloader:can_update',
   CAN_GET: 'dataloader:can_get',
