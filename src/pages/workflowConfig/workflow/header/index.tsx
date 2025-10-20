@@ -42,6 +42,7 @@ import { getQueryParams, useParams } from '@/utils/url';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { validateName } from '@/utils/valiate';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -320,41 +321,41 @@ const Header: FC = () => {
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              {headerOperationDisplay &&
-                workflowPerms.includes(
-                  WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE
-                ) && (
+              {headerOperationDisplay && (
+                <PermissionWrapper
+                  permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
+                >
                   <Popover trigger="hover" content="编辑">
                     <div
                       className={styles['edit-icon']}
                       onClick={handleEdit}
                     ></div>
                   </Popover>
-                )}
+                </PermissionWrapper>
+              )}
             </div>
           )}
           <EditingTitle />
         </div>
       </div>
-      {headerOperationDisplay &&
-        workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_OPERATION) && (
-          <>
-            <div className={styles['right-part']}>
-              <TaskOperation
-                {...{
-                  workflowStatus: appDetail?.is_online ?? IsOnline.offline,
-                  cycleText,
-                  onOperate
-                }}
-              />
-            </div>
-            <SuccessModal
-              visible={showRuningModal}
-              onClose={() => setShowRuningModal(false)}
-              params={workflowOperationRes}
+      {headerOperationDisplay && (
+        <PermissionWrapper permission={WORKFLOW_DETAIL_PERMISSIONS.OPERATION}>
+          <div className={styles['right-part']}>
+            <TaskOperation
+              {...{
+                workflowStatus: appDetail?.is_online ?? IsOnline.offline,
+                cycleText,
+                onOperate
+              }}
             />
-          </>
-        )}
+          </div>
+          <SuccessModal
+            visible={showRuningModal}
+            onClose={() => setShowRuningModal(false)}
+            params={workflowOperationRes}
+          />
+        </PermissionWrapper>
+      )}
     </div>
   );
 };
