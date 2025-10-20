@@ -351,49 +351,49 @@ export const ModaForgeResourceEndpoints = {
   // 删除连接器数据
   delconnection: PrefixAimdp + '/DeleteConnector',
   // 修改连接器数据
-  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  editconnection: PrefixAimdp + '/EditConnector',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+  getconnection: PrefixAimdp + '/GetConnector',
 
   // 数据载入接口
 
   // 获取数据载入列表
   getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
-  addLoadApi: PrefixAimdp + '/load_tasks',
+  addLoadApi: PrefixAimdp + '/CreateLoadTask',
   //数据载入上传文件
-  uploadApi: PrefixAimdp + '/load_tasks/upload',
+  uploadApi: PrefixAimdp + '/load_tasks/upload', // 没调用过
   // 删除指定载入任务
-  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  delLoadApi: PrefixAimdp + '/DeleteLoadTask',
   // 修改单个载入任务
-  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  editLoadApi: PrefixAimdp + '/EditLoadTask',
   // 查看单个载入任务详情
-  getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  getLoadApi: PrefixAimdp + '/GetLoadTask',
   // 启停单个载入任务
-  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/cron/release',
+  startAndStopeLoadApi: PrefixAimdp + '/ControlLoadTaskCron',
   // 立即运行指定载入任务
-  runLoadApi: PrefixAimdp + '/load_tasks/new_start',
+  runLoadApi: PrefixAimdp + '/CreateLoadTaskInstance',
   // 删除指定文件
-  delFileApi: PrefixAimdp + '/load_tasks/files',
+  delFileApi: PrefixAimdp + '/load_tasks/files', // 没搜到
   // 查询载入任务详情的列表
-  getdetailListApi: PrefixAimdp + '/load_tasks/records/page',
+  getdetailListApi: PrefixAimdp + '/ListLoadTaskInstances',
   // 查询单个载入任务的执行记录
-  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
+  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}', // 前端没调用
   // 查询单个载入任务已加载文件信息
-  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}', // 没搜到
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
-  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page',
+  getLoadTaskFiles: PrefixAimdp + '/ListSourceDirFiles',
   // 停止单个载入任务
-  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop',
+  stopLoadApi: PrefixAimdp + '/StopLoadTaskInstance',
   // 查询个人载入记录列表
-  getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
+  getLoadRecordListApi: PrefixAimdp + '/ListLoadTaskInstanceFiles',
   // 查询任务单个执行记录详情
-  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+  getLoadRecordDetailApi: PrefixAimdp + '/GetLoadTaskInstanceInfo',
   // 重试载入任务
-  reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  reTryLoadApi: PrefixAimdp + '/RetryLoadTaskInstance',
   //载入获取表名
-  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
+  getTableNameApi: PrefixAimdp + '/GenerateDBName',
 
   // 数据标注接口
   // 数据标注配置 发布
