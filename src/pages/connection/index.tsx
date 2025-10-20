@@ -34,8 +34,8 @@ const InputSearch = Input.Search;
 
 // 连接器状态枚举
 enum ConnectionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected'
+  CONNECTED = '1',
+  DISCONNECTED = '0'
 }
 
 // 状态显示配置

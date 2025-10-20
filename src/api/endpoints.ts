@@ -360,13 +360,13 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据载入列表
   getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
-  addLoadApi: PrefixAimdp + '/load_tasks',
+  addLoadApi: PrefixAimdp + '/CreateLoadTask',
   //数据载入上传文件
   uploadApi: PrefixAimdp + '/load_tasks/upload',
   // 删除指定载入任务
-  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  delLoadApi: PrefixAimdp + '/DeleteLoadTask',
   // 修改单个载入任务
-  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  editLoadApi: PrefixAimdp + '/EditLoadTask',
   // 查看单个载入任务详情
   getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 启停单个载入任务

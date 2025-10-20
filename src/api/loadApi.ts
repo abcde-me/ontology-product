@@ -13,7 +13,7 @@ export async function addLoad(params: any) {
 }
 // 删除载入任务
 export async function delLoad(task_id) {
-  return await UAPI.RES.delLoadApi({ task_id }).delete().inRegion().do();
+  return await UAPI.RES.delLoadApi({}).post({ task_id }).inRegion().do();
 }
 // 修改载入任务
 export async function editLoad(params) {
@@ -58,7 +58,7 @@ interface CatalogListParams {
 }
 // 获取数据集列表
 export async function getDirectoryList(params: CatalogListParams) {
-  return await UAPI.RES.catalogListApi({}).get(params).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(params).inRegion().do();
 }
 // 停止单个载入任务
 export async function stopeLoad(params) {
