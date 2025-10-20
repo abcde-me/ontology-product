@@ -177,6 +177,7 @@ export const usePermission = () => {
     userPermissions,
     setUserPermissions,
     hasPermission,
+    hasMenuPermission,
     hasAnyPermission,
     hasAllPermissions,
     // getPermissions,
