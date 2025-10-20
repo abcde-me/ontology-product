@@ -21,7 +21,9 @@ const ModalDetail = (props) => {
   const getdetailListHan = async () => {
     try {
       setLoading(true);
-      const res = await getdetailList(props.detailId);
+      const res = await getdetailList({
+        id: props.detailId
+      });
       setDetailData(res.data);
     } catch (error) {
       console.error('获取详情页数据失败:', error);

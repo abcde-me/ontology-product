@@ -351,9 +351,9 @@ export const ModaForgeResourceEndpoints = {
   // 删除连接器数据
   delconnection: PrefixAimdp + '/DeleteConnector',
   // 修改连接器数据
-  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  editconnection: PrefixAimdp + '/EditConnector',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+  getconnection: PrefixAimdp + '/GetConnector',
 
   // 数据载入接口
 
