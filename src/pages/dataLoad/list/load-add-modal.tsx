@@ -501,7 +501,7 @@ const LoadAddModal = (props: propsType) => {
         if (sourceType) {
           const res = await getConnectionList({
             type: sourceType,
-            status: 'connected'
+            status: '1'
           });
           if (!cancelled && res.data && res.data.items) {
             const newConnectName = res.data.items.map((item) => ({

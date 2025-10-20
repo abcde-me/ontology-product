@@ -50,9 +50,9 @@ export const CONNECTION_PERMISSIONS = {
 // 数据载入相关权限
 export const DATA_LOAD_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:data_loader:manage:create',
-  CAN_DETELE: 'dataloader:can_delete',
+  CAN_DETELE: 'aimdp-manager:data_loader:manage:delete',
   CAN_UPDATE: 'dataloader:can_update',
-  CAN_GET: 'dataloader:can_get',
+  CAN_GET: 'aimdp-manager:data_loader:read:get',
   CAN_START: 'dataloader:can_start',
   CAN_STOP: 'dataloader:can_stop',
 
