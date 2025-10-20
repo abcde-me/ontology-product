@@ -2,12 +2,11 @@ import {
   Input,
   Message,
   Pagination,
-  Popconfirm,
+  Space,
   Table,
   Button,
   Modal,
-  Form,
-  Space
+  Form
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
@@ -35,8 +34,8 @@ const InputSearch = Input.Search;
 
 // 连接器状态枚举
 enum ConnectionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected'
+  CONNECTED = '1',
+  DISCONNECTED = '0'
 }
 
 // 状态显示配置
@@ -131,8 +130,8 @@ export default function Connection() {
       };
       setEditLoadingState(true);
       const res = await updataConnectionList({
-        connector_id: editObject.id,
-        newfrom
+        id: editObject.id,
+        ...newfrom
       });
       if (res.code == '' && res.status == 200) {
         setEditLoadingState(false);
@@ -256,29 +255,10 @@ export default function Connection() {
     },
     {
       title: '操作',
-      width: 140,
+      width: 160,
       fixed: 'right',
+      align: 'center',
       render: (_, record) => {
-        // const perms = record?.perms || [];
-        // const config = [] as any;
-        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
-        //   config.push({
-        //     label: <div>1</div>,
-        //     onClick: () => viewDetailHan(record.id)
-        //   });
-        // }
-        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
-        //   config.push({
-        //     label: '编辑',
-        //     onClick: () => editFormHandle(record)
-        //   });
-        // }
-        // if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
-        //   config.push({
-        //     label: '删除',
-        //     onClick: () => delModalHan(record.id)
-        //   });
-        // }
         return (
           <Space>
             <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_GET}>
@@ -297,12 +277,6 @@ export default function Connection() {
               </Button>
             </PermissionWrapper>
           </Space>
-          // <OperationColumn
-          //   row={record}
-          //   config={config}
-          //   index={0}
-          //   extendFont="操作"
-          // />
         );
       }
     }
@@ -335,7 +309,6 @@ export default function Connection() {
   };
   // 点击详情的回调
   const editFormHandle = (obj) => {
-    console.log(obj);
     setEditObject(obj);
     setEditVisible(true);
   };
@@ -478,7 +451,8 @@ export default function Connection() {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          width: '100%'
+          width: '100%',
+          marginBottom: '16px'
         }}
       >
         <Input.Search
@@ -504,19 +478,25 @@ export default function Connection() {
           </Button>
         </PermissionWrapper>
       </div>
-      <Table
-        border={false}
-        columns={columns}
-        data={ConnectionData}
-        noDataElement={noDataElement({ description: '暂无数据' })}
-        style={{ padding: '16px 0px' }}
-        pagination={false}
-        rowKey="id"
-        loading={tableLoding}
-        onChange={(pagination, sorter, filters) => {
-          siftHan(sorter, filters);
-        }}
-      />
+      <div style={{ overflow: 'auto', flex: 1 }}>
+        <Table
+          border={false}
+          columns={columns}
+          data={ConnectionData}
+          noDataElement={noDataElement({ description: '暂无数据' })}
+          style={{ padding: '16px 0px' }}
+          pagination={false}
+          rowKey="id"
+          loading={tableLoding}
+          onChange={(pagination, sorter, filters) => {
+            siftHan(sorter, filters);
+          }}
+          scroll={{
+            x: 1600,
+            y: 400
+          }}
+        />
+      </div>
       {/* 分页 */}
       {ConnectionData && ConnectionData.length > 0 && (
         <Pagination

@@ -351,22 +351,22 @@ export const ModaForgeResourceEndpoints = {
   // 删除连接器数据
   delconnection: PrefixAimdp + '/DeleteConnector',
   // 修改连接器数据
-  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  editconnection: PrefixAimdp + '/EditConnector',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+  getconnection: PrefixAimdp + '/GetConnector',
 
   // 数据载入接口
 
   // 获取数据载入列表
   getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
-  addLoadApi: PrefixAimdp + '/load_tasks',
+  addLoadApi: PrefixAimdp + '/CreateLoadTask',
   //数据载入上传文件
   uploadApi: PrefixAimdp + '/load_tasks/upload',
   // 删除指定载入任务
-  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  delLoadApi: PrefixAimdp + '/DeleteLoadTask',
   // 修改单个载入任务
-  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  editLoadApi: PrefixAimdp + '/EditLoadTask',
   // 查看单个载入任务详情
   getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 启停单个载入任务
