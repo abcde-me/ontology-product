@@ -191,7 +191,7 @@ export function apiHierarchicalCatalog(
     .do();
 }
 //知识库层级目录编辑接口
-export async function apiHierarchicalCatalogEdit(
+export function apiHierarchicalCatalogEdit(
   dataset_id: string,
   document_id: string,
   params: any

@@ -71,7 +71,6 @@ interface DatasetFormProps {
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
-  isDataMarket?: boolean;
 }
 
 const FormItem = Form.Item;
@@ -212,7 +211,7 @@ const DatasetForm = React.forwardRef<
   { resetForm: () => void },
   DatasetFormProps
 >((props, ref) => {
-  const { visible, onSubmit, onCancel, isDataMarket = false } = props;
+  const { visible, onSubmit, onCancel } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -771,9 +770,9 @@ const DatasetForm = React.forwardRef<
             </Radio.Group>
           </FormItem>
           <FormItem
-            label="数据集类型"
+            label="格式类型"
             field="storageType"
-            rules={[{ required: true, message: '请选择数据集类型' }]}
+            rules={[{ required: true, message: '请选择格式类型' }]}
             initialValue="file"
             extra={
               storageType === StorageType.File
@@ -788,15 +787,13 @@ const DatasetForm = React.forwardRef<
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
             </Radio.Group>
           </FormItem>
-          {isDataMarket && (
-            <FormItem
-              label="场景分类"
-              field="sceneType"
-              rules={[{ required: true, message: '请选择场景分类' }]}
-            >
-              <Select placeholder="请选择场景分类" options={sceneTypeOptions} />
-            </FormItem>
-          )}
+          <FormItem
+            label="场景分类"
+            field="sceneType"
+            rules={[{ required: true, message: '请选择场景分类' }]}
+          >
+            <Select placeholder="请选择场景分类" options={sceneTypeOptions} />
+          </FormItem>
 
           {dataSource === 'volume' && (
             <div

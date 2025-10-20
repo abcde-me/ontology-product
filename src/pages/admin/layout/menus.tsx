@@ -159,17 +159,17 @@ export const menus: MenuModel[] = [
         permission: 'directory:can_search_dirs'
       },
       {
-        title: '数据集管理',
+        title: '数据集市',
         icon: <DatasetManagement className={iconClass} />,
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
         permission: 'datasets:can_search'
       },
       {
-        title: '数据集市',
+        title: '命中测试',
         icon: <DataMarket className={iconClass} />,
         key: 'dataMarket',
-        path: '/tenant/compute/modaforge/dataMarket'
+        path: '/tenant/compute/modaforge/dataMarketDetail'
       }
     ]
   },
