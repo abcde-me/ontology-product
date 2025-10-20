@@ -23,28 +23,7 @@ import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout } from '@/utils/env';
-import { GetProjOrg, ResourcePermissionActions } from '@/api/modules/project';
-
-// import { getDocContent } from '@/api/datasetsV2';
-
-// 获取第一个有权限的菜单路径
-const getFirstAvailableMenuPath = (permissions: string[]): string | null => {
-  const filteredMenus = filterMenusByPermissions(menus, permissions);
-
-  const findFirstPath = (menuList: MenuModel[]): string | null => {
-    for (const menu of menuList) {
-      if (menu.children && menu.children.length > 0) {
-        const childPath = findFirstPath(menu.children);
-        if (childPath) return childPath;
-      } else if (menu.path) {
-        return menu.path;
-      }
-    }
-    return null;
-  };
-
-  return findFirstPath(filteredMenus);
-};
+import { GetProjOrg } from '@/api/modules/project';
 
 export default function Header({
   className,
@@ -58,7 +37,6 @@ export default function Header({
     logoPic: HeaderLogo
   };
   const { pushPath } = usePathChange();
-  const history = useHistory();
   const isMountedRef = useRef(true);
 
   // 从全局 store 获取用户信息
@@ -125,13 +103,15 @@ export default function Header({
   }, []);
 
   React.useEffect(() => {
-    if (projectId) {
+    if (projectId && projectId[1]) {
       setUserPermissions(projectId[1]);
     }
   }, [projectId[1]]);
 
   const changeProject = (value: string[]) => {
     setLocalStorage(ProjectIdKey, value);
+    // 重置权限状态，这样下次初始化时会重新加载权限
+    setUserActions({ isAdmin: false, actions: null });
     setProjectId(value);
   };
 

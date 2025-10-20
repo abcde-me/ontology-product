@@ -7,7 +7,13 @@ import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
 import './style/theme.scss';
-import React, { useEffect, Suspense, useMemo } from 'react';
+import React, {
+  useEffect,
+  Suspense,
+  useMemo,
+  useRef,
+  useCallback
+} from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
@@ -44,8 +50,21 @@ import { isInFrame, isWujie } from './utils/env';
 import { useUserInfoStore } from './store/userInfoStore';
 import { usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
+import { is } from 'immer/dist/internal';
+import { getLocalStorage } from './utils/storage';
+import { ProjectIdKey } from './utils/const';
 
 initI18n();
+
+// 在应用启动时从 localStorage 恢复 projectId
+const initProjectIdFromStorage = () => {
+  const pId = getLocalStorage<string[]>(ProjectIdKey);
+  if (Array.isArray(pId) && pId.length > 1) {
+    useUserInfoStore.getState().setProjectId(pId);
+  }
+};
+
+initProjectIdFromStorage();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
@@ -74,15 +93,20 @@ function App() {
     useUserInfoStore();
   const { createPermissionFilter, setUserPermissions } = usePermission();
 
+  // 用于追踪是否已经初始化过权限
+  const permissionInitializedRef = useRef(false);
+
   useEffect(() => {
     if (
       projectId &&
+      userActions.actions !== null &&
       !window.location.pathname.includes('/tenant/compute/modaforge/login')
     ) {
       let finalMenus = [...menus];
       if (!userActions.isAdmin) {
         finalMenus = createPermissionFilter(menus);
       }
+      console.log('finalMenus', finalMenus);
       setUserMenus(finalMenus);
 
       history.push(
@@ -92,17 +116,37 @@ function App() {
   }, [projectId, userActions.actions, userActions.isAdmin]);
 
   useEffect(() => {
-    // 集成环境，会隐藏自身header，但默认会有projectId，需要再这里初始化一次
-    if (isWujie && projectId) {
-      console.log('eeee');
+    // 在主应用中加载子应用时，初始化权限
+    // 子应用中 isWujie 为 true，需要从 localStorage 恢复的 projectId 初始化权限
+    // 只在初始化时调用，不在切换项目时调用
+    if (
+      isWujie &&
+      projectId &&
+      projectId[1] &&
+      userActions.actions === null &&
+      !permissionInitializedRef.current
+    ) {
       setUserPermissions(projectId[1]);
+      permissionInitializedRef.current = true;
     }
-  }, [projectId]);
+  }, [projectId, userActions.actions, setUserPermissions]);
 
-  const switchProject = (pId: string[]) => {
-    console.log('Wujie ProjectId', pId);
-    setProjectId(pId);
-  };
+  const switchProject = useCallback(
+    (pId: string[]) => {
+      console.log('Wujie ProjectId', pId);
+      // 直接使用传入的 pId 调用权限初始化，避免 state 更新的时序问题
+      if (pId && pId[1]) {
+        setUserPermissions(pId[1]);
+      }
+      // 重置权限状态
+      setUserActions({ isAdmin: false, actions: null });
+      // 更新 projectId
+      setProjectId(pId);
+      // 重置初始化标记，但不要在这里设置为 false，因为我们已经调用了 setUserPermissions
+      permissionInitializedRef.current = true;
+    },
+    [setUserPermissions, setUserActions, setProjectId]
+  );
 
   useEffect(() => {
     (window as any).$wujie?.bus.$on('switchProject', switchProject);
@@ -110,7 +154,7 @@ function App() {
     return () => {
       (window as any).$wujie?.bus.$off('switchProject', switchProject);
     };
-  }, []);
+  }, [switchProject]);
 
   const hidden = useMemo(
     () =>

@@ -150,9 +150,9 @@ export const usePermission = () => {
   );
 
   const setUserPermissions = async (projectId: string) => {
+    console.log('setUserPermissions', projectId);
     try {
       const response = await ResourcePermissionActions({
-        // projectID: 'proj-qbpx8uiy',
         projectID: projectId,
         platforms: ['aimdp-manager']
       });

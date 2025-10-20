@@ -1,5 +1,5 @@
 import UAPI_CONFIG from './uapi';
-import { logout, isSingleApp } from '@/utils/env';
+import { logout, isSingleApp, getLoginToken } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
 import { useUserInfoStore } from '@/store/userInfoStore';
 
@@ -8,7 +8,6 @@ const isNil = (o) => o === undefined || o === null;
 const excludeUrl = [
   '/ceai/user-space/api/v1/GetUser',
   '/ceai/user-space/api/v1/GetProjOrg',
-  '/ceai/auth-center/api/v1/GetResourcePermissionActions',
   '/ceai/user-space/api/v1/Login',
   '/ceai/user-space/api/v1/GetUserInfo',
   '/ceai/user-space/api/v1/Logout'
@@ -28,6 +27,8 @@ UAPI_CONFIG.addRequestInterceptor(
   (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
     const projectId = useUserInfoStore.getState().projectId;
+    console.log('www', projectId);
+
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (config.headers && !config.headers?.['x-auth-validate'])
@@ -36,11 +37,14 @@ UAPI_CONFIG.addRequestInterceptor(
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
     config.headers && (config.headers['Content-Type'] = 'application/json');
     const shouldExclude = config.url && excludeUrl.includes(config.url);
+
     // 统一添加的公共参数（例如：设备信息、用户 Token 等）
+    const hasValidProjectId = projectId && projectId.length > 1 && projectId[1];
 
     const commonParams = {
-      projectID: !shouldExclude ? projectId[1] : undefined
+      projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
     };
+    console.log('commonParams', commonParams);
     // 合并原有参数和公共参数
     if (config.data) {
       // 如果已有请求体，合并参数
