@@ -65,7 +65,7 @@ export default function AutoDefine(props) {
                 setFilterKeys(value ? [value] : []);
                 if (!value) {
                   setNameFilter('');
-                  if (confirm) confirm();
+                  // if (confirm) confirm();
                 }
               }}
               onSearch={(val: string) => {

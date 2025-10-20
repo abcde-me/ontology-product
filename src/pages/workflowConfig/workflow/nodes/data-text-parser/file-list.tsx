@@ -42,8 +42,18 @@ function FileList({
     total: 0
   });
   const [searchers, setSearchers] = useState<Record<string, any>>({});
-
+  const [isCleanFileName, setIsCleanFileName] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const filterConfirmRef = useRef<(() => void) | null>(null);
+
+  // 点击清除按钮后触发confirm方法
+  useEffect(() => {
+    if (isCleanFileName && filterConfirmRef.current) {
+      filterConfirmRef.current();
+      setIsCleanFileName(false);
+    }
+  }, [isCleanFileName]);
+
   const columns: any[] = [
     {
       title: '文件名',
@@ -51,10 +61,12 @@ function FileList({
       width: 170,
       filterIcon: <IconSearch />,
       filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
+        filterConfirmRef.current = confirm;
         return (
           <div className="arco-table-custom-filter">
             <Input.Search
               ref={inputRef}
+              allowClear
               placeholder="输入文件名搜索"
               value={filterKeys[0] || ''}
               onChange={(value) => {
@@ -62,6 +74,10 @@ function FileList({
               }}
               onSearch={() => {
                 confirm();
+              }}
+              onClear={() => {
+                setFilterKeys([]);
+                setIsCleanFileName(true);
               }}
             />
           </div>

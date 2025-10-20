@@ -59,6 +59,10 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     overflow: hidden;
 
+    .arco-spin-children {
+      height: 100%;
+    }
+
     // CodeMirror 编辑器样式
     .code-editor {
       height: 100%;
