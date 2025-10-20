@@ -14,8 +14,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getFlatRoutes, routes } from '../route';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
-import { usePermission } from '@/context/PermissionContext';
 import './sider.scss';
+import { usePermission } from '@/hooks/usePermission';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -31,21 +32,11 @@ const hideSidebarPaths = [
 const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
-  // 从权限Context获取权限数据
-  const { permissions, isLoading, isInitialized } = usePermission();
-
-  // 根据用户权限过滤菜单
-  const filteredMenus = useMemo(() => {
-    // 如果权限还在加载中，返回空菜单避免闪烁
-    if (isLoading || !isInitialized) {
-      return [];
-    }
-    console.log('使用新权限系统过滤菜单, permissions:', permissions);
-    return filterMenusByPermissions(menus, permissions);
-  }, [permissions, isLoading, isInitialized]);
+  const { createPermissionFilter } = usePermission();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [showMenus, setShowMenus] = useState(filteredMenus);
+  const [showMenus, setShowMenus] = useState(menus);
+  const { userMenus } = useUserInfoStore();
 
   const history = useHistory();
   const location = useLocation();
@@ -160,8 +151,8 @@ function LayoutWithSider({ children }) {
   };
 
   useEffect(() => {
-    setShowMenus(filteredMenus);
-  }, [filteredMenus]);
+    setShowMenus(userMenus);
+  }, [userMenus]);
 
   useEffect(() => {
     setopenKeys((keys) => {
@@ -195,7 +186,7 @@ function LayoutWithSider({ children }) {
               setopenKeys(openKeys);
             }}
           >
-            {getMenu(showMenus)}
+            {getMenu(createPermissionFilter(showMenus))}
           </Menu>
         </Sider>
       )}

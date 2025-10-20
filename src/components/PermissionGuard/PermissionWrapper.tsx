@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import { Tooltip } from '@arco-design/web-react';
 import { useHasPermission, useHasAnyPermission } from '@/store/userInfoStore';
 
 interface PermissionWrapperProps {
@@ -84,7 +85,7 @@ export const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
   // 无权限时的处理
   if (disableWhenNoPermission) {
     // 尝试禁用组件
-    return React.cloneElement(children as React.ReactElement, {
+    const clonedChild = React.cloneElement(children as React.ReactElement, {
       disabled: true,
       className:
         `${(children as React.ReactElement).props.className || ''} ${noPermissionClassName || ''}`.trim(),
@@ -95,6 +96,11 @@ export const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
         cursor: 'not-allowed'
       }
     });
+    return (
+      <Tooltip content="不可操作，需提升权限" position="top">
+        {clonedChild}
+      </Tooltip>
+    );
   }
 
   // 返回 fallback 或不显示
