@@ -66,10 +66,10 @@ export const DATA_LOAD_PERMISSIONS = {
 
 // 工作流列表权限
 export const WORKFLOW_LIST_PERMISSIONS = {
-  CAN_CREATE: 'workflow:can_create',
-  CAN_GET: 'workflow:can_get',
-  CAN_COPY: 'workflow:can_copy',
-  CAN_DELETE: 'workflow:can_delete',
+  CAN_CREATE: 'aimdp-manager:workflow:manage:create',
+  CAN_GET: 'aimdp-manager:workflow:read:list',
+  CAN_COPY: 'aimdp-manager:workflow:read:list',
+  CAN_DELETE: 'aimdp-manager:workflow:manage:delete',
 
   LIST: 'aimdp-manager:workflow:read:list', // 菜单权限
   GET: 'aimdp-manager:workflow:read:get',
@@ -88,7 +88,7 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {
 
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {
-  CAN_UPDATE: 'workflow:can_update',
+  CAN_UPDATE: 'aimdp-manager:workflow:read:get',
   LIST: 'aimdp-manager:workflow:read:list' // 菜单权限（与工作流共用）
 } as const;
 
@@ -143,21 +143,21 @@ export const NEW_WORKFLOW_PERMISSIONS = {
 
 // PySpark权限
 export const PYSPARK_PERMISSIONS = {
-  CAN_SEARCH: 'pyspark:can_search', // 菜单权限
-  CAN_DELETE: 'pyspark:can_delete', // 删除
-  CAN_UPDATE: 'pyspark:can_update', // 编辑
-  CAN_COPY: 'pyspark:can_copy', // 复制
-  CAN_RENAME: 'pyspark:can_rename', // 重命名
-  CAN_RUN: 'pyspark:can_run', // 运行
-  CAN_CANCEL_RUN: 'pyspark:can_cancel_run', // 停止运行
-  CAN_EXPORT: 'pyspark:can_export_dataset', // 导出数据集按钮
-  CAN_SEARCH_EXPORTS: 'pyspark:can_search_exports', // 导出列表
-  CAN_EXPORT_STOP: 'pyspark:can_export_stop', // 导出停止
-  CAN_EXPORT_RETRY: 'pyspark:can_export_retry', // 导出重试
-  CAN_EXPORT_PREVIEW: 'pyspark:can_export_preview', // 导出预览
-  CAN_DIRECTORY: 'directory:can_search_dirs', // 数据目录
-  CAN_DATASETS_SEARCH: 'datasets:can_search', // 数据集列表
-  CAN_RETRIEVE_OPERATOR: 'directory:can_retrieve_operator', // 算子库
+  CAN_SEARCH: 'aimdp-manager:pyspark:read:list', // 菜单权限
+  CAN_DELETE: 'aimdp-manager:pyspark:manage:delete', // 删除
+  CAN_UPDATE: 'aimdp-manager:pyspark:manage:modify', // 编辑
+  CAN_COPY: 'aimdp-manager:pyspark:read:list', // 复制
+  CAN_RENAME: 'aimdp-manager:pyspark:read:list', // 重命名
+  CAN_RUN: 'aimdp-manager:pyspark:manage:run', // 运行
+  CAN_CANCEL_RUN: 'aimdp-manager:pyspark:manage:run', // 停止运行
+  CAN_EXPORT: 'aimdp-manager:pyspark:manage:export', // 导出数据集按钮
+  CAN_SEARCH_EXPORTS: 'aimdp-manager:pyspark:manage:export', // 导出列表
+  CAN_EXPORT_STOP: 'aimdp-manager:pyspark:manage:export', // 导出停止
+  CAN_EXPORT_RETRY: 'aimdp-manager:pyspark:manage:export', // 导出重试
+  CAN_EXPORT_PREVIEW: 'aimdp-manager:pyspark:manage:export', // 导出预览
+  CAN_DIRECTORY: 'aimdp-manager:directory:read:list', // 数据目录
+  CAN_DATASETS_SEARCH: 'aimdp-manager:dataset:read:list', // 数据集列表
+  CAN_RETRIEVE_OPERATOR: 'aimdp-manager:pyspark:read:list', // 算子库
 
   LIST: 'aimdp-manager:pyspark:read:list', // 菜单权限
   GET: 'aimdp-manager:pyspark:read:get',
@@ -170,22 +170,22 @@ export const PYSPARK_PERMISSIONS = {
 
 // SQL权限
 export const SQL_PERMISSIONS = {
-  CAN_CREATE: 'sql_script:can_create', // 创建
-  CAN_DELETE: 'sql_script:can_delete', // 删除
-  CAN_UPDATE: 'sql_script:can_update', // 编辑
-  CAN_COPY: 'sql_script:can_copy', // 复制
-  CAN_RENAME: 'sql_script:can_rename', // 重命名
-  CAN_SEARCH: 'sql_script:can_search', // 菜单权限
-  CAN_GET: 'sql_script:can_get', // 详情
-  CAN_RUN: 'sql_script:can_run', // 运行
-  CAN_CANCEL_RUN: 'sql_script:can_cancel_run', // 取消运行
-  CAN_GET_RUN_RESULT: 'sql_script:can_get_run_result', // 获取运行结果
-  CAN_EXPORT_RESULT: 'sql_script:can_export_result', // 导出结果
-  CAN_EXPORT_VERSION_UPDATE: 'sql_script:can_export_version_update', // 导出版本更新
-  CAN_EXPORT_TASK_LIST: 'sql_script:can_export_task_list', // 导出任务列表
-  CAN_EXPORT_TASK_STOP: 'sql_script:can_export_task_stop', // 导出任务停止
-  CAN_EXPORT_TASK_RETRY: 'sql_script:can_export_task_retry', // 导出任务重试
-  CAN_EXPORT_GET_SQL_INFO: 'sql_script:can_export_get_sql_info', // 导出任务对应的SQL详情
+  CAN_CREATE: 'aimdp-manager:sql_script:manage:create', // 创建
+  CAN_DELETE: 'aimdp-manager:sql_script:manage:delete', // 删除
+  CAN_UPDATE: 'aimdp-manager:sql_script:manage:modify', // 编辑
+  CAN_COPY: 'aimdp-manager:sql_script:read:list', // 复制
+  CAN_RENAME: 'aimdp-manager:sql_script:read:list', // 重命名
+  CAN_SEARCH: 'aimdp-manager:sql_script:read:list', // 菜单权限
+  CAN_GET: 'aimdp-manager:sql_script:read:get', // 详情
+  CAN_RUN: 'aimdp-manager:sql_script:manage:run', // 运行
+  CAN_CANCEL_RUN: 'aimdp-manager:sql_script:manage:run', // 取消运行
+  CAN_GET_RUN_RESULT: 'aimdp-manager:sql_script:manage:run', // 获取运行结果
+  CAN_EXPORT_RESULT: 'aimdp-manager:sql_script:manage:export', // 导出结果
+  CAN_EXPORT_VERSION_UPDATE: 'aimdp-manager:sql_script:manage:export', // 导出版本更新
+  CAN_EXPORT_TASK_LIST: 'aimdp-manager:sql_script:manage:export', // 导出任务列表
+  CAN_EXPORT_TASK_STOP: 'aimdp-manager:sql_script:manage:export', // 导出任务停止
+  CAN_EXPORT_TASK_RETRY: 'aimdp-manager:sql_script:manage:export', // 导出任务重试
+  CAN_EXPORT_GET_SQL_INFO: 'aimdp-manager:sql_script:manage:export', // 导出任务对应的SQL详情
 
   LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
   GET: 'aimdp-manager:sql_script:read:get',

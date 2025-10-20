@@ -255,46 +255,42 @@ export const ModaForgeResourceEndpoints = {
   // 工作流详情
   workflowDetail: PrefixAimdp + '/workflow/info/{workflow_uuid}',
   // 工作流列表
-  workflowList: PrefixAimdp + '/workflow/list',
+  workflowList: PrefixAimdp + '/ListWorkFlows',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
   // 工作流删除
-  workflowDelete: PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
+  workflowDelete: PrefixAimdp + '/DeleteWorkFlow',
   // 工作流复制
-  workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
+  workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/directory',
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
   // 工作流-脚本类型
-  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
-  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  scriptingEngine: PrefixAimdp + '/ListWorkFlowScriptEngineTypes',
   // 工作流-脚本模板
-  scriptingTemplate:
-    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  scriptingTemplate: PrefixAimdp + '/GetWorkFlowScriptTemplate',
   // 工作流-脚本执行
-  scriptingBench:
-    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  scriptingBench: PrefixAimdp + '/RunWorkFlowScript',
   // 工作流-脚本执行结果
-  scriptingBenchResult:
-    PrefixAimdp +
-    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  scriptingBenchResult: PrefixAimdp + '/GETWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
 
   // 作业列表
-  taskList: PrefixAimdp + '/workflow_instance/list',
+  taskList: PrefixAimdp + '/ListWorkflowInstances',
   // 作业详情
-  taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+  taskDetail: PrefixAimdp + '/GetWorkflowInstanceInfo',
   // 作业详情节点
-  taskDetailNode: PrefixAimdp + '/workflow_instance/task_detail',
+  taskDetailNode: PrefixAimdp + '/GetWorkflowInstanceFiles',
   // 作业重跑
-  taskRerun: PrefixAimdp + '/workflow_instance/task_rerun',
+  taskRerun: PrefixAimdp + '/RerunWorkflowInstance',
   // 作业停用
-  taskStop: PrefixAimdp + '/workflow_instance/task_stop',
+  taskStop: PrefixAimdp + '/StopWorkflowInstance',
 
   modelGet: PrefixAimdp + '/model/model_list',
 
@@ -308,7 +304,7 @@ export const ModaForgeResourceEndpoints = {
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixAimdp + '/datasets/list',
+  datasetsApi: PrefixAimdp + '/ListDatasets',
   //获取数据集详情
   datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
@@ -416,67 +412,61 @@ export const ModaForgeResourceEndpoints = {
 
   // python开发
   // 获取python列表
-  pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
+  pythonListApi: PrefixAimdp + '/ListPysparkFiles',
   // 创建python
-  pythonCreateApi: PrefixAimdp + '/pyspark',
+  pythonCreateApi: PrefixAimdp + '/CreatePysparkFile',
   // 重命名python
-  pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  pythonRenameApi: PrefixAimdp + '/RenamePysparkFile',
   // 删除python
-  pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  pythonDeleteApi: PrefixAimdp + '/DeletePysparkFile',
   // 复制python
-  pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  pythonCopyApi: PrefixAimdp + '/CopyPysparkFile',
   // 打开python
-  pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  pythonOpenApi: PrefixAimdp + '/OpenPysparkFile',
   // 修改python
-  pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  pythonSaveApi: PrefixAimdp + '/UpdatePysparkFile',
   // 运行python
-  pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  pythonRunApi: PrefixAimdp + '/RunPysparkFile',
   // 停止运行python
-  pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  pythonRunCancelApi: PrefixAimdp + '/StopPysparkFile',
   // 获取运行结果
-  pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  pythonRunResultApi: PrefixAimdp + '/GetPysparkFileRunResult',
   // 获取运行日志
-  pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonRunLogApi: PrefixAimdp + '/GetPysparkFileRunLog',
   // 获取导出数据集列表
-  pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
+  pythonExportDatasetListApi: PrefixAimdp + '/ListPysparkExportTasks',
   // 停止导出数据集
-  pythonExportDatasetStopApi:
-    PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
+  pythonExportDatasetStopApi: PrefixAimdp + '/StopPysparkExportTask',
   // 重试导出数据集
-  pythonExportDatasetRetryApi:
-    PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
+  pythonExportDatasetRetryApi: PrefixAimdp + '/RetryPysparkExportTask',
   // 获取算子
-  pythonOperatorApi: PrefixAimdp + '/directory/get-operator',
+  pythonOperatorApi: PrefixAimdp + '/GetOperatorDemo',
   // 导出数据集
-  pythonExportDatasetApi: PrefixAimdp + '/pyspark/export/dataset',
+  pythonExportDatasetApi: PrefixAimdp + '/CreatePysparkExportTask',
   // 获取导出文件列表
-  pythonExportFileApi: PrefixAimdp + '/pyspark/export/file',
+  pythonExportFileApi: PrefixAimdp + '/ListPysparkExportFiles',
   // 获取导出预览数据
-  pythonExportPreviewApi: PrefixAimdp + '/pyspark/export/preview',
+  pythonExportPreviewApi: PrefixAimdp + '/PreviewPysparkExportData',
 
   // SQL开发
-  sqlListApi: PrefixAimdp + '/sql_script/list',
-  sqlCreateApi: PrefixAimdp + '/sql_script/create',
-  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
-  sqlDeleteApi: PrefixAimdp + '/sql_script/{script_id}/delete',
-  sqlCopyApi: PrefixAimdp + '/sql_script/{script_id}/copy',
-  sqlOpenApi: PrefixAimdp + '/sql_script/{script_id}/info',
-  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
-  sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
-  sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
-  sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
-  sqlRunLogApi: PrefixAimdp + '/sql_script/{script_id}/get_run_log',
-  sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
-  sqlExportDatasetVersion:
-    PrefixAimdp + '/sql_script/{script_id}/export_version_update',
-  sqlExportDatasetList: PrefixAimdp + '/sql_script/export_task/list',
-  sqlExportDatasetStopApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/stop',
-  sqlExportDatasetRetryApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/retry',
-  sqlExportDatasetDetailApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/get_sql_info',
-  datasetsOptionsApi: PrefixAimdp + '/datasets/list',
+  sqlListApi: PrefixAimdp + '/ListSqlFile',
+  sqlCreateApi: PrefixAimdp + '/CreateSqlFile',
+  sqlRenameApi: PrefixAimdp + '/RenameSqlFile',
+  sqlDeleteApi: PrefixAimdp + '/DeleteSqlFile',
+  sqlCopyApi: PrefixAimdp + '/CopySqlFile',
+  sqlOpenApi: PrefixAimdp + '/GetSqlFile',
+  sqlSaveApi: PrefixAimdp + '/EditSqlFile',
+  sqlRunApi: PrefixAimdp + '/RunSqlFile',
+  sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
+  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResultt',
+  sqlRunLogApi: PrefixAimdp + '/GetSqlFileRunLog',
+  sqlExportDataset: PrefixAimdp + '/CreateSqlExportTask',
+  sqlExportDatasetVersion: PrefixAimdp + '/UpdateSqlExportTaskVersion',
+  sqlExportDatasetList: PrefixAimdp + '/ListSqlExportTask',
+  sqlExportDatasetStopApi: PrefixAimdp + '/StopSqlExportTask',
+  sqlExportDatasetRetryApi: PrefixAimdp + '/RetrySqlExportTask',
+  sqlExportDatasetDetailApi: PrefixAimdp + '/GetSqlExportTaskInfo',
+  datasetsOptionsApi: PrefixAimdp + '/ListDatasets',
 
   leGetTask: PrefixLabelService + '/getTask',
   leGetTaskById: PrefixLabelService + '/getTaskById',
