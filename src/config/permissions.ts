@@ -115,14 +115,14 @@ export const DATA_CATALOG_PERMISSIONS = {
 
 // 数据集管理权限
 export const DATA_MANAGEMENT_PERMISSIONS = {
-  CAN_CREATE: 'datasets:can_create', //创建数据集
-  CAN_SEARCH_BATCH: 'connectors:can_output', //批量导出
-  CAN_DELETE_BATCH: 'datasets:can_delete_batch', //批量删除
-  CAN_SEARCH: 'datasets:can_search', //导出
-  CAN_DELETE: 'datasets:can_delete', //删除
-  CAN_UPDATE_VERSION_RETRY: 'datasets:can_update_version_retry', //重试
-  CAN_UPDATE: 'datasets:can_update', //编辑
-  CAN_UPDATE_VERSION_DATA: 'datasets:can_update_version_data', //编辑数据内容
+  CAN_CREATE: 'aimdp-manager:dataset:manage:create', //创建数据集
+  CAN_SEARCH_BATCH: 'aimdp-manager:dataset:read:get', //批量导出
+  CAN_DELETE_BATCH: 'aimdp-manager:dataset:manage:delete', //批量删除
+  CAN_SEARCH: 'aimdp-manager:dataset:read:get', //导出
+  CAN_DELETE: 'aimdp-manager:dataset:manage:delete', //删除
+  CAN_UPDATE_VERSION_RETRY: 'aimdp-manager:dataset:manage:modify', //重试
+  CAN_UPDATE: 'aimdp-manager:dataset:manage:modify', //编辑
+  CAN_UPDATE_VERSION_DATA: 'aimdp-manager:dataset:manage:modify', //编辑数据内容
 
   LIST: 'aimdp-manager:dataset:read:list', // 菜单权限
   GET: 'aimdp-manager:dataset:read:get',

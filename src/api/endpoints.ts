@@ -308,39 +308,39 @@ export const ModaForgeResourceEndpoints = {
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixAimdp + '/datasets/list',
+  datasetsApi: PrefixAimdp + '/ListDatasets',
   //获取数据集详情
-  datasetDetailApi: PrefixV1 + '/dataset/{id}',
+  // datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
-  createDatasetApi: PrefixAimdp + '/datasets',
+  createDatasetApi: PrefixAimdp + '/CreateDataset',
   //获取标签列表
-  tagListApi: PrefixAimdp + '/tags',
+  tagListApi: PrefixAimdp + '/ListTags',
   //删除数据集
-  deleteDataset: PrefixV1 + '/dataset/{id}',
+  // deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
-  connectorListApi: PrefixAimdp + '/connectors',
+  connectorListApi: PrefixAimdp + '/ListConnectors',
   //查询指定连接器加载成功的文件信息
-  connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
+  connectorFileListApi: PrefixAimdp + '/ListConnectorLoadedFiles',
   //修改数据集
-  updateDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
+  updateDatasetApi: PrefixAimdp + '/EditDataset',
   //获取数据集详细信息
-  datasetDetailPageApi: PrefixAimdp + '/datasets/{dataset_id}',
+  datasetDetailPageApi: PrefixAimdp + '/GetDatasetInfo',
   //删除数据集
-  deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
+  deleteDatasetApi: PrefixAimdp + '/DeleteDataset',
   //批量删除数据集
-  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch-delete',
+  batchDeleteDatasetApi: PrefixAimdp + '/DeleteDatasets',
   //查询数据集详细信息的数据内容和
-  datasetContentsApi: PrefixAimdp + '/datasets/version/data',
+  datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
+  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
   //获取数据集版本列表
-  datasetVersionListApi: PrefixAimdp + '/datasets/version',
+  datasetVersionListApi: PrefixAimdp + '/ListDatasetVersion',
   //版本重新生成
-  datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/datasets/version/file',
+  dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
   //数据内容数据库表
-  dataContentTableList: PrefixAimdp + '/datasets/version/table',
+  dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
 
   // 连接器接口
 
