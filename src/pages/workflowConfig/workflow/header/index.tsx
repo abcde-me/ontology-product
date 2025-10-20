@@ -109,8 +109,9 @@ const Header: FC = () => {
   );
 
   const updateWorkFlowStatus = async () => {
-    const workflowDetailRes = await getWorkflowDetail(workflowUuid, {
-      workflow_version: workflowVersion
+    const workflowDetailRes = await getWorkflowDetail({
+      workflow_version: workflowVersion,
+      workflow_uuid: workflowUuid
     });
 
     if (workflowDetailRes?.data) {
@@ -171,7 +172,8 @@ const Header: FC = () => {
             onSuccess: async () => {
               const ds_workflow_id =
                 getQueryParams(history, 'ds_workflow_id') ?? '';
-              const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+              const workflowRes = await operateWorkflow({
+                workflow_uuid: workflowUuid ?? '',
                 uid: userInfo?.id ?? '',
                 ds_workflow_id: Number(ds_workflow_id),
                 op
@@ -197,7 +199,8 @@ const Header: FC = () => {
       }
 
       const ds_workflow_id = getQueryParams(history, 'ds_workflow_id') ?? '';
-      const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+      const workflowRes = await operateWorkflow({
+        workflow_uuid: workflowUuid ?? '',
         uid: userInfo?.id ?? '',
         ds_workflow_id: Number(ds_workflow_id),
         op,
@@ -254,7 +257,8 @@ const Header: FC = () => {
     }
 
     // 这里可以添加保存逻辑
-    const workflowRes = await editWorkflow(workflowUuid ?? '', {
+    const workflowRes = await editWorkflow({
+      workflow_uuid: workflowUuid ?? '',
       workflow_name
     });
 

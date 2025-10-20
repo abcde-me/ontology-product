@@ -249,38 +249,34 @@ export const ModaForgeResourceEndpoints = {
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流
-  createWorkflow: PrefixAimdp + '/workflow/info',
+  createWorkflow: PrefixAimdp + '/CreateWorkFlow',
   // 编辑工作流
-  editWorkflow: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  editWorkflow: PrefixAimdp + '/EditWorkFlow',
   // 工作流详情
-  workflowDetail: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  workflowDetail: PrefixAimdp + '/GetWorkFlowInfo',
   // 工作流列表
   workflowList: PrefixAimdp + '/workflow/list',
   // 工作流操作
-  workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  workflowOperation: PrefixAimdp + '/ManageWorkFlow',
   // 工作流删除
   workflowDelete: PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
   // 工作流复制
   workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
   // 工作流 - 结束节点目标目录
-  workflowTargetPath: PrefixAimdp + '/directory',
+  workflowTargetPath: PrefixAimdp + '/ListDirectory',
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
   // 工作流-脚本类型
-  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
-  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  scriptingEngine: PrefixAimdp + '/ListWorkFlowScriptEngineTypes',
   // 工作流-脚本模板
-  scriptingTemplate:
-    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  scriptingTemplate: PrefixAimdp + '/GetWorkFlowScriptTemplate',
   // 工作流-脚本执行
-  scriptingBench:
-    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  scriptingBench: PrefixAimdp + '/RunWorkFlowScript',
   // 工作流-脚本执行结果
-  scriptingBenchResult:
-    PrefixAimdp +
-    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  scriptingBenchResult: PrefixAimdp + '/GETWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',

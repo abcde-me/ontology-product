@@ -4,7 +4,8 @@ import {
   WorkflowDetailRes,
   WorkflowOperationParams,
   WorkflowOperation,
-  WorkflowDetailParams
+  WorkflowDetailParams,
+  EditWorkflowParams
 } from '@/types/workflowApi';
 import UAPI from '@/api';
 
@@ -17,35 +18,21 @@ export async function createWorkflow(
 
 // 编辑工作流
 export async function editWorkflow(
-  workflow_uuid: string | number,
-  params: CreateWorkflowParams
+  params: EditWorkflowParams
 ): Promise<ApiRes<CreateWorkflowRes>> {
-  return await UAPI.RES.editWorkflow({ workflow_uuid })
-    .put(params)
-    .inRegion()
-    .do();
+  return await UAPI.RES.editWorkflow({}).post(params).inRegion().do();
 }
 
 // 获取工作流详情
 export async function getWorkflowDetail(
-  workflow_uuid: string | number,
   params: WorkflowDetailParams
 ): Promise<ApiRes<WorkflowDetailRes>> {
-  return await UAPI.RES.workflowDetail({ workflow_uuid })
-    .get(params)
-    .inRegion()
-    .do();
+  return await UAPI.RES.workflowDetail({}).post(params).inRegion().do();
 }
 
 // 工作流操作（上下线、运行）
-export async function operateWorkflow(
-  workflow_uuid: string | number,
-  params: WorkflowOperationParams
-) {
-  return UAPI.RES.workflowOperation({ workflow_uuid })
-    .put(params)
-    .inRegion()
-    .do();
+export async function operateWorkflow(params: WorkflowOperationParams) {
+  return UAPI.RES.workflowOperation({}).post(params).inRegion().do();
 }
 
 // 获取结束节点目标目录
@@ -54,7 +41,7 @@ export async function getWorkflowTargetPath(
   search: string
 ) {
   return await UAPI.RES.workflowTargetPath({ root_type, search })
-    .get({
+    .post({
       root_type,
       search
     })
@@ -64,19 +51,27 @@ export async function getWorkflowTargetPath(
 
 // 工作流-脚本类型
 export async function getScriptingType() {
-  return await UAPI.RES.scriptingType({}).get().inRegion().do();
+  return await UAPI.RES.scriptingType({}).post({}).inRegion().do();
 }
 // 工作流-脚本执行器列表
 export async function getScriptingEngine(script_type: string) {
-  return await UAPI.RES.scriptingEngine({ script_type }).get().inRegion().do();
+  return await UAPI.RES.scriptingEngine({ script_type })
+    .post({
+      script_type
+    })
+    .inRegion()
+    .do();
 }
 // 工作流-脚本模板
 export async function getScriptingTemplate(
   workflow_uuid: string,
   node_id: string
 ) {
-  return await UAPI.RES.scriptingTemplate({ workflow_uuid, node_id })
-    .get()
+  return await UAPI.RES.scriptingTemplate({})
+    .post({
+      id: workflow_uuid,
+      node_id
+    })
     .inRegion()
     .do();
 }
@@ -87,8 +82,13 @@ export async function scriptingBench(
   node_id: string,
   params
 ) {
-  return await UAPI.RES.scriptingBench({ workflow_uuid, session_id, node_id })
-    .put(params)
+  return await UAPI.RES.scriptingBench({})
+    .post({
+      workflow_uuid,
+      session_id,
+      node_id,
+      ...(params ?? {})
+    })
     .inRegion()
     .do();
 }
@@ -99,13 +99,13 @@ export async function scriptingBenchResult(
   node_id: string,
   bench_job_id: string
 ) {
-  return await UAPI.RES.scriptingBenchResult({
-    workflow_uuid,
-    session_id,
-    node_id,
-    bench_job_id
-  })
-    .get()
+  return await UAPI.RES.scriptingBenchResult({})
+    .post({
+      workflow_uuid,
+      session_id,
+      node_id,
+      bench_job_id
+    })
     .inRegion()
     .do();
 }
@@ -117,13 +117,13 @@ export async function scriptingBenchCancel(
   node_id: string,
   bench_job_id: string
 ) {
-  return await UAPI.RES.scriptingBenchResult({
-    workflow_uuid,
-    session_id,
-    node_id,
-    bench_job_id
-  })
-    .delete()
+  return await UAPI.RES.scriptingBenchResult({})
+    .post({
+      workflow_uuid,
+      session_id,
+      node_id,
+      bench_job_id
+    })
     .inRegion()
     .do();
 }
