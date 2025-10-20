@@ -162,7 +162,7 @@ export const ResourceEndpointsV2 = {
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
   // 数据目录
-  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
+  catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
   catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
   dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
@@ -349,7 +349,7 @@ export const ModaForgeResourceEndpoints = {
   // 新建连接器数据
   addconnection: PrefixAimdp + '/CreateConnector',
   // 删除连接器数据
-  delconnection: PrefixAimdp + '/connectors/{connector_id}',
+  delconnection: PrefixAimdp + '/DeleteConnector',
   // 修改连接器数据
   editconnection: PrefixAimdp + '/connectors/{connector_id}',
   // 查看连接器详情数据

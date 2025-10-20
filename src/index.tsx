@@ -95,6 +95,8 @@ function App() {
 
   // 用于追踪是否已经初始化过权限
   const permissionInitializedRef = useRef(false);
+  // 用于追踪项目是否刚刚切换过
+  const projectSwitchedRef = useRef(false);
 
   useEffect(() => {
     if (
@@ -109,9 +111,27 @@ function App() {
       console.log('finalMenus', finalMenus);
       setUserMenus(finalMenus);
 
-      history.push(
-        finalMenus.find((item) => item.children)?.children?.[0]?.path as string
-      );
+      // 检查当前路由是否在菜单中，如果不在则跳转到第一个路由
+      const currentPath = window.location.pathname;
+      const isCurrentPathValid = finalMenus.some((menu) => {
+        if (menu.children) {
+          return menu.children.some(
+            (child) => child.path && currentPath.includes(child.path)
+          );
+        }
+        return menu.path && currentPath.includes(menu.path);
+      });
+
+      // 只有当前路由无效时才跳转到第一个路由
+      // 或者当项目刚刚切换过时，也要跳转到第一个有权限的路由
+      if (!isCurrentPathValid || projectSwitchedRef.current) {
+        const firstValidPath = finalMenus.find((item) => item.children)
+          ?.children?.[0]?.path;
+        if (firstValidPath) {
+          history.push(firstValidPath);
+        }
+        projectSwitchedRef.current = false;
+      }
     }
   }, [projectId, userActions.actions, userActions.isAdmin]);
 
@@ -142,6 +162,8 @@ function App() {
       setUserActions({ isAdmin: false, actions: null });
       // 更新 projectId
       setProjectId(pId);
+      // 标记项目已切换，这样权限加载完成后会跳转到新项目的第一个有权限的路由
+      projectSwitchedRef.current = true;
       // 重置初始化标记，但不要在这里设置为 false，因为我们已经调用了 setUserPermissions
       permissionInitializedRef.current = true;
     },

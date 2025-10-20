@@ -9,11 +9,8 @@ export async function addconnectionList(params) {
   return await UAPI.RES.addconnection({}).post(params).inRegion().do();
 }
 // 删除的api
-export async function delconnectionList(connector_id) {
-  return await UAPI.RES.delconnection({ connector_id })
-    .delete()
-    .inRegion()
-    .do();
+export async function delconnectionList(params) {
+  return await UAPI.RES.delconnection({}).post(params).inRegion().do();
 }
 // 查看的api
 export async function getdetailList(connector_id) {
