@@ -163,14 +163,14 @@ export const ResourceEndpointsV2 = {
 
   // 数据目录
   catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
-  catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
-  volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
-  dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
+  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
+  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
-  tableDeleteApi: PrefixAimdp + '/directory/delete-table', //删除数据库表
-  catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
+  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
+  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
-  targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
+  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
   sourceFileTypeListApi:
     PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
@@ -183,7 +183,7 @@ export const ResourceEndpointsV2 = {
   dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: PrefixAimdp + `/connectors/files/output`,
+  fileExportApi: PrefixAimdp + `/OutputToConnector`,
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,

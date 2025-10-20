@@ -618,21 +618,24 @@ export async function deleteVolume(
   id: string,
   params?: { root_type?: string }
 ) {
-  const res = await UAPI.RES.volumeDeleteApi({ id })
-    .delete(params)
+  const res = await UAPI.RES.volumeDeleteApi({})
+    .post({ ...params, id })
     .inRegion()
     .do();
   return res;
 }
 // 删除库表
 export async function deleteTable(data) {
-  const res = await UAPI.RES.tableDeleteApi({}).post(data).inRegion().do();
+  const res = await UAPI.RES.tableDeleteApi({})
+    .post({ ...data })
+    .inRegion()
+    .do();
   return res;
 }
 // 重命名目录
 export async function renameCatalog(id: string, params: any) {
-  const res = await UAPI.RES.catalogRenameApi({ catalogId: id })
-    .put(params)
+  const res = await UAPI.RES.catalogRenameApi({})
+    .post({ ...params, catalogId: id })
     .inRegion()
     .do();
   return res;
@@ -700,20 +703,18 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   }
 
   return await UAPI.RES.targetDataFileListApi({})
-    .get(queryParams)
+    .post(queryParams)
     .inRegion()
     .do();
 }
 //查询目标数据文件类型列表
 export async function getTargetFileTypeList() {
-  return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
+  return await UAPI.RES.targetFileTypeListApi({}).post().inRegion().do();
 }
 //查询源数据文件类型列表
 export async function getSourceFileTypeList(params) {
-  return await UAPI.RES.sourceFileTypeListApi({
-    file_id: params.id
-  })
-    .get()
+  return await UAPI.RES.sourceFileTypeListApi({})
+    .post({ file_id: params.id })
     .inRegion()
     .do();
 }
@@ -764,7 +765,7 @@ export async function deleteSourceFileBatch(params: any) {
 
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
-  return await UAPI.RES.catalogPreviewApi({}).get(param).inRegion().do();
+  return await UAPI.RES.catalogPreviewApi({}).post(param).inRegion().do();
 }
 
 //删除目录文件接口
@@ -777,7 +778,7 @@ export async function deleteFileById(id: string, params: any = {}) {
 
 //查询指定目录下，已加载成功的文件记录
 export async function getDataCatalogList(param: any = {}) {
-  return await UAPI.RES.dataCatalogListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.dataCatalogListApi({}).post(param).inRegion().do();
 }
 
 // 获取数据目录列表
