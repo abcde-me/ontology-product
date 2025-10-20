@@ -64,19 +64,22 @@ export async function getWorkflowTargetPath(
 
 // 工作流-脚本类型
 export async function getScriptingType() {
-  return await UAPI.RES.scriptingType({}).get().inRegion().do();
+  return await UAPI.RES.scriptingType({}).post().inRegion().do();
 }
 // 工作流-脚本执行器列表
 export async function getScriptingEngine(script_type: string) {
-  return await UAPI.RES.scriptingEngine({ script_type }).get().inRegion().do();
+  return await UAPI.RES.scriptingEngine({})
+    .post({ script_type })
+    .inRegion()
+    .do();
 }
 // 工作流-脚本模板
 export async function getScriptingTemplate(
   workflow_uuid: string,
   node_id: string
 ) {
-  return await UAPI.RES.scriptingTemplate({ workflow_uuid, node_id })
-    .get()
+  return await UAPI.RES.scriptingTemplate({})
+    .post({ workflow_uuid, node_id })
     .inRegion()
     .do();
 }
@@ -87,8 +90,8 @@ export async function scriptingBench(
   node_id: string,
   params
 ) {
-  return await UAPI.RES.scriptingBench({ workflow_uuid, session_id, node_id })
-    .put(params)
+  return await UAPI.RES.scriptingBench({})
+    .post({ ...params, workflow_uuid, session_id, node_id })
     .inRegion()
     .do();
 }
@@ -99,13 +102,13 @@ export async function scriptingBenchResult(
   node_id: string,
   bench_job_id: string
 ) {
-  return await UAPI.RES.scriptingBenchResult({
-    workflow_uuid,
-    session_id,
-    node_id,
-    bench_job_id
-  })
-    .get()
+  return await UAPI.RES.scriptingBenchResult({})
+    .post({
+      workflow_uuid,
+      session_id,
+      node_id,
+      bench_job_id
+    })
     .inRegion()
     .do();
 }
