@@ -87,7 +87,6 @@ function App() {
   );
   const location = useLocation();
   const history = useHistory();
-  const { pushPath } = usePathChange();
 
   const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
     useUserInfoStore();
@@ -111,20 +110,8 @@ function App() {
       console.log('finalMenus', finalMenus);
       setUserMenus(finalMenus);
 
-      // 检查当前路由是否在菜单中，如果不在则跳转到第一个路由
-      const currentPath = window.location.pathname;
-      const isCurrentPathValid = finalMenus.some((menu) => {
-        if (menu.children) {
-          return menu.children.some(
-            (child) => child.path && currentPath.includes(child.path)
-          );
-        }
-        return menu.path && currentPath.includes(menu.path);
-      });
-
-      // 只有当前路由无效时才跳转到第一个路由
-      // 或者当项目刚刚切换过时，也要跳转到第一个有权限的路由
-      if (!isCurrentPathValid || projectSwitchedRef.current) {
+      // 只有当项目刚刚切换过时，才跳转到第一个有权限的路由
+      if (projectSwitchedRef.current) {
         const firstValidPath = finalMenus.find((item) => item.children)
           ?.children?.[0]?.path;
         if (firstValidPath) {
