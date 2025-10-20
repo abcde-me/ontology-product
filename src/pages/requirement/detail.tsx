@@ -133,13 +133,13 @@ export default function RequirementDetail() {
   };
 
   // 创建需求，角色=开发者、用户时，禁止勾选 个人
+  // 1030 需要重新对接, 用户权限类型、权限变更
   const isShowPersonal = useMemo(() => {
     return (
-      !['Developer', 'User'].includes(userInfo?.role || '') && type === 'create'
+      !['Developer', 'User'].includes(userInfo?.role?.[0]?.name || '') &&
+      type === 'create'
     );
-  }, [userInfo, type]);
-
-  // 初始化状态
+  }, [userInfo?.role, type]);
   const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
