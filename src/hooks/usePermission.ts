@@ -7,6 +7,7 @@ import {
 } from '@/store/userInfoStore';
 import { ResourcePermissionActions } from '@/api/modules/project';
 import { isRequestSuccess } from '@/api/utils';
+import { isWujie } from '@/utils/env';
 
 /**
  * 权限相关的 hooks 集合
@@ -125,26 +126,29 @@ export const usePermission = () => {
       T extends {
         children?: T[];
         permission?: string;
+        external?: boolean;
       }
     >(
       items: T[]
     ): T[] => {
-      return items.reduce<T[]>((result, item) => {
-        // 如果是ItemGroup，递归处理其子项
-        if (item.children) {
-          const filteredChildren = createPermissionFilter(item.children);
-          // 只有当子项不为空时，才保留这个ItemGroup
-          if (filteredChildren.length > 0) {
-            result.push({ ...item, children: filteredChildren });
+      return items
+        .filter((m) => (isWujie ? !m.external : true))
+        .reduce<T[]>((result, item) => {
+          // 如果是ItemGroup，递归处理其子项
+          if (item.children) {
+            const filteredChildren = createPermissionFilter(item.children);
+            // 只有当子项不为空时，才保留这个ItemGroup
+            if (filteredChildren.length > 0) {
+              result.push({ ...item, children: filteredChildren });
+            }
           }
-        }
-        // 普通菜单项，检查是否有权限
-        else if (!item.permission || hasMenuPermission(item.permission)) {
-          result.push(item);
-        }
+          // 普通菜单项，检查是否有权限
+          else if (!item.permission || hasMenuPermission(item.permission)) {
+            result.push(item);
+          }
 
-        return result;
-      }, [] as T[]);
+          return result;
+        }, [] as T[]);
     },
     [hasMenuPermission]
   );
