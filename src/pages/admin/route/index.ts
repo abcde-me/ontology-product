@@ -14,6 +14,7 @@ export type IRoute = AuthParams & {
   component?: React.FC<any>;
   level?: number;
   sub?: boolean;
+  exact?: boolean;
   // 路由权限标识
   permission?: string;
 };
