@@ -2,6 +2,18 @@ import * as React from 'react';
 import auth, { AuthParams } from '@/utils/authentication';
 import { useEffect, useMemo, useState } from 'react';
 import { Redirect } from 'react-router';
+import {
+  CONNECTION_PERMISSIONS,
+  DATA_LOAD_PERMISSIONS,
+  SQL_PERMISSIONS,
+  PYSPARK_PERMISSIONS,
+  WORKFLOW_LIST_PERMISSIONS,
+  WORKFLOW_TASK_PERMISSIONS,
+  DATA_CATALOG_PERMISSIONS,
+  DATA_MANAGEMENT_PERMISSIONS,
+  REQUIREMENT_PERMISSIONS,
+  ANNOTATION_TASK_PERMISSIONS
+} from '@/config/permissions';
 
 export type IRoute = AuthParams & {
   name: string;
@@ -26,7 +38,7 @@ export const routes: IRoute[] = [
     name: 'connection',
     key: '/tenant/compute/modaforge/connection',
     component: React.lazy(async () => import('../../connection')),
-    permission: 'aimdp-manager:connector:read:list',
+    permission: CONNECTION_PERMISSIONS.LIST,
     children: []
   },
   // 数据载入
@@ -34,13 +46,13 @@ export const routes: IRoute[] = [
     name: 'dataLoad',
     key: '/tenant/compute/modaforge/dataLoad', //临时修改../../dataLoad/index
     component: React.lazy(async () => import('../../dataLoad')),
-    permission: 'aimdp-manager:data_loader:read:list',
+    permission: DATA_LOAD_PERMISSIONS.LIST,
     children: [
       {
         name: 'dataLoadList',
         key: '/tenant/compute/modaforge/dataLoad/list',
         component: React.lazy(async () => import('../../dataLoad/list/list')),
-        permission: 'aimdp-manager:data_loader:read:list'
+        permission: DATA_LOAD_PERMISSIONS.LIST
       },
       {
         name: 'dataLoadDetail',
@@ -48,7 +60,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataLoad/detail/dataLoad-detail')
         ),
-        permission: 'aimdp-manager:data_loader:read:list'
+        permission: DATA_LOAD_PERMISSIONS.CAN_GET
       },
       {
         name: 'accessLodaDetail',
@@ -65,7 +77,7 @@ export const routes: IRoute[] = [
     name: 'sql',
     key: '/tenant/compute/modaforge/sql',
     component: React.lazy(async () => import('../../sql')),
-    permission: 'aimdp-manager:sql:read:list',
+    permission: SQL_PERMISSIONS.LIST,
     children: []
   },
   // 工作流
@@ -73,15 +85,15 @@ export const routes: IRoute[] = [
     name: 'workflowList',
     key: '/tenant/compute/modaforge/workflowList',
     component: React.lazy(async () => import('../../workflowList')),
-    permission: 'aimdp-manager:workflow:read:list',
+    permission: WORKFLOW_LIST_PERMISSIONS.LIST,
     children: []
   },
-  // Notebook
+  // pyspark
   {
     name: 'pyspark',
     key: '/tenant/compute/modaforge/pyspark',
     component: React.lazy(async () => import('../../pyspark')),
-    permission: 'aimdp-manager:pyspark:read:list',
+    permission: PYSPARK_PERMISSIONS.LIST,
     children: []
   },
   // 创建工作流
@@ -89,7 +101,7 @@ export const routes: IRoute[] = [
     name: 'workflowConfig',
     key: '/tenant/compute/modaforge/workflowConfig',
     component: React.lazy(async () => import('../../workflowConfig')),
-    permission: 'aimdp-manager:workflow:manage:create',
+    permission: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
     children: []
   },
   // 作业
@@ -97,13 +109,13 @@ export const routes: IRoute[] = [
     name: 'workflowTask',
     key: '/tenant/compute/modaforge/workflowTask',
     component: React.lazy(async () => import('../../workflowTask')),
-    permission: 'aimdp-manager:workflow:read:list',
+    permission: WORKFLOW_TASK_PERMISSIONS.LIST,
     children: [
       {
         name: 'taskDetail',
         key: '/tenant/compute/modaforge/workflowTaskDetail',
         component: React.lazy(async () => import('../../workflowTask/detail')),
-        permission: 'aimdp-manager:workflow:read:list'
+        permission: WORKFLOW_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -150,7 +162,7 @@ export const routes: IRoute[] = [
     name: 'dataCatalog',
     key: '/tenant/compute/modaforge/dataCatalog',
     component: React.lazy(async () => import('../../dataCatalog')),
-    permission: 'aimdp-manager:directory:read:list',
+    permission: DATA_CATALOG_PERMISSIONS.LIST,
     children: []
   },
   // 数据集详情 (需要在数据集管理之前匹配)
@@ -161,7 +173,7 @@ export const routes: IRoute[] = [
       console.log('加载数据集详情页组件');
       return import('../../../components/detail/index');
     }),
-    permission: 'aimdp-manager:dataset:read:list',
+    permission: DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH,
     children: []
   },
   // 数据集管理
@@ -169,7 +181,7 @@ export const routes: IRoute[] = [
     name: 'datasetManagement',
     key: '/tenant/compute/modaforge/datasetManagement',
     component: React.lazy(async () => import('../../datasetManagement')),
-    permission: 'aimdp-manager:dataset:read:list',
+    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
     children: []
   },
   // 数据标注 - 需求管理
@@ -177,13 +189,13 @@ export const routes: IRoute[] = [
     name: 'requirement',
     key: '/tenant/compute/modaforge/requirement',
     component: React.lazy(async () => import('../../requirement')),
-    permission: 'aimdp-manager:label_req_manager:read:get_req_list',
+    permission: REQUIREMENT_PERMISSIONS.LIST,
     children: [
       {
         name: 'requirementDetail',
         key: '/tenant/compute/modaforge/requirementDetail',
         component: React.lazy(async () => import('../../requirement/detail')),
-        permission: 'aimdp-manager:requirement:read:list'
+        permission: REQUIREMENT_PERMISSIONS.GET
       }
     ]
   },
@@ -192,7 +204,7 @@ export const routes: IRoute[] = [
     name: 'taskList',
     key: '/tenant/compute/modaforge/taskList',
     component: React.lazy(async () => import('../../requirement/taskList')),
-    permission: 'aimdp-manager:label_task:read:get_task_list',
+    permission: ANNOTATION_TASK_PERMISSIONS.LIST,
     children: []
   },
   // 标注工具页面
@@ -200,7 +212,7 @@ export const routes: IRoute[] = [
     name: 'labelEditor',
     key: '/tenant/compute/modaforge/labelEditor',
     component: React.lazy(async () => import('../../labelEditor')),
-    permission: 'aimdp-manager:annotation_task:read:list',
+    permission: ANNOTATION_TASK_PERMISSIONS.GET_ID_TASK,
     children: []
   },
   // 运营中心页面
