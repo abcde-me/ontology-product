@@ -1,4 +1,4 @@
-.pyspark-source-tree {
+.pyspark-target-tree {
   width: 100%;
   height: 100%;
   display: flex;
@@ -7,8 +7,8 @@
   border-radius: 8px;
   // overflow: hidden;
 
-  .pyspark-source-tree__content .pyspark-source-tree__content-tree {
-    .arco-tree-node {
+  .pyspark-target-tree__content .pyspark-target-tree__content-tree {
+    :global(.arco-tree-node) {
       position: relative;
       align-items: center;
       padding-left: 4px;
@@ -18,89 +18,68 @@
         background-color: transparent;
       }
 
-      .arco-tree-node-title {
-        // width: 267px;
-        // flex-basis: 267px;
-        // flex-shrink: 0;
+      :global(.arco-tree-node-title) {
+        padding: 7px 0;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
 
-        .pyspark-source-tree__node-title {
+        .pyspark-target-tree__node-title {
           width: 250px;
         }
 
-        .pyspark-source-tree__node-title-volume_item {
+        .pyspark-target-tree__node-title-volume_item {
           width: 170px;
         }
 
-        .pyspark-source-tree__node-title-file,
-        .pyspark-source-tree__node-size-file {
+        .pyspark-target-tree__node-title-file,
+        .pyspark-target-tree__node-size-file {
           width: 150px;
         }
 
         &:hover {
           background-color: var(--color-bg-5);
 
-          .pyspark-source-tree__node-title {
+          .pyspark-target-tree__node-title {
             color: var(--primary-6);
           }
 
-          .pyspark-source-tree__node-title-file,
-          .pyspark-source-tree__node-size-file {
+          .pyspark-target-tree__node-title-file,
+          .pyspark-target-tree__node-size-file {
             width: 116px;
           }
 
-          .pyspark-source-tree__node-title-volume_item,
-          .pyspark-source-tree__node-size-volume_item {
-            width: 144px;
+          .pyspark-target-tree__node-title-volume_item,
+          .pyspark-target-tree__node-size-volume_item {
+            width: 146px;
           }
 
-          .pyspark-source-tree__node-actions {
+          .pyspark-target-tree__node-actions {
             opacity: 1;
             visibility: visible;
           }
         }
       }
 
-      // &:hover {
-      //   background-color: var(--color-bg-5);
-
-      //   .pyspark-source-tree__node-title {
-      //     color: var(--primary-6);
-      //   }
-
-      //   .pyspark-source-tree__node-title-file,
-      //   .pyspark-source-tree__node-size-file {
-      //     max-width: 40px;
-      //   }
-
-      //   .pyspark-source-tree__node-title-volume_item,
-      //   .pyspark-source-tree__node-size-volume_item {
-      //     max-width: 70px;
-      //   }
-
-      //   .pyspark-source-tree__node-actions {
-      //     opacity: 1;
-      //     visibility: visible;
-      //   }
-      // }
-
-      &.arco-tree-node-selected {
+      // 去除选中时的高亮
+      &:global(.arco-tree-node-selected) {
         background-color: transparent;
         color: var(--color-text-2);
 
-        .arco-tree-node-switcher {
+        :global(.arco-tree-node-switcher) {
           color: var(--color-text-2);
         }
       }
 
-      &-title-text {
+      &:global(.arco-tree-node-title-text) {
         flex-grow: 1;
       }
 
-      &-custom-icon {
+      &:global(.arco-tree-node-custom-icon) {
         margin-right: 4px;
       }
 
-      .arco-tree-node-indent {
+      :global(.arco-tree-node-indent) {
         display: unset;
       }
     }
@@ -152,7 +131,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    position: relative;
+    // position: relative;
 
     &-info {
       display: flex;
@@ -164,7 +143,8 @@
       flex-grow: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      // max-width: 196px;
+      // width:
+      // will-change: width;
     }
 
     &-size {
@@ -194,28 +174,28 @@
   }
 
   // 空状态
-  .arco-empty {
+  :global(.arco-empty) {
     padding: 40px 0;
 
-    .arco-empty-description {
+    :global(.arco-empty-description) {
       color: #999;
       font-size: 14px;
     }
   }
 
   // 按钮样式
-  .arco-btn-size-default {
+  :global(.arco-btn-size-default) {
     height: 24px;
     padding: 0 12px;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled) {
+  :global(.arco-btn-outline:not(.arco-btn-disabled)) {
     color: #007dfa;
     border-color: #007dfa;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled):active,
-  .arco-btn-outline:not(.arco-btn-disabled):hover {
+  :global(.arco-btn-outline:not(.arco-btn-disabled):active),
+  :global(.arco-btn-outline:not(.arco-btn-disabled):hover) {
     color: #007dfa;
     border-color: #007dfa;
     background-color: transparent;

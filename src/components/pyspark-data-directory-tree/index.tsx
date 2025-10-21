@@ -5,7 +5,7 @@ import SourceTree from './components/source-tree';
 import TargetTree from './components/target-tree';
 import FileIcon from './assets/file-icon.svg';
 import { DatasetListItem } from '@/types/datasetManagement';
-import './index.scss';
+import styles from './index.module.scss';
 import { Db, FluffyVolume } from '@/api/dataCatalog';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
@@ -158,7 +158,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
       default:
         return (
           <Tree
-            className="tree-content"
+            className={styles['tree-content']}
             treeData={treeData}
             selectedKeys={selectedKeys}
             onSelect={handleSelect}
@@ -170,7 +170,11 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     }
   };
 
-  return <div className="pyspark-data-directory-tree">{renderContent()}</div>;
+  return (
+    <div className={styles['pyspark-data-directory-tree']}>
+      {renderContent()}
+    </div>
+  );
 };
 
 export default DataDirectoryTree;
