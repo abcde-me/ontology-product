@@ -207,7 +207,6 @@ const renderActionColumn = (
   handAllReset,
   resetPage
 ) => {
-  const params = record?.perms || [];
   const config: {
     label: string;
     onClick: () => void;

@@ -80,7 +80,6 @@ interface DatasetDetail {
   creator_name: string;
   created_at: string;
   updated_at: string;
-  perms: string[];
   storage_type: string;
 }
 
@@ -187,7 +186,6 @@ const generateArcoColumns = (
       fixed: 'right',
       headerClassName: 'custom-table-header-action', // 自定义表头样式
       render: (_, record) => {
-        const perms = record.perms;
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
           return (
@@ -445,8 +443,7 @@ const renderStatusTag = (
   status: string,
   errorReason?: string,
   handleVersionRebuild?: () => void,
-  handlerefresh?: () => void,
-  perms?: string[]
+  handlerefresh?: () => void
 ) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -1325,8 +1322,7 @@ const DatasetDetail = (props: {
                             datasetDetail.status,
                             datasetDetail.error_reason,
                             handleVersionRebuild,
-                            handlerefresh,
-                            datasetDetail?.perms
+                            handlerefresh
                           )}
                         </div>
                       )

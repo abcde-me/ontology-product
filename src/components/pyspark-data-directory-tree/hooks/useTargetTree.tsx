@@ -41,7 +41,6 @@ export interface DstCatalogItemWithPath {
   sort_field?: string;
   name?: string;
   parent_id?: number;
-  perms?: string[];
   type?: number;
   type_name?: string;
   full_path?: string;

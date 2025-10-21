@@ -37,7 +37,6 @@ interface DstCatalogItemWithPath {
   id?: number;
   name?: string;
   parent_id?: number;
-  perms?: string[];
   type?: number;
   type_name?: string;
   full_path?: string;
