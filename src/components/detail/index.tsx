@@ -41,7 +41,7 @@ import {
 import { formatFileSize } from '@/utils/format';
 import { Breadcrumb } from '@arco-design/web-react';
 import {
-  getDatasetDetail,
+  // getDatasetDetail,
   updateDataset,
   getDatasetContents,
   getDatasetDetailPage,
@@ -482,9 +482,9 @@ const renderStatusTag = (
             }}
           />
         </Tooltip>
-        {perms?.includes(
-          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-        ) && (
+        <PermissionWrapper
+          permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+        >
           <Button
             type="text"
             size="small"
@@ -499,7 +499,7 @@ const renderStatusTag = (
               重试
             </span>
           </Button>
-        )}
+        </PermissionWrapper>
       </div>
     );
   }
@@ -1272,9 +1272,9 @@ const DatasetDetail = (props: {
             {!isHideEdit && (
               <div className="basic-info-header">
                 <Title heading={4}>基本信息</Title>
-                {datasetDetail?.perms?.includes(
-                  DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
-                ) && (
+                <PermissionWrapper
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE}
+                >
                   <Tooltip
                     content={
                       !datasetDetail || datasetDetail.status !== 'normal'
@@ -1295,7 +1295,7 @@ const DatasetDetail = (props: {
                       编辑
                     </Button>
                   </Tooltip>
-                )}
+                </PermissionWrapper>
               </div>
             )}
 
@@ -1703,32 +1703,38 @@ const DatasetDetail = (props: {
                         </Tooltip>
                       </Space>
                     ) : (
-                      <Tooltip
-                        content={
-                          !datasetDetail || datasetDetail.status !== 'normal'
-                            ? '当前状态下不能进行编辑'
-                            : ''
-                        }
-                      >
-                        {datasetDetail?.perms?.includes(
-                          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
-                        ) &&
-                          !isHideEdit && (
-                            <Button
-                              // type="primary"
-                              disabled={
+                      <>
+                        {!isHideEdit ? (
+                          <PermissionWrapper
+                            permission={
+                              DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
+                            }
+                          >
+                            <Tooltip
+                              content={
                                 !datasetDetail ||
                                 datasetDetail.status !== 'normal'
+                                  ? '当前状态下不能进行编辑'
+                                  : ''
                               }
-                              onClick={() => setUpdateStatus(true)}
-                              type="text"
-                              icon={<IconEdit />}
-                              className="edit-btn"
                             >
-                              编辑
-                            </Button>
-                          )}
-                      </Tooltip>
+                              <Button
+                                // type="primary"
+                                disabled={
+                                  !datasetDetail ||
+                                  datasetDetail.status !== 'normal'
+                                }
+                                onClick={() => setUpdateStatus(true)}
+                                type="text"
+                                icon={<IconEdit />}
+                                className="edit-btn"
+                              >
+                                编辑
+                              </Button>
+                            </Tooltip>
+                          </PermissionWrapper>
+                        ) : null}
+                      </>
                     )}
                   </>
                 ) : null}

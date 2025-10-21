@@ -22,7 +22,7 @@ import CircleIcon from '@/assets/workflow-header-circle.svg';
 import CircleIconDisabled from '@/assets/workflow-header-circle-disabled.svg';
 import PlayIcon from '@/assets/workflow-header-play.svg';
 import PlayIconDisabled from '@/assets/workflow-header-play-disabled.svg';
-import './index.scss';
+import styles from './index.module.scss';
 import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
 
 dayjs.extend(relativeTime);
@@ -62,10 +62,10 @@ const AppPublisher = ({
 
   return (
     <>
-      <Space className="task-operation">
+      <Space className={styles['task-operation']}>
         <Button
           type="outline"
-          className="toggle-btn"
+          className={styles['toggle-btn']}
           onClick={() => {
             console.log('我进行了操作', isOnline);
             handleOperate(
@@ -77,7 +77,7 @@ const AppPublisher = ({
         </Button>
         <div>
           <Button
-            className="scheduler-btn"
+            className={styles['scheduler-btn']}
             type="outline"
             disabled={!isOnline}
             onClick={() => setSchedulerDialogVisible(true)}
@@ -111,7 +111,7 @@ const AppPublisher = ({
           </Modal>
         </div>
         <Button
-          className="run-btn"
+          className={styles['run-btn']}
           type="primary"
           disabled={!isOnline}
           onClick={() => handleOperate(WorkflowOperation.RUNNING)}

@@ -1,0 +1,112 @@
+.sql-content {
+  height: 100%;
+  // height: calc(100vh - 120px); // 确保最小高度充满屏幕
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+
+  :global(.arco-btn-text):not(:global(.arco-btn-disabled)) {
+    color: #0f172a;
+    padding: 0px;
+  }
+
+  // 顶部工具栏
+  .sql-toolbar {
+    height: 48px;
+    background-color: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      color: #6e7b8d;
+      font-size: 14px;
+      line-height: 22px;
+
+      .run-status {
+        display: flex;
+        align-items: center;
+      }
+
+      .loading-icon {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    }
+  }
+
+  // 代码编辑器容器
+  .sql-editor-container {
+    flex: 1;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    :global(.arco-spin-children) {
+      height: 100%;
+    }
+
+    // CodeMirror 编辑器样式
+    .code-editor {
+      height: 100%;
+
+      :global(.cm-editor) {
+        height: 100%;
+      }
+    }
+
+    :global(.cm-content) {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: #0f172a;
+    }
+
+    :global(.cm-placeholder) {
+      color: #94a3b8;
+    }
+
+    :global(.cm-line) {
+      padding: 0 12px;
+    }
+
+    :global(.cm-activeLine) {
+      background-color: unset;
+    }
+
+    :global(.cm-gutters) {
+      border: unset;
+      padding-top: 3px;
+      background-color: unset;
+      color: var(--color-text-4);
+      width: 24px;
+    }
+  }
+
+  .running-code-mirror {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.7;
+
+    :global(.cm-scroller) {
+      background-color: #f8fafd;
+    }
+  }
+}

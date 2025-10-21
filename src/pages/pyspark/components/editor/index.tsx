@@ -15,7 +15,6 @@ interface EditorContentProps {
     title: string;
     content: string;
     fileId?: string;
-    perms?: Array<string>;
   }>;
   activeTab: string;
   onTabChange: (key: string) => void;

@@ -374,6 +374,7 @@ const DatasetForm = React.forwardRef<
   ) => {
     if (dataSource === 'volume') {
       console.log('选择的值:', value);
+      setCurrent(1);
       setTargetData(value);
 
       // 判断是一级目录还是二级目录
@@ -397,7 +398,13 @@ const DatasetForm = React.forwardRef<
         // getVolumePreviewData(path);
         getVolumePreviewData(
           value?.[1]?.[1],
-          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+          value?.[0]?.[0] === '/'
+            ? '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+            : value?.[0]?.[0] +
+                '/dst/' +
+                value?.[0]?.[1] +
+                '/volume/' +
+                value?.[1]?.[0]
         );
       } else if (Array.isArray(value) && value.length === 2) {
         return;
@@ -423,7 +430,7 @@ const DatasetForm = React.forwardRef<
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type?: string) => {
-    getConnectorFileList({ connector_id: id, type: type })
+    getConnectorFileList({ id, type })
       .then((res) => {
         // 判断接口返回状态
         if (res.stat !== 0 && !res.code) {
@@ -473,7 +480,13 @@ const DatasetForm = React.forwardRef<
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
-      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+      targetData?.[0]?.[0] === '/'
+        ? '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+        : targetData?.[0]?.[0] +
+            '/dst/' +
+            targetData?.[0]?.[1] +
+            '/volume/' +
+            targetData?.[1]?.[0]
     );
   }, [current, pageSize]);
 

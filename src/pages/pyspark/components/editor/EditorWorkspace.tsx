@@ -26,6 +26,7 @@ import ExampleIcon from '@/assets/python/example.svg';
 import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -33,7 +34,6 @@ interface NotebookWorkspaceProps {
   currentFileId?: string;
   activeTab?: string;
   fileTabs?: Array<{
-    perms?: Array<string>;
     key: string;
     title: string;
     content: string;
@@ -105,11 +105,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     });
 
-    const getActiveTabPerms = () => {
-      const now_active =
-        fileTabs?.filter((item) => item.key === activeTab) || [];
-      return now_active[0]?.perms || [];
-    };
     // console.log('看一看编辑器卡顿的事情～');
 
     // const myTheme = createTheme({
@@ -207,12 +202,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
       if (!editorRef.current?.view) return;
 
-      // 检查权限
-      if (!getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)) {
-        Message.warning('没有编辑权限，无法插入内容');
-        return;
-      }
-
       const view = editorRef.current.view;
       const currentPos = view.state.selection.main.head;
 
@@ -243,14 +232,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         <div className="notebook-toolbar">
           <div className="toolbar-left">
             <Space size={12}>
-              {((runStatus === RunningStatus.RUNNING &&
-                getActiveTabPerms()?.includes(
-                  PYSPARK_PERMISSIONS.CAN_CANCEL_RUN
-                )) ||
-                (runStatus !== RunningStatus.RUNNING &&
-                  getActiveTabPerms()?.includes(
-                    PYSPARK_PERMISSIONS.CAN_RUN
-                  ))) && (
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_RUN}>
                 <Button
                   type="primary"
                   icon={
@@ -266,10 +248,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
-              )}
-              {getActiveTabPerms()?.includes(
-                PYSPARK_PERMISSIONS.CAN_EXPORT
-              ) && (
+              </PermissionWrapper>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_EXPORT}>
                 <Button
                   icon={<IconUpload />}
                   onClick={handleExportDataset}
@@ -278,7 +258,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 >
                   导出数据集
                 </Button>
-              )}
+              </PermissionWrapper>
               <Button
                 type="text"
                 icon={<SuanZiIcon />}
@@ -309,17 +289,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         </div>
 
         {/* 编辑器区域 */}
-        <div
-          className={`pyspark-editor-container ${getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE) ? '' : 'running-code-mirror'}`}
-        >
+        <div className="pyspark-editor-container">
           <CodeMirror
             ref={editorRef}
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
-            readOnly={
-              !getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)
-            }
             extensions={[
               python(),
               lintGutter(),

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Typography } from '@arco-design/web-react';
-import './index.scss';
+import styles from './index.module.scss';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeFrom,
@@ -12,12 +12,7 @@ const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
-  onFileOpen?: (
-    fileId: string,
-    scriptId: string,
-    fileName?: string,
-    perms?: Array<string>
-  ) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
@@ -56,12 +51,12 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   });
 
   return (
-    <div className="sql-tab-content">
-      <div className="tab-header">
-        <Title className="tab-title">SQL脚本列表</Title>
+    <div className={styles['sql-tab-content']}>
+      <div className={styles['tab-header']}>
+        <Title className={styles['tab-title']}>SQL脚本列表</Title>
       </div>
 
-      <div className="tab-tree sider-container">
+      <div className={`${styles['tab-tree']} ${styles['sider-container']}`}>
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           from={DirectoryTreeFrom.SQL}

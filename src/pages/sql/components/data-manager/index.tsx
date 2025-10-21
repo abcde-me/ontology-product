@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Message, Typography } from '@arco-design/web-react';
 import DataDirectoryTree from '@/components/sql-data-directory-tree';
 import { DatasetListItem } from '@/types/datasetManagement';
-import './index.scss';
+import styles from './index.module.scss';
 import { Db } from '@/api/dataCatalog';
 import { DataDirectoryTreeFrom } from '@/components/sql-data-directory-tree/types';
 import ModalDbDetail from './ModalDbDetail';
@@ -123,12 +123,12 @@ const SQLTabContent: React.FC<DataManagerProps> = ({
   };
 
   return (
-    <div className="sql-tab-content">
-      <div className="tab-header">
-        <Title className="tab-title">源数据</Title>
+    <div className={styles['sql-tab-content']}>
+      <div className={styles['tab-header']}>
+        <Title className={styles['tab-title']}>源数据</Title>
       </div>
 
-      <div className="tab-tree sider-container">
+      <div className={`${styles['tab-tree']} ${styles['sider-container']}`}>
         <DataDirectoryTree
           // 数据集插入
           onInsertDataset={handleInsertDataset}

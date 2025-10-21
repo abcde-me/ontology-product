@@ -1,12 +1,20 @@
 import { useCallback, useMemo } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { baseRoute } from '@/config/base';
 
 type Actions = {
   push: (path: string, state?) => void;
   replace: (path: string, state?) => void;
   new: (path: string, state?) => void;
 };
-
+/**
+ * 处理路径 - 加上产品前缀
+ * @param url - 以/开头的路径
+ * @returns
+ */
+export function handlePathName(url: string): string {
+  return `${baseRoute}${url}`;
+}
 /**
  * 层级替换函数
  */
@@ -83,7 +91,7 @@ export function usePathChange() {
         } else {
           window.open(path);
         }
-      },
+      }
     }),
     [history.push, history.replace]
   );
@@ -106,6 +114,6 @@ export function usePathChange() {
     openNew: useMemo(() => goPath('new'), [goPath]),
     goBack: history.goBack,
     match,
-    history,
+    history
   };
 }

@@ -406,5 +406,4 @@ interface ListDataItem {
     file_size: string;
     workflow_uuid: string;
   };
-  perms: string[];
 }

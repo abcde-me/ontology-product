@@ -1,0 +1,13 @@
+// ModalDatasetForm 组件样式
+
+.modal-dataset-form {
+  // 设置 arco-table-header 的 overflow-y 为 hidden
+  :global(.arco-table-header) {
+    overflow-y: hidden !important;
+  }
+
+  // 修复多选 Select 组件 placeholder 显示不完全的问题
+  :global(.arco-select-size-default):global(.arco-select-multiple) input {
+    min-width: 130px;
+  }
+}

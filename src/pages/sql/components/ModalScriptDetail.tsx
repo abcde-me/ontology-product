@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
-import './ModalScriptDetail.scss';
+import styles from './ModalScriptDetail.module.scss';
 
 /** 数据库详情 弹框 */
 const ModalScriptDetail = (props) => {
@@ -22,7 +22,7 @@ const ModalScriptDetail = (props) => {
           value={codeValue}
           editable={false}
           height="500px"
-          className="sql-detail-code-mirror"
+          className={styles['sql-detail-code-mirror']}
         />
       </div>
     </Modal>

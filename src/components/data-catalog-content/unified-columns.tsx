@@ -5,7 +5,13 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
-import { Button, Popover, DatePicker, Modal } from '@arco-design/web-react';
+import {
+  Button,
+  Popover,
+  DatePicker,
+  Modal,
+  Link
+} from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
 import DocIcon from './icon/DOC.svg';
@@ -19,7 +25,10 @@ import {
   getSourceFileTypeList as getSourceFileTypeListApi
 } from '@/api/dataCatalog';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { PermissionGuard } from '@/components/PermissionGuard';
+import {
+  PermissionGuard,
+  PermissionWrapper
+} from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
@@ -203,32 +212,43 @@ const renderActionColumn = (
     label: string;
     onClick: () => void;
   }[] = [];
-  if (
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) ||
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)
-  ) {
-    config.push({
-      label: '导出',
-      onClick: () => handleDownload(record, setVisible, selectedFullPath)
-    });
-  }
-  if (
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) ||
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)
-  ) {
-    config.push({
-      label: '删除',
-      onClick: () =>
-        handleDelete(
-          record,
-          refreshData,
-          selectedKey,
-          tableType,
-          handAllReset,
-          resetPage
-        )
-    });
-  }
+  <>
+    <PermissionWrapper
+      permission={
+        DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR ||
+        DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE
+      }
+    >
+      <Link
+        href="#"
+        onClick={() => handleDownload(record, setVisible, selectedFullPath)}
+      >
+        导出
+      </Link>
+    </PermissionWrapper>
+    <PermissionWrapper
+      permission={
+        DATA_CATALOG_PERMISSIONS.CAN_DELETE ||
+        DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE
+      }
+    >
+      <Link
+        href="#"
+        onClick={() =>
+          handleDelete(
+            record,
+            refreshData,
+            selectedKey,
+            tableType,
+            handAllReset,
+            resetPage
+          )
+        }
+      >
+        删除
+      </Link>
+    </PermissionWrapper>
+  </>;
   return (
     <OperationColumn row={record} index={0} config={config} extendFont="更多" />
   );

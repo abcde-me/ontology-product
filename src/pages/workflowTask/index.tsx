@@ -10,11 +10,11 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import './index.scss';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
 
@@ -74,7 +74,7 @@ export default function WorkflowTask() {
   const getList = async () => {
     setLoading(true);
     try {
-      const params = {
+      const params: any = {
         uid: userInfo?.id,
         search_value: searchSelectValue === 'task_id' ? searchValue : '',
         instance_name: searchSelectValue === 'task_id' ? '' : searchValue,
@@ -87,7 +87,7 @@ export default function WorkflowTask() {
         setWorkflowTaskData(res.data.list);
         setCurrent(res.data.page_info.page);
         setPageSize(res.data.page_info.page_size);
-        setTotal(res.data.page_info.total);
+        setTotal(res.data.page_info.total || 10);
       }
     } finally {
       setLoading(false);
@@ -167,7 +167,7 @@ export default function WorkflowTask() {
       dataIndex: 'id',
       width: 80,
       ellipsis: true,
-      className: 'hover-change',
+      className: styles['hover-change'],
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.id)}
@@ -277,7 +277,7 @@ export default function WorkflowTask() {
       dataIndex: 'source_path',
       width: 200,
       ellipsis: true,
-      className: 'hover-change',
+      className: styles['hover-change'],
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.source_path)}
@@ -298,7 +298,7 @@ export default function WorkflowTask() {
       dataIndex: 'target_path',
       width: 200,
       ellipsis: true,
-      className: 'hover-change',
+      className: styles['hover-change'],
       render: (_, record) => (
         <EllipsisPopover
           value={renderEmptyPlaceholder(record.target_path)}
@@ -335,11 +335,11 @@ export default function WorkflowTask() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 80,
+      width: 85,
       fixed: 'right',
       render: (_, record) => (
         <span
-          className="operate-text"
+          className={styles['operate-text']}
           onClick={() =>
             handleToTaskDeatil(
               record?.id ?? '',
@@ -356,7 +356,7 @@ export default function WorkflowTask() {
   ];
 
   return (
-    <div className="workflow-task">
+    <div className={styles['workflow-task']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>作业</h1>
       <div
         style={{
@@ -368,7 +368,7 @@ export default function WorkflowTask() {
       >
         <Input.Group style={{ display: 'flex' }}>
           <Select
-            className="task-select"
+            className={styles['task-select']}
             style={{ width: 100 }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}

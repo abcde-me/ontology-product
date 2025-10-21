@@ -36,12 +36,13 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { RiCheckboxCircleFill } from '@remixicon/react';
-import './index.scss';
+import styles from './index.module.scss';
 import { useShallow } from 'zustand/react/shallow';
 import { getQueryParams, useParams } from '@/utils/url';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { validateName } from '@/utils/valiate';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -109,8 +110,9 @@ const Header: FC = () => {
   );
 
   const updateWorkFlowStatus = async () => {
-    const workflowDetailRes = await getWorkflowDetail(workflowUuid, {
-      workflow_version: workflowVersion
+    const workflowDetailRes = await getWorkflowDetail({
+      workflow_version: workflowVersion,
+      workflow_uuid: workflowUuid
     });
 
     if (workflowDetailRes?.data) {
@@ -171,7 +173,8 @@ const Header: FC = () => {
             onSuccess: async () => {
               const ds_workflow_id =
                 getQueryParams(history, 'ds_workflow_id') ?? '';
-              const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+              const workflowRes = await operateWorkflow({
+                workflow_uuid: workflowUuid ?? '',
                 uid: userInfo?.id ?? '',
                 ds_workflow_id: Number(ds_workflow_id),
                 op
@@ -197,7 +200,8 @@ const Header: FC = () => {
       }
 
       const ds_workflow_id = getQueryParams(history, 'ds_workflow_id') ?? '';
-      const workflowRes = await operateWorkflow(workflowUuid ?? '', {
+      const workflowRes = await operateWorkflow({
+        workflow_uuid: workflowUuid ?? '',
         uid: userInfo?.id ?? '',
         ds_workflow_id: Number(ds_workflow_id),
         op,
@@ -254,7 +258,8 @@ const Header: FC = () => {
     }
 
     // 这里可以添加保存逻辑
-    const workflowRes = await editWorkflow(workflowUuid ?? '', {
+    const workflowRes = await editWorkflow({
+      workflow_uuid: workflowUuid ?? '',
       workflow_name
     });
 
@@ -284,18 +289,23 @@ const Header: FC = () => {
   };
 
   return (
-    <div className="app-workflow-page-header absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3">
-      <div className="left-part">
+    <div
+      className={
+        styles['app-workflow-page-header'] +
+        ' absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3'
+      }
+    >
+      <div className={styles['left-part']}>
         <div
-          className="back-icon"
+          className={styles['back-icon']}
           onClick={() => history.push('/tenant/compute/modaforge/workflowList')}
         >
           <BackIcon className="size-[16px]" />
         </div>
-        <div className="app-info">
+        <div className={styles['app-info']}>
           {editing ? (
             <Input
-              className="app-name--editing"
+              className={styles['app-name--editing']}
               ref={inputRef}
               value={workflowName}
               onChange={handleWorkflowNameChange}
@@ -303,46 +313,49 @@ const Header: FC = () => {
               onPressEnter={() => handlePressEnter(workflowName)}
             />
           ) : (
-            <div className="app-name">
+            <div className={styles['app-name']}>
               <Typography.Paragraph
-                className="app-name-text"
+                className={styles['app-name-text']}
                 style={{ maxWidth: '700px' }}
                 ellipsis={{ cssEllipsis: true, rows: 1, showTooltip: true }}
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              {headerOperationDisplay &&
-                workflowPerms.includes(
-                  WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE
-                ) && (
+              {headerOperationDisplay && (
+                <PermissionWrapper
+                  permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
+                >
                   <Popover trigger="hover" content="编辑">
-                    <div className="eidt-icon" onClick={handleEdit}></div>
+                    <div
+                      className={styles['edit-icon']}
+                      onClick={handleEdit}
+                    ></div>
                   </Popover>
-                )}
+                </PermissionWrapper>
+              )}
             </div>
           )}
           <EditingTitle />
         </div>
       </div>
-      {headerOperationDisplay &&
-        workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_OPERATION) && (
-          <>
-            <div className="right-part">
-              <TaskOperation
-                {...{
-                  workflowStatus: appDetail?.is_online ?? IsOnline.offline,
-                  cycleText,
-                  onOperate
-                }}
-              />
-            </div>
-            <SuccessModal
-              visible={showRuningModal}
-              onClose={() => setShowRuningModal(false)}
-              params={workflowOperationRes}
+      {headerOperationDisplay && (
+        <PermissionWrapper permission={WORKFLOW_DETAIL_PERMISSIONS.OPERATION}>
+          <div className={styles['right-part']}>
+            <TaskOperation
+              {...{
+                workflowStatus: appDetail?.is_online ?? IsOnline.offline,
+                cycleText,
+                onOperate
+              }}
             />
-          </>
-        )}
+          </div>
+          <SuccessModal
+            visible={showRuningModal}
+            onClose={() => setShowRuningModal(false)}
+            params={workflowOperationRes}
+          />
+        </PermissionWrapper>
+      )}
     </div>
   );
 };

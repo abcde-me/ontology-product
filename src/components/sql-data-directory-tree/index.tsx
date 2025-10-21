@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import FileIcon from './assets/file-icon.svg';
 import DataCollection from './components/daset-tree';
 import SourceTree from './components/source-tree';
-import './index.scss';
+import styles from './index.module.scss';
 
 // 数据目录配置数组
 const directoryItems = [
@@ -112,7 +112,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
       default:
         return (
           <Tree
-            className={'sql-data-directory-tree-catalogue'}
+            className={styles['sql-data-directory-tree-catalogue']}
             treeData={treeData}
             selectedKeys={selectedKeys}
             onSelect={handleSelect}
@@ -124,7 +124,9 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     }
   };
 
-  return <div className="sql-data-directory-tree">{renderContent()}</div>;
+  return (
+    <div className={styles['sql-data-directory-tree']}>{renderContent()}</div>
+  );
 };
 
 export default DataDirectoryTree;
