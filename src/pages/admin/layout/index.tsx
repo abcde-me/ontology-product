@@ -150,6 +150,7 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
                     key={route.key}
                     path={route.key}
                     render={() => <PermissionRoute route={route} />}
+                    exact={route.exact !== false} // 默认加exact， 除非显示关闭
                   />
                 );
               })}
