@@ -175,10 +175,6 @@ export interface CreateSqlScriptParams {
   uid: string;
 }
 
-export interface CopySqlScriptReq {
-  script_file_id?: string;
-}
-
 export interface CreateSqlScriptData {
   perms: Array<string>;
   script_id: string;
