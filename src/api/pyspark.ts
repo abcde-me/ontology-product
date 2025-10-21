@@ -1,9 +1,7 @@
 import UAPI from '@/api';
-import { Get, Post } from '@/utils/request';
 import {
   PythonListRes,
   PythonListParams,
-  PythonItemType,
   CreatePythonItemReq,
   CreatePythonItemRes,
   RenamePythonItemReq,
@@ -16,11 +14,9 @@ import {
   RunPythonItemRes,
   GetRunResultReq,
   GetRunResultRes,
-  RunningStatus,
   GetRunLogReq,
   GetRunLogRes,
   GetOperatorListItem,
-  OperatorCatalog,
   ExportDatasetReq,
   ExportDatasetRes,
   GetExportFileReq,

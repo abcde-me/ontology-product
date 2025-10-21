@@ -8,7 +8,6 @@ import { groupBy } from 'lodash-es'
 import BlockIcon from '../block-icon'
 import { BlockEnum } from '../types'
 import {
-  useIsChatMode,
   useNodesExtraData,
 } from '../hooks'
 import { BLOCK_CLASSIFICATIONS } from './constants'
@@ -27,7 +26,6 @@ const Blocks = ({
   availableBlocksTypes = [],
 }: BlocksProps) => {
   const { t } = useTranslation('plugin__console-plugin-appforge')
-  const isChatMode = useIsChatMode()
   const nodesExtraData = useNodesExtraData()
   const blocks = useBlocks()
 

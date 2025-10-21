@@ -1,12 +1,11 @@
-import { MAX_VAR_KEY_LENGTH, VAR_ITEM_TEMPLATE, VAR_ITEM_TEMPLATE_IN_WORKFLOW, getMaxVarNameLength } from '@/pages/workflowConfig/config/'
+import { MAX_VAR_KEY_LENGTH, VAR_ITEM_TEMPLATE, getMaxVarNameLength } from '@/pages/workflowConfig/config/'
 import {
   CONTEXT_PLACEHOLDER_TEXT,
   HISTORY_PLACEHOLDER_TEXT,
   PRE_PROMPT_PLACEHOLDER_TEXT,
   QUERY_PLACEHOLDER_TEXT,
 } from '@/pages/workflowConfig/components/prompt-editor/constants'
-import { InputVarType } from '@/pages/workflowConfig/workflow/types'
-import { MarkerType } from 'reactflow'
+// import { InputVarType } from '@/pages/workflowConfig/workflow/types'
 
 const otherAllowedRegex = /^[a-zA-Z0-9_]+$/
 
@@ -35,23 +34,23 @@ export const getNewVar = (key: string, type: string) => {
   }
 }
 
-export const getNewVarInWorkflow = (key: string, type = InputVarType.textInput) => {
-  const { max_length, ...rest } = VAR_ITEM_TEMPLATE_IN_WORKFLOW
-  if (type !== InputVarType.textInput) {
-    return {
-      ...rest,
-      type,
-      variable: key,
-      label: key.slice(0, getMaxVarNameLength(key)),
-    }
-  }
-  return {
-    ...VAR_ITEM_TEMPLATE_IN_WORKFLOW,
-    type,
-    variable: key,
-    label: key.slice(0, getMaxVarNameLength(key)),
-  }
-}
+// export const getNewVarInWorkflow = (key: string, type = InputVarType.textInput) => {
+//   const { max_length, ...rest } = VAR_ITEM_TEMPLATE_IN_WORKFLOW
+//   if (type !== InputVarType.textInput) {
+//     return {
+//       ...rest,
+//       type,
+//       variable: key,
+//       label: key.slice(0, getMaxVarNameLength(key)),
+//     }
+//   }
+//   return {
+//     ...VAR_ITEM_TEMPLATE_IN_WORKFLOW,
+//     type,
+//     variable: key,
+//     label: key.slice(0, getMaxVarNameLength(key)),
+//   }
+// }
 
 export const checkKey = (key: string, canBeEmpty?: boolean) => {
   if (key.length === 0 && !canBeEmpty)

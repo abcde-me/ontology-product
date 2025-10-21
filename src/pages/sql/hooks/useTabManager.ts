@@ -1,8 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { getSqlScriptDetail } from '@/api/sql';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
-import { formatDateTime } from '../utils';
 import { generateSqlDefaultName } from '../utils/formatDateTime';
 
 // 文件标签页类型
@@ -269,7 +267,7 @@ export const useTabManager = (
   );
 
   const handleCreate = useCallback(
-    (finalName: string, node?: any): Promise<any> => {
+    (): Promise<any> => {
       return new Promise((resolve) => {
         addTab();
         resolve(null);

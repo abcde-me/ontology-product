@@ -1,13 +1,7 @@
-import SpaceIcon1 from '@/assets/space-icon1.svg';
-import IconApps from '@/assets/home.svg';
 import { useQueryParams } from '@/utils';
 import {
-  Button,
   Layout,
-  Popover,
   Menu,
-  Input,
-  Trigger
 } from '@arco-design/web-react';
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';

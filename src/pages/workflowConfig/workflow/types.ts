@@ -8,7 +8,6 @@ import type {
   TransferMethod
 } from '@/pages/workflowConfig/types/app';
 import type { ToolDefaultValue } from '@/pages/workflowConfig/workflow/block-selector/types';
-import type { VarType as VarKindType } from '@/pages/workflowConfig/workflow/nodes/tool/types';
 import type {
   FileResponse,
   NodeTracing
@@ -21,28 +20,6 @@ import type {
 import type { WorkflowRetryConfig } from '@/pages/workflowConfig/workflow/nodes/_base/components/retry/types';
 
 export enum BlockEnum {
-  Answer = 'answer',
-  LLM = 'llm',
-  KnowledgeRetrieval = 'knowledge-retrieval',
-  QuestionClassifier = 'question-classifier',
-  IfElse = 'if-else',
-  Code = 'code',
-  TemplateTransform = 'template-transform',
-  HttpRequest = 'http-request',
-  VariableAssigner = 'variable-assigner',
-  VariableAggregator = 'variable-aggregator',
-  Tool = 'tool',
-  ParameterExtractor = 'parameter-extractor',
-  Iteration = 'iteration',
-  DocExtractor = 'document-extractor',
-  ListFilter = 'list-operator',
-  IterationStart = 'iteration-start',
-  Assigner = 'assigner', // is now named as VariableAssigner
-  Agent = 'agent',
-  Loop = 'loop',
-  LoopStart = 'loop-start',
-  // TODO：上面无用代码删除
-
   Start = 'start',
   End = 'end',
   Text = 'text',
@@ -144,23 +121,6 @@ export type WorkflowDataUpdater = {
 
 export type ValueSelector = string[]; // [nodeId, key | obj key path]
 
-export type Variable = {
-  variable: string;
-  label?:
-    | string
-    | {
-        nodeType: BlockEnum;
-        nodeName: string;
-        variable: string;
-      };
-  value_selector: ValueSelector;
-  variable_type?: VarKindType;
-  value?: string;
-  options?: string[];
-  required?: boolean;
-  isParagraph?: boolean;
-};
-
 export type EnvironmentVariable = {
   id: string;
   name: string;
@@ -181,50 +141,6 @@ export type GlobalVariable = {
   value_type: 'string' | 'number';
   description: string;
 };
-
-export type VariableWithValue = {
-  key: string;
-  value: string;
-};
-
-export enum InputVarType {
-  boolean = 'boolean',
-  integer = 'integer',
-  array = 'array',
-  textInput = 'text-input',
-  string = 'string',
-  paragraph = 'paragraph',
-  select = 'select',
-  number = 'number',
-  url = 'url',
-  files = 'files',
-  json = 'json', // obj, array
-  contexts = 'contexts', // knowledge retrieval
-  iterator = 'iterator', // iteration input
-  singleFile = 'file',
-  multiFiles = 'file-list',
-  loop = 'loop' // loop input
-}
-
-export type InputVar = {
-  id?: string;
-  type: InputVarType;
-  label:
-    | string
-    | {
-        nodeType: BlockEnum;
-        nodeName: string;
-        variable: string;
-        isChatVar?: boolean;
-      };
-  variable: string;
-  max_length?: number;
-  default?: string;
-  required: boolean;
-  hint?: string;
-  options?: string[];
-  value_selector?: ValueSelector;
-} & Partial<UploadFileSetting>;
 
 export type ModelConfig = {
   provider: string;

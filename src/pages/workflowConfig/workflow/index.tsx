@@ -45,10 +45,6 @@ import SubHeader from './sub-header';
 import CustomNode from './nodes';
 import CustomNoteNode from './note-node';
 import { CUSTOM_NOTE_NODE } from './note-node/constants';
-import CustomIterationStartNode from './nodes/iteration-start';
-import { CUSTOM_ITERATION_START_NODE } from './nodes/iteration-start/constants';
-import CustomLoopStartNode from './nodes/loop-start';
-import { CUSTOM_LOOP_START_NODE } from './nodes/loop-start/constants';
 import CustomEdge from './custom-edge';
 import CustomConnectionLine from './custom-connection-line';
 import Panel from './panel';
@@ -82,8 +78,6 @@ import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConf
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
   [CUSTOM_NOTE_NODE]: CustomNoteNode,
-  [CUSTOM_ITERATION_START_NODE]: CustomIterationStartNode,
-  [CUSTOM_LOOP_START_NODE]: CustomLoopStartNode
 };
 const edgeTypes = {
   [CUSTOM_EDGE]: CustomEdge
@@ -351,8 +345,8 @@ const Workflow: FC<WorkflowProps> = memo(
             size={2}
             className="react-flow-bg bg-workflow-canvas-workflow-bg"
             color="var(--color-workflow-canvas-workflow-dot-color)"
-            // color='#c8ceda20'
-            // variant={BackgroundVariant.Lines}
+          // color='#c8ceda20'
+          // variant={BackgroundVariant.Lines}
           />
         </ReactFlow>
       </div>

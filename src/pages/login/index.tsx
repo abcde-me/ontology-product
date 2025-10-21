@@ -35,8 +35,6 @@ const LoginCard = () => {
       const res = await login(values);
       console.log('登录结果', res);
       if (res.success) {
-        // 测试解析后端返回的实际 token
-        const testToken = res.data.token;
         console.log('解析后端返回的实际 token:');
 
         // // 导入解析工具

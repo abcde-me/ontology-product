@@ -1,9 +1,7 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { CodeNodeType } from './types';
 import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
-import { RiArrowDownSFill } from '@remixicon/react';
-import { useStoreApi } from 'reactflow';
 import { Tooltip } from '@arco-design/web-react';
 import { useUnmountedRef } from 'ahooks';
 import { getModelList } from '@/api/modelV2';
@@ -14,13 +12,11 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const { app_scenarios, enha_modle_id, modelList, prompt_checkbox } =
     props.data;
   const {
-    enhanced_proportion,
     sample_num,
     similarity_threshold,
     generate_sample_num
   } = app_scenarios?.option ?? {};
   const app_scenarios_type = app_scenarios?.type ?? '';
-  const store = useStoreApi();
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,
     props.data

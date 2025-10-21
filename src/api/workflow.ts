@@ -3,7 +3,6 @@ import {
   CreateWorkflowRes,
   WorkflowDetailRes,
   WorkflowOperationParams,
-  WorkflowOperation,
   WorkflowDetailParams
 } from '@/types/workflowApi';
 import UAPI from '@/api';

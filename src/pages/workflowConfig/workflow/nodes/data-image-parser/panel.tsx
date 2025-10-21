@@ -1,45 +1,21 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import RemoveEffectVarConfirm from '../_base/components/remove-effect-var-confirm';
 import useConfig from './use-config';
 import type { ImageParserNodeType } from './types';
-import VarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/var-list';
-import OutputVarList from '@/pages/workflowConfig/workflow/nodes/_base/components/variable/output-var-list';
-import AddButton from '@/pages/workflowConfig/components/button/add-button';
-import Field from '@/pages/workflowConfig/workflow/nodes/_base/components/field';
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
-import CodeEditor from '@/pages/workflowConfig/workflow/nodes/_base/components/editor/code-editor';
-import TypeSelector from '@/pages/workflowConfig/workflow/nodes/_base/components/selector';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import BeforeRunForm from '@/pages/workflowConfig/workflow/nodes/_base/components/before-run-form';
-import ResultPanel from '@/pages/workflowConfig/workflow/run/result-panel';
-import {
-  Table,
-  Form,
-  Input,
-  Select,
-  InputNumber,
-  Checkbox
-} from '@arco-design/web-react';
-import { RiAddLine } from '@remixicon/react';
-import { cloneDeep } from 'lodash-es';
-import { v4 as uuid4 } from 'uuid';
+import { Form, Select } from '@arco-design/web-react';
 import FileList from '../data-text-parser/file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
 import { useUnmountedRef } from 'ahooks';
 
-const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
 const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
-
-  const { t } = useTranslation('plugin__console-plugin-appforge');
   const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
-  const [picEmbModels, setPicEmbModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
 
   const { readOnly, inputs, handleFilesChange, handleFieldsChange } = useConfig(
@@ -56,7 +32,6 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
         res.data.find((d) => d.type === 'pic_emb_model')?.model_data || [];
 
       setPicModels(picList);
-      setPicEmbModels(picEmbList);
 
       const defaultPicId = picList[0]?.id || '';
       const defaultPicEmbId = picEmbList[0]?.id || '';

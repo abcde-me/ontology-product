@@ -1,6 +1,4 @@
 import UAPI from '@/api';
-import { Get, Post } from '@/utils/request';
-import { Message } from '@arco-design/web-react';
 
 // 数据目录相关接口
 
@@ -656,10 +654,6 @@ interface TargetDataFileQueryParams {
   file_type: Array<string>;
   sort_field?: string;
   sort_order?: string;
-}
-
-interface SourceFileTypeList {
-  id: string;
 }
 
 // 定义删除目标文件的参数接口

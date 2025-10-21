@@ -7,18 +7,15 @@ import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
 import './style/theme.scss';
-import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
+import React, { useEffect, Suspense, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import {
   ConfigProvider,
   Layout,
   Spin,
-  Dropdown,
-  Menu
 } from '@arco-design/web-react';
-import {} from '@ccf2e/arco-material';
-import { IconUser } from '@arco-design/web-react/icon';
+import { } from '@ccf2e/arco-material';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -44,7 +41,6 @@ import {
 } from 'react-router-dom';
 import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
-import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
 import { isInFrame } from './utils/env';
 
@@ -70,7 +66,6 @@ function App() {
     (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
   );
   const location = useLocation();
-  const { pushPath } = usePathChange();
 
   const hidden = useMemo(
     () =>
@@ -184,24 +179,18 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
   // @ts-expect-error
   module.hot.accept('./pages/admin/layout', () => {
     // 当 App 组件或其依赖发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextApp = require('./pages/admin/layout').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/login', () => {
     // 当 Login 组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextLogin = require('./pages/login').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/errorPages', () => {
     // 当错误页面组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextPage404 = require('./pages/errorPages').default;
     render(Index);
   });
 

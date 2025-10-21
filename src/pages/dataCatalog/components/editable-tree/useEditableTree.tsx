@@ -12,9 +12,6 @@ import {
   IconEdit,
   IconStorage,
   IconArchive,
-  IconFolder,
-  IconCaretDown,
-  IconFile
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -24,10 +21,8 @@ import {
   deleteTable,
   renameCatalog,
   addDb,
-  getDbItemList
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
-import { PermissionGuard } from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import styles from '../../modal.module.css';
 
@@ -136,11 +131,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const handleExpand = (
     expandedKeys: string[],
-    extra?: {
-      expanded: boolean;
-      node: NodeInstance;
-      expandedNodes: NodeInstance[];
-    }
   ) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
@@ -456,28 +446,28 @@ export function useEditableTree({ catalogTreeStore }) {
                 DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
               ) ||
                 dataRef?.type === CatalogTypeEnum.db_item) && (
-                <Tooltip color="white" content="删除">
-                  <IconDelete
-                    onClick={() => {
-                      Modal.confirm({
-                        title: '确认删除数据库表?',
-                        content: '删除后不可恢复',
-                        async onOk() {
-                          try {
-                            await handleDelete(node, 'db_item');
-                          } catch (apiError: any) {
-                            Message.error(
-                              '删除失败: ' + (apiError.message || '请稍后重试')
-                            );
-                          }
-                        },
-                        className: styles['modalWrapper']
-                      });
-                    }}
-                    className="hover:text-[rgb(var(--primary-6))]"
-                  />
-                </Tooltip>
-              )}
+                  <Tooltip color="white" content="删除">
+                    <IconDelete
+                      onClick={() => {
+                        Modal.confirm({
+                          title: '确认删除数据库表?',
+                          content: '删除后不可恢复',
+                          async onOk() {
+                            try {
+                              await handleDelete(node, 'db_item');
+                            } catch (apiError: any) {
+                              Message.error(
+                                '删除失败: ' + (apiError.message || '请稍后重试')
+                              );
+                            }
+                          },
+                          className: styles['modalWrapper']
+                        });
+                      }}
+                      className="hover:text-[rgb(var(--primary-6))]"
+                    />
+                  </Tooltip>
+                )}
             </>
           ) : (
             <>
@@ -487,42 +477,42 @@ export function useEditableTree({ catalogTreeStore }) {
                   {dataRef?.perms?.includes(
                     DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
                   ) && (
-                    <Tooltip color="white" content="重命名">
-                      <IconEdit
-                        className={
-                          'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                        }
-                        onClick={() => handleEdit(node)}
-                      />
-                    </Tooltip>
-                  )}
+                      <Tooltip color="white" content="重命名">
+                        <IconEdit
+                          className={
+                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                          }
+                          onClick={() => handleEdit(node)}
+                        />
+                      </Tooltip>
+                    )}
                   {dataRef?.perms?.includes(
                     DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
                   ) && (
-                    <Tooltip color="white" content="删除">
-                      <IconDelete
-                        onClick={() => {
-                          Modal.confirm({
-                            title: '确认删除目录?',
-                            content:
-                              '删除后，该目录下所有内容将被删除，不可恢复',
-                            async onOk() {
-                              try {
-                                await handleDelete(node, 'directory');
-                              } catch (apiError: any) {
-                                Message.error(
-                                  '删除失败: ' +
+                      <Tooltip color="white" content="删除">
+                        <IconDelete
+                          onClick={() => {
+                            Modal.confirm({
+                              title: '确认删除目录?',
+                              content:
+                                '删除后，该目录下所有内容将被删除，不可恢复',
+                              async onOk() {
+                                try {
+                                  await handleDelete(node, 'directory');
+                                } catch (apiError: any) {
+                                  Message.error(
+                                    '删除失败: ' +
                                     (apiError.message || '请稍后重试')
-                                );
-                              }
-                            },
-                            className: styles['modalWrapper']
-                          });
-                        }}
-                        className="hover:text-[rgb(var(--primary-6))]"
-                      />
-                    </Tooltip>
-                  )}
+                                  );
+                                }
+                              },
+                              className: styles['modalWrapper']
+                            });
+                          }}
+                          className="hover:text-[rgb(var(--primary-6))]"
+                        />
+                      </Tooltip>
+                    )}
                 </>
               )}
               {/* 为数据卷和数据库都添加新建按钮 */}

@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import {
-  Button,
   Form,
   Input,
   Link,
@@ -147,16 +146,16 @@ const DatasetsList: FC = () => {
             actionBtn = item?.perms?.includes(
               SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
             ) && (
-              <>
-                <Tooltip content={item.failed_reason}>
-                  <IconInfoCircle />
-                </Tooltip>
-                <Link href="#" onClick={() => handleRetryTask(item)}>
-                  {' '}
-                  重试{' '}
-                </Link>
-              </>
-            );
+                <>
+                  <Tooltip content={item.failed_reason}>
+                    <IconInfoCircle />
+                  </Tooltip>
+                  <Link href="#" onClick={() => handleRetryTask(item)}>
+                    {' '}
+                    重试{' '}
+                  </Link>
+                </>
+              );
             break;
           case 3:
             text = '导出终止';
@@ -164,11 +163,11 @@ const DatasetsList: FC = () => {
             actionBtn = item?.perms?.includes(
               SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
             ) && (
-              <Link href="#" onClick={() => handleRetryTask(item)}>
-                {' '}
-                重试{' '}
-              </Link>
-            );
+                <Link href="#" onClick={() => handleRetryTask(item)}>
+                  {' '}
+                  重试{' '}
+                </Link>
+              );
             break;
 
           default:

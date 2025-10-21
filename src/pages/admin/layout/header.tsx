@@ -8,9 +8,6 @@ import { usePathChange } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { openNewPage } from '@/utils/env';
-import { PrefixV2 } from '@/api/endpoints';
-import axios from 'axios';
-import { getToken } from '@/utils/request';
 
 export default function Header({
   className,
