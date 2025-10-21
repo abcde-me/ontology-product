@@ -17,19 +17,36 @@ import { withSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { Page403 } from '@/pages/errorPages';
 import { Spin } from '@arco-design/web-react';
+import { usePermission } from '@/hooks';
 
 type LayoutPageProps = {
   history: any;
 };
 // 带权限检查的路由组件
 const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
+  const { userActions } = useUserInfoStore();
+  const Component = route.component;
+
   // 如果路由没有权限要求，直接渲染
   if (!route.permission) {
-    return <route.component />;
+    return <Component />;
   }
 
+  // 如果是管理员，直接渲染
+  if (userActions.isAdmin) {
+    return <Component />;
+  }
+
+  // 检查用户是否拥有该权限
+  const hasPermission = userActions.actions?.includes(route.permission);
+
   // 无权限时显示403页面
-  return <Page403 />;
+  if (!hasPermission) {
+    return <Page403 />;
+  }
+
+  // 有权限时渲染组件
+  return <Component />;
 };
 
 const LayoutPage: React.FC<LayoutPageProps> = () => {
@@ -132,8 +149,7 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
                   <Route
                     key={route.key}
                     path={route.key}
-                    // render={() => <PermissionRoute route={route} />}
-                    component={route.component}
+                    render={() => <PermissionRoute route={route} />}
                   />
                 );
               })}

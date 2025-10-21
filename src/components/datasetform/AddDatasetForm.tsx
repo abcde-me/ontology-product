@@ -430,7 +430,7 @@ const DatasetForm = React.forwardRef<
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type?: string) => {
-    getConnectorFileList({ connector_id: id, type: type })
+    getConnectorFileList({ id, type })
       .then((res) => {
         // 判断接口返回状态
         if (res.stat !== 0 && !res.code) {

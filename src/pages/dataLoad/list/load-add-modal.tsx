@@ -554,7 +554,8 @@ const LoadAddModal = (props: propsType) => {
       return;
     }
     try {
-      const res = await getdetailList(connector_id);
+      console.log('connector_id', connector_id);
+      const res = await getdetailList({ id: connector_id });
       if (sourceType === 'db') {
         const tableNameRes = await getTableName({ connector_id: connector_id });
         console.log(tableNameRes, '获取连接器下面的表格');
