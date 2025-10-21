@@ -12,7 +12,7 @@
       height: unset;
     }
 
-    .arco-tabs-header-nav {
+    :global(.arco-tabs-header-nav) {
       background-color: #e7ecf0;
 
       &::before {
@@ -21,19 +21,21 @@
     }
 
     // 隐藏标签页内容区域，因为我们使用独立工作区
-    .arco-tabs-content {
+    :global(.arco-tabs-content) {
       display: none;
     }
   }
 
-  .arco-tabs .arco-tabs-header-nav-card .arco-tabs-header-title-active {
+  :global(.arco-tabs)
+    :global(.arco-tabs-header-nav-card)
+    :global(.arco-tabs-header-title-active) {
     background-color: #fff !important;
     border-radius: 0;
   }
 
   // 标签页文本样式统一管理
-  .arco-tabs .arco-tabs-header-nav-card {
-    .arco-tabs-header-title-text {
+  :global(.arco-tabs) :global(.arco-tabs-header-nav-card) {
+    :global(.arco-tabs-header-title-text) {
       color: #1e293b;
       font-weight: 400;
       transition:
@@ -42,8 +44,10 @@
     }
 
     // 激活状态和hover状态保持一致的样式
-    .arco-tabs-header-title-active .arco-tabs-header-title-text,
-    .arco-tabs-header-title:hover .arco-tabs-header-title-text {
+    :global(.arco-tabs-header-title-active)
+      :global(.arco-tabs-header-title-text),
+    :global(.arco-tabs-header-title):hover
+      :global(.arco-tabs-header-title-text) {
       color: #1e293b;
       font-weight: 400;
     }

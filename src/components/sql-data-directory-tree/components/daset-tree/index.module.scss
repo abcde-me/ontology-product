@@ -7,7 +7,7 @@
   border-radius: 8px;
   overflow: hidden;
 
-  // 第一部分：标题导航
+  // 头部导航区域
   &__header {
     padding-bottom: 11px;
     background: #fff;
@@ -34,19 +34,19 @@
     overflow: hidden;
   }
 
-  // 第二部分：搜索框
+  // 搜索区域
   &__search {
     &-input {
       width: 100%;
     }
   }
 
+  // 内容区域
   &__content {
     padding-top: 8px;
     height: calc(100% - 64px);
     overflow-y: auto;
 
-    // 加载状态时的居中样式
     &--loading {
       display: flex;
       justify-content: center;
@@ -54,55 +54,63 @@
     }
   }
 
-  // 第三部分：列表
-  .sql-dataset-tree__content .sql-dataset-tree__content-tree .arco-tree-node {
-    position: relative;
-    align-items: center;
-    padding-left: 4px;
+  // 树形结构样式
+  .sql-dataset-tree__content .sql-dataset-tree__content-tree {
+    :global(.arco-tree-node) {
+      position: relative;
+      align-items: center;
+      padding-left: 4px;
 
-    // 去除选中时的高亮
-    &.arco-tree-node-selected {
+      &:hover {
+        background-color: var(--color-bg-5);
+        color: #007dfa;
+
+        // hover时不同节点类型的最大宽度
+        .sql-dataset-tree__node-title-dataset {
+          color: #007dfa;
+          max-width: 130px;
+        }
+        .sql-dataset-tree__node-title-scheam {
+          max-width: 150px;
+        }
+
+        .sql-dataset-tree__node-actions {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+    }
+
+    // arco组件样式覆盖
+    :global(.arco-tree-node-selected) {
       background-color: transparent;
       color: var(--color-text-2);
       font-weight: 400;
 
-      .arco-tree-node-switcher {
+      :global(.arco-tree-node-switcher) {
         color: var(--color-text-2);
       }
-
-      .arco-tree-node-title {
+      :global(.arco-tree-node-title) {
         background-color: transparent;
       }
     }
 
-    &:hover {
-      background-color: var(--color-bg-5);
-      color: #007dfa;
-
-      .sql-dataset-tree__node-title-dataset {
-        color: #007dfa;
-        max-width: 130px;
-      }
-
-      .sql-dataset-tree__node-title-scheam {
-        max-width: 150px;
-      }
-
-      .sql-dataset-tree__node-actions {
-        opacity: 1;
-        visibility: visible;
-      }
+    :global(.arco-tree-node-title) {
+      padding: 7px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
     }
 
-    &-title-text {
+    :global(.arco-tree-node-title-text) {
       flex-grow: 1;
     }
-
-    &-custom-icon {
+    :global(.arco-tree-node-custom-icon) {
       margin-right: 4px;
     }
   }
 
+  // 节点样式
   &__node {
     display: flex;
     align-items: center;
@@ -144,40 +152,30 @@
     }
   }
 
-  // 树节点内容样式
-  &__node-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    position: relative;
-  }
-
-  // 空状态
-  .arco-empty {
+  // 全局组件样式覆盖
+  :global(.arco-empty) {
     padding: 40px 0;
-
-    .arco-empty-description {
+    :global(.arco-empty-description) {
       color: #999;
       font-size: 14px;
     }
   }
 
-  // 按钮样式
-  .arco-btn-size-default {
+  // 按钮样式统一管理
+  :global(.arco-btn-size-default) {
     height: 24px;
     padding: 0 12px;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled) {
+  :global(.arco-btn-outline):not(:global(.arco-btn-disabled)) {
     color: #007dfa;
     border-color: #007dfa;
-  }
 
-  .arco-btn-outline:not(.arco-btn-disabled):active,
-  .arco-btn-outline:not(.arco-btn-disabled):hover {
-    color: #007dfa;
-    border-color: #007dfa;
-    background-color: transparent;
+    &:active,
+    &:hover {
+      color: #007dfa;
+      border-color: #007dfa;
+      background-color: transparent;
+    }
   }
 }

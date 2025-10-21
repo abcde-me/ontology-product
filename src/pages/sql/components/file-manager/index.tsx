@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Typography } from '@arco-design/web-react';
-import './index.scss';
+import styles from './index.module.scss';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeFrom,
@@ -51,12 +51,12 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   });
 
   return (
-    <div className="sql-tab-content">
-      <div className="tab-header">
-        <Title className="tab-title">SQL脚本列表</Title>
+    <div className={styles['sql-tab-content']}>
+      <div className={styles['tab-header']}>
+        <Title className={styles['tab-title']}>SQL脚本列表</Title>
       </div>
 
-      <div className="tab-tree sider-container">
+      <div className={`${styles['tab-tree']} ${styles['sider-container']}`}>
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           from={DirectoryTreeFrom.SQL}

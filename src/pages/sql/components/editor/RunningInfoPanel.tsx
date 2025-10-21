@@ -28,7 +28,7 @@ import React, { memo, useEffect, useState } from 'react';
 import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
-import './RunningInfoPanel.scss';
+import styles from './RunningInfoPanel.module.scss';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -181,7 +181,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           lastScriptRunStatus === RunningStatus.FAILED)
       ) {
         return (
-          <div className="run-status">
+          <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">结果加载中</span>
             <IconLoading style={{ color: '#007DFA' }} />
           </div>
@@ -189,7 +189,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       }
       if (status === RunningStatus.RUNNING) {
         return (
-          <div className="run-status">
+          <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行中</span>
             <IconLoading style={{ color: '#007DFA' }} />
           </div>
@@ -198,7 +198,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       if (status === RunningStatus.SUCCESS) {
         return (
           <Space>
-            <div className="run-status">
+            <div className={styles['run-status']}>
               <span className="mr-4 text-[14px]">运行成功</span>
               <RunSuccessIcon className="mr-[8px]" />
               <span className="text-[14px]">
@@ -214,7 +214,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       }
       if (status === RunningStatus.FAILED) {
         return (
-          <div className="run-status">
+          <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行失败</span>
             <RunFailedIcon className="mr-[8px]" />
             <span className="text-[14px]">
@@ -246,14 +246,14 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         type="secondary"
         icon={<IconCopy />}
         onClick={() => handleCopyContent(content)}
-        className="sql-copy-button"
+        className={styles['sql-copy-button']}
       >
         复制
       </Button>
     );
 
     return (
-      <div className="sql-running-info-panel">
+      <div className={styles['sql-running-info-panel']}>
         <Collapse
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
@@ -292,7 +292,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         >
           <CollapseItem
             header={
-              <div className="panel-header">
+              <div className={styles['panel-header']}>
                 <div className="flex flex-1 items-center gap-[12px]">
                   <Text style={{ fontSize: '14px', fontWeight: 500 }}>
                     运行信息
@@ -430,7 +430,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
             }
             name="1"
           >
-            <div className="panel-content">
+            <div className={styles['panel-content']}>
               <Tabs
                 activeTab={activeKey}
                 onClickTab={handleClickTab}
@@ -439,7 +439,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                 }}
               >
                 <TabPane key="result" title="结果">
-                  <div className="run-result-content">
+                  <div className={styles['run-result-content']}>
                     {runStatus === RunningStatus.RUNNING && (
                       <Empty description="正在运行中，请等待..." />
                     )}
@@ -458,7 +458,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                             <Typography.Text>{runWarning}</Typography.Text>
                           )}
                         </div>
-                        <div className="run-result-table">
+                        <div className={styles['run-result-table']}>
                           {columns.length > 0 && data.length > 0 ? (
                             <Table
                               border={false}
@@ -477,7 +477,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </div>
                 </TabPane>
                 <TabPane key="log" title="日志">
-                  <div className="runlog-content">{runLog}</div>
+                  <div className={styles['runlog-content']}>{runLog}</div>
                 </TabPane>
               </Tabs>
               {/* 复制按钮放在滚动容器外部 */}
