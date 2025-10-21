@@ -295,7 +295,7 @@ const useOneStepRun = <T>({
           return '';
         };
         ssePost(
-          getIterationSingleNodeRunUrl(isChatMode, appId!, id),
+          getIterationSingleNodeRunUrl(isChatMode, appId, id),
           { body: { inputs: submitData } },
           {
             onWorkflowStarted: () => {},
@@ -420,7 +420,7 @@ const useOneStepRun = <T>({
           return '';
         };
         ssePost(
-          getLoopSingleNodeRunUrl(isChatMode, appId!, id),
+          getLoopSingleNodeRunUrl(isChatMode, appId, id),
           { body: { inputs: submitData } },
           {
             onWorkflowStarted: () => {},
