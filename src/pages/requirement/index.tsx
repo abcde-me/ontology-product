@@ -17,6 +17,8 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { getAnnotationList, getAnnotationDownload } from '@/api/dataAnnotation';
 import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { useHasPermission } from '@/store/userInfoStore';
+import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
 import './index.scss';
 
 export default function Requirement() {
@@ -159,6 +161,12 @@ export default function Requirement() {
         );
     }
   };
+  // 查看需求详情权限
+  const hasPermissionGetDetail = useHasPermission(REQUIREMENT_PERMISSIONS.GET);
+  // 查询下载结果权限
+  const hasPermissionGetDownload = useHasPermission(
+    REQUIREMENT_PERMISSIONS.DOWNLOAD
+  );
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -169,14 +177,19 @@ export default function Requirement() {
       className: 'hover-change workflow-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
-          <EllipsisPopover
-            value={record.name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.id);
-            }}
-          />
+          // 查看需求详情权限判断
+          hasPermissionGetDetail ? (
+            <EllipsisPopover
+              value={record.name}
+              isEdit={false}
+              isLink
+              handleLink={() => {
+                viewDetailWorkflow(record.id);
+              }}
+            />
+          ) : (
+            record.name
+          )
         ) : (
           <span>-</span>
         );
@@ -306,42 +319,46 @@ export default function Requirement() {
         const perms = record.perms || [];
         return (
           <div style={{ marginLeft: 4 }} className="option-content">
-            <span
-              className="operate-text"
-              style={{ marginRight: 8 }}
-              onClick={() => {
-                viewDetailWorkflow(record.id);
-              }}
-            >
-              详情
-            </span>
-            {(record?.status === RequirementStatus.Annotated ||
-              record?.status === RequirementStatus.Published) && (
+            {/* 查看需求详情权限判断 */}
+            {hasPermissionGetDetail && (
               <span
                 className="operate-text"
+                style={{ marginRight: 8 }}
                 onClick={() => {
-                  setLoading(true);
-                  try {
-                    getAnnotationDownload({ requirement_id: record.id })
-                      .then((res) => {
-                        if (res.code === 0) {
-                          const a = document.createElement('a');
-                          a.href = res?.data?.download_url;
-                          document.body.appendChild(a);
-                          a.click();
-                        }
-                        setLoading(false);
-                      })
-                      .catch(() => {})
-                      .finally(() => {});
-                  } catch {
-                    setLoading(false);
-                  }
+                  viewDetailWorkflow(record.id);
                 }}
               >
-                下载结果
+                详情
               </span>
             )}
+            {hasPermissionGetDownload &&
+              (record?.status === RequirementStatus.Annotated ||
+                record?.status === RequirementStatus.Published) && (
+                <span
+                  className="operate-text"
+                  onClick={() => {
+                    setLoading(true);
+                    try {
+                      getAnnotationDownload({ requirement_id: record.id })
+                        .then((res) => {
+                          if (res.code === 0) {
+                            const a = document.createElement('a');
+                            a.href = res?.data?.download_url;
+                            document.body.appendChild(a);
+                            a.click();
+                          }
+                          setLoading(false);
+                        })
+                        .catch(() => {})
+                        .finally(() => {});
+                    } catch {
+                      setLoading(false);
+                    }
+                  }}
+                >
+                  下载结果
+                </span>
+              )}
           </div>
         );
       }
@@ -386,7 +403,8 @@ export default function Requirement() {
             />
           </FormItem>
         </Form>
-        <PermissionWrapper>
+        {/* 创建需求权限判断 */}
+        <PermissionWrapper permission={REQUIREMENT_PERMISSIONS.CREATE}>
           <Button
             type="primary"
             onClick={handleCreateWorkflow}
@@ -408,7 +426,7 @@ export default function Requirement() {
               <IconPlus /> 创建需求
             </>
           ),
-          // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
+          perms: REQUIREMENT_PERMISSIONS.CREATE,
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"

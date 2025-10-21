@@ -11,7 +11,8 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { getAnnotationTaskList } from '@/api/dataAnnotation';
-import { useUserInfo } from '@/store/userInfoStore';
+import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
+import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -106,6 +107,11 @@ function TaskList() {
 
     setSortValue(sortdata);
   };
+
+  // 查询是否有权限标注
+  const hasPermissionGetTask = useHasPermission(
+    ANNOTATION_TASK_PERMISSIONS.GET
+  );
 
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
@@ -228,15 +234,16 @@ function TaskList() {
         return (
           <div style={{ display: 'flex' }}>
             {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
-            <span
-              className="operate-text"
-              onClick={() => {
-                viewDetailWorkflow(record);
-              }}
-            >
-              标注
-            </span>
-            {/* )} */}
+            {hasPermissionGetTask && (
+              <span
+                className="operate-text"
+                onClick={() => {
+                  viewDetailWorkflow(record);
+                }}
+              >
+                标注
+              </span>
+            )}
           </div>
         );
       }
