@@ -1294,9 +1294,9 @@ export default function RequirementDetail() {
                                               value.trim() !== ''
                                           );
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入标签名称');
                                           } else if (isDuplicate) {
-                                            callback('标注名称不能重复');
+                                            callback('标签名称不能重复');
                                           } else {
                                             callback();
                                           }

@@ -123,7 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
-export const PrefixLabelService = '/label-service/api/v1';
+export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -393,13 +393,13 @@ export const ModaForgeResourceEndpoints = {
 
   // 数据标注接口
   // 数据标注配置 发布
-  publishRequirementApi: PrefixLabelService + '/requirements/create',
+  publishRequirementApi: PrefixLabelService + '/createRequirement',
   // 需求详情查看
-  getRequirementDetailApi: PrefixLabelService + '/requirements/query',
+  getRequirementDetailApi: PrefixLabelService + '/queryRequirement',
   // 获取数据标注列表
-  getAnnotationListApi: PrefixLabelService + '/requirements/list',
+  getAnnotationListApi: PrefixLabelService + '/listRequirement',
   // 标注下载结果
-  getAnnotationDownloadApi: PrefixLabelService + '/requirements/resultDownload',
+  getAnnotationDownloadApi: PrefixLabelService + '/resultDownlaodRequirement',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
