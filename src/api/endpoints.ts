@@ -169,7 +169,7 @@ export const ResourceEndpointsV2 = {
   volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
   tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
   catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
-  targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
+  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
   sourceFileTypeListApi:
     PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
@@ -300,7 +300,7 @@ export const ModaForgeResourceEndpoints = {
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
-  catalogPreviewApi: PrefixAimdp + '/datasets/preview', //数据集管理在用
+  catalogPreviewApi: PrefixAimdp + '/PreviewDatasetsByDst', //数据集管理在用
 
   //数据集
   //获取数据集列表
