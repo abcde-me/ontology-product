@@ -46,8 +46,7 @@ import {
   updateSqlScriptParams,
   SqlTaskDetailData,
   DatasetsOptionsParams,
-  DatasetsOptionsData,
-  CopySqlScriptReq
+  DatasetsOptionsData
 } from '@/types/sqlApi';
 
 /** 查询目标目录文件列表 卷详情 文件列表 */
@@ -670,7 +669,7 @@ export async function getSqlScriptList(
 /** 删除SQL脚本 */
 export async function deleteSqlScript(id: string): Promise<ApiRes<{}>> {
   return await UAPI.RES.sqlDeleteApi({})
-    .post({ script_id: id })
+    .post({ script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -679,7 +678,10 @@ export async function deleteSqlScript(id: string): Promise<ApiRes<{}>> {
 export async function runSqlScript(
   id: string
 ): Promise<ApiRes<RunSqlScriptData>> {
-  return await UAPI.RES.sqlRunApi({}).post({ script_id: id }).inRegion().do();
+  return await UAPI.RES.sqlRunApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
 }
 
 /** SQL脚本运行取消 */
@@ -688,7 +690,7 @@ export async function runCancelSqlScript(
   params: RunCancelSqlScriptParams
 ): Promise<ApiRes<{}>> {
   return await UAPI.RES.sqlRunCancelApi({})
-    .post({ ...params, script_id: id })
+    .post({ ...params, script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -699,7 +701,7 @@ export async function getRunResultSqlScript(
   params: RunResultSqlScriptParams
 ): Promise<ApiRes<RunResultSqlScriptData>> {
   return await UAPI.RES.sqlRunResultApi({})
-    .post({ ...params, script_id: id })
+    .post({ ...params, script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -710,7 +712,7 @@ export async function getRunLogSqlScript(
   params: { script_execid: string }
 ): Promise<ApiRes<any>> {
   return await UAPI.RES.sqlRunLogApi({})
-    .post({ ...params, script_id: id })
+    .post({ ...params, script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -719,16 +721,22 @@ export async function getRunLogSqlScript(
 export async function getSqlScriptDetail(
   id: string
 ): Promise<ApiRes<SqlScriptDetailData>> {
-  return await UAPI.RES.sqlOpenApi({}).post({ script_id: id }).inRegion().do();
+  return await UAPI.RES.sqlOpenApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
 }
 
 /** SQL脚本复制 */
 export async function copySqlScript(
   id: string,
-  params: CopySqlScriptReq
+  script_file_id: string
 ): Promise<ApiRes<CreateSqlScriptData>> {
   return await UAPI.RES.sqlCopyApi({})
-    .post({ ...params, script_id: id })
+    .post({
+      script_file_id: Number(script_file_id),
+      copy_script_id: Number(id)
+    })
     .inRegion()
     .do();
 }
@@ -826,7 +834,7 @@ export async function calcelExportSqlTask(
   script_id: number
 ): Promise<ApiRes<{}>> {
   return await UAPI.RES.sqlExportDatasetStopApi({})
-    .post({ item_id: id, script_id })
+    .post({ id, script_id })
     .inRegion()
     .do();
 }
@@ -837,7 +845,7 @@ export async function retryExportSqlTask(
   script_id: number
 ): Promise<ApiRes<{}>> {
   return await UAPI.RES.sqlExportDatasetRetryApi({})
-    .post({ item_id: id, script_id })
+    .post({ id, script_id })
     .inRegion()
     .do();
 }
@@ -848,7 +856,7 @@ export async function getSqlTaskDetail(
   script_id: number
 ): Promise<ApiRes<SqlTaskDetailData>> {
   return await UAPI.RES.sqlExportDatasetDetailApi({})
-    .post({ item_id: id, script_id })
+    .post({ id, script_id })
     .inRegion()
     .do();
 }
