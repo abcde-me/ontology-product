@@ -170,8 +170,8 @@ export async function getPythonList(
 
   // TODO: 联调
   // console.log('getPythonList', pyspark_id, params);
-  return await UAPI.RES.pythonListApi({ pyspark_id: id })
-    .post(params)
+  return await UAPI.RES.pythonListApi({})
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -210,7 +210,7 @@ export async function renamePythonItem(
 ): Promise<ApiRes<RenamePythonItemRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonRenameApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -231,7 +231,7 @@ export async function renamePythonItem(
 export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
   // TODO: 联调
   return await UAPI.RES.pythonDeleteApi({})
-    .post({ pyspark_id: id })
+    .post({ pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -252,7 +252,7 @@ export async function copyPythonItem(
 ): Promise<ApiRes<CopyPythonItemRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonCopyApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -282,7 +282,7 @@ export async function openPythonItem(
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonOpenApi({})
-    .post({ pyspark_id: id })
+    .post({ pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -355,7 +355,7 @@ export async function savePythonItem(
 ): Promise<ApiRes<SavePythonItemRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonSaveApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -378,7 +378,7 @@ export async function runPythonItem(
 ): Promise<ApiRes<RunPythonItemRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonRunApi({})
-    .post({ pyspark_id: id })
+    .post({ pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -402,7 +402,7 @@ export async function getRunResult(
 ): Promise<ApiRes<GetRunResultRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonRunResultApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 
@@ -427,7 +427,7 @@ export async function stopRunPythonItem(
   params: StopRunPythonItemReq
 ): Promise<ApiRes<{}>> {
   return await UAPI.RES.pythonRunCancelApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -439,7 +439,7 @@ export async function getRunLog(
 ): Promise<ApiRes<GetRunLogRes>> {
   // TODO: 联调
   return await UAPI.RES.pythonRunLogApi({})
-    .post({ ...params, pyspark_id: id })
+    .post({ ...params, pyspark_id: Number(id) })
     .inRegion()
     .do();
 }
