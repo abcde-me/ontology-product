@@ -264,9 +264,7 @@ export const ModaForgeResourceEndpoints = {
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/ListDirectory',
-  workflowDraft:
-    PrefixAimdp +
-    '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表

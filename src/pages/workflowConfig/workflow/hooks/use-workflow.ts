@@ -445,7 +445,7 @@ export const useWorkflowInit = () => {
           conversation_variables: [],
           version: 'draft'
         }).then(({ data: res }) => {
-          workflowStore.getState().setDraftUpdatedAt(res.updated_at);
+          workflowStore.getState().setDraftUpdatedAt(res?.updated_at);
           handleGetInitialWorkflowData();
         });
       } else {
