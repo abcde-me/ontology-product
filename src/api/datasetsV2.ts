@@ -19,7 +19,10 @@ export async function getknowledgeBaseRootList(params: any = {}) {
 }
 //知识库目录列表接口, 返回所有根目录get
 export async function getknowledgeBaseRootTree(Id?: string, params: any = {}) {
-  return UAPI.RES.knowledgeBaseRoot({ Id }).get().inRegion().do();
+  return UAPI.RES.knowledgeBaseRoot(Id ? { Id } : {})
+    .get()
+    .inRegion()
+    .do();
 }
 //知识库目录创建接口post
 export async function postknowledgeBaseRootTree(Id: string, params: any = {}) {
@@ -140,7 +143,7 @@ export async function postHitTest(dataset_id: string, params: any) {
 export async function deletedocsublevel(
   dataset_id: string,
   document_id: string,
-  segment_id?: string
+  segment_id: string
 ) {
   return UAPI.RES.docDeleteSublevel({ dataset_id, document_id, segment_id })
     .delete()
@@ -210,5 +213,8 @@ export function apiTableHeaderConfiguration(params: any) {
   return UAPI.RES.TableHeaderConfiguration({}).get(params).inRegion().do();
 }
 export function getdatasetstree(Id?: string, params: any = {}) {
-  return UAPI.RES.datasetstree({ Id }).get().inRegion().do();
+  return UAPI.RES.datasetstree(Id ? { Id } : {})
+    .get()
+    .inRegion()
+    .do();
 }

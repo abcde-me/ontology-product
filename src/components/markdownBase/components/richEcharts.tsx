@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import * as echarts from 'echarts';
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption, ECharts } from 'echarts';
 
 export interface IEchartsData {
   option: EChartsOption;
@@ -13,33 +13,37 @@ const RichEcharts: React.FC<IEchartsData> = ({
   className = '',
   style = { height: '400px', width: '100%' }
 }) => {
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<ECharts | null>(null);
 
   useEffect(() => {
     // 初始化图表
-    chartInstance.current = echarts.init(chartRef.current);
+    if (chartRef.current) {
+      chartInstance.current = echarts.init(chartRef.current);
 
-    // 设置图表配置项
+      // 设置图表配置项
 
-    // 应用配置
-    chartInstance.current.setOption(option);
+      // 应用配置
+      chartInstance.current.setOption(option);
 
-    // 添加响应式支持
-    const resizeHandler = () => {
-      chartInstance.current.resize();
-    };
+      // 添加响应式支持
+      const resizeHandler = () => {
+        if (chartInstance.current) {
+          chartInstance.current.resize();
+        }
+      };
 
-    window.addEventListener('resize', resizeHandler);
+      window.addEventListener('resize', resizeHandler);
 
-    // 组件卸载时清理
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.dispose();
-        chartInstance.current = null;
-      }
-      window.removeEventListener('resize', resizeHandler);
-    };
+      // 组件卸载时清理
+      return () => {
+        if (chartInstance.current) {
+          chartInstance.current.dispose();
+          chartInstance.current = null;
+        }
+        window.removeEventListener('resize', resizeHandler);
+      };
+    }
   }, [option]);
 
   return (
