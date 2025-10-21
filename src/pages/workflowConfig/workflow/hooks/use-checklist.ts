@@ -4,30 +4,21 @@ import { useStoreApi } from 'reactflow';
 import type { Edge, Node } from '../types';
 import { BlockEnum } from '../types';
 import { useStore } from '../store';
-import { getToolCheckParams, getValidTreeNodes } from '../utils';
+import { getValidTreeNodes } from '../utils';
 import { CUSTOM_NODE, MAX_TREE_DEPTH } from '../constants';
-import type { ToolNodeType } from '../nodes/tool/types';
-import { useIsChatMode } from './use-workflow';
 import { useNodesExtraData } from './use-nodes-data';
 import { useToastContext } from '@/pages/workflowConfig/components/toast';
-import { CollectionType } from '@/pages/workflowConfig/tools/types';
 import { useGetLanguage } from '@/pages/workflowConfig/context/i18n';
-// import type { AgentNodeType } from '../nodes/agent/types'
-// import { useStrategyProviders } from '@/service/use-strategy'
-import { canFindTool } from '@/pages/workflowConfig/utils';
-
-type AgentNodeType = any;
 
 export const useChecklist = (nodes: Node[], edges: Edge[]) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const language = useGetLanguage();
   const nodesExtraData = useNodesExtraData();
-  const isChatMode = useIsChatMode();
+  const isChatMode = false;
   const buildInTools = useStore((s) => s.buildInTools);
   const customTools = useStore((s) => s.customTools);
   const workflowTools = useStore((s) => s.workflowTools);
   console.warn('API NOT IMPLEMENTED', 'useStrategyProviders');
-  // const { data: strategyProviders } = useStrategyProviders()
   const strategyProviders = [] as any;
 
   const needWarningNodes = useMemo(() => {
@@ -41,51 +32,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
       const node = nodes[i];
       let toolIcon;
       let moreDataForCheckValid;
-
-      if (node.data.type === BlockEnum.Tool) {
-        const { provider_type } = node.data;
-
-        moreDataForCheckValid = getToolCheckParams(
-          node.data as ToolNodeType,
-          buildInTools,
-          customTools,
-          workflowTools,
-          language
-        );
-        if (provider_type === CollectionType.builtIn)
-          toolIcon = buildInTools.find((tool) =>
-            canFindTool(tool.id, node.data.provider_id || '')
-          )?.icon;
-
-        if (provider_type === CollectionType.custom)
-          toolIcon = customTools.find(
-            (tool) => tool.id === node.data.provider_id
-          )?.icon;
-
-        if (provider_type === CollectionType.workflow)
-          toolIcon = workflowTools.find(
-            (tool) => tool.id === node.data.provider_id
-          )?.icon;
-      }
-
-      if (node.data.type === BlockEnum.Agent) {
-        const data = node.data as AgentNodeType;
-        const isReadyForCheckValid = !!strategyProviders;
-        const provider = strategyProviders?.find(
-          (provider) =>
-            provider.declaration.identity.name ===
-            data.agent_strategy_provider_name
-        );
-        const strategy = provider?.declaration.strategies?.find(
-          (s) => s.identity.name === data.agent_strategy_name
-        );
-        moreDataForCheckValid = {
-          provider,
-          strategy,
-          language,
-          isReadyForCheckValid
-        };
-      }
 
       if (node.type === CUSTOM_NODE) {
         const { errorMessage } = nodesExtraData[node.data.type].checkValid(
@@ -107,19 +53,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
           });
         }
       }
-    }
-
-    if (
-      isChatMode &&
-      !nodes.find((node) => node.data.type === BlockEnum.Answer)
-    ) {
-      // @ts-expect-error
-      list.push({
-        id: 'answer-need-added',
-        type: BlockEnum.Answer,
-        title: t('workflow.blocks.answer'),
-        errorMessage: t('workflow.common.needAnswerNode')
-      });
     }
 
     if (
@@ -159,7 +92,6 @@ export const useChecklistBeforePublish = () => {
   const customTools = useStore((s) => s.customTools);
   const workflowTools = useStore((s) => s.workflowTools);
   const { notify } = useToastContext();
-  const isChatMode = useIsChatMode();
   const store = useStoreApi();
   const nodesExtraData = useNodesExtraData();
   // const { data: strategyProviders } = useStrategyProviders()
@@ -184,33 +116,6 @@ export const useChecklistBeforePublish = () => {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
       let moreDataForCheckValid;
-      if (node.data.type === BlockEnum.Tool)
-        moreDataForCheckValid = getToolCheckParams(
-          node.data as ToolNodeType,
-          buildInTools,
-          customTools,
-          workflowTools,
-          language
-        );
-
-      if (node.data.type === BlockEnum.Agent) {
-        const data = node.data;
-        const isReadyForCheckValid = !!strategyProviders;
-        const provider = strategyProviders?.find(
-          (provider) =>
-            provider.declaration.identity.name ===
-            data.agent_strategy_provider_name
-        );
-        const strategy = provider?.declaration.strategies?.find(
-          (s) => s.identity.name === data.agent_strategy_name
-        );
-        moreDataForCheckValid = {
-          provider,
-          strategy,
-          language,
-          isReadyForCheckValid
-        };
-      }
 
       const { errorMessage } = nodesExtraData[
         node.data.type as BlockEnum
@@ -233,18 +138,7 @@ export const useChecklistBeforePublish = () => {
       }
     }
 
-    if (
-      isChatMode &&
-      !nodes.find((node) => node.data.type === BlockEnum.Answer)
-    ) {
-      notify({ type: 'error', message: t('workflow.common.needAnswerNode') });
-      return false;
-    }
-
-    if (
-      !isChatMode &&
-      !nodes.find((node) => node.data.type === BlockEnum.End)
-    ) {
+    if (!nodes.find((node) => node.data.type === BlockEnum.End)) {
       notify({ type: 'error', message: t('workflow.common.needEndNode') });
       return false;
     }
@@ -252,7 +146,6 @@ export const useChecklistBeforePublish = () => {
     return true;
   }, [
     store,
-    isChatMode,
     notify,
     t,
     buildInTools,

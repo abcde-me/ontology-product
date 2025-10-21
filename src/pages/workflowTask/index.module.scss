@@ -1,0 +1,54 @@
+.workflow-task {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 20px 20px 0;
+  padding: 20px 18px 20px 20px;
+  border-radius: 10px;
+  min-height: calc(100% - 30px);
+
+  :global(.arco-pagination-total-text) {
+    line-height: 32px;
+  }
+
+  .operate-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  .operate-text:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  :global(tbody) .hover-change :global(.ellipsis-text) {
+    color: #1e293b;
+  }
+
+  :global(tbody)
+    :global(.arco-table-tr):hover
+    .hover-change
+    :global(.ellipsis-text) {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  :global(tbody)
+    :global(.arco-table-tr):hover
+    .hover-change
+    :global(.ellipsis-text):hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  :global(.arco-select-size-default.arco-select-single)
+    :global(.arco-select-view) {
+    border-radius: 4px 0 0 4px;
+  }
+
+  :global(.arco-input-inner-wrapper) {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .task-select :global(.arco-select-view) {
+    border-right: 0;
+  }
+}

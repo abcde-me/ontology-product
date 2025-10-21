@@ -1,23 +1,16 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEdges } from 'reactflow';
-import { useNodeHelpLink } from '../../hooks/use-node-help-link';
 import ChangeBlock from './change-block';
 import { canRunBySingle } from '@/pages/workflowConfig/workflow/utils';
-import { useStore } from '@/pages/workflowConfig/workflow/store';
 import {
   useNodeDataUpdate,
-  useNodesExtraData,
   useNodesInteractions,
   useNodesReadOnly,
   useNodesSyncDraft
 } from '@/pages/workflowConfig/workflow/hooks';
-import ShortcutsName from '@/pages/workflowConfig/workflow/shortcuts-name';
 import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
-import { useGetLanguage } from '@/pages/workflowConfig/context/i18n';
-import { CollectionType } from '@/pages/workflowConfig/tools/types';
-import { canFindTool } from '@/pages/workflowConfig/utils';
 
 type PanelOperatorPopupProps = {
   id: string;
@@ -29,79 +22,28 @@ const PanelOperatorPopup = ({
   id,
   data,
   onClosePopup,
-  showHelpLink
 }: PanelOperatorPopupProps) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const language = useGetLanguage();
   const edges = useEdges();
   const {
     handleNodeDelete,
     handleNodesDuplicate,
     handleNodeSelect,
-    handleNodesCopy
   } = useNodesInteractions();
   const { handleNodeDataUpdate } = useNodeDataUpdate();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
   const { nodesReadOnly } = useNodesReadOnly();
-  const nodesExtraData = useNodesExtraData();
-  const buildInTools = useStore((s) => s.buildInTools);
-  const customTools = useStore((s) => s.customTools);
-  const workflowTools = useStore((s) => s.workflowTools);
   const edge = edges.find((edge) => edge.target === id);
-  const author = useMemo(() => {
-    if (data.type !== BlockEnum.Tool) return nodesExtraData[data.type].author;
-
-    if (data.provider_type === CollectionType.builtIn)
-      return buildInTools.find((toolWithProvider) =>
-        canFindTool(toolWithProvider.id, data.provider_id)
-      )?.author;
-
-    if (data.provider_type === CollectionType.workflow)
-      return workflowTools.find(
-        (toolWithProvider) => toolWithProvider.id === data.provider_id
-      )?.author;
-
-    return customTools.find(
-      (toolWithProvider) => toolWithProvider.id === data.provider_id
-    )?.author;
-  }, [data, nodesExtraData, buildInTools, customTools, workflowTools]);
-
-  const about = useMemo(() => {
-    if (data.type !== BlockEnum.Tool) return nodesExtraData[data.type].about;
-
-    if (data.provider_type === CollectionType.builtIn)
-      return buildInTools.find((toolWithProvider) =>
-        canFindTool(toolWithProvider.id, data.provider_id)
-      )?.description[language];
-
-    if (data.provider_type === CollectionType.workflow)
-      return workflowTools.find(
-        (toolWithProvider) => toolWithProvider.id === data.provider_id
-      )?.description[language];
-
-    return customTools.find(
-      (toolWithProvider) => toolWithProvider.id === data.provider_id
-    )?.description[language];
-  }, [
-    data,
-    nodesExtraData,
-    language,
-    buildInTools,
-    customTools,
-    workflowTools
-  ]);
 
   // const showChangeBlock = data.type !== BlockEnum.Start && !nodesReadOnly && data.type !== BlockEnum.Iteration && data.type !== BlockEnum.Loop
   const showChangeBlock = false;
 
-  const link = useNodeHelpLink(data.type);
-
   return (
     <div className="w-[200px] rounded-[4px] border-[0.5px] border-gray-200 bg-white">
-      {(showChangeBlock || canRunBySingle(data.type)) && (
+      {(showChangeBlock || canRunBySingle()) && (
         <>
           <div className="p-1">
-            {canRunBySingle(data.type) && (
+            {canRunBySingle() && (
               <div
                 className={`
                       flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm text-gray-700

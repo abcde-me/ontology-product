@@ -3,46 +3,22 @@ import {
   getConnectedEdges,
   getIncomers,
   getOutgoers,
-  MarkerType
 } from 'reactflow';
 import dagre from '@dagrejs/dagre';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, groupBy, isEqual, uniqBy } from 'lodash-es';
 import type {
   Edge,
-  InputVar,
   Node,
-  ToolWithProvider,
   ValueSelector
 } from './types';
-import { BlockEnum, ErrorHandleMode, NodeRunningStatus } from './types';
+import { BlockEnum, NodeRunningStatus } from './types';
 import {
   CUSTOM_NODE,
-  DEFAULT_RETRY_INTERVAL,
-  DEFAULT_RETRY_MAX,
-  ITERATION_CHILDREN_Z_INDEX,
-  ITERATION_NODE_Z_INDEX,
-  LOOP_CHILDREN_Z_INDEX,
-  LOOP_NODE_Z_INDEX,
   NODE_WIDTH_X_OFFSET,
   START_INITIAL_POSITION
 } from './constants';
-import { CUSTOM_ITERATION_START_NODE } from './nodes/iteration-start/constants';
-import { CUSTOM_LOOP_START_NODE } from './nodes/loop-start/constants';
-import type { QuestionClassifierNodeType } from './nodes/question-classifier/types';
-import type { IfElseNodeType } from './nodes/if-else/types';
-import { branchNameCorrect } from './nodes/if-else/utils';
-import type { ToolNodeType } from './nodes/tool/types';
-import type { IterationNodeType } from './nodes/iteration/types';
-import type { LoopNodeType } from './nodes/loop/types';
-import { CollectionType } from '@/pages/workflowConfig/tools/types';
-import { toolParametersToFormSchemas } from '@/pages/workflowConfig/tools/utils/to-form-schema';
-import {
-  canFindTool,
-  correctModelProvider
-} from '@/pages/workflowConfig/utils';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
-import { Ease } from '@svgdotjs/svg.js';
 
 const WHITE = 'WHITE';
 const GRAY = 'GRAY';
@@ -104,48 +80,6 @@ const getCycleEdges = (nodes: Node[], edges: Edge[]) => {
   return cycleEdges;
 };
 
-export function getIterationStartNode(iterationId: string): Node {
-  return generateNewNode({
-    id: `${iterationId}start`,
-    type: CUSTOM_ITERATION_START_NODE,
-    data: {
-      title: '',
-      desc: '',
-      type: BlockEnum.IterationStart,
-      isInIteration: true
-    },
-    position: {
-      x: 24,
-      y: 68
-    },
-    zIndex: ITERATION_CHILDREN_Z_INDEX,
-    parentId: iterationId,
-    selectable: false,
-    draggable: false
-  }).newNode;
-}
-
-export function getLoopStartNode(loopId: string): Node {
-  return generateNewNode({
-    id: `${loopId}start`,
-    type: CUSTOM_LOOP_START_NODE,
-    data: {
-      title: '',
-      desc: '',
-      type: BlockEnum.LoopStart,
-      isInLoop: true
-    },
-    position: {
-      x: 24,
-      y: 68
-    },
-    zIndex: LOOP_CHILDREN_Z_INDEX,
-    parentId: loopId,
-    selectable: false,
-    draggable: false
-  }).newNode;
-}
-
 export function generateNewNode({
   data,
   position,
@@ -165,35 +99,9 @@ export function generateNewNode({
     position,
     targetPosition: Position.Left,
     sourcePosition: Position.Right,
-    zIndex:
-      data.type === BlockEnum.Iteration
-        ? ITERATION_NODE_Z_INDEX
-        : data.type === BlockEnum.Loop
-          ? LOOP_NODE_Z_INDEX
-          : zIndex,
+    zIndex,
     ...rest
   } as Node;
-
-  if (data.type === BlockEnum.Iteration) {
-    const newIterationStartNode = getIterationStartNode(newNode.id);
-    (newNode.data as IterationNodeType).start_node_id =
-      newIterationStartNode.id;
-    (newNode.data as IterationNodeType)._children = [newIterationStartNode.id];
-    return {
-      newNode,
-      newIterationStartNode
-    };
-  }
-
-  if (data.type === BlockEnum.Loop) {
-    const newLoopStartNode = getLoopStartNode(newNode.id);
-    (newNode.data as LoopNodeType).start_node_id = newLoopStartNode.id;
-    (newNode.data as LoopNodeType)._children = [newLoopStartNode.id];
-    return {
-      newNode,
-      newLoopStartNode
-    };
-  }
 
   return {
     newNode
@@ -201,146 +109,9 @@ export function generateNewNode({
 }
 
 export const preprocessNodesAndEdges = (nodes: Node[], edges: Edge[]) => {
-  const hasIterationNode = nodes.some(
-    (node) => node.data.type === BlockEnum.Iteration
-  );
-  const hasLoopNode = nodes.some((node) => node.data.type === BlockEnum.Loop);
-
-  if (!hasIterationNode) {
-    return {
-      nodes,
-      edges
-    };
-  }
-
-  if (!hasLoopNode) {
-    return {
-      nodes,
-      edges
-    };
-  }
-
-  const nodesMap = nodes.reduce(
-    (prev, next) => {
-      prev[next.id] = next;
-      return prev;
-    },
-    {} as Record<string, Node>
-  );
-
-  const iterationNodesWithStartNode: Node[] = [];
-  const iterationNodesWithoutStartNode: Node[] = [];
-  const loopNodesWithStartNode: Node[] = [];
-  const loopNodesWithoutStartNode: Node[] = [];
-
-  for (let i = 0; i < nodes.length; i++) {
-    const currentNode = nodes[i] as Node<IterationNodeType | LoopNodeType>;
-
-    if (currentNode.data.type === BlockEnum.Iteration) {
-      if (currentNode.data.start_node_id) {
-        if (
-          nodesMap[currentNode.data.start_node_id]?.type !==
-          CUSTOM_ITERATION_START_NODE
-        )
-          iterationNodesWithStartNode.push(currentNode);
-      } else {
-        iterationNodesWithoutStartNode.push(currentNode);
-      }
-    }
-
-    if (currentNode.data.type === BlockEnum.Loop) {
-      if (currentNode.data.start_node_id) {
-        if (
-          nodesMap[currentNode.data.start_node_id]?.type !==
-          CUSTOM_LOOP_START_NODE
-        )
-          loopNodesWithStartNode.push(currentNode);
-      } else {
-        loopNodesWithoutStartNode.push(currentNode);
-      }
-    }
-  }
-
-  const newIterationStartNodesMap = {} as Record<string, Node>;
-  const newIterationStartNodes = [
-    ...iterationNodesWithStartNode,
-    ...iterationNodesWithoutStartNode
-  ].map((iterationNode: Node, index) => {
-    const newNode = getIterationStartNode(iterationNode.id);
-    newNode.id = newNode.id + index;
-    newIterationStartNodesMap[iterationNode.id] = newNode;
-    return newNode;
-  });
-
-  const newLoopStartNodesMap = {} as Record<string, Node>;
-  const newLoopStartNodes = [
-    ...loopNodesWithStartNode,
-    ...loopNodesWithoutStartNode
-  ].map((loopNode, index) => {
-    const newNode = getLoopStartNode(loopNode.id);
-    newNode.id = newNode.id + index;
-    newLoopStartNodesMap[loopNode.id] = newNode;
-    return newNode;
-  });
-
-  const newEdges = [
-    ...iterationNodesWithStartNode,
-    ...loopNodesWithStartNode
-  ].map((nodeItem) => {
-    const isIteration = nodeItem.data.type === BlockEnum.Iteration;
-    const newNode = (
-      isIteration ? newIterationStartNodesMap : newLoopStartNodesMap
-    )[nodeItem.id];
-    // TODO: ts错误
-    // @ts-expect-error
-    const startNode = nodesMap[nodeItem.data.start_node_id];
-    const source = newNode.id;
-    const sourceHandle = 'source';
-    const target = startNode.id;
-    const targetHandle = 'target';
-
-    const parentNode =
-      nodes.find((node) => node.id === startNode.parentId) || null;
-    const isInIteration =
-      !!parentNode && parentNode.data.type === BlockEnum.Iteration;
-    const isInLoop = !!parentNode && parentNode.data.type === BlockEnum.Loop;
-
-    return {
-      id: `${source}-${sourceHandle}-${target}-${targetHandle}`,
-      type: 'custom',
-      source,
-      sourceHandle,
-      target,
-      targetHandle,
-      data: {
-        sourceType: newNode.data.type,
-        targetType: startNode.data.type,
-        isInIteration,
-        iteration_id: isInIteration ? startNode.parentId : undefined,
-        isInLoop,
-        loop_id: isInLoop ? startNode.parentId : undefined,
-        _connectedNodeIsSelected: true
-      },
-      markerEnd,
-      zIndex: isIteration ? ITERATION_CHILDREN_Z_INDEX : LOOP_CHILDREN_Z_INDEX
-    };
-  });
-  nodes.forEach((node) => {
-    if (
-      node.data.type === BlockEnum.Iteration &&
-      newIterationStartNodesMap[node.id]
-    )
-      (node.data as IterationNodeType).start_node_id =
-        newIterationStartNodesMap[node.id].id;
-
-    if (node.data.type === BlockEnum.Loop && newLoopStartNodesMap[node.id])
-      (node.data as LoopNodeType).start_node_id =
-        newLoopStartNodesMap[node.id].id;
-  });
-
   return {
-    nodes: [...nodes, ...newIterationStartNodes, ...newLoopStartNodes],
-    edges: [...edges, ...newEdges]
+    nodes,
+    edges
   };
 };
 
@@ -360,17 +131,6 @@ export const initialNodes = (originNodes: Node[], originEdges: Edge[]) => {
     });
   }
 
-  const iterationOrLoopNodeMap = nodes.reduce(
-    (acc, node) => {
-      if (node.parentId) {
-        if (acc[node.parentId]) acc[node.parentId].push(node.id);
-        else acc[node.parentId] = [node.id];
-      }
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
-
   return nodes.map((node) => {
     if (!node.type) node.type = CUSTOM_NODE;
 
@@ -381,84 +141,6 @@ export const initialNodes = (originNodes: Node[], originEdges: Edge[]) => {
     node.data._connectedTargetHandleIds = connectedEdges
       .filter((edge) => edge.target === node.id)
       .map((edge) => edge.targetHandle || 'target');
-
-    if (node.data.type === BlockEnum.IfElse) {
-      const nodeData = node.data as IfElseNodeType;
-
-      if (!nodeData.cases && nodeData.logical_operator && nodeData.conditions) {
-        (node.data as IfElseNodeType).cases = [
-          {
-            case_id: 'true',
-            logical_operator: nodeData.logical_operator,
-            conditions: nodeData.conditions
-          }
-        ];
-      }
-      node.data._targetBranches = branchNameCorrect([
-        ...(node.data as IfElseNodeType).cases.map((item) => ({
-          id: item.case_id,
-          name: ''
-        })),
-        { id: 'false', name: '' }
-      ]);
-    }
-
-    if (node.data.type === BlockEnum.QuestionClassifier) {
-      node.data._targetBranches = (
-        node.data as QuestionClassifierNodeType
-      ).classes.map((topic) => {
-        return topic;
-      });
-    }
-
-    if (node.data.type === BlockEnum.Iteration) {
-      const iterationNodeData = node.data as IterationNodeType;
-      iterationNodeData._children = iterationOrLoopNodeMap[node.id] || [];
-      iterationNodeData.is_parallel = iterationNodeData.is_parallel || false;
-      iterationNodeData.parallel_nums = iterationNodeData.parallel_nums || 10;
-      iterationNodeData.error_handle_mode =
-        iterationNodeData.error_handle_mode || ErrorHandleMode.Terminated;
-    }
-
-    // TODO: loop error handle mode
-    if (node.data.type === BlockEnum.Loop) {
-      const loopNodeData = node.data as LoopNodeType;
-      loopNodeData._children = iterationOrLoopNodeMap[node.id] || [];
-      loopNodeData.error_handle_mode =
-        loopNodeData.error_handle_mode || ErrorHandleMode.Terminated;
-    }
-
-    // legacy provider handle
-    if (node.data.type === BlockEnum.LLM)
-      (node as any).data.model.provider = correctModelProvider(
-        (node as any).data.model.provider
-      );
-
-    if (
-      node.data.type === BlockEnum.KnowledgeRetrieval &&
-      (node as any).data.multiple_retrieval_config?.reranking_model
-    )
-      (node as any).data.multiple_retrieval_config.reranking_model.provider =
-        correctModelProvider(
-          (node as any).data.multiple_retrieval_config?.reranking_model.provider
-        );
-
-    if (node.data.type === BlockEnum.QuestionClassifier)
-      (node as any).data.model.provider = correctModelProvider(
-        (node as any).data.model.provider
-      );
-
-    if (node.data.type === BlockEnum.ParameterExtractor)
-      (node as any).data.model.provider = correctModelProvider(
-        (node as any).data.model.provider
-      );
-    if (node.data.type === BlockEnum.HttpRequest && !node.data.retry_config) {
-      node.data.retry_config = {
-        retry_enabled: true,
-        max_retries: DEFAULT_RETRY_MAX,
-        retry_interval: DEFAULT_RETRY_INTERVAL
-      };
-    }
 
     return node;
   });
@@ -558,20 +240,8 @@ export const getLayoutByDagre = (originNodes: Node[], originEdges: Edge[]) => {
   return dagreGraph;
 };
 
-export const canRunBySingle = (nodeType: BlockEnum) => {
+export const canRunBySingle = () => {
   return false;
-  // return nodeType === BlockEnum.LLM
-  //   || nodeType === BlockEnum.KnowledgeRetrieval
-  //   || nodeType === BlockEnum.Code
-  //   || nodeType === BlockEnum.TemplateTransform
-  //   || nodeType === BlockEnum.QuestionClassifier
-  //   || nodeType === BlockEnum.HttpRequest
-  //   || nodeType === BlockEnum.Tool
-  //   || nodeType === BlockEnum.ParameterExtractor
-  //   || nodeType === BlockEnum.Iteration
-  //   || nodeType === BlockEnum.Agent
-  //   || nodeType === BlockEnum.DocExtractor
-  //   || nodeType === BlockEnum.Loop
 };
 
 type ConnectedSourceOrTargetNodesChange = {
@@ -687,20 +357,10 @@ export const getValidTreeNodes = (nodes: Node[], edges: Edge[]) => {
       outgoers.forEach((outgoer) => {
         list.push(outgoer);
 
-        if (outgoer.data.type === BlockEnum.Iteration)
-          list.push(...nodes.filter((node) => node.parentId === outgoer.id));
-        if (outgoer.data.type === BlockEnum.Loop)
-          list.push(...nodes.filter((node) => node.parentId === outgoer.id));
-
         traverse(outgoer, depth + 1);
       });
     } else {
       list.push(root);
-
-      if (root.data.type === BlockEnum.Iteration)
-        list.push(...nodes.filter((node) => node.parentId === root.id));
-      if (root.data.type === BlockEnum.Loop)
-        list.push(...nodes.filter((node) => node.parentId === root.id));
     }
   };
 
@@ -709,59 +369,6 @@ export const getValidTreeNodes = (nodes: Node[], edges: Edge[]) => {
   return {
     validNodes: uniqBy(list, 'id'),
     maxDepth
-  };
-};
-
-export const getToolCheckParams = (
-  toolData: ToolNodeType,
-  buildInTools: ToolWithProvider[],
-  customTools: ToolWithProvider[],
-  workflowTools: ToolWithProvider[],
-  language: string
-) => {
-  const { provider_id, provider_type, tool_name } = toolData;
-  const isBuiltIn = provider_type === CollectionType.builtIn;
-  const currentTools =
-    provider_type === CollectionType.builtIn
-      ? buildInTools
-      : provider_type === CollectionType.custom
-        ? customTools
-        : workflowTools;
-  const currCollection = currentTools.find((item) =>
-    canFindTool(item.id, provider_id)
-  );
-  const currTool = currCollection?.tools.find(
-    (tool) => tool.name === tool_name
-  );
-  const formSchemas = currTool
-    ? toolParametersToFormSchemas(currTool.parameters)
-    : [];
-  const toolInputVarSchema = formSchemas.filter(
-    (item: any) => item.form === 'llm'
-  );
-  const toolSettingSchema = formSchemas.filter(
-    (item: any) => item.form !== 'llm'
-  );
-
-  return {
-    toolInputsSchema: (() => {
-      const formInputs: InputVar[] = [];
-      toolInputVarSchema.forEach((item: any) => {
-        formInputs.push({
-          label: item.label[language] || item.label.en_US,
-          variable: item.variable,
-          type: item.type,
-          required: item.required
-        });
-      });
-      return formInputs;
-    })(),
-    notAuthed:
-      isBuiltIn &&
-      !!currCollection?.allow_delete &&
-      !currCollection?.is_team_authorization,
-    toolSettingSchema,
-    language
   };
 };
 
@@ -879,7 +486,7 @@ export const getParallelInfo = (
     startNode = nodes.find(
       (node) =>
         node.id ===
-        (parentNode.data as IterationNodeType | LoopNodeType).start_node_id
+        (parentNode.data as any).start_node_id
     );
   } else {
     startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
@@ -1029,15 +636,6 @@ export const getParallelInfo = (
   };
 };
 
-export const hasErrorHandleNode = (nodeType?: BlockEnum) => {
-  return (
-    nodeType === BlockEnum.LLM ||
-    nodeType === BlockEnum.Tool ||
-    nodeType === BlockEnum.HttpRequest ||
-    nodeType === BlockEnum.Code
-  );
-};
-
 export const getEdgeColor = (
   nodeRunningStatus?: NodeRunningStatus,
   isFailBranch?: boolean
@@ -1058,26 +656,11 @@ export const getEdgeColor = (
   }
 
   return 'var(--color-workflow-link-line-normal)';
-  // return 'var(--color-workflow-link-line-handle)';
 };
 
-export const isExceptionVariable = (variable: string, nodeType?: BlockEnum) => {
-  if (
-    (variable === 'error_message' || variable === 'error_type') &&
-    hasErrorHandleNode(nodeType)
-  )
-    return true;
+export const isExceptionVariable = () => {
 
   return false;
-};
-
-export const hasRetryNode = (nodeType?: BlockEnum) => {
-  return (
-    nodeType === BlockEnum.LLM ||
-    nodeType === BlockEnum.Tool ||
-    nodeType === BlockEnum.HttpRequest ||
-    nodeType === BlockEnum.Code
-  );
 };
 
 export const MAX_NODES_NUM = 16;

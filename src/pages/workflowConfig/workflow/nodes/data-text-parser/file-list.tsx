@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import { Table, Input } from '@arco-design/web-react';
 import { useNodes, type Node } from 'reactflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
 import { getLoadTaskFiles } from '@/api/loadApi';
@@ -42,8 +41,18 @@ function FileList({
     total: 0
   });
   const [searchers, setSearchers] = useState<Record<string, any>>({});
-
+  const [isCleanFileName, setIsCleanFileName] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const filterConfirmRef = useRef<(() => void) | null>(null);
+
+  // 点击清除按钮后触发confirm方法
+  useEffect(() => {
+    if (isCleanFileName && filterConfirmRef.current) {
+      filterConfirmRef.current();
+      setIsCleanFileName(false);
+    }
+  }, [isCleanFileName]);
+
   const columns: any[] = [
     {
       title: '文件名',
@@ -51,10 +60,12 @@ function FileList({
       width: 170,
       filterIcon: <IconSearch />,
       filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
+        filterConfirmRef.current = confirm;
         return (
           <div className="arco-table-custom-filter">
             <Input.Search
               ref={inputRef}
+              allowClear
               placeholder="输入文件名搜索"
               value={filterKeys[0] || ''}
               onChange={(value) => {
@@ -62,6 +73,10 @@ function FileList({
               }}
               onSearch={() => {
                 confirm();
+              }}
+              onClear={() => {
+                setFilterKeys([]);
+                setIsCleanFileName(true);
               }}
             />
           </div>
@@ -74,7 +89,7 @@ function FileList({
           setTimeout(() => inputRef.current?.focus(), 150);
         }
       },
-      render(col, record) {
+      render(col) {
         return (
           <>
             <EllipsisPopover value={col} isEdit={false} preferTypography />
@@ -94,7 +109,7 @@ function FileList({
     {
       title: '文件大小',
       dataIndex: 'file_size',
-      render(col, record) {
+      render(col) {
         return <>{formatFileSize(+col)}</>;
       }
     },
@@ -219,7 +234,7 @@ function FileList({
       rowSelection={{
         selectedRowKeys,
         checkAll: !readOnly,
-        checkboxProps: (record) => {
+        checkboxProps: () => {
           return {
             disabled: readOnly
           };

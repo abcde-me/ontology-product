@@ -1,0 +1,18 @@
+.sql-detail-code-mirror {
+  font-size: 14px;
+
+  :global(.cm-line) {
+    line-height: 24px;
+  }
+
+  :global(.cm-activeLine),
+  :global(.cm-activeLineGutter) {
+    background-color: unset;
+  }
+
+  :global(.cm-gutters) {
+    border: none;
+    line-height: 24px;
+    background-color: unset;
+  }
+}

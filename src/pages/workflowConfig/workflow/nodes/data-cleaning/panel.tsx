@@ -1,22 +1,16 @@
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import useConfig from './use-config';
 import type { CodeNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import {
   Form,
-  Input,
   Select,
   Checkbox,
   Switch,
   InputNumber,
   Radio
-  // Table,
-  // Space,
-  // Slider,
-  // Button
 } from '@arco-design/web-react';
-import { cloneDeep } from 'lodash-es';
 import {
   dataStandardizationBefore,
   dataStandardizationAfter,
@@ -24,12 +18,6 @@ import {
   dataScreeningBefore,
   dataSpecialBefore,
   dataSpecialAfter,
-  dataSpecialCharactersAfter,
-  dataSpecialCharactersBefore,
-  // dataDeduplicateBefore,
-  // dataDeduplicateAfter,
-  // dataFuzzyDeduplicateBefore,
-  // dataFuzzyDeduplicateAfter,
   dataDetoxificationAfter,
   dataDetoxificationBefore,
   dataImputationBefore,
@@ -92,7 +80,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           mg_duplicate: inputs?.mg_duplicate_checkbox,
-          mg_duplicate_ngram: inputs?.mg_duplicate_ngram
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
@@ -466,7 +454,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </div>
               <FormItem
                 label={null}
-                field="ngram_threshold"
+                field="mg_duplicate_ngram"
                 labelAlign="left"
                 disabled={
                   form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'

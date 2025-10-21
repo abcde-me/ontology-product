@@ -65,17 +65,8 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   ]);
   // 选中的标签类型
   const [selectedSubstanceValue, setSelectedSubstanceValue] = useState(1);
-  const [filterArrState, setFilterArrState] = useState<
-    Array<{
-      label_name_cn: string;
-    }>
-  >([]);
   // 处理基本字段变更
   const handleFieldChange = (index, field, value) => {
-    const filterArr = formText
-      .getFieldsValue()
-      ?.entityRelations?.filter((item, i) => i !== index);
-    setFilterArrState(filterArr);
     const newData = [...entityRelations];
     newData[index][field] = value;
     setEntityRelations(newData);
@@ -85,7 +76,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const handleRelationFieldChange = (index, field, value) => {
     const newData: any = [...relationRelations];
     const currentRelation = newData[index];
-    const oldValue = currentRelation[field];
     // 更新当前字段值
     newData[index][field] = value;
     // 如果是起始标签变化，需要检查并清理目标标签中可能存在的相同选项
@@ -138,7 +128,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       setEntityRelations(getDetailObj?.labels);
       setRelationRelations(getDetailObj?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.labels?.forEach((item, index) => {
+      getDetailObj?.labels?.forEach((item) => {
         formText.setFieldValue(
           `label_name_en${item.order_num}`,
           item.label_name_en
@@ -148,7 +138,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           item.label_name_cn
         );
       });
-      getDetailObj?.entity_relations?.forEach((item, index) => {
+      getDetailObj?.entity_relations?.forEach((item) => {
         formLabel.setFieldValue(
           `relation_name_en${item.order_num}`,
           item.relation_name_en
@@ -286,7 +276,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       validator: (value, callback) => {
                         // 1. 判断同组内不能为空
                         if (!value || value.trim() === '') {
-                          callback('请输入属性名称');
+                          callback('请输入展示名称');
                         } else {
                           const trimmedValue = value.toString().trim();
                           // 2. 判断同组内不能有重复内容
@@ -301,7 +291,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           );
 
                           if (hasDuplicate) {
-                            callback('属性名称不能重复');
+                            callback('展示名称不能重复');
                           } else {
                             callback();
                           }
@@ -315,9 +305,36 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     style={{ width: 250 }}
                     value={item.label_name_cn}
                     onChange={(value) => {
-                      // 保存当前项的order_num用于精准匹配
-                      const currentOrderNum = item.order_num;
                       handleFieldChange(index, 'label_name_cn', value);
+                    }}
+                    onFocus={(e: any) => {
+                      // 从 entityRelations 中获取最新的值
+                      const currentItem = entityRelations[index];
+                      // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
+                      if (
+                        !currentItem.label_name_cn?.trim() &&
+                        currentItem.label_name_en?.trim()
+                      ) {
+                        // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
+                        const fieldName = `label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`;
+                        // 更新数据状态
+                        handleFieldChange(
+                          index,
+                          'label_name_cn',
+                          currentItem.label_name_en
+                        );
+                        // 更新表单字段
+                        formText.setFieldValue(
+                          fieldName,
+                          currentItem.label_name_en
+                        );
+                        // 使用 setTimeout 确保值更新后再选中
+                        setTimeout(() => {
+                          e.target.select();
+                        }, 0);
+                      } else {
+                        e.target.select();
+                      }
                     }}
                   />
                 </FormItem>
@@ -334,7 +351,22 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         handleFieldChange(index, 'label_colour', value);
                       }}
                     />
-                    <IconDown className="color-icon" />
+                    <IconDown
+                      className="color-icon"
+                      onClick={(e) => {
+                        if (type !== 'detail') {
+                          e.stopPropagation();
+                          const trigger =
+                            e.currentTarget.parentElement?.querySelector(
+                              '.arco-color-picker-preview'
+                            ) as HTMLElement;
+                          trigger?.click();
+                        }
+                      }}
+                      style={{
+                        cursor: type === 'detail' ? 'not-allowed' : 'pointer'
+                      }}
+                    />
                   </div>
                 </FormItem>
                 <FormItem
@@ -392,7 +424,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
             <Form
               form={formLabel}
               disabled={type === 'detail'}
-              onValuesChange={(_, val) => {}}
+              onValuesChange={() => {}}
               layout="inline"
               labelAlign="right"
               labelCol={{ flex: 'none' }}
@@ -509,7 +541,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         />
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
-                        {relationRelations?.length > 1 && (
+                        {relationRelations?.length > 0 && (
                           <Tooltip content={type === 'detail' ? '' : '删除'}>
                             <IconDelete
                               fontSize={18}
@@ -624,7 +656,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                             >
                               {entityRelations &&
                                 entityRelations?.length > 0 &&
-                                entityRelations?.map((option, index) => {
+                                entityRelations?.map((option) => {
                                   if (!option?.label_name_en) {
                                     return null;
                                   }

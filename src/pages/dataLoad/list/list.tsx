@@ -4,13 +4,11 @@ import {
   Message,
   Modal,
   Pagination,
-  Popconfirm,
-  Popover,
   Table,
-  Tooltip
+  Space
 } from '@arco-design/web-react';
-import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
-import React, { useEffect, useMemo, useState } from 'react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
@@ -19,7 +17,6 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
@@ -187,23 +184,13 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
-      // className: 'hover-change',
       width: 200,
       ellipsis: true,
       render: (_, item) => {
         return (
           <div>
             {item.data_path_name !== '' ? (
-              <EllipsisPopoverCom
-                value={item.data_path_name}
-                isEdit={false}
-                // isLink
-                // handleLink={() => {
-                //   history.push(
-                //     `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-                //   );
-                // }}
-              />
+              <EllipsisPopoverCom value={item.data_path_name} isEdit={false} />
             ) : (
               '-'
             )}
@@ -222,64 +209,64 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: () => {} // 排序
     },
     {
       title: '最后运行时间',
       dataIndex: 'last_run_time',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: () => {} // 排序
     },
     {
       title: '操作',
       fixed: 'right',
       width: 105,
       render: (_, item) => {
-        const perms = item?.perms || [];
-        const config = [] as any;
-        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
-          config.push({
-            label: '详情',
-            onClick: () => {
-              gotoDetail(item.task_id);
-            }
-          });
-        }
-        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
-          config.push({
-            label: '删除',
-            onClick: () => {
-              deleteLoad(item.task_id, item.name);
-            }
-          });
-        }
+        // const perms = item?.perms || [];
+        // const config = [] as any;
+        // if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
+        //   config.push({
+        //     label: '详情',
+        //     onClick: () => {
+        //       gotoDetail(item.task_id);
+        //     }
+        //   });
+        // }
+        // if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
+        //   config.push({
+        //     label: '删除',
+        //     onClick: () => {
+        //       deleteLoad(item.task_id, item.name);
+        //     }
+        //   });
+        // }
         return (
-          <OperationColumn
-            row={item}
-            config={config}
-            index={0}
-            extendFont="操作"
-          />
+          <Space>
+            <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_GET}>
+              <Button type="text" onClick={() => gotoDetail(item.task_id)}>
+                详情
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_DETELE}>
+              <Button
+                type="text"
+                onClick={() => deleteLoad(item.task_id, item.name)}
+              >
+                删除
+              </Button>
+            </PermissionWrapper>
+          </Space>
+          // <OperationColumn
+          //   row={item}
+          //   config={config}
+          //   index={0}
+          //   extendFont="操作"
+          // />
         );
       }
     }
   ] as any;
-  const [data, setData] = useState<ITableData[]>([
-    // {
-    //   task_id: '1',
-    //   connector_id: '1',
-    //   connector_name: '中科院大数据库任务1',
-    //   name: '1234',
-    //   source_type: 'hdfs',
-    //   load_type: 'once',
-    //   status: 'succeed',
-    //   data_path_id: '2',
-    //   data_path_name: '1234',
-    //   creator: '111',
-    //   created_at: '1234',
-    //   last_run_time: '1234'
-    // }
-  ]);
+  const [data, setData] = useState<ITableData[]>([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -322,7 +309,6 @@ export default function DataLoad() {
         ...loadSiftObject
       });
       if (res.message == 'ok') {
-        console.log(res.data.items);
         setData(res.data.items);
         setLoadTotal(res.data.total);
       }
@@ -333,9 +319,6 @@ export default function DataLoad() {
     }
   };
   const loadSiftHan = (sorter, filters) => {
-    console.log(filters);
-    console.log(sorter);
-
     const newSiftObj = {
       status: filters.status == undefined ? [] : filters.status,
       load_type: filters.load_type == undefined ? [] : filters.load_type,
@@ -480,8 +463,12 @@ export default function DataLoad() {
         pagination={false}
         rowKey="task_id"
         border={false}
+        // scroll={{
+        //   x: true
+        // }}
         scroll={{
-          x: true
+          x: 1600,
+          y: 400
         }}
         onChange={(pagination, filters, sorter) => {
           loadSiftHan(filters, sorter);

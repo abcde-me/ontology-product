@@ -11,8 +11,6 @@ import {
   IconDown,
   IconUp,
   IconLoading,
-  IconCheckCircle,
-  IconCloseCircle,
   IconCopy
 } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
@@ -20,7 +18,6 @@ import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/pythonApi';
 import './RunningInfoPanel.scss';
-import { formatTime } from '@/utils/format';
 import timeFormattig from '@/utils/timeFormatting';
 
 const { Item: CollapseItem } = Collapse;
@@ -144,9 +141,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         icon={<IconCopy />}
         onClick={() => handleCopyContent(content)}
         className="copy-button"
-        title="复制代码"
       >
-        复制代码
+        复制
       </Button>
     );
 

@@ -31,18 +31,6 @@ export default function AutoDefine(props) {
   useEffect(() => {
     getTypes(dataList);
   }, [dataList]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-
-  const handlePageChange = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  };
-
-  const handlePageSizeChange = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  };
 
   const columns = [
     {
@@ -65,7 +53,7 @@ export default function AutoDefine(props) {
                 setFilterKeys(value ? [value] : []);
                 if (!value) {
                   setNameFilter('');
-                  if (confirm) confirm();
+                  // if (confirm) confirm();
                 }
               }}
               onSearch={(val: string) => {

@@ -7,7 +7,6 @@ import {
 } from '@/pages/workflowConfig/workflow/blocks';
 import TextPlan from './textDefault';
 
-const i18nPrefix = 'workflow.errorMsg';
 
 const nodeDefault: NodeDefault<CodeNodeType> = {
   defaultValue: {
@@ -33,8 +32,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-          (type) => type !== BlockEnum.End
-        );
+        (type) => type !== BlockEnum.End
+      );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -43,9 +42,9 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       : ALL_COMPLETION_AVAILABLE_BLOCKS;
     return nodes;
   },
-  checkValid(payload: CodeNodeType, t: any) {
+  checkValid(payload: CodeNodeType) {
     let errorMessages = '';
-    const { enha_modle_id, app_scenarios, modelList } = payload;
+    const { enha_modle_id, app_scenarios } = payload;
     const {
       enhanced_proportion,
       sample_num,

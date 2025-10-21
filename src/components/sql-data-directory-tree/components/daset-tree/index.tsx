@@ -1,15 +1,16 @@
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { DatasetListItem } from '@/types/datasetManagement';
 import { formatFileSize } from '@/utils/format';
-import { Button, Empty, Input, Tree, Spin } from '@arco-design/web-react';
+import { Button, Empty, Input, Spin, Tree } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconCaretDown,
   IconCaretRight
 } from '@arco-design/web-react/icon';
+import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { useDatasetTree } from '../../hooks/useDatasetTree';
-import './index.scss';
+import styles from './index.module.scss';
 
 interface DataSetTreeProps {
   isEditorFocused?: boolean;
@@ -83,20 +84,20 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
   );
 
   return (
-    <div className="sql-dataset-tree">
+    <div className={styles['sql-dataset-tree']}>
       {/* 第一部分：标题导航 */}
-      <div className="sql-dataset-tree__header">
-        <div className="sql-dataset-tree__header-left">
+      <div className={styles['sql-dataset-tree__header']}>
+        <div className={styles['sql-dataset-tree__header-left']}>
           <IconArrowLeft
-            className="sql-dataset-tree__back-icon"
+            className={styles['sql-dataset-tree__back-icon']}
             onClick={handleBack}
           />
-          <span className="sql-dataset-tree__title">数据集</span>
+          <span className={styles['sql-dataset-tree__title']}>数据集</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className="sql-dataset-tree__search">
+      <div className={styles['sql-dataset-tree__search']}>
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -106,13 +107,15 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className="sql-dataset-tree__search-input"
+          className={styles['sql-dataset-tree__search-input']}
         />
       </div>
 
       {/* 第三部分：列表 */}
       <div
-        className={`sql-dataset-tree__content ${treeDataLoading ? 'sql-dataset-tree__content--loading' : ''}`}
+        className={classNames(styles['sql-dataset-tree__content'], {
+          [styles['sql-dataset-tree__content--loading']]: treeDataLoading
+        })}
       >
         {treeDataLoading ? (
           <div className="mt-[110px] flex flex-col items-center">
@@ -127,7 +130,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             blockNode
             treeData={treeData}
             expandedKeys={expandedKeys}
-            className="sql-dataset-tree__content-tree"
+            className={styles['sql-dataset-tree__content-tree']}
             onExpand={setExpandedKeys}
             icons={(props) => ({
               switcherIcon:
@@ -139,10 +142,10 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
               const isDataset = nodeData?.type === 'dataset';
 
               return (
-                <div className="sql-dataset-tree__node">
-                  <div className="sql-dataset-tree__node-info">
+                <div className={styles['sql-dataset-tree__node']}>
+                  <div className={styles['sql-dataset-tree__node-info']}>
                     <div
-                      className={`sql-dataset-tree__node-title sql-dataset-tree__node-title-${nodeData?.type}`}
+                      className={`${styles['sql-dataset-tree__node-title']} ${styles[`sql-dataset-tree__node-title-${nodeData?.type}`]}`}
                     >
                       <EllipsisPopover
                         value={highlightSearchKeyword(
@@ -152,12 +155,12 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                       />
                     </div>
                     {isDataset && (
-                      <div className="sql-dataset-tree__node-size">
+                      <div className={styles['sql-dataset-tree__node-size']}>
                         {formatFileSize(Number(nodeData?.latest_size ?? 0))}
                       </div>
                     )}
                   </div>
-                  <div className="sql-dataset-tree__node-actions">
+                  <div className={styles['sql-dataset-tree__node-actions']}>
                     {isDataset && (
                       <Button
                         style={{
@@ -166,7 +169,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                           padding: 0
                         }}
                         type="text"
-                        className="sql-dataset-tree__detail-btn"
+                        className={styles['sql-dataset-tree__detail-btn']}
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
@@ -174,7 +177,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                     )}
                     <Button
                       type="outline"
-                      className="sql-dataset-tree__insert-btn"
+                      className={styles['sql-dataset-tree__insert-btn']}
                       onClick={(e) => handleInsertClick(e, nodeData)}
                       onMouseDown={(e) => {
                         // 阻止按钮获得焦点，保持编辑器焦点

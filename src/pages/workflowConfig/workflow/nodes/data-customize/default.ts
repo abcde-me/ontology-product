@@ -6,8 +6,6 @@ import {
   ALL_COMPLETION_AVAILABLE_BLOCKS
 } from '@/pages/workflowConfig/workflow/blocks';
 
-const i18nPrefix = 'workflow.errorMsg';
-
 const nodeDefault: NodeDefault<CustomNodeType> = {
   defaultValue: {
     script_content: '',
@@ -20,8 +18,8 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-          (type) => type !== BlockEnum.End
-        );
+        (type) => type !== BlockEnum.End
+      );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -30,7 +28,7 @@ const nodeDefault: NodeDefault<CustomNodeType> = {
       : ALL_COMPLETION_AVAILABLE_BLOCKS;
     return nodes;
   },
-  checkValid(payload: CustomNodeType, t: any) {
+  checkValid(payload: CustomNodeType) {
     let errorMessages = '';
     const { script_content, custom_run_status } = payload;
 

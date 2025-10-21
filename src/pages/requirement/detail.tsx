@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Breadcrumb,
   Button,
@@ -20,12 +20,10 @@ import {
   IconDelete,
   IconDown,
   IconPlus,
-  IconQuestionCircle,
-  IconSwap
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
-import { useUserInfo } from '@/store/userInfoStore';
 import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
 import { DepartmentModal } from './components/DepartmentModal';
 import { IndividualModal } from './components/IndividualModal';
@@ -39,7 +37,7 @@ import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty, min } from 'lodash';
+import _, { omitBy, isArray, isEmpty } from 'lodash';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -51,6 +49,7 @@ import {
 } from './type';
 
 import './detail.scss';
+import { useUserInfo } from '@/store/userInfoStore';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -90,6 +89,7 @@ export default function RequirementDetail() {
   const type = useParams('type');
   const requirementId = useParams('id') as string;
   const history = useHistory();
+  const userInfo = useUserInfo();
   const [selectedRadio, setSelectedRadio] = useState('');
   const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
   const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
@@ -131,7 +131,14 @@ export default function RequirementDetail() {
     ];
   };
 
-  // 初始化状态
+  // 创建需求，角色=开发者、用户时，禁止勾选 个人
+  // 1030 需要重新对接, 用户权限类型、权限变更
+  const isShowPersonal = useMemo(() => {
+    return (
+      !['Developer', 'User'].includes(userInfo?.role?.[0]?.name || '') &&
+      type === 'create'
+    );
+  }, [userInfo?.role, type]);
   const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
@@ -156,32 +163,149 @@ export default function RequirementDetail() {
   // 添加新的useEffect来同步模板更新到标签
   useEffect(() => {
     // 当templateData更新时，检查并更新所有使用了该模板的标签属性组
-    const updatedDatalist = _.cloneDeep(templateData);
-    // 遍历每个标签
-    // 遍历标签中的每个属性组
-    updatedDatalist.forEach((attrGroup: any, groupIndex: any) => {
-      form2.setFieldValue(
-        `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
-        attrGroup.attribute_group_name
-      );
+    if (
+      templateData &&
+      templateData.length > 0 &&
+      datalist &&
+      datalist.length > 0
+    ) {
+      // 使用函数式状态更新，一次性更新所有数据
+      setDatalist((prevDatalist) => {
+        const newDatalist = _.cloneDeep(prevDatalist);
+        let hasChanges = false;
 
-      // 如果新组有属性，也需要设置这些属性的表单字段
-      if (
-        attrGroup.label_info_attribute &&
-        attrGroup.label_info_attribute.length > 0
-      ) {
-        attrGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-          form2.setFieldValue(
-            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
-            attribute.attribute_name_cn
-          );
-          form2.setFieldValue(
-            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
-            attribute.attribute_name_en
-          );
+        // 遍历datalist中的每个标签
+        newDatalist.forEach((labelItem, labelIndex) => {
+          if (
+            labelItem.label_info_attribute_groups &&
+            labelItem.label_info_attribute_groups.length > 0
+          ) {
+            // 遍历每个标签的属性组
+            labelItem.label_info_attribute_groups.forEach(
+              (attrGroup, groupIndex) => {
+                // 通过多种方式查找对应的模板
+                let matchingTemplate = templateData.find(
+                  (template) => template.attribute_id === attrGroup.attribute_id
+                );
+
+                // 如果通过ID没找到，尝试通过名称匹配
+                if (!matchingTemplate) {
+                  matchingTemplate = templateData.find(
+                    (template) =>
+                      template.attribute_group_name ===
+                      attrGroup.attribute_group_name
+                  );
+                }
+
+                // 如果还没找到，尝试通过属性内容匹配（用于复制的标签）
+                if (
+                  !matchingTemplate &&
+                  attrGroup.label_info_attribute &&
+                  attrGroup.label_info_attribute.length > 0
+                ) {
+                  matchingTemplate = templateData.find((template) => {
+                    if (
+                      !template.label_info_attribute ||
+                      template.label_info_attribute.length !==
+                        attrGroup.label_info_attribute.length
+                    ) {
+                      return false;
+                    }
+                    // 比较属性的中文名和英文名是否匹配
+                    return template.label_info_attribute.every(
+                      (tplAttr, idx) => {
+                        const groupAttr = attrGroup.label_info_attribute[idx];
+                        return (
+                          tplAttr.attribute_name_cn ===
+                            groupAttr.attribute_name_cn &&
+                          tplAttr.attribute_name_en ===
+                            groupAttr.attribute_name_en
+                        );
+                      }
+                    );
+                  });
+                }
+
+                if (matchingTemplate) {
+                  hasChanges = true;
+
+                  // 更新属性组名称
+                  attrGroup.attribute_group_name =
+                    matchingTemplate.attribute_group_name;
+                  attrGroup.attribute_group_class =
+                    matchingTemplate.attribute_group_class;
+                  attrGroup.attribute_group_type =
+                    matchingTemplate.attribute_group_type;
+
+                  // 更新属性数据，保留原有的label_info_id
+                  if (
+                    Array.isArray(matchingTemplate.label_info_attribute) &&
+                    Array.isArray(attrGroup.label_info_attribute)
+                  ) {
+                    attrGroup.label_info_attribute =
+                      matchingTemplate.label_info_attribute.map(
+                        (tplAttr, idx) => {
+                          const existAttr = attrGroup.label_info_attribute[idx];
+                          return {
+                            ...tplAttr,
+                            label_info_id:
+                              existAttr?.label_info_id || tplAttr.label_info_id,
+                            input_type:
+                              tplAttr.input_type ?? existAttr?.input_type ?? 1
+                          };
+                        }
+                      );
+                  }
+
+                  // 更新表单字段
+                  form2.setFieldValue(
+                    `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
+                    attrGroup.attribute_group_name
+                  );
+
+                  // 更新属性的表单字段
+                  if (
+                    attrGroup.label_info_attribute &&
+                    attrGroup.label_info_attribute.length > 0
+                  ) {
+                    attrGroup.label_info_attribute.forEach(
+                      (attribute, attrIndex) => {
+                        const fieldId = attribute.label_info_id;
+
+                        // 更新两种可能的字段命名格式
+                        form2.setFieldValue(
+                          `label_info_attribute_groups_${fieldId}_attribute_name_cn`,
+                          attribute.attribute_name_cn
+                        );
+                        form2.setFieldValue(
+                          `label_info_attribute_groups_${fieldId}_attribute_name_en`,
+                          attribute.attribute_name_en
+                        );
+                        form2.setFieldValue(
+                          `attribute_name_cn${fieldId}`,
+                          attribute.attribute_name_cn
+                        );
+                        form2.setFieldValue(
+                          `attribute_name_en${fieldId}`,
+                          attribute.attribute_name_en
+                        );
+                        form2.setFieldValue(
+                          `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`,
+                          attribute.input_type
+                        );
+                      }
+                    );
+                  }
+                }
+              }
+            );
+          }
         });
-      }
-    });
+
+        // 只有在有变化时才返回新数据
+        return hasChanges ? newDatalist : prevDatalist;
+      });
+    }
   }, [templateData]);
   // 基础配置
 
@@ -335,24 +459,20 @@ export default function RequirementDetail() {
    * @param {number} labelIndex - 标签索引
    * @param {number} groupIndex - 要删除的属性组索引
    */
-  const deleteAttributeGroup = (attribute_id, groupIndex) => {
+  const deleteAttributeGroup = (labelIndex, groupIndex) => {
     setDatalist((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
       const newData = _.cloneDeep(prevData);
 
-      // 遍历每个标签项
-      newData.forEach((label, labelIndex) => {
-        // 查找当前标签中是否包含要删除的属性组
-        const attributeGroups = label.label_info_attribute_groups || [];
-        const groupToDeleteIndex = attributeGroups.findIndex(
-          (group) => group && group.attribute_id === attribute_id
-        );
-        // 如果找到匹配的属性组，则删除它
-        if (groupToDeleteIndex !== -1) {
-          // 从数组中删除该属性组
-          attributeGroups.splice(groupToDeleteIndex, 1);
-        }
-      });
+      // 只在指定的标签中删除指定的属性组
+      if (
+        newData[labelIndex] &&
+        newData[labelIndex].label_info_attribute_groups
+      ) {
+        const attributeGroups = newData[labelIndex].label_info_attribute_groups;
+        // 删除指定索引的属性组
+        attributeGroups.splice(groupIndex, 1);
+      }
 
       return newData;
     });
@@ -443,6 +563,9 @@ export default function RequirementDetail() {
       // 生成全新的唯一ID
       lastLabel.label_id = uuidV4();
       lastLabel.label_colour = getRandomHexColorStrict();
+      // 清空标签名称和展示名称，让用户重新输入
+      lastLabel.label_name_en = '';
+      lastLabel.label_name_cn = '';
 
       // 确保完整保留所有属性组和属性
       if (
@@ -625,15 +748,20 @@ export default function RequirementDetail() {
     return Message.error('请输入必填信息');
   };
   const stepNext = async () => {
-    const { formText, formLabel } = TextEntityDataContent;
+    const { formText, formLabel, entityRelations, relationRelations } =
+      TextEntityDataContent;
     const result = await Promise.all([
       annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
         ? formText
             .validate()
             .then((val) => {
-              return true;
+              const entityRelationsFlag = entityRelations.every(
+                (item) =>
+                  item?.label_name_en !== '' && item?.label_name_cn !== ''
+              );
+              return entityRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -641,19 +769,27 @@ export default function RequirementDetail() {
         ? formLabel
             .validate()
             .then((val) => {
-              return true;
+              const relationRelationsFlag = relationRelations.every(
+                (item) =>
+                  item?.relation_name_en !== '' &&
+                  item?.relation_name_cn !== '' &&
+                  (item?.start_entity_labels || []).length > 0 &&
+                  (item?.target_entity_labels || []).length > 0
+              );
+
+              return relationRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
         ? formType
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -670,7 +806,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (selectedData?.length <= 0) {
             setIsShowDataErrorInfo(true);
           }
@@ -682,16 +818,16 @@ export default function RequirementDetail() {
         }),
       form2
         .validate()
-        .then((val) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       form2Child
         .validate()
-        .then((value) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       // 任务验证
       form3
         .validate()
@@ -703,7 +839,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (taskAssignData?.length === 0) {
             setIsShowTypeErrorInfo(true);
             return;
@@ -750,7 +886,7 @@ export default function RequirementDetail() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-    const newSetLabels = datalist.map((item, index) => {
+    const newSetLabels = datalist.map((item) => {
       return {
         ...item,
         order_num: datalist?.length + 1,
@@ -866,7 +1002,7 @@ export default function RequirementDetail() {
               );
               item?.label_info_attribute_groups?.map((group) => {
                 form2.setFieldValue(
-                  `label_info_attribute_groups_${item?.id}_attribute_group_name`,
+                  `label_info_attribute_groups_${group?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
@@ -1157,9 +1293,9 @@ export default function RequirementDetail() {
                                               value.trim() !== ''
                                           );
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入标签名称');
                                           } else if (isDuplicate) {
-                                            callback('标注名称不能重复');
+                                            callback('标签名称不能重复');
                                           } else {
                                             callback();
                                           }
@@ -1244,6 +1380,35 @@ export default function RequirementDetail() {
                                           val
                                         );
                                       }}
+                                      onFocus={(e: any) => {
+                                        // 从 datalist 中获取最新的值
+                                        const currentItem =
+                                          datalist[labelIndex];
+                                        // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
+                                        if (
+                                          !currentItem.label_name_cn?.trim() &&
+                                          currentItem.label_name_en?.trim()
+                                        ) {
+                                          // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
+                                          const fieldName = `label_name_cn_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          // 更新数据状态
+                                          updateNestedValue(
+                                            [labelIndex, 'label_name_cn'],
+                                            currentItem.label_name_en
+                                          );
+                                          // 更新表单字段，使用 currentItem 的值
+                                          form2.setFieldValue(
+                                            fieldName,
+                                            currentItem.label_name_en
+                                          );
+                                          // 使用 setTimeout 确保值更新后再选中
+                                          setTimeout(() => {
+                                            e.target.select();
+                                          }, 0);
+                                        } else {
+                                          e.target.select();
+                                        }
+                                      }}
                                       className="sortable-item-input"
                                       placeholder="展示在标注页面的名称"
                                       value={item.label_name_cn}
@@ -1323,7 +1488,25 @@ export default function RequirementDetail() {
                                         }}
                                         showPreset
                                       />
-                                      <IconDown className="color-icon" />
+                                      <IconDown
+                                        className="color-icon"
+                                        onClick={(e) => {
+                                          if (type !== 'detail') {
+                                            e.stopPropagation();
+                                            const trigger =
+                                              e.currentTarget.parentElement?.querySelector(
+                                                '.arco-color-picker-preview'
+                                              ) as HTMLElement;
+                                            trigger?.click();
+                                          }
+                                        }}
+                                        style={{
+                                          cursor:
+                                            type === 'detail'
+                                              ? 'not-allowed'
+                                              : 'pointer'
+                                        }}
+                                      />
                                     </div>
                                   </FormItem>
                                   <FormItem>
@@ -1353,7 +1536,7 @@ export default function RequirementDetail() {
                                         >
                                           <div className="attribute-group-content-item">
                                             <FormItem
-                                              field={`label_info_attribute_groups_${type === 'detail' ? item?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                              field={`label_info_attribute_groups_${type === 'detail' ? attrGroup?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                               disabled={
                                                 type === 'detail' ||
                                                 attrGroup?.isTemp === true
@@ -1600,7 +1783,7 @@ export default function RequirementDetail() {
                                                     }
                                                     if (type !== 'detail') {
                                                       deleteAttributeGroup(
-                                                        attrGroup.attribute_id,
+                                                        labelIndex,
                                                         groupIndex
                                                       );
                                                     }
@@ -2641,6 +2824,7 @@ export default function RequirementDetail() {
                     部门
                   </Radio>
                   <Radio
+                    disabled={!isShowPersonal}
                     style={{ display: 'flex', alignItems: 'center' }}
                     value={1}
                   >

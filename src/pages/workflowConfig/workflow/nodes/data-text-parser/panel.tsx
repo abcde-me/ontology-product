@@ -1,6 +1,5 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
 import useConfig from './use-config';
 import type { TextParserNodeType } from './types';
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
@@ -11,7 +10,6 @@ import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
 import { useUnmountedRef } from 'ahooks';
 
-const i18nPrefix = 'workflow.nodes.code';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -25,10 +23,6 @@ const segmentationOptions: any = [
 const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
 
-  const { t } = useTranslation('plugin__console-plugin-appforge');
-  // const [ocrModels, setOcrModels] = useState<Record<string, any>[]>([]);
-  // const [picModels, setPicModels] = useState<Record<string, any>[]>([]);
-  const [textEmbModels, setTextEmbModels] = useState<Record<string, any>[]>([]);
   const unmountedRef = useUnmountedRef();
   const textSlice = Form.useWatch('text_slice_rule', form);
 
@@ -49,7 +43,6 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
 
       // setOcrModels(ocrList);
       // setPicModels(picList);
-      setTextEmbModels(textList);
 
       // const defaultOcrId = ocrList[0]?.id || '';
       // const defaultPicId = picList[0]?.id || '';

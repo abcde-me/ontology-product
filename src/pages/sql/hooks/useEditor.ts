@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunningStatus } from '@/types/sqlApi';
@@ -54,6 +54,7 @@ export interface UseEditorReturn {
   currentFileId?: string;
   currentScriptId?: string;
   runError: string;
+  runWarning: string;
   resultLoading: boolean;
   lastScriptRunStatus: RunningStatus;
   // 表格数据处理
@@ -108,6 +109,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [size, setSize] = useState<string>('100');
   const [runLog, setRunLog] = useState<string>('');
   const [runError, setRunError] = useState<string>('');
+  const [runWarning, setRunWarning] = useState<string>('');
   const [resultLoading, setResultLoading] = useState(false);
   // 新增脚本最后执行结果
   const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
@@ -204,7 +206,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setRunDuration(Number(res.data?.run_duration));
         setRunStartTime(new Date(res.data?.run_end_time ?? ''));
       },
-      onError: (error) => {
+      onError: () => {
         updateRunStatus(RunningStatus.FAILED);
         cancelGetRunResultPolling();
         setRunResult([]);
@@ -254,7 +256,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setRunResult([]);
     setRunLog('');
     setRunError('');
-    setLastAutoSave('');
+    setRunWarning('');
+    // setLastAutoSave('');
     setLastScriptRunStatus(RunningStatus.IDLE);
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
@@ -365,9 +368,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setExecid('');
 
     try {
+      // 将上一次运行结果置为未运行， 重新获取结果
+      setLastScriptRunStatus(RunningStatus.IDLE);
       const res = await runSqlScript(currentFile?.scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
+        if (res.data?.warning_msg) {
+          setRunWarning(res.data.warning_msg);
+        }
       } else {
         setRunError(res.message);
         Message.error(res.message);
@@ -504,6 +512,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     currentFileId: currentFile?.fileId,
     currentScriptId: currentFile?.scriptId,
     runError,
+    runWarning,
     resultLoading,
     // 表格数据处理
     columns,

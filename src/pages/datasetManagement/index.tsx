@@ -145,7 +145,9 @@ const columns = (
   sortField: string,
   sortOrder: string,
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
-  handleRetry: (id: string | number, version_id: string) => void
+  handleRetry: (id: string | number, version_id: string) => void,
+  selectedScenarioFilters?: string[], //场景分类过滤
+  selectedSourceFilters?: string[] //来源过滤
 ) => [
   {
     title: '数据集名称',
@@ -201,9 +203,21 @@ const columns = (
     }
   },
   {
-    title: '标签',
-    dataIndex: 'tag_names',
+    title: '场景分类',
+    dataIndex: 'scenario_type',
     width: 120,
+    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
+    filteredValue: selectedScenarioFilters,
+    filterMultiple: true,
+    render: (src_model: string) => {
+      if (!src_model) return '-';
+      return src_model;
+    }
+  },
+  {
+    title: '数据集标签',
+    dataIndex: 'tag_names',
+    width: 150,
     filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
     filteredValue: selectedTagFilters,
     filterMultiple: true,
@@ -249,31 +263,31 @@ const columns = (
       );
     }
   },
+  // {
+  //   title: '版本',
+  //   dataIndex: 'latest_version',
+  //   width: 195,
+  //   render: (latest_version: string) => {
+  //     if (!latest_version) {
+  //       return '-';
+  //     }
+  //     return (
+  //       <div>
+  //         {/* <Tooltip content={latest_version}> */}
+  //         <div
+  //           style={{
+  //             whiteSpace: 'nowrap'
+  //           }}
+  //         >
+  //           {latest_version}
+  //         </div>
+  //         {/* </Tooltip> */}
+  //       </div>
+  //     );
+  //   }
+  // },
   {
-    title: '版本',
-    dataIndex: 'latest_version',
-    width: 195,
-    render: (latest_version: string) => {
-      if (!latest_version) {
-        return '-';
-      }
-      return (
-        <div>
-          {/* <Tooltip content={latest_version}> */}
-          <div
-            style={{
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {latest_version}
-          </div>
-          {/* </Tooltip> */}
-        </div>
-      );
-    }
-  },
-  {
-    title: '存储格式',
+    title: '格式类型',
     dataIndex: 'storage_type',
     width: 120,
     filterIcon: <IconFilter />,
@@ -298,6 +312,18 @@ const columns = (
         </div>
       );
     }
+  },
+  {
+    title: '来源',
+    dataIndex: 'source',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: '标注', value: 1 },
+      { text: '工作流', value: 2 }
+    ],
+    filteredValue: selectedSourceFilters,
+    filterMultiple: true
   },
   {
     title: '文件大小',
@@ -350,17 +376,19 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {perms?.includes(
-            DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-          ) &&
-            (status === datasetStatus.version_update_failed ? (
+
+          {status === datasetStatus.version_update_failed ? (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+            >
               <span
                 className={styles.retryText}
                 onClick={() => handleRetry(record.id, record.latest_version)}
               >
                 重试
               </span>
-            ) : null)}
+            </PermissionWrapper>
+          ) : null}
         </div>
       );
     }
@@ -405,44 +433,53 @@ const columns = (
       );
     }
   },
+  // {
+  //   title: '生成模型',
+  //   dataIndex: 'src_model',
+  //   filterIcon: <IconFilter />,
+  //   width: 130,
+  //   filters: (() => {
+  //     const modelSet = new Set<string>();
+  //     datasetList?.forEach((dataset) => {
+  //       if (dataset.src_model) {
+  //         modelSet.add(dataset.src_model);
+  //       }
+  //     });
+  //     return Array.from(modelSet).map((model) => ({
+  //       text: model,
+  //       value: model
+  //     }));
+  //   })(),
+  //   onFilter: (value: string, record: Dataset) => {
+  //     return record.src_model === value;
+  //   },
+  //   render: (src_model: string) => {
+  //     if (!src_model) return '-';
+  //     return (
+  //       // <Tag
+  //       //   className={styles.tagPurple}
+  //       //   style={{
+  //       //     display: '-webkit-box',
+  //       //     WebkitBoxOrient: 'vertical',
+  //       //     WebkitLineClamp: 2,
+  //       //     overflow: 'hidden',
+  //       //     textOverflow: 'ellipsis',
+  //       //     wordBreak: 'break-all'
+  //       //   }}
+  //       // >
+  //       //   <Tooltip content={src_model}>{src_model}</Tooltip>
+  //       // </Tag>
+  //       <EllipsisPopover value={src_model}></EllipsisPopover>
+  //     );
+  //   }
+  // },
   {
-    title: '生成模型',
-    dataIndex: 'src_model',
-    filterIcon: <IconFilter />,
-    width: 130,
-    filters: (() => {
-      const modelSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.src_model) {
-          modelSet.add(dataset.src_model);
-        }
-      });
-      return Array.from(modelSet).map((model) => ({
-        text: model,
-        value: model
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.src_model === value;
-    },
-    render: (src_model: string) => {
-      if (!src_model) return '-';
-      return (
-        // <Tag
-        //   className={styles.tagPurple}
-        //   style={{
-        //     display: '-webkit-box',
-        //     WebkitBoxOrient: 'vertical',
-        //     WebkitLineClamp: 2,
-        //     overflow: 'hidden',
-        //     textOverflow: 'ellipsis',
-        //     wordBreak: 'break-all'
-        //   }}
-        // >
-        //   <Tooltip content={src_model}>{src_model}</Tooltip>
-        // </Tag>
-        <EllipsisPopover value={src_model}></EllipsisPopover>
-      );
+    title: '数据目录',
+    dataIndex: 'directory',
+    width: 200,
+    render: (directory: string) => {
+      if (!directory) return '-';
+      return <EllipsisPopover value={directory}></EllipsisPopover>;
     }
   },
   {
@@ -522,8 +559,10 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
-            record.storage_type !== datasetStorageType.table && (
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
               <Button
                 type="text"
                 className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
@@ -538,8 +577,12 @@ const columns = (
               >
                 导出
               </Button>
-            )}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+            </PermissionWrapper>
+          )}
+
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
             <Button
               type="text"
               className={`${styles.actionButton} ${styles.delete}`}
@@ -553,7 +596,7 @@ const columns = (
             >
               删除
             </Button>
-          )}
+          </PermissionWrapper>
         </div>
       );
     }
@@ -756,7 +799,7 @@ const DatasetManagement: React.FC = () => {
 
   // 删除数据集的方法
   const deleteDatasetRecord = (record: Dataset) => {
-    deleteDataset(record)
+    deleteDataset({ id: record?.id })
       .then((res) => {
         fetchDatasetList();
         Message.success('删除成功');
@@ -1132,7 +1175,7 @@ const DatasetManagement: React.FC = () => {
             color: '#0F172A'
           }}
         >
-          数据集管理
+          数据集市
         </h1>
         {/* <div
           style={{

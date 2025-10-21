@@ -3,7 +3,6 @@ import {
   Modal,
   Button,
   Tree,
-  Form,
   Input,
   DatePicker,
   Table,
@@ -38,6 +37,9 @@ interface DataSourceModalProps {
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getDetailObj: any;
 }
+
+const InputSearch = Input.Search;
+
 const DataSourceModal: React.FC<DataSourceModalProps> = ({
   fileType,
   visible,
@@ -48,10 +50,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   initialSelectedData = [], // 接收初始数据
   getDetailObj
 }) => {
-  const FormItem = Form.Item;
-  const [form] = Form.useForm();
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -144,6 +145,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             : { title: item.name, key: item.id };
         });
         setTreeData(newTreeData);
+        setOriginalTreeData(newTreeData);
       });
     } catch (err) {}
   };
@@ -236,7 +238,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 100
     }
   ];
-  const searchData = (searchValue) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -253,14 +255,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       return result;
     };
 
-    return loop(treeData);
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
-    if (!searchValue || searchValue === '') {
-      setTreeData(treeData);
+    if (!searchValue) {
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
@@ -291,13 +293,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
+    if (type === 'detail') {
+      return;
+    }
     settableLoading(true);
     getTableData();
   }, [checkedKeys, current, pageSize]);
-  const [dateRange, setDateRange] = useState([]); // 存储选择的日期范围 [start, end]
   // 处理日期范围变化
   const handleDateChange = (value) => {
-    setDateRange(value);
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
       const [start, end] = value;
@@ -313,9 +316,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       // 清空日期选择时，恢复原始数据
       getTableData();
     }
-  };
-  const getTableSelectContent = () => {
-    onClose();
   };
 
   useEffect(() => {
@@ -352,7 +352,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       <div className="detail-modal-content">
         <div className="content-tree">
           <div className="search-input">
-            <Input
+            <InputSearch
               type="text"
               placeholder="请输入名称搜索"
               onChange={(value) => {
@@ -360,10 +360,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               }}
               allowClear={true}
               onClear={() => {
-                setSearchValue('');
-                getTreeDataList();
-              }}
-              onPressEnter={() => {
                 getTreeDataList();
               }}
             />
@@ -373,16 +369,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         <div className="content-table">
           <div className="content-table-form">
             <div className="tree-node-name">{treeNodeName}</div>
-            <div className="form-option">
-              <DatePicker.RangePicker
-                onChange={handleDateChange}
-                style={{ width: 350 }}
-                onClear={() => {
-                  setDateRange([]);
-                  getTableData();
-                }}
-              />
-            </div>
+            <DatePicker.RangePicker
+              onChange={handleDateChange}
+              style={{ width: 350 }}
+              onClear={() => {
+                // setDateRange([]);
+                getTableData();
+              }}
+            />
+            {/* <div className="form-option">
+            </div> */}
           </div>
           <Table
             ref={tableRef}

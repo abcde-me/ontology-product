@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Button,
   Tree,
-  Form,
   Input,
   Empty,
   Tooltip
@@ -18,7 +17,7 @@ interface DataSourceModalProps {
   getDetailObj: any;
   type: any;
 }
-
+const InputSearch = Input.Search;
 const DepartmentModal: React.FC<DataSourceModalProps> = ({
   visible,
   onClose,
@@ -27,9 +26,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   getDetailObj,
   type
 }) => {
-  const FormItem = Form.Item;
-  const [activeTab, setActiveTab] = useState('src');
+  const [activeTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
+  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [checkedKeysDetail, setCheckedKeysDetail] = useState<string[]>([]);
@@ -60,6 +59,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             };
           });
           setTreeData(newTreeData || []);
+          setOriginalTreeData(newTreeData || []);
         })
         .catch((err) => {
           console.error(err);
@@ -72,7 +72,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     getTreeData();
   }, [activeTab, visible]);
 
-  const searchData = (searchValue, treeData) => {
+  const searchData = (searchValue, originalTreeData) => {
     const loop = (data) => {
       const result: any = [];
       data.forEach((item) => {
@@ -88,42 +88,14 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       });
       return result;
     };
-    return loop(treeData);
-  };
-
-  /**
-   * 辅助函数：查找所有最深层的id
-   * @param {Array} array - 要搜索的数组
-   * @returns {Array} - 所有最深层的id数组
-   */
-  const collectAllLeafIds = (nodes) => {
-    const leafIds: string[] = [];
-
-    for (const node of nodes) {
-      // 检查是否有有效的子节点
-      const hasChildren =
-        node.children &&
-        Array.isArray(node.children) &&
-        node.children.length > 0;
-
-      if (hasChildren) {
-        // 有子节点，递归处理子节点
-        leafIds.push(...collectAllLeafIds(node.children));
-      } else {
-        // 没有子节点，是叶子节点，收集ID
-        leafIds.push(node.id);
-      }
-    }
-
-    return leafIds;
+    return loop(originalTreeData);
   };
 
   useEffect(() => {
     if (!searchValue) {
-      setTreeData(treeData);
+      setTreeData(originalTreeData);
     } else {
-      const result = searchData(searchValue, treeData);
-      console.log(2, result);
+      const result = searchData(searchValue, originalTreeData);
       setTreeData(result);
     }
   }, [searchValue]);
@@ -186,14 +158,11 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     >
       <div className="department-modal-content">
         <div className="department-modal-search">
-          <Input
+          <InputSearch
             type="text"
             allowClear
             placeholder="请输入名称搜索"
             onClear={() => {
-              getTreeData();
-            }}
-            onPressEnter={() => {
               getTreeData();
             }}
             onChange={(value) => {
@@ -233,8 +202,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
               );
             }}
             treeData={treeData}
-            onCheck={(key, val) => {
-              setCheckedKeys(key);
+            onCheck={(key) => {
               getChildTreeSelectData(key);
             }}
           />

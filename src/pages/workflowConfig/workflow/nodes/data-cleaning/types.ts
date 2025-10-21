@@ -1,9 +1,7 @@
 import type {
   CommonNodeType,
   VarType,
-  Variable
 } from '@/pages/workflowConfig/workflow/types';
-import exp from 'constants';
 
 export enum CodeLanguage {
   python3 = 'python3',
@@ -20,7 +18,7 @@ export type OutputVar = Record<
 >;
 
 export type CodeNodeType = CommonNodeType & {
-  variables: Variable[];
+  variables: any[];
   code_language: CodeLanguage;
   code: string;
   outputs: OutputVar;

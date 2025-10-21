@@ -2,7 +2,7 @@ import UAPI from '@/api';
 
 // 作业详情
 export async function getTaskDetail(task_id: string) {
-  return await UAPI.RES.taskDetail({ task_id }).get().inRegion().do();
+  return await UAPI.RES.taskDetail({}).post({ task_id }).inRegion().do();
 }
 
 // 作业详情节点
@@ -18,7 +18,7 @@ export async function getTaskDetailNode(params: {
   sort?: string;
   sort_by?: string;
 }) {
-  return await UAPI.RES.taskDetailNode({}).get(params).inRegion().do();
+  return await UAPI.RES.taskDetailNode({}).post(params).inRegion().do();
 }
 
 // 作业重跑

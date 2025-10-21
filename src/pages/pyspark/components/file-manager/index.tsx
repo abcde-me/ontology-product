@@ -1,6 +1,4 @@
 import React, { forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Typography } from '@arco-design/web-react';
-import { PythonListItem } from '@/types/pythonApi';
 import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
@@ -8,15 +6,9 @@ import DirectoryTree, {
 } from '@/components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
 
-const { Title } = Typography;
-
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
-  onFileOpen?: (
-    fileId: string,
-    fileName?: string,
-    perms?: Array<string>
-  ) => void;
+  onFileOpen?: (fileId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
@@ -43,9 +35,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     selectedKeys,
     currentFolderId,
     handleSearch,
-    handleNew,
     handleTreeSelect,
-    handleTreeExpand,
     handleCreate,
     handleRename,
     handleCopy,
@@ -82,7 +72,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   useImperativeHandle(
     directoryTreeRef,
     () => ({
-      startRootCreate: (isFolder = true) => {
+      startRootCreate: () => {
         // 这里可以调用 DirectoryTree 的 startRootCreate 方法
         // 由于我们使用的是 DirectoryTree 组件，这个方法会通过 ref 传递
       },

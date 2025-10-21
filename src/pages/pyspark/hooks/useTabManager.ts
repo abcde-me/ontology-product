@@ -40,7 +40,7 @@ export const useTabManager = (
 
   // 打开文件 - 只创建或切换到标签页，不请求文件内容
   const openFile = useCallback(
-    (fileId: string, fileName?: string, perms?: Array<string>) => {
+    (fileId: string, fileName?: string) => {
       const newTabKey = `file-${fileId}`;
       const existingTabIndex = fileState.fileTabs.findIndex(
         (tab) => tab.fileId === fileId
@@ -57,8 +57,7 @@ export const useTabManager = (
           title: fileName || `文件 ${fileId}`,
           content: '', // 初始内容为空，由 useEditor 负责加载
           fileId: fileId,
-          lastModified: new Date().toISOString(),
-          perms: perms
+          lastModified: new Date().toISOString()
         };
         updatedTabs = [...fileState.fileTabs, newTab];
       }
@@ -198,7 +197,7 @@ export const useTabManager = (
 
   // 从 FileManager 获取创建文件的函数
   const handleCreate = useCallback(
-    (finalName: string, node?: any): Promise<any> => {
+    (finalName: string): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           // 获取当前文件夹ID，如果没有则使用根目录
@@ -241,11 +240,7 @@ export const useTabManager = (
             }
 
             // 自动打开文件
-            openFile(
-              String(createRes.data.id),
-              createRes.data.name,
-              createRes.data.perms
-            );
+            openFile(String(createRes.data.id), createRes.data.name);
           }
 
           resolve(createRes.data);

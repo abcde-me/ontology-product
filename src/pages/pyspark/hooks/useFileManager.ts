@@ -11,11 +11,7 @@ import { PythonListItem, PythonItemType } from '@/types/pythonApi';
 import { validateName } from '@/utils/valiate';
 
 interface UseFileManagerOptions {
-  onFileOpen?: (
-    fileId: string,
-    fileName?: string,
-    perms?: Array<string>
-  ) => void;
+  onFileOpen?: (fileId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
@@ -70,7 +66,7 @@ export const useFileManager = (
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
   const [isCanCreate, setIsCanCreate] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
@@ -138,7 +134,7 @@ export const useFileManager = (
             'ID:',
             dataRef.id
           );
-          onFileOpen(String(dataRef.id), dataRef.name, dataRef.perms);
+          onFileOpen(String(dataRef.id), dataRef.name);
         }
       }
     },
@@ -220,11 +216,7 @@ export const useFileManager = (
           // 设置选中状态
           setSelectedKeys([String(createRes.data.id)]);
           // 自动打开文件
-          onFileOpen?.(
-            String(createRes.data.id),
-            createRes.data.name,
-            createRes.data.perms
-          );
+          onFileOpen?.(String(createRes.data.id), createRes.data.name);
         } else if (
           createRes.data &&
           createRes.data.type === PythonItemType.Directory
@@ -424,7 +416,7 @@ export const useFileManager = (
           );
           // 设置选中状态
           setSelectedKeys([String(firstFile.id)]);
-          onFileOpen(String(firstFile.id), firstFile.name, firstFile.perms);
+          onFileOpen(String(firstFile.id), firstFile.name);
         }
       }
     });

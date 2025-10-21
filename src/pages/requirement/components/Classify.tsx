@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Tooltip,
-  ColorPicker,
   Select,
   Checkbox
 } from '@arco-design/web-react';
@@ -41,8 +40,6 @@ const Classify = (props: ClassifyComponentProps) => {
   const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
-  // 当前选择类型
-  const [currentType, setCurrentType] = useState(1);
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
@@ -87,7 +84,7 @@ const Classify = (props: ClassifyComponentProps) => {
   };
   useEffect(() => {
     if (type === 'detail') {
-      getDetailObj?.file_labels?.map((item, index) => {
+      getDetailObj?.file_labels?.map((item) => {
         formClassify.setFieldValue(
           `attribute_group_name${item?.id}`,
           item?.attribute_group_name
@@ -134,6 +131,7 @@ const Classify = (props: ClassifyComponentProps) => {
                   style={{ paddingLeft: 16, marginRight: 8 }}
                   label="属性名称:"
                   field={`attribute_group_name${item?.attribute_id}`}
+                  className="classify-relation-item_group_name"
                   rules={[
                     {
                       required: true,
@@ -183,12 +181,11 @@ const Classify = (props: ClassifyComponentProps) => {
                     style={{ width: 100 }}
                     value={item.attribute_group_class}
                     onChange={(value) => {
-                      setCurrentType(value);
                       handleFieldChange(index, 'attribute_group_class', value);
                       // 切换到输入框的时候情况选项内容
                       if (value === 3) {
                         setTextRelations(
-                          textRelations.map((group, groupIndex) => {
+                          textRelations.map((group) => {
                             if (group.attribute_id === item.attribute_id) {
                               return {
                                 ...group,
@@ -455,7 +452,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           }
                         >
                           <Input
-                            style={{ width: 290 }}
+                            style={{ width: 290, backgroundColor: '#fff' }}
                             placeholder="用于存储标注结果"
                             value={attr.attribute_name_en}
                             onChange={(value) => {
@@ -493,7 +490,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               validator: (value, callback) => {
                                 // 检查内容是否为空或只包含空格
                                 if (!value || value.trim() === '') {
-                                  callback('请输入选项名称');
+                                  callback('请输入展示名称');
                                 } else {
                                   // 排除当前项，检查同组其他项是否有相同的选项名称
                                   const trimmedValue = value.trim();
@@ -510,7 +507,7 @@ const Classify = (props: ClassifyComponentProps) => {
                                     );
 
                                   if (hasDuplicate) {
-                                    callback('选项名称不能重复');
+                                    callback('展示名称不能重复');
                                   } else {
                                     callback();
                                   }
@@ -520,7 +517,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                         >
                           <Input
-                            style={{ width: 268 }}
+                            style={{ width: 268, backgroundColor: '#fff' }}
                             placeholder="展示在标注页面的名称"
                             value={attr.attribute_name_cn}
                             onChange={(value) => {

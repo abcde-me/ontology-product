@@ -11,7 +11,6 @@ import { BlockEnum } from '../../types'
 import type { ToolDefaultValue, ToolValue } from '../types'
 import { ViewType } from '../view-type-select'
 import ActonItem from './action-item'
-import BlockIcon from '../../block-icon'
 import { useTranslation } from 'react-i18next'
 
 type Props = {
@@ -98,11 +97,11 @@ const Tool: FC<Props> = ({
           }}
         >
           <div className='flex grow items-center h-8 ml-[8px]'>
-            <BlockIcon
+            {/* <BlockIcon
               className='shrink-0 size-[24px] tool-icon'
               type={BlockEnum.Tool}
               toolIcon={payload.icon}
-            />
+            /> */}
             <div className='ml-2 text-sm text-text-primary flex-1 w-0 grow truncate'>{payload.label[language]}</div>
           </div>
 
