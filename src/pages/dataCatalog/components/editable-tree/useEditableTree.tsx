@@ -429,6 +429,7 @@ export function useEditableTree({ catalogTreeStore }) {
       // 编辑
       if (fileName !== dataRef?.name) {
         res = await renameCatalog(dataRef?.id, {
+          id: dataRef?.id,
           new_name: fileName,
           root_type: root_type,
           type: dataRef?.type,
