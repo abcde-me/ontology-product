@@ -1,8 +1,17 @@
 import UAPI_CONFIG from './uapi';
-import { logout, isSingleApp } from '@/utils/env';
+import { logout, isSingleApp, getLoginToken } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const isNil = (o) => o === undefined || o === null;
+
+const excludeUrl = [
+  '/ceai/user-space/api/v1/GetUser',
+  '/ceai/user-space/api/v1/GetProjOrg',
+  '/ceai/user-space/api/v1/Login',
+  '/ceai/user-space/api/v1/GetUserInfo',
+  '/ceai/user-space/api/v1/Logout'
+];
 
 // UAPI默认配置(配置项和Axios配置项兼容)（示例）
 UAPI_CONFIG.setDefaultConfig({
@@ -17,6 +26,8 @@ UAPI_CONFIG.setDefaultConfig({
 UAPI_CONFIG.addRequestInterceptor(
   (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
+    const projectId = useUserInfoStore.getState().projectId;
+
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (config.headers && !config.headers?.['x-auth-validate'])
@@ -24,6 +35,22 @@ UAPI_CONFIG.addRequestInterceptor(
     if (consolePluginToken && config.headers)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
     config.headers && (config.headers['Content-Type'] = 'application/json');
+    const shouldExclude = config.url && excludeUrl.includes(config.url);
+
+    // 统一添加的公共参数（例如：设备信息、用户 Token 等）
+    const hasValidProjectId = projectId && projectId.length > 1 && projectId[1];
+    const commonParams = {
+      projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
+    };
+    console.log('commonParams', commonParams);
+    // 合并原有参数和公共参数
+    if (config.data) {
+      // 如果已有请求体，合并参数
+      config.data = { ...commonParams, ...config.data };
+    } else {
+      // 如果没有请求体，直接赋值
+      config.data = commonParams;
+    }
     return config;
   },
   (error) => {
@@ -37,9 +64,9 @@ UAPI_CONFIG.addRequestInterceptor(
 UAPI_CONFIG.addResponseInterceptor(
   (response) => {
     const res = response.data;
-
-    if (response.status == 401) {
-      logout(res.data.content);
+    if (response.status == 401 || res?.status == 401) {
+      console.error('API返回401错误:', response.config?.url, res);
+      logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
       // 兼容没有code和message的接口
       if (
@@ -74,12 +101,12 @@ UAPI_CONFIG.addResponseInterceptor(
         'SUCCESS',
         'success',
         200,
-        'AIAP.DraftWorkflowNotFound',
-        'AIMDP.WorkflowDraftNotFound'
+        'AIAP.DraftWorkflowNotFound'
       ];
       if (
         successCode.includes(res.code) ||
         successCode.includes(res.status) ||
+        successCode.includes(res.statusCode) ||
         successCode.includes(res.message)
       ) {
         if (res.data === undefined) {
@@ -92,8 +119,7 @@ UAPI_CONFIG.addResponseInterceptor(
           Message.error(errorMsg);
           console.error(errorMsg);
         }
-        // return Promise.reject(errorMsg);
-        return res;
+        return Promise.reject(errorMsg);
       }
     }
   },
@@ -120,6 +146,12 @@ UAPI_CONFIG.addResponseInterceptor(
     }
     if (code) {
       if (code === 401 || code === 402) {
+        console.error(
+          'API错误401/402:',
+          error.response?.config?.url,
+          error.response?.data
+        );
+        // 临时注释，用于调试
         logout(error.response.data?.data?.content);
       } else if (code === 403) {
         // 临时在这里全局加一下，实际需要按业务捕获
@@ -130,8 +162,7 @@ UAPI_CONFIG.addResponseInterceptor(
         console.log('code 500: ', code);
         const errorMsg = error.response.data.message || error.message;
         errorMsg && Message.error(errorMsg) && console.error(errorMsg);
-        return Promise.resolve(error);
-        // return Promise.reject(error);
+        return Promise.reject(error);
       }
     } else if (!(code === 0 && error?.message === 'canceled')) {
       Message.error({
@@ -139,8 +170,7 @@ UAPI_CONFIG.addResponseInterceptor(
         duration: 5000
       });
     }
-    return Promise.resolve(error);
-    // return Promise.reject(error);
+    return Promise.reject(error);
   }
 );
 

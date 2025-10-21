@@ -12,10 +12,11 @@ import {
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useUserInfo } from '@/store/userInfoStore';
 import { getFlatRoutes, routes } from '../route';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
 import './sider.scss';
+import { usePermission } from '@/hooks/usePermission';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -31,17 +32,11 @@ const hideSidebarPaths = [
 const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
-  // 从全局 store 获取用户信息
-  const userInfo = useUserInfo();
-
-  // 根据用户权限过滤菜单
-  const filteredMenus = useMemo(() => {
-    const userPermissions = userInfo?.perms || [];
-    return filterMenusByPermissions(menus, userPermissions);
-  }, [userInfo?.perms]);
+  const { createPermissionFilter } = usePermission();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [showMenus, setShowMenus] = useState(filteredMenus);
+  const [showMenus, setShowMenus] = useState(menus);
+  const { userMenus } = useUserInfoStore();
 
   const history = useHistory();
   const location = useLocation();
@@ -64,13 +59,22 @@ function LayoutWithSider({ children }) {
           const path = activePaths.find((path) =>
             location.pathname.startsWith(path ?? '')
           );
-          if (path) return [menu.key];
+          if (path) {
+            // 如果有查询参数匹配器，使用它来进一步判断
+            if (menu.queryParamMatcher) {
+              if (menu.queryParamMatcher(location.search)) {
+                return [menu.key];
+              }
+            } else {
+              return [menu.key];
+            }
+          }
         }
       }
       return null;
     };
     return findMatch(showMenus);
-  }, [location.pathname, showMenus]);
+  }, [location.pathname, location.search, showMenus]);
 
   const [openKeys, setopenKeys] = useState(actives || []);
 
@@ -102,6 +106,7 @@ function LayoutWithSider({ children }) {
   );
 
   const getMenu = (data: typeof menus) => {
+    console.log('data', data);
     return data.map((item) => {
       if (!item.children || item.children.length === 0)
         return (
@@ -146,8 +151,8 @@ function LayoutWithSider({ children }) {
   };
 
   useEffect(() => {
-    setShowMenus(filteredMenus);
-  }, [filteredMenus]);
+    setShowMenus(userMenus);
+  }, [userMenus]);
 
   useEffect(() => {
     setopenKeys((keys) => {
@@ -181,7 +186,7 @@ function LayoutWithSider({ children }) {
               setopenKeys(openKeys);
             }}
           >
-            {getMenu(showMenus)}
+            {getMenu(createPermissionFilter(showMenus))}
           </Menu>
         </Sider>
       )}

@@ -74,7 +74,7 @@ export default function WorkflowTask() {
   const getList = async () => {
     setLoading(true);
     try {
-      const params = {
+      const params: any = {
         uid: userInfo?.id,
         search_value: searchSelectValue === 'task_id' ? searchValue : '',
         instance_name: searchSelectValue === 'task_id' ? '' : searchValue,
@@ -87,7 +87,7 @@ export default function WorkflowTask() {
         setWorkflowTaskData(res.data.list);
         setCurrent(res.data.page_info.page);
         setPageSize(res.data.page_info.page_size);
-        setTotal(res.data.page_info.total);
+        setTotal(res.data.page_info.total || 10);
       }
     } finally {
       setLoading(false);

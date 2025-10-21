@@ -350,17 +350,19 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {perms?.includes(
-            DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-          ) &&
-            (status === datasetStatus.version_update_failed ? (
+
+          {status === datasetStatus.version_update_failed ? (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+            >
               <span
                 className={styles.retryText}
                 onClick={() => handleRetry(record.id, record.latest_version)}
               >
                 重试
               </span>
-            ) : null)}
+            </PermissionWrapper>
+          ) : null}
         </div>
       );
     }
@@ -522,8 +524,10 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
-            record.storage_type !== datasetStorageType.table && (
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
               <Button
                 type="text"
                 className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
@@ -538,8 +542,12 @@ const columns = (
               >
                 导出
               </Button>
-            )}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+            </PermissionWrapper>
+          )}
+
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
             <Button
               type="text"
               className={`${styles.actionButton} ${styles.delete}`}
@@ -553,7 +561,7 @@ const columns = (
             >
               删除
             </Button>
-          )}
+          </PermissionWrapper>
         </div>
       );
     }
@@ -756,7 +764,7 @@ const DatasetManagement: React.FC = () => {
 
   // 删除数据集的方法
   const deleteDatasetRecord = (record: Dataset) => {
-    deleteDataset(record)
+    deleteDataset({ id: record?.id })
       .then((res) => {
         fetchDatasetList();
         Message.success('删除成功');

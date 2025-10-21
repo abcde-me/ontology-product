@@ -9,6 +9,12 @@ export interface CreateWorkflowRes {
   workflow_uuid: string | number;
 }
 
+/** 编辑工作流 */
+export interface EditWorkflowParams {
+  workflow_name: string;
+  workflow_uuid: string;
+}
+
 export enum IsOnline {
   offline = 0,
   online = 1
@@ -16,6 +22,7 @@ export enum IsOnline {
 
 export interface WorkflowDetailParams {
   workflow_version: string | null;
+  workflow_uuid: string;
 }
 
 /** 获取工作流详情 */
@@ -76,6 +83,7 @@ export interface CycleText {
 
 /** 工作流操作 */
 export interface WorkflowOperationParams {
+  workflow_uuid: string;
   uid: string;
   ds_workflow_id: number;
   op: WorkflowOperation;

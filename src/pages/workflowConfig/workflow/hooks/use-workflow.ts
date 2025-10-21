@@ -49,6 +49,7 @@ import { IsOnline } from '@/types/workflowApi';
 import { useLocation } from 'react-router-dom';
 import { useParams } from '@/utils/url';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 export const useIsChatMode = () => {
   const appDetail = useTaskStore((s) => s.workflowDetail);
@@ -732,6 +733,9 @@ export const useNodesReadOnly = () => {
   const workflowPerms = appDetail?.perms ?? [];
   // url上携带版本，不支持工作流编辑，主要场景：作业详情跳转到工作流详情
   const workflowVersion = useParams('workflow_version');
+  const hasPermission = useHasPermission(
+    WORKFLOW_DETAIL_PERMISSIONS.UPDATE_DAG
+  );
 
   const getNodesReadOnly = useCallback(() => {
     const { workflowRunningData, historyWorkflowData, isRestoring } =
@@ -744,7 +748,7 @@ export const useNodesReadOnly = () => {
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
       !!workflowVersion ||
-      !workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE_DAG)
+      !hasPermission
     );
   }, [workflowStore, appDetail]);
 
@@ -756,7 +760,7 @@ export const useNodesReadOnly = () => {
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
       !!workflowVersion ||
-      !workflowPerms.includes(WORKFLOW_DETAIL_PERMISSIONS.CAN_UPDATE_DAG)
+      !hasPermission
     ),
     getNodesReadOnly
   };

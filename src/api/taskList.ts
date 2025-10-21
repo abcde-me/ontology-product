@@ -11,5 +11,5 @@ export async function getTaskList(params: {
   sort: string;
   sort_by: string;
 }) {
-  return await UAPI.RES.taskList({}).get(params).inRegion().do();
+  return await UAPI.RES.taskList({}).post(params).inRegion().do();
 }
