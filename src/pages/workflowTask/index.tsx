@@ -87,7 +87,7 @@ export default function WorkflowTask() {
         setWorkflowTaskData(res.data.list);
         setCurrent(res.data.page_info.page);
         setPageSize(res.data.page_info.page_size);
-        setTotal(res.data.page_info.total);
+        setTotal(res.data.page_info.total || 10);
       }
     } finally {
       setLoading(false);

@@ -209,8 +209,8 @@ export async function renamePythonItem(
   params: RenamePythonItemReq
 ): Promise<ApiRes<RenamePythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRenameApi({ pyspark_id: id })
-    .put(params)
+  return await UAPI.RES.pythonRenameApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 
@@ -230,8 +230,8 @@ export async function renamePythonItem(
 // 文件/目录删除
 export async function deletePythonItem(id: string): Promise<ApiRes<null>> {
   // TODO: 联调
-  return await UAPI.RES.pythonDeleteApi({ pyspark_id: id })
-    .delete({})
+  return await UAPI.RES.pythonDeleteApi({})
+    .post({ pyspark_id: id })
     .inRegion()
     .do();
 
@@ -251,8 +251,8 @@ export async function copyPythonItem(
   params: CopyPythonItemReq
 ): Promise<ApiRes<CopyPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonCopyApi({ pyspark_id: id })
-    .post(params)
+  return await UAPI.RES.pythonCopyApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 
@@ -281,8 +281,8 @@ export async function openPythonItem(
   id: string
 ): Promise<ApiRes<OpenPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonOpenApi({ pyspark_id: id })
-    .get({})
+  return await UAPI.RES.pythonOpenApi({})
+    .post({ pyspark_id: id })
     .inRegion()
     .do();
 
@@ -354,8 +354,8 @@ export async function savePythonItem(
   params: SavePythonItemReq
 ): Promise<ApiRes<SavePythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonSaveApi({ pyspark_id: id })
-    .put(params)
+  return await UAPI.RES.pythonSaveApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 
@@ -377,8 +377,8 @@ export async function runPythonItem(
   id: string
 ): Promise<ApiRes<RunPythonItemRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunApi({ pyspark_id: id })
-    .put({})
+  return await UAPI.RES.pythonRunApi({})
+    .post({ pyspark_id: id })
     .inRegion()
     .do();
 
@@ -401,8 +401,8 @@ export async function getRunResult(
   params: GetRunResultReq
 ): Promise<ApiRes<GetRunResultRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunResultApi({ pyspark_id: id })
-    .get(params)
+  return await UAPI.RES.pythonRunResultApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 
@@ -426,8 +426,8 @@ export async function stopRunPythonItem(
   id: string,
   params: StopRunPythonItemReq
 ): Promise<ApiRes<{}>> {
-  return await UAPI.RES.pythonRunCancelApi({ pyspark_id: id })
-    .put(params)
+  return await UAPI.RES.pythonRunCancelApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 }
@@ -438,8 +438,8 @@ export async function getRunLog(
   params: GetRunLogReq
 ): Promise<ApiRes<GetRunLogRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonRunLogApi({ pyspark_id: id })
-    .get(params)
+  return await UAPI.RES.pythonRunLogApi({})
+    .post({ ...params, pyspark_id: id })
     .inRegion()
     .do();
 }
@@ -631,7 +631,7 @@ export async function getExportFile(
   params: GetExportFileReq
 ): Promise<ApiRes<GetExportFile[]>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportFileApi({}).get(params).inRegion().do();
+  return await UAPI.RES.pythonExportFileApi({}).post(params).inRegion().do();
 
   // return Promise.resolve({
   //   status: 200,
@@ -672,7 +672,7 @@ export async function getExportJsonl(
   params: GetExportJsonlReq
 ): Promise<ApiRes<GetExportJsonlRes>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportPreviewApi({}).get(params).inRegion().do();
+  return await UAPI.RES.pythonExportPreviewApi({}).post(params).inRegion().do();
 
   // return Promise.resolve({
   //   status: 200,
@@ -698,8 +698,8 @@ export async function stopExportDataset(
   }
 ): Promise<ApiRes<object>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportDatasetStopApi({ export_id })
-    .put(params)
+  return await UAPI.RES.pythonExportDatasetStopApi({})
+    .post({ ...params, export_id })
     .inRegion()
     .do();
 }
@@ -712,8 +712,8 @@ export async function retryExportDataset(
   }
 ): Promise<ApiRes<object>> {
   // TODO: 联调
-  return await UAPI.RES.pythonExportDatasetRetryApi({ export_id })
-    .put(params)
+  return await UAPI.RES.pythonExportDatasetRetryApi({})
+    .post({ ...params, export_id })
     .inRegion()
     .do();
 }

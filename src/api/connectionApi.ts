@@ -13,13 +13,10 @@ export async function delconnectionList(params) {
   return await UAPI.RES.delconnection({}).post(params).inRegion().do();
 }
 // 查看的api
-export async function getdetailList(connector_id) {
-  return await UAPI.RES.getconnection({ connector_id }).get().inRegion().do();
+export async function getdetailList(params) {
+  return await UAPI.RES.getconnection({}).post(params).inRegion().do();
 }
 // 修改的api
 export async function updataConnectionList(params: any) {
-  return await UAPI.RES.editconnection({ connector_id: params.connector_id })
-    .put(params.newfrom)
-    .inRegion()
-    .do();
+  return await UAPI.RES.editconnection({}).post(params).inRegion().do();
 }

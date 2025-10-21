@@ -80,7 +80,7 @@ export default function WorkflowList() {
         setWorkflowData(res.data.list);
         setCurrent(res.data.page_info?.page);
         setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total);
+        setTotal(res.data.page_info?.total || 10);
       }
     } finally {
       setLoading(false);
@@ -354,7 +354,7 @@ export default function WorkflowList() {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
-            {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && (
+            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_GET}>
               <span
                 className={styles['operate-text']}
                 onClick={() => {
@@ -366,8 +366,8 @@ export default function WorkflowList() {
               >
                 详情
               </span>
-            )}
-            {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_COPY) && (
+            </PermissionWrapper>
+            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}>
               <span
                 className={styles['operate-text']}
                 onClick={() => {
@@ -376,8 +376,10 @@ export default function WorkflowList() {
               >
                 复制
               </span>
-            )}
-            {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_DELETE) && (
+            </PermissionWrapper>
+            <PermissionWrapper
+              permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}
+            >
               <Popover
                 trigger="hover"
                 content="请先下线工作流"
@@ -397,7 +399,7 @@ export default function WorkflowList() {
                   删除
                 </span>
               </Popover>
-            )}
+            </PermissionWrapper>
           </div>
         );
       }

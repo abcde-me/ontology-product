@@ -16,12 +16,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { validateName } from '@/utils/valiate';
 
 interface UseFileManagerOptions {
-  onFileOpen?: (
-    fileId: string,
-    scriptId: string,
-    fileName?: string,
-    perms?: Array<string>
-  ) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
@@ -139,8 +134,7 @@ export const useFileManager = (
           onFileOpen(
             String(dataRef.id),
             String(dataRef.script_id),
-            dataRef.name,
-            dataRef.perms
+            dataRef.name
           );
         }
       }
@@ -211,12 +205,7 @@ export const useFileManager = (
 
         // 编辑器自动打开当前脚本
         onFileOpen &&
-          onFileOpen(
-            scriptFileId,
-            String(createRes.data.script_id),
-            finalName,
-            createRes.data.perms
-          );
+          onFileOpen(scriptFileId, String(createRes.data.script_id), finalName);
 
         return createRes.data;
       } catch (error) {
@@ -336,8 +325,7 @@ export const useFileManager = (
             name: item.script_name,
             id: String(Number(item.script_file_id) || item.script_id),
             script_id: item.script_id,
-            type: PythonItemType.Notebook,
-            perms: item.perms
+            type: PythonItemType.Notebook
           }
         };
       }) ?? []

@@ -51,14 +51,12 @@ export async function getWorkflowTargetPath(
 
 // 工作流-脚本类型
 export async function getScriptingType() {
-  return await UAPI.RES.scriptingType({}).post({}).inRegion().do();
+  return await UAPI.RES.scriptingType({}).post().inRegion().do();
 }
 // 工作流-脚本执行器列表
 export async function getScriptingEngine(script_type: string) {
-  return await UAPI.RES.scriptingEngine({ script_type })
-    .post({
-      script_type
-    })
+  return await UAPI.RES.scriptingEngine({})
+    .post({ script_type })
     .inRegion()
     .do();
 }
