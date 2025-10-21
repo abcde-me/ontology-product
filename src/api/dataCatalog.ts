@@ -716,8 +716,8 @@ export async function getTargetFileTypeList() {
 }
 //查询源数据文件类型列表
 export async function getSourceFileTypeList(params) {
-  return await UAPI.RES.sourceFileTypeListApi({})
-    .post({ file_id: params.id })
+  return await UAPI.RES.sourceFileTypeListApi({ file_id: params.id })
+    .get()
     .inRegion()
     .do();
 }
