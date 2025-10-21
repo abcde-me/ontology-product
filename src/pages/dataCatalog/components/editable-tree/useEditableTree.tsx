@@ -532,12 +532,7 @@ export function useEditableTree({ catalogTreeStore }) {
                   }
                 </>
               )}
-              {
-                /* 为数据卷和数据库都添加新建按钮 */ console.log(
-                  dataRef,
-                  'top - 123'
-                )
-              }
+              {/* 为数据卷和数据库都添加新建按钮 */}
               {(dataRef?.type === 'volume' || dataRef?.type === 'db') && (
                 <PermissionWrapper
                   permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
