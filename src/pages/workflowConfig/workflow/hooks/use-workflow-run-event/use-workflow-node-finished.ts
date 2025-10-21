@@ -3,7 +3,6 @@ import { useStoreApi } from 'reactflow'
 import produce from 'immer'
 import type { NodeFinishedResponse } from '@/pages/workflowConfig/types/workflow'
 import {
-  BlockEnum,
   NodeRunningStatus,
 } from '@/pages/workflowConfig/workflow/types'
 import { ErrorHandleTypeEnum } from '@/pages/workflowConfig/workflow/nodes/_base/components/error-handle/types'
@@ -43,13 +42,6 @@ export const useWorkflowNodeFinished = () => {
       if (data.status === NodeRunningStatus.Exception) {
         if (data.execution_metadata?.error_strategy === ErrorHandleTypeEnum.failBranch)
           currentNode.data._runningBranchId = ErrorHandleTypeEnum.failBranch
-      }
-      else {
-        if (data.node_type === BlockEnum.IfElse)
-          currentNode.data._runningBranchId = data?.outputs?.selected_case_id
-
-        if (data.node_type === BlockEnum.QuestionClassifier)
-          currentNode.data._runningBranchId = data?.outputs?.class_id
       }
     })
     setNodes(newNodes)

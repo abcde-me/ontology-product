@@ -1,14 +1,14 @@
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { formatFileSize } from '@/utils/format';
-import { Button, Empty, Input, Tree, Spin } from '@arco-design/web-react';
+import { Button, Empty, Input, Spin, Tree } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconCaretDown,
   IconCaretRight
 } from '@arco-design/web-react/icon';
+import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { useSourceTree } from '../../hooks/useSourceTree';
-import './index.scss';
+import styles from './index.module.scss';
 
 interface SourceTreeProps {
   isEditorFocused?: boolean;
@@ -89,20 +89,20 @@ const SourceTree: React.FC<SourceTreeProps> = ({
   );
 
   return (
-    <div className="sql-source-tree">
+    <div className={styles['sql-source-tree']}>
       {/* 第一部分：标题导航 */}
-      <div className="sql-source-tree__header">
-        <div className="sql-source-tree__header-left">
+      <div className={styles['sql-source-tree__header']}>
+        <div className={styles['sql-source-tree__header-left']}>
           <IconArrowLeft
-            className="sql-source-tree__back-icon"
+            className={styles['sql-source-tree__back-icon']}
             onClick={handleBack}
           />
-          <span className="sql-source-tree__title">源数据目录</span>
+          <span className={styles['sql-source-tree__title']}>源数据目录</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className="sql-source-tree__search">
+      <div className={styles['sql-source-tree__search']}>
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -112,13 +112,15 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className="sql-source-tree__search-input"
+          className={styles['sql-source-tree__search-input']}
         />
       </div>
 
       {/* 第三部分：列表 */}
       <div
-        className={`sql-source-tree__content ${treeDataLoading ? 'sql-source-tree__content--loading' : ''}`}
+        className={classNames(styles['sql-source-tree__content'], {
+          [styles['sql-source-tree__content--loading']]: treeDataLoading
+        })}
       >
         {treeDataLoading ? (
           <div className="mt-[110px] flex flex-col items-center">
@@ -135,7 +137,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             expandedKeys={expandedKeys}
             onExpand={setExpandedKeys}
             treeData={treeDataFiltered}
-            className="sql-source-tree__content-tree"
+            className={styles['sql-source-tree__content-tree']}
             icons={(props) => {
               const nodeType = props.dataRef?.type;
               const isExpandable = [
@@ -160,9 +162,9 @@ const SourceTree: React.FC<SourceTreeProps> = ({
               );
 
               return (
-                <div className="sql-source-tree__node">
+                <div className={styles['sql-source-tree__node']}>
                   <div
-                    className={`sql-source-tree__node-title sql-source-tree__node-title-${nodeData?.type}`}
+                    className={`${styles['sql-source-tree__node-title']} ${styles[`sql-source-tree__node-title-${nodeData?.type}`]}`}
                   >
                     <EllipsisPopover
                       value={highlightSearchKeyword(
@@ -171,7 +173,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                       )}
                     />
                   </div>
-                  <div className="sql-source-tree__node-actions">
+                  <div className={styles['sql-source-tree__node-actions']}>
                     {showDetailBtn && (
                       <Button
                         style={{
@@ -180,7 +182,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                           padding: 0
                         }}
                         type="text"
-                        className="sql-source-tree__detail-btn"
+                        className={styles['sql-source-tree__detail-btn']}
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
@@ -189,7 +191,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {showInsertBtn && (
                       <Button
                         type="outline"
-                        className="sql-source-tree__insert-btn"
+                        className={styles['sql-source-tree__insert-btn']}
                         onClick={(e) => handleInsertClick(e, nodeData)}
                         onMouseDown={(e) => {
                           // 阻止按钮获得焦点，保持编辑器焦点

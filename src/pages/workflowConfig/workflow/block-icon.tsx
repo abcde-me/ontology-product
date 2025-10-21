@@ -36,30 +36,6 @@ const ICON_CONTAINER_CLASSNAME_SIZE_MAP: Record<string, string> = {
   md: 'w-6 h-6 rounded-[4px] shadow-md'
 };
 const getIcon = (type: BlockEnum, className: string) => {
-  // return {
-  //   [BlockEnum.Start]: <Home className={className} />,
-  //   [BlockEnum.LLM]: <Llm className={className} />,
-  //   [BlockEnum.Code]: <Code className={className} />,
-  //   [BlockEnum.End]: <End className={className} />,
-  //   [BlockEnum.IfElse]: <IfElse className={className} />,
-  //   [BlockEnum.HttpRequest]: <Http className={className} />,
-  //   [BlockEnum.Answer]: <Answer className={className} />,
-  //   [BlockEnum.KnowledgeRetrieval]: <KnowledgeRetrieval className={className} />,
-  //   [BlockEnum.QuestionClassifier]: <QuestionClassifier className={className} />,
-  //   [BlockEnum.TemplateTransform]: <TemplatingTransform className={className} />,
-  //   [BlockEnum.VariableAssigner]: <VariableX className={className} />,
-  //   [BlockEnum.VariableAggregator]: <VariableX className={className} />,
-  //   [BlockEnum.Assigner]: <Assigner className={className} />,
-  //   [BlockEnum.Tool]: <VariableX className={className} />,
-  //   [BlockEnum.IterationStart]: <VariableX className={className} />,
-  //   [BlockEnum.Iteration]: <Iteration className={className} />,
-  //   [BlockEnum.LoopStart]: <VariableX className={className} />,
-  //   [BlockEnum.Loop]: <Loop className={className} />,
-  //   [BlockEnum.ParameterExtractor]: <ParameterExtractor className={className} />,
-  //   [BlockEnum.DocExtractor]: <DocsExtractor className={className} />,
-  //   [BlockEnum.ListFilter]: <ListFilter className={className} />,
-  //   [BlockEnum.Agent]: <Agent className={className} />,
-  // }[type]
   return <RiApps2Fill className={className} />;
 };
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
@@ -72,25 +48,6 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Customize]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.End]: 'bg-util-colors-warning-warning-500'
-
-  // TODO：待删除
-  // [BlockEnum.LLM]: 'bg-util-colors-indigo-indigo-500',
-  // [BlockEnum.Code]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.IfElse]: 'bg-util-colors-cyan-cyan-500',
-  // [BlockEnum.Iteration]: 'bg-util-colors-cyan-cyan-500',
-  // [BlockEnum.Loop]: 'bg-util-colors-cyan-cyan-500',
-  // [BlockEnum.HttpRequest]: 'bg-util-colors-violet-violet-500',
-  // [BlockEnum.Answer]: 'bg-util-colors-warning-warning-500',
-  // [BlockEnum.KnowledgeRetrieval]: 'bg-util-colors-green-green-500',
-  // [BlockEnum.QuestionClassifier]: 'bg-util-colors-green-green-500',
-  // [BlockEnum.TemplateTransform]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.VariableAssigner]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.VariableAggregator]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.Assigner]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.ParameterExtractor]: 'bg-util-colors-blue-blue-500',
-  // [BlockEnum.DocExtractor]: 'bg-util-colors-green-green-500',
-  // [BlockEnum.ListFilter]: 'bg-util-colors-cyan-cyan-500',
-  // [BlockEnum.Agent]: 'bg-util-colors-indigo-indigo-500',
 };
 const BlockIcon: FC<BlockIconProps> = ({
   type,

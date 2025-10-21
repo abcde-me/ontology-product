@@ -15,11 +15,7 @@ import {
 } from '@/api/individualAndDepartment';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import {
-  IconCaretDown,
-  IconDown,
-  IconDragArrow
-} from '@arco-design/web-react/icon';
+import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
 
 interface DataSourceModalProps {
@@ -314,7 +310,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
             pagination={false}
             noDataElement={noDataElement({ description: '暂无数据' })}
             rowSelection={{
-              checkboxProps: (record) => {
+              checkboxProps: () => {
                 return {
                   disabled: type === 'detail'
                 };

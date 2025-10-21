@@ -1,5 +1,6 @@
 .wk-data-customize-panel-content {
   min-height: calc(100% - 150px);
+  position: relative;
 
   .arco-form-item {
     margin-bottom: unset;
@@ -11,6 +12,22 @@
 
   .arco-collapse-item-content-box {
     background-color: #f8fafd;
+  }
+
+  .arco-form .arco-form-item > .arco-form-label-item {
+    padding: unset;
+  }
+
+  .wk-customize-running-result-collapse {
+    position: fixed;
+    border: unset;
+    width: 562px;
+    bottom: 10px;
+    right: 31px;
+    .arco-collapse-item-content-box {
+      height: 360px;
+      overflow: auto;
+    }
   }
 }
 
@@ -122,5 +139,47 @@
 
   .cm-scroller {
     min-height: calc(100vh - 170px) !important;
+  }
+}
+
+.custom-popover {
+  max-width: 562px !important;
+  top: 170px !important;
+
+  .arco-popover-content {
+    height: calc(100vh - 180px) !important;
+    max-height: 900px !important;
+  }
+
+  .arco-popover-arrow {
+    top: 22.8px !important;
+    right: -5px !important;
+    background: transparent !important; /* 移除背景色 */
+    border: none !important; /* 移除原来的边框 */
+    /* 使用边框创建三角形 */
+    border-left: 8px solid transparent !important;
+    border-right: 8px solid #fff !important;
+    border-bottom: 8px solid transparent !important;
+  }
+
+  .custom-markdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: stretch;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+
+    h1 {
+      font-weight: 600;
+      line-height: 22px;
+    }
+
+    blockquote {
+      background-color: #f8fafd;
+      padding: 12px;
+    }
   }
 }

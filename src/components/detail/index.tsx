@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
-import { useParams, useHistory, Prompt } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import styles from './style.module.css';
-import NoDataEmpty from '@/components/NoDataEmpty';
 import EllipsisPopover from '../ellipsis-popover-com';
-import { useLocation } from 'react-router-dom';
 import {
   Typography,
   Button,
@@ -16,19 +14,14 @@ import {
   Tabs,
   Table,
   Input,
-  Select,
   Pagination,
   Tooltip,
-  Empty,
   TableColumnProps
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconEdit,
-  IconDelete,
   IconSearch,
-  IconPlayArrow,
-  IconHistory,
   IconRefresh,
   IconCheck,
   IconClose,
@@ -41,25 +34,22 @@ import {
 import { formatFileSize } from '@/utils/format';
 import { Breadcrumb } from '@arco-design/web-react';
 import {
-  getDatasetDetail,
+  // getDatasetDetail,
   updateDataset,
   getDatasetContents,
   getDatasetDetailPage,
   editDatasetVersion,
-  type DataChangeItem,
   getDatasetVersionList,
   datasetVersionRebuild,
   getDataContentFileList,
   getDataContentTableList
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
-import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
-import { PermissionGuard } from '@/components/PermissionGuard';
 import './style.css';
-import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
+import { PermissionWrapper } from '../PermissionGuard';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -80,7 +70,6 @@ interface DatasetDetail {
   creator_name: string;
   created_at: string;
   updated_at: string;
-  perms: string[];
   storage_type: string;
 }
 
@@ -96,7 +85,6 @@ interface TableColumn {
 }
 
 const countWidth = (count: number) => {
-  const viewportWidth = window.innerWidth - 360;
   if (count > 4) {
     return '400px';
   } else {
@@ -104,16 +92,6 @@ const countWidth = (count: number) => {
   }
 };
 
-//headers:表头
-//handleEditContent:编辑内容
-//handleContinue:删除
-//editingRowKey:当前编辑行
-//editingData:当前编辑数据
-//onDataChange:处理编辑数据变化
-//handleInlineEditSubmit:确认编辑
-//handleInlineEditCancel:取消编辑
-//idName:唯一标识符字段名
-//updateStatus:更新状态
 const generateArcoColumns = (
   headers,
   handleEditContent,
@@ -137,7 +115,6 @@ const generateArcoColumns = (
     ellipsis: true,
     width: columnWidth,
     render: (value: any, record: any) => {
-      const cellWidth = columnWidth; // 设置默认宽度
       if (updateStatus && editingRowKey === record[idName]) {
         return (
           <Input.TextArea
@@ -187,7 +164,6 @@ const generateArcoColumns = (
       fixed: 'right',
       headerClassName: 'custom-table-header-action', // 自定义表头样式
       render: (_, record) => {
-        const perms = record.perms;
         if (editingRowKey === record[idName]) {
           // 编辑模式：显示确认和取消按钮
           return (
@@ -445,8 +421,7 @@ const renderStatusTag = (
   status: string,
   errorReason?: string,
   handleVersionRebuild?: () => void,
-  handlerefresh?: () => void,
-  perms?: string[]
+  handlerefresh?: () => void
 ) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -482,9 +457,9 @@ const renderStatusTag = (
             }}
           />
         </Tooltip>
-        {perms?.includes(
-          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-        ) && (
+        <PermissionWrapper
+          permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+        >
           <Button
             type="text"
             size="small"
@@ -499,7 +474,7 @@ const renderStatusTag = (
               重试
             </span>
           </Button>
-        )}
+        </PermissionWrapper>
       </div>
     );
   }
@@ -586,10 +561,8 @@ const DatasetDetail = (props: {
   //历史数据
   const [versionHistory, setVersionHistory] = React.useState<any[]>([]);
   const rightDescriptionsRef = React.useRef<HTMLDivElement>(null);
-  const [divWidth, setDivWidth] = React.useState<number>(0);
 
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
-  const locatio = useLocation();
   const [isHiddenBaseInfo, setIsHiddenBaseInfo] = React.useState(false); // 基础信息是否隐藏
   const lastScrollTop = React.useRef(0);
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -723,27 +696,6 @@ const DatasetDetail = (props: {
   }, [history, updateStatus, isModalVisible]);
 
   React.useEffect(() => {
-    // 初始获取元素宽度
-    const updateWidth = () => {
-      if (rightDescriptionsRef.current) {
-        console.log(rightDescriptionsRef.current.offsetWidth);
-        setDivWidth(rightDescriptionsRef.current.offsetWidth - 100);
-      }
-    };
-
-    // 初始调用一次
-    updateWidth();
-
-    // 监听窗口变化
-    window.addEventListener('resize', updateWidth);
-
-    // 组件卸载时移除监听
-    return () => {
-      window.removeEventListener('resize', updateWidth);
-    };
-  }, []);
-
-  React.useEffect(() => {
     if (contentTableColumnsList.length > 0) {
       setContentTableColumns(
         contentTableColumnsList.map((item) => ({
@@ -869,7 +821,7 @@ const DatasetDetail = (props: {
           Message.error(res.msg || '数据集更新失败');
         }
       })
-      .catch((err) => {
+      .catch(() => {
         Message.error('数据集更新失败');
       });
   };
@@ -937,7 +889,7 @@ const DatasetDetail = (props: {
   };
 
   // 确认保存内联编辑
-  const handleInlineEditSubmit = (record: any) => {
+  const handleInlineEditSubmit = () => {
     if (!updateStatus) return; // 非编辑状态下不允许提交编辑
     // 更新数据
 
@@ -1081,7 +1033,7 @@ const DatasetDetail = (props: {
           Message.error(res.msg || '数据修改失败');
         }
       })
-      .catch((err) => {
+      .catch(() => {
         Message.error('编辑失败，请稍后重试');
       });
   };
@@ -1138,7 +1090,7 @@ const DatasetDetail = (props: {
         console.log(1111111, res);
         Message.success('刷新成功');
       })
-      .catch((err) => {
+      .catch(() => {
         Message.success('刷新失败');
       });
   };
@@ -1286,12 +1238,6 @@ const DatasetDetail = (props: {
         Message.error('版本重新生成失败');
       });
   };
-  const getwidth = () => {
-    if (window.innerWidth) {
-      return `${(window.innerWidth - 400) / 2}px`;
-    }
-    // return `${(window.innerWidth - 400)/2}px`
-  };
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
@@ -1326,9 +1272,9 @@ const DatasetDetail = (props: {
             {!isHideEdit && (
               <div className="basic-info-header">
                 <Title heading={4}>基本信息</Title>
-                {datasetDetail?.perms?.includes(
-                  DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
-                ) && (
+                <PermissionWrapper
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE}
+                >
                   <Tooltip
                     content={
                       !datasetDetail || datasetDetail.status !== 'normal'
@@ -1337,19 +1283,17 @@ const DatasetDetail = (props: {
                     }
                   >
                     <Button
+                      // @ts-expect-error
                       disabled={
                         !datasetDetail || datasetDetail.status !== 'normal'
+                          ? '当前状态下不能进行编辑'
+                          : ''
                       }
-                      onClick={handleEdit}
-                      type="text"
-                      icon={<IconEdit />}
-                      className="edit-btn"
-                      style={{ height: '100%' }}
                     >
                       编辑
                     </Button>
                   </Tooltip>
-                )}
+                </PermissionWrapper>
               </div>
             )}
 
@@ -1379,8 +1323,7 @@ const DatasetDetail = (props: {
                             datasetDetail.status,
                             datasetDetail.error_reason,
                             handleVersionRebuild,
-                            handlerefresh,
-                            datasetDetail?.perms
+                            handlerefresh
                           )}
                         </div>
                       )
@@ -1757,32 +1700,38 @@ const DatasetDetail = (props: {
                         </Tooltip>
                       </Space>
                     ) : (
-                      <Tooltip
-                        content={
-                          !datasetDetail || datasetDetail.status !== 'normal'
-                            ? '当前状态下不能进行编辑'
-                            : ''
-                        }
-                      >
-                        {datasetDetail?.perms?.includes(
-                          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
-                        ) &&
-                          !isHideEdit && (
-                            <Button
-                              // type="primary"
-                              disabled={
+                      <>
+                        {!isHideEdit ? (
+                          <PermissionWrapper
+                            permission={
+                              DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
+                            }
+                          >
+                            <Tooltip
+                              content={
                                 !datasetDetail ||
-                                datasetDetail.status !== 'normal'
+                                  datasetDetail.status !== 'normal'
+                                  ? '当前状态下不能进行编辑'
+                                  : ''
                               }
-                              onClick={() => setUpdateStatus(true)}
-                              type="text"
-                              icon={<IconEdit />}
-                              className="edit-btn"
                             >
-                              编辑
-                            </Button>
-                          )}
-                      </Tooltip>
+                              <Button
+                                // type="primary"
+                                disabled={
+                                  !datasetDetail ||
+                                  datasetDetail.status !== 'normal'
+                                }
+                                onClick={() => setUpdateStatus(true)}
+                                type="text"
+                                icon={<IconEdit />}
+                                className="edit-btn"
+                              >
+                                编辑
+                              </Button>
+                            </Tooltip>
+                          </PermissionWrapper>
+                        ) : null}
+                      </>
                     )}
                   </>
                 ) : null}

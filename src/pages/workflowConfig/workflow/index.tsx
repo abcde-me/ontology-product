@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import useSWR from 'swr';
 import { setAutoFreeze } from 'immer';
 import { useLocation } from 'react-router-dom';
 import { useEventListener } from 'ahooks';
@@ -19,8 +18,7 @@ import ReactFlow, {
   useNodesState,
   useOnViewportChange,
   useReactFlow,
-  useStoreApi,
-  BackgroundVariant
+  useStoreApi
 } from 'reactflow';
 import type { Viewport } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -47,11 +45,6 @@ import SubHeader from './sub-header';
 import CustomNode from './nodes';
 import CustomNoteNode from './note-node';
 import { CUSTOM_NOTE_NODE } from './note-node/constants';
-import CustomIterationStartNode from './nodes/iteration-start';
-import { CUSTOM_ITERATION_START_NODE } from './nodes/iteration-start/constants';
-import CustomLoopStartNode from './nodes/loop-start';
-import { CUSTOM_LOOP_START_NODE } from './nodes/loop-start/constants';
-import Operator from './operator';
 import CustomEdge from './custom-edge';
 import CustomConnectionLine from './custom-connection-line';
 import Panel from './panel';
@@ -64,7 +57,6 @@ import SyncingDataModal from './syncing-data-modal';
 import UpdateDSLModal from './update-dsl-modal';
 import DSLExportConfirmModal from './dsl-export-confirm-modal';
 import LimitTips from './limit-tips';
-import PluginDependency from './plugin-dependency';
 import { useStore, useWorkflowStore } from './store';
 import { initialEdges, initialNodes } from './utils';
 import {
@@ -77,7 +69,6 @@ import {
 import { WorkflowHistoryProvider } from './workflow-history-store';
 import Loading from '@/pages/workflowConfig/components/loading';
 import { FeaturesProvider } from '@/pages/workflowConfig/components/features';
-import type { Features as FeaturesData } from '@/pages/workflowConfig/components/features/types';
 import { useFeaturesStore } from '@/pages/workflowConfig/components/features/hooks';
 import { useEventEmitterContextContext } from '@/pages/workflowConfig/context/event-emitter';
 import Confirm from '@/pages/workflowConfig/components/confirm';
@@ -87,8 +78,6 @@ import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConf
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
   [CUSTOM_NOTE_NODE]: CustomNoteNode,
-  [CUSTOM_ITERATION_START_NODE]: CustomIterationStartNode,
-  [CUSTOM_LOOP_START_NODE]: CustomLoopStartNode
 };
 const edgeTypes = {
   [CUSTOM_EDGE]: CustomEdge
@@ -356,8 +345,8 @@ const Workflow: FC<WorkflowProps> = memo(
             size={2}
             className="react-flow-bg bg-workflow-canvas-workflow-bg"
             color="var(--color-workflow-canvas-workflow-dot-color)"
-            // color='#c8ceda20'
-            // variant={BackgroundVariant.Lines}
+          // color='#c8ceda20'
+          // variant={BackgroundVariant.Lines}
           />
         </ReactFlow>
       </div>

@@ -5,7 +5,6 @@ import { useStoreApi } from 'reactflow';
 import type { BlockEnum, Node } from '../../types';
 import { generateNewNode } from '../../utils';
 import { ITERATION_PADDING, NODES_INITIAL_DATA } from '../../constants';
-import { CUSTOM_ITERATION_START_NODE } from '../iteration-start/constants';
 
 export const useNodeIterationInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -137,7 +136,7 @@ export const useNodeIterationInteractions = () => {
       const { getNodes } = store.getState();
       const nodes = getNodes();
       const childrenNodes = nodes.filter(
-        (n) => n.parentId === nodeId && n.type !== CUSTOM_ITERATION_START_NODE
+        (n) => n.parentId === nodeId
       );
       const newIdMapping = { ...idMapping };
 

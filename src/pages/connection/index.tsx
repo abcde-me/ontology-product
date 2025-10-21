@@ -2,15 +2,14 @@ import {
   Input,
   Message,
   Pagination,
-  Popconfirm,
+  Space,
   Table,
   Button,
   Modal,
-  Form,
-  Tooltip
+  Form
 } from '@arco-design/web-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { IconExclamationCircle, IconPlus } from '@arco-design/web-react/icon';
+import React, { useEffect, useRef, useState } from 'react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import ModalDetail from './detail/detail-modal';
 import Add from './add';
 import {
@@ -19,7 +18,7 @@ import {
   updataConnectionList
 } from '@/api/connectionApi';
 import Edit, { EditRef } from './edit';
-import { ConnectionType, connectorDetailType } from './type';
+import { connectorDetailType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -31,12 +30,11 @@ import { ConnectorType, TYPE_CONFIG } from './config';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
-const InputSearch = Input.Search;
 
 // 连接器状态枚举
 enum ConnectionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected'
+  CONNECTED = '1',
+  DISCONNECTED = '0'
 }
 
 // 状态显示配置
@@ -131,8 +129,8 @@ export default function Connection() {
       };
       setEditLoadingState(true);
       const res = await updataConnectionList({
-        connector_id: editObject.id,
-        newfrom
+        id: editObject.id,
+        ...newfrom
       });
       if (res.code == '' && res.status == 200) {
         setEditLoadingState(false);
@@ -256,36 +254,28 @@ export default function Connection() {
     },
     {
       title: '操作',
-      width: 140,
+      width: 160,
       fixed: 'right',
+      align: 'center',
       render: (_, record) => {
-        const perms = record?.perms || [];
-        const config = [] as any;
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_GET)) {
-          config.push({
-            label: '详情',
-            onClick: () => viewDetailHan(record.id)
-          });
-        }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_UPDATE)) {
-          config.push({
-            label: '编辑',
-            onClick: () => editFormHandle(record)
-          });
-        }
-        if (perms.includes(CONNECTION_PERMISSIONS.CAN_DELETE)) {
-          config.push({
-            label: '删除',
-            onClick: () => delModalHan(record.id)
-          });
-        }
         return (
-          <OperationColumn
-            row={record}
-            config={config}
-            index={0}
-            extendFont="操作"
-          />
+          <Space>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_GET}>
+              <Button type="text" onClick={() => viewDetailHan(record.id)}>
+                详情
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_UPDATE}>
+              <Button type="text" onClick={() => editFormHandle(record)}>
+                编辑
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_DELETE}>
+              <Button type="text" onClick={() => delModalHan(record.id)}>
+                删除
+              </Button>
+            </PermissionWrapper>
+          </Space>
         );
       }
     }
@@ -318,14 +308,13 @@ export default function Connection() {
   };
   // 点击详情的回调
   const editFormHandle = (obj) => {
-    console.log(obj);
     setEditObject(obj);
     setEditVisible(true);
   };
 
   // 点击删除按钮执行的方法
   const DeleteMethod = async (id) => {
-    const res = await delconnectionList(id);
+    const res = await delconnectionList({ id });
     if (res.code == '' && res.status == 200) {
       Message.success({
         content: '删除成功'
@@ -461,7 +450,8 @@ export default function Connection() {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          width: '100%'
+          width: '100%',
+          marginBottom: '16px'
         }}
       >
         <Input.Search
@@ -487,19 +477,25 @@ export default function Connection() {
           </Button>
         </PermissionWrapper>
       </div>
-      <Table
-        border={false}
-        columns={columns}
-        data={ConnectionData}
-        noDataElement={noDataElement({ description: '暂无数据' })}
-        style={{ padding: '16px 0px' }}
-        pagination={false}
-        rowKey="id"
-        loading={tableLoding}
-        onChange={(pagination, sorter, filters) => {
-          siftHan(sorter, filters);
-        }}
-      />
+      <div style={{ overflow: 'auto', flex: 1 }}>
+        <Table
+          border={false}
+          columns={columns}
+          data={ConnectionData}
+          noDataElement={noDataElement({ description: '暂无数据' })}
+          style={{ padding: '16px 0px' }}
+          pagination={false}
+          rowKey="id"
+          loading={tableLoding}
+          onChange={(pagination, sorter, filters) => {
+            siftHan(sorter, filters);
+          }}
+          scroll={{
+            x: 1600,
+            y: 400
+          }}
+        />
+      </div>
       {/* 分页 */}
       {ConnectionData && ConnectionData.length > 0 && (
         <Pagination

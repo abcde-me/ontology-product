@@ -1,29 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-} from 'react'
-import { useNodes } from 'reactflow'
-import { useStore } from './store'
-import {
-  useIsChatMode,
-  useNodesReadOnly,
-  useNodesSyncDraft,
-} from './hooks'
-import { type CommonNodeType, type InputVar, InputVarType, type Node } from './types'
-import useConfig from './nodes/start/use-config'
-import type { StartNodeType } from './nodes/start/types'
-import type { PromptVariable } from '@/pages/workflowConfig/models/debug'
-// import NewFeaturePanel from '@/app/components/base/features/new-feature-panel'
+import React, { memo } from 'react'
 
 const Features = () => {
-  const setShowFeaturesPanel = useStore(s => s.setShowFeaturesPanel)
-  const isChatMode = useIsChatMode()
-  const { nodesReadOnly } = useNodesReadOnly()
-  const { handleSyncWorkflowDraft } = useNodesSyncDraft()
-  const nodes = useNodes<CommonNodeType>()
 
-  const startNode = nodes.find(node => node.data.type === 'start')
-  const { id, data } = startNode as Node<StartNodeType>
   // const { handleAddVariable } = useConfig(id, data)
 
   // const handleAddOpeningStatementVariable = (variables: PromptVariable[]) => {
@@ -38,11 +16,6 @@ const Features = () => {
   //   }
   //   handleAddVariable(startNodeVariable)
   // }
-
-  const handleFeaturesChange = useCallback(() => {
-    handleSyncWorkflowDraft()
-    setShowFeaturesPanel(true)
-  }, [handleSyncWorkflowDraft, setShowFeaturesPanel])
 
   return (
     // <NewFeaturePanel

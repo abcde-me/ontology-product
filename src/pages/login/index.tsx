@@ -1,7 +1,7 @@
-import { login } from '@/api/user';
+import { Login } from '@/api/modules/user';
+import { isRequestSuccess } from '@/api/utils';
 import LoginBgPng from '@/assets/LOGINbg.png';
 import LogoPng from '@/assets/logo.png';
-import { setLoginToken, removeLoginToken, getLoginToken } from '@/utils/env';
 import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -25,33 +25,19 @@ const LoginCard = () => {
         console.error('Invalid redirect URL:', e);
       }
     }
-    return '/tenant/compute/modaforge/connection';
+    // 默认重定向到组织管理页面
+    return '/';
   };
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      console.log(values);
-      const res = await login(values);
+      const res = await Login(values);
       console.log('登录结果', res);
-      if (res.success) {
-        // 测试解析后端返回的实际 token
-        const testToken = res.data.token;
-        console.log('解析后端返回的实际 token:');
-
-        // // 导入解析工具
-        // import('@/utils/authUtils').then(({ getTokenExpiration, isValidToken }) => {
-        //   console.log('Token 有效性:', isValidToken(testToken));
-        //   const expTime = getTokenExpiration(testToken);
-        //   console.log('过期时间:', expTime ? new Date(expTime).toLocaleString() : '解析失败');
-        // });
-        if (getLoginToken()) {
-          removeLoginToken();
-        }
-        setLoginToken(res.data.token);
-        localStorage.removeItem('cascader');
+      if (isRequestSuccess(res)) {
         // 重定向到之前的页面或默认页面
         const redirectPath = getRedirectPath();
+        console.log('Redirecting to:', redirectPath);
         history.push(redirectPath);
       }
     } catch (error) {
@@ -75,8 +61,7 @@ const LoginCard = () => {
         bordered={false}
         style={{
           borderRadius: '12px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-          padding: '20px 2px'
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
         }}
       >
         {/* Logo 和标题部分 */}
@@ -91,9 +76,7 @@ const LoginCard = () => {
         >
           <Form.Item
             label={
-              <div className="max-w-30 text-[14px] font-bold text-gray-800">
-                用户名
-              </div>
+              <div className="text-[14px] font-bold text-gray-800">用户名</div>
             }
             field="account"
             rules={[{ required: true, message: '请输入用户名' }]}
@@ -137,7 +120,7 @@ function Header() {
       <Space className="mb-8">
         <img className="w-48 object-contain" src={LogoPng} />
         <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
-        <div className="text-xl font-bold text-gray-800">
+        <div className="text-[17px] font-bold text-gray-800">
           多模态数据治理平台
         </div>
       </Space>

@@ -3,13 +3,10 @@ import produce from 'immer';
 import useVarList from '../_base/hooks/use-var-list';
 import type { CodeNodeType, EnhancementNodeType } from './types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
-import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
 const useConfig = (id: string, payload: CodeNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
-
-  const appId = useTaskStore.getState().workflowDetail?.workflow_uuid;
 
   const { inputs, setInputs } = useNodeCrud<CodeNodeType>(id, payload);
   const { handleVarListChange, handleAddVariable } = useVarList<CodeNodeType>({
@@ -27,7 +24,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
       console.log('让我看看什么时候这里的值变化了～');
       const newInputs = produce(inputRef.current, (draft: any) => {
         draft.type = 'enhancement';
-        draft.title = '数据增强节点';
+        draft.title = '数据增强';
         draft.enha_modle_id = payload.enha_modle_id;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.app_scenarios = {

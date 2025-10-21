@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 import produce from 'immer'
-import type { Variable } from '@/pages/workflowConfig/workflow/types'
 
 type Params<T> = {
   inputs: T
@@ -12,9 +11,9 @@ function useVarList<T>({
   setInputs,
   varKey = 'variables',
 }: Params<T>) {
-  const handleVarListChange = useCallback((newList: Variable[] | string) => {
+  const handleVarListChange = useCallback((newList: any[] | string) => {
     const newInputs = produce(inputs, (draft: any) => {
-      draft[varKey] = newList as Variable[]
+      draft[varKey] = newList as []
     })
     setInputs(newInputs)
   }, [inputs, setInputs, varKey])

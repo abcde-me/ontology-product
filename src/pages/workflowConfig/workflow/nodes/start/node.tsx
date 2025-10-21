@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import InputVarTypeIcon from '../_base/components/input-var-type-icon';
 import type { StartNodeType } from './types';
 import {
   BlockEnum,

@@ -107,7 +107,7 @@ const ConfigModal: FC<IConfigModalProps> = ({
           ) {
             Object.keys(DEFAULT_FILE_UPLOAD_SETTING).forEach((key) => {
               if (key !== 'max_length')
-                (draft as any)[key] = (DEFAULT_FILE_UPLOAD_SETTING as any)[key];
+                draft[key] = (DEFAULT_FILE_UPLOAD_SETTING as any)[key];
             });
             if (type === InputVarType.multiFiles)
               draft.max_length = DEFAULT_FILE_UPLOAD_SETTING.max_length;

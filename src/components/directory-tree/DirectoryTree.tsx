@@ -746,16 +746,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               return (
                 <div className="directory-tree-extra">
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
+                  <PermissionWrapper permission={nowPermissions.CAN_RENAME}>
                     <Tooltip color="white" content="重命名">
                       <IconEdit
                         className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
-                  )}
-                  {node.dataRef?.type !== PythonItemType.Directory &&
-                    node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
+                  </PermissionWrapper>
+                  <PermissionWrapper permission={nowPermissions.CAN_COPY}>
+                    {node.dataRef?.type !== PythonItemType.Directory && (
                       <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -765,7 +765,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         />
                       </Tooltip>
                     )}
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
+                  </PermissionWrapper>
+                  <PermissionWrapper permission={nowPermissions.CAN_DELETE}>
                     <Tooltip color="white" content="删除">
                       <IconDelete
                         className="text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -774,7 +775,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         }
                       />
                     </Tooltip>
-                  )}
+                  </PermissionWrapper>
                 </div>
               );
             }}

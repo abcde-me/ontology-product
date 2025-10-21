@@ -1,5 +1,5 @@
 import React from 'react';
-import './index.scss';
+import styles from './index.module.scss';
 
 export default function DataAugmentationNode(props: {
   dataSource: { raw_data_num: number; processed_data_num: number; log: string };
@@ -9,7 +9,7 @@ export default function DataAugmentationNode(props: {
   const { dataSource, status } = props;
 
   return (
-    <div className="data-augmentation-node">
+    <div className={styles['data-augmentation-node']}>
       <div
         style={{
           display: 'flex',
@@ -18,26 +18,26 @@ export default function DataAugmentationNode(props: {
           overflow: 'hidden'
         }}
       >
-        <div className="item-box">
-          <span className="item-title">原始数据量</span>
-          <span className="item-content">
+        <div className={styles['item-box']}>
+          <span className={styles['item-title']}>原始数据量</span>
+          <span className={styles['item-content']}>
             {status === 0 && dataSource?.raw_data_num === 0
               ? '--'
               : (dataSource?.raw_data_num ?? '--')}
           </span>
         </div>
-        <div className="item-box">
-          <span className="item-title">增强后数据量</span>
-          <span className="item-content">
+        <div className={styles['item-box']}>
+          <span className={styles['item-title']}>增强后数据量</span>
+          <span className={styles['item-content']}>
             {status === 0 && dataSource?.processed_data_num === 0
               ? '--'
               : (dataSource?.processed_data_num ?? '--')}
           </span>
         </div>
       </div>
-      <div className="running-detail">运行详情：</div>
+      <div className={styles['running-detail']}>运行详情：</div>
       <div
-        className="running-detail-content-box"
+        className={styles['running-detail-content-box']}
         style={{
           whiteSpace: 'pre-wrap',
           fontSize: '14px',

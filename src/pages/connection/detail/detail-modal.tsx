@@ -1,12 +1,11 @@
-import { Message, Modal, Popover, Tooltip } from '@arco-design/web-react';
+import { Message, Tooltip } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { IconCopy, IconLoading } from '@arco-design/web-react/icon';
-import TimeFormatting from '../../../utils/timeFormatting';
 import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
 import copy from 'copy-to-clipboard';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import { DATABASE_TYPE_ENUM, ConnectorType, TYPE_CONFIG } from '../config';
+import { DATABASE_TYPE_ENUM, TYPE_CONFIG } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import styles from '../styles/detail.module.scss';
 
@@ -21,7 +20,9 @@ const ModalDetail = (props) => {
   const getdetailListHan = async () => {
     try {
       setLoading(true);
-      const res = await getdetailList(props.detailId);
+      const res = await getdetailList({
+        id: props.detailId
+      });
       setDetailData(res.data);
     } catch (error) {
       console.error('获取详情页数据失败:', error);
@@ -29,12 +30,6 @@ const ModalDetail = (props) => {
       setLoading(false);
     }
   };
-  function capitalizeFirstLetter(str) {
-    if (typeof str !== 'string' || str.length === 0) {
-      return str;
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
   useEffect(() => {
     getdetailListHan();
   }, [props.detailId]);
@@ -84,9 +79,9 @@ const ModalDetail = (props) => {
                     width: '8px',
                     height: '8px',
                     backgroundColor:
-                      DetailData?.status == 'connected'
+                      DetailData?.status == '1'
                         ? '#059669'
-                        : DetailData?.status == 'disconnected'
+                        : DetailData?.status == '0'
                           ? '#DC2626'
                           : '',
                     borderRadius: '50%',
@@ -94,8 +89,8 @@ const ModalDetail = (props) => {
                   }}
                 ></div>
                 <div>
-                  {DetailData?.status == 'connected' && '已连接'}
-                  {DetailData?.status == 'disconnected' && '已断开'}
+                  {DetailData?.status == '1' && '已连接'}
+                  {DetailData?.status == '0' && '已断开'}
                 </div>
               </div>
             </div>

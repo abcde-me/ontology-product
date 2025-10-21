@@ -1,20 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import produce from 'immer';
-import { useBoolean } from 'ahooks';
 import type { StartNodeType } from './types';
-import { ChangeType } from '@/pages/workflowConfig/workflow/types';
-import type {
-  BlockEnum,
-  InputVar,
-  MoreInfo,
-  ValueSelector
-} from '@/pages/workflowConfig/workflow/types';
+import type { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 import useNodeCrud from '@/pages/workflowConfig/workflow/nodes/_base/hooks/use-node-crud';
-import {
-  useIsChatMode,
-  useNodesReadOnly,
-  useWorkflow
-} from '@/pages/workflowConfig/workflow/hooks';
+import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 import StartNodeDefault from './default';
 import { useStoreApi } from 'reactflow';
 import { getLoadTaskFiles } from '@/api/loadApi';

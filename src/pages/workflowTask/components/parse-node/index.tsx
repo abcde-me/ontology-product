@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pagination, PaginationProps, Table } from '@arco-design/web-react';
+import { Pagination, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import getFileIcon from '@/components/file-icon';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { FileType } from '@/utils/type';
-import './index.scss';
+import styles from './index.module.scss';
 
 // 枚举文件状态
 enum FileStatus {
@@ -195,7 +195,7 @@ export default function ParseNode(props: {
     }
   ];
   return (
-    <div className="parse-node">
+    <div className={styles['parse-node']}>
       <div
         style={{
           display: 'flex',
@@ -204,25 +204,25 @@ export default function ParseNode(props: {
           overflow: 'hidden'
         }}
       >
-        <div className="item-box">
-          <span className="item-title">原始数据量</span>
-          <span className="item-content">
+        <div className={styles['item-box']}>
+          <span className={styles['item-title']}>原始数据量</span>
+          <span className={styles['item-content']}>
             {status === 0 && dataSource?.total === 0
               ? '--'
               : (dataSource?.total ?? '--')}
           </span>
         </div>
-        <div className="item-box">
-          <span className="item-title">成功</span>
-          <span className="item-content">
+        <div className={styles['item-box']}>
+          <span className={styles['item-title']}>成功</span>
+          <span className={styles['item-content']}>
             {status === 0 && dataSource?.success_total === 0
               ? '--'
               : (dataSource?.success_total ?? '--')}
           </span>
         </div>
-        <div className="item-box">
-          <span className="item-title">失败</span>
-          <span className="item-content">
+        <div className={styles['item-box']}>
+          <span className={styles['item-title']}>失败</span>
+          <span className={styles['item-content']}>
             {status === 0 && dataSource?.fail_total === 0
               ? '--'
               : (dataSource?.fail_total ?? '--')}

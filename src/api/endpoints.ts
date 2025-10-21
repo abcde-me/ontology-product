@@ -117,13 +117,13 @@ export const ResourceEndpoints = {
   logoInfo: '/api/menu/v1/ex/logo/info'
 };
 // todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
-
+const API_PREFIX = '/ceai';
 // 研发环境部署
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdp = '/api/aimdp/v1';
-export const PrefixLabelService = '/label-service/api/v1';
+export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
+export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -162,15 +162,15 @@ export const ResourceEndpointsV2 = {
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
   // 数据目录
-  catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
-  catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
-  volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
-  dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
-  volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
-  tableDeleteApi: PrefixAimdp + '/directory/delete-table', //删除数据库表
-  catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
-  targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
-  targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
+  catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
+  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
+  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
+  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
+  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
+  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
   sourceFileTypeListApi:
     PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
@@ -183,7 +183,7 @@ export const ResourceEndpointsV2 = {
   dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: PrefixAimdp + `/connectors/files/output`,
+  fileExportApi: PrefixAimdp + `/OutputToConnector`,
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,
@@ -260,165 +260,168 @@ export const ResourceEndpointsV2 = {
   datasetstree: PrefixV2 + '/dataset_contents/tree'
 };
 
+export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
+export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 // 多模态数据治理平台接口
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
+  // 登录
+  Login: PrefixUserSpace + '/Login',
+  Logout: PrefixUserSpace + '/Logout',
+  GetUser: PrefixUserSpace + '/GetUser',
+  GetProjOrg: PrefixUserSpace + '/GetProjOrg',
+
+  ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流
-  createWorkflow: PrefixAimdp + '/workflow/info',
+  createWorkflow: PrefixAimdp + '/CreateWorkFlow',
   // 编辑工作流
-  editWorkflow: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  editWorkflow: PrefixAimdp + '/EditWorkFlow',
   // 工作流详情
-  workflowDetail: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  workflowDetail: PrefixAimdp + '/GetWorkFlowInfo',
   // 工作流列表
-  workflowList: PrefixAimdp + '/workflow/list',
+  workflowList: PrefixAimdp + '/ListWorkFlows',
   // 工作流操作
-  workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  workflowOperation: PrefixAimdp + '/ManageWorkFlow',
   // 工作流删除
-  workflowDelete: PrefixAimdp + '/workflow/{workflow_uuid}/{workflow_version}',
+  workflowDelete: PrefixAimdp + '/DeleteWorkFlow',
   // 工作流复制
-  workflowCopy: PrefixAimdp + '/workflow/copy/{workflow_uuid}',
+  workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
-  workflowTargetPath: PrefixAimdp + '/directory',
-  workflowDraft:
-    PrefixAimdp +
-    '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  workflowTargetPath: PrefixAimdp + '/ListDirectory',
+  workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
   // 工作流-脚本类型
-  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
-  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  scriptingEngine: PrefixAimdp + '/ListWorkFlowScriptEngineTypes',
   // 工作流-脚本模板
-  scriptingTemplate:
-    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  scriptingTemplate: PrefixAimdp + '/GetWorkFlowScriptTemplate',
   // 工作流-脚本执行
-  scriptingBench:
-    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  scriptingBench: PrefixAimdp + '/RunWorkFlowScript',
   // 工作流-脚本执行结果
-  scriptingBenchResult:
-    PrefixAimdp +
-    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  scriptingBenchResult: PrefixAimdp + '/GETWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
 
   // 作业列表
-  taskList: PrefixAimdp + '/workflow_instance/list',
+  taskList: PrefixAimdp + '/ListWorkflowInstances',
   // 作业详情
-  taskDetail: PrefixAimdp + '/workflow_instance/{task_id}',
+  taskDetail: PrefixAimdp + '/GetWorkflowInstanceInfo',
   // 作业详情节点
-  taskDetailNode: PrefixAimdp + '/workflow_instance/task_detail',
+  taskDetailNode: PrefixAimdp + '/GetWorkflowInstanceFiles',
   // 作业重跑
-  taskRerun: PrefixAimdp + '/workflow_instance/task_rerun',
+  taskRerun: PrefixAimdp + '/RerunWorkflowInstance',
   // 作业停用
-  taskStop: PrefixAimdp + '/workflow_instance/task_stop',
+  taskStop: PrefixAimdp + '/StopWorkflowInstance',
 
   modelGet: PrefixAimdp + '/model/model_list',
 
   //数据目录
   //获取数据目录
-  catalogListApi: PrefixAimdp + '/directory',
+  catalogListApi: PrefixAimdp + '/ListDirectory',
   //查询指定目录下加载成功的文件信息
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
-  catalogPreviewApi: PrefixAimdp + '/datasets/preview', //数据集管理在用
+  catalogPreviewApi: PrefixAimdp + '/PreviewDatasetsByDst', //数据集管理在用
 
   //数据集
   //获取数据集列表
-  datasetsApi: PrefixAimdp + '/datasets/list',
+  datasetsApi: PrefixAimdp + '/ListDatasets',
   //获取数据集详情
-  datasetDetailApi: PrefixV1 + '/dataset/{id}',
+  // datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
-  createDatasetApi: PrefixAimdp + '/datasets',
+  createDatasetApi: PrefixAimdp + '/CreateDataset',
   //获取标签列表
-  tagListApi: PrefixAimdp + '/tags',
+  tagListApi: PrefixAimdp + '/ListTags',
   //删除数据集
-  deleteDataset: PrefixV1 + '/dataset/{id}',
+  // deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
-  connectorListApi: PrefixAimdp + '/connectors',
+  connectorListApi: PrefixAimdp + '/ListConnectors',
   //查询指定连接器加载成功的文件信息
-  connectorFileListApi: PrefixAimdp + '/connectors/{connector_id}/files',
+  connectorFileListApi: PrefixAimdp + '/ListConnectorLoadedFiles',
   //修改数据集
-  updateDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
+  updateDatasetApi: PrefixAimdp + '/EditDataset',
   //获取数据集详细信息
-  datasetDetailPageApi: PrefixAimdp + '/datasets/{dataset_id}',
+  datasetDetailPageApi: PrefixAimdp + '/GetDatasetInfo',
   //删除数据集
-  deleteDatasetApi: PrefixAimdp + '/datasets/{dataset_id}',
+  deleteDatasetApi: PrefixAimdp + '/DeleteDataset',
   //批量删除数据集
-  batchDeleteDatasetApi: PrefixAimdp + '/datasets/batch-delete',
+  batchDeleteDatasetApi: PrefixAimdp + '/DeleteDatasets',
   //查询数据集详细信息的数据内容和
-  datasetContentsApi: PrefixAimdp + '/datasets/version/data',
+  datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/datasets/version/data',
+  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
   //获取数据集版本列表
-  datasetVersionListApi: PrefixAimdp + '/datasets/version',
+  datasetVersionListApi: PrefixAimdp + '/ListDatasetVersion',
   //版本重新生成
-  datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/datasets/version/file',
+  dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
   //数据内容数据库表
-  dataContentTableList: PrefixAimdp + '/datasets/version/table',
+  dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
 
   // 连接器接口
 
   // 获取连接器数据列表
-  getConnection: PrefixAimdp + '/connectors',
+  getConnection: PrefixAimdp + '/ListConnectors',
   // 新建连接器数据
-  addconnection: PrefixAimdp + '/connectors',
+  addconnection: PrefixAimdp + '/CreateConnector',
   // 删除连接器数据
-  delconnection: PrefixAimdp + '/connectors/{connector_id}',
+  delconnection: PrefixAimdp + '/DeleteConnector',
   // 修改连接器数据
-  editconnection: PrefixAimdp + '/connectors/{connector_id}',
+  editconnection: PrefixAimdp + '/EditConnector',
   // 查看连接器详情数据
-  getconnection: PrefixAimdp + '/connectors/{connector_id}',
+  getconnection: PrefixAimdp + '/GetConnector',
 
   // 数据载入接口
 
   // 获取数据载入列表
-  getLoadListApi: PrefixAimdp + '/load_tasks_page',
+  getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务
-  addLoadApi: PrefixAimdp + '/load_tasks',
+  addLoadApi: PrefixAimdp + '/CreateLoadTask',
   //数据载入上传文件
-  uploadApi: PrefixAimdp + '/load_tasks/upload',
+  uploadApi: PrefixAimdp + '/load_tasks/upload', // 没调用过
   // 删除指定载入任务
-  delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  delLoadApi: PrefixAimdp + '/DeleteLoadTask',
   // 修改单个载入任务
-  editLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  editLoadApi: PrefixAimdp + '/EditLoadTask',
   // 查看单个载入任务详情
-  getLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
+  getLoadApi: PrefixAimdp + '/GetLoadTask',
   // 启停单个载入任务
-  startAndStopeLoadApi: PrefixAimdp + '/load_tasks/cron/release',
+  startAndStopeLoadApi: PrefixAimdp + '/ControlLoadTaskCron',
   // 立即运行指定载入任务
-  runLoadApi: PrefixAimdp + '/load_tasks/new_start',
+  runLoadApi: PrefixAimdp + '/CreateLoadTaskInstance',
   // 删除指定文件
-  delFileApi: PrefixAimdp + '/load_tasks/files',
+  delFileApi: PrefixAimdp + '/load_tasks/files', // 没搜到
   // 查询载入任务详情的列表
-  getdetailListApi: PrefixAimdp + '/load_tasks/records/page',
+  getdetailListApi: PrefixAimdp + '/ListLoadTaskInstances',
   // 查询单个载入任务的执行记录
-  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}',
+  getLoadRecordApi: PrefixAimdp + '/load_tasks/record/{task_id}', // 前端没调用
   // 查询单个载入任务已加载文件信息
-  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}',
+  getLoadFileApi: PrefixAimdp + '/load_tasks/files/{task_id}', // 没搜到
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
-  getLoadTaskFiles: PrefixAimdp + '/load_tasks/source_dir/files_page',
+  getLoadTaskFiles: PrefixAimdp + '/ListSourceDirFiles',
   // 停止单个载入任务
-  stopLoadApi: PrefixAimdp + '/load_tasks/records/stop',
+  stopLoadApi: PrefixAimdp + '/StopLoadTaskInstance',
   // 查询个人载入记录列表
-  getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
+  getLoadRecordListApi: PrefixAimdp + '/ListLoadTaskInstanceFiles',
   // 查询任务单个执行记录详情
-  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+  getLoadRecordDetailApi: PrefixAimdp + '/GetLoadTaskInstanceInfo',
   // 重试载入任务
-  reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  reTryLoadApi: PrefixAimdp + '/RetryLoadTaskInstance',
   //载入获取表名
-  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
+  getTableNameApi: PrefixAimdp + '/GenerateDBName',
 
   // 数据标注接口
   // 数据标注配置 发布
-  publishRequirementApi: PrefixLabelService + '/requirements/create',
+  publishRequirementApi: PrefixLabelService + '/createRequirement',
   // 需求详情查看
-  getRequirementDetailApi: PrefixLabelService + '/requirements/query',
+  getRequirementDetailApi: PrefixLabelService + '/queryRequirement',
   // 获取数据标注列表
-  getAnnotationListApi: PrefixLabelService + '/requirements/list',
+  getAnnotationListApi: PrefixLabelService + '/listRequirement',
   // 标注下载结果
-  getAnnotationDownloadApi: PrefixLabelService + '/requirements/resultDownload',
+  getAnnotationDownloadApi: PrefixLabelService + '/resultDownlaodRequirement',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
@@ -431,67 +434,61 @@ export const ModaForgeResourceEndpoints = {
 
   // python开发
   // 获取python列表
-  pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
+  pythonListApi: PrefixAimdp + '/ListPysparkFiles',
   // 创建python
-  pythonCreateApi: PrefixAimdp + '/pyspark',
+  pythonCreateApi: PrefixAimdp + '/CreatePysparkFile',
   // 重命名python
-  pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  pythonRenameApi: PrefixAimdp + '/RenamePysparkFile',
   // 删除python
-  pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  pythonDeleteApi: PrefixAimdp + '/DeletePysparkFile',
   // 复制python
-  pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  pythonCopyApi: PrefixAimdp + '/CopyPysparkFile',
   // 打开python
-  pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  pythonOpenApi: PrefixAimdp + '/OpenPysparkFile',
   // 修改python
-  pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  pythonSaveApi: PrefixAimdp + '/UpdatePysparkFile',
   // 运行python
-  pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  pythonRunApi: PrefixAimdp + '/RunPysparkFile',
   // 停止运行python
-  pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  pythonRunCancelApi: PrefixAimdp + '/StopPysparkFile',
   // 获取运行结果
-  pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  pythonRunResultApi: PrefixAimdp + '/GetPysparkFileRunResult',
   // 获取运行日志
-  pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  pythonRunLogApi: PrefixAimdp + '/GetPysparkFileRunLog',
   // 获取导出数据集列表
-  pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
+  pythonExportDatasetListApi: PrefixAimdp + '/ListPysparkExportTasks',
   // 停止导出数据集
-  pythonExportDatasetStopApi:
-    PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
+  pythonExportDatasetStopApi: PrefixAimdp + '/StopPysparkExportTask',
   // 重试导出数据集
-  pythonExportDatasetRetryApi:
-    PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
+  pythonExportDatasetRetryApi: PrefixAimdp + '/RetryPysparkExportTask',
   // 获取算子
-  pythonOperatorApi: PrefixAimdp + '/directory/get-operator',
+  pythonOperatorApi: PrefixAimdp + '/GetOperatorDemo',
   // 导出数据集
-  pythonExportDatasetApi: PrefixAimdp + '/pyspark/export/dataset',
+  pythonExportDatasetApi: PrefixAimdp + '/CreatePysparkExportTask',
   // 获取导出文件列表
-  pythonExportFileApi: PrefixAimdp + '/pyspark/export/file',
+  pythonExportFileApi: PrefixAimdp + '/ListPysparkExportFiles',
   // 获取导出预览数据
-  pythonExportPreviewApi: PrefixAimdp + '/pyspark/export/preview',
+  pythonExportPreviewApi: PrefixAimdp + '/PreviewPysparkExportData',
 
   // SQL开发
-  sqlListApi: PrefixAimdp + '/sql_script/list',
-  sqlCreateApi: PrefixAimdp + '/sql_script/create',
-  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
-  sqlDeleteApi: PrefixAimdp + '/sql_script/{script_id}/delete',
-  sqlCopyApi: PrefixAimdp + '/sql_script/{script_id}/copy',
-  sqlOpenApi: PrefixAimdp + '/sql_script/{script_id}/info',
-  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
-  sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
-  sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
-  sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
-  sqlRunLogApi: PrefixAimdp + '/sql_script/{script_id}/get_run_log',
-  sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
-  sqlExportDatasetVersion:
-    PrefixAimdp + '/sql_script/{script_id}/export_version_update',
-  sqlExportDatasetList: PrefixAimdp + '/sql_script/export_task/list',
-  sqlExportDatasetStopApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/stop',
-  sqlExportDatasetRetryApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/retry',
-  sqlExportDatasetDetailApi:
-    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/get_sql_info',
-  datasetsOptionsApi: PrefixAimdp + '/datasets/list',
+  sqlListApi: PrefixAimdp + '/ListSqlFile',
+  sqlCreateApi: PrefixAimdp + '/CreateSqlFile',
+  sqlRenameApi: PrefixAimdp + '/RenameSqlFile',
+  sqlDeleteApi: PrefixAimdp + '/DeleteSqlFile',
+  sqlCopyApi: PrefixAimdp + '/CopySqlFile',
+  sqlOpenApi: PrefixAimdp + '/GetSqlFile',
+  sqlSaveApi: PrefixAimdp + '/EditSqlFile',
+  sqlRunApi: PrefixAimdp + '/RunSqlFile',
+  sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
+  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResultt',
+  sqlRunLogApi: PrefixAimdp + '/GetSqlFileRunLog',
+  sqlExportDataset: PrefixAimdp + '/CreateSqlExportTask',
+  sqlExportDatasetVersion: PrefixAimdp + '/UpdateSqlExportTaskVersion',
+  sqlExportDatasetList: PrefixAimdp + '/ListSqlExportTask',
+  sqlExportDatasetStopApi: PrefixAimdp + '/StopSqlExportTask',
+  sqlExportDatasetRetryApi: PrefixAimdp + '/RetrySqlExportTask',
+  sqlExportDatasetDetailApi: PrefixAimdp + '/GetSqlExportTaskInfo',
+  datasetsOptionsApi: PrefixAimdp + '/ListDatasets',
 
   leGetTask: PrefixLabelService + '/getTask',
   leGetTaskById: PrefixLabelService + '/getTaskById',

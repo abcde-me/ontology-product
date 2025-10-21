@@ -6,8 +6,6 @@ import {
   ALL_COMPLETION_AVAILABLE_BLOCKS
 } from '@/pages/workflowConfig/workflow/blocks';
 
-const i18nPrefix = 'workflow.errorMsg';
-
 const nodeDefault: NodeDefault<TextParserNodeType> = {
   defaultValue: {
     files: [],
@@ -23,8 +21,8 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-          (type) => type !== BlockEnum.End
-        );
+        (type) => type !== BlockEnum.End
+      );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {
@@ -33,7 +31,7 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
       : ALL_COMPLETION_AVAILABLE_BLOCKS;
     return nodes;
   },
-  checkValid(payload: TextParserNodeType, t: any) {
+  checkValid(payload: TextParserNodeType) {
     let errorMessages = '';
     const {
       selected_files_num,

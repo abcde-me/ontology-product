@@ -9,7 +9,7 @@ export async function getWorkflowList(params: {
   run_cycle: string;
   sort: string;
 }) {
-  return await UAPI.RES.workflowList({}).get(params).inRegion().do();
+  return await UAPI.RES.workflowList({}).post(params).inRegion().do();
 }
 
 // 工作流删除
@@ -17,13 +17,16 @@ export async function workflowDelete(
   workflow_uuid: string | number,
   workflow_version: string
 ) {
-  return await UAPI.RES.workflowDelete({ workflow_uuid, workflow_version })
-    .delete()
+  return await UAPI.RES.workflowDelete({})
+    .post({ workflow_uuid, workflow_version })
     .inRegion()
     .do();
 }
 
 // 工作流复制
 export async function workflowCopy(workflow_uuid: string | number) {
-  return await UAPI.RES.workflowCopy({ workflow_uuid }).post().inRegion().do();
+  return await UAPI.RES.workflowCopy({})
+    .post({ workflow_uuid })
+    .inRegion()
+    .do();
 }

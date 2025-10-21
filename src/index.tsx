@@ -7,18 +7,18 @@ import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
 import './style/theme.scss';
-import React, { useEffect, Suspense, useMemo, useCallback } from 'react';
+import React, {
+  useEffect,
+  Suspense,
+  useMemo,
+  useRef,
+  useCallback
+} from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import {
-  ConfigProvider,
-  Layout,
-  Spin,
-  Dropdown,
-  Menu
-} from '@arco-design/web-react';
+import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
-import { IconUser } from '@arco-design/web-react/icon';
+import { useHistory } from 'react-router-dom';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -44,11 +44,26 @@ import {
 } from 'react-router-dom';
 import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
-import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
-import { isInFrame } from './utils/env';
+import { isInFrame, isWujie } from './utils/env';
+import { useUserInfoStore } from './store/userInfoStore';
+import { usePermission } from '@/hooks';
+import { menus } from '@/pages/admin/layout/menus';
+import { is } from 'immer/dist/internal';
+import { getLocalStorage } from './utils/storage';
+import { ProjectIdKey } from './utils/const';
 
 initI18n();
+
+// 在应用启动时从 localStorage 恢复 projectId
+const initProjectIdFromStorage = () => {
+  const pId = getLocalStorage<string[]>(ProjectIdKey);
+  if (Array.isArray(pId) && pId.length > 1) {
+    useUserInfoStore.getState().setProjectId(pId);
+  }
+};
+
+initProjectIdFromStorage();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
@@ -70,7 +85,84 @@ function App() {
     (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
   );
   const location = useLocation();
-  const { pushPath } = usePathChange();
+  const history = useHistory();
+
+  const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
+    useUserInfoStore();
+  const { createPermissionFilter, setUserPermissions } = usePermission();
+
+  // 用于追踪是否已经初始化过权限
+  const permissionInitializedRef = useRef(false);
+  // 用于追踪项目是否刚刚切换过
+  const projectSwitchedRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      projectId &&
+      userActions.actions !== null &&
+      !window.location.pathname.includes('/tenant/compute/modaforge/login')
+    ) {
+      let finalMenus = [...menus];
+      if (!userActions.isAdmin) {
+        finalMenus = createPermissionFilter(menus);
+      }
+      console.log('finalMenus', finalMenus);
+      setUserMenus(finalMenus);
+
+      // 只有当项目刚刚切换过时，才跳转到第一个有权限的路由
+      if (projectSwitchedRef.current) {
+        const firstValidPath = finalMenus.find((item) => item.children)
+          ?.children?.[0]?.path;
+        if (firstValidPath) {
+          history.push(firstValidPath);
+        }
+        projectSwitchedRef.current = false;
+      }
+    }
+  }, [projectId, userActions.actions, userActions.isAdmin]);
+
+  useEffect(() => {
+    // 在主应用中加载子应用时，初始化权限
+    // 子应用中 isWujie 为 true，需要从 localStorage 恢复的 projectId 初始化权限
+    // 只在初始化时调用，不在切换项目时调用
+    if (
+      isWujie &&
+      projectId &&
+      projectId[1] &&
+      userActions.actions === null &&
+      !permissionInitializedRef.current
+    ) {
+      setUserPermissions(projectId[1]);
+      permissionInitializedRef.current = true;
+    }
+  }, [projectId, userActions.actions, setUserPermissions]);
+
+  const switchProject = useCallback(
+    (pId: string[]) => {
+      console.log('Wujie ProjectId', pId);
+      // 直接使用传入的 pId 调用权限初始化，避免 state 更新的时序问题
+      if (pId && pId[1]) {
+        setUserPermissions(pId[1]);
+      }
+      // 重置权限状态
+      setUserActions({ isAdmin: false, actions: null });
+      // 更新 projectId
+      setProjectId(pId);
+      // 标记项目已切换，这样权限加载完成后会跳转到新项目的第一个有权限的路由
+      projectSwitchedRef.current = true;
+      // 重置初始化标记，但不要在这里设置为 false，因为我们已经调用了 setUserPermissions
+      permissionInitializedRef.current = true;
+    },
+    [setUserPermissions, setUserActions, setProjectId]
+  );
+
+  useEffect(() => {
+    (window as any).$wujie?.bus.$on('switchProject', switchProject);
+
+    return () => {
+      (window as any).$wujie?.bus.$off('switchProject', switchProject);
+    };
+  }, [switchProject]);
 
   const hidden = useMemo(
     () =>
@@ -184,24 +276,18 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
   // @ts-expect-error
   module.hot.accept('./pages/admin/layout', () => {
     // 当 App 组件或其依赖发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextApp = require('./pages/admin/layout').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/login', () => {
     // 当 Login 组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextLogin = require('./pages/login').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/errorPages', () => {
     // 当错误页面组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextPage404 = require('./pages/errorPages').default;
     render(Index);
   });
 
