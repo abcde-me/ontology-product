@@ -83,7 +83,11 @@ export const WORKFLOW_LIST_PERMISSIONS = {
 export const WORKFLOW_DETAIL_PERMISSIONS = {
   CAN_UPDATE_DAG: 'workflow:can_update_dag', // 编辑保存画布
   CAN_OPERATION: 'workflow:can_operation', // 工作流操作（上下线、运行）
-  CAN_UPDATE: 'workflow:can_update' // 工作流名称修改
+  CAN_UPDATE: 'workflow:can_update', // 工作流名称修改
+
+  UPDATE_DAG: 'aimdp-manager:workflow:manage:modify', // 编辑保存画布
+  OPERATION: 'aimdp-manager:workflow:manage:run', // 工作流操作（上下线、运行）
+  UPDATE: 'aimdp-manager:workflow:manage:modify' // 工作流名称修改
 } as const;
 
 // 作业列表相关权限

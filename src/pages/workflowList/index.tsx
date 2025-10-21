@@ -435,7 +435,7 @@ export default function WorkflowList() {
           }}
         />
 
-        <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_CREATE}>
+        <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
           <Button
             type="primary"
             onClick={handleCreateWorkflow}
@@ -453,7 +453,7 @@ export default function WorkflowList() {
         noDataElement={noDataElement({
           description: '暂无工作流',
           btnText: '创建工作流',
-          perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
+          perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
           handleBtn: () => handleCreateWorkflow()
         })}
         rowKey="id"

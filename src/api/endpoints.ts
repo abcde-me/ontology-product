@@ -249,21 +249,21 @@ export const ModaForgeResourceEndpoints = {
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流
-  createWorkflow: PrefixAimdp + '/workflow/info',
+  createWorkflow: PrefixAimdp + '/CreateWorkFlow',
   // 编辑工作流
-  editWorkflow: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  editWorkflow: PrefixAimdp + '/EditWorkFlow',
   // 工作流详情
-  workflowDetail: PrefixAimdp + '/workflow/info/{workflow_uuid}',
+  workflowDetail: PrefixAimdp + '/GetWorkFlowInfo',
   // 工作流列表
   workflowList: PrefixAimdp + '/ListWorkFlows',
   // 工作流操作
-  workflowOperation: PrefixAimdp + '/workflow/operation/{workflow_uuid}',
+  workflowOperation: PrefixAimdp + '/ManageWorkFlow',
   // 工作流删除
   workflowDelete: PrefixAimdp + '/DeleteWorkFlow',
   // 工作流复制
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
-  workflowTargetPath: PrefixAimdp + '/directory',
+  workflowTargetPath: PrefixAimdp + '/ListDirectory',
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
