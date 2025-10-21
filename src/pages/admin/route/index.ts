@@ -119,30 +119,6 @@ export const routes: IRoute[] = [
       }
     ]
   },
-  //APIKey
-  {
-    name: 'apiKey',
-    key: '/tenant/compute/modaforge/apiKey',
-    component: React.lazy(async () => import('../../apiKey')),
-    permission: 'aimdp-manager:apikey:read:list',
-    children: []
-  },
-  // 组织管理
-  {
-    name: 'organization',
-    key: '/tenant/compute/modaforge/organization',
-    component: React.lazy(async () => import('../../organization')),
-    permission: 'organizations:can_view',
-    children: []
-  },
-  // 成员管理
-  {
-    name: 'member',
-    key: '/tenant/compute/modaforge/member',
-    component: React.lazy(async () => import('../../member')),
-    permission: 'user:can_view',
-    children: []
-  },
   // 登陆页面
   {
     name: 'login',
