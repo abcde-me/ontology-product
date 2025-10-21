@@ -1,60 +1,32 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import React from 'react';
-import produce from 'immer';
-import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { StartNodeType } from './types';
 import {
   BlockEnum,
-  type InputVar,
   type NodePanelProps
 } from '@/pages/workflowConfig/workflow/types';
 import {
   Form,
-  Input,
   Select,
   Checkbox,
   Switch,
-  Cascader,
-  Button,
-  Tag,
-  AutoComplete,
-  Message
 } from '@arco-design/web-react';
-import { v4 as uuid4 } from 'uuid';
-import { cloneDeep, debounce, escapeRegExp } from 'lodash-es';
+import { cloneDeep } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
-import CustomizeIcon from '@/assets/file/customize-icon.svg';
-import StartNodeDefault, { FileOptions } from './default';
-import { useStoreApi } from 'reactflow';
-import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
+import { FileOptions } from './default';
 import { getCatalogList } from '@/api/dataCatalog';
-import { getLoadTaskFiles } from '@/api/loadApi';
 import { useHistory } from 'react-router-dom';
-import { IconPlus } from '@arco-design/web-react/icon';
 
 const FormItem = Form.Item;
-const i18nPrefix = 'workflow.nodes.start';
 
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge');
-  const { data_category } = StartNodeDefault.defaultValue;
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
-  const [customizeFormat, setCustomizeFormat] = useState<string[]>(
-    data?.data_category?.[4]?.format || []
-  );
-  const [customizeOptions, setCustomizeOptions] = useState(
-    JSON.parse(localStorage.getItem('customizeOptions') || '[]')
-  );
-  const [customizeInputValue, setCustomizeInputValue] = useState('');
   const [form] = Form.useForm();
-  // const store = useStoreApi();
-  // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
   const history = useHistory();
-  const { OptGroup, Option } = AutoComplete;
 
   const docParams = Form.useWatch('data_category[0]', form);
   const imageParams = Form.useWatch('data_category[1]', form);
@@ -159,68 +131,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     );
   };
 
-  const handleCustomizeSwitch = () => {
-    const customizeConfig = form.getFieldValue('data_category[4]');
-    doFileConfigChange(
-      BlockEnum.Customize,
-      form.getFieldValue('data_path_id'),
-      customizeConfig
-    );
-  };
-  const handleCustomizeChange = (isClose: boolean, index?: number) => {
-    if (!customizeInputValue && !isClose) {
-      Message.error({
-        content: '文件类型不能为空！'
-      });
-      return;
-    }
-    if (customizeFormat.includes(customizeInputValue) && !isClose) {
-      Message.error({
-        content: '已存在当前类型文件！'
-      });
-      return;
-    }
-    const customizeConfig = form.getFieldValue('data_category[4]');
-    const newFormat = isClose
-      ? customizeFormat.filter((_, i) => i !== index)
-      : [...customizeFormat, customizeInputValue];
-    const newCustomizeOptions = isClose
-      ? [...customizeOptions]
-      : [...customizeOptions, customizeInputValue];
-    setCustomizeFormat(newFormat);
-    if (!isClose) {
-      localStorage.setItem(
-        'customizeOptions',
-        JSON.stringify(newCustomizeOptions)
-      );
-      setCustomizeOptions(newCustomizeOptions);
-    }
-    setCustomizeInputValue('');
-    const updatedConfig = {
-      ...customizeConfig,
-      format: newFormat,
-      id: (data_category && data_category[4]?.id) || 999,
-      category: (data_category && data_category[4]?.category) || '自定义'
-    };
-    form.setFieldValue('data_category[4]', updatedConfig);
-    handleChanged({
-      ...data,
-      data_category: [
-        docParams,
-        imageParams,
-        audioParams,
-        videoParams,
-        updatedConfig
-      ]
-    });
-    console.log(updatedConfig, index, 'updatedConfig');
-    doFileConfigChange(
-      BlockEnum.Customize,
-      form.getFieldValue('data_path_id'),
-      updatedConfig
-    );
-  };
-
   useEffect(() => {
     getCatalogList({ root_type: 1 }).then((res) => {
       const dirs: Record<string, any>[] = [];
@@ -240,26 +150,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const highlightMatch = (text: string, query: string) => {
-    if (!query) return <span>{text}</span>;
-    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
-    const parts = text.split(regex);
-
-    return (
-      <span>
-        {parts.map((part, i) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <span key={i} style={{ color: '#007dfa' }}>
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </span>
-    );
-  };
 
   return (
     <div className="wk-node-panel-content start-panel-content mt-[24px]">

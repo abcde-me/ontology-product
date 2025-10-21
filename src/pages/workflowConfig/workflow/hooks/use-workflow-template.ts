@@ -1,10 +1,9 @@
 import { generateNewNode } from '../utils';
-import { NODE_WIDTH_X_OFFSET, START_INITIAL_POSITION } from '../constants';
-import { useIsChatMode } from './use-workflow';
+import { START_INITIAL_POSITION } from '../constants';
 import { useNodesInitialData } from './use-nodes-data';
 
 export const useWorkflowTemplate = () => {
-  const isChatMode = useIsChatMode();
+  const isChatMode = false;
   const nodesInitialData = useNodesInitialData();
 
   const { newNode: startNode } = generateNewNode({

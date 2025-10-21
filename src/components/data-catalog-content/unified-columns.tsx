@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo
-} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Popover,
@@ -13,10 +7,6 @@ import {
   Link
 } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
-import { IconLaunch } from '@arco-design/web-react/icon';
-import DocIcon from './icon/DOC.svg';
-import PdfIcon from './icon/PDF.svg';
-import TxtIcon from './icon/TXT.svg';
 import getFileIcon from '@/components/file-icon';
 import {
   deleteTargetFile,
@@ -34,10 +24,6 @@ import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import getLabelByValue from '@/utils/getLabelByValue';
-// 图标组件定义
-const DOCIcon = ({ size = 16 }) => <DocIcon width={size} height={size} />;
-const PDFIcon = ({ size = 16 }) => <PdfIcon width={size} height={size} />;
-const TXTIcon = ({ size = 16 }) => <TxtIcon width={size} height={size} />;
 
 // 默认文件类型筛选器
 let fileTypeFilters = [
@@ -131,33 +117,9 @@ export const useFileTypeFilters = () => {
   }, []);
   return filters;
 };
-// export const useSourceFileTypeFilters = () => {
-//   const [sourceFilters, setSourceFilters] = useState(SourcefileTypeFilters);
-//   useEffect(() => {
-//     const fetchFileTypes = async () => {
-//       try {
-//         const fileTypes = await getFileTypeLists();
-//         if (fileTypes && Array.isArray(fileTypes)) {
-//           const newFilters = fileTypes
-//             .filter((type) => type)
-//             .map((type) => ({
-//               text: type,
-//               value: type
-//             }));
-//           setSourceFilters(newFilters);
-//         }
-//       } catch (error) {
-//         console.error('获取文件类型列表失败:', error);
-//       }
-//     };
-
-//     fetchFileTypes();
-//   }, []);
-//   return sourceFilters;
-// };
 
 // 工作流ID显示组件，用于管理悬浮状态（Target表格专用）
-const WorkflowIdCell = ({ record, showIcon }) => {
+const WorkflowIdCell = ({ record }) => {
   // 添加空值检查
   const extras = record?.extras || {};
 
@@ -204,8 +166,7 @@ const renderActionColumn = (
   selectedKey,
   tableType,
   selectedFullPath,
-  handAllReset,
-  resetPage
+  handAllReset
 ) => {
   const config: {
     label: string;
@@ -239,8 +200,7 @@ const renderActionColumn = (
             refreshData,
             selectedKey,
             tableType,
-            handAllReset,
-            resetPage
+            handAllReset
           )
         }
       >
@@ -303,7 +263,6 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   setVisibleDbmodel,
-  hoveredRowId = null,
   refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
@@ -317,7 +276,6 @@ export const getUnifiedColumns = (
 ) => {
   // 使用传入的自定义筛选器或全局变量中的筛选器
   const filters = customFileTypeFilters || fileTypeFilters;
-  console.log(selectedNodeType, 'selectedNodeType1232131313');
   // Source表格的卷数据列配置
   if (tableType === 'source' && dataType === 'volume') {
     return [
@@ -406,8 +364,7 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset,
-            resetPage
+            handAllReset
           )
       }
     ];
@@ -569,12 +526,7 @@ export const getUnifiedColumns = (
         title: '其他信息',
         dataIndex: 'workflowId',
         width: 240,
-        render: (_, record) => (
-          <WorkflowIdCell
-            record={record}
-            showIcon={hoveredRowId === record.id}
-          />
-        )
+        render: (_, record) => <WorkflowIdCell record={record} />
       },
       {
         title: '原文件类型',
@@ -608,8 +560,7 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset,
-            resetPage
+            handAllReset
           )
       }
     ];
@@ -617,14 +568,9 @@ export const getUnifiedColumns = (
 
   return [];
 };
-const setDetail = (id: string, setVisibleDbmodel) => {
-  console.log('详情', id);
-  setVisibleDbmodel(true);
-};
 
 // 处理导出操作
 const handleDownload = (record, setVisible, selectedFullPath) => {
-  console.log('导出', record);
   // 如果record有full_path属性，优先使用它，否则使用selectedFullPath
   const filePath = record.full_path || selectedFullPath;
   const downloadData = { ...record, filePath };
@@ -637,8 +583,7 @@ const handleDelete = (
   refreshData,
   selectedKey,
   tableType: 'source' | 'target',
-  handAllReset,
-  resetPage
+  handAllReset
 ) => {
   const ids: Array<string> = [];
   try {

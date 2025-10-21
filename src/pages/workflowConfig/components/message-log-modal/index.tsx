@@ -5,7 +5,6 @@ import { useClickAway } from 'ahooks'
 import { RiCloseLine } from '@remixicon/react'
 import cn from '@/pages/workflowConfig/utils/classnames'
 import type { IChatItem } from '@/pages/workflowConfig/chat/chat/type'
-import Run from '@/pages/workflowConfig/workflow/run'
 
 interface MessageLogModalProps {
   currentLogItem?: IChatItem
@@ -16,7 +15,6 @@ interface MessageLogModalProps {
 }
 const MessageLogModal: FC<MessageLogModalProps> = ({
   currentLogItem,
-  defaultTab = 'DETAIL',
   width,
   fixedWidth,
   onCancel,
@@ -59,11 +57,11 @@ const MessageLogModal: FC<MessageLogModalProps> = ({
       <span className='absolute right-3 top-4 p-1 cursor-pointer z-20' onClick={onCancel}>
         <RiCloseLine className='w-4 h-4 text-text-tertiary' />
       </span>
-      <Run
+      {/* <Run
         hideResult
         activeTab={defaultTab as any}
         runID={currentLogItem.workflow_run_id}
-      />
+      /> */}
     </div>
   )
 }

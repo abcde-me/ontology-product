@@ -20,7 +20,6 @@ import {
   RiStopLine,
 } from '@remixicon/react'
 import Tooltip from '@/pages/workflowConfig/components/tooltip'
-import { BlockEnum } from '@/pages/workflowConfig/workflow/types'
 
 type NodeControlProps = Pick<Node, 'id' | 'data'>
 const NodeControl: FC<NodeControlProps> = ({
@@ -50,7 +49,7 @@ const NodeControl: FC<NodeControlProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {
-          canRunBySingle(data.type) && (
+          canRunBySingle() && (
             <div
               className='flex items-center justify-center w-5 h-5 rounded-md cursor-pointer hover:bg-state-base-hover'
               onClick={() => {

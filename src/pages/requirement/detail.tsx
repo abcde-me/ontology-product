@@ -20,12 +20,10 @@ import {
   IconDelete,
   IconDown,
   IconPlus,
-  IconQuestionCircle,
-  IconSwap
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
-import { useUserInfo } from '@/store/userInfoStore';
 import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
 import { DepartmentModal } from './components/DepartmentModal';
 import { IndividualModal } from './components/IndividualModal';
@@ -39,7 +37,7 @@ import AnnotationType from './components/AnnotationType';
 import TextSubstanceComponent from './components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
 import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty, min } from 'lodash';
+import _, { omitBy, isArray, isEmpty } from 'lodash';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -51,6 +49,7 @@ import {
 } from './type';
 
 import './detail.scss';
+import { useUserInfo } from '@/store/userInfoStore';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -762,7 +761,7 @@ export default function RequirementDetail() {
               );
               return entityRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -780,17 +779,17 @@ export default function RequirementDetail() {
 
               return relationRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
         ? formType
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -807,7 +806,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (selectedData?.length <= 0) {
             setIsShowDataErrorInfo(true);
           }
@@ -819,16 +818,16 @@ export default function RequirementDetail() {
         }),
       form2
         .validate()
-        .then((val) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       form2Child
         .validate()
-        .then((value) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       // 任务验证
       form3
         .validate()
@@ -840,7 +839,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (taskAssignData?.length === 0) {
             setIsShowTypeErrorInfo(true);
             return;
@@ -887,7 +886,7 @@ export default function RequirementDetail() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-    const newSetLabels = datalist.map((item, index) => {
+    const newSetLabels = datalist.map((item) => {
       return {
         ...item,
         order_num: datalist?.length + 1,

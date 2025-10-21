@@ -1,4 +1,3 @@
-import { InputVarType } from '@/pages/workflowConfig/workflow/types'
 import { AgentStrategy } from '@/pages/workflowConfig/types/app'
 import { PromptRole } from '@/pages/workflowConfig/models/debug'
 
@@ -143,7 +142,7 @@ export const VAR_ITEM_TEMPLATE = {
 export const VAR_ITEM_TEMPLATE_IN_WORKFLOW = {
   variable: '',
   label: '',
-  type: InputVarType.textInput,
+  type: '',
   max_length: DEFAULT_VALUE_MAX_LEN,
   required: true,
   options: [],

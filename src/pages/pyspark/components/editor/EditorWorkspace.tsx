@@ -21,7 +21,6 @@ import { useExportDaset } from '../../hooks/useExportDaset';
 import DatasetForm from '../daset-export/AddDatasetForm';
 import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
-import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import ExampleIcon from '@/assets/python/example.svg';
 import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
@@ -47,8 +46,6 @@ interface NotebookWorkspaceProps {
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
   ({
-    content,
-    fileName,
     currentFileId,
     activeTab,
     fileTabs,
@@ -58,10 +55,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onEditorFocusChange
   }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
-    const [lastCursorPosition, setLastCursorPosition] =
-      React.useState<number>(0);
-    const [isEditorFocused, setIsEditorFocused] =
-      React.useState<boolean>(false);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
     // 使用useEditor hook管理编辑器状态
@@ -71,8 +64,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       runDuration,
       activeKey,
       setActiveKey,
-      handleStopRunCode,
-      handleRunCode,
       handleGetRunLog,
       handleGetRunResult,
       lastAutoSave,
@@ -152,10 +143,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       setModalDatasetVisible(false);
     };
 
-    const handleExportList = () => {
-      console.log('Exporting list...');
-    };
-
     const handleCallOperator = () => {
       // 切换到左侧tools菜单
       if (onSidebarTabChange) {
@@ -181,16 +168,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     };
 
-    // 处理光标位置变化
-    const handleCursorChange = useCallback((view: EditorView) => {
-      const pos = view.state.selection.main.head;
-      setLastCursorPosition(pos);
-    }, []);
-
     // 处理编辑器聚焦状态变化
     const handleFocusChange = useCallback(
       (focused: boolean) => {
-        setIsEditorFocused(focused);
         if (onEditorFocusChange) {
           onEditorFocusChange(focused);
         }
@@ -306,9 +286,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
               }),
               syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
               EditorView.updateListener.of((update) => {
-                if (update.selectionSet) {
-                  handleCursorChange(update.view);
-                }
                 if (update.focusChanged) {
                   handleFocusChange(update.view.hasFocus);
                 }

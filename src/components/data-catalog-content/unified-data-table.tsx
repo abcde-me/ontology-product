@@ -5,7 +5,6 @@ import React, {
   forwardRef,
   useImperativeHandle
 } from 'react';
-import { Modal, Tabs, Typography } from '@arco-design/web-react';
 import dayjs from 'dayjs';
 import {
   getTargetDataFileList,
@@ -20,15 +19,6 @@ import { getUnifiedColumns, getSourceFileTypeList } from './unified-columns';
 import './index.scss';
 import { PopupsFormFrom } from './components/popups-form/types';
 import DbModal from './components/popups-form/dbmodal';
-const { Text } = Typography;
-
-// 数据类型接口定义
-interface TreeNode {
-  key: string;
-  title: React.ReactNode;
-  children?: TreeNode[];
-}
-
 interface TableDataItem {
   id: number;
   content: string;
@@ -37,12 +27,6 @@ interface TableDataItem {
   file: string;
   workflowId: string;
   full_path?: string;
-}
-
-// 将日期字符串转换为时间戳的工具函数
-function toUnixTimestamp(dateString: string) {
-  const date = new Date(dateString.replace(' ', 'T'));
-  return Math.floor(date.getTime() / 1000);
 }
 
 // 统一数据表格组件属性类型
@@ -81,7 +65,6 @@ interface UnifiedDataTableProps {
  */
 const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const {
-    selectedNode,
     onSelectionChange,
     searchValue = '',
     searchCondition = { type: '数据内容', keyword: '', isActive: false },
@@ -98,7 +81,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const [visible, setVisible] = useState(false); // 下载弹框控制
   const [visibleDbmodel, setVisibleDbmodel] = useState(false); // 数据详情弹框控制
   const [downloadData, setDownloadData] = useState(null); // 下载的数据
-  const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
+  const [selectedFilePath] = useState(''); // 选中的文件路径
   const [currentDbDetails, setCurrentDbDetails] = useState<{
     databaseName: string;
     tableName: string;
@@ -119,7 +102,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // 表格选择状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
   // 跨页选中状态
   const [crossPageSelectedKeys, setCrossPageSelectedKeys] = useState<
@@ -132,7 +114,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   // Target表格特有的行悬浮状态
   const [hoveredRowId, setHoveredRowId] = useState<any>(null);
-  const childRef = useRef(null);
 
   // 表格组件引用，用于调用表格内部方法
   const tableRef = useRef<UnifiedTableRef>(null);
@@ -170,7 +151,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       handAllReset();
     } else {
       setSelectedRowKeys([]);
-      setSelectedRows([]);
       setCrossPageSelectedKeys([]);
       setCrossPageSelectedRows([]);
       setFileTypeFilters([]);
@@ -202,7 +182,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       }
       // 同时重置当前组件的选择状态
       setSelectedRowKeys([]);
-      setSelectedRows([]);
       // 重置跨页选择状态
       setCrossPageSelectedKeys([]);
       setCrossPageSelectedRows([]);
@@ -217,7 +196,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // 清除所有选择状态（包括跨页）
     clearAllSelections: () => {
       setSelectedRowKeys([]);
-      setSelectedRows([]);
       setCrossPageSelectedKeys([]);
       setCrossPageSelectedRows([]);
       if (tableRef.current) {
@@ -394,7 +372,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   //重置选中数据
   const handAllReset = () => {
     setSelectedRowKeys([]);
-    setSelectedRows([]);
     setCrossPageSelectedKeys([]);
     setCrossPageSelectedRows([]);
     if (tableRef.current) {
@@ -406,7 +383,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     setTimeout(() => {
       if (crossPageSelectedKeys.length > 0 || selectedRowKeys.length > 0) {
         setSelectedRowKeys([]);
-        setSelectedRows([]);
         setCrossPageSelectedKeys([]);
         setCrossPageSelectedRows([]);
       } else {
@@ -459,7 +435,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // 重置页码和选择状态
     setCurrentPage(1);
     setSelectedRowKeys([]);
-    setSelectedRows([]);
     setHoveredRowId(null);
     // 重置文件类型筛选条件
     setFileTypeFilters([]);
@@ -518,7 +493,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       dataType,
       downloadShow,
       setVisibleDbmodel,
-      null, // hoveredRowId
       getTableList, // refreshData
       selectedKey,
       selectedFullPath,
@@ -529,8 +503,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       selectedNodeType,
       (data) => {
         setCurrentDbDetails(data); // 存储当前的数据库详情
-      },
-      selectedParentId // 传递父节点ID
+      }
     );
   }, [
     tableType,
@@ -553,7 +526,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         dataType,
         downloadShow,
         setVisibleDbmodel,
-        hoveredRowId,
         getTableList,
         selectedKey,
         selectedFullPath,
@@ -564,8 +536,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedNodeType,
         (data) => {
           setCurrentDbDetails(data); // 存储当前的数据库详情
-        },
-        selectedParentId // 传递父节点ID
+        }
       );
     }
     return baseColumns;
@@ -587,7 +558,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   const handleSelectionChange = React.useCallback(
     (selectedRowKeys: React.Key[], selectedRows: any[]) => {
       setSelectedRowKeys(selectedRowKeys);
-      setSelectedRows(selectedRows);
       console.log(
         `UnifiedDataTable (${tableType}) - 表格选择变化:`,
         selectedRowKeys,
@@ -727,10 +697,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         tableData.some((item) => item.id === Number(key))
       );
       setSelectedRowKeys(currentPageSelectedKeys);
-      const currentPageSelectedRows = tableData.filter((item) =>
-        currentPageSelectedKeys.includes(item.id)
-      );
-      setSelectedRows(currentPageSelectedRows);
       if (tableRef.current) {
         tableRef.current.updateSelection(currentPageSelectedKeys);
       }

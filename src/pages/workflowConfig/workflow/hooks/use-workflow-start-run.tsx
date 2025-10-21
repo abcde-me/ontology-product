@@ -3,7 +3,6 @@ import { useStoreApi } from 'reactflow';
 import { useWorkflowStore } from '../store';
 import { BlockEnum, WorkflowRunningStatus } from '../types';
 import {
-  useIsChatMode,
   useNodesSyncDraft,
   useWorkflowInteractions,
   useWorkflowRun
@@ -14,7 +13,7 @@ export const useWorkflowStartRun = () => {
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
   // const featuresStore = useFeaturesStore()
-  const isChatMode = useIsChatMode();
+  const isChatMode = false;
   const { handleCancelDebugAndPreviewPanel } = useWorkflowInteractions();
   const { handleRun } = useWorkflowRun();
   const { doSyncWorkflowDraft } = useNodesSyncDraft();

@@ -1,9 +1,8 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import { Tabs, Message } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { RunningStatus } from '@/types/pythonApi';
 import './index.scss';
 
 const { TabPane } = Tabs;
@@ -35,15 +34,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     fileTabs,
     activeTab,
     onTabChange,
-    onAddTab,
     onRemoveTab,
     onCreate,
     onTabContentUpdate,
     onSidebarTabChange,
     onInsertContent,
     onEditorFocusChange,
-    refreshDirectory,
-    selectFile,
     isCanCreate = true // 添加 isCanCreate 参数，默认值为 true
   }) => {
     // 获取当前活动标签页

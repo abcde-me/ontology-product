@@ -7,7 +7,6 @@ import type {
   HelpLineHorizontalPosition,
   HelpLineVerticalPosition
 } from './help-line/types';
-import type { VariableAssignerNodeType } from './nodes/variable-assigner/types';
 import type {
   ConversationVariable,
   Edge,
@@ -23,24 +22,6 @@ import type {
   NodeTracing,
   VersionHistory
 } from '@/pages/workflowConfig/types/workflow';
-
-// #TODO chatVar#
-// const MOCK_DATA = [
-//   {
-//     id: 'fjlaksdjflkjg-dfjlajfl0dnfkafjk-djfdkafj-djfak',
-//     name: 'chat_history',
-//     value_type: 'array[message]',
-//     value: [],
-//     description: 'The chat history of the conversation',
-//   },
-//   {
-//     id: 'fljdaklfjl-dfjlafj0-dklajglje-eknglh',
-//     name: 'order_id',
-//     value: '123456',
-//     value_type: 'string',
-//     description: '',
-//   },
-// ]
 
 type PreviewRunningData = WorkflowRunningData & {
   resultTabActive?: boolean;
@@ -163,7 +144,7 @@ type Shape = {
     nodeId: string;
     nodeData: Node['data'];
     variableAssignerNodeId: string;
-    variableAssignerNodeData: VariableAssignerNodeType;
+    variableAssignerNodeData: any;
     variableAssignerNodeHandleId: string;
     parentNode?: Node;
     x: number;
@@ -187,7 +168,7 @@ type Shape = {
   ) => void;
   enteringNodePayload?: {
     nodeId: string;
-    nodeData: VariableAssignerNodeType;
+    nodeData: any;
   };
   setEnteringNodePayload: (
     enteringNodePayload?: Shape['enteringNodePayload']

@@ -230,7 +230,6 @@ function TaskList() {
       fixed: 'right',
       width: 75,
       render: (_, record) => {
-        const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
             {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
@@ -294,7 +293,6 @@ function TaskList() {
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无任务'
-          // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
         })}
         rowKey="id"
         loading={loading}

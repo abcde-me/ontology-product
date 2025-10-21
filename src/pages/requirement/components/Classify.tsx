@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Tooltip,
-  ColorPicker,
   Select,
   Checkbox
 } from '@arco-design/web-react';
@@ -41,8 +40,6 @@ const Classify = (props: ClassifyComponentProps) => {
   const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
-  // 当前选择类型
-  const [currentType, setCurrentType] = useState(1);
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
@@ -87,7 +84,7 @@ const Classify = (props: ClassifyComponentProps) => {
   };
   useEffect(() => {
     if (type === 'detail') {
-      getDetailObj?.file_labels?.map((item, index) => {
+      getDetailObj?.file_labels?.map((item) => {
         formClassify.setFieldValue(
           `attribute_group_name${item?.id}`,
           item?.attribute_group_name
@@ -184,12 +181,11 @@ const Classify = (props: ClassifyComponentProps) => {
                     style={{ width: 100 }}
                     value={item.attribute_group_class}
                     onChange={(value) => {
-                      setCurrentType(value);
                       handleFieldChange(index, 'attribute_group_class', value);
                       // 切换到输入框的时候情况选项内容
                       if (value === 3) {
                         setTextRelations(
-                          textRelations.map((group, groupIndex) => {
+                          textRelations.map((group) => {
                             if (group.attribute_id === item.attribute_id) {
                               return {
                                 ...group,

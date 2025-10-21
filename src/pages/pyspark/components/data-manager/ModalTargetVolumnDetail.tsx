@@ -5,7 +5,6 @@ import {
   Input,
   Modal,
   PaginationProps,
-  Popover,
   Select,
   Table,
   TableColumnProps
@@ -13,11 +12,7 @@ import {
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
 import './ModalTargetVolumnDetail.scss';
-// import { getTargetFileTypeList } from '@/api/dataCatalog';
-// import { getSourceDataFileList } from '@/api/dataCatalog';
-import { formatTime } from '@/utils/format';
 import {
-  getTargetCatalogFileList,
   GetTargetCatalogFileListItem,
   getTargetDataFileList,
   getTargetFileTypeList
@@ -25,22 +20,6 @@ import {
 import timeFormattig from '@/utils/timeFormatting';
 
 const FormItem = Form.Item;
-
-const formatDateTime = (dateTimeString: string): string => {
-  try {
-    const date = new Date(dateTimeString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    return dateTimeString; // 如果格式化失败，返回原字符串
-  }
-};
 
 /** 数据卷详情 弹框 */
 const ModalVolumnDetail = ({

@@ -8,7 +8,7 @@ import {
   Space
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Styles from './index.module.css';
 import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
@@ -184,23 +184,13 @@ export default function DataLoad() {
     },
     {
       title: '载入位置',
-      // className: 'hover-change',
       width: 200,
       ellipsis: true,
       render: (_, item) => {
         return (
           <div>
             {item.data_path_name !== '' ? (
-              <EllipsisPopoverCom
-                value={item.data_path_name}
-                isEdit={false}
-                // isLink
-                // handleLink={() => {
-                //   history.push(
-                //     `/tenant/compute/modaforge/dataCatalog?root_type=${item.root_type}&id=${item.data_path_id}&parent_id=${item.parent_id}`
-                //   );
-                // }}
-              />
+              <EllipsisPopoverCom value={item.data_path_name} isEdit={false} />
             ) : (
               '-'
             )}
@@ -219,13 +209,13 @@ export default function DataLoad() {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: () => {} // 排序
     },
     {
       title: '最后运行时间',
       dataIndex: 'last_run_time',
       width: 240,
-      sorter: (a, b) => {} // 排序
+      sorter: () => {} // 排序
     },
     {
       title: '操作',

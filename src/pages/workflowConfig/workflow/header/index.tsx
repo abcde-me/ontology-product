@@ -1,5 +1,5 @@
 import { FC, useRef, useState } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useContext } from 'use-context-selector';

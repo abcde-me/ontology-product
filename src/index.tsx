@@ -44,7 +44,6 @@ import {
 } from 'react-router-dom';
 import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
-import { usePathChange } from '@/hooks';
 import Header from './pages/admin/layout/header';
 import { isInFrame, isWujie } from './utils/env';
 import { useUserInfoStore } from './store/userInfoStore';
@@ -277,24 +276,18 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
   // @ts-expect-error
   module.hot.accept('./pages/admin/layout', () => {
     // 当 App 组件或其依赖发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextApp = require('./pages/admin/layout').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/login', () => {
     // 当 Login 组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextLogin = require('./pages/login').default;
     render(Index);
   });
 
   // @ts-expect-error
   module.hot.accept('./pages/errorPages', () => {
     // 当错误页面组件发生变化时，重新渲染
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextPage404 = require('./pages/errorPages').default;
     render(Index);
   });
 

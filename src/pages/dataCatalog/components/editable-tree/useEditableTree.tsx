@@ -11,10 +11,7 @@ import {
   IconDelete,
   IconEdit,
   IconStorage,
-  IconArchive,
-  IconFolder,
-  IconCaretDown,
-  IconFile
+  IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -23,11 +20,9 @@ import {
   deleteVolume,
   deleteTable,
   renameCatalog,
-  addDb,
-  getDbItemList
+  addDb
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
-import { PermissionGuard } from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from '../../modal.module.css';
@@ -135,14 +130,7 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const handleExpand = (
-    expandedKeys: string[],
-    extra?: {
-      expanded: boolean;
-      node: NodeInstance;
-      expandedNodes: NodeInstance[];
-    }
-  ) => {
+  const handleExpand = (expandedKeys: string[]) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
     });

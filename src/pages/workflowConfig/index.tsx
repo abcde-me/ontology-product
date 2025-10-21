@@ -9,7 +9,6 @@ import { useHistory } from 'react-router-dom';
 import { Message } from '@arco-design/web-react';
 import Cookies from 'js-cookie';
 import './styles/index.css';
-// import './styles/markdown.scss';
 import './styles/custom.scss';
 
 function WorkflowConfig({ setHeight }) {

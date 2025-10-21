@@ -197,7 +197,7 @@ export const useTabManager = (
 
   // 从 FileManager 获取创建文件的函数
   const handleCreate = useCallback(
-    (finalName: string, node?: any): Promise<any> => {
+    (finalName: string): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           // 获取当前文件夹ID，如果没有则使用根目录

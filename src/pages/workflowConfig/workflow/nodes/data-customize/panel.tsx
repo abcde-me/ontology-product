@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Button,
@@ -7,9 +7,7 @@ import {
   Message,
   Modal,
   Popover,
-  Spin,
-  Tabs,
-  Typography
+  Spin
 } from '@arco-design/web-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { tags as t } from '@lezer/highlight';
@@ -52,20 +50,16 @@ const Panel = ({ id, data, parentRef }) => {
   const store = useStoreApi();
   const [form] = Form.useForm();
   const CollapseItem = Collapse.Item;
-  const TabPane = Tabs.TabPane;
   const workflow_uuid = useParams('workflow_uuid') as string;
   const { readOnly, inputs, handleValueChange } = useConfig(id, data);
   const [isSticky, setSticky] = useState(false);
-  const [isModalSticky, setModalSticky] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [runningTime, setRunningTime] = useState(0);
   const [resultData, setResultData] = useState('');
   const [scriptingType, setScriptingType] = useState('');
   const [scriptingEngine, setScriptingEngine] = useState('');
   const stickyRef = useRef<HTMLDivElement>(null);
-  const stickyModalRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null);
   const [value, setValue] = useState(inputs?.script_content);
   const [visible, setVisible] = useState(false);
   const [runningStatus, setRunningStatus] = useState('');
@@ -108,7 +102,7 @@ const Panel = ({ id, data, parentRef }) => {
     getScriptingInfo();
   }, []);
 
-  const onChange = (val, viewUpdate) => {
+  const onChange = (val) => {
     setValue(val);
     handleValueChange({
       ...inputs,
@@ -130,21 +124,6 @@ const Panel = ({ id, data, parentRef }) => {
     setSticky(isSticking);
   };
 
-  // 计算距离的核心函数
-  const calculateDistanceModal = () => {
-    if (!modalElement || !stickyModalRef.current) return;
-    // 获取父容器和子元素相对于视口的位置信息
-    const parentRect = modalElement.getBoundingClientRect();
-    const childRect = stickyModalRef.current.getBoundingClientRect();
-    const stickyTop = parseInt(
-      window.getComputedStyle(stickyModalRef.current).top
-    );
-    // 子元素顶部距离父容器顶部的距离 = 子元素视口顶部 - 父容器视口顶部
-    const distance = childRect.top - parentRect.top;
-    const isSticking = distance <= stickyTop;
-    setModalSticky(isSticking);
-  };
-
   useEffect(() => {
     const parent = parentRef.current;
     if (!parent) return;
@@ -160,32 +139,11 @@ const Panel = ({ id, data, parentRef }) => {
     // 添加事件监听
     parent.addEventListener('scroll', handleParentScroll);
 
-    // 初始化计算一次
-    calculateDistanceModal();
-
     // 组件卸载时清理事件监听
     return () => {
       parent.removeEventListener('scroll', handleParentScroll);
     };
   }, []);
-
-  useEffect(() => {
-    if (!modalElement) return;
-    calculateDistanceModal();
-
-    // 监听父容器的滚动事件（核心：仅父容器滚动时触发）
-    const handleModalScroll = () => {
-      calculateDistanceModal();
-    };
-
-    // 添加事件监听
-    modalElement.addEventListener('scroll', handleModalScroll);
-
-    // 组件卸载时清理事件监听
-    return () => {
-      modalElement.removeEventListener('scroll', handleModalScroll);
-    };
-  }, [modalElement]);
 
   const getRunningTime = async () => {
     if (!isRunning) return;
@@ -224,12 +182,7 @@ const Panel = ({ id, data, parentRef }) => {
     }
   };
 
-  const {
-    data: runningTimeData,
-    loading,
-    run,
-    cancel
-  } = useRequest(getRunningTime, {
+  const { run, cancel } = useRequest(getRunningTime, {
     pollingInterval: 1000,
     pollingWhenHidden: false
   });

@@ -1,12 +1,11 @@
-import { Message, Modal, Popover, Tooltip } from '@arco-design/web-react';
+import { Message, Tooltip } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { IconCopy, IconLoading } from '@arco-design/web-react/icon';
-import TimeFormatting from '../../../utils/timeFormatting';
 import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
 import copy from 'copy-to-clipboard';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import { DATABASE_TYPE_ENUM, ConnectorType, TYPE_CONFIG } from '../config';
+import { DATABASE_TYPE_ENUM, TYPE_CONFIG } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import styles from '../styles/detail.module.scss';
 
@@ -31,12 +30,6 @@ const ModalDetail = (props) => {
       setLoading(false);
     }
   };
-  function capitalizeFirstLetter(str) {
-    if (typeof str !== 'string' || str.length === 0) {
-      return str;
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
   useEffect(() => {
     getdetailListHan();
   }, [props.detailId]);

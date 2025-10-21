@@ -1,14 +1,10 @@
 import React, { forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Typography } from '@arco-design/web-react';
-import { PythonListItem } from '@/types/pythonApi';
 import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
 } from '@/components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
-
-const { Title } = Typography;
 
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
@@ -39,9 +35,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     selectedKeys,
     currentFolderId,
     handleSearch,
-    handleNew,
     handleTreeSelect,
-    handleTreeExpand,
     handleCreate,
     handleRename,
     handleCopy,
@@ -78,7 +72,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   useImperativeHandle(
     directoryTreeRef,
     () => ({
-      startRootCreate: (isFolder = true) => {
+      startRootCreate: () => {
         // 这里可以调用 DirectoryTree 的 startRootCreate 方法
         // 由于我们使用的是 DirectoryTree 组件，这个方法会通过 ref 传递
       },

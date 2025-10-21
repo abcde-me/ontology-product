@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Message } from '@arco-design/web-react';
-import { now } from 'lodash-es';
 import {
   getSqlScriptList,
   createSqlScript,
@@ -9,7 +8,6 @@ import {
   copySqlScript
 } from '@/api/sql';
 import { PythonItemType } from '@/types/pythonApi';
-import timeFormattig from '@/utils/timeFormatting';
 import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -62,12 +60,12 @@ export const useFileManager = (
 
   // 状态管理
   const [sqlScriptList, setSqlScriptList] = useState<SqlScriptItem[]>([]);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
 
-  const generateDefaultName = useCallback((node: any) => {
+  const generateDefaultName = useCallback(() => {
     // 生成默认文件名：SQL查询 + 时间戳
     return generateSqlDefaultName(new Date());
   }, []);
@@ -174,7 +172,7 @@ export const useFileManager = (
 
   // 创建文件/文件夹
   const handleCreate = useCallback(
-    async (finalName: string, node: any) => {
+    async (finalName: string) => {
       try {
         if (!validateName(finalName).isValid) {
           Message.error(
@@ -334,26 +332,23 @@ export const useFileManager = (
   }, []);
 
   // 文件夹点击处理
-  const handleFolderClick = useCallback(
-    async (folderId: string) => {
-      try {
-        const res = await getSqlScriptList({
-          search_content: searchValue,
-          page: 1,
-          page_size: 1000
-        });
-        return res?.data?.items ?? [];
-      } catch (error) {
-        console.error('获取文件夹内容失败:', error);
-        Message.error('获取文件夹内容失败');
-        return [];
-      }
-    },
-    [searchValue]
-  );
+  const handleFolderClick = useCallback(async () => {
+    try {
+      const res = await getSqlScriptList({
+        search_content: searchValue,
+        page: 1,
+        page_size: 1000
+      });
+      return res?.data?.items ?? [];
+    } catch (error) {
+      console.error('获取文件夹内容失败:', error);
+      Message.error('获取文件夹内容失败');
+      return [];
+    }
+  }, [searchValue]);
 
   // 返回父级处理
-  const handleBackToParent = useCallback(async (parentId: string) => {
+  const handleBackToParent = useCallback(async () => {
     try {
       const res = await getSqlScriptList({
         page: 1,

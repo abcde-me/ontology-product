@@ -66,7 +66,7 @@ export const useFileManager = (
   // 状态管理
   const [pythonList, setPythonList] = useState<PythonListItem[]>([]);
   const [isCanCreate, setIsCanCreate] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态

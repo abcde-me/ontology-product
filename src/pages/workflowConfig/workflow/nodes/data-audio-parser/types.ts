@@ -1,9 +1,7 @@
 import type {
   CommonNodeType,
-  VarType,
-  Variable
+  VarType
 } from '@/pages/workflowConfig/workflow/types';
-import { string } from 'mobx-state-tree/dist/internal';
 
 export type OutputVar = Record<
   string,
