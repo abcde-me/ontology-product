@@ -208,7 +208,7 @@ export const routes: IRoute[] = [
     name: 'operationCenter',
     key: '/tenant/compute/modaforge/operationCenter',
     component: React.lazy(async () => import('../../operationCenter')),
-    permission: 'organizations:can_view',
+    // permission: 'organizations:can_view',
     children: []
   }
 ];

@@ -24,8 +24,36 @@ type LayoutPageProps = {
 };
 // 带权限检查的路由组件
 const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
-  const { userActions } = useUserInfoStore();
+  const { userActions, projectId } = useUserInfoStore();
+  const { setUserPermissions } = usePermission();
   const Component = route.component;
+  const [isInitializing, setIsInitializing] = React.useState(false);
+
+  // 如果需要权限但权限未加载，则触发加载
+  React.useEffect(() => {
+    if (
+      route.permission &&
+      userActions.actions === null &&
+      projectId &&
+      projectId[1] &&
+      !isInitializing
+    ) {
+      setIsInitializing(true);
+      console.log(
+        '🔐 PermissionRoute 触发权限初始化，projectId:',
+        projectId[1]
+      );
+      setUserPermissions(projectId[1]).finally(() => {
+        setIsInitializing(false);
+      });
+    }
+  }, [
+    route.permission,
+    userActions.actions,
+    projectId,
+    isInitializing,
+    setUserPermissions
+  ]);
 
   // 如果路由没有权限要求，直接渲染
   if (!route.permission) {
@@ -37,8 +65,14 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
     return <Component />;
   }
 
+  // 如果权限数据还在加载中（actions 为 null），返回 null 等待权限加载完成
+  // 页面自己的 loading 会处理加载状态
+  if (userActions.actions === null) {
+    return null;
+  }
+
   // 检查用户是否拥有该权限
-  const hasPermission = userActions.actions?.includes(route.permission);
+  const hasPermission = userActions.actions.includes(route.permission);
 
   // 无权限时显示403页面
   if (!hasPermission) {
