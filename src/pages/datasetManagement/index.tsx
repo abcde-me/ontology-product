@@ -1,6 +1,7 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import './index.css';
 import {
+  Typography,
   Input,
   Button,
   Table,
@@ -9,13 +10,21 @@ import {
   Modal,
   Message,
   Select,
+  Checkbox,
   Tooltip
 } from '@arco-design/web-react';
 import {
   IconPlus,
+  IconEdit,
+  IconUpload,
   IconDelete,
   IconDownload,
   IconFilter,
+  IconEmpty,
+  IconLoading,
+  IconCloseCircleFill,
+  IconCheckCircleFill,
+  IconExclamationCircleFill,
   IconInfoCircle
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
@@ -30,16 +39,20 @@ import {
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
+import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.css';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionGuard } from '@/components/PermissionGuard';
 import {
   PopupsFormFrom,
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
+import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
+import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
 
@@ -80,11 +93,11 @@ export interface Dataset {
   perms: string[];
   storage_type: datasetStorageType;
   status:
-  | 'creating'
-  | 'create_failed'
-  | 'normal'
-  | 'version_updating'
-  | 'version_update_failed';
+    | 'creating'
+    | 'create_failed'
+    | 'normal'
+    | 'version_updating'
+    | 'version_update_failed';
 }
 
 // 状态显示配置
@@ -97,6 +110,23 @@ const getStatusConfig = (status: string) => {
     version_update_failed: { text: datasetStatusName.version_update_failed }
   };
   return statusMap[status] || { text: status };
+};
+
+// 获取状态icon
+const getStatusIcon = (status: string) => {
+  return status === datasetStatus.creating ? (
+    <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
+  ) : status === datasetStatus.create_failed ? (
+    <IconCloseCircleFill style={{ color: '#EF4444', margin: '0 5px 0 0' }} />
+  ) : status === datasetStatus.normal ? (
+    <IconCheckCircleFill style={{ color: '#10B981', margin: '0 5px 0 0' }} />
+  ) : status === datasetStatus.version_updating ? (
+    <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
+  ) : (
+    <IconExclamationCircleFill
+      style={{ color: '#F97316', margin: '0 5px 0 0' }}
+    />
+  );
 };
 
 const renderEmptyPlaceholder = (value: string | null) => {
@@ -117,403 +147,392 @@ const columns = (
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
   handleRetry: (id: string | number, version_id: string) => void
 ) => [
-    {
-      title: '数据集名称',
-      dataIndex: 'name',
-      width: 200,
-      className: 'dataset-management-hover-change workflow-name',
-      rowClassName: 'dataset-management-hover-change',
-      render: (name: string, record: Dataset) => {
-        if (!name) return '-';
-        return (
-          <EllipsisPopover
-            className={
-              record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                ? 'dataset-hover'
-                : ''
-            }
-            value={renderEmptyPlaceholder(record.name)}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                ? handleGoToDetail(record.id)
-                : '';
-            }}
-          />
-          // <div
-          //   onClick={() => handleGoToDetail(record.id)}
-          //   style={{ cursor: 'pointer' }}
-          // >
-          //   <EllipsisPopover
-          //     value={record.name}
-          //     isEdit={false}
-          //     preferTypography={true}
-          //     className="custom-typography-text"
-          //     ellipsis={{
-          //       rows: 2,
-          //       expandable: false,
-          //       showTooltip: {
-          //         type: 'popover',
-          //         props: {
-          //           position: 'tl',
-          //           style: { maxHeight: '400px', overflow: 'auto' }
-          //         }
-          //       }
-          //     }}
-          //   />
-          // </div>
-        );
-      }
-    },
-    {
-      title: '标签',
-      dataIndex: 'tag_names',
-      width: 120,
-      filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-      filteredValue: selectedTagFilters,
-      filterMultiple: true,
-      render: (tag_names: string[]) => {
-        if (!tag_names || tag_names.length === 0) return '-';
-        return (
-          <Space size="mini">
-            {tag_names && tag_names.length > 0 && tag_names[0] && (
-              <Tag className={styles.tagGreen}>
-                {tag_names[0].length > 5 ? (
-                  <Tooltip content={tag_names[0]}>
-                    {tag_names[0].substring(0, 5)}...
-                  </Tooltip>
-                ) : (
-                  tag_names[0] || '-'
-                )}
-              </Tag>
-            )}
-            {tag_names && tag_names.length > 1 && (
-              <Tooltip
-                content={tag_names.map((tag, index) => (
-                  <Tag
-                    key={index}
-                    className={styles.tagGreen}
-                    style={{
-                      // background: '#E2E8F0',
-                      // color: '#0F172A',
-                      margin: '2px 2px'
-                      // borderRadius: '16px',
-                      // fontSize: '12px',
-                      // height: '18px',
-                      // alignItems: 'center'
-                    }}
-                  >
-                    {tag}
-                  </Tag>
-                ))}
-              >
-                <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
-              </Tooltip>
-            )}
-          </Space>
-        );
-      }
-    },
-    {
-      title: '版本',
-      dataIndex: 'latest_version',
-      width: 195,
-      render: (latest_version: string) => {
-        if (!latest_version) {
-          return '-';
-        }
-        return (
-          <div>
-            {/* <Tooltip content={latest_version}> */}
-            <div
-              style={{
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {latest_version}
-            </div>
-            {/* </Tooltip> */}
-          </div>
-        );
-      }
-    },
-    {
-      title: '存储格式',
-      dataIndex: 'storage_type',
-      width: 120,
-      filterIcon: <IconFilter />,
-      filters: [
-        { text: 'jsonl', value: datasetStorageType.jsonl },
-        { text: '文件', value: datasetStorageType.file },
-        { text: '数据库表', value: datasetStorageType.table }
-      ],
-      filteredValue: selectedStorageTypeFilters,
-      filterMultiple: true,
-      render: (status: string, record: Dataset) => {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div>{getFileIcon(record.storage_type ?? '-')}</div>
-            <span className="ml-[4px]">
-              {record.storage_type === datasetStorageType.table
-                ? '数据库表'
-                : record.storage_type === datasetStorageType.file
-                  ? '文件'
-                  : (record.storage_type ?? '-')}
-            </span>
-          </div>
-        );
-      }
-    },
-    {
-      title: '文件大小',
-      dataIndex: 'latest_size',
-      width: 120,
-      render: (_, record: Dataset) => formatFileSize(record.latest_size || 0)
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 180,
-      filterIcon: <IconFilter />,
-      filters: [
-        { text: '创建中', value: datasetStatus.creating },
-        { text: '创建失败', value: datasetStatus.create_failed },
-        { text: '正常', value: datasetStatus.normal },
-        { text: '版本更新中', value: datasetStatus.version_updating },
-        { text: '版本更新失败', value: datasetStatus.version_update_failed }
-      ],
-      filteredValue: selectedStatusFilters,
-      filterMultiple: true,
-      render: (status: string, record: Dataset) => {
-        const perms = record.perms;
-        const statusConfig = getStatusConfig(status);
-        if (!status) return '-';
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {/* {status && getStatusIcon(status)} */}
-            <div
-              style={{
-                width: '8px',
-                height: '8px',
-                backgroundColor:
-                  status === 'normal'
-                    ? '#10B981'
-                    : status === 'create_failed' ||
-                      status === 'version_update_failed'
-                      ? '#EF4444'
-                      : status === 'version_updating' || status === 'creating'
-                        ? '#007DFA'
-                        : '#CBD5E1',
-                borderRadius: '50%',
-                marginRight: '5px'
-              }}
-            ></div>
-            <span>{statusConfig.text}</span>
-            {status === datasetStatus.version_update_failed ||
-              status === datasetStatus.create_failed ? (
-              <Tooltip mini content={record.error_reason || ''}>
-                <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
-              </Tooltip>
-            ) : null}
-            {perms?.includes(
-              DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-            ) &&
-              (status === datasetStatus.version_update_failed ? (
-                <span
-                  className={styles.retryText}
-                  onClick={() => handleRetry(record.id, record.latest_version)}
+  {
+    title: '数据集名称',
+    dataIndex: 'name',
+    width: 200,
+    className: 'dataset-management-hover-change workflow-name',
+    rowClassName: 'dataset-management-hover-change',
+    render: (name: string, record: Dataset) => {
+      if (!name) return '-';
+      return (
+        <EllipsisPopover
+          className={
+            record.status === datasetStatus.normal ||
+            record.status === datasetStatus.version_updating ||
+            record.status === datasetStatus.version_update_failed
+              ? 'dataset-hover'
+              : ''
+          }
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+          isLink
+          handleLink={() => {
+            record.status === datasetStatus.normal ||
+            record.status === datasetStatus.version_updating ||
+            record.status === datasetStatus.version_update_failed
+              ? handleGoToDetail(record.id)
+              : '';
+          }}
+        />
+        // <div
+        //   onClick={() => handleGoToDetail(record.id)}
+        //   style={{ cursor: 'pointer' }}
+        // >
+        //   <EllipsisPopover
+        //     value={record.name}
+        //     isEdit={false}
+        //     preferTypography={true}
+        //     className="custom-typography-text"
+        //     ellipsis={{
+        //       rows: 2,
+        //       expandable: false,
+        //       showTooltip: {
+        //         type: 'popover',
+        //         props: {
+        //           position: 'tl',
+        //           style: { maxHeight: '400px', overflow: 'auto' }
+        //         }
+        //       }
+        //     }}
+        //   />
+        // </div>
+      );
+    }
+  },
+  {
+    title: '标签',
+    dataIndex: 'tag_names',
+    width: 120,
+    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
+    filteredValue: selectedTagFilters,
+    filterMultiple: true,
+    render: (tag_names: string[]) => {
+      if (!tag_names || tag_names.length === 0) return '-';
+      return (
+        <Space size="mini">
+          {tag_names && tag_names.length > 0 && tag_names[0] && (
+            <Tag className={styles.tagGreen}>
+              {tag_names[0].length > 5 ? (
+                <Tooltip content={tag_names[0]}>
+                  {tag_names[0].substring(0, 5)}...
+                </Tooltip>
+              ) : (
+                tag_names[0] || '-'
+              )}
+            </Tag>
+          )}
+          {tag_names && tag_names.length > 1 && (
+            <Tooltip
+              content={tag_names.map((tag, index) => (
+                <Tag
+                  key={index}
+                  className={styles.tagGreen}
+                  style={{
+                    // background: '#E2E8F0',
+                    // color: '#0F172A',
+                    margin: '2px 2px'
+                    // borderRadius: '16px',
+                    // fontSize: '12px',
+                    // height: '18px',
+                    // alignItems: 'center'
+                  }}
                 >
-                  重试
-                </span>
-              ) : null)}
-          </div>
-        );
+                  {tag}
+                </Tag>
+              ))}
+            >
+              <Tag className={styles.tagGreen}>+{tag_names.length - 1}</Tag>
+            </Tooltip>
+          )}
+        </Space>
+      );
+    }
+  },
+  {
+    title: '版本',
+    dataIndex: 'latest_version',
+    width: 195,
+    render: (latest_version: string) => {
+      if (!latest_version) {
+        return '-';
       }
-    },
-    {
-      title: '描述说明',
-      dataIndex: 'description',
-      width: 260,
-      render: (description: string) => {
-        if (!description) return '-';
-        return (
-          // <div
-          //   style={{
-          //     display: '-webkit-box',
-          //     WebkitBoxOrient: 'vertical',
-          //     WebkitLineClamp: 2,
-          //     overflow: 'hidden',
-          //     textOverflow: 'ellipsis',
-          //     wordBreak: 'break-all'
-          //   }}
-          // >
-          //   <Tooltip content={description}>{description}</Tooltip>
-          // </div>
-          <EllipsisPopover
-            value={description}
-            preferTypography={true}
-            ellipsis={{
-              rows: 1,
-              showTooltip: {
-                hover: true,
-                click: false,
-                props: {
-                  style: {
-                    maxWidth: 600,
-                    maxHeight: 400,
-                    overflow: 'auto'
-                  }
+      return (
+        <div>
+          {/* <Tooltip content={latest_version}> */}
+          <div
+            style={{
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {latest_version}
+          </div>
+          {/* </Tooltip> */}
+        </div>
+      );
+    }
+  },
+  {
+    title: '存储格式',
+    dataIndex: 'storage_type',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: 'jsonl', value: datasetStorageType.jsonl },
+      { text: '文件', value: datasetStorageType.file },
+      { text: '数据库表', value: datasetStorageType.table }
+    ],
+    filteredValue: selectedStorageTypeFilters,
+    filterMultiple: true,
+    render: (status: string, record: Dataset) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div>{getFileIcon(record.storage_type ?? '-')}</div>
+          <span className="ml-[4px]">
+            {record.storage_type === datasetStorageType.table
+              ? '数据库表'
+              : record.storage_type === datasetStorageType.file
+                ? '文件'
+                : (record.storage_type ?? '-')}
+          </span>
+        </div>
+      );
+    }
+  },
+  {
+    title: '文件大小',
+    dataIndex: 'latest_size',
+    width: 120,
+    render: (_, record: Dataset) => formatFileSize(record.latest_size || 0)
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: 180,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: '创建中', value: datasetStatus.creating },
+      { text: '创建失败', value: datasetStatus.create_failed },
+      { text: '正常', value: datasetStatus.normal },
+      { text: '版本更新中', value: datasetStatus.version_updating },
+      { text: '版本更新失败', value: datasetStatus.version_update_failed }
+    ],
+    filteredValue: selectedStatusFilters,
+    filterMultiple: true,
+    render: (status: string, record: Dataset) => {
+      const perms = record.perms;
+      const statusConfig = getStatusConfig(status);
+      if (!status) return '-';
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* {status && getStatusIcon(status)} */}
+          <div
+            style={{
+              width: '8px',
+              height: '8px',
+              backgroundColor:
+                status === 'normal'
+                  ? '#10B981'
+                  : status === 'create_failed' ||
+                      status === 'version_update_failed'
+                    ? '#EF4444'
+                    : status === 'version_updating' || status === 'creating'
+                      ? '#007DFA'
+                      : '#CBD5E1',
+              borderRadius: '50%',
+              marginRight: '5px'
+            }}
+          ></div>
+          <span>{statusConfig.text}</span>
+          {status === datasetStatus.version_update_failed ||
+          status === datasetStatus.create_failed ? (
+            <Tooltip mini content={record.error_reason || ''}>
+              <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
+            </Tooltip>
+          ) : null}
+
+          {status === datasetStatus.version_update_failed ? (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+            >
+              <span
+                className={styles.retryText}
+                onClick={() => handleRetry(record.id, record.latest_version)}
+              >
+                重试
+              </span>
+            </PermissionWrapper>
+          ) : null}
+        </div>
+      );
+    }
+  },
+  {
+    title: '描述说明',
+    dataIndex: 'description',
+    width: 260,
+    render: (description: string) => {
+      if (!description) return '-';
+      return (
+        // <div
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={description}>{description}</Tooltip>
+        // </div>
+        <EllipsisPopover
+          value={description}
+          preferTypography={true}
+          ellipsis={{
+            rows: 1,
+            showTooltip: {
+              hover: true,
+              click: false,
+              props: {
+                style: {
+                  maxWidth: 600,
+                  maxHeight: 400,
+                  overflow: 'auto'
                 }
               }
-            }}
-          ></EllipsisPopover>
-        );
-      }
+            }
+          }}
+        ></EllipsisPopover>
+      );
+    }
+  },
+  {
+    title: '生成模型',
+    dataIndex: 'src_model',
+    filterIcon: <IconFilter />,
+    width: 130,
+    filters: (() => {
+      const modelSet = new Set<string>();
+      datasetList?.forEach((dataset) => {
+        if (dataset.src_model) {
+          modelSet.add(dataset.src_model);
+        }
+      });
+      return Array.from(modelSet).map((model) => ({
+        text: model,
+        value: model
+      }));
+    })(),
+    onFilter: (value: string, record: Dataset) => {
+      return record.src_model === value;
     },
-    {
-      title: '生成模型',
-      dataIndex: 'src_model',
-      filterIcon: <IconFilter />,
-      width: 130,
-      filters: (() => {
-        const modelSet = new Set<string>();
-        datasetList?.forEach((dataset) => {
-          if (dataset.src_model) {
-            modelSet.add(dataset.src_model);
-          }
-        });
-        return Array.from(modelSet).map((model) => ({
-          text: model,
-          value: model
-        }));
-      })(),
-      onFilter: (value: string, record: Dataset) => {
-        return record.src_model === value;
-      },
-      render: (src_model: string) => {
-        if (!src_model) return '-';
-        return (
-          // <Tag
-          //   className={styles.tagPurple}
-          //   style={{
-          //     display: '-webkit-box',
-          //     WebkitBoxOrient: 'vertical',
-          //     WebkitLineClamp: 2,
-          //     overflow: 'hidden',
-          //     textOverflow: 'ellipsis',
-          //     wordBreak: 'break-all'
-          //   }}
-          // >
-          //   <Tooltip content={src_model}>{src_model}</Tooltip>
-          // </Tag>
-          <EllipsisPopover value={src_model}></EllipsisPopover>
-        );
-      }
-    },
-    {
-      title: '创建人',
-      dataIndex: 'creator_name',
-      width: 100,
-      filterIcon: <IconFilter />,
-      render: (creator_name: string) => {
-        if (!creator_name) return '-';
-        return <EllipsisPopover value={creator_name}></EllipsisPopover>;
-      }
-      // filters: (() => {
-      //   const creatorSet = new Set<string>();
-      //   datasetList?.forEach((dataset) => {
-      //     if (dataset.creator_name) {
-      //       creatorSet.add(dataset.creator_name);
-      //     }
-      //   });
-      //   return Array.from(creatorSet).map((creator) => ({
-      //     text: creator,
-      //     value: creator
-      //   }));
-      // })(),
-      // onFilter: (value: string, record: Dataset) => {
-      //   return record.creator_name === value;
-      // }
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      width: 180,
-      sorter: true, // 启用排序功能，但不提供排序函数
-      sortOrder:
-        sortField === 'created_at'
-          ? sortOrder === 'asc'
-            ? ('ascend' as const)
-            : sortOrder === 'desc'
-              ? ('descend' as const)
-              : undefined
-          : undefined,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (created_at: string) => formatDateTime(created_at)
-    },
-    {
-      title: '最近更新',
-      dataIndex: 'updated_at',
-      width: 180,
-      sorter: true, // 启用排序功能，但不提供排序函数
-      sortOrder:
-        sortField === 'updated_at'
-          ? sortOrder === 'asc'
-            ? ('ascend' as const)
-            : sortOrder === 'desc'
-              ? ('descend' as const)
-              : undefined
-          : undefined,
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (updated_at: string) => formatDateTime(updated_at)
-    },
-    {
-      title: '操作',
-      dataIndex: 'op',
-      width: 104,
-      fixed: 'right' as const,
-      render: (_: unknown, record: Dataset) => {
-        const perms = record.perms;
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {/* <Button
+    render: (src_model: string) => {
+      if (!src_model) return '-';
+      return (
+        // <Tag
+        //   className={styles.tagPurple}
+        //   style={{
+        //     display: '-webkit-box',
+        //     WebkitBoxOrient: 'vertical',
+        //     WebkitLineClamp: 2,
+        //     overflow: 'hidden',
+        //     textOverflow: 'ellipsis',
+        //     wordBreak: 'break-all'
+        //   }}
+        // >
+        //   <Tooltip content={src_model}>{src_model}</Tooltip>
+        // </Tag>
+        <EllipsisPopover value={src_model}></EllipsisPopover>
+      );
+    }
+  },
+  {
+    title: '创建人',
+    dataIndex: 'creator_name',
+    width: 100,
+    filterIcon: <IconFilter />,
+    render: (creator_name: string) => {
+      if (!creator_name) return '-';
+      return <EllipsisPopover value={creator_name}></EllipsisPopover>;
+    }
+    // filters: (() => {
+    //   const creatorSet = new Set<string>();
+    //   datasetList?.forEach((dataset) => {
+    //     if (dataset.creator_name) {
+    //       creatorSet.add(dataset.creator_name);
+    //     }
+    //   });
+    //   return Array.from(creatorSet).map((creator) => ({
+    //     text: creator,
+    //     value: creator
+    //   }));
+    // })(),
+    // onFilter: (value: string, record: Dataset) => {
+    //   return record.creator_name === value;
+    // }
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'created_at',
+    width: 180,
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'created_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (created_at: string) => formatDateTime(created_at)
+  },
+  {
+    title: '最近更新',
+    dataIndex: 'updated_at',
+    width: 180,
+    sorter: true, // 启用排序功能，但不提供排序函数
+    sortOrder:
+      sortField === 'updated_at'
+        ? sortOrder === 'asc'
+          ? ('ascend' as const)
+          : sortOrder === 'desc'
+            ? ('descend' as const)
+            : undefined
+        : undefined,
+    sortDirections: ['ascend' as const, 'descend' as const],
+    render: (updated_at: string) => formatDateTime(updated_at)
+  },
+  {
+    title: '操作',
+    dataIndex: 'op',
+    width: 104,
+    fixed: 'right' as const,
+    render: (_: unknown, record: Dataset) => {
+      const perms = record.perms;
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* <Button
           type="text"
           className={`${styles.actionButton} ${styles.export}`}
         >
           编辑
         </Button> */}
-            {/* <Button
+          {/* <Button
             type='text'
           >
             详情
           </Button> */}
-            {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
-              record.storage_type !== datasetStorageType.table && (
-                <Button
-                  type="text"
-                  className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-                  onClick={() => handleExport(record)}
-                  disabled={record.status !== datasetStatus.normal}
-                  style={{
-                    padding: '0 8px 0 5px',
-                    height: '100%',
-                    borderTop: 'none',
-                    borderBottom: 'none'
-                  }}
-                >
-                  导出
-                </Button>
-              )}
-            {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
               <Button
                 type="text"
-                className={`${styles.actionButton} ${styles.delete}`}
-                onClick={() => handleDelete(record)}
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                onClick={() => handleExport(record)}
+                disabled={record.status !== datasetStatus.normal}
                 style={{
                   padding: '0 8px 0 5px',
                   height: '100%',
@@ -521,14 +540,33 @@ const columns = (
                   borderBottom: 'none'
                 }}
               >
-                删除
+                导出
               </Button>
-            )}
-          </div>
-        );
-      }
+            </PermissionWrapper>
+          )}
+
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
+            <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.delete}`}
+              onClick={() => handleDelete(record)}
+              style={{
+                padding: '0 8px 0 5px',
+                height: '100%',
+                borderTop: 'none',
+                borderBottom: 'none'
+              }}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
+        </div>
+      );
     }
-  ];
+  }
+];
 
 export enum searchFieldType {
   name = 'name',
@@ -675,14 +713,14 @@ const DatasetManagement: React.FC = () => {
       src_extra:
         formData.dataSource === 'volume'
           ? {
-            // path: fullPath,
-            path_id: formData.targetDataSource?.[1]?.[1] ?? '',
-            path_file_ids: formData.path_file_ids || []
-          }
+              // path: fullPath,
+              path_id: formData.targetDataSource?.[1]?.[1] ?? '',
+              path_file_ids: formData.path_file_ids || []
+            }
           : {
-            connector_id: parseInt(formData?.targetDataSource) || 0,
-            connector_file_ids: formData?.selectedFiles || []
-          }
+              connector_id: parseInt(formData?.targetDataSource) || 0,
+              connector_file_ids: formData?.selectedFiles || []
+            }
     };
 
     console.log('提交数据:', submitData);
@@ -726,12 +764,12 @@ const DatasetManagement: React.FC = () => {
 
   // 删除数据集的方法
   const deleteDatasetRecord = (record: Dataset) => {
-    deleteDataset(record)
-      .then(() => {
+    deleteDataset({ id: record?.id })
+      .then((res) => {
         fetchDatasetList();
         Message.success('删除成功');
       })
-      .catch(() => {
+      .catch((err) => {
         Message.error('删除失败，请稍候重试');
       });
   };
@@ -1021,7 +1059,7 @@ const DatasetManagement: React.FC = () => {
               Message.error('批量删除失败！');
             }
           })
-          .catch(() => {
+          .catch((err) => {
             Message.error('批量删除失败！');
           });
       }
@@ -1222,7 +1260,7 @@ const DatasetManagement: React.FC = () => {
           current: currentPage,
           total: total,
           pageSize: pageSize,
-          showTotal: (total) => `共${total}条`,
+          showTotal: (total, range) => `共${total}条`,
           sizeCanChange: true,
           showJumper: true,
           pageSizeChangeResetCurrent: true,

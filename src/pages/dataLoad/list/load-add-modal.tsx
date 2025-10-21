@@ -19,6 +19,8 @@ import { validateName } from '@/utils/valiate';
 import Uploads from './file-upload';
 import ComponentTree from './component-tree';
 import './db-tree.css';
+import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
+import { isNumber } from 'lodash-es';
 interface connecort_nameType {
   key: number;
   label: string;
@@ -439,7 +441,7 @@ const LoadAddModal = (props: propsType) => {
         if (sourceType) {
           const res = await getConnectionList({
             type: sourceType,
-            status: 'connected'
+            status: '1'
           });
           if (!cancelled && res.data && res.data.items) {
             const newConnectName = res.data.items.map((item) => ({
@@ -480,7 +482,8 @@ const LoadAddModal = (props: propsType) => {
       return;
     }
     try {
-      const res = await getdetailList(connector_id);
+      console.log('connector_id', connector_id);
+      const res = await getdetailList({ id: connector_id });
       if (sourceType === 'db') {
         const tableNameRes = await getTableName({ connector_id: connector_id });
         console.log(tableNameRes, '获取连接器下面的表格');
@@ -866,7 +869,10 @@ const LoadAddModal = (props: propsType) => {
                     dest_path: path
                   });
                   // 选择完成后关闭下拉框
-                  setDropdownVisible(false);
+                  // 初始节点id是一个字符串， 生成成功后是number类型
+                  if (isNumber(nodeId)) {
+                    setDropdownVisible(false);
+                  }
                 }}
                 showAddTree={true}
                 enableRootAdd={true}

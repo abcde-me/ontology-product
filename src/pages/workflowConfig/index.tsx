@@ -25,8 +25,9 @@ function WorkflowConfig({ setHeight }) {
   useEffect(() => {
     const init = async () => {
       if (appId) {
-        const workflowDetailRes = await getWorkflowDetail(appId, {
-          workflow_version: workflowVersion
+        const workflowDetailRes = await getWorkflowDetail({
+          workflow_version: workflowVersion,
+          workflow_uuid: appId
         });
 
         if (workflowDetailRes?.data) {

@@ -46,12 +46,7 @@ export const useTabManager = (
 
   // 文件操作
   const openFile = useCallback(
-    (
-      fileId: string,
-      scriptId: string,
-      fileName?: string,
-      perms?: Array<string>
-    ) => {
+    (fileId: string, scriptId: string, fileName?: string) => {
       try {
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -90,8 +85,7 @@ export const useTabManager = (
             content: '', // 初始内容为空，由 useEditor 加载
             fileId: fileId,
             scriptId: scriptId,
-            lastModified: new Date().toISOString(),
-            perms: perms
+            lastModified: new Date().toISOString()
           };
           updatedTabs = [...fileState.fileTabs, newTab];
         }
@@ -266,15 +260,12 @@ export const useTabManager = (
     [fileState.fileTabs, fileState.activeTab]
   );
 
-  const handleCreate = useCallback(
-    (): Promise<any> => {
-      return new Promise((resolve) => {
-        addTab();
-        resolve(null);
-      });
-    },
-    []
-  );
+  const handleCreate = useCallback((): Promise<any> => {
+    return new Promise((resolve) => {
+      addTab();
+      resolve(null);
+    });
+  }, []);
 
   // 更新标签页标题的函数
   const updateTabTitle = useCallback((fileId: string, newTitle: string) => {

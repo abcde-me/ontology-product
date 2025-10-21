@@ -1,8 +1,11 @@
-import React, {
-  useState,
-  useEffect,
-} from 'react';
-import { Popover, Modal } from '@arco-design/web-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Button,
+  Popover,
+  DatePicker,
+  Modal,
+  Link
+} from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import getFileIcon from '@/components/file-icon';
 import {
@@ -12,6 +15,10 @@ import {
   getSourceFileTypeList as getSourceFileTypeListApi
 } from '@/api/dataCatalog';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import {
+  PermissionGuard,
+  PermissionWrapper
+} from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
@@ -159,38 +166,49 @@ const renderActionColumn = (
   selectedKey,
   tableType,
   selectedFullPath,
-  handAllReset,
+  handAllReset
 ) => {
   const params = record?.perms || [];
   const config: {
     label: string;
     onClick: () => void;
   }[] = [];
-  if (
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR) ||
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE)
-  ) {
-    config.push({
-      label: '导出',
-      onClick: () => handleDownload(record, setVisible, selectedFullPath)
-    });
-  }
-  if (
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE) ||
-    params.includes(DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE)
-  ) {
-    config.push({
-      label: '删除',
-      onClick: () =>
-        handleDelete(
-          record,
-          refreshData,
-          selectedKey,
-          tableType,
-          handAllReset,
-        )
-    });
-  }
+  <>
+    <PermissionWrapper
+      permission={
+        DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR ||
+        DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE
+      }
+    >
+      <Link
+        href="#"
+        onClick={() => handleDownload(record, setVisible, selectedFullPath)}
+      >
+        导出
+      </Link>
+    </PermissionWrapper>
+    <PermissionWrapper
+      permission={
+        DATA_CATALOG_PERMISSIONS.CAN_DELETE ||
+        DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE
+      }
+    >
+      <Link
+        href="#"
+        onClick={() =>
+          handleDelete(
+            record,
+            refreshData,
+            selectedKey,
+            tableType,
+            handAllReset
+          )
+        }
+      >
+        删除
+      </Link>
+    </PermissionWrapper>
+  </>;
   return (
     <OperationColumn row={record} index={0} config={config} extendFont="更多" />
   );
@@ -246,7 +264,7 @@ export const getUnifiedColumns = (
   dataType: 'volume' | 'database',
   setVisible,
   setVisibleDbmodel,
-  refreshData = () => { }, // 添加刷新数据的回调函数
+  refreshData = () => {}, // 添加刷新数据的回调函数
   selectedKey?: string, // 添加selectedKey参数
   selectedFullPath?: string, // 添加selectedFullPath参数
   customFileTypeFilters?: any[], // 新增参数，用于接收动态生成的文件类型筛选器
@@ -347,7 +365,7 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset,
+            handAllReset
           )
       }
     ];
@@ -509,11 +527,7 @@ export const getUnifiedColumns = (
         title: '其他信息',
         dataIndex: 'workflowId',
         width: 240,
-        render: (_, record) => (
-          <WorkflowIdCell
-            record={record}
-          />
-        )
+        render: (_, record) => <WorkflowIdCell record={record} />
       },
       {
         title: '原文件类型',
@@ -547,7 +561,7 @@ export const getUnifiedColumns = (
             selectedKey,
             tableType,
             selectedFullPath,
-            handAllReset,
+            handAllReset
           )
       }
     ];
@@ -570,7 +584,7 @@ const handleDelete = (
   refreshData,
   selectedKey,
   tableType: 'source' | 'target',
-  handAllReset,
+  handAllReset
 ) => {
   const ids: Array<string> = [];
   try {

@@ -5,7 +5,7 @@
   flex-direction: column;
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
+  // overflow: hidden;
 
   .pyspark-source-tree__content .pyspark-source-tree__content-tree {
     .arco-tree-node {
@@ -50,7 +50,7 @@
 
           .pyspark-source-tree__node-title-volume_item,
           .pyspark-source-tree__node-size-volume_item {
-            width: 146px;
+            width: 144px;
           }
 
           .pyspark-source-tree__node-actions {

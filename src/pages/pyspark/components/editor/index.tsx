@@ -14,7 +14,6 @@ interface EditorContentProps {
     title: string;
     content: string;
     fileId?: string;
-    perms?: Array<string>;
   }>;
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -145,10 +144,10 @@ const EditorContent: React.FC<EditorContentProps> = memo(
                   value={tab.title}
                   // preferTypography
                   className="tab-title-ellipsis"
-                // ellipsis={{
-                //   rows: 1,
-                //   showTooltip: true
-                // }}
+                  // ellipsis={{
+                  //   rows: 1,
+                  //   showTooltip: true
+                  // }}
                 />
               }
               closable={fileTabs.length > 1}

@@ -24,6 +24,7 @@ import { formatFileSize } from '@/utils/format';
 import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import RefreshButton from '@/components/refreshButton';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const FormItem = Form.Item;
 
@@ -132,9 +133,13 @@ const DatasetsList: FC = () => {
           case 0:
             text = '导出中';
             color = '#007DFA';
-            actionBtn = item?.perms?.includes(
-              SQL_PERMISSIONS.CAN_EXPORT_TASK_STOP
-            ) && <Link onClick={() => handleStopTask(item)}> 终止 </Link>;
+            actionBtn = (
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_STOP}
+              >
+                <Link onClick={() => handleStopTask(item)}> 终止 </Link>;
+              </PermissionWrapper>
+            );
             break;
           case 1:
             text = '导出成功';
@@ -143,31 +148,33 @@ const DatasetsList: FC = () => {
           case 2:
             text = '导出失败';
             color = '#EF4444';
-            actionBtn = item?.perms?.includes(
-              SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
-            ) && (
-                <>
-                  <Tooltip content={item.failed_reason}>
-                    <IconInfoCircle />
-                  </Tooltip>
-                  <Link href="#" onClick={() => handleRetryTask(item)}>
-                    {' '}
-                    重试{' '}
-                  </Link>
-                </>
-              );
-            break;
-          case 3:
-            text = '导出终止';
-            color = '#FB923C';
-            actionBtn = item?.perms?.includes(
-              SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY
-            ) && (
+            actionBtn = (
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY}
+              >
+                <Tooltip content={item.failed_reason}>
+                  <IconInfoCircle />
+                </Tooltip>
                 <Link href="#" onClick={() => handleRetryTask(item)}>
                   {' '}
                   重试{' '}
                 </Link>
-              );
+              </PermissionWrapper>
+            );
+            break;
+          case 3:
+            text = '导出终止';
+            color = '#FB923C';
+            actionBtn = (
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY}
+              >
+                <Link href="#" onClick={() => handleRetryTask(item)}>
+                  {' '}
+                  重试{' '}
+                </Link>
+              </PermissionWrapper>
+            );
             break;
 
           default:

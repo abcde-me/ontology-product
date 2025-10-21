@@ -8,7 +8,7 @@ import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
-import './index.scss';
+import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 
@@ -101,20 +101,20 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   return (
-    <Layout className="sql-page-layout">
-      <Sider width={isDasetTab ? '100%' : 360} className="sql-sider">
+    <Layout className={styles['sql-page-layout']}>
+      <Sider width={isDasetTab ? '100%' : 360} className={styles['sql-sider']}>
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="sql-tabs"
+          className={styles['sql-tabs']}
           type="rounded"
         >
           <TabPane
             key="data"
             title={
-              <Popover content="源数据" position="right">
-                <DataIcon className="sql-menu-icon" />
+              <Popover content="源数据" position="left">
+                <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -129,8 +129,8 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="SQL脚本列表" position="right">
-                <SQLIcon className="sql-menu-icon" />
+              <Popover content="SQL脚本列表" position="left">
+                <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -150,8 +150,8 @@ const SqlIndex: React.FC = memo(() => {
             <TabPane
               key="dataset"
               title={
-                <Popover content="数据集导出任务" position="right">
-                  <DasetIcon className="sql-menu-icon" />
+                <Popover content="数据集导出任务" position="left">
+                  <DasetIcon className={styles['sql-menu-icon']} />
                 </Popover>
               }
             >
@@ -160,7 +160,9 @@ const SqlIndex: React.FC = memo(() => {
           )}
         </Tabs>
       </Sider>
-      <Content className={`sql-content ${isDasetTab ? 'hidden' : 'visible'}`}>
+      <Content
+        className={`${styles['sql-content']} ${isDasetTab ? styles.hidden : styles.visible}`}
+      >
         <EditorContent
           fileTabs={fileState.fileTabs}
           activeTab={fileState.activeTab}

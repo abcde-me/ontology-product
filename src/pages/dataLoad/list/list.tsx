@@ -4,7 +4,8 @@ import {
   Message,
   Modal,
   Pagination,
-  Table
+  Table,
+  Space
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
@@ -221,31 +222,46 @@ export default function DataLoad() {
       fixed: 'right',
       width: 105,
       render: (_, item) => {
-        const perms = item?.perms || [];
-        const config = [] as any;
-        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
-          config.push({
-            label: '详情',
-            onClick: () => {
-              gotoDetail(item.task_id);
-            }
-          });
-        }
-        if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
-          config.push({
-            label: '删除',
-            onClick: () => {
-              deleteLoad(item.task_id, item.name);
-            }
-          });
-        }
+        // const perms = item?.perms || [];
+        // const config = [] as any;
+        // if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET)) {
+        //   config.push({
+        //     label: '详情',
+        //     onClick: () => {
+        //       gotoDetail(item.task_id);
+        //     }
+        //   });
+        // }
+        // if (perms.includes(DATA_LOAD_PERMISSIONS.CAN_DETELE)) {
+        //   config.push({
+        //     label: '删除',
+        //     onClick: () => {
+        //       deleteLoad(item.task_id, item.name);
+        //     }
+        //   });
+        // }
         return (
-          <OperationColumn
-            row={item}
-            config={config}
-            index={0}
-            extendFont="操作"
-          />
+          <Space>
+            <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_GET}>
+              <Button type="text" onClick={() => gotoDetail(item.task_id)}>
+                详情
+              </Button>
+            </PermissionWrapper>
+            <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_DETELE}>
+              <Button
+                type="text"
+                onClick={() => deleteLoad(item.task_id, item.name)}
+              >
+                删除
+              </Button>
+            </PermissionWrapper>
+          </Space>
+          // <OperationColumn
+          //   row={item}
+          //   config={config}
+          //   index={0}
+          //   extendFont="操作"
+          // />
         );
       }
     }
@@ -447,8 +463,12 @@ export default function DataLoad() {
         pagination={false}
         rowKey="task_id"
         border={false}
+        // scroll={{
+        //   x: true
+        // }}
         scroll={{
-          x: true
+          x: 1600,
+          y: 400
         }}
         onChange={(pagination, filters, sorter) => {
           loadSiftHan(filters, sorter);

@@ -24,6 +24,6 @@
   }
 }
 
-.parse-node .arco-table-tr > th {
+.parse-node :global(.arco-table-tr) > :global(th) {
   background-color: rgb(245, 249, 255) !important;
 }

@@ -25,6 +25,7 @@ import noDataElement from '@/components/no-data';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import ModalDatasetDetail from '../data-manager/ModalDatasetDetail';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const FormItem = Form.Item;
 
@@ -112,7 +113,7 @@ const DatasetsList: FC = () => {
     {
       title: '导出状态',
       dataIndex: 'status',
-      width: 130,
+      width: 140,
       render: (_, item) => {
         let text = '未知状态';
         let color = '#999999';
@@ -122,13 +123,15 @@ const DatasetsList: FC = () => {
           case ExportStatus.Exporting:
             text = '导出中';
             color = '#1890ff';
-            actionBtn = item.perms?.includes(
-              PYSPARK_PERMISSIONS.CAN_EXPORT_STOP
-            ) && (
-              <Link href="#" onClick={() => handleStopTask(item)}>
-                {' '}
-                停止{' '}
-              </Link>
+            actionBtn = (
+              <PermissionWrapper
+                permission={PYSPARK_PERMISSIONS.CAN_EXPORT_STOP}
+              >
+                <Link href="#" onClick={() => handleStopTask(item)}>
+                  {' '}
+                  停止{' '}
+                </Link>
+              </PermissionWrapper>
             );
             break;
           case ExportStatus.ExportSuccess:
@@ -138,12 +141,14 @@ const DatasetsList: FC = () => {
           case ExportStatus.ExportFailed:
             text = '导出失败';
             color = '#ff4d4f';
-            actionBtn = item.perms?.includes(
-              PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY
-            ) && (
-              <Tooltip content={item.err_reason}>
-                <IconInfoCircle />
-              </Tooltip>
+            actionBtn = (
+              <PermissionWrapper
+                permission={PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY}
+              >
+                <Tooltip content={item.err_reason}>
+                  <IconInfoCircle />
+                </Tooltip>
+              </PermissionWrapper>
             );
             break;
           case ExportStatus.ExportTerminated:
@@ -255,7 +260,7 @@ const DatasetsList: FC = () => {
   // }
 
   return (
-    <div className="flex h-full flex-col overflow-y-hidden p-[20px]">
+    <div className="flex h-full flex-col overflow-y-auto p-[20px]">
       <h1 className="mb-[15px] text-[20px] font-bold">数据集导出任务</h1>
       <Form autoComplete="off" layout="inline">
         <FormItem field="file_name" style={{ marginRight: 12 }}>
@@ -272,10 +277,10 @@ const DatasetsList: FC = () => {
         </FormItem>
       </Form>
       <Table
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
+        // style={{
+        //   width: '100%',
+        //   height: '100%'
+        // }}
         columns={columns}
         data={listData}
         pagination={pagination}

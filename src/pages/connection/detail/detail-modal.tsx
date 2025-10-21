@@ -20,7 +20,9 @@ const ModalDetail = (props) => {
   const getdetailListHan = async () => {
     try {
       setLoading(true);
-      const res = await getdetailList(props.detailId);
+      const res = await getdetailList({
+        id: props.detailId
+      });
       setDetailData(res.data);
     } catch (error) {
       console.error('获取详情页数据失败:', error);
@@ -77,9 +79,9 @@ const ModalDetail = (props) => {
                     width: '8px',
                     height: '8px',
                     backgroundColor:
-                      DetailData?.status == 'connected'
+                      DetailData?.status == '1'
                         ? '#059669'
-                        : DetailData?.status == 'disconnected'
+                        : DetailData?.status == '0'
                           ? '#DC2626'
                           : '',
                     borderRadius: '50%',
@@ -87,8 +89,8 @@ const ModalDetail = (props) => {
                   }}
                 ></div>
                 <div>
-                  {DetailData?.status == 'connected' && '已连接'}
-                  {DetailData?.status == 'disconnected' && '已断开'}
+                  {DetailData?.status == '1' && '已连接'}
+                  {DetailData?.status == '0' && '已断开'}
                 </div>
               </div>
             </div>
@@ -97,7 +99,7 @@ const ModalDetail = (props) => {
               <span className={styles['item-value']}>
                 {DetailData?.type !== 'db'
                   ? (DetailData?.type && TYPE_CONFIG[DetailData.type]) ||
-                  '未知类型'
+                    '未知类型'
                   : TYPE_CONFIG[DetailData?.sub_type]}
               </span>
             </div>

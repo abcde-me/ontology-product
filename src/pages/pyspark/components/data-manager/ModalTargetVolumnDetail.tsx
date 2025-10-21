@@ -108,8 +108,8 @@ const FileList = (props) => {
             onChange={(date) => {
               handleValuesChange({ datetime_range: date });
             }}
-            onSelect={() => { }}
-            onOk={() => { }}
+            onSelect={() => {}}
+            onOk={() => {}}
             allowClear={true}
           />
         </FormItem>
@@ -333,14 +333,14 @@ const useTableList = (props) => {
         page_size: pagination.pageSize,
         ...(filters
           ? {
-            file_type: filters.file_type
-          }
+              file_type: filters.file_type
+            }
           : {}),
         ...(sorter
           ? {
-            sort_field: sorter.field,
-            sort_order: sorter.direction === 'ascend' ? 'asc' : 'desc'
-          }
+              sort_field: sorter.field,
+              sort_order: sorter.direction === 'ascend' ? 'asc' : 'desc'
+            }
           : {})
       };
     });
@@ -369,3 +369,20 @@ interface SourceDataFileQueryParams {
   path_id: string;
 }
 
+interface ListDataItem {
+  id: number;
+  generated_at: string;
+  FileName: string;
+  file_type: string;
+  full_path: string;
+  short_content: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  extras: {
+    ds_workflow_id: string;
+    file_name: string;
+    file_size: string;
+    workflow_uuid: string;
+  };
+}

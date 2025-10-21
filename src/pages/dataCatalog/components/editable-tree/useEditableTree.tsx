@@ -11,7 +11,7 @@ import {
   IconDelete,
   IconEdit,
   IconStorage,
-  IconArchive,
+  IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -20,10 +20,11 @@ import {
   deleteVolume,
   deleteTable,
   renameCatalog,
-  addDb,
+  addDb
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from '../../modal.module.css';
 
 export function useEditableTree({ catalogTreeStore }) {
@@ -129,9 +130,7 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const handleExpand = (
-    expandedKeys: string[],
-  ) => {
+  const handleExpand = (expandedKeys: string[]) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
     });
@@ -418,6 +417,7 @@ export function useEditableTree({ catalogTreeStore }) {
       // 编辑
       if (fileName !== dataRef?.name) {
         res = await renameCatalog(dataRef?.id, {
+          id: dataRef?.id,
           new_name: fileName,
           root_type: root_type,
           type: dataRef?.type,
@@ -442,10 +442,10 @@ export function useEditableTree({ catalogTreeStore }) {
           {/* db_item 类型只显示删除按钮 */}
           {dataRef?.type === CatalogTypeEnum.db_item ? (
             <>
-              {(dataRef?.perms?.includes(
-                DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-              ) ||
-                dataRef?.type === CatalogTypeEnum.db_item) && (
+              {dataRef?.type === CatalogTypeEnum.db_item && (
+                <PermissionWrapper
+                  permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}
+                >
                   <Tooltip color="white" content="删除">
                     <IconDelete
                       onClick={() => {
@@ -457,7 +457,8 @@ export function useEditableTree({ catalogTreeStore }) {
                               await handleDelete(node, 'db_item');
                             } catch (apiError: any) {
                               Message.error(
-                                '删除失败: ' + (apiError.message || '请稍后重试')
+                                '删除失败: ' +
+                                  (apiError.message || '请稍后重试')
                               );
                             }
                           },
@@ -467,16 +468,18 @@ export function useEditableTree({ catalogTreeStore }) {
                       className="hover:text-[rgb(var(--primary-6))]"
                     />
                   </Tooltip>
-                )}
+                </PermissionWrapper>
+              )}
             </>
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
               {['volume'].every((key) => dataRef?.type !== key) && (
                 <>
-                  {dataRef?.perms?.includes(
-                    DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
-                  ) && (
+                  {
+                    <PermissionWrapper
+                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                    >
                       <Tooltip color="white" content="重命名">
                         <IconEdit
                           className={
@@ -485,10 +488,12 @@ export function useEditableTree({ catalogTreeStore }) {
                           onClick={() => handleEdit(node)}
                         />
                       </Tooltip>
-                    )}
-                  {dataRef?.perms?.includes(
-                    DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-                  ) && (
+                    </PermissionWrapper>
+                  }
+                  {
+                    <PermissionWrapper
+                      permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}
+                    >
                       <Tooltip color="white" content="删除">
                         <IconDelete
                           onClick={() => {
@@ -502,7 +507,7 @@ export function useEditableTree({ catalogTreeStore }) {
                                 } catch (apiError: any) {
                                   Message.error(
                                     '删除失败: ' +
-                                    (apiError.message || '请稍后重试')
+                                      (apiError.message || '请稍后重试')
                                   );
                                 }
                               },
@@ -512,19 +517,23 @@ export function useEditableTree({ catalogTreeStore }) {
                           className="hover:text-[rgb(var(--primary-6))]"
                         />
                       </Tooltip>
-                    )}
+                    </PermissionWrapper>
+                  }
                 </>
               )}
               {/* 为数据卷和数据库都添加新建按钮 */}
-              {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
-                perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+              {(dataRef?.type === 'volume' || dataRef?.type === 'db') && (
+                <PermissionWrapper
+                  permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
+                >
                   <Tooltip color="white" content="新建">
                     <IconPlus
                       className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
                       onClick={() => addSubVolume(node)}
                     />
                   </Tooltip>
-                )}
+                </PermissionWrapper>
+              )}
             </>
           )}
         </div>

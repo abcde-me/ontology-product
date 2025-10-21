@@ -19,7 +19,7 @@ import {
   getDatasetsOptions
 } from '@/api/sql';
 import { requiredValidator, tableNameValidator } from '../utils';
-import './ModalDatasetForm.scss';
+import styles from './ModalDatasetForm.module.scss';
 
 const FormItem = Form.Item;
 
@@ -157,7 +157,7 @@ function DatasetForm(props) {
   };
 
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className={`${styles['modal-dataset-form']} flex flex-col gap-[16px]`}>
       <div className="flex flex-col gap-[12px]">
         <div>
           <span className="text-[14px] font-[600]">基本信息</span>
@@ -269,7 +269,6 @@ function DatasetForm(props) {
           <span className="text-[14px] font-[600]">来源信息</span>
         </div>
         <Table
-          className="modal-dataset-form"
           columns={columns}
           data={tableData}
           rowKey="key"

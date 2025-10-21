@@ -141,9 +141,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         icon={<IconCopy />}
         onClick={() => handleCopyContent(content)}
         className="copy-button"
-        title="复制代码"
       >
-        复制代码
+        复制
       </Button>
     );
 

@@ -80,7 +80,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           mg_duplicate: inputs?.mg_duplicate_checkbox,
-          mg_duplicate_ngram: inputs?.mg_duplicate_ngram
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
@@ -454,7 +454,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
               </div>
               <FormItem
                 label={null}
-                field="ngram_threshold"
+                field="mg_duplicate_ngram"
                 labelAlign="left"
                 disabled={
                   form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'
