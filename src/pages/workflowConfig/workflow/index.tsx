@@ -51,7 +51,7 @@ import Panel from './panel';
 import Features from './features';
 import HelpLine from './help-line';
 import CandidateNode from './candidate-node';
-import PanelContextmenu from './panel-contextmenu';
+// import PanelContextmenu from './panel-contextmenu';
 import NodeContextmenu from './node-contextmenu';
 import SyncingDataModal from './syncing-data-modal';
 import UpdateDSLModal from './update-dsl-modal';
@@ -77,7 +77,7 @@ import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConf
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
-  [CUSTOM_NOTE_NODE]: CustomNoteNode,
+  [CUSTOM_NOTE_NODE]: CustomNoteNode
 };
 const edgeTypes = {
   [CUSTOM_EDGE]: CustomEdge
@@ -268,7 +268,7 @@ const Workflow: FC<WorkflowProps> = memo(
         <Panel />
         {/* <Operator handleRedo={handleHistoryForward} handleUndo={handleHistoryBack} /> */}
         {showFeaturesPanel && <Features />}
-        {!isShowChatMode && <PanelContextmenu />}
+        {/* {!isShowChatMode && <PanelContextmenu />} */}
         {!isShowChatMode && <NodeContextmenu />}
         <HelpLine />
         {!!showConfirm && (
@@ -345,8 +345,8 @@ const Workflow: FC<WorkflowProps> = memo(
             size={2}
             className="react-flow-bg bg-workflow-canvas-workflow-bg"
             color="var(--color-workflow-canvas-workflow-dot-color)"
-          // color='#c8ceda20'
-          // variant={BackgroundVariant.Lines}
+            // color='#c8ceda20'
+            // variant={BackgroundVariant.Lines}
           />
         </ReactFlow>
       </div>
