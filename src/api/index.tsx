@@ -27,7 +27,6 @@ UAPI_CONFIG.addRequestInterceptor(
   (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
     const projectId = useUserInfoStore.getState().projectId;
-    console.log('www', projectId);
 
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
@@ -40,7 +39,6 @@ UAPI_CONFIG.addRequestInterceptor(
 
     // 统一添加的公共参数（例如：设备信息、用户 Token 等）
     const hasValidProjectId = projectId && projectId.length > 1 && projectId[1];
-
     const commonParams = {
       projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
     };
