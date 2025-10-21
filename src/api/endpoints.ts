@@ -292,8 +292,8 @@ export const ModaForgeResourceEndpoints = {
   taskRerun: PrefixAimdp + '/RerunWorkflowInstance',
   // 作业停用
   taskStop: PrefixAimdp + '/StopWorkflowInstance',
-
-  modelGet: PrefixAimdp + '/model/model_list',
+  // 工作流-获取工作流模型列表
+  modelGet: PrefixAimdp + '/ListWorkFlowModel',
 
   //数据目录
   //获取数据目录
