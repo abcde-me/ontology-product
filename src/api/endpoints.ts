@@ -171,16 +171,13 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi:
-    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
-  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
-  sourceDataFileDeleteApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
-  sourceDataFileDeleteBatcheApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
+  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件类型列表
+  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
+  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
+  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
   dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
-  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
+  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
