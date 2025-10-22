@@ -50,6 +50,7 @@ import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
+import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -1710,7 +1711,7 @@ const DatasetDetail = (props: {
                             <Tooltip
                               content={
                                 !datasetDetail ||
-                                  datasetDetail.status !== 'normal'
+                                datasetDetail.status !== 'normal'
                                   ? '当前状态下不能进行编辑'
                                   : ''
                               }
@@ -1796,7 +1797,7 @@ const DatasetDetail = (props: {
             </TabPane>
           )}
           <TabPane key="hittest" title="命中测试">
-            <div>命中测试</div>
+            <HitTest />
           </TabPane>
           <TabPane key="element" title="元素搜索"></TabPane>
           <TabPane key="version" title="变更记录">
