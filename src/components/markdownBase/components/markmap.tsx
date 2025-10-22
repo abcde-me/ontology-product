@@ -4,11 +4,11 @@ import { transformer } from '../hooks/useMarkmap';
 
 export default function MarkmapRenderer({ chart }) {
   const [value, setValue] = useState(chart);
-  const refSvg = useRef<SVGSVGElement>();
+  const refSvg = useRef<SVGSVGElement>(null);
   const refMm = useRef<Markmap>();
 
   useEffect(() => {
-    if (refMm.current) return;
+    if (refMm.current || !refSvg.current) return;
     const mm = Markmap.create(refSvg.current, {
       pan: false, // 禁用拖拽
       zoom: false, // 禁用缩放
