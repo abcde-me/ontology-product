@@ -72,21 +72,20 @@ const TableDetail = (props) => {
               RunStateType[RunState.STOPPED].text}
             {item.status === 'stopping' && '停止中'}
           </div>
-          {item.status == 'running' &&
-            props.permission.includes(DATA_LOAD_PERMISSIONS.CAN_STOP) && (
-              <span
-                style={{
-                  color: 'rgb(0, 125, 250)',
-                  marginLeft: '7px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => {
-                  stopTaskHan(item.execution_id);
-                }}
-              >
-                停止
-              </span>
-            )}
+          {item.status == 'running' && (
+            <span
+              style={{
+                color: 'rgb(0, 125, 250)',
+                marginLeft: '7px',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                stopTaskHan(item.execution_id);
+              }}
+            >
+              停止
+            </span>
+          )}
           {item.status === 'failed' && (
             <span
               style={{
