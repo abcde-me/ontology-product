@@ -16,7 +16,7 @@ import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
-import './index.css';
+import './index.scss';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import modal from '@/pages/workflowConfig/tools/edit-custom-collection-modal/modal';
