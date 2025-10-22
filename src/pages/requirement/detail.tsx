@@ -1350,7 +1350,7 @@ export default function RequirementDetail() {
                                         validateTrigger: ['onChange', 'onBlur'],
                                         validator: (value, callback) => {
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入展示名称');
                                             return;
                                           }
                                           // 检查是否有重复的展示名称（排除当前项）
