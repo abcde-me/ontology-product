@@ -54,13 +54,13 @@
   position: relative;
   border-radius: 8px;
 
-  .arco-btn-outline:not(.arco-btn-disabled) {
+  :global(.arco-btn-outline:not(.arco-btn-disabled)) {
     color: #007dfa;
     border-color: #007dfa;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled):active,
-  .arco-btn-outline:not(.arco-btn-disabled):hover {
+  :global(.arco-btn-outline:not(.arco-btn-disabled):active),
+  :global(.arco-btn-outline:not(.arco-btn-disabled):hover) {
     color: #007dfa;
     border-color: #007dfa;
     background-color: transparent;

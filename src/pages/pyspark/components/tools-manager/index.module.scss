@@ -2,18 +2,26 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 9px 12px 0;
 
-  .arco-tree-node:hover {
+  .sider-title {
+    padding-bottom: 9px;
+    font-size: var(--font-size-primary);
+    font-weight: 500;
+    color: var(--color-text-2);
+  }
+
+  :global(.arco-tree-node:hover) {
     background-color: transparent;
     cursor: unset;
   }
 
-  .arco-tree-node-title:hover {
+  :global(.arco-tree-node-title:hover) {
     background-color: transparent;
     color: var(--color-text-2);
   }
 
-  .arco-tree-node-is-leaf {
+  :global(.arco-tree-node-is-leaf) {
     &:hover {
       background-color: #eef6ff;
       border-radius: 2px;
@@ -35,7 +43,7 @@
       }
     }
 
-    .arco-tree-node-title {
+    :global(.arco-tree-node-title) {
       margin-left: -24px;
       padding: 6px 8px;
       cursor: unset;

@@ -50,7 +50,7 @@
   // 第三部分：列表
   .pyspark-dataset-tree__content
     .pyspark-dataset-tree__content-tree
-    .arco-tree-node {
+    :global(.arco-tree-node) {
     position: relative;
     align-items: center;
     padding-left: 4px;
@@ -60,7 +60,7 @@
       background-color: transparent;
     }
 
-    .arco-tree-node-title {
+    :global(.arco-tree-node-title) {
       width: 267px;
       flex-basis: 267px;
       flex-shrink: 0;
@@ -90,20 +90,20 @@
     }
 
     // 去除选中时的高亮
-    &.arco-tree-node-selected {
+    &:global(.arco-tree-node-selected) {
       background-color: transparent;
       color: var(--color-text-2);
 
-      .arco-tree-node-switcher {
+      :global(.arco-tree-node-switcher) {
         color: var(--color-text-2);
       }
     }
 
-    &-title-text {
+    &:global(.arco-tree-node-title-text) {
       flex-grow: 1;
     }
 
-    &-custom-icon {
+    &:global(.arco-tree-node-custom-icon) {
       margin-right: 4px;
     }
   }
@@ -113,24 +113,12 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    position: relative;
 
     &-info {
       display: flex;
       align-items: start;
       flex-direction: column;
     }
-
-    // &-title {
-    //   flex-grow: 1;
-    //   color: var(--color-text-2);
-    //   font-size: 14px;
-    //   max-width: 175px;
-
-    //   &-file {
-    //     max-width: 150px;
-    //   }
-    // }
 
     &-size {
       font-size: 12px;
@@ -159,28 +147,28 @@
   }
 
   // 空状态
-  .arco-empty {
+  :global(.arco-empty) {
     padding: 40px 0;
 
-    .arco-empty-description {
+    :global(.arco-empty-description) {
       color: #999;
       font-size: 14px;
     }
   }
 
   // 按钮样式
-  .arco-btn-size-default {
+  :global(.arco-btn-size-default) {
     height: 24px;
     padding: 0 12px;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled) {
+  :global(.arco-btn-outline:not(.arco-btn-disabled)) {
     color: #007dfa;
     border-color: #007dfa;
   }
 
-  .arco-btn-outline:not(.arco-btn-disabled):active,
-  .arco-btn-outline:not(.arco-btn-disabled):hover {
+  :global(.arco-btn-outline:not(.arco-btn-disabled):active),
+  :global(.arco-btn-outline:not(.arco-btn-disabled):hover) {
     color: #007dfa;
     border-color: #007dfa;
     background-color: transparent;

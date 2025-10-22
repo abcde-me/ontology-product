@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useEffect } from 'react';
-import './index.scss';
+import styles from './index.module.scss';
+import classNames from 'classnames';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
@@ -83,10 +84,15 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   );
 
   return (
-    <div className="python-tab-content sider-container">
-      <div className="sider-title">PySpark文件</div>
+    <div
+      className={classNames(
+        styles['python-tab-content'],
+        styles['sider-container']
+      )}
+    >
+      <div className={styles['sider-title']}>PySpark文件</div>
 
-      <div className="tab-tree">
+      <div className={styles['tab-tree']}>
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           data={pythonList as TreeNodeItem[]}
