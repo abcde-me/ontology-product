@@ -19,7 +19,7 @@ import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
-import styles from './AddDatasetForm.module.css';
+import styles from './AddDatasetForm.module.scss';
 import './AddDatasetForm.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
