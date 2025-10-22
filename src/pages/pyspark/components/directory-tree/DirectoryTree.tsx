@@ -52,6 +52,7 @@ import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 import styles from './DirectoryTree.module.scss';
 import { createPythonItem } from '@/api/pyspark';
 import { validateName } from '@/utils/valiate';
+import { is } from 'immer/dist/internal';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -65,7 +66,11 @@ export type TreeNodeItem = Partial<PythonListItem> & {
 
 // 暴露给父组件的方法接口
 export interface DirectoryTreeRef {
-  startRootCreate: (isFolder?: boolean) => void;
+  startRootCreate: (
+    isFolder?: boolean,
+    node?: NodeProps,
+    isIcon?: boolean
+  ) => void;
   refresh: () => Promise<void>; // 刷新目录列表
   selectFile: (fileId: string) => void; // 选中指定文件
 }
@@ -209,17 +214,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     }, []);
 
     // 暴露方法给父组件
-    useImperativeHandle(
-      ref,
-      () => ({
-        startRootCreate: (isFolder = true) => {
-          startRootCreate(isFolder);
-        },
-        refresh: refreshCurrentDirectory,
-        selectFile: selectFileById
-      }),
-      [refreshCurrentDirectory, selectFileById]
-    );
+    // useImperativeHandle(
+    //   ref,
+    //   () => ({
+    //     startRootCreate: (isFolder = true) => {
+    //       startRootCreate(isFolder);
+    //     },
+    //     refresh: refreshCurrentDirectory,
+    //     selectFile: selectFileById
+    //   }),
+    //   [refreshCurrentDirectory, selectFileById]
+    // );
 
     // 处理从多级路径导航跳转到指定文件夹
 
@@ -272,12 +277,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       handleSearch
     ]);
 
-    // 输入变化时触发搜索
-    const handleInputChange = (value: string) => {
-      setSearchValue(value);
-      debouncedSearch(value);
-    };
-
     // 处理搜索框清空
     const handleSearchClear = () => {
       setSearchValue('');
@@ -285,7 +284,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setSearchResults([]);
     };
     const handleCreate = useCallback(
-      async (finalName: string, node: any) => {
+      async (finalName: string, node: any, isFolder) => {
         try {
           if (!validateName(finalName).isValid) {
             Message.error(
@@ -316,25 +315,45 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       },
       [currentFolderId]
     );
-    const startRootCreate = (isFolder = true, node?) => {
+    const startRootCreate = (isFolder = true, node?, isIcon?: boolean) => {
       const name = generateDefaultName(treeData, isFolder);
       setDefaultName(name);
       setInputValue(name);
-      setTreeData([
-        {
-          name,
-          showInput: true,
-          isAdd: true,
-          type: isFolder ? PythonItemType.Directory : PythonItemType.Notebook,
-          children: [],
-          id: 0,
-          path: '',
-          created: '',
-          last_modified: ''
-        },
-        ...treeData
-      ]);
-      handleCreate(name, node);
+      // isFolder = true 表示创建文件夹，false 表示创建 notebook
+      if (isIcon) {
+        const newNode = [
+          ...node?.dataRef?.children,
+          {
+            name,
+            showInput: true,
+            isAdd: true,
+            type: isFolder ? PythonItemType.Directory : PythonItemType.Notebook,
+            children: [],
+            id: 0,
+            path: '',
+            created: '',
+            last_modified: ''
+          }
+        ];
+        console.log(newNode, '123 node');
+
+        setTreeData([...treeData, ...node.dataRef, ...newNode]);
+      } else {
+        setTreeData([
+          {
+            name,
+            showInput: true,
+            isAdd: true,
+            type: isFolder ? PythonItemType.Directory : PythonItemType.Notebook,
+            children: [],
+            id: 0,
+            path: '',
+            created: '',
+            last_modified: ''
+          },
+          ...treeData
+        ]);
+      }
       focusAndSelect();
     };
 
@@ -469,14 +488,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
       setInputValue('');
       setDefaultName('');
-    };
-
-    const handleCopy = (node: NodeProps) => {
-      try {
-        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
-      } catch (e) {
-        Message.error('复制失败');
-      }
     };
 
     const handleDelete = (node: NodeProps) => {
@@ -630,9 +641,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                           <Menu
                             onClickMenuItem={(key) => {
                               if (key === 'folder') {
-                                startRootCreate(true, node);
+                                startRootCreate(true, node, true);
                               } else if (key === 'file') {
-                                startRootCreate(false, node);
+                                startRootCreate(false, node, true);
                               }
                             }}
                           >
@@ -667,6 +678,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               );
             }}
             renderTitle={(props: NodeProps) => {
+              console.log(props, 'showInput ----');
               const isInput = Boolean(props?.dataRef?.showInput);
               const isFolder =
                 props?.dataRef?.type === PythonItemType.Directory;
