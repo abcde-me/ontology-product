@@ -43,14 +43,15 @@ import {
 } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
-import './DirectoryTree.scss';
 import timeFormattig from '@/utils/timeFormatting';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
-import Mock from 'mockjs';
+import styles from './DirectoryTree.module.scss';
+import { createPythonItem } from '@/api/pyspark';
+import { validateName } from '@/utils/valiate';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -173,9 +174,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
 
     useEffect(() => {
-      const formattedData = formatTreeData(data);
-      console.log(formattedData, 'formattedData pythonList', data);
-      setTreeData(formattedData);
+      setTreeData(data);
       setLoading(false);
     }, [data]);
 
@@ -223,94 +222,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     );
 
     // 处理从多级路径导航跳转到指定文件夹
-    const handleNavigateToFolder = async (
-      folderId: string,
-      folderName: string,
-      newStack: Array<{ id: string; name: string }>
-    ) => {
-      handleSearchClear();
-      setLoading(true);
-      try {
-        // 更新文件夹栈
-        setFolderStack(newStack);
-
-        // 设置当前文件夹
-        setCurrentFolderId(folderId);
-        setCurrentFolderName(folderName);
-
-        // 加载该文件夹内容
-        if (onFolderClick) {
-          const newData = await onFolderClick(folderId);
-          const formattedData = formatTreeData(newData as any[]);
-          setTreeData(formattedData);
-        }
-
-        // 重置选择状态
-        setSelectedKeys([]);
-        setExpandedKeys([]);
-      } catch (error) {
-        Message.error('跳转到文件夹失败');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // 处理返回上级目录
-    const handleBackToParent = async () => {
-      handleSearchClear();
-      setLoading(true);
-      try {
-        // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
-        if (folderStack.length === 0 && currentFolderId && currentFolderName) {
-          setCurrentFolderId('');
-          setCurrentFolderName('');
-          // 重新请求根目录数据
-          if (onBackToParent) {
-            const newData = await onBackToParent('0');
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-          setSelectedKeys([]);
-          setExpandedKeys([]);
-          return;
-        }
-
-        if (folderStack.length === 0) return;
-
-        const parentFolder = folderStack[folderStack.length - 1];
-        const newStack = folderStack.slice(0, -1);
-
-        setFolderStack(newStack);
-
-        // 如果返回的是根目录（id为空），则重置为根目录状态
-        if (!parentFolder.id || parentFolder.id === '') {
-          setCurrentFolderId('');
-          setCurrentFolderName('');
-          // 重新请求根目录数据
-          if (onBackToParent) {
-            const newData = await onBackToParent('');
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-        } else {
-          setCurrentFolderId(parentFolder.id);
-          setCurrentFolderName(parentFolder.name);
-
-          if (onBackToParent) {
-            const newData = await onBackToParent(parentFolder.id);
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-        }
-
-        setSelectedKeys([]);
-        setExpandedKeys([]);
-      } catch (error) {
-        Message.error('返回上级目录失败');
-      } finally {
-        setLoading(false);
-      }
-    };
 
     const focusAndSelect = () => {
       setTimeout(() => {
@@ -373,8 +284,39 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setIsSearchMode(false);
       setSearchResults([]);
     };
+    const handleCreate = useCallback(
+      async (finalName: string, node: any) => {
+        try {
+          if (!validateName(finalName).isValid) {
+            Message.error(
+              validateName(finalName)?.errorMessage ?? '命名不符合规则'
+            );
+            return null;
+          }
 
-    const startRootCreate = (isFolder = true) => {
+          const createRes = await createPythonItem({
+            path_id: Number(node?.dataRef?.id),
+            type: node?.dataRef?.type,
+            name: finalName
+          });
+
+          if (createRes.status !== 200) {
+            Message.error(createRes?.message ?? '创建失败');
+            return null;
+          }
+
+          Message.success('创建成功');
+
+          return createRes.data;
+        } catch (error) {
+          console.error('创建失败:', error);
+          Message.error('创建失败');
+          return null;
+        }
+      },
+      [currentFolderId]
+    );
+    const startRootCreate = (isFolder = true, node?) => {
       const name = generateDefaultName(treeData, isFolder);
       setDefaultName(name);
       setInputValue(name);
@@ -392,6 +334,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         },
         ...treeData
       ]);
+      handleCreate(name, node);
       focusAndSelect();
     };
 
@@ -567,7 +510,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     return (
       <div
-        className="directory-pySpark-tree-container"
+        className={styles['directory-pySpark-tree-container']}
         style={
           currentFolderName
             ? ({
@@ -576,9 +519,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : undefined
         }
       >
-        <div className="directory-tree-header mb-2 flex items-center justify-between">
+        <div
+          className={
+            styles['directory-tree-header'] +
+            'mb-2 flex items-center justify-between'
+          }
+        >
           <InputSearch
-            className="directory-tree-header-search"
+            className={styles['directory-tree-header-search']}
             placeholder={placeholder}
             value={searchValue}
             onChange={(value) => setSearchValue(value)}
@@ -645,7 +593,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           <Empty />
         ) : (
           <Tree
-            className="directory-pySpark-tree"
+            className={styles['directory-pySpark-tree-container']}
             blockNode
             treeData={treeData}
             selectable
@@ -661,17 +609,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 setSelectedKeys(keys);
                 onSelect?.(keys, extra);
               }
-
-              // 如果是文件夹并且非编辑态，触发下钻逻辑
-              // if (
-              //   !dataRef?.showInput &&
-              //   dataRef?.type === PythonItemType.Directory &&
-              //   onFolderClick
-              // ) {
-              //   // handleFolderClick(extra.node);
-              // }
             }}
-            renderExtra={(node) => {
+            renderExtra={(node: any) => {
               const isEditing = node.dataRef?.showInput;
               const nowPermissions =
                 from === DirectoryTreeFrom.SQL
@@ -681,36 +620,49 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               if (isEditing) return null;
 
               return (
-                <div className="directory-tree-extra">
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
-                    <Tooltip color="white" content="重命名">
-                      <IconEdit
-                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        onClick={() => handleEdit(node)}
-                      />
-                    </Tooltip>
-                  )}
-                  {node.dataRef?.type !== PythonItemType.Directory &&
-                    node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
-                      <Tooltip color="white" content="复制并粘贴">
-                        <IconCopy
-                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                          onClick={() =>
-                            handleCopy(node as unknown as NodeProps)
-                          }
-                        />
-                      </Tooltip>
-                    )}
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
-                    <Tooltip color="white" content="删除">
-                      <IconDelete
-                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        onClick={() =>
-                          handleDelete(node as unknown as NodeProps)
+                <div className={styles['directory-tree-extra']}>
+                  {node?.type === 'directory' && (
+                    <Tooltip color="white" content="新建">
+                      <Dropdown
+                        trigger="click"
+                        position="bl"
+                        droplist={
+                          <Menu
+                            onClickMenuItem={(key) => {
+                              if (key === 'folder') {
+                                startRootCreate(true, node);
+                              } else if (key === 'file') {
+                                startRootCreate(false, node);
+                              }
+                            }}
+                          >
+                            <Menu.Item key="file">新建PySpark</Menu.Item>
+                            <Menu.Item key="folder">新建文件夹</Menu.Item>
+                          </Menu>
                         }
-                      />
+                      >
+                        <IconPlus className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]" />
+                      </Dropdown>
                     </Tooltip>
                   )}
+                  <Tooltip color="white" content="重命名">
+                    <IconEdit
+                      className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => handleEdit(node)}
+                    />
+                  </Tooltip>
+                  {/* )} */}
+                  {/* {node.dataRef?.type !== PythonItemType.Directory && */}
+                  {/* node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && ( */}
+                  {/* )} */}
+                  {/* {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && ( */}
+                  <Tooltip color="white" content="删除">
+                    <IconDelete
+                      className="text-[14px] hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => handleDelete(node as unknown as NodeProps)}
+                    />
+                  </Tooltip>
+                  {/* )} */}
                 </div>
               );
             }}
