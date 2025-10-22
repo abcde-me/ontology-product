@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
-import { IconDriveFile } from '@arco-design/web-react/icon';
+import { IconDriveFile, IconSettings } from '@arco-design/web-react/icon';
 import {
   Button,
   Input,
@@ -29,6 +29,7 @@ function PageContentFalse(props) {
   const { id } = detailsdata || {};
   const RadioGroup = Radio.Group;
   const InputSearch = Input.Search;
+  const TextArea = Input.TextArea;
   const childRef: any = useRef();
   const [editPolicy, seteditPolicy] = useState(false);
   const [text, setText] = useState('');
@@ -88,13 +89,6 @@ function PageContentFalse(props) {
   };
   const oncEditPolicy = () => {
     seteditPolicy(true);
-  };
-  const handleChange = (e) => {
-    let updatedText = e.target.value;
-    if (updatedText.length > 2000) {
-      updatedText = updatedText.slice(0, 2000); // 截取前2000个字符
-    }
-    setText(updatedText);
   };
   const recordColumns: any = [
     {
@@ -224,22 +218,21 @@ function PageContentFalse(props) {
         </div>
         <div className={styles.testContent}>
           <div className={styles.testContentText}>
-            <textarea
+            <TextArea
               className={styles.inputBox}
-              placeholder="请输入内容..."
+              placeholder="请输入文本进行召回测试"
               value={text}
-              onChange={handleChange} // 更新状态
-            ></textarea>
+              autoSize={{ minRows: 13 }}
+              allowClear
+              maxLength={2000}
+              onChange={(value) => setText(value)} // 更新状态
+            ></TextArea>
           </div>
         </div>
 
         <div className={styles.testContentButton}>
           {!text ? (
-            <Tooltip
-              position="top"
-              trigger="hover"
-              content="请输入命中测试内容"
-            >
+            <Tooltip position="top" trigger="hover" content="请先输入测试文本">
               <Button
                 loading={loading1}
                 className={styles.cs}
@@ -260,7 +253,12 @@ function PageContentFalse(props) {
               开始测试
             </Button>
           )}
-          <Button className={styles.cl} type="outline" onClick={oncEditPolicy}>
+          <Button
+            className={styles.cl}
+            type="outline"
+            icon={<IconSettings />}
+            onClick={oncEditPolicy}
+          >
             检索设置
           </Button>
         </div>
