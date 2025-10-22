@@ -134,8 +134,8 @@ const DataLoadDetail = () => {
         execution_id: searchValue.trim(),
         ...directoryObj
       });
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -316,7 +316,7 @@ const DataLoadDetail = () => {
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
 
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) &&
+          {perms?.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) &&
             (listDetail?.source_type as string) !== 'local' && (
               <div
                 className={runningFlag ? '' : 'isDisabled'}
@@ -579,7 +579,7 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) &&
+          {perms?.includes(DATA_LOAD_PERMISSIONS.CAN_START) &&
             (listDetail?.source_type as string) !== 'local' && (
               <Button
                 type="primary"
