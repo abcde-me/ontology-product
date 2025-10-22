@@ -81,6 +81,7 @@ function convertToCascaderOptions(dataSourceData) {
     label: catalog.name,
     // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
+    disabled: !catalog?.children?.volume,
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
