@@ -672,6 +672,7 @@ const DatasetForm = React.forwardRef<
                 placeholder="请输入或选择标签"
                 mode="multiple"
                 options={tagList}
+                className={styles.dropdownSelect}
                 dropdownMenuClassName={styles.dropdownMenuSelect}
                 allowCreate
                 // style={{ marginLeft: 10 }}
