@@ -13,15 +13,13 @@ export const Page403: React.FC = () => {
       <div className="text-center">
         <Result
           status="403"
-          title="403"
+          title="暂无权限"
           subTitle={
             <div className="space-y-2">
               <div className="text-lg font-medium text-gray-700">
-                抱歉，您没有权限访问此页面
+                您当前没有被分配到该项目，请联系管理员获取访问权限
               </div>
-              <div className="text-sm text-gray-500">
-                请联系管理员获取相应权限，或返回其他页面
-              </div>
+              <div className="text-sm text-gray-500">姓名：xxx 电话：xxx</div>
             </div>
           }
         />

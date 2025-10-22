@@ -20,6 +20,7 @@ import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
+import { useHasPermission } from '@/hooks/usePermission';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
   RunState,
@@ -34,6 +35,7 @@ import {
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
+  const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
   const columns = [
     {
       title: '载入任务名称',
@@ -46,8 +48,7 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            text.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) &&
-              gotoDetail(text.task_id);
+            hasPermission && gotoDetail(text.task_id);
           }}
         />
       )
