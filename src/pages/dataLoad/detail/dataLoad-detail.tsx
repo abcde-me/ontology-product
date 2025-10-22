@@ -97,8 +97,8 @@ const DataLoadDetail = () => {
   const getTask_idHan = async () => {
     try {
       const res = await getLoad(loadId);
-      setListDetail(res.data);
-      setPerms(res.data.perms);
+      setListDetail(res?.data ?? null);
+      setPerms(res?.data?.perms ?? []);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -164,17 +164,17 @@ const DataLoadDetail = () => {
         execution_id: searchValue.trim(),
         ...directoryObj
       });
-      if (res.data.items[0].status === 'stopped') {
+      if (res?.data?.items?.[0]?.status === 'stopped') {
         Message.success('任务已停止');
       } else {
-        if (res.data.items[0].status === 'failed') {
-          Message.error(res.data.items[0].error_msg);
+        if (res?.data?.items?.[0]?.status === 'failed') {
+          Message.error(res?.data?.items?.[0]?.error_msg);
         } else {
           Message.error('任务停止失败');
         }
       }
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
       const boo = detailList?.findIndex(
         (item) => item.status == 'succeed' || item.status == 'stopping'
       );
@@ -245,8 +245,8 @@ const DataLoadDetail = () => {
         execution_id: '',
         ...directoryObj
       });
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
     } catch (err) {
       console.error(err);
     } finally {
