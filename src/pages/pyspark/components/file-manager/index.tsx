@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
-} from '@/components/directory-tree/DirectoryTree';
+} from '../../components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
 
 interface NotebookTabContentProps {
@@ -82,7 +82,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     }),
     [refreshDirectory, selectFile]
   );
-
+  console.log('pythonList', pythonList);
   return (
     <div
       className={classNames(
@@ -95,7 +95,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
       <div className={styles['tab-tree']}>
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
-          data={pythonList as TreeNodeItem[]}
+          data={pythonList}
           isCanCreate={isCanCreate}
           selectedKeys={selectedKeys} // 传递选中状态
           onSelect={handleTreeSelect} // 添加文件选择处理

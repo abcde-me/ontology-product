@@ -80,7 +80,7 @@ export const useFileManager = (
         console.log('targetFolderId', targetFolderId);
         const res = await getPythonList(targetFolderId, {
           name: searchValue,
-          mode: 1,
+          mode: 2,
           page: 1,
           page_size: 1000
         });
