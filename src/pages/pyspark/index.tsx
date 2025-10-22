@@ -8,7 +8,7 @@ import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import { useTabManager } from './hooks/useTabManager';
-import './index.scss';
+import styles from './index.module.scss';
 import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
 import { useHasPermission } from '@/store/userInfoStore';
@@ -112,13 +112,16 @@ const Python: React.FC = memo(() => {
   };
 
   return (
-    <Layout className="pyspark-layout">
-      <Sider width={isDasetTab ? '100%' : 360} className="pyspark-sider">
+    <Layout className={styles['pyspark-layout']}>
+      <Sider
+        width={isDasetTab ? '100%' : 360}
+        className={styles['pyspark-sider']}
+      >
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className="pyspark-tabs"
+          className={styles['pyspark-tabs']}
           type="rounded"
         >
           <TabPane
@@ -222,7 +225,7 @@ const Python: React.FC = memo(() => {
         </Tabs>
       </Sider>
       {!isDasetTab && (
-        <Content className="pyspark-content">
+        <Content className={styles['pyspark-content']}>
           <EditorContent
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
