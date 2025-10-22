@@ -8,9 +8,11 @@
   .arco-tree-node {
     align-items: center !important;
   }
+
   .arco-tree-node-indent:hover {
     background-color: transparent !important;
   }
+
   .arco-select-view-multiple .arco-select-view-tag {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -25,8 +27,9 @@
     max-width: calc(100% - 50px) !important;
   }
 }
+
 .select-tag-style {
   .arco-input-tag-input.arco-input-tag-input-size-default {
-    font-size: 12px !important;
+    min-width: 110px;
   }
 }
