@@ -6,7 +6,7 @@ import {
   useThrottleFn,
   useDebounceFn
 } from 'ahooks';
-import { RunningStatus } from '@/types/pythonApi';
+import { RunLogStatus, RunningStatus } from '@/types/pythonApi';
 import {
   runPythonItem,
   getRunResult,
@@ -76,6 +76,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
+  const [runLogStatus, setRunLogStatus] = useState<RunLogStatus>(
+    RunLogStatus.STOP
+  );
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
   const [runDuration, setRunDuration] = useState<number>(0);
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
@@ -84,7 +87,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
-  const [activeKey, setActiveKey] = useState<string>('result');
+  const [activeKey, setActiveKey] = useState<string>('log');
 
   // 跟踪前一个 runStatus 状态
   const prevRunStatusRef = useRef<RunningStatus>(RunningStatus.IDLE);
@@ -149,27 +152,23 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
-          setRunStatus(RunningStatus.FAILED);
-          cancelGetRunResultPolling();
+          setRunLogStatus(RunLogStatus.STOP);
+          cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           return;
         }
 
-        if (res?.data?.log) {
-          cancelGetRunResultPolling();
-        }
-
+        setRunLogStatus(res?.data?.status ?? RunLogStatus.STOP);
         setRunLog(res?.data?.log ?? '');
       },
       onError: (error) => {
-        setRunStatus(RunningStatus.FAILED);
-        cancelGetRunResultPolling();
+        setRunLogStatus(RunLogStatus.STOP);
+        cancelGetRunLogPolling();
         setRunResult(error?.message ?? '获取运行结果失败');
       }
     });
 
   const handleActiveTabChange = async () => {
-    console.log('handleActiveTabChange', prevActiveTabRef.current, activeTab);
     // 如果 activeTab 发生变化，且不是初始化
     if (
       prevActiveTabRef.current !== undefined &&
@@ -221,7 +220,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     // 标签页切换时重置面板状态为关闭
-    setActiveKey('result');
+    setActiveKey('log');
     setRunStatus(RunningStatus.IDLE);
     setExecid('');
     setRunStartTime(null);
@@ -232,6 +231,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setIsPanelOpen(false); // 重置面板状态为关闭
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
+    // 取消正在进行的轮询获取日志
+    cancelGetRunLogPolling();
 
     // 如果有 fileId，重新加载文件内容以获取最新状态
     if (currentTab.fileId) {
@@ -369,9 +370,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     cancelGetRunResultPolling();
+    cancelGetRunLogPolling();
     setRunStatus(RunningStatus.IDLE);
     setHasFetchedResult(true);
-  }, [currentFileId, execid, cancelGetRunResultPolling]);
+  }, [
+    currentFileId,
+    execid,
+    cancelGetRunResultPolling,
+    cancelGetRunLogPolling
+  ]);
 
   // 统一的按钮点击处理函数（带防抖）
   const handleButtonClick = useCallback(() => {
@@ -434,6 +441,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         // setRunStatus(RunningStatus.RUNNING);
         getRunResultPolling(currentFileId, {
+          execid
+        });
+
+        getRunLogPolling(currentFileId, {
           execid
         });
       } catch (error) {
