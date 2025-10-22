@@ -29,7 +29,8 @@ export async function createWorkflowDraft(params: any = {}) {
     .post({
       workflow_uuid: workflowUUID,
       ds_workflow_id: dsWorkflowId,
-      workflow_version: workflowVersion
+      workflow_version: workflowVersion,
+      ...(params ?? {})
     })
     .inRegion()
     .do();
