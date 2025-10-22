@@ -51,10 +51,10 @@ export const CONNECTION_PERMISSIONS = {
 export const DATA_LOAD_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:data_loader:manage:create',
   CAN_DETELE: 'aimdp-manager:data_loader:manage:delete',
-  CAN_UPDATE: 'dataloader:can_update',
+  CAN_UPDATE: 'aimdp-manager:data_loader:manage:modify',
   CAN_GET: 'aimdp-manager:data_loader:read:get',
-  CAN_START: 'dataloader:can_start',
-  CAN_STOP: 'dataloader:can_stop',
+  CAN_START: 'aimdp-manager:data_loader:manage:run',
+  CAN_STOP: 'aimdp-manager:data_loader:manage:run',
 
   LIST: 'aimdp-manager:data_loader:read:list', // 菜单权限
   GET: 'aimdp-manager:data_loader:read:get',
