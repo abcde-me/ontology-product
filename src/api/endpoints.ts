@@ -6,11 +6,235 @@
  * 注意不要修改该变量名（用于代码提示）
  */
 
+// const Prefix = '/dify';
+const Prefix = '/api/appforge/v1';
+
+export const ResourceEndpoints = {
+  // 在该对象内添加资源端点声明
+  // 知识库
+  knowledgeBase: Prefix + '/console/api/datasets',
+  knowledgeBaseInit: Prefix + '/console/api/datasets/init',
+  knowledgeId: Prefix + '/console/api/datasets/{knowledgeId}',
+  knowledgeAction: Prefix + '/console/api/datasets/{action}',
+  knowledgeIdAction: Prefix + '/console/api/datasets/{knowledgeId}/{action}',
+  documentsList: Prefix + '/console/api/datasets/{knowledgeId}/documents',
+  documentsId:
+    Prefix + '/console/api/datasets/{knowledgeId}/documents/{documentId}',
+  documentsIdAction:
+    Prefix +
+    '/console/api/datasets/{knowledgeId}/documents/{documentId}/{action}',
+  batchIdAction:
+    Prefix + '/console/api/datasets/{knowledgeId}/batch/{batchId}/{action}',
+  //大模型列表
+  llmList: Prefix + '/console/api/workspaces/current/models/model-types/llm',
+  //大模型参数
+  llmParams:
+    Prefix +
+    '/console/api/workspaces/current/model-providers/{provider}/models/parameter-rules',
+  //应用列表
+  appList: Prefix + '/console/api/apps',
+  //删除应用
+  deleteApp: Prefix + '/console/api/apps/{appId}',
+  //创建应用
+  createApp: Prefix + '/console/api/apps',
+  //修改应用的标题，描述
+  modifyAppInfo: Prefix + `/console/api/apps/{appId}/site`,
+  //app详情
+  appDetail: Prefix + `/console/api/apps/{appId}`,
+  //发布app
+  publishApp: Prefix + `/console/api/apps/{appId}/model-config`,
+  //保存app
+  saveApp: Prefix + '/console/api/apps/{appId}/save/model-config',
+  //停止聊天
+  stopChat: Prefix + `/console/api/apps/{appId}/chat-messages/{taskId}/stop`,
+  //发送聊天消息
+  sendChatMsg: Prefix + `/console/api/apps/{appId}/chat-messages`,
+  //获取聊天信息
+  chatMsgs: Prefix + `/console/api/apps/{appId}/chat-messages`,
+  //聊天推荐问题
+  chatSuggestedQuestions:
+    Prefix +
+    `/console/api/apps/{appId}/chat-messages/{responseItemId}/suggested-questions`,
+  //内置工具集的工具列表
+  builtIntoolsList:
+    Prefix +
+    '/console/api/workspaces/current/tool-provider/builtin/{provider}/tools',
+  //自定义工具集的工具列表
+  customToolsList:
+    Prefix +
+    '/console/api/workspaces/current/tool-provider/api/tools?provider={provider}',
+  //工具商店列表
+  toolsProviders: Prefix + '/console/api/workspaces/current/tool-providers',
+  //我的工具列表
+  myToolsProviders:
+    Prefix + '/console/api/workspaces/current/owner/tool-providers',
+  //添加工具
+  addTool: Prefix + '/console/api/workspaces/current/tool-provider/api/add',
+  //工具集详情
+  collectionDetail:
+    Prefix + '/console/api/workspaces/current/tool-provider/api/get',
+  //修改工具
+  updateTool:
+    Prefix + '/console/api/workspaces/current/tool-provider/api/update',
+  //调试工具
+  debugTool:
+    Prefix + '/console/api/workspaces/current/tool-provider/api/test/pre',
+  // 删除工具
+  deleteTool:
+    Prefix + '/console/api/workspaces/current/tool-provider/api/delete',
+  // 工具授权配置schema
+  toolCredentialSchema:
+    Prefix +
+    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/credentials_schema',
+  //工具授权删除
+  toolCredentialDelete:
+    Prefix +
+    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/delete',
+  // 更新工具授权
+  toolCredentialUpdate:
+    Prefix +
+    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/update',
+  //发布工具
+  toolPublish:
+    Prefix + '/console/api/workspaces/current/tool-provider/api/publish',
+  //删除聊天会话
+  deleteConvension:
+    Prefix +
+    '/console/api/installed-apps/{appId}/conversations/{conversationId}',
+  //重命名会话
+  renameConvension:
+    Prefix +
+    '/console/api/installed-apps/{appId}/conversations/{conversationId}/name',
+  /**获取应用商店的app */
+  installedAppList: Prefix + '/console/api/installed-apps',
+  /**应用商店app详情 */
+  installedApp: Prefix + '/console/api/installed-apps/{appId}',
+  /**根据个人空间appid查询installedApp */
+  installedAppBasedId: Prefix + '/console/api/installed-apps/app-id/{id}',
+  /**文生图 */
+  imageGenerate: Prefix + '/console/api/apps/icon-gen',
+  /**客户化信息 */
+  logoInfo: '/api/menu/v1/ex/logo/info'
+};
+// todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
 const API_PREFIX = '/ceai';
 // 研发环境部署
+export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
+export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const ResourceEndpointsV2 = {
+  knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
+  knowledgeBaseCreate: PrefixV2 + '/datasets/init',
+  knowledgeBaseList: PrefixV2 + '/datasets',
+  documentList: PrefixV2 + '/datasets/{dataset_id}/documents',
+  docSegmentation:
+    PrefixV2 + '/datasets/{dataset_id}/documents/{document_id}/segments',
+  docSwitch:
+    PrefixV2 +
+    '/datasets/{dataset_id}/documents/status/{action}/batch?document_id={document_id}',
+  docSwitchSegmentation:
+    PrefixV2 +
+    '/datasets/{dataset_id}/documents/{document_id}/segments/{action}?segment_id={segment_id}',
+  docEditList: PrefixV2 + '/datasets/{dataset_id}/documents',
+  docdeleteList:
+    PrefixV2 + '/datasets/{dataset_id}/documents?document_id={document_id}',
+  doxdetailData: PrefixV2 + '/datasets/{dataset_id}/documents/{document_id}',
+  docIndex:
+    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/indexing-status`,
+  hitTestapi: PrefixV2 + `/datasets/{dataset_id}/hit-testing`,
+  docDeleteSublevel:
+    PrefixV2 +
+    `/datasets/{dataset_id}/documents/{document_id}/segments?segment_id={segment_id}`,
+  docAddSublevel:
+    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/segment`,
+  docEditSublevel:
+    PrefixV2 +
+    `/datasets/{dataset_id}/documents/{document_id}/segments/{segment_id}`,
+  HitRecordList: PrefixV2 + `/datasets/{dataset_id}/queries`,
+  docContent: PrefixV2 + `/files/browser/{file_id}`,
+
+  // 文件下载端点
+  fileDownloadApi: PrefixV2 + `/files/download/{file_id}`,
+  //删除文件的端点
+  fileDeleteApi: Prefix + `/files/delete/{file_id}`,
+  dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
+
+  // 数据目录
+  catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
+  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
+  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
+  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
+  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
+  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
+  sourceFileTypeListApi:
+    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
+  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
+  sourceDataFileDeleteApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
+  sourceDataFileDeleteBatcheApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
+
+  CatalogCreateApi: Prefix + `/catalogs`,
+  fileExportApi: PrefixAimdp + `/OutputToConnector`,
+  connectorListAPI: Prefix + `/connectors`,
+
+  apiKeyList: PrefixV2 + `/api-keys`,
+
+  apps: PrefixV2 + '/apps',
+  appDetailV2: PrefixV2 + '/apps/{appId}',
+  models: PrefixV2 + '/model-providers/models',
+  providers: PrefixV2 + '/model-providers',
+  aiGenerate: PrefixV2 + '/apps/ai-generate',
+  updateApp: PrefixV2 + '/apps/{appId}',
+  updateAppConfig: PrefixV2 + '/apps/{appId}/model-config',
+
+  // 应用广场列表
+  appStoreV2: PrefixV2 + '/published-apps',
+
+  // 登录
+  login: PrefixAuth + '/login',
+  // 成员查询
+  users: PrefixAuth + '/user/search',
+  // 组织树
+  organizationTree: PrefixAuth + '/organization/tree',
+  // 成员crud
+  user: PrefixAuth + '/user',
+  // token 续约
+  renew: PrefixAuth + '/renew',
+  // 用户启用/停用
+  ban: PrefixAuth + '/user/ban',
+  // 组织
+  organization: PrefixAuth + '/organization',
+  // 角色
+  role: PrefixAuth + '/role/search',
+  // 根据组织查用户
+  searchUsers: PrefixAuth + '/user/search',
+  // 修改密码
+  password: PrefixAuth + '/user/passwd',
+  // 获取用户信息
+  selfUser: PrefixAuth + '/user/self',
+  // 删除组织/用户前判断
+  preDelOrg: PrefixAuth + '/organization/authorize_delete/{orgId}',
+  preDelUser: PrefixAuth + '/user/authorize_delete/{userId}',
+  // 用户管理搜索
+  memberSearch: PrefixAuth + '/user/organization/search',
+
+  // workflowDraft: PrefixV2 + '/apps/{appId}/workflows/draft',
+  workflowPublish: PrefixV2 + '/apps/{appId}/workflows/publish',
+  workflowPublishHistory: PrefixV2 + '/apps/{appId}/workflows',
+  workflowBlockConfig:
+    PrefixV2 + '/apps/{appId}/workflows/default-workflow-block-configs',
+  workflowPublishDetail: PrefixV2 + '/apps/{appId}/workflows/{workflowId}',
+  workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
+};
 
 export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
 export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
@@ -82,10 +306,14 @@ export const ModaForgeResourceEndpoints = {
   //数据集
   //获取数据集列表
   datasetsApi: PrefixAimdp + '/ListDatasets',
+  //获取数据集详情
+  // datasetDetailApi: PrefixV1 + '/dataset/{id}',
   //创建数据集
   createDatasetApi: PrefixAimdp + '/CreateDataset',
   //获取标签列表
   tagListApi: PrefixAimdp + '/ListTags',
+  //删除数据集
+  // deleteDataset: PrefixV1 + '/dataset/{id}',
   //查询连接器信息列表
   connectorListApi: PrefixAimdp + '/ListConnectors',
   //查询指定连接器加载成功的文件信息
@@ -231,7 +459,7 @@ export const ModaForgeResourceEndpoints = {
   sqlSaveApi: PrefixAimdp + '/EditSqlFile',
   sqlRunApi: PrefixAimdp + '/RunSqlFile',
   sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
-  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResultt',
+  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResult',
   sqlRunLogApi: PrefixAimdp + '/GetSqlFileRunLog',
   sqlExportDataset: PrefixAimdp + '/CreateSqlExportTask',
   sqlExportDatasetVersion: PrefixAimdp + '/UpdateSqlExportTaskVersion',
