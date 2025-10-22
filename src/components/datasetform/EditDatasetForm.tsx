@@ -164,6 +164,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="标签" field="tags">
           <Select
+            className={styles.dropdownSelect}
             dropdownMenuClassName={styles.dropdownMenuSelect}
             placeholder="请选择标签"
             mode="multiple"
