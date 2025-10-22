@@ -101,7 +101,7 @@ export async function getRunResultSqlScript(
   params: RunResultSqlScriptParams
 ): Promise<ApiRes<RunResultSqlScriptData>> {
   return await UAPI.RES.sqlRunResultApi({})
-    .post({ ...params, script_id: Number(id) })
+    .post({ ...params, size: Number(params.size), script_id: Number(id) })
     .inRegion()
     .do();
 }
