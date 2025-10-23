@@ -124,6 +124,7 @@ export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -403,12 +404,11 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
-  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  getDepartmentTreeListApi: PrefixUserCenter + '/GetOrgTree',
   // 获取个人列表树内容
-  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
-  getAnnotationTabledDataApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
+  getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
 
   // python开发
   // 获取python列表
