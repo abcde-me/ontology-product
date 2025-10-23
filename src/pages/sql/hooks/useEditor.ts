@@ -238,7 +238,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         }
 
         setRunLogStatus(res?.data?.status ?? RunLogStatus.STOP);
-        setRunLog(res?.data?.log ?? '');
+        setRunLog(res?.data?.run_log ?? '');
         setHasFetchedLog(true);
 
         if (res?.data?.status === RunLogStatus.STOP) {
@@ -289,7 +289,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    setRunLog(res?.data?.log ?? '');
+    setRunLog(res?.data?.run_log ?? '');
     setHasFetchedLog(true);
   }, [currentFile?.fileId, execid]);
 
