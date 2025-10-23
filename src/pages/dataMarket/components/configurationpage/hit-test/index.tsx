@@ -20,8 +20,7 @@ function HitTest() {
     if (!id) return;
     try {
       const documentList = await getknowledgeBaseDetails(id); //知识库详情
-      if (!documentList.data) return;
-      setdetailsdata(documentList.data);
+      if (documentList?.data) setdetailsdata(documentList?.data);
     } catch {}
   };
   const onInit = () => {
