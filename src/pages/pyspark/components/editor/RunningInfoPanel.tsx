@@ -258,7 +258,27 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
                   <TabPane key="log" title="日志">
                     <div className="runlog-content tab-content-wrapper">
-                      {runLog}
+                      {(() => {
+                        // 如果有日志内容，直接显示
+                        if (runLog && runLog.trim() !== '') {
+                          return runLog;
+                        }
+
+                        // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
+                        if (!hasFetchedResult) {
+                          // 还没有调用过 getRunLog，显示开始输出
+                          return '开始输出...';
+                        } else {
+                          // 已经调用过 getRunLog 但日志为空
+                          if (runStatus === RunningStatus.SUCCESS) {
+                            return '运行成功，暂无日志输出';
+                          } else if (runStatus === RunningStatus.FAILED) {
+                            return '运行失败，暂无错误日志';
+                          } else {
+                            return '暂无运行日志';
+                          }
+                        }
+                      })()}
                     </div>
                   </TabPane>
                 </Tabs>
