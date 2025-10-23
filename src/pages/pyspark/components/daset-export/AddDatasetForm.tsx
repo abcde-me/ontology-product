@@ -12,8 +12,7 @@ import {
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import React, { useState, useEffect, useImperativeHandle } from 'react';
-import styles from './AddDatasetForm.module.css';
-import './AddDatasetForm.css';
+import styles from './AddDatasetForm.module.scss';
 import { getCatalogList } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { getConnectorList, getTagList } from '@/api/datasetManagement';

@@ -101,7 +101,7 @@ export async function getRunResultSqlScript(
   params: RunResultSqlScriptParams
 ): Promise<ApiRes<RunResultSqlScriptData>> {
   return await UAPI.RES.sqlRunResultApi({})
-    .post({ ...params, script_id: Number(id) })
+    .post({ ...params, size: Number(params.size), script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -147,7 +147,7 @@ export async function exportSqlResult(
   params: ExportSqlResultParams
 ): Promise<ApiRes<ExportSqlResultData>> {
   return await UAPI.RES.sqlExportDataset({})
-    .post({ ...params, script_id: id })
+    .post({ ...params, script_id: Number(id) })
     .inRegion()
     .do();
 }
@@ -158,7 +158,7 @@ export async function exportSqlResultVersion(
   params: ExportSqlResultVersionParams
 ): Promise<ApiRes<ExportSqlResultVersionData>> {
   return await UAPI.RES.sqlExportDatasetVersion({})
-    .post({ ...params, script_id: id })
+    .post({ ...params, script_id: Number(id) })
     .inRegion()
     .do();
 }

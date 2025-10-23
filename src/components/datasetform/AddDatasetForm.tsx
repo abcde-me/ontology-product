@@ -70,6 +70,7 @@ function convertToCascaderOptions(dataSourceData) {
     label: catalog.name,
     // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
+    disabled: !catalog?.children?.volume,
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
@@ -645,6 +646,7 @@ const DatasetForm = React.forwardRef<
                 placeholder="请输入或选择标签"
                 mode="multiple"
                 options={tagList}
+                className={styles.dropdownSelect}
                 dropdownMenuClassName={styles.dropdownMenuSelect}
                 allowCreate
                 // style={{ marginLeft: 10 }}

@@ -197,6 +197,7 @@ $spacing-9: 24px;
 
 .arco-select-size-default.arco-select-multiple input {
   font-size: $font-size-body-3;
+  outline: none;
 }
 
 .arco-textarea {
@@ -315,6 +316,20 @@ $spacing-9: 24px;
   font-size: 14px;
 }
 
+.arco-input:hover,
+.arco-input:focus,
+.arco-textarea:hover,
+.arco-textarea:focus {
+  outline: none;
+}
+
+.arco-picker-input,
+.arco-picker-input-active {
+  input {
+    outline: none;
+  }
+}
+
 /* 面包屑 */
 .arco-breadcrumb-item {
   font-weight: 500 !important;
@@ -334,6 +349,17 @@ $spacing-9: 24px;
   /* 去除滚动条预留空间，否则表格默认会多出滚动条的宽度 */
   scrollbar-gutter: auto;
   // background: transparent;
+}
+
+/* 修复 arco-table-header 滚动条的问题 */
+.arco-table-header {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
 }
 
 .arco-table-content-inner::-webkit-scrollbar,

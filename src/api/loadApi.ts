@@ -25,7 +25,10 @@ export async function editLoad(params) {
 }
 // 查看载入任务详情
 export async function getLoad(task_id) {
-  return await UAPI.RES.getLoadApi({}).post({ task_id }).inRegion().do();
+  return await UAPI.RES.getLoadApi({})
+    .post({ task_id: Number(task_id) })
+    .inRegion()
+    .do();
 }
 // 启停单个载入任务
 export async function startAndStopeLoad(params) {

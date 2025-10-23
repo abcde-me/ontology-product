@@ -45,7 +45,7 @@ interface ConnectorFileListParams {
 }
 
 interface UpdateDatasetParams {
-  id: string;
+  id: number;
   name?: string;
   description?: string;
   tag_ids?: string[];
@@ -60,7 +60,7 @@ interface DatasetContentsParams {
 }
 
 interface DatasetDetailPageParams {
-  id: string;
+  id: number;
 }
 
 // 数据变更类型枚举
