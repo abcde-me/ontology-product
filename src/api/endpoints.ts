@@ -171,13 +171,16 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件类型列表
-  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
-  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
-  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
+  sourceFileTypeListApi:
+    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
+  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
+  sourceDataFileDeleteApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
+  sourceDataFileDeleteBatcheApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
   dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
-  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
+  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
@@ -261,7 +264,10 @@ export const ModaForgeResourceEndpoints = {
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/ListDirectory',
+  // 工作流-获取工作流DAG信息
   workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
+  // 工作流-编辑工作流DAG信息
+  editWorkFlowDraft: PrefixAimdp + '/EditWorkFlowDraft',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
@@ -286,8 +292,8 @@ export const ModaForgeResourceEndpoints = {
   taskRerun: PrefixAimdp + '/RerunWorkflowInstance',
   // 作业停用
   taskStop: PrefixAimdp + '/StopWorkflowInstance',
-
-  modelGet: PrefixAimdp + '/model/model_list',
+  // 工作流-获取工作流模型列表
+  modelGet: PrefixAimdp + '/ListWorkFlowModel',
 
   //数据目录
   //获取数据目录
