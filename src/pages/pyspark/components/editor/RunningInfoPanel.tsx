@@ -79,34 +79,42 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
     // 监听父组件传递的面板状态变化
     useEffect(() => {
+      console.log('isPanelOpen', isPanelOpen);
       setIsExpanded(isPanelOpen || false);
     }, [isPanelOpen]);
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
-      // 运行完成时自动展开面板
-      if (
-        runStatus === RunningStatus.SUCCESS ||
-        runStatus === RunningStatus.FAILED
-      ) {
-        // 检查前一个状态，避免在状态重置时误触发
-        const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
-
-        // 只有当状态真正从运行中变为完成状态时才执行自动行为
-        // 避免在标签页切换时状态重置导致的误触发
-        if (prevStatus === RunningStatus.RUNNING) {
-          setIsExpanded(true);
-          onPanelStateChange?.(true);
-
-          // 根据运行结果自动定位到对应标签页
-          if (runStatus === RunningStatus.SUCCESS) {
-            setActiveKey('result');
-          } else if (runStatus === RunningStatus.FAILED) {
-            setActiveKey('log');
-            onGetRunLog?.();
-          }
-        }
+      // 运行中时自动展开面板
+      if (runStatus === RunningStatus.RUNNING) {
+        setIsExpanded(true);
+        onPanelStateChange?.(true);
+        setActiveKey('log'); // 运行中时显示日志标签页
+        // onGetRunLog?.();
       }
+      // 运行完成时自动展开面板
+      // else if (
+      //   runStatus === RunningStatus.SUCCESS ||
+      //   runStatus === RunningStatus.FAILED
+      // ) {
+      //   // 检查前一个状态，避免在状态重置时误触发
+      //   const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
+
+      //   // 只有当状态真正从运行中变为完成状态时才执行自动行为
+      //   // 避免在标签页切换时状态重置导致的误触发
+      //   if (prevStatus === RunningStatus.RUNNING) {
+      //     setIsExpanded(true);
+      //     onPanelStateChange?.(true);
+
+      //     // 根据运行结果自动定位到对应标签页
+      //     if (runStatus === RunningStatus.SUCCESS) {
+      //       setActiveKey('result');
+      //     } else if (runStatus === RunningStatus.FAILED) {
+      //       setActiveKey('log');
+      //       onGetRunLog?.();
+      //     }
+      //   }
+      // }
     }, [runStatus, onPanelStateChange, getPrevRunStatus]);
 
     const handleClickTab = (key: string) => {
