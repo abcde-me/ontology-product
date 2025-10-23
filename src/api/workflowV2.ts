@@ -18,7 +18,7 @@ export async function getWorkflowDraft(params: any = {}) {
     .do();
 }
 
-export async function createWorkflowDraft(params: any = {}) {
+export function createWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
   const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
   const dsWorkflowId =
