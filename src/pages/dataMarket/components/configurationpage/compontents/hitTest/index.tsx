@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import './index.less';
-import { IconDriveFile } from '@arco-design/web-react/icon';
+import styles from './index.module.scss';
+import { IconDriveFile, IconSettings } from '@arco-design/web-react/icon';
 import {
   Button,
   Input,
@@ -29,6 +29,7 @@ function PageContentFalse(props) {
   const { id } = detailsdata || {};
   const RadioGroup = Radio.Group;
   const InputSearch = Input.Search;
+  const TextArea = Input.TextArea;
   const childRef: any = useRef();
   const [editPolicy, seteditPolicy] = useState(false);
   const [text, setText] = useState('');
@@ -88,13 +89,6 @@ function PageContentFalse(props) {
   };
   const oncEditPolicy = () => {
     seteditPolicy(true);
-  };
-  const handleChange = (e) => {
-    let updatedText = e.target.value;
-    if (updatedText.length > 2000) {
-      updatedText = updatedText.slice(0, 2000); // 截取前2000个字符
-    }
-    setText(updatedText);
   };
   const recordColumns: any = [
     {
@@ -181,7 +175,7 @@ function PageContentFalse(props) {
   };
   const rowClassName = (record: any, index: number) => {
     // 如果是选中的行，给该行添加浅蓝色的背景
-    return index === selectedRowIndex ? 'selected-row-mz' : '';
+    return index === selectedRowIndex ? styles.selectedRowMz : '';
   };
   const handleSearch = () => {
     const filterlist = value
@@ -216,55 +210,60 @@ function PageContentFalse(props) {
     console.log(con);
   }, []);
   return (
-    <div className="PageContentFalse">
-      <div className="leftList">
-        <div className="test-header">
-          <span className="one">命中测试</span>
-          <span className="two">根据给定的查询文本测试知识的召回效果。</span>
+    <div className={styles.PageContentFalse}>
+      <div className={styles.leftList}>
+        <div className={styles.testHeader}>
+          <span className={styles.one}>测试内容</span>
+          {/* <span className={styles.two}>根据给定的查询文本测试知识的召回效果。</span> */}
         </div>
-        <div className="test-content">
-          <div className="test-content-text">
-            <textarea
-              className="input-box"
-              placeholder="请输入内容..."
+        <div className={styles.testContent}>
+          <div className={styles.testContentText}>
+            <TextArea
+              className={styles.inputBox}
+              placeholder="请输入文本进行召回测试"
               value={text}
-              onChange={handleChange} // 更新状态
-            ></textarea>
+              autoSize={{ minRows: 13 }}
+              allowClear
+              maxLength={2000}
+              onChange={(value) => setText(value)} // 更新状态
+            ></TextArea>
           </div>
-          <div className="test-content-button">
-            <Button className="cl" type="outline" onClick={oncEditPolicy}>
-              策略配置
-            </Button>
-            {!text ? (
-              <Tooltip
-                position="top"
-                trigger="hover"
-                content="请输入命中测试内容"
-              >
-                <Button
-                  loading={loading1}
-                  className="cs"
-                  type="primary"
-                  disabled={!text}
-                  onClick={Functest}
-                >
-                  测试
-                </Button>
-              </Tooltip>
-            ) : (
+        </div>
+
+        <div className={styles.testContentButton}>
+          {!text ? (
+            <Tooltip position="top" trigger="hover" content="请先输入测试文本">
               <Button
                 loading={loading1}
-                className="cs"
+                className={styles.cs}
                 type="primary"
+                disabled={!text}
                 onClick={Functest}
               >
-                测试
+                开始测试
               </Button>
-            )}
-          </div>
+            </Tooltip>
+          ) : (
+            <Button
+              loading={loading1}
+              className={styles.cs}
+              type="primary"
+              onClick={Functest}
+            >
+              开始测试
+            </Button>
+          )}
+          <Button
+            className={styles.cl}
+            type="outline"
+            icon={<IconSettings />}
+            onClick={oncEditPolicy}
+          >
+            检索设置
+          </Button>
         </div>
-        <div className="history-header">历史记录</div>
-        <div className="history-content">
+        <div className={styles.historyHeader}>历史记录</div>
+        <div className={styles.historyContent}>
           {recordList.length === 0 ? (
             <NoDataEmpty />
           ) : (
@@ -290,50 +289,52 @@ function PageContentFalse(props) {
           )}
         </div>
       </div>
-      <div className="rightContent">
-        <div className="rightContent-hit">
-          <div className="rightContent-header">
-            <div className="header-left">
-              命中分段 ({segmentationlist.length})
+      <div className={styles.rightContent}>
+        <div className={styles.rightContentHit}>
+          <div className={styles.rightContentHeader}>
+            <div className={styles.headerLeft}>
+              命中结果 ({segmentationlist.length})
             </div>
-            <div className="header-right">
+            {/* <div className={styles.headerRight}>
               <InputSearch
-                className="inp"
+                className={styles.inp}
                 onSearch={handleSearch}
                 value={value}
                 onChange={(value: string, e) => setValue(value)}
                 allowClear
                 placeholder="搜索分段"
               />
-            </div>
+            </div> */}
           </div>
 
-          <div className="rightContent-scoll">
+          <div className={styles.rightContentScoll}>
             {/* <Empty /> */}
             {segmentationlist.length > 0 ? (
               segmentationlist.map((e: any, index) => {
                 return (
-                  <div key={index} className="segmentation-box">
-                    <div className="segmentation-header">
-                      <div className="s-l">
+                  <div key={index} className={styles.segmentationBox}>
+                    <div className={styles.segmentationHeader}>
+                      <div className={styles.sl}>
                         <span>
                           <IconDriveFile />
                         </span>
                         <Tooltip content={e.document_name}>
-                          <span className="nm">{e.document_name}</span>
+                          <span className={styles.nm}>{e.document_name}</span>
                         </Tooltip>
-                        <span className="sp">
+                        <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
                         </span>
                         <div className="ml-2 w-[220px]">
                           <TagContent tagList={e.tags} />
                         </div>
                       </div>
-                      <div className="s-r">
-                        <div className="s-r-t">分值：{e.score.toFixed(2)}</div>
+                      <div className={styles.sr}>
+                        <div className={styles.srt}>
+                          分值：{e.score.toFixed(2)}
+                        </div>
                       </div>
                     </div>
-                    <div className="segmentation-content">
+                    <div className={styles.segmentationContent}>
                       <MarkdownBase
                         content={e.content_shot}
                         onChangeSup={onChangeSup}

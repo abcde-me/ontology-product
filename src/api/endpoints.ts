@@ -124,6 +124,7 @@ export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -171,10 +172,9 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi:
-    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
+  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
+  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
   sourceDataFileDeleteApi:
     PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
   sourceDataFileDeleteBatcheApi:
@@ -401,12 +401,11 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
-  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  getDepartmentTreeListApi: PrefixUserCenter + '/GetOrgTree',
   // 获取个人列表树内容
-  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
-  getAnnotationTabledDataApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
+  getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
 
   // python开发
   // 获取python列表
@@ -456,7 +455,7 @@ export const ModaForgeResourceEndpoints = {
   sqlSaveApi: PrefixAimdp + '/EditSqlFile',
   sqlRunApi: PrefixAimdp + '/RunSqlFile',
   sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
-  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResultt',
+  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResult',
   sqlRunLogApi: PrefixAimdp + '/GetSqlFileRunLog',
   sqlExportDataset: PrefixAimdp + '/CreateSqlExportTask',
   sqlExportDatasetVersion: PrefixAimdp + '/UpdateSqlExportTaskVersion',

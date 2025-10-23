@@ -18,6 +18,23 @@ import noDataElement from '@/components/no-data';
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
 
+// 树节点处理工具函数
+const processTreeNode = (node: any, isDetailMode: boolean): any => {
+  return {
+    ...node,
+    disableCheckbox: isDetailMode,
+    // 递归处理子节点，将childList转换为children
+    children: node.childList?.map((child: any) =>
+      processTreeNode(child, isDetailMode)
+    )
+  };
+};
+
+// 处理树数据的工具函数
+const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
+  return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
+};
+
 interface DataSourceModalProps {
   visible: boolean;
   onClose: () => void;
@@ -68,72 +85,15 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       );
     }
   }, [getDetailObj]);
-  // 递归处理部门树数据，支持任意层级
-  const processTreeData = (data: any[], level = 1): any[] => {
-    return (
-      data?.map((item) => {
-        const baseItem = {
-          allowClick: false,
-          title: item.name,
-          key: String(item.id),
-          disabled: type === 'detail',
-          level: level,
-          perms: item.perms
-        };
-
-        // 如果有子级数据，递归处理
-        if (item?.children && item.children.length > 0) {
-          return {
-            ...baseItem,
-            children: processTreeData(item.children, level + 1)
-          };
-        }
-
-        // 没有子级数据，直接返回基础项
-        return baseItem;
-      }) || []
-    );
-  };
-
-  // 递归过滤掉perms为null的节点，只保留有权限数据的节点
-  const filterTreeDataByPerms = (data: any[]): any[] => {
-    const result: any[] = [];
-
-    data?.forEach((item) => {
-      // 如果当前节点有权限数据，保留该节点
-      if (item.perms && item.perms.length > 0) {
-        const filteredItem = { ...item };
-        // 如果有子节点，递归过滤子节点
-        if (item.children && item.children.length > 0) {
-          const filteredChildren = filterTreeDataByPerms(item.children);
-          filteredItem.children = filteredChildren;
-        }
-        result.push(filteredItem);
-      } else if (item.children && item.children.length > 0) {
-        // 如果当前节点没有权限数据，但有子节点，递归处理子节点
-        const filteredChildren = filterTreeDataByPerms(item.children);
-        // 将过滤后的子节点直接添加到结果中（提升层级）
-        result.push(...filteredChildren);
-      }
-      // 既没有权限数据，也没有子节点的节点被忽略
-    });
-
-    return result;
-  };
-
   const getTreeData = () => {
     try {
-      getDepartmentTreeList({})
+      getDepartmentTreeList()
         .then((res) => {
-          let newTreeDateList = processTreeData(res?.data || []);
-
-          if (type === 'create') {
-            // 删除所有perms为null的节点
-            newTreeDateList = filterTreeDataByPerms(newTreeDateList);
-          }
-
-          setTreeData(newTreeDateList);
-          setOriginalTreeData(newTreeDateList);
+          // 使用工具函数处理整个树结构
+          const isDetailMode = type === 'detail';
+          const newTreeData = processTreeData(res?.data || [], isDetailMode);
+          setTreeData(newTreeData);
+          setOriginalTreeData(newTreeData);
         })
         .catch((err) => {
           console.error(err);
@@ -185,7 +145,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const columns = [
     {
       title: '姓名',
-      dataIndex: 'username',
+      dataIndex: 'name',
       ellipsis: true,
       width: 327
     },
@@ -234,15 +194,15 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   // 获取表格数据
   const getTableData = async () => {
     const sourceParams: any = {
-      page: current,
-      size: pageSize,
-      organization_id: checkedKeys[0] || ''
+      pageNo: current,
+      pageSize: pageSize,
+      organizationId: checkedKeys[0] || ''
     };
     try {
       const res = await getIndividualList({ ...sourceParams });
-      if (res.success) {
-        setTableData(res?.data.data);
-        setTotal(res?.data?.total);
+      if (res.code === 'Success') {
+        setTableData(res?.data?.result || []);
+        setTotal(res?.data?.totalCount || 0);
       } else {
         setTableData([]);
         setTotal(0);

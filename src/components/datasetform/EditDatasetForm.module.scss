@@ -33,12 +33,21 @@
   outline: none !important;
   box-shadow: none !important;
 }
+
 .dropdownMenuSelect
   :global(.arco-select-option-wrapper .arco-select-highlight) {
   color: #007dfa;
 }
-.editForm :global(.arco-form-item-label) {
+
+.dropdownSelect {
+  /* 修复多选 Select 组件 placeholder 显示不完全的问题 */
+  :global(.arco-input-tag-inner) {
+    input {
+      min-width: 130px;
+    }
+  }
 }
+
 :global(.arco-form-label-item > label) {
   white-space: nowrap;
 }

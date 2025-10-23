@@ -25,7 +25,7 @@ import {
   RootTypeEnum
 } from '../../dataCatalog/consts';
 import { validateName } from '@/utils/valiate';
-import './index.module.css';
+import './index.module.scss';
 
 const TreeNode = Tree.Node;
 

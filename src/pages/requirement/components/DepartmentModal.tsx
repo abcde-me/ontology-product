@@ -9,6 +9,24 @@ import {
 } from '@arco-design/web-react';
 import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 import './DepartmentModal.scss';
+
+// 树节点处理工具函数
+const processTreeNode = (node: any, isDetailMode: boolean): any => {
+  return {
+    ...node,
+    actionOnClick: 'check',
+    disableCheckbox: isDetailMode,
+    // 递归处理子节点，将childList转换为children
+    children: node.childList?.map((child: any) =>
+      processTreeNode(child, isDetailMode)
+    )
+  };
+};
+
+// 处理树数据的工具函数
+const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
+  return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
+};
 interface DataSourceModalProps {
   visible: boolean;
   onClose: () => void;
@@ -40,26 +58,12 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   }, [getDetailObj]);
   const getTreeData = () => {
     try {
-      getDepartmentTreeList({})
+      getDepartmentTreeList()
         .then((res) => {
-          // 每个层级增加一个属性
-          const newTreeData = res?.data?.map((item) => {
-            if (item.children) {
-              item.children.forEach((child) => {
-                child.disableCheckbox = type === 'detail' ? true : false;
-                child?.children?.forEach((childChild) => {
-                  childChild.disableCheckbox = type === 'detail' ? true : false;
-                });
-              });
-            }
-            return {
-              ...item,
-              actionOnClick: 'check',
-              disableCheckbox: type === 'detail' ? true : false
-            };
-          });
-          setTreeData(newTreeData || []);
-          setOriginalTreeData(newTreeData || []);
+          const isDetailMode = type === 'detail';
+          const newTreeData = processTreeData(res?.data || [], isDetailMode);
+          setTreeData(newTreeData);
+          setOriginalTreeData(newTreeData);
         })
         .catch((err) => {
           console.error(err);
@@ -69,7 +73,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    getTreeData();
+    if (visible) {
+      getTreeData();
+    }
   }, [activeTab, visible]);
 
   const searchData = (searchValue, originalTreeData) => {
