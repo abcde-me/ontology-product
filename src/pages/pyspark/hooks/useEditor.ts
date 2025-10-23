@@ -147,7 +147,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取日志
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
     useRequest(getRunLog, {
-      pollingInterval: 10000,
+      pollingInterval: 5000,
       pollingWhenHidden: false,
       manual: true,
       onSuccess: (res) => {
@@ -160,6 +160,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         setRunLogStatus(res?.data?.status ?? RunLogStatus.STOP);
         setRunLog(res?.data?.log ?? '');
+
+        if (res?.data?.status === RunLogStatus.STOP) {
+          cancelGetRunLogPolling();
+        }
       },
       onError: (error) => {
         setRunLogStatus(RunLogStatus.STOP);
@@ -351,12 +355,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
       if (res?.status !== 200) {
         Message.error(res?.message ?? '运行失败');
+        setRunStatus(RunningStatus.IDLE);
         return;
       }
 
       setExecid(res.data.execid);
     } catch (error) {
       Message.error('运行失败');
+      setRunStatus(RunningStatus.IDLE);
     }
   }, [runStatus, currentFileId, editorContent]);
 
@@ -430,6 +436,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   useEffect(() => {
     if (runStatus !== RunningStatus.RUNNING) {
       cancelGetRunResultPolling();
+      cancelGetRunLogPolling();
     }
 
     if (!execid || !currentFileId) {
@@ -444,9 +451,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           execid
         });
 
+        console.log('获取运行日志', currentFileId, execid);
+
         getRunLogPolling(currentFileId, {
           execid
         });
+
+        console.log('获取运行日志成功');
       } catch (error) {
         console.error('获取运行结果失败:', error);
         setRunStatus(RunningStatus.FAILED);
