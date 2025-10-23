@@ -321,7 +321,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setInputValue(name);
       // isFolder = true 表示创建文件夹，false 表示创建 notebook
       if (isIcon) {
-        const newNode = [
+        const newNodeChildren = [
           ...node?.dataRef?.children,
           {
             name,
@@ -335,9 +335,19 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             last_modified: ''
           }
         ];
-        console.log(newNode, '123 node');
+        const newNode = treeData.map((n) => {
+          if (String(n?.id) === String(node?.dataRef?.id)) {
+            console.log(n, '123 n', newNodeChildren, {
+              ...n,
+              children: newNodeChildren
+            });
+            return { ...n, children: newNodeChildren };
+          }
+          return n;
+        });
 
-        setTreeData([...treeData, ...node.dataRef, ...newNode]);
+        setTreeData(newNode);
+        console.log(newNode, '123 node');
       } else {
         setTreeData([
           {

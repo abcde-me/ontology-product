@@ -188,6 +188,7 @@ export const useFileManager = (
   // 创建文件/文件夹
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
+      console.log('11111');
       try {
         if (!validateName(finalName).isValid) {
           Message.error(
