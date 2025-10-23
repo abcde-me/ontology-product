@@ -10,7 +10,7 @@ import {
   TreeSelect
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';

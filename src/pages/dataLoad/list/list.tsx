@@ -9,7 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';

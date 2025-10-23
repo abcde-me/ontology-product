@@ -7,7 +7,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import styles from './EditDatasetForm.module.css';
+import styles from './EditDatasetForm.module.scss';
 import { getTagList } from '@/api/datasetManagement';
 import { validateName } from '@/utils/valiate';
 interface Dataset {

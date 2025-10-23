@@ -1045,7 +1045,6 @@ const DatasetDetail = (props: {
     if (id) {
       getDatasetDetailPage({ id: Number(id) })
         .then((res) => {
-          console.log(1111111, res);
           setDatasetDetail(res.data);
         })
         .catch((err) => {
@@ -1086,7 +1085,6 @@ const DatasetDetail = (props: {
     getDatasetDetailPage({ id: Number(id) })
       .then((res) => {
         setDatasetDetail(res.data);
-        console.log(1111111, res);
         Message.success('刷新成功');
       })
       .catch(() => {
@@ -1282,12 +1280,10 @@ const DatasetDetail = (props: {
                     }
                   >
                     <Button
-                      // @ts-expect-error
                       disabled={
                         !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
                       }
+                      onClick={() => setUpdateStatus(true)}
                     >
                       编辑
                     </Button>
