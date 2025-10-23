@@ -1,4 +1,3 @@
-import { title } from 'process';
 import { useState, useCallback, useEffect } from 'react';
 import { Message } from '@arco-design/web-react';
 import {
@@ -81,7 +80,7 @@ export const useFileManager = (
         console.log('targetFolderId', targetFolderId);
         const res = await getPythonList(targetFolderId, {
           name: searchValue,
-          mode: 2,
+          mode: 1,
           page: 1,
           page_size: 1000
         });
@@ -155,25 +154,17 @@ export const useFileManager = (
       const targetFolderId = folderId || currentFolderId;
       setIsLoading(true);
       try {
-        const rawPythonList = await getPythonList(targetFolderId, {
-          mode: 2,
-          page: 1,
-          page_size: 1000
-        });
+        const rawPythonList = await getPythonList(targetFolderId, {});
 
         if (rawPythonList.status !== 200) {
           Message.error(rawPythonList?.message ?? '获取文件列表失败');
           return [];
         }
 
-        const formattedItems = rawPythonList?.data?.items.map((item) => ({
-          ...item,
-          title: item.name,
-          key: item.id
-        }));
-        setPythonList(formattedItems);
+        const items = rawPythonList?.data?.items ?? [];
+        setPythonList(items);
         setIsCanCreate(rawPythonList?.data?.create_perm ?? false);
-        return formattedItems; // 返回获取到的数据
+        return items; // 返回获取到的数据
       } catch (error) {
         console.error('获取Python列表失败:', error);
         Message.error('获取文件列表失败');
@@ -197,7 +188,7 @@ export const useFileManager = (
         }
 
         const createRes = await createPythonItem({
-          path_id: Number(node?.dataRef?.id ?? currentFolderId),
+          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
           type: node?.dataRef?.type,
           name: finalName
         });
@@ -360,7 +351,7 @@ export const useFileManager = (
 
         const res = await getPythonList(String(folderId), {
           name: searchValue,
-          mode: 2,
+          mode: 0,
           page: 1,
           page_size: 20
         });
@@ -380,12 +371,7 @@ export const useFileManager = (
     try {
       // 更新当前文件夹ID
       setCurrentFolderId(parentId || '0');
-      const res = await getPythonList(String(parentId || ''), {
-        name: searchValue,
-        mode: 2,
-        page: 1,
-        page_size: 1000
-      } as any);
+      const res = await getPythonList(String(parentId || ''), {} as any);
       setIsCanCreate(res?.data?.create_perm ?? false);
       return res?.data?.items || [];
     } catch (error) {
