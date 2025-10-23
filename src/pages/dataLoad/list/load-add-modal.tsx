@@ -18,7 +18,7 @@ import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from './file-upload';
 import ComponentTree from './component-tree';
-import './db-tree.css';
+import './db-tree.scss';
 import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 import { isNumber } from 'lodash-es';
 interface connecort_nameType {
