@@ -6,7 +6,7 @@ import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
 
