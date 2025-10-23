@@ -1283,7 +1283,7 @@ const DatasetDetail = (props: {
                       disabled={
                         !datasetDetail || datasetDetail.status !== 'normal'
                       }
-                      onClick={() => setUpdateStatus(true)}
+                      onClick={handleEdit}
                     >
                       编辑
                     </Button>
