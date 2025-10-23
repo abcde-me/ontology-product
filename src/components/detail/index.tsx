@@ -1227,12 +1227,10 @@ const DatasetDetail = (props: {
                     }
                   >
                     <Button
-                      // @ts-expect-error
                       disabled={
                         !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
                       }
+                      onClick={handleEdit}
                     >
                       编辑
                     </Button>
