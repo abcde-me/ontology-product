@@ -140,7 +140,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       placeholder = '搜索文件或文件夹',
       newButtonText = '新建'
     } = props;
-    console.log(data, 'data pythonList');
     const [treeData, setTreeData] = useState<TreeNodeItem[]>(data);
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -322,7 +321,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       // isFolder = true 表示创建文件夹，false 表示创建 notebook
       if (isIcon) {
         const newNodeChildren = [
-          ...node?.dataRef?.children,
           {
             name,
             showInput: true,
@@ -333,21 +331,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             path: '',
             created: '',
             last_modified: ''
-          }
+          },
+          ...node?.dataRef?.children
         ];
         const newNode = treeData.map((n) => {
           if (String(n?.id) === String(node?.dataRef?.id)) {
-            console.log(n, '123 n', newNodeChildren, {
-              ...n,
-              children: newNodeChildren
-            });
             return { ...n, children: newNodeChildren };
           }
           return n;
         });
 
         setTreeData(newNode);
-        console.log(newNode, '123 node');
       } else {
         setTreeData([
           {
@@ -614,17 +608,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           <Empty />
         ) : (
           <Tree
-            className={styles['directory-pySpark-tree-container']}
+            className={styles['directory-pySpark-tree']}
             blockNode
             treeData={treeData}
             selectable
             autoExpandParent={false}
             actionOnClick={['expand', 'select']}
-            // expandedKeys={expandedKeys}
+            expandedKeys={expandedKeys}
             selectedKeys={selectedKeys}
-            // onExpand={setExpandedKeys}
+            onExpand={setExpandedKeys}
             onSelect={(keys, extra) => {
-              console.log(keys, extra, 'top--');
               const dataRef = extra?.node?.props?.dataRef ?? null;
               if (dataRef?.actionOnClick === 'select') {
                 setSelectedKeys(keys);
@@ -662,7 +655,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                           </Menu>
                         }
                       >
-                        <IconPlus className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]" />
+                        <IconPlus
+                          onClick={() => {
+                            setExpandedKeys([node?.dataRef?.id]);
+                          }}
+                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                        />
                       </Dropdown>
                     </Tooltip>
                   )}
@@ -688,7 +686,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               );
             }}
             renderTitle={(props: NodeProps) => {
-              console.log(props, 'showInput ----');
               const isInput = Boolean(props?.dataRef?.showInput);
               const isFolder =
                 props?.dataRef?.type === PythonItemType.Directory;

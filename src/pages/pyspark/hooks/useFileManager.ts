@@ -188,7 +188,7 @@ export const useFileManager = (
   // 创建文件/文件夹
   const handleCreate = useCallback(
     async (finalName: string, node: any) => {
-      console.log('11111');
+      console.log('11111', node, finalName, currentFolderId);
       try {
         if (!validateName(finalName).isValid) {
           Message.error(
@@ -198,7 +198,7 @@ export const useFileManager = (
         }
 
         const createRes = await createPythonItem({
-          path_id: Number(node?.dataRef?.id ?? currentFolderId),
+          path_id: Number(node?.parentKey ?? currentFolderId),
           type: node?.dataRef?.type,
           name: finalName
         });

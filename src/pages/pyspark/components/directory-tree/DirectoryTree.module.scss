@@ -82,67 +82,10 @@
     }
   }
 
-  .directory-tree {
-    height: 100%;
-
-    .directory-tree {
-      height: calc(100% - var(--directory-nav-height, 40px));
-      overflow-y: auto;
-      overflow-x: hidden;
-      width: 100%;
-    }
-
-    // 节点样式
-    :global(.arco-tree-node) {
-      position: relative;
-      border-radius: 2px;
-    }
-
-    // 确保层级缩进生效的关键样式 - 重写版本
-    :global(.arco-tree) {
-      // 使用嵌套选择器来精确匹配不同层级的节点
-      :global(.arco-tree-node-wrapper) {
-        :global(.arco-tree-node-content) {
-          padding-left: 0 !important;
-        }
-
-        // 第二级节点
-        :global(.arco-tree-child-tree) {
-          :global(.arco-tree-node-wrapper) {
-            :global(.arco-tree-node-content) {
-              padding-left: 20px !important;
-            }
-
-            // 第三级节点
-            :global(.arco-tree-child-tree) {
-              :global(.arco-tree-node-wrapper) {
-                :global(.arco-tree-node-content) {
-                  padding-left: 40px !important;
-                }
-
-                // 第四级节点
-                :global(.arco-tree-child-tree) {
-                  :global(.arco-tree-node-wrapper) {
-                    :global(.arco-tree-node-content) {
-                      padding-left: 60px !important;
-                    }
-
-                    // 第五级及以上节点
-                    :global(.arco-tree-child-tree) {
-                      :global(.arco-tree-node-wrapper) {
-                        :global(.arco-tree-node-content) {
-                          padding-left: 80px !important;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  :global(.arco-tree) {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: calc(100% - var(--directory-nav-height, 40px));
   }
 
   // 空数据状态样式
