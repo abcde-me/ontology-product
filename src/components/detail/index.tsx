@@ -998,7 +998,7 @@ const DatasetDetail = (props: {
           Message.error('加载数据集详情失败');
         });
 
-      getDatasetVersionList({ id: id }).then((res) => {
+      getDatasetVersionList({ id: Number(id) }).then((res) => {
         setVersionHistory(res.data);
       });
     }
