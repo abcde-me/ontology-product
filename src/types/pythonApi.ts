@@ -101,6 +101,13 @@ export enum RunningStatus {
   RUNNING = 2
 }
 
+export enum RunLogStatus {
+  /** 继续获取日志 */
+  CONTINUE = '0',
+  /** 停止获取日志 */
+  STOP = '1'
+}
+
 // 打开Python项目响应结构
 export interface OpenPythonItemRes {
   /** 任务执行id */
@@ -166,6 +173,8 @@ export interface StopRunPythonItemReq {
 export interface GetRunLogRes {
   /** 日志 */
   log: string;
+  /** 日志状态 */
+  status: RunLogStatus;
 }
 
 export enum OperatorCatalog {

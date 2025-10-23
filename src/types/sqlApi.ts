@@ -284,6 +284,13 @@ export enum RunningStatus {
   RUNNING = 2
 }
 
+export enum RunLogStatus {
+  /** 继续获取日志 */
+  CONTINUE = '0',
+  /** 停止获取日志 */
+  STOP = '1'
+}
+
 export interface RunResultSqlScriptData {
   /**
    * 运行耗时 单位：毫秒

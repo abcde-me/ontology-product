@@ -9,6 +9,7 @@ import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/hooks/usePermission';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -22,6 +23,7 @@ interface PropsType {
 }
 const TableDetail = (props) => {
   const history = useHistory();
+  const hasStopPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_STOP);
   const { type } = props;
   const columns: any = [
     {
@@ -72,21 +74,20 @@ const TableDetail = (props) => {
               RunStateType[RunState.STOPPED].text}
             {item.status === 'stopping' && '停止中'}
           </div>
-          {item.status == 'running' &&
-            props.permission.includes(DATA_LOAD_PERMISSIONS.CAN_STOP) && (
-              <span
-                style={{
-                  color: 'rgb(0, 125, 250)',
-                  marginLeft: '7px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => {
-                  stopTaskHan(item.execution_id);
-                }}
-              >
-                停止
-              </span>
-            )}
+          {hasStopPermission && item.status == 'running' && (
+            <span
+              style={{
+                color: 'rgb(0, 125, 250)',
+                marginLeft: '7px',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                stopTaskHan(item.execution_id);
+              }}
+            >
+              停止
+            </span>
+          )}
           {item.status === 'failed' && (
             <span
               style={{

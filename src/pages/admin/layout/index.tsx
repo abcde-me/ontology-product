@@ -1,4 +1,3 @@
-import useAuthTimeout from '@/hooks/useAuthTimeout';
 import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
@@ -16,8 +15,8 @@ import Bread from './Bread';
 import { withSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { Page403 } from '@/pages/errorPages';
-import { Spin } from '@arco-design/web-react';
 import { usePermission } from '@/hooks';
+import AuthLoad from '@/pages/errorPages/authLoad';
 
 type LayoutPageProps = {
   history: any;
@@ -54,6 +53,10 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
     isInitializing,
     setUserPermissions
   ]);
+
+  if (isInitializing) {
+    return <AuthLoad />;
+  }
 
   // 如果路由没有权限要求，直接渲染
   if (!route.permission) {

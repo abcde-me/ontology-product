@@ -68,7 +68,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       resultLoading,
       loadRunResult,
       handleGetRunLog,
-      lastScriptRunStatus
+      lastScriptRunStatus,
+      hasFetchedResult,
+      hasFetchedLog
     } = useEditorContext();
 
     const sortableColumns = addSortToColumns(columns);
@@ -89,35 +91,41 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
-      // 运行完成时自动展开面板
-      if (
-        runStatus === RunningStatus.SUCCESS ||
-        runStatus === RunningStatus.FAILED
-      ) {
-        // 检查前一个状态，避免在状态重置时误触发
-        const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
-
-        // 只有当状态真正从运行中变为完成状态时才执行自动行为
-        // 避免在标签页切换时状态重置导致的误触发
-        if (prevStatus === RunningStatus.RUNNING && !hasUserClosed) {
-          setIsExpanded(true);
-          onPanelStateChange?.(true);
-
-          // 根据运行结果自动定位到对应标签页
-          if (runStatus === RunningStatus.SUCCESS) {
-            setActiveKey('result');
-          } else if (runStatus === RunningStatus.FAILED) {
-            setActiveKey('log');
-            handleGetRunLog?.();
-          }
-        }
+      if (runStatus === RunningStatus.RUNNING) {
+        setIsExpanded(true);
+        onPanelStateChange?.(true);
+        setActiveKey('log');
       }
+
+      // 运行完成时自动展开面板
+      // if (
+      //   runStatus === RunningStatus.SUCCESS ||
+      //   runStatus === RunningStatus.FAILED
+      // ) {
+      //   // 检查前一个状态，避免在状态重置时误触发
+      //   const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
+
+      //   // 只有当状态真正从运行中变为完成状态时才执行自动行为
+      //   // 避免在标签页切换时状态重置导致的误触发
+      //   if (prevStatus === RunningStatus.RUNNING && !hasUserClosed) {
+      //     setIsExpanded(true);
+      //     onPanelStateChange?.(true);
+
+      //     // 根据运行结果自动定位到对应标签页
+      //     if (runStatus === RunningStatus.SUCCESS) {
+      //       setActiveKey('result');
+      //     } else if (runStatus === RunningStatus.FAILED) {
+      //       setActiveKey('log');
+      //       handleGetRunLog?.();
+      //     }
+      //   }
+      // }
     }, [
       runStatus,
-      onPanelStateChange,
-      getPrevRunStatus,
-      hasUserClosed,
-      handleGetRunLog
+      onPanelStateChange
+      // getPrevRunStatus,
+      // hasUserClosed,
+      // handleGetRunLog
     ]);
 
     const handleShowForm = () => {
@@ -475,7 +483,29 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </div>
                 </TabPane>
                 <TabPane key="log" title="日志">
-                  <div className={styles['runlog-content']}>{runLog}</div>
+                  <div className={styles['runlog-content']}>
+                    {(() => {
+                      // 如果有日志内容，直接显示
+                      if (runLog && runLog.trim() !== '') {
+                        return runLog;
+                      }
+
+                      // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
+                      if (!hasFetchedLog) {
+                        // 还没有调用过 getRunLog，显示开始输出
+                        return '开始输出...';
+                      } else {
+                        // 已经调用过 getRunLog 但日志为空
+                        if (runStatus === RunningStatus.SUCCESS) {
+                          return '运行成功，暂无日志输出';
+                        } else if (runStatus === RunningStatus.FAILED) {
+                          return '运行失败，暂无错误日志';
+                        } else {
+                          return '暂无运行日志';
+                        }
+                      }
+                    })()}
+                  </div>
                 </TabPane>
               </Tabs>
               {/* 复制按钮放在滚动容器外部 */}
