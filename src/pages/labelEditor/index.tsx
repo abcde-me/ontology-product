@@ -16,10 +16,9 @@ import {
   getTaskDetail
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
-import { InstanceofPlugin, EventTargetPlugin } from 'wujie-polyfill';
 import { Message, Modal } from '@arco-design/web-react';
 import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
-import { TEXT_DATA, LabelTypeMap } from './const';
+import { TEXT_DATA, LabelTypeMap, WujiePlugins } from './const';
 
 const { bus } = WujieReact;
 
@@ -142,25 +141,7 @@ function LabelEditorPage() {
           sync={true}
           alive={true}
           loading={document.createElement('span') as any}
-          plugins={[
-            InstanceofPlugin(),
-            EventTargetPlugin(),
-            {
-              patchElementHook(element: any, iframeWindow: any) {
-                // 解决firefox下拉框无法对齐
-                try {
-                  Object.defineProperties(element, {
-                    getRootNode: {
-                      configurable: true,
-                      get: () => iframeWindow.Node.prototype.getRootNode
-                    }
-                  });
-                } catch (error) {
-                  console.warn(error);
-                }
-              }
-            }
-          ]}
+          plugins={WujiePlugins}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,
