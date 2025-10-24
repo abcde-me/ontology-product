@@ -150,13 +150,8 @@ export async function getImgJobMeta(taskId?: string) {
       {
         width: res.task_info.pic.width,
         height: res.task_info.pic.height,
-        url:
-          process.env.NODE_ENV === 'development'
-            ? res.item_path.replace(
-                'http://10.1.4.73:9002',
-                'http://61.182.98.8:38093'
-              )
-            : res.item_path, // 'https://temp.im/600x600',
+        url: res.item_path,
+        //   : res.item_path, // 'https://temp.im/600x600',
         name: res.task_info.pic.name,
         related_files: 0,
         has_related_context: false

@@ -23477,6 +23477,11 @@ ws@^8.13.0:
   resolved "http://npm.cestc.cn/ws/download/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
   integrity sha1-QnOLK+V87YX0YVQyCqu1GrADcFo=
 
+wujie-polyfill@1.1.3:
+  version "1.1.3"
+  resolved "http://npm.cestc.cn/wujie-polyfill/download/wujie-polyfill-1.1.3.tgz#17adf6f573f1f6097e4ed39e32305ffc997fdd7c"
+  integrity sha1-F6329XPx9gl+TtOeMjBf/Jl/3Xw=
+
 wujie-react@1.0.29:
   version "1.0.29"
   resolved "http://npm.cestc.cn/wujie-react/download/wujie-react-1.0.29.tgz#471cebfe23ec9016901a7393643a0836bf1abeac"
