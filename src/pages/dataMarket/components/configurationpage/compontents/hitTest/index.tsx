@@ -19,7 +19,6 @@ import {
 } from '@/api/datasetsV2';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import brother from '../brother';
-import DemoForm from '../../../components/From/index';
 import MarkdownBase from '@/components/markdownBase';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import TagContent from '../tagContent';
@@ -411,25 +410,6 @@ function PageContentFalse(props) {
           </div>
         </div>
       </div>
-      <Modal
-        title="编辑"
-        visible={editChildVisible}
-        onOk={() => submitEditChild()}
-        onCancel={() => clearEditChild()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: 800
-        }}
-      >
-        <DemoForm
-          seteditChildVisible={seteditChildVisible}
-          ref={childRef}
-          detailsdata={detailsdata}
-          FuncEdit={FuncEdit}
-          typemodel={'editChild'}
-        ></DemoForm>
-      </Modal>
       <Modal
         title="策略配置"
         visible={editPolicy}

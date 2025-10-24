@@ -1,27 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import styles from './index.module.scss';
-import { useHistory } from 'react-router-dom';
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  Checkbox,
-  Radio,
-  Upload,
-  Message,
-  Space,
-  Slider,
-  Switch
-} from '@arco-design/web-react';
-import {
-  IconCheck,
-  IconCheckCircle,
-  IconUpload
-} from '@arco-design/web-react/icon';
+import { Form, Radio, Space, Slider } from '@arco-design/web-react';
 import { useState } from 'react';
-import { get } from 'lodash';
-import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 
 function DemoForm(props, ref) {
   const { FuncChildFrom, seteditPolicy, initParams = {} } = props;
@@ -100,12 +80,6 @@ function DemoForm(props, ref) {
     wrapperCol: {
       span: 20
     }
-  };
-  const handleChangeManage = (checked: boolean) => {
-    setCheckedManage(checked);
-  };
-  const handleChangeManagescore = (checked: boolean) => {
-    setCheckedManagescore(checked);
   };
   return (
     <Form
