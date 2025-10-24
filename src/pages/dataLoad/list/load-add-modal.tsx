@@ -528,6 +528,8 @@ const LoadAddModal = (props: propsType) => {
 
   // 存储上传的文件数据
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  // 文件上传中状态
+  const [isFileUploading, setIsFileUploading] = useState(false);
   // TreeSelect 下拉框显示状态
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -788,6 +790,7 @@ const LoadAddModal = (props: propsType) => {
             <Uploads
               onFileChange={handleFileChange}
               onFileDelete={handleFileDelete}
+              onUploadingChange={setIsFileUploading}
             />
           </FormItem>
         )}
@@ -903,7 +906,7 @@ const LoadAddModal = (props: propsType) => {
         <Button
           onClick={() => handleSubmit('run')}
           type="primary"
-          disabled={loading}
+          disabled={loading || isFileUploading}
         >
           保存并执行
         </Button>
