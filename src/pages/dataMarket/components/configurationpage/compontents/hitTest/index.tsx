@@ -34,8 +34,70 @@ function PageContentFalse(props) {
   const [editPolicy, seteditPolicy] = useState(false);
   const [text, setText] = useState('');
   const [fromdata, setfromdata] = useState<any>({});
-  const [recordList, setRecordList] = useState<any>([]);
-  const [segmentationlist, setsegmentationlist] = useState([]);
+  const [recordList, setRecordList] = useState<any>([
+    {
+      query: '蜂巢工厂',
+      dataset_query_results: [],
+      retrieval_model: {
+        search_method: 'hybrid_search',
+        reranking_enable: true,
+        reranking_model: {
+          reranking_provider_name: '智源',
+          reranking_model_name: 'bge-rerank-base'
+        },
+        top_k: 6,
+        weights: 0.6,
+        score_threshold_enabled: true,
+        score_threshold: 0.6
+      },
+      created_at: '2025-09-29T17:19:10.131+08:00'
+    },
+    {
+      query: '蜂巢工厂',
+      dataset_query_results: [],
+      retrieval_model: {
+        search_method: 'hybrid_search',
+        reranking_enable: true,
+        reranking_model: {
+          reranking_provider_name: '智源',
+          reranking_model_name: 'bge-rerank-base'
+        },
+        top_k: 6,
+        weights: 0.6,
+        score_threshold_enabled: true,
+        score_threshold: 0.6
+      },
+      created_at: '2025-09-29T17:18:58.506+08:00'
+    }
+  ]);
+  const [segmentationlist, setsegmentationlist] = useState([
+    {
+      chunk_id: 'segment-ac91be00-d773-45be-add0-89b423975605',
+      document_id: 'document-fb5ccf73-232c-4714-933e-e22e4eed4d5c',
+      document_name: '工作簿8.xlsx',
+      dataset_id: 'dataset-d9e0699d-d99d-44d3-98d0-142faee124b9',
+      content:
+        '{"企业全称":"中国经济信息社有限公司","简称或别名":"中国经济信息社.CIN.中国经济信息中心.中国经信社.经济信息社.中国经信","company_id":"58037e49939bef870af94d2402afdf03","股票代码":"（非上市企业）"}',
+      content_shot:
+        '{"企业全称":"中国经济信息社有限公司","简称或别名":"中国经济信息社.CIN.中国经济信息中心.中国经信社.经济信息社.中国经信","company_id":"58037e49939bef870af94d2402afdf03","股票代码":"（非上市企业）"}',
+      score: 0.17382812,
+      bbox: {},
+      extra_expr: ''
+    },
+    {
+      chunk_id: 'segment-5d5016a7-7a57-47e5-8e5f-81a6022320f3',
+      document_id: 'document-fb5ccf73-232c-4714-933e-e22e4eed4d5c',
+      document_name: '工作簿8.xlsx',
+      dataset_id: 'dataset-d9e0699d-d99d-44d3-98d0-142faee124b9',
+      content:
+        '{"企业全称":"中电云计算技术有限","简称或别名":"CEC·中电云·中电云技术·中电云技术有限公司·中电云计算·中电云计算技术公司","company_id":"8e4dc3b4413990fe30556bc9b9b79f34","股票代码":"（非上市企业）"}',
+      content_shot:
+        '{"企业全称":"中电云计算技术有限","简称或别名":"CEC·中电云·中电云技术·中电云技术有限公司·中电云计算·中电云计算技术公司","company_id":"8e4dc3b4413990fe30556bc9b9b79f34","股票代码":"（非上市企业）"}',
+      score: 0.14648438,
+      bbox: {},
+      extra_expr: ''
+    }
+  ]);
   const [segmentationlistFilter, setsegmentationlistFilter] = useState([]);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(0); // 默认选中第一行
   const [loading1, setLoading1] = useState(false);
@@ -69,7 +131,7 @@ function PageContentFalse(props) {
   }, [id]);
   useEffect(() => {
     if (recordList.length > 0) {
-      setsegmentationlist(recordList[0].dataset_query_results || []);
+      // setsegmentationlist(recordList[0].dataset_query_results || []);
       setsegmentationlistFilter(recordList[0].dataset_query_results || []);
     }
   }, [recordList]);
@@ -169,7 +231,7 @@ function PageContentFalse(props) {
   const onRowClick = (record: any, index: number) => {
     setSelectedRowIndex(index); // 设置选中的行
     setText(record.query);
-    setsegmentationlist(record.dataset_query_results || []);
+    // setsegmentationlist(record.dataset_query_results || []);
 
     setsegmentationlistFilter(recordList[index].dataset_query_results || []);
   };

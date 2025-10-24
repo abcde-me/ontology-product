@@ -68,14 +68,14 @@
     width: 240px;
     height: 140px;
   } */
-  .arco-radio-group .arco-radio {
+  :global(.arco-radio-group) :global(.arco-radio) {
     margin-right: 0;
   }
   .policy-text {
     height: 80px;
     overflow: auto; /* 超出部分隐藏 */
   }
-  .arco-form-label-item {
+  :global(.arco-form-label-item) {
     font-family: PingFangSC-Semibold;
     font-size: 14px;
     color: #0f172a;
@@ -83,7 +83,7 @@
     line-height: 22px;
     font-weight: 600;
   }
-  .arco-form-item-control-children {
+  :global(.arco-form-item-control-children) {
     display: flex;
     align-items: center;
   }

@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
-import './index.css';
+import styles from './index.module.scss';
 import { useHistory } from 'react-router-dom';
 import {
   Form,
@@ -33,7 +33,7 @@ function DemoForm(props, ref) {
   );
   const [form] = Form.useForm();
   const [initFromValue, setinitFromValue] = useState({
-    retrievalV: 'hybrid_search',
+    retrievalV: 'semantic_search',
     weightSettings: 0.6,
     reordering: checkedManage,
     topK: 6,
@@ -43,7 +43,7 @@ function DemoForm(props, ref) {
   });
 
   const [formvalues, setformvalues] = useState<any>({
-    retrievalV: 'hybrid_search'
+    retrievalV: 'semantic_search'
   });
   //交互事件
   useImperativeHandle(ref, () => ({
@@ -60,22 +60,22 @@ function DemoForm(props, ref) {
   };
   const retrievalVlist = [
     {
-      value: 'hybrid_search',
-      name: '混合检索',
+      value: 'semantic_search',
+      name: '向量检索',
       placeholder:
-        '使用全文检索和语义检索两种策略检索知识点，并召回对应切片内容。推荐在需兼顾句子语义理解和关键词匹配的场景下使用，综合效果更优'
+        '基于语义相似度的先进方法。 将数据转换为“向量”，查找语义上最相关或最相似的文本片段。'
     },
     {
       value: 'full_text_search',
       name: '全文检索',
       placeholder:
-        '使用全文检索策略检索知识点，并召回对应切片内容，返回与提问Query关键字匹配度高的内容。推荐在需要对提问Query的关键词精准匹配的场景中使用  '
+        '也称关键词检索，通过扫描文档，查找与用户查询关键词完全匹配的内容。对术语、代码等查询快速精确。'
     },
     {
-      value: 'semantic_search',
-      name: '语义检索',
+      value: 'hybrid_search',
+      name: '混合检索',
       placeholder:
-        '使用语义检索策略检索知识点，并召回对应切片内容，返回与提问Query含义相匹配内容。推荐在需要对上下文相关性和意图相关性匹配的场景中使用'
+        '同时执行向量检索（语义）和全文检索（关键词）。 系统将两者的结果合并并重新排序，提供综合优势。'
     }
   ];
   const submitEditeditPolicy = async () => {
@@ -95,10 +95,10 @@ function DemoForm(props, ref) {
   useEffect(() => {}, []);
   const formItemLayout = {
     labelCol: {
-      span: 3
+      span: 4
     },
     wrapperCol: {
-      span: 21
+      span: 20
     }
   };
   const handleChangeManage = (checked: boolean) => {
@@ -109,17 +109,17 @@ function DemoForm(props, ref) {
   };
   return (
     <Form
-      className="fromstylePolicy"
+      className={styles.fromstylePolicy}
       form={form}
       onValuesChange={onValuesChange}
       initialValues={initFromValue}
       {...formItemLayout}
     >
-      <div className="headername">检索策略</div>
+      <div className={styles.headername}>检索策略</div>
       <Form.Item
         label=""
         field="retrievalV"
-        className="retrievalV"
+        className={styles.retrievalV}
         wrapperCol={{
           span: 24
         }}
@@ -137,14 +137,22 @@ function DemoForm(props, ref) {
                   return (
                     <Space
                       align="start"
-                      className={`custom-radio-card ${checked ? 'custom-radio-card-checked' : ''}`}
+                      className={
+                        styles['custom-radio-card'] +
+                        ' ' +
+                        (checked ? styles['custom-radio-card-checked'] : '')
+                      }
                     >
-                      <div className="custom-radio-card-mask">
-                        <div className="custom-radio-card-mask-dot"></div>
-                      </div>
-                      <div className="policybox">
-                        <div className="custom-radio-card-title">{e.name}</div>
-                        <div className="policy-text"> {e.placeholder}</div>
+                      {/* <div className={styles['custom-radio-card-mask']}>
+                        <div className={styles['custom-radio-card-mask-dot']}></div>
+                      </div> */}
+                      <div className={styles.policybox}>
+                        <div className={styles['custom-radio-card-title']}>
+                          {e.name}
+                        </div>
+                        <div className={styles['policy-text']}>
+                          {e.placeholder}
+                        </div>
                       </div>
                     </Space>
                   );
@@ -154,85 +162,62 @@ function DemoForm(props, ref) {
           })}
         </Radio.Group>
       </Form.Item>
-      <div className="headername">排序召回配置</div>
-      {formvalues.retrievalV == 'hybrid_search' ? (
-        <Form.Item
-          label="权重设置："
-          field="weightSettings"
-          rules={[{ required: true, message: '请选择' }]}
-          help="通过调整分数赋权比例，决定两种检索方式的优先度。"
-        >
-          <Slider
-            showInput
-            style={{ width: 280 }}
-            min={0} // 设置最小值为 0
-            max={1} // 设置最大值为 1
-            step={0.01} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
-          />
-        </Form.Item>
-      ) : null}
-
-      <Form.Item
-        label="重排序："
-        field="reordering"
-        rules={[{ required: true, message: '请选择' }]}
-      >
-        <Switch
-          checked={checkedManage}
-          onChange={handleChangeManage}
-          checkedText="开"
-          uncheckedText="关"
-        />
-      </Form.Item>
-
+      <div className={styles.headername}>重排序配置</div>
       <Form.Item
         label="Top K："
         field="topK"
         rules={[{ required: true, message: '请选择' }]}
-        help="从知识库中召回与输⼊Query匹配的切⽚个数的上限值。"
+        help="返回相似度最高的前K个结果(1～100)"
+      >
+        <Slider showInput style={{ width: 480 }} min={1} max={100} step={1} />
+      </Form.Item>
+
+      <Form.Item
+        label="相似度阈值："
+        field="score"
+        rules={[{ required: true, message: '请选择' }]}
+        help="过滤相似度低于此阈值的结果(0.00～1.00)"
       >
         <Slider
           showInput
-          style={{ width: 280 }}
+          style={{ width: 480 }}
           min={0} // 设置最小值为 0
-          max={20} // 设置最大值为 1
-          step={1} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
+          max={1} // 设置最大值为 1
+          step={0.01} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
         />
       </Form.Item>
-      <Form.Item
-        label="Score阈值："
-        field="score"
-        rules={[{ required: true, message: '请选择' }]}
-        help="系统会筛选出与输⼊ Query 的匹配分 ≥ 此阈值的切⽚，低于阈值的会被过滤。"
-      >
-        {' '}
-        <Form.Item
-          style={{ width: 60 }}
-          label=""
-          field="scoreSwitch"
-          rules={[{ required: true, message: '请选择' }]}
-        >
-          <Switch
-            checked={checkedManagescore}
-            onChange={handleChangeManagescore}
-            checkedText="开"
-            uncheckedText="关"
-          />
-        </Form.Item>
-        <Form.Item
-          label=""
-          field="scoreValue"
-          rules={[{ required: true, message: '请选择' }]}
-        >
-          <Slider
-            showInput
-            style={{ width: 280, marginLeft: 10 }}
-            min={0} // 设置最小值为 0
-            max={1} // 设置最大值为 1
-            step={0.01} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
-          />
-        </Form.Item>
-      </Form.Item>
+      {formvalues.retrievalV == 'hybrid_search' ? (
+        <>
+          <Form.Item
+            label="语义权重："
+            field="weightSettings"
+            rules={[{ required: true, message: '请选择' }]}
+            help="调高语义权重侧重于理解问题意图(0.0～1.0)"
+          >
+            <Slider
+              showInput
+              style={{ width: 480 }}
+              min={0} // 设置最小值为 0
+              max={1} // 设置最大值为 1
+              step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
+            />
+          </Form.Item>
+          <Form.Item
+            label="关键词权重："
+            field="reordering"
+            rules={[{ required: true, message: '请选择' }]}
+            help="调高关键词权重侧重于文本的精确匹配(0.0～1.0)"
+          >
+            <Slider
+              showInput
+              style={{ width: 480 }}
+              min={0} // 设置最小值为 0
+              max={1} // 设置最大值为 1
+              step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
+            />
+          </Form.Item>
+        </>
+      ) : null}
     </Form>
   );
 }
