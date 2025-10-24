@@ -183,8 +183,9 @@
             .sr {
               display: flex;
               justify-content: flex-end;
+              align-items: center;
               .srt {
-                background: #e6f0ff;
+                background: #eef6ff;
                 border-radius: 6px;
                 width: 80px;
                 height: 20px;
@@ -193,7 +194,7 @@
                 justify-content: center;
                 font-family: PingFangSC-Medium;
                 font-size: 14px;
-                color: #2468f2;
+                color: #007dfa;
                 line-height: 20px;
                 font-weight: 500;
               }

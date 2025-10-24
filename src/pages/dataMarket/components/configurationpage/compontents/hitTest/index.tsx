@@ -377,24 +377,13 @@ function PageContentFalse(props) {
                 return (
                   <div key={index} className={styles.segmentationBox}>
                     <div className={styles.segmentationHeader}>
-                      <div className={styles.sl}>
-                        <span>
-                          <IconDriveFile />
-                        </span>
-                        <Tooltip content={e.document_name}>
-                          <span className={styles.nm}>{e.document_name}</span>
-                        </Tooltip>
-                        <span className={styles.sp}>
-                          分段数：{index + 1}/{segmentationlist.length}
-                        </span>
-                        <div className="ml-2 w-[220px]">
-                          <TagContent tagList={e.tags} />
-                        </div>
-                      </div>
                       <div className={styles.sr}>
                         <div className={styles.srt}>
                           分值：{e.score.toFixed(2)}
                         </div>
+                        <span className="ml-[8px] text-[12px] leading-5">
+                          字符数：{e.content_shot.length}
+                        </span>
                       </div>
                     </div>
                     <div className={styles.segmentationContent}>
@@ -402,6 +391,20 @@ function PageContentFalse(props) {
                         content={e.content_shot}
                         onChangeSup={onChangeSup}
                       ></MarkdownBase>
+                    </div>
+                    <div className={styles.sl}>
+                      <span>
+                        <IconDriveFile />
+                      </span>
+                      <Tooltip content={e.document_name}>
+                        <span className={styles.nm}>{e.document_name}</span>
+                      </Tooltip>
+                      {/* <span className={styles.sp}>
+                          分段数：{index + 1}/{segmentationlist.length}
+                        </span> */}
+                      <div className="ml-2 w-[220px]">
+                        <TagContent tagList={e.tags} />
+                      </div>
                     </div>
                   </div>
                 );
