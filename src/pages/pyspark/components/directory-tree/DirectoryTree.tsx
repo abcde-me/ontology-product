@@ -314,34 +314,103 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       },
       [currentFolderId]
     );
+    const hasIdInNestedArray = (items, targetId, newNodeChildren) => {
+      // 创建数组副本，避免直接修改原数组
+      const updatedItems = [...items];
+
+      for (let i = 0; i < updatedItems.length; i++) {
+        const item = updatedItems[i];
+
+        // 如果找到目标ID的项
+        if (item.id === targetId) {
+          // 创建项的副本并更新children属性
+          updatedItems[i] = { ...item, children: newNodeChildren };
+          return { updatedItems };
+        }
+
+        // 如果当前项有children，递归搜索
+        if (
+          item.children &&
+          Array.isArray(item.children) &&
+          item.children.length > 0
+        ) {
+          const result = hasIdInNestedArray(
+            item.children,
+            targetId,
+            newNodeChildren
+          );
+
+          // 如果在子树中找到了并更新了
+          if (result.found) {
+            // 更新当前项的children
+            updatedItems[i] = { ...item, children: result.updatedItems };
+            return { updatedItems };
+          }
+        }
+      }
+
+      // 遍历完所有元素都没找到
+      return { found: false, updatedItems };
+    };
     const startRootCreate = (isFolder = true, node?, isIcon?: boolean) => {
       const name = generateDefaultName(treeData, isFolder);
       setDefaultName(name);
       setInputValue(name);
       // isFolder = true 表示创建文件夹，false 表示创建 notebook
       if (isIcon) {
-        const newNodeChildren = [
-          {
-            name,
-            showInput: true,
-            isAdd: true,
-            type: isFolder ? PythonItemType.Directory : PythonItemType.Notebook,
-            children: [],
-            id: 0,
-            path: '',
-            created: '',
-            last_modified: ''
-          },
-          ...node?.dataRef?.children
-        ];
-        const newNode = treeData.map((n) => {
-          if (String(n?.id) === String(node?.dataRef?.id)) {
-            return { ...n, children: newNodeChildren };
-          }
-          return n;
-        });
+        console.log('node', node);
+        const newNodeChildren =
+          node?.dataRef?.children?.length > 0
+            ? [
+                {
+                  name,
+                  showInput: true,
+                  isAdd: true,
+                  type: isFolder
+                    ? PythonItemType.Directory
+                    : PythonItemType.Notebook,
+                  children: [],
+                  id: 0,
+                  path: '',
+                  created: '',
+                  last_modified: ''
+                },
+                ...node?.dataRef?.children
+              ]
+            : [
+                {
+                  name,
+                  showInput: true,
+                  isAdd: true,
+                  type: isFolder
+                    ? PythonItemType.Directory
+                    : PythonItemType.Notebook,
+                  children: [],
+                  id: 0,
+                  path: '',
+                  created: '',
+                  last_modified: ''
+                }
+              ];
+        console.log('newNodeChildren', newNodeChildren, node);
+        const hasId: any = hasIdInNestedArray(
+          treeData,
+          node?.dataRef?.id,
+          newNodeChildren
+        );
+        // const newNode = treeData.map((n) => {
+        //   if (String(n?.id) === String(hasId?.id)) {
+        //     return { ...n, children: hasId?.children };
+        //   }
+        //   return n;
+        // });
 
-        setTreeData(newNode);
+        console.log('newNode newNodeChildren', hasId, treeData, [
+          ...treeData,
+          { ...hasId }
+        ]);
+
+        setTreeData([...treeData, { ...hasId }]);
       } else {
         setTreeData([
           {
@@ -657,7 +726,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       >
                         <IconPlus
                           onClick={() => {
-                            setExpandedKeys([node?.dataRef?.id]);
+                            if (!expandedKeys.includes(node?.dataRef?.id)) {
+                              setExpandedKeys([
+                                ...expandedKeys,
+                                node?.dataRef?.id
+                              ]);
+                            }
                           }}
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         />
@@ -721,14 +795,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 <div className="flex items-center overflow-hidden">
                   {icon}
                   <div className="flex flex-1 flex-col overflow-hidden">
-                    <div className="file-name">
+                    <div className={styles['file-name']}>
                       <EllipsisPopover value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
                     {isSearchMode &&
                       from !== DirectoryTreeFrom.SQL &&
                       props.dataRef?.path && (
-                        <div className="search-result-path">
+                        <div className={styles['search-result-path']}>
                           <EllipsisPopover value={props.dataRef.path} />
                         </div>
                       )}

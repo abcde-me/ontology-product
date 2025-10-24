@@ -199,11 +199,9 @@ export const useTabManager = (
   const handleCreate = useCallback(
     (finalName: string): Promise<any> => {
       return new Promise(async (resolve) => {
-        console.log('2222222');
         try {
           // 获取当前文件夹ID，如果没有则使用根目录
           const currentFolderId = getCurrentFolderId?.() || '0';
-          console.log(currentFolderId, 'currentFolderId');
           const createRes = await createPythonItem({
             path_id: Number(currentFolderId),
             type: PythonItemType.Notebook,
