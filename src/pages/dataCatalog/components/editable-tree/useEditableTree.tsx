@@ -436,6 +436,7 @@ export function useEditableTree({ catalogTreeStore }) {
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
     perms = dataRef?.perms ? dataRef.perms : perms;
+
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
@@ -474,7 +475,7 @@ export function useEditableTree({ catalogTreeStore }) {
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
-              {['volume'].every((key) => dataRef?.type !== key) && (
+              {['volume', 'db'].every((key) => dataRef?.type !== key) && (
                 <>
                   {
                     <PermissionWrapper
