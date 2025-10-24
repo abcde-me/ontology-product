@@ -35,6 +35,7 @@ function PageContentFalse(props) {
   const [fromdata, setfromdata] = useState<any>({});
   const [recordList, setRecordList] = useState<any>([
     {
+      id: 1,
       query: '蜂巢工厂',
       dataset_query_results: [],
       retrieval_model: {
@@ -52,6 +53,7 @@ function PageContentFalse(props) {
       created_at: '2025-09-29T17:19:10.131+08:00'
     },
     {
+      id: 2,
       query: '蜂巢工厂',
       dataset_query_results: [],
       retrieval_model: {
