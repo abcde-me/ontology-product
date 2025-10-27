@@ -134,7 +134,7 @@ export async function copySqlScript(
 ): Promise<ApiRes<CreateSqlScriptData>> {
   return await UAPI.RES.sqlCopyApi({})
     .post({
-      script_file_id: Number(script_file_id),
+      script_file_id: script_file_id,
       copy_script_id: Number(id)
     })
     .inRegion()

@@ -46,7 +46,7 @@ import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 import Header from './pages/admin/layout/header';
 import { isInFrame, isWujie } from './utils/env';
-import { useUserInfoStore } from './store/userInfoStore';
+import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
 import { usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
 import { is } from 'immer/dist/internal';
@@ -56,14 +56,14 @@ import { ProjectIdKey } from './utils/const';
 initI18n();
 
 // 在应用启动时从 localStorage 恢复 projectId
-const initProjectIdFromStorage = () => {
-  const pId = getLocalStorage<string[]>(ProjectIdKey);
-  if (Array.isArray(pId) && pId.length > 1) {
-    useUserInfoStore.getState().setProjectId(pId);
-  }
-};
+// const initProjectIdFromStorage = () => {
+//   const pId = getLocalStorage<string[]>(ProjectIdKey);
+//   if (Array.isArray(pId) && pId.length > 1) {
+//     useUserInfoStore.getState().setProjectId(pId);
+//   }
+// };
 
-initProjectIdFromStorage();
+// initProjectIdFromStorage();
 
 // 路由数组
 const flattenRoutes = getFlatRoutes(routes);
@@ -90,6 +90,7 @@ function App() {
   const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
     useUserInfoStore();
   const { createPermissionFilter, setUserPermissions } = usePermission();
+  const userInfo = useUserInfo();
 
   // 用于追踪是否已经初始化过权限
   const permissionInitializedRef = useRef(false);
@@ -136,6 +137,16 @@ function App() {
       permissionInitializedRef.current = true;
     }
   }, [projectId, userActions.actions, setUserPermissions]);
+
+  useEffect(() => {
+    if (userInfo?.id) {
+      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+      const pId = getLocalStorage<string[]>(fullProjectIdKey);
+      if (Array.isArray(pId) && pId.length > 1) {
+        setProjectId(pId);
+      }
+    }
+  }, [userInfo?.id]);
 
   const switchProject = useCallback(
     (pId: string[]) => {

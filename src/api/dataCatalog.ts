@@ -748,7 +748,7 @@ export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
 //删除源数据目录单个文件
 export async function deleteSourceFile(id: string) {
   return await UAPI.RES.sourceDataFileDeleteApi({})
-    .post({ file_id: id })
+    .post({ id })
     .inRegion()
     .do();
 }
