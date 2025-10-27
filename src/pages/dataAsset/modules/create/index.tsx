@@ -1,6 +1,6 @@
 import React from 'react';
-import DataAssetForm from '../../components/form';
+import DataAssetFormContainer from '../../components/DataAssetForm/DataAssetFormContainer';
 
 export default function DataAssetCreate() {
-  return <DataAssetForm isEditMode={false} />;
+  return <DataAssetFormContainer isEditMode={false} />;
 }
