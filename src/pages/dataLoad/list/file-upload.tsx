@@ -1,13 +1,19 @@
 import { Upload, Message, Tooltip } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import { PrefixAimdp } from '@/api/endpoints';
 
 interface UploadsProps {
   onFileChange: (fileData: any, blobURL?: string) => void;
   onFileDelete?: (fileName: string) => void;
+  onUploadingChange?: (isUploading: boolean) => void;
 }
 
-const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
+const Uploads: React.FC<UploadsProps> = ({
+  onFileChange,
+  onFileDelete,
+  onUploadingChange
+}) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
 
@@ -24,6 +30,12 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
   const handleUploadChange = (files: any) => {
     const prevLength = fileList.length;
     setFileList(files);
+
+    // 检查是否有文件正在上传
+    const isUploading = files.some((file: any) => file.status === 'uploading');
+    if (onUploadingChange) {
+      onUploadingChange(isUploading);
+    }
 
     // 检查是否有文件被删除
     if (prevLength > files.length) {
@@ -159,7 +171,7 @@ const Uploads: React.FC<UploadsProps> = ({ onFileChange, onFileDelete }) => {
       beforeUpload={(file, list) => {
         return checkFile(file, list);
       }}
-      action="/api/aimdp/v1/load_tasks/upload"
+      action={`${PrefixAimdp}/UploadLoadTaskFile`}
       onChange={handleUploadChange}
       onDrop={handleDrop}
       headers={{

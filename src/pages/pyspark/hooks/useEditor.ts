@@ -408,9 +408,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
     const res = await getRunLog(currentFileId, { execid });
 
-    if (res?.status === 200) {
-      setRunLog(res.data.log);
+    if (res?.status !== 200) {
+      setRunLog(res.message ?? '获取日志失败');
+      return;
     }
+
+    setRunLog(res?.data?.log ?? '');
   }, [currentFileId, execid]);
 
   const handleGetRunResult = useCallback(async () => {

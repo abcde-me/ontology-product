@@ -11,22 +11,37 @@ import {
   Select,
   Checkbox,
   Switch,
+  Button,
+  Tag,
+  AutoComplete,
+  Message
 } from '@arco-design/web-react';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, escapeRegExp } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
-import { FileOptions } from './default';
+import CustomizeIcon from '@/assets/file/customize-icon.svg';
+import StartNodeDefault, { FileOptions } from './default';
 import { getCatalogList } from '@/api/dataCatalog';
 import { useHistory } from 'react-router-dom';
+import { IconPlus } from '@arco-design/web-react/icon';
 
 const FormItem = Form.Item;
 
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
+  const { data_category } = StartNodeDefault.defaultValue;
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
+  const [customizeFormat, setCustomizeFormat] = useState<string[]>(
+    data?.data_category?.[4]?.format || []
+  );
+  const [customizeOptions, setCustomizeOptions] = useState(
+    JSON.parse(localStorage.getItem('customizeOptions') || '[]')
+  );
+  const [customizeInputValue, setCustomizeInputValue] = useState('');
   const [form] = Form.useForm();
   const history = useHistory();
+  const { OptGroup, Option } = AutoComplete;
 
   const docParams = Form.useWatch('data_category[0]', form);
   const imageParams = Form.useWatch('data_category[1]', form);
@@ -131,6 +146,67 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     );
   };
 
+  const handleCustomizeSwitch = () => {
+    const customizeConfig = form.getFieldValue('data_category[4]');
+    doFileConfigChange(
+      BlockEnum.Customize,
+      form.getFieldValue('data_path_id'),
+      customizeConfig
+    );
+  };
+  const handleCustomizeChange = (isClose: boolean, index?: number) => {
+    if (!customizeInputValue && !isClose) {
+      Message.error({
+        content: '文件类型不能为空！'
+      });
+      return;
+    }
+    if (customizeFormat.includes(customizeInputValue) && !isClose) {
+      Message.error({
+        content: '已存在当前类型文件！'
+      });
+      return;
+    }
+    const customizeConfig = form.getFieldValue('data_category[4]');
+    const newFormat = isClose
+      ? customizeFormat.filter((_, i) => i !== index)
+      : [...customizeFormat, customizeInputValue];
+    const newCustomizeOptions = isClose
+      ? [...customizeOptions]
+      : [...customizeOptions, customizeInputValue];
+    setCustomizeFormat(newFormat);
+    if (!isClose) {
+      localStorage.setItem(
+        'customizeOptions',
+        JSON.stringify(newCustomizeOptions)
+      );
+      setCustomizeOptions(newCustomizeOptions);
+    }
+    setCustomizeInputValue('');
+    const updatedConfig = {
+      ...customizeConfig,
+      format: newFormat,
+      id: (data_category && data_category[4]?.id) || 999,
+      category: (data_category && data_category[4]?.category) || '自定义'
+    };
+    form.setFieldValue('data_category[4]', updatedConfig);
+    handleChanged({
+      ...data,
+      data_category: [
+        docParams,
+        imageParams,
+        audioParams,
+        videoParams,
+        updatedConfig
+      ]
+    });
+    doFileConfigChange(
+      BlockEnum.Customize,
+      form.getFieldValue('data_path_id'),
+      updatedConfig
+    );
+  };
+
   useEffect(() => {
     getCatalogList({ root_type: 1 }).then((res) => {
       const dirs: Record<string, any>[] = [];
@@ -150,6 +226,26 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return <span>{text}</span>;
+    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+    const parts = text.split(regex);
+
+    return (
+      <span>
+        {parts.map((part, i) =>
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} style={{ color: '#007dfa' }}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="wk-node-panel-content start-panel-content mt-[24px]">
@@ -344,7 +440,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
               />
             </FormItem>
           </div>
-          {/* <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
+          <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
             <div className="flex h-[22px] items-center gap-x-[8px]">
               <FormItem
                 field="data_category[4].enabled"
@@ -418,7 +514,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 )}
               </div>
             )}
-          </div> */}
+          </div>
         </FormItem>
       </Form>
     </div>
