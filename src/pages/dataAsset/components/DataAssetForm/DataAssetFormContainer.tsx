@@ -148,8 +148,11 @@ export default function DataAssetFormContainer({
         </div>
 
         {/* 步骤指示器 */}
-        <div className="mb-8">
-          <Steps current={currentStep}>
+        <div className="mb-6">
+          <Steps
+            current={currentStep}
+            style={{ maxWidth: 440, margin: '0 auto' }}
+          >
             <Steps.Step title={step1Title} />
             <Steps.Step title={step2Title} />
           </Steps>

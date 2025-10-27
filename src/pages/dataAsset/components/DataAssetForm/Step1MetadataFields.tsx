@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Card,
@@ -10,6 +10,7 @@ import {
 // import { Add, Upload } from '@arco-design/web-react/icon';
 import { MetadataField, DataSource } from './DataAssetFormContainer';
 import FieldRow from './FieldRow';
+import ImportFieldsModal from './ImportFieldsModal';
 
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
@@ -30,6 +31,7 @@ export default function Step1MetadataFields({
 }: Step1MetadataFieldsProps) {
   const Row = Grid.Row;
   const Col = Grid.Col;
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // 添加字段行
   const handleAddField = () => {
@@ -65,8 +67,15 @@ export default function Step1MetadataFields({
 
   // 导入字段
   const handleImportFields = () => {
-    // TODO: 实现导入字段逻辑
-    Message.info('导入字段功能待实现');
+    setShowImportModal(true);
+  };
+
+  // 处理导入确认
+  const handleImportConfirm = (importType: string, fileData: any) => {
+    // TODO: 根据导入类型和文件数据，解析并更新字段列表
+    console.log('导入类型:', importType);
+    console.log('文件数据:', fileData);
+    Message.success('字段导入成功');
   };
 
   // 数据源变更
@@ -96,6 +105,13 @@ export default function Step1MetadataFields({
 
   return (
     <>
+      {/* 导入字段模态框 */}
+      <ImportFieldsModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onConfirm={handleImportConfirm}
+      />
+
       {/* 数据资产字段列表 */}
       <Card
         className="mb-4"
