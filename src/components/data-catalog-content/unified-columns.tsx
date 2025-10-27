@@ -24,6 +24,7 @@ import { OperationColumn } from '@ccf2e/arco-material';
 import styles from '../../pages/dataCatalog/modal.module.css';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import getLabelByValue from '@/utils/getLabelByValue';
+import { useHasAnyPermission } from '@/store/userInfoStore';
 
 // 默认文件类型筛选器
 let fileTypeFilters = [
@@ -168,33 +169,34 @@ const renderActionColumn = (
   selectedFullPath,
   handAllReset
 ) => {
-  const config: {
-    label: string;
-    onClick: () => void;
-  }[] = [];
-  <>
-    <PermissionWrapper
-      permission={
-        DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR ||
-        DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE
-      }
-    >
-      <Link
-        href="#"
-        onClick={() => handleDownload(record, setVisible, selectedFullPath)}
-      >
-        导出
-      </Link>
-    </PermissionWrapper>
-    <PermissionWrapper
-      permission={
-        DATA_CATALOG_PERMISSIONS.CAN_DELETE ||
-        DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE
-      }
-    >
-      <Link
-        href="#"
-        onClick={() =>
+  // 定义内部组件以使用权限检查 hooks
+  const ActionColumnComponent: React.FC = () => {
+    const hasExportPermission = useHasAnyPermission([
+      DATA_CATALOG_PERMISSIONS.CAN_SEARCH_DIR,
+      DATA_CATALOG_PERMISSIONS.CAN_EXPORT_LIST_FILE
+    ]);
+    const hasDeletePermission = useHasAnyPermission([
+      DATA_CATALOG_PERMISSIONS.CAN_DELETE,
+      DATA_CATALOG_PERMISSIONS.CAN_DELETE_LIST_FILE
+    ]);
+
+    const config: {
+      label: string;
+      onClick: () => void;
+    }[] = [];
+
+    // 根据权限添加操作项
+    if (hasExportPermission) {
+      config.push({
+        label: '导出',
+        onClick: () => handleDownload(record, setVisible, selectedFullPath)
+      });
+    }
+
+    if (hasDeletePermission) {
+      config.push({
+        label: '删除',
+        onClick: () =>
           handleDelete(
             record,
             refreshData,
@@ -202,15 +204,25 @@ const renderActionColumn = (
             tableType,
             handAllReset
           )
-        }
-      >
-        删除
-      </Link>
-    </PermissionWrapper>
-  </>;
-  return (
-    <OperationColumn row={record} index={0} config={config} extendFont="更多" />
-  );
+      });
+    }
+
+    // 如果没有权限显示任何操作，返回 null
+    if (config.length === 0) {
+      return null;
+    }
+
+    return (
+      <OperationColumn
+        row={record}
+        index={0}
+        config={config}
+        extendFont="更多"
+      />
+    );
+  };
+
+  return <ActionColumnComponent />;
 };
 
 export const getSourceFileTypeList = async (params) => {
