@@ -191,6 +191,39 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../dataMarket/detail')),
     children: []
   },
+  // 数据资产
+  {
+    name: 'dataAsset',
+    key: '/tenant/compute/modaforge/dataAsset',
+    component: React.lazy(async () => import('../../dataAsset')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'dataAssetList',
+        key: '/tenant/compute/modaforge/dataAsset/list',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/list')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        name: 'dataAssetCreate',
+        key: '/tenant/compute/modaforge/dataAsset/create',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/create')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        name: 'dataAssetEdit',
+        key: '/tenant/compute/modaforge/dataAsset/edit/:id',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/edit')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
+  },
   // 数据标注 - 需求管理
   {
     name: 'requirement',
