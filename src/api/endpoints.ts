@@ -123,7 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
-export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
@@ -398,7 +398,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/listRequirement',
   // 标注下载结果
-  getAnnotationDownloadApi: PrefixLabelService + '/resultDownlaodRequirement',
+  getAnnotationDownloadApi: PrefixLabelService + '/resultDownloadRequirement',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
