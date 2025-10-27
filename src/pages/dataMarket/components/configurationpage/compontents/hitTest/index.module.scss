@@ -4,10 +4,10 @@
   .leftList {
     flex: 1;
     background: #ffffff;
-    border-radius: 12px;
+    border-right: 1px solid #e2e8f0;
     padding: 0px 14px 16px 16px;
     overflow-y: auto;
-    .test-header {
+    .testHeader {
       height: 24px;
       margin: 14px 0px;
       .one {
@@ -28,40 +28,36 @@
         margin-left: 18px;
       }
     }
-    .test-content {
+    .testContent {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
+      // border: 1px solid #cbd5e1;
       border-radius: 4px;
       width: 100%;
       height: 300px;
       display: flex;
       flex-direction: column;
-      .test-content-text {
+      .testContentText {
         flex: 1;
-        padding: 8px;
         overflow-y: auto;
-        .input-box {
+        :global(.arco-textarea-wrapper) .inputBox {
           width: 100%;
-          height: 95%;
-          border: none;
-          padding: 10px;
-          resize: none; /* 禁用用户调整文本框大小 */
+          height: 100%;
           box-sizing: border-box;
         }
       }
-      .test-content-button {
-        height: 32px;
-        margin: 8px 0;
-        display: flex;
-        align-items: center;
-        padding: 8px;
-        justify-content: flex-end;
-        .cl {
-          margin-right: 8px;
-        }
+    }
+    .testContentButton {
+      height: 32px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      gap: 8px;
+      .cl {
+        margin-right: 8px;
       }
     }
-    .history-header {
+    .historyHeader {
       height: 24px;
       margin: 14px 0px;
 
@@ -72,12 +68,12 @@
       font-style: normal;
       font-weight: 600;
     }
-    .history-content {
+    .historyContent {
       overflow-y: auto;
-      .arco-table-th {
+      :global(.arco-table-th) {
         background-color: var(--color-bg-3);
       }
-      .selected-row-mz {
+      .selectedRowMz {
         border: 1px solid blue !important; /* 设置选中行的边框为1px实线蓝色 */
       }
     }
@@ -86,16 +82,13 @@
     // overflow-y: auto;
     flex: 1;
     background: #ffffff;
-    border-radius: 12px;
-    padding: 0px 16px 14px 16px;
-    margin-left: 16px;
-    .rightContent-SQL {
+    .rightContentSQL {
       padding: 0px 16px 14px 16px;
       background: #ffffff;
       border-radius: 12px;
       display: flex;
       flex-direction: column;
-      .SQL-title {
+      .SQLTitle {
         height: 52px;
         /* padding: 0 0 12px 0; */
         display: flex;
@@ -107,8 +100,8 @@
         font-style: normal;
         font-weight: 600;
       }
-      .SQL-content {
-        .content-header {
+      .SQLContent {
+        .contentHeader {
           height: 22px;
           color: #151b26;
 
@@ -124,7 +117,7 @@
       }
     }
 
-    .rightContent-hit {
+    .rightContentHit {
       overflow-y: auto;
       flex: 1;
       display: flex;
@@ -133,12 +126,12 @@
       // margin-top: 16px;
       background: #ffffff;
       border-radius: 12px;
-      .rightContent-header {
+      .rightContentHeader {
         height: 52px;
         /* padding: 0 0 12px 0; */
         display: flex;
         align-items: center;
-        .header-left {
+        .headerLeft {
           width: 150px;
           height: 24px;
 
@@ -149,7 +142,7 @@
           font-style: normal;
           font-weight: 600;
         }
-        .header-right {
+        .headerRight {
           flex: 1;
           text-align: right;
           .inp {
@@ -158,23 +151,23 @@
           }
         }
       }
-      .rightContent-scoll {
+      .rightContentScoll {
         flex: 1;
         overflow-y: auto;
-        .segmentation-box {
+        .segmentationBox {
           background: #ffffff;
           border: 1px solid #cbd5e1;
           border-radius: 8px;
           /* padding: 0 8px; */
           margin-bottom: 12px;
-          .segmentation-header {
+          .segmentationHeader {
             height: 40px;
             padding: 8px;
             display: flex;
-          justify-content: space-between;
+            justify-content: space-between;
             align-items: center;
-            .s-l {
-                display: flex;
+            .sl {
+              display: flex;
               align-items: center;
               .nm {
                 width: 96px;
@@ -187,11 +180,12 @@
                 margin-left: 12px;
               }
             }
-            .s-r {
-                display: flex;
+            .sr {
+              display: flex;
               justify-content: flex-end;
-              .s-r-t {
-                background: #e6f0ff;
+              align-items: center;
+              .srt {
+                background: #eef6ff;
                 border-radius: 6px;
                 width: 80px;
                 height: 20px;
@@ -200,13 +194,13 @@
                 justify-content: center;
                 font-family: PingFangSC-Medium;
                 font-size: 14px;
-                color: #2468f2;
+                color: #007dfa;
                 line-height: 20px;
                 font-weight: 500;
               }
             }
           }
-          .segmentation-content {
+          .segmentationContent {
             padding-bottom: 12px;
             padding: 0 8px 8px;
             max-height: 100px;

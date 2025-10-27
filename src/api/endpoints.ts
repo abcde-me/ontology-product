@@ -124,6 +124,7 @@ export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -171,10 +172,9 @@ export const ResourceEndpointsV2 = {
   catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi:
-    PrefixAimdp + '/load_tasks/source_dir/file_types/{file_id}', //查询源数据文件类型列表
+  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
   targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/load_tasks/source_dir/files_page', //查询源数据文件列表
+  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
   sourceDataFileDeleteApi:
     PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
   sourceDataFileDeleteBatcheApi:
@@ -233,31 +233,7 @@ export const ResourceEndpointsV2 = {
   workflowBlockConfig:
     PrefixV2 + '/apps/{appId}/workflows/default-workflow-block-configs',
   workflowPublishDetail: PrefixV2 + '/apps/{appId}/workflows/{workflowId}',
-  workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters',
-
-  // 知识库标签管理增删改查
-  knowGetTagElement: PrefixV2 + `/tag/list`,
-  knowCreateTagElement: PrefixV2 + `/tag/create`,
-  knowEditTagElement: PrefixV2 + `/tag/{tag_id}`,
-  knowDelTagElement: PrefixV2 + `/tag/delete`,
-  KnowUploadTagElement: PrefixV2 + `/tag/update`,
-  // 判断知识库是否所有的文档的标签都已经生成
-  KnowGetPolicyElement: PrefixV2 + `/datasets/check_tag`,
-  // 获取知识库策略配置
-  knowGetPolicy:
-    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/tag-rule`,
-  //知识库层级 - 目录
-  HierarchicalCatalog:
-    PrefixV2 + `/datasets/{dataset_id}/documents/{document_id}/catalogs`,
-  //知识库层级 - 目录编辑
-  HierarchicalCatalogEdit:
-    PrefixV2 +
-    `/datasets/{dataset_id}/documents/{document_id}/catalog/edit-catalog`,
-  //创建知识库sheet信息与默认表头获取
-  TableConfiguration: PrefixV2 + `/spreadsheet/info`,
-  //知识库表头信息获取
-  TableHeaderConfiguration: PrefixV2 + `/spreadsheet/headers`,
-  datasetstree: PrefixV2 + '/dataset_contents/tree'
+  workflowPublishParam: PrefixV2 + '/apps/{appId}/workflows/publish/parameters'
 };
 
 export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
@@ -298,7 +274,7 @@ export const ModaForgeResourceEndpoints = {
   // 工作流-脚本执行
   scriptingBench: PrefixAimdp + '/RunWorkFlowScript',
   // 工作流-脚本执行结果
-  scriptingBenchResult: PrefixAimdp + '/GETWorkFlowScriptResult',
+  scriptingBenchResult: PrefixAimdp + '/GetWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
@@ -425,12 +401,11 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
-  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  getDepartmentTreeListApi: PrefixUserCenter + '/GetOrgTree',
   // 获取个人列表树内容
-  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
-  getAnnotationTabledDataApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
+  getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
 
   // python开发
   // 获取python列表
@@ -480,7 +455,7 @@ export const ModaForgeResourceEndpoints = {
   sqlSaveApi: PrefixAimdp + '/EditSqlFile',
   sqlRunApi: PrefixAimdp + '/RunSqlFile',
   sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
-  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResultt',
+  sqlRunResultApi: PrefixAimdp + '/GetSqlFileRunResult',
   sqlRunLogApi: PrefixAimdp + '/GetSqlFileRunLog',
   sqlExportDataset: PrefixAimdp + '/CreateSqlExportTask',
   sqlExportDatasetVersion: PrefixAimdp + '/UpdateSqlExportTaskVersion',

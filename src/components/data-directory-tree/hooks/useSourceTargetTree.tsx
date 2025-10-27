@@ -270,7 +270,6 @@ export const useSourceTargetTree = (dataType) => {
       return null;
     };
 
-    console.log('treeData', treeData);
     console.log('nodeKey', nodeKey);
     const nodePath = findNodePath(treeData, nodeKey);
     if (!nodePath) return null;

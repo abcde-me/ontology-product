@@ -50,6 +50,7 @@ import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
+import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -798,7 +799,7 @@ const DatasetDetail = (props: {
 
     // 只传递需要的字段
     const updateData = {
-      id: datasetDetail.id.toString(),
+      id: datasetDetail.id,
       name: formData.name,
       description: formData.description,
       tag_names: formData.tags
@@ -810,13 +811,11 @@ const DatasetDetail = (props: {
           Message.success('数据集更新成功');
           setEditModalVisible(false);
           // 刷新数据
-          getDatasetDetailPage({ id: datasetDetail.id.toString() }).then(
-            (detailRes) => {
-              if (!detailRes.code) {
-                setDatasetDetail(detailRes.data);
-              }
+          getDatasetDetailPage({ id: datasetDetail.id }).then((detailRes) => {
+            if (!detailRes.code) {
+              setDatasetDetail(detailRes.data);
             }
-          );
+          });
         } else {
           Message.error(res.msg || '数据集更新失败');
         }
@@ -1044,9 +1043,8 @@ const DatasetDetail = (props: {
 
   const fetchDatasetDetail = () => {
     if (id) {
-      getDatasetDetailPage({ id: id })
+      getDatasetDetailPage({ id: Number(id) })
         .then((res) => {
-          console.log(1111111, res);
           setDatasetDetail(res.data);
         })
         .catch((err) => {
@@ -1054,7 +1052,7 @@ const DatasetDetail = (props: {
           Message.error('加载数据集详情失败');
         });
 
-      getDatasetVersionList({ id: id }).then((res) => {
+      getDatasetVersionList({ id: Number(id) }).then((res) => {
         setVersionHistory(res.data);
       });
     }
@@ -1084,10 +1082,9 @@ const DatasetDetail = (props: {
   };
 
   const handlerefresh = () => {
-    getDatasetDetailPage({ id: id })
+    getDatasetDetailPage({ id: Number(id) })
       .then((res) => {
         setDatasetDetail(res.data);
-        console.log(1111111, res);
         Message.success('刷新成功');
       })
       .catch(() => {
@@ -1154,7 +1151,7 @@ const DatasetDetail = (props: {
         });
     } else {
       const params = {
-        id: id,
+        id: Number(id),
         version_id: datasetDetail.latest_version
       };
       return getDataContentTableList(params)
@@ -1283,12 +1280,10 @@ const DatasetDetail = (props: {
                     }
                   >
                     <Button
-                      // @ts-expect-error
                       disabled={
                         !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
                       }
+                      onClick={handleEdit}
                     >
                       编辑
                     </Button>
@@ -1710,7 +1705,7 @@ const DatasetDetail = (props: {
                             <Tooltip
                               content={
                                 !datasetDetail ||
-                                  datasetDetail.status !== 'normal'
+                                datasetDetail.status !== 'normal'
                                   ? '当前状态下不能进行编辑'
                                   : ''
                               }
@@ -1796,7 +1791,7 @@ const DatasetDetail = (props: {
             </TabPane>
           )}
           <TabPane key="hittest" title="命中测试">
-            <div>命中测试</div>
+            <HitTest />
           </TabPane>
           <TabPane key="element" title="元素搜索"></TabPane>
           <TabPane key="version" title="变更记录">

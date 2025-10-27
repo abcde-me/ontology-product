@@ -7,7 +7,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import styles from './EditDatasetForm.module.css';
+import styles from './EditDatasetForm.module.scss';
 import { getTagList } from '@/api/datasetManagement';
 import { validateName } from '@/utils/valiate';
 interface Dataset {
@@ -164,6 +164,7 @@ const EditDatasetForm: React.FC<Props> = ({
 
         <FormItem label="标签" field="tags">
           <Select
+            className={styles.dropdownSelect}
             dropdownMenuClassName={styles.dropdownMenuSelect}
             placeholder="请选择标签"
             mode="multiple"

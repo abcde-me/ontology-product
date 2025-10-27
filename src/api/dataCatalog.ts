@@ -683,7 +683,7 @@ interface SourceDataFileQueryParams {
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   const { file_type, ...restParams } = params;
-
+  console.log('params222', params);
   const queryParams = new URLSearchParams();
 
   Object.entries(restParams).forEach(([key, value]) => {
@@ -698,11 +698,8 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
       queryParams.append('file_type', type);
     });
   }
-
-  return await UAPI.RES.targetDataFileListApi({})
-    .post(queryParams)
-    .inRegion()
-    .do();
+  console.log('queryParams', queryParams);
+  return await UAPI.RES.targetDataFileListApi({}).post(params).inRegion().do();
 }
 //查询目标数据文件类型列表
 export async function getTargetFileTypeList() {
@@ -710,8 +707,8 @@ export async function getTargetFileTypeList() {
 }
 //查询源数据文件类型列表
 export async function getSourceFileTypeList(params) {
-  return await UAPI.RES.sourceFileTypeListApi({ file_id: params.id })
-    .get()
+  return await UAPI.RES.sourceFileTypeListApi({})
+    .post({ data_path_id: Number(params?.id) })
     .inRegion()
     .do();
 }

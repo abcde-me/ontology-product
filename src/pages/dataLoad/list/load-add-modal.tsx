@@ -10,7 +10,7 @@ import {
   TreeSelect
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
@@ -18,7 +18,7 @@ import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from './file-upload';
 import ComponentTree from './component-tree';
-import './db-tree.css';
+import './db-tree.scss';
 import { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
 import { isNumber } from 'lodash-es';
 interface connecort_nameType {
@@ -528,6 +528,8 @@ const LoadAddModal = (props: propsType) => {
 
   // 存储上传的文件数据
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  // 文件上传中状态
+  const [isFileUploading, setIsFileUploading] = useState(false);
   // TreeSelect 下拉框显示状态
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -788,6 +790,7 @@ const LoadAddModal = (props: propsType) => {
             <Uploads
               onFileChange={handleFileChange}
               onFileDelete={handleFileDelete}
+              onUploadingChange={setIsFileUploading}
             />
           </FormItem>
         )}
@@ -903,7 +906,7 @@ const LoadAddModal = (props: propsType) => {
         <Button
           onClick={() => handleSubmit('run')}
           type="primary"
-          disabled={loading}
+          disabled={loading || isFileUploading}
         >
           保存并执行
         </Button>

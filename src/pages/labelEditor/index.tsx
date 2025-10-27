@@ -18,7 +18,7 @@ import {
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
 import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
-import { TEXT_DATA, LabelTypeMap } from './const';
+import { TEXT_DATA, LabelTypeMap, WujiePlugins } from './const';
 
 const { bus } = WujieReact;
 
@@ -141,6 +141,7 @@ function LabelEditorPage() {
           sync={true}
           alive={true}
           loading={document.createElement('span') as any}
+          plugins={WujiePlugins}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,

@@ -2,12 +2,15 @@
 
 /* Modal内容区域样式调整 - 只影响这个组件的Modal */
 .modalWrapper :global(.arco-modal-content) {
-  padding-left: 0px;
+  padding-left: 0;
 }
+
 .modalWrapper :global(.arco-form-label-item > label) {
   white-space: nowrap;
+
   /* 不换行 */
 }
+
 /* 单元格内容截断显示 */
 .cellContent {
   display: block;
@@ -23,6 +26,15 @@
   word-wrap: break-word;
   max-height: 120px;
   overflow-y: auto;
+}
+
+.dropdownSelect {
+  /* 修复多选 Select 组件 placeholder 显示不完全的问题 */
+  :global(.arco-input-tag-inner) {
+    input {
+      min-width: 130px;
+    }
+  }
 }
 
 /* 长文本展开提示 */

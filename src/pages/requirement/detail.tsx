@@ -49,7 +49,6 @@ import {
 } from './type';
 
 import './detail.scss';
-import { useUserInfo } from '@/store/userInfoStore';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口
@@ -89,7 +88,6 @@ export default function RequirementDetail() {
   const type = useParams('type');
   const requirementId = useParams('id') as string;
   const history = useHistory();
-  const userInfo = useUserInfo();
   const [selectedRadio, setSelectedRadio] = useState('');
   const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
   const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
@@ -131,14 +129,6 @@ export default function RequirementDetail() {
     ];
   };
 
-  // 创建需求，角色=开发者、用户时，禁止勾选 个人
-  // 1030 需要重新对接, 用户权限类型、权限变更
-  const isShowPersonal = useMemo(() => {
-    return (
-      !['Developer', 'User'].includes(userInfo?.role?.[0]?.name || '') &&
-      type === 'create'
-    );
-  }, [userInfo?.role, type]);
   const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
@@ -1350,7 +1340,7 @@ export default function RequirementDetail() {
                                         validateTrigger: ['onChange', 'onBlur'],
                                         validator: (value, callback) => {
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入展示名称');
                                             return;
                                           }
                                           // 检查是否有重复的展示名称（排除当前项）
@@ -2824,7 +2814,6 @@ export default function RequirementDetail() {
                     部门
                   </Radio>
                   <Radio
-                    disabled={!isShowPersonal}
                     style={{ display: 'flex', alignItems: 'center' }}
                     value={1}
                   >

@@ -7,7 +7,7 @@ import {
   Alert,
   Divider
 } from '@arco-design/web-react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import React, { useState } from 'react';
 import './index.css';
 // 导入每周数据

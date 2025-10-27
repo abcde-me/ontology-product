@@ -85,7 +85,7 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
           'wk-node group relative shadow-xs',
           'rounded-[12px] border border-transparent',
           'w-[240px] bg-workflow-block-bg',
-          'flex h-full w-full flex-col border-workflow-block-border bg-workflow-block-bg-transparent',
+          'flex h-full flex-col border-workflow-block-border bg-workflow-block-bg-transparent',
           !data._runningStatus && 'show-hover-shadow hover:shadow-lg',
           // showRunningBorder && '!border-state-accent-solid',
           // showSuccessBorder && '!border-state-success-solid',
@@ -131,11 +131,7 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             'wk-node-header flex items-center rounded-t-2xl px-3 pb-[12px] pt-3'
           )}
         >
-          <BlockIcon
-            className="mr-2 shrink-0"
-            type={data.type}
-            size="md"
-          />
+          <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
           <div className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary">
             <EllipsisPopover
               value={data.title}
@@ -170,8 +166,8 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             )}
           {(data._runningStatus === NodeRunningStatus.Running ||
             data._singleRunningStatus === NodeRunningStatus.Running) && (
-              <RiLoader2Line className="size-[16px] animate-spin text-[#007DFA]" />
-            )}
+            <RiLoader2Line className="size-[16px] animate-spin text-[#007DFA]" />
+          )}
           {data._runningStatus === NodeRunningStatus.Succeeded && (
             <RiCheckboxCircleFill className="size-[16px] text-[#0AB58D]" />
           )}

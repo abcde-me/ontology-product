@@ -15,7 +15,7 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
     variables: [],
     outputs: {},
     app_scenarios: {
-      name: '通用',
+      name: '问答对生成',
       type: 'tongyong',
       option: {
         sample_num: 10,

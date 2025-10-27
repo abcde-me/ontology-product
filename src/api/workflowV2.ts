@@ -18,19 +18,20 @@ export async function getWorkflowDraft(params: any = {}) {
     .do();
 }
 
-export async function createWorkflowDraft(params: any = {}) {
+export function createWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
   const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
   const dsWorkflowId =
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
     params.workflowVersion || searchParams.get('workflow_version') || '';
-  return UAPI.RES.workflowDraft({
-    workflow_uuid: workflowUUID,
-    ds_workflow_id: dsWorkflowId,
-    workflow_version: workflowVersion
-  })
-    .post(params)
+  return UAPI.RES.editWorkFlowDraft({})
+    .post({
+      workflow_uuid: workflowUUID,
+      ds_workflow_id: dsWorkflowId,
+      workflow_version: workflowVersion,
+      ...(params ?? {})
+    })
     .inRegion()
     .do();
 }

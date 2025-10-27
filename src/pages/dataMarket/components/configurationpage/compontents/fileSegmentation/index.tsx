@@ -14,7 +14,6 @@ import {
   IconLoading
 } from '@arco-design/web-react/icon';
 import DocDisplay from '../docDisplay/index';
-import DemoForm from '../../../components/From/index';
 import FileSublevel from '../FileSublevel/index';
 import TabelPage from '../tabelPage/index';
 import {
@@ -1136,26 +1135,6 @@ function PageContentTrue(props) {
         <Empty />
       )}
       <Modal
-        title={'添加文件'}
-        visible={addfileVisible}
-        onOk={() => submitaddfile()}
-        onCancel={() => clearaddfile()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: '75%'
-        }}
-      >
-        <DemoForm
-          FunSubmitAddfile={FunSubmitAddfile}
-          setaddfileVisible={setaddfileVisibleFun}
-          ref={childRef}
-          detailsdata={detailsdata}
-          typemodel={'createPolicy'}
-          typeDisabled={true}
-        ></DemoForm>
-      </Modal>
-      <Modal
         title={typeSublevel.typestats == 'add' ? '添加切片' : '编辑切片'}
         visible={addChildVisible}
         onOk={() => submitaddChild()}
@@ -1187,47 +1166,6 @@ function PageContentTrue(props) {
           </p>
           <TagTree />
         </div>
-      </Modal>
-      <Modal
-        title="编辑"
-        visible={editChildVisible}
-        onOk={() => submitEditChild()}
-        onCancel={() => clearEditChild()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: 800
-        }}
-      >
-        <DemoForm
-          seteditChildVisible={seteditChildVisible}
-          seteditManageVisible={seteditManageVisible}
-          ref={childRef1}
-          detailsdata={detailsdata}
-          FuncEdit={FuncEdit}
-          typemodel={'editChild'}
-        ></DemoForm>
-      </Modal>
-      <Modal
-        title="切片配置"
-        visible={editManageVisible}
-        onOk={() => submitEditManage()}
-        onCancel={() => clearEditManage()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: 1100
-        }}
-      >
-        <DemoForm
-          switchList={switchList}
-          detailsdata={filedetail?.current}
-          seteditChildVisible={seteditChildVisible}
-          seteditManageVisible={seteditManageVisible}
-          ref={childRef2}
-          FuncEditM={FuncEditM}
-          typemodel={'editManage'}
-        ></DemoForm>
       </Modal>
     </div>
   );
