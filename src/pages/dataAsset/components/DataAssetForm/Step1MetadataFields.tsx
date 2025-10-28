@@ -207,6 +207,7 @@ export default function Step1MetadataFields({
 
   // 导入字段
   const handleImportFields = () => {
+    console.log('导入字段', showImportModal);
     setShowImportModal(true);
   };
 
