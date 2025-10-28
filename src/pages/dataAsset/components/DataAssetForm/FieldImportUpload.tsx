@@ -1,6 +1,7 @@
 import { Upload, Message } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
+import { IconUpload } from '@arco-design/web-react/icon';
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
@@ -84,23 +85,66 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     return true;
   };
 
+  const handleDownloadTemplate = () => {
+    // TODO: 实现模板下载功能
+    Message.info('模板下载功能待实现');
+  };
+
   return (
-    <Upload
-      drag
-      className="upload-file"
-      accept=".xlsx,.xls"
-      beforeUpload={(file) => {
-        return checkFile(file);
-      }}
-      action={`${PrefixAimdp}/UploadLoadTaskFile`}
-      onChange={handleUploadChange}
-      onDrop={handleDrop}
-      headers={{
-        Authorization: getToken(),
-        'X-Auth-Validate': 'true',
-        'X-Regionid': 'region1'
-      }}
-    />
+    <div>
+      <Upload
+        drag
+        className="upload-file"
+        accept=".xlsx,.xls"
+        beforeUpload={(file) => {
+          return checkFile(file);
+        }}
+        action={`${PrefixAimdp}/UploadLoadTaskFile`}
+        onChange={handleUploadChange}
+        onDrop={handleDrop}
+        headers={{
+          Authorization: getToken(),
+          'X-Auth-Validate': 'true',
+          'X-Regionid': 'region1'
+        }}
+        tip={
+          <>
+            支持Excel格式（.xlsx,.xls）文件
+            <br />
+            最多上传1个文件，文件/压缩包源文件大小不超过xx
+          </>
+        }
+      >
+        <div>
+          <div className="flex h-[210px] w-full flex-col items-center justify-center rounded-[2px] border border-dashed border-[#CBD5E1]">
+            <IconUpload
+              className="mb-[24px] size-[24px]"
+              style={{ color: 'var(--text-color-text-1)' }}
+            />
+            <span className="text-[14px] text-[var(--color-text-1)]">
+              点击或拖拽文件到此处上传
+            </span>
+            <span className="text-[12px] text-[var(--color-text-4)]">
+              支持Excel格式（.xlsx,.xls）文件
+            </span>
+            <span className="text-[12px] text-[var(--color-text-4)]">
+              最多上传1个文件，文件/压缩包源文件大小不超过xx
+            </span>
+          </div>
+          {/* 下载模板提示 */}
+          <div className="mt-[4px] text-[14px] text-[var(--color-text-2)]">
+            <span>按照格式准备数据，点击</span>
+            <a
+              href="#"
+              onClick={handleDownloadTemplate}
+              className="text-[#007DFA]"
+            >
+              下载模板
+            </a>
+          </div>
+        </div>
+      </Upload>
+    </div>
   );
 };
 

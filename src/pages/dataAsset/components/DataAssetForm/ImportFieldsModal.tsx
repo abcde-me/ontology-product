@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
-import { Modal, Radio, Button, Message } from '@arco-design/web-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Radio, Button, Message, Form } from '@arco-design/web-react';
 import FieldImportUpload from './FieldImportUpload';
+import {
+  UploadItem,
+  type UploadStatus
+} from '@arco-design/web-react/es/Upload';
+
+const FormItem = Form.Item;
 
 interface ImportFieldsModalProps {
   visible: boolean;
@@ -13,36 +19,62 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
   onClose,
   onConfirm
 }) => {
-  const [importType, setImportType] = useState('append');
-  const [fileData, setFileData] = useState<any>(null);
+  const [form] = Form.useForm();
   const [isUploading, setIsUploading] = useState(false);
-  const [canConfirm, setCanConfirm] = useState(false);
+  const [fileData, setFileData] = useState<any>(null);
 
-  const handleFileChange = (data: any) => {
-    setFileData(data);
-    setCanConfirm(!!data);
-  };
-
-  const handleConfirm = () => {
-    if (!fileData) {
-      Message.error('请选择文件');
-      return;
+  useEffect(() => {
+    if (visible) {
+      form.resetFields();
+      setIsUploading(false);
+      setFileData(null);
     }
+  }, [visible, form]);
 
-    onConfirm(importType, fileData);
+  const handleFileChange = useCallback(
+    (data: UploadItem) => {
+      setFileData(data);
+      // 验证文件字段
+      if (data?.status === 'done') {
+        form.setFieldValue('fileData', data);
+        form.clearFields('fileData');
+      } else {
+        form.setFieldValue('fileData', null);
+      }
+    },
+    [form]
+  );
 
-    // 重置状态
-    setImportType('append');
-    setFileData(null);
-    setCanConfirm(false);
-    onClose();
+  const validateFileData = useCallback(
+    (value: any, callback: any) => {
+      if (!fileData) {
+        callback('请选择并上传文件');
+      } else {
+        callback();
+      }
+    },
+    [fileData]
+  );
+
+  const handleConfirm = async () => {
+    try {
+      const values = await form.validate();
+      onConfirm(values.importType, fileData);
+
+      // 重置状态
+      form.resetFields();
+      setFileData(null);
+      setIsUploading(false);
+      onClose();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
   };
 
   const handleCancel = () => {
-    // 重置状态
-    setImportType('append');
+    form.resetFields();
     setFileData(null);
-    setCanConfirm(false);
+    setIsUploading(false);
     onClose();
   };
 
@@ -56,66 +88,61 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
       autoFocus={false}
       focusLock={true}
     >
-      <div style={{ padding: '20px 0' }}>
+      <Form
+        form={form}
+        initialValues={{
+          importType: 'append'
+        }}
+        className="mb-[20px]"
+      >
         {/* 导入方式 */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ marginBottom: '12px' }}>
-            <span style={{ color: '#F53F3F', marginRight: '4px' }}>*</span>
-            <span>导入方式：</span>
-          </div>
-          <Radio.Group
-            value={importType}
-            onChange={(value) => setImportType(value)}
-          >
+        <FormItem
+          label="导入方式:"
+          labelCol={{ span: 4 }}
+          field="importType"
+          required
+          rules={[{ required: true, message: '请选择导入方式' }]}
+        >
+          <Radio.Group>
             <Radio value="append">追加导入</Radio>
             <Radio value="overwrite">覆盖导入</Radio>
           </Radio.Group>
-        </div>
+        </FormItem>
 
         {/* 选择文件 */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ marginBottom: '12px' }}>
-            <span style={{ color: '#F53F3F', marginRight: '4px' }}>*</span>
-            <span>选择文件：</span>
-          </div>
+        <FormItem
+          label="选择文件:"
+          labelCol={{ span: 4 }}
+          field="fileData"
+          required
+          rules={[
+            {
+              required: true,
+              validator: validateFileData
+            }
+          ]}
+        >
           <FieldImportUpload
             onFileChange={handleFileChange}
             onUploadingChange={setIsUploading}
           />
-        </div>
-
-        {/* 下载模板提示 */}
-        <div
-          style={{ marginBottom: '24px', fontSize: '14px', color: '#4E5969' }}
-        >
-          <span>按照格式准备数据，</span>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              // TODO: 实现模板下载功能
-              Message.info('模板下载功能待实现');
-            }}
-            style={{ color: '#165DFF' }}
-          >
-            下载模板
-          </a>
-        </div>
+        </FormItem>
 
         {/* 操作按钮 */}
         <div
-          style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '8px',
+            marginTop: '24px'
+          }}
         >
           <Button onClick={handleCancel}>取消</Button>
-          <Button
-            type="primary"
-            onClick={handleConfirm}
-            disabled={!canConfirm || isUploading}
-          >
+          <Button type="primary" onClick={handleConfirm} disabled={isUploading}>
             确定
           </Button>
         </div>
-      </div>
+      </Form>
     </Modal>
   );
 };

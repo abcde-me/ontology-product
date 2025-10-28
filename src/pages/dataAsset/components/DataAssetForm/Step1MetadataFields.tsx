@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Button,
   Card,
   Checkbox,
   Grid,
   Input,
-  Message
+  Message,
+  Form,
+  Upload,
+  Table,
+  Select,
+  Space
 } from '@arco-design/web-react';
 // import { Add, Upload } from '@arco-design/web-react/icon';
 import { MetadataField, DataSource } from './DataAssetFormContainer';
-import FieldRow from './FieldRow';
 import ImportFieldsModal from './ImportFieldsModal';
+import styles from './Step1MetadataFields.module.scss';
+import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
+
+const FormItem = Form.Item;
 
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
@@ -32,6 +40,132 @@ export default function Step1MetadataFields({
   const Row = Grid.Row;
   const Col = Grid.Col;
   const [showImportModal, setShowImportModal] = useState(false);
+  const [form] = Form.useForm();
+
+  // Table列定义
+  const columns = [
+    {
+      title: '序号',
+      dataIndex: 'sequence',
+      width: 80,
+      align: 'center' as const
+    },
+    {
+      title: '字段中文名称',
+      dataIndex: 'chineseName',
+      width: 200,
+      render: (_: any, record: MetadataField) => (
+        <Input
+          placeholder="请输入中文名称"
+          value={record.chineseName}
+          onChange={(value) =>
+            handleUpdateField(record.id, { chineseName: value })
+          }
+        />
+      )
+    },
+    {
+      title: '字段英文名称',
+      dataIndex: 'englishName',
+      width: 200,
+      render: (_: any, record: MetadataField) => (
+        <Input
+          placeholder="请输入英文名称"
+          value={record.englishName}
+          onChange={(value) =>
+            handleUpdateField(record.id, { englishName: value })
+          }
+        />
+      )
+    },
+    {
+      title: '字段类型',
+      dataIndex: 'fieldType',
+      width: 150,
+      render: (_: any, record: MetadataField) => (
+        <Select
+          placeholder="请选择"
+          value={record.fieldType}
+          onChange={(value) =>
+            handleUpdateField(record.id, { fieldType: value })
+          }
+        >
+          <Select.Option value="string">字符串</Select.Option>
+          <Select.Option value="number">数字</Select.Option>
+          <Select.Option value="boolean">布尔值</Select.Option>
+          <Select.Option value="date">日期</Select.Option>
+          <Select.Option value="object">对象</Select.Option>
+        </Select>
+      )
+    },
+    {
+      title: '空值默认填充',
+      dataIndex: 'defaultValue',
+      width: 200,
+      render: (_: any, record: MetadataField) => (
+        <Input
+          value={record.defaultValue}
+          onChange={(value) =>
+            handleUpdateField(record.id, { defaultValue: value })
+          }
+        />
+      )
+    },
+    {
+      title: '必填',
+      dataIndex: 'required',
+      width: 80,
+      align: 'center' as const,
+      render: (_: any, record: MetadataField) => (
+        <Checkbox
+          checked={record.required}
+          onChange={(checked) =>
+            handleUpdateField(record.id, { required: checked })
+          }
+        />
+      )
+    },
+    {
+      title: '可修改',
+      dataIndex: 'editable',
+      width: 80,
+      align: 'center' as const,
+      render: (_: any, record: MetadataField) => (
+        <Checkbox
+          checked={record.editable}
+          onChange={(checked) =>
+            handleUpdateField(record.id, { editable: checked })
+          }
+        />
+      )
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      width: 100,
+      align: 'center' as const,
+      render: (_: any, record: MetadataField) => (
+        <Space>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => handleAddField()}
+            className="cursor-pointer text-red-500"
+          >
+            添加行
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => handleDeleteField(record.id)}
+            className="cursor-pointer text-red-500"
+          >
+            删除行
+          </Button>
+        </Space>
+      )
+    }
+  ];
 
   // 添加字段行
   const handleAddField = () => {
@@ -45,24 +179,30 @@ export default function Step1MetadataFields({
       required: true,
       editable: true
     };
-    setMetadataFields([...metadataFields, newField]);
+    const updatedFields = [...metadataFields, newField];
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
+    form.validate(['metadataFields']);
   };
 
   // 删除字段行
   const handleDeleteField = (id: string) => {
-    setMetadataFields(metadataFields.filter((field) => field.id !== id));
+    const updatedFields = metadataFields.filter((field) => field.id !== id);
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
+    form.validate(['metadataFields']);
   };
 
   // 更新字段
   const handleUpdateField = (id: string, updates: Partial<MetadataField>) => {
-    setMetadataFields(
-      metadataFields.map((field) => {
-        if (field.id === id) {
-          return { ...field, ...updates };
-        }
-        return field;
-      })
-    );
+    const updatedFields = metadataFields.map((field) => {
+      if (field.id === id) {
+        return { ...field, ...updates };
+      }
+      return field;
+    });
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
   };
 
   // 导入字段
@@ -80,27 +220,63 @@ export default function Step1MetadataFields({
 
   // 数据源变更
   const handleDataSourceChange = (key: keyof DataSource, checked: boolean) => {
-    setDataSources({ ...dataSources, [key]: checked });
+    const updatedDataSources = { ...dataSources, [key]: checked };
+    setDataSources(updatedDataSources);
+    form.setFieldValue('dataSources', updatedDataSources);
+    // 触发表单验证
+    form.validate(['dataSources']);
   };
 
+  // 验证字段列表的自定义验证器
+  const validateMetadataFields = useCallback(
+    (value: any, callback: any) => {
+      if (metadataFields.length === 0) {
+        callback('请至少添加一个字段');
+      } else {
+        // 验证所有字段是否填写完整
+        const incompleteFields = metadataFields.some(
+          (field) =>
+            !field.chineseName || !field.englishName || !field.fieldType
+        );
+        if (incompleteFields) {
+          callback('请填写完整的字段信息');
+        } else {
+          callback();
+        }
+      }
+    },
+    [metadataFields]
+  );
+
+  // 验证数据来源的自定义验证器
+  const validateDataSource = useCallback(
+    (value: any, callback: any) => {
+      const hasAnySource =
+        dataSources.dataset ||
+        dataSources.volume ||
+        dataSources.database ||
+        dataSources.metadataDir;
+      if (!hasAnySource) {
+        callback('请至少选择一个数据来源');
+      } else {
+        callback();
+      }
+    },
+    [dataSources]
+  );
+
   // 下一步前验证
-  const handleNextStep = () => {
-    if (metadataFields.length === 0) {
-      Message.error('请至少添加一个字段');
-      return;
+  const handleNextStep = async () => {
+    // 同步metadataFields和dataSources到form
+    form.setFieldValue('metadataFields', metadataFields);
+    form.setFieldValue('dataSources', dataSources);
+
+    try {
+      await form.validate();
+      onNext();
+    } catch (error) {
+      console.error('表单验证失败:', error);
     }
-
-    // 验证所有字段是否填写完整
-    const incompleteFields = metadataFields.some(
-      (field) => !field.chineseName || !field.englishName || !field.fieldType
-    );
-
-    if (incompleteFields) {
-      Message.error('请填写完整的字段信息');
-      return;
-    }
-
-    onNext();
   };
 
   return (
@@ -112,114 +288,108 @@ export default function Step1MetadataFields({
         onConfirm={handleImportConfirm}
       />
 
-      {/* 数据资产字段列表 */}
-      <Card
-        className="mb-4"
-        title={<span className="required">数据资产字段列表</span>}
+      <Form
+        form={form}
+        initialValues={{
+          metadataFields,
+          dataSources
+        }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        labelAlign="left"
+        style={{ width: '100%' }}
+        className={styles.formContainer}
       >
-        <div className="mb-4">
+        {/* 数据资产字段列表 */}
+        <div className={styles.importFieldsButton}>
           <Button
             type="text"
-            className="cursor-pointer"
-            // icon={<Upload />}
+            icon={<IconDownload />}
             onClick={handleImportFields}
           >
             导入字段
           </Button>
         </div>
+        <FormItem
+          label="数据资产字段列表："
+          required
+          // labelAlign="left"
+          field="metadataFields"
+          rules={[{ validator: validateMetadataFields }]}
+        >
+          <div className="w-full">
+            <Table
+              columns={columns}
+              className="w-full"
+              data={metadataFields}
+              pagination={false}
+              border={false}
+            />
 
-        {/* 表头 */}
-        <div className="overflow-x-auto">
-          <div className="grid grid-cols-[50px_2fr_2fr_200px_2fr_80px_80px_100px] gap-2 border-b pb-2 text-sm font-medium">
-            <div>序号</div>
-            <div>字段中文名称(展示名称)</div>
-            <div>字段英文名称(存储名称)</div>
-            <div>字段类型</div>
-            <div>空值默认填充</div>
-            <div className="text-center">必填</div>
-            <div className="text-center">可修改</div>
-            <div>操作</div>
+            {/* {metadataFields.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <Button type="text" onClick={handleAddField}>
+                  添加行
+                </Button>
+              </div>
+            )} */}
           </div>
+        </FormItem>
 
-          {/* 字段行 */}
-          {metadataFields.length === 0 ? (
-            <div className="mt-8 text-center text-gray-400">
-              <Button
-                type="text"
-                // icon={<Add />}
-                className="cursor-pointer"
-                onClick={handleAddField}
+        {/* 数据来源 */}
+        <FormItem
+          label="数据来源："
+          required
+          // labelAlign="left"
+          // labelCol={{ span: 24 }}
+          field="dataSources"
+          rules={[{ validator: validateDataSource }]}
+          className="mb-4"
+        >
+          <Row gutter={24}>
+            <Col span={8}>
+              <Checkbox
+                checked={dataSources.dataset}
+                onChange={(checked) =>
+                  handleDataSourceChange('dataset', checked)
+                }
               >
-                添加行
-              </Button>
-            </div>
-          ) : (
-            metadataFields.map((field) => (
-              <FieldRow
-                key={field.id}
-                field={field}
-                onUpdate={(updates) => handleUpdateField(field.id, updates)}
-                onDelete={() => handleDeleteField(field.id)}
-              />
-            ))
-          )}
-
-          {/* 添加行按钮 */}
-          {metadataFields.length > 0 && (
-            <div className="mt-2">
-              <Button
-                type="text"
-                className="cursor-pointer"
-                onClick={handleAddField}
+                数据集
+              </Checkbox>
+            </Col>
+            <Col span={8}>
+              <Checkbox
+                checked={dataSources.volume}
+                onChange={(checked) =>
+                  handleDataSourceChange('volume', checked)
+                }
               >
-                添加行
-              </Button>
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {/* 数据来源 */}
-      <Card className="mb-4" title={<span className="required">数据来源</span>}>
-        <Row gutter={24}>
-          <Col span={8}>
-            <Checkbox
-              checked={dataSources.dataset}
-              onChange={(checked) => handleDataSourceChange('dataset', checked)}
-            >
-              数据集
-            </Checkbox>
-          </Col>
-          <Col span={8}>
-            <Checkbox
-              checked={dataSources.volume}
-              onChange={(checked) => handleDataSourceChange('volume', checked)}
-            >
-              源数据目录-卷
-            </Checkbox>
-          </Col>
-          <Col span={8}>
-            <Checkbox
-              checked={dataSources.database}
-              onChange={(checked) =>
-                handleDataSourceChange('database', checked)
-              }
-            >
-              源数据目录-数据库
-            </Checkbox>
-          </Col>
-          <Col span={8}>
-            <Checkbox
-              checked={dataSources.metadataDir}
-              onChange={(checked) =>
-                handleDataSourceChange('metadataDir', checked)
-              }
-            >
-              源数据目录-元数据-目录
-            </Checkbox>
-          </Col>
-        </Row>
-      </Card>
+                源数据目录-卷
+              </Checkbox>
+            </Col>
+            <Col span={8}>
+              <Checkbox
+                checked={dataSources.database}
+                onChange={(checked) =>
+                  handleDataSourceChange('database', checked)
+                }
+              >
+                源数据目录-数据库
+              </Checkbox>
+            </Col>
+            <Col span={8}>
+              <Checkbox
+                checked={dataSources.metadataDir}
+                onChange={(checked) =>
+                  handleDataSourceChange('metadataDir', checked)
+                }
+              >
+                源数据目录-元数据-目录
+              </Checkbox>
+            </Col>
+          </Row>
+        </FormItem>
+      </Form>
 
       {/* 操作按钮 */}
       <div className="flex gap-4">

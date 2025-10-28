@@ -49,8 +49,19 @@ export default function DataAssetFormContainer({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 表单数据
-  const [metadataFields, setMetadataFields] = useState<MetadataField[]>([]);
+  // 表单数据 - 默认包含一个字段
+  const [metadataFields, setMetadataFields] = useState<MetadataField[]>([
+    {
+      id: `field_${Date.now()}`,
+      sequence: 1,
+      chineseName: '',
+      englishName: '',
+      fieldType: '',
+      defaultValue: '默认null',
+      required: true,
+      editable: true
+    }
+  ]);
   const [dataSources, setDataSources] = useState<DataSource>({
     dataset: true,
     volume: false,
