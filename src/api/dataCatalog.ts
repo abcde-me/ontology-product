@@ -715,24 +715,24 @@ export async function getSourceFileTypeList(params) {
 
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
-  const { file_ids, ...restParams } = params;
+  // const { file_ids, ...restParams } = params;
 
-  const queryParams = new URLSearchParams();
+  // const queryParams = new URLSearchParams();
 
-  Object.entries(restParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      queryParams.append(key, String(value));
-    }
-  });
+  // Object.entries(restParams).forEach(([key, value]) => {
+  //   if (value !== undefined && value !== null) {
+  //     queryParams.append(key, String(value));
+  //   }
+  // });
 
-  file_ids.forEach((id) => {
-    queryParams.append('file_ids', String(id));
-  });
+  // file_ids.forEach((id) => {
+  //   queryParams.append('file_ids', String(id));
+  // });
 
   return await UAPI.RES.targetDataFileDeleteApi({})
-    .post()
-    .withConfig({
-      params: queryParams
+    .post({
+      ...params,
+      path_id: Number(params.path_id)
     })
     .inRegion()
     .do();
