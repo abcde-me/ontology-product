@@ -19,6 +19,8 @@ import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
 import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 import { TEXT_DATA, LabelTypeMap, WujiePlugins } from './const';
+import { useHasPermission } from '@/store/userInfoStore';
+import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 
 const { bus } = WujieReact;
 
@@ -33,6 +35,7 @@ function LabelEditorPage() {
   const taskCount = useParams('count');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
+  const hasSavePermission = useHasPermission(ANNOTATION_TASK_PERMISSIONS.SAVE);
 
   useEffect(() => {
     const init = async () => {
@@ -160,7 +163,8 @@ function LabelEditorPage() {
             getTaskDetail,
 
             goBack,
-            switchNextTask
+            switchNextTask,
+            hasSavePermission
           }}
         ></WujieReact>
       )}
