@@ -53,9 +53,10 @@ const FormComponent: React.FC<FormProps> = ({
       }
 
       const filesArray: string[] = [];
+
       if (downloadData?.data_path_id) {
         filesArray.push(
-          downloadData.real_abs_data_path + '/' + downloadData.file_sub_path
+          downloadData.real_abs_data_path + '/' + downloadData.file_name
         );
       } else if (downloadData?.extras) {
         filesArray.push(
@@ -67,7 +68,7 @@ const FormComponent: React.FC<FormProps> = ({
       if (!exportdataset && exportdatas && exportdatas?.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.real_abs_data_path + '/' + item.file_sub_path);
+            filesArray.push(item.real_abs_data_path + '/' + item.file_name);
           });
         } else if (exportdatas[0].extras) {
           exportdatas.forEach((item: any) => {
