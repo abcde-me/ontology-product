@@ -544,7 +544,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-    console.log(dataRef, '----', dataRef?.isLastLeaf, '查看dataRef');
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
@@ -583,8 +582,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
-    // console.log(dataRef?.type, '查看dataRef77777');
-    console.log(dataRef, '再次查看dataRef');
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>

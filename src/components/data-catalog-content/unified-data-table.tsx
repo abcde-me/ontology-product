@@ -502,8 +502,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       sourceFileTypeFilters,
       selectedNodeType,
       (data) => {
+        console.log('回调函数里的数据', data);
         setCurrentDbDetails(data); // 存储当前的数据库详情
-      }
+      },
+      selectedParentId
     );
   }, [
     tableType,
@@ -536,7 +538,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         selectedNodeType,
         (data) => {
           setCurrentDbDetails(data); // 存储当前的数据库详情
-        }
+        },
+        selectedParentId
       );
     }
     return baseColumns;

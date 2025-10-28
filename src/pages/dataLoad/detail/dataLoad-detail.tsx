@@ -137,7 +137,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
       setTotal(res?.data?.total ?? 0);
@@ -167,7 +167,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
       if (res?.data?.items?.[0]?.status === 'stopped') {
@@ -248,7 +248,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: 1,
         page_size: pageSize,
-        execution_id: '',
+        execution_name: '',
         ...directoryObj
       });
       setTotal(res?.data?.total ?? 0);
@@ -576,7 +576,7 @@ const DataLoadDetail = () => {
           <InputSearch
             onClear={clearHan}
             allowClear
-            placeholder="搜索运行ID"
+            placeholder="搜索运行名称"
             style={{ width: 220 }}
             onPressEnter={() => {
               getDetailList();
