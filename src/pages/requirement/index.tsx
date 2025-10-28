@@ -350,7 +350,9 @@ export default function Requirement() {
                           setLoading(false);
                         })
                         .catch(() => {})
-                        .finally(() => {});
+                        .finally(() => {
+                          setLoading(false);
+                        });
                     } catch {
                       setLoading(false);
                     }
