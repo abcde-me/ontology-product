@@ -27,8 +27,8 @@ const TableDetail = (props) => {
   const { type } = props;
   const columns: any = [
     {
-      title: '运行ID',
-      dataIndex: 'execution_id',
+      title: '运行名称',
+      dataIndex: 'execution_name',
       width: 300,
       ellipsis: true,
       render: (text: string) => {
