@@ -809,7 +809,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王1',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -827,7 +827,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王2',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -845,7 +845,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王3',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -864,7 +864,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王4',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -882,7 +882,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王5',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -900,7 +900,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王6',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -918,7 +918,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王7',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -936,7 +936,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王8',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -954,7 +954,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王9',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -972,7 +972,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王10',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -990,7 +990,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王11',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -1008,7 +1008,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王12',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
