@@ -1,0 +1,14 @@
+.formContainer {
+  position: relative;
+}
+
+.operationButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}

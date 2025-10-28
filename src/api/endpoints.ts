@@ -469,7 +469,14 @@ export const ModaForgeResourceEndpoints = {
   leGetTaskById: PrefixLabelService + '/getTaskById',
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
-  leGetTaskReuslt: PrefixLabelService + '/getTaskResult'
+  leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
+
+  // 数据资产接口
+  dataAssetList: PrefixAimdp + '/ListDataAssets',
+  dataAssetDetail: PrefixAimdp + '/GetDataAsset',
+  dataAssetCreate: PrefixAimdp + '/CreateDataAsset',
+  dataAssetUpdate: PrefixAimdp + '/EditDataAsset',
+  dataAssetDelete: PrefixAimdp + '/DeleteDataAsset'
 };
 
 /**

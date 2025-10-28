@@ -185,6 +185,13 @@ export const menus: MenuModel[] = [
         icon: <DataMarket className={iconClass} />,
         key: 'dataMarket',
         path: '/tenant/compute/modaforge/dataMarketDetail'
+      },
+      {
+        title: '数据资产',
+        icon: <DatasetManagement className={iconClass} />,
+        key: 'dataAsset',
+        path: '/tenant/compute/modaforge/dataAsset',
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   },
