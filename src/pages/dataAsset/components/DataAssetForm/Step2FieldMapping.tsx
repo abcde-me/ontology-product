@@ -1,11 +1,15 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   Button,
   Card,
   Input,
   Message,
+  Form,
   Select,
-  Switch
+  Switch,
+  Grid,
+  Table,
+  Space
 } from '@arco-design/web-react';
 // import { Download } from '@icon-park/react';
 import {
@@ -13,7 +17,12 @@ import {
   MetadataField,
   DataSource
 } from './DataAssetFormContainer';
-import MappingRow from './MappingRow';
+import { IconDownload } from '@arco-design/web-react/icon';
+import styles from './Step2FieldMapping.module.scss';
+
+const FormItem = Form.Item;
+const Row = Grid.Row;
+const Col = Grid.Col;
 
 interface Step2FieldMappingProps {
   mappings: FieldMapping[];
@@ -38,6 +47,8 @@ export default function Step2FieldMapping({
   onPrev,
   onFinish
 }: Step2FieldMappingProps) {
+  const [form] = Form.useForm();
+
   // 生成列配置
   const columns = useMemo(() => {
     const cols = ['序号', '数据资产名称'];
@@ -46,6 +57,139 @@ export default function Step2FieldMapping({
     if (dataSources.volume) cols.push('源数据目录-卷');
     if (dataSources.database) cols.push('源数据目录-数据库');
     if (dataSources.metadataDir) cols.push('源数据目录-元数据-目录');
+
+    return cols;
+  }, [dataSources]);
+
+  // Table列定义
+  const tableColumns = useMemo(() => {
+    const cols: any[] = [
+      {
+        title: '序号',
+        dataIndex: 'sequence',
+        width: 80,
+        align: 'center' as const
+      },
+      {
+        title: '数据资产名称',
+        dataIndex: 'assetName',
+        width: 200,
+        render: (_: any, record: FieldMapping) => (
+          <Input
+            placeholder="请输入数据资产名称"
+            value={record.assetName}
+            onChange={(value) =>
+              handleUpdateMapping(record.id, { assetName: value })
+            }
+          />
+        )
+      }
+    ];
+
+    if (dataSources.dataset) {
+      cols.push({
+        title: '数据集',
+        dataIndex: 'dataset',
+        width: 200,
+        render: (_: any, record: FieldMapping) => (
+          <Select
+            placeholder="请选择"
+            value={record.dataset}
+            onChange={(value) =>
+              handleUpdateMapping(record.id, { dataset: value })
+            }
+          >
+            <Select.Option value="dataset1">这是一个数据集名称</Select.Option>
+          </Select>
+        )
+      });
+    }
+
+    if (dataSources.volume) {
+      cols.push({
+        title: '源数据目录-卷',
+        dataIndex: 'volume',
+        width: 200,
+        render: (_: any, record: FieldMapping) => (
+          <Select
+            placeholder="请选择"
+            value={record.volume}
+            onChange={(value) =>
+              handleUpdateMapping(record.id, { volume: value })
+            }
+          >
+            <Select.Option value="volume1">这是一个源数据目录-卷</Select.Option>
+          </Select>
+        )
+      });
+    }
+
+    if (dataSources.database) {
+      cols.push({
+        title: '源数据目录-数据库',
+        dataIndex: 'database',
+        width: 200,
+        render: (_: any, record: FieldMapping) => (
+          <Select
+            placeholder="请选择"
+            value={record.database}
+            onChange={(value) =>
+              handleUpdateMapping(record.id, { database: value })
+            }
+          >
+            <Select.Option value="db1">这是一个源数据目录-数据库</Select.Option>
+          </Select>
+        )
+      });
+    }
+
+    if (dataSources.metadataDir) {
+      cols.push({
+        title: '源数据目录-元数据-目录',
+        dataIndex: 'metadataDir',
+        width: 200,
+        render: (_: any, record: FieldMapping) => (
+          <Select
+            placeholder="请选择"
+            value={record.metadataDir}
+            onChange={(value) =>
+              handleUpdateMapping(record.id, { metadataDir: value })
+            }
+          >
+            <Select.Option value="metadata1">
+              这是一个源数据目录-元数据-目录
+            </Select.Option>
+          </Select>
+        )
+      });
+    }
+
+    cols.push({
+      title: '操作',
+      dataIndex: 'operation',
+      width: 150,
+      align: 'center' as const,
+      render: (_: any, record: FieldMapping) => (
+        <Space>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => handleAddMapping()}
+            className="cursor-pointer text-green-500"
+          >
+            添加行
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            onClick={() => handleDeleteMapping(record.id)}
+            className="cursor-pointer text-red-500"
+          >
+            删除行
+          </Button>
+        </Space>
+      )
+    });
 
     return cols;
   }, [dataSources]);
@@ -67,6 +211,11 @@ export default function Step2FieldMapping({
       setMappings(initialMappings);
     }
   }, [metadataFields]);
+
+  // 初始化表单值
+  useEffect(() => {
+    form.setFieldsValue({ mappings });
+  }, [mappings]);
 
   // 添加映射行
   const handleAddMapping = () => {
@@ -99,92 +248,90 @@ export default function Step2FieldMapping({
     );
   };
 
+  // 验证映射数据
+  const validateMappings = useCallback(
+    (value: any, callback: any) => {
+      if (mappings.length === 0) {
+        callback('请至少添加一个映射');
+      } else {
+        const incompleteMappings = mappings.some(
+          (mapping) => !mapping.assetName
+        );
+        if (incompleteMappings) {
+          callback('请填写完整的映射信息');
+        } else {
+          callback();
+        }
+      }
+    },
+    [mappings]
+  );
+
   // 导入字段
   const handleImportFields = () => {
-    // TODO: 实现导入字段逻辑
     Message.info('导入字段功能待实现');
   };
 
   // 自动映射
   const handleAutoMapping = () => {
-    // TODO: 实现自动映射逻辑
     Message.info('自动映射功能待实现');
   };
 
   // 完成
-  const handleFinish = () => {
-    if (mappings.length === 0) {
-      Message.error('请至少添加一个映射');
-      return;
-    }
-
-    // 验证所有映射是否填写完整
-    const incompleteMappings = mappings.some((mapping) => !mapping.assetName);
-
-    if (incompleteMappings) {
+  const handleFinish = async () => {
+    try {
+      await form.validate();
+      onFinish();
+    } catch (error) {
+      console.error('表单验证失败:', error);
       Message.error('请填写完整的映射信息');
-      return;
     }
-
-    onFinish();
   };
 
   return (
     <>
       {/* 映射列表 */}
-      <Card
-        title={
-          <div className="flex items-center justify-between">
-            <span className="required">映射列表</span>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span>自动映射</span>
-                <Switch checked={autoMapping} onChange={setAutoMapping} />
-              </div>
-              <Button
-                type="text"
-                // icon={<Download />}
-                onClick={handleImportFields}
-              >
-                导入字段
-              </Button>
-            </div>
-          </div>
-        }
+      <Form
+        form={form}
+        initialValues={{ mappings }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        labelAlign="left"
+        style={{ width: '100%' }}
+        className={styles.formContainer}
       >
-        {/* 表头 */}
-        <div className="overflow-x-auto">
-          <div
-            className="mb-2 grid gap-2 border-b pb-2 text-sm font-medium"
-            style={{
-              gridTemplateColumns: `50px 200px ${columns
-                .slice(2)
-                .map(() => '200px')
-                .join(' ')}`
-            }}
-          >
-            {columns.map((col) => (
-              <div key={col}>{col}</div>
-            ))}
+        <div className={styles.operationButtonWrapper}>
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[rgb(var(--primary-6))]">
+              自动映射
+            </span>
+            <Switch checked={autoMapping} onChange={setAutoMapping} />
           </div>
-
-          {/* 映射行 */}
-          {mappings.length === 0 ? (
-            <div className="mt-8 text-center text-gray-400">暂无映射数据</div>
-          ) : (
-            mappings.map((mapping) => (
-              <MappingRow
-                key={mapping.id}
-                mapping={mapping}
-                columns={columns}
-                dataSources={dataSources}
-                onUpdate={(updates) => handleUpdateMapping(mapping.id, updates)}
-                onDelete={() => handleDeleteMapping(mapping.id)}
-              />
-            ))
-          )}
+          <Button
+            type="text"
+            icon={<IconDownload />}
+            onClick={handleImportFields}
+          >
+            导入字段
+          </Button>
         </div>
-      </Card>
+
+        <FormItem
+          label="映射列表："
+          required
+          field="mappings"
+          className="mb-[24px]"
+          rules={[{ validator: validateMappings }]}
+        >
+          <Table
+            columns={tableColumns}
+            className="mt-[16px] w-full"
+            data={mappings}
+            pagination={false}
+            border={false}
+          />
+        </FormItem>
+      </Form>
 
       {/* 操作按钮 */}
       <div className="flex gap-4">

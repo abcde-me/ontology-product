@@ -228,6 +228,19 @@ export default function Step1MetadataFields({
     form.validate(['dataSources']);
   };
 
+  // 全选/取消全选数据源
+  const handleSelectAllDataSources = (checked: boolean) => {
+    const updatedDataSources = {
+      dataset: checked,
+      volume: checked,
+      database: checked,
+      metadataDir: checked
+    };
+    setDataSources(updatedDataSources);
+    form.setFieldValue('dataSources', updatedDataSources);
+    form.validate(['dataSources']);
+  };
+
   // 验证字段列表的自定义验证器
   const validateMetadataFields = useCallback(
     (value: any, callback: any) => {
@@ -314,11 +327,11 @@ export default function Step1MetadataFields({
         <FormItem
           label="数据资产字段列表："
           required
-          // labelAlign="left"
           field="metadataFields"
+          className="mb-[24px]"
           rules={[{ validator: validateMetadataFields }]}
         >
-          <div className="w-full">
+          <div className="mt-[16px] w-full">
             <Table
               columns={columns}
               className="w-full"
@@ -341,14 +354,37 @@ export default function Step1MetadataFields({
         <FormItem
           label="数据来源："
           required
-          // labelAlign="left"
-          // labelCol={{ span: 24 }}
           field="dataSources"
+          className="mb-[24px]"
           rules={[{ validator: validateDataSource }]}
-          className="mb-4"
         >
           <Row gutter={24}>
-            <Col span={8}>
+            <Col span={4}>
+              <Checkbox
+                checked={
+                  dataSources.dataset &&
+                  dataSources.volume &&
+                  dataSources.database &&
+                  dataSources.metadataDir
+                }
+                indeterminate={
+                  (dataSources.dataset ||
+                    dataSources.volume ||
+                    dataSources.database ||
+                    dataSources.metadataDir) &&
+                  !(
+                    dataSources.dataset &&
+                    dataSources.volume &&
+                    dataSources.database &&
+                    dataSources.metadataDir
+                  )
+                }
+                onChange={(checked) => handleSelectAllDataSources(checked)}
+              >
+                全选
+              </Checkbox>
+            </Col>
+            <Col span={4}>
               <Checkbox
                 checked={dataSources.dataset}
                 onChange={(checked) =>
@@ -358,7 +394,7 @@ export default function Step1MetadataFields({
                 数据集
               </Checkbox>
             </Col>
-            <Col span={8}>
+            <Col span={4}>
               <Checkbox
                 checked={dataSources.volume}
                 onChange={(checked) =>
@@ -368,7 +404,7 @@ export default function Step1MetadataFields({
                 源数据目录-卷
               </Checkbox>
             </Col>
-            <Col span={8}>
+            <Col span={4}>
               <Checkbox
                 checked={dataSources.database}
                 onChange={(checked) =>
@@ -378,7 +414,7 @@ export default function Step1MetadataFields({
                 源数据目录-数据库
               </Checkbox>
             </Col>
-            <Col span={8}>
+            <Col span={4}>
               <Checkbox
                 checked={dataSources.metadataDir}
                 onChange={(checked) =>
@@ -394,10 +430,10 @@ export default function Step1MetadataFields({
 
       {/* 操作按钮 */}
       <div className="flex gap-4">
-        <Button onClick={onCancel}>取消</Button>
         <Button type="primary" onClick={handleNextStep}>
           下一步
         </Button>
+        <Button onClick={onCancel}>取消</Button>
       </div>
     </>
   );
