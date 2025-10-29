@@ -2,6 +2,7 @@ import { Upload, Message } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload } from '@arco-design/web-react/icon';
+import { UploadStatus } from '../../types';
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
@@ -32,7 +33,9 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
       // 处理已完成的文件
       const completedFiles = files.filter(
         (file: any) =>
-          file.status === 'done' && file.response && file.response.data
+          file.status === UploadStatus.done &&
+          file.response &&
+          file.response.data
       );
 
       if (completedFiles.length > 0) {
@@ -99,7 +102,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         beforeUpload={(file) => {
           return checkFile(file);
         }}
-        action={`${PrefixAimdp}/UploadLoadTaskFile`}
+        action={`${PrefixAimdp}/AnalyzeDataAssetFieldsFile`}
         onChange={handleUploadChange}
         onDrop={handleDrop}
         headers={{
@@ -128,7 +131,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
               支持Excel格式（.xlsx,.xls）文件
             </span>
             <span className="text-[12px] text-[var(--color-text-4)]">
-              最多上传1个文件，文件/压缩包源文件大小不超过xx
+              最多上传1个文件，文件大小不超过50M
             </span>
           </div>
           {/* 下载模板提示 */}

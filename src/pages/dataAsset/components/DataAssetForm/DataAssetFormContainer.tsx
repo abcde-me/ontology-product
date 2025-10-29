@@ -4,6 +4,7 @@ import { Steps, Message } from '@arco-design/web-react';
 import { getDataAssetDetail } from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
+import { DataAssetField } from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
   isEditMode?: boolean;
@@ -11,15 +12,8 @@ interface DataAssetFormContainerProps {
 }
 
 // 第一步的字段定义
-export interface MetadataField {
+export interface MetadataField extends DataAssetField {
   id: string;
-  sequence: number;
-  chineseName: string;
-  englishName: string;
-  fieldType: string;
-  defaultValue: string;
-  required: boolean;
-  editable: boolean;
 }
 
 // 第二步的映射定义
@@ -53,13 +47,12 @@ export default function DataAssetFormContainer({
   const [metadataFields, setMetadataFields] = useState<MetadataField[]>([
     {
       id: `field_${Date.now()}`,
-      sequence: 1,
-      chineseName: '',
-      englishName: '',
-      fieldType: '',
-      defaultValue: '默认null',
+      nameZh: '',
+      nameEn: '',
+      type: undefined,
+      default: 'null',
       required: true,
-      editable: true
+      allowModify: true
     }
   ]);
   const [dataSources, setDataSources] = useState<DataSource>({
@@ -151,52 +144,53 @@ export default function DataAssetFormContainer({
   const step2Title = isEditMode ? '编辑字段映射' : '设置字段映射';
 
   return (
-    <div className="h-full w-full py-5 pr-5">
-      <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-        {/* 标题 */}
-        <div className="mb-4 h-[30px] w-full leading-[30px]">
-          <p className="text-xl font-bold">{pageTitle}</p>
-        </div>
+    <>
+      {/* 标题 */}
+      <div className="mb-[8px] mt-[16px] h-[32px] w-full leading-[32px]">
+        <p className="text-xl font-bold">{pageTitle}</p>
+      </div>
+      <div className="h-[calc(100%-32px-24px-20px)] w-full pr-5">
+        <div className="box-border h-full w-full overflow-y-auto rounded-2xl bg-white pl-[24px] pr-6 pt-[24px]">
+          {/* 步骤指示器 */}
+          <div className="mb-6">
+            <Steps
+              current={currentStep}
+              style={{ maxWidth: 440, margin: '0 auto' }}
+            >
+              <Steps.Step title={step1Title} />
+              <Steps.Step title={step2Title} />
+            </Steps>
+          </div>
 
-        {/* 步骤指示器 */}
-        <div className="mb-6">
-          <Steps
-            current={currentStep}
-            style={{ maxWidth: 440, margin: '0 auto' }}
-          >
-            <Steps.Step title={step1Title} />
-            <Steps.Step title={step2Title} />
-          </Steps>
-        </div>
+          {/* 表单内容 */}
+          <div className="w-full">
+            {currentStep === 0 && (
+              <Step1MetadataFields
+                metadataFields={metadataFields}
+                setMetadataFields={setMetadataFields}
+                dataSources={dataSources}
+                setDataSources={setDataSources}
+                onCancel={handleCancel}
+                onNext={handleNext}
+              />
+            )}
 
-        {/* 表单内容 */}
-        <div className="w-full">
-          {currentStep === 0 && (
-            <Step1MetadataFields
-              metadataFields={metadataFields}
-              setMetadataFields={setMetadataFields}
-              dataSources={dataSources}
-              setDataSources={setDataSources}
-              onCancel={handleCancel}
-              onNext={handleNext}
-            />
-          )}
-
-          {currentStep === 1 && (
-            <Step2FieldMapping
-              mappings={mappings}
-              setMappings={setMappings}
-              autoMapping={autoMapping}
-              setAutoMapping={setAutoMapping}
-              metadataFields={metadataFields}
-              dataSources={dataSources}
-              onCancel={handleCancel}
-              onPrev={handlePrev}
-              onFinish={handleFinish}
-            />
-          )}
+            {currentStep === 1 && (
+              <Step2FieldMapping
+                mappings={mappings}
+                setMappings={setMappings}
+                autoMapping={autoMapping}
+                setAutoMapping={setAutoMapping}
+                metadataFields={metadataFields}
+                dataSources={dataSources}
+                onCancel={handleCancel}
+                onPrev={handlePrev}
+                onFinish={handleFinish}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
