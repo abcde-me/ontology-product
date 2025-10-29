@@ -134,9 +134,7 @@ const DatasetsList: FC = () => {
             text = '导出中';
             color = '#007DFA';
             actionBtn = (
-              <PermissionWrapper
-                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_STOP}
-              >
+              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
                 <Link onClick={() => handleStopTask(item)}> 终止 </Link>;
               </PermissionWrapper>
             );
@@ -149,9 +147,7 @@ const DatasetsList: FC = () => {
             text = '导出失败';
             color = '#EF4444';
             actionBtn = (
-              <PermissionWrapper
-                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY}
-              >
+              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
                 <Tooltip content={item.failed_reason}>
                   <IconInfoCircle />
                 </Tooltip>
@@ -166,9 +162,7 @@ const DatasetsList: FC = () => {
             text = '导出终止';
             color = '#FB923C';
             actionBtn = (
-              <PermissionWrapper
-                permission={SQL_PERMISSIONS.CAN_EXPORT_TASK_RETRY}
-              >
+              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
                 <Link href="#" onClick={() => handleRetryTask(item)}>
                   {' '}
                   重试{' '}

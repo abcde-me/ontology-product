@@ -212,7 +212,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         <div className="notebook-toolbar">
           <div className="toolbar-left">
             <Space size={12}>
-              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_RUN}>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.RUN}>
                 <Button
                   type="primary"
                   icon={
@@ -229,7 +229,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
               </PermissionWrapper>
-              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_EXPORT}>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Button
                   icon={<IconUpload />}
                   onClick={handleExportDataset}

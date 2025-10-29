@@ -147,18 +147,18 @@ export const NEW_WORKFLOW_PERMISSIONS = {
 
 // PySpark权限
 export const PYSPARK_PERMISSIONS = {
-  CAN_SEARCH: 'aimdp-manager:pyspark:read:list', // 菜单权限
-  CAN_DELETE: 'aimdp-manager:pyspark:manage:delete', // 删除
-  CAN_UPDATE: 'aimdp-manager:pyspark:manage:modify', // 编辑
-  CAN_COPY: 'aimdp-manager:pyspark:read:list', // 复制
-  CAN_RENAME: 'aimdp-manager:pyspark:read:list', // 重命名
-  CAN_RUN: 'aimdp-manager:pyspark:manage:run', // 运行
-  CAN_CANCEL_RUN: 'aimdp-manager:pyspark:manage:run', // 停止运行
-  CAN_EXPORT: 'aimdp-manager:pyspark:manage:export', // 导出数据集按钮
+  // LIST: 'aimdp-manager:pyspark:read:list', // 菜单权限
+  // CAN_DELETE: 'aimdp-manager:pyspark:manage:delete', // 删除
+  // CAN_UPDATE: 'aimdp-manager:pyspark:manage:modify', // 编辑
+  // CAN_COPY: 'aimdp-manager:pyspark:manage:create', // 复制
+  // CAN_RENAME: 'aimdp-manager:pyspark:read:list', // 重命名
+  // CAN_RUN: 'aimdp-manager:pyspark:manage:run', // 运行
+  // CAN_CANCEL_RUN: 'aimdp-manager:pyspark:manage:run', // 停止运行
+  // CAN_EXPORT: 'aimdp-manager:pyspark:manage:export', // 导出数据集按钮
   CAN_SEARCH_EXPORTS: 'aimdp-manager:pyspark:manage:export', // 导出列表
-  CAN_EXPORT_STOP: 'aimdp-manager:pyspark:manage:export', // 导出停止
-  CAN_EXPORT_RETRY: 'aimdp-manager:pyspark:manage:export', // 导出重试
-  CAN_EXPORT_PREVIEW: 'aimdp-manager:pyspark:manage:export', // 导出预览
+  // CAN_EXPORT_STOP: 'aimdp-manager:pyspark:manage:export', // 导出停止
+  // CAN_EXPORT_RETRY: 'aimdp-manager:pyspark:manage:export', // 导出重试
+  // CAN_EXPORT_PREVIEW: 'aimdp-manager:pyspark:manage:export', // 导出预览
   CAN_DIRECTORY: 'aimdp-manager:directory:read:list', // 数据目录
   CAN_DATASETS_SEARCH: 'aimdp-manager:dataset:read:list', // 数据集列表
   CAN_RETRIEVE_OPERATOR: 'aimdp-manager:pyspark:read:list', // 算子库
@@ -174,22 +174,22 @@ export const PYSPARK_PERMISSIONS = {
 
 // SQL权限
 export const SQL_PERMISSIONS = {
-  CAN_CREATE: 'aimdp-manager:sql_script:manage:create', // 创建
-  CAN_DELETE: 'aimdp-manager:sql_script:manage:delete', // 删除
-  CAN_UPDATE: 'aimdp-manager:sql_script:manage:modify', // 编辑
-  CAN_COPY: 'aimdp-manager:sql_script:read:list', // 复制
-  CAN_RENAME: 'aimdp-manager:sql_script:read:list', // 重命名
-  CAN_SEARCH: 'aimdp-manager:sql_script:read:list', // 菜单权限
-  CAN_GET: 'aimdp-manager:sql_script:read:get', // 详情
-  CAN_RUN: 'aimdp-manager:sql_script:manage:run', // 运行
-  CAN_CANCEL_RUN: 'aimdp-manager:sql_script:manage:run', // 取消运行
-  CAN_GET_RUN_RESULT: 'aimdp-manager:sql_script:manage:run', // 获取运行结果
-  CAN_EXPORT_RESULT: 'aimdp-manager:sql_script:manage:export', // 导出结果
-  CAN_EXPORT_VERSION_UPDATE: 'aimdp-manager:sql_script:manage:export', // 导出版本更新
-  CAN_EXPORT_TASK_LIST: 'aimdp-manager:sql_script:manage:export', // 导出任务列表
-  CAN_EXPORT_TASK_STOP: 'aimdp-manager:sql_script:manage:export', // 导出任务停止
-  CAN_EXPORT_TASK_RETRY: 'aimdp-manager:sql_script:manage:export', // 导出任务重试
-  CAN_EXPORT_GET_SQL_INFO: 'aimdp-manager:sql_script:manage:export', // 导出任务对应的SQL详情
+  // CAN_CREATE: 'aimdp-manager:sql_script:manage:create', // 创建
+  // CAN_DELETE: 'aimdp-manager:sql_script:manage:delete', // 删除
+  // CAN_UPDATE: 'aimdp-manager:sql_script:manage:modify', // 编辑
+  // CAN_COPY: 'aimdp-manager:sql_script:read:list', // 复制
+  // CAN_RENAME: 'aimdp-manager:sql_script:read:list', // 重命名
+  // CAN_SEARCH: 'aimdp-manager:sql_script:read:list', // 菜单权限
+  // CAN_GET: 'aimdp-manager:sql_script:read:get', // 详情
+  // CAN_RUN: 'aimdp-manager:sql_script:manage:run', // 运行
+  // CAN_CANCEL_RUN: 'aimdp-manager:sql_script:manage:run', // 取消运行
+  // CAN_GET_RUN_RESULT: 'aimdp-manager:sql_script:manage:run', // 获取运行结果
+  // CAN_EXPORT_RESULT: 'aimdp-manager:sql_script:manage:export', // 导出结果
+  // CAN_EXPORT_VERSION_UPDATE: 'aimdp-manager:sql_script:manage:export', // 导出版本更新
+  // CAN_EXPORT_TASK_LIST: 'aimdp-manager:sql_script:manage:export', // 导出任务列表
+  // CAN_EXPORT_TASK_STOP: 'aimdp-manager:sql_script:manage:export', // 导出任务停止
+  // CAN_EXPORT_TASK_RETRY: 'aimdp-manager:sql_script:manage:export', // 导出任务重试
+  // CAN_EXPORT_GET_SQL_INFO: 'aimdp-manager:sql_script:manage:export', // 导出任务对应的SQL详情
 
   LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
   GET: 'aimdp-manager:sql_script:read:get',

@@ -146,7 +146,7 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(SQL_PERMISSIONS.CAN_EXPORT_TASK_LIST) && (
+          {useHasPermission(SQL_PERMISSIONS.LIST) && (
             <TabPane
               key="dataset"
               title={
