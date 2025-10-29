@@ -68,10 +68,10 @@ export const TYPE_CONFIG = {
 export const DATABASE_TYPE_ENUM = [
   {
     label: 'MySQL',
-    value: 'mysql'
+    value: 'MySQL'
   },
   {
     label: 'PostgreSQL',
-    value: 'postgresql'
+    value: 'PostgreSQL'
   }
 ];

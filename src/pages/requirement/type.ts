@@ -99,25 +99,24 @@ export const TeamTypeMap = {
   [TeamType.DEPARTMENT]: '部门'
 };
 // 标注工具查询表格type类型
-// 1 图片 2 文本 3 音频 4 视频
 export const toolFileType = {
-  2: ['jpeg', 'jpg', 'png', 'gif'],
-  1: ['txt', 'json'],
-  3: ['mp3', 'wma', 'wav', 'flac', 'ape', 'aac'],
-  4: [
-    'wmv',
-    'asf',
-    'asx',
-    'rm',
-    'rmvb',
-    'mp4',
-    '3gp',
-    'mov',
-    'm4v',
-    'avi',
-    'dat',
-    'mkv',
-    'flv',
-    'vob'
+  [AnnotationTypeStatus.IMAGE]: ['JPEG', 'JPG', 'PNG', 'GIF'],
+  [AnnotationTypeStatus.TEXT]: ['TXT', 'JSON'],
+  [AnnotationTypeStatus.AUDIO]: ['MP3', 'WMA', 'WAV', 'FLAC', 'APE', 'AAC'],
+  [AnnotationTypeStatus.VIDEO]: [
+    'WMV',
+    'ASF',
+    'ASX',
+    'RM',
+    'RMVB',
+    'MP4',
+    '3GP',
+    'MOV',
+    'M4V',
+    'AVI',
+    'DAT',
+    'MKV',
+    'FLV',
+    'VOB'
   ]
 };

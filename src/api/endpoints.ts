@@ -123,7 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
-export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
@@ -173,14 +173,12 @@ export const ResourceEndpointsV2 = {
   targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
   sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
-  targetDataFileDeleteApi: PrefixAimdp + '/directory/dst', //删除目标数据文件
+  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
   sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
-  sourceDataFileDeleteApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
-  sourceDataFileDeleteBatcheApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
-  dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
-  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
+  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
+  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/ListDirDatabaseTables', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
@@ -397,7 +395,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/listRequirement',
   // 标注下载结果
-  getAnnotationDownloadApi: PrefixLabelService + '/resultDownlaodRequirement',
+  getAnnotationDownloadApi: PrefixLabelService + '/resultDownloadRequirement',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容

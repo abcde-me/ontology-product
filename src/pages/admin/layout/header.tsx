@@ -41,8 +41,14 @@ export default function Header({
 
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
-  const { clearUserInfo, setUserActions, projectId, setProjectId } =
-    useUserInfoStore();
+  const {
+    clearUserInfo,
+    setUserActions,
+    projectId,
+    setProjectId,
+    isInitialized,
+    fetchUserInfo
+  } = useUserInfoStore();
   const { setUserPermissions } = usePermission();
   const [projects, setProjects] = useState<Record<string, any>[]>([]);
   // 组件卸载时的清理
@@ -83,9 +89,11 @@ export default function Header({
     const list = async () => {
       const { data: result } = await GetProjOrg({});
       setProjects(result);
+      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+      console.log('fullProjectIdKey', fullProjectIdKey);
 
       if (result.length) {
-        const pId = getLocalStorage<string[]>(ProjectIdKey);
+        const pId = getLocalStorage<string[]>(fullProjectIdKey);
         if (Array.isArray(pId)) {
           const org = result.find((r) => r.id === pId[0]);
           if (org && org.projectList.find((p) => p.id === pId[1])) {
@@ -95,12 +103,15 @@ export default function Header({
         }
 
         const defaultPId = [result[0].id, result[0].projectList[0].id];
-        setLocalStorage(ProjectIdKey, defaultPId);
+        setLocalStorage(fullProjectIdKey, defaultPId);
         setProjectId(defaultPId);
       }
     };
-    list();
-  }, []);
+
+    if (userInfo?.id) {
+      list();
+    }
+  }, [userInfo?.id]);
 
   React.useEffect(() => {
     if (projectId && projectId[1]) {
@@ -108,8 +119,15 @@ export default function Header({
     }
   }, [projectId[1]]);
 
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
+
   const changeProject = (value: string[]) => {
-    setLocalStorage(ProjectIdKey, value);
+    const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+    setLocalStorage(fullProjectIdKey, value);
     // 重置权限状态，这样下次初始化时会重新加载权限
     setUserActions({ isAdmin: false, actions: null });
     setProjectId(value);
