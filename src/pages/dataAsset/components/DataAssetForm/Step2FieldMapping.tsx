@@ -201,7 +201,7 @@ export default function Step2FieldMapping({
         (field, index) => ({
           id: `mapping_${Date.now()}_${index}`,
           sequence: index + 1,
-          assetName: field.chineseName,
+          assetName: field.nameZh,
           dataset: '',
           volume: '',
           database: '',
@@ -334,7 +334,7 @@ export default function Step2FieldMapping({
       </Form>
 
       {/* 操作按钮 */}
-      <div className="flex gap-4">
+      <div className={styles.actionBar}>
         <Button onClick={handleFinish} type="primary">
           确定
         </Button>

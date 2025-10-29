@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -17,6 +17,9 @@ import { MetadataField, DataSource } from './DataAssetFormContainer';
 import ImportFieldsModal from './ImportFieldsModal';
 import styles from './Step1MetadataFields.module.scss';
 import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
+import { DataAssetField } from '@/types/dataAssetApi';
+import { listDataAssetFieldTypes } from '@/api/dataAsset';
+import { ImportType } from '../../types';
 
 const FormItem = Form.Item;
 
@@ -40,9 +43,39 @@ export default function Step1MetadataFields({
   const Row = Grid.Row;
   const Col = Grid.Col;
   const [showImportModal, setShowImportModal] = useState(false);
+  const [fieldTypes, setFieldTypes] = useState<string[]>([]);
+  const [fieldTypesLoading, setFieldTypesLoading] = useState(false);
   const [form] = Form.useForm();
 
-  // Table列定义
+  // 进入页面时查询支持的字段类型
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFieldTypes = async () => {
+      try {
+        setFieldTypesLoading(true);
+        const res = await listDataAssetFieldTypes();
+
+        if (res?.status !== 200 || !Array.isArray(res?.data)) {
+          Message.error(res?.message ?? '获取字段类型失败');
+          return;
+        }
+
+        setFieldTypes(res.data);
+      } catch (e) {
+        Message.error('获取字段类型失败');
+      } finally {
+        if (isMounted) setFieldTypesLoading(false);
+      }
+    };
+
+    fetchFieldTypes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Table列定义（字段名对齐 DataAssetField）
   const columns = [
     {
       title: '序号',
@@ -52,62 +85,55 @@ export default function Step1MetadataFields({
     },
     {
       title: '字段中文名称',
-      dataIndex: 'chineseName',
+      dataIndex: 'nameZh',
       width: 200,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Input
           placeholder="请输入中文名称"
-          value={record.chineseName}
-          onChange={(value) =>
-            handleUpdateField(record.id, { chineseName: value })
-          }
+          value={record.nameZh}
+          onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
       )
     },
     {
       title: '字段英文名称',
-      dataIndex: 'englishName',
+      dataIndex: 'nameEn',
       width: 200,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Input
           placeholder="请输入英文名称"
-          value={record.englishName}
-          onChange={(value) =>
-            handleUpdateField(record.id, { englishName: value })
-          }
+          value={record.nameEn}
+          onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
       )
     },
     {
       title: '字段类型',
-      dataIndex: 'fieldType',
+      dataIndex: 'type',
       width: 150,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Select
           placeholder="请选择"
-          value={record.fieldType}
-          onChange={(value) =>
-            handleUpdateField(record.id, { fieldType: value })
-          }
+          loading={fieldTypesLoading}
+          value={record.type}
+          onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
-          <Select.Option value="string">字符串</Select.Option>
-          <Select.Option value="number">数字</Select.Option>
-          <Select.Option value="boolean">布尔值</Select.Option>
-          <Select.Option value="date">日期</Select.Option>
-          <Select.Option value="object">对象</Select.Option>
+          {fieldTypes.map((type) => (
+            <Select.Option key={type} value={type}>
+              {type}
+            </Select.Option>
+          ))}
         </Select>
       )
     },
     {
       title: '空值默认填充',
-      dataIndex: 'defaultValue',
+      dataIndex: 'default',
       width: 200,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Input
-          value={record.defaultValue}
-          onChange={(value) =>
-            handleUpdateField(record.id, { defaultValue: value })
-          }
+          value={record.default}
+          onChange={(value) => handleUpdateField(record.id, { default: value })}
         />
       )
     },
@@ -116,7 +142,7 @@ export default function Step1MetadataFields({
       dataIndex: 'required',
       width: 80,
       align: 'center' as const,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Checkbox
           checked={record.required}
           onChange={(checked) =>
@@ -127,14 +153,14 @@ export default function Step1MetadataFields({
     },
     {
       title: '可修改',
-      dataIndex: 'editable',
+      dataIndex: 'allowModify',
       width: 80,
       align: 'center' as const,
-      render: (_: any, record: MetadataField) => (
+      render: (_: any, record: any) => (
         <Checkbox
-          checked={record.editable}
+          checked={record.allowModify}
           onChange={(checked) =>
-            handleUpdateField(record.id, { editable: checked })
+            handleUpdateField(record.id, { allowModify: checked })
           }
         />
       )
@@ -145,24 +171,16 @@ export default function Step1MetadataFields({
       width: 100,
       align: 'center' as const,
       render: (_: any, record: MetadataField) => (
-        <Space>
-          <Button
-            type="text"
-            size="small"
-            onClick={() => handleAddField()}
-            className="cursor-pointer text-red-500"
-          >
+        <div className="flex items-center">
+          <Button type="text" onClick={() => handleAddField()}>
             添加行
           </Button>
-          <Button
-            type="text"
-            size="small"
-            onClick={() => handleDeleteField(record.id)}
-            className="cursor-pointer text-red-500"
-          >
-            删除行
-          </Button>
-        </Space>
+          {metadataFields.length > 1 && (
+            <Button type="text" onClick={() => handleDeleteField(record.id)}>
+              删除行
+            </Button>
+          )}
+        </div>
       )
     }
   ];
@@ -171,18 +189,16 @@ export default function Step1MetadataFields({
   const handleAddField = () => {
     const newField: MetadataField = {
       id: `field_${Date.now()}`,
-      sequence: metadataFields.length + 1,
-      chineseName: '',
-      englishName: '',
-      fieldType: '',
-      defaultValue: '默认null',
+      nameZh: '',
+      nameEn: '',
+      type: undefined,
+      default: 'null',
       required: true,
-      editable: true
+      allowModify: true
     };
     const updatedFields = [...metadataFields, newField];
     setMetadataFields(updatedFields);
     form.setFieldValue('metadataFields', updatedFields);
-    form.validate(['metadataFields']);
   };
 
   // 删除字段行
@@ -190,7 +206,6 @@ export default function Step1MetadataFields({
     const updatedFields = metadataFields.filter((field) => field.id !== id);
     setMetadataFields(updatedFields);
     form.setFieldValue('metadataFields', updatedFields);
-    form.validate(['metadataFields']);
   };
 
   // 更新字段
@@ -212,10 +227,30 @@ export default function Step1MetadataFields({
   };
 
   // 处理导入确认
-  const handleImportConfirm = (importType: string, fileData: any) => {
-    // TODO: 根据导入类型和文件数据，解析并更新字段列表
-    console.log('导入类型:', importType);
-    console.log('文件数据:', fileData);
+  const handleImportConfirm = (
+    importType: ImportType,
+    dataAssetFields: DataAssetField[]
+  ) => {
+    // 将外部数据转换为内部使用结构
+    const mapped: MetadataField[] = (dataAssetFields || []).map((f, idx) => ({
+      id: `field_import_${Date.now()}_${idx}`,
+      nameZh: f.nameZh ?? '',
+      nameEn: f.nameEn ?? '',
+      type: f.type ?? '',
+      default: f.default ?? '',
+      required: !!f.required,
+      allowModify: !!f.allowModify
+    }));
+
+    if (importType === ImportType.overwrite) {
+      setMetadataFields(mapped);
+      form.setFieldValue('metadataFields', mapped);
+    } else {
+      const combined = [...metadataFields, ...mapped];
+      setMetadataFields(combined);
+      form.setFieldValue('metadataFields', combined);
+    }
+
     Message.success('字段导入成功');
   };
 
@@ -224,8 +259,6 @@ export default function Step1MetadataFields({
     const updatedDataSources = { ...dataSources, [key]: checked };
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
-    // 触发表单验证
-    form.validate(['dataSources']);
   };
 
   // 全选/取消全选数据源
@@ -238,7 +271,6 @@ export default function Step1MetadataFields({
     };
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
-    form.validate(['dataSources']);
   };
 
   // 验证字段列表的自定义验证器
@@ -249,8 +281,7 @@ export default function Step1MetadataFields({
       } else {
         // 验证所有字段是否填写完整
         const incompleteFields = metadataFields.some(
-          (field) =>
-            !field.chineseName || !field.englishName || !field.fieldType
+          (field) => !field.nameZh || !field.nameEn || !field.type
         );
         if (incompleteFields) {
           callback('请填写完整的字段信息');
@@ -335,18 +366,13 @@ export default function Step1MetadataFields({
             <Table
               columns={columns}
               className="w-full"
-              data={metadataFields}
+              data={metadataFields.map((f, idx) => ({
+                ...f,
+                sequence: idx + 1
+              }))}
               pagination={false}
               border={false}
             />
-
-            {/* {metadataFields.length > 0 && (
-              <div style={{ marginTop: '16px' }}>
-                <Button type="text" onClick={handleAddField}>
-                  添加行
-                </Button>
-              </div>
-            )} */}
           </div>
         </FormItem>
 
@@ -429,7 +455,7 @@ export default function Step1MetadataFields({
       </Form>
 
       {/* 操作按钮 */}
-      <div className="flex gap-4">
+      <div className={styles.actionBar}>
         <Button type="primary" onClick={handleNextStep}>
           下一步
         </Button>

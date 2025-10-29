@@ -472,11 +472,20 @@ export const ModaForgeResourceEndpoints = {
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
 
   // 数据资产接口
+  // 获取数据资产列表
   dataAssetList: PrefixAimdp + '/ListDataAssets',
+  // 获取数据资产详情
   dataAssetDetail: PrefixAimdp + '/GetDataAsset',
+  // 创建数据资产
   dataAssetCreate: PrefixAimdp + '/CreateDataAsset',
+  // 更新数据资产
   dataAssetUpdate: PrefixAimdp + '/EditDataAsset',
-  dataAssetDelete: PrefixAimdp + '/DeleteDataAsset'
+  // 删除数据资产
+  dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
+  // 解析数据资产字段文件
+  analyzeDataAssetFieldsFile: PrefixAimdp + '/AnalyzeDataAssetFieldsFile',
+  // 查询支持的字段类型
+  listDataAssetFieldTypes: PrefixAimdp + '/ListDataAssetFieldTypes'
 };
 
 /**

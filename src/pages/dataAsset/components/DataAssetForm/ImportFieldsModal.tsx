@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Radio, Button, Message, Form } from '@arco-design/web-react';
 import FieldImportUpload from './FieldImportUpload';
-import {
-  UploadItem,
-  type UploadStatus
-} from '@arco-design/web-react/es/Upload';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
+import { ImportType, UploadStatus } from '../../types';
+import { DataAssetField } from '@/types/dataAssetApi';
 
 const FormItem = Form.Item;
 
 interface ImportFieldsModalProps {
   visible: boolean;
   onClose: () => void;
-  onConfirm: (importType: string, fileData: any) => void;
+  onConfirm: (importType: ImportType, fileData: DataAssetField[]) => void;
 }
 
 const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
@@ -21,7 +20,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [isUploading, setIsUploading] = useState(false);
-  const [fileData, setFileData] = useState<any>(null);
+  const [fileData, setFileData] = useState<UploadItem | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -35,7 +34,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
     (data: UploadItem) => {
       setFileData(data);
       // 验证文件字段
-      if (data?.status === 'done') {
+      if (data?.status === UploadStatus.done) {
         form.setFieldValue('fileData', data);
         form.clearFields('fileData');
       } else {
@@ -48,7 +47,9 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
   const validateFileData = useCallback(
     (value: any, callback: any) => {
       if (!fileData) {
-        callback('请选择并上传文件');
+        // TODO: 联调放开验证
+        // callback('请选择并上传文件');
+        callback();
       } else {
         callback();
       }
@@ -59,7 +60,34 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
-      onConfirm(values.importType, fileData);
+      // TODO: 确认返回值,先写死
+      // onConfirm(values.importType, fileData?.response?.data ?? []);
+      onConfirm(values.importType, [
+        {
+          nameZh: '111',
+          nameEn: '111',
+          type: 'string',
+          default: 'null',
+          required: true,
+          allowModify: true
+        },
+        {
+          nameZh: '222',
+          nameEn: '222',
+          type: 'number',
+          default: 'null',
+          required: true,
+          allowModify: true
+        },
+        {
+          nameZh: '333',
+          nameEn: '333',
+          type: 'boolean',
+          default: 'null',
+          required: true,
+          allowModify: true
+        }
+      ]);
 
       // 重置状态
       form.resetFields();
@@ -91,7 +119,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
       <Form
         form={form}
         initialValues={{
-          importType: 'append'
+          importType: ImportType.append
         }}
         className="mb-[20px]"
       >
@@ -104,8 +132,8 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
           rules={[{ required: true, message: '请选择导入方式' }]}
         >
           <Radio.Group>
-            <Radio value="append">追加导入</Radio>
-            <Radio value="overwrite">覆盖导入</Radio>
+            <Radio value={ImportType.append}>追加导入</Radio>
+            <Radio value={ImportType.overwrite}>覆盖导入</Radio>
           </Radio.Group>
         </FormItem>
 

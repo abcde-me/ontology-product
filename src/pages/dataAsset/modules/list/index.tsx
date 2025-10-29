@@ -3,9 +3,12 @@ import { Button, Table, Pagination } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
+import DataAssetTableList from '../../components/DataAssetTableList';
+import DataAssetTableCard from '../../components/DataAssetTableCard';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState([]);
+  const [viewType, setViewType] = useState('list');
   const history = useHistory();
 
   const handleCreateDataAsset = () => {
@@ -32,7 +35,13 @@ export default function DataAssetList() {
             })}
           </div>
         ) : (
-          <div>{/* TODO: 实现数据资产列表展示 */}</div>
+          <div>
+            {viewType === 'list' ? (
+              <DataAssetTableList />
+            ) : (
+              <DataAssetTableCard />
+            )}
+          </div>
         )}
       </div>
     </div>

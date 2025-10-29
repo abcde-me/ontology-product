@@ -12,3 +12,14 @@
   right: 0;
   z-index: 1;
 }
+
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border-2, #e5e6eb);
+  display: flex;
+  gap: 16px;
+  z-index: 5;
+}
