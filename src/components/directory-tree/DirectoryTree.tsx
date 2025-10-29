@@ -659,7 +659,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
               {/* <Button
                 type="text"
                 size="small"
@@ -746,7 +746,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               return (
                 <div className="directory-tree-extra">
-                  <PermissionWrapper permission={nowPermissions.CAN_RENAME}>
+                  <PermissionWrapper permission={nowPermissions.MODIFY}>
                     <Tooltip color="white" content="重命名">
                       <IconEdit
                         className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -754,7 +754,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       />
                     </Tooltip>
                   </PermissionWrapper>
-                  <PermissionWrapper permission={nowPermissions.CAN_COPY}>
+                  <PermissionWrapper permission={nowPermissions.CREATE}>
                     {node.dataRef?.type !== PythonItemType.Directory && (
                       <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
@@ -766,7 +766,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       </Tooltip>
                     )}
                   </PermissionWrapper>
-                  <PermissionWrapper permission={nowPermissions.CAN_DELETE}>
+                  <PermissionWrapper permission={nowPermissions.DELETE}>
                     <Tooltip color="white" content="删除">
                       <IconDelete
                         className="text-[14px] hover:text-[rgb(var(--primary-6))]"
