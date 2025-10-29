@@ -1,5 +1,9 @@
 import UAPI from '@/api';
-import { CreateDataAssetRes, DataAssetField } from '@/types/dataAssetApi';
+import {
+  CreateDataAssetRes,
+  DataAssetField,
+  Empty
+} from '@/types/dataAssetApi';
 
 // 获取数据资产列表
 export async function getDataAssetList(params: any = {}) {
@@ -39,11 +43,29 @@ export async function analyzeDataAssetFieldsFile(params: {
 // 查询支持的字段类型
 export async function listDataAssetFieldTypes(): Promise<ApiRes<string[]>> {
   return Promise.resolve({
-    code: '0',
+    code: 0,
     status: 200,
     data: ['string', 'number', 'boolean', 'date', 'object'],
     message: 'success',
     requestId: ''
   });
   // return await UAPI.RES.listDataAssetFieldTypes({}).post().inRegion().do();
+}
+
+// 查询数据来源
+export async function listDataAssetSource(): Promise<ApiRes<Empty[]>> {
+  return await UAPI.RES.listDataAssetSource({}).post().inRegion().do();
+}
+
+export async function editDataAssetColumnMap(
+  params: any
+): Promise<ApiRes<any>> {
+  return Promise.resolve({
+    code: 0,
+    status: 200,
+    data: {},
+    message: 'success',
+    requestId: ''
+  });
+  // return await UAPI.RES.editDataAssetColumnMap({}).post(params).inRegion().do();
 }

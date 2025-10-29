@@ -38,3 +38,17 @@ export interface Empty {
    */
   type: string;
 }
+
+export interface EditDataAssetColumnMapReq {
+  fields: DataAssetField[];
+  source: Empty[];
+}
+
+export interface EditDataAssetColumnMapRes {
+  data: {
+    /** 数据资产字段英文名 */
+    field_name_en: string;
+    /** 与数据来源字段的映射关系 */
+    mapping: Empty;
+  };
+}

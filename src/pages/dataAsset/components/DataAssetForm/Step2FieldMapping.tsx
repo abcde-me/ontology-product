@@ -173,26 +173,26 @@ export default function Step2FieldMapping({
         <Space>
           <Button
             type="text"
-            size="small"
             onClick={() => handleAddMapping()}
             className="cursor-pointer text-green-500"
           >
             添加行
           </Button>
-          <Button
-            type="text"
-            size="small"
-            onClick={() => handleDeleteMapping(record.id)}
-            className="cursor-pointer text-red-500"
-          >
-            删除行
-          </Button>
+          {mappings.length > 1 && (
+            <Button
+              type="text"
+              onClick={() => handleDeleteMapping(record.id)}
+              className="cursor-pointer text-red-500"
+            >
+              删除行
+            </Button>
+          )}
         </Space>
       )
     });
 
     return cols;
-  }, [dataSources]);
+  }, [dataSources, mappings]);
 
   // 初始化映射
   useEffect(() => {
