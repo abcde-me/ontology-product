@@ -26,6 +26,7 @@ import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useHasPermission } from '@/store/userInfoStore';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -57,6 +58,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
+
+    // 检查编辑权限
+    const canModify = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -289,7 +293,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 if (update.focusChanged) {
                   handleFocusChange(update.view.hasFocus);
                 }
-              })
+              }),
+              // 根据权限控制编辑器是否可编辑
+              EditorView.editable.of(canModify)
             ]}
             theme={myTheme}
             basicSetup={{
