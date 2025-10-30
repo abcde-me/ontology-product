@@ -22,6 +22,7 @@ type TabKey = 'files' | 'tools' | 'data' | 'daset';
 
 const Python: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const isCanCreate = useHasPermission(PYSPARK_PERMISSIONS.CREATE);
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
@@ -36,7 +37,7 @@ const Python: React.FC = memo(() => {
   const [currentFolderId, setCurrentFolderId] = useState<string>('0');
 
   // 用于存储创建权限的状态
-  const [isCanCreate, setIsCanCreate] = useState<boolean>(true);
+  // const [isCanCreate, setIsCanCreate] = useState<boolean>(true);
 
   // FileManager 的引用
   const fileManagerRef = useRef<DirectoryTreeRef>(null);
@@ -59,7 +60,7 @@ const Python: React.FC = memo(() => {
 
   // 处理创建权限变化的回调
   const handleCanCreateChange = (canCreate: boolean) => {
-    setIsCanCreate(canCreate);
+    // setIsCanCreate(canCreate);
   };
 
   const {
@@ -150,7 +151,7 @@ const Python: React.FC = memo(() => {
                 ref={fileManagerRef}
                 externalSelectedKeys={fileManagerSelectedKeys}
                 onCurrentFolderChange={setCurrentFolderId} // 传递当前文件夹变化的回调
-                onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
+                // onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
               />
             )}
           </TabPane>
@@ -177,51 +178,47 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
-            <TabPane
-              key="tools"
-              title={
-                <Popover content="算子库" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <SuanziIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {activeTab === 'tools' && (
-                <ToolsManager
-                  onInsertContent={insertContentToEditor}
-                  getIsEditorFocused={() => isEditorFocusedRef.current}
-                />
-              )}
-            </TabPane>
-          )}
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_SEARCH_EXPORTS) && (
-            <TabPane
-              key="daset"
-              title={
-                <Popover content="数据集导出任务" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <DasetIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {isDasetTab && <DatasetsList />}
-            </TabPane>
-          )}
+          <TabPane
+            key="tools"
+            title={
+              <Popover content="算子库" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <SuanziIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
+              />
+            )}
+          </TabPane>
+          <TabPane
+            key="daset"
+            title={
+              <Popover content="数据集导出任务" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <DasetIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {isDasetTab && <DatasetsList />}
+          </TabPane>
         </Tabs>
       </Sider>
       {!isDasetTab && (
