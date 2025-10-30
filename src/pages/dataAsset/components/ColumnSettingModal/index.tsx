@@ -9,7 +9,7 @@ import {
   Input
 } from '@arco-design/web-react';
 import { IconDelete, IconClose, IconSearch } from '@arco-design/web-react/icon';
-import './index.css'; // 确保引入样式文件
+import './index.module.scss'; // 确保引入样式文件
 // @ts-ignore
 import Sortable from 'react-sortablejs';
 const SortableAny = Sortable as any;
@@ -132,9 +132,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       onOk={() => onOk(selectedFields)}
       onCancel={onCancel}
       className="column-setting-modal"
-      style={{ width: 900 }}
+      style={{ width: 900, height: 800 }}
     >
-      <div className="flex justify-between gap-[16px] rounded-[12px] border-[1px] border-[var(--color-border-2)] pl-[16px]">
+      <div className="flex h-full justify-between gap-[16px] rounded-[12px] border-[1px] border-[var(--color-border-2)] pl-[16px]">
         {/* 左侧表格区（带搜索） */}
         <div>
           <div className="mb-[16px] mt-[16px] flex items-center justify-between">
@@ -162,7 +162,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               onChange: (keys) => setSelectedIds(keys as string[])
             }}
             rowClassName={(_, idx) =>
-              idx === displayFields.length - 1 ? 'no-border-bottom' : ''
+              idx === displayFields.length - 1
+                ? 'column-setting-modal-table no-border-bottom'
+                : ''
             }
             columns={[
               { title: '字段名称', dataIndex: 'name', width: 310 },
