@@ -6,12 +6,13 @@ import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
 import SearchArea, { SearchField } from '../../components/SearchArea';
+import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import { getTagList } from '@/api/datasetManagement';
 import { listDataAssetSource } from '@/api/dataAsset';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState([]);
-  const [viewType, setViewType] = useState('list');
+  const [viewType, setViewType] = useState<ViewType>('list');
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -113,14 +114,21 @@ export default function DataAssetList() {
     // TODO: 重新获取列表数据
   };
 
+  // 切换视图类型
+  const handleViewTypeChange = (type: ViewType) => {
+    setViewType(type);
+  };
+
   return (
     <div className="h-full w-full py-5 pr-5">
       <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-        <div className="mb-4 h-[30px] w-full leading-[30px]">
-          <p className="text-xl font-bold">
-            数据资产（{dataAssetList.length}）
-          </p>
-        </div>
+        {dataAssetList.length !== 0 && (
+          <div className="mb-4 h-[30px] w-full leading-[30px]">
+            <p className="text-xl font-bold">
+              数据资产（{dataAssetList.length}）
+            </p>
+          </div>
+        )}
 
         {/* 搜索区域 */}
         <SearchArea
@@ -129,6 +137,14 @@ export default function DataAssetList() {
           onFieldSearch={handleFieldSearch}
           onReset={handleReset}
         />
+
+        {/* 标题和视图切换区域 */}
+        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[30px]">
+          <p className="text-xl font-bold">
+            数据资产（{dataAssetList.length}）
+          </p>
+          <ViewToggle value={viewType} onChange={handleViewTypeChange} />
+        </div>
 
         {dataAssetList.length !== 0 ? (
           <div className="flex h-[calc(100%-70px)] items-center justify-center">

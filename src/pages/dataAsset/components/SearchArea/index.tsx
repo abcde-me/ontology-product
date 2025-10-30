@@ -274,9 +274,9 @@ export default function SearchArea({
   };
 
   return (
-    <div className="mb-4">
+    <div className="border-b border-[var(--color-border-2)] pb-[24px]">
       {/* 主搜索区域 */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Input
           className="flex-1"
           placeholder={mainSearchPlaceholder}
@@ -312,7 +312,7 @@ export default function SearchArea({
 
       {/* 字段搜索区域（可展开/收起） */}
       {isFieldSearchExpanded && (
-        <div>
+        <div className="pt-[24px]">
           {/* 字段搜索列表 */}
           {visibleFields.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-4">
@@ -328,7 +328,7 @@ export default function SearchArea({
           )}
 
           {/* 操作按钮区域 */}
-          <div className="flex items-center gap-2 border-b border-[var(--color-border-2)] pb-[24px]">
+          <div className="flex items-center gap-2">
             <QueryButton />
             <Button onClick={handleReset}>重置</Button>
             <Popover
@@ -341,10 +341,6 @@ export default function SearchArea({
               <Button type="text" className="ml-auto flex items-center gap-1">
                 <IconSettings />
                 设置搜索条件
-                {/* <IconDown
-                                    className={`transition-transform ${settingsVisible ? 'rotate-180' : ''
-                                        }`}
-                                /> */}
               </Button>
             </Popover>
           </div>
