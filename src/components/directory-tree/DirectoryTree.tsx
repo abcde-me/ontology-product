@@ -677,30 +677,32 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               </div>
             </PermissionWrapper>
           ) : (
-            <Dropdown
-              trigger="click"
-              position="bl"
-              droplist={
-                <Menu
-                  onClickMenuItem={(key) => {
-                    if (key === 'folder') {
-                      startRootCreate(true);
-                    } else if (key === 'file') {
-                      startRootCreate(false);
-                    }
-                  }}
-                >
-                  <Menu.Item key="file">新建PySpark</Menu.Item>
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
-                </Menu>
-              }
-            >
-              {isCanCreate && (
-                <Button type="text" size="small" icon={<IconPlus />}>
-                  {newButtonText}
-                </Button>
-              )}
-            </Dropdown>
+            <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
+              <Dropdown
+                trigger="click"
+                position="bl"
+                droplist={
+                  <Menu
+                    onClickMenuItem={(key) => {
+                      if (key === 'folder') {
+                        startRootCreate(true);
+                      } else if (key === 'file') {
+                        startRootCreate(false);
+                      }
+                    }}
+                  >
+                    <Menu.Item key="file">新建PySpark</Menu.Item>
+                    <Menu.Item key="folder">新建文件夹</Menu.Item>
+                  </Menu>
+                }
+              >
+                {isCanCreate && (
+                  <Button type="text" size="small" icon={<IconPlus />}>
+                    {newButtonText}
+                  </Button>
+                )}
+              </Dropdown>
+            </PermissionWrapper>
           )}
         </div>
 
