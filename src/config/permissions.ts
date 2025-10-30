@@ -68,7 +68,7 @@ export const DATA_LOAD_PERMISSIONS = {
 export const WORKFLOW_LIST_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:workflow:manage:create',
   CAN_GET: 'aimdp-manager:workflow:read:list',
-  CAN_COPY: 'aimdp-manager:workflow:read:list',
+  CAN_COPY: 'aimdp-manager:workflow:manage:create',
   CAN_DELETE: 'aimdp-manager:workflow:manage:delete',
 
   LIST: 'aimdp-manager:workflow:read:list', // 菜单权限
