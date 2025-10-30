@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Table, Pagination, Message } from '@arco-design/web-react';
-import { IconPlus, IconSettings } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconSettings,
+  IconDelete,
+  IconEdit
+} from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
@@ -155,13 +160,36 @@ export default function DataAssetList() {
           </p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
-              <Button
-                icon={<IconSettings />}
-                className="mr-[20px]"
-                onClick={() => setColumnModalOpen(true)}
-              >
-                列设置
-              </Button>
+              <>
+                <Button
+                  icon={<IconDelete />}
+                  className="mr-[20px]"
+                  onClick={() => setColumnModalOpen(true)}
+                >
+                  批量删除
+                </Button>
+                <Button
+                  icon={<IconEdit />}
+                  className="mr-[20px]"
+                  onClick={() => setColumnModalOpen(true)}
+                >
+                  批量修改
+                </Button>
+                <Button
+                  icon={<IconSettings />}
+                  className="mr-[20px]"
+                  onClick={() => setColumnModalOpen(true)}
+                >
+                  资产设置
+                </Button>
+                <Button
+                  icon={<IconSettings />}
+                  className="mr-[20px]"
+                  onClick={() => setColumnModalOpen(true)}
+                >
+                  列设置
+                </Button>
+              </>
             )}
             <ViewToggle value={viewType} onChange={handleViewTypeChange} />
           </div>
@@ -178,7 +206,19 @@ export default function DataAssetList() {
         ) : (
           <div>
             {viewType === ViewType.LIST ? (
-              <DataAssetTableList />
+              <DataAssetTableList
+                // @ts-expect-error
+                data={dataAssetList}
+                onEditAsset={(record) => {
+                  /* TODO: 跳转到资产编辑 */
+                }}
+                onEditTags={(record) => {
+                  /* TODO: 弹出标签编辑 */
+                }}
+                onDelete={(record) => {
+                  /* TODO: 触发删除逻辑 */
+                }}
+              />
             ) : (
               <DataAssetTableCard />
             )}
