@@ -177,51 +177,47 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
-            <TabPane
-              key="tools"
-              title={
-                <Popover content="算子库" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <SuanziIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {activeTab === 'tools' && (
-                <ToolsManager
-                  onInsertContent={insertContentToEditor}
-                  getIsEditorFocused={() => isEditorFocusedRef.current}
-                />
-              )}
-            </TabPane>
-          )}
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_SEARCH_EXPORTS) && (
-            <TabPane
-              key="daset"
-              title={
-                <Popover content="数据集导出任务" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <DasetIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {isDasetTab && <DatasetsList />}
-            </TabPane>
-          )}
+          <TabPane
+            key="tools"
+            title={
+              <Popover content="算子库" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <SuanziIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
+              />
+            )}
+          </TabPane>
+          <TabPane
+            key="daset"
+            title={
+              <Popover content="数据集导出任务" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <DasetIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {isDasetTab && <DatasetsList />}
+          </TabPane>
         </Tabs>
       </Sider>
       {!isDasetTab && (
