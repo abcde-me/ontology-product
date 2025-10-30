@@ -20,7 +20,7 @@ const columns = [
     title: '序号',
     dataIndex: 'index',
     width: 80,
-    key: (_, idx) => `${idx}`,
+    key: 'index',
     render: (_: any, __: any, idx: number) => idx + 1
   },
   {
@@ -33,11 +33,12 @@ const columns = [
   {
     title: '资产标签',
     dataIndex: 'tags',
+    key: 'tags',
     render: (tag_names: string[]) => {
       if (!tag_names || tag_names.length === 0) return '-';
       return (
         <Space size="mini">
-          {tag_names && tag_names.length > 0 && tag_names[0] && (
+          {tag_names[0] && (
             <Tag>
               {tag_names[0].length > 2 ? (
                 <Tooltip content={tag_names[0]}>
@@ -48,15 +49,10 @@ const columns = [
               )}
             </Tag>
           )}
-          {tag_names && tag_names.length > 1 && (
+          {tag_names.length > 1 && (
             <Tooltip
               content={tag_names.map((tag, index) => (
-                <Tag
-                  key={index}
-                  style={{
-                    margin: '2px 2px'
-                  }}
-                >
+                <Tag key={`${tag}-${index}`} style={{ margin: '2px 2px' }}>
                   {tag}
                 </Tag>
               ))}
@@ -142,6 +138,7 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
       data={data}
       pagination={false}
       scroll={{ x: 'max-content' }}
+      rowKey={(record) => record.name}
     />
   );
 };
