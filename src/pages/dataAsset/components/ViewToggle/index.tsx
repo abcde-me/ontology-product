@@ -1,8 +1,12 @@
 import React from 'react';
-import { Radio } from '@arco-design/web-react';
 import { IconApps, IconMenu } from '@arco-design/web-react/icon';
 
-export type ViewType = 'card' | 'list';
+export enum ViewType {
+  /** 卡片视图 */
+  CARD = 'card',
+  /** 列表视图 */
+  LIST = 'list'
+}
 
 export interface ViewToggleProps {
   /** 当前选中的视图类型 */
@@ -24,78 +28,44 @@ export default function ViewToggle({
     }
   };
 
-  const isCardSelected = value === 'card';
-  const isListSelected = value === 'list';
-  const borderColor =
-    isCardSelected || isListSelected
-      ? 'rgb(var(--primary-6))'
-      : 'var(--color-border-2)';
+  const selectedView = value;
 
   return (
-    <div
-      className={`inline-flex overflow-hidden rounded bg-white ${className}`}
-      style={{
-        border: `1px solid ${borderColor}`
-      }}
-    >
-      <Radio.Group
-        value={value}
-        onChange={handleChange}
-        style={{
-          display: 'inline-flex',
-          border: 'none'
-        }}
-        className="[&_.arco-radio-button-wrapper]:m-0 [&_.arco-radio-button-wrapper]:p-0 [&_.arco-radio]:hidden"
+    <div className={'flex items-center ' + className}>
+      <button
+        type="button"
+        onClick={() => handleChange(ViewType.CARD)}
+        className={
+          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-bl-[4px] rounded-tl-[4px] border bg-white ' +
+          (selectedView === ViewType.CARD
+            ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
+            : 'border-[var(--color-border-2)]')
+        }
       >
-        {/* 卡片视图选项 */}
-        <Radio value="card">
-          {({ checked }) => {
-            return (
-              <div
-                className="flex cursor-pointer items-center justify-center px-3 py-1.5 transition-all"
-                style={{
-                  borderRight: checked
-                    ? '1px solid rgb(var(--primary-6))'
-                    : '1px solid var(--color-border-2)',
-                  borderTopLeftRadius: '4px',
-                  borderBottomLeftRadius: '4px'
-                }}
-              >
-                <IconApps
-                  className={`text-base ${
-                    checked
-                      ? 'text-[rgb(var(--primary-6))]'
-                      : 'text-[var(--color-text-2)]'
-                  }`}
-                />
-              </div>
-            );
-          }}
-        </Radio>
-
-        {/* 列表视图选项 */}
-        <Radio value="list">
-          {({ checked }) => {
-            return (
-              <div
-                className="flex cursor-pointer items-center justify-center px-3 py-1.5 transition-all"
-                style={{
-                  borderTopRightRadius: '4px',
-                  borderBottomRightRadius: '4px'
-                }}
-              >
-                <IconMenu
-                  className={`text-base ${
-                    checked
-                      ? 'text-[rgb(var(--primary-6))]'
-                      : 'text-[var(--color-text-2)]'
-                  }`}
-                />
-              </div>
-            );
-          }}
-        </Radio>
-      </Radio.Group>
+        <IconApps
+          className={
+            'text-[22px] ' +
+            (selectedView === 'card' ? 'text-[var(--primary-6)]' : '')
+          }
+        />
+      </button>
+      <button
+        type="button"
+        onClick={() => handleChange(ViewType.LIST)}
+        className={
+          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-br-[4px] rounded-tr-[4px] border bg-white ' +
+          (selectedView === ViewType.LIST
+            ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
+            : 'border-[var(--color-border-2)]')
+        }
+      >
+        <IconMenu
+          className={
+            'text-[22px] ' +
+            (selectedView === 'list' ? 'text-[var(--primary-6)]' : '')
+          }
+        />
+      </button>
     </div>
   );
 }

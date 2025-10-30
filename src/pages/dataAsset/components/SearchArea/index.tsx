@@ -209,7 +209,7 @@ export default function SearchArea({
   const QueryButton = () => {
     const button = (
       <Button type="primary" disabled={!hasCheckedFields} onClick={handleQuery}>
-        确定
+        查询
       </Button>
     );
 

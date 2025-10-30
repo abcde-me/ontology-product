@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, Pagination } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { Button, Table, Pagination, Message } from '@arco-design/web-react';
+import { IconPlus, IconSettings } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
@@ -9,10 +9,11 @@ import SearchArea, { SearchField } from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import { getTagList } from '@/api/datasetManagement';
 import { listDataAssetSource } from '@/api/dataAsset';
+import ColumnSettingModal from '../../components/ColumnSettingModal';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState([]);
-  const [viewType, setViewType] = useState<ViewType>('list');
+  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -20,6 +21,7 @@ export default function DataAssetList() {
   const [assetSources, setAssetSources] = useState<
     Array<{ label: string; value: any }>
   >([]);
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
   const history = useHistory();
 
   // 初始化搜索字段配置
@@ -119,6 +121,14 @@ export default function DataAssetList() {
     setViewType(type);
   };
 
+  // 列设置弹窗回调
+  const handleModalOk = (selectedFields: any) => {
+    // TODO: 处理列设置确定逻辑
+    setColumnModalOpen(false);
+    Message.success('列设置已保存');
+  };
+  const handleModalCancel = () => setColumnModalOpen(false);
+
   return (
     <div className="h-full w-full py-5 pr-5">
       <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
@@ -139,11 +149,22 @@ export default function DataAssetList() {
         />
 
         {/* 标题和视图切换区域 */}
-        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[30px]">
+        <div className="mb-4 mt-[24px] flex h-[30px] w-full items-center justify-between leading-[32px]">
           <p className="text-xl font-bold">
             数据资产（{dataAssetList.length}）
           </p>
-          <ViewToggle value={viewType} onChange={handleViewTypeChange} />
+          <div className="flex items-center">
+            {viewType === ViewType.LIST && (
+              <Button
+                icon={<IconSettings />}
+                className="mr-[20px]"
+                onClick={() => setColumnModalOpen(true)}
+              >
+                列设置
+              </Button>
+            )}
+            <ViewToggle value={viewType} onChange={handleViewTypeChange} />
+          </div>
         </div>
 
         {dataAssetList.length !== 0 ? (
@@ -156,7 +177,7 @@ export default function DataAssetList() {
           </div>
         ) : (
           <div>
-            {viewType === 'list' ? (
+            {viewType === ViewType.LIST ? (
               <DataAssetTableList />
             ) : (
               <DataAssetTableCard />
@@ -164,6 +185,12 @@ export default function DataAssetList() {
           </div>
         )}
       </div>
+      {/* 列设置弹窗 */}
+      <ColumnSettingModal
+        visible={columnModalOpen}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+      />
     </div>
   );
 }

@@ -54,7 +54,14 @@ export async function listDataAssetFieldTypes(): Promise<ApiRes<string[]>> {
 
 // 查询数据来源
 export async function listDataAssetSource(): Promise<ApiRes<Empty[]>> {
-  return await UAPI.RES.listDataAssetSource({}).post().inRegion().do();
+  return Promise.resolve({
+    code: 0,
+    status: 200,
+    data: [],
+    message: 'success',
+    requestId: ''
+  });
+  // return await UAPI.RES.listDataAssetSource({}).post().inRegion().do();
 }
 
 export async function editDataAssetColumnMap(
