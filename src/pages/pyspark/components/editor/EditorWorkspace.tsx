@@ -58,9 +58,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
-
-    // 检查编辑权限
-    const canModify = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
+    const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -186,6 +184,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
       if (!editorRef.current?.view) return;
 
+      // 检查权限
+      if (!hasUpdatePermission) {
+        Message.warning('没有编辑权限，无法插入内容');
+        return;
+      }
+
       const view = editorRef.current.view;
       const currentPos = view.state.selection.main.head;
 
@@ -279,6 +283,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
+            readOnly={
+              !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+            }
             extensions={[
               python(),
               lintGutter(),
@@ -293,9 +300,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 if (update.focusChanged) {
                   handleFocusChange(update.view.hasFocus);
                 }
-              }),
-              // 根据权限控制编辑器是否可编辑
-              EditorView.editable.of(canModify)
+              })
             ]}
             theme={myTheme}
             basicSetup={{
