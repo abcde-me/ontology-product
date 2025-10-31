@@ -219,7 +219,7 @@ export const menus: MenuModel[] = [
         }
       },
       {
-        title: '用户管理',
+        title: '用户组管理',
         icon: <MemberMenu className={iconClass} />,
         path:
           '/tenant/compute/modaforge/operationCenter?url=' +
@@ -269,6 +269,21 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('project') ?? false;
+        }
+      },
+      {
+        title: 'API Key管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'apiKeyMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/apikey'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('apikey') ?? false;
         }
       }
     ]
