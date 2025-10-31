@@ -219,6 +219,21 @@ export const menus: MenuModel[] = [
         }
       },
       {
+        title: '用户管理',
+        icon: <MemberMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/user-group'
+          ),
+        key: 'userGroupMgmt',
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('user-group') ?? false;
+        }
+      },
+      {
         title: '角色管理',
         icon: <BaseMenu className={iconClass} />,
         path:
