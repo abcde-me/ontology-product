@@ -7,15 +7,18 @@ import {
   Tooltip,
   Space
 } from '@arco-design/web-react';
+import { ColumnProps } from '@arco-design/web-react/es/Table';
+
 // 可以根据实际情况，扩展 props 以接受 columns 变动等
 export interface DataAssetTableListProps {
   data: any[];
+  columns?: ColumnProps[];
   onEditAsset?: (record: any) => void;
   onEditTags?: (record: any) => void;
   onDelete?: (record: any) => void;
 }
 
-const columns = [
+const defaultColumns = [
   {
     title: '序号',
     dataIndex: 'index',
@@ -112,14 +115,18 @@ const columns = [
 
 const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   data,
+  columns,
   onEditAsset,
   onEditTags,
   onDelete
 }) => {
+  // 使用传入的 columns 或默认的 columns
+  const tableColumns = columns || defaultColumns;
+
   return (
     <Table
       columns={
-        columns.map((col) =>
+        tableColumns.map((col) =>
           col.dataIndex === 'actions'
             ? {
                 ...col,
@@ -138,7 +145,7 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
       data={data}
       pagination={false}
       scroll={{ x: 'max-content' }}
-      rowKey={(record) => record.name}
+      rowKey={(record) => record.id || record.name || String(Math.random())}
     />
   );
 };
@@ -164,5 +171,4 @@ const mockData = [
   }
 ];
 
-// 默认导出 Demo 版（如需实际使用可恢复为：export default DataAssetTableList）
-export default () => <DataAssetTableList data={mockData} />;
+export default DataAssetTableList;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Table,
@@ -25,6 +25,7 @@ export interface ColumnField {
 
 export interface ColumnSettingModalProps {
   visible: boolean;
+  fields?: ColumnField[]; // 外部传入的字段列表
   onOk: (selected: ColumnField[]) => void;
   onCancel: () => void;
 }
@@ -76,12 +77,31 @@ const defaultSelected = ['1', '2', '3', '4'];
 
 const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   visible,
+  fields: externalFields,
   onOk,
   onCancel
 }) => {
-  const [fields, setFields] = useState<ColumnField[]>(mockFields);
-  const [selectedIds, setSelectedIds] = useState<string[]>(defaultSelected);
+  // 使用外部传入的 fields 或默认的 mockFields
+  const initialFields = externalFields || mockFields;
+  const [fields, setFields] = useState<ColumnField[]>(initialFields);
+  // 初始化选中的字段（外部传入时选择所有字段，否则使用默认）
+  const initialSelectedIds = externalFields
+    ? externalFields.map((f) => f.id).filter(Boolean)
+    : defaultSelected;
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
   const [searchKeyword, setSearchKeyword] = useState('');
+
+  // 当外部 fields 变化时更新内部状态
+  useEffect(() => {
+    if (externalFields) {
+      setFields(externalFields);
+      // 更新选中的字段ID列表
+      const allIds = externalFields.map((f) => f.id).filter(Boolean);
+      if (allIds.length > 0) {
+        setSelectedIds(allIds);
+      }
+    }
+  }, [externalFields]);
 
   const displayFields = searchKeyword
     ? fields.filter(

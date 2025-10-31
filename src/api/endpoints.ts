@@ -472,14 +472,10 @@ export const ModaForgeResourceEndpoints = {
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
 
   // 数据资产接口
+  // 查询数据资产表字段和映射关系
+  findDataAssetMapping: PrefixAimdp + '/FindDataAssetMapping',
   // 获取数据资产列表
-  dataAssetList: PrefixAimdp + '/ListDataAssets',
-  // 获取数据资产详情
-  dataAssetDetail: PrefixAimdp + '/GetDataAsset',
-  // 创建数据资产
-  dataAssetCreate: PrefixAimdp + '/CreateDataAsset',
-  // 更新数据资产
-  dataAssetUpdate: PrefixAimdp + '/EditDataAsset',
+  listDataAssetData: PrefixAimdp + '/ListDataAssetData',
   // 查询数据来源
   listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
   // 删除数据资产
@@ -489,7 +485,20 @@ export const ModaForgeResourceEndpoints = {
   // 查询支持的字段类型
   listDataAssetFieldTypes: PrefixAimdp + '/ListDataAssetFieldTypes',
   // 数据资产字段自动映射
-  editDataAssetColumnMap: PrefixAimdp + '/EditDataAssetColumnMap'
+  editDataAssetColumnMap: PrefixAimdp + '/EditDataAssetColumnMap',
+  // 创建数据资产和映射关系
+  createDataAssetAndMapping: PrefixAimdp + '/CreateDataAssetAndMapping',
+  // 修改数据资产和映射关系
+  editDataAsset: PrefixAimdp + '/EditDataAsset',
+  // 修改数据资产表列设置（前端展示）
+  editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
+  // 查询数据资产表列设置（前端展示）
+  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  // 查询指定字段去重后的数量
+  getDataAssetTableDistinctFieldCount:
+    PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
+  // 批量修改数据资产表中的数据信息
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
 };
 
 /**
