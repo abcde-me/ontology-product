@@ -215,7 +215,9 @@ export const menus: MenuModel[] = [
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
-          return url?.includes('user') ?? false;
+          return (
+            (url?.includes('/user') && !url?.includes('user-group')) ?? false
+          );
         }
       },
       {
@@ -259,7 +261,7 @@ export const menus: MenuModel[] = [
       {
         title: '项目管理',
         icon: <OrganMenu className={iconClass} />,
-        key: 'orgMgmt',
+        key: 'projectMgmt',
         path:
           '/tenant/compute/modaforge/operationCenter?url=' +
           encodeURIComponent(
