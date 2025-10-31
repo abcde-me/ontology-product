@@ -202,7 +202,6 @@ export const menus: MenuModel[] = [
           const url = new URLSearchParams(search).get('url');
           return url?.includes('organization') ?? false;
         }
-        // permission: PERMISSIONS.ORGANIZATION.LIST
       },
       {
         title: '用户管理',
@@ -218,7 +217,6 @@ export const menus: MenuModel[] = [
           const url = new URLSearchParams(search).get('url');
           return url?.includes('user') ?? false;
         }
-        // permission: PERMISSIONS.USER.LIST
       },
       {
         title: '角色管理',
@@ -234,7 +232,29 @@ export const menus: MenuModel[] = [
           const url = new URLSearchParams(search).get('url');
           return url?.includes('role') ?? false;
         }
-        // permission: PERMISSIONS.USER.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '工作空间',
+    key: 'mgmtGroup',
+    external: true,
+    children: [
+      {
+        title: '项目管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'orgMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/project'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('project') ?? false;
+        }
       }
     ]
   }
