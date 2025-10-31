@@ -219,7 +219,7 @@ export const menus: MenuModel[] = [
         }
       },
       {
-        title: '用户管理',
+        title: '用户组管理',
         icon: <MemberMenu className={iconClass} />,
         path:
           '/tenant/compute/modaforge/operationCenter?url=' +
