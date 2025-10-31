@@ -270,6 +270,21 @@ export const menus: MenuModel[] = [
           const url = new URLSearchParams(search).get('url');
           return url?.includes('project') ?? false;
         }
+      },
+      {
+        title: 'API Key管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'apiKeyMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/apikey'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('apikey') ?? false;
+        }
       }
     ]
   }
