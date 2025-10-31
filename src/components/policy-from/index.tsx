@@ -25,8 +25,12 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 
 function DemoForm(props, ref) {
   const { FuncChildFrom, seteditPolicy, initParams = {} } = props;
-  const [checkedManage, setCheckedManage] = useState(initParams.reordering ?? true);
-  const [checkedManagescore, setCheckedManagescore] = useState(initParams.checkedManagescore ?? true);
+  const [checkedManage, setCheckedManage] = useState(
+    initParams.reordering ?? true
+  );
+  const [checkedManagescore, setCheckedManagescore] = useState(
+    initParams.checkedManagescore ?? true
+  );
   const [form] = Form.useForm();
   const [initFromValue, setinitFromValue] = useState({
     retrievalV: 'hybrid_search',
@@ -123,7 +127,7 @@ function DemoForm(props, ref) {
         <Radio.Group
           onChange={(e) => {
             // e.target.value 获取当前选中的值
-            console.log('选中的值:', e);
+            // console.log('选中的值:', e);
           }}
         >
           {retrievalVlist.map((e, index) => {

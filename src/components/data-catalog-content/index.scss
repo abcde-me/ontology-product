@@ -1,7 +1,3 @@
-.arco-table-tr > th {
-  // background-color: rgb(245, 249, 255);
-}
-
 .unified-columns-wrapper {
   .unified-columns {
     display: flex;
@@ -75,4 +71,123 @@
   .jump-workflow:hover + .jump-workflow-icon {
     background-image: url(../../assets/jump-hover.svg);
   }
+}
+.hover-change .ellipsis-text {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.arco-table-tr:hover .hover-change .ellipsis-text {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
+}
+
+.arco-table-tr:hover .hover-change .ellipsis-text:hover {
+  color: rgba(67, 141, 251, 1);
+}
+// TODO 待优化
+.hover-change_normal .ellipsis-text {
+  color: #1e293b;
+}
+
+.arco-table-tr:hover .hover-change_normal .ellipsis-text {
+  color: rgb(0, 125, 250);
+  cursor: pointer;
+}
+
+.arco-table-tr:hover .hover-change_normal .ellipsis-text:hover {
+  color: rgba(67, 141, 251, 1);
+}
+
+//新建的数据库弹窗样式
+/* 弹窗头部样式 */
+.detailModal .arco-modal-header {
+  padding: 20px 24px 20px 28px !important;
+  font-size: 16px;
+  height: fit-content !important;
+  font-weight: 500;
+}
+
+.detailModal .arco-modal-close-icon {
+  top: 25px !important;
+}
+.detailModal .arco-modal-header {
+  border-bottom: none !important;
+}
+
+.detailModal .arco-modal-content {
+  padding: 0px 24px 24px 24px !important;
+  height: calc(700px - 90px);
+  overflow: hidden;
+}
+
+/* 弹窗内容容器 */
+.detailModal .modal-content-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.detailModal
+  .arco-tabs-header-nav-line.arco-tabs-header-nav-horizontal
+  > .arco-tabs-header-scroll
+  .arco-tabs-header-title:first-of-type {
+  margin-left: 0px !important;
+}
+.detailModal .arco-tabs-header-nav-line .arco-tabs-header-title {
+  margin-right: 32px !important;
+  padding: 9px 0px !important;
+}
+
+/* 固定状态的Tab头部 */
+.sticky-tabs-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e6eb;
+}
+
+/* 可滚动内容区域 */
+.scrollable-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  /* 自定义滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* 表格包装器样式 */
+.table-wrapper {
+  width: 100%;
+  min-width: max-content;
+  max-height: 490;
+  overflow: auto;
+}
+
+.detailModal .arco-table-custom-filter {
+  padding: 10px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+  background-color: white !important;
+}
+
+.detailModal .arco-table-filters {
+  top: -1.5px !important;
+}
+
+.ol-style {
+  margin-top: 12px;
+  list-style: none;
+  padding: 0px;
+}
+.ol-style li:nth-last-child {
+  margin-bottom: 0px;
+}
+.ol-style li {
+  /* margin-bottom: 8px; */
+  line-height: 24px;
+  font-size: 14px;
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import './index.css';
 import {
   Typography,
@@ -53,6 +53,8 @@ import {
 } from '@/components/data-catalog-content/components/popups-form/types';
 import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
+import getFileIcon from '@/components/file-icon';
+import { formatFileSize } from '@/utils/format';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -73,6 +75,7 @@ const formatDateTime = (dateTimeString: string): string => {
 
 // 数据集类型
 export interface Dataset {
+  latest_size: number;
   id: number;
   name: string;
   description: string;
@@ -88,6 +91,7 @@ export interface Dataset {
   src_model: string;
   latest_file_path: string;
   perms: string[];
+  storage_type: datasetStorageType;
   status:
     | 'creating'
     | 'create_failed'
@@ -136,6 +140,7 @@ const columns = (
   handleExport: (record: Dataset) => void,
   tagList: { id: number; name: string }[],
   selectedTagFilters: string[],
+  selectedStorageTypeFilters: string[], //存储格式过滤
   selectedStatusFilters: string[], //状态过滤
   sortField: string,
   sortOrder: string,
@@ -146,8 +151,8 @@ const columns = (
     title: '数据集名称',
     dataIndex: 'name',
     width: 200,
-    className: 'hover-change workflow-name',
-    rowClassName: 'hover-change',
+    className: 'dataset-management-hover-change workflow-name',
+    rowClassName: 'dataset-management-hover-change',
     render: (name: string, record: Dataset) => {
       if (!name) return '-';
       return (
@@ -266,6 +271,39 @@ const columns = (
         </div>
       );
     }
+  },
+  {
+    title: '存储格式',
+    dataIndex: 'storage_type',
+    width: 120,
+    filterIcon: <IconFilter />,
+    filters: [
+      { text: 'jsonl', value: datasetStorageType.jsonl },
+      { text: '文件', value: datasetStorageType.file },
+      { text: '数据库表', value: datasetStorageType.table }
+    ],
+    filteredValue: selectedStorageTypeFilters,
+    filterMultiple: true,
+    render: (status: string, record: Dataset) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div>{getFileIcon(record.storage_type ?? '-')}</div>
+          <span className="ml-[4px]">
+            {record.storage_type === datasetStorageType.table
+              ? '数据库表'
+              : record.storage_type === datasetStorageType.file
+                ? '文件'
+                : (record.storage_type ?? '-')}
+          </span>
+        </div>
+      );
+    }
+  },
+  {
+    title: '文件大小',
+    dataIndex: 'latest_size',
+    width: 120,
+    render: (_, record: Dataset) => formatFileSize(record.latest_size || 0)
   },
   {
     title: '状态',
@@ -484,22 +522,23 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) && (
-            <Button
-              type="text"
-              className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-              onClick={() => handleExport(record)}
-              disabled={record.status !== datasetStatus.normal}
-              style={{
-                padding: '0 8px 0 5px',
-                height: '100%',
-                borderTop: 'none',
-                borderBottom: 'none'
-              }}
-            >
-              导出
-            </Button>
-          )}
+          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
+            record.storage_type !== datasetStorageType.table && (
+              <Button
+                type="text"
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                onClick={() => handleExport(record)}
+                disabled={record.status !== datasetStatus.normal}
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
+                导出
+              </Button>
+            )}
           {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
             <Button
               type="text"
@@ -539,6 +578,13 @@ export enum datasetStatusName {
 }
 
 // 枚举数据集状态名称
+export enum datasetStorageType {
+  jsonl = 'jsonl',
+  file = 'file',
+  table = 'table'
+}
+
+// 枚举数据集状态名称
 export enum datasetStatus {
   creating = 'creating',
   create_failed = 'create_failed',
@@ -571,6 +617,10 @@ const DatasetManagement: React.FC = () => {
   const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
     []
   ); //选中的标签过滤
+
+  // 存储格式过滤相关状态
+  const [selectedStorageTypeFilters, setSelectedStorageTypeFilters] =
+    React.useState<string[]>([]); //选中的存储格式过滤
 
   // 状态过滤相关状态
   const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<
@@ -650,12 +700,14 @@ const DatasetManagement: React.FC = () => {
       name: formData.name,
       description: formData.description,
       tag_names: formData.tags || [],
+      storage_type: formData.storageType,
       src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
       src_extra:
         formData.dataSource === 'volume'
           ? {
               // path: fullPath,
-              path_id: formData.targetDataSource?.[1]?.[1] ?? ''
+              path_id: formData.targetDataSource?.[1]?.[1] ?? '',
+              path_file_ids: formData.path_file_ids || []
             }
           : {
               connector_id: parseInt(formData?.targetDataSource) || 0,
@@ -815,6 +867,12 @@ const DatasetManagement: React.FC = () => {
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
     }
+    console.log('selectedStorageTypeFilters', selectedStorageTypeFilters);
+
+    // 添加存储格式过滤参数
+    if (selectedStorageTypeFilters.length > 0) {
+      params.storage_type = selectedStorageTypeFilters;
+    }
 
     // 添加状态过滤参数
     if (selectedStatusFilters.length > 0) {
@@ -849,6 +907,7 @@ const DatasetManagement: React.FC = () => {
     actualSearchField,
     selectedTagFilters,
     selectedStatusFilters,
+    selectedStorageTypeFilters,
     sortField,
     sortOrder
   ]);
@@ -860,6 +919,14 @@ const DatasetManagement: React.FC = () => {
       setSelectedTagFilters(filters.tag_names);
       setCurrentPage(1); // 重置到第一页
     }
+    // 处理存储格式过滤
+    if (
+      filters.storage_type &&
+      filters.storage_type !== selectedStorageTypeFilters
+    ) {
+      setSelectedStorageTypeFilters(filters.storage_type);
+      setCurrentPage(1); // 重置到第一页
+    }
     // 处理状态过滤
     if (filters.status && filters.status !== selectedStatusFilters) {
       setSelectedStatusFilters(filters.status);
@@ -868,6 +935,12 @@ const DatasetManagement: React.FC = () => {
 
     if (filters.tag_names === undefined) {
       setSelectedTagFilters([]);
+      setCurrentPage(1);
+    }
+
+    // 处理存储格式过滤
+    if (filters.storage_type === undefined) {
+      setSelectedStorageTypeFilters([]);
       setCurrentPage(1);
     }
 
@@ -997,15 +1070,40 @@ const DatasetManagement: React.FC = () => {
     //   Message.warning('请先选择要导出的数据集');
     //   return;
     // }
+    // 过滤掉storage_type为table的数据集
+    const filteredRows = selectedRows.filter(
+      (row) => row.storage_type !== datasetStorageType.table
+    );
+    const filteredRowKeys = filteredRows.map((row) => row.id);
+
+    // 更新选中状态，移除不能导出的数据集
+    setSelectedRows(filteredRows);
+    setSelectedRowKeys(filteredRowKeys);
+
+    setDownloadData(null);
     setVisible(true);
-    console.log('批量导出:', selectedRows);
-    // Message.success(`开始导出 ${selectedRowKeys.length} 个数据集...`);
+    console.log('批量导出(已过滤table类型):', filteredRows);
+
+    // 如果过滤后有数据被移除，给用户提示
+    const removedCount = selectedRows.length - filteredRows.length;
+    if (removedCount > 0) {
+      Message.info(`已自动过滤 ${removedCount} 个数据库表类型的数据集`);
+    }
   };
   //清除选中状态函数
   const handClear = () => {
     setSelectedRowKeys([]);
     setSelectedRows([]);
   };
+  // 批量导出，未选择或只选中数据库表类型时禁用
+  const batchExportDisabled = useMemo(
+    () =>
+      selectedRows.filter(
+        (row: Dataset) => row.storage_type !== datasetStorageType.table
+      ).length === 0,
+    [selectedRows]
+  );
+
   return (
     <div
       style={{
@@ -1036,7 +1134,7 @@ const DatasetManagement: React.FC = () => {
         >
           数据集管理
         </h1>
-        <div
+        {/* <div
           style={{
             color: '#334155',
             margin: '0px',
@@ -1044,7 +1142,7 @@ const DatasetManagement: React.FC = () => {
           }}
         >
           管理用于模型精调和训练的数据集
-        </div>
+        </div> */}
       </div>
       <div className={styles.searchToolbar}>
         <Input.Group compact>
@@ -1108,7 +1206,7 @@ const DatasetManagement: React.FC = () => {
               <Button
                 icon={<IconDownload />}
                 className={styles.batchExportBtn}
-                disabled={selectedRowKeys.length === 0}
+                disabled={batchExportDisabled}
                 onClick={handleBatchExport}
               >
                 批量导出
@@ -1140,6 +1238,7 @@ const DatasetManagement: React.FC = () => {
           handleExport,
           tagList,
           selectedTagFilters,
+          selectedStorageTypeFilters,
           selectedStatusFilters,
           sortField,
           sortOrder,

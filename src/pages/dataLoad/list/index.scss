@@ -1,0 +1,88 @@
+.load-list {
+  .arco-timepicker-container {
+    width: 430px !important;
+  }
+
+  .arco-table-tr > th {
+    background-color: rgb(245, 249, 255) !important;
+  }
+
+  .arco-timepicker-list {
+    width: 50% !important;
+  }
+
+  /* .jump-a {
+    max-width: 160px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  } */
+  .cascader-dropdown .arco-cascader-list-item-label,
+  .arco-cascader-list-search-item-label {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .omit {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .text-ellipsis {
+    display: inline-block;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tbody .hover-change .ellipsis-text {
+    color: #1e293b;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
+    color: rgba(67, 141, 251, 100%);
+  }
+
+  tbody .arco-table-tr .txt:hover {
+    color: rgba(67, 141, 251, 100%);
+    cursor: pointer;
+  }
+}
+
+.arco-cascader-list-item-label {
+  white-space: nowrap; /* 禁止换行 */
+  overflow: hidden; /* 隐藏溢出内容 */
+  text-overflow: ellipsis; /* 超出部分显示... */
+  max-width: 212px;
+  font-size: 14px;
+}
+
+/* .cascader-dropdown .arco-cascader-list-wrapper {
+ 
+} */
+tbody .load-name .ellipsis-text {
+  font-weight: 600;
+}
+
+.text-prompt {
+  color: #6e7b8d;
+  font-size: 12px;
+}
+
+.upload-file .arco-upload-trigger-drag .arco-upload-trigger-tip {
+  margin-top: 4px !important;
+}
+
+.upload-file .arco-upload-trigger-tip {
+  white-space: wrap !important;
+  padding: 0 45px;
+  line-height: 18px !important;
+}

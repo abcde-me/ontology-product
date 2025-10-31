@@ -1,0 +1,107 @@
+.running-info-panel {
+  .panel-header {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .panel-content {
+    border-radius: 4px;
+    overflow: hidden;
+
+    .arco-tabs-header-nav {
+      background-color: #f8fafd !important;
+      // border-bottom: 1px solid var(--LineLine-color-border-2, #e2e8f0);
+    }
+  }
+
+  .tabs-container {
+    position: relative;
+
+    .copy-button {
+      position: absolute;
+      top: 48px;
+      right: 12px;
+      height: 24px;
+      padding: 0 12px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 10;
+      background-color: #fff;
+
+      &:hover {
+        background-color: #fff !important;
+      }
+    }
+
+    &:hover .copy-button {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .run-result-content,
+  .runlog-content {
+    white-space: pre; // 仅按换行符换行，保留空格
+    word-break: normal; // 不在单词中间断行
+    overflow-x: auto; // 容器边界出现横向滚动条
+    overflow-y: hidden;
+    overflow-wrap: normal; // 禁止自动换行
+    padding: 12px;
+  }
+
+  // .tab-content-wrapper 不再需要特殊样式，因为复制按钮现在在外部
+
+  .arco-tabs-content {
+    padding: 0;
+    height: 308px;
+    overflow-y: auto;
+  }
+
+  .arco-collapse {
+    border-radius: 0;
+  }
+
+  .arco-collapse-item-header-icon-down {
+    transform: rotate(0deg);
+  }
+
+  .arco-collapse-item-header {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .arco-collapse-item-content-box {
+    padding: 0 12px 12px;
+  }
+
+  .run-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--color-text-4);
+
+    .mr-4 {
+      margin-right: 4px;
+    }
+
+    .time-info {
+      margin-left: 8px;
+      font-size: 11px;
+      color: var(--color-text-3);
+      opacity: 0.8;
+    }
+
+    &.running {
+      color: #0a65cc;
+    }
+    &.success {
+      color: #059669;
+    }
+    &.failed {
+      color: #ef4444;
+    }
+  }
+}

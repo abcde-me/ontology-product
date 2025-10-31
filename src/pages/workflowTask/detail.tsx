@@ -33,6 +33,7 @@ import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { openNewPage } from '@/utils/env';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import ScriptingNode from './components/scripting-node';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -47,10 +48,10 @@ enum TaskRunStatus {
 
 // 枚举节点运行状态
 enum NodeRunStatus {
-  running = 0,
+  wait = 0,
   completeSuccess = 1,
   completeFail = 2,
-  wait = 3
+  running = 3
 }
 
 // 枚举节点类型
@@ -60,17 +61,8 @@ enum NodeType {
   audio = 'audio',
   video = 'video',
   cleaning = 'cleaning',
-  enhancement = 'enhancement'
-}
-
-// 枚举节点类型中文名称
-enum NodeTypeName {
-  text = '文本解析',
-  pic = '图片解析',
-  audio = '音频解析',
-  video = '视频解析',
-  cleaning = '数据清洗',
-  enhancement = '数据增强'
+  enhancement = 'enhancement',
+  scripting = 'scripting'
 }
 
 // 枚举开始时间结束时间字段
@@ -125,6 +117,15 @@ export default function WorkflowTaskDetail() {
     processed_data_num: 0,
     log: ''
   });
+  // 初始化脚本节点数据
+  const [scriptingNodeData, setScriptingNodeData] = useState({
+    run_log: '',
+    output_file_num: 0,
+    input_file_num: 0,
+    input_file_size: '',
+    output_file_size: ''
+  });
+
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化分页数据
@@ -173,8 +174,8 @@ export default function WorkflowTaskDetail() {
         )
           return;
         setWorkflowName(res.data.workflow_name);
-        setActiveNode(res.data.result_info.node_code);
         setActiveNodeType(res.data.result_info.task_type);
+        setActiveNode(res.data.result_info.node_code);
         // 判断第一个节点是否是解析数据节点
         const isParse =
           res.data.result_info.task_type === NodeType.text ||
@@ -183,19 +184,19 @@ export default function WorkflowTaskDetail() {
           res.data.result_info.task_type === NodeType.audio;
         setIsParseNode(isParse);
         // 将节点状态列表第一个运行中后面的状态都改为未开始
-        const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
-          (item: { status: number }) => item.status === 0
-        );
-        const updatedData = res.data.result_info.task_type_list.map(
-          (item: { status: number }, index: number) =>
-            (res.data.base_info.run_status === TaskRunStatus.fail ||
-              res.data.base_info.run_status === TaskRunStatus.stop ||
-              index > firstZeroIndex) &&
-            item.status === 0
-              ? { ...item, status: 3 }
-              : item
-        );
-        setNodeData(updatedData);
+        // const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
+        //   (item: { status: number }) => item.status === 0
+        // );
+        // const updatedData = res.data.result_info.task_type_list.map(
+        //   (item: { status: number }, index: number) =>
+        //     (res.data.base_info.run_status === TaskRunStatus.fail ||
+        //       res.data.base_info.run_status === TaskRunStatus.stop ||
+        //       index > firstZeroIndex) &&
+        //       item.status === 0
+        //       ? { ...item, status: 3 }
+        //       : item
+        // );
+        setNodeData(res.data.result_info.task_type_list);
         if (isParse) {
           setParseNodeData(res.data.result_info.data_parse);
           setPagination({
@@ -439,6 +440,8 @@ export default function WorkflowTaskDetail() {
         pageSize: res.data.data_parse.page_info.page_size,
         total: res.data.data_parse.page_info.total
       });
+    } else if (activeNodeType === NodeType.scripting) {
+      setScriptingNodeData(res.data.data_scripting);
     } else setCleaningAugmentNodeData(res.data.data_dispose);
   };
 
@@ -496,9 +499,15 @@ export default function WorkflowTaskDetail() {
                       loading={loading}
                       status={item?.status}
                     />
-                  ) : (
+                  ) : item.task_type === NodeType.enhancement ? (
                     <DataAugmentationNode
                       dataSource={cleaningAugmentNodeData}
+                      loading={loading}
+                      status={item?.status}
+                    />
+                  ) : (
+                    <ScriptingNode
+                      dataSource={scriptingNodeData}
                       loading={loading}
                       status={item?.status}
                     />
@@ -552,7 +561,7 @@ export default function WorkflowTaskDetail() {
 
   const handleClickWorkflow = () => {
     openNewPage(
-      `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 

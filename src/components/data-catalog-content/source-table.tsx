@@ -359,7 +359,6 @@
 
 //   // 页码变化处理
 //   const handlePageChange = (page: number, size: number) => {
-//     console.log('页码变化:', page, '每页条数:', size);
 //     setCurrentPage(page);
 //     setPageSize(size);
 //     // 这里可以添加获取数据的逻辑

@@ -25,7 +25,6 @@ const LoginCard = () => {
         console.error('Invalid redirect URL:', e);
       }
     }
-    // 默认重定向到应用商店页面
     return '/tenant/compute/modaforge/connection';
   };
 

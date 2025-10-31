@@ -16,6 +16,8 @@ import TorrentIcon from '@/assets/file/torrent-icon.svg';
 import DefaultIcon from '@/assets/file/default-icon.svg';
 import JsonIcon from '@/assets/file/json-icon.svg';
 import MarkDownIcon from '@/assets/file/markdown-icon.svg';
+import FileIcon from '@/assets/file/customize-icon.svg';
+import DatabaseIcon from '@/assets/file/database-icon.svg';
 import './index.css';
 import { FileType } from '@/utils/type';
 
@@ -95,6 +97,10 @@ export default function getFileIcon(file_type: string) {
       return <MarkDownIcon className="icon-size" />;
     case FileType.md:
       return <MarkDownIcon className="icon-size" />;
+    case FileType.file:
+      return <FileIcon className="icon-size" />;
+    case FileType.database:
+      return <DatabaseIcon className="icon-size" />;
     default:
       return <DefaultIcon className="icon-size" />;
   }

@@ -7,8 +7,9 @@ import { createWorkflow, getWorkflowDetail } from '@/api/workflow';
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router-dom';
 import { Message } from '@arco-design/web-react';
+import Cookies from 'js-cookie';
 import './styles/index.css';
-import './styles/markdown.scss';
+// import './styles/markdown.scss';
 import './styles/custom.scss';
 
 function WorkflowConfig({ setHeight }) {
@@ -51,8 +52,31 @@ function WorkflowConfig({ setHeight }) {
         }
       }
     };
+
+    const isSessionId = Cookies.get('session_id');
+    if (!isSessionId) {
+      // 生成随机session_id
+      const sessionId = generateSessionId();
+      // 设置 cookie，过期时间为1周
+      Cookies.set('session_id', sessionId, {
+        expires: 7, // 7天
+        sameSite: 'strict'
+      });
+    }
+
     init();
   }, [appId, history, setWorkflowDetail]);
+
+  // 生成随机sessionId
+  const generateSessionId = () => {
+    // 生成随机数 (0-999999)
+    const randomNum = Math.floor(Math.random() * 1000000);
+    // 获取当前时间戳
+    const timestamp = Date.now();
+    const combinedString = `${randomNum}-${timestamp}`;
+
+    return combinedString;
+  };
 
   return (
     <Initor>

@@ -55,31 +55,27 @@ const FormComponent: React.FC<FormProps> = ({
       const filesArray: string[] = [];
       if (downloadData?.data_path_id) {
         filesArray.push(
-          downloadData.abs_data_path + '/' + downloadData.file_sub_path
+          downloadData.real_abs_data_path + '/' + downloadData.file_sub_path
         );
       } else if (downloadData?.extras) {
         filesArray.push(
-          downloadData.full_path + '/' + downloadData.extras.file_name
+          downloadData.real_full_path + '/' + downloadData.extras.file_name
         );
       } else if (exportdataset?.latest_file_path) {
-        filesArray.push(
-          exportdataset.latest_file_path + '/' + exportdataset.latest_file_name
-        );
+        filesArray.push(exportdataset.latest_file_path);
       }
       if (!exportdataset && exportdatas && exportdatas?.length > 0) {
         if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.abs_data_path + '/' + item.file_sub_path);
+            filesArray.push(item.real_abs_data_path + '/' + item.file_sub_path);
           });
         } else if (exportdatas[0].extras) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(item.full_path + '/' + item.extras.file_name);
+            filesArray.push(item.real_full_path + '/' + item.extras.file_name);
           });
         } else if (exportdatas[0].latest_file_path) {
           exportdatas.forEach((item: any) => {
-            filesArray.push(
-              item.latest_file_path + '/' + item.latest_file_name
-            );
+            filesArray.push(item.latest_file_path);
           });
         }
       }
@@ -115,7 +111,7 @@ const FormComponent: React.FC<FormProps> = ({
       console.log('这是导出返回的结果', res);
       if (res.status === 200) {
         form.resetFields();
-        Message.success('导出成功');
+        Message.success('导出任务下发成功');
         handlClear && handlClear();
         if (onExportSuccess) {
           onExportSuccess();
@@ -155,7 +151,11 @@ const FormComponent: React.FC<FormProps> = ({
     try {
       const res = await getConnectionList({});
       if (res && res.data) {
-        setConnectorList(res.data.items);
+        // 数据库表不支持导出，过滤掉数据库类型连接器
+        const connectorList = (res.data?.items || []).filter(
+          (item) => item.type !== 'db'
+        );
+        setConnectorList(connectorList);
       } else {
         setConnectorList([]);
         Message.error('获取连接器列表失败：数据格式异常');
@@ -199,7 +199,10 @@ const FormComponent: React.FC<FormProps> = ({
         {...formItemLayout}
         style={{ width: 584 }}
       >
-        <Alert content="空文件不会被导出" style={{ marginBottom: 10 }} />
+        <Alert
+          content="空文件不会被导出，数据库表暂不支持导出"
+          style={{ marginBottom: 10 }}
+        />
         <Form.Item
           label="选择连接器："
           field="province"

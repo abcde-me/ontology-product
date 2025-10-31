@@ -1,4 +1,10 @@
 import UAPI from '@/api';
+import {
+  DatasetVersionFileParams,
+  DatasetVersionFileRes,
+  GetDatasetListReq,
+  GetDatasetListRes
+} from '@/types/datasetManagement';
 // 数据集管理相关接口
 
 // 类型定义
@@ -8,6 +14,7 @@ interface DatasetListParams {
   search?: string;
   search_field?: string;
   tag_names?: string[];
+  storage_type?: string[];
   status?: string[];
   sort_field?: string;
   sort_order?: string;
@@ -99,6 +106,7 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     search_field,
     search,
     tag_names,
+    storage_type,
     status,
     sort_field,
     sort_order
@@ -112,6 +120,9 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   }
   if (tag_names && tag_names.length > 0) {
     queryParams.tags = tag_names; // 直接赋值数组
+  }
+  if (storage_type && storage_type.length > 0) {
+    queryParams.storage_type_list = storage_type; // 直接赋值数组
   }
   if (status && status.length > 0) {
     queryParams.status_list = status; // 直接赋值数组
@@ -209,6 +220,33 @@ export async function datasetVersionRebuild(
   return UAPI.RES.datasetVersionRebuildApi({}).post(params).inRegion().do();
 }
 
+// 定义查询目标数据文件的参数接口
+interface TargetDataFileQueryParams {
+  page: number;
+  full_path: string;
+  limit: number;
+}
+//查询目标数据文件列表
+export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
+  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+}
+//查询数据内容文件列表
+export async function getDataContentFileList(params: {
+  id: number | string;
+  version_id: string;
+  page: number;
+  page_size: number;
+}) {
+  return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
+}
+//查询数据内容数据库列表
+export async function getDataContentTableList(params: {
+  id: number | string;
+  version_id: string;
+}) {
+  return await UAPI.RES.dataContentTableList({}).get(params).inRegion().do();
+}
+
 //获取连接器列表
 // export async function getconnectorList(params: any = {}){
 //   return UAPI.RES.connectorListAPI({}).get(params).inRegion().do();
@@ -221,3 +259,111 @@ export async function datasetVersionRebuild(
 // export async function deleteDataset(params:any){
 //   return UAPI.RES.datasets({}).delete(params).inRegion().do();
 // }
+
+// 搜索数据集列表
+export async function searchDatasetList(
+  params: GetDatasetListReq
+): Promise<ApiRes<GetDatasetListRes>> {
+  // TODO: 联调
+  return await UAPI.RES.datasetsApi({}).post(params).inRegion().do();
+
+  // Mock implementation per spe
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     list: [
+  //       {
+  //         database: 'sample_db',
+  //         id: 331,
+  //         latest_size: 102400,
+  //         latest_table: 'sample_table',
+  //         latest_version: 'v1.0.0',
+  //         name: '示例数据集',
+  //         scheams: [
+  //           { cn_name: '姓名', name: 'name' },
+  //           { cn_name: '年龄', name: 'age' }
+  //         ],
+  //         status: 'active',
+  //         storage_type: 'table'
+  //       },
+  //       {
+  //         database: 'test_db',
+  //         id: 347,
+  //         latest_size: 204800,
+  //         latest_table: 'test_table',
+  //         latest_version: 'v2.1.0',
+  //         name: '测试数据集',
+  //         scheams: [
+  //           { cn_name: '编号', name: 'id' },
+  //           { cn_name: '分数', name: 'score' }
+  //         ],
+  //         status: 'inactive',
+  //         storage_type: 'jsonl'
+  //       }
+  //     ],
+  //     total: 0,
+  //     page: 1,
+  //     limit: 10
+  //   }
+  // });
+}
+
+export async function getDatasetVersionFile(
+  params: DatasetVersionFileParams
+): Promise<ApiRes<DatasetVersionFileRes>> {
+  // TODO: 联调
+  return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
+
+  // Mock implementation per spe
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '',
+  //   message: 'OK',
+  //   requestId: '1',
+  //   data: {
+  //     list: [
+  //       {
+  //         created_at: '2021-01-01 12:00:00',
+  //         file_modify_time: '2021-01-01 12:00:00',
+  //         file_name: 'example.txt',
+  //         file_size: '1024',
+  //         file_type: 'file'
+  //       },
+  //       {
+  //         created_at: '2021-02-15 09:30:00',
+  //         file_modify_time: '2021-02-15 10:00:00',
+  //         file_name: 'data.jsonl',
+  //         file_size: '2048',
+  //         file_type: 'file'
+  //       },
+  //       {
+  //         created_at: '2021-03-10 14:20:00',
+  //         file_modify_time: '2021-03-10 15:00:00',
+  //         file_name: 'table_data.csv',
+  //         file_size: '4096',
+  //         file_type: 'file'
+  //       },
+  //       {
+  //         created_at: '2021-04-01 08:00:00',
+  //         file_modify_time: '2021-04-01 08:30:00',
+  //         file_name: 'report.pdf',
+  //         file_size: '5120',
+  //         file_type: 'file'
+  //       },
+  //       {
+  //         created_at: '2021-05-20 16:45:00',
+  //         file_modify_time: '2021-05-20 17:00:00',
+  //         file_name: 'archive.zip',
+  //         file_size: '8192',
+  //         file_type: 'file'
+  //       }
+  //     ],
+  //     total: 1,
+  //     page: 1,
+  //     limit: 10
+  //   }
+  // });
+}

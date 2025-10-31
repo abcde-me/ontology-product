@@ -1,0 +1,10 @@
+.python-tab-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .tab-tree {
+    height: calc(100% - 30px);
+    overflow: hidden;
+  }
+}

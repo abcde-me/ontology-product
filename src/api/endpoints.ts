@@ -123,6 +123,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = '/api/aimdp/v1';
+export const PrefixLabelService = '/label-service/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -164,7 +165,9 @@ export const ResourceEndpointsV2 = {
   catalogListApi: PrefixAimdp + '/directory', //获取数据目录列表
   catalogAddApi: PrefixAimdp + '/directory/catalog', //添加目录
   volumeAddApi: PrefixAimdp + '/directory/volume', //新建卷
+  dbAddApi: PrefixAimdp + '/directory/database', //新建数据库
   volumeDeleteApi: PrefixAimdp + '/directory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/directory/delete-table', //删除数据库表
   catalogRenameApi: PrefixAimdp + `/directory/{catalogId}/rename`, //重命名目录
   targetDataFileListApi: PrefixAimdp + '/directory/dst/file', //查询目标数据文件列表
   targetFileTypeListApi: PrefixAimdp + '/constants', //查询目标数据文件类型列表
@@ -176,6 +179,8 @@ export const ResourceEndpointsV2 = {
     PrefixAimdp + '/load_tasks/source_dir/files/{file_id}', //删除源数据文件
   sourceDataFileDeleteBatcheApi:
     PrefixAimdp + '/load_tasks/source_dir/files/delete', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/directory/get-table-detail', //查询源库下的表详情
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/connectors/files/output`,
@@ -253,6 +258,23 @@ export const ModaForgeResourceEndpoints = {
   workflowDraft:
     PrefixAimdp +
     '/workflow/draft/{workflow_uuid}/{ds_workflow_id}/{workflow_version}',
+  // 工作流-脚本类型
+  scriptingType: PrefixAimdp + '/workflow/scripting/types',
+  // 工作流-脚本执行器列表
+  scriptingEngine: PrefixAimdp + '/workflow/scripting/engine/{script_type}',
+  // 工作流-脚本模板
+  scriptingTemplate:
+    PrefixAimdp + '/workflow/scripting/template/{workflow_uuid}/{node_id}',
+  // 工作流-脚本执行
+  scriptingBench:
+    PrefixAimdp + '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}',
+  // 工作流-脚本执行结果
+  scriptingBenchResult:
+    PrefixAimdp +
+    '/workflow/bench/{workflow_uuid}/{session_id}/{node_id}/{bench_job_id}',
+  // 工作流-知识库名称校验
+  knowledgeBaseNameCheck:
+    PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/workflow_instance/list',
@@ -306,6 +328,10 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionListApi: PrefixAimdp + '/datasets/version',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/datasets/version/retry',
+  //数据内容文件表
+  dataContentFileList: PrefixAimdp + '/datasets/version/file',
+  //数据内容数据库表
+  dataContentTableList: PrefixAimdp + '/datasets/version/table',
 
   // 连接器接口
 
@@ -326,6 +352,8 @@ export const ModaForgeResourceEndpoints = {
   getLoadListApi: PrefixAimdp + '/load_tasks_page',
   // 创建单个载入任务
   addLoadApi: PrefixAimdp + '/load_tasks',
+  //数据载入上传文件
+  uploadApi: PrefixAimdp + '/load_tasks/upload',
   // 删除指定载入任务
   delLoadApi: PrefixAimdp + '/load_tasks/{task_id}',
   // 修改单个载入任务
@@ -352,7 +380,100 @@ export const ModaForgeResourceEndpoints = {
   // 查询个人载入记录列表
   getLoadRecordListApi: PrefixAimdp + '/load_tasks/records/files/page',
   // 查询任务单个执行记录详情
-  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}'
+  getLoadRecordDetailApi: PrefixAimdp + '/load_tasks/records/{task_id}',
+  // 重试载入任务
+  reTryLoadApi: PrefixAimdp + '/load_tasks/retry',
+  //载入获取表名
+  getTableNameApi: PrefixAimdp + '/load_tasks/generate_db_name',
+
+  // 数据标注接口
+  // 数据标注配置 发布
+  publishRequirementApi: PrefixLabelService + '/requirements/create',
+  // 需求详情查看
+  getRequirementDetailApi: PrefixLabelService + '/requirements/query',
+  // 获取数据标注列表
+  getAnnotationListApi: PrefixLabelService + '/requirements/list',
+  // 标注下载结果
+  getAnnotationDownloadApi: PrefixLabelService + '/requirements/resultDownload',
+  // 获取数据标注 - 任务列表
+  getAnnotationTaskListApi: PrefixLabelService + '/taskList',
+  // 获取部门列表树内容
+  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  // 获取个人列表树内容
+  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  //  查询标注数据表格内容
+  getAnnotationTabledDataApi:
+    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
+
+  // python开发
+  // 获取python列表
+  pythonListApi: PrefixAimdp + '/pyspark/{pyspark_id}/list',
+  // 创建python
+  pythonCreateApi: PrefixAimdp + '/pyspark',
+  // 重命名python
+  pythonRenameApi: PrefixAimdp + '/pyspark/{pyspark_id}/rename',
+  // 删除python
+  pythonDeleteApi: PrefixAimdp + '/pyspark/{pyspark_id}/delete',
+  // 复制python
+  pythonCopyApi: PrefixAimdp + '/pyspark/{pyspark_id}/copy',
+  // 打开python
+  pythonOpenApi: PrefixAimdp + '/pyspark/{pyspark_id}/open',
+  // 修改python
+  pythonSaveApi: PrefixAimdp + '/pyspark/{pyspark_id}/modify',
+  // 运行python
+  pythonRunApi: PrefixAimdp + '/pyspark/{pyspark_id}/run',
+  // 停止运行python
+  pythonRunCancelApi: PrefixAimdp + '/pyspark/{pyspark_id}/run_cancel',
+  // 获取运行结果
+  pythonRunResultApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_result',
+  // 获取运行日志
+  pythonRunLogApi: PrefixAimdp + '/pyspark/{pyspark_id}/get_run_log',
+  // 获取导出数据集列表
+  pythonExportDatasetListApi: PrefixAimdp + '/pyspark/export/dataset/list',
+  // 停止导出数据集
+  pythonExportDatasetStopApi:
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/stop',
+  // 重试导出数据集
+  pythonExportDatasetRetryApi:
+    PrefixAimdp + '/pyspark/export/dataset/{export_id}/retry',
+  // 获取算子
+  pythonOperatorApi: PrefixAimdp + '/directory/get-operator',
+  // 导出数据集
+  pythonExportDatasetApi: PrefixAimdp + '/pyspark/export/dataset',
+  // 获取导出文件列表
+  pythonExportFileApi: PrefixAimdp + '/pyspark/export/file',
+  // 获取导出预览数据
+  pythonExportPreviewApi: PrefixAimdp + '/pyspark/export/preview',
+
+  // SQL开发
+  sqlListApi: PrefixAimdp + '/sql_script/list',
+  sqlCreateApi: PrefixAimdp + '/sql_script/create',
+  sqlRenameApi: PrefixAimdp + '/sql_script/{script_id}/rename',
+  sqlDeleteApi: PrefixAimdp + '/sql_script/{script_id}/delete',
+  sqlCopyApi: PrefixAimdp + '/sql_script/{script_id}/copy',
+  sqlOpenApi: PrefixAimdp + '/sql_script/{script_id}/info',
+  sqlSaveApi: PrefixAimdp + '/sql_script/{script_id}/edit',
+  sqlRunApi: PrefixAimdp + '/sql_script/{script_id}/run',
+  sqlRunCancelApi: PrefixAimdp + '/sql_script/{script_id}/run_cancel',
+  sqlRunResultApi: PrefixAimdp + '/sql_script/{script_id}/get_run_result',
+  sqlRunLogApi: PrefixAimdp + '/sql_script/{script_id}/get_run_log',
+  sqlExportDataset: PrefixAimdp + '/sql_script/{script_id}/result_export',
+  sqlExportDatasetVersion:
+    PrefixAimdp + '/sql_script/{script_id}/export_version_update',
+  sqlExportDatasetList: PrefixAimdp + '/sql_script/export_task/list',
+  sqlExportDatasetStopApi:
+    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/stop',
+  sqlExportDatasetRetryApi:
+    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/retry',
+  sqlExportDatasetDetailApi:
+    PrefixAimdp + '/sql_script/export_task/{script_id}/{item_id}/get_sql_info',
+  datasetsOptionsApi: PrefixAimdp + '/datasets/list',
+
+  leGetTask: PrefixLabelService + '/getTask',
+  leGetTaskById: PrefixLabelService + '/getTaskById',
+  leGetLabels: PrefixLabelService + '/getLabels',
+  leSaveTask: PrefixLabelService + '/saveTask',
+  leGetTaskReuslt: PrefixLabelService + '/getTaskResult'
 };
 
 /**

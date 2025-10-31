@@ -1,0 +1,98 @@
+.sql-page-layout {
+  height: calc(100% - 20px - 20px);
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  margin: 20px 20px 20px 0;
+  overflow: hidden;
+
+  .sider-container {
+    padding: 0 12px;
+  }
+
+  .arco-tabs-header-title {
+    border-radius: 0;
+  }
+
+  .sql-sider {
+    .arco-layout-sider-children {
+      .sql-tabs {
+        height: 100%;
+
+        .sql-menu-icon {
+          &:hover {
+            path {
+              fill: #2563eb;
+            }
+          }
+        }
+
+        .arco-tabs-header-nav-rounded
+          .arco-tabs-header-title-active
+          .sql-menu-icon {
+          path {
+            fill: #2563eb;
+          }
+        }
+
+        .arco-tabs-header-nav {
+          padding: 8px;
+          border-right: 1px solid #e2e8f0;
+        }
+
+        .arco-tabs-header-nav-rounded .arco-tabs-header-title {
+          padding: 0px;
+          border-radius: 4px;
+          margin-top: 12px;
+          width: 28px;
+          height: 28px;
+
+          &:first-of-type {
+            margin-top: 0px;
+          }
+        }
+
+        .arco-tabs-content {
+          height: 100%;
+          overflow: hidden;
+          padding: 0px;
+
+          .arco-tabs-content-inner {
+            height: 100%;
+
+            .arco-tabs-pane {
+              height: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .sql-content {
+    background-color: #fff;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+// 删除sider组件自带宽度切换动画
+.sql-sider.arco-layout-sider {
+  transition: none;
+  box-shadow: none;
+  border-right: 1px solid #e2e8f0;
+}
+
+.my-descriptions .arco-descriptions-item,
+.arco-descriptions-item-label,
+.arco-descriptions-item-value {
+  font-size: 14px;
+}
+
+.my-dataset-detail .dataset-detail {
+  padding: 0;
+}
+.my-dataset-detail .basic-info-card .arco-card-body {
+  padding: 0;
+}

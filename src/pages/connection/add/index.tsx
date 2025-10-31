@@ -4,16 +4,21 @@ import {
   Input,
   Message,
   Modal,
-  Radio
+  Radio,
+  Select
 } from '@arco-design/web-react';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import '../index.css';
 import { addconnectionList, updataConnectionList } from '@/api/connectionApi';
 import { Connection } from '../type';
 import { filterValues } from '@/api/filterValues';
 import { validateName } from '@/utils/valiate';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const Option = Select.Option;
+const options = [
+  { text: 'MySQL', value: 'mysql' },
+  { text: 'PostgreSQL', value: 'postgresql' }
+];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
   const [form] = Form.useForm();
@@ -25,13 +30,15 @@ const add = forwardRef((props: any, ref) => {
 
   // 确定按钮的状态
   const [loading, setLoading] = useState<boolean>(false);
+  //判断输入框的状态
+  const [inputDisabled, setInputDisabled] = useState(false);
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     displayModalView: () => {
       setVisible(true);
       // 添加模式 - 重置表单
       form.resetFields();
-      form.setFieldsValue({ type: 's3', name: '' });
+      form.setFieldsValue({ type: 's3', name: '', sub_type: 'mysql' });
       setStorageType('s3');
     }
   }));
@@ -60,23 +67,88 @@ const add = forwardRef((props: any, ref) => {
         secret_key: undefined,
         region: undefined
       });
+    } else if (value === 'db') {
+      form.setFieldsValue({
+        region: '',
+        host: '',
+        port: '',
+        database: '',
+        user: '',
+        password: ''
+      });
     }
   };
+  // 点击创建的按钮
+  // const createConnectionHan = async () => {
+  //   try {
+  //     const values = await form.validate();
+  //     const { type, name, sub_type } = values;
+  //     delete values.name;
+  //     delete values.type;
+  //     // 如果选中有字段，不选的话没有字段的一个函数
+  //     // const filteredValues = filterValues(values);
+  //     const newfrom = {
+  //       name,
+  //       type,
+  //       sub_type,
+  //       config: { ...values }
+  //     };
+  //     setLoading(true);
+  //     setInputDisabled(true);
+  //     const res = await addconnectionList(newfrom);
+  //     if (res.message == 'ok') {
+  //       Message.success('测试通过，连接器创建成功');
+  //       setVisible(false);
+  //       // 确保数据更新完成后再调用 getListHan
+  //       props.getListHan();
+  //       resetHan();
+  //     } else {
+  //       Message.error(res.message);
+  //     }
+  //   } catch (error) {
+  //     console.log('验证失败', error);
+  //   } finally {
+  //     setLoading(false);
+  //     setInputDisabled(false);
+  //   }
+  // };
+  // 去除对象中所有字符串字段的前后空格
+  const trimStringValues = <T extends Record<string, unknown>>(obj: T): T => {
+    const trimmed = {} as T;
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        if (typeof value === 'string') {
+          (trimmed as Record<string, unknown>)[key] = value.trim();
+        } else {
+          trimmed[key] = value;
+        }
+      }
+    }
+    return trimmed;
+  };
+
   // 点击创建的按钮
   const createConnectionHan = async () => {
     try {
       const values = await form.validate();
-      const { type, name } = values;
-      delete values.name;
-      delete values.type;
+
+      // 去除所有字符串字段的前后空格
+      const trimmedValues = trimStringValues(values);
+      const { type, name, sub_type, ...configValues } = trimmedValues;
+
       // 如果选中有字段，不选的话没有字段的一个函数
-      // const filteredValues = filterValues(values);
+      // const filteredValues = filterValues(configValues);
+
       const newfrom = {
         name,
         type,
-        config: { ...values }
+        sub_type: type === 'db' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
+        config: { ...configValues }
       };
+
       setLoading(true);
+      setInputDisabled(true);
       const res = await addconnectionList(newfrom);
       if (res.message == 'ok') {
         Message.success('测试通过，连接器创建成功');
@@ -91,6 +163,7 @@ const add = forwardRef((props: any, ref) => {
       console.log('验证失败', error);
     } finally {
       setLoading(false);
+      setInputDisabled(false);
     }
   };
   const resetHan = () => {
@@ -100,7 +173,7 @@ const add = forwardRef((props: any, ref) => {
   };
   // 输入框onchange的正则校验
   return (
-    <div>
+    <>
       <Modal
         style={{ width: '760px' }}
         title={
@@ -142,33 +215,34 @@ const add = forwardRef((props: any, ref) => {
                 fontWeight: '400'
               }}
             >
-              {'测试并保存'}
+              {'测试并创建'}
             </Button>
           </div>
         }
       >
-        <div className="modal-overlay">
+        <>
           <Form
             style={{ width: 700 }}
             autoComplete="off"
             form={form}
             disabled={loading}
+            colon={'：'}
+            labelCol={{ span: 5 }}
+            wrapperCol={{ span: 19 }}
           >
             <FormItem
-              label="连接器名称："
+              label="连接器名称"
               required
               field="name"
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-              labelAlign="right"
               rules={[
                 {
                   validator: (value, cb) => {
-                    if (!value || value.trim() === '') {
+                    const trimmedValue = value ? value.trim() : '';
+                    if (!trimmedValue) {
                       return cb('请输入连接器名称');
                     }
-                    if (validateName(value).isValid == false) {
-                      return cb(validateName(value).errorMessage);
+                    if (validateName(trimmedValue).isValid == false) {
+                      return cb(validateName(trimmedValue).errorMessage);
                     }
                     return cb();
                   }
@@ -178,20 +252,18 @@ const add = forwardRef((props: any, ref) => {
               <Input placeholder="请输入" />
             </FormItem>
             <FormItem
-              label="连接器类型："
+              label="连接器类型"
               field="type"
               rules={[{ required: true, message: '请选择类型' }]}
-              labelCol={{ span: 5 }}
-              wrapperCol={{ span: 19 }}
-              labelAlign="right"
               initialValue="s3"
             >
               <RadioGroup
                 defaultValue="s3"
                 onChange={(value) => handleStorageTypeChange(value)}
               >
-                <Radio value="s3">对象存储</Radio>
+                <Radio value="s3">对象存储(S3)</Radio>
                 <Radio value="hdfs">HDFS</Radio>
+                <Radio value="db">数据库</Radio>
               </RadioGroup>
             </FormItem>
             <span
@@ -205,86 +277,72 @@ const add = forwardRef((props: any, ref) => {
             </span>
             {storageType == 's3' ? (
               <div>
+                <FormItem label="region" field="region">
+                  <Input placeholder="请输入服务端所在地域" />
+                </FormItem>
                 <FormItem
-                  label="Endpoint："
+                  label="Endpoint"
                   field="endpoint"
                   rules={[{ required: true, message: '请输入Endpoint' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey lD："
+                  label="AccessKey ID"
                   field="access_key"
-                  rules={[{ required: true, message: '请输入AccessKey lD' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  rules={[{ required: true, message: '请输入AccessKey ID' }]}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey Secret："
+                  label="AccessKey Secret"
                   field="secret_key"
                   rules={[
                     { required: true, message: '请输入AccessKey Secret' }
                   ]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 {/* <FormItem
-                  label="区域："
+                  label="区域"
                   field="region"
                   labelCol={{ span: 5 }}
                   wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  
                 >
                   <Input placeholder="请输入" />
                 </FormItem> */}
                 <FormItem
-                  label="文件路径："
+                  label="文件路径"
                   field="path"
                   rules={[{ required: true, message: '请输入文件路径' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                 >
                   <Input placeholder="<桶名>/<文件夹路径>或<桶名>" />
                 </FormItem>
               </div>
-            ) : (
+            ) : storageType == 'hdfs' ? (
               <div>
                 <FormItem
-                  label="Host："
+                  label="Host"
                   rules={[{ required: true, message: '请输入Host' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="host"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="Port："
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
+                  label="Port"
                   field="port"
                   required
                   rules={[
                     {
                       validator: (value, cb) => {
-                        if (!value || value.trim() === '') {
+                        const trimmedValue = value ? value.trim() : '';
+                        if (!trimmedValue) {
                           return cb('请输入Port端口号');
                         }
                         const regex =
                           /^(6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]?\d{1,4}|0)$/;
-                        if (!regex.test(value)) {
+                        if (!regex.test(trimmedValue)) {
                           return cb('请输入合法的端口号，范围在0-65535之间');
                         }
                         return cb();
@@ -296,30 +354,25 @@ const add = forwardRef((props: any, ref) => {
                 </FormItem>
                 <FormItem
                   initialValue={'root'}
-                  label="用户名："
+                  label="用户名"
                   rules={[{ required: true, message: '请输入用户名' }]}
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="user"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="目录路径："
+                  label="目录路径"
                   required
-                  labelCol={{ span: 5 }}
-                  wrapperCol={{ span: 19 }}
-                  labelAlign="right"
                   field="path"
                   rules={[
                     {
                       validator: (value, cb) => {
-                        if (!value || value.trim() === '') {
+                        const trimmedValue = value ? value.trim() : '';
+                        if (!trimmedValue) {
                           return cb('请输入目录路径');
                         }
                         const regex = /^\/.*/;
-                        if (!regex.test(value)) {
+                        if (!regex.test(trimmedValue)) {
                           return cb('输入的路径需要以/开头');
                         }
                         return cb();
@@ -330,11 +383,84 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="请输入HDFS日录路径，如/user/data" />
                 </FormItem>
               </div>
+            ) : (
+              <div>
+                <FormItem
+                  label="所属系统"
+                  field="system"
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入所属系统" />
+                </FormItem>
+                <FormItem
+                  label="数据库类型"
+                  field="sub_type"
+                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                  disabled={inputDisabled}
+                >
+                  <Select
+                    placeholder="请选择"
+                    // onChange={(value) =>
+                    //   Message.info({
+                    //     content: `You select ${value}.`,
+                    //     showIcon: true
+                    //   })
+                    // }
+                    defaultValue="mysql"
+                  >
+                    {options.map((option, index) => (
+                      <Option key={option.value} value={option.value}>
+                        {option.text}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  label="主机名"
+                  field="host"
+                  rules={[{ required: true, message: '请输入主机名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入，如localhost，10.2.2.1" />
+                </FormItem>
+                <FormItem
+                  label="端口"
+                  field="port"
+                  rules={[{ required: true, message: '请输入端口' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入，如3306" />
+                </FormItem>
+                <FormItem
+                  label="数据库名"
+                  field="database"
+                  rules={[{ required: true, message: '请输入数据库名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="用户名"
+                  field="user"
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="密码"
+                  field="password"
+                  rules={[{ required: true, message: '请输入密码' }]}
+                  disabled={inputDisabled}
+                >
+                  <Input.Password placeholder="请输入" />
+                </FormItem>
+              </div>
             )}
           </Form>
-        </div>
+        </>
       </Modal>
-    </div>
+    </>
   );
 });
 export default add;

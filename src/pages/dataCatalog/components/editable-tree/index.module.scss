@@ -1,0 +1,134 @@
+.treeContainer :global(.arco-tree-node) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 36px;
+
+  :global(.arco-tree-node-switcher) {
+    height: 100%;
+  }
+
+  :global(.arco-tree-node-title) {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border-radius: 2px;
+    padding-left: 4px;
+  }
+
+  :global(.arco-tree-node-title .arco-input) {
+    font-size: 14px;
+  }
+
+  :global(.extra-container) {
+    position: absolute;
+    height: 36px;
+    right: 5px;
+    top: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  :global(.catalog-title-text) {
+    width: 168px;
+    transition: width 0.2s ease;
+  }
+
+  :global(.last-leaf-text) {
+    width: 110px;
+    transition: width 0.2s ease;
+  }
+
+  :global(.no-operation) {
+    width: 158px;
+    transition: width 0.2s ease;
+  }
+}
+
+.treeContainer :global(.arco-tree-node):hover {
+  background-color: transparent;
+
+  :global(.arco-tree-node-title) {
+    background-color: var(--color-bg-5);
+  }
+
+  :global(.extra-container) {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  :global(.tree-icon),
+  :global(.whitespace-nowrap) {
+    color: #0f172a;
+  }
+
+  :global(.catalog-title-text) {
+    width: 128px;
+    transition: width 0.2s ease;
+    color: #0f172a;
+  }
+
+  &:not(:has(.no-operation)) {
+    :global(.last-leaf-text) {
+      width: 80px;
+      transition: width 0.2s ease;
+    }
+  }
+
+  :global(.no-operation) {
+    width: 118px;
+    transition: width 0.2s ease;
+  }
+}
+
+.treeContainer :global(.arco-tree-node:has(.last-leaf-text)),
+.treeContainer :global(.arco-tree-node:has(.last-leaf-input)) {
+  :global(.arco-tree-node-indent)::after {
+    top: -2px;
+    right: 35%;
+  }
+
+  :global(.arco-tree-node-switcher) {
+    width: 0;
+    margin-right: 0;
+  }
+}
+
+.treeContainer :global(.arco-tree-node.arco-tree-node-selected) {
+  background-color: transparent;
+
+  :global(.arco-tree-node-title) {
+    background-color: var(--color-bg-5);
+    font-weight: 400;
+  }
+
+  :global(.tree-icon),
+  :global(.whitespace-nowrap) {
+    color: #007dfa;
+  }
+}
+
+.treeContainer
+  :global(
+    .arco-tree-node.arco-tree-node-is-leaf.arco-tree-node-is-tail:has(
+        .last-leaf-text
+      )
+  ) {
+  :global(.arco-tree-node-indent) {
+    height: 36px;
+  }
+
+  :global(.arco-tree-node-indent::after) {
+    content: '';
+    position: absolute;
+    box-sizing: border-box;
+    border-left: 1px solid #e2e8f0;
+    width: 1px;
+    transform: translateX(50%);
+    bottom: 0;
+    top: -2px;
+    right: 35%;
+  }
+}

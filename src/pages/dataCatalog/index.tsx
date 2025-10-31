@@ -8,7 +8,7 @@ const DataCatalog: React.FC = () => {
   return (
     <DataCatalogProvider>
       <div className="h-full w-full py-5 pr-5">
-        <div className="box-border h-full w-full rounded-2xl bg-white pb-[27px] pl-4 pr-6 pt-6">
+        <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
           <div className="mb-4 h-[30px] w-full leading-[30px]">
             <p className="text-xl font-bold">数据目录</p>
           </div>

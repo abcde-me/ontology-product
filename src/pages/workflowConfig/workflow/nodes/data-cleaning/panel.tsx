@@ -9,7 +9,8 @@ import {
   Select,
   Checkbox,
   Switch,
-  InputNumber
+  InputNumber,
+  Radio
   // Table,
   // Space,
   // Slider,
@@ -36,16 +37,19 @@ import {
   dataOutlierHandlingBefore,
   dataOutlierHandlingAfter,
   dataSensitiveBefore,
-  dataSensitiveAfter
+  dataSensitiveAfter,
+  dataDeduplicateBefore,
+  dataDeduplicateAfter
 } from './date-text';
-import './date-cleaning.scss';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
+import './date-cleaning.scss';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const { readOnly, inputs, onValuesChange } = useConfig(id, data);
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
+  const RadioGroup = Radio.Group;
 
   const data_standardization = useWatch('data_standardization', form);
   const threshold_switch = useWatch('threshold_switch', form);
@@ -55,6 +59,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const df_is = useWatch('df_is', form);
   const oh_is = useWatch('oh_is', form);
   const case_uniformity = useWatch('case_uniformity', form);
+  const mg_duplicate = useWatch('mg_duplicate', form);
   const isChecked_data_standardization = () => {
     return [
       inputs?.unicode,
@@ -85,7 +90,9 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           unicode: inputs?.unicode,
           traditional_to_simplified: inputs?.traditional_to_simplified,
           case_transform: inputs?.case_transform,
-          case_uniformity: inputs?.case_uniformity
+          case_uniformity: inputs?.case_uniformity,
+          mg_duplicate: inputs?.mg_duplicate_checkbox,
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
@@ -111,6 +118,15 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                 uncheckedText="关"
                 checked={form.getFieldValue('data_standardization')}
                 style={{ margin: 0, width: 'auto' }}
+                onChange={(checked) => {
+                  if (!checked) {
+                    form.setFieldsValue({
+                      unicode: false,
+                      traditional_to_simplified: false,
+                      case_uniformity: false
+                    });
+                  }
+                }}
               />
             </FormItem>
             <span className="date-switch-text">数据标准化</span>
@@ -403,46 +419,73 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </>
           )}
         </div>
-        {/* 这期不做 */}
-        {/* <div className="file-box">
+        <div className="file-box">
           <div className="date-switch">
-            <FormItem field="data_standardization[5].enabled">
+            <FormItem field="mg_duplicate">
               <Switch
+                checkedText="开"
+                uncheckedText="关"
                 style={{ margin: 0, width: 'auto' }}
-                checked={deduplicateSwitch}
+                checked={form.getFieldValue('mg_duplicate')}
                 onChange={(checked) => {
-                  setDeduplicateSwitch(checked);
+                  form.setFieldValue('mg_duplicate', checked);
                 }}
               />
             </FormItem>
             <span className="date-switch-text">数据去重</span>
           </div>
-          <div className="date-desc">---</div>
-          {deduplicateSwitch && (
+          {mg_duplicate && (
             <>
-              <FormItem
-                layout="vertical"
-                label={null}
-                field="duplicationCheckbox"
-                labelAlign="left"
+              <div
+                className="mg-content-duplicates"
+                style={{ display: 'flex' }}
               >
-                <Checkbox>重复比率过滤</Checkbox>
-              </FormItem>
+                <FormItem
+                  layout="vertical"
+                  label={null}
+                  field="mg_duplicate_checkbox"
+                  labelAlign="left"
+                >
+                  <RadioGroup
+                    value={form.getFieldValue('mg_duplicate_checkbox')}
+                    onChange={(value) =>
+                      form.setFieldValue('mg_duplicate_checkbox', value)
+                    }
+                  >
+                    <Radio style={{ whiteSpace: 'nowrap' }} value="ngram">
+                      重复比率过滤
+                    </Radio>
+                    <Radio
+                      style={{ whiteSpace: 'nowrap', marginLeft: 16 }}
+                      value="md5"
+                    >
+                      基于MD5去重
+                    </Radio>
+                  </RadioGroup>
+                </FormItem>
+              </div>
               <FormItem
-                layout="vertical"
                 label={null}
-                field="duplicationInput"
+                field="mg_duplicate_ngram"
                 labelAlign="left"
+                disabled={
+                  form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'
+                }
               >
-                <Input placeholder="请输入" />
-              </FormItem>
-              <FormItem
-                layout="vertical"
-                label={null}
-                field="MD5"
-                labelAlign="left"
-              >
-                <Checkbox>基于MD5去重</Checkbox>
+                <InputNumber
+                  disabled={
+                    form.getFieldValue('mg_duplicate_checkbox') !== 'ngram'
+                  }
+                  onChange={(value) =>
+                    form.setFieldValue('mg_duplicate_ngram', value)
+                  }
+                  style={{ marginLeft: 16, marginRight: 16 }}
+                  size="small"
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  placeholder="请输入"
+                />
               </FormItem>
               <div className="date-cleaning-info">
                 <div className="info-before">
@@ -452,7 +495,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   </span>
                 </div>
                 <div className="info-after">
-                  <span className="info-after-text">清洗前:</span>
+                  <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataDeduplicateAfter}
                   </span>
@@ -461,7 +504,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
             </>
           )}
         </div>
-        <div className="file-box">
+        {/* 这期不做 */}
+        {/*<div className="file-box">
           <div className="date-switch">
             <FormItem field="data_standardization[6].enabled">
               <Switch

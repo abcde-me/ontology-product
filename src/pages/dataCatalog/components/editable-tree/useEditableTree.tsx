@@ -11,14 +11,20 @@ import {
   IconDelete,
   IconEdit,
   IconStorage,
-  IconArchive
+  IconArchive,
+  IconFolder,
+  IconCaretDown,
+  IconFile
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
   addCatalog,
   addVolume,
   deleteVolume,
-  renameCatalog
+  deleteTable,
+  renameCatalog,
+  addDb,
+  getDbItemList
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { PermissionGuard } from '@/components/PermissionGuard';
@@ -49,9 +55,13 @@ export function useEditableTree({ catalogTreeStore }) {
   const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
     return treeData?.map?.((item) => {
       const { children, key, ...rest } = item;
+      // 确保数据库类型的节点能正确渲染其子节点
+      const hasChildren = children && children.length > 0;
+      const isExpandable = hasChildren;
+
       return (
-        <Tree.Node key={key} {...rest} dataRef={item}>
-          {children ? generatorTreeNodes(children) : null}
+        <Tree.Node key={key} {...rest} dataRef={item} isLeaf={!isExpandable}>
+          {hasChildren ? generatorTreeNodes(children) : null}
         </Tree.Node>
       );
     });
@@ -60,14 +70,14 @@ export function useEditableTree({ catalogTreeStore }) {
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
       const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
-      const set = new Set(data.map((item) => item.name));
-      let x = data.length + 1;
-      let name = `${baseName}${x}`;
+      // const set = new Set(data.map((item) => item.name));
+      // let x = data.length + 1;
+      const name = `${baseName}_${Date.now()}`;
 
-      while (set.has(name)) {
-        x++;
-        name = `${baseName}${x}`;
-      }
+      // while (set.has(name)) {
+      //   x++;
+      //   name = `${baseName}${x}`;
+      // }
 
       return name;
     },
@@ -75,10 +85,18 @@ export function useEditableTree({ catalogTreeStore }) {
   );
 
   const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
+    console.log(node, '看看看什么是node');
+
+    // 生成key，避免同级节点key冲突
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    const nodeType = node?.dataRef?.type || 'catalog';
+    const parentId = node?.dataRef?.parent_id || 'root';
+
     const newNode: TreeDataType = {
       title: name,
-      key: `${node?.dataRef?.type || 'catalog'}-${Date.now()}`,
-      type: CatalogTypeEnum[node?.dataRef?.type || 'catalog'],
+      key: `${nodeType}-${parentId}-${timestamp}-${random}`,
+      type: CatalogTypeEnum[nodeType],
       isLastLeaf: node ? true : false,
       showInput: true,
       isAdd: true
@@ -116,7 +134,14 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const handleExpand = (expandedKeys: string[]) => {
+  const handleExpand = (
+    expandedKeys: string[],
+    extra?: {
+      expanded: boolean;
+      node: NodeInstance;
+      expandedNodes: NodeInstance[];
+    }
+  ) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
     });
@@ -133,10 +158,17 @@ export function useEditableTree({ catalogTreeStore }) {
   ) => {
     const { props } = extra.node;
     const { dataRef } = props;
-    if (dataRef?.isLastLeaf && !dataRef?.showInput) {
+    if (
+      dataRef?.isLastLeaf &&
+      !dataRef?.showInput &&
+      dataRef?.type_name !== 'db'
+    ) {
       catalogTreeStore.setState({
-        selectedKey: selectedKeys[0],
-        selectedPath: dataRef?.fullPath
+        selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
+        selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
+        selectedPath: dataRef?.fullPath,
+        selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
+        selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
       });
     }
   };
@@ -156,9 +188,30 @@ export function useEditableTree({ catalogTreeStore }) {
         break;
 
       case CatalogTypeEnum.volume:
+        // 处理数据卷编辑
         newTreeData = treeData.map((data: TreeDataType) => {
           if (data.id === dataRef?.parent_id) {
-            data.children?.[0]?.children?.forEach((item: TreeDataType) => {
+            // 找到数据卷类型的子节点
+            const volumeChild = data.children?.find(
+              (child) => child.type === 'volume'
+            );
+            volumeChild?.children?.forEach((item: TreeDataType) => {
+              if (item.key === _key) {
+                item.showInput = true;
+              }
+            });
+          }
+          return data;
+        });
+        break;
+
+      case CatalogTypeEnum.db:
+        // 处理数据库编辑
+        newTreeData = treeData.map((data: TreeDataType) => {
+          if (data.id === dataRef?.parent_id) {
+            // 找到数据库类型的子节点
+            const dbChild = data.children?.find((child) => child.type === 'db');
+            dbChild?.children?.forEach((item: TreeDataType) => {
               if (item.key === _key) {
                 item.showInput = true;
               }
@@ -180,31 +233,50 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
-  // 删除目录 or 卷
-  const handleDelete = async (node: NodeProps) => {
+  // 删除目录 or 卷 or 数据库表
+  const handleDelete = async (node: NodeProps, type: string) => {
     const { _key, dataRef } = node;
 
     if (!_key || !dataRef?.type) {
       Message.error('删除失败，请稍后重试');
       return;
     }
-
     let newTreeData: TreeDataType[] = [...treeData];
-
-    const res = await deleteVolume(dataRef?.id, {
-      root_type: RootTypeEnum[activeTab]
-    });
+    let res: Partial<ApiRes<any>> = {};
+    if (type === 'db_item') {
+      const params = {
+        path_id: dataRef?.parent_id,
+        database: dataRef?.name,
+        tables: []
+      };
+      res = await deleteTable(params);
+    } else if (type === 'directory') {
+      res = await deleteVolume(dataRef?.id, {
+        root_type: RootTypeEnum[activeTab]
+      });
+    }
     if (res && res.status === 200) {
       newTreeData = await catalogTreeStore.getRawData();
       Message.success('删除成功!');
+
+      // 清除表格相关的选中状态，避免显示已删除节点的数据
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData,
+        selectedKey: '', // 清除选中的节点ID
+        selectedTreeKey: '', // 清除选中的树节点key
+        selectedPath: '', // 清除选中节点的路径
+        selectedNodeType: '', // 清除选中节点的类型
+        selectedParentId: '' // 清除选中节点的父节点ID
+      });
     } else {
       Message.error(res?.message ?? '删除失败，请稍后重试');
-    }
 
-    catalogTreeStore.setState({
-      treeData: newTreeData,
-      rawTreeData: newTreeData
-    });
+      catalogTreeStore.setState({
+        treeData: newTreeData,
+        rawTreeData: newTreeData
+      });
+    }
   };
 
   const focusAndSelectInput = () => {
@@ -225,27 +297,64 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
+  // 添加子级元素（数据卷或数据库）
   const addSubVolume = (node: NodeProps) => {
     const { dataRef } = node;
+
     const rawChildrenTreeData = rawTreeData.find(
       (item: TreeDataType) => item.key === node?.pathParentKeys?.[0]
     );
+
+    // 根据当前节点类型找到对应的子数据数组
+    // 如果是"数据卷"节点，在数据卷下新增；如果是"数据库"节点，在数据库下新增
+    let targetChildrenArray = [];
+    if (dataRef?.type === 'volume') {
+      // 找到数据卷类型的子数组
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find((child) => child.type === 'volume')
+          ?.children ?? [];
+    } else if (dataRef?.type === 'db') {
+      // 找到数据库类型的子数组
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find((child) => child.type === 'db')
+          ?.children ?? [];
+    }
+
     const name = generateName(
-      rawChildrenTreeData?.children?.[0]?.children ?? [],
-      subLeafKeys[dataRef?.type]
+      targetChildrenArray,
+      subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
     );
+
     const cachTreeData = treeData.map((item: TreeDataType) => {
       if (item.key === node.pathParentKeys?.[0]) {
-        item.children?.[0]?.children?.unshift(genereteInputNode(name, node));
+        // 找到对应类型的子节点并在其下添加新元素
+        item.children?.forEach((child: TreeDataType) => {
+          if (child.type === dataRef?.type) {
+            child.children?.unshift(genereteInputNode(name, node));
+          }
+        });
       }
       return item;
     });
+
+    // 只展开当前操作的节点路径，避免展开同级节点
+    const newExpandedKeys = [...expandedKeys];
+    if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
+      newExpandedKeys.push(dataRef.key);
+    }
+    // 确保父节点也是展开状态
+    if (
+      node.pathParentKeys?.[0] &&
+      !newExpandedKeys.includes(node.pathParentKeys[0])
+    ) {
+      newExpandedKeys.push(node.pathParentKeys[0]);
+    }
 
     catalogTreeStore.setState({
       inputValue: name,
       defaultName: name,
       treeData: cachTreeData,
-      expandedKeys: [...new Set([...expandedKeys, dataRef?.key])]
+      expandedKeys: newExpandedKeys
     });
     focusAndSelectInput();
   };
@@ -285,14 +394,30 @@ export function useEditableTree({ catalogTreeStore }) {
 
           break;
         case CatalogTypeEnum.volume:
+          // 新建数据卷
           res = await addVolume({
             name: fileName,
             parent_id: dataRef.parent_id,
-            root_type: root_type
+            root_type: root_type,
+            type: CatalogTypeEnum.volume
           });
 
           if (res.status !== 200) {
             Message.error(res?.message ?? '新建卷失败');
+          }
+
+          break;
+        case CatalogTypeEnum.db:
+          // 新建数据库 - 后面在这里修改逻辑
+          res = await addDb({
+            name: fileName,
+            parent_id: dataRef.parent_id
+            // root_type: root_type,
+            // type: CatalogTypeEnum.db // 明确指定类型为数据库
+          });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建数据库失败');
           }
 
           break;
@@ -320,39 +445,26 @@ export function useEditableTree({ catalogTreeStore }) {
   let perms: string[] = [];
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
-
     perms = dataRef?.perms ? dataRef.perms : perms;
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
-          {['volume', 'db', CatalogTypeEnum.db].every(
-            (key) => dataRef?.type !== key
-          ) && (
+          {/* db_item 类型只显示删除按钮 */}
+          {dataRef?.type === CatalogTypeEnum.db_item ? (
             <>
-              {dataRef?.perms?.includes(
-                DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
-              ) && (
-                <Tooltip color="white" content="重命名">
-                  <IconEdit
-                    className={
-                      'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                    }
-                    onClick={() => handleEdit(node)}
-                  />
-                </Tooltip>
-              )}
-              {dataRef?.perms?.includes(
+              {(dataRef?.perms?.includes(
                 DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-              ) && (
+              ) ||
+                dataRef?.type === CatalogTypeEnum.db_item) && (
                 <Tooltip color="white" content="删除">
                   <IconDelete
                     onClick={() => {
                       Modal.confirm({
-                        title: '确认删除目录?',
-                        content: '删除后，该目录下所有内容将被删除，不可恢复',
+                        title: '确认删除数据库表?',
+                        content: '删除后不可恢复',
                         async onOk() {
                           try {
-                            await handleDelete(node);
+                            await handleDelete(node, 'db_item');
                           } catch (apiError: any) {
                             Message.error(
                               '删除失败: ' + (apiError.message || '请稍后重试')
@@ -367,16 +479,64 @@ export function useEditableTree({ catalogTreeStore }) {
                 </Tooltip>
               )}
             </>
+          ) : (
+            <>
+              {/* 其他类型的操作按钮 */}
+              {['volume'].every((key) => dataRef?.type !== key) && (
+                <>
+                  {dataRef?.perms?.includes(
+                    DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
+                  ) && (
+                    <Tooltip color="white" content="重命名">
+                      <IconEdit
+                        className={
+                          'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                        }
+                        onClick={() => handleEdit(node)}
+                      />
+                    </Tooltip>
+                  )}
+                  {dataRef?.perms?.includes(
+                    DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
+                  ) && (
+                    <Tooltip color="white" content="删除">
+                      <IconDelete
+                        onClick={() => {
+                          Modal.confirm({
+                            title: '确认删除目录?',
+                            content:
+                              '删除后，该目录下所有内容将被删除，不可恢复',
+                            async onOk() {
+                              try {
+                                await handleDelete(node, 'directory');
+                              } catch (apiError: any) {
+                                Message.error(
+                                  '删除失败: ' +
+                                    (apiError.message || '请稍后重试')
+                                );
+                              }
+                            },
+                            className: styles['modalWrapper']
+                          });
+                        }}
+                        className="hover:text-[rgb(var(--primary-6))]"
+                      />
+                    </Tooltip>
+                  )}
+                </>
+              )}
+              {/* 为数据卷和数据库都添加新建按钮 */}
+              {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
+                perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+                  <Tooltip color="white" content="新建">
+                    <IconPlus
+                      className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => addSubVolume(node)}
+                    />
+                  </Tooltip>
+                )}
+            </>
           )}
-          {dataRef?.type === 'volume' &&
-            perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
-              <Tooltip color="white" content="新建">
-                <IconPlus
-                  className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
-                  onClick={() => addSubVolume(node)}
-                />
-              </Tooltip>
-            )}
         </div>
       )
     );
@@ -384,6 +544,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
+    console.log(dataRef, '----', dataRef?.isLastLeaf, '查看dataRef');
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
@@ -413,6 +574,7 @@ export function useEditableTree({ catalogTreeStore }) {
               : ''
           )}
         >
+          {/* {!dataRef?.isLastLeaf&&<IconFolder />} */}
           {TitleText}
         </div>
       </Tooltip>
@@ -421,16 +583,16 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
+    // console.log(dataRef?.type, '查看dataRef77777');
+    console.log(dataRef, '再次查看dataRef');
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>
         {dataRef?.isLastLeaf && (
           <div className="tree-icon mr-2 w-4">
-            {[CatalogTypeEnum.db, CatalogTypeEnum.volume].includes(
-              dataRef?.type
-            ) ? (
+            {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
-            ) : (
+            ) : dataRef?.type === CatalogTypeEnum.db ? null : ( // <IconCaretDown style={{ fontSize: '12px' }} />
               <IconArchive className="text-base" />
             )}
           </div>

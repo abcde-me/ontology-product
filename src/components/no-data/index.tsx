@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Button, Empty } from '@arco-design/web-react';
 import emptyList from '@/assets/empty-list.png';
 import './index.css';
@@ -6,7 +6,7 @@ import { PermissionWrapper } from '../PermissionGuard';
 
 export default function noDataElement(props: {
   description: string;
-  btnText?: string;
+  btnText?: string | ReactNode;
   perms?: string;
   handleBtn?: ((e: Event) => void) | undefined;
 }) {

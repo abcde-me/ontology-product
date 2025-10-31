@@ -27,6 +27,11 @@ import {
 import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { useHistory } from 'react-router';
+import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
+import getLabelByValue from '@/utils/getLabelByValue';
+import { useInterval } from '@/utils/useInterval';
+
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
 // 转换
@@ -67,6 +72,8 @@ const DataLoadDetail = () => {
   const [total, setTotal] = useState(0);
   // 搜索框的状态
   const [searchValue, setSearchValue] = useState('');
+  // 新建任务loading状态
+  const [newTaskLoading, setNewTaskLoading] = useState(false);
   // 判断任务中是否存在运行的任务
   const handlePageChange = (page) => {
     setCurrent(page);
@@ -75,13 +82,16 @@ const DataLoadDetail = () => {
   const [editVisible, setEditVisible] = useState(false);
   // 相切列表loding的状态
   const [detailListLoading, setDetailListLoading] = useState(false);
+
+  const history = useHistory();
+
   // 点击编辑显示弹框
   const hideEditModal = () => {
     setEditVisible(false);
   };
   // 返回上一层的函数
   const OneLevelUpHan = () => {
-    history.back();
+    history.goBack();
   };
   // 通过路由id获取数据
   const getTask_idHan = async () => {
@@ -135,11 +145,14 @@ const DataLoadDetail = () => {
 
   const judgmentTask = () => {
     getDetailList();
-    const boo = detailList?.findIndex(
-      (item) => item.status == 'succeed' || item.status == 'stopping'
-    );
-    setRunningFlag(boo == -1 ? false : true);
+    // const boo = detailList?.findIndex(
+    //   (item) => item.status == 'succeed' || item.status == 'stopping'
+    // );
+    // setRunningFlag(boo == -1 ? false : true);
   };
+  // 5s轮询一次
+  useInterval(judgmentTask, 5000);
+
   // 停止中的过程
   const StopeJudgmentTask = async () => {
     try {
@@ -186,11 +199,13 @@ const DataLoadDetail = () => {
   };
   // 点击新建运行
   const runningHan = async () => {
+    setNewTaskLoading(true);
     try {
       const res = await runLoad({
         task_id: Number(loadId)
+      }).finally(() => {
+        setNewTaskLoading(false);
       });
-      console.log(res);
       if (res.code == '' && res.status == '200') {
         Message.success(`已成功发起载入任务${listDetail?.name}`);
         judgmentTask();
@@ -201,14 +216,25 @@ const DataLoadDetail = () => {
       console.error('Error:', error);
     }
   };
-  useEffect(() => {
-    getDetailList();
-  }, [current, pageSize, directoryObj]);
+  // 页面初始化时获取基础数据
   useEffect(() => {
     getdirectorylist();
     getTask_idHan();
   }, []);
 
+  // 当分页参数或目录筛选条件变化时重新获取列表
+  useEffect(() => {
+    getDetailList();
+  }, [current, pageSize, directoryObj]);
+
+  // 页面首次加载时延迟获取运行历史，确保任务已创建
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getDetailList();
+    }, 1000); // 延迟1秒加载运行历史
+
+    return () => clearTimeout(timer);
+  }, [loadId]);
   const clearHan = async () => {
     try {
       setDetailListLoading(true);
@@ -264,7 +290,7 @@ const DataLoadDetail = () => {
           }}
         >
           <BreadcrumbItem
-            href="/tenant/compute/modaforge/dataLoad"
+            onClick={() => history.push('/tenant/compute/modaforge/dataLoad')}
             style={{ color: '#7F8C9F' }}
           >
             数据载入详情
@@ -290,23 +316,24 @@ const DataLoadDetail = () => {
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
 
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) && (
-            <div
-              className={runningFlag ? '' : 'isDisabled'}
-              style={{
-                color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
-                pointerEvents: runningFlag ? 'none' : undefined,
-                cursor: runningFlag ? '' : 'pointer',
-                fontSize: '14px'
-              }}
-              onClick={() => {
-                setEditVisible(true);
-                console.log(listDetail?.run_config?.cycle_text);
-              }}
-            >
-              <IconEdit /> 编辑
-            </div>
-          )}
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) &&
+            (listDetail?.source_type as string) !== 'local' && (
+              <div
+                className={runningFlag ? '' : 'isDisabled'}
+                style={{
+                  color: runningFlag ? '#94A3B8' : 'rgb(0, 125, 250)',
+                  pointerEvents: runningFlag ? 'none' : undefined,
+                  cursor: runningFlag ? '' : 'pointer',
+                  fontSize: '14px'
+                }}
+                onClick={() => {
+                  setEditVisible(true);
+                  console.log(listDetail?.run_config?.cycle_text);
+                }}
+              >
+                <IconEdit /> 编辑
+              </div>
+            )}
         </div>
         <div className="info-container">
           <div className="info-column">
@@ -333,7 +360,11 @@ const DataLoadDetail = () => {
               >
                 {listDetail && (
                   <EllipsisPopoverCom
-                    value={listDetail.data_path_name}
+                    value={
+                      listDetail?.source_type === 'db'
+                        ? listDetail?.data_path_name + '/' + listDetail?.db_name
+                        : listDetail?.data_path_name
+                    }
                     isEdit={false}
                   />
                 )}
@@ -406,7 +437,16 @@ const DataLoadDetail = () => {
                 数据源类型：
               </div>
               <div style={{ fontSize: '14px' }}>
-                {listDetail && listDetail.source_type}
+                {/* {listDetail && listDetail.source_type} */}
+                {listDetail?.source_type == TYPE_CONFIG[ConnectorType.S3].value
+                  ? TYPE_CONFIG[ConnectorType.S3].text
+                  : listDetail?.source_type ==
+                      TYPE_CONFIG[ConnectorType.HDFS].value
+                    ? TYPE_CONFIG[ConnectorType.HDFS].text
+                    : listDetail?.source_type ==
+                        TYPE_CONFIG[ConnectorType.DB].value
+                      ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, listDetail?.sub_type || '')}`
+                      : TYPE_CONFIG[ConnectorType.Local].text}
               </div>
             </div>
             <div
@@ -430,9 +470,13 @@ const DataLoadDetail = () => {
                   maxWidth: '400px'
                 }}
               >
-                {listDetail && (
+                {listDetail &&
+                listDetail?.source_type ===
+                  TYPE_CONFIG[ConnectorType.Local].value ? (
+                  <span>本地上传</span>
+                ) : (
                   <EllipsisPopoverCom
-                    value={listDetail.connector_name}
+                    value={listDetail?.connector_name}
                     isEdit={false}
                   />
                 )}
@@ -496,8 +540,8 @@ const DataLoadDetail = () => {
                   <EllipsisPopoverCom
                     value={parseCron(
                       listDetail &&
-                      listDetail.run_config &&
-                      listDetail.run_config.cycle_text
+                        listDetail.run_config &&
+                        listDetail.run_config.cycle_text
                     )}
                     isEdit={false}
                   />
@@ -535,18 +579,20 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) && (
-            <Button
-              type="primary"
-              icon={<IconPlus />}
-              disabled={runningFlag ? true : false}
-              onClick={() => {
-                runningHan();
-              }}
-            >
-              新建运行
-            </Button>
-          )}
+          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) &&
+            (listDetail?.source_type as string) !== 'local' && (
+              <Button
+                type="primary"
+                icon={<IconPlus />}
+                disabled={runningFlag ? true : false}
+                loading={newTaskLoading}
+                onClick={() => {
+                  runningHan();
+                }}
+              >
+                新建运行
+              </Button>
+            )}
         </div>
         <div
           style={{
@@ -564,6 +610,7 @@ const DataLoadDetail = () => {
             name={listDetail?.name || ''}
             change={getChildrenTableChange}
             permission={perms}
+            type={listDetail?.source_type}
           />
         </div>
         {detailList && detailList.length > 0 && (

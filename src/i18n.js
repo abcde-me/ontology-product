@@ -29,7 +29,7 @@ export const init = () => {
     .init({
       backend: {
         // console compare: loadPath: '/locales/resource.json?lng={{lng}}&ns={{ns}}',
-        loadPath: '/locales/{{lng}}/{{ns}}.json',
+        loadPath: '/modaforge/locales/{{lng}}/{{ns}}.json'
       },
       lng: getLastLanguage(),
       fallbackLng: FALLBACK_LNG,
@@ -56,19 +56,19 @@ export const init = () => {
           // }
           return value;
         },
-        escapeValue: false, // not needed for react as it escapes by default
+        escapeValue: false // not needed for react as it escapes by default
       },
       react: {
         useSuspense: true,
         wait: true,
-        transSupportBasicHtmlNodes: true, // allow <br/> and simple html elements in translations
+        transSupportBasicHtmlNodes: true // allow <br/> and simple html elements in translations
       },
       saveMissing: true,
       missingKeyHandler: function (lng, ns, key) {
         // window.windowError = `Missing i18n key "${key}" in namespace "${ns}" and language "${lng}."`;
         // eslint-disable-next-line no-console
         // console.error(window.windowError);
-      },
+      }
     });
 };
 

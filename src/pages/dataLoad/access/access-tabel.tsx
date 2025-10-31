@@ -9,8 +9,9 @@ import {
 import { IconExclamationCircle } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import { RecordingType } from '../type';
+import { useParams } from '@/utils/url';
 import './index.css';
-import { RunState } from '../list/list';
+import { RunState } from '../config';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 const InputSearch = Input.Search;
@@ -32,81 +33,175 @@ const STATUSTYPEARR = {
 const AccessTable = (props) => {
   // 输入框的默认状态
   const [searchValue, setSearchValue] = useState('');
-  const columns = [
-    {
-      title: '文件名',
-      width: 400,
-      ellipsis: true,
-      render: (_, item) => {
-        return <EllipsisPopoverCom value={item.file_name} isEdit={false} />;
-      }
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 120,
-      render: (_, item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background:
-                item.status === StatusType.FAIL
-                  ? STATUSTYPEARR[StatusType.FAIL].color
-                  : STATUSTYPEARR[StatusType.SYCCESS].color
-            }}
-          ></div>
-          <div style={{ margin: '0px 3px 0px 5px' }}>
-            {item.status == StatusType.FAIL
-              ? STATUSTYPEARR[StatusType.FAIL].txt
-              : STATUSTYPEARR[StatusType.SYCCESS].txt}
-          </div>
-          {item.status == StatusType.FAIL && (
-            <Tooltip
-              mini
-              content={item.error_log}
-              style={{ maxHeight: '200px', overflow: 'auto' }}
-            >
-              <IconExclamationCircle
-                style={{ color: '#FB923C', fontSize: '16px' }}
-              />
-            </Tooltip>
-          )}
-        </div>
-      ),
-      filters: [
+  const [Judgment, setJudgment] = useState<boolean>(true);
+  const type = useParams('type');
+  const { check_type } = props;
+  const columns = () => {
+    if (type !== 'db') {
+      return [
         {
-          text: '成功',
-          value: RunState.SUCCEED
+          title: '文件名',
+          width: 400,
+          ellipsis: true,
+          render: (_, item) => {
+            return <EllipsisPopoverCom value={item.file_name} isEdit={false} />;
+          }
         },
         {
-          text: '失败',
-          value: RunState.FAILED
+          title: '状态',
+          dataIndex: 'status',
+          width: 120,
+          render: (_, item) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background:
+                    item.status === StatusType.FAIL
+                      ? STATUSTYPEARR[StatusType.FAIL].color
+                      : STATUSTYPEARR[StatusType.SYCCESS].color
+                }}
+              ></div>
+              <div style={{ margin: '0px 3px 0px 5px' }}>
+                {item.status == StatusType.FAIL
+                  ? STATUSTYPEARR[StatusType.FAIL].txt
+                  : STATUSTYPEARR[StatusType.SYCCESS].txt}
+              </div>
+              {item.status == StatusType.FAIL && (
+                <Tooltip
+                  mini
+                  content={item.error_log}
+                  style={{ maxHeight: '200px', overflow: 'auto' }}
+                >
+                  <IconExclamationCircle
+                    style={{ color: '#FB923C', fontSize: '16px' }}
+                  />
+                </Tooltip>
+              )}
+            </div>
+          ),
+          filters: [
+            {
+              text: '成功',
+              value: RunState.SUCCEED
+            },
+            {
+              text: '失败',
+              value: RunState.FAILED
+            }
+          ]
+        },
+        {
+          title: '类型',
+          dataIndex: 'file_type',
+          width: 120
+        },
+        {
+          title: '开始时间',
+          dataIndex: 'start_time',
+          render: (_, item) => <div>{item.start_time}</div>,
+          sorter: (a, b) => a.start_time - b.start_time,
+          width: 230
+        },
+        {
+          title: '结束时间',
+          dataIndex: 'end_time',
+          render: (_, item) => <div>{item.end_time}</div>,
+          sorter: (a, b) => a.end_time - b.end_time,
+          width: 230
         }
-      ]
-    },
-    {
-      title: '类型',
-      dataIndex: 'file_type',
-      width: 120
-    },
-    {
-      title: '开始时间',
-      dataIndex: 'start_time',
-      render: (_, item) => <div>{item.start_time}</div>,
-      sorter: (a, b) => a.start_time - b.start_time,
-      width: 230
-    },
-    {
-      title: '结束时间',
-      dataIndex: 'end_time',
-      render: (_, item) => <div>{item.end_time}</div>,
-      sorter: (a, b) => a.end_time - b.end_time,
-      width: 230
+      ];
+    } else {
+      return [
+        {
+          title: '序号',
+          width: 200,
+          ellipsis: true,
+          dataIndex: 'index',
+          render: (_, item, index) => {
+            return <span>{index + 1}</span>;
+          }
+        },
+        {
+          title: '表名',
+          width: 400,
+          ellipsis: true,
+          dataIndex: 'file_name',
+          render: (_, item) => {
+            return <EllipsisPopoverCom value={item.file_name} isEdit={false} />;
+          }
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          width: 120,
+          render: (_, item) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background:
+                    item.status === StatusType.FAIL
+                      ? STATUSTYPEARR[StatusType.FAIL].color
+                      : STATUSTYPEARR[StatusType.SYCCESS].color
+                }}
+              ></div>
+              <div style={{ margin: '0px 3px 0px 5px' }}>
+                {item.status == StatusType.FAIL
+                  ? STATUSTYPEARR[StatusType.FAIL].txt
+                  : STATUSTYPEARR[StatusType.SYCCESS].txt}
+              </div>
+              {item.status == StatusType.FAIL && (
+                <Tooltip
+                  mini
+                  content={item.error_log}
+                  style={{ maxHeight: '200px', overflow: 'auto' }}
+                >
+                  <IconExclamationCircle
+                    style={{ color: '#FB923C', fontSize: '16px' }}
+                  />
+                </Tooltip>
+              )}
+            </div>
+          ),
+          filters: [
+            {
+              text: '成功',
+              value: RunState.SUCCEED
+            },
+            {
+              text: '失败',
+              value: RunState.FAILED
+            }
+          ]
+        },
+        {
+          title: '类型',
+          dataIndex: 'db_type',
+          // render: (_, item) => <div>myslq表</div>,
+          width: 120
+        },
+        {
+          title: '开始时间',
+          dataIndex: 'start_time',
+          render: (_, item) => <div>{item.start_time}</div>,
+          sorter: (a, b) => a.start_time - b.start_time,
+          width: 230
+        },
+        {
+          title: '结束时间',
+          dataIndex: 'end_time',
+          render: (_, item) => <div>{item.end_time}</div>,
+          sorter: (a, b) => a.end_time - b.end_time,
+          width: 230
+        }
+      ];
     }
-  ];
+  };
   const [data, setData] = useState<RecordingType[] | null>([
     // {
     //   id: 1,
@@ -199,7 +294,7 @@ const AccessTable = (props) => {
       <InputSearch
         onClear={clearHan}
         allowClear
-        placeholder="搜索文件名"
+        placeholder={check_type == 'db' ? '搜索表名' : '搜索文件名'}
         style={{ width: 220, marginLeft: '24px' }}
         onPressEnter={(e) => {
           getRecordingList();
@@ -212,7 +307,7 @@ const AccessTable = (props) => {
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}
       >
         <Table
-          columns={columns}
+          columns={columns()}
           data={data ?? []}
           style={{ padding: '15px 24px', width: '100%' }}
           border={false}

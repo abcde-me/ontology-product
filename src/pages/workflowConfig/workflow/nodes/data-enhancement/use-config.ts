@@ -27,7 +27,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
       console.log('让我看看什么时候这里的值变化了～');
       const newInputs = produce(inputRef.current, (draft: any) => {
         draft.type = 'enhancement';
-        draft.title = '数据增强节点';
+        draft.title = '数据增强';
         draft.enha_modle_id = payload.enha_modle_id;
         draft.prompt_checkbox = payload.prompt_checkbox;
         draft.app_scenarios = {
@@ -39,8 +39,8 @@ const useConfig = (id: string, payload: CodeNodeType) => {
               payload?.app_scenarios?.option?.similarity_threshold,
             generate_sample_num:
               payload?.app_scenarios?.option?.generate_sample_num,
-            // enhanced_proportion:
-            //   payload?.app_scenarios?.option?.enhanced_proportion,
+            enhanced_proportion:
+              payload?.app_scenarios?.option?.enhanced_proportion,
             is_prompt: payload.prompt_checkbox ? 1 : 0,
             prompt: payload?.app_scenarios?.option?.prompt,
             sample_data: payload?.app_scenarios?.option?.sample_data

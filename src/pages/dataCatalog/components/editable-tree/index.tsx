@@ -6,18 +6,18 @@ import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
 
 export default function EditableTree() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { treeData, expandedKeys, selectedKey, searchValue } =
+  const { treeData, expandedKeys, selectedTreeKey, searchValue } =
     catalogTreeStore.useGetState([
       'treeData',
       'expandedKeys',
-      'selectedKey',
+      'selectedTreeKey',
       'inputValue'
     ]);
 
@@ -40,7 +40,7 @@ export default function EditableTree() {
           onChange={onSearchChange}
           maxLength={255}
           allowClear
-          style={{ height: '32px', width: '130px' }}
+          style={{ height: '32px', width: '180px' }}
         />
         <PermissionWrapper
           permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_CATALOG}
@@ -60,7 +60,7 @@ export default function EditableTree() {
           blockNode
           selectable
           expandedKeys={expandedKeys}
-          selectedKeys={[selectedKey]}
+          selectedKeys={[selectedTreeKey]}
           icons={(node) => ({
             switcherIcon: !node.dataRef?.isLastLeaf ? <IconCaretDown /> : null
           })}

@@ -4,35 +4,49 @@ import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { EndNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import { Form, Select } from '@arco-design/web-react';
-import { getWorkflowTargetPath } from '@/api/workflow';
+import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
+import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
+import { useUserInfo } from '@/store/userInfoStore';
 import './end.scss';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
+  const userInfo = useUserInfo();
   const { readOnly, inputs, onValuesChange } = useConfig(id, data);
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const Option = Select.Option;
+  const searchParams = new URLSearchParams(location.search);
+  const workflow_uuid = searchParams.get('workflow_uuid');
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
+  const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
+  const [knowledgeBaseNameValid, setKnowledgeBaseNameValid] = useState(true);
+  const [knowledgeBaseName, setKnowledgeBaseName] = useState(
+    inputs?.knowledge_base_name || ''
+  );
 
   useEffect(() => {
-    getWorkflowTargetPath(2, '').then(res => {
+    getWorkflowTargetPath(2, '').then((res) => {
       const dirsArr: Record<string, any>[] = [];
       res.data.dst.forEach((catalog) => {
         // 重置name结构
-        const restData = catalog.children?.volume.map(item => {
+        const restData = catalog.children?.volume?.map((item) => {
           return {
             ...item,
             parent_name: catalog.name
-          }
-        })
+          };
+        });
         dirsArr.push(...(restData || []));
       });
       setDataSource(dirsArr);
     });
   }, []);
-  console.log(dataSource, 'dataSource===');
+
+  // 初始化时名称已回退为上一次输入合法名称，将名称校验设为true
+  useEffect(() => {
+    onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
+  }, []);
+
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form
@@ -42,9 +56,20 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         disabled={readOnly}
         wrapperCol={{ span: 24 }}
-        onValuesChange={(_, v: any) => { onValuesChange(v, dataSource) }}
+        onValuesChange={(_, v: any) => {
+          onValuesChange(
+            {
+              ...v,
+              knowledge_base_name: knowledgeBaseName || '',
+              isKnowledgeBaseNameValid: knowledgeBaseNameValid
+            },
+            dataSource
+          );
+        }}
         initialValues={{
-          target_path_id: inputs?.target_path_id
+          target_path_id: inputs?.target_path_id,
+          is_embedding: inputs?.is_embedding,
+          knowledge_base_name: inputs?.knowledge_base_name
         }}
       >
         <FormItem
@@ -60,7 +85,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             allowClear
             showSearch
             filterOption={(inputValue, option) => {
-              return option?.props?.children?.includes(inputValue)
+              return option?.props?.children?.includes(inputValue);
             }}
           >
             {dataSource.map((option) => (
@@ -70,6 +95,74 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             ))}
           </Select>
         </FormItem>
+        <FormItem
+          extra="开启后会对输出数据执行向量化（Embedding）流程。"
+          field="is_embedding"
+        >
+          <Checkbox
+            className="mt-[8px] text-[14px]"
+            checked={isEmbedding}
+            value={isEmbedding}
+            onChange={(value) => {
+              setIsEmbedding(value);
+            }}
+          >
+            是否进行Embedding
+          </Checkbox>
+        </FormItem>
+        {isEmbedding && (
+          <FormItem
+            label="知识库名称"
+            extra="为构建的知识库指定一个名称，用于后续的检索和管理"
+            field="knowledge_base_name"
+            rules={[
+              {
+                required: true,
+                validateTrigger: 'onBlur',
+                validator: async (value, callback) => {
+                  const formData = form.getFieldsValue() as EndNodeType;
+                  return knowledgeBaseNameCheck({
+                    knowledgeName: value,
+                    userId: userInfo?.id || '',
+                    dsWorkflowUuid: workflow_uuid || ''
+                  }).then((res) => {
+                    if (
+                      res.data &&
+                      (res.msg === 'success' || res.msg === '成功')
+                    ) {
+                      setKnowledgeBaseName(value);
+                      setKnowledgeBaseNameValid(true);
+                      // 校验通过保存名称
+                      onValuesChange(
+                        { ...formData, isKnowledgeBaseNameValid: true },
+                        dataSource
+                      );
+                    } else {
+                      // 校验未通过名称重置为之前名称
+                      setKnowledgeBaseNameValid(false);
+                      onValuesChange(
+                        {
+                          ...formData,
+                          isKnowledgeBaseNameValid: false,
+                          knowledge_base_name: knowledgeBaseName,
+                          knowledge_base_name_msg: res.msg
+                        },
+                        dataSource
+                      );
+                      callback(res.msg);
+                    }
+                  });
+                }
+              }
+            ]}
+          >
+            <Input
+              placeholder="请输入知识库名称（50字以内）"
+              maxLength={50}
+              value={knowledgeBaseName}
+            />
+          </FormItem>
+        )}
       </Form>
     </div>
   );

@@ -5,10 +5,12 @@ import React, {
   forwardRef,
   useImperativeHandle
 } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Modal, Tabs, Typography } from '@arco-design/web-react';
+import dayjs from 'dayjs';
 import {
   getTargetDataFileList,
-  getSourceDataFileList
+  getSourceDataFileList,
+  getDbItemList
 } from '@/api/dataCatalog';
 // 导入统一的组件
 import UnifiedTable, { UnifiedTableRef } from './unified-table';
@@ -17,7 +19,7 @@ import FormComponent from './components/popups-form';
 import { getUnifiedColumns, getSourceFileTypeList } from './unified-columns';
 import './index.scss';
 import { PopupsFormFrom } from './components/popups-form/types';
-
+import DbModal from './components/popups-form/dbmodal';
 const { Text } = Typography;
 
 // 数据类型接口定义
@@ -68,6 +70,10 @@ interface UnifiedDataTableProps {
   // 选中节点的完整路径
   selectedFullPath?: string;
   selectedKey?: string;
+  // 选中节点的类型
+  selectedNodeType?: string;
+  // 选中节点的父节点ID
+  selectedParentId?: string;
 }
 
 /**
@@ -84,17 +90,27 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     tableType,
     dataType = 'volume',
     selectedFullPath,
-    selectedKey
+    selectedKey,
+    selectedNodeType,
+    selectedParentId
   } = props;
   // 基础状态管理
   const [visible, setVisible] = useState(false); // 下载弹框控制
+  const [visibleDbmodel, setVisibleDbmodel] = useState(false); // 数据详情弹框控制
   const [downloadData, setDownloadData] = useState(null); // 下载的数据
   const [selectedFilePath, setSelectedFilePath] = useState(''); // 选中的文件路径
+  const [currentDbDetails, setCurrentDbDetails] = useState<{
+    databaseName: string;
+    tableName: string;
+    path_id: number;
+    table_id: number;
+  } | null>(null); // 当前选中的数据库详情
   const [tableData, setTableData] = useState<TableDataItem[]>([]); // 表格数据
   const [loading, setLoading] = useState(false); // 添加加载状态
   const [fileTypeFilters, setFileTypeFilters] = useState<string[]>([]); // 文件类型筛选条件
   const [sortField, setSortField] = useState<string>(''); // 排序字段
   const [sortOrder, setSortOrder] = useState<string>(''); // 排序方向 asc/desc
+  const [dbFilterType, setDbFilterType] = useState<string[]>([]); // 数据库类型筛选条件
 
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,15 +154,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     };
   }, []);
 
-  // 监听选中路径变化
-  // useEffect(() => {
-  //   console.log('选中的路径selectedFullPath9999999999999', selectedFullPath);
-  //   // 获取到路径后直接传递给后端，然后前端根据路径获取数据
-  //   if (!isFirstRender.current && selectedFullPath) {
-  //     setCurrentPage(1);
-  //     getTableList();
-  //   }
-  // }, [selectedFullPath]);
   useEffect(() => {
     if (isFirstRender.current) {
       return;
@@ -171,7 +178,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         tableRef.current.resetSelection();
       }
     }
-  }, [selectedKey, selectedFullPath]);
+  }, [selectedKey, selectedFullPath, selectedNodeType, selectedParentId]);
   // 监听搜索类型变化
   useEffect(() => {
     if (isFirstRender.current) {
@@ -243,12 +250,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
       const validFileTypes = fileTypeFilters || [];
       // 目标数据表参数
-      const params = {
+      const params: any = {
         full_path: selectedFullPath, // 使用选中的完整路径
         page: currentPage,
         limit: pageSize,
-        start_time: startTime || '',
-        end_time: endTime || '',
         search_content:
           searchConditionType === '数据内容' ? searchConditionKeyword : '',
         search_id: searchConditionType === 'ID' ? searchConditionKeyword : '',
@@ -258,16 +263,30 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         // file_type: validFileTypes || []// 使用筛选条件中的文件类型
       };
 
+      // 只有当时间存在时才添加时间参数
+      if (startTime) {
+        params.start_time = startTime;
+      }
+      if (endTime) {
+        params.end_time = endTime;
+      }
+
       // 源数据表参数
-      const sourceParams = {
+      const sourceParams: any = {
         page: currentPage,
         page_size: pageSize,
         file_name: searchValue || '',
         data_path_id: Number(selectedKey) // 优先使用选中ID 后期改成selectedKey
-        // start: startTime, //后期改成startTime
-        // end: endTime, //后期改成endTime
         // file_type: validFileTypes.length > 0 ? validFileTypes : [''] // 使用筛选条件中的文件类型
       };
+
+      // 只有当时间存在时才添加时间参数，并转换为ISO字符串
+      if (startTime) {
+        sourceParams.start = startTime;
+      }
+      if (endTime) {
+        sourceParams.end = endTime;
+      }
       const newParams: any = { ...params };
       const newSourceParams: any = { ...sourceParams };
 
@@ -281,19 +300,48 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newParams.file_type = validFileTypes;
         newSourceParams.file_type = validFileTypes;
       }
-      if (startTime) {
-        newSourceParams.start = startTime;
-      }
-      if (endTime) {
-        newSourceParams.end = endTime;
-      }
       let res;
-      if (tableType === 'target') {
+      console.log(tableType, '查看tableType11111111');
+      console.log(selectedNodeType, '查看selectedNodeType');
+
+      // 根据节点类型决定调用哪个API
+      if (selectedNodeType === 'db_item') {
+        let databaseName = '';
+        if (selectedFullPath) {
+          const pathParts = selectedFullPath.split('/');
+          if (pathParts.length >= 2) {
+            databaseName = pathParts[pathParts.length - 1];
+          }
+        }
+        const dbParams: any = {
+          path_id: Number(selectedParentId || selectedKey), // 使用父节点ID（数据库ID），如果没有则使用selectedKey
+          search:
+            tableType === 'source'
+              ? searchValue || ''
+              : searchConditionKeyword || '',
+          page: currentPage,
+          limit: pageSize,
+          database: databaseName, // 使用提取的数据库名称
+          db_type: dbFilterType
+        };
+
+        // 只有当时间存在时才添加时间参数，并转换为ISO字符串
+        if (startTime) {
+          dbParams.start_time = dayjs(startTime).toISOString();
+        }
+        if (endTime) {
+          dbParams.end_time = dayjs(endTime).toISOString();
+        }
+        res = await getDbItemList(dbParams);
+        console.log('调用数据库表API，参数:', dbParams);
+      } else if (tableType === 'target') {
         // 调用目标数据API
+        console.log(newParams, 'top----111111');
         res = await getTargetDataFileList(newParams);
         console.log('调用目标数据API，参数:', newParams);
       } else {
         // 调用源数据API
+        console.log(newSourceParams, 'top-------2222');
         res = await getSourceDataFileList(newSourceParams);
         console.log('调用源数据API，参数:', newSourceParams);
       }
@@ -403,7 +451,9 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     fileTypeFilters,
     tableType,
     sortField,
-    sortOrder
+    sortOrder,
+    selectedNodeType,
+    selectedParentId
   ]);
 
   // 当tableType变化时重置相关状态，不再重复调用getTableList
@@ -424,6 +474,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   }, [tableType]);
 
   useEffect(() => {
+    console.log('查看table是什么类型', tableType);
+
     const handleResetPage = (event) => {
       const { tableType: eventTableType } = event.detail;
       if (eventTableType === tableType) {
@@ -452,12 +504,14 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
   );
 
   useEffect(() => {
-    getSourceFileTypeList({
-      id: selectedKey
-    }).then((result) => {
-      setSourceFileTypeFilters(result);
-    });
-  }, [selectedKey]);
+    if (!!selectedKey && dataType === 'volume') {
+      getSourceFileTypeList({
+        id: selectedKey
+      }).then((result) => {
+        setSourceFileTypeFilters(result);
+      });
+    }
+  }, [selectedKey, dataType]);
 
   // 动态生成列配置 - 仅在表格类型和数据类型变化时重新生成
   const baseColumns = React.useMemo(() => {
@@ -465,14 +519,20 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
       tableType,
       dataType,
       downloadShow,
-      null,
-      getTableList,
+      setVisibleDbmodel,
+      null, // hoveredRowId
+      getTableList, // refreshData
       selectedKey,
       selectedFullPath,
-      undefined,
+      undefined, // customFileTypeFilters
       handAllReset,
       resetPage,
-      sourceFileTypeFilters
+      sourceFileTypeFilters,
+      selectedNodeType,
+      (data) => {
+        setCurrentDbDetails(data); // 存储当前的数据库详情
+      },
+      selectedParentId // 传递父节点ID
     );
   }, [
     tableType,
@@ -482,7 +542,8 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     selectedFullPath,
     handAllReset,
     resetPage,
-    sourceFileTypeFilters
+    sourceFileTypeFilters,
+    selectedNodeType
   ]);
 
   // 处理带有hoveredRowId的列配置
@@ -493,12 +554,20 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         tableType,
         dataType,
         downloadShow,
+        setVisibleDbmodel,
         hoveredRowId,
         getTableList,
         selectedKey,
         selectedFullPath,
         undefined,
-        handAllReset
+        handAllReset,
+        resetPage,
+        sourceFileTypeFilters,
+        selectedNodeType,
+        (data) => {
+          setCurrentDbDetails(data); // 存储当前的数据库详情
+        },
+        selectedParentId // 传递父节点ID
       );
     }
     return baseColumns;
@@ -510,7 +579,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     hoveredRowId,
     selectedKey,
     selectedFullPath,
-    handAllReset
+    handAllReset,
+    resetPage,
+    sourceFileTypeFilters,
+    selectedNodeType
   ]);
 
   // 处理表格选择变化 - 支持跨页选择
@@ -565,17 +637,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     ]
   );
 
-  // 处理从外部传入的selectedNode
-  // useEffect(() => {
-  //   if (selectedNode) {
-  //     console.log(
-  //       `UnifiedDataTable (${tableType}) - Selected node changed:`,
-  //       selectedNode
-  //     );
-  //     // 这里可以根据selectedNode来更新表格数据
-  //   }
-  // }, [selectedNode, tableType]);
-
   // 页码变化处理 - 使用useCallback避免重新创建
   const handlePageChange = React.useCallback(
     (page: number, size: number) => {
@@ -606,7 +667,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     [tableType]
   );
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log('Table changed:', { pagination, filters, sorter, tableType });
+    console.log('Table changed:123456789', {
+      pagination,
+      filters,
+      sorter,
+      tableType
+    });
     let newFileTypes: string[] = [];
     // 处理排序参数
     let newSortField = '';
@@ -638,7 +704,13 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     // 设置文件类型筛选条件
     // console.log(`${tableType}表格设置文件类型筛选条件:`, newFileTypes);
     setFileTypeFilters(newFileTypes);
-
+    if (sorter && sorter.db_type && Array.isArray(sorter.db_type)) {
+      setDbFilterType(sorter.db_type);
+    } else if (sorter && typeof sorter.db_type === 'string') {
+      setDbFilterType([sorter.db_type]);
+    } else {
+      setDbFilterType([]);
+    }
     // 当筛选条件变化时，重置到第一页
     if (
       (filters && Object.keys(filters).length > 0) ||
@@ -646,7 +718,6 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
     ) {
       setCurrentPage(1);
     }
-
     // 重新获取数据
     // getTableList();
   };
@@ -718,6 +789,15 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         onCancel={() => setVisible(false)}
         visible={visible}
         resetSelectedData={handAllReset}
+      />
+      {/* 数据详情弹框 */}
+      <DbModal
+        visible={visibleDbmodel}
+        onCancel={() => {
+          setVisibleDbmodel(false);
+          setCurrentDbDetails(null); // 清除当前数据库详情
+        }}
+        data={currentDbDetails} // 传递当前数据库详情
       />
     </>
   );

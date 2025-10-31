@@ -53,11 +53,12 @@ export async function getLoadRecordList(params) {
 
 interface CatalogListParams {
   root_type?: number; // 如果 root_type 是可选的，可以加上 ?
+  dir_type?: number;
   // 其他可能的字段...
 }
 // 获取数据集列表
-export async function getDirectoryList(params) {
-  return await UAPI.RES.catalogListApi(params).get().inRegion().do();
+export async function getDirectoryList(params: CatalogListParams) {
+  return await UAPI.RES.catalogListApi({}).get(params).inRegion().do();
 }
 // 停止单个载入任务
 export async function stopeLoad(params) {
@@ -72,4 +73,28 @@ export async function getLoadTaskFiles(params: any = {}) {
 // 查询单个任务已加载文件列表分页
 export async function getLoadRecordLists(params: any = {}) {
   return await UAPI.RES.getLoadRecordListApi({}).post(params).inRegion().do();
+}
+//重试载入任务
+interface reTryLoadParams {
+  execution_id: string;
+  task_id: number;
+}
+export async function reTryLoad(params: reTryLoadParams) {
+  return await UAPI.RES.reTryLoadApi({}).post(params).inRegion().do();
+}
+//载入时获取表名
+interface getTableNameParams {
+  connector_id: string;
+}
+export async function getTableName(params: getTableNameParams) {
+  return await UAPI.RES.getTableNameApi({}).post(params).inRegion().do();
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve({
+  //       data: {
+  //         table_name: '模拟的数据名'
+  //       }
+  //     });
+  //   }, 500);
+  // });
 }

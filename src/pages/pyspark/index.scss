@@ -1,0 +1,100 @@
+.pyspark-layout {
+  height: calc(100% - 20px - 20px);
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  margin: 20px 20px 20px 0;
+  overflow: hidden;
+
+  // ---以下组件样式覆盖---
+  .arco-btn-outline:not(.arco-btn-disabled) {
+    color: #007dfa;
+    border-color: #007dfa;
+  }
+
+  .arco-btn-outline:not(.arco-btn-disabled):active,
+  .arco-btn-outline:not(.arco-btn-disabled):hover {
+    color: #007dfa;
+    border-color: #007dfa;
+    background-color: transparent;
+  }
+
+  .arco-tree-node {
+    .arco-tree-node-indent {
+      display: none;
+    }
+  }
+
+  // ---以上组件样式覆盖---
+
+  // ---以下左侧目录通用样式---
+  .sider-container {
+    padding: 9px 12px 0;
+  }
+
+  .sider-title {
+    padding-bottom: 9px;
+    font-size: var(--font-size-primary);
+    font-weight: 500;
+    color: var(--color-text-2);
+  }
+
+  .arco-tabs-header-scroll:hover {
+    .arco-tabs-header-title-active {
+      .arco-tabs-header-title-text {
+        color: #007dfa;
+      }
+    }
+    .arco-tabs-header-title-text {
+      color: #1e293b;
+    }
+  }
+  // ---以上左侧目录通用样式---
+
+  .arco-tabs-header-title {
+    border-radius: 0;
+  }
+
+  .pyspark-sider {
+    .arco-layout-sider-children {
+      .pyspark-tabs {
+        height: 100%;
+
+        .arco-tabs-header-nav {
+          padding: 8px;
+          border-right: 1px solid #e2e8f0;
+        }
+
+        .arco-tabs-header-nav-rounded .arco-tabs-header-title {
+          padding: 0px;
+          border-radius: 4px;
+          margin-top: 12px;
+          width: 28px;
+          height: 28px;
+
+          &:first-of-type {
+            margin-top: 0px;
+          }
+        }
+
+        .arco-tabs-content {
+          height: 100%;
+          overflow: hidden;
+          padding: 0px;
+
+          .arco-tabs-content-inner {
+            height: 100%;
+
+            .arco-tabs-pane {
+              height: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .pyspark-content {
+    background-color: #fff;
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,451 @@
+/******** 定义全局css变量 https://arco.design/react/docs/token ********/
+:root {
+  /******** 文字颜色 *******/
+  --color-text-2: #1e293b;
+  --color-text-4: #6e7b8d;
+
+  /******** 文字大小 *******/
+  --font-size-primary: 14px;
+  --font-size-secondary: 12px;
+
+  /******** 主色 *******/
+  --primary-1: #eef6ff;
+  --primary-6: #007dfa;
+}
+
+/******** fontSize *******/
+$font-size-body-3: 14px;
+/******** background ********/
+$color-bg-hover: #438dfb;
+$color-bg-btn-normal: #007dfa;
+$color-bg-btn-normal-hover: #438dfb;
+$color-bg-btn-line: #007dfa;
+$color-bg-btn-line-hover: #438dfb;
+$color-font-white: #ffffff;
+/******** fontWeight ********/
+$font-weight-400: 400;
+$font-weight-600: 600;
+
+/*********** border ***********/
+$border-radius-medium: 4px;
+
+/*********** size ***********/
+$size-4: 16px;
+
+/*********** spacing ***********/
+
+$spacing-none: 0;
+$spacing-1: 2px;
+$spacing-2: 4px;
+$spacing-3: 6px;
+$spacing-4: 8px;
+$spacing-5: 10px;
+$spacing-6: 12px;
+$spacing-7: 16px;
+$spacing-8: 20px;
+$spacing-9: 24px;
+
+// TODO: 应该再抽离中间层，用于场景定义，需要与视觉设计师一起共创
+// $font-weight-normal: $font-weight-400;
+// $font-weight-block: $font-weight-600;
+
+/******** btn ********/
+.arco-btn-size-default {
+  font-size: $font-size-body-3;
+}
+
+.arco-btn-text {
+  font-weight: $font-weight-400;
+}
+
+// .arco-btn-secondary:not(.arco-btn-disabled) {
+//   background-color: rgb(var(--primary-6));
+//   color: var(--color-white);
+// }
+// .arco-btn-secondary:not(.arco-btn-disabled):hover {
+//   background-color: $color-bg-hover !important;
+//   color: var(--color-white) !important;
+// }
+/******** table ********/
+// .arco-table-td .arco-table-col-fixed-right .arco-table-col-fixed-right-first {
+//   color: red;
+// }
+.arco-table-th {
+  font-weight: $font-weight-600;
+}
+
+.arco-table .arco-table-th-item {
+  font-size: $font-size-body-3;
+}
+
+.arco-table
+  .arco-table-th-item.arco-table-col-has-sorter
+  .arco-table-cell-with-sorter {
+  font-size: $font-size-body-3;
+}
+
+.arco-table-td {
+  font-size: $font-size-body-3;
+  padding: 12px 16px;
+}
+
+/******** pagination ********/
+.arco-pagination-item {
+  font-size: $font-size-body-3;
+  color: var(--color-text-2);
+  font-weight: $font-weight-600;
+}
+
+.arco-pagination-item-active {
+  color: rgb(var(--primary-6));
+  background-color: rgb(var(--primary-1));
+}
+
+.arco-pagination-total-text {
+  color: var(--color-text-1);
+}
+
+.arco-pagination-item:not(:last-child) {
+  margin-right: 12px;
+}
+
+/******** tree ********/
+
+.arco-tree-node:hover {
+  background-color: var(--color-bg-3);
+}
+
+.arco-tree-node-title {
+  font-size: $font-size-body-3;
+}
+
+.arco-tree-node-title:hover {
+  background-color: var(--color-bg-3);
+}
+
+.arco-tree-node.arco-tree-node-selected {
+  background-color: var(--color-bg-3);
+  color: rgb(var(--primary-6));
+}
+
+.arco-tree-node-selected .arco-tree-node-title,
+.arco-tree-node-selected .arco-tree-node-title:hover {
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
+}
+
+/******** form ********/
+.arco-form .arco-form-item > .arco-form-label-item {
+  padding-right: $size-4;
+}
+
+.arco-input-word-limit {
+  color: var(--color-text-5);
+}
+
+.arco-link {
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
+}
+
+.arco-menu-vertical .arco-menu-group-title {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+/******** button ********/
+
+/******** popconfirm ********/
+.arco-popconfirm .arco-popconfirm-btn {
+  display: flex;
+  justify-content: right;
+}
+
+/* 比如这样写进项目全局样式里 */
+.arco-modal-confirm .arco-modal-confirm-title {
+  margin-bottom: 6px;
+  /* 默认是16px */
+  padding-bottom: 0;
+}
+
+.arco-modal-simple .arco-modal-content {
+  width: 464;
+  height: 142;
+  padding-left: 28px;
+}
+
+.arco-modal-simple .arco-modal-header {
+  margin-bottom: 4px;
+}
+
+.arco-modal-simple {
+  width: 464px;
+  padding: 24px 28px;
+}
+
+.arco-table-th-item {
+  padding: 9px 16px !important;
+}
+
+.arco-input-search .arco-input::placeholder {
+  color: #7f8c9f;
+}
+
+.arco-input-tag.arco-input-tag-focus .arco-input-tag-tag {
+  background-color: #e7ecf0;
+}
+
+.arco-select-size-default.arco-select-multiple input {
+  font-size: $font-size-body-3;
+  outline: none;
+}
+
+.arco-textarea {
+  font-size: $font-size-body-3;
+}
+
+.arco-radio {
+  font-size: $font-size-body-3;
+}
+
+.arco-cascader-single .arco-cascader-view-value,
+.arco-cascader-single .arco-cascader-view-value-mirror {
+  font-size: $font-size-body-3;
+}
+
+.arco-input {
+  font-size: $font-size-body-3;
+}
+
+.arco-select-popup .arco-select-option-selected {
+  background: none;
+}
+
+.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-input {
+  font-size: $font-size-body-3;
+}
+
+.arco-select-single .arco-select-view-selector .arco-select-view-input {
+  font-size: $font-size-body-3;
+}
+
+.arco-select-single .arco-select-view-value,
+.arco-select-single .arco-select-view-value-mirror {
+  font-size: $font-size-body-3;
+}
+
+.arco-select-popup .arco-select-option-selected {
+  font-size: $font-size-body-3;
+}
+
+.arco-select-popup .arco-select-option {
+  font-size: $font-size-body-3;
+}
+
+.arco-radio-text {
+  font-size: $font-size-body-3;
+}
+
+/* 禁用表头 title 属性 */
+.arco-table-th-item-title {
+  pointer-events: none !important;
+}
+
+.arco-input-tag .arco-input-tag-tag {
+  padding: 1px 8px;
+  font-size: 14px;
+}
+
+.arco-input-tag .arco-input-tag-tag {
+  background-color: #e7ecf0;
+}
+
+.arco-input-tag.arco-input-tag-focus .arco-input-tag-tag {
+  background-color: #e7ecf0;
+}
+
+.arco-select-option-wrapper:hover {
+  background-color: #eef6ff;
+  border-radius: 4px;
+}
+
+.arco-select-option-wrapper:hover .arco-select-option {
+  background-color: #eef6ff;
+}
+
+.arco-select-popup .arco-select-option:hover {
+  background-color: #eef6ff;
+}
+
+.arco-select-popup .arco-select-option-hover {
+  background-color: white;
+}
+
+// 正常按钮的颜色
+.arco-btn-primary:not(.arco-btn-disabled) {
+  background-color: $color-bg-btn-normal;
+  color: white;
+}
+
+// 正常按钮划入的颜色
+.arco-btn-primary:not(.arco-btn-disabled):hover {
+  background-color: $color-bg-btn-normal-hover;
+  color: $color-bg-btn-normal-hover;
+}
+
+// 线性按钮的颜色
+.datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(
+    .arco-btn-disabled
+  ):not(.arco-btn-loading) {
+  color: $color-bg-btn-line;
+  background-color: white;
+}
+
+// 线性按钮的划入颜色
+.datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(
+    .arco-btn-disabled
+  ):not(.arco-btn-loading):hover {
+  background-color: $color-bg-btn-line;
+  color: $color-bg-btn-line;
+}
+
+/* 全局修改所有 placeholder */
+.arco-input::placeholder,
+.arco-picker input::placeholder,
+.arco-tree-select-view-input::placeholder {
+  font-size: 14px;
+}
+
+.arco-input:hover,
+.arco-input:focus,
+.arco-textarea:hover,
+.arco-textarea:focus {
+  outline: none;
+}
+
+.arco-picker-input,
+.arco-picker-input-active {
+  input {
+    outline: none;
+  }
+}
+
+/* 面包屑 */
+.arco-breadcrumb-item {
+  font-weight: 500 !important;
+}
+
+.arco-table {
+  .arco-table-tr {
+    .arco-table-checkbox {
+      // 去除表格头部选中框和内容选中框不能左对齐的问题
+      padding-left: 0;
+    }
+  }
+}
+
+.arco-table-content-inner,
+.data-catalog-left-box {
+  /* 去除滚动条预留空间，否则表格默认会多出滚动条的宽度 */
+  scrollbar-gutter: auto;
+  // background: transparent;
+}
+
+/* 修复 arco-table-header 滚动条的问题 */
+.arco-table-header {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+.arco-table-content-inner::-webkit-scrollbar,
+.data-catalog-left-box::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+
+.arco-table-content-inner::-webkit-scrollbar-thumb,
+.data-catalog-left-box::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.arco-table-content-inner:hover::-webkit-scrollbar-thumb,
+.data-catalog-left-box:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+// alert
+.arco-alert {
+  border-radius: 4px;
+
+  .arco-alert-icon-wrapper {
+    margin-top: 2px;
+  }
+
+  .arco-alert-content {
+    font-size: 14px;
+  }
+}
+
+// popover
+.arco-popover-inner-content {
+  font-size: 14px !important;
+}
+
+.arco-modal-title .arco-icon {
+  font-size: 20px;
+  vertical-align: -4px;
+}
+
+.arco-table-tr > th {
+  background-color: #f5f9ff;
+}
+
+.arco-form-item-symbol {
+  position: relative;
+  bottom: 1px;
+  /* 上移 */
+  right: 2px;
+}
+
+.arco-modal-footer .arco-btn-secondary:focus {
+  box-shadow: none;
+}
+
+.arco-btn-primary:not(.arco-btn-disabled):hover {
+  color: $color-font-white;
+  background-color: $color-bg-btn-normal;
+}
+
+.arco-table-tr > th {
+  background-color: #f5f9ff;
+}
+
+.arco-btn-primary:not(.arco-btn-disabled):hover {
+  color: $color-font-white;
+  background-color: $color-bg-btn-normal;
+}
+
+.arco-form-label-item {
+  > label {
+    display: flex;
+  }
+}
+
+.arco-btn-secondary:not(.arco-btn-disabled) {
+  color: $color-bg-btn-normal !important;
+  background-color: $color-font-white !important;
+  border: 1px solid $color-bg-btn-line !important;
+}
+
+.arco-btn-secondary:not(.arco-btn-disabled):hover {
+  color: $color-bg-btn-line-hover !important;
+  background-color: $color-font-white !important;
+  border: 1px solid $color-bg-btn-line-hover !important;
+}

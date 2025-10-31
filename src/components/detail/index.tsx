@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
 import styles from './style.module.css';
 import NoDataEmpty from '@/components/NoDataEmpty';
@@ -19,7 +19,8 @@ import {
   Select,
   Pagination,
   Tooltip,
-  Empty
+  Empty,
+  TableColumnProps
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -37,7 +38,7 @@ import {
   IconInfoCircle
   //  IconRefresh
 } from '@arco-design/web-react/icon';
-
+import { formatFileSize } from '@/utils/format';
 import { Breadcrumb } from '@arco-design/web-react';
 import {
   getDatasetDetail,
@@ -47,7 +48,9 @@ import {
   editDatasetVersion,
   type DataChangeItem,
   getDatasetVersionList,
-  datasetVersionRebuild
+  datasetVersionRebuild,
+  getDataContentFileList,
+  getDataContentTableList
 } from '@/api/datasetManagement';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -56,10 +59,12 @@ import { PermissionGuard } from '@/components/PermissionGuard';
 import './style.css';
 import { validateName } from '@/utils/valiate';
 import noDataElement from '@/components/no-data';
+import getFileIcon from '@/components/file-icon';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 interface DatasetDetail {
+  latest_size: number;
   id: number;
   name: string;
   tag_names: string[];
@@ -76,6 +81,18 @@ interface DatasetDetail {
   created_at: string;
   updated_at: string;
   perms: string[];
+  storage_type: string;
+}
+
+enum StorageType {
+  jsonl = 'jsonl',
+  file = 'file',
+  table = 'table'
+}
+
+interface TableColumn {
+  name: string;
+  cn_name: string;
 }
 
 const countWidth = (count: number) => {
@@ -83,7 +100,7 @@ const countWidth = (count: number) => {
   if (count > 4) {
     return '400px';
   } else {
-    return `${viewportWidth / count}px`;
+    return `${100 / count}%`; // 等宽分布
   }
 };
 
@@ -139,7 +156,7 @@ const generateArcoColumns = (
         );
       } else {
         return (
-          <div style={{ width: cellWidth }}>
+          <div style={{ width: '100%' }}>
             {/* {header === 'name' ? ( */}
             <EllipsisPopover
               preferTypography
@@ -264,6 +281,45 @@ const formatDate = (dateString: string) => {
   );
 };
 
+// 数据内容文件表格列定义
+const contentFileColumns = [
+  {
+    title: 'ID',
+    dataIndex: 'id',
+    width: 80
+  },
+  {
+    title: '文件名称',
+    dataIndex: 'file_name',
+    width: 300,
+    render: (_, record) => (
+      <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+    )
+  },
+  {
+    title: '文件类型',
+    dataIndex: 'file_type',
+    width: 100,
+    render: (_, record) => (
+      <div>
+        {getFileIcon(record.file_type)} {record.file_type}
+      </div>
+    )
+  },
+  {
+    title: '文件大小',
+    dataIndex: 'file_size',
+    width: 100,
+    render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
+  },
+  {
+    title: '修改时间',
+    dataIndex: 'file_modify_time',
+    width: 180,
+    render: (_, record) => <span>{formatDate(record.file_modify_time)}</span>
+  }
+];
+
 // 版本历史表格列定义
 const versionColumns: any[] = [
   {
@@ -329,7 +385,8 @@ const versionColumns: any[] = [
   },
   {
     title: '更变记录',
-    width: 470,
+    minWidth: 100,
+    maxWidth: 470,
     dataIndex: 'description',
     render: (description: string) => {
       return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
@@ -428,21 +485,21 @@ const renderStatusTag = (
         {perms?.includes(
           DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
         ) && (
-            <Button
-              type="text"
-              size="small"
-              style={{
-                color: '#165dff',
-                padding: '0 4px',
-                fontSize: '14px',
-                height: 'auto'
-              }}
-            >
-              <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
-                重试
-              </span>
-            </Button>
-          )}
+          <Button
+            type="text"
+            size="small"
+            style={{
+              color: '#165dff',
+              padding: '0 4px',
+              fontSize: '14px',
+              height: 'auto'
+            }}
+          >
+            <span style={{ color: '#007DFA' }} onClick={handleVersionRebuild}>
+              重试
+            </span>
+          </Button>
+        )}
       </div>
     );
   }
@@ -481,23 +538,42 @@ const renderStatusTag = (
   return statusWithTooltip;
 };
 
-const DatasetDetail: React.FC = () => {
+const DatasetDetail = (props: {
+  isHideEdit: boolean;
+  detailId: string;
+  datasetDetailVisible?: boolean;
+}) => {
+  const { isHideEdit, detailId, datasetDetailVisible } = props;
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
   const [activeTab, setActiveTab] = React.useState('content'); //当前选中的tab
   const [contentData, setContentData] = React.useState<any[]>([]); //内容数据
+  const [contentFileData, setContentFileData] = React.useState<any[]>([]); //文件内容数据
   const [contentDatabackup, setContentDatabackup] = React.useState<any[]>([]); //内容数据备份
+  const [contentTableColumns, setContentTableColumns] = React.useState<
+    TableColumnProps[]
+  >([]); //数据库内容列信息
+  const [contentTableColumnsList, setContentTableColumnsList] = React.useState<
+    TableColumn[]
+  >([]); //数据库内容列数据
+  const [contentTableData, setContentTableData] = React.useState<Array<Object>>(
+    []
+  ); //数据库内容数据
 
   const [searchValue, setSearchValue] = React.useState(''); //搜索框输入值
   const [actualSearchValue, setActualSearchValue] = React.useState(''); // 实际用于搜索的值
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
   const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
+  const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
+  const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
+  const [fileTotal, setFileTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
   const [idName, setIdName] = React.useState<string>(''); //唯一标识符字段名
-  const { id } = useParams<{ id: string }>(); //数据集id
+  const { id: urlId } = useParams<{ id: string }>(); //数据集id
+  const id = detailId || urlId;
   const history = useHistory();
 
   // 编辑数据
@@ -612,6 +688,32 @@ const DatasetDetail: React.FC = () => {
       window.removeEventListener('resize', updateWidth);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (contentTableColumnsList.length > 0) {
+      setContentTableColumns(
+        contentTableColumnsList.map((item) => ({
+          title: item.cn_name ? `${item.name}(${item.cn_name})` : item.name,
+          dataIndex: item.name,
+          key: item.name,
+          width: contentTableColumnsList.length > 4 ? 260 : 200,
+          render: (_, record) => (
+            // TODO: 待优化，父页面是modal还是page， EllipsisPopover 需要详细看下
+            <div
+              style={{
+                width:
+                  contentTableColumnsList.length > 4
+                    ? 228
+                    : `calc(('100%' / ${contentTableColumnsList.length}) - 40)`
+              }}
+            >
+              <EllipsisPopover value={record[item.name]} preferTypography />
+            </div>
+          )
+        }))
+      );
+    }
+  }, [contentTableColumnsList]);
 
   // 返回按钮
   const handleBack = () => {
@@ -986,36 +1088,85 @@ const DatasetDetail: React.FC = () => {
         Message.success('刷新失败');
       });
   };
+  useEffect(() => {
+    if (!datasetDetailVisible) {
+      setDatasetDetail(null);
+    }
+  }, [datasetDetailVisible]);
   // 封装获取数据集内容的通用方法
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    const params: any = {
-      id: id,
-      page: currentPage,
-      limit: pageSize,
-      keyword: actualSearchValue || undefined,
-      version_id: datasetDetail.latest_version
-    };
+    if (datasetDetail.storage_type === StorageType.file) {
+      const params = {
+        id: id,
+        version_id: datasetDetail.latest_version,
+        page: fileCurrentPage,
+        page_size: filePageSize
+      };
+      return getDataContentFileList(params)
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentFileData(res.data.list || []);
+            setFileTotal(res.data.total);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    } else if (datasetDetail.storage_type === StorageType.jsonl) {
+      const params: any = {
+        id: id,
+        page: currentPage,
+        limit: pageSize,
+        keyword: actualSearchValue || undefined,
+        version_id: datasetDetail.latest_version
+      };
 
-    return getDatasetContents(params)
-      .then((res) => {
-        if (res.status !== 200) {
-          Message.error('获取内容数据失败');
-          return;
-        }
-        if (res.data) {
-          setContentData(res.data.list || []);
-          setContentColumnslist(res.data.field_names || []);
-          setIdName(res.data.id_name || '');
-          setTotal(res.data.total || 0);
-          setContentDatabackup(res.data.list || []);
-        }
-      })
-      .catch((err) => {
-        console.error('获取数据集内容失败:', err);
-        Message.error('加载数据失败');
-      });
+      return getDatasetContents(params)
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentData(res.data.list || []);
+            setContentColumnslist(res.data.field_names || []);
+            setIdName(res.data.id_name || '');
+            setTotal(res.data.total || 0);
+            setContentDatabackup(res.data.list || []);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    } else {
+      const params = {
+        id: id,
+        version_id: datasetDetail.latest_version
+      };
+      return getDataContentTableList(params)
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error('获取内容数据失败');
+            return;
+          }
+          if (res.data) {
+            setContentTableColumnsList(res.data.columns || []);
+            setContentTableData(res.data.data || []);
+          }
+        })
+        .catch((err) => {
+          console.error('获取数据集内容失败:', err);
+          Message.error('加载数据失败');
+        });
+    }
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
@@ -1090,25 +1241,27 @@ const DatasetDetail: React.FC = () => {
   return (
     <div className="dataset-detail">
       {/* 面包屑导航区域 */}
-      <div className="breadcrumb-wrapper">
-        <IconArrowLeft
-          style={{ cursor: 'pointer', fontSize: '14px' }}
-          onClick={() => {
-            handleBack();
-          }}
-        />
-        <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
-          <Breadcrumb.Item>
-            <span
-              style={{ fontWeight: '500', fontSize: '20px' }}
-              onClick={handleGoToDatasetList}
-            >
-              数据集管理
-            </span>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
-        </Breadcrumb>
-      </div>
+      {!isHideEdit && (
+        <div className="breadcrumb-wrapper">
+          <IconArrowLeft
+            style={{ cursor: 'pointer', fontSize: '14px' }}
+            onClick={() => {
+              handleBack();
+            }}
+          />
+          <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
+            <Breadcrumb.Item>
+              <span
+                style={{ fontWeight: '500', fontSize: '20px' }}
+                onClick={handleGoToDatasetList}
+              >
+                数据集管理
+              </span>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+      )}
 
       {/* 数据集详情面板 */}
       <Card className="basic-info-card" bordered={false}>
@@ -1116,11 +1269,12 @@ const DatasetDetail: React.FC = () => {
         {datasetDetail && (
           <>
             {/* 标题区域 */}
-            <div className="basic-info-header">
-              <Title heading={4}>基本信息</Title>
-              {datasetDetail?.perms?.includes(
-                DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
-              ) && (
+            {!isHideEdit && (
+              <div className="basic-info-header">
+                <Title heading={4}>基本信息</Title>
+                {datasetDetail?.perms?.includes(
+                  DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE
+                ) && (
                   <Tooltip
                     content={
                       !datasetDetail || datasetDetail.status !== 'normal'
@@ -1142,7 +1296,8 @@ const DatasetDetail: React.FC = () => {
                     </Button>
                   </Tooltip>
                 )}
-            </div>
+              </div>
+            )}
 
             {/* 内容区域 */}
             <div className="basic-info-content" style={{ marginBottom: 24 }}>
@@ -1257,6 +1412,16 @@ const DatasetDetail: React.FC = () => {
                     {
                       label: '生成模型:',
                       value: datasetDetail.src_model || '-'
+                    },
+                    {
+                      label: '存储格式:',
+                      value: datasetDetail.storage_type
+                        ? datasetDetail.storage_type === StorageType.file
+                          ? '文件'
+                          : datasetDetail.storage_type === StorageType.table
+                            ? '数据库表'
+                            : datasetDetail.storage_type
+                        : '-'
                     }
                   ]}
                   column={1}
@@ -1303,8 +1468,7 @@ const DatasetDetail: React.FC = () => {
                       value: (
                         <div
                           style={{
-                            gap: '8px',
-                            width: getwidth()
+                            gap: '8px'
                           }}
                         >
                           <EllipsisPopover
@@ -1315,6 +1479,10 @@ const DatasetDetail: React.FC = () => {
                           ></EllipsisPopover>
                         </div>
                       )
+                    },
+                    {
+                      label: '文件大小:',
+                      value: formatFileSize(datasetDetail.latest_size) || '-'
                     }
                   ]}
                   column={1}
@@ -1394,180 +1562,236 @@ const DatasetDetail: React.FC = () => {
             // setCurrentPage(1);
           }}
         >
-          <TabPane key="content" title="数据内容">
-            {/* 搜索系统 */}
-            <div
-              className="search-section"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-                // marginBottom: 12
-              }}
-            >
-              <Input
-                placeholder="输入ID、关键字搜索"
-                value={searchValue}
-                onChange={setSearchValue}
-                onPressEnter={handleSearch}
-                onClear={handleClearSearch}
-                className={'custom-input'}
-                disabled={updateStatus}
-                style={{
-                  width: 300,
-                  minWidth: 300,
-                  maxWidth: 300,
-                  flexShrink: 0
-                }}
-                allowClear
-                suffix={<IconSearch style={{ color: '#999' }} />}
+          {datasetDetail?.storage_type === StorageType.file ? (
+            <TabPane key="content" title="数据内容">
+              <Table
+                columns={contentFileColumns}
+                data={contentFileData}
+                pagination={false}
+                rowKey="id"
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                scroll={{ x: 'max-content' }}
+                border={false}
               />
-              {contentData.length !== 0 && contentColumns.length !== 0 ? (
-                <>
-                  {updateStatus ? (
-                    <Space>
-                      <Button
-                        style={{
-                          fontWeight: '400'
-                        }}
-                        className={styles.customButton}
-                        onClick={() => {
-                          // 检查是否有改动
-                          const hasChanges =
-                            changedRows.length > 0 || deletedRows.length > 0;
-                          console.log(changedRows, deletedRows);
-                          if (!hasChanges) {
-                            // 没有改动，直接取消编辑
-                            setEditingRowKey(null);
-                            setEditingData({});
-                            setChangedRows([]);
-                            setDeletedRows([]);
-                            setContentData(contentDatabackup);
-                            setUpdateStatus(false);
-                          } else {
-                            // 有改动，弹窗确认
-                            Modal.confirm({
-                              title: '确定放弃编辑?',
-                              content: (
-                                <div
-                                  style={{
-                                    fontSize: '14px',
-                                    paddingLeft: '28px'
-                                    // lineHeight: '1.5'
-                                  }}
-                                >
-                                  放弃后，当前修改不会保存
-                                </div>
-                              ),
-                              okText: '确定',
-                              cancelText: '取消',
-                              onOk: () => {
-                                // 用户确认放弃编辑
-                                setEditingRowKey(null);
-                                setEditingData({});
-                                setChangedRows([]);
-                                setDeletedRows([]);
-                                setContentData(contentDatabackup);
-                                setUpdateStatus(false);
-                              },
-                              onCancel: () => {
-                                // 用户取消，不做任何操作
-                              }
-                            });
-                          }
-                        }}
-                      >
-                        取消本页编辑
-                      </Button>
-                      <Tooltip content={editingRowKey ? '请完成当前编辑' : ''}>
-                        <Button
-                          style={{ fontWeight: '400' }}
-                          className={'update-btn'}
-                          type="primary"
-                          onClick={handleSubmitChanges}
-                          disabled={
-                            editingRowKey !== null ||
-                            (changedRows.length === 0 &&
-                              deletedRows.length === 0)
-                          }
-                        >
-                          保存本页编辑
-                        </Button>
-                      </Tooltip>
-                    </Space>
-                  ) : (
-                    <Tooltip
-                      content={
-                        !datasetDetail || datasetDetail.status !== 'normal'
-                          ? '当前状态下不能进行编辑'
-                          : ''
-                      }
-                    >
-                      {datasetDetail?.perms?.includes(
-                        DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
-                      ) && (
-                          <Button
-                            // type="primary"
-                            disabled={
-                              !datasetDetail || datasetDetail.status !== 'normal'
-                            }
-                            onClick={() => setUpdateStatus(true)}
-                            type="text"
-                            icon={<IconEdit />}
-                            className="edit-btn"
-                          >
-                            编辑
-                          </Button>
-                        )}
-                    </Tooltip>
-                  )}
-                </>
-              ) : null}
-            </div>
-            {contentData.length !== 0 && contentColumns.length !== 0 ? (
-              <>
-                {/* 内容数据表格 */}
-                {activeTab === 'content' ? (
+              <div className="pagination-wrapper">
+                <Pagination
+                  disabled={updateStatus}
+                  style={{
+                    float: 'right'
+                  }}
+                  current={fileCurrentPage}
+                  pageSize={filePageSize}
+                  total={fileTotal}
+                  onChange={(filePage) => {
+                    setFileCurrentPage(filePage);
+                  }}
+                  onPageSizeChange={(filePageSize) => {
+                    setFilePageSize(filePageSize);
+                    setFileCurrentPage(1);
+                  }}
+                  showTotal={(total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                  }
+                  sizeOptions={[10, 20, 50, 100]}
+                  showJumper
+                  sizeCanChange={true}
+                />
+              </div>
+            </TabPane>
+          ) : datasetDetail?.storage_type === StorageType.jsonl ? (
+            <TabPane key="content" title="数据内容">
+              {/* 搜索系统 */}
+              <div
+                className="search-section"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                  // marginBottom: 12
+                }}
+              >
+                <Input
+                  placeholder="输入ID、关键字搜索"
+                  value={searchValue}
+                  onChange={setSearchValue}
+                  onPressEnter={handleSearch}
+                  onClear={handleClearSearch}
+                  className={'custom-input'}
+                  disabled={updateStatus}
+                  style={{
+                    width: 300,
+                    minWidth: 300,
+                    maxWidth: 300,
+                    flexShrink: 0
+                  }}
+                  allowClear
+                  suffix={<IconSearch style={{ color: '#999' }} />}
+                />
+                {contentData.length !== 0 && contentColumns.length !== 0 ? (
                   <>
-                    <Table
-                      columns={contentColumns}
-                      data={contentData}
-                      noDataElement={noDataElement({ description: '暂无数据' })}
-                      pagination={false}
-                      scroll={{ x: 'max-content' }}
-                      border={false}
-                    />
+                    {updateStatus ? (
+                      <Space>
+                        <Button
+                          style={{
+                            fontWeight: '400'
+                          }}
+                          className={styles.customButton}
+                          onClick={() => {
+                            // 检查是否有改动
+                            const hasChanges =
+                              changedRows.length > 0 || deletedRows.length > 0;
+                            console.log(changedRows, deletedRows);
+                            if (!hasChanges) {
+                              // 没有改动，直接取消编辑
+                              setEditingRowKey(null);
+                              setEditingData({});
+                              setChangedRows([]);
+                              setDeletedRows([]);
+                              setContentData(contentDatabackup);
+                              setUpdateStatus(false);
+                            } else {
+                              // 有改动，弹窗确认
+                              Modal.confirm({
+                                title: '确定放弃编辑?',
+                                content: (
+                                  <div
+                                    style={{
+                                      fontSize: '14px',
+                                      paddingLeft: '28px'
+                                      // lineHeight: '1.5'
+                                    }}
+                                  >
+                                    放弃后，当前修改不会保存
+                                  </div>
+                                ),
+                                okText: '确定',
+                                cancelText: '取消',
+                                onOk: () => {
+                                  // 用户确认放弃编辑
+                                  setEditingRowKey(null);
+                                  setEditingData({});
+                                  setChangedRows([]);
+                                  setDeletedRows([]);
+                                  setContentData(contentDatabackup);
+                                  setUpdateStatus(false);
+                                },
+                                onCancel: () => {
+                                  // 用户取消，不做任何操作
+                                }
+                              });
+                            }
+                          }}
+                        >
+                          取消本页编辑
+                        </Button>
+                        <Tooltip
+                          content={editingRowKey ? '请完成当前编辑' : ''}
+                        >
+                          <Button
+                            style={{ fontWeight: '400' }}
+                            className={'update-btn'}
+                            type="primary"
+                            onClick={handleSubmitChanges}
+                            disabled={
+                              editingRowKey !== null ||
+                              (changedRows.length === 0 &&
+                                deletedRows.length === 0)
+                            }
+                          >
+                            保存本页编辑
+                          </Button>
+                        </Tooltip>
+                      </Space>
+                    ) : (
+                      <Tooltip
+                        content={
+                          !datasetDetail || datasetDetail.status !== 'normal'
+                            ? '当前状态下不能进行编辑'
+                            : ''
+                        }
+                      >
+                        {datasetDetail?.perms?.includes(
+                          DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_DATA
+                        ) &&
+                          !isHideEdit && (
+                            <Button
+                              // type="primary"
+                              disabled={
+                                !datasetDetail ||
+                                datasetDetail.status !== 'normal'
+                              }
+                              onClick={() => setUpdateStatus(true)}
+                              type="text"
+                              icon={<IconEdit />}
+                              className="edit-btn"
+                            >
+                              编辑
+                            </Button>
+                          )}
+                      </Tooltip>
+                    )}
                   </>
                 ) : null}
+              </div>
+              {contentData.length !== 0 && contentColumns.length !== 0 ? (
+                <>
+                  {/* 内容数据表格 */}
+                  {activeTab === 'content' ? (
+                    <>
+                      <Table
+                        columns={contentColumns}
+                        data={contentData}
+                        noDataElement={noDataElement({
+                          description: '暂无数据'
+                        })}
+                        pagination={false}
+                        // scroll={{ x: 'max-content' }}
+                        border={false}
+                      />
+                    </>
+                  ) : null}
 
-                {/* 分页控件 */}
-                <div className="pagination-wrapper">
-                  <Pagination
-                    disabled={updateStatus}
-                    style={{
-                      float: 'right'
-                    }}
-                    current={currentPage}
-                    pageSize={pageSize}
-                    total={total}
-                    onChange={(page) => {
-                      setCurrentPage(page);
-                    }}
-                    onPageSizeChange={handlePageSizeChange}
-                    showTotal={(total, range) =>
-                      `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                    }
-                    sizeOptions={[10, 20, 50, 100]}
-                    showJumper
-                    sizeCanChange={true}
-                  />
-                </div>
-              </>
-            ) : (
-              noDataElement({ description: '暂无数据' })
-            )}
-          </TabPane>
-
+                  {/* 分页控件 */}
+                  <div className="pagination-wrapper">
+                    <Pagination
+                      disabled={updateStatus}
+                      style={{
+                        float: 'right'
+                      }}
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={total}
+                      onChange={(page) => {
+                        setCurrentPage(page);
+                      }}
+                      onPageSizeChange={handlePageSizeChange}
+                      showTotal={(total, range) =>
+                        `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                      }
+                      sizeOptions={[10, 20, 50, 100]}
+                      showJumper
+                      sizeCanChange={true}
+                    />
+                  </div>
+                </>
+              ) : (
+                noDataElement({ description: '暂无数据' })
+              )}
+            </TabPane>
+          ) : (
+            // 数据库表数据内容
+            <TabPane key="content" title="数据内容">
+              <div className="table-scroll-container">
+                <Table
+                  columns={contentTableColumns}
+                  data={contentTableData}
+                  pagination={false}
+                  rowKey="id"
+                  border={false}
+                />
+              </div>
+            </TabPane>
+          )}
           <TabPane key="version" title="版本历史">
             {activeTab === 'version' ? (
               <Table
@@ -1577,6 +1801,7 @@ const DatasetDetail: React.FC = () => {
                 noDataElement={noDataElement({ description: '暂无数据' })}
                 scroll={{ x: 'max-content' }}
                 border={false}
+                rowKey="version_id"
               />
             ) : (
               ''

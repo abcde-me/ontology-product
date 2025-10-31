@@ -1,14 +1,15 @@
-import { Breadcrumb, Grid, Input } from '@arco-design/web-react';
+import { Breadcrumb, Grid, Input, Message } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconHome } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import AccessTable from './access-tabel';
 import { useParams } from '@/utils/url';
-import { getLoadRecord } from '@/api/loadApi';
-import { RunState, RunStateType } from '../list/list';
+import { getLoadRecord, reTryLoad, getLoad } from '@/api/loadApi';
+import { RunState, RunStateType } from '../config';
 import { formatRunTime } from '../detail/parseCron';
 import { useSetState } from 'ahooks';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import { useHistory } from 'react-router';
 const Row = Grid.Row;
 const Col = Grid.Col;
 const BreadcrumbItem = Breadcrumb.Item;
@@ -17,10 +18,12 @@ const AccessDetail = () => {
   const recordsId = useParams('execution_id');
   const name = useParams('name');
   const [arressDetail, setArressDetail] = useState<any>({});
+  const [taskDetail, setTaskDetail] = useState<any>({}); // 添加任务详情状态
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
   // 返回上一层的函数
   const OneLevelUpHan = () => {
-    history.back();
+    history.goBack();
   };
   const [totalNum, setTotalNum] = useState(0);
   // 获取上面的详情
@@ -29,6 +32,14 @@ const AccessDetail = () => {
       setLoading(true);
       const res = await getLoadRecord(recordsId);
       setArressDetail(res.data);
+
+      // 获取任务详情（包含source_type）
+      if (res.data.task_id) {
+        const taskRes = await getLoad(res.data.task_id);
+        console.log('getLoad response:', taskRes.data); // 添加调试信息
+        setTaskDetail(taskRes.data);
+      }
+
       if (res.code == '' && res.status == 200) {
         setTotalNum(res.data.success_files + res.data.failed_files);
       }
@@ -38,7 +49,20 @@ const AccessDetail = () => {
       setLoading(false);
     }
   };
-
+  const reTry = async (id: string) => {
+    console.log('重试的ID666666666666666666666666666', id);
+    console.log('重试的ID', id);
+    const res = await reTryLoad({
+      execution_id: id,
+      task_id: arressDetail?.task_id
+    });
+    if (res.code == '' && res.status == 200) {
+      getDetail();
+      Message.success('操作成功');
+    } else {
+      Message.error(res.message);
+    }
+  };
   useEffect(() => {
     getDetail();
   }, []);
@@ -75,14 +99,14 @@ const AccessDetail = () => {
             }}
           >
             <BreadcrumbItem
-              href="/tenant/compute/modaforge/dataLoad"
+              onClick={() => history.push('/tenant/compute/modaforge/dataLoad')}
               style={{ color: '#7F8C9F' }}
             >
               数据载入详情
             </BreadcrumbItem>
             <BreadcrumbItem
               onClick={() => {
-                history.back();
+                history.goBack();
               }}
               className="bread-style"
             >
@@ -138,6 +162,22 @@ const AccessDetail = () => {
                       ? RunStateType[RunState.FAILED].text
                       : ''}
             </div>
+            {arressDetail.status === 'failed' && (
+              <span
+                style={{
+                  color: '#007DFA',
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  marginLeft: '8px',
+                  fontSize: '14px'
+                }}
+                onClick={() => {
+                  reTry(arressDetail.execution_id);
+                }}
+              >
+                重试
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -159,7 +199,7 @@ const AccessDetail = () => {
             margin: '15px 0px'
           }}
         >
-          任务信息
+          {taskDetail.source_type === 'db' ? '运行信息' : '任务信息'}
         </div>
         <div className="task-box">
           <div className="task-left">
@@ -192,7 +232,7 @@ const AccessDetail = () => {
           </div>
           <div className="task-right">
             <div className="task-right-item" style={{ color: 'black' }}>
-              <div>总文件</div>
+              <div>总数量</div>
               <div className="fontSize">{totalNum}</div>
             </div>
             <div
@@ -218,10 +258,13 @@ const AccessDetail = () => {
             margin: '15px 0px 15px 24px'
           }}
         >
-          文件详情
+          {taskDetail.source_type === 'db' ? '载入详情' : '文件详情'}
         </div>
 
-        <AccessTable records_id={recordsId} />
+        <AccessTable
+          records_id={recordsId}
+          check_type={taskDetail.source_type}
+        />
       </div>
     </div>
   );

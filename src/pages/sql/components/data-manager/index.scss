@@ -1,0 +1,32 @@
+.sql-tab-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 0;
+
+  .tab-header {
+    .tab-title {
+      line-height: 22px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e293b;
+      margin-top: 0;
+      margin-bottom: 17px;
+      margin: 0 12px 17px;
+    }
+  }
+
+  .tab-search {
+    margin-top: 17px;
+
+    .search-container-new {
+      padding: 0;
+    }
+  }
+
+  .tab-tree {
+    // 30px,顶部标题
+    height: calc(100% - 30px);
+    overflow: hidden;
+  }
+}

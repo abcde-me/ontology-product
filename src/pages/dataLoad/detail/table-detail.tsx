@@ -1,10 +1,10 @@
 import { Message, Modal, Popover, Table } from '@arco-design/web-react';
-import { RunState, RunStateType } from '../list/list';
+import { RunState, RunStateType } from '../config';
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import { useHistory } from 'react-router-dom';
 import { ExecutionHistory } from '../type';
-import { stopeLoad } from '@/api/loadApi';
+import { stopeLoad, reTryLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
@@ -18,10 +18,11 @@ interface PropsType {
   change: (state: DataType) => void;
   name: string;
   taskId: number;
-  judmentTaskHan: (taskId: number) => void;
+  judgmentTaskHan: () => void;
 }
 const TableDetail = (props) => {
   const history = useHistory();
+  const { type } = props;
   const columns: any = [
     {
       title: '运行ID',
@@ -86,6 +87,21 @@ const TableDetail = (props) => {
                 停止
               </span>
             )}
+          {item.status === 'failed' && (
+            <span
+              style={{
+                color: '#007DFA',
+                cursor: 'pointer',
+                display: 'inline-block',
+                marginLeft: '8px'
+              }}
+              onClick={() => {
+                reTry(item.execution_id);
+              }}
+            >
+              重试
+            </span>
+          )}
         </div>
       ),
       filters: [
@@ -149,7 +165,7 @@ const TableDetail = (props) => {
           style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
           onClick={() => {
             history.push(
-              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}`
+              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}&type=${type}`
             );
           }}
         >
@@ -210,6 +226,22 @@ const TableDetail = (props) => {
   // 模态框点击取消
   const modalNo = () => {
     setVisible(false);
+  };
+  //重试
+  const reTry = async (id: string) => {
+    console.log('重试的ID', id);
+    const res = await reTryLoad({
+      execution_id: id,
+      task_id: props.taskId
+    });
+    if (res.code == '' && res.status == 200) {
+      Message.success('操作成功');
+      // 调用父组件的刷新方法来重新获取最新数据
+      props.judgmentTaskHan();
+    } else {
+      Message.error(res.message);
+    }
+    //调取重试接口
   };
   useEffect(() => {
     setData(props.datalist);

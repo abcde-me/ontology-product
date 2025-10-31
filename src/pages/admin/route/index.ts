@@ -59,11 +59,25 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // SQL开发
+  {
+    name: 'sql',
+    key: '/tenant/compute/modaforge/sql',
+    component: React.lazy(async () => import('../../sql')),
+    children: []
+  },
   // 工作流
   {
     name: 'workflowList',
     key: '/tenant/compute/modaforge/workflowList',
     component: React.lazy(async () => import('../../workflowList')),
+    children: []
+  },
+  // Notebook
+  {
+    name: 'pyspark',
+    key: '/tenant/compute/modaforge/pyspark',
+    component: React.lazy(async () => import('../../pyspark')),
     children: []
   },
   // 创建工作流
@@ -143,6 +157,40 @@ export const routes: IRoute[] = [
     name: 'datasetManagement',
     key: '/tenant/compute/modaforge/datasetManagement',
     component: React.lazy(async () => import('../../datasetManagement')),
+    children: []
+  },
+  // 数据标注 - 需求管理
+  {
+    name: 'requirement',
+    key: '/tenant/compute/modaforge/requirement',
+    component: React.lazy(async () => import('../../requirement')),
+    children: [
+      {
+        name: 'requirementDetail',
+        key: '/tenant/compute/modaforge/requirementDetail',
+        component: React.lazy(async () => import('../../requirement/detail'))
+      }
+    ]
+  },
+  // 数据标注 - 任务列表
+  {
+    name: 'taskList',
+    key: '/tenant/compute/modaforge/taskList',
+    component: React.lazy(async () => import('../../requirement/taskList')),
+    children: []
+  },
+  // 标注工具页面
+  {
+    name: 'labelEditor',
+    key: '/tenant/compute/modaforge/labelEditor',
+    component: React.lazy(async () => import('../../labelEditor')),
+    children: []
+  },
+  // 运营中心页面
+  {
+    name: 'operationCenter',
+    key: '/tenant/compute/modaforge/operationCenter',
+    component: React.lazy(async () => import('../../operationCenter')),
     children: []
   }
 ];

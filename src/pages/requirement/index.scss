@@ -1,0 +1,137 @@
+.requirement {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 20px 20px 0;
+  padding: 20px 20px 20px 24px;
+  border-radius: 10px;
+  min-height: calc(100% - 30px);
+
+  .requirement-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 5px;
+    padding-bottom: 16px;
+  }
+
+  .arco-table-tr > th {
+    background-color: rgb(245, 249, 255) !important;
+  }
+
+  .arco-pagination-total-text {
+    line-height: 32px;
+  }
+
+  .operate-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  .operate-text:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  .disabled-text {
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  tbody .workflow-name .ellipsis-text {
+    font-weight: 600;
+  }
+
+  tbody .hover-change .ellipsis-text {
+    color: #1e293b;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+  }
+
+  tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  .publish-part {
+    width: 75px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .published {
+    background: #dbf4ee;
+    color: #0ab58d;
+  }
+
+  .not-published {
+    background: #f7f7f9;
+    color: #6e7b8d;
+  }
+
+  .option-content {
+    justify-content: center;
+  }
+
+  .status-text {
+    font-size: 14px;
+    line-height: 20px;
+    margin-left: 8px;
+    margin-right: 4px;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-draft-icon {
+    width: 8px;
+    height: 8px;
+    background: #007dfa;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-published-icon {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-publishFailed-icon {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-annotated-icon {
+    width: 8px;
+    height: 8px;
+    background: #e3e3e3;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .workflow-name-content {
+    width: 268px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.arco-modal-footer .arco-btn-secondary:focus {
+  box-shadow: none;
+}

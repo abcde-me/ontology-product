@@ -30,7 +30,8 @@ export enum ExecutionStatus {
 
 export enum SourceType {
   HDFS = 'HDFS',
-  S3 = 'S3'
+  S3 = 'S3',
+  DB = 'db'
 }
 
 export enum LoadType {
@@ -46,6 +47,8 @@ interface Connector {
 
 // 任务信息类型
 export interface TaskInfo {
+  db_name: string;
+  sub_type?: string;
   connector_id: number;
   connector_name: string;
   created_at: string;

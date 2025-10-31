@@ -12,13 +12,14 @@ import {
   Modal,
   Tooltip,
   Message,
-  Tag
+  Tag,
+  Pagination
 } from '@arco-design/web-react';
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 import TooltipOnOverflow from './tootioOnocweflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
-import React, { useState, useEffect, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './AddDatasetForm.module.css';
 import './AddDatasetForm.css';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
@@ -26,9 +27,11 @@ import { validateName } from '@/utils/valiate';
 import {
   getConnectorList,
   getConnectorFileList,
-  getTagList
+  getTagList,
+  getTargetDataFileList
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
+import getFileIcon from '../file-icon';
 const { Text } = Typography;
 
 interface Dataset {
@@ -37,6 +40,7 @@ interface Dataset {
   tags: string[];
   description: string;
   dataSource: 'volume' | 'connector';
+  storageType: StorageType;
   targetDataSource?: string;
   selectedFiles?: string[];
 }
@@ -58,6 +62,11 @@ interface ConnectorFile {
   file_id: string;
 }
 
+enum StorageType {
+  Jsonl = 'jsonl',
+  File = 'file'
+}
+
 interface DatasetFormProps {
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
@@ -68,16 +77,15 @@ const FormItem = Form.Item;
 
 // 转换函数：将新数据格式转换为 Cascader 组件需要的格式
 function convertToCascaderOptions(dataSourceData) {
-  console.log(123123, dataSourceData);
   return dataSourceData.map((catalog) => ({
-    label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
+    label: catalog.name,
     // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
+    disabled: !catalog?.children?.volume,
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
-            label: <EllipsisPopover value={volume.name}></EllipsisPopover>,
-            // label: volume.name,
+            label: volume.name,
             value: [volume.name, volume.id],
             type: 'volume',
             originalData: volume
@@ -151,8 +159,8 @@ function formatDateTime(isoString) {
   const pad = (n) => n.toString().padStart(2, '0');
   return (
     <span>
-      {date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} $
-      {pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}
+      {date.getFullYear()}-{pad(date.getMonth() + 1)}-{pad(date.getDate())}{' '}
+      {pad(date.getHours())}:{pad(date.getMinutes())}:{pad(date.getSeconds())}
     </span>
   );
 }
@@ -209,6 +217,7 @@ const DatasetForm = React.forwardRef<
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
   ); //数据来源,判断是数据目录卷还是连接器，volume是数据目录卷，connector是连接器
+  const [storageType, setStorageType] = useState<StorageType>(StorageType.File);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     null
   ); //选择的连接器ID
@@ -221,6 +230,8 @@ const DatasetForm = React.forwardRef<
     ConnectorFile[]
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
+  const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
+  const [previewFileData, setPreviewFileData] = useState<string[] | null>(null); //数据目录文件预览数据
   const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
@@ -231,6 +242,19 @@ const DatasetForm = React.forwardRef<
   const [inputValue, setInputValue] = useState('');
   const [tableLoading, setTableLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(true);
+  const [targetData, setTargetData] = useState<string | (string | string[])[]>(
+    []
+  );
+  // 选择的文件ID
+  const [fileIds, setFileIds] = useState<string[]>([]);
+  // 当前的第几页
+  const [current, setCurrent] = useState(1);
+  // 每页展示数据的数据量
+  const [pageSize, setPageSize] = useState(10);
+  // 总数据量
+  const [total, setTotal] = useState(10);
+  // 使用 useRef 来标记是否是首次渲染
+  const isInitialMount = useRef(true);
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -238,12 +262,16 @@ const DatasetForm = React.forwardRef<
       form.setFieldValue('name', '');
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
+      setStorageType(StorageType.File); //重置数据集类型
       setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      setIsPreviewFile(false);
+      setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
+      form.setFieldValue('storageType', StorageType.File);
       setIscreateTagDisabled(false);
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
@@ -314,6 +342,27 @@ const DatasetForm = React.forwardRef<
     setSelectedFiles([]);
     setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
+    setIsPreviewFile(false);
+    setPreviewFileData(null); //重置文件预览数据
+    setPreviewColumns([]); //重置表格列
+    // 清除表单字段
+    form.setFieldValue('connector', undefined);
+    form.setFieldValue('selectedFiles', []);
+  };
+
+  // 处理数据集类型变化
+  const handleStorageTypeChange = (value: StorageType) => {
+    form.setFieldValue('targetDataSource', undefined);
+    setStorageType(value);
+    form.setFieldValue('storageType', value);
+    setShowFileSelection(false); //不显示文件选择
+    setShowDataPreview(false); //不显示数据预览
+    setSelectedConnector(null); //清除连接器选择
+    setSelectedFiles([]);
+    setConnectorFileInformation([]); //清除连接器文件信息
+    setPreviewData(null);
+    setIsPreviewFile(false);
+    setPreviewFileData(null); //重置文件预览数据
     setPreviewColumns([]); //重置表格列
     // 清除表单字段
     form.setFieldValue('connector', undefined);
@@ -326,6 +375,7 @@ const DatasetForm = React.forwardRef<
   ) => {
     if (dataSource === 'volume') {
       console.log('选择的值:', value);
+      setTargetData(value);
 
       // 判断是一级目录还是二级目录
       if (Array.isArray(value) && Array.isArray(value[0])) {
@@ -346,7 +396,10 @@ const DatasetForm = React.forwardRef<
           return;
         }
         // getVolumePreviewData(path);
-        getVolumePreviewData(value?.[1]?.[1]);
+        getVolumePreviewData(
+          value?.[1]?.[1],
+          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+        );
       } else if (Array.isArray(value) && value.length === 2) {
         return;
       }
@@ -363,11 +416,14 @@ const DatasetForm = React.forwardRef<
     setConnectorFileInformation([]);
     form.setFieldValue('selectedFiles', []);
     // 获取连接器文件信息
-    getConnectorFileInformationfun(value, 'jsonl');
+    getConnectorFileInformationfun(
+      value,
+      storageType === StorageType.File ? '' : 'jsonl'
+    );
   };
 
   // 模拟连接器文件数据
-  const getConnectorFileInformationfun = (id: string, type: 'jsonl') => {
+  const getConnectorFileInformationfun = (id: string, type?: string) => {
     getConnectorFileList({ connector_id: id, type: type })
       .then((res) => {
         // 判断接口返回状态
@@ -410,25 +466,55 @@ const DatasetForm = React.forwardRef<
     });
   };
 
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    // 仅在 current 或 pageSize 变化时执行
+    getVolumePreviewData(
+      targetData?.[1]?.[1],
+      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+    );
+  }, [current, pageSize]);
+
   // 获取数据目录卷预览数据的方法
-  const getVolumePreviewData = (volumeId: string) => {
+  const getVolumePreviewData = (volumeId: string, file_path: string) => {
     setTableLoading(true);
     // 这里应该调用真实的API
-    getCatalogPreview({ path_id: volumeId })
-      .then((res) => {
-        if (res.status !== 200) {
+    if (storageType === StorageType.Jsonl) {
+      getCatalogPreview({ path_id: volumeId })
+        .then((res) => {
+          if (res.status !== 200) {
+            Message.error(res.message);
+            setPreviewData(null);
+            setPreviewColumns([]);
+            return;
+          }
+          setPreviewData(stringifyFirstLevelValues(res.data.list || []));
+          setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
+        })
+        .finally(() => {
+          setTableLoading(false);
+        });
+    } else if (storageType === StorageType.File) {
+      const params = {
+        path_id: volumeId,
+        full_path: file_path,
+        page: current,
+        limit: pageSize
+      };
+      getTargetDataFileList(params).then((res) => {
+        if (res.data && res.code === '') {
+          setIsPreviewFile(true);
+          setPreviewFileData(res.data.list || []);
+          setTotal(res.data.total);
+        } else {
           Message.error(res.message);
-          setPreviewData(null);
-          setPreviewColumns([]);
-          return;
+          setIsPreviewFile(false);
         }
-        setPreviewData(stringifyFirstLevelValues(res.data.list || [])); //这里的数据不能直接赋值，需要处理一下
-        console.log('previewData', res.data.list);
-        setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
-      })
-      .finally(() => {
-        setTableLoading(false);
       });
+    }
 
     // setPreviewData(csmockPreviewData);
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
@@ -453,12 +539,14 @@ const DatasetForm = React.forwardRef<
               ? mapselectFiles(selectedFiles)
               : undefined, //如果数据源是连接器，则设置选择文件
           targetDataSource:
-            dataSource === 'volume' ? values.targetDataSource : values.connector //数据目录卷用targetDataSource，连接器用connector
+            dataSource === 'volume'
+              ? values.targetDataSource
+              : values.connector, //数据目录卷用targetDataSource，连接器用connector
+          path_file_ids: fileIds
         };
         // setIscreateTagDisabled(true);
 
         setCanSubmit(false);
-        console.log('111111111111111111111111', formData);
         await onSubmit(formData);
 
         setCanSubmit(true);
@@ -470,6 +558,50 @@ const DatasetForm = React.forwardRef<
         setCanSubmit(true);
       });
   }, 500);
+
+  const fileColumns = [
+    {
+      title: '文件ID',
+      dataIndex: 'id',
+      width: 80
+    },
+    {
+      title: '文件名',
+      dataIndex: 'file_name',
+      ellipsis: true,
+      width: 300,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.extras?.file_name || '-'}
+          isEdit={false}
+          preferTypography
+        />
+      )
+    },
+    {
+      title: '文件类型',
+      dataIndex: 'type', // 使用动态获取的文件类型筛选器
+      width: 134,
+      render: (_, record) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          {getFileIcon(record.type)}
+          <span>{record.file_type}</span>
+        </div>
+      )
+    },
+    {
+      title: '文件大小',
+      dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
+      width: 134,
+      render: (_, record) => <span>{record.extras?.file_size || '-'}</span>
+    }
+  ];
 
   return (
     <Modal
@@ -540,6 +672,7 @@ const DatasetForm = React.forwardRef<
                 placeholder="请输入或选择标签"
                 mode="multiple"
                 options={tagList}
+                className={styles.dropdownSelect}
                 dropdownMenuClassName={styles.dropdownMenuSelect}
                 allowCreate
                 // style={{ marginLeft: 10 }}
@@ -615,6 +748,24 @@ const DatasetForm = React.forwardRef<
               <Radio value="connector">连接器</Radio>
             </Radio.Group>
           </FormItem>
+          <FormItem
+            label="数据集类型"
+            field="storageType"
+            rules={[{ required: true, message: '请选择数据集类型' }]}
+            initialValue="file"
+            extra={
+              storageType === StorageType.File
+                ? '文件格式：支持各种文件类型，如图片、音频、视频等'
+                : storageType === StorageType.Jsonl
+                  ? 'JSONL格式：每行一个JSON对象，适用于结构化数据存储'
+                  : '数据库表格式：表格形式的数据，支持SQL查询和数据分析'
+            }
+          >
+            <Radio.Group value={storageType} onChange={handleStorageTypeChange}>
+              <Radio value={StorageType.File}>文件</Radio>
+              <Radio value={StorageType.Jsonl}>jsonl</Radio>
+            </Radio.Group>
+          </FormItem>
 
           {dataSource === 'volume' && (
             <div
@@ -640,7 +791,7 @@ const DatasetForm = React.forwardRef<
                   placeholder="请选择"
                   //@ts-expect-error
                   renderFormat={(labels, selectedOptions) => {
-                    const value = `${labels?.[0]?.props?.value} / ${labels?.[1]?.props?.value}`;
+                    const value = `${labels.join(' / ')}`;
                     return (
                       <div>
                         <EllipsisPopover value={value}></EllipsisPopover>
@@ -650,6 +801,16 @@ const DatasetForm = React.forwardRef<
                   options={targetDataSourceOptions}
                   onChange={handleTargetDataSourceChange}
                   expandTrigger="hover"
+                  showSearch={{
+                    retainInputValue: true
+                  }}
+                  renderOption={(node, _level) => {
+                    return (
+                      <div>
+                        <EllipsisPopover value={node.label} />
+                      </div>
+                    );
+                  }}
                   dropdownMenuColumnStyle={{
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -670,12 +831,14 @@ const DatasetForm = React.forwardRef<
                   marginBottom: 8
                 }}
               >
-                {previewData ? (
+                {previewData || previewFileData ? (
                   <span style={{ fontSize: '14px' }}>
                     <span style={{ fontWeight: '500', color: '#000' }}>
                       预览
                     </span>{' '}
-                    目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：
+                    {storageType === StorageType.File
+                      ? '文件格式数据集暂不支持数据预览，仅显示选中的文件列表：'
+                      : '目前平台仅支持格式为JSON的数据，并且按照KV对的格式进行解析，预览仅限显示前50行数据：'}
                   </span>
                 ) : (
                   <span style={{ fontSize: '14px' }}>
@@ -704,6 +867,41 @@ const DatasetForm = React.forwardRef<
                     placeholder="暂无数据"
                   />
                 </div>
+              ) : null}
+              {isPreviewFile && previewFileData ? (
+                <>
+                  <Table
+                    rowKey="id"
+                    columns={fileColumns}
+                    data={previewFileData}
+                    pagination={false}
+                    rowSelection={{
+                      type: 'checkbox',
+                      onChange: (selectedRowKeys, selectedRows) => {
+                        setFileIds(selectedRowKeys as string[]);
+                      }
+                    }}
+                  />
+                  {previewFileData && previewFileData.length > 0 && (
+                    <Pagination
+                      current={current}
+                      pageSize={pageSize}
+                      onPageSizeChange={(pageSize) => {
+                        setPageSize(pageSize);
+                        setCurrent(1);
+                      }}
+                      onChange={(page) => {
+                        setCurrent(page);
+                      }}
+                      sizeOptions={[10, 20, 50, 100]}
+                      showTotal
+                      total={total}
+                      showJumper
+                      sizeCanChange
+                      style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+                    />
+                  )}
+                </>
               ) : null}
             </div>
           )}
@@ -743,14 +941,18 @@ const DatasetForm = React.forwardRef<
                 className="form-item-select-files"
                 wrapperCol={{ span: 20 }}
                 extra={
-                  <span
-                    style={{
-                      fontSize: '14px',
-                      color: '#86909c'
-                    }}
-                  >
-                    目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
-                  </span>
+                  storageType === StorageType.File ? (
+                    ''
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        color: '#86909c'
+                      }}
+                    >
+                      目前平台仅支持JSON格式保存的数据集，所以此处仅展示JSON格式的文件
+                    </span>
+                  )
                 }
               >
                 <Tooltip

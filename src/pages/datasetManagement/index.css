@@ -7,16 +7,16 @@ tbody .workflow-name .ellipsis-text {
   font-weight: 600;
 }
 
-tbody .hover-change .ellipsis-text {
+tbody .dataset-management-hover-change .ellipsis-text {
   color: #1e293b;
 }
 
-tbody .arco-table-tr:hover .hover-change .dataset-hover {
+tbody .arco-table-tr:hover .dataset-management-hover-change .dataset-hover {
   color: rgb(0, 125, 250);
   cursor: pointer;
 }
 
-/* tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
+/* tbody .arco-table-tr:hover .dataset-management-hover-change .ellipsis-text:hover {
   color: rgba(67, 141, 251, 1);
 } */
 

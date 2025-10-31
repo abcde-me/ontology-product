@@ -1,0 +1,664 @@
+/******** fontSize *******/
+$font-size-body-3: 14px;
+
+/******** fontWeight ********/
+$font-weight-400: 400;
+$font-weight-600: 600;
+
+/*********** border ***********/
+$border-radius-medium: 4px;
+
+/*********** size ***********/
+$size-4: 16px;
+
+/*********** spacing ***********/
+
+$spacing-none: 0;
+$spacing-1: 2px;
+$spacing-2: 4px;
+$spacing-3: 6px;
+$spacing-4: 8px;
+$spacing-5: 10px;
+$spacing-6: 12px;
+$spacing-7: 16px;
+$spacing-8: 20px;
+$spacing-9: 24px;
+
+// TODO: 应该再抽离中间层，用于场景定义，需要与视觉设计师一起共创
+// @font-weight-normal: @font-weight-400;
+// @font-weight-block: @font-weight-600;
+
+/******** btn ********/
+.arco-btn-size-default {
+  font-size: $font-size-body-3;
+}
+
+.arco-btn-text {
+  font-weight: $font-weight-400;
+}
+
+/******** table ********/
+.arco-table thead .arco-table-tr {
+  height: 40px;
+}
+
+.arco-table thead .arco-table-th.arco-table-col-sorted {
+  background-color: #f5f9ff;
+}
+
+.arco-table tbody .arco-table-td.arco-table-col-sorted {
+  background-color: #fff;
+}
+
+.arco-table-th {
+  font-weight: $font-weight-600;
+}
+
+.arco-table .arco-table-th-item {
+  font-size: $font-size-body-3;
+}
+
+.arco-table-td {
+  font-size: $font-size-body-3;
+  padding: 12px;
+}
+
+/******** pagination ********/
+.arco-pagination-item {
+  font-size: $font-size-body-3;
+  color: var(--color-text-2);
+  font-weight: $font-weight-600;
+}
+
+.arco-pagination-item-active {
+  color: rgb(var(--primary-6));
+  background-color: rgb(var(--primary-1));
+}
+
+.arco-pagination-total-text {
+  color: var(--color-text-1);
+}
+
+/******** tree ********/
+
+.arco-tree-node:hover {
+  background-color: var(--color-bg-3);
+}
+
+.arco-tree-node-title {
+  font-size: $font-size-body-3;
+}
+
+.arco-tree-node-title:hover {
+  background-color: var(--color-bg-3);
+}
+
+.arco-tree-node.arco-tree-node-selected {
+  background-color: var(--color-bg-3);
+}
+
+// TODO: 当前平台树选中字重均为400， 先修改为400
+.arco-tree-node-selected .arco-tree-node-title,
+.arco-tree-node-selected .arco-tree-node-title:hover {
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
+}
+
+/******** form ********/
+.arco-form .arco-form-item > .arco-form-label-item {
+  padding-right: $size-4;
+}
+
+.arco-input:focus,
+.arco-input.arco-input-focus {
+  border-color: rgb(var(--primary-6));
+}
+
+.arco-input-inner-wrapper:focus,
+.arco-input-inner-wrapper.arco-input-inner-wrapper-focus {
+  border-color: rgb(var(--primary-6));
+}
+
+.arco-textarea:focus,
+.arco-textarea.arco-textarea-focus {
+  border-color: rgb(var(--primary-6));
+}
+
+.arco-tree-select.arco-tree-select-focused .arco-tree-select-view,
+.arco-select.arco-select-focused .arco-select-view {
+  border-color: rgb(var(--primary-6));
+}
+
+.arco-input-word-limit {
+  color: var(--color-text-5);
+}
+
+.arco-link {
+  font-size: $font-size-body-3;
+  font-weight: $font-weight-400;
+}
+
+.arco-menu-vertical .arco-menu-group-title {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+// .arco-radio>input[type='radio']:focus-visible+.arco-radio-icon-hover::before,
+// .arco-radio-button>input[type='radio']:focus-visible+.arco-radio-icon-hover::before {
+//     background-color: var(--color-fill-2)
+// }
+
+// .arco-radio>input[type='radio']:focus-visible+.arco-radio-button-inner,
+// .arco-radio-button>input[type='radio']:focus-visible+.arco-radio-button-inner {
+//     box-shadow: inset 0 0 0 2px rgb(var(--primary-6))
+// }
+
+// .arco-radio-text {
+//     color: var(--color-text-2)
+// }
+
+// .arco-radio-mask {
+//     border: 1px solid var(--color-border-1)
+// }
+
+// .arco-radio:hover .arco-radio-mask {
+//     border-color: rgb(var(--primary-6))
+// }
+
+// .arco-radio-checked .arco-radio-mask {
+//     background-color: rgb(var(--primary-6));
+//     border-color: rgb(var(--primary-6))
+// }
+
+// .arco-radio-checked .arco-radio-mask::after {
+//     background-color: var(--color-white)
+// }
+
+// .arco-radio-checked:hover .arco-radio-mask {
+//     border-color: rgb(var(--primary-6))
+// }
+
+// .arco-radio-disabled .arco-radio-text {
+//     color: var(--color-text-6)
+// }
+
+// .arco-radio-disabled .arco-radio-mask {
+//     border-color: var(--color-border-1)
+// }
+
+// .arco-radio-disabled .arco-radio-mask::after {
+//     background-color: var(--color-fill-2)
+// }
+
+// .arco-radio-disabled:hover .arco-radio-mask {
+//     border-color: var(--color-border-1)
+// }
+
+// .arco-radio-checked.arco-radio-disabled .arco-radio-mask,
+// .arco-radio-checked.arco-radio-disabled:hover .arco-radio-mask {
+//     background-color: var(--color-fill-2)
+// }
+
+// .arco-radio-checked.arco-radio-disabled .arco-radio-mask::after {
+//     background-color: var(--color-text-6)
+// }
+
+// .arco-radio-checked.arco-radio-disabled .arco-radio-text {
+//     color: var(--color-text-4)
+// }
+
+// .arco-radio-button {
+//     color: var(--color-text-2)
+// }
+
+// .arco-radio-button:not(:first-of-type)::before {
+//     background-color: transparent;
+// }
+
+// .arco-radio-button::after {
+//     background-color: rgb(var(--primary-2));
+// }
+
+// .arco-radio-button:hover {
+//     background-color: rgb(var(--primary-2));
+//     color: rgb(var(--primary-6))
+// }
+
+// .arco-radio-button.arco-radio-checked {
+//     background-color: rgb(var(--primary-6));
+//     color: var(--color-white);
+// }
+
+// .arco-radio-button.arco-radio-disabled {
+//     background-color: var(--color-fill-2);
+//     color: var(--color-text-6)
+// }
+
+// .arco-radio-button.arco-radio-disabled.arco-radio-checked {
+//     background-color: var(--color-bg-2);
+//     color: var(--color-text-3)
+// }
+
+// body[arco-theme='dark'] .arco-radio-button.arco-radio-checked{
+//     background-color: rgb(var(--primary-2));
+// }
+
+// body[arco-theme='dark'] .arco-radio-group .arco-radio-button.arco-radio-checked:hover {
+//     background-color: rgb(var(--primary-2));
+// }
+// body[arco-theme='dark'] .arco-radio-group .arco-radio-button.arco-radio-disabled.arco-radio-checked:hover {
+//     background-color: var(--color-fill-1);
+// }
+
+// body[arco-theme='dark'] .arco-radio-button:not(.arco-radio-disabled):hover {
+//     background-color: rgb(var(--primary-2));
+// }
+
+// body[arco-theme='dark'] .arco-radio-button::after {
+//     background-color: rgb(var(--primary-2));
+// }
+
+.arco-radio-group-type-button {
+  position: relative;
+  z-index: 0;
+  padding: 1.5px;
+  line-height: 26px;
+}
+
+.arco-radio-size-small.arco-radio-group-type-button,
+.arco-radio-size-small .arco-radio-button {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.arco-radio-size-large.arco-radio-group-type-button,
+.arco-radio-group.arco-radio-size-large .arco-radio-button {
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.arco-radio-size-small.arco-radio-group-type-button,
+.arco-radio-size-small .arco-radio-button {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.arco-radio-size-large.arco-radio-group-type-button,
+.arco-radio-group.arco-radio-size-large .arco-radio-button {
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.arco-radio-size-mini.arco-radio-group-type-button,
+.arco-radio-size-mini .arco-radio-button {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+// acro design index.css
+// .arco-radio-button::after{
+//   content:' ';
+//   display:block;
+//   position:absolute;
+//   left:-3px;top:-3px;
+//   right:-3px;
+//   bottom:-3px;
+//   background-color:var(--color-fill-2);
+//   pointer-events:none;
+//   z-index:-1
+// }
+
+// cecloud themes acro.css
+// .arco-radio-button::after{
+//   content:' ';
+//   display:block;
+//   position:absolute;
+//   left:0;
+//   top:0;
+//   right:0;
+//   bottom:0;
+//   background-color:rgb(var(--primary-2));
+//   pointer-events:none;z-index:-1;
+// }
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-button::after {
+  left: -3px;
+  top: -3px;
+  right: -3px;
+  bottom: -3px;
+  background-color: rgb(var(--gray-2));
+}
+
+.arco-radio-group .arco-radio-button:first-of-type {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+// cecloud themes acro.css
+//.arco-radio-group .arco-radio-button{
+//   border-radius:0;
+//   border:1px solid var(--color-border-2);
+//   background:var(--color-bg-1)
+// }
+
+// acro design index.css
+.arco-radio-group .arco-radio-button {
+  display: inline-block;
+  position: relative;
+  margin: 1.5px;
+  border-radius: var(--border-radius-small);
+  font-size: 14px;
+  line-height: 26px;
+  color: var(--color-text-2);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.1s cubic-bezier(0, 0, 1, 1);
+  border: none;
+}
+
+// cecloud themes acro.css
+// .arco-radio-group .arco-radio-button.arco-radio-checked{
+//   border-color:rgb(var(--primary-2));
+//   background:rgb(var(--primary-2));
+//   color:rgb(var(--primary-6));
+//   font-weight:600
+// }
+
+// acro design index.css
+.arco-radio-group .arco-radio-button.arco-radio-checked {
+  background-color: #fff;
+  color: rgb(var(--primary-6));
+  font-weight: 500;
+}
+
+// cecloud themes acro.css
+// .arco-radio-group .arco-radio-button.arco-radio-checked:hover{
+//   background-color:rgb(var(--primary-2))
+// }
+
+// acro design index.css
+.arco-radio-group .arco-radio-button.arco-radio-checked:hover {
+  background-color: #fff;
+  color: rgb(var(--primary-6));
+}
+
+// acro design index.css
+// .arco-radio-button:hover{
+//   background-color:var(--color-bg-5);
+//   color:var(--color-text-1)
+// }
+
+// cecloud themes acro.css
+//.arco-radio-group .arco-radio-button:hover{
+//   border-color:rgb(var(--primary-2));
+//   background:rgb(var(--primary-2));
+//   color:rgb(var(--primary-5));
+//   font-weight:600
+// }
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-group .arco-radio-button:hover {
+  background-color: #fff;
+  color: var(--color-text-1);
+  font-weight: 500;
+}
+
+// acro design index.css
+// .arco-radio-button:last-of-type::after{
+//   border-top-right-radius:var(--border-radius-small);
+//   border-bottom-right-radius:var(--border-radius-small)
+// }
+
+// cecloud themes acro.css
+// .arco-radio-group .arco-radio-button:last-of-type{
+//   border-top-right-radius:4px;
+//   border-bottom-right-radius:4px
+// }
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-group .arco-radio-button:last-of-type {
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+// acro design index.css
+// .arco-radio-button:not(:first-of-type)::before{
+//   position:absolute;
+//   top:50%;
+//   left:-2px;
+//   transform:translateY(-50%);
+//   display:block;
+//   height:14px;
+//   width:1px;
+//   background-color:var(--color-neutral-3);
+//   content:'';
+//   transition:all .1s cubic-bezier(0,0,1,1)
+// }
+
+// acro design index.css
+// .arco-radio-button.arco-radio-checked+.arco-radio-button::before,
+// .arco-radio-button.arco-radio-checked::before,
+// .arco-radio-button:hover+.arco-radio-button::before,
+// .arco-radio-button:hover::before{
+//   opacity:0
+// }
+
+// cecloud themes acro.css
+// .arco-radio-button:not(:first-of-type)::before{
+//   position:absolute;
+//   top:50%;
+//   left:-0.5px;
+//   transform:translateY(-50%);
+//   display:block;
+//   height:28px;
+//   width:1px;
+//   background-color:#ffffff;
+//   content:'';
+//   transition:all .1s cubic-bezier(0, 0, 1, 1)
+// }
+
+// cecloud themes acro.css
+// .arco-radio-button:hover::before,
+// .arco-radio-button:hover+.arco-radio-button::before,
+// .arco-radio-button.arco-radio-checked::before,
+// .arco-radio-button.arco-radio-checked+.arco-radio-button::before{
+//   opacity:0
+// }
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-button:not(:first-of-type)::before {
+  left: -2px;
+  height: 14px;
+  background-color: rgb(var(--gray-3));
+}
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+  opacity: 1;
+}
+
+// acro design < cecloud themes < 覆盖
+.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+  opacity: 1;
+}
+
+/******** tag ********/
+/******** TODO: 视觉设计暂未提供统一组件样式 ********/
+
+.ai-tag {
+  height: 24px;
+  line-height: 20px;
+  padding-inline: 8px;
+  padding-block: 2px;
+}
+
+.ai-tag-success {
+  color: rgb(var(--success-7));
+  background-color: rgb(var(--success-1));
+
+  .arco-tag-icon {
+    color: rgb(var(--success-7));
+  }
+}
+
+.ai-tag-warning {
+  color: rgb(var(--warning-7));
+  background-color: rgb(var(--warning-1));
+
+  .arco-tag-icon {
+    color: rgb(var(--warning-7));
+  }
+}
+
+.ai-tag-default {
+  color: rgb(var(--gray-7));
+  background-color: rgb(var(--gray-1));
+
+  .arco-tag-icon {
+    color: rgb(var(--gray-7));
+  }
+}
+
+.ai-tag-danger {
+  color: rgb(var(--red-7));
+  background-color: rgb(var(--red-1));
+
+  .arco-tag-icon {
+    color: rgb(var(--red-7));
+  }
+}
+
+/******** avatar ********/
+/******** TODO: 视觉设计暂未提供统一组件样式 ********/
+
+.ai-avatar {
+  color: rgb(var(--primary-6));
+  background-color: rgb(var(--primary-1));
+}
+
+/******** tree ********/
+
+.ai-tree {
+  .arco-tree-node {
+    border-radius: $border-radius-medium;
+    position: relative;
+  }
+
+  .arco-tree-node-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 60%;
+    // padding-right: 20px;
+  }
+
+  .ai-node-title {
+    display: inline-block;
+  }
+
+  .ai-node-title-inner {
+  }
+
+  .ai-node-value {
+    position: absolute;
+    right: 6px;
+    top: 7px;
+  }
+
+  .ai-node-action {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
+}
+
+/******** 页面 右侧内容区域 ********/
+
+.ai-page-content-wrap {
+  overflow: hidden;
+  padding: 20px;
+  padding-left: 0px;
+  height: 100%;
+}
+
+.ai-page-content {
+  height: 100%;
+  border-radius: 12px;
+  background-color: var(--color-bg-1);
+  padding: 32px 16px 32px 32px;
+}
+
+.ai-page-content-lr {
+  height: 100%;
+  border-radius: 12px;
+  background-color: var(--color-bg-1);
+  padding: 0px;
+}
+
+.ai-page-content-left {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: content-box;
+  width: 318px;
+  padding-block: $spacing-8;
+  border-right: 1px solid var(--color-border-2);
+  overflow: hidden;
+}
+
+.ai-page-content-left-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-inline: $spacing-9;
+}
+
+.ai-page-content-right {
+  padding-inline: $spacing-9;
+  padding-block: $spacing-8;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-page-content-right-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ai-page-title {
+  padding-bottom: $spacing-8;
+  color: var(--color-text-1);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.ai-page-title.px {
+  padding-inline: $spacing-9;
+}
+
+.ai-page-subtitle {
+}
+
+/******** Popover 弹窗箭头去除 className="no-arrow-popover" ********/
+
+.no-arrow-popover {
+  .arco-trigger-arrow,
+  .arco-popover-arrow {
+    display: none;
+  }
+}
+
+.ai-layout {
+  min-width: 1280px;
+}
+
+/** Popover */
+.arco-popover {
+  .arco-popover-content {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+}

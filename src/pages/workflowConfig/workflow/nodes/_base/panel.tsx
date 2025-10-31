@@ -173,7 +173,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
           <div className="mx-[16px] border-b-[0.5px] border-[#E8E9EB]"></div>
         </div>
         <div className="wk-node-panel-content-wrapper">
-          {cloneElement(children, { id, data })}
+          {cloneElement(children, { id, data, parentRef: containerRef })}
         </div>
         {/* <Split />
         {
