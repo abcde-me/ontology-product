@@ -20,6 +20,7 @@ import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
+import BaseMenu from '@/assets/sider/basemenu.svg';
 import PasparkMenu from '@/assets/sider/pyspark.svg';
 import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
@@ -216,6 +217,22 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('user') ?? false;
+        }
+        // permission: PERMISSIONS.USER.LIST
+      },
+      {
+        title: '角色管理',
+        icon: <BaseMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/role'
+          ),
+        key: 'roleMgmt',
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('role') ?? false;
         }
         // permission: PERMISSIONS.USER.LIST
       }
