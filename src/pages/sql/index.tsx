@@ -24,7 +24,7 @@ const SqlIndex: React.FC = memo(() => {
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
-  const isEditorFocusedRef = useRef<boolean>(false);
+  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
 
   // 添加状态桥接：用于同步FileManager的选中状态
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
@@ -70,12 +70,6 @@ const SqlIndex: React.FC = memo(() => {
 
   // 插入内容到编辑器
   const insertContentToEditor = (content: string) => {
-    console.log(
-      'insertContentToEditor called with:',
-      content,
-      'isEditorFocused:',
-      isEditorFocusedRef.current
-    );
     if (insertContentFunction) {
       insertContentFunction(content);
     }
@@ -83,7 +77,7 @@ const SqlIndex: React.FC = memo(() => {
 
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
-    isEditorFocusedRef.current = focused;
+    setIsEditorFocused(focused);
   };
 
   // 刷新目录的函数
@@ -122,7 +116,7 @@ const SqlIndex: React.FC = memo(() => {
               <DataManager
                 key="data"
                 onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
+                getIsEditorFocused={() => isEditorFocused}
               />
             )}
           </TabPane>
@@ -146,7 +140,7 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(SQL_PERMISSIONS.CAN_EXPORT_TASK_LIST) && (
+          {useHasPermission(SQL_PERMISSIONS.LIST) && (
             <TabPane
               key="dataset"
               title={

@@ -262,7 +262,10 @@ export const ModaForgeResourceEndpoints = {
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/ListDirectory',
+  // 工作流-获取工作流DAG信息
   workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
+  // 工作流-编辑工作流DAG信息
+  editWorkFlowDraft: PrefixAimdp + '/EditWorkFlowDraft',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
@@ -288,7 +291,7 @@ export const ModaForgeResourceEndpoints = {
   // 作业停用
   taskStop: PrefixAimdp + '/StopWorkflowInstance',
 
-  modelGet: PrefixAimdp + '/model/model_list',
+  modelGet: PrefixAimdp + '/ListWorkFlowModel',
 
   //数据目录
   //获取数据目录
@@ -470,20 +473,33 @@ export const ModaForgeResourceEndpoints = {
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
 
   // 数据资产接口
+  // 查询数据资产表字段和映射关系
+  findDataAssetMapping: PrefixAimdp + '/FindDataAssetMapping',
   // 获取数据资产列表
-  dataAssetList: PrefixAimdp + '/ListDataAssets',
-  // 获取数据资产详情
-  dataAssetDetail: PrefixAimdp + '/GetDataAsset',
-  // 创建数据资产
-  dataAssetCreate: PrefixAimdp + '/CreateDataAsset',
-  // 更新数据资产
-  dataAssetUpdate: PrefixAimdp + '/EditDataAsset',
+  listDataAssetData: PrefixAimdp + '/ListDataAssetData',
+  // 查询数据来源
+  listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
   // 删除数据资产
   dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
   // 解析数据资产字段文件
   analyzeDataAssetFieldsFile: PrefixAimdp + '/AnalyzeDataAssetFieldsFile',
   // 查询支持的字段类型
-  listDataAssetFieldTypes: PrefixAimdp + '/ListDataAssetFieldTypes'
+  listDataAssetFieldTypes: PrefixAimdp + '/ListDataAssetFieldTypes',
+  // 数据资产字段自动映射
+  editDataAssetColumnMap: PrefixAimdp + '/EditDataAssetColumnMap',
+  // 创建数据资产和映射关系
+  createDataAssetAndMapping: PrefixAimdp + '/CreateDataAssetAndMapping',
+  // 修改数据资产和映射关系
+  editDataAsset: PrefixAimdp + '/EditDataAsset',
+  // 修改数据资产表列设置（前端展示）
+  editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
+  // 查询数据资产表列设置（前端展示）
+  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  // 查询指定字段去重后的数量
+  getDataAssetTableDistinctFieldCount:
+    PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
+  // 批量修改数据资产表中的数据信息
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
 };
 
 /**

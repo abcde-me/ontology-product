@@ -2,7 +2,7 @@ import UAPI from '@/api';
 import { groupBy, pick, omit } from 'lodash-es';
 
 export async function getModelList(params: any = {}) {
-  return UAPI.RES.modelGet({}).get(params).inRegion().do();
+  return UAPI.RES.modelGet({}).post(params).inRegion().do();
 }
 
 export async function getModels(params: any = {}) {

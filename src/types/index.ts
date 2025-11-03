@@ -1,5 +1,5 @@
 interface ApiRes<T> {
-  code: number;
+  code: number | string;
   data: T;
   message: string;
   requestId: string;
