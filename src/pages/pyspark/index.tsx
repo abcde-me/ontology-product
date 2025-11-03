@@ -1,4 +1,4 @@
-import React, { useState, memo, useRef } from 'react';
+import React, { useState, memo, useRef, useEffect } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
@@ -14,20 +14,35 @@ import ToolsManager from './components/tools-manager';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { useLocation, useHistory } from 'react-router-dom';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
 type TabKey = 'files' | 'tools' | 'data' | 'daset';
+const defaultActiveTab = 'files';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const location = useLocation();
+  const history = useHistory();
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
   const isCanCreate = useHasPermission(PYSPARK_PERMISSIONS.CREATE);
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+
+  // 从URL查询参数中解析activeTab
+  const getActiveTabFromUrl = () => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('activeTab') || defaultActiveTab;
+  };
+
+  useEffect(() => {
+    setActiveTab(getActiveTabFromUrl() as TabKey);
+  }, [location.search]);
+
   // 用于同步选中状态到FileManager的回调函数
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
     string[]
@@ -91,6 +106,17 @@ const Python: React.FC = memo(() => {
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+
+    const searchParams = new URLSearchParams(location.search);
+
+    // 更新activeTab参数
+    searchParams.set('activeTab', key);
+
+    // 使用history更新URL，不触发页面重载
+    history.push({
+      pathname: location.pathname,
+      search: searchParams.toString()
+    });
   };
 
   // 处理插入内容功能注册
