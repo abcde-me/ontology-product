@@ -10,7 +10,13 @@ import {
   PYSPARK_PERMISSIONS,
   SQL_PERMISSIONS,
   REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK_PERMISSIONS
+  ANNOTATION_TASK_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  USER_PERMISSIONS,
+  USER_GROUP_PERMISSIONS,
+  ROLE_PERMISSIONS,
+  PROJECT_PERMISSIONS,
+  API_KEY_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -201,7 +207,8 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('organization') ?? false;
-        }
+        },
+        permission: ORGANIZATION_PERMISSIONS.MENU
       },
       {
         title: '用户管理',
@@ -218,7 +225,8 @@ export const menus: MenuModel[] = [
           return (
             (url?.includes('/user') && !url?.includes('user-group')) ?? false
           );
-        }
+        },
+        permission: USER_PERMISSIONS.MENU
       },
       {
         title: '用户组管理',
@@ -233,7 +241,8 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('user-group') ?? false;
-        }
+        },
+        permission: USER_GROUP_PERMISSIONS.MENU
       },
       {
         title: '角色管理',
@@ -248,7 +257,8 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('role') ?? false;
-        }
+        },
+        permission: ROLE_PERMISSIONS.MENU
       }
     ]
   },
@@ -271,7 +281,8 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('project') ?? false;
-        }
+        },
+        permission: PROJECT_PERMISSIONS.MENU
       },
       {
         title: 'API Key管理',
@@ -286,7 +297,8 @@ export const menus: MenuModel[] = [
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('apikey') ?? false;
-        }
+        },
+        permission: API_KEY_PERMISSIONS.MENU
       }
     ]
   }
