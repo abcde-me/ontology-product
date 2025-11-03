@@ -163,7 +163,31 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/dataCatalog',
     component: React.lazy(async () => import('../../dataCatalog')),
     permission: DATA_CATALOG_PERMISSIONS.LIST,
-    children: []
+    children: [
+      {
+        name: 'dataCatalogList',
+        key: '/tenant/compute/modaforge/dataCatalog/list',
+        component: React.lazy(async () => import('../../dataCatalog/list')),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        // 创建元数据目录
+        name: 'createMetaData',
+        key: '/tenant/compute/modaforge/dataCatalog/createMetaData',
+        component: React.lazy(
+          async () => import('../../dataCatalog/createMetaData')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+      // {
+      //   name: 'dataAssetEdit',
+      //   key: '/tenant/compute/modaforge/dataAsset/edit/:id',
+      //   component: React.lazy(
+      //     async () => import('../../dataAsset/modules/edit')
+      //   ),
+      //   permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      // }
+    ]
   },
   // 数据集详情 (需要在数据集管理之前匹配)
   {

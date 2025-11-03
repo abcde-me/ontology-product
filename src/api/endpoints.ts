@@ -179,6 +179,7 @@ export const ResourceEndpointsV2 = {
   sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
   dbItemListApi: PrefixAimdp + '/ListDirDatabaseTables', //获取数据库表列表
   dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
+  createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
 
   CatalogCreateApi: Prefix + `/catalogs`,
   fileExportApi: PrefixAimdp + `/OutputToConnector`,

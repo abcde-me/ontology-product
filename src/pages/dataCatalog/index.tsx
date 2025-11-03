@@ -1,25 +1,27 @@
 import React from 'react';
-import SourceData from './components/source-data';
-import ElTable from './components/el-table';
-import DataCatalogProvider from './components/DataCatalogProvider';
-import './index.css';
+import { Redirect, Route, Switch } from 'react-router';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const routes = require('../admin/route').routes || [];
 
-const DataCatalog: React.FC = () => {
+export default function DataAsset() {
   return (
-    <DataCatalogProvider>
-      <div className="h-full w-full py-5 pr-5">
-        <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-          <div className="mb-4 h-[30px] w-full leading-[30px]">
-            <p className="text-xl font-bold">数据目录</p>
-          </div>
-          <div className="flex w-full" style={{ height: 'calc(100% - 43px)' }}>
-            <SourceData />
-            <ElTable />
-          </div>
-        </div>
-      </div>
-    </DataCatalogProvider>
+    <Switch>
+      <Redirect
+        exact
+        from="/tenant/compute/modaforge/dataCatalog"
+        to="/tenant/compute/modaforge/dataCatalog/list"
+      />
+      {routes
+        .find((route) => route.name === 'dataCatalog')
+        ?.children?.map((route) => {
+          return (
+            <Route
+              key={route.key}
+              path={route.key}
+              component={route.component}
+            />
+          );
+        })}
+    </Switch>
   );
-};
-
-export default DataCatalog;
+}
