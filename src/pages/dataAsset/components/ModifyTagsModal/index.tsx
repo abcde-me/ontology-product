@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Select } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import { Modal, Button, Select, Form } from '@arco-design/web-react';
 
 interface ModifyTagsModalProps {
   visible: boolean;
@@ -16,16 +16,24 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
   onCancel,
   onConfirm
 }) => {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (visible) {
-      setSelectedTags(initialTags);
+      form.resetFields();
+      form.setFieldsValue({
+        tags: initialTags
+      });
     }
-  }, [visible, initialTags]);
+  }, [visible, initialTags, form]);
 
-  const handleConfirm = () => {
-    onConfirm(selectedTags);
+  const handleConfirm = async () => {
+    try {
+      const values = await form.validate();
+      onConfirm(values.tags || []);
+    } catch (error) {
+      // 验证失败，不做任何操作
+    }
   };
 
   return (
@@ -37,23 +45,21 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
       style={{ width: 400 }}
       className="modify-tags-modal"
     >
-      <div className="flex flex-col gap-4">
+      <Form form={form} autoComplete="off">
         {/* 选择标签 */}
-        <div>
-          <label className="mb-2 block text-sm">
-            <span className="text-[#F53F3F]">*</span>
-            <span className="ml-1">选择标签:</span>
-          </label>
+        <Form.Item
+          label="选择标签"
+          field="tags"
+          rules={[{ required: true, message: '请选择标签' }]}
+        >
           <Select
             mode="multiple"
             placeholder="请选择标签"
-            value={selectedTags}
-            onChange={setSelectedTags}
             style={{ width: '100%' }}
             options={tagOptions}
             allowCreate
           />
-        </div>
+        </Form.Item>
 
         {/* 按钮 */}
         <div className="mb-[20px] flex justify-end gap-[8px]">
@@ -62,7 +68,7 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
             确定
           </Button>
         </div>
-      </div>
+      </Form>
     </Modal>
   );
 };
