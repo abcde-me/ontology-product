@@ -49,6 +49,22 @@ export async function findDataAssetMapping(): Promise<
 export async function listDataAssetData(
   params: ListDataAssetDataReq
 ): Promise<ApiRes<ListDataAssetDataRes>> {
+  // Mock 所有数据
+  const allRecords = Array.from({ length: 50 }, (_, i) => ({
+    id: String(i + 1),
+    name: `数据资产${i + 1}`,
+    tags: ['标签1', '标签2'],
+    source: '来源1',
+    updateTime: '2024-01-01 12:00:00'
+  }));
+
+  // 分页处理
+  const page = params.page || 1;
+  const pageSize = params.pageSize || 10;
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedRecords = allRecords.slice(startIndex, endIndex);
+
   return Promise.resolve({
     code: 0,
     status: 200,
@@ -83,50 +99,10 @@ export async function listDataAssetData(
           isDisplay: true
         }
       ],
-      records: [
-        {
-          id: '1',
-          name: '数据资产1',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        },
-        {
-          id: '2',
-          name: '数据资产2',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        },
-        {
-          id: '3',
-          name: '数据资产3',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        },
-        {
-          id: '4',
-          name: '数据资产4',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        },
-        {
-          id: '5',
-          name: '数据资产5',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        },
-        {
-          id: '6',
-          name: '数据资产6',
-          tags: ['标签1', '标签2'],
-          source: '来源1',
-          updateTime: '2024-01-01 12:00:00'
-        }
-      ]
+      records: paginatedRecords,
+      total: allRecords.length,
+      page: page,
+      pageSize: pageSize
     },
     message: 'success',
     requestId: ''

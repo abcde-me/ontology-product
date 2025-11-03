@@ -11,8 +11,9 @@ import {
 import { IconDelete, IconClose, IconSearch } from '@arco-design/web-react/icon';
 import './index.module.scss'; // 确保引入样式文件
 // @ts-ignore
-import Sortable from 'react-sortablejs';
-const SortableAny = Sortable as any;
+import { ReactSortable } from 'react-sortablejs';
+import DragIcon from '../../assets/drag-icon.svg';
+// const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
   id: string; // 唯一key
@@ -28,50 +29,51 @@ export interface ColumnSettingModalProps {
   fields?: ColumnField[]; // 外部传入的字段列表
   onOk: (selected: ColumnField[]) => void;
   onCancel: () => void;
+  onChange: (list: ColumnField[]) => void;
 }
 
-const mockFields: ColumnField[] = [
-  {
-    id: '1',
-    name: '数据资产名称',
-    type: 'string',
-    enumChecked: false,
-    enumLoading: false,
-    enumCount: 0
-  },
-  {
-    id: '2',
-    name: '资产标签',
-    type: 'number',
-    enumChecked: false,
-    enumLoading: false,
-    enumCount: 0
-  },
-  {
-    id: '3',
-    name: '资产来源',
-    type: 'string',
-    enumChecked: false,
-    enumLoading: false,
-    enumCount: 0
-  },
-  {
-    id: '4',
-    name: '更新时间',
-    type: 'number',
-    enumChecked: false,
-    enumLoading: false,
-    enumCount: 0
-  },
-  {
-    id: '5',
-    name: '数据血缘',
-    type: 'string',
-    enumChecked: false,
-    enumLoading: false,
-    enumCount: 0
-  }
-];
+// const mockFields: ColumnField[] = [
+//   {
+//     id: '1',
+//     name: '数据资产名称',
+//     type: 'string',
+//     enumChecked: false,
+//     enumLoading: false,
+//     enumCount: 0
+//   },
+//   {
+//     id: '2',
+//     name: '资产标签',
+//     type: 'number',
+//     enumChecked: false,
+//     enumLoading: false,
+//     enumCount: 0
+//   },
+//   {
+//     id: '3',
+//     name: '资产来源',
+//     type: 'string',
+//     enumChecked: false,
+//     enumLoading: false,
+//     enumCount: 0
+//   },
+//   {
+//     id: '4',
+//     name: '更新时间',
+//     type: 'number',
+//     enumChecked: false,
+//     enumLoading: false,
+//     enumCount: 0
+//   },
+//   {
+//     id: '5',
+//     name: '数据血缘',
+//     type: 'string',
+//     enumChecked: false,
+//     enumLoading: false,
+//     enumCount: 0
+//   }
+// ];
 
 const defaultSelected = ['1', '2', '3', '4'];
 
@@ -79,10 +81,11 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   visible,
   fields: externalFields,
   onOk,
-  onCancel
+  onCancel,
+  onChange = () => {}
 }) => {
   // 使用外部传入的 fields 或默认的 mockFields
-  const initialFields = externalFields || mockFields;
+  const initialFields = externalFields ?? [];
   const [fields, setFields] = useState<ColumnField[]>(initialFields);
   // 初始化选中的字段（外部传入时选择所有字段，否则使用默认）
   const initialSelectedIds = externalFields
@@ -110,10 +113,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           f.type.toLowerCase().includes(searchKeyword.toLowerCase())
       )
     : fields;
-  // 已选的field数据
-  const selectedFields = fields.filter((f) => selectedIds.includes(f.id));
-  // 拖拽排序
-  const handleSort = (orderIds: string[]) => setSelectedIds(orderIds);
+  // 已选的field数据，按照selectedIds的顺序
+  const selectedFields = selectedIds
+    .map((id) => fields.find((f) => f.id === id))
+    .filter(Boolean) as ColumnField[];
   // 枚举复选框 mock
   const handleEnumCheck = (id: string, checked: boolean) => {
     setFields((fields) =>
@@ -231,26 +234,36 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               }}
             />
           </div>
-          {/* <SortableAny
-                        tag="div"
-                        options={{ animation: 200 }}
-                        onChange={order => handleSort(order as string[])}
-                        value={selectedIds}
-                    > */}
-          {selectedFields.map((field) => (
-            <div
-              key={field.id}
-              data-id={field.id}
-              className="m-t-[7px] flex h-[22px] items-center"
-            >
-              <span style={{ flex: 1 }}>{field.name}</span>
-              <IconClose
-                className="size-[12px] cursor-pointer"
-                onClick={() => handleRemove(field.id)}
-              />
-            </div>
-          ))}
-          {/* </SortableAny> */}
+          <ReactSortable
+            tag="div"
+            animation={150}
+            list={selectedFields}
+            setList={(list) => {
+              // 从新的列表顺序中提取id数组，更新selectedIds状态
+              const newOrderIds = list.map((item) => item.id);
+              setSelectedIds(newOrderIds);
+              // 通知父组件顺序变化
+              onChange(list);
+            }}
+          >
+            {selectedFields.map((field) => (
+              <div
+                key={field.id}
+                data-id={field.id}
+                className="m-t-[7px] flex h-[40px] items-center"
+              >
+                <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
+                {/* <div className='w-[14px] h-[14px] mr-[8px]'>
+                  
+                </div> */}
+                <span className="line-height-[40px] flex-1">{field.name}</span>
+                <IconClose
+                  className="size-[12px] cursor-pointer"
+                  onClick={() => handleRemove(field.id)}
+                />
+              </div>
+            ))}
+          </ReactSortable>
         </div>
       </div>
     </Modal>

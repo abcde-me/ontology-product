@@ -40,6 +40,8 @@ export interface SearchAreaProps {
   onFieldSearch?: (fieldValues: Record<string, any>) => void;
   /** 重置回调 */
   onReset?: () => void;
+  /** 样式类 */
+  className?: string;
 }
 
 export default function SearchArea({
@@ -48,7 +50,8 @@ export default function SearchArea({
   mainSearchPlaceholder = '请输入搜索内容,如10月份所有的表',
   onMainSearch,
   onFieldSearch,
-  onReset
+  onReset,
+  className = ''
 }: SearchAreaProps) {
   // 主搜索框的值
   const [mainSearch, setMainSearch] = useState(mainSearchValue);
@@ -274,11 +277,11 @@ export default function SearchArea({
   };
 
   return (
-    <div className="border-b border-[var(--color-border-2)] pb-[24px]">
+    <div className={`pb-[24px] ${className}`}>
       {/* 主搜索区域 */}
       <div className="flex items-center gap-3">
         <Input
-          className="flex-1"
+          className="w-[480px]"
           placeholder={mainSearchPlaceholder}
           value={mainSearch}
           onChange={setMainSearch}

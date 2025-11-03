@@ -26,13 +26,18 @@ import {
   listDataAssetData,
   findDataAssetFieldsDisplay
 } from '@/api/dataAsset';
-import { ColumnField as ApiColumnField } from '@/types/dataAssetApi';
+import {
+  ColumnField as ApiColumnField,
+  ListDataAssetDataRes
+} from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 
 export default function DataAssetList() {
-  const [dataAssetList, setDataAssetList] = useState<any[]>([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
+  const [dataAssetList, setDataAssetList] = useState<
+    ListDataAssetDataRes['records']
+  >([]);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -47,7 +52,101 @@ export default function DataAssetList() {
     ColumnField[]
   >([]); // 列设置字段
   const [loading, setLoading] = useState(false);
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
+  const [total, setTotal] = useState(0);
+  const [searchParams, setSearchParams] = useState({
+    commonSearch: '',
+    fieldSearch: [] as any[]
+  });
   const history = useHistory();
+
+  // 获取列表数据
+  const loadListData = async (page: number, size: number) => {
+    setLoading(true);
+    try {
+      const listRes = await listDataAssetData({
+        ...searchParams,
+        page,
+        pageSize: size
+      });
+
+      if (listRes.code === 0 || listRes.code === undefined) {
+        const {
+          fields,
+          records,
+          total: totalCount
+        } = listRes.data || {
+          fields: [],
+          records: [],
+          total: 0
+        };
+        setDataAssetList(records || []);
+        setTotal(totalCount || 0);
+
+        // 根据 fields 动态生成表格列
+        const dynamicColumns = [
+          {
+            title: '序号',
+            dataIndex: 'index',
+            width: 80,
+            key: 'index',
+            render: (_: any, __: any, idx: number) =>
+              (page - 1) * size + idx + 1
+          },
+          // 根据 fields 生成列，保证每一列和表头一一对应
+          ...(fields || [])
+            .filter((field: ApiColumnField) => field.isDisplay !== false)
+            .map((field: ApiColumnField) => ({
+              title: field.nameZh,
+              dataIndex: field.nameEn,
+              key: field.nameEn,
+              width: 150,
+              ellipsis: true
+            })),
+          {
+            title: '操作',
+            dataIndex: 'actions',
+            width: 200,
+            key: 'actions',
+            fixed: 'right' as const,
+            render: (
+              _: any,
+              record: any,
+              idx: number,
+              { onEditAsset, onEditTags, onDelete }: any
+            ) => (
+              <Space>
+                <Button
+                  type="text"
+                  style={{ marginRight: 6 }}
+                  onClick={() => onEditAsset?.(record)}
+                >
+                  修改资产
+                </Button>
+                <Button
+                  type="text"
+                  style={{ marginRight: 6 }}
+                  onClick={() => onEditTags?.(record)}
+                >
+                  修改标签
+                </Button>
+                <Button type="text" onClick={() => onDelete?.(record)}>
+                  删除
+                </Button>
+              </Space>
+            )
+          }
+        ];
+        setTableColumns(dynamicColumns);
+      }
+    } catch (err) {
+      console.error('获取数据资产列表失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 初始化：检查是否有mapping数据
   useEffect(() => {
@@ -61,87 +160,11 @@ export default function DataAssetList() {
           const hasData = mappingData.length > 0;
           setHasMapping(hasData);
 
-          // 如果有mapping数据，并行请求列表数据和列设置
+          // 如果有mapping数据，并行请求列设置和列表数据
           if (hasData) {
-            setLoading(true);
-            Promise.all([
-              listDataAssetData({
-                commonSearch: '',
-                fieldSearch: []
-              }),
-              findDataAssetFieldsDisplay({})
-            ])
-              .then(([listRes, displayRes]) => {
-                setLoading(false);
-                // 处理列表数据
-                if (listRes.code === 0 || listRes.code === undefined) {
-                  const { fields, records } = listRes.data || {
-                    fields: [],
-                    records: []
-                  };
-                  setDataAssetList(records || []);
-
-                  // 根据 fields 动态生成表格列
-                  const dynamicColumns = [
-                    {
-                      title: '序号',
-                      dataIndex: 'index',
-                      width: 80,
-                      key: 'index',
-                      render: (_: any, __: any, idx: number) => idx + 1
-                    },
-                    // 根据 fields 生成列，保证每一列和表头一一对应
-                    ...(fields || [])
-                      .filter(
-                        (field: ApiColumnField) => field.isDisplay !== false
-                      )
-                      .map((field: ApiColumnField) => ({
-                        title: field.nameZh,
-                        dataIndex: field.nameEn,
-                        key: field.nameEn,
-                        width: 150,
-                        ellipsis: true
-                      })),
-                    {
-                      title: '操作',
-                      dataIndex: 'actions',
-                      width: 200,
-                      key: 'actions',
-                      fixed: 'right' as const,
-                      render: (
-                        _: any,
-                        record: any,
-                        idx: number,
-                        { onEditAsset, onEditTags, onDelete }: any
-                      ) => (
-                        <Space>
-                          <Button
-                            type="text"
-                            style={{ marginRight: 6 }}
-                            onClick={() => onEditAsset?.(record)}
-                          >
-                            修改资产
-                          </Button>
-                          <Button
-                            type="text"
-                            style={{ marginRight: 6 }}
-                            onClick={() => onEditTags?.(record)}
-                          >
-                            修改标签
-                          </Button>
-                          <Button
-                            type="text"
-                            onClick={() => onDelete?.(record)}
-                          >
-                            删除
-                          </Button>
-                        </Space>
-                      )
-                    }
-                  ];
-                  setTableColumns(dynamicColumns);
-                }
-
+            // 获取列设置
+            findDataAssetFieldsDisplay({})
+              .then((displayRes) => {
                 // 处理列设置数据
                 if (displayRes.code === 0 || displayRes.code === undefined) {
                   const { fields: displayFields } = displayRes.data || {
@@ -162,9 +185,11 @@ export default function DataAssetList() {
                 }
               })
               .catch((err) => {
-                setLoading(false);
-                console.error('获取数据资产列表或列设置失败:', err);
+                console.error('获取列设置失败:', err);
               });
+
+            // 加载列表数据
+            loadListData(1, 12);
           }
         } else {
           // 接口失败时默认显示列表页
@@ -273,15 +298,35 @@ export default function DataAssetList() {
   // 切换视图类型
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
+    // 切换视图时，重置分页并重新加载数据
+    const newPageSize = type === ViewType.LIST ? 10 : 12;
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+    loadListData(1, newPageSize);
+  };
+
+  // 处理分页变化
+  const handlePageChange = (page: number, newPageSize?: number) => {
+    const targetPage = newPageSize ? 1 : page;
+    const targetPageSize = newPageSize || pageSize;
+    setCurrentPage(targetPage);
+    if (newPageSize) {
+      setPageSize(newPageSize);
+    }
+    loadListData(targetPage, targetPageSize);
   };
 
   // 列设置弹窗回调
   const handleModalOk = (selectedFields: any) => {
     // TODO: 处理列设置确定逻辑
     setColumnModalOpen(false);
-    Message.success('列设置已保存');
+    // Message.success('列设置已保存');
   };
   const handleModalCancel = () => setColumnModalOpen(false);
+  const handleColumnChange = (list: ColumnField[]) => {
+    console.log('列设置变化:', list);
+    // TODO: 处理列设置变化逻辑
+  };
 
   // 如果还在加载中，显示空内容（或可以显示loading）
   if (hasMapping === null) {
@@ -313,15 +358,15 @@ export default function DataAssetList() {
 
   // 如果有mapping数据，显示带搜索区域的列表页
   return (
-    <div className="h-full w-full py-5 pr-5">
+    <div className="min-h-full w-full py-5 pr-5">
       <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-        {dataAssetList.length !== 0 && (
+        {/* {dataAssetList.length !== 0 && (
           <div className="mb-4 h-[30px] w-full leading-[30px]">
             <p className="text-xl font-bold">
               数据资产（{dataAssetList.length}）
             </p>
           </div>
-        )}
+        )} */}
 
         {/* 搜索区域 */}
         <SearchArea
@@ -332,10 +377,8 @@ export default function DataAssetList() {
         />
 
         {/* 标题和视图切换区域 */}
-        <div className="mb-4 mt-[24px] flex h-[30px] w-full items-center justify-between leading-[32px]">
-          <p className="text-xl font-bold">
-            数据资产（{dataAssetList.length}）
-          </p>
+        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[32px]">
+          <p className="text-xl font-bold">数据资产（{total}）</p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
               <>
@@ -391,6 +434,10 @@ export default function DataAssetList() {
             <DataAssetTableList
               data={dataAssetList}
               columns={tableColumns.length > 0 ? tableColumns : undefined}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={handlePageChange}
               onEditAsset={(record) => {
                 /* TODO: 跳转到资产编辑 */
               }}
@@ -402,7 +449,14 @@ export default function DataAssetList() {
               }}
             />
           ) : (
-            <DataAssetTableCard />
+            <DataAssetTableCard
+              dataAssetList={dataAssetList}
+              loading={loading}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
         {/* )} */}
@@ -415,6 +469,7 @@ export default function DataAssetList() {
         }
         onOk={handleModalOk}
         onCancel={handleModalCancel}
+        onChange={handleColumnChange}
       />
     </div>
   );

@@ -5,7 +5,8 @@ import {
   Tag,
   InputTag,
   Tooltip,
-  Space
+  Space,
+  Pagination
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 
@@ -13,6 +14,10 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 export interface DataAssetTableListProps {
   data: any[];
   columns?: ColumnProps[];
+  currentPage?: number;
+  pageSize?: number;
+  total?: number;
+  onPageChange?: (page: number, newPageSize?: number) => void;
   onEditAsset?: (record: any) => void;
   onEditTags?: (record: any) => void;
   onDelete?: (record: any) => void;
@@ -116,6 +121,10 @@ const defaultColumns = [
 const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   data,
   columns,
+  currentPage = 1,
+  pageSize = 10,
+  total = 0,
+  onPageChange,
   onEditAsset,
   onEditTags,
   onDelete
@@ -123,30 +132,63 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   // 使用传入的 columns 或默认的 columns
   const tableColumns = columns || defaultColumns;
 
+  // 计算起始索引（用于序号显示）
+  const startIndex = (currentPage - 1) * pageSize;
+
+  // 处理分页变化
+  const handlePageChange = (page: number, newPageSize?: number) => {
+    onPageChange?.(page, newPageSize);
+  };
+
   return (
-    <Table
-      columns={
-        tableColumns.map((col) =>
-          col.dataIndex === 'actions'
-            ? {
-                ...col,
-                render: (val: any, record: any, idx: number) =>
-                  col.render
-                    ? col.render(val, record, idx, {
-                        onEditAsset,
-                        onEditTags,
-                        onDelete
-                      })
-                    : null
-              }
-            : col
-        ) as any
-      }
-      data={data}
-      pagination={false}
-      scroll={{ x: 'max-content' }}
-      rowKey={(record) => record.id || record.name || String(Math.random())}
-    />
+    <div className="flex w-full flex-col">
+      <Table
+        columns={
+          tableColumns.map((col) =>
+            col.dataIndex === 'actions'
+              ? {
+                  ...col,
+                  render: (val: any, record: any, idx: number) =>
+                    col.render
+                      ? col.render(val, record, idx, {
+                          onEditAsset,
+                          onEditTags,
+                          onDelete
+                        })
+                      : null
+                }
+              : col.dataIndex === 'index'
+                ? {
+                    ...col,
+                    render: (_: any, __: any, idx: number) =>
+                      startIndex + idx + 1
+                  }
+                : col
+          ) as any
+        }
+        data={data}
+        pagination={false}
+        scroll={{ x: 'max-content' }}
+        rowKey={(record) => record.id || record.name || String(Math.random())}
+      />
+
+      {/* 分页组件 */}
+      {total > 0 && (
+        <div className="mt-[16px] flex items-center justify-end">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={total}
+            showTotal
+            showJumper
+            sizeOptions={[10, 20, 50, 100]}
+            sizeCanChange
+            onChange={handlePageChange}
+            onPageSizeChange={handlePageChange}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

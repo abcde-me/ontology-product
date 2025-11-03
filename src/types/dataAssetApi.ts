@@ -130,6 +130,10 @@ export interface ListDataAssetDataReq {
     type: string;
     searchContent: string[];
   }[];
+  /** 页码，从1开始 */
+  page?: number;
+  /** 每页数量 */
+  pageSize?: number;
 }
 
 /** 数据资产记录类型，对象的键对应 fields 中每个 ColumnField 的 nameEn */
@@ -142,6 +146,12 @@ export interface ListDataAssetDataRes {
   records: ({
     id: string;
   } & DataAssetRecord)[];
+  /** 总记录数 */
+  total?: number;
+  /** 当前页码 */
+  page?: number;
+  /** 每页数量 */
+  pageSize?: number;
 }
 
 export enum ModifyMethod {
