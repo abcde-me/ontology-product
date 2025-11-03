@@ -255,7 +255,7 @@ export const menus: MenuModel[] = [
   {
     type: 'itemGroup',
     title: '工作空间',
-    key: 'mgmtGroup',
+    key: 'workspaceGroup',
     external: true,
     children: [
       {
