@@ -86,7 +86,7 @@ const Classify = (props: ClassifyComponentProps) => {
     if (type === 'detail') {
       getDetailObj?.file_labels?.map((item) => {
         formClassify.setFieldValue(
-          `attribute_group_name${item?.id}`,
+          `attribute_group_name${item?.order_num}`,
           item?.attribute_group_name
         );
         // 设置选项内容
@@ -126,11 +126,11 @@ const Classify = (props: ClassifyComponentProps) => {
           textRelations?.map((item, index) => (
             <div className="classify-item" key={index}>
               <div className="classify-relation-item">
-                {console.log(item.attribute_group_name)}
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8 }}
                   label="属性名称:"
-                  field={`attribute_group_name${item?.attribute_id}`}
+                  field={`attribute_group_name${type === 'detail' ? item?.order_num : item.attribute_id}`}
+                  // field={`attribute_group_name${item?.attribute_id}`}
                   className="classify-relation-item_group_name"
                   rules={[
                     {

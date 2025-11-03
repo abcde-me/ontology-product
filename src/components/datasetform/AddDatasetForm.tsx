@@ -18,7 +18,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './AddDatasetForm.module.scss';
-import './AddDatasetForm.css';
+import './AddDatasetForm.scss';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import {
@@ -943,7 +943,7 @@ const DatasetForm = React.forwardRef<
                     <Select
                       placeholder={
                         !selectedConnector
-                          ? '请先选数据文件'
+                          ? '请先选择连接器'
                           : '请选择要使用的文件'
                       }
                       mode="multiple"

@@ -35,6 +35,32 @@ const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
   return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
 };
 
+// 只保留有权限数据的节点
+const filterTreeDataByPerms = (data: any[]): any[] => {
+  if (!data?.length) return [];
+
+  return data.reduce((result: any[], item) => {
+    // 递归过滤子节点
+    const filteredChildren = item.children?.length
+      ? filterTreeDataByPerms(item.children)
+      : undefined;
+
+    // 如果当前节点有权限，保留该节点（即使子节点被过滤为空也要保留）
+    if (item.isPermission) {
+      result.push({
+        ...item,
+        children: filteredChildren
+      });
+    } else if (filteredChildren?.length) {
+      // 如果当前节点没有权限但有过滤后的子节点，提升子节点层级
+      result.push(...filteredChildren);
+    }
+    // 既没有权限也没有有效子节点的节点被忽略
+
+    return result;
+  }, []);
+};
+
 interface DataSourceModalProps {
   visible: boolean;
   onClose: () => void;
@@ -92,8 +118,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           // 使用工具函数处理整个树结构
           const isDetailMode = type === 'detail';
           const newTreeData = processTreeData(res?.data || [], isDetailMode);
-          setTreeData(newTreeData);
-          setOriginalTreeData(newTreeData);
+          setTreeData(filterTreeDataByPerms(newTreeData));
+          setOriginalTreeData(filterTreeDataByPerms(newTreeData));
         })
         .catch((err) => {
           console.error(err);

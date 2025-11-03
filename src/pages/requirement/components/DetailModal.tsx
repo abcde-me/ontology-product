@@ -296,8 +296,10 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     if (type === 'detail') {
       return;
     }
-    settableLoading(true);
-    getTableData();
+    if (checkedKeys?.length > 0) {
+      settableLoading(true);
+      getTableData();
+    }
   }, [checkedKeys, current, pageSize]);
   // 处理日期范围变化
   const handleDateChange = (value) => {
