@@ -4,37 +4,37 @@
  */
 
 // 用户管理相关权限
-export const USER_PERMISSIONS = {
-  // 基础权限
-  CAN_VIEW: 'user:can_view',
-  CAN_SEARCH: 'user:can_search',
-  CAN_CREATE: 'user:can_create',
-  CAN_EDIT: 'user:can_edit',
-  CAN_DELETE: 'user:can_delete',
+// export const USER_PERMISSIONS = {
+//   // 基础权限
+//   CAN_VIEW: 'user:can_view',
+//   CAN_SEARCH: 'user:can_search',
+//   CAN_CREATE: 'user:can_create',
+//   CAN_EDIT: 'user:can_edit',
+//   CAN_DELETE: 'user:can_delete',
 
-  // 高级权限
-  CAN_MANAGE: 'user:can_manage',
-  CAN_RESET_PASSWORD: 'user:can_reset_password',
-  CAN_CHANGE_ROLE: 'user:can_change_role',
-  CAN_BATCH_IMPORT: 'user:can_batch_import',
-  CAN_EXPORT: 'user:can_export',
-  CAN_EXPORT_SENSITIVE: 'user:can_export_sensitive',
+//   // 高级权限
+//   CAN_MANAGE: 'user:can_manage',
+//   CAN_RESET_PASSWORD: 'user:can_reset_password',
+//   CAN_CHANGE_ROLE: 'user:can_change_role',
+//   CAN_BATCH_IMPORT: 'user:can_batch_import',
+//   CAN_EXPORT: 'user:can_export',
+//   CAN_EXPORT_SENSITIVE: 'user:can_export_sensitive',
 
-  // 状态管理
-  CAN_ENABLE: 'user:can_enable',
-  CAN_DISABLE: 'user:can_disable',
-  CAN_BAN: 'user:can_ban'
-} as const;
+//   // 状态管理
+//   CAN_ENABLE: 'user:can_enable',
+//   CAN_DISABLE: 'user:can_disable',
+//   CAN_BAN: 'user:can_ban'
+// } as const;
 
 // 组织管理相关权限
-export const ORGANIZATION_PERMISSIONS = {
-  CAN_VIEW: 'organizations:can_view',
-  CAN_SEARCH: 'organizations:can_search',
-  CAN_CREATE: 'organizations:can_create',
-  CAN_EDIT: 'organizations:can_edit',
-  CAN_DELETE: 'organizations:can_delete',
-  CAN_MANAGE: 'organizations:can_manage'
-} as const;
+// export const ORGANIZATION_PERMISSIONS = {
+//   CAN_VIEW: 'organizations:can_view',
+//   CAN_SEARCH: 'organizations:can_search',
+//   CAN_CREATE: 'organizations:can_create',
+//   CAN_EDIT: 'organizations:can_edit',
+//   CAN_DELETE: 'organizations:can_delete',
+//   CAN_MANAGE: 'organizations:can_manage'
+// } as const;
 
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
@@ -216,6 +216,36 @@ export const ANNOTATION_TASK_PERMISSIONS = {
   GET_ID_TASK: 'aimdp-manager:label_task:read:get_task_by_id', // 获取某标注任务详情
   GET: 'aimdp-manager:label_task:read:get_task', // 获取一个标注任务
   SAVE: 'aimdp-manager:label_task:manage:save_task_result' // 保存和提交标注任务
+} as const;
+
+// 组织管理
+export const ORGANIZATION_PERMISSIONS = {
+  MENU: 'aisocket:organization:read:menu'
+} as const;
+
+// 用户管理
+export const USER_PERMISSIONS = {
+  MENU: 'aisocket:user:read:menu'
+} as const;
+
+// 用户组管理
+export const USER_GROUP_PERMISSIONS = {
+  MENU: 'aisocket:usergroup:read:menu'
+} as const;
+
+// 角色管理
+export const ROLE_PERMISSIONS = {
+  MENU: 'aisocket:role:read:menu'
+} as const;
+
+// 项目管理
+export const PROJECT_PERMISSIONS = {
+  MENU: 'aisocket:project:read:menu'
+} as const;
+
+// API KEY管理
+export const API_KEY_PERMISSIONS = {
+  MENU: 'aisocket:apikey:read:menu'
 } as const;
 
 // 聚合所有权限
