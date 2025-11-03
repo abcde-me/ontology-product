@@ -135,7 +135,7 @@ const DatasetsList: FC = () => {
             color = '#007DFA';
             actionBtn = (
               <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
-                <Link onClick={() => handleStopTask(item)}> 终止 </Link>;
+                <Link onClick={() => handleStopTask(item)}> 终止 </Link>
               </PermissionWrapper>
             );
             break;
