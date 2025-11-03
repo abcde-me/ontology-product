@@ -10,7 +10,8 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  useState
+  useState,
+  useMemo
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
@@ -24,6 +25,7 @@ import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout } from '@/utils/env';
 import { GetProjOrg } from '@/api/modules/project';
+import { isSameArray } from '@/utils/array';
 
 export default function Header({
   className,
@@ -50,7 +52,9 @@ export default function Header({
     fetchUserInfo
   } = useUserInfoStore();
   const { setUserPermissions } = usePermission();
+  const { id: userId } = userInfo || {};
   const [projects, setProjects] = useState<Record<string, any>[]>([]);
+  const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
   // 组件卸载时的清理
   useEffect(() => {
     return () => {
@@ -113,11 +117,11 @@ export default function Header({
     }
   }, [userInfo?.id]);
 
-  React.useEffect(() => {
-    if (projectId && projectId[1]) {
-      setUserPermissions(projectId[1]);
-    }
-  }, [projectId[1]]);
+  // React.useEffect(() => {
+  //   if (projectId && projectId[1]) {
+  //     setUserPermissions(projectId[1]);
+  //   }
+  // }, [projectId[1]]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -126,8 +130,10 @@ export default function Header({
   }, [fetchUserInfo, isInitialized]);
 
   const changeProject = (value: string[]) => {
-    const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
-    setLocalStorage(fullProjectIdKey, value);
+    if (!userId || !userId.length) return;
+    if (isSameArray(value, projectId)) return;
+
+    setLocalStorage(FullStorageKey, value);
     // 重置权限状态，这样下次初始化时会重新加载权限
     setUserActions({ isAdmin: false, actions: null });
     setProjectId(value);
