@@ -8,7 +8,8 @@ import {
   Spin,
   Popover,
   Dropdown,
-  Menu
+  Menu,
+  Modal
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -22,7 +23,6 @@ import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
 import SearchArea, { SearchField } from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
-import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
 import { getTagList } from '@/api/datasetManagement';
@@ -73,10 +73,8 @@ export default function DataAssetList() {
   // 选中行状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   // 弹窗状态
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [modifyAssetModalVisible, setModifyAssetModalVisible] = useState(false);
   const [modifyTagsModalVisible, setModifyTagsModalVisible] = useState(false);
-  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]); // 要删除的ID列表（单个或批量）
   const [fieldsForModify, setFieldsForModify] = useState<
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
@@ -368,33 +366,51 @@ export default function DataAssetList() {
   // 处理批量删除
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return;
-    setDeleteTargetIds(selectedRowKeys);
-    setDeleteModalVisible(true);
+
+    Modal.confirm({
+      title: '确定删除资产吗?',
+      content: '删除后，不可恢复',
+      onOk: async () => {
+        try {
+          const res = await deleteDataAssetDataBatch({ ids: selectedRowKeys });
+          if (res.code === 0 || res.code === undefined) {
+            Message.success('删除成功');
+            setSelectedRowKeys([]);
+            // 重新加载数据
+            loadListData(currentPage, pageSize);
+          } else {
+            Message.error('删除失败');
+          }
+        } catch (error) {
+          console.error('删除失败:', error);
+          Message.error('删除失败');
+        }
+      }
+    });
   };
 
   // 处理单个删除
   const handleSingleDelete = (record: any) => {
-    setDeleteTargetIds([record.id]);
-    setDeleteModalVisible(true);
-  };
-
-  // 确认删除
-  const handleDeleteConfirm = async () => {
-    try {
-      const res = await deleteDataAssetDataBatch({ ids: deleteTargetIds });
-      if (res.code === 0 || res.code === undefined) {
-        Message.success('删除成功');
-        setDeleteModalVisible(false);
-        setSelectedRowKeys([]);
-        // 重新加载数据
-        loadListData(currentPage, pageSize);
-      } else {
-        Message.error('删除失败');
+    Modal.confirm({
+      title: '确定删除资产吗?',
+      content: '删除后，不可恢复',
+      onOk: async () => {
+        try {
+          const res = await deleteDataAssetDataBatch({ ids: [record.id] });
+          if (res.code === 0 || res.code === undefined) {
+            Message.success('删除成功');
+            setSelectedRowKeys([]);
+            // 重新加载数据
+            loadListData(currentPage, pageSize);
+          } else {
+            Message.error('删除失败');
+          }
+        } catch (error) {
+          console.error('删除失败:', error);
+          Message.error('删除失败');
+        }
       }
-    } catch (error) {
-      console.error('删除失败:', error);
-      Message.error('删除失败');
-    }
+    });
   };
 
   // 处理批量修改资产
@@ -482,6 +498,22 @@ export default function DataAssetList() {
   const handleSingleEditTags = (record: any) => {
     setSelectedRowKeys([record.id]);
     setModifyTagsModalVisible(true);
+  };
+
+  // 处理资产设置跳转
+  const handleAssetSettings = () => {
+    if (selectedRowKeys.length === 0) {
+      Message.warning('请先选择一个资产');
+      return;
+    }
+    if (selectedRowKeys.length > 1) {
+      Message.warning('请只选择一个资产进行设置');
+      return;
+    }
+    // 跳转到编辑资产页面
+    history.push(
+      `/tenant/compute/modaforge/dataAsset/edit/${selectedRowKeys[0]}`
+    );
   };
 
   // 如果还在加载中，显示空内容（或可以显示loading）
@@ -596,13 +628,20 @@ export default function DataAssetList() {
                   </Dropdown>
                 )}
 
-                <Button
-                  icon={<IconSettings />}
-                  className="mr-[20px]"
-                  onClick={() => setColumnModalOpen(true)}
+                <Popover
+                  content="请先选择一个资产"
+                  disabled={selectedRowKeys.length === 1}
+                  position="top"
                 >
-                  资产设置
-                </Button>
+                  <Button
+                    icon={<IconSettings />}
+                    className="mr-[20px]"
+                    disabled={selectedRowKeys.length !== 1}
+                    onClick={handleAssetSettings}
+                  >
+                    资产设置
+                  </Button>
+                </Popover>
                 <Button
                   icon={<IconSettings />}
                   className="mr-[20px]"
@@ -666,12 +705,6 @@ export default function DataAssetList() {
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         onChange={handleColumnChange}
-      />
-      {/* 删除确认弹窗 */}
-      <DeleteConfirmModal
-        visible={deleteModalVisible}
-        onCancel={() => setDeleteModalVisible(false)}
-        onConfirm={handleDeleteConfirm}
       />
       {/* 修改资产弹窗 */}
       <ModifyAssetModal
