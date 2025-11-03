@@ -9,6 +9,9 @@
 .tabs-center .arco-tabs-header-title {
   padding: 9px 40px !important;
 }
+.data-catalog-left-box {
+  border-right: 1px solid #e2e8f0;
+}
 /* Custom tree node hover style */
 /* .arco-tree-node-title:hover {
   width: auto !important;
