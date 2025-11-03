@@ -3,6 +3,7 @@ import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import WujieReact from 'wujie-react';
 import { getFlatRoutes, routes } from '../route';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
 import './sider.scss';
@@ -56,6 +57,7 @@ function LayoutWithSider({ children }) {
               if (menu.queryParamMatcher(location.search)) {
                 return [menu.key];
               }
+              continue;
             } else {
               return [menu.key];
             }
@@ -74,23 +76,38 @@ function LayoutWithSider({ children }) {
   };
 
   const clickMenu = React.useCallback(
-    (key: string) => {
-      const route = flattenRoutes.find((r) => r.key === key);
-      if (route?.sub) {
-        let tmp = key;
-        // 菜单跳转时保持param参数不变
-        for (const param in params) {
-          if (Object.prototype.hasOwnProperty.call(params, param)) {
-            const val = params[param];
-            const reg = new RegExp(`/:${param}/`, 'g');
-            if (reg.test(tmp)) {
-              tmp = tmp.replace(reg, `/${val}/`);
+    (path: string) => {
+      // 检查是否是 operationCenter 路由
+      if (path.includes('/tenant/compute/modaforge/operationCenter')) {
+        try {
+          // 销毁 wujie 应用的缓存，使用正确的 API
+          WujieReact.destroyApp('operationcenter');
+          console.log('Destroyed operationcenter wujie app');
+        } catch (e) {
+          console.warn('Failed to destroy wujie app:', e);
+        }
+        // 直接导航到 operationCenter 路由，不需要查找 route 配置
+        history.push(path);
+      } else {
+        // 对于其他路由，查找对应的 route 配置
+        const route = flattenRoutes.find((r) => r.key === path);
+        if (route?.sub) {
+          let tmp = path;
+          // 菜单跳转时保持param参数不变
+          for (const param in params) {
+            if (Object.prototype.hasOwnProperty.call(params, param)) {
+              const val = params[param];
+              const reg = new RegExp(`/:${param}/`, 'g');
+              if (reg.test(tmp)) {
+                tmp = tmp.replace(reg, `/${val}/`);
+              }
             }
           }
+          history.push(tmp + '?' + queryParams);
+        } else {
+          // 点击菜单时，清除所有查询参数，确保导航到干净的状态
+          history.push(path);
         }
-        history.push(tmp + '?' + queryParams);
-      } else {
-        history.push(key);
       }
     },
     [flattenRoutes, history, params, queryParams]
