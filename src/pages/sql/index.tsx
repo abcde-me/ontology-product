@@ -28,6 +28,7 @@ const SqlIndex: React.FC = memo(() => {
     ((content: string) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
+  const isEditorFocusedRef = useRef<boolean>(false);
 
   // 从URL查询参数中解析activeTab
   const getActiveTabFromUrl = () => {
@@ -100,6 +101,7 @@ const SqlIndex: React.FC = memo(() => {
 
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
+    isEditorFocusedRef.current = focused;
     setIsEditorFocused(focused);
   };
 
@@ -139,7 +141,7 @@ const SqlIndex: React.FC = memo(() => {
               <DataManager
                 key="data"
                 onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocused}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
               />
             )}
           </TabPane>
