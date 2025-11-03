@@ -40,7 +40,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
 
-    const hasCreatePermission = useHasPermission(SQL_PERMISSIONS.CAN_CREATE);
+    const hasCreatePermission = useHasPermission(SQL_PERMISSIONS.CREATE);
 
     const handleTabChange = (key: string) => {
       onTabChange(key);

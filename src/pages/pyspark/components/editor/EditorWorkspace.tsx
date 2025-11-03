@@ -26,6 +26,8 @@ import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useHasPermission } from '@/store/userInfoStore';
+import classNames from 'classnames';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -57,6 +59,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
+    const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -182,6 +185,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
       if (!editorRef.current?.view) return;
 
+      // 检查权限
+      if (!hasUpdatePermission) {
+        Message.warning('没有编辑权限，无法插入内容');
+        return;
+      }
+
       const view = editorRef.current.view;
       const currentPos = view.state.selection.main.head;
 
@@ -206,13 +215,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     }, [insertContentAtCursor, onInsertContent]);
 
+    // 计算编辑器是否为只读状态
+    const isReadOnly =
+      !hasUpdatePermission || runStatus === RunningStatus.RUNNING;
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
         <div className="notebook-toolbar">
           <div className="toolbar-left">
             <Space size={12}>
-              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_RUN}>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.RUN}>
                 <Button
                   type="primary"
                   icon={
@@ -229,7 +242,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
               </PermissionWrapper>
-              <PermissionWrapper permission={PYSPARK_PERMISSIONS.CAN_EXPORT}>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Button
                   icon={<IconUpload />}
                   onClick={handleExportDataset}
@@ -269,12 +282,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         </div>
 
         {/* 编辑器区域 */}
-        <div className="pyspark-editor-container">
+        <div
+          className={classNames('pyspark-editor-container', {
+            'running-code-mirror': isReadOnly
+          })}
+        >
           <CodeMirror
             ref={editorRef}
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
+            readOnly={isReadOnly}
             extensions={[
               python(),
               lintGutter(),
