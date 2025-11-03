@@ -5,7 +5,10 @@ import {
   Pagination,
   Message,
   Space,
-  Spin
+  Spin,
+  Popover,
+  Dropdown,
+  Menu
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -19,25 +22,32 @@ import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
 import SearchArea, { SearchField } from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
+import ModifyAssetModal from '../../components/ModifyAssetModal';
+import ModifyTagsModal from '../../components/ModifyTagsModal';
 import { getTagList } from '@/api/datasetManagement';
 import {
   listDataAssetSource,
   findDataAssetMapping,
   listDataAssetData,
-  findDataAssetFieldsDisplay
+  findDataAssetFieldsDisplay,
+  deleteDataAssetDataBatch,
+  editDataAssetDataBatch
 } from '@/api/dataAsset';
 import {
   ColumnField as ApiColumnField,
-  ListDataAssetDataRes
+  ListDataAssetDataRes,
+  ModifyMethod
 } from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
+import { EditDataAssetData } from '@/types/dataAssetApi';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
     ListDataAssetDataRes['records']
   >([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -60,6 +70,16 @@ export default function DataAssetList() {
     commonSearch: '',
     fieldSearch: [] as any[]
   });
+  // 选中行状态
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  // 弹窗状态
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [modifyAssetModalVisible, setModifyAssetModalVisible] = useState(false);
+  const [modifyTagsModalVisible, setModifyTagsModalVisible] = useState(false);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]); // 要删除的ID列表（单个或批量）
+  const [fieldsForModify, setFieldsForModify] = useState<
+    Array<{ nameZh: string; nameEn: string; type: string }>
+  >([]); // 用于修改资产的字段列表
   const history = useHistory();
 
   // 获取列表数据
@@ -84,6 +104,16 @@ export default function DataAssetList() {
         };
         setDataAssetList(records || []);
         setTotal(totalCount || 0);
+
+        // 保存字段列表用于修改资产弹窗
+        const fieldsForModifyList = (fields || []).map(
+          (field: ApiColumnField) => ({
+            nameZh: field.nameZh,
+            nameEn: field.nameEn,
+            type: field.type
+          })
+        );
+        setFieldsForModify(fieldsForModifyList);
 
         // 根据 fields 动态生成表格列
         const dynamicColumns = [
@@ -298,10 +328,11 @@ export default function DataAssetList() {
   // 切换视图类型
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
-    // 切换视图时，重置分页并重新加载数据
+    // 切换视图时，重置分页并重新加载数据，清空选中状态
     const newPageSize = type === ViewType.LIST ? 10 : 12;
     setPageSize(newPageSize);
     setCurrentPage(1);
+    setSelectedRowKeys([]);
     loadListData(1, newPageSize);
   };
 
@@ -313,6 +344,7 @@ export default function DataAssetList() {
     if (newPageSize) {
       setPageSize(newPageSize);
     }
+    setSelectedRowKeys([]); // 分页变化时清空选中状态
     loadListData(targetPage, targetPageSize);
   };
 
@@ -326,6 +358,130 @@ export default function DataAssetList() {
   const handleColumnChange = (list: ColumnField[]) => {
     console.log('列设置变化:', list);
     // TODO: 处理列设置变化逻辑
+  };
+
+  // 处理行选择变化
+  const handleSelectChange = (keys: string[]) => {
+    setSelectedRowKeys(keys);
+  };
+
+  // 处理批量删除
+  const handleBatchDelete = () => {
+    if (selectedRowKeys.length === 0) return;
+    setDeleteTargetIds(selectedRowKeys);
+    setDeleteModalVisible(true);
+  };
+
+  // 处理单个删除
+  const handleSingleDelete = (record: any) => {
+    setDeleteTargetIds([record.id]);
+    setDeleteModalVisible(true);
+  };
+
+  // 确认删除
+  const handleDeleteConfirm = async () => {
+    try {
+      const res = await deleteDataAssetDataBatch({ ids: deleteTargetIds });
+      if (res.code === 0 || res.code === undefined) {
+        Message.success('删除成功');
+        setDeleteModalVisible(false);
+        setSelectedRowKeys([]);
+        // 重新加载数据
+        loadListData(currentPage, pageSize);
+      } else {
+        Message.error('删除失败');
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+      Message.error('删除失败');
+    }
+  };
+
+  // 处理批量修改资产
+  const handleBatchModifyAsset = () => {
+    if (selectedRowKeys.length === 0) return;
+    setModifyAssetModalVisible(true);
+  };
+
+  // 确认修改资产
+  const handleModifyAssetConfirm = async (data: {
+    modifyMethod: ModifyMethod;
+    fieldEnName: string;
+    separator: string;
+    fieldValue: string;
+  }) => {
+    try {
+      const editData: EditDataAssetData = {
+        modifyMethod: data.modifyMethod,
+        modifyIds: selectedRowKeys,
+        modifyContext: [
+          {
+            fieldEnName: data.fieldEnName,
+            fieldValue: data.fieldValue
+          }
+        ]
+      };
+      const res = await editDataAssetDataBatch(editData);
+      if (res.code === 0 || res.code === undefined) {
+        Message.success('修改成功');
+        setModifyAssetModalVisible(false);
+        setSelectedRowKeys([]);
+        // 重新加载数据
+        loadListData(currentPage, pageSize);
+      } else {
+        Message.error('修改失败');
+      }
+    } catch (error) {
+      console.error('修改失败:', error);
+      Message.error('修改失败');
+    }
+  };
+
+  // 处理批量修改标签
+  const handleBatchModifyTags = () => {
+    if (selectedRowKeys.length === 0) return;
+    setModifyTagsModalVisible(true);
+  };
+
+  // 确认修改标签
+  const handleModifyTagsConfirm = async (tags: string[]) => {
+    try {
+      const editData: EditDataAssetData = {
+        modifyMethod: ModifyMethod.COVER,
+        modifyIds: selectedRowKeys,
+        modifyContext: [
+          {
+            fieldEnName: 'tags',
+            fieldValue: tags.join(',')
+          }
+        ]
+      };
+      const res = await editDataAssetDataBatch(editData);
+      if (res.code === 0 || res.code === undefined) {
+        Message.success('标签修改成功');
+        setModifyTagsModalVisible(false);
+        setSelectedRowKeys([]);
+        // 重新加载数据
+        loadListData(currentPage, pageSize);
+      } else {
+        Message.error('标签修改失败');
+      }
+    } catch (error) {
+      console.error('标签修改失败:', error);
+      Message.error('标签修改失败');
+    }
+  };
+
+  // 处理单个修改资产
+  const handleSingleEditAsset = (record: any) => {
+    setSelectedRowKeys([record.id]);
+    setModifyAssetModalVisible(true);
+  };
+
+  // 处理单个修改标签
+  const handleSingleEditTags = (record: any) => {
+    setSelectedRowKeys([record.id]);
+    setModifyTagsModalVisible(true);
   };
 
   // 如果还在加载中，显示空内容（或可以显示loading）
@@ -382,20 +538,64 @@ export default function DataAssetList() {
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
               <>
-                <Button
-                  icon={<IconDelete />}
-                  className="mr-[20px]"
-                  onClick={() => setColumnModalOpen(true)}
+                {/* 批量删除按钮 */}
+                <Popover
+                  content="请先选择资产"
+                  disabled={selectedRowKeys.length > 0}
+                  position="top"
                 >
-                  批量删除
-                </Button>
-                <Button
-                  icon={<IconEdit />}
-                  className="mr-[20px]"
-                  onClick={() => setColumnModalOpen(true)}
-                >
-                  批量修改
-                </Button>
+                  <Button
+                    icon={<IconDelete />}
+                    className="mr-[20px]"
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={handleBatchDelete}
+                  >
+                    批量删除
+                  </Button>
+                </Popover>
+
+                {/* 批量修改按钮 */}
+                {selectedRowKeys.length === 0 ? (
+                  <Popover content="请先选择资产" position="top">
+                    <Button
+                      icon={<IconEdit />}
+                      className="mr-[20px]"
+                      disabled={true}
+                    >
+                      批量修改
+                    </Button>
+                  </Popover>
+                ) : (
+                  <Dropdown
+                    droplist={
+                      <Menu style={{ width: '110px' }}>
+                        <Menu.Item
+                          key="modifyAsset"
+                          onClick={handleBatchModifyAsset}
+                        >
+                          修改资产
+                        </Menu.Item>
+                        <Menu.Item
+                          key="modifyTags"
+                          onClick={handleBatchModifyTags}
+                        >
+                          修改标签
+                        </Menu.Item>
+                      </Menu>
+                    }
+                    trigger="click"
+                    position="bl"
+                  >
+                    <Button
+                      icon={<IconEdit />}
+                      className="mr-[20px]"
+                      disabled={false}
+                    >
+                      批量修改
+                    </Button>
+                  </Dropdown>
+                )}
+
                 <Button
                   icon={<IconSettings />}
                   className="mr-[20px]"
@@ -438,15 +638,11 @@ export default function DataAssetList() {
               pageSize={pageSize}
               total={total}
               onPageChange={handlePageChange}
-              onEditAsset={(record) => {
-                /* TODO: 跳转到资产编辑 */
-              }}
-              onEditTags={(record) => {
-                /* TODO: 弹出标签编辑 */
-              }}
-              onDelete={(record) => {
-                /* TODO: 触发删除逻辑 */
-              }}
+              selectedRowKeys={selectedRowKeys}
+              onSelectChange={handleSelectChange}
+              onEditAsset={handleSingleEditAsset}
+              onEditTags={handleSingleEditTags}
+              onDelete={handleSingleDelete}
             />
           ) : (
             <DataAssetTableCard
@@ -470,6 +666,32 @@ export default function DataAssetList() {
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         onChange={handleColumnChange}
+      />
+      {/* 删除确认弹窗 */}
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onCancel={() => setDeleteModalVisible(false)}
+        onConfirm={handleDeleteConfirm}
+      />
+      {/* 修改资产弹窗 */}
+      <ModifyAssetModal
+        visible={modifyAssetModalVisible}
+        fields={fieldsForModify}
+        onCancel={() => setModifyAssetModalVisible(false)}
+        onConfirm={handleModifyAssetConfirm}
+      />
+      {/* 修改标签弹窗 */}
+      <ModifyTagsModal
+        visible={modifyTagsModalVisible}
+        tagOptions={assetTags}
+        initialTags={
+          selectedRowKeys.length === 1
+            ? (dataAssetList.find((item) => item.id === selectedRowKeys[0])
+                ?.tags as string[]) || []
+            : []
+        }
+        onCancel={() => setModifyTagsModalVisible(false)}
+        onConfirm={handleModifyTagsConfirm}
       />
     </div>
   );

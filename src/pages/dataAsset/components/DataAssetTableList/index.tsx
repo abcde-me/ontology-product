@@ -21,6 +21,8 @@ export interface DataAssetTableListProps {
   onEditAsset?: (record: any) => void;
   onEditTags?: (record: any) => void;
   onDelete?: (record: any) => void;
+  selectedRowKeys?: string[];
+  onSelectChange?: (selectedRowKeys: string[]) => void;
 }
 
 const defaultColumns = [
@@ -127,7 +129,9 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   onPageChange,
   onEditAsset,
   onEditTags,
-  onDelete
+  onDelete,
+  selectedRowKeys = [],
+  onSelectChange
 }) => {
   // 使用传入的 columns 或默认的 columns
   const tableColumns = columns || defaultColumns;
@@ -140,9 +144,23 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
     onPageChange?.(page, newPageSize);
   };
 
+  // 处理行选择变化
+  const handleRowSelectionChange = (
+    rowKeys: (string | number)[],
+    selectedRows: any[]
+  ) => {
+    onSelectChange?.(rowKeys.map((key) => String(key)));
+  };
+
   return (
     <div className="flex w-full flex-col">
       <Table
+        border={false}
+        rowSelection={{
+          type: 'checkbox',
+          selectedRowKeys: selectedRowKeys as (string | number)[],
+          onChange: handleRowSelectionChange
+        }}
         columns={
           tableColumns.map((col) =>
             col.dataIndex === 'actions'
@@ -191,26 +209,5 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
     </div>
   );
 };
-
-const mockData = [
-  {
-    name: '数据资产A',
-    tags: ['标签1', '标签2', '标签3'],
-    source: '系统导入',
-    updateTime: '2024-01-01 12:00:00'
-  },
-  {
-    name: '数据资产B',
-    tags: [],
-    source: '人工录入',
-    updateTime: '2024-04-15 09:42:38'
-  },
-  {
-    name: '数据资产C',
-    tags: ['标签A'],
-    source: '外部同步',
-    updateTime: '2024-05-21 16:20:18'
-  }
-];
 
 export default DataAssetTableList;
