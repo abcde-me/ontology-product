@@ -115,6 +115,10 @@ export default function WorkflowTask() {
       `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
   };
+  // 跳转目标数据 - 数据集详情
+  const handleToTargetDatasetDetail = (id: string) => {
+    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
+  };
 
   // 筛选排序操作
   const handleTableChange = (
@@ -272,7 +276,7 @@ export default function WorkflowTask() {
       )
     },
     {
-      title: '源数据目录',
+      title: '起点',
       dataIndex: 'source_path',
       width: 200,
       ellipsis: true,
@@ -293,7 +297,7 @@ export default function WorkflowTask() {
       )
     },
     {
-      title: '目标数据目录',
+      title: '终点',
       dataIndex: 'target_path',
       width: 200,
       ellipsis: true,
@@ -303,13 +307,7 @@ export default function WorkflowTask() {
           value={renderEmptyPlaceholder(record.target_path)}
           isEdit={false}
           isLink
-          handleLink={() =>
-            handleToDirectoryPath(
-              record.target_path_id,
-              record.target_parent_id,
-              2
-            )
-          }
+          handleLink={() => handleToTargetDatasetDetail(record.id)}
         />
       )
     },
