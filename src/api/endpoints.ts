@@ -262,7 +262,10 @@ export const ModaForgeResourceEndpoints = {
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/ListDirectory',
+  // 工作流-获取工作流DAG信息
   workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
+  // 工作流-编辑工作流DAG信息
+  editWorkFlowDraft: PrefixAimdp + '/EditWorkFlowDraft',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
@@ -288,7 +291,7 @@ export const ModaForgeResourceEndpoints = {
   // 作业停用
   taskStop: PrefixAimdp + '/StopWorkflowInstance',
 
-  modelGet: PrefixAimdp + '/model/model_list',
+  modelGet: PrefixAimdp + '/ListWorkFlowModel',
 
   //数据目录
   //获取数据目录
