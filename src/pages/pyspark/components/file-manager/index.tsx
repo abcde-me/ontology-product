@@ -82,7 +82,6 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     }),
     [refreshDirectory, selectFile]
   );
-  console.log('pythonList', pythonList);
   return (
     <div
       className={classNames(

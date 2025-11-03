@@ -282,38 +282,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setIsSearchMode(false);
       setSearchResults([]);
     };
-    const handleCreate = useCallback(
-      async (finalName: string, node: any, isFolder) => {
-        try {
-          if (!validateName(finalName).isValid) {
-            Message.error(
-              validateName(finalName)?.errorMessage ?? '命名不符合规则'
-            );
-            return null;
-          }
-
-          const createRes = await createPythonItem({
-            path_id: Number(node?.dataRef?.id),
-            type: node?.dataRef?.type,
-            name: finalName
-          });
-
-          if (createRes.status !== 200) {
-            Message.error(createRes?.message ?? '创建失败');
-            return null;
-          }
-
-          Message.success('创建成功');
-
-          return createRes.data;
-        } catch (error) {
-          console.error('创建失败:', error);
-          Message.error('创建失败');
-          return null;
-        }
-      },
-      [currentFolderId]
-    );
     const hasIdInNestedArray = (items, targetId, newNodeChildren) => {
       // 创建数组副本，避免直接修改原数组
       const updatedItems = [...items];
@@ -325,7 +293,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         if (item.id === targetId) {
           // 创建项的副本并更新children属性
           updatedItems[i] = { ...item, children: newNodeChildren };
-          return { updatedItems };
+          // 确保返回found: true
+          return { found: true, updatedItems };
         }
 
         // 如果当前项有children，递归搜索
@@ -340,11 +309,11 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             newNodeChildren
           );
 
-          // 如果在子树中找到了并更新了
+          // 现在可以正确检查result.found了
           if (result.found) {
             // 更新当前项的children
             updatedItems[i] = { ...item, children: result.updatedItems };
-            return { updatedItems };
+            return { found: true, updatedItems };
           }
         }
       }
@@ -392,25 +361,15 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   last_modified: ''
                 }
               ];
-        console.log('newNodeChildren', newNodeChildren, node);
+
         const hasId: any = hasIdInNestedArray(
           treeData,
           node?.dataRef?.id,
           newNodeChildren
         );
-        // const newNode = treeData.map((n) => {
-        //   if (String(n?.id) === String(hasId?.id)) {
-        //     return { ...n, children: hasId?.children };
-        //   }
-        //   return n;
-        // });
 
-        console.log('newNode newNodeChildren', hasId, treeData, [
-          ...treeData,
-          { ...hasId }
-        ]);
-
-        setTreeData([...treeData, { ...hasId }]);
+        // 修复：使用更新后的完整树数据，而不是将hasId作为新节点添加
+        setTreeData([...hasId.updatedItems]);
       } else {
         setTreeData([
           {
