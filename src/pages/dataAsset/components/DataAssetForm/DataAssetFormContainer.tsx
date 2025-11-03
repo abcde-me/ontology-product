@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Steps, Message } from '@arco-design/web-react';
-import { getDataAssetDetail } from '@/api/dataAsset';
+import { findDataAssetMapping } from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
 import { DataAssetField } from '@/types/dataAssetApi';
@@ -70,30 +70,30 @@ export default function DataAssetFormContainer({
 
     try {
       setLoading(true);
-      const res = await getDataAssetDetail(id);
+      const res = await findDataAssetMapping();
 
       if (res.code === '' && res.status === 200) {
         const data = res.data;
 
         // 设置元数据字段
-        if (data.metadataFields) {
-          setMetadataFields(data.metadataFields);
-        }
+        // if (data.metadataFields) {
+        //   setMetadataFields(data.metadataFields);
+        // }
 
-        // 设置数据来源
-        if (data.dataSources) {
-          setDataSources(data.dataSources);
-        }
+        // // 设置数据来源
+        // if (data.dataSources) {
+        //   setDataSources(data.dataSources);
+        // }
 
-        // 设置字段映射
-        if (data.mappings) {
-          setMappings(data.mappings);
-        }
+        // // 设置字段映射
+        // if (data.mappings) {
+        //   setMappings(data.mappings);
+        // }
 
-        // 设置自动映射
-        if (data.autoMapping !== undefined) {
-          setAutoMapping(data.autoMapping);
-        }
+        // // 设置自动映射
+        // if (data.autoMapping !== undefined) {
+        //   setAutoMapping(data.autoMapping);
+        // }
       }
     } catch (error) {
       console.error('获取数据资产详情失败:', error);
