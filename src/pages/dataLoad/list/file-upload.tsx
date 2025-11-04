@@ -28,6 +28,7 @@ const Uploads: React.FC<UploadsProps> = ({
   };
 
   const handleUploadChange = (files: any) => {
+    console.log('files', files);
     const prevLength = fileList.length;
     setFileList(files);
 
@@ -167,10 +168,10 @@ const Uploads: React.FC<UploadsProps> = ({
       drag
       className="upload-file"
       multiple
-      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
-      beforeUpload={(file, list) => {
-        return checkFile(file, list);
-      }}
+      // accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
+      // beforeUpload={(file, list) => {
+      //   return checkFile(file, list);
+      // }}
       action={`${PrefixAimdp}/UploadLoadTaskFile`}
       onChange={handleUploadChange}
       onDrop={handleDrop}
