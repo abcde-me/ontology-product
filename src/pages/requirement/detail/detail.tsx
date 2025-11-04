@@ -47,7 +47,7 @@ import { DepartmentModal } from './components/DepartmentModal';
 import { DataSourceModal } from './components/DetailModal';
 import { IndividualModal } from './components/IndividualModal';
 import TextSubstanceComponent from './components/TextEntity';
-
+import { generateLabels } from './utils/generateLabels';
 import './detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -77,9 +77,8 @@ interface LabelData {
 
 export default function RequirementDetail() {
   const [basicForm] = Form.useForm();
-  const [labelForm] = Form.useForm();
+  const [labelToolForm] = Form.useForm();
   const [distributeForm] = Form.useForm();
-  const [form2Child] = Form.useForm();
   const FormItem = Form.Item;
   const RadioGroup = Radio.Group;
   const Option = Select.Option;
@@ -248,7 +247,7 @@ export default function RequirementDetail() {
                   }
 
                   // 更新表单字段
-                  labelForm.setFieldValue(
+                  labelToolForm.setFieldValue(
                     `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
                     attrGroup.attribute_group_name
                   );
@@ -263,23 +262,23 @@ export default function RequirementDetail() {
                         const fieldId = attribute.label_info_id;
 
                         // 更新两种可能的字段命名格式
-                        labelForm.setFieldValue(
+                        labelToolForm.setFieldValue(
                           `label_info_attribute_groups_${fieldId}_attribute_name_cn`,
                           attribute.attribute_name_cn
                         );
-                        labelForm.setFieldValue(
+                        labelToolForm.setFieldValue(
                           `label_info_attribute_groups_${fieldId}_attribute_name_en`,
                           attribute.attribute_name_en
                         );
-                        labelForm.setFieldValue(
+                        labelToolForm.setFieldValue(
                           `attribute_name_cn${fieldId}`,
                           attribute.attribute_name_cn
                         );
-                        labelForm.setFieldValue(
+                        labelToolForm.setFieldValue(
                           `attribute_name_en${fieldId}`,
                           attribute.attribute_name_en
                         );
-                        labelForm.setFieldValue(
+                        labelToolForm.setFieldValue(
                           `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`,
                           attribute.input_type
                         );
@@ -543,25 +542,25 @@ export default function RequirementDetail() {
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
       newDatalist?.map((item) => {
-        labelForm.setFieldValue(
+        labelToolForm.setFieldValue(
           `label_shape_${item?.label_id}`,
           item?.label_shape
         );
-        labelForm.setFieldValue(
+        labelToolForm.setFieldValue(
           `label_colour_${item?.label_id}`,
           item?.label_colour
         );
         item?.label_info_attribute_groups?.map((group) => {
-          labelForm.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${group?.attribute_id}_attribute_group_name`,
             group?.attribute_group_name
           );
           group?.label_info_attribute?.map((attribute) => {
-            labelForm.setFieldValue(
+            labelToolForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
               attribute?.attribute_name_cn
             );
-            labelForm.setFieldValue(
+            labelToolForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
               attribute?.attribute_name_en
             );
@@ -651,7 +650,7 @@ export default function RequirementDetail() {
         [labelIndex, 'label_info_attribute_groups'],
         [...currentGroups, newGroup]
       );
-      labelForm.setFieldValue(
+      labelToolForm.setFieldValue(
         `label_info_attribute_groups_${newGroup.attribute_id}_attribute_group_name`,
         newGroup.attribute_group_name
       );
@@ -662,15 +661,15 @@ export default function RequirementDetail() {
         newGroup.label_info_attribute.length > 0
       ) {
         newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-          labelForm.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
             attribute.attribute_name_cn
           );
-          labelForm.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
             attribute.attribute_name_en
           );
-          labelForm.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_input_type`,
             attribute.input_type
           );
@@ -764,13 +763,7 @@ export default function RequirementDetail() {
           }
           return false;
         }),
-      labelForm
-        .validate()
-        .then(() => {
-          return true;
-        })
-        .catch(() => {}),
-      form2Child
+      labelToolForm
         .validate()
         .then(() => {
           return true;
@@ -834,32 +827,6 @@ export default function RequirementDetail() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-    const newSetLabels = datalist.map((item) => {
-      return {
-        ...item,
-        order_num: datalist?.length + 1,
-        label_info_attribute_groups: item.label_info_attribute_groups.map(
-          (group) => {
-            return {
-              ...group,
-              order_num: item?.label_info_attribute_groups?.length + 1,
-              label_info_attribute: group.label_info_attribute?.map(
-                (attribute) => {
-                  return {
-                    ...attribute,
-                    order_num: group?.label_info_attribute?.length + 1,
-                    attribute_name_en: attribute.attribute_name_en.replace(
-                      /\s+/g,
-                      '_'
-                    )
-                  };
-                }
-              )
-            };
-          }
-        )
-      };
-    });
 
     // 发布数据重置
     const new_publishData = {
@@ -888,7 +855,7 @@ export default function RequirementDetail() {
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_CLASSIFICATION
-            ? newSetLabels
+            ? generateLabels(datalist)
             : [],
       entity_relations:
         annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
@@ -903,7 +870,6 @@ export default function RequirementDetail() {
     };
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
-    console.log(obj, 'top ---- 我是提交的数据', text_fl_data);
     // 发布数据
     try {
       const res = await publishRequirement(obj);
@@ -935,33 +901,33 @@ export default function RequirementDetail() {
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
-              labelForm.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_name_cn_${item?.id}`,
                 item?.label_name_cn
               );
-              labelForm.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
-              labelForm.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_shape_${item?.id}`,
                 item?.label_shape
               );
-              labelForm.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_colour_${item?.id}`,
                 item?.label_colour
               );
               item?.label_info_attribute_groups?.map((group) => {
-                labelForm.setFieldValue(
+                labelToolForm.setFieldValue(
                   `label_info_attribute_groups_${group?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
-                  labelForm.setFieldValue(
+                  labelToolForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
-                  labelForm.setFieldValue(
+                  labelToolForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
                     attribute?.attribute_name_en
                   );
@@ -1139,7 +1105,7 @@ export default function RequirementDetail() {
               AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
             <div className="tool-annotation-config">
               <Form
-                form={labelForm}
+                form={labelToolForm}
                 disabled={type === 'detail'}
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
@@ -1330,7 +1296,7 @@ export default function RequirementDetail() {
                                             currentItem.label_name_en
                                           );
                                           // 更新表单字段，使用 currentItem 的值
-                                          labelForm.setFieldValue(
+                                          labelToolForm.setFieldValue(
                                             fieldName,
                                             currentItem.label_name_en
                                           );
@@ -1554,11 +1520,6 @@ export default function RequirementDetail() {
                                               label={null}
                                               style={{ marginRight: 0 }}
                                             >
-                                              {console.log(
-                                                attrGroup.attribute_group_class,
-                                                datalist,
-                                                'top'
-                                              )}
                                               <Select
                                                 disabled={
                                                   type === 'detail' ||
@@ -1725,104 +1686,6 @@ export default function RequirementDetail() {
                                               </Tooltip>
                                             </FormItem>
                                           </div>
-                                          {/* 选项内容区域 */}
-                                          {/* {groupClassVal !== 3 && (
-                                          <div className="attribute-group-header-content">
-                                            <div className="attribute-group-info-title">
-                                              {1 ===
-                                              attrGroup.attribute_group_class
-                                                ? '单选选项'
-                                                : 2 ===
-                                                    attrGroup.attribute_group_class
-                                                  ? '多选选项'
-                                                  : ''}
-                                            </div>
-                                            <Checkbox
-                                              disabled={
-                                                type === 'detail' ||
-                                                attrGroup?.isTemp === true
-                                              }
-                                              style={{
-                                                whiteSpace: 'nowrap',
-                                                fontSize: 14,
-                                                marginLeft: 5
-                                              }}
-                                              checked={
-                                                attrGroup.label_info_attribute?.some(
-                                                  (item) =>
-                                                    item.input_type === 2
-                                                )
-                                                  ? true
-                                                  : false
-                                              }
-                                              onChange={(checked) => {
-                                                // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
-                                                if (checked) {
-                                                  const newData =
-                                                    cloneDeep(datalist);
-                                                  newData[
-                                                    labelIndex
-                                                  ].label_info_attribute_groups?.[
-                                                    groupIndex
-                                                  ]?.label_info_attribute.push({
-                                                    label_info_id: uuidV4(),
-                                                    attribute_name_cn:
-                                                      '标注时的输入内容',
-                                                    attribute_name_en: '其他',
-                                                    input_type: 2
-                                                  });
-                                                  // 把选项组最后一个的选项名称和展示名称的内重置
-                                                  const updatedAttrGroup =
-                                                    newData[labelIndex]
-                                                      ?.label_info_attribute_groups?.[
-                                                      groupIndex
-                                                    ];
-                                                  const lastIndex =
-                                                    updatedAttrGroup
-                                                      ?.label_info_attribute
-                                                      ?.length - 1;
-                                                  const lastAttr =
-                                                    updatedAttrGroup
-                                                      ?.label_info_attribute?.[
-                                                      lastIndex
-                                                    ];
-                                                  if (lastAttr?.label_info_id) {
-                                                    labelForm?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
-                                                      '标注时的输入内容'
-                                                    );
-                                                    labelForm?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
-                                                      '其他'
-                                                    );
-                                                  }
-                                                  setDatalist(newData);
-                                                } else {
-                                                  // 取消选中的时候删除增加的内容，复选框恢复到未选中
-                                                  const newItems =
-                                                    cloneDeep(datalist);
-                                                  // 过滤掉所有input_type为2的元素
-                                                  newItems[
-                                                    labelIndex
-                                                  ].label_info_attribute_groups[
-                                                    groupIndex
-                                                  ].label_info_attribute =
-                                                    newItems[
-                                                      labelIndex
-                                                    ].label_info_attribute_groups[
-                                                      groupIndex
-                                                    ].label_info_attribute.filter(
-                                                      (item) =>
-                                                        item.input_type !== 2
-                                                    );
-                                                  setDatalist(newItems);
-                                                }
-                                              }}
-                                            >
-                                              支持手动输入
-                                            </Checkbox>
-                                          </div>
-                                        )} */}
                                           {attrGroup?.label_info_attribute?.map(
                                             (attr, attrIndex) => (
                                               <div
@@ -1834,9 +1697,6 @@ export default function RequirementDetail() {
                                                   2 ===
                                                     attrGroup.attribute_group_class) && (
                                                   <div className="attribute-info-item">
-                                                    {console.log(
-                                                      attrGroup.attribute_name_en
-                                                    )}
                                                     <FormItem
                                                       label={
                                                         <div

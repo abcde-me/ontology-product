@@ -173,7 +173,6 @@ const Classify = (props: ClassifyComponentProps) => {
                     }}
                   />
                 </FormItem>
-                {console.log(item.attribute_group_class)}
                 <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
                   <Select
                     allowClear
@@ -369,7 +368,6 @@ const Classify = (props: ClassifyComponentProps) => {
                             const newAttribute =
                               newData[index].file_label_attribute[lastIndex];
                             if (newAttribute.input_type === 2) {
-                              console.log('top', newAttribute);
                               const attributeId =
                                 type === 'detail'
                                   ? newAttribute.order_num
@@ -399,7 +397,6 @@ const Classify = (props: ClassifyComponentProps) => {
                     </div>
                     {item.file_label_attribute?.map((attr: any, attrIndex) => (
                       <div key={attr.attribute_id} className="attribute-item">
-                        {console.log(attr.attribute_name_en)}
                         <FormItem
                           field={`attribute_name_en_${type === 'detail' ? attr?.order_num : attr.attribute_id}`}
                           style={{ padding: 0, marginRight: 8 }}
