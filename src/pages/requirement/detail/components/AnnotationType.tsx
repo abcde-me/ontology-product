@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import './AnnotationType.scss';
-import { AnnotationTypeStatus } from '../type';
+import { AnnotationTypeStatus } from '../../type';
 import { Tooltip } from '@arco-design/web-react';
 
 const typeList = [

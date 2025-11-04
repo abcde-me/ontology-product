@@ -14,7 +14,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { uuid } from '@/models/utils';
-import { getRandomHexColorStrict } from '../common';
+import { getRandomHexColorStrict } from '../../common';
 import './TextEntity.scss';
 // 实体/实体关系 - 组件
 const btnList = [
