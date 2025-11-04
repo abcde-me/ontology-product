@@ -52,6 +52,7 @@ import { menus } from '@/pages/admin/layout/menus';
 import { is } from 'immer/dist/internal';
 import { getLocalStorage } from './utils/storage';
 import { ProjectIdKey } from './utils/const';
+import { isSameArray } from './utils/array';
 
 initI18n();
 
@@ -151,10 +152,11 @@ function App() {
   const switchProject = useCallback(
     (pId: string[]) => {
       console.log('Wujie ProjectId', pId);
-      // 直接使用传入的 pId 调用权限初始化，避免 state 更新的时序问题
-      if (pId && pId[1]) {
-        setUserPermissions(pId[1]);
-      }
+      if (isSameArray(pId, projectId)) return;
+      // // 直接使用传入的 pId 调用权限初始化，避免 state 更新的时序问题
+      // if (pId && pId[1]) {
+      //   setUserPermissions(pId[1]);
+      // }
       // 重置权限状态
       setUserActions({ isAdmin: false, actions: null });
       // 更新 projectId
