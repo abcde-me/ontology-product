@@ -47,6 +47,10 @@ const useConfig = (id: string, payload: EndNodeType) => {
           'name'
         );
         draft.data = data;
+        draft.scene_id = payload.scene_id;
+        draft.name = payload.name;
+        draft.description = payload.description;
+        draft.tag_names = payload.tag_names;
       });
       setInputs(newInputs);
     },
