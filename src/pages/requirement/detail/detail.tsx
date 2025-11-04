@@ -23,7 +23,7 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import _, { isArray, isEmpty, omitBy } from 'lodash';
+import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
@@ -76,9 +76,9 @@ interface LabelData {
 }
 
 export default function RequirementDetail() {
-  const [form1] = Form.useForm();
-  const [form2] = Form.useForm();
-  const [form3] = Form.useForm();
+  const [basicForm] = Form.useForm();
+  const [labelForm] = Form.useForm();
+  const [distributeForm] = Form.useForm();
   const [form2Child] = Form.useForm();
   const FormItem = Form.Item;
   const RadioGroup = Radio.Group;
@@ -145,7 +145,7 @@ export default function RequirementDetail() {
   useEffect(() => {
     if (activeTab === 1) {
       // 深拷贝当前的 templateData 来触发更新
-      const updatedTemplateData = _.cloneDeep(templateData);
+      const updatedTemplateData = cloneDeep(templateData);
       setTemplateData(updatedTemplateData);
     }
   }, [activeTab]);
@@ -161,7 +161,7 @@ export default function RequirementDetail() {
     ) {
       // 使用函数式状态更新，一次性更新所有数据
       setDatalist((prevDatalist) => {
-        const newDatalist = _.cloneDeep(prevDatalist);
+        const newDatalist = cloneDeep(prevDatalist);
         let hasChanges = false;
 
         // 遍历datalist中的每个标签
@@ -248,7 +248,7 @@ export default function RequirementDetail() {
                   }
 
                   // 更新表单字段
-                  form2.setFieldValue(
+                  labelForm.setFieldValue(
                     `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
                     attrGroup.attribute_group_name
                   );
@@ -263,23 +263,23 @@ export default function RequirementDetail() {
                         const fieldId = attribute.label_info_id;
 
                         // 更新两种可能的字段命名格式
-                        form2.setFieldValue(
+                        labelForm.setFieldValue(
                           `label_info_attribute_groups_${fieldId}_attribute_name_cn`,
                           attribute.attribute_name_cn
                         );
-                        form2.setFieldValue(
+                        labelForm.setFieldValue(
                           `label_info_attribute_groups_${fieldId}_attribute_name_en`,
                           attribute.attribute_name_en
                         );
-                        form2.setFieldValue(
+                        labelForm.setFieldValue(
                           `attribute_name_cn${fieldId}`,
                           attribute.attribute_name_cn
                         );
-                        form2.setFieldValue(
+                        labelForm.setFieldValue(
                           `attribute_name_en${fieldId}`,
                           attribute.attribute_name_en
                         );
-                        form2.setFieldValue(
+                        labelForm.setFieldValue(
                           `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`,
                           attribute.input_type
                         );
@@ -385,52 +385,7 @@ export default function RequirementDetail() {
     setDatalist((prevDatalist) => {
       const newDatalist = [...prevDatalist];
 
-      // 在删除前获取要删除的标签数据，以便清除相关表单字段
-      const deletedLabel = newDatalist[labelIndex];
       newDatalist.splice(labelIndex, 1);
-
-      // 清除表单中与该标签相关的所有字段
-      if (deletedLabel) {
-        // 清除标签基本信息字段
-        form1.resetFields(`datalist_${labelIndex}_label_name_cn`);
-        form1.resetFields(`datalist_${labelIndex}_label_name_en`);
-        form1.resetFields(`datalist_${labelIndex}_label_type`);
-        form1.resetFields(`datalist_${labelIndex}_label_tool_code`);
-
-        // 清除所有属性组及其属性字段
-        if (deletedLabel.label_info_attribute_groups) {
-          deletedLabel.label_info_attribute_groups.forEach(
-            (group, groupIndex) => {
-              // 清除属性组基本信息字段
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`
-              );
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_class`
-              );
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_type`
-              );
-
-              // 清除属性组中的所有属性字段
-              if (group.label_info_attribute) {
-                group.label_info_attribute?.forEach((_, attrIndex) => {
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`
-                  );
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`
-                  );
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`
-                  );
-                });
-              }
-            }
-          );
-        }
-      }
-
       return newDatalist;
     });
   };
@@ -452,7 +407,7 @@ export default function RequirementDetail() {
   const deleteAttributeGroup = (labelIndex, groupIndex) => {
     setDatalist((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
-      const newData = _.cloneDeep(prevData);
+      const newData = cloneDeep(prevData);
 
       // 只在指定的标签中删除指定的属性组
       if (
@@ -497,13 +452,13 @@ export default function RequirementDetail() {
     );
 
     // 清除表单中与该属性相关的所有字段
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_attribute_name_cn`
     );
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_attribute_name_en`
     );
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_input_type`
     );
   };
@@ -516,7 +471,7 @@ export default function RequirementDetail() {
     if (path.length === 0) return;
     // 创建数据的深拷贝，避免直接修改原数据
     // 深拷贝
-    const newData = _.cloneDeep(isTemp ? templateData : datalist);
+    const newData = cloneDeep(isTemp ? templateData : datalist);
     // 遍历路径找到目标位置并更新值
     let current: any = newData;
     for (let i = 0; i < path.length; i++) {
@@ -549,7 +504,7 @@ export default function RequirementDetail() {
       }
 
       // 获取最后一个标签的深拷贝
-      const lastLabel = _.cloneDeep(prevDatalist[prevDatalist.length - 1]);
+      const lastLabel = cloneDeep(prevDatalist[prevDatalist.length - 1]);
       // 生成全新的唯一ID
       lastLabel.label_id = uuidV4();
       lastLabel.label_colour = getRandomHexColorStrict();
@@ -564,7 +519,7 @@ export default function RequirementDetail() {
       ) {
         lastLabel.label_info_attribute_groups =
           lastLabel.label_info_attribute_groups.map((group) => {
-            const newGroup = _.cloneDeep(group);
+            const newGroup = cloneDeep(group);
             newGroup.attribute_id = uuidV4();
             // 为每个属性生成新ID
             if (
@@ -574,7 +529,7 @@ export default function RequirementDetail() {
             ) {
               newGroup.label_info_attribute = newGroup.label_info_attribute.map(
                 (attr) => {
-                  const newAttr = _.cloneDeep(attr);
+                  const newAttr = cloneDeep(attr);
                   newAttr.label_info_id = uuidV4();
                   return newAttr;
                 }
@@ -588,22 +543,25 @@ export default function RequirementDetail() {
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
       newDatalist?.map((item) => {
-        form2.setFieldValue(`label_shape_${item?.label_id}`, item?.label_shape);
-        form2.setFieldValue(
+        labelForm.setFieldValue(
+          `label_shape_${item?.label_id}`,
+          item?.label_shape
+        );
+        labelForm.setFieldValue(
           `label_colour_${item?.label_id}`,
           item?.label_colour
         );
         item?.label_info_attribute_groups?.map((group) => {
-          form2.setFieldValue(
+          labelForm.setFieldValue(
             `label_info_attribute_groups_${group?.attribute_id}_attribute_group_name`,
             group?.attribute_group_name
           );
           group?.label_info_attribute?.map((attribute) => {
-            form2.setFieldValue(
+            labelForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
               attribute?.attribute_name_cn
             );
-            form2.setFieldValue(
+            labelForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
               attribute?.attribute_name_en
             );
@@ -686,14 +644,14 @@ export default function RequirementDetail() {
     );
     if (selectedTemplate) {
       // 深拷贝选中的模板，确保包含完整的label_info_attribute内容
-      const newGroup = _.cloneDeep(selectedTemplate);
+      const newGroup = cloneDeep(selectedTemplate);
       // 获取当前属性组并添加新组
       const currentGroups = datalist[labelIndex].label_info_attribute_groups;
       updateNestedValue(
         [labelIndex, 'label_info_attribute_groups'],
         [...currentGroups, newGroup]
       );
-      form2.setFieldValue(
+      labelForm.setFieldValue(
         `label_info_attribute_groups_${newGroup.attribute_id}_attribute_group_name`,
         newGroup.attribute_group_name
       );
@@ -704,15 +662,15 @@ export default function RequirementDetail() {
         newGroup.label_info_attribute.length > 0
       ) {
         newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-          form2.setFieldValue(
+          labelForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
             attribute.attribute_name_cn
           );
-          form2.setFieldValue(
+          labelForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
             attribute.attribute_name_en
           );
-          form2.setFieldValue(
+          labelForm.setFieldValue(
             `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_input_type`,
             attribute.input_type
           );
@@ -783,7 +741,7 @@ export default function RequirementDetail() {
               return false;
             })
         : true,
-      form1
+      basicForm
         .validate()
         .then(() => {
           if (selectedData?.length <= 0) {
@@ -806,7 +764,7 @@ export default function RequirementDetail() {
           }
           return false;
         }),
-      form2
+      labelForm
         .validate()
         .then(() => {
           return true;
@@ -819,7 +777,7 @@ export default function RequirementDetail() {
         })
         .catch(() => {}),
       // 任务验证
-      form3
+      distributeForm
         .validate()
         .then(() => {
           // 验证通过，切换到下一步
@@ -972,35 +930,38 @@ export default function RequirementDetail() {
               res?.data?.label_tool?.label_tool_code
             );
             setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
-            form1.setFieldValue('name', res?.data?.name);
-            form1.setFieldValue('description', res?.data?.description);
+            basicForm.setFieldValue('name', res?.data?.name);
+            basicForm.setFieldValue('description', res?.data?.description);
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
-              form2.setFieldValue(
+              labelForm.setFieldValue(
                 `label_name_cn_${item?.id}`,
                 item?.label_name_cn
               );
-              form2.setFieldValue(
+              labelForm.setFieldValue(
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
-              form2.setFieldValue(`label_shape_${item?.id}`, item?.label_shape);
-              form2.setFieldValue(
+              labelForm.setFieldValue(
+                `label_shape_${item?.id}`,
+                item?.label_shape
+              );
+              labelForm.setFieldValue(
                 `label_colour_${item?.id}`,
                 item?.label_colour
               );
               item?.label_info_attribute_groups?.map((group) => {
-                form2.setFieldValue(
+                labelForm.setFieldValue(
                   `label_info_attribute_groups_${group?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
-                  form2.setFieldValue(
+                  labelForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
-                  form2.setFieldValue(
+                  labelForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
                     attribute?.attribute_name_en
                   );
@@ -1014,6 +975,7 @@ export default function RequirementDetail() {
       getDetail();
     }
   }, [requirementId]);
+
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -1052,7 +1014,7 @@ export default function RequirementDetail() {
           <div className="basic-configuration">
             <div className="basic-title">基础信息</div>
             <Form
-              form={form1}
+              form={basicForm}
               disabled={type === 'detail'}
               initialValues={{ name: publishData?.name }}
               onValuesChange={(_, val) => {
@@ -1139,7 +1101,6 @@ export default function RequirementDetail() {
               >
                 <div className="data-content-set">
                   <Button
-                    // disabled={type === 'detail'}
                     onClick={() => {
                       setModalVisible(true);
                     }}
@@ -1178,7 +1139,7 @@ export default function RequirementDetail() {
               AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
             <div className="tool-annotation-config">
               <Form
-                form={form2}
+                form={labelForm}
                 disabled={type === 'detail'}
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
@@ -1369,7 +1330,7 @@ export default function RequirementDetail() {
                                             currentItem.label_name_en
                                           );
                                           // 更新表单字段，使用 currentItem 的值
-                                          form2.setFieldValue(
+                                          labelForm.setFieldValue(
                                             fieldName,
                                             currentItem.label_name_en
                                           );
@@ -1798,7 +1759,7 @@ export default function RequirementDetail() {
                                                 // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
                                                 if (checked) {
                                                   const newData =
-                                                    _.cloneDeep(datalist);
+                                                    cloneDeep(datalist);
                                                   newData[
                                                     labelIndex
                                                   ].label_info_attribute_groups?.[
@@ -1826,11 +1787,11 @@ export default function RequirementDetail() {
                                                       lastIndex
                                                     ];
                                                   if (lastAttr?.label_info_id) {
-                                                    form2?.setFieldValue(
+                                                    labelForm?.setFieldValue(
                                                       `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
                                                       '标注时的输入内容'
                                                     );
-                                                    form2?.setFieldValue(
+                                                    labelForm?.setFieldValue(
                                                       `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
                                                       '其他'
                                                     );
@@ -1839,7 +1800,7 @@ export default function RequirementDetail() {
                                                 } else {
                                                   // 取消选中的时候删除增加的内容，复选框恢复到未选中
                                                   const newItems =
-                                                    _.cloneDeep(datalist);
+                                                    cloneDeep(datalist);
                                                   // 过滤掉所有input_type为2的元素
                                                   newItems[
                                                     labelIndex
@@ -2763,7 +2724,7 @@ export default function RequirementDetail() {
           <div className="task-configuration-content">
             <div className="basic-title">任务分配</div>
             <Form
-              form={form3}
+              form={distributeForm}
               disabled={type === 'detail'}
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
