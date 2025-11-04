@@ -24,7 +24,30 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const [knowledgeBaseName, setKnowledgeBaseName] = useState(
     inputs?.knowledge_base_name || ''
   );
-
+  // 数据集标签
+  const [knowledgeBaseNameOptions, setKnowledgeBaseNameOptions] = useState<
+    Record<string, any>[]
+  >([]);
+  // 场景分类
+  const [sceneCategoryOptions, setSceneCategoryOptions] = useState<
+    Record<string, any>[]
+  >([]);
+  useEffect(() => {
+    setSceneCategoryOptions([
+      {
+        id: '1',
+        name: '场景分类1'
+      },
+      {
+        id: '2',
+        name: '场景分类2'
+      },
+      {
+        id: '3',
+        name: '场景分类3'
+      }
+    ]);
+  }, []);
   useEffect(() => {
     getWorkflowTargetPath(2, '').then((res) => {
       const dirsArr: Record<string, any>[] = [];
@@ -72,7 +95,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           knowledge_base_name: inputs?.knowledge_base_name
         }}
       >
-        <FormItem
+        {/* <FormItem
           label="目标数据目录"
           field="target_path_id"
           rules={[{ required: true, message: '目标数据目录不可为空' }]}
@@ -94,8 +117,75 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
               </Option>
             ))}
           </Select>
+        </FormItem> */}
+        <FormItem
+          label="数据集名称："
+          field="knowledge_base_name"
+          rules={[{ required: true, message: '数据集名称不可为空' }]}
+          style={{ margin: 0, paddingBottom: 24 }}
+        >
+          <Input
+            value={knowledgeBaseName}
+            placeholder="请输入数据集名称"
+            style={{ width: '100%' }}
+            allowClear
+          />
         </FormItem>
         <FormItem
+          label="数据集标签："
+          field="knowledge_base_name_id"
+          style={{ margin: 0, paddingBottom: 24 }}
+        >
+          <Select
+            placeholder="请选择或添加自定义标签"
+            style={{ width: '100%' }}
+          >
+            {knowledgeBaseNameOptions.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {`${option.parent_name}/${option.name}`}
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+        <FormItem
+          label="描述说明"
+          field="target_path_id"
+          style={{ margin: 0, paddingBottom: 24 }}
+        >
+          <Input
+            placeholder="可以描述数据集的用途、特点或其他相关信息"
+            type="textarea"
+            style={{ width: '100%' }}
+            allowClear
+          />
+        </FormItem>
+        <FormItem
+          label="场景分类："
+          field="scene_category_id"
+          style={{ margin: 0 }}
+        >
+          <Select
+            placeholder="请选择场景分类"
+            style={{ width: '100%' }}
+            filterOption={(inputValue, option) => {
+              return option?.props?.children?.includes(inputValue);
+            }}
+          >
+            {sceneCategoryOptions.map((option) => (
+              <Option key={option.id} value={option.id}>
+                <div className="scene-category-item">
+                  <span className="item-text text-[14px]">
+                    场景分类{option.id}
+                  </span>
+                  <span className="item-text text-[14px] text-[#6E7B8D]">
+                    {option.name}
+                  </span>
+                </div>
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+        {/* <FormItem
           extra="开启后会对输出数据执行向量化（Embedding）流程。"
           field="is_embedding"
         >
@@ -109,8 +199,8 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           >
             是否进行Embedding
           </Checkbox>
-        </FormItem>
-        {isEmbedding && (
+        </FormItem> */}
+        {/* {isEmbedding && (
           <FormItem
             label="知识库名称"
             extra="为构建的知识库指定一个名称，用于后续的检索和管理"
@@ -162,7 +252,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
               value={knowledgeBaseName}
             />
           </FormItem>
-        )}
+        )} */}
       </Form>
     </div>
   );
