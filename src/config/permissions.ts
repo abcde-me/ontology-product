@@ -87,7 +87,8 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {
 
   UPDATE_DAG: 'aimdp-manager:workflow:manage:modify', // 编辑保存画布
   OPERATION: 'aimdp-manager:workflow:manage:run', // 工作流操作（上下线、运行）
-  UPDATE: 'aimdp-manager:workflow:manage:modify' // 工作流名称修改
+  UPDATE: 'aimdp-manager:workflow:manage:modify', // 工作流名称修改
+  GET: 'aimdp-manager:workflow:read:get'
 } as const;
 
 // 作业列表相关权限
