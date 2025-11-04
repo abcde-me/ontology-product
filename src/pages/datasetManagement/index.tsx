@@ -11,7 +11,11 @@ import {
   Message,
   Select,
   Checkbox,
-  Tooltip
+  Tooltip,
+  Dropdown,
+  Menu,
+  Tabs,
+  Form
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -25,7 +29,9 @@ import {
   IconCloseCircleFill,
   IconCheckCircleFill,
   IconExclamationCircleFill,
-  IconInfoCircle
+  IconInfoCircle,
+  IconDown,
+  IconUp
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
@@ -40,7 +46,7 @@ import {
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -55,6 +61,10 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
+import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
+import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
+import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
+import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -542,61 +552,74 @@ const columns = (
   {
     title: '操作',
     dataIndex: 'op',
-    width: 104,
+    width: 200,
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => {
       const perms = record.perms;
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.export}`}
-        >
-          编辑
-        </Button> */}
-          {/* <Button
-            type='text'
-          >
-            详情
-          </Button> */}
-          {record.storage_type !== datasetStorageType.table && (
-            <PermissionWrapper
-              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
-            >
-              <Button
-                type="text"
-                className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-                onClick={() => handleExport(record)}
-                disabled={record.status !== datasetStatus.normal}
-                style={{
-                  padding: '0 8px 0 5px',
-                  height: '100%',
-                  borderTop: 'none',
-                  borderBottom: 'none'
-                }}
-              >
-                导出
-              </Button>
-            </PermissionWrapper>
-          )}
-
-          <PermissionWrapper
-            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
-          >
-            <Button
               type="text"
-              className={`${styles.actionButton} ${styles.delete}`}
-              onClick={() => handleDelete(record)}
-              style={{
-                padding: '0 8px 0 5px',
-                height: '100%',
-                borderTop: 'none',
-                borderBottom: 'none'
-              }}
+              className={`${styles.actionButton} ${styles.export}`}
             >
-              删除
+              编辑
+            </Button> */}
+          <Button type="text">详情</Button>
+          <Button type="text">移动</Button>
+
+          <Dropdown
+            droplist={
+              <Menu>
+                {record.storage_type !== datasetStorageType.table && (
+                  <Menu.Item key="export">
+                    <PermissionWrapper
+                      permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+                    >
+                      <Button
+                        type="text"
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                        onClick={() => handleExport(record)}
+                        disabled={record.status !== datasetStatus.normal}
+                        style={{
+                          padding: '0 8px 0 5px',
+                          height: '100%',
+                          borderTop: 'none',
+                          borderBottom: 'none'
+                        }}
+                      >
+                        导出
+                      </Button>
+                    </PermissionWrapper>
+                  </Menu.Item>
+                )}
+                <Menu.Item key="delete">
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+                  >
+                    <Button
+                      type="text"
+                      className={`${styles.actionButton} ${styles.delete}`}
+                      onClick={() => handleDelete(record)}
+                      style={{
+                        padding: '0 8px 0 5px',
+                        height: '100%',
+                        borderTop: 'none',
+                        borderBottom: 'none'
+                      }}
+                    >
+                      删除
+                    </Button>
+                  </PermissionWrapper>
+                </Menu.Item>
+              </Menu>
+            }
+            trigger="click"
+            position="bl"
+          >
+            <Button type="text">
+              更多 <IconDown />
             </Button>
-          </PermissionWrapper>
+          </Dropdown>
         </div>
       );
     }
@@ -638,6 +661,8 @@ export enum datasetStatus {
 
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
+  const TabPane = Tabs.TabPane;
+  const [sceneTypeForm] = Form.useForm();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
     []
   ); //标签列表
@@ -673,6 +698,11 @@ const DatasetManagement: React.FC = () => {
   // 排序相关状态
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
+  // 描述是否展开
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(true);
+  const [tabData, setTabData] = React.useState<string[]>([]);
+  const [addSceneTypeVisible, setAddSceneTypeVisible] =
+    React.useState<boolean>(false);
 
   const childRef = useRef<{
     resetForm: () => void;
@@ -696,6 +726,65 @@ const DatasetManagement: React.FC = () => {
     { label: '名称', value: 'name' },
     { label: '描述说明', value: 'description' }
   ];
+
+  // 数据集市header
+  const datasetMarketHeaderData = [
+    {
+      title: '丰富的数据类型',
+      desc: '支持模型微调数据集、CV标注数据集、RAG知识库等多种数据类型',
+      icon: dataTypesIcon
+    },
+    {
+      title: '数据血缘追溯',
+      desc: '完整记录数据加工全链路，确保数据质量可追溯、可审计',
+      icon: dataRelationIcon
+    },
+    {
+      title: '高质量数据保障',
+      desc: '支持模型自动质检与人工质检相结合，确保数据集高质量输出',
+      icon: dataGuaranteeIcon
+    },
+    {
+      title: '广泛的应用场景',
+      desc: '应用于大模型微调、AI模型训练、商业智能分析等场景',
+      icon: dataSceneIcon
+    }
+  ];
+
+  // 数据集tab数据
+  const datasetTabData = [
+    {
+      title: '全部',
+      key: '1',
+      count: 180
+    },
+    {
+      title: '模型训练与微调数据集',
+      key: '2',
+      count: 100
+    },
+    {
+      title: 'RAG知识库',
+      key: '3',
+      count: 20
+    },
+    {
+      title: '数据分析',
+      key: '4',
+      count: 20
+    },
+    {
+      title: '其他',
+      key: '5',
+      count: 40
+    }
+  ];
+
+  // 新增场景类型提交
+  const handleAddSceneTypeSubmit = (values: any) => {
+    console.log('新增场景类型:', values);
+    setAddSceneTypeVisible(false);
+  };
 
   // 行选择配置
   const rowSelection = {
@@ -1149,22 +1238,21 @@ const DatasetManagement: React.FC = () => {
 
   return (
     <div
+      className={styles.datasetManagementContainer}
       style={{
-        backgroundColor: 'white',
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px 20px 20px 0px',
         borderRadius: '10px',
-        padding: '20px'
+        padding: '24px'
       }}
     >
       <div
         style={{
           display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: '20px'
+          flexDirection: 'column',
+          marginBottom: '20px',
+          zIndex: 1
         }}
       >
         <h1
@@ -1177,16 +1265,85 @@ const DatasetManagement: React.FC = () => {
         >
           数据集市
         </h1>
-        {/* <div
+        <div
           style={{
             color: '#334155',
             margin: '0px',
-            fontSize: '14px'
+            fontSize: '14px',
+            display: 'flex',
+            justifyContent: 'space-between'
           }}
         >
-          管理用于模型精调和训练的数据集
-        </div> */}
+          <span>
+            从数据接入到智能应用，构建企业级高质量数据集，支持模型训练、知识库构建与数据分析
+          </span>
+          <Dropdown trigger="click" position="br">
+            <Button type="text" onClick={() => setIsCollapsed(!isCollapsed)}>
+              {isCollapsed ? '收起' : '展开'}
+              {isCollapsed ? <IconUp /> : <IconDown />}
+            </Button>
+          </Dropdown>
+        </div>
       </div>
+      {isCollapsed && (
+        <div
+          style={{
+            borderRadius: '8px',
+            border: '1px solid #FFF',
+            background: 'rgba(255, 255, 255, 0.48)',
+            boxShadow: '0 0 3.5px 0 rgba(0, 0, 0, 0.04)',
+            display: 'flex',
+            flexDirection: 'row',
+            marginBottom: '20px',
+            zIndex: 1
+          }}
+        >
+          {datasetMarketHeaderData.map((item, index) => (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                padding: '16px 20px',
+                gap: '20px'
+              }}
+              key={index}
+            >
+              <div>
+                <h1
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    lineHeight: '24px'
+                  }}
+                >
+                  {item.title}
+                </h1>
+                <span style={{ fontSize: '12px', lineHeight: '18px' }}>
+                  {item.desc}
+                </span>
+              </div>
+              <img
+                style={{ width: '80px', height: '80px' }}
+                src={item.icon}
+                alt={item.title}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      <Tabs
+        editable
+        defaultActiveTab="1"
+        style={{ zIndex: 1 }}
+        type="card"
+        onAddTab={() => setAddSceneTypeVisible(true)}
+      >
+        {datasetTabData.map((item, index) => (
+          <TabPane key={item.key} title={item.title} closable={false}>
+            <Typography.Paragraph>{item.count}</Typography.Paragraph>
+          </TabPane>
+        ))}
+      </Tabs>
       <div className={styles.searchToolbar}>
         <Input.Group compact>
           <Select
@@ -1304,7 +1461,11 @@ const DatasetManagement: React.FC = () => {
           sizeOptions: [10, 20, 50, 100]
         }}
         border={false}
-        scroll={{ x: 1200 }}
+        virtualized
+        scroll={{
+          x: 1200,
+          y: 500
+        }}
         onChange={handleTableChange}
       />
 
@@ -1326,6 +1487,30 @@ const DatasetManagement: React.FC = () => {
         }
         handlClear={handClear}
       />
+
+      {/* 新增场景类型弹窗 */}
+      <Modal
+        visible={addSceneTypeVisible}
+        onOk={() => sceneTypeForm.submit()}
+        onCancel={() => setAddSceneTypeVisible(false)}
+        title="新增场景类型"
+      >
+        <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
+          <Form.Item
+            label="场景分类名称："
+            field="sceneTypeName"
+            rules={[{ required: true, message: '请输入场景类型名称' }]}
+          >
+            <Input placeholder="请输入名称" />
+          </Form.Item>
+          <Form.Item label="场景分类标签：" field="sceneTypeTag">
+            <Select placeholder="请选择标签" />
+          </Form.Item>
+          <Form.Item label="描述说明：" field="sceneTypeDesc">
+            <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
