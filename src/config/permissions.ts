@@ -70,6 +70,7 @@ export const WORKFLOW_LIST_PERMISSIONS = {
   CAN_GET: 'aimdp-manager:workflow:read:list',
   CAN_COPY: 'aimdp-manager:workflow:manage:create',
   CAN_DELETE: 'aimdp-manager:workflow:manage:delete',
+  CAN_READE: 'aimdp-manager:workflow:read:get',
 
   LIST: 'aimdp-manager:workflow:read:list', // 菜单权限
   GET: 'aimdp-manager:workflow:read:get',
