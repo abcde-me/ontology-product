@@ -61,6 +61,8 @@
     }
 
     :global(.arco-tree-node-title) {
+      display: flex;
+      align-items: center;
       width: 267px;
       flex-basis: 267px;
       flex-shrink: 0;
