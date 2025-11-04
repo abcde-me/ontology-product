@@ -61,10 +61,10 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
-import dataTypesIcon from '@/assets/dataset_dataType.png';
-import dataRelationIcon from '@/assets/dataset_relation.png';
-import dataGuaranteeIcon from '@/assets/dataset_guarantee.png';
-import dataSceneIcon from '@/assets/dataset_scene.png';
+import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
+import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
+import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
+import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
