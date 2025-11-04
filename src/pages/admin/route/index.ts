@@ -28,7 +28,7 @@ export type IRoute = AuthParams & {
   sub?: boolean;
   exact?: boolean;
   // 路由权限标识
-  permission?: string;
+  permission?: string | string[];
 };
 
 // om 运维、tenant 运营、portal 租户
@@ -101,7 +101,10 @@ export const routes: IRoute[] = [
     name: 'workflowConfig',
     key: '/tenant/compute/modaforge/workflowConfig',
     component: React.lazy(async () => import('../../workflowConfig')),
-    permission: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
+    permission: [
+      WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
+      WORKFLOW_LIST_PERMISSIONS.GET
+    ],
     children: []
   },
   // 作业
@@ -238,7 +241,7 @@ export const getName = (path: string, routes) => {
 export const getRoutePermission = (
   path: string,
   routesArr: IRoute[] = routes
-): string | undefined => {
+): string | string[] | undefined => {
   for (const route of routesArr) {
     // 精确匹配
     if (route.key === path) {
