@@ -50,9 +50,6 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 import styles from './DirectoryTree.module.scss';
-import { createPythonItem } from '@/api/pyspark';
-import { validateName } from '@/utils/valiate';
-import { is } from 'immer/dist/internal';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -326,50 +323,47 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setDefaultName(name);
       setInputValue(name);
       // isFolder = true 表示创建文件夹，false 表示创建 notebook
-      if (isIcon) {
+      if (isIcon && node?.dataRef?.id) {
         console.log('node', node);
-        const newNodeChildren =
-          node?.dataRef?.children?.length > 0
-            ? [
-                {
-                  name,
-                  showInput: true,
-                  isAdd: true,
-                  type: isFolder
-                    ? PythonItemType.Directory
-                    : PythonItemType.Notebook,
-                  children: [],
-                  id: 0,
-                  path: '',
-                  created: '',
-                  last_modified: ''
-                },
-                ...node?.dataRef?.children
-              ]
-            : [
-                {
-                  name,
-                  showInput: true,
-                  isAdd: true,
-                  type: isFolder
-                    ? PythonItemType.Directory
-                    : PythonItemType.Notebook,
-                  children: [],
-                  id: 0,
-                  path: '',
-                  created: '',
-                  last_modified: ''
-                }
-              ];
+        const newNode = {
+          name,
+          showInput: true,
+          isAdd: true,
+          type: isFolder ? PythonItemType.Directory : PythonItemType.Notebook,
+          children: [],
+          id: 0,
+          path: '',
+          created: '',
+          last_modified: ''
+        };
 
-        const hasId: any = hasIdInNestedArray(
-          treeData,
-          node?.dataRef?.id,
-          newNodeChildren
-        );
+        // 创建一个递归函数来查找并更新指定ID的节点
+        const findAndUpdateNode = (items: TreeNodeItem[]): TreeNodeItem[] => {
+          return items.map((item) => {
+            // 如果找到目标ID的节点
+            if (String(item.id) === String(node.dataRef.id)) {
+              // 复制当前节点并添加新子节点到开头
+              return {
+                ...item,
+                children: [newNode, ...(item.children || [])]
+              };
+            }
 
-        // 修复：使用更新后的完整树数据，而不是将hasId作为新节点添加
-        setTreeData([...hasId.updatedItems]);
+            // 如果当前节点有子节点，递归查找
+            if (item.children && item.children.length > 0) {
+              return {
+                ...item,
+                children: findAndUpdateNode(item.children)
+              };
+            }
+
+            return item;
+          });
+        };
+
+        // 更新树数据
+        const updatedTreeData = findAndUpdateNode(treeData);
+        setTreeData([...updatedTreeData]);
       } else {
         setTreeData([
           {

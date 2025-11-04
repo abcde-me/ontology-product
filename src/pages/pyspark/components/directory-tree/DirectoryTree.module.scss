@@ -37,15 +37,11 @@
   }
 
   .directory-tree-extra {
-    position: absolute;
     right: 12px;
     top: 50%;
-    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
-    opacity: 0;
     visibility: hidden;
-    transition: opacity 0.12s ease;
     color: rgba(30, 41, 59, 1);
   }
 
@@ -55,20 +51,20 @@
   }
 
   // 文件名样式 - 非 hover 态最大宽度 260px
-  .file-name {
-    max-width: 260px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 400;
-  }
+  // .file-name {
+  //   // max-width: 260px;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   white-space: nowrap;
+  //   font-weight: 400;
+  // }
 
   // 搜索结果路径样式 - 非 hover 态最大宽度 260px
   .search-result-path {
     font-size: 12px;
     color: #6e7b8d;
     line-height: 18px;
-    overflow: hidden;
+    // overflow: hidden;
   }
 
   // hover 态样式 - 最大宽度 200px
@@ -87,7 +83,6 @@
 
   :global(.arco-tree) {
     overflow-y: auto !important;
-    overflow-x: hidden;
     height: calc(100% - var(--directory-nav-height, 40px));
   }
 
