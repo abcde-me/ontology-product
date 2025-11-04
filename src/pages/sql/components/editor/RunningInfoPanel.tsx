@@ -28,6 +28,8 @@ import React, { memo, useEffect, useState, useRef } from 'react';
 import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import styles from './RunningInfoPanel.module.scss';
 
 const { Item: CollapseItem } = Collapse;
@@ -435,19 +437,21 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         </Menu>
                       }
                     >
-                      <Button
-                        type="outline"
-                        size="mini"
-                        icon={<SaveToDasetIcon />}
-                        style={{
-                          fontSize: '14px',
-                          color: '#1E293B',
-                          fontWeight: 600
-                        }}
-                        disabled={runStatus !== RunningStatus.SUCCESS}
-                      >
-                        保存到数据集
-                      </Button>
+                      <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                        <Button
+                          type="outline"
+                          size="mini"
+                          icon={<SaveToDasetIcon />}
+                          style={{
+                            fontSize: '14px',
+                            color: '#1E293B',
+                            fontWeight: 600
+                          }}
+                          disabled={runStatus !== RunningStatus.SUCCESS}
+                        >
+                          保存到数据集
+                        </Button>
+                      </PermissionWrapper>
                     </Dropdown>
                   </div>
                 )}
