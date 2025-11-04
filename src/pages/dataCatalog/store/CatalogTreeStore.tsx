@@ -18,12 +18,16 @@ interface BaseTreeData {
   fullPath?: string;
   isAdd?: boolean;
   defaultName?: string;
+  children?: {
+    db_item?: BaseTreeData[];
+  };
 }
 
 interface ITreeData extends BaseTreeData {
   children?: {
     volume?: BaseTreeData[];
     db?: BaseTreeData[];
+    meta_data?: BaseTreeData[];
     db_item?: BaseTreeData[];
   };
 }
@@ -113,10 +117,12 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       search: props?.searchValue
     });
 
-    return this.convertRawDataToTreeData({
+    const treeData = this.convertRawDataToTreeData({
       data: res?.data?.[activeKey] || [],
       activeKey
     });
+
+    return treeData;
   }
 
   async initTreeData(options: Parameters<Effects['fetchData']>[0]) {
@@ -183,6 +189,117 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     });
   }
 
+  /**
+   * 转换 volume 类型数据为树节点
+   */
+  private convertVolumeType(
+    activeKey: string,
+    catalogId: number,
+    volumeData: BaseTreeData[]
+  ): TreeDataType {
+    const typeKey = `${activeKey}-${catalogId}-volume`;
+    const typeData = volumeData || [];
+
+    return {
+      title: subLeafKeys.volume,
+      key: typeKey,
+      type: 'volume',
+      parent_id: catalogId,
+      fullPath: '',
+      children: typeData.map((item) => {
+        const { children, ...rest } = item;
+        return {
+          ...rest,
+          title: item.name,
+          key: `${activeKey}-${catalogId}-volume-${item.id}`,
+          parent_id: catalogId,
+          isLastLeaf: true,
+          fullPath: ''
+        };
+      })
+    };
+  }
+
+  /**
+   * 转换 db 类型数据为树节点
+   */
+  private convertDbType(
+    activeKey: string,
+    catalogId: number,
+    dbData: BaseTreeData[]
+  ): TreeDataType {
+    const typeKey = `${activeKey}-${catalogId}-db`;
+    const typeData = dbData || [];
+
+    return {
+      title: subLeafKeys.db,
+      key: typeKey,
+      type: 'db',
+      parent_id: catalogId,
+      fullPath: '',
+      children: typeData.map((item) => {
+        const { children, ...rest } = item;
+        return {
+          ...rest,
+          title: item.name,
+          key: `${activeKey}-${catalogId}-db-${item.id}`,
+          parent_id: catalogId,
+          isLastLeaf: false,
+          fullPath: '',
+          children:
+            item.children?.db_item && item.children.db_item.length > 0
+              ? item.children.db_item.map((table) => {
+                  const { children: tableChildren, ...tableRest } = table;
+                  return {
+                    ...tableRest,
+                    title: table.name,
+                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table.id}`,
+                    parent_id: item.id,
+                    type: table.type,
+                    type_name: 'db_item',
+                    isLastLeaf: true,
+                    fullPath: ''
+                  };
+                })
+              : []
+        };
+      })
+    };
+  }
+
+  /**
+   * 转换 meta_data 类型数据为树节点
+   */
+  private convertMetaDataType(
+    activeKey: string,
+    catalogId: number,
+    metaData: BaseTreeData[]
+  ): TreeDataType {
+    const typeKey = `${activeKey}-${catalogId}-meta_data`;
+    const typeData = metaData || [];
+
+    return {
+      title: subLeafKeys.meta_data || '元数据',
+      key: typeKey,
+      type: 'meta_data',
+      parent_id: catalogId,
+      fullPath: '',
+      children: typeData.map((item) => {
+        const { children, ...rest } = item;
+        return {
+          ...rest,
+          title: item.name,
+          key: `${activeKey}-${catalogId}-meta_data-${item.id}`,
+          parent_id: catalogId,
+          isLastLeaf: true,
+          fullPath: '',
+          // TODO: 需要根据item.children.item的类型来决定children的类型
+          children: []
+        };
+      })
+    };
+  }
+
   convertRawDataToTreeData(options: { data: ITreeData[]; activeKey?: string }) {
     const { data } = options;
     if (!Array.isArray(data)) return [];
@@ -193,62 +310,52 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
-      // 根据activeKey决定支持的类型：源数据支持volume和db，目标数据只支持volume
-      const supportedTypes =
-        activeKey === 'src' ? ['volume', 'db'] : ['volume'];
+      // 根据activeKey决定支持的类型：源数据支持volume、db和meta_data，目标数据只支持volume
+      if (activeKey === 'src') {
+        // 源数据：处理 volume
+        if (catalog.children?.volume) {
+          childrenArr.push(
+            this.convertVolumeType(
+              activeKey,
+              catalog.id,
+              catalog.children.volume
+            )
+          );
+        }
 
-      supportedTypes.forEach((type) => {
-        // 修复key重复问题：加入catalog.id和activeKey确保唯一性
-        const typeKey = `${activeKey}-${catalog.id}-${type}`;
-        // 获取该类型下的实际数据，如果没有则使用空数组
-        const typeData = catalog.children?.[type] || [];
+        // 源数据：处理 db
+        if (catalog.children?.db) {
+          childrenArr.push(
+            this.convertDbType(activeKey, catalog.id, catalog.children.db)
+          );
+        }
 
-        const subChildren = {
-          title: subLeafKeys[type], // 显示"数据卷"或"数据库"
-          key: typeKey,
-          type: type,
-          parent_id: catalog.id,
-          // 为分类节点也设置fullPath，便于选中时使用
-          fullPath: `${catalog.base_dir === '/' ? catalog.base_dir : `${catalog.base_dir}/`}${activeKey}/${catalog.name}/${type === 'volume' ? 'volume' : 'database'}`,
-          children: typeData.map((item) => {
-            // 根据类型设置不同的路径格式
-            const pathType = type === 'volume' ? 'volume' : 'database';
-            return {
-              ...item,
-              title: item.name,
-              // 修复key重复问题：确保数据库/数据卷节点key的唯一性
-              key: `${activeKey}-${catalog.id}-${type}-${item.id}`,
-              parent_id: catalog.id,
-              // 对于数据库类型，始终不是叶子节点；对于数据卷，总是叶子节点
-              isLastLeaf: type === 'volume',
-              fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}`,
-              // 如果是数据库且有表，则添加表作为子节点；否则初始化为空数组
-              children:
-                type === 'db'
-                  ? item.children?.db_item && item.children.db_item.length > 0
-                    ? item.children.db_item.map((table) => ({
-                        ...table,
-                        title: table.name,
-                        // 修复key重复问题：确保数据库表key的唯一性
-                        key: `${activeKey}-${catalog.id}-${type}-${item.id}-table-${table.id}`,
-                        parent_id: item.id,
-                        type: table.type,
-                        type_name: 'db_item',
-                        isLastLeaf: true,
-                        fullPath: `${item.base_dir === '/' ? item.base_dir : `${item.base_dir}/`}${activeKey}/${catalog.name}/${pathType}/${item.name}/${table.name}`
-                      }))
-                    : []
-                  : undefined
-            };
-          })
-        };
-        childrenArr.push(subChildren);
-      });
+        // 源数据：处理 meta_data
+        if (catalog.children?.meta_data) {
+          childrenArr.push(
+            this.convertMetaDataType(
+              activeKey,
+              catalog.id,
+              catalog.children.meta_data
+            )
+          );
+        }
+      } else {
+        // 目标数据：只处理 volume
+        if (catalog.children?.volume) {
+          childrenArr.push(
+            this.convertVolumeType(
+              activeKey,
+              catalog.id,
+              catalog.children.volume
+            )
+          );
+        }
+      }
 
       return {
         ...catalog,
         title: catalog.name,
-        // 修复key重复问题：确保catalog节点key的唯一性
         key: `${activeKey}-catalog-${catalog.id}`,
         children: childrenArr
       };

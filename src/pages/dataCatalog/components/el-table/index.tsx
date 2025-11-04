@@ -15,6 +15,7 @@ import FormComponent from '@/components/data-catalog-content/components/popups-f
 // 导入统一的表格组件
 import UnifiedDataTable from '@/components/data-catalog-content/unified-data-table';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
+import MetaData from './MetaData';
 import { deleteTargetFile, deleteSourceFileBatch } from '@/api/dataCatalog';
 import styles from '../../modal.module.css';
 import {
@@ -567,6 +568,19 @@ export default function Eltable() {
     </Space>
   );
 
+  // 如果是元数据目录，直接渲染 MetaData 组件
+  if (selectedNodeType === 'meta_data') {
+    return (
+      <div style={{ flex: 1, overflowX: 'auto' }}>
+        <div style={{ height: 'calc(100% - 50px)' }}>
+          <div className="data-catalog-content">
+            <MetaData />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ flex: 1, overflowX: 'auto' }}>
       <div style={{ height: 'calc(100% - 50px)' }}>
@@ -603,7 +617,7 @@ export default function Eltable() {
           {renderActionButtons()}
         </div>
 
-        {/* 使用统一的数据表格组件，根据active类型动态切换 */}
+        {/* 使用统一的数据表格组件 */}
         <div className="data-catalog-content">
           <UnifiedDataTable
             ref={tableRef}
