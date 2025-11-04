@@ -13,6 +13,8 @@ import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import PermissionWrapper from '@/components/PermissionGuard';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
@@ -337,19 +339,21 @@ export default function WorkflowTask() {
       width: 85,
       fixed: 'right',
       render: (_, record) => (
-        <span
-          className={styles['operate-text']}
-          onClick={() =>
-            handleToTaskDeatil(
-              record?.id ?? '',
-              record?.workflow_uuid ?? '',
-              record?.ds_workflow_id ?? '',
-              record?.workflow_version ?? ''
-            )
-          }
-        >
-          详情
-        </span>
+        <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
+          <span
+            className={styles['operate-text']}
+            onClick={() =>
+              handleToTaskDeatil(
+                record?.id ?? '',
+                record?.workflow_uuid ?? '',
+                record?.ds_workflow_id ?? '',
+                record?.workflow_version ?? ''
+              )
+            }
+          >
+            详情
+          </span>
+        </PermissionWrapper>
       )
     }
   ];
