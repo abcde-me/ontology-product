@@ -241,7 +241,7 @@ export const getName = (path: string, routes) => {
 export const getRoutePermission = (
   path: string,
   routesArr: IRoute[] = routes
-): string | undefined => {
+): string | string[] | undefined => {
   for (const route of routesArr) {
     // 精确匹配
     if (route.key === path) {
