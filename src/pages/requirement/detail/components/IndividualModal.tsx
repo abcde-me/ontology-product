@@ -129,7 +129,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    getTreeData();
+    if (visible) {
+      getTreeData();
+    }
   }, [visible]);
   // 树的内容
   const renderTreeContent = () => {

@@ -1,3 +1,20 @@
+import { v4 as uuidV4 } from 'uuid';
+import { LabelShape } from '../../type';
+import { getRandomHexColorStrict } from '../../common';
+
+// 初始化label数据
+export const generateInitialData = [
+  {
+    label_id: uuidV4(),
+    label_name_cn: '',
+    label_name_en: '',
+    label_shape: LabelShape.RECTANGLE,
+    label_colour: getRandomHexColorStrict(),
+    label_info_attribute_groups: []
+  }
+];
+
+// 提交label数据
 export const generateLabels = (data: any[]) => {
   return data.map((item) => {
     return {

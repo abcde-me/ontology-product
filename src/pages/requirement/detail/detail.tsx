@@ -39,7 +39,10 @@ import {
   LabelInfoAttributeGroupType,
   LabelShape,
   RequirementTypeNameMap,
-  toolFileType
+  toolFileType,
+  LabelInfoAttribute,
+  LabelInfoAttributeGroup,
+  LabelData
 } from '../type';
 import AnnotationType from './components/AnnotationType';
 import { Classify } from './components/Classify';
@@ -47,33 +50,10 @@ import { DepartmentModal } from './components/DepartmentModal';
 import { DataSourceModal } from './components/DetailModal';
 import { IndividualModal } from './components/IndividualModal';
 import TextSubstanceComponent from './components/TextEntity';
-import { generateLabels } from './utils/generateLabels';
+import { generateLabels, generateInitialData } from './utils/generateLabels';
 import './detail.scss';
+
 const BreadcrumbItem = Breadcrumb.Item;
-
-// 定义数据类型接口
-interface LabelInfoAttribute {
-  label_info_id: string;
-  attribute_name_cn: string;
-  attribute_name_en: string;
-  input_type: 1 | 2; // 1=选项，2=输入框
-}
-
-interface LabelInfoAttributeGroup {
-  attribute_id: string;
-  attribute_group_name: string;
-  attribute_group_class: 1 | 2 | 3; // 1=单选，2=多选，3=输入框
-  attribute_group_type: 1 | 2; // 1=必选，2=非必选
-  label_info_attribute: LabelInfoAttribute[];
-}
-interface LabelData {
-  label_id: string;
-  label_name_cn: string;
-  label_name_en: string;
-  label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
-  label_colour: string;
-  label_info_attribute_groups: LabelInfoAttributeGroup[];
-}
 
 export default function RequirementDetail() {
   const [basicForm] = Form.useForm();
@@ -114,21 +94,9 @@ export default function RequirementDetail() {
   const [formType, setFormType]: any = useState({});
   const [text_fl_data, setText_fl_data] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
-  // 生成初始示例数据
-  const generateInitialData = (): LabelData[] => {
-    return [
-      {
-        label_id: uuidV4(),
-        label_name_cn: '',
-        label_name_en: '',
-        label_shape: LabelShape.RECTANGLE,
-        label_colour: getRandomHexColorStrict(),
-        label_info_attribute_groups: []
-      }
-    ];
-  };
 
-  const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
+  const [labelDataList, setLabelDataList] =
+    useState<LabelData[]>(generateInitialData);
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
 
@@ -155,11 +123,11 @@ export default function RequirementDetail() {
     if (
       templateData &&
       templateData.length > 0 &&
-      datalist &&
-      datalist.length > 0
+      labelDataList &&
+      labelDataList.length > 0
     ) {
       // 使用函数式状态更新，一次性更新所有数据
-      setDatalist((prevDatalist) => {
+      setLabelDataList((prevDatalist) => {
         const newDatalist = cloneDeep(prevDatalist);
         let hasChanges = false;
 
@@ -345,7 +313,6 @@ export default function RequirementDetail() {
       ...publishData,
       label_type_code: annotationTypeContentCode
     });
-    // setDatalist(generateInitialData());
   };
 
   // 安全获取嵌套属性
@@ -381,7 +348,7 @@ export default function RequirementDetail() {
    */
   const deleteLabel = (labelIndex) => {
     // 使用函数式更新确保获取到最新的状态
-    setDatalist((prevDatalist) => {
+    setLabelDataList((prevDatalist) => {
       const newDatalist = [...prevDatalist];
 
       newDatalist.splice(labelIndex, 1);
@@ -389,14 +356,14 @@ export default function RequirementDetail() {
     });
   };
   const updateField = (path, value) => {
-    const currentValue = getNestedValue(datalist, path);
+    const currentValue = getNestedValue(labelDataList, path);
     if (currentValue === undefined) {
       console.warn(`无效的路径: ${path.join('.')}`);
       return;
     }
 
-    const newData = setNestedValue(datalist, path, value);
-    setDatalist(newData);
+    const newData = setNestedValue(labelDataList, path, value);
+    setLabelDataList(newData);
   };
   /**
    * 删除属性组
@@ -404,7 +371,7 @@ export default function RequirementDetail() {
    * @param {number} groupIndex - 要删除的属性组索引
    */
   const deleteAttributeGroup = (labelIndex, groupIndex) => {
-    setDatalist((prevData) => {
+    setLabelDataList((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
       const newData = cloneDeep(prevData);
 
@@ -429,7 +396,7 @@ export default function RequirementDetail() {
    */
   const deleteAttribute = (labelIndex, groupIndex, attributeIndex) => {
     const currentAttributes =
-      getNestedValue(datalist, [
+      getNestedValue(labelDataList, [
         labelIndex,
         'label_info_attribute_groups',
         groupIndex,
@@ -470,7 +437,7 @@ export default function RequirementDetail() {
     if (path.length === 0) return;
     // 创建数据的深拷贝，避免直接修改原数据
     // 深拷贝
-    const newData = cloneDeep(isTemp ? templateData : datalist);
+    const newData = cloneDeep(isTemp ? templateData : labelDataList);
     // 遍历路径找到目标位置并更新值
     let current: any = newData;
     for (let i = 0; i < path.length; i++) {
@@ -489,17 +456,17 @@ export default function RequirementDetail() {
       current = current[key];
     }
     // 更新状态
-    isTemp ? setTemplateData(newData) : setDatalist(newData);
+    isTemp ? setTemplateData(newData) : setLabelDataList(newData);
   };
 
   // 添加新标签
   const addNewLabel = () => {
     // 使用函数式更新确保基于最新状态进行操作
-    setDatalist((prevDatalist) => {
+    setLabelDataList((prevDatalist) => {
       // 检查数组是否为空
       if (!Array.isArray(prevDatalist) || prevDatalist.length === 0) {
         // 如果为空，创建一个初始标签
-        return [...prevDatalist, generateInitialData()[0]];
+        return [...prevDatalist, ...generateInitialData];
       }
 
       // 获取最后一个标签的深拷贝
@@ -595,7 +562,7 @@ export default function RequirementDetail() {
     };
 
     // 获取当前属性组并添加新组
-    const currentGroups = datalist[labelIndex].label_info_attribute_groups;
+    const currentGroups = labelDataList[labelIndex].label_info_attribute_groups;
     updateNestedValue(
       [labelIndex, 'label_info_attribute_groups'],
       [...currentGroups, newGroup]
@@ -612,8 +579,9 @@ export default function RequirementDetail() {
     };
     // 获取当前属性并添加新属性
     const currentAttributes =
-      datalist[labelIndex].label_info_attribute_groups[groupIndex as number]
-        .label_info_attribute;
+      labelDataList[labelIndex].label_info_attribute_groups[
+        groupIndex as number
+      ].label_info_attribute;
 
     const updatedAttributes = [...currentAttributes];
 
@@ -645,7 +613,8 @@ export default function RequirementDetail() {
       // 深拷贝选中的模板，确保包含完整的label_info_attribute内容
       const newGroup = cloneDeep(selectedTemplate);
       // 获取当前属性组并添加新组
-      const currentGroups = datalist[labelIndex].label_info_attribute_groups;
+      const currentGroups =
+        labelDataList[labelIndex].label_info_attribute_groups;
       updateNestedValue(
         [labelIndex, 'label_info_attribute_groups'],
         [...currentGroups, newGroup]
@@ -855,7 +824,7 @@ export default function RequirementDetail() {
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_CLASSIFICATION
-            ? generateLabels(datalist)
+            ? generateLabels(labelDataList)
             : [],
       entity_relations:
         annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
@@ -934,7 +903,7 @@ export default function RequirementDetail() {
                 });
               });
             });
-            setDatalist(res?.data?.labels);
+            setLabelDataList(res?.data?.labels);
           }
         } catch (error) {}
       };
@@ -1168,8 +1137,8 @@ export default function RequirementDetail() {
                       {/* 原有的标签部分内容 */}
                       {activeTab === LabelInfoAttributeGroupType.LABEL && (
                         <div className="attribute-content">
-                          {datalist &&
-                            datalist?.map((item: any, labelIndex) => (
+                          {labelDataList &&
+                            labelDataList?.map((item: any, labelIndex) => (
                               <div
                                 className="sortable-item"
                                 key={item?.label_id}
@@ -1184,13 +1153,14 @@ export default function RequirementDetail() {
                                         validateTrigger: ['onChange', 'onBlur'],
                                         validator: (value, callback) => {
                                           // 检查是否有重复的标注名称（排除当前项）
-                                          const isDuplicate = datalist.some(
-                                            (otherItem, otherIndex) =>
-                                              otherIndex !== labelIndex &&
-                                              otherItem.label_name_en ===
-                                                value &&
-                                              value.trim() !== ''
-                                          );
+                                          const isDuplicate =
+                                            labelDataList.some(
+                                              (otherItem, otherIndex) =>
+                                                otherIndex !== labelIndex &&
+                                                otherItem.label_name_en ===
+                                                  value &&
+                                                value.trim() !== ''
+                                            );
                                           if (!value) {
                                             callback('请输入标签名称');
                                           } else if (isDuplicate) {
@@ -1253,13 +1223,14 @@ export default function RequirementDetail() {
                                             return;
                                           }
                                           // 检查是否有重复的展示名称（排除当前项）
-                                          const isDuplicate = datalist.some(
-                                            (otherItem, otherIndex) =>
-                                              otherIndex !== labelIndex &&
-                                              otherItem.label_name_cn ===
-                                                value &&
-                                              value.trim() !== ''
-                                          );
+                                          const isDuplicate =
+                                            labelDataList.some(
+                                              (otherItem, otherIndex) =>
+                                                otherIndex !== labelIndex &&
+                                                otherItem.label_name_cn ===
+                                                  value &&
+                                                value.trim() !== ''
+                                            );
                                           if (isDuplicate) {
                                             callback('展示名称不能重复');
                                           } else {
@@ -1280,9 +1251,9 @@ export default function RequirementDetail() {
                                         );
                                       }}
                                       onFocus={(e: any) => {
-                                        // 从 datalist 中获取最新的值
+                                        // 从 labelDataList 中获取最新的值
                                         const currentItem =
-                                          datalist[labelIndex];
+                                          labelDataList[labelIndex];
                                         // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
                                         if (
                                           !currentItem.label_name_cn?.trim() &&
@@ -1409,7 +1380,7 @@ export default function RequirementDetail() {
                                     </div>
                                   </FormItem>
                                   <FormItem>
-                                    {datalist.length > 1 && (
+                                    {labelDataList.length > 1 && (
                                       <Tooltip content="删除">
                                         <IconDelete
                                           className={`${type === 'detail' ? 'is-disabled' : 'icon-wrapper'}`}
@@ -1970,7 +1941,7 @@ export default function RequirementDetail() {
                                     }
                                   )}
                                 <div className="btn-content-items">
-                                  {labelIndex === datalist?.length - 1 && (
+                                  {labelIndex === labelDataList?.length - 1 && (
                                     <Button
                                       disabled={type === 'detail'}
                                       className={
@@ -2015,7 +1986,7 @@ export default function RequirementDetail() {
                                           {templateData?.length > 0 &&
                                             templateData?.map(
                                               (TempItem, index) => {
-                                                const isDis = datalist[
+                                                const isDis = labelDataList[
                                                   labelIndex
                                                 ]?.label_info_attribute_groups?.find(
                                                   (item) =>
@@ -2041,7 +2012,7 @@ export default function RequirementDetail() {
                                                       // 如果当前标签已经选择了模版，就不能再次选择
                                                       className={[
                                                         'menu-item-content',
-                                                        datalist[
+                                                        labelDataList[
                                                           labelIndex
                                                         ]?.label_info_attribute_groups?.find(
                                                           (item) =>
@@ -2052,7 +2023,7 @@ export default function RequirementDetail() {
                                                           : 'menu-item-content-active'
                                                       ].join(' ')}
                                                       disabled={
-                                                        datalist[
+                                                        labelDataList[
                                                           labelIndex
                                                         ]?.label_info_attribute_groups?.find(
                                                           (item) =>
