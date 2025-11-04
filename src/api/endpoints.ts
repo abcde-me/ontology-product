@@ -162,27 +162,8 @@ export const ResourceEndpointsV2 = {
   fileDeleteApi: Prefix + `/files/delete/{file_id}`,
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
-  // 数据目录
-  catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
-  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
-  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
-  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
-  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
-  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
-  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
-  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
-  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
-  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
-  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
-  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
-  dbItemListApi: PrefixAimdp + '/ListDirDatabaseTables', //获取数据库表列表
-  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
-  createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
-
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: PrefixAimdp + `/OutputToConnector`,
+
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,
@@ -301,6 +282,25 @@ export const ModaForgeResourceEndpoints = {
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
   catalogPreviewApi: PrefixAimdp + '/PreviewDatasetsByDst', //数据集管理在用
+  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
+  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
+  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
+  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
+  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
+  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
+  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
+  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
+  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/ListDirDatabaseTables', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
+  createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
+  fileExportApi: PrefixAimdp + `/OutputToConnector`,
+  listMetaData: PrefixAimdp + '/ListMetaData', // 查询元数据列表
+  createDirMetaData: PrefixAimdp + '/CreateDirMetaData', // 创建元数据目录
 
   //数据集
   //获取数据集列表
