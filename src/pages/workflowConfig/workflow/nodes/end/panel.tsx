@@ -7,6 +7,7 @@ import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
+import { getTagList } from '@/api/datasetManagement';
 import './end.scss';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
@@ -33,17 +34,21 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     Record<string, any>[]
   >([]);
   useEffect(() => {
+    getTagList().then((res) => {
+      setKnowledgeBaseNameOptions(res.data || []);
+    });
+
     setSceneCategoryOptions([
       {
-        id: '1',
+        id: 1,
         name: '场景分类1'
       },
       {
-        id: '2',
+        id: 2,
         name: '场景分类2'
       },
       {
-        id: '3',
+        id: 3,
         name: '场景分类3'
       }
     ]);
@@ -92,7 +97,11 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         initialValues={{
           target_path_id: inputs?.target_path_id,
           is_embedding: inputs?.is_embedding,
-          knowledge_base_name: inputs?.knowledge_base_name
+          knowledge_base_name: inputs?.knowledge_base_name,
+          scene_id: inputs?.scene_id,
+          name: inputs?.name,
+          description: inputs?.description,
+          tag_names: inputs?.tag_names
         }}
       >
         {/* <FormItem
@@ -120,7 +129,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         </FormItem> */}
         <FormItem
           label="数据集名称："
-          field="knowledge_base_name"
+          field="name"
           rules={[{ required: true, message: '数据集名称不可为空' }]}
           style={{ margin: 0, paddingBottom: 24 }}
         >
@@ -133,7 +142,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
         </FormItem>
         <FormItem
           label="数据集标签："
-          field="knowledge_base_name_id"
+          field="tag_names"
           style={{ margin: 0, paddingBottom: 24 }}
         >
           <Select
@@ -142,14 +151,14 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           >
             {knowledgeBaseNameOptions.map((option) => (
               <Option key={option.id} value={option.id}>
-                {`${option.parent_name}/${option.name}`}
+                {option.name}
               </Option>
             ))}
           </Select>
         </FormItem>
         <FormItem
           label="描述说明"
-          field="target_path_id"
+          field="description"
           style={{ margin: 0, paddingBottom: 24 }}
         >
           <Input
@@ -159,11 +168,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             allowClear
           />
         </FormItem>
-        <FormItem
-          label="场景分类："
-          field="scene_category_id"
-          style={{ margin: 0 }}
-        >
+        <FormItem label="场景分类：" field="scene_id" style={{ margin: 0 }}>
           <Select
             placeholder="请选择场景分类"
             style={{ width: '100%' }}
