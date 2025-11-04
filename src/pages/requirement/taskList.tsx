@@ -80,7 +80,7 @@ function TaskList() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (record: Record<string, any>) => {
+  const viewDetailRequirement = (record: Record<string, any>) => {
     openNewPage(
       `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}`
     );
@@ -237,7 +237,7 @@ function TaskList() {
               <span
                 className="operate-text"
                 onClick={() => {
-                  viewDetailWorkflow(record);
+                  viewDetailRequirement(record);
                 }}
               >
                 标注
