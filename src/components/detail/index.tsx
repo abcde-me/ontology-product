@@ -1770,7 +1770,7 @@ const DatasetDetail = (props: {
           <TabPane key="hittest" title="命中测试">
             <HitTest />
           </TabPane>
-          <TabPane key="element" title="元素搜索"></TabPane>
+          {/* <TabPane key="element" title="元素搜索"></TabPane> */}
           <TabPane key="version" title="变更记录">
             {activeTab === 'version' ? (
               <Table
