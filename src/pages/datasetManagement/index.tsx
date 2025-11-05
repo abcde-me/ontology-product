@@ -1560,7 +1560,6 @@ const DatasetManagement: React.FC = () => {
           sizeOptions: [10, 20, 50, 100]
         }}
         border={false}
-        virtualized
         scroll={{
           x: 1200
         }}
