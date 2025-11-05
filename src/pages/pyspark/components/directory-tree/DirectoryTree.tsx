@@ -23,27 +23,12 @@ import type {
   NodeProps,
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
-import {
-  IconPlus,
-  IconEdit,
-  IconDelete,
-  IconCopy,
-  IconFolder,
-  IconFile
-} from '@arco-design/web-react/icon';
+import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
-import {
-  CopyPythonItemRes,
-  CreatePythonItemRes,
-  PythonItemType,
-  PythonListItem,
-  RenamePythonItemRes
-} from '@/types/pythonApi';
+import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import MultiLevelPathNavigation from './MultiLevelPathNavigation';
-import timeFormattig from '@/utils/timeFormatting';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -59,6 +44,7 @@ export type TreeNodeItem = Partial<PythonListItem> & {
   children?: TreeNodeItem[];
   title?: string;
   key?: string;
+  parentKey?: string; // 添加 parentKey 属性
 };
 
 // 暴露给父组件的方法接口
@@ -323,8 +309,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setDefaultName(name);
       setInputValue(name);
       // isFolder = true 表示创建文件夹，false 表示创建 notebook
-      if (isIcon && node?.dataRef?.id) {
-        console.log('node', node);
+      if (isIcon) {
         const newNode = {
           name,
           showInput: true,
@@ -334,31 +319,42 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           id: 0,
           path: '',
           created: '',
-          last_modified: ''
+          last_modified: '',
+          parentKey: node?.dataRef?.id?.toString() // 设置 parentKey 为父文件夹ID
         };
 
-        // 创建一个递归函数来查找并更新指定ID的节点
+        // 修复后的递归函数
         const findAndUpdateNode = (items: TreeNodeItem[]): TreeNodeItem[] => {
-          return items.map((item) => {
+          // 创建数组副本
+          const updatedItems = [...items];
+
+          for (let i = 0; i < updatedItems.length; i++) {
+            const item = updatedItems[i];
+
             // 如果找到目标ID的节点
             if (String(item.id) === String(node.dataRef.id)) {
               // 复制当前节点并添加新子节点到开头
-              return {
+              updatedItems[i] = {
                 ...item,
                 children: [newNode, ...(item.children || [])]
               };
+              break;
             }
 
             // 如果当前节点有子节点，递归查找
             if (item.children && item.children.length > 0) {
-              return {
-                ...item,
-                children: findAndUpdateNode(item.children)
-              };
+              const updatedChildren = findAndUpdateNode(item.children);
+              // 只有当子节点发生变化时才更新
+              if (updatedChildren !== item.children) {
+                updatedItems[i] = {
+                  ...item,
+                  children: updatedChildren
+                };
+              }
             }
+          }
 
-            return item;
-          });
+          return updatedItems;
         };
 
         // 更新树数据
@@ -375,7 +371,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             id: 0,
             path: '',
             created: '',
-            last_modified: ''
+            last_modified: '',
+            parentKey: '0' // 根目录创建时设置为0
           },
           ...treeData
         ]);
@@ -641,7 +638,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             onExpand={setExpandedKeys}
             onSelect={(keys, extra) => {
               const dataRef = extra?.node?.props?.dataRef ?? null;
-              if (dataRef?.actionOnClick === 'select') {
+              if (
+                dataRef?.actionOnClick === 'select' ||
+                dataRef?.type === 'notebook'
+              ) {
                 setSelectedKeys(keys);
                 onSelect?.(keys, extra);
               }
