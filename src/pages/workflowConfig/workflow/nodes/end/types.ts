@@ -10,6 +10,10 @@ export type EndNodeType = CommonNodeType & {
   is_embedding: boolean;
   knowledge_base_name: string;
   dataSource: Array<any>;
+  scene_id: number;
+  name: string;
+  description: string;
+  tag_names: string[];
   data: {
     type: string;
     title: string;
