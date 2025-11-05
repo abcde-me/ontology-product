@@ -66,7 +66,7 @@ import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
 import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
-import { set, throttle } from 'lodash';
+import { throttle } from 'lodash';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
