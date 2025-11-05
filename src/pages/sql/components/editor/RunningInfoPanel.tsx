@@ -381,63 +381,63 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         行数据
                       </span>
                     </Space>
-                    <Dropdown
-                      position="br"
-                      disabled={runStatus !== RunningStatus.SUCCESS}
-                      droplist={
-                        <Menu onClickMenuItem={handleMenuClick}>
-                          <Menu.Item key="1" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新数据集
+                    <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                      <Dropdown
+                        position="br"
+                        disabled={runStatus !== RunningStatus.SUCCESS}
+                        droplist={
+                          <Menu onClickMenuItem={handleMenuClick}>
+                            <Menu.Item key="1" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新数据集
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  适用于字段变更或使用场景差异较大等场景
+                                </div>
                               </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                适用于字段变更或使用场景差异较大等场景
+                            </Menu.Item>
+                            <Menu.Item key="2" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新版本
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  已存在数据集且字段不变
+                                </div>
                               </div>
-                            </div>
-                          </Menu.Item>
-                          <Menu.Item key="2" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新版本
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                已存在数据集且字段不变
-                              </div>
-                            </div>
-                          </Menu.Item>
-                        </Menu>
-                      }
-                    >
-                      <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                            </Menu.Item>
+                          </Menu>
+                        }
+                      >
                         <Button
                           type="outline"
                           size="mini"
@@ -451,8 +451,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         >
                           保存到数据集
                         </Button>
-                      </PermissionWrapper>
-                    </Dropdown>
+                      </Dropdown>
+                    </PermissionWrapper>
                   </div>
                 )}
               </div>
