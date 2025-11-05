@@ -1,6 +1,25 @@
 .requirement-detail {
   padding: 10px;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .configuration-form {
+    .arco-form-label-item {
+      width: 90px;
+      flex: none;
+    }
+  }
+
+  .requirement-detail-content-spin {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 15px;
+    padding-top: 24px;
+    padding-left: 24px;
+    margin: 16px 0;
+  }
 
   .arco-checkbox-text {
     margin-left: 4px;
@@ -33,13 +52,13 @@
     align-items: center;
   }
 
-  .detail-content {
-    background-color: #fff;
-    border-radius: 15px;
-    padding-top: 24px;
-    padding-left: 24px;
-    margin-top: 16px;
-  }
+  // .detail-content {
+  //   background-color: #fff;
+  //   border-radius: 15px;
+  //   padding-top: 24px;
+  //   padding-left: 24px;
+  //   margin-top: 16px;
+  // }
 
   .basic-title {
     font-family: PingFang SC;
@@ -108,7 +127,8 @@
     width: 100%;
   }
 
-  .annotation-tool {
+  .annotation-tool,
+  .label_info_attribute_groups_content {
     position: relative;
   }
 
