@@ -300,35 +300,35 @@ const contentFileColumns = [
 
 // 版本历史表格列定义
 const versionColumns: any[] = [
-  {
-    title: '版本号',
-    dataIndex: 'version_id',
-    width: 260,
-    render: (version: string, record: any, index: number) => (
-      <Space>
-        <Text style={{ whiteSpace: 'nowrap' }}>{version}</Text>
-        {index === 0 && (
-          <div
-            style={{
-              width: '56px',
-              height: '18px',
-              backgroundColor: '#ECFDF5',
-              color: '#10b981',
-              borderRadius: '2px',
-              fontWeight: 400,
-              fontSize: '12px',
-              // marginLeft: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            最新版本
-          </div>
-        )}
-      </Space>
-    )
-  },
+  // {
+  //   title: '版本号',
+  //   dataIndex: 'version_id',
+  //   width: 260,
+  //   render: (version: string, record: any, index: number) => (
+  //     <Space>
+  //       <Text style={{ whiteSpace: 'nowrap' }}>{version}</Text>
+  //       {index === 0 && (
+  //         <div
+  //           style={{
+  //             width: '56px',
+  //             height: '18px',
+  //             backgroundColor: '#ECFDF5',
+  //             color: '#10b981',
+  //             borderRadius: '2px',
+  //             fontWeight: 400,
+  //             fontSize: '12px',
+  //             // marginLeft: '8px',
+  //             display: 'flex',
+  //             alignItems: 'center',
+  //             justifyContent: 'center'
+  //           }}
+  //         >
+  //           最新版本
+  //         </div>
+  //       )}
+  //     </Space>
+  //   )
+  // },
   {
     title: '修改类型',
     dataIndex: 'type',
