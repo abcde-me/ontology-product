@@ -1058,15 +1058,7 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, ...val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              layout="horizontal"
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="需求名称:"
@@ -1119,9 +1111,7 @@ export default function RequirementDetail() {
                   maxLength={200}
                 />
               </FormItem>
-              <div className="basic-title" style={{ marginLeft: '-20px' }}>
-                任务配置
-              </div>
+              <div className="basic-title">任务配置</div>
               <FormItem
                 label="标注类型:"
                 required
@@ -1193,16 +1183,8 @@ export default function RequirementDetail() {
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
                 }}
-                style={{
-                  marginLeft: '0',
-                  marginRight: 'auto',
-                  marginBottom: 24
-                }}
+                style={{ marginBottom: 24 }}
                 layout="inline"
-                labelCol={{
-                  span: 1,
-                  offset: 0
-                }}
               >
                 <FormItem
                   field="label_info_attribute_groups"
@@ -2786,14 +2768,7 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="选择类型:"
