@@ -1463,8 +1463,7 @@ const DatasetManagement: React.FC = () => {
         border={false}
         virtualized
         scroll={{
-          x: 1200,
-          y: 500
+          x: 1200
         }}
         onChange={handleTableChange}
       />
