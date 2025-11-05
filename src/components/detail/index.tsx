@@ -51,6 +51,7 @@ import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
 import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
+import { throttle } from 'lodash';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -566,8 +567,6 @@ const DatasetDetail = (props: {
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
   const [isHiddenBaseInfo, setIsHiddenBaseInfo] = React.useState(false); // 基础信息是否隐藏
   const lastScrollTop = React.useRef(0);
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const isAnimating = React.useRef(false); // 状态锁，防止频繁切换
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
@@ -575,37 +574,17 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      // 清除之前的定时器
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(true);
+      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(false);
+        event.preventDefault();
       }
-      // 设置新的定时器，100ms后执行
-      timeoutRef.current = setTimeout(() => {
-        if (
-          container.scrollTop > 20 &&
-          !isHiddenBaseInfo &&
-          !isAnimating.current
-        ) {
-          isAnimating.current = true;
-          setIsHiddenBaseInfo(true);
-          setTimeout(() => {
-            isAnimating.current = false;
-          }, 300);
-        } else if (
-          currentScrollTop === 0 &&
-          isHiddenBaseInfo &&
-          !isAnimating.current
-        ) {
-          isAnimating.current = true;
-          setIsHiddenBaseInfo(false);
-          setTimeout(() => {
-            isAnimating.current = false;
-          }, 300);
-          event.preventDefault();
-        }
-        lastScrollTop.current = currentScrollTop;
-      }, 100);
+      lastScrollTop.current = currentScrollTop;
     };
+
+    // 节流处理滚动事件，避免频繁触发
+    const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
     container.addEventListener('scroll', handleScroll, { passive: false });
@@ -613,9 +592,7 @@ const DatasetDetail = (props: {
     // 在组件卸载时移除监听器
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
 

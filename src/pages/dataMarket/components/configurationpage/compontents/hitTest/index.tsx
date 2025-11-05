@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
-import { IconDriveFile, IconSettings } from '@arco-design/web-react/icon';
+import {
+  IconDriveFile,
+  IconMindMapping,
+  IconSettings,
+  IconStorage
+} from '@arco-design/web-react/icon';
 import {
   Button,
   Input,
@@ -33,6 +38,7 @@ function PageContentFalse(props) {
   const [editPolicy, seteditPolicy] = useState(false);
   const [text, setText] = useState('');
   const [fromdata, setfromdata] = useState<any>({});
+  const [showDrawer, setShowDrawer] = useState(false);
   const [recordList, setRecordList] = useState<any>([
     {
       id: 1,
@@ -384,6 +390,22 @@ function PageContentFalse(props) {
                         <span className="ml-[8px] text-[12px] leading-5">
                           字符数：{e.content_shot.length}
                         </span>
+                      </div>
+                      <div className={styles.operateBtn}>
+                        <Button
+                          type="outline"
+                          icon={<IconStorage />}
+                          onClick={() => setShowDrawer(true)}
+                        >
+                          分段详情
+                        </Button>
+                        <Button
+                          type="outline"
+                          icon={<IconMindMapping />}
+                          onClick={() => setShowDrawer(true)}
+                        >
+                          溯源日志
+                        </Button>
                       </div>
                     </div>
                     <div className={styles.segmentationContent}>
