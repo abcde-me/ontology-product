@@ -56,8 +56,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           sceneType: data.sceneType,
           segments: data.segments,
           directory: data.directory,
-          selectedSegmentId: data.segments[0]?.id || null,
-          selectedDirectoryNodeId: data.directory?.[0]?.id || null,
+          // 默认不选中任何分段和目录节点
+          selectedSegmentId: null,
+          selectedDirectoryNodeId: null,
           loading: false
         });
       } catch (error) {
@@ -183,8 +184,13 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       const segments = get().segments;
       const segment = segments.find((s) => s.id === segmentId);
 
-      if (segment && 'pdfCoordinate' in segment && segment.pdfCoordinate) {
-        set({ highlightedPdfCoordinate: segment.pdfCoordinate });
+      if (
+        segment &&
+        segment.pdfCoordinates &&
+        segment.pdfCoordinates.length > 0
+      ) {
+        // 使用第一个坐标进行高亮
+        set({ highlightedPdfCoordinate: segment.pdfCoordinates[0] });
       }
     },
 
@@ -194,6 +200,20 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
     setError: (error: string | null) => {
       set({ error });
+    },
+
+    // 设置选中的分段ID（用于高亮）
+    setSelectedSegmentId: (segmentId: string | null) => {
+      set({ selectedSegmentId: segmentId });
+    },
+
+    // 滚动到指定分段
+    scrollToSegment: (segmentId: string) => {
+      // 触发滚动事件，由SegmentList组件监听
+      const event = new CustomEvent('scrollToSegment', {
+        detail: { segmentId }
+      });
+      window.dispatchEvent(event);
     }
   })
 );

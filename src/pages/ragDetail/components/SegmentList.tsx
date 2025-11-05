@@ -21,8 +21,11 @@ const SegmentList: React.FC<SegmentListProps> = ({
   renderMode = 'text',
   hideHeader = false
 }) => {
-  const { segments: storeSegments, selectedSegmentId: storeSelectedSegmentId } =
-    useRagDetailStore();
+  const {
+    segments: storeSegments,
+    selectedSegmentId: storeSelectedSegmentId,
+    setSelectedSegmentId
+  } = useRagDetailStore();
   const segmentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // 优先使用props，如果没有则使用store中的数据
@@ -42,6 +45,36 @@ const SegmentList: React.FC<SegmentListProps> = ({
     }
   }, [selectedSegmentId]);
 
+  // 监听目录树触发的滚动事件
+  useEffect(() => {
+    const handleScrollToSegment = (event: CustomEvent) => {
+      const { segmentId } = event.detail;
+      if (segmentId && segmentRefs.current[segmentId]) {
+        segmentRefs.current[segmentId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
+
+    window.addEventListener(
+      'scrollToSegment',
+      handleScrollToSegment as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        'scrollToSegment',
+        handleScrollToSegment as EventListener
+      );
+    };
+  }, []);
+
+  // 处理点击分段
+  const handleSegmentClick = (segmentId: string) => {
+    // 设置选中的分段ID，这会触发目录树的高亮
+    setSelectedSegmentId(segmentId);
+  };
+
   const segmentItems = useMemo(() => {
     return segments.map((segment) => {
       // 根据renderMode渲染不同的卡片
@@ -50,6 +83,8 @@ const SegmentList: React.FC<SegmentListProps> = ({
           <div
             key={segment.id}
             ref={(el) => (segmentRefs.current[segment.id] = el)}
+            onClick={() => handleSegmentClick(segment.id)}
+            style={{ cursor: 'pointer' }}
           >
             <ImageTextSegmentCard
               segment={segment as ImageTextSegment}
@@ -63,6 +98,8 @@ const SegmentList: React.FC<SegmentListProps> = ({
         <div
           key={segment.id}
           ref={(el) => (segmentRefs.current[segment.id] = el)}
+          onClick={() => handleSegmentClick(segment.id)}
+          style={{ cursor: 'pointer' }}
         >
           <SegmentCard
             segment={segment}

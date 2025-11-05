@@ -27,19 +27,12 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   const [pdfPath, setPdfPath] = useState<string>('');
 
   useEffect(() => {
-    // 如果提供了filePath，使用它；否则使用默认的PDF路径
-    if (filePath) {
-      setPdfPath(filePath);
-    } else {
-      // 使用在线PDF文件进行测试
-      // 这是一个公开的示例PDF文件
-      const samplePdf =
-        'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-      setPdfPath(samplePdf);
-      // setPdfPath('/modaforge/test.pdf');
-      console.log('Using sample PDF:', samplePdf);
-    }
-  }, [filePath]);
+    // 使用在线PDF文件进行测试
+    const samplePdf =
+      'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+    setPdfPath(samplePdf);
+    console.log('Using sample PDF:', samplePdf);
+  }, []);
 
   const displayFileName = propFileName || storeName || 'Document.pdf';
 

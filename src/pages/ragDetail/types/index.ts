@@ -8,16 +8,43 @@ export type FileType = 'pdf' | 'ppt' | 'excel';
 // 为了向后兼容，保留SceneType别名
 export type SceneType = FileType;
 
-// PDF坐标信息 (position_bbox)
+// PDF坐标信息 - 前端使用格式
 export interface PDFCoordinate {
   page: number; // 页码（1-based）
-  x: number; // 左上角X坐标
-  y: number; // 左上角Y坐标
-  w: number; // 宽度
-  h: number; // 高度
+  x1: number; // 左上角X坐标
+  y1: number; // 左上角Y坐标
+  x2: number; // 右下角X坐标
+  y2: number; // 右下角Y坐标
 }
 
-// 基础分段类型
+// 后端返回的位置数据格式: { "0": [x1, y1, x2, y2], "1": [...] }
+export type PositionBBox = Record<string, number[]>;
+
+// 后端返回的分段数据结构
+export interface ApiSegment {
+  id: string;
+  dataset_id: string;
+  document_id: string;
+  position_bbox: PositionBBox;
+  position: number;
+  content: string;
+  content_shot: string;
+  word_count: number;
+  tokens: number;
+  enabled: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  type: number;
+  full_title: string;
+  title_id: string;
+  node_id: number;
+  level: number;
+  title: string;
+  tag_status: number;
+}
+
+// 前端使用的分段类型
 export interface Segment {
   id: string;
   content: string;
@@ -25,7 +52,10 @@ export interface Segment {
   segmentIndex: number;
   createdAt: string;
   updatedAt: string;
-  pdfCoordinate?: PDFCoordinate; // PDF中的坐标信息（可选）
+  pdfCoordinates?: PDFCoordinate[]; // 可能跨多页
+  title?: string;
+  fullTitle?: string;
+  level?: number;
 }
 
 // 分层级分段（场景2）
@@ -59,13 +89,28 @@ export interface TableSegment extends Segment {
   };
 }
 
-// 目录树节点（场景2）
+// 后端返回的目录树节点结构
+export interface ApiCatalogNode {
+  title: string;
+  title_id: string;
+  position: Record<string, string>; // {"0": "[73,109,481,137]"}
+  short_text_positions: Record<string, string> | null; // {"segment-id": "{\"0\":[73,141,284,157]}"}
+  level: number;
+  short_texts?: string[];
+  node_id: number;
+  segment_ids: string[] | null;
+  children?: ApiCatalogNode[];
+}
+
+// 前端使用的目录树节点
 export interface DirectoryNode {
   id: string;
   label: string;
   level: number;
   children?: DirectoryNode[];
   segmentIds?: string[];
+  position?: PDFCoordinate[]; // 标题在PDF中的位置
+  isShort?: boolean; // 标记是否为short_text节点（子级）
 }
 
 export interface RagDetailData {
@@ -123,6 +168,8 @@ export interface RagDetailActions {
   highlightPdfSegment: (segmentId: string) => void;
   clearPdfHighlight: () => void;
   setError: (error: string | null) => void;
+  setSelectedSegmentId: (segmentId: string | null) => void;
+  scrollToSegment: (segmentId: string) => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;
