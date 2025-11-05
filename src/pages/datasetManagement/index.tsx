@@ -66,6 +66,7 @@ import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
 import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
+import { set, throttle } from 'lodash';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -724,56 +725,41 @@ const DatasetManagement: React.FC = () => {
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
 
   const lastScrollTop = React.useRef(0);
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const isAnimating = React.useRef(false); // 状态锁，防止频繁切换
+  const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
+  const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
     if (!container) return;
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
-
-      // 清除之前的定时器
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (stickyRef.current) {
+        const stickyTop = stickyRef.current.current.offsetTop;
+        setIsSticky(stickyTop === 86);
       }
-      // 设置新的定时器，100ms后执行
-      timeoutRef.current = setTimeout(() => {
-        if (
-          container.scrollTop > 20 &&
-          !isHiddenBaseInfo &&
-          !isAnimating.current
-        ) {
-          isAnimating.current = true;
-          setIsHiddenBaseInfo(true);
-          setTimeout(() => {
-            isAnimating.current = false;
-          }, 300);
-        } else if (
-          currentScrollTop === 0 &&
-          isHiddenBaseInfo &&
-          !isAnimating.current
-        ) {
-          isAnimating.current = true;
-          setIsHiddenBaseInfo(false);
-          setTimeout(() => {
-            isAnimating.current = false;
-          }, 300);
-          event.preventDefault();
-        }
-        lastScrollTop.current = currentScrollTop;
-      }, 100);
+
+      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(true);
+      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(false);
+        setIsSticky(false);
+        event.preventDefault();
+      }
+      lastScrollTop.current = currentScrollTop;
     };
 
+    // 节流处理滚动事件，避免频繁触发
+    const throttledHandleScroll = throttle(handleScroll, 100);
+
     // 监听滚轮事件
-    container.addEventListener('scroll', handleScroll, { passive: false });
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      container.removeEventListener('scroll', throttledHandleScroll);
+      throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
 
@@ -1321,7 +1307,7 @@ const DatasetManagement: React.FC = () => {
           position: 'sticky',
           top: 0,
           zIndex: 10,
-          background: `${!isHiddenBaseInfo ? 'unset' : '#f0f6fe'}`
+          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         数据集市
@@ -1400,6 +1386,7 @@ const DatasetManagement: React.FC = () => {
         style={{ zIndex: 1 }}
         type="card"
         onAddTab={() => setAddSceneTypeVisible(true)}
+        ref={stickyRef}
       >
         {datasetTabData.map((item, index) => (
           <TabPane key={item.key} title={item.title} closable={false}>
