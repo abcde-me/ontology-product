@@ -110,7 +110,14 @@ module.exports = function (proxy, allowedHost) {
       // Paths with dots should still use the history fallback.
       // See https://github.com/facebook/create-react-app/issues/387.
       disableDotRule: true,
-      index: paths.publicUrlOrPath
+      index: paths.publicUrlOrPath,
+      // 排除PDF文件，让它们直接从文件系统提供
+      rewrites: [
+        {
+          from: /\.pdf$/,
+          to: (context) => context.parsedUrl.pathname
+        }
+      ]
     },
     // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
     proxy,

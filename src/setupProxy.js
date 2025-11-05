@@ -64,6 +64,19 @@ module.exports = function (app) {
       })
     );
     app.use(
+      ['/api/aiap/v1'],
+      createProxyMiddleware({
+        // target: 'http://10.1.4.73:30890/api/aiap/v1',
+        target: 'http://61.182.98.8:38049/api/aiap/v1',
+        changeOrigin: true,
+        secure: false
+        // logger: console,
+        // pathRewrite: {
+        //   '^/api/appforge/v1': ''
+        // }
+      })
+    );
+    app.use(
       ['/api/auth/v1'],
       createProxyMiddleware(
         addProxy({
