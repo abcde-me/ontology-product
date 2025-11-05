@@ -24,7 +24,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useHistory } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 import {
@@ -52,7 +52,10 @@ import { IndividualModal } from './components/IndividualModal';
 import TextSubstanceComponent from './components/TextEntity';
 import { generateLabels, generateInitialData } from './utils/generateLabels';
 import './detail.scss';
-
+import {
+  useGetModelList,
+  useGetModelLabelList
+} from '../hooks/useGetModelInfo';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementDetail() {
@@ -911,6 +914,26 @@ export default function RequirementDetail() {
     }
   }, [requirementId]);
 
+  // 图片、文本问答展示预标注
+  const showPreLabeling = useMemo(() => {
+    return (
+      annotationTypeContentCode ===
+        AnnotationTypeContentCode.IMAGE_ANNOTATION ||
+      annotationTypeContentCode === AnnotationTypeContentCode.QA
+    );
+  }, [annotationTypeContentCode]);
+
+  const { data: modelList = [] } = useGetModelList({
+    enabled: showPreLabeling
+  });
+
+  const model_name = Form.useWatch('model_name', basicForm);
+
+  const { data: modelLabelList = [] } = useGetModelLabelList(
+    { model_name },
+    { enabled: !!model_name }
+  );
+
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -978,7 +1001,7 @@ export default function RequirementDetail() {
               >
                 <Input
                   placeholder="请输入需求名称"
-                  style={{ width: 800 }}
+                  style={{ width: 900 }}
                   showWordLimit
                   maxLength={50}
                 />
@@ -1003,7 +1026,7 @@ export default function RequirementDetail() {
               >
                 <TextArea
                   placeholder="请输入描述内容"
-                  style={{ width: 800 }}
+                  style={{ width: 900 }}
                   showWordLimit
                   maxLength={200}
                 />
@@ -1053,6 +1076,20 @@ export default function RequirementDetail() {
                   </div>
                 )}
               </FormItem>
+              {showPreLabeling && (
+                <FormItem
+                  field="model_name"
+                  label="预标注模型:"
+                  style={{ marginBottom: 24 }}
+                >
+                  <Select
+                    allowClear
+                    options={modelList}
+                    style={{ width: 900 }}
+                    placeholder="请选择预标注模型"
+                  />
+                </FormItem>
+              )}
             </Form>
             <DataSourceModal
               fileType={toolFileType[Number(annotationTypeVal)]}
@@ -1175,7 +1212,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: 200
+                                        minWidth: !!model_name ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1242,7 +1279,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: 190
+                                        minWidth: !!model_name ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1284,6 +1321,20 @@ export default function RequirementDetail() {
                                       value={item.label_name_cn}
                                     />
                                   </FormItem>
+                                  {!!model_name && (
+                                    <FormItem
+                                      label="模型映射:"
+                                      field={`label_mapping_${type === 'detail' ? item?.id : item?.label_id}`}
+                                      style={{ padding: 0 }}
+                                    >
+                                      <Select
+                                        placeholder="请选择"
+                                        options={modelLabelList}
+                                        style={{ width: 110 }}
+                                        allowClear
+                                      ></Select>
+                                    </FormItem>
+                                  )}
                                   <FormItem
                                     field={`label_shape_${type === 'detail' ? item?.id : item?.label_id}`}
                                     initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
@@ -1297,30 +1348,42 @@ export default function RequirementDetail() {
                                           parseInt(val)
                                         );
                                       }}
-                                      style={{ width: 110, height: 32 }}
+                                      style={{ width: 64, height: 32 }}
+                                      triggerProps={{
+                                        autoAlignPopupWidth: false,
+                                        autoAlignPopupMinWidth: true,
+                                        position: 'bl'
+                                      }}
                                       renderFormat={(option, value) => {
                                         return (
-                                          <span className="label-shape-options">
-                                            <Image
-                                              width={20}
+                                          <Tooltip
+                                            content={
+                                              shapeOptions.find(
+                                                (opt) => opt.value === value
+                                              )?.label
+                                            }
+                                          >
+                                            <span
                                               style={{
-                                                marginRight: 4,
-                                                pointerEvents: 'none'
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                height: '100%'
                                               }}
-                                              src={
-                                                shapeOptions.find(
-                                                  (opt) => opt.value === value
-                                                )?.icon
-                                              }
-                                            />
-                                            <span>
-                                              {
-                                                shapeOptions.find(
-                                                  (opt) => opt.value === value
-                                                )?.label
-                                              }
+                                            >
+                                              <Image
+                                                width={20}
+                                                style={{
+                                                  pointerEvents: 'none',
+                                                  verticalAlign: 'middle'
+                                                }}
+                                                src={
+                                                  shapeOptions.find(
+                                                    (opt) => opt.value === value
+                                                  )?.icon
+                                                }
+                                              />
                                             </span>
-                                          </span>
+                                          </Tooltip>
                                         );
                                       }}
                                     >
@@ -1328,17 +1391,18 @@ export default function RequirementDetail() {
                                         <Option
                                           key={option.value}
                                           value={option.value}
-                                          className="label_shape_options"
                                         >
-                                          <Image
-                                            width={20}
-                                            src={option?.icon}
-                                            style={{
-                                              pointerEvents: 'none',
-                                              marginRight: 4
-                                            }}
-                                          />
-                                          {option.label}
+                                          <div className="label-shape-options">
+                                            <Image
+                                              width={20}
+                                              src={option?.icon}
+                                              style={{
+                                                pointerEvents: 'none',
+                                                marginRight: 4
+                                              }}
+                                            />
+                                            <span>{option.label}</span>
+                                          </div>
                                         </Option>
                                       ))}
                                     </Select>
@@ -1463,7 +1527,7 @@ export default function RequirementDetail() {
                                             >
                                               <Input
                                                 style={{
-                                                  width: 422,
+                                                  width: 522,
                                                   backgroundColor:
                                                     type === 'detail' ||
                                                     attrGroup?.isTemp
@@ -1752,7 +1816,7 @@ export default function RequirementDetail() {
                                                           attr.attribute_name_en
                                                         }
                                                         style={{
-                                                          width: 290,
+                                                          width: 340,
                                                           backgroundColor:
                                                             type === 'detail' ||
                                                             attrGroup?.isTemp ||
@@ -1866,7 +1930,7 @@ export default function RequirementDetail() {
                                                     >
                                                       <Input
                                                         style={{
-                                                          width: 268,
+                                                          width: 318,
                                                           backgroundColor:
                                                             type === 'detail' ||
                                                             attrGroup?.isTemp
@@ -2127,7 +2191,7 @@ export default function RequirementDetail() {
                                   <Input
                                     disabled={type === 'detail'}
                                     style={{
-                                      width: 446,
+                                      width: 546,
                                       height: 32
                                     }}
                                     value={attrGroup.attribute_group_name}
@@ -2336,7 +2400,7 @@ export default function RequirementDetail() {
                                               placeholder="用于存储标注结果"
                                               value={attr.attribute_name_en}
                                               style={{
-                                                width: 290,
+                                                width: 340,
                                                 height: 32,
                                                 backgroundColor: '#fff'
                                               }}
@@ -2429,7 +2493,7 @@ export default function RequirementDetail() {
                                               placeholder="展示在标注页面的名称"
                                               type="text"
                                               style={{
-                                                width: 290,
+                                                width: 340,
                                                 height: 32,
                                                 backgroundColor: '#fff'
                                               }}

@@ -47,11 +47,6 @@
     }
   }
 
-  .label_shape_options {
-    display: flex;
-    align-items: center;
-  }
-
   // .detail-content {
   //   background-color: #fff;
   //   border-radius: 15px;
@@ -72,6 +67,7 @@
   .label-shape-options {
     display: flex;
     align-items: center;
+    width: 110px;
   }
 
   .basic-configuration {
@@ -410,7 +406,7 @@
   }
 
   .labe-and-attribute-warp {
-    width: 800px;
+    width: 900px;
     border: 1px solid #cbd5e1;
     border-radius: 4px;
 
@@ -470,7 +466,7 @@
   }
 
   .task-configuration-content {
-    min-width: 1700px;
+    max-width: 1700px;
   }
 
   .arco-textarea-wrapper {

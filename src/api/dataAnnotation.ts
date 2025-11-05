@@ -1,5 +1,10 @@
 import { create } from './../../integration-tests-cypress/support/index';
 import UAPI from '@/api';
+import { dataInit, modelLabelDataInit } from './mockData';
+
+const DEBUG_FLAG = true;
+
+const DEBUG = process.env.NODE_ENV !== 'production' && DEBUG_FLAG;
 
 // 需求列表
 export async function getAnnotationList(params: {
@@ -155,4 +160,18 @@ export async function getAnnotationTabledData(params: {
     .post({ ...params })
     .inRegion()
     .do();
+}
+
+// 模型列表
+export async function getModelList() {
+  return DEBUG
+    ? dataInit()
+    : await UAPI.RES.getModelList({}).post().inRegion().do();
+}
+
+// 获取模型标签信息
+export async function getModelLabelList(params) {
+  return DEBUG
+    ? modelLabelDataInit()
+    : await UAPI.RES.getModelLabelList({}).post(params).inRegion().do();
 }
