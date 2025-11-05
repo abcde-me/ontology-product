@@ -15,10 +15,10 @@ import { connectorDetailType } from '../type';
 // 表单
 const FormItem = Form.Item;
 const Option = Select.Option;
-// const options = ['mysql', 'postgresql'];
+// const options = ['MySQL', 'PostgreSQL'];
 const options = [
-  { text: 'MySQL', value: 'mysql' },
-  { text: 'PostgreSQL', value: 'postgresql' }
+  { text: 'MySQL', value: 'MySQL' },
+  { text: 'PostgreSQL', value: 'PostgreSQL' }
 ];
 // 单选
 const RadioGroup = Radio.Group;

@@ -45,7 +45,7 @@ interface ConnectorFileListParams {
 }
 
 interface UpdateDatasetParams {
-  id: string;
+  id: number;
   name?: string;
   description?: string;
   tag_ids?: string[];
@@ -60,7 +60,7 @@ interface DatasetContentsParams {
 }
 
 interface DatasetDetailPageParams {
-  id: string;
+  id: number;
 }
 
 // 数据变更类型枚举
@@ -177,7 +177,10 @@ export async function getDatasetDetailPage(params: DatasetDetailPageParams) {
 
 //获取数据集详情页的数据内容
 export async function getDatasetContents(params: DatasetContentsParams) {
-  return UAPI.RES.datasetContentsApi({}).post(params).inRegion().do();
+  return UAPI.RES.datasetContentsApi({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
 }
 
 //编辑数据集版本数据
@@ -224,7 +227,10 @@ export async function getDataContentFileList(params: {
   page: number;
   page_size: number;
 }) {
-  return await UAPI.RES.dataContentFileList({}).post(params).inRegion().do();
+  return await UAPI.RES.dataContentFileList({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
 }
 //查询数据内容数据库列表
 export async function getDataContentTableList(params: {
@@ -245,5 +251,8 @@ export async function getDatasetVersionFile(
   params: DatasetVersionFileParams
 ): Promise<ApiRes<DatasetVersionFileRes>> {
   // TODO: 联调
-  return await UAPI.RES.dataContentFileList({}).post(params).inRegion().do();
+  return await UAPI.RES.dataContentFileList({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
 }

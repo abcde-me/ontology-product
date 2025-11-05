@@ -1,4 +1,4 @@
-import React, { useState, memo, useRef } from 'react';
+import React, { useState, memo, useRef, useEffect } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
@@ -8,25 +8,41 @@ import DasetIcon from '@/assets/python/daset-left-menu.svg';
 import SuanziIcon from '@/assets/python/suanzi-left-menu.svg';
 import PythonIcon from '@/assets/python/python-left-menu.svg';
 import { useTabManager } from './hooks/useTabManager';
-import styles from './index.module.scss';
+import './index.scss';
 import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { useLocation, useHistory } from 'react-router-dom';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
 type TabKey = 'files' | 'tools' | 'data' | 'daset';
+const defaultActiveTab = 'files';
 
 const Python: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<TabKey>('files');
+  const location = useLocation();
+  const history = useHistory();
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
+  const isCanCreate = useHasPermission(PYSPARK_PERMISSIONS.CREATE);
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+
+  // 从URL查询参数中解析activeTab
+  const getActiveTabFromUrl = () => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('activeTab') || defaultActiveTab;
+  };
+
+  useEffect(() => {
+    setActiveTab(getActiveTabFromUrl() as TabKey);
+  }, [location.search]);
+
   // 用于同步选中状态到FileManager的回调函数
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
     string[]
@@ -36,7 +52,7 @@ const Python: React.FC = memo(() => {
   const [currentFolderId, setCurrentFolderId] = useState<string>('0');
 
   // 用于存储创建权限的状态
-  const [isCanCreate, setIsCanCreate] = useState<boolean>(true);
+  // const [isCanCreate, setIsCanCreate] = useState<boolean>(true);
 
   // FileManager 的引用
   const fileManagerRef = useRef<DirectoryTreeRef>(null);
@@ -59,7 +75,7 @@ const Python: React.FC = memo(() => {
 
   // 处理创建权限变化的回调
   const handleCanCreateChange = (canCreate: boolean) => {
-    setIsCanCreate(canCreate);
+    // setIsCanCreate(canCreate);
   };
 
   const {
@@ -90,6 +106,17 @@ const Python: React.FC = memo(() => {
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+
+    const searchParams = new URLSearchParams(location.search);
+
+    // 更新activeTab参数
+    searchParams.set('activeTab', key);
+
+    // 使用history更新URL，不触发页面重载
+    history.push({
+      pathname: location.pathname,
+      search: searchParams.toString()
+    });
   };
 
   // 处理插入内容功能注册
@@ -112,16 +139,13 @@ const Python: React.FC = memo(() => {
   };
 
   return (
-    <Layout className={styles['pyspark-layout']}>
-      <Sider
-        width={isDasetTab ? '100%' : 360}
-        className={styles['pyspark-sider']}
-      >
+    <Layout className="pyspark-layout">
+      <Sider width={isDasetTab ? '100%' : 360} className="pyspark-sider">
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
           direction="vertical"
-          className={styles['pyspark-tabs']}
+          className="pyspark-tabs"
           type="rounded"
         >
           <TabPane
@@ -150,7 +174,7 @@ const Python: React.FC = memo(() => {
                 ref={fileManagerRef}
                 externalSelectedKeys={fileManagerSelectedKeys}
                 onCurrentFolderChange={setCurrentFolderId} // 传递当前文件夹变化的回调
-                onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
+                // onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
               />
             )}
           </TabPane>
@@ -177,55 +201,51 @@ const Python: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_RETRIEVE_OPERATOR) && (
-            <TabPane
-              key="tools"
-              title={
-                <Popover content="算子库" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <SuanziIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {activeTab === 'tools' && (
-                <ToolsManager
-                  onInsertContent={insertContentToEditor}
-                  getIsEditorFocused={() => isEditorFocusedRef.current}
-                />
-              )}
-            </TabPane>
-          )}
-          {useHasPermission(PYSPARK_PERMISSIONS.CAN_SEARCH_EXPORTS) && (
-            <TabPane
-              key="daset"
-              title={
-                <Popover content="数据集导出任务" position="left">
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <DasetIcon />
-                  </div>
-                </Popover>
-              }
-            >
-              {isDasetTab && <DatasetsList />}
-            </TabPane>
-          )}
+          <TabPane
+            key="tools"
+            title={
+              <Popover content="算子库" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <SuanziIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {activeTab === 'tools' && (
+              <ToolsManager
+                onInsertContent={insertContentToEditor}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
+              />
+            )}
+          </TabPane>
+          <TabPane
+            key="daset"
+            title={
+              <Popover content="数据集导出任务" position="left">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <DasetIcon />
+                </div>
+              </Popover>
+            }
+          >
+            {isDasetTab && <DatasetsList />}
+          </TabPane>
         </Tabs>
       </Sider>
       {!isDasetTab && (
-        <Content className={styles['pyspark-content']}>
+        <Content className="pyspark-content">
           <EditorContent
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}

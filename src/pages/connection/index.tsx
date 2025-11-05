@@ -256,22 +256,48 @@ export default function Connection() {
       title: '操作',
       width: 160,
       fixed: 'right',
-      align: 'center',
       render: (_, record) => {
         return (
           <Space>
             <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_GET}>
-              <Button type="text" onClick={() => viewDetailHan(record.id)}>
+              <Button
+                type="text"
+                onClick={() => viewDetailHan(record.id)}
+                style={{
+                  padding: '0 8px 0 0',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
                 详情
               </Button>
             </PermissionWrapper>
             <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_UPDATE}>
-              <Button type="text" onClick={() => editFormHandle(record)}>
+              <Button
+                type="text"
+                onClick={() => editFormHandle(record)}
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
                 编辑
               </Button>
             </PermissionWrapper>
             <PermissionWrapper permission={CONNECTION_PERMISSIONS.CAN_DELETE}>
-              <Button type="text" onClick={() => delModalHan(record.id)}>
+              <Button
+                type="text"
+                onClick={() => delModalHan(record.id)}
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
                 删除
               </Button>
             </PermissionWrapper>
@@ -477,25 +503,22 @@ export default function Connection() {
           </Button>
         </PermissionWrapper>
       </div>
-      <div style={{ overflow: 'auto', flex: 1 }}>
-        <Table
-          border={false}
-          columns={columns}
-          data={ConnectionData}
-          noDataElement={noDataElement({ description: '暂无数据' })}
-          style={{ padding: '16px 0px' }}
-          pagination={false}
-          rowKey="id"
-          loading={tableLoding}
-          onChange={(pagination, sorter, filters) => {
-            siftHan(sorter, filters);
-          }}
-          scroll={{
-            x: 1600,
-            y: 400
-          }}
-        />
-      </div>
+      <Table
+        border={false}
+        columns={columns}
+        data={ConnectionData}
+        noDataElement={noDataElement({ description: '暂无数据' })}
+        style={{ padding: '16px 0px' }}
+        pagination={false}
+        rowKey="id"
+        loading={tableLoding}
+        onChange={(pagination, sorter, filters) => {
+          siftHan(sorter, filters);
+        }}
+        scroll={{
+          x: true
+        }}
+      />
       {/* 分页 */}
       {ConnectionData && ConnectionData.length > 0 && (
         <Pagination

@@ -1,0 +1,466 @@
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Grid,
+  Input,
+  Message,
+  Form,
+  Upload,
+  Table,
+  Select,
+  Space
+} from '@arco-design/web-react';
+// import { Add, Upload } from '@arco-design/web-react/icon';
+import { MetadataField, DataSource } from './DataAssetFormContainer';
+import ImportFieldsModal from './ImportFieldsModal';
+import styles from './Step1MetadataFields.module.scss';
+import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
+import { DataAssetField } from '@/types/dataAssetApi';
+import { listDataAssetFieldTypes } from '@/api/dataAsset';
+import { ImportType } from '../../types';
+
+const FormItem = Form.Item;
+
+interface Step1MetadataFieldsProps {
+  metadataFields: MetadataField[];
+  setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
+  dataSources: DataSource;
+  setDataSources: React.Dispatch<React.SetStateAction<DataSource>>;
+  onCancel: () => void;
+  onNext: () => void;
+}
+
+export default function Step1MetadataFields({
+  metadataFields,
+  setMetadataFields,
+  dataSources,
+  setDataSources,
+  onCancel,
+  onNext
+}: Step1MetadataFieldsProps) {
+  const Row = Grid.Row;
+  const Col = Grid.Col;
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [fieldTypes, setFieldTypes] = useState<string[]>([]);
+  const [fieldTypesLoading, setFieldTypesLoading] = useState(false);
+  const [form] = Form.useForm();
+
+  // 进入页面时查询支持的字段类型
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFieldTypes = async () => {
+      try {
+        setFieldTypesLoading(true);
+        const res = await listDataAssetFieldTypes();
+
+        if (res?.status !== 200 || !Array.isArray(res?.data)) {
+          Message.error(res?.message ?? '获取字段类型失败');
+          return;
+        }
+
+        setFieldTypes(res.data);
+      } catch (e) {
+        Message.error('获取字段类型失败');
+      } finally {
+        if (isMounted) setFieldTypesLoading(false);
+      }
+    };
+
+    fetchFieldTypes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Table列定义（字段名对齐 DataAssetField）
+  const columns = [
+    {
+      title: '序号',
+      dataIndex: 'sequence',
+      width: 80,
+      align: 'center' as const
+    },
+    {
+      title: '字段中文名称',
+      dataIndex: 'nameZh',
+      width: 200,
+      render: (_: any, record: any) => (
+        <Input
+          placeholder="请输入中文名称"
+          value={record.nameZh}
+          onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
+        />
+      )
+    },
+    {
+      title: '字段英文名称',
+      dataIndex: 'nameEn',
+      width: 200,
+      render: (_: any, record: any) => (
+        <Input
+          placeholder="请输入英文名称"
+          value={record.nameEn}
+          onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
+        />
+      )
+    },
+    {
+      title: '字段类型',
+      dataIndex: 'type',
+      width: 150,
+      render: (_: any, record: any) => (
+        <Select
+          placeholder="请选择"
+          loading={fieldTypesLoading}
+          value={record.type}
+          onChange={(value) => handleUpdateField(record.id, { type: value })}
+        >
+          {fieldTypes.map((type) => (
+            <Select.Option key={type} value={type}>
+              {type}
+            </Select.Option>
+          ))}
+        </Select>
+      )
+    },
+    {
+      title: '空值默认填充',
+      dataIndex: 'default',
+      width: 200,
+      render: (_: any, record: any) => (
+        <Input
+          value={record.default}
+          onChange={(value) => handleUpdateField(record.id, { default: value })}
+        />
+      )
+    },
+    {
+      title: '必填',
+      dataIndex: 'required',
+      width: 80,
+      align: 'center' as const,
+      render: (_: any, record: any) => (
+        <Checkbox
+          checked={record.required}
+          onChange={(checked) =>
+            handleUpdateField(record.id, { required: checked })
+          }
+        />
+      )
+    },
+    {
+      title: '可修改',
+      dataIndex: 'allowModify',
+      width: 80,
+      align: 'center' as const,
+      render: (_: any, record: any) => (
+        <Checkbox
+          checked={record.allowModify}
+          onChange={(checked) =>
+            handleUpdateField(record.id, { allowModify: checked })
+          }
+        />
+      )
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      width: 100,
+      align: 'center' as const,
+      render: (_: any, record: MetadataField) => (
+        <div className="flex items-center">
+          <Button type="text" onClick={() => handleAddField()}>
+            添加行
+          </Button>
+          {metadataFields.length > 1 && (
+            <Button type="text" onClick={() => handleDeleteField(record.id)}>
+              删除行
+            </Button>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  // 添加字段行
+  const handleAddField = () => {
+    const newField: MetadataField = {
+      id: `field_${Date.now()}`,
+      nameZh: '',
+      nameEn: '',
+      type: undefined,
+      default: 'null',
+      required: true,
+      allowModify: true
+    };
+    const updatedFields = [...metadataFields, newField];
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
+  };
+
+  // 删除字段行
+  const handleDeleteField = (id: string) => {
+    const updatedFields = metadataFields.filter((field) => field.id !== id);
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
+  };
+
+  // 更新字段
+  const handleUpdateField = (id: string, updates: Partial<MetadataField>) => {
+    const updatedFields = metadataFields.map((field) => {
+      if (field.id === id) {
+        return { ...field, ...updates };
+      }
+      return field;
+    });
+    setMetadataFields(updatedFields);
+    form.setFieldValue('metadataFields', updatedFields);
+  };
+
+  // 导入字段
+  const handleImportFields = () => {
+    console.log('导入字段', showImportModal);
+    setShowImportModal(true);
+  };
+
+  // 处理导入确认
+  const handleImportConfirm = (
+    importType: ImportType,
+    dataAssetFields: DataAssetField[]
+  ) => {
+    // 将外部数据转换为内部使用结构
+    const mapped: MetadataField[] = (dataAssetFields || []).map((f, idx) => ({
+      id: `field_import_${Date.now()}_${idx}`,
+      nameZh: f.nameZh ?? '',
+      nameEn: f.nameEn ?? '',
+      type: f.type ?? '',
+      default: f.default ?? '',
+      required: !!f.required,
+      allowModify: !!f.allowModify
+    }));
+
+    if (importType === ImportType.overwrite) {
+      setMetadataFields(mapped);
+      form.setFieldValue('metadataFields', mapped);
+    } else {
+      const combined = [...metadataFields, ...mapped];
+      setMetadataFields(combined);
+      form.setFieldValue('metadataFields', combined);
+    }
+
+    Message.success('字段导入成功');
+  };
+
+  // 数据源变更
+  const handleDataSourceChange = (key: keyof DataSource, checked: boolean) => {
+    const updatedDataSources = { ...dataSources, [key]: checked };
+    setDataSources(updatedDataSources);
+    form.setFieldValue('dataSources', updatedDataSources);
+  };
+
+  // 全选/取消全选数据源
+  const handleSelectAllDataSources = (checked: boolean) => {
+    const updatedDataSources = {
+      dataset: checked,
+      volume: checked,
+      database: checked,
+      metadataDir: checked
+    };
+    setDataSources(updatedDataSources);
+    form.setFieldValue('dataSources', updatedDataSources);
+  };
+
+  // 验证字段列表的自定义验证器
+  const validateMetadataFields = useCallback(
+    (value: any, callback: any) => {
+      if (metadataFields.length === 0) {
+        callback('请至少添加一个字段');
+      } else {
+        // 验证所有字段是否填写完整
+        const incompleteFields = metadataFields.some(
+          (field) => !field.nameZh || !field.nameEn || !field.type
+        );
+        if (incompleteFields) {
+          callback('请填写完整的字段信息');
+        } else {
+          callback();
+        }
+      }
+    },
+    [metadataFields]
+  );
+
+  // 验证数据来源的自定义验证器
+  const validateDataSource = useCallback(
+    (value: any, callback: any) => {
+      const hasAnySource =
+        dataSources.dataset ||
+        dataSources.volume ||
+        dataSources.database ||
+        dataSources.metadataDir;
+      if (!hasAnySource) {
+        callback('请至少选择一个数据来源');
+      } else {
+        callback();
+      }
+    },
+    [dataSources]
+  );
+
+  // 下一步前验证
+  const handleNextStep = async () => {
+    // 同步metadataFields和dataSources到form
+    form.setFieldValue('metadataFields', metadataFields);
+    form.setFieldValue('dataSources', dataSources);
+
+    try {
+      await form.validate();
+      onNext();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
+  };
+
+  return (
+    <>
+      {/* 导入字段模态框 */}
+      <ImportFieldsModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onConfirm={handleImportConfirm}
+      />
+
+      <Form
+        form={form}
+        initialValues={{
+          metadataFields,
+          dataSources
+        }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        labelAlign="left"
+        style={{ width: '100%' }}
+        className={styles.formContainer}
+      >
+        {/* 数据资产字段列表 */}
+        <div className={styles.importFieldsButton}>
+          <Button
+            type="text"
+            icon={<IconDownload />}
+            onClick={handleImportFields}
+          >
+            导入字段
+          </Button>
+        </div>
+        <FormItem
+          label="数据资产字段列表："
+          required
+          field="metadataFields"
+          className="mb-[24px]"
+          rules={[{ validator: validateMetadataFields }]}
+        >
+          <div className="mt-[16px] w-full">
+            <Table
+              columns={columns}
+              className="w-full"
+              data={metadataFields.map((f, idx) => ({
+                ...f,
+                sequence: idx + 1
+              }))}
+              pagination={false}
+              border={false}
+            />
+          </div>
+        </FormItem>
+
+        {/* 数据来源 */}
+        <FormItem
+          label="数据来源："
+          required
+          field="dataSources"
+          className="mb-[24px]"
+          rules={[{ validator: validateDataSource }]}
+        >
+          <Row gutter={24}>
+            <Col span={4}>
+              <Checkbox
+                checked={
+                  dataSources.dataset &&
+                  dataSources.volume &&
+                  dataSources.database &&
+                  dataSources.metadataDir
+                }
+                indeterminate={
+                  (dataSources.dataset ||
+                    dataSources.volume ||
+                    dataSources.database ||
+                    dataSources.metadataDir) &&
+                  !(
+                    dataSources.dataset &&
+                    dataSources.volume &&
+                    dataSources.database &&
+                    dataSources.metadataDir
+                  )
+                }
+                onChange={(checked) => handleSelectAllDataSources(checked)}
+              >
+                全选
+              </Checkbox>
+            </Col>
+            <Col span={4}>
+              <Checkbox
+                checked={dataSources.dataset}
+                onChange={(checked) =>
+                  handleDataSourceChange('dataset', checked)
+                }
+              >
+                数据集
+              </Checkbox>
+            </Col>
+            <Col span={4}>
+              <Checkbox
+                checked={dataSources.volume}
+                onChange={(checked) =>
+                  handleDataSourceChange('volume', checked)
+                }
+              >
+                源数据目录-卷
+              </Checkbox>
+            </Col>
+            <Col span={4}>
+              <Checkbox
+                checked={dataSources.database}
+                onChange={(checked) =>
+                  handleDataSourceChange('database', checked)
+                }
+              >
+                源数据目录-数据库
+              </Checkbox>
+            </Col>
+            <Col span={4}>
+              <Checkbox
+                checked={dataSources.metadataDir}
+                onChange={(checked) =>
+                  handleDataSourceChange('metadataDir', checked)
+                }
+              >
+                源数据目录-元数据-目录
+              </Checkbox>
+            </Col>
+          </Row>
+        </FormItem>
+      </Form>
+
+      {/* 操作按钮 */}
+      <div className={styles.actionBar}>
+        <Button type="primary" onClick={handleNextStep}>
+          下一步
+        </Button>
+        <Button onClick={onCancel}>取消</Button>
+      </div>
+    </>
+  );
+}

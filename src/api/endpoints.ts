@@ -123,7 +123,8 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
-export const PrefixLabelService = API_PREFIX + '/label-service/api/v1/';
+export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
+export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
   knowledgeBaseRoot: PrefixV2 + '/dataset_contents',
   knowledgeBaseCreate: PrefixV2 + '/datasets/init',
@@ -161,26 +162,8 @@ export const ResourceEndpointsV2 = {
   fileDeleteApi: Prefix + `/files/delete/{file_id}`,
   dataCatalogListApi: Prefix + `load_tasks/files{file_id}`,
 
-  // 数据目录
-  catalogListApi: PrefixAimdp + '/ListDirectory', //获取数据目录列表
-  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
-  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
-  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
-  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
-  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
-  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
-  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
-  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
-  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件类型列表
-  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
-  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
-  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
-  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
-  dbItemListApi: PrefixAimdp + '/directory/get-table-list', //获取数据库表列表
-  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
-
   CatalogCreateApi: Prefix + `/catalogs`,
-  fileExportApi: PrefixAimdp + `/OutputToConnector`,
+
   connectorListAPI: Prefix + `/connectors`,
 
   apiKeyList: PrefixV2 + `/api-keys`,
@@ -261,7 +244,10 @@ export const ModaForgeResourceEndpoints = {
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
   workflowTargetPath: PrefixAimdp + '/ListDirectory',
+  // 工作流-获取工作流DAG信息
   workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
+  // 工作流-编辑工作流DAG信息
+  editWorkFlowDraft: PrefixAimdp + '/EditWorkFlowDraft',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
@@ -271,7 +257,7 @@ export const ModaForgeResourceEndpoints = {
   // 工作流-脚本执行
   scriptingBench: PrefixAimdp + '/RunWorkFlowScript',
   // 工作流-脚本执行结果
-  scriptingBenchResult: PrefixAimdp + '/GETWorkFlowScriptResult',
+  scriptingBenchResult: PrefixAimdp + '/GetWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
@@ -287,7 +273,7 @@ export const ModaForgeResourceEndpoints = {
   // 作业停用
   taskStop: PrefixAimdp + '/StopWorkflowInstance',
 
-  modelGet: PrefixAimdp + '/model/model_list',
+  modelGet: PrefixAimdp + '/ListWorkFlowModel',
 
   //数据目录
   //获取数据目录
@@ -296,6 +282,25 @@ export const ModaForgeResourceEndpoints = {
   fileListApi: PrefixAimdp + '/path/files',
   //预览/搜索数据集
   catalogPreviewApi: PrefixAimdp + '/PreviewDatasetsByDst', //数据集管理在用
+  catalogAddApi: PrefixAimdp + '/CreateDirCatalog', //添加目录
+  volumeAddApi: PrefixAimdp + '/CreateDirVolume', //新建卷
+  dbAddApi: PrefixAimdp + '/CreateDirDatabase', //新建数据库
+  volumeDeleteApi: PrefixAimdp + '/DeleteDirectory', //删除数据卷
+  tableDeleteApi: PrefixAimdp + '/DeleteDirDatabaseTable', //删除数据库表
+  catalogRenameApi: PrefixAimdp + `/RenameDirectory`, //重命名目录
+  targetDataFileListApi: PrefixAimdp + '/ListDstDirFiles', //查询目标数据文件列表
+  targetFileTypeListApi: PrefixAimdp + '/ListDirConstants', //查询目标数据文件类型列表
+  sourceFileTypeListApi: PrefixAimdp + '/ListSourceDirTypes', //查询源数据文件类型列表
+  targetDataFileDeleteApi: PrefixAimdp + '/DeleteDstDirFiles', //删除目标数据文件
+  sourceDataFileListApi: PrefixAimdp + '/ListSourceDirFiles', //查询源数据文件列表
+  sourceDataFileDeleteApi: PrefixAimdp + '/DeleteSourceDirFile', //删除源数据文件
+  sourceDataFileDeleteBatcheApi: PrefixAimdp + '/DeleteSourceDirFiles', //批量删除源数据文件
+  dbItemListApi: PrefixAimdp + '/ListDirDatabaseTables', //获取数据库表列表
+  dbItemDetailApi: PrefixAimdp + '/GetDirDatabaseTableInfo', //查询源库下的表详情
+  createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
+  fileExportApi: PrefixAimdp + `/OutputToConnector`,
+  listMetaData: PrefixAimdp + '/ListMetaData', // 查询元数据列表
+  createDirMetaData: PrefixAimdp + '/CreateDirMetaData', // 创建元数据目录
 
   //数据集
   //获取数据集列表
@@ -394,16 +399,15 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据标注列表
   getAnnotationListApi: PrefixLabelService + '/listRequirement',
   // 标注下载结果
-  getAnnotationDownloadApi: PrefixLabelService + '/resultDownlaodRequirement',
+  getAnnotationDownloadApi: PrefixLabelService + '/resultDownloadRequirement',
   // 获取数据标注 - 任务列表
   getAnnotationTaskListApi: PrefixLabelService + '/taskList',
   // 获取部门列表树内容
-  getDepartmentTreeListApi: PrefixAuth + '/organization/tree',
+  getDepartmentTreeListApi: PrefixUserCenter + '/GetOrgTree',
   // 获取个人列表树内容
-  getIndividualTreeListApi: PrefixAuth + '/user/organization/search',
+  getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
-  getAnnotationTabledDataApi:
-    PrefixAimdp + '/load_tasks/source_dir/files/statistics_page',
+  getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
 
   // python开发
   // 获取python列表
@@ -467,7 +471,36 @@ export const ModaForgeResourceEndpoints = {
   leGetTaskById: PrefixLabelService + '/getTaskById',
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
-  leGetTaskReuslt: PrefixLabelService + '/getTaskResult'
+  leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
+
+  // 数据资产接口
+  // 查询数据资产表字段和映射关系
+  findDataAssetMapping: PrefixAimdp + '/FindDataAssetMapping',
+  // 获取数据资产列表
+  listDataAssetData: PrefixAimdp + '/ListDataAssetData',
+  // 查询数据来源
+  listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
+  // 删除数据资产
+  dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
+  // 解析数据资产字段文件
+  analyzeDataAssetFieldsFile: PrefixAimdp + '/AnalyzeDataAssetFieldsFile',
+  // 查询支持的字段类型
+  listDataAssetFieldTypes: PrefixAimdp + '/ListDataAssetFieldTypes',
+  // 数据资产字段自动映射
+  editDataAssetColumnMap: PrefixAimdp + '/EditDataAssetColumnMap',
+  // 创建数据资产和映射关系
+  createDataAssetAndMapping: PrefixAimdp + '/CreateDataAssetAndMapping',
+  // 修改数据资产和映射关系
+  editDataAsset: PrefixAimdp + '/EditDataAsset',
+  // 修改数据资产表列设置（前端展示）
+  editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
+  // 查询数据资产表列设置（前端展示）
+  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  // 查询指定字段去重后的数量
+  getDataAssetTableDistinctFieldCount:
+    PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
+  // 批量修改数据资产表中的数据信息
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
 };
 
 /**

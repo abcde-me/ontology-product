@@ -21,7 +21,7 @@ export default function DbModal(props: DbModalProps) {
   const { visible, onCancel, data } = props;
   const [activeTab, setActiveTab] = useState('1');
   const [dataList, setDataList] = useState({});
-  console.log(data?.path_id, '查看点击详情后传递过来的数据ID');
+  console.log(data, data?.path_id, '查看点击详情后传递过来的数据ID');
   const getDataList = async () => {
     const params = {
       detail_type:

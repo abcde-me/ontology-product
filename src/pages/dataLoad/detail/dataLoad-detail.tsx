@@ -31,6 +31,7 @@ import { useHistory } from 'react-router';
 import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { useInterval } from '@/utils/useInterval';
+import { useHasPermission } from '@/hooks/usePermission';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const InputSearch = Input.Search;
@@ -85,6 +86,11 @@ const DataLoadDetail = () => {
 
   const history = useHistory();
 
+  const hasUpdatePermission = useHasPermission(
+    DATA_LOAD_PERMISSIONS.CAN_UPDATE
+  );
+  const hasStartPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_START);
+
   // 点击编辑显示弹框
   const hideEditModal = () => {
     setEditVisible(false);
@@ -97,8 +103,8 @@ const DataLoadDetail = () => {
   const getTask_idHan = async () => {
     try {
       const res = await getLoad(loadId);
-      setListDetail(res.data);
-      setPerms(res.data.perms);
+      setListDetail(res?.data ?? null);
+      setPerms(res?.data?.perms ?? []);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -131,11 +137,11 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -161,20 +167,20 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
-      if (res.data.items[0].status === 'stopped') {
+      if (res?.data?.items?.[0]?.status === 'stopped') {
         Message.success('任务已停止');
       } else {
-        if (res.data.items[0].status === 'failed') {
-          Message.error(res.data.items[0].error_msg);
+        if (res?.data?.items?.[0]?.status === 'failed') {
+          Message.error(res?.data?.items?.[0]?.error_msg);
         } else {
           Message.error('任务停止失败');
         }
       }
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
       const boo = detailList?.findIndex(
         (item) => item.status == 'succeed' || item.status == 'stopping'
       );
@@ -242,11 +248,11 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: 1,
         page_size: pageSize,
-        execution_id: '',
+        execution_name: '',
         ...directoryObj
       });
-      setTotal(res.data.total);
-      setDetailList(res.data.items);
+      setTotal(res?.data?.total ?? 0);
+      setDetailList(res?.data?.items ?? []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -316,7 +322,7 @@ const DataLoadDetail = () => {
         <div className="box">
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
 
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_UPDATE) &&
+          {hasUpdatePermission &&
             (listDetail?.source_type as string) !== 'local' && (
               <div
                 className={runningFlag ? '' : 'isDisabled'}
@@ -570,7 +576,7 @@ const DataLoadDetail = () => {
           <InputSearch
             onClear={clearHan}
             allowClear
-            placeholder="搜索运行ID"
+            placeholder="搜索运行名称"
             style={{ width: 220 }}
             onPressEnter={() => {
               getDetailList();
@@ -579,7 +585,7 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          {perms.includes(DATA_LOAD_PERMISSIONS.CAN_START) &&
+          {hasStartPermission &&
             (listDetail?.source_type as string) !== 'local' && (
               <Button
                 type="primary"

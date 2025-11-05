@@ -6,26 +6,20 @@ import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import './end.scss';
 
 const Node: FC<NodeProps<EndNodeType>> = ({ data }) => {
-  const { target_path_name, target_path_id } = data;
+  const { target_path_name, target_path_id, name } = data;
   const dirsArr: Record<string, any>[] = [];
-  const [targetPathName, setTargetPathName] = useState(target_path_name);
+  const [targetPathName, setTargetPathName] = useState(name);
   useEffect(() => {
-    getWorkflowTargetPath(2, '').then((res) => {
-      if (res.status === 200) {
-        setTargetPathName(
-          dirsArr?.find((item) => item?.id === target_path_id)?.name
-        );
-      }
-    });
-  }, [target_path_name, target_path_id, targetPathName]);
+    setTargetPathName(name);
+  }, [target_path_name, target_path_id, targetPathName, name]);
   return (
     <div className={`wk-node-content end-node-content`}>
       <div className="end-node-content-item">
-        <div className="txt">目标数据目录</div>
+        <div className="txt">数据集名称</div>
         {targetPathName && targetPathName ? (
           <div className="val">{targetPathName}</div>
         ) : (
-          <div className="item-text">未配置</div>
+          <div className="item-text">暂无名称</div>
         )}
       </div>
     </div>

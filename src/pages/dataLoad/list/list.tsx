@@ -9,7 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import { ITableData } from './type';
 import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
@@ -20,6 +20,7 @@ import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
+import { useHasPermission } from '@/hooks/usePermission';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
   RunState,
@@ -34,6 +35,7 @@ import {
 const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
+  const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
   const columns = [
     {
       title: '载入任务名称',
@@ -46,8 +48,7 @@ export default function DataLoad() {
           isEdit={false}
           isLink
           handleLink={() => {
-            text.perms.includes(DATA_LOAD_PERMISSIONS.CAN_GET) &&
-              gotoDetail(text.task_id);
+            hasPermission && gotoDetail(text.task_id);
           }}
         />
       )
@@ -220,7 +221,7 @@ export default function DataLoad() {
     {
       title: '操作',
       fixed: 'right',
-      width: 105,
+      width: 120,
       render: (_, item) => {
         // const perms = item?.perms || [];
         // const config = [] as any;
@@ -243,7 +244,16 @@ export default function DataLoad() {
         return (
           <Space>
             <PermissionWrapper permission={DATA_LOAD_PERMISSIONS.CAN_GET}>
-              <Button type="text" onClick={() => gotoDetail(item.task_id)}>
+              <Button
+                type="text"
+                onClick={() => gotoDetail(item.task_id)}
+                style={{
+                  padding: '0 8px 0 0',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
                 详情
               </Button>
             </PermissionWrapper>
@@ -251,6 +261,12 @@ export default function DataLoad() {
               <Button
                 type="text"
                 onClick={() => deleteLoad(item.task_id, item.name)}
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
               >
                 删除
               </Button>
@@ -463,12 +479,8 @@ export default function DataLoad() {
         pagination={false}
         rowKey="task_id"
         border={false}
-        // scroll={{
-        //   x: true
-        // }}
         scroll={{
-          x: 1600,
-          y: 400
+          x: true
         }}
         onChange={(pagination, filters, sorter) => {
           loadSiftHan(filters, sorter);

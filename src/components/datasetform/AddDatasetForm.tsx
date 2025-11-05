@@ -17,8 +17,8 @@ import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
-import styles from './AddDatasetForm.module.css';
-import './AddDatasetForm.css';
+import styles from './AddDatasetForm.module.scss';
+import './AddDatasetForm.scss';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import {
@@ -70,6 +70,7 @@ function convertToCascaderOptions(dataSourceData) {
     label: catalog.name,
     // label: catalog.name,
     value: [catalog.base_dir, catalog.name],
+    disabled: !catalog?.children?.volume,
     children:
       catalog.children && catalog.children.volume
         ? catalog.children.volume.map((volume) => ({
@@ -219,6 +220,17 @@ const DatasetForm = React.forwardRef<
   const [total, setTotal] = useState(10);
   // 使用 useRef 来标记是否是首次渲染
   const isInitialMount = useRef(true);
+  //场景分类选项
+  const sceneTypeOptions = [
+    {
+      label: 'nlp',
+      value: 'nlp'
+    },
+    {
+      label: 'gan',
+      value: 'gan'
+    }
+  ];
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -634,6 +646,7 @@ const DatasetForm = React.forwardRef<
                 placeholder="请输入或选择标签"
                 mode="multiple"
                 options={tagList}
+                className={styles.dropdownSelect}
                 dropdownMenuClassName={styles.dropdownMenuSelect}
                 allowCreate
                 // style={{ marginLeft: 10 }}
@@ -710,9 +723,9 @@ const DatasetForm = React.forwardRef<
             </Radio.Group>
           </FormItem>
           <FormItem
-            label="数据集类型"
+            label="格式类型"
             field="storageType"
-            rules={[{ required: true, message: '请选择数据集类型' }]}
+            rules={[{ required: true, message: '请选择格式类型' }]}
             initialValue="file"
             extra={
               storageType === StorageType.File
@@ -726,6 +739,13 @@ const DatasetForm = React.forwardRef<
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
             </Radio.Group>
+          </FormItem>
+          <FormItem
+            label="场景分类"
+            field="sceneType"
+            rules={[{ required: true, message: '请选择场景分类' }]}
+          >
+            <Select placeholder="请选择场景分类" options={sceneTypeOptions} />
           </FormItem>
 
           {dataSource === 'volume' && (
@@ -923,7 +943,7 @@ const DatasetForm = React.forwardRef<
                     <Select
                       placeholder={
                         !selectedConnector
-                          ? '请先选数据文件'
+                          ? '请先选择连接器'
                           : '请选择要使用的文件'
                       }
                       mode="multiple"

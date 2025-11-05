@@ -26,7 +26,7 @@ import type {
 } from '@/pages/workflowConfig/types/workflow';
 import type { FetchOptionType } from './fetch';
 import { ContentType, baseOptions, getAccessToken } from './fetch';
-// import { PrefixV2 } from '@/api/endpoints';
+import { PrefixV2 } from '@/api/endpoints';
 import { getToken } from '@/utils/request';
 import { queryCurrentRegionInfo } from '@/hooks//use-region-info';
 
@@ -295,203 +295,203 @@ const handleStream = (
   read();
 };
 
-// export const upload = (options: any, searchParams?: string): Promise<any> => {
-//   const urlPrefix = PrefixV2;
-//   const defaultOptions = {
-//     method: 'POST',
-//     url: `${urlPrefix}/files/upload` + (searchParams || ''),
-//     headers: {},
-//     data: {}
-//   };
-//   options = {
-//     ...defaultOptions,
-//     ...options,
-//     headers: { ...defaultOptions.headers, ...options.headers }
-//   };
-//   return new Promise((resolve, reject) => {
-//     const xhr = options.xhr;
-//     xhr.open(options.method, options.url);
-//     for (const key in options.headers)
-//       xhr.setRequestHeader(key, options.headers[key]);
+export const upload = (options: any, searchParams?: string): Promise<any> => {
+  const urlPrefix = PrefixV2;
+  const defaultOptions = {
+    method: 'POST',
+    url: `${urlPrefix}/files/upload` + (searchParams || ''),
+    headers: {},
+    data: {}
+  };
+  options = {
+    ...defaultOptions,
+    ...options,
+    headers: { ...defaultOptions.headers, ...options.headers }
+  };
+  return new Promise((resolve, reject) => {
+    const xhr = options.xhr;
+    xhr.open(options.method, options.url);
+    for (const key in options.headers)
+      xhr.setRequestHeader(key, options.headers[key]);
 
-//     xhr.withCredentials = true;
-//     xhr.responseType = 'json';
-//     xhr.onreadystatechange = function () {
-//       if (xhr.readyState === 4) {
-//         if (xhr.status === 200 || xhr.status === 201) resolve(xhr.response);
-//         else reject(xhr);
-//       }
-//     };
-//     xhr.upload.onprogress = options.onprogress;
-//     xhr.send(options.data);
-//   });
-// };
+    xhr.withCredentials = true;
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200 || xhr.status === 201) resolve(xhr.response);
+        else reject(xhr);
+      }
+    };
+    xhr.upload.onprogress = options.onprogress;
+    xhr.send(options.data);
+  });
+};
 
-// export const ssePost = (
-//   url: string,
-//   fetchOptions: FetchOptionType,
-//   otherOptions: IOtherOptions
-// ) => {
-//   const {
-//     isPublicAPI = false,
-//     onData,
-//     onCompleted,
-//     onThought,
-//     onFile,
-//     onMessageEnd,
-//     onMessageReplace,
-//     onWorkflowStarted,
-//     onWorkflowFinished,
-//     onNodeStarted,
-//     onNodeFinished,
-//     onIterationStart,
-//     onIterationNext,
-//     onIterationFinish,
-//     onNodeRetry,
-//     onParallelBranchStarted,
-//     onParallelBranchFinished,
-//     onTextChunk,
-//     onTTSChunk,
-//     onTTSEnd,
-//     onTextReplace,
-//     onAgentLog,
-//     onError,
-//     getAbortController,
-//     onLoopStart,
-//     onLoopNext,
-//     onLoopFinish
-//   } = otherOptions;
-//   const abortController = new AbortController();
+export const ssePost = (
+  url: string,
+  fetchOptions: FetchOptionType,
+  otherOptions: IOtherOptions
+) => {
+  const {
+    isPublicAPI = false,
+    onData,
+    onCompleted,
+    onThought,
+    onFile,
+    onMessageEnd,
+    onMessageReplace,
+    onWorkflowStarted,
+    onWorkflowFinished,
+    onNodeStarted,
+    onNodeFinished,
+    onIterationStart,
+    onIterationNext,
+    onIterationFinish,
+    onNodeRetry,
+    onParallelBranchStarted,
+    onParallelBranchFinished,
+    onTextChunk,
+    onTTSChunk,
+    onTTSEnd,
+    onTextReplace,
+    onAgentLog,
+    onError,
+    getAbortController,
+    onLoopStart,
+    onLoopNext,
+    onLoopFinish
+  } = otherOptions;
+  const abortController = new AbortController();
 
-//   const region = queryCurrentRegionInfo();
-//   const accessToken = getToken();
+  const region = queryCurrentRegionInfo();
+  const accessToken = getToken();
 
-//   const options = Object.assign(
-//     {},
-//     baseOptions,
-//     {
-//       method: 'POST',
-//       signal: abortController.signal,
-//       // TODO: ts错误
-//       // @ts-expect-error
-//       headers: new Headers({
-//         ...accessToken
-//       })
-//     } as RequestInit,
-//     fetchOptions
-//   );
+  const options = Object.assign(
+    {},
+    baseOptions,
+    {
+      method: 'POST',
+      signal: abortController.signal,
+      // TODO: ts错误
+      // @ts-expect-error
+      headers: new Headers({
+        ...accessToken
+      })
+    } as RequestInit,
+    fetchOptions
+  );
 
-//   const contentType = (options.headers as Headers).get('Content-Type');
-//   if (!contentType)
-//     (options.headers as Headers).set('Content-Type', ContentType.json);
+  const contentType = (options.headers as Headers).get('Content-Type');
+  if (!contentType)
+    (options.headers as Headers).set('Content-Type', ContentType.json);
 
-//   getAbortController?.(abortController);
+  getAbortController?.(abortController);
 
-//   const urlPrefix = PrefixV2;
-//   const urlWithPrefix =
-//     url.startsWith('http://') || url.startsWith('https://')
-//       ? url
-//       : `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`;
+  const urlPrefix = PrefixV2;
+  const urlWithPrefix =
+    url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`;
 
-//   const { body } = options;
-//   if (body) options.body = JSON.stringify(body);
+  const { body } = options;
+  if (body) options.body = JSON.stringify(body);
 
-//   if (accessToken.authorization) {
-//     (options.headers as Headers).set(
-//       'Authorization',
-//       accessToken.authorization
-//     );
-//   }
-//   if (region.regionId) {
-//     (options.headers as Headers).set('x-regionid', region.regionId);
-//   }
+  if (accessToken.authorization) {
+    (options.headers as Headers).set(
+      'Authorization',
+      accessToken.authorization
+    );
+  }
+  if (region.regionId) {
+    (options.headers as Headers).set('x-regionid', region.regionId);
+  }
 
-//   globalThis
-//     .fetch(urlWithPrefix, options as RequestInit)
-//     .then((res) => {
-//       if (!/^(2|3)\d{2}$/.test(String(res.status))) {
-//         if (res.status === 401) {
-//           // refreshAccessTokenOrRelogin(TIME_OUT).then(() => {
-//           //   ssePost(url, fetchOptions, otherOptions)
-//           // }).catch(() => {
-//           //   res.json().then((data: any) => {
-//           //     if (isPublicAPI) {
-//           //       if (data.code === 'web_sso_auth_required')
-//           //         // requiredWebSSOLogin()
-//           //         console.error('need relogin')
+  globalThis
+    .fetch(urlWithPrefix, options as RequestInit)
+    .then((res) => {
+      if (!/^(2|3)\d{2}$/.test(String(res.status))) {
+        if (res.status === 401) {
+          // refreshAccessTokenOrRelogin(TIME_OUT).then(() => {
+          //   ssePost(url, fetchOptions, otherOptions)
+          // }).catch(() => {
+          //   res.json().then((data: any) => {
+          //     if (isPublicAPI) {
+          //       if (data.code === 'web_sso_auth_required')
+          //         // requiredWebSSOLogin()
+          //         console.error('need relogin')
 
-//           //       if (data.code === 'unauthorized') {
-//           //         removeAccessToken()
-//           //         globalThis.location.reload()
-//           //       }
-//           //     }
-//           //   })
-//           // })
-//           console.error('401 need relogin');
-//         } else {
-//           res.json().then((data) => {
-//             Toast.notify({
-//               type: 'error',
-//               message: data.message || 'Server Error'
-//             });
-//           });
-//           onError?.('Server Error');
-//         }
-//         return;
-//       }
-//       return handleStream(
-//         res,
-//         (str: string, isFirstMessage: boolean, moreInfo: IOnDataMoreInfo) => {
-//           if (moreInfo.errorMessage) {
-//             onError?.(moreInfo.errorMessage, moreInfo.errorCode);
-//             // TypeError: Cannot assign to read only property ... will happen in page leave, so it should be ignored.
-//             if (
-//               moreInfo.errorMessage !==
-//               'AbortError: The user aborted a request.' &&
-//               !moreInfo.errorMessage.includes(
-//                 'TypeError: Cannot assign to read only property'
-//               )
-//             )
-//               Toast.notify({ type: 'error', message: moreInfo.errorMessage });
-//             return;
-//           }
-//           onData?.(str, isFirstMessage, moreInfo);
-//         },
-//         onCompleted,
-//         onThought,
-//         onMessageEnd,
-//         onMessageReplace,
-//         onFile,
-//         onWorkflowStarted,
-//         onWorkflowFinished,
-//         onNodeStarted,
-//         onNodeFinished,
-//         onIterationStart,
-//         onIterationNext,
-//         onIterationFinish,
-//         onLoopStart,
-//         onLoopNext,
-//         onLoopFinish,
-//         onNodeRetry,
-//         onParallelBranchStarted,
-//         onParallelBranchFinished,
-//         onTextChunk,
-//         onTTSChunk,
-//         onTTSEnd,
-//         onTextReplace,
-//         onAgentLog
-//       );
-//     })
-//     .catch((e) => {
-//       if (
-//         e.toString() !== 'AbortError: The user aborted a request.' &&
-//         !e
-//           .toString()
-//           .errorMessage.includes(
-//             'TypeError: Cannot assign to read only property'
-//           )
-//       )
-//         Toast.notify({ type: 'error', message: e });
-//       onError?.(e);
-//     });
-// };
+          //       if (data.code === 'unauthorized') {
+          //         removeAccessToken()
+          //         globalThis.location.reload()
+          //       }
+          //     }
+          //   })
+          // })
+          console.error('401 need relogin');
+        } else {
+          res.json().then((data) => {
+            Toast.notify({
+              type: 'error',
+              message: data.message || 'Server Error'
+            });
+          });
+          onError?.('Server Error');
+        }
+        return;
+      }
+      return handleStream(
+        res,
+        (str: string, isFirstMessage: boolean, moreInfo: IOnDataMoreInfo) => {
+          if (moreInfo.errorMessage) {
+            onError?.(moreInfo.errorMessage, moreInfo.errorCode);
+            // TypeError: Cannot assign to read only property ... will happen in page leave, so it should be ignored.
+            if (
+              moreInfo.errorMessage !==
+                'AbortError: The user aborted a request.' &&
+              !moreInfo.errorMessage.includes(
+                'TypeError: Cannot assign to read only property'
+              )
+            )
+              Toast.notify({ type: 'error', message: moreInfo.errorMessage });
+            return;
+          }
+          onData?.(str, isFirstMessage, moreInfo);
+        },
+        onCompleted,
+        onThought,
+        onMessageEnd,
+        onMessageReplace,
+        onFile,
+        onWorkflowStarted,
+        onWorkflowFinished,
+        onNodeStarted,
+        onNodeFinished,
+        onIterationStart,
+        onIterationNext,
+        onIterationFinish,
+        onLoopStart,
+        onLoopNext,
+        onLoopFinish,
+        onNodeRetry,
+        onParallelBranchStarted,
+        onParallelBranchFinished,
+        onTextChunk,
+        onTTSChunk,
+        onTTSEnd,
+        onTextReplace,
+        onAgentLog
+      );
+    })
+    .catch((e) => {
+      if (
+        e.toString() !== 'AbortError: The user aborted a request.' &&
+        !e
+          .toString()
+          .errorMessage.includes(
+            'TypeError: Cannot assign to read only property'
+          )
+      )
+        Toast.notify({ type: 'error', message: e });
+      onError?.(e);
+    });
+};

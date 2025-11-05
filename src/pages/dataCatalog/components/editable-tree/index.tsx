@@ -6,7 +6,7 @@ import { useEditableTree } from './useEditableTree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
 
@@ -32,7 +32,7 @@ export default function EditableTree() {
   } = useEditableTree({ catalogTreeStore });
 
   return (
-    <div className={classNames('pl-3 pr-3 pt-10')}>
+    <div className={classNames('pl-3 pr-3 pt-2')}>
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
         <InputSearch
           placeholder="输入名称搜索"

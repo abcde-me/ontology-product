@@ -1,0 +1,229 @@
+.PageContentFalse {
+  display: flex;
+  height: calc(100vh - 72px);
+  .leftList {
+    flex: 1;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    padding: 0px 14px 16px 16px;
+    overflow-y: auto;
+    .testHeader {
+      height: 24px;
+      margin: 14px 0px;
+      .one {
+        color: #151b26;
+        /* 16 弹窗标题/600 */
+        font-family: 'PingFang SC';
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+      }
+      .two {
+        font-family: PingFangSC-Regular;
+        font-size: 12px;
+        color: #7f8c9f;
+        letter-spacing: 0;
+        line-height: 18px;
+        font-weight: 400;
+        margin-left: 18px;
+      }
+    }
+    .testContent {
+      background: #ffffff;
+      // border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      width: 100%;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      .testContentText {
+        flex: 1;
+        overflow-y: auto;
+        :global(.arco-textarea-wrapper) .inputBox {
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+        }
+      }
+    }
+    .testContentButton {
+      height: 32px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      gap: 8px;
+      .cl {
+        margin-right: 8px;
+      }
+    }
+    .historyHeader {
+      height: 24px;
+      margin: 14px 0px;
+
+      color: #151b26;
+      /* 16 弹窗标题/600 */
+      font-family: 'PingFang SC';
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+    }
+    .historyContent {
+      overflow-y: auto;
+      :global(.arco-table-th) {
+        background-color: var(--color-bg-3);
+      }
+      .selectedRowMz {
+        border: 1px solid blue !important; /* 设置选中行的边框为1px实线蓝色 */
+      }
+    }
+  }
+  .rightContent {
+    // overflow-y: auto;
+    flex: 1;
+    background: #ffffff;
+    .rightContentSQL {
+      padding: 0px 16px 14px 16px;
+      background: #ffffff;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      .SQLTitle {
+        height: 52px;
+        /* padding: 0 0 12px 0; */
+        display: flex;
+        align-items: center;
+        color: #151b26;
+        /* 16 弹窗标题/600 */
+        font-family: 'PingFang SC';
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+      }
+      .SQLContent {
+        .contentHeader {
+          height: 22px;
+          color: #151b26;
+
+          /* 14 正文&二级标题/600 */
+          font-family: 'PingFang SC';
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 600;
+        }
+        .content-content {
+          padding: 8px;
+        }
+      }
+    }
+
+    .rightContentHit {
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0px 16px 14px 16px;
+      // margin-top: 16px;
+      background: #ffffff;
+      border-radius: 12px;
+      .rightContentHeader {
+        height: 52px;
+        /* padding: 0 0 12px 0; */
+        display: flex;
+        align-items: center;
+        .headerLeft {
+          width: 150px;
+          height: 24px;
+
+          color: #151b26;
+          /* 16 弹窗标题/600 */
+          font-family: 'PingFang SC';
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 600;
+        }
+        .headerRight {
+          flex: 1;
+          text-align: right;
+          .inp {
+            width: 240px;
+            height: 32px;
+          }
+        }
+      }
+      .rightContentScoll {
+        flex: 1;
+        overflow-y: auto;
+        .segmentationBox {
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          /* padding: 0 8px; */
+          margin-bottom: 12px;
+          .segmentationHeader {
+            height: 40px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .operateBtn {
+              display: none;
+            }
+            .sr {
+              display: flex;
+              justify-content: flex-end;
+              align-items: center;
+              .srt {
+                background: #eef6ff;
+                border-radius: 6px;
+                width: 80px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: PingFangSC-Medium;
+                font-size: 14px;
+                color: #007dfa;
+                line-height: 20px;
+                font-weight: 500;
+              }
+            }
+          }
+          .sl {
+            display: flex;
+            align-items: center;
+            padding: 0 8px 8px;
+            .nm {
+              width: 96px;
+              white-space: nowrap; /* 禁止换行 */
+              overflow: hidden; /* 超出部分隐藏 */
+              text-overflow: ellipsis; /* 超出部分显示省略号 */
+              cursor: pointer; /* 鼠标悬停时显示手型 */
+            }
+            .sp {
+              margin-left: 12px;
+            }
+          }
+          .segmentationContent {
+            padding-bottom: 12px;
+            padding: 0 8px 8px;
+            max-height: 100px;
+            overflow-y: auto;
+          }
+        }
+        .segmentationBox:hover {
+          .operateBtn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 24px;
+
+            :global(.arco-btn) {
+              height: 24px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

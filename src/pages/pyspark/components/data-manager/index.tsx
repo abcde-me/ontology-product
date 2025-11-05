@@ -3,8 +3,7 @@ import { Message, Typography } from '@arco-design/web-react';
 import DataDirectoryTree from '@/components/pyspark-data-directory-tree';
 import ModalDatasetDetail from './ModalDatasetDetail';
 import { DatasetListItem } from '@/types/datasetManagement';
-import styles from './index.module.scss';
-import classNames from 'classnames';
+import './index.scss';
 import ModalSourceVolumnDetail from './ModalSourceVolumnDetail';
 import ModalTargetVolumnDetail from './ModalTargetVolumnDetail';
 import { Db, FluffyVolume } from '@/api/dataCatalog';
@@ -119,15 +118,10 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   };
 
   return (
-    <div
-      className={classNames(
-        styles['python-tab-content'],
-        styles['sider-container']
-      )}
-    >
-      <div className={styles['sider-title']}>数据目录</div>
+    <div className="python-tab-content sider-container">
+      <div className="sider-title">数据目录</div>
 
-      <div className={styles['tab-tree']}>
+      <div className="tab-tree">
         <DataDirectoryTree
           onVolumeInsert={handleVolumeInsert}
           onViewDatasetDetail={handleViewDatasetDetail}

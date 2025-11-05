@@ -11,21 +11,18 @@ import './data-enhancement.scss';
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const { app_scenarios, enha_modle_id, modelList, prompt_checkbox } =
     props.data;
-  const {
-    sample_num,
-    similarity_threshold,
-    generate_sample_num
-  } = app_scenarios?.option ?? {};
+  const { sample_num, similarity_threshold, generate_sample_num } =
+    app_scenarios?.option ?? {};
   const app_scenarios_type = app_scenarios?.type ?? '';
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,
     props.data
   );
   const appScenarios: { [key: string]: string } = {
-    tongyong: '通用',
+    tongyong: '问答对生成',
     fenlei: '文本分类',
     tiqu: '文本提取',
-    shengcheng: '文本生成',
+    shengcheng: '文本扩写',
     duolong: '多轮回答'
   };
   let defaultModelName = null;
@@ -45,7 +42,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       }
       if (!app_scenarios_type) {
         fields.app_scenarios = {};
-        fields.app_scenarios.name = '通用';
+        fields.app_scenarios.name = '问答对生成';
         fields.app_scenarios.type = 'tongyong';
       }
       handleModelChange(fields);

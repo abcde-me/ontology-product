@@ -16,8 +16,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { useDatasetTree } from '../../hooks/useDatasetTree';
 import { DatasetListItem } from '@/types/datasetManagement';
-import styles from './index.module.scss';
-import classNames from 'classnames';
+import './index.scss';
 import { A } from '@svgdotjs/svg.js';
 import { formatFileSize } from '@/utils/format';
 import { useSourceTree } from '../../hooks/useSourceTree';
@@ -98,22 +97,20 @@ const SourceTree: React.FC<SourceTreeProps> = ({
   );
 
   return (
-    <div className={styles['pyspark-source-tree']}>
+    <div className="pyspark-source-tree">
       {/* 第一部分：标题导航 */}
-      <div className={styles['pyspark-source-tree__header']}>
-        <div className={styles['pyspark-source-tree__header-left']}>
+      <div className="pyspark-source-tree__header">
+        <div className="pyspark-source-tree__header-left">
           <IconArrowLeft
-            className={styles['pyspark-source-tree__back-icon']}
+            className="pyspark-source-tree__back-icon"
             onClick={handleBack}
           />
-          <span className={styles['pyspark-source-tree__title']}>
-            源数据目录
-          </span>
+          <span className="pyspark-source-tree__title">源数据目录</span>
         </div>
       </div>
 
       {/* 第二部分：搜索框 */}
-      <div className={styles['pyspark-source-tree__search']}>
+      <div className="pyspark-source-tree__search">
         <Input.Search
           placeholder={'搜索当前文件夹'}
           onSearch={(value) => {
@@ -124,12 +121,12 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             handleSearch('');
           }}
           allowClear
-          className={styles['pyspark-source-tree__search-input']}
+          className="pyspark-source-tree__search-input"
         />
       </div>
 
       {/* 第三部分：列表 */}
-      <div className={styles['pyspark-source-tree__content']}>
+      <div className="pyspark-source-tree__content">
         {loading ? (
           <div className="mt-[110px] flex flex-col items-center">
             <Spin size={26} />
@@ -145,7 +142,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             expandedKeys={expandedKeys}
             onExpand={setExpandedKeys}
             treeData={treeDataFiltered}
-            className={styles['pyspark-source-tree__content-tree']}
+            className="pyspark-source-tree__content-tree"
             icons={(props) => {
               const nodeType = props.dataRef?.type;
               const isExpandable = [
@@ -164,15 +161,10 @@ const SourceTree: React.FC<SourceTreeProps> = ({
               const isFile = nodeData?.type === 'file';
 
               return (
-                <div className={styles['pyspark-source-tree__node']}>
-                  <div className={styles['pyspark-source-tree__node-info']}>
+                <div className="pyspark-source-tree__node">
+                  <div className="pyspark-source-tree__node-info">
                     <EllipsisPopover
-                      className={classNames(
-                        styles['pyspark-source-tree__node-title'],
-                        styles[
-                          `pyspark-source-tree__node-title-${nodeData?.type}`
-                        ]
-                      )}
+                      className={`pyspark-source-tree__node-title pyspark-source-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
                         searchKeyword
@@ -181,12 +173,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {(nodeData?.type === 'file' ||
                       nodeData?.type === 'volume_item') && (
                       <EllipsisPopover
-                        className={classNames(
-                          styles['pyspark-source-tree__node-size'],
-                          styles[
-                            `pyspark-source-tree__node-size-${nodeData?.type}`
-                          ]
-                        )}
+                        className={`pyspark-source-tree__node-size pyspark-source-tree__node-size-${nodeData?.type}`}
                         value={
                           nodeData?.type === 'file'
                             ? formatFileSize(Number(nodeData?.file_size ?? 0))
@@ -195,11 +182,11 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                       />
                     )}
                   </div>
-                  <div className={styles['pyspark-source-tree__node-actions']}>
+                  <div className="pyspark-source-tree__node-actions">
                     {isVolumeItem && (
                       <Button
                         type="text"
-                        className={styles['pyspark-source-tree__detail-btn']}
+                        className="pyspark-source-tree__detail-btn"
                         onClick={(e) => handleDetailClick(e, nodeData)}
                       >
                         详情
@@ -208,7 +195,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {isFile && (
                       <Button
                         type="outline"
-                        className={styles['pyspark-source-tree__insert-btn']}
+                        className="pyspark-source-tree__insert-btn"
                         onClick={(e) => handleInsertClick(e, nodeData)}
                         onMouseDown={(e) => {
                           // 阻止按钮获得焦点，保持编辑器焦点

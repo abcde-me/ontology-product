@@ -1,7 +1,7 @@
 import mime from 'mime';
 import { FileAppearanceTypeEnum } from './types';
 import type { FileEntity } from './types';
-// import { upload } from '@/pages/workflowConfig/service/base'
+import { upload } from '@/pages/workflowConfig/service/base';
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
 import { SupportUploadFileTypes } from '@/pages/workflowConfig/workflow/types';
 import type { FileResponse } from '@/pages/workflowConfig/types/workflow';
@@ -18,33 +18,33 @@ type FileUpload = (
   isPublic?: boolean,
   url?: string
 ) => void;
-// export const fileUpload: FileUpload = ({
-//   file,
-//   onProgressCallback,
-//   onSuccessCallback,
-//   onErrorCallback,
-// }) => {
-//   const formData = new FormData()
-//   formData.append('file', file)
-//   const onProgress = (e: ProgressEvent) => {
-//     if (e.lengthComputable) {
-//       const percent = Math.floor(e.loaded / e.total * 100)
-//       onProgressCallback(percent)
-//     }
-//   }
+export const fileUpload: FileUpload = ({
+  file,
+  onProgressCallback,
+  onSuccessCallback,
+  onErrorCallback
+}) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const onProgress = (e: ProgressEvent) => {
+    if (e.lengthComputable) {
+      const percent = Math.floor((e.loaded / e.total) * 100);
+      onProgressCallback(percent);
+    }
+  };
 
-//   upload({
-//     xhr: new XMLHttpRequest(),
-//     data: formData,
-//     onprogress: onProgress,
-//   })
-//     .then((res: any) => {
-//       onSuccessCallback(res.data || res)
-//     })
-//     .catch(() => {
-//       onErrorCallback()
-//     })
-// }
+  upload({
+    xhr: new XMLHttpRequest(),
+    data: formData,
+    onprogress: onProgress
+  })
+    .then((res: any) => {
+      onSuccessCallback(res.data || res);
+    })
+    .catch(() => {
+      onErrorCallback();
+    });
+};
 
 export const getFileExtension = (
   fileName: string,

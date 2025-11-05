@@ -9,6 +9,51 @@ import {
 } from '@arco-design/web-react';
 import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 import './DepartmentModal.scss';
+
+// 树节点处理工具函数
+const processTreeNode = (node: any, isDetailMode: boolean): any => {
+  return {
+    ...node,
+    actionOnClick: 'check',
+    disableCheckbox: isDetailMode,
+    // 递归处理子节点，将childList转换为children
+    children: node.childList?.map((child: any) =>
+      processTreeNode(child, isDetailMode)
+    )
+  };
+};
+
+// 处理树数据的工具函数
+const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
+  return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
+};
+
+// 只保留有权限数据的节点
+const filterTreeDataByPerms = (data: any[]): any[] => {
+  if (!data?.length) return [];
+
+  return data.reduce((result: any[], item) => {
+    // 递归过滤子节点
+    const filteredChildren = item.children?.length
+      ? filterTreeDataByPerms(item.children)
+      : undefined;
+
+    // 如果当前节点有权限，保留该节点（即使子节点被过滤为空也要保留）
+    if (item.isPermission) {
+      result.push({
+        ...item,
+        children: filteredChildren
+      });
+    } else if (filteredChildren?.length) {
+      // 如果当前节点没有权限但有过滤后的子节点，提升子节点层级
+      result.push(...filteredChildren);
+    }
+    // 既没有权限也没有有效子节点的节点被忽略
+
+    return result;
+  }, []);
+};
+
 interface DataSourceModalProps {
   visible: boolean;
   onClose: () => void;
@@ -40,26 +85,12 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   }, [getDetailObj]);
   const getTreeData = () => {
     try {
-      getDepartmentTreeList({})
+      getDepartmentTreeList()
         .then((res) => {
-          // 每个层级增加一个属性
-          const newTreeData = res?.data?.map((item) => {
-            if (item.children) {
-              item.children.forEach((child) => {
-                child.disableCheckbox = type === 'detail' ? true : false;
-                child?.children?.forEach((childChild) => {
-                  childChild.disableCheckbox = type === 'detail' ? true : false;
-                });
-              });
-            }
-            return {
-              ...item,
-              actionOnClick: 'check',
-              disableCheckbox: type === 'detail' ? true : false
-            };
-          });
-          setTreeData(newTreeData || []);
-          setOriginalTreeData(newTreeData || []);
+          const isDetailMode = type === 'detail';
+          const newTreeData = processTreeData(res?.data || [], isDetailMode);
+          setTreeData(filterTreeDataByPerms(newTreeData));
+          setOriginalTreeData(filterTreeDataByPerms(newTreeData));
         })
         .catch((err) => {
           console.error(err);
@@ -69,7 +100,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    getTreeData();
+    if (visible) {
+      getTreeData();
+    }
   }, [activeTab, visible]);
 
   const searchData = (searchValue, originalTreeData) => {

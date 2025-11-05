@@ -124,9 +124,7 @@ const DatasetsList: FC = () => {
             text = '导出中';
             color = '#1890ff';
             actionBtn = (
-              <PermissionWrapper
-                permission={PYSPARK_PERMISSIONS.CAN_EXPORT_STOP}
-              >
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Link href="#" onClick={() => handleStopTask(item)}>
                   {' '}
                   停止{' '}
@@ -142,9 +140,7 @@ const DatasetsList: FC = () => {
             text = '导出失败';
             color = '#ff4d4f';
             actionBtn = (
-              <PermissionWrapper
-                permission={PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY}
-              >
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Tooltip content={item.err_reason}>
                   <IconInfoCircle />
                 </Tooltip>
