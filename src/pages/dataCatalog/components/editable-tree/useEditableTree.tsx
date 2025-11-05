@@ -108,10 +108,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
       data?.forEach?.((item) => {
-        if (
-          typeof item.title === 'string' &&
-          item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
-        ) {
+        if (typeof item.title === 'string' && item.title.indexOf(value) > -1) {
           if (item.parentKey) {
             keys.push(item.parentKey);
           }
@@ -556,10 +553,9 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
-      const index = title.toLowerCase().indexOf(searchValue.toLowerCase());
+      const index = title.indexOf(searchValue);
       if (index !== -1) {
         const prefix = title.slice(0, index);
         const suffix = title.slice(index + searchValue.length);
