@@ -13,7 +13,7 @@ import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import PermissionWrapper from '@/components/PermissionGuard';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import styles from './index.module.scss';
 
