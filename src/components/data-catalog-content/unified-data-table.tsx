@@ -713,6 +713,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         <UnifiedTable
           ref={tableRef}
           columns={columns}
+          rowKey={'table_id'}
           data={tableData as any}
           onSelectionChange={handleSelectionChange}
           onChange={handleTableChange}
