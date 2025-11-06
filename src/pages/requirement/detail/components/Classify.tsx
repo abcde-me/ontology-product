@@ -166,7 +166,7 @@ const Classify = (props: ClassifyComponentProps) => {
                 >
                   <Input
                     placeholder="请输入属性名称"
-                    style={{ width: 440 }}
+                    style={{ width: 540 }}
                     value={item.attribute_group_name}
                     onChange={(value) => {
                       handleFieldChange(index, 'attribute_group_name', value);
@@ -449,7 +449,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           }
                         >
                           <Input
-                            style={{ width: 290, backgroundColor: '#fff' }}
+                            style={{ width: 340, backgroundColor: '#fff' }}
                             placeholder="用于存储标注结果"
                             value={attr.attribute_name_en}
                             onChange={(value) => {
@@ -514,7 +514,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                         >
                           <Input
-                            style={{ width: 268, backgroundColor: '#fff' }}
+                            style={{ width: 300, backgroundColor: '#fff' }}
                             placeholder="展示在标注页面的名称"
                             value={attr.attribute_name_cn}
                             onChange={(value) => {
