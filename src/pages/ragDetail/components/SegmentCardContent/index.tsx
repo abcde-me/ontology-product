@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useRagDetailStore, type Segment } from '../store/ragDetailStore';
-import SegmentMarkdown from './SegmentMarkdown';
+import { useRagDetailStore, type Segment } from '../../store/ragDetailStore';
+import SegmentMarkdown from '../SegmentMarkdown';
 import styles from './SegmentCardContent.module.scss';
 
 interface SegmentCardContentProps {

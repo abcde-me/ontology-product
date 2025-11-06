@@ -6,8 +6,8 @@
 import React, { useMemo } from 'react';
 import { Tree, Tooltip } from '@arco-design/web-react';
 import type { TreeProps } from '@arco-design/web-react/es/Tree';
-import { DirectoryNode } from '../types';
-import { useRagDetailStore } from '../store/ragDetailStore';
+import { DirectoryNode } from '../../types';
+import { useRagDetailStore } from '../../store/ragDetailStore';
 import styles from './DirectoryTree.module.scss';
 
 interface DirectoryTreeProps {

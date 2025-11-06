@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { ImageTextSegment } from '../types';
 import { useRagDetailStore } from '../store/ragDetailStore';
 import SegmentCardActions from './SegmentCardActions';
-import styles from './SegmentCardContent.module.scss';
+import styles from './SegmentCardContent/SegmentCardContent.module.scss';
 
 interface ImageTextSegmentCardProps {
   segment: ImageTextSegment;

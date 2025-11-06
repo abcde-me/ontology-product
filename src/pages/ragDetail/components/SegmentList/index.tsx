@@ -3,10 +3,10 @@ import {
   useRagDetailStore,
   type Segment,
   type ImageTextSegment
-} from '../store/ragDetailStore';
-import SegmentCard from './SegmentCard';
-import ImageTextSegmentCard from './ImageTextSegmentCard';
-import SegmentListHeader from './SegmentListHeader';
+} from '../../store/ragDetailStore';
+import SegmentCard from '../SegmentCard';
+import ImageTextSegmentCard from '../ImageTextSegmentCard';
+import SegmentListHeader from '../SegmentListHeader';
 import styles from './SegmentList.module.scss';
 
 interface SegmentListProps {
