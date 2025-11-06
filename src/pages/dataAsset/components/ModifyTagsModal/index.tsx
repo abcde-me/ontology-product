@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { Modal, Button, Select, Form } from '@arco-design/web-react';
+import {
+  Modal,
+  Button,
+  Select,
+  Form,
+  Tooltip,
+  Tag
+} from '@arco-design/web-react';
 
 interface ModifyTagsModalProps {
   visible: boolean;
@@ -53,12 +60,59 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
           rules={[{ required: true, message: '请选择标签' }]}
         >
           <Select
+            placeholder=""
+            mode="multiple"
+            // value={recordTags}
+            options={tagOptions}
+            dropdownMenuClassName="data-asset-dropdown-select"
+            allowCreate
+            // renderTag={tagRender}
+            // popupVisible={selectVisible[record.id] || false}
+            // onVisibleChange={(visible) => {
+            //   setSelectVisible((prev) => ({
+            //     ...prev,
+            //     [record.id]: visible
+            //   }));
+            //   if (visible) {
+            //     setEditingTagRecordId(record.id);
+            //   }
+            // }}
+            maxTagCount={{
+              count: 2,
+              render: (invisibleTagCount) => {
+                const allTags = form.getFieldValue('tags') || [];
+                const remainingTags = allTags.slice(2);
+                return (
+                  <Tooltip
+                    content={
+                      <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                        {remainingTags.map((item, i) => (
+                          <Tag
+                            key={i}
+                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                            // className={classNames(styles['tag'])}
+                          >
+                            {item}
+                          </Tag>
+                        ))}
+                      </div>
+                    }
+                  >
+                    +{invisibleTagCount}
+                  </Tooltip>
+                );
+              }
+            }}
+            // onChange={(values) => handleTagChange(record.id, values)}
+          ></Select>
+          {/* <Select
             mode="multiple"
             placeholder="请选择标签"
             style={{ width: '100%' }}
+            maxTagCount={2}
             options={tagOptions}
             allowCreate
-          />
+          /> */}
         </Form.Item>
 
         {/* 按钮 */}

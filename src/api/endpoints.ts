@@ -504,7 +504,9 @@ export const ModaForgeResourceEndpoints = {
   getDataAssetTableDistinctFieldCount:
     PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
   // 批量修改数据资产表中的数据信息
-  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
+  // 获取标签列表
+  listAssetTags: PrefixAimdp + '/ListAssetTags'
 };
 
 /**

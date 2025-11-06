@@ -11,8 +11,10 @@ import {
   EditDataAssetData,
   ModifyMethod
 } from '@/types/dataAssetApi';
-import { getTagList } from '@/api/datasetManagement';
+import { getTagList } from '@/api/dataAsset';
 import { editDataAssetDataBatch } from '@/api/dataAsset';
+import classNames from 'classnames';
+import styles from './index.module.scss';
 
 interface DataAssetTableCardProps {
   dataAssetList: ListDataAssetDataRes['records'];
@@ -38,15 +40,29 @@ export default function DataAssetTableCard({
     null
   );
   const [tagValues, setTagValues] = useState<Record<string, string[]>>({});
+  const [selectVisible, setSelectVisible] = useState<Record<string, boolean>>(
+    {}
+  );
+  const { Option } = Select;
+
+  const tagRender = (props) => {
+    const { label, value } = props;
+
+    return (
+      <Tag className={classNames(styles['tag'])} key={value}>
+        {label}
+      </Tag>
+    );
+  };
 
   // 获取标签列表
   useEffect(() => {
     getTagList()
       .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const options = (res.data || []).map((tag: any) => ({
-            label: tag.name || tag.label,
-            value: tag.name || tag.value || tag.id
+        if (res.code === 0) {
+          const options = (res.data || []).map((tag) => ({
+            label: tag.value,
+            value: tag.id
           }));
           setTagList(options);
         }
@@ -75,48 +91,6 @@ export default function DataAssetTableCard({
       ...prev,
       [recordId]: values
     }));
-  };
-
-  // 处理标签保存
-  const handleTagBlur = async (recordId: string) => {
-    if (editingTagRecordId !== recordId) return;
-
-    const currentTags = tagValues[recordId] || [];
-    const record = dataAssetList.find((item) => item.id === recordId);
-    const originalTags = ((record?.tags as string[]) || []).join(',');
-    const newTags = currentTags.join(',');
-
-    // 如果标签没有变化，直接退出编辑状态
-    if (originalTags === newTags) {
-      setEditingTagRecordId(null);
-      return;
-    }
-
-    try {
-      const editData: EditDataAssetData = {
-        modifyMethod: ModifyMethod.COVER,
-        modifyIds: [recordId],
-        modifyContext: [
-          {
-            fieldEnName: 'tags',
-            fieldValue: newTags
-          }
-        ]
-      };
-
-      await editDataAssetDataBatch(editData);
-      Message.success('标签更新成功');
-      setEditingTagRecordId(null);
-      // TODO: 刷新列表数据
-    } catch (error) {
-      console.error('更新标签失败:', error);
-      Message.error('标签更新失败');
-      // 恢复原始标签值
-      setTagValues((prev) => ({
-        ...prev,
-        [recordId]: (record?.tags as string[]) || []
-      }));
-    }
   };
 
   // 格式化更新时间
@@ -163,18 +137,24 @@ export default function DataAssetTableCard({
   }
 
   return (
-    <div className="flex w-full flex-col">
+    <div
+      className={classNames(
+        'flex w-full flex-col',
+        styles['data-asset-table-card']
+      )}
+    >
       <div className="mb-6 grid grid-cols-4 gap-x-[12px] gap-y-6">
         {paginatedList.map((record) => {
           const recordTags =
             tagValues[record.id] || (record.tags as string[]) || [];
-          const isEditing = editingTagRecordId === record.id;
-          const hasTags = recordTags.length > 0;
 
           return (
             <div
               key={record.id}
-              className="flex flex-col gap-3 rounded-lg border border-[#e5e7eb] bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md"
+              className={classNames(
+                'flex flex-col rounded-lg border border-[#F2F3F5] bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md',
+                styles['data-asset-table-card-item']
+              )}
             >
               {/* 标题 */}
               <div className="truncate text-base font-semibold leading-6 text-[#1f2937]">
@@ -182,72 +162,78 @@ export default function DataAssetTableCard({
               </div>
 
               {/* 标签区域 */}
-              <div className="flex min-h-8 items-start">
-                {isEditing || hasTags ? (
-                  <Select
-                    placeholder="请输入或选择标签"
-                    mode="multiple"
-                    options={tagList}
-                    value={recordTags}
-                    className="data-asset-tag-select w-full"
-                    dropdownMenuClassName="data-asset-dropdown-select"
-                    allowCreate
-                    maxTagCount={{
-                      count: 2,
-                      render: (invisibleTagCount) => {
-                        const remainingTags = recordTags.slice(2);
-                        return (
-                          <Tooltip
-                            content={
-                              <div className="flex max-w-[300px] flex-wrap gap-1">
-                                {remainingTags.map((item, i) => (
-                                  <Tag
-                                    key={i}
-                                    style={{
-                                      height: '24px',
-                                      background: '#E7ECF0',
-                                      color: '#0F172A',
-                                      borderRadius: '2px',
-                                      fontSize: '12px',
-                                      alignItems: 'center',
-                                      margin: '0 2px'
-                                    }}
-                                  >
-                                    {item}
-                                  </Tag>
-                                ))}
-                              </div>
-                            }
-                          >
-                            <span className="inline-block h-6 cursor-pointer rounded border border-[#d1d5db] bg-[#e7ecf0] px-2 text-xs leading-6 text-[#0f172a]">
-                              +{invisibleTagCount}
-                            </span>
-                          </Tooltip>
-                        );
-                      }
-                    }}
-                    onVisibleChange={(visible) => {
-                      if (visible) {
-                        setEditingTagRecordId(record.id);
-                      } else {
-                        // 延迟处理，等待 onBlur 触发
-                        setTimeout(() => {
-                          if (editingTagRecordId === record.id) {
-                            handleTagBlur(record.id);
+              <div className="relative ml-[-4px] flex h-[36px] items-center">
+                <Select
+                  placeholder=""
+                  mode="multiple"
+                  value={recordTags}
+                  className={classNames('w-full', styles['tag-wrapper'])}
+                  dropdownMenuClassName="data-asset-dropdown-select"
+                  allowCreate
+                  renderTag={tagRender}
+                  popupVisible={selectVisible[record.id] || false}
+                  onVisibleChange={(visible) => {
+                    setSelectVisible((prev) => ({
+                      ...prev,
+                      [record.id]: visible
+                    }));
+                    if (visible) {
+                      setEditingTagRecordId(record.id);
+                    }
+                  }}
+                  maxTagCount={{
+                    count: 2,
+                    render: (invisibleTagCount) => {
+                      const remainingTags = recordTags.slice(2);
+                      return (
+                        <Tooltip
+                          content={
+                            <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                              {remainingTags.map((item, i) => (
+                                <Tag
+                                  key={i}
+                                  className={classNames(styles['tag'])}
+                                >
+                                  {item}
+                                </Tag>
+                              ))}
+                            </div>
                           }
-                        }, 100);
-                      }
-                    }}
-                    onBlur={() => handleTagBlur(record.id)}
-                    onChange={(values) => handleTagChange(record.id, values)}
-                    style={{ width: '100%' }}
-                  />
-                ) : (
+                        >
+                          +{invisibleTagCount}
+                        </Tooltip>
+                      );
+                    }
+                  }}
+                  onChange={(values) => handleTagChange(record.id, values)}
+                >
+                  {tagList.map((item) => (
+                    <Option key={item.value} value={item.value}>
+                      {item.label}
+                    </Option>
+                  ))}
+                </Select>
+                {recordTags.length === 0 && (
                   <div
-                    className="flex min-h-8 w-full cursor-pointer items-center justify-center rounded border border-dashed border-[#d1d5db] transition-all duration-200 hover:border-[#007dfa] hover:bg-[#f5f5f5]"
-                    onClick={() => setEditingTagRecordId(record.id)}
+                    className="pointer-events-none absolute left-0 top-0 ml-[-4px] flex h-full w-full items-center"
+                    style={{ paddingLeft: '12px' }}
                   >
-                    <span className="text-sm text-[#9ca3af]">请添加标签</span>
+                    <span className="text-[#86909c]">
+                      暂无标签，
+                      <span
+                        className="pointer-events-auto cursor-pointer text-[#007DFA]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTagRecordId(record.id);
+                          setSelectVisible((prev) => ({
+                            ...prev,
+                            [record.id]: true
+                          }));
+                        }}
+                      >
+                        点击添加
+                      </span>
+                    </span>
                   </div>
                 )}
               </div>
