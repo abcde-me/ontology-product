@@ -1,24 +1,22 @@
-import type { FC } from 'react'
-import React from 'react'
+import type { FC } from 'react';
+import React from 'react';
 // import {
 //   RiSparklingFill,
 // } from '@remixicon/react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next';
 
-export type INoDataProps = any
+export type INoDataProps = any;
 const NoData: FC<INoDataProps> = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
   return (
-    <div className='flex flex-col h-full w-full justify-center items-center'>
+    <div className="flex h-full w-full flex-col items-center justify-center">
       {/* <RiSparklingFill className='w-12 h-12 text-text-empty-state-icon' /> */}
-      <div className='right-part-empty-icon' />
-      <div
-        className='mt-2 text-text-quaternary system-sm-regular'
-      >
+      <div className="right-part-empty-icon" />
+      <div className="system-sm-regular mt-2 text-text-quaternary">
         {/* {t('share.generation.noData')} */}
         AI会在这里给你惊喜
       </div>
     </div>
-  )
-}
-export default React.memo(NoData)
+  );
+};
+export default React.memo(NoData);
