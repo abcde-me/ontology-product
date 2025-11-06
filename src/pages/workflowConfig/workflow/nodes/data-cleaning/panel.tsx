@@ -27,7 +27,9 @@ import {
   dataSensitiveBefore,
   dataSensitiveAfter,
   dataDeduplicateBefore,
-  dataDeduplicateAfter
+  dataDeduplicateAfter,
+  dataWrittenCorrectBefore,
+  dataWrittenCorrectAfter
 } from './date-text';
 import useWatch from '@arco-design/web-react/es/Form/hooks/useWatch';
 import './date-cleaning.scss';
@@ -48,6 +50,7 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const oh_is = useWatch('oh_is', form);
   const case_uniformity = useWatch('case_uniformity', form);
   const mg_duplicate = useWatch('mg_duplicate', form);
+  const written_correct = useWatch('written_correct', form);
   const isChecked_data_standardization = () => {
     return [
       inputs?.unicode,
@@ -80,7 +83,8 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
           case_transform: inputs?.case_transform,
           case_uniformity: inputs?.case_uniformity,
           mg_duplicate: inputs?.mg_duplicate_checkbox,
-          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5
+          mg_duplicate_ngram: inputs?.mg_duplicate_ngram ?? 0.5,
+          written_correct: inputs?.written_correct
         }}
         layout="inline"
         onValuesChange={(_, v: any) => {
@@ -626,6 +630,38 @@ const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
                   <span className="info-after-text">清洗后:</span>
                   <span className="info-after-content">
                     {dataOutlierHandlingAfter}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="file-box">
+          <div className="date-switch">
+            <FormItem field="written_correct">
+              <Switch
+                checkedText="开"
+                uncheckedText="关"
+                checked={form.getFieldValue('written_correct')}
+                style={{ margin: 0, width: 'auto' }}
+              />
+            </FormItem>
+            <span className="date-switch-text">错别字改写</span>
+          </div>
+          {/* <div className="date-desc">---</div> */}
+          {written_correct && (
+            <>
+              <div className="date-cleaning-info">
+                <div className="info-before">
+                  <span className="info-before-text">清洗前:</span>
+                  <span className="info-before-content">
+                    {dataWrittenCorrectBefore}
+                  </span>
+                </div>
+                <div className="info-after">
+                  <span className="info-after-text">清洗后:</span>
+                  <span className="info-after-content">
+                    {dataWrittenCorrectAfter}
                   </span>
                 </div>
               </div>
