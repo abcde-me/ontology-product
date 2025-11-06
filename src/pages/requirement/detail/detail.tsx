@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { getRequirementDetail, publishRequirement } from '@/api/dataAnnotation';
+import { useParams } from '@/utils/url';
 import {
   Breadcrumb,
   Button,
+  Checkbox,
+  ColorPicker,
+  Dropdown,
   Form,
+  Image,
   Input,
+  Menu,
+  Message,
   Radio,
   Select,
-  Checkbox,
-  Tooltip,
-  Image,
-  Dropdown,
-  Menu,
-  ColorPicker,
-  Message,
-  Spin
+  Spin,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -22,22 +23,15 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import { useParams } from '@/utils/url';
+import _, { isArray, isEmpty, omitBy } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
-import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
-import { DepartmentModal } from './components/DepartmentModal';
-import { IndividualModal } from './components/IndividualModal';
 import { v4 as uuidV4 } from 'uuid';
 import {
   convertToUTCFormat,
   getRandomHexColorStrict,
   shapeOptions
-} from './common';
-import AnnotationType from './components/AnnotationType';
-import TextSubstanceComponent from './components/TextEntity';
-import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
-import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty } from 'lodash';
+} from '../common';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -46,7 +40,13 @@ import {
   LabelShape,
   RequirementTypeNameMap,
   toolFileType
-} from './type';
+} from '../type';
+import AnnotationType from './components/AnnotationType';
+import { Classify } from './components/Classify';
+import { DepartmentModal } from './components/DepartmentModal';
+import { DataSourceModal } from './components/DetailModal';
+import { IndividualModal } from './components/IndividualModal';
+import TextSubstanceComponent from './components/TextEntity';
 
 import './detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
@@ -1046,7 +1046,7 @@ export default function RequirementDetail() {
           </div>
         )}
       </div>
-      <Spin loading={pageLoading}>
+      <Spin loading={pageLoading} className="requirement-detail-content-spin">
         <div className="detail-content">
           {/* 基础配置部分 */}
           <div className="basic-configuration">
@@ -1058,15 +1058,7 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, ...val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              layout="horizontal"
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="需求名称:"
@@ -1119,9 +1111,7 @@ export default function RequirementDetail() {
                   maxLength={200}
                 />
               </FormItem>
-              <div className="basic-title" style={{ marginLeft: '-20px' }}>
-                任务配置
-              </div>
+              <div className="basic-title">任务配置</div>
               <FormItem
                 label="标注类型:"
                 required
@@ -1193,16 +1183,8 @@ export default function RequirementDetail() {
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
                 }}
-                style={{
-                  marginLeft: '0',
-                  marginRight: 'auto',
-                  marginBottom: 24
-                }}
+                style={{ marginBottom: 24 }}
                 layout="inline"
-                labelCol={{
-                  span: 1,
-                  offset: 0
-                }}
               >
                 <FormItem
                   field="label_info_attribute_groups"
@@ -2786,14 +2768,7 @@ export default function RequirementDetail() {
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="选择类型:"

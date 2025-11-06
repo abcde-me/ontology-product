@@ -50,3 +50,8 @@ export const dataImputationAfter = '“年龄：25,30,35,40,38”';
 export const dataOutlierHandlingBefore = '“体温：36.5, 36.7, 42.1, 36.9, 36.8”';
 export const dataOutlierHandlingAfter =
   '“体温：36.5, 36.7, 36.9, 36.8” (移除了异常值42.1)';
+// 错别字改写
+export const dataWrittenCorrectBefore =
+  '“这场会议的议题非常重要，大家要认真对待，积极发研讨仑，确保会议圆满陈功。”';
+export const dataWrittenCorrectAfter =
+  '“这场会议的议题非常重要，大家要认真对待，积极发言讨论，确保会议圆满成功。”';

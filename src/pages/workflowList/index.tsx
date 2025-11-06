@@ -353,7 +353,7 @@ export default function WorkflowList() {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_GET}>
+            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
               <span
                 className={styles['operate-text']}
                 onClick={() => {

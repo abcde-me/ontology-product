@@ -181,7 +181,7 @@ const AccessTable = (props) => {
         },
         {
           title: '类型',
-          dataIndex: 'db_type',
+          dataIndex: 'file_type',
           // render: (_, item) => <div>myslq表</div>,
           width: 120
         },

@@ -28,6 +28,8 @@ import React, { memo, useEffect, useState, useRef } from 'react';
 import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import styles from './RunningInfoPanel.module.scss';
 
 const { Item: CollapseItem } = Collapse;
@@ -379,76 +381,78 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         行数据
                       </span>
                     </Space>
-                    <Dropdown
-                      position="br"
-                      disabled={runStatus !== RunningStatus.SUCCESS}
-                      droplist={
-                        <Menu onClickMenuItem={handleMenuClick}>
-                          <Menu.Item key="1" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新数据集
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                适用于字段变更或使用场景差异较大等场景
-                              </div>
-                            </div>
-                          </Menu.Item>
-                          <Menu.Item key="2" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新版本
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                已存在数据集且字段不变
-                              </div>
-                            </div>
-                          </Menu.Item>
-                        </Menu>
-                      }
-                    >
-                      <Button
-                        type="outline"
-                        size="mini"
-                        icon={<SaveToDasetIcon />}
-                        style={{
-                          fontSize: '14px',
-                          color: '#1E293B',
-                          fontWeight: 600
-                        }}
+                    <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                      <Dropdown
+                        position="br"
                         disabled={runStatus !== RunningStatus.SUCCESS}
+                        droplist={
+                          <Menu onClickMenuItem={handleMenuClick}>
+                            <Menu.Item key="1" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新数据集
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  适用于字段变更或使用场景差异较大等场景
+                                </div>
+                              </div>
+                            </Menu.Item>
+                            <Menu.Item key="2" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新版本
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  已存在数据集且字段不变
+                                </div>
+                              </div>
+                            </Menu.Item>
+                          </Menu>
+                        }
                       >
-                        保存到数据集
-                      </Button>
-                    </Dropdown>
+                        <Button
+                          type="outline"
+                          size="mini"
+                          icon={<SaveToDasetIcon />}
+                          style={{
+                            fontSize: '14px',
+                            color: '#1E293B',
+                            fontWeight: 600
+                          }}
+                          disabled={runStatus !== RunningStatus.SUCCESS}
+                        >
+                          保存到数据集
+                        </Button>
+                      </Dropdown>
+                    </PermissionWrapper>
                   </div>
                 )}
               </div>
