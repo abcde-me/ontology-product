@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRagDetailStore, type Segment } from '../store/ragDetailStore';
 
 interface SegmentCardActionsProps {
@@ -10,14 +10,23 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
   segment,
   isEditing
 }) => {
-  const { startEditingSegment } = useRagDetailStore();
-  const [activeAction, setActiveAction] = useState<
-    'edit' | 'detail' | 'trace' | null
-  >(isEditing ? 'edit' : null);
+  const {
+    startEditingSegment,
+    openSegmentDrawer,
+    segmentDrawerVisible,
+    segmentDrawerSegmentId
+  } = useRagDetailStore();
 
   const buttonBaseClass = 'px-3 py-1 text-xs rounded transition-all border';
   const getButtonClass = (action: 'edit' | 'detail' | 'trace') => {
-    const isActive = action === 'edit' ? isEditing : activeAction === action;
+    // 检查当前分段的 drawer 是否打开
+    const isDrawerOpenForThisSegment =
+      segmentDrawerVisible && segmentDrawerSegmentId === segment.id;
+    const isActive =
+      action === 'edit'
+        ? isEditing
+        : isDrawerOpenForThisSegment &&
+          (action === 'detail' || action === 'trace');
     return `${buttonBaseClass} ${
       isActive
         ? 'border-[#007DFA] bg-[#EEF6FF] text-[#007DFA]'
@@ -31,7 +40,6 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
         onClick={(e) => {
           e.stopPropagation();
           startEditingSegment(segment.id);
-          setActiveAction('edit');
         }}
         className={getButtonClass('edit')}
         title="编辑分段"
@@ -42,7 +50,7 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          setActiveAction('detail');
+          openSegmentDrawer(segment.id, 'detail');
         }}
         className={getButtonClass('detail')}
         title="分段详情"
@@ -53,7 +61,7 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          setActiveAction('trace');
+          openSegmentDrawer(segment.id, 'trace');
         }}
         className={getButtonClass('trace')}
         title="溯源日志"

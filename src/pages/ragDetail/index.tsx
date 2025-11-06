@@ -3,13 +3,23 @@ import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import SceneRouter from './components/SceneRouter';
 import ImageModal from './components/ImageModal';
+import SegmentDrawer from './components/SegmentDrawer';
 import { useRagDetailStore } from './store/ragDetailStore';
 import './styles/index.css';
 
 function RagDetail() {
   const location = useLocation();
-  const { initializeRagDetail, sceneType, showPdfViewer, loading } =
-    useRagDetailStore();
+  const {
+    initializeRagDetail,
+    sceneType,
+    showPdfViewer,
+    loading,
+    segmentDrawerVisible,
+    segmentDrawerTab,
+    segmentDrawerSegmentId,
+    closeSegmentDrawer,
+    segments
+  } = useRagDetailStore();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -18,6 +28,11 @@ function RagDetail() {
       initializeRagDetail(ragId);
     }
   }, [location, initializeRagDetail]);
+
+  // 获取当前打开 drawer 的分段信息
+  const currentSegment = segments.find(
+    (seg) => seg.id === segmentDrawerSegmentId
+  );
 
   return (
     <div
@@ -42,6 +57,16 @@ function RagDetail() {
       </div>
       {/* 图片放大弹窗 */}
       <ImageModal />
+      {/* 分段详情/溯源日志抽屉 */}
+      {currentSegment && (
+        <SegmentDrawer
+          visible={segmentDrawerVisible}
+          onClose={closeSegmentDrawer}
+          defaultActiveTab={segmentDrawerTab}
+          currentSegmentIndex={currentSegment.segmentIndex}
+          totalSegments={segments.length}
+        />
+      )}
     </div>
   );
 }

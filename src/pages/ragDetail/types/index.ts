@@ -154,6 +154,10 @@ export interface RagDetailState {
   highlightedPdfCoordinates?: PDFCoordinate[]; // PDF高亮坐标（多个，支持跨页）
   loading: boolean;
   error: string | null;
+  // Segment Drawer state
+  segmentDrawerVisible: boolean;
+  segmentDrawerTab: 'detail' | 'trace';
+  segmentDrawerSegmentId: string | null;
 }
 
 export interface RagDetailActions {
@@ -172,6 +176,9 @@ export interface RagDetailActions {
   setError: (error: string | null) => void;
   setSelectedSegmentId: (segmentId: string | null) => void;
   scrollToSegment: (segmentId: string) => void;
+  // Segment Drawer actions
+  openSegmentDrawer: (segmentId: string, tab: 'detail' | 'trace') => void;
+  closeSegmentDrawer: () => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;

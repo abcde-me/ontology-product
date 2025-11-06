@@ -44,6 +44,10 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     highlightedPdfCoordinates: undefined,
     loading: false,
     error: null,
+    // Segment Drawer state
+    segmentDrawerVisible: false,
+    segmentDrawerTab: 'trace',
+    segmentDrawerSegmentId: null,
 
     // Actions
     initializeRagDetail: async (ragId: string) => {
@@ -223,6 +227,22 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         detail: { segmentId }
       });
       window.dispatchEvent(event);
+    },
+
+    // Segment Drawer actions
+    openSegmentDrawer: (segmentId: string, tab: 'detail' | 'trace') => {
+      set({
+        segmentDrawerVisible: true,
+        segmentDrawerTab: tab,
+        segmentDrawerSegmentId: segmentId
+      });
+    },
+
+    closeSegmentDrawer: () => {
+      set({
+        segmentDrawerVisible: false,
+        segmentDrawerSegmentId: null
+      });
     }
   })
 );
