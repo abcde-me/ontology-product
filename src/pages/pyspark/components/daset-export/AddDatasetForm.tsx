@@ -373,7 +373,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
