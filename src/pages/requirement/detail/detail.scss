@@ -47,20 +47,11 @@
     }
   }
 
-  // .detail-content {
-  //   background-color: #fff;
-  //   border-radius: 15px;
-  //   padding-top: 24px;
-  //   padding-left: 24px;
-  //   margin-top: 16px;
-  // }
-
   .basic-title {
     font-family: PingFang SC;
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
-    // margin-left: -12px;
     margin-bottom: 16px;
   }
 
@@ -68,14 +59,6 @@
     display: flex;
     align-items: center;
     width: 110px;
-  }
-
-  .basic-configuration {
-    min-width: 1700px;
-
-    .table-container {
-      margin-left: 77px;
-    }
   }
 
   .data-content-set {
@@ -465,9 +448,9 @@
     }
   }
 
-  .task-configuration-content {
-    max-width: 1700px;
-  }
+  // .task-configuration-content {
+  //   max-width: 1700px;
+  // }
 
   .arco-textarea-wrapper {
     width: min-content;

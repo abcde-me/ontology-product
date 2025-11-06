@@ -50,7 +50,11 @@ import { DepartmentModal } from './components/DepartmentModal';
 import { DataSourceModal } from './components/DetailModal';
 import { IndividualModal } from './components/IndividualModal';
 import TextSubstanceComponent from './components/TextEntity';
-import { generateLabels, generateInitialData } from './utils/generateLabels';
+import {
+  generateLabels,
+  generateInitialData,
+  LABEL_MAPPING
+} from './utils/generateLabels';
 import './detail.scss';
 import {
   useGetModelList,
@@ -934,6 +938,16 @@ export default function RequirementDetail() {
     { enabled: !!model_name }
   );
 
+  // 监听预标注模型变化，清空所有模型映射字段
+  useEffect(() => {
+    if (labelDataList && labelDataList.length > 0 && type !== 'detail') {
+      labelDataList.forEach((item) => {
+        const fieldName = `label_mapping_${item?.label_id}`;
+        labelToolForm.setFieldValue(fieldName, undefined);
+      });
+    }
+  }, [model_name, type]);
+
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -1332,6 +1346,33 @@ export default function RequirementDetail() {
                                         options={modelLabelList}
                                         style={{ width: 110 }}
                                         allowClear
+                                        onChange={(val: any) => {
+                                          // 根据模型映射选择的值设置对应的形状
+                                          if (
+                                            val !== undefined &&
+                                            val !== null
+                                          ) {
+                                            // 使用 LABEL_MAPPING 将字符串形状转换为数字
+                                            const mappedShape =
+                                              LABEL_MAPPING[val];
+
+                                            if (mappedShape !== undefined) {
+                                              const shapeFieldName = `label_shape_${type === 'detail' ? item?.id : item?.label_id}`;
+
+                                              // 先更新表单字段
+                                              labelToolForm.setFieldValue(
+                                                shapeFieldName,
+                                                mappedShape
+                                              );
+
+                                              // 再更新 labelDataList 中的形状值
+                                              updateNestedValue(
+                                                [labelIndex, 'label_shape'],
+                                                mappedShape
+                                              );
+                                            }
+                                          }
+                                        }}
                                       ></Select>
                                     </FormItem>
                                   )}
@@ -1347,6 +1388,14 @@ export default function RequirementDetail() {
                                           [labelIndex, 'label_shape'],
                                           parseInt(val)
                                         );
+                                        // 形状改变时，清空对应的模型映射值
+                                        if (model_name) {
+                                          const mappingFieldName = `label_mapping_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          labelToolForm.setFieldValue(
+                                            mappingFieldName,
+                                            undefined
+                                          );
+                                        }
                                       }}
                                       style={{ width: 64, height: 32 }}
                                       triggerProps={{

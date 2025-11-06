@@ -32,7 +32,7 @@ export const useGetModelLabelList = (
   options?
 ) => {
   const { data, isLoading, isFetching, refetch } = useQuery(
-    ['get-model-label-list'],
+    ['get-model-label-list', params.model_name],
     () => getModelLabelList(params),
     {
       ...options,

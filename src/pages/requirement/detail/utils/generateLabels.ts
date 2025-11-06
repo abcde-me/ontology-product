@@ -43,3 +43,15 @@ export const generateLabels = (data: any[]) => {
     };
   });
 };
+
+// 模型标签形状映射：将API返回的字符串形状转换为数字
+export const LABEL_MAPPING = {
+  bbox: 3, // 矩形
+  rectangle: 3, // 矩形
+  polygon: 4, // 多边形
+  points: 1, // 点
+  point: 1, // 点
+  polyline: 2, // 线
+  line: 2, // 线
+  ellipse: 5 // 椭圆
+};
