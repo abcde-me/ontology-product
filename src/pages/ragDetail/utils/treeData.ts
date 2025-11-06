@@ -3,11 +3,17 @@
  * ragId=1001: 无目录树
  * ragId=1002: 有目录树
  * ragId=1003: 有目录树(图文混排场景)
+ * ragId=1004: 有目录树(PPT场景)
  */
 export function getTreeDataByRagId(ragId: string) {
   // ragId=1001 没有目录树
   if (ragId === '1001') {
     return null;
+  }
+
+  // ragId=1004 PPT场景的目录树
+  if (ragId === '1004') {
+    return TreeData_1004;
   }
 
   // ragId=1002 和 1003 都有目录树
@@ -266,6 +272,92 @@ export const TreeData_1002 = {
     },
     created_at: '2025-11-04T10:59:34.1+08:00',
     updated_at: '2025-11-04T10:59:34.1+08:00',
+    indexing_status: 'completed'
+  }
+};
+
+// ragId=1004 的PPT目录树数据
+export const TreeData_1004 = {
+  code: 'Success',
+  message: '请求成功',
+  data: {
+    id: 'document_catalogs-ppt-001',
+    tenant_id: '',
+    dataset_id: 'dataset-68471725-5c49-4392-a7ce-2d02d3401160',
+    document_id: 'document-ppt-001',
+    catalog_content: {
+      title: '2024年度工作总结与展望1',
+      title_id: 'title::ppt::root',
+      position: {},
+      short_text_positions: {},
+      level: 0,
+      short_texts: [],
+      children: [
+        {
+          title: '第一章 财务成果',
+          title_id: 'title::ppt::chapter1',
+          position: {},
+          short_text_positions: {
+            'segment-ppt-002': '{}'
+          },
+          level: 1,
+          short_texts: ['本年度实现营业收入1,234.56万元'],
+          node_id: 1,
+          segment_ids: ['segment-ppt-002']
+        },
+        {
+          title: '第二章 项目成果',
+          title_id: 'title::ppt::chapter2',
+          position: {},
+          short_text_positions: {
+            'segment-ppt-003': '{}'
+          },
+          level: 1,
+          short_texts: ['完成了5个重点项目'],
+          node_id: 2,
+          segment_ids: ['segment-ppt-003']
+        },
+        {
+          title: '第三章 未来展望',
+          title_id: 'title::ppt::chapter3',
+          position: {},
+          short_text_positions: {},
+          level: 1,
+          short_texts: [],
+          node_id: 3,
+          children: [
+            {
+              title: '3.1 2025年目标',
+              title_id: 'title::ppt::4',
+              position: {},
+              short_text_positions: {
+                'segment-ppt-004': '{}'
+              },
+              level: 2,
+              short_texts: ['2025年将继续深化改革'],
+              node_id: 4,
+              segment_ids: ['segment-ppt-004']
+            },
+            {
+              title: '3.2 团队建设',
+              title_id: 'title::ppt::5',
+              position: {},
+              short_text_positions: {
+                'segment-ppt-005': '{}'
+              },
+              level: 2,
+              short_texts: ['加强团队建设'],
+              node_id: 5,
+              segment_ids: ['segment-ppt-005']
+            }
+          ]
+        }
+      ],
+      node_id: 0,
+      segment_ids: ['segment-ppt-001']
+    },
+    created_at: '2024-01-15T10:30:00Z',
+    updated_at: '2024-01-15T10:30:00Z',
     indexing_status: 'completed'
   }
 };

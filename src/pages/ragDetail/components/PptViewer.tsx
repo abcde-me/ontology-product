@@ -1,76 +1,152 @@
 /**
  * PPT Viewer Component
- * PPT展示查看器
+ * PPT在线查看器 - 类似PdfViewer的实现
+ * 使用iframe + Office Online Viewer或Google Docs Viewer来渲染PPT文件
  */
 
-import React, { useState } from 'react';
-import { PptSegment } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRagDetailStore } from '../store/ragDetailStore';
 
 interface PptViewerProps {
-  segments: PptSegment[];
+  fileName?: string;
+  filePath?: string;
+  pptData?: ArrayBuffer; // 支持直接传入二进制数据
+  hideHeader?: boolean;
 }
 
-const PptViewer: React.FC<PptViewerProps> = ({ segments }) => {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+const PptViewer: React.FC<PptViewerProps> = ({
+  fileName,
+  filePath,
+  pptData,
+  hideHeader = false
+}) => {
+  const { selectedSegmentId, segments } = useRagDetailStore();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [pptUrl, setPptUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (segments.length === 0) {
-    return (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <div className="text-gray-500">暂无PPT数据</div>
-      </div>
-    );
-  }
+  // 显示的文件名
+  const displayFileName = fileName || filePath?.split('/').pop() || 'PPT文档';
 
-  const currentSlide = segments[currentSlideIndex];
+  // 处理PPT文件URL
+  useEffect(() => {
+    if (pptData) {
+      // 如果有二进制数据，创建Blob URL
+      const blob = new Blob([pptData], {
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      });
+      const url = URL.createObjectURL(blob);
+      setPptUrl(url);
 
-  const handlePrevious = () => {
-    setCurrentSlideIndex((prev) => Math.max(0, prev - 1));
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else if (filePath) {
+      // 使用文件路径
+      setPptUrl(filePath);
+    }
+  }, [pptData, filePath]);
+
+  // 监听selectedSegmentId变化，跳转到对应的幻灯片
+  useEffect(() => {
+    if (selectedSegmentId && segments.length > 0 && iframeRef.current) {
+      const segment = segments.find((seg: any) => seg.id === selectedSegmentId);
+      if (segment && 'slideNumber' in segment) {
+        const slideNumber = (segment as any).slideNumber;
+        // 尝试通过postMessage与iframe通信来跳转到指定页面
+        // 注意：这取决于使用的PPT查看器是否支持
+        try {
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: 'gotoSlide',
+              slideNumber: slideNumber
+            },
+            '*'
+          );
+        } catch (e) {
+          console.warn('无法跳转到指定幻灯片:', e);
+        }
+      }
+    }
+  }, [selectedSegmentId, segments]);
+
+  const handleIframeLoad = () => {
+    setLoading(false);
   };
 
-  const handleNext = () => {
-    setCurrentSlideIndex((prev) => Math.min(segments.length - 1, prev + 1));
+  const handleIframeError = () => {
+    setLoading(false);
+    setError('无法加载PPT文件');
+  };
+
+  // 使用Office Online Viewer或Google Docs Viewer
+  const getViewerUrl = (url: string) => {
+    // 如果URL已经包含viewer，直接返回
+    if (
+      url.includes('view.officeapps.live.com') ||
+      url.includes('docs.google.com/gview')
+    ) {
+      return url;
+    }
+
+    // 方案1: Microsoft Office Online Viewer
+    return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+
+    // 方案2: Google Docs Viewer
+    // return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
   };
 
   return (
-    <div className="flex h-full flex-col bg-gray-100">
-      {/* 幻灯片显示区域 */}
-      <div className="flex flex-1 items-center justify-center overflow-auto p-4">
-        <div className="max-h-full max-w-full rounded-lg bg-white p-8 shadow-lg">
-          {/* 幻灯片标题 */}
-          {currentSlide.slideTitle && (
-            <h2 className="mb-4 text-2xl font-bold text-gray-900">
-              {currentSlide.slideTitle}
-            </h2>
-          )}
+    <div className="flex h-full w-full flex-col">
+      {/* PPT头部 - 文件名（可选） */}
+      {!hideHeader && (
+        <div className="flex h-[56px] items-center border-b border-gray-200 px-5">
+          <span className="text-[14px] font-medium text-gray-900">
+            {displayFileName}
+          </span>
+        </div>
+      )}
 
-          {/* 幻灯片内容 */}
-          <div className="whitespace-pre-wrap text-gray-700">
-            {currentSlide.slideContent || currentSlide.content}
+      {/* PPT内容 */}
+      <div className="relative flex-1 overflow-hidden bg-[#F7F8FA]">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
+              <p className="text-gray-600">加载PPT中...</p>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* 控制条 */}
-      <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3">
-        <button
-          onClick={handlePrevious}
-          disabled={currentSlideIndex === 0}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          ← 上一页
-        </button>
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white">
+            <div className="text-center">
+              <p className="text-red-500">{error}</p>
+              <p className="mt-2 text-sm text-gray-500">
+                请确保PPT文件可访问或使用支持的格式
+              </p>
+            </div>
+          </div>
+        )}
 
-        <div className="text-sm text-gray-600">
-          第 {currentSlideIndex + 1} / {segments.length} 页
-        </div>
+        {pptUrl && (
+          <iframe
+            ref={iframeRef}
+            src={getViewerUrl(pptUrl)}
+            className="h-full w-full border-0"
+            title={displayFileName}
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+          />
+        )}
 
-        <button
-          onClick={handleNext}
-          disabled={currentSlideIndex === segments.length - 1}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          下一页 →
-        </button>
+        {!pptUrl && !loading && !error && (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-gray-500">暂无PPT数据</div>
+          </div>
+        )}
       </div>
     </div>
   );

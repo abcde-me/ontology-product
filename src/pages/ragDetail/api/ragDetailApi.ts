@@ -36,7 +36,7 @@ function transformPositionBBox(positionBbox: PositionBBox): PDFCoordinate[] {
  * 将后端的ApiSegment转换为前端的Segment
  */
 function transformSegment(apiSegment: any): Segment {
-  return {
+  const baseSegment: any = {
     id: apiSegment.id,
     content: apiSegment.content,
     charCount: apiSegment.word_count,
@@ -48,6 +48,15 @@ function transformSegment(apiSegment: any): Segment {
     fullTitle: apiSegment.full_title || undefined,
     level: apiSegment.level
   };
+
+  // 如果是PPT分段，添加PPT特有字段
+  if (apiSegment.slideNumber !== undefined) {
+    baseSegment.slideNumber = apiSegment.slideNumber;
+    baseSegment.slideTitle = apiSegment.slideTitle;
+    baseSegment.slideContent = apiSegment.slideContent;
+  }
+
+  return baseSegment;
 }
 
 /**
@@ -157,9 +166,10 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
         directory = [rootNode];
       }
 
-      // 根据ragId设置不同的文件名
+      // 根据ragId设置不同的文件名和场景类型
       let fileName = '有为政府如何促进中国产业政策演进.pdf';
       let filePath = '/知识库/政策研究';
+      let sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
 
       if (ragId === '1001') {
         fileName = '纯文本分段示例.pdf';
@@ -170,13 +180,20 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
       } else if (ragId === '1003') {
         fileName = '图文混排文档.pdf';
         filePath = '/知识库/多媒体文档';
+      } else if (ragId === '1004') {
+        fileName = '2024年度工作总结.pptx';
+        // 使用一个公开的PPT文件URL作为示例
+        // 实际使用时应该从后端API获取真实的文件路径
+        filePath =
+          'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
+        sceneType = 'ppt';
       }
 
       const result: RagDetailData = {
         ragId,
         fileName,
         filePath,
-        sceneType: 'pdf',
+        sceneType,
         segments,
         directory
       };
