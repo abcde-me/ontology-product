@@ -125,7 +125,7 @@ function TaskList() {
       dataIndex: 'name',
       width: 300,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: 'hover-change requirement-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
           <Tooltip content={record?.name}>{record?.name}</Tooltip>

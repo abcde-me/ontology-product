@@ -16,14 +16,6 @@
     padding-bottom: 16px;
   }
 
-  .arco-table-tr > th {
-    background-color: rgb(245, 249, 255) !important;
-  }
-
-  .arco-pagination-total-text {
-    line-height: 32px;
-  }
-
   .operate-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
@@ -38,7 +30,7 @@
     cursor: not-allowed;
   }
 
-  tbody .workflow-name .ellipsis-text {
+  tbody .requirement-name .ellipsis-text {
     font-weight: 600;
   }
 
@@ -122,13 +114,6 @@
     background: #e3e3e3;
     border-radius: 50%;
     display: inline-block;
-  }
-
-  .workflow-name-content {
-    width: 268px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 

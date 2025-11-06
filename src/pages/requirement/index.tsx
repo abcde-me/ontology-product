@@ -174,7 +174,7 @@ export default function Requirement() {
       dataIndex: 'name',
       width: 280,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: 'hover-change requirement-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
           // 查看需求详情权限判断
