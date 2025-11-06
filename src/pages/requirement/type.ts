@@ -142,4 +142,5 @@ export interface LabelData {
   label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
   label_colour: string;
   label_info_attribute_groups: LabelInfoAttributeGroup[];
+  label_mapping?: string; // 模型映射字段（可选）
 }

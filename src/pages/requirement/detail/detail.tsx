@@ -442,28 +442,33 @@ export default function RequirementDetail() {
     isTemp?: boolean
   ) => {
     if (path.length === 0) return;
-    // 创建数据的深拷贝，避免直接修改原数据
-    // 深拷贝
-    const newData = cloneDeep(isTemp ? templateData : labelDataList);
-    // 遍历路径找到目标位置并更新值
-    let current: any = newData;
-    for (let i = 0; i < path.length; i++) {
-      const key = path[i];
-      // 如果是最后一个路径段，设置值
-      if (i === path.length - 1) {
-        current[key] = value;
-        break;
-      }
 
-      // 移动到下一个层级
-      if (current[key] === undefined) {
-        console.error(`路径错误: 找不到 ${key} 在层级 ${i}`);
-        return;
+    // 使用函数式更新确保基于最新状态
+    const updateFn = (prevData: any) => {
+      // 创建数据的深拷贝，避免直接修改原数据
+      const newData = cloneDeep(prevData);
+      // 遍历路径找到目标位置并更新值
+      let current: any = newData;
+      for (let i = 0; i < path.length; i++) {
+        const key = path[i];
+        // 如果是最后一个路径段，设置值
+        if (i === path.length - 1) {
+          current[key] = value;
+          break;
+        }
+
+        // 移动到下一个层级
+        if (current[key] === undefined) {
+          console.error(`路径错误: 找不到 ${key} 在层级 ${i}`);
+          return prevData; // 返回原数据，不做更新
+        }
+        current = current[key];
       }
-      current = current[key];
-    }
+      return newData;
+    };
+
     // 更新状态
-    isTemp ? setTemplateData(newData) : setLabelDataList(newData);
+    isTemp ? setTemplateData(updateFn) : setLabelDataList(updateFn);
   };
 
   // 添加新标签
@@ -484,6 +489,8 @@ export default function RequirementDetail() {
       // 清空标签名称和展示名称，让用户重新输入
       lastLabel.label_name_en = '';
       lastLabel.label_name_cn = '';
+      // 清空模型映射，让用户重新选择
+      lastLabel.label_mapping = '';
 
       // 确保完整保留所有属性组和属性
       if (
@@ -844,6 +851,9 @@ export default function RequirementDetail() {
           org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
     };
+    if (model_name) {
+      new_publishData['model_name'] = model_name;
+    }
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
     // 发布数据
@@ -874,6 +884,7 @@ export default function RequirementDetail() {
             setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
             basicForm.setFieldValue('name', res?.data?.name);
             basicForm.setFieldValue('description', res?.data?.description);
+            basicForm.setFieldValue('model_name', res?.data?.model_name);
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
@@ -885,6 +896,12 @@ export default function RequirementDetail() {
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
+              if (item?.label_mapping) {
+                labelToolForm.setFieldValue(
+                  `label_mapping_${item?.id}`,
+                  item?.label_mapping
+                );
+              }
               labelToolForm.setFieldValue(
                 `label_shape_${item?.id}`,
                 item?.label_shape
@@ -944,6 +961,7 @@ export default function RequirementDetail() {
       labelDataList.forEach((item) => {
         const fieldName = `label_mapping_${item?.label_id}`;
         labelToolForm.setFieldValue(fieldName, undefined);
+        item['label_mapping'] = '';
       });
     }
   }, [model_name, type]);
@@ -1348,10 +1366,11 @@ export default function RequirementDetail() {
                                         allowClear
                                         onChange={(val: any) => {
                                           // 根据模型映射选择的值设置对应的形状
-                                          if (
-                                            val !== undefined &&
-                                            val !== null
-                                          ) {
+                                          if (!!val) {
+                                            updateNestedValue(
+                                              [labelIndex, 'label_mapping'],
+                                              val
+                                            );
                                             // 使用 LABEL_MAPPING 将字符串形状转换为数字
                                             const mappedShape =
                                               LABEL_MAPPING[val];
@@ -1387,6 +1406,10 @@ export default function RequirementDetail() {
                                         updateNestedValue(
                                           [labelIndex, 'label_shape'],
                                           parseInt(val)
+                                        );
+                                        updateNestedValue(
+                                          [labelIndex, 'label_mapping'],
+                                          ''
                                         );
                                         // 形状改变时，清空对应的模型映射值
                                         if (model_name) {

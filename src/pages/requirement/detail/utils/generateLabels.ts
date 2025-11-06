@@ -10,7 +10,8 @@ export const generateInitialData = [
     label_name_en: '',
     label_shape: LabelShape.RECTANGLE,
     label_colour: getRandomHexColorStrict(),
-    label_info_attribute_groups: []
+    label_info_attribute_groups: [],
+    label_mapping: ''
   }
 ];
 
