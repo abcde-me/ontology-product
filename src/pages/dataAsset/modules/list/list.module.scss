@@ -1,29 +1,8 @@
 .data-asset-list {
-  :global(.arco-select .arco-select-view) {
-    border: 1px solid transparent;
-    background-color: transparent;
-
-    &:hover {
-      border: 1px solid #bfdcff;
-    }
-
-    &:focus {
-      border: 1px solid transparent;
-      background-color: #d9eaff;
-    }
-  }
-
-  :global(.arco-select-focused .arco-select-view) {
-    border: 1px solid transparent;
-    background-color: #d9eaff;
-
-    &:hover {
-      border: 1px solid transparent;
-    }
-  }
-
-  :global(.arco-select-suffix) {
-    display: none;
+  :global(.arco-btn-secondary:not(.arco-btn-disabled)) {
+    border-color: #cbd5e1 !important;
+    color: var(--color-text-2) !important;
+    // background-color: transparent !important;
   }
 
   &-content {

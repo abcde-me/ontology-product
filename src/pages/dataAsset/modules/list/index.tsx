@@ -138,7 +138,7 @@ export default function DataAssetList() {
           {
             title: '操作',
             dataIndex: 'actions',
-            width: 200,
+            width: 204,
             key: 'actions',
             fixed: 'right' as const,
             render: (
@@ -147,25 +147,29 @@ export default function DataAssetList() {
               idx: number,
               { onEditAsset, onEditTags, onDelete }: any
             ) => (
-              <Space>
+              <div className="flex items-center gap-[16px]">
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditAsset?.(record)}
+                  className="px-[0px]"
                 >
                   修改资产
                 </Button>
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditTags?.(record)}
+                  className="px-[0px]"
                 >
                   修改标签
                 </Button>
-                <Button type="text" onClick={() => onDelete?.(record)}>
+                <Button
+                  type="text"
+                  className="px-[0px]"
+                  onClick={() => onDelete?.(record)}
+                >
                   删除
                 </Button>
-              </Space>
+              </div>
             )
           }
         ];
@@ -572,7 +576,7 @@ export default function DataAssetList() {
         />
 
         {/* 标题和视图切换区域 */}
-        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[32px]">
+        <div className="my-[24px] flex h-[30px] w-full items-center justify-between leading-[32px]">
           <p className="text-xl font-bold">数据资产（{total}）</p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (

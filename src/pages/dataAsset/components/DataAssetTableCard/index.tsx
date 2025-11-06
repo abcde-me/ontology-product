@@ -49,10 +49,7 @@ export default function DataAssetTableCard({
     const { label, value } = props;
 
     return (
-      <Tag
-        className="text-color-[#646C85] mr-[4px] rounded-[4px] border border-[#C3C7D4] bg-[#FAFBFF] px-[6px]"
-        key={value}
-      >
+      <Tag className={classNames(styles['tag'])} key={value}>
         {label}
       </Tag>
     );
@@ -195,7 +192,7 @@ export default function DataAssetTableCard({
                               {remainingTags.map((item, i) => (
                                 <Tag
                                   key={i}
-                                  className={classNames(styles['tooltip-tag'])}
+                                  className={classNames(styles['tag'])}
                                 >
                                   {item}
                                 </Tag>
