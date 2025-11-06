@@ -52,7 +52,7 @@ const TableDetail = (props) => {
                 background:
                   item.status === 'SUCCESS'
                     ? '#10B981'
-                    : item.status === 'FAILURE'
+                    : item.status === 'FAILED'
                       ? '#EF4444'
                       : item.status === 'RUNNING_EXECUTION'
                         ? '#007DFA'
@@ -88,7 +88,7 @@ const TableDetail = (props) => {
               停止
             </span>
           )}
-          {item.status === 'FAILURE' && (
+          {item.status === 'FAILED' && (
             <span
               style={{
                 color: '#007DFA',
