@@ -82,7 +82,7 @@ export default function Header({
       )}
       style={style}
     >
-      <a href="/" className="flex items-center">
+      <a href="/modaforge" className="flex items-center">
         <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
         <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
         <div className="text-[16px] leading-[22px] text-white">
