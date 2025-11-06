@@ -227,7 +227,7 @@ export default function DataAssetList() {
               });
 
             // 加载列表数据
-            loadListData(1, 12);
+            loadListData(1, pageSize);
           }
         } else {
           // 接口失败时默认显示列表页
@@ -374,7 +374,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 50 : 60;
+    const newPageSize = type === ViewType.LIST ? 50 : 48;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
