@@ -1,15 +1,11 @@
-.directory-pySpark-tree-container {
+.directory-pyspark-tree-container {
   height: 100%;
 
-  .pySpark-tree-container {
+  .pyspark-tree-container {
     height: calc(100% - var(--directory-nav-height, 40px));
     overflow-y: auto;
     overflow-x: auto;
     width: 100%;
-  }
-
-  .pyspark_pyspark-layout__bI7xH .arco-tree-node .arco-tree-node-indent {
-    display: block !important;
   }
 
   .directory-tree-nav {
@@ -121,16 +117,16 @@
       }
     }
   }
-}
 
-// 节点样式
-:global(.arco-tree-node) {
-  position: relative;
-  border-radius: 2px;
-  display: flex !important;
-  align-items: center !important;
+  // 节点样式
+  :global(.arco-tree-node) {
+    position: relative;
+    border-radius: 2px;
+    display: flex !important;
+    align-items: center !important;
 
-  :global(.arco-tree-node-indent) {
-    display: block !important;
+    :global(.arco-tree-node-indent) {
+      display: block !important;
+    }
   }
 }

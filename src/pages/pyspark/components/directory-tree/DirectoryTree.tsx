@@ -544,7 +544,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     return (
       <div
-        className={styles['directory-pySpark-tree-container']}
+        className={styles['directory-pyspark-tree-container']}
         style={
           currentFolderName
             ? ({
