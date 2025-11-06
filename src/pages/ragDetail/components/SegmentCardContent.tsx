@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useRagDetailStore, type Segment } from '../store/ragDetailStore';
+import SegmentMarkdown from './SegmentMarkdown';
+import styles from './SegmentCardContent.module.scss';
 
 interface SegmentCardContentProps {
   segment: Segment;
@@ -48,21 +50,26 @@ const SegmentCardContent: React.FC<SegmentCardContentProps> = ({
   }, [isEditing, editContent, segment.content, segment.id]);
 
   return (
-    <div ref={containerRef} className="max-h-[500px] overflow-y-auto px-3 pb-3">
-      {isEditing ? (
-        <textarea
-          ref={textareaRef}
-          value={editContent}
-          onChange={(e) => setEditContent(e.target.value)}
-          className="w-full resize-none rounded border border-[#007DFA] p-2 text-sm text-gray-700 focus:outline-none"
-          rows={6}
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-          {segment.content}
-        </p>
-      )}
+    <div ref={containerRef} className="px-3 pb-3">
+      <div
+        className={`max-h-[500px] overflow-y-auto ${styles.scrollContainer}`}
+      >
+        {isEditing ? (
+          <textarea
+            ref={textareaRef}
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full resize-none rounded border border-[#007DFA] p-2 text-sm text-gray-700 focus:outline-none"
+            rows={6}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <SegmentMarkdown
+            content={segment.content}
+            className="text-sm leading-relaxed text-gray-700"
+          />
+        )}
+      </div>
     </div>
   );
 };

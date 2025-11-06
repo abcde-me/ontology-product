@@ -7,6 +7,7 @@ import {
 import SegmentCard from './SegmentCard';
 import ImageTextSegmentCard from './ImageTextSegmentCard';
 import SegmentListHeader from './SegmentListHeader';
+import styles from './SegmentList.module.scss';
 
 interface SegmentListProps {
   segments?: Segment[];
@@ -90,7 +91,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
   };
 
   const segmentItems = useMemo(() => {
-    return segments.map((segment) => {
+    return segments.map((segment, index) => {
       // 根据renderMode渲染不同的卡片
       if (renderMode === 'image-text') {
         return (
@@ -98,6 +99,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
             key={segment.id}
             ref={(el) => (segmentRefs.current[segment.id] = el)}
             onClick={() => handleSegmentClick(segment.id)}
+            className={index > 0 ? 'mt-3' : ''}
             style={{ cursor: 'pointer' }}
           >
             <ImageTextSegmentCard
@@ -113,6 +115,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
           key={segment.id}
           ref={(el) => (segmentRefs.current[segment.id] = el)}
           onClick={() => handleSegmentClick(segment.id)}
+          className={index > 0 ? 'mt-3' : ''}
           style={{ cursor: 'pointer' }}
         >
           <SegmentCard
@@ -127,8 +130,11 @@ const SegmentList: React.FC<SegmentListProps> = ({
   return (
     <div className="flex h-full flex-col bg-white px-4">
       {!hideHeader && <SegmentListHeader />}
-      <div className="flex-1 overflow-y-auto pb-4">
-        <div className="flex flex-col gap-3">{segmentItems}</div>
+      <div
+        className={`flex-1 overflow-y-auto pb-4 ${styles.scrollContainer}`}
+        style={{ minHeight: 0 }}
+      >
+        {segmentItems}
       </div>
     </div>
   );

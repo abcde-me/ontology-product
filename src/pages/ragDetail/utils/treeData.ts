@@ -1,4 +1,21 @@
-export const TreeData = {
+/**
+ * 根据ragId获取对应的目录树数据
+ * ragId=1001: 无目录树
+ * ragId=1002: 有目录树
+ * ragId=1003: 有目录树(图文混排场景)
+ */
+export function getTreeDataByRagId(ragId: string) {
+  // ragId=1001 没有目录树
+  if (ragId === '1001') {
+    return null;
+  }
+
+  // ragId=1002 和 1003 都有目录树
+  return TreeData_1002;
+}
+
+// ragId=1002 的目录树数据
+export const TreeData_1002 = {
   code: 'Success',
   message: '请求成功',
   data: {
@@ -252,3 +269,6 @@ export const TreeData = {
     indexing_status: 'completed'
   }
 };
+
+// 保留原有的TreeData导出以保持向后兼容
+export const TreeData = TreeData_1002;

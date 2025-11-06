@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { ImageTextSegment } from '../types';
 import { useRagDetailStore } from '../store/ragDetailStore';
 import SegmentCardActions from './SegmentCardActions';
+import styles from './SegmentCardContent.module.scss';
 
 interface ImageTextSegmentCardProps {
   segment: ImageTextSegment;
@@ -57,7 +58,9 @@ const ImageTextSegmentCard: React.FC<ImageTextSegmentCardProps> = ({
       </div>
 
       {/* Content area */}
-      <div className="max-h-[500px] overflow-y-auto px-3 pb-3">
+      <div
+        className={`max-h-[500px] overflow-y-auto px-3 pb-3 ${styles.scrollContainer}`}
+      >
         {/* 文本内容 */}
         {isEditing ? (
           <textarea

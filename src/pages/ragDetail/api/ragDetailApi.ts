@@ -14,7 +14,8 @@ import type {
   PositionBBox
 } from '../types';
 import { SegmentData } from '../utils/segmentData';
-import { TreeData } from '../utils/treeData';
+import { TreeData, getTreeDataByRagId } from '../utils/treeData';
+import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
 
 /**
  * 将后端的position_bbox转换为前端的PDFCoordinate数组
@@ -131,11 +132,12 @@ function transformCatalogNode(apiNode: any): DirectoryNode {
  * @returns RAG详情数据
  */
 export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
-  // 使用真实的Mock数据
+  // 根据ragId获取对应的Mock数据
   return new Promise((resolve) => {
     setTimeout(() => {
-      const segmentResponse = SegmentData;
-      const treeResponse = TreeData;
+      // 根据ragId获取对应的分段数据和目录树数据
+      const segmentResponse = getSegmentDataByRagId(ragId);
+      const treeResponse = getTreeDataByRagId(ragId);
 
       // 转换分段数据
       const segments: Segment[] =
@@ -143,7 +145,11 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
 
       // 转换目录树数据
       let directory: DirectoryNode[] | undefined;
-      if (treeResponse.data && treeResponse.data.catalog_content) {
+      if (
+        treeResponse &&
+        treeResponse.data &&
+        treeResponse.data.catalog_content
+      ) {
         const rootNode = transformCatalogNode(
           treeResponse.data.catalog_content
         );
@@ -151,10 +157,25 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
         directory = [rootNode];
       }
 
+      // 根据ragId设置不同的文件名
+      let fileName = '有为政府如何促进中国产业政策演进.pdf';
+      let filePath = '/知识库/政策研究';
+
+      if (ragId === '1001') {
+        fileName = '纯文本分段示例.pdf';
+        filePath = '/知识库/示例文档';
+      } else if (ragId === '1002') {
+        fileName = '带目录树的文档.pdf';
+        filePath = '/知识库/结构化文档';
+      } else if (ragId === '1003') {
+        fileName = '图文混排文档.pdf';
+        filePath = '/知识库/多媒体文档';
+      }
+
       const result: RagDetailData = {
         ragId,
-        fileName: '有为政府如何促进中国产业政策演进.pdf',
-        filePath: '/知识库/政策研究',
+        fileName,
+        filePath,
         sceneType: 'pdf',
         segments,
         directory
