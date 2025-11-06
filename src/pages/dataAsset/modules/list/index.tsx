@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Table,
@@ -66,7 +66,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(60); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -81,6 +81,10 @@ export default function DataAssetList() {
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
   const history = useHistory();
+  // 吸顶状态
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -303,6 +307,43 @@ export default function DataAssetList() {
     setSearchFields(fields);
   }, [assetTags, assetSources]);
 
+  // 检测吸顶状态
+  useEffect(() => {
+    // 只有当 hasMapping 为 true 时，sentinel 元素才会渲染
+    if (hasMapping !== true) return;
+
+    let observer: IntersectionObserver | null = null;
+
+    // 使用 requestAnimationFrame 确保 DOM 已经渲染
+    const rafId = requestAnimationFrame(() => {
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            // 当占位元素离开视口时，说明标题栏已经吸顶
+            setIsSticky(!entry.isIntersecting);
+          });
+        },
+        {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0
+        }
+      );
+
+      observer.observe(sentinel);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [hasMapping]);
+
   const handleCreateDataAsset = () => {
     // TODO: 实现创建数据资产的逻辑
     console.log('创建数据资产');
@@ -333,7 +374,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 10 : 12;
+    const newPageSize = type === ViewType.LIST ? 50 : 60;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
@@ -555,7 +596,7 @@ export default function DataAssetList() {
     <div className={classNames('min-h-full w-full', styles['data-asset-list'])}>
       <div
         className={classNames(
-          'box-border h-full w-full pb-[24px] pl-[24px] pr-[24px] pt-[24px]',
+          'box-border h-full w-full py-[24px]',
           styles['data-asset-list-content']
         )}
       >
@@ -573,10 +614,20 @@ export default function DataAssetList() {
           onMainSearch={handleMainSearch}
           onFieldSearch={handleFieldSearch}
           onReset={handleReset}
+          className="px-[24px]"
         />
 
+        {/* 占位元素，用于检测吸顶状态 */}
+        <div ref={sentinelRef} style={{ height: '1px', marginTop: '-1px' }} />
+
         {/* 标题和视图切换区域 */}
-        <div className="my-[24px] flex h-[30px] w-full items-center justify-between leading-[32px]">
+        <div
+          ref={headerRef}
+          className={classNames(
+            'sticky top-0 z-10 flex w-full items-center justify-between px-[24px] pb-[16px] pt-[24px] leading-[30px]',
+            isSticky && 'bg-[var(--color-bg-4)]'
+          )}
+        >
           <p className="text-xl font-bold">数据资产（{total}）</p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
@@ -675,7 +726,7 @@ export default function DataAssetList() {
             })}
           </div>
         ) : ( */}
-        <div>
+        <div className="px-[24px]">
           {loading ? (
             <div className="flex h-[calc(100%-70px)] items-center justify-center">
               <Spin />
