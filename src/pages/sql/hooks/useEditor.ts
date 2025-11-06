@@ -263,6 +263,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       if (res?.status === 200) {
         setRunResult(res.data?.sql_result_lists);
         setHasFetchedResult(true);
+        setRunStatus(res.data?.run_status);
       } else {
         setRunResult([]);
         setHasFetchedResult(true);
