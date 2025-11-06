@@ -42,12 +42,14 @@ import {
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import { EditDataAssetData } from '@/types/dataAssetApi';
+import styles from './list.module.scss';
+import classNames from 'classnames';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
     ListDataAssetDataRes['records']
   >([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -546,8 +548,13 @@ export default function DataAssetList() {
 
   // 如果有mapping数据，显示带搜索区域的列表页
   return (
-    <div className="min-h-full w-full py-5 pr-5">
-      <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
+    <div className={classNames('min-h-full w-full', styles['data-asset-list'])}>
+      <div
+        className={classNames(
+          'box-border h-full w-full pb-[24px] pl-[24px] pr-[24px] pt-[24px]',
+          styles['data-asset-list-content']
+        )}
+      >
         {/* {dataAssetList.length !== 0 && (
           <div className="mb-4 h-[30px] w-full leading-[30px]">
             <p className="text-xl font-bold">
