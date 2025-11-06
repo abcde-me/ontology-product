@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Message, Tooltip } from '@arco-design/web-react';
-import { NodeDetail } from '../utils/traceLogMockData';
+import { NodeDetail } from '../../utils/traceLogMockData';
 import UpCollapseIconSvg from '@/assets/rag/up-collapse.svg';
 import DownCollapseIconSvg from '@/assets/rag/down-collapse.svg';
 import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';

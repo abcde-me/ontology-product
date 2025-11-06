@@ -7,17 +7,17 @@ import React, { useEffect } from 'react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import BasicInfo from './BasicInfo';
 import ElementList from './ElementList';
-import { mockSegmentDetailData } from './mockData';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
+import { useSegmentDrawerStore } from '../SegmentDrawer/store/segmentDrawerStore';
 
 interface SegmentDetailProps {
   segmentId: string;
 }
 
 const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
-  // 从 store 获取状态和方法
+  // 从本地 store 获取编辑状态和方法
   const {
-    detailData,
+    detailData: localDetailData,
     isEditing,
     loading,
     initializeDetail,
@@ -26,21 +26,24 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
     confirmEditing
   } = useSegmentDetailStore();
 
+  // 从统一的 drawer store 获取数据
+  const { segmentDetailData, segmentDetailLoading } = useSegmentDrawerStore();
+
   // 初始化数据
   useEffect(() => {
-    // TODO: 从 API 获取数据，目前使用 mock 数据
-    initializeDetail(segmentId, mockSegmentDetailData);
-
-    // 组件卸载时重置状态
-    return () => {
-      // 可选：如果需要在组件卸载时清理状态
-      // reset();
-    };
-  }, [segmentId, initializeDetail]);
+    // 从统一的 drawer store 获取数据并初始化到本地 store
+    if (segmentDetailData) {
+      initializeDetail(segmentId, segmentDetailData);
+    }
+  }, [segmentId, segmentDetailData, initializeDetail]);
 
   // 如果数据还没加载，显示加载状态
-  if (!detailData) {
-    return <div className="p-6">加载中...</div>;
+  if (segmentDetailLoading || !segmentDetailData || !localDetailData) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-gray-500">加载中...</div>
+      </div>
+    );
   }
 
   return (
@@ -48,8 +51,8 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
       <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
         {/* 基本信息 */}
         <BasicInfo
-          segmentId={detailData.segmentId}
-          charCount={detailData.charCount}
+          segmentId={localDetailData.segmentId}
+          charCount={localDetailData.charCount}
         />
 
         {/* 元素信息 */}
@@ -86,7 +89,10 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
             </div>
           </div>
 
-          <ElementList elements={detailData.elements} isEditing={isEditing} />
+          <ElementList
+            elements={localDetailData.elements}
+            isEditing={isEditing}
+          />
         </div>
       </div>
     </div>

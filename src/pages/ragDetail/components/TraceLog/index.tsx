@@ -4,18 +4,27 @@
  */
 
 import React from 'react';
-import {
-  mockTraceLogStatistics,
-  mockNodeDetails
-} from '../utils/traceLogMockData';
+import { useSegmentDrawerStore } from '../SegmentDrawer/store/segmentDrawerStore';
 import CollapsibleNodePanel from './CollapsibleNodePanel';
 import AllNodeIconSvg from '@/assets/rag/all-node-icon.svg';
 import SuccessNodeIconSvg from '@/assets/rag/success-node-icon.svg';
 import AllTimeIconSvg from '@/assets/rag/all-time-icon.svg';
 
 const TraceLog: React.FC = () => {
-  const statistics = mockTraceLogStatistics;
-  const nodeDetails = mockNodeDetails;
+  const { traceLogStatistics, traceLogNodes, traceLogLoading } =
+    useSegmentDrawerStore();
+
+  // 如果数据还未加载，显示加载状态
+  if (traceLogLoading || !traceLogStatistics) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-gray-500">加载中...</div>
+      </div>
+    );
+  }
+
+  const statistics = traceLogStatistics;
+  const nodeDetails = traceLogNodes;
 
   return (
     <div className="flex h-full flex-col">
