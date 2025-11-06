@@ -91,7 +91,9 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
     selectDirectoryNode,
     setSelectedSegmentId,
     scrollToSegment,
-    selectedSegmentId
+    selectedSegmentId,
+    highlightPdfCoordinates,
+    clearPdfHighlight
   } = useRagDetailStore();
 
   // 转换数据格式
@@ -191,6 +193,14 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
       // 查找节点
       const node = findNode(nodeId, nodes);
       if (!node) return;
+
+      // 如果节点有position，高亮PDF位置
+      if (node.position && node.position.length > 0) {
+        highlightPdfCoordinates(node.position);
+      } else {
+        // 清除PDF高亮
+        clearPdfHighlight();
+      }
 
       // 如果节点有segmentIds，说明需要滚动到对应的分段
       if (node.segmentIds && node.segmentIds.length > 0) {

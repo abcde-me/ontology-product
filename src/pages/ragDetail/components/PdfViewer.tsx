@@ -1,42 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { useRagDetailStore } from '../store/ragDetailStore';
 import PdfRenderer from './PdfRenderer';
-
-interface PDFCoordinate {
-  page: number;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
+import { PDFCoordinate } from '../types';
+import { mockApiGetPdfBinaryData } from '../utils/mockPdfData';
 
 interface PdfViewerProps {
   fileName?: string;
   filePath?: string;
-  highlightCoordinate?: PDFCoordinate;
+  pdfData?: ArrayBuffer; // 支持直接传入二进制数据
+  highlightCoordinates?: PDFCoordinate[];
   hideHeader?: boolean;
+  useMockBinaryData?: boolean; // 是否使用mock二进制数据
 }
 
 const PdfViewer: React.FC<PdfViewerProps> = ({
   fileName: propFileName,
   filePath,
-  highlightCoordinate,
-  hideHeader = false
+  pdfData: propPdfData,
+  highlightCoordinates,
+  hideHeader = false,
+  useMockBinaryData = false
 }) => {
-  const { fileName: storeName } = useRagDetailStore();
+  const { fileName: storeName, highlightedPdfCoordinates } =
+    useRagDetailStore();
   const [pdfPath, setPdfPath] = useState<string>('');
+  const [pdfBinaryData, setPdfBinaryData] = useState<ArrayBuffer | undefined>(
+    propPdfData
+  );
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // 使用在线PDF文件进行测试
-    const samplePdf =
-      'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-    setPdfPath(samplePdf);
-    console.log('Using sample PDF:', samplePdf);
-  }, []);
+    const loadPdf = async () => {
+      if (useMockBinaryData) {
+        // 使用mock二进制数据
+        setLoading(true);
+        try {
+          const binaryData = await mockApiGetPdfBinaryData(
+            'mock-dataset',
+            'mock-document'
+          );
+          setPdfBinaryData(binaryData);
+          console.log('Loaded mock PDF binary data');
+        } catch (error) {
+          console.error('Error loading mock PDF binary data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else if (filePath) {
+        // 使用URL路径
+        setPdfPath(filePath);
+        console.log('Using PDF path:', filePath);
+      } else if (!propPdfData) {
+        // 默认使用在线PDF文件进行测试
+        const samplePdf =
+          'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+        setPdfPath(samplePdf);
+        console.log('Using sample PDF:', samplePdf);
+      }
+    };
+
+    loadPdf();
+  }, [filePath, propPdfData, useMockBinaryData]);
 
   const displayFileName = propFileName || storeName || 'Document.pdf';
 
-  if (!pdfPath) {
+  // 使用props传入的坐标或store中的坐标
+  const coordinates = highlightCoordinates || highlightedPdfCoordinates;
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600">加载PDF中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!pdfPath && !pdfBinaryData) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -61,7 +102,8 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
       <div className="flex-1 overflow-auto bg-[#F7F8FA]">
         <PdfRenderer
           filePath={pdfPath}
-          highlightCoordinates={highlightCoordinate}
+          pdfData={pdfBinaryData}
+          highlightCoordinates={coordinates}
           scale={1.3}
         />
       </div>

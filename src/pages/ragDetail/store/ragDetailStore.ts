@@ -41,6 +41,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     showImageModal: false,
     selectedImageUrl: undefined,
     highlightedPdfCoordinate: undefined,
+    highlightedPdfCoordinates: undefined,
     loading: false,
     error: null,
 
@@ -195,7 +196,15 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     clearPdfHighlight: () => {
-      set({ highlightedPdfCoordinate: undefined });
+      set({
+        highlightedPdfCoordinate: undefined,
+        highlightedPdfCoordinates: undefined
+      });
+    },
+
+    // 新增：高亮多个PDF坐标
+    highlightPdfCoordinates: (coordinates: PDFCoordinate[]) => {
+      set({ highlightedPdfCoordinates: coordinates });
     },
 
     setError: (error: string | null) => {

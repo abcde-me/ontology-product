@@ -150,7 +150,8 @@ export interface RagDetailState {
   showPdfViewer: boolean;
   showImageModal: boolean;
   selectedImageUrl?: string;
-  highlightedPdfCoordinate?: PDFCoordinate; // PDF高亮坐标
+  highlightedPdfCoordinate?: PDFCoordinate; // PDF高亮坐标（单个，保留向后兼容）
+  highlightedPdfCoordinates?: PDFCoordinate[]; // PDF高亮坐标（多个，支持跨页）
   loading: boolean;
   error: string | null;
 }
@@ -166,6 +167,7 @@ export interface RagDetailActions {
   openImageModal: (imageUrl: string) => void;
   closeImageModal: () => void;
   highlightPdfSegment: (segmentId: string) => void;
+  highlightPdfCoordinates: (coordinates: PDFCoordinate[]) => void; // 新增：高亮多个坐标
   clearPdfHighlight: () => void;
   setError: (error: string | null) => void;
   setSelectedSegmentId: (segmentId: string | null) => void;

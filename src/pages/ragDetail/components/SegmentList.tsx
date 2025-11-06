@@ -24,7 +24,9 @@ const SegmentList: React.FC<SegmentListProps> = ({
   const {
     segments: storeSegments,
     selectedSegmentId: storeSelectedSegmentId,
-    setSelectedSegmentId
+    setSelectedSegmentId,
+    highlightPdfCoordinates,
+    clearPdfHighlight
   } = useRagDetailStore();
   const segmentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -73,6 +75,18 @@ const SegmentList: React.FC<SegmentListProps> = ({
   const handleSegmentClick = (segmentId: string) => {
     // 设置选中的分段ID，这会触发目录树的高亮
     setSelectedSegmentId(segmentId);
+
+    // 查找对应的segment，获取PDF坐标并高亮
+    const segment = segments.find((s) => s.id === segmentId);
+    if (
+      segment &&
+      segment.pdfCoordinates &&
+      segment.pdfCoordinates.length > 0
+    ) {
+      highlightPdfCoordinates(segment.pdfCoordinates);
+    } else {
+      clearPdfHighlight();
+    }
   };
 
   const segmentItems = useMemo(() => {
