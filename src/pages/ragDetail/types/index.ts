@@ -89,6 +89,55 @@ export interface TableSegment extends Segment {
   };
 }
 
+// 元素类型定义
+export type ElementType = 'text' | 'image' | 'table';
+
+// 文本元素
+export interface TextElement {
+  id: string;
+  type: 'text';
+  content: string;
+  relatedDescription?: string; // 关键描述
+  extractionEntity?: string[]; // 抽取实体（标签）
+  positionType?: string; // 定位类型
+  positionInfo?: string; // 位置信息
+}
+
+// 图片元素
+export interface ImageElement {
+  id: string;
+  type: 'image';
+  url: string;
+  relatedDescription?: string; // 关键描述
+  extractionEntity?: string[]; // 抽取实体（标签）
+  positionType?: string; // 定位类型
+  positionInfo?: string; // 位置信息
+  dimensions?: string; // 尺寸
+  modifiers?: string; // 修饰
+}
+
+// 表格元素
+export interface TableElement {
+  id: string;
+  type: 'table';
+  headers: string[];
+  rows: Array<Record<string, string>>;
+  relatedDescription?: string; // 关键描述
+  extractionEntity?: string[]; // 抽取实体（标签）
+  positionType?: string; // 定位类型
+  positionInfo?: string; // 位置信息
+}
+
+// 元素联合类型
+export type Element = TextElement | ImageElement | TableElement;
+
+// 分段详情数据
+export interface SegmentDetailData {
+  segmentId: string;
+  charCount: number;
+  elements: Element[];
+}
+
 // 后端返回的目录树节点结构
 export interface ApiCatalogNode {
   title: string;

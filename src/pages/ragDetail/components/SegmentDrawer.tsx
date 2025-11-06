@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Drawer } from '@arco-design/web-react';
 import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import TraceLog from './TraceLog';
+import SegmentDetail from './SegmentDetail';
 
 interface SegmentDrawerProps {
   visible: boolean;
@@ -135,9 +136,7 @@ const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
           {/* Tab Content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === 'detail' && (
-              <div className="p-6">
-                <div className="text-gray-500">分段详情内容待实现...</div>
-              </div>
+              <SegmentDetail segmentId={`segment_${segmentIndex}`} />
             )}
             {activeTab === 'trace' && <TraceLog />}
           </div>
