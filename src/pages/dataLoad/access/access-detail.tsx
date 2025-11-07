@@ -141,8 +141,8 @@ const AccessDetail = () => {
                 background:
                   arressDetail.status == RunState.STOPPED
                     ? RunStateType[RunState.STOPPED].color
-                    : arressDetail.status == RunState.FAILED
-                      ? RunStateType[RunState.FAILED].color
+                    : arressDetail.status == RunState.FAILURE
+                      ? RunStateType[RunState.FAILURE].color
                       : arressDetail.status == RunState.RUNNING
                         ? RunStateType[RunState.RUNNING].color
                         : arressDetail.status == RunState.SUCCEED
@@ -158,8 +158,8 @@ const AccessDetail = () => {
                   ? RunStateType[RunState.RUNNING].text
                   : arressDetail.status == RunState.SUCCEED
                     ? RunStateType[RunState.SUCCEED].text
-                    : arressDetail.status == RunState.FAILED
-                      ? RunStateType[RunState.FAILED].text
+                    : arressDetail.status == RunState.FAILURE
+                      ? RunStateType[RunState.FAILURE].text
                       : ''}
             </div>
             {arressDetail.status === 'failed' && (
