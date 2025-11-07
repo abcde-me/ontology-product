@@ -29,7 +29,9 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
         <span className="inline-flex items-center rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
           文本
         </span>
-        <span className="ml-2 text-sm text-gray-600">元素ID: {element.id}</span>
+        <span className="ml-2 text-sm font-semibold text-gray-600">
+          元素ID: {element.id}
+        </span>
       </div>
 
       {/* 文本内容 */}
@@ -42,18 +44,18 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
           placeholder="请输入文本内容"
         />
       ) : (
-        <div className="mb-3 rounded bg-gray-50 p-3 text-sm text-gray-900">
+        <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
           {element.content}
         </div>
       )}
 
-      <div className="space-y-2 text-sm">
+      <div className="flex items-center gap-3 text-sm">
         <div className="flex">
-          <span className="w-20 text-gray-500">定位类型:</span>
+          <span className="w-18 text-gray-500">定位类型：</span>
           <span className="text-gray-900">{element.positionType}</span>
         </div>
         <div className="flex">
-          <span className="w-20 text-gray-500">位置信息:</span>
+          <span className="w-18 text-gray-500">位置信息：</span>
           <span className="text-gray-900">{element.positionInfo}</span>
         </div>
       </div>
