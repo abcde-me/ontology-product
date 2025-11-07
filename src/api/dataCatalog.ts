@@ -435,7 +435,7 @@ export interface GetTargetCatalogFileListParams {
   /**
    * 文件所属目录ID，卷ID
    */
-  path_id: string;
+  path_id: string | number;
   /**
    * 搜索数据内容
    */
