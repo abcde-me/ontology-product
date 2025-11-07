@@ -1,6 +1,6 @@
 export enum RunState {
   SUCCEED = 'SUCCESS',
-  FAILED = 'FAILED',
+  FAILURE = 'FAILURE',
   RUNNING = 'RUNNING_EXECUTION',
   STOPPED = 'STOP'
 }
@@ -11,9 +11,9 @@ export const RunStateType = {
     value: 'SUCCESS',
     color: '#10B981'
   },
-  [RunState.FAILED]: {
+  [RunState.FAILURE]: {
     text: '运行失败',
-    value: 'FAILED',
+    value: 'FAILURE',
     color: '#EF4444'
   },
   [RunState.RUNNING]: {

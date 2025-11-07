@@ -52,7 +52,7 @@ const TableDetail = (props) => {
                 background:
                   item.status === 'SUCCESS'
                     ? '#10B981'
-                    : item.status === 'FAILED'
+                    : item.status === 'FAILURE'
                       ? '#EF4444'
                       : item.status === 'RUNNING_EXECUTION'
                         ? '#007DFA'
@@ -66,8 +66,8 @@ const TableDetail = (props) => {
           <div style={{ marginLeft: '7px' }}>
             {item.status == RunStateType[RunState.SUCCEED].value &&
               RunStateType[RunState.SUCCEED].text}
-            {item.status == RunStateType[RunState.FAILED].value &&
-              RunStateType[RunState.FAILED].text}
+            {item.status == RunStateType[RunState.FAILURE].value &&
+              RunStateType[RunState.FAILURE].text}
             {item.status == RunStateType[RunState.RUNNING].value &&
               RunStateType[RunState.RUNNING].text}
             {item.status == RunStateType[RunState.STOPPED].value &&
@@ -88,7 +88,7 @@ const TableDetail = (props) => {
               停止
             </span>
           )}
-          {item.status === 'FAILED' && (
+          {item.status === 'FAILURE' && (
             <span
               style={{
                 color: '#007DFA',
@@ -112,7 +112,7 @@ const TableDetail = (props) => {
         },
         {
           text: '运行失败',
-          value: RunState.FAILED
+          value: RunState.FAILURE
         },
         {
           text: '运行停止',
