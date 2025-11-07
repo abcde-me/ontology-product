@@ -166,19 +166,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            .sl {
-              display: flex;
-              align-items: center;
-              .nm {
-                width: 96px;
-                white-space: nowrap; /* 禁止换行 */
-                overflow: hidden; /* 超出部分隐藏 */
-                text-overflow: ellipsis; /* 超出部分显示省略号 */
-                cursor: pointer; /* 鼠标悬停时显示手型 */
-              }
-              .sp {
-                margin-left: 12px;
-              }
+            .operateBtn {
+              display: none;
             }
             .sr {
               display: flex;
@@ -200,11 +189,38 @@
               }
             }
           }
+          .sl {
+            display: flex;
+            align-items: center;
+            padding: 0 8px 8px;
+            .nm {
+              width: 96px;
+              white-space: nowrap; /* 禁止换行 */
+              overflow: hidden; /* 超出部分隐藏 */
+              text-overflow: ellipsis; /* 超出部分显示省略号 */
+              cursor: pointer; /* 鼠标悬停时显示手型 */
+            }
+            .sp {
+              margin-left: 12px;
+            }
+          }
           .segmentationContent {
             padding-bottom: 12px;
             padding: 0 8px 8px;
             max-height: 100px;
             overflow-y: auto;
+          }
+        }
+        .segmentationBox:hover {
+          .operateBtn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 24px;
+
+            :global(.arco-btn) {
+              height: 24px;
+            }
           }
         }
       }

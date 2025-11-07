@@ -277,7 +277,7 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`pb-[24px] ${className}`}>
+    <div className={`${className}`}>
       {/* 主搜索区域 */}
       <div className="flex items-center gap-3">
         <Input
@@ -315,7 +315,7 @@ export default function SearchArea({
 
       {/* 字段搜索区域（可展开/收起） */}
       {isFieldSearchExpanded && (
-        <div className="pt-[24px]">
+        <div className="border-b border-[#CBD5E1] py-[24px]">
           {/* 字段搜索列表 */}
           {visibleFields.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-4">

@@ -183,38 +183,3 @@ export async function getDocContent(file_id: string) {
 
   return response;
 }
-//知识库层级目录接口
-export function apiHierarchicalCatalog(
-  dataset_id: string,
-  document_id: string
-) {
-  return UAPI.RES.HierarchicalCatalog({ dataset_id, document_id })
-    .get()
-    .inRegion()
-    .do();
-}
-//知识库层级目录编辑接口
-export function apiHierarchicalCatalogEdit(
-  dataset_id: string,
-  document_id: string,
-  params: any
-) {
-  return UAPI.RES.HierarchicalCatalogEdit({ dataset_id, document_id })
-    .put(params)
-    .inRegion()
-    .do();
-}
-//知识库sheet信息与默认表头获取
-export function apiTableConfiguration(params: any) {
-  return UAPI.RES.TableConfiguration({}).get(params).inRegion().do();
-}
-//知识库表头信息获取
-export function apiTableHeaderConfiguration(params: any) {
-  return UAPI.RES.TableHeaderConfiguration({}).get(params).inRegion().do();
-}
-export function getdatasetstree(Id?: string, params: any = {}) {
-  return UAPI.RES.datasetstree(Id ? { Id } : {})
-    .get()
-    .inRegion()
-    .do();
-}

@@ -5,13 +5,12 @@
   flex-direction: column;
   background: #fff;
   border-radius: 8px;
-  // overflow: hidden;
 
   .pyspark-source-tree__content .pyspark-source-tree__content-tree {
     .arco-tree-node {
       position: relative;
       align-items: center;
-      padding-left: 4px;
+      padding-left: 0px;
       width: 100%;
 
       &:hover {

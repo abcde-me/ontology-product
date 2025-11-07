@@ -6,6 +6,20 @@
   }
 }
 
+.scene-category-item {
+  display: grid;
+  align-items: center;
+  padding: 7px 0;
+
+  .item-text {
+    height: 22px;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    font-family: 'PingFangSC';
+  }
+}
+
 .end-node-content {
   .end-node-content-item {
     background-color: #f5f9ff;

@@ -58,7 +58,7 @@ function RagDetail() {
       {/* 图片放大弹窗 */}
       <ImageModal />
       {/* 分段详情/溯源日志抽屉 */}
-      {currentSegment && (
+      {/* {currentSegment && (
         <SegmentDrawer
           visible={segmentDrawerVisible}
           onClose={closeSegmentDrawer}
@@ -66,14 +66,14 @@ function RagDetail() {
           currentSegmentIndex={currentSegment.segmentIndex}
           totalSegments={segments.length}
         />
-      )}
-      {/* <SegmentDrawer
+      )} */}
+      <SegmentDrawer
         visible={true}
         onClose={closeSegmentDrawer}
         defaultActiveTab={segmentDrawerTab}
         currentSegmentIndex={currentSegment?.segmentIndex}
         totalSegments={segments.length}
-      /> */}
+      />
     </div>
   );
 }

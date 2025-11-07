@@ -115,7 +115,6 @@ function LayoutWithSider({ children }) {
   );
 
   const getMenu = (data: typeof menus) => {
-    console.log('data', data);
     return data.map((item) => {
       if (!item.children || item.children.length === 0)
         return (

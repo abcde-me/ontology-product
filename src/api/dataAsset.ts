@@ -53,7 +53,8 @@ export async function listDataAssetData(
   const allRecords = Array.from({ length: 50 }, (_, i) => ({
     id: String(i + 1),
     name: `数据资产${i + 1}`,
-    tags: ['标签1', '标签2'],
+    tags:
+      i % 2 === 0 ? ['标签1', '标签2', '标签3', '标签4'] : ['标签1', '标签2'],
     source: '来源1',
     updateTime: '2024-01-01 12:00:00'
   }));
@@ -390,4 +391,38 @@ export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
     requestId: ''
   });
   // return await UAPI.RES.deleteDataAssetDataBatch({}).post(params).inRegion().do();
+}
+
+export async function getTagList(): Promise<
+  ApiRes<{ id: string; value: string }[]>
+> {
+  return Promise.resolve({
+    code: 0,
+    status: 200,
+    data: [
+      {
+        id: '1',
+        value: '标签1'
+      },
+      {
+        id: '2',
+        value: '标签2'
+      },
+      {
+        id: '3',
+        value: '标签3'
+      },
+      {
+        id: '4',
+        value: '标签4'
+      },
+      {
+        id: '5',
+        value: '标签5'
+      }
+    ],
+    message: 'success',
+    requestId: ''
+  });
+  // return await UAPI.RES.listAssetTags({}).post({}).inRegion().do();
 }

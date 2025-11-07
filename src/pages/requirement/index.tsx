@@ -92,12 +92,12 @@ export default function Requirement() {
   };
 
   // 创建工作流
-  const handleCreateWorkflow = () => {
+  const handleCreateRequirement = () => {
     history.push(`/tenant/compute/modaforge/requirementDetail?type=create`);
   };
 
   // 查看详情
-  const viewDetailWorkflow = (id: number | string) => {
+  const viewDetailRequirement = (id: number | string) => {
     history.push(
       `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
     );
@@ -174,7 +174,7 @@ export default function Requirement() {
       dataIndex: 'name',
       width: 280,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: 'hover-change requirement-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
           // 查看需求详情权限判断
@@ -184,7 +184,7 @@ export default function Requirement() {
               isEdit={false}
               isLink
               handleLink={() => {
-                viewDetailWorkflow(record.id);
+                viewDetailRequirement(record.id);
               }}
             />
           ) : (
@@ -325,7 +325,7 @@ export default function Requirement() {
                 className="operate-text"
                 style={{ marginRight: 8 }}
                 onClick={() => {
-                  viewDetailWorkflow(record.id);
+                  viewDetailRequirement(record.id);
                 }}
               >
                 详情
@@ -409,7 +409,7 @@ export default function Requirement() {
         <PermissionWrapper permission={REQUIREMENT_PERMISSIONS.CREATE}>
           <Button
             type="primary"
-            onClick={handleCreateWorkflow}
+            onClick={handleCreateRequirement}
             loading={loading}
           >
             <IconPlus /> 创建需求
@@ -429,7 +429,7 @@ export default function Requirement() {
             </>
           ),
           perms: REQUIREMENT_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateWorkflow()
+          handleBtn: () => handleCreateRequirement()
         })}
         rowKey="id"
         loading={loading}

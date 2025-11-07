@@ -1,34 +1,36 @@
-import type { FC, FormEvent } from 'react'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import {
-  RiPlayLargeLine,
-  RiPlayLargeFill,
-} from '@remixicon/react'
-import Select from '@/pages/workflowConfig/components/select'
-import type { SiteInfo } from '@/pages/workflowConfig/models/share'
-import type { PromptConfig } from '@/pages/workflowConfig/models/debug'
-import Button from '@/pages/workflowConfig/components/button'
-import Textarea from '@/pages/workflowConfig/components/textarea'
-import Input from '@/pages/workflowConfig/components/input'
-import { DEFAULT_VALUE_MAX_LEN } from '@/pages/workflowConfig/config'
-import TextGenerationImageUploader from '@/pages/workflowConfig/components/image-uploader/text-generation-image-uploader'
-import type { VisionFile, VisionSettings } from '@/pages/workflowConfig/types/app'
-import { FileUploaderInAttachmentWrapper } from '@/pages/workflowConfig/components/file-uploader'
-import { getProcessedFiles } from '@/pages/workflowConfig/components/file-uploader/utils'
-import useBreakpoints, { MediaType } from '@/pages/workflowConfig/hooks/use-breakpoints'
-import cn from '@/pages/workflowConfig/utils/classnames'
+import type { FC, FormEvent } from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiPlayLargeLine, RiPlayLargeFill } from '@remixicon/react';
+import Select from '@/pages/workflowConfig/components/select';
+import type { SiteInfo } from '@/pages/workflowConfig/models/share';
+import type { PromptConfig } from '@/pages/workflowConfig/models/debug';
+import Button from '@/pages/workflowConfig/components/button';
+import Textarea from '@/pages/workflowConfig/components/textarea';
+import Input from '@/pages/workflowConfig/components/input';
+import { DEFAULT_VALUE_MAX_LEN } from '@/pages/workflowConfig/config';
+import TextGenerationImageUploader from '@/pages/workflowConfig/components/image-uploader/text-generation-image-uploader';
+import type {
+  VisionFile,
+  VisionSettings
+} from '@/pages/workflowConfig/types/app';
+import { FileUploaderInAttachmentWrapper } from '@/pages/workflowConfig/components/file-uploader';
+import { getProcessedFiles } from '@/pages/workflowConfig/components/file-uploader/utils';
+import useBreakpoints, {
+  MediaType
+} from '@/pages/workflowConfig/hooks/use-breakpoints';
+import cn from '@/pages/workflowConfig/utils/classnames';
 
 export type IRunOnceProps = {
-  siteInfo: SiteInfo
-  promptConfig: PromptConfig
-  inputs: Record<string, any>
-  inputsRef: React.MutableRefObject<Record<string, any>>
-  onInputsChange: (inputs: Record<string, any>) => void
-  onSend: () => void
-  visionConfig: VisionSettings
-  onVisionFilesChange: (files: VisionFile[]) => void
-}
+  siteInfo: SiteInfo;
+  promptConfig: PromptConfig;
+  inputs: Record<string, any>;
+  inputsRef: React.MutableRefObject<Record<string, any>>;
+  onInputsChange: (inputs: Record<string, any>) => void;
+  onSend: () => void;
+  visionConfig: VisionSettings;
+  onVisionFilesChange: (files: VisionFile[]) => void;
+};
 const RunOnce: FC<IRunOnceProps> = ({
   promptConfig,
   inputs,
@@ -36,45 +38,58 @@ const RunOnce: FC<IRunOnceProps> = ({
   onInputsChange,
   onSend,
   visionConfig,
-  onVisionFilesChange,
+  onVisionFilesChange
 }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const media = useBreakpoints()
-  const isPC = media === MediaType.pc
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const media = useBreakpoints();
+  const isPC = media === MediaType.pc;
 
   const onClear = () => {
-    const newInputs: Record<string, any> = {}
+    const newInputs: Record<string, any> = {};
     promptConfig.prompt_variables.forEach((item) => {
-      newInputs[item.key] = ''
-    })
-    onInputsChange(newInputs)
-  }
+      newInputs[item.key] = '';
+    });
+    onInputsChange(newInputs);
+  };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    onSend()
-  }
+    e.preventDefault();
+    onSend();
+  };
 
-  const handleInputsChange = useCallback((newInputs: Record<string, any>) => {
-    onInputsChange(newInputs)
-    inputsRef.current = newInputs
-  }, [onInputsChange, inputsRef])
+  const handleInputsChange = useCallback(
+    (newInputs: Record<string, any>) => {
+      onInputsChange(newInputs);
+      inputsRef.current = newInputs;
+    },
+    [onInputsChange, inputsRef]
+  );
 
   return (
     <div className="">
       <section>
         {/* input form */}
         <form onSubmit={onSubmit}>
-          {promptConfig.prompt_variables.map(item => (
-            <div className='w-full mt-4' key={item.key}>
-              <label className='h-6 flex items-center text-text-secondary system-md-semibold'>{item.name}</label>
-              <div className='mt-1'>
+          {promptConfig.prompt_variables.map((item) => (
+            <div className="mt-4 w-full" key={item.key}>
+              <label className="system-md-semibold flex h-6 items-center text-text-secondary">
+                {item.name}
+              </label>
+              <div className="mt-1">
                 {item.type === 'select' && (
                   <Select
-                    className='w-full rounded-[4px]'
+                    className="w-full rounded-[4px]"
                     defaultValue={inputs[item.key]}
-                    onSelect={(i) => { handleInputsChange({ ...inputsRef.current, [item.key]: i.value }) }}
-                    items={(item.options || []).map(i => ({ name: i, value: i }))}
+                    onSelect={(i) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: i.value
+                      });
+                    }}
+                    items={(item.options || []).map((i) => ({
+                      name: i,
+                      value: i
+                    }))}
                     allowSearch={false}
                   />
                 )}
@@ -84,16 +99,26 @@ const RunOnce: FC<IRunOnceProps> = ({
                     className="rounded-[4px]"
                     placeholder={`${item.name}${!item.required ? `(${t('appDebug.variableTable.optional')})` : ''}`}
                     value={inputs[item.key]}
-                    onChange={(e) => { handleInputsChange({ ...inputsRef.current, [item.key]: e.target.value }) }}
+                    onChange={(e) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: e.target.value
+                      });
+                    }}
                     maxLength={item.max_length || DEFAULT_VALUE_MAX_LEN}
                   />
                 )}
                 {item.type === 'paragraph' && (
                   <Textarea
-                    className='h-[104px] sm:text-xs rounded-[4px]'
+                    className="h-[104px] rounded-[4px] sm:text-xs"
                     placeholder={`${item.name}${!item.required ? `(${t('appDebug.variableTable.optional')})` : ''}`}
                     value={inputs[item.key]}
-                    onChange={(e) => { handleInputsChange({ ...inputsRef.current, [item.key]: e.target.value }) }}
+                    onChange={(e) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: e.target.value
+                      });
+                    }}
                   />
                 )}
                 {item.type === 'number' && (
@@ -102,70 +127,95 @@ const RunOnce: FC<IRunOnceProps> = ({
                     className="rounded-[4px]"
                     placeholder={`${item.name}${!item.required ? `(${t('appDebug.variableTable.optional')})` : ''}`}
                     value={inputs[item.key]}
-                    onChange={(e) => { handleInputsChange({ ...inputsRef.current, [item.key]: e.target.value }) }}
+                    onChange={(e) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: e.target.value
+                      });
+                    }}
                   />
                 )}
                 {item.type === 'file' && (
                   <FileUploaderInAttachmentWrapper
-                    onChange={(files) => { handleInputsChange({ ...inputsRef.current, [item.key]: getProcessedFiles(files)[0] }) }}
+                    onChange={(files) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: getProcessedFiles(files)[0]
+                      });
+                    }}
                     fileConfig={{
                       ...item.config,
-                      fileUploadConfig: (visionConfig as any).fileUploadConfig,
+                      fileUploadConfig: (visionConfig as any).fileUploadConfig
                     }}
                   />
                 )}
                 {item.type === 'file-list' && (
                   <FileUploaderInAttachmentWrapper
-                    onChange={(files) => { handleInputsChange({ ...inputsRef.current, [item.key]: getProcessedFiles(files) }) }}
+                    onChange={(files) => {
+                      handleInputsChange({
+                        ...inputsRef.current,
+                        [item.key]: getProcessedFiles(files)
+                      });
+                    }}
                     fileConfig={{
                       ...item.config,
-                      fileUploadConfig: (visionConfig as any).fileUploadConfig,
+                      fileUploadConfig: (visionConfig as any).fileUploadConfig
                     }}
                   />
                 )}
               </div>
             </div>
           ))}
-          {
-            visionConfig?.enabled && (
-              <div className="w-full mt-4">
-                <div className="h-6 flex items-center text-text-secondary system-md-semibold">{t('common.imageUploader.imageUpload')}</div>
-                <div className='mt-1'>
-                  <TextGenerationImageUploader
-                    settings={visionConfig}
-                    onFilesChange={files => onVisionFilesChange(files.filter(file => file.progress !== -1).map(fileItem => ({
-                      type: 'image',
-                      transfer_method: fileItem.type,
-                      url: fileItem.url,
-                      upload_file_id: fileItem.fileId,
-                    })))}
-                  />
-                </div>
+          {visionConfig?.enabled && (
+            <div className="mt-4 w-full">
+              <div className="system-md-semibold flex h-6 items-center text-text-secondary">
+                {t('common.imageUploader.imageUpload')}
               </div>
-            )
-          }
-          <div className='w-full mt-6 mb-3'>
+              <div className="mt-1">
+                <TextGenerationImageUploader
+                  settings={visionConfig}
+                  onFilesChange={(files) =>
+                    onVisionFilesChange(
+                      files
+                        .filter((file) => file.progress !== -1)
+                        .map((fileItem) => ({
+                          type: 'image',
+                          transfer_method: fileItem.type,
+                          url: fileItem.url,
+                          upload_file_id: fileItem.fileId
+                        }))
+                    )
+                  }
+                />
+              </div>
+            </div>
+          )}
+          <div className="mb-3 mt-6 w-full">
             <div className="flex items-center justify-center gap-2">
-              <Button
-                onClick={onClear}
-                disabled={false}
-              >
-                <span className='text-[12px]/[18px]'>{t('common.operation.clear')}</span>
+              <Button onClick={onClear} disabled={false}>
+                <span className="text-[12px]/[18px]">
+                  {t('common.operation.clear')}
+                </span>
               </Button>
               <Button
                 className={cn(!isPC && 'grow', 'custom-primary')}
-                type='submit'
+                type="submit"
                 variant="primary"
                 disabled={false}
               >
-                <RiPlayLargeFill className="shrink-0 w-4 h-4 mr-1" aria-hidden="true" />
-                <span className='text-[12px]/[18px]'>{t('share.generation.run')}</span>
+                <RiPlayLargeFill
+                  className="mr-1 h-4 w-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-[12px]/[18px]">
+                  {t('share.generation.run')}
+                </span>
               </Button>
             </div>
           </div>
         </form>
       </section>
     </div>
-  )
-}
-export default React.memo(RunOnce)
+  );
+};
+export default React.memo(RunOnce);

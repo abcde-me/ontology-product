@@ -1,0 +1,14 @@
+.data-asset-list {
+  :global(.arco-btn-secondary:not(.arco-btn-disabled)) {
+    border-color: #cbd5e1 !important;
+    color: var(--color-text-2) !important;
+    // background-color: transparent !important;
+  }
+
+  &-content {
+    background-image: url('../../assets/data-asset-list-bg.png');
+    background-position: top;
+    background-repeat: no-repeat;
+    background-size: 100% 224px;
+  }
+}

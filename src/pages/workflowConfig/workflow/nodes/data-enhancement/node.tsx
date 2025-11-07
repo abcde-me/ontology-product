@@ -11,11 +11,8 @@ import './data-enhancement.scss';
 const Node: FC<NodeProps<CodeNodeType>> = (props) => {
   const { app_scenarios, enha_modle_id, modelList, prompt_checkbox } =
     props.data;
-  const {
-    sample_num,
-    similarity_threshold,
-    generate_sample_num
-  } = app_scenarios?.option ?? {};
+  const { sample_num, similarity_threshold, generate_sample_num } =
+    app_scenarios?.option ?? {};
   const app_scenarios_type = app_scenarios?.type ?? '';
   const { handleModelChange, setBoostPageData } = useConfig(
     props.id,
