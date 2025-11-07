@@ -53,10 +53,6 @@ function FileList({
     }
   }, [isCleanFileName]);
 
-  useEffect(() => {
-    console.log('filesData', filesData);
-  }, [filesData]);
-
   const columns: any[] = [
     {
       title: '文件名',
@@ -173,7 +169,6 @@ function FileList({
       }
       if (unmountedRef.current) return;
       const { items = [], total = 0 } = result.data;
-      console.log('列表数据:', result, items, total);
       setFilesData(items || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
@@ -247,7 +242,6 @@ function FileList({
           };
         },
         onSelect: (selected, record, selectedRows) => {
-          console.log('onSelect:', selected, record, selectedRows);
           if (selected) {
             if (!selectedRowKeys.includes(record.id)) {
               setSelectedRowKeys([...selectedRowKeys, record.id]);
