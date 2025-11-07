@@ -89,7 +89,7 @@ const AccessTable = (props) => {
             },
             {
               text: '失败',
-              value: RunState.FAILED
+              value: RunState.FAILURE
             }
           ]
         },
@@ -175,7 +175,7 @@ const AccessTable = (props) => {
             },
             {
               text: '失败',
-              value: RunState.FAILED
+              value: RunState.FAILURE
             }
           ]
         },
