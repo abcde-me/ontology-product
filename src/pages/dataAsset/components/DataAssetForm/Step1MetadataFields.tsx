@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Button,
   Card,
@@ -13,11 +13,14 @@ import {
   Space
 } from '@arco-design/web-react';
 // import { Add, Upload } from '@arco-design/web-react/icon';
-import { MetadataField, DataSource } from './DataAssetFormContainer';
+import { MetadataField } from './DataAssetFormContainer';
 import ImportFieldsModal from './ImportFieldsModal';
 import styles from './Step1MetadataFields.module.scss';
 import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
-import { DataAssetField } from '@/types/dataAssetApi';
+import {
+  DataAssetField,
+  FindDataAssetMappingItemRes
+} from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 
@@ -26,8 +29,9 @@ const FormItem = Form.Item;
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
-  dataSources: DataSource;
-  setDataSources: React.Dispatch<React.SetStateAction<DataSource>>;
+  dataSources: Record<string, boolean>;
+  setDataSources: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  findDataAssetMappingData: FindDataAssetMappingItemRes[];
   onCancel: () => void;
   onNext: () => void;
 }
@@ -37,6 +41,7 @@ export default function Step1MetadataFields({
   setMetadataFields,
   dataSources,
   setDataSources,
+  findDataAssetMappingData,
   onCancel,
   onNext
 }: Step1MetadataFieldsProps) {
@@ -74,6 +79,61 @@ export default function Step1MetadataFields({
       isMounted = false;
     };
   }, []);
+
+  // 从 findDataAssetMappingData 直接计算可用的数据来源（使用 nameEn 作为键）
+  const availableDataSources = useMemo(() => {
+    if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
+      return {};
+    }
+
+    // 使用 nameEn 字段作为数据源键
+    const result: Record<string, boolean> = {};
+    findDataAssetMappingData.forEach((field) => {
+      if (field.nameEn) {
+        result[field.nameEn] = true;
+      }
+    });
+
+    return result;
+  }, [findDataAssetMappingData]);
+
+  // 数据来源类型的中文显示名称映射（仅用于显示）
+  const dataSourceDisplayNames: Record<string, string> = {
+    dataset: '数据集',
+    datavolume: '源数据目录-卷',
+    database: '源数据目录-数据库',
+    metadata: '源数据目录-元数据-目录'
+  };
+
+  // 初始化 dataSources，确保所有可用的数据来源都有初始值
+  useEffect(() => {
+    if (Object.keys(availableDataSources).length > 0) {
+      const updatedDataSources = { ...dataSources };
+      let hasUpdate = false;
+
+      // 为新的可用数据来源设置初始值（如果还没有的话）
+      Object.keys(availableDataSources).forEach((key) => {
+        if (updatedDataSources[key] === undefined) {
+          updatedDataSources[key] = true;
+          hasUpdate = true;
+        }
+      });
+
+      // 移除不再可用的数据来源
+      Object.keys(updatedDataSources).forEach((key) => {
+        if (availableDataSources[key] === undefined) {
+          delete updatedDataSources[key];
+          hasUpdate = true;
+        }
+      });
+
+      if (hasUpdate) {
+        setDataSources(updatedDataSources);
+        form.setFieldValue('dataSources', updatedDataSources);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableDataSources]);
 
   // Table列定义（字段名对齐 DataAssetField）
   const columns = [
@@ -255,7 +315,7 @@ export default function Step1MetadataFields({
   };
 
   // 数据源变更
-  const handleDataSourceChange = (key: keyof DataSource, checked: boolean) => {
+  const handleDataSourceChange = (key: string, checked: boolean) => {
     const updatedDataSources = { ...dataSources, [key]: checked };
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
@@ -263,12 +323,13 @@ export default function Step1MetadataFields({
 
   // 全选/取消全选数据源
   const handleSelectAllDataSources = (checked: boolean) => {
-    const updatedDataSources = {
-      dataset: checked,
-      volume: checked,
-      database: checked,
-      metadataDir: checked
-    };
+    const updatedDataSources: Record<string, boolean> = { ...dataSources };
+    // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
+    findDataAssetMappingData.forEach((field) => {
+      if (field.nameEn) {
+        updatedDataSources[field.nameEn] = checked;
+      }
+    });
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
   };
@@ -296,18 +357,16 @@ export default function Step1MetadataFields({
   // 验证数据来源的自定义验证器
   const validateDataSource = useCallback(
     (value: any, callback: any) => {
-      const hasAnySource =
-        dataSources.dataset ||
-        dataSources.volume ||
-        dataSources.database ||
-        dataSources.metadataDir;
+      const hasAnySource = Object.keys(availableDataSources).some(
+        (key) => dataSources[key] === true
+      );
       if (!hasAnySource) {
         callback('请至少选择一个数据来源');
       } else {
         callback();
       }
     },
-    [dataSources]
+    [dataSources, availableDataSources]
   );
 
   // 下一步前验证
@@ -385,71 +444,45 @@ export default function Step1MetadataFields({
           rules={[{ validator: validateDataSource }]}
         >
           <Row gutter={24}>
-            <Col span={4}>
-              <Checkbox
-                checked={
-                  dataSources.dataset &&
-                  dataSources.volume &&
-                  dataSources.database &&
-                  dataSources.metadataDir
-                }
-                indeterminate={
-                  (dataSources.dataset ||
-                    dataSources.volume ||
-                    dataSources.database ||
-                    dataSources.metadataDir) &&
-                  !(
-                    dataSources.dataset &&
-                    dataSources.volume &&
-                    dataSources.database &&
-                    dataSources.metadataDir
-                  )
-                }
-                onChange={(checked) => handleSelectAllDataSources(checked)}
-              >
-                全选
-              </Checkbox>
-            </Col>
-            <Col span={4}>
-              <Checkbox
-                checked={dataSources.dataset}
-                onChange={(checked) =>
-                  handleDataSourceChange('dataset', checked)
-                }
-              >
-                数据集
-              </Checkbox>
-            </Col>
-            <Col span={4}>
-              <Checkbox
-                checked={dataSources.volume}
-                onChange={(checked) =>
-                  handleDataSourceChange('volume', checked)
-                }
-              >
-                源数据目录-卷
-              </Checkbox>
-            </Col>
-            <Col span={4}>
-              <Checkbox
-                checked={dataSources.database}
-                onChange={(checked) =>
-                  handleDataSourceChange('database', checked)
-                }
-              >
-                源数据目录-数据库
-              </Checkbox>
-            </Col>
-            <Col span={4}>
-              <Checkbox
-                checked={dataSources.metadataDir}
-                onChange={(checked) =>
-                  handleDataSourceChange('metadataDir', checked)
-                }
-              >
-                源数据目录-元数据-目录
-              </Checkbox>
-            </Col>
+            {findDataAssetMappingData.length > 0 &&
+              (() => {
+                // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
+                const nameEnArray = findDataAssetMappingData
+                  .map((field) => field.nameEn)
+                  .filter((nameEn): nameEn is string => !!nameEn);
+                const allChecked =
+                  nameEnArray.length > 0 &&
+                  nameEnArray.every((nameEn) => dataSources[nameEn] === true);
+                const someChecked = nameEnArray.some(
+                  (nameEn) => dataSources[nameEn] === true
+                );
+
+                return (
+                  <Col span={4}>
+                    <Checkbox
+                      checked={allChecked}
+                      indeterminate={someChecked && !allChecked}
+                      onChange={(checked) =>
+                        handleSelectAllDataSources(checked)
+                      }
+                    >
+                      全选
+                    </Checkbox>
+                  </Col>
+                );
+              })()}
+            {findDataAssetMappingData.map((field) => (
+              <Col key={field.nameEn} span={4}>
+                <Checkbox
+                  checked={dataSources[field.nameEn] || false}
+                  onChange={(checked) =>
+                    handleDataSourceChange(field.nameEn, checked)
+                  }
+                >
+                  {field.nameZh}
+                </Checkbox>
+              </Col>
+            ))}
           </Row>
         </FormItem>
       </Form>

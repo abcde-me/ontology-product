@@ -37,6 +37,28 @@ export async function findDataAssetMapping(): Promise<
             feildName: 'name'
           }
         ]
+      },
+      {
+        nameZh: '源数据目录-卷',
+        nameEn: 'datavolume',
+        type: 'string',
+        default: '',
+        required: false,
+        allowModify: true,
+        mapping: [
+          {
+            type: 'string',
+            tableName: 'table002',
+            fieldType: 'varchar(255)',
+            feildName: '源数据目录-卷-name1'
+          },
+          {
+            type: 'number',
+            tableName: 'table002',
+            fieldType: 'bigint',
+            feildName: 'id'
+          }
+        ]
       }
     ],
     message: 'success',

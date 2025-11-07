@@ -1,11 +1,11 @@
 import React from 'react';
 import { Input, Select } from '@arco-design/web-react';
-import { FieldMapping, DataSource } from './DataAssetFormContainer';
+import { FieldMapping } from './DataAssetFormContainer';
 
 interface MappingRowProps {
   mapping: FieldMapping;
   columns: string[];
-  dataSources: DataSource;
+  dataSources: Record<string, boolean>;
   onUpdate: (updates: Partial<FieldMapping>) => void;
   onDelete: () => void;
 }
