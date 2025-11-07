@@ -50,14 +50,120 @@ export async function listDataAssetData(
   params: ListDataAssetDataReq
 ): Promise<ApiRes<ListDataAssetDataRes>> {
   // Mock 所有数据
-  const allRecords = Array.from({ length: 50 }, (_, i) => ({
-    id: String(i + 1),
-    name: `数据资产${i + 1}`,
-    tags:
-      i % 2 === 0 ? ['标签1', '标签2', '标签3', '标签4'] : ['标签1', '标签2'],
-    source: '来源1',
-    updateTime: '2024-01-01 12:00:00'
-  }));
+  const allRecords = [
+    {
+      id: '1',
+      name: '井位分布图.map',
+      tags: ['实体:井'],
+      source: '数据目录\\图件',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '2',
+      name: '储量计算报告.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '3',
+      name: '试井解释报告.pdf',
+      tags: ['实体:井'],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '4',
+      name: '压裂施工设计书.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '5',
+      name: '废弃液处理报告.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '6',
+      name: '设备维护手册.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '7',
+      name: '管道腐蚀检测报告.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '8',
+      name: '硫化氢监测报告.pdf',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '9',
+      name: '井场视频监控.mp4',
+      tags: ['实体:井'],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '10',
+      name: '地理底图.shp',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '11',
+      name: '开发方案多媒体报告.ppt',
+      tags: [],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '12',
+      name: '实时功图数据表.dat',
+      tags: ['代码工具'],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '13',
+      name: '井下工具工作日志.dat',
+      tags: ['实体:井', '代码工具'],
+      source: '数据目录\\文档',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '14',
+      name: '射孔数据表.job',
+      tags: [],
+      source: '数据目录\\体数据',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '15',
+      name: '井口温度压力实时趋势.realtime',
+      tags: ['实体:井'],
+      source: '数据目录\\体数据',
+      updateTime: '2024-01-01 12:00:00'
+    },
+    {
+      id: '16',
+      name: '油藏数值模拟输入文件.input',
+      tags: [],
+      source: '数据目录\\体数据',
+      updateTime: '2024-01-01 12:00:00'
+    }
+  ];
 
   // 分页处理
   const page = params.page || 1;
