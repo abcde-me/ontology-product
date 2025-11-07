@@ -145,6 +145,12 @@ function LabelEditorPage() {
           alive={true}
           loading={document.createElement('span') as any}
           plugins={WujiePlugins}
+          activated={() => {
+            bus.$emit('labeleditor-activated');
+          }}
+          deactivated={() => {
+            bus.$emit('labeleditor-deactivated');
+          }}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,

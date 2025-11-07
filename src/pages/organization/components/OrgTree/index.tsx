@@ -260,8 +260,8 @@ export default function OrgTree() {
             const operationButtonSpace = 60; // 减少操作按钮预留空间，确保按钮能正常显示
             const dynamicMaxWidth = Math.max(
               baseWidth -
-              (nodeLevel - 1) * indentPerLevel -
-              operationButtonSpace,
+                (nodeLevel - 1) * indentPerLevel -
+                operationButtonSpace,
               80 // 增加最小宽度
             );
 

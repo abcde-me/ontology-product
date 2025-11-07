@@ -1,6 +1,6 @@
 import type {
   CommonNodeType,
-  VarType,
+  VarType
 } from '@/pages/workflowConfig/workflow/types';
 
 export enum CodeLanguage {
@@ -43,6 +43,7 @@ export type CodeNodeType = CommonNodeType & {
   mg_duplicate_checkbox: string;
   mg_duplicate_ngram: number;
   mg_duplicate: boolean;
+  written_correct: boolean | number;
 };
 
 export type CodeDependency = any;

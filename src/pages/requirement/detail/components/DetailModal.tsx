@@ -150,7 +150,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {}
   };
   useEffect(() => {
-    getTreeDataList();
+    if (visible) {
+      getTreeDataList();
+    }
   }, [visible]);
 
   // 树的内容

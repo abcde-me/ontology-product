@@ -394,7 +394,7 @@ const Panel = ({ id, data, parentRef }) => {
         {(isRunning || resultData) && (
           <Collapse
             defaultActiveKey="running_result"
-            style={{ maxWidth: 1180 }}
+            style={{ maxWidth: 1180, zIndex: 2 }}
             className="wk-customize-running-result-collapse"
           >
             <CollapseItem

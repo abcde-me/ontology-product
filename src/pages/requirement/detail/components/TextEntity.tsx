@@ -14,7 +14,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { uuid } from '@/models/utils';
-import { getRandomHexColorStrict } from '../common';
+import { getRandomHexColorStrict } from '../../common';
 import './TextEntity.scss';
 // 实体/实体关系 - 组件
 const btnList = [
@@ -243,7 +243,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 >
                   <Input
                     placeholder="请输入标签名称"
-                    style={{ width: 260 }}
+                    style={{ width: 300 }}
                     value={item.label_name_en}
                     onChange={(value) => {
                       handleFieldChange(index, 'label_name_en', value);
@@ -302,7 +302,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 >
                   <Input
                     placeholder="请输入展示名称"
-                    style={{ width: 250 }}
+                    style={{ width: 300 }}
                     value={item.label_name_cn}
                     onChange={(value) => {
                       handleFieldChange(index, 'label_name_cn', value);
@@ -471,7 +471,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       >
                         <Input
                           placeholder="用于储存标注结果"
-                          style={{ width: 294 }}
+                          style={{ width: 340 }}
                           value={item.relation_name_en}
                           onChange={(value) => {
                             handleRelationFieldChange(
@@ -529,7 +529,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       >
                         <Input
                           placeholder="展示在标注页面的名称"
-                          style={{ width: 284 }}
+                          style={{ width: 330 }}
                           value={item.relation_name_cn}
                           onChange={(value) => {
                             handleRelationFieldChange(
@@ -579,7 +579,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               allowClear
                               placeholder="请选择起始标签"
                               style={{
-                                width: 260,
+                                width: 310,
                                 backgroundColor:
                                   type === 'detail' ? '#e2e8f0' : '#fff'
                               }}
@@ -641,7 +641,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               placeholder="请选择目标标签"
                               notFoundContent={renderNotFoundContent()}
                               style={{
-                                width: 276,
+                                width: 320,
                                 backgroundColor:
                                   type === 'detail' ? '#e2e8f0' : '#fff'
                               }}

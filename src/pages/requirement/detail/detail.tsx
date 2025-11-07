@@ -1,45 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { getRequirementDetail, publishRequirement } from '@/api/dataAnnotation';
+import { useParams } from '@/utils/url';
 import {
   Breadcrumb,
   Button,
+  Checkbox,
+  ColorPicker,
+  Dropdown,
   Form,
+  Image,
   Input,
+  Menu,
+  Message,
   Radio,
   Select,
-  Checkbox,
-  Tooltip,
-  Image,
-  Dropdown,
-  Menu,
-  ColorPicker,
-  Message,
-  Spin
+  Spin,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
   IconDelete,
   IconDown,
   IconPlus,
-  IconQuestionCircle,
-  IconSwap
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import { useParams } from '@/utils/url';
+import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useHistory } from 'react-router';
-import { useUserInfo } from '@/store/userInfoStore';
-import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
-import { DepartmentModal } from './components/DepartmentModal';
-import { IndividualModal } from './components/IndividualModal';
 import { v4 as uuidV4 } from 'uuid';
 import {
   convertToUTCFormat,
   getRandomHexColorStrict,
   shapeOptions
-} from './common';
-import AnnotationType from './components/AnnotationType';
-import TextSubstanceComponent from './components/TextEntity';
-import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
-import { Classify } from './components/Classify';
-import _, { omitBy, isArray, isEmpty, min } from 'lodash';
+} from '../common';
 import {
   AnnotationChildType,
   AnnotationTypeContentCode,
@@ -47,41 +39,33 @@ import {
   LabelInfoAttributeGroupType,
   LabelShape,
   RequirementTypeNameMap,
-  toolFileType
-} from './type';
-
+  toolFileType,
+  LabelInfoAttribute,
+  LabelInfoAttributeGroup,
+  LabelData
+} from '../type';
+import AnnotationType from './components/AnnotationType';
+import { Classify } from './components/Classify';
+import { DepartmentModal } from './components/DepartmentModal';
+import { DataSourceModal } from './components/DetailModal';
+import { IndividualModal } from './components/IndividualModal';
+import TextSubstanceComponent from './components/TextEntity';
+import {
+  generateLabels,
+  generateInitialData,
+  LABEL_MAPPING
+} from './utils/generateLabels';
 import './detail.scss';
+import {
+  useGetModelList,
+  useGetModelLabelList
+} from '../hooks/useGetModelInfo';
 const BreadcrumbItem = Breadcrumb.Item;
 
-// 定义数据类型接口
-interface LabelInfoAttribute {
-  label_info_id: string;
-  attribute_name_cn: string;
-  attribute_name_en: string;
-  input_type: 1 | 2; // 1=选项，2=输入框
-}
-
-interface LabelInfoAttributeGroup {
-  attribute_id: string;
-  attribute_group_name: string;
-  attribute_group_class: 1 | 2 | 3; // 1=单选，2=多选，3=输入框
-  attribute_group_type: 1 | 2; // 1=必选，2=非必选
-  label_info_attribute: LabelInfoAttribute[];
-}
-interface LabelData {
-  label_id: string;
-  label_name_cn: string;
-  label_name_en: string;
-  label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
-  label_colour: string;
-  label_info_attribute_groups: LabelInfoAttributeGroup[];
-}
-
 export default function RequirementDetail() {
-  const [form1] = Form.useForm();
-  const [form2] = Form.useForm();
-  const [form3] = Form.useForm();
-  const [form2Child] = Form.useForm();
+  const [basicForm] = Form.useForm();
+  const [labelToolForm] = Form.useForm();
+  const [distributeForm] = Form.useForm();
   const FormItem = Form.Item;
   const RadioGroup = Radio.Group;
   const Option = Select.Option;
@@ -117,22 +101,9 @@ export default function RequirementDetail() {
   const [formType, setFormType]: any = useState({});
   const [text_fl_data, setText_fl_data] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
-  // 生成初始示例数据
-  const generateInitialData = (): LabelData[] => {
-    return [
-      {
-        label_id: uuidV4(),
-        label_name_cn: '',
-        label_name_en: '',
-        label_shape: LabelShape.RECTANGLE,
-        label_colour: getRandomHexColorStrict(),
-        label_info_attribute_groups: []
-      }
-    ];
-  };
 
-  // 初始化状态
-  const [datalist, setDatalist] = useState<LabelData[]>(generateInitialData());
+  const [labelDataList, setLabelDataList] =
+    useState<LabelData[]>(generateInitialData);
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
 
@@ -148,7 +119,7 @@ export default function RequirementDetail() {
   useEffect(() => {
     if (activeTab === 1) {
       // 深拷贝当前的 templateData 来触发更新
-      const updatedTemplateData = _.cloneDeep(templateData);
+      const updatedTemplateData = cloneDeep(templateData);
       setTemplateData(updatedTemplateData);
     }
   }, [activeTab]);
@@ -156,32 +127,149 @@ export default function RequirementDetail() {
   // 添加新的useEffect来同步模板更新到标签
   useEffect(() => {
     // 当templateData更新时，检查并更新所有使用了该模板的标签属性组
-    const updatedDatalist = _.cloneDeep(templateData);
-    // 遍历每个标签
-    // 遍历标签中的每个属性组
-    updatedDatalist.forEach((attrGroup: any, groupIndex: any) => {
-      form2.setFieldValue(
-        `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
-        attrGroup.attribute_group_name
-      );
+    if (
+      templateData &&
+      templateData.length > 0 &&
+      labelDataList &&
+      labelDataList.length > 0
+    ) {
+      // 使用函数式状态更新，一次性更新所有数据
+      setLabelDataList((prevDatalist) => {
+        const newDatalist = cloneDeep(prevDatalist);
+        let hasChanges = false;
 
-      // 如果新组有属性，也需要设置这些属性的表单字段
-      if (
-        attrGroup.label_info_attribute &&
-        attrGroup.label_info_attribute.length > 0
-      ) {
-        attrGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-          form2.setFieldValue(
-            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
-            attribute.attribute_name_cn
-          );
-          form2.setFieldValue(
-            `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
-            attribute.attribute_name_en
-          );
+        // 遍历datalist中的每个标签
+        newDatalist.forEach((labelItem, labelIndex) => {
+          if (
+            labelItem.label_info_attribute_groups &&
+            labelItem.label_info_attribute_groups.length > 0
+          ) {
+            // 遍历每个标签的属性组
+            labelItem.label_info_attribute_groups.forEach(
+              (attrGroup, groupIndex) => {
+                // 通过多种方式查找对应的模板
+                let matchingTemplate = templateData.find(
+                  (template) => template.attribute_id === attrGroup.attribute_id
+                );
+
+                // 如果通过ID没找到，尝试通过名称匹配
+                if (!matchingTemplate) {
+                  matchingTemplate = templateData.find(
+                    (template) =>
+                      template.attribute_group_name ===
+                      attrGroup.attribute_group_name
+                  );
+                }
+
+                // 如果还没找到，尝试通过属性内容匹配（用于复制的标签）
+                if (
+                  !matchingTemplate &&
+                  attrGroup.label_info_attribute &&
+                  attrGroup.label_info_attribute.length > 0
+                ) {
+                  matchingTemplate = templateData.find((template) => {
+                    if (
+                      !template.label_info_attribute ||
+                      template.label_info_attribute.length !==
+                        attrGroup.label_info_attribute.length
+                    ) {
+                      return false;
+                    }
+                    // 比较属性的中文名和英文名是否匹配
+                    return template.label_info_attribute.every(
+                      (tplAttr, idx) => {
+                        const groupAttr = attrGroup.label_info_attribute[idx];
+                        return (
+                          tplAttr.attribute_name_cn ===
+                            groupAttr.attribute_name_cn &&
+                          tplAttr.attribute_name_en ===
+                            groupAttr.attribute_name_en
+                        );
+                      }
+                    );
+                  });
+                }
+
+                if (matchingTemplate) {
+                  hasChanges = true;
+
+                  // 更新属性组名称
+                  attrGroup.attribute_group_name =
+                    matchingTemplate.attribute_group_name;
+                  attrGroup.attribute_group_class =
+                    matchingTemplate.attribute_group_class;
+                  attrGroup.attribute_group_type =
+                    matchingTemplate.attribute_group_type;
+
+                  // 更新属性数据，保留原有的label_info_id
+                  if (
+                    Array.isArray(matchingTemplate.label_info_attribute) &&
+                    Array.isArray(attrGroup.label_info_attribute)
+                  ) {
+                    attrGroup.label_info_attribute =
+                      matchingTemplate.label_info_attribute.map(
+                        (tplAttr, idx) => {
+                          const existAttr = attrGroup.label_info_attribute[idx];
+                          return {
+                            ...tplAttr,
+                            label_info_id:
+                              existAttr?.label_info_id || tplAttr.label_info_id,
+                            input_type:
+                              tplAttr.input_type ?? existAttr?.input_type ?? 1
+                          };
+                        }
+                      );
+                  }
+
+                  // 更新表单字段
+                  labelToolForm.setFieldValue(
+                    `label_info_attribute_groups_${attrGroup.attribute_id}_attribute_group_name`,
+                    attrGroup.attribute_group_name
+                  );
+
+                  // 更新属性的表单字段
+                  if (
+                    attrGroup.label_info_attribute &&
+                    attrGroup.label_info_attribute.length > 0
+                  ) {
+                    attrGroup.label_info_attribute.forEach(
+                      (attribute, attrIndex) => {
+                        const fieldId = attribute.label_info_id;
+
+                        // 更新两种可能的字段命名格式
+                        labelToolForm.setFieldValue(
+                          `label_info_attribute_groups_${fieldId}_attribute_name_cn`,
+                          attribute.attribute_name_cn
+                        );
+                        labelToolForm.setFieldValue(
+                          `label_info_attribute_groups_${fieldId}_attribute_name_en`,
+                          attribute.attribute_name_en
+                        );
+                        labelToolForm.setFieldValue(
+                          `attribute_name_cn${fieldId}`,
+                          attribute.attribute_name_cn
+                        );
+                        labelToolForm.setFieldValue(
+                          `attribute_name_en${fieldId}`,
+                          attribute.attribute_name_en
+                        );
+                        labelToolForm.setFieldValue(
+                          `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`,
+                          attribute.input_type
+                        );
+                      }
+                    );
+                  }
+                }
+              }
+            );
+          }
         });
-      }
-    });
+
+        // 只有在有变化时才返回新数据
+        return hasChanges ? newDatalist : prevDatalist;
+      });
+    }
   }, [templateData]);
   // 基础配置
 
@@ -232,7 +320,6 @@ export default function RequirementDetail() {
       ...publishData,
       label_type_code: annotationTypeContentCode
     });
-    // setDatalist(generateInitialData());
   };
 
   // 安全获取嵌套属性
@@ -268,67 +355,22 @@ export default function RequirementDetail() {
    */
   const deleteLabel = (labelIndex) => {
     // 使用函数式更新确保获取到最新的状态
-    setDatalist((prevDatalist) => {
+    setLabelDataList((prevDatalist) => {
       const newDatalist = [...prevDatalist];
 
-      // 在删除前获取要删除的标签数据，以便清除相关表单字段
-      const deletedLabel = newDatalist[labelIndex];
       newDatalist.splice(labelIndex, 1);
-
-      // 清除表单中与该标签相关的所有字段
-      if (deletedLabel) {
-        // 清除标签基本信息字段
-        form1.resetFields(`datalist_${labelIndex}_label_name_cn`);
-        form1.resetFields(`datalist_${labelIndex}_label_name_en`);
-        form1.resetFields(`datalist_${labelIndex}_label_type`);
-        form1.resetFields(`datalist_${labelIndex}_label_tool_code`);
-
-        // 清除所有属性组及其属性字段
-        if (deletedLabel.label_info_attribute_groups) {
-          deletedLabel.label_info_attribute_groups.forEach(
-            (group, groupIndex) => {
-              // 清除属性组基本信息字段
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_name`
-              );
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_class`
-              );
-              form1.resetFields(
-                `label_info_attribute_groups_${labelIndex}_${groupIndex}_attribute_group_type`
-              );
-
-              // 清除属性组中的所有属性字段
-              if (group.label_info_attribute) {
-                group.label_info_attribute?.forEach((_, attrIndex) => {
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_cn`
-                  );
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_attribute_name_en`
-                  );
-                  form1.resetFields(
-                    `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attrIndex}_input_type`
-                  );
-                });
-              }
-            }
-          );
-        }
-      }
-
       return newDatalist;
     });
   };
   const updateField = (path, value) => {
-    const currentValue = getNestedValue(datalist, path);
+    const currentValue = getNestedValue(labelDataList, path);
     if (currentValue === undefined) {
       console.warn(`无效的路径: ${path.join('.')}`);
       return;
     }
 
-    const newData = setNestedValue(datalist, path, value);
-    setDatalist(newData);
+    const newData = setNestedValue(labelDataList, path, value);
+    setLabelDataList(newData);
   };
   /**
    * 删除属性组
@@ -336,9 +378,9 @@ export default function RequirementDetail() {
    * @param {number} groupIndex - 要删除的属性组索引
    */
   const deleteAttributeGroup = (labelIndex, groupIndex) => {
-    setDatalist((prevData) => {
+    setLabelDataList((prevData) => {
       // 创建数据的深拷贝，避免直接修改原数据
-      const newData = _.cloneDeep(prevData);
+      const newData = cloneDeep(prevData);
 
       // 只在指定的标签中删除指定的属性组
       if (
@@ -361,7 +403,7 @@ export default function RequirementDetail() {
    */
   const deleteAttribute = (labelIndex, groupIndex, attributeIndex) => {
     const currentAttributes =
-      getNestedValue(datalist, [
+      getNestedValue(labelDataList, [
         labelIndex,
         'label_info_attribute_groups',
         groupIndex,
@@ -383,13 +425,13 @@ export default function RequirementDetail() {
     );
 
     // 清除表单中与该属性相关的所有字段
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_attribute_name_cn`
     );
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_attribute_name_en`
     );
-    form1.resetFields(
+    basicForm.resetFields(
       `label_info_attribute_groups_${labelIndex}_${groupIndex}_label_info_attribute_${attributeIndex}_input_type`
     );
   };
@@ -400,48 +442,55 @@ export default function RequirementDetail() {
     isTemp?: boolean
   ) => {
     if (path.length === 0) return;
-    // 创建数据的深拷贝，避免直接修改原数据
-    // 深拷贝
-    const newData = _.cloneDeep(isTemp ? templateData : datalist);
-    // 遍历路径找到目标位置并更新值
-    let current: any = newData;
-    for (let i = 0; i < path.length; i++) {
-      const key = path[i];
-      // 如果是最后一个路径段，设置值
-      if (i === path.length - 1) {
-        current[key] = value;
-        break;
-      }
 
-      // 移动到下一个层级
-      if (current[key] === undefined) {
-        console.error(`路径错误: 找不到 ${key} 在层级 ${i}`);
-        return;
+    // 使用函数式更新确保基于最新状态
+    const updateFn = (prevData: any) => {
+      // 创建数据的深拷贝，避免直接修改原数据
+      const newData = cloneDeep(prevData);
+      // 遍历路径找到目标位置并更新值
+      let current: any = newData;
+      for (let i = 0; i < path.length; i++) {
+        const key = path[i];
+        // 如果是最后一个路径段，设置值
+        if (i === path.length - 1) {
+          current[key] = value;
+          break;
+        }
+
+        // 移动到下一个层级
+        if (current[key] === undefined) {
+          console.error(`路径错误: 找不到 ${key} 在层级 ${i}`);
+          return prevData; // 返回原数据，不做更新
+        }
+        current = current[key];
       }
-      current = current[key];
-    }
+      return newData;
+    };
+
     // 更新状态
-    isTemp ? setTemplateData(newData) : setDatalist(newData);
+    isTemp ? setTemplateData(updateFn) : setLabelDataList(updateFn);
   };
 
   // 添加新标签
   const addNewLabel = () => {
     // 使用函数式更新确保基于最新状态进行操作
-    setDatalist((prevDatalist) => {
+    setLabelDataList((prevDatalist) => {
       // 检查数组是否为空
       if (!Array.isArray(prevDatalist) || prevDatalist.length === 0) {
         // 如果为空，创建一个初始标签
-        return [...prevDatalist, generateInitialData()[0]];
+        return [...prevDatalist, ...generateInitialData];
       }
 
       // 获取最后一个标签的深拷贝
-      const lastLabel = _.cloneDeep(prevDatalist[prevDatalist.length - 1]);
+      const lastLabel = cloneDeep(prevDatalist[prevDatalist.length - 1]);
       // 生成全新的唯一ID
       lastLabel.label_id = uuidV4();
       lastLabel.label_colour = getRandomHexColorStrict();
       // 清空标签名称和展示名称，让用户重新输入
       lastLabel.label_name_en = '';
       lastLabel.label_name_cn = '';
+      // 清空模型映射，让用户重新选择
+      lastLabel.label_mapping = '';
 
       // 确保完整保留所有属性组和属性
       if (
@@ -450,7 +499,7 @@ export default function RequirementDetail() {
       ) {
         lastLabel.label_info_attribute_groups =
           lastLabel.label_info_attribute_groups.map((group) => {
-            const newGroup = _.cloneDeep(group);
+            const newGroup = cloneDeep(group);
             newGroup.attribute_id = uuidV4();
             // 为每个属性生成新ID
             if (
@@ -460,7 +509,7 @@ export default function RequirementDetail() {
             ) {
               newGroup.label_info_attribute = newGroup.label_info_attribute.map(
                 (attr) => {
-                  const newAttr = _.cloneDeep(attr);
+                  const newAttr = cloneDeep(attr);
                   newAttr.label_info_id = uuidV4();
                   return newAttr;
                 }
@@ -474,22 +523,25 @@ export default function RequirementDetail() {
       // 创建新的标签列表
       const newDatalist = [...prevDatalist, lastLabel];
       newDatalist?.map((item) => {
-        form2.setFieldValue(`label_shape_${item?.label_id}`, item?.label_shape);
-        form2.setFieldValue(
+        labelToolForm.setFieldValue(
+          `label_shape_${item?.label_id}`,
+          item?.label_shape
+        );
+        labelToolForm.setFieldValue(
           `label_colour_${item?.label_id}`,
           item?.label_colour
         );
         item?.label_info_attribute_groups?.map((group) => {
-          form2.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${group?.attribute_id}_attribute_group_name`,
             group?.attribute_group_name
           );
           group?.label_info_attribute?.map((attribute) => {
-            form2.setFieldValue(
+            labelToolForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
               attribute?.attribute_name_cn
             );
-            form2.setFieldValue(
+            labelToolForm.setFieldValue(
               `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
               attribute?.attribute_name_en
             );
@@ -524,7 +576,7 @@ export default function RequirementDetail() {
     };
 
     // 获取当前属性组并添加新组
-    const currentGroups = datalist[labelIndex].label_info_attribute_groups;
+    const currentGroups = labelDataList[labelIndex].label_info_attribute_groups;
     updateNestedValue(
       [labelIndex, 'label_info_attribute_groups'],
       [...currentGroups, newGroup]
@@ -541,8 +593,9 @@ export default function RequirementDetail() {
     };
     // 获取当前属性并添加新属性
     const currentAttributes =
-      datalist[labelIndex].label_info_attribute_groups[groupIndex as number]
-        .label_info_attribute;
+      labelDataList[labelIndex].label_info_attribute_groups[
+        groupIndex as number
+      ].label_info_attribute;
 
     const updatedAttributes = [...currentAttributes];
 
@@ -572,14 +625,15 @@ export default function RequirementDetail() {
     );
     if (selectedTemplate) {
       // 深拷贝选中的模板，确保包含完整的label_info_attribute内容
-      const newGroup = _.cloneDeep(selectedTemplate);
+      const newGroup = cloneDeep(selectedTemplate);
       // 获取当前属性组并添加新组
-      const currentGroups = datalist[labelIndex].label_info_attribute_groups;
+      const currentGroups =
+        labelDataList[labelIndex].label_info_attribute_groups;
       updateNestedValue(
         [labelIndex, 'label_info_attribute_groups'],
         [...currentGroups, newGroup]
       );
-      form2.setFieldValue(
+      labelToolForm.setFieldValue(
         `label_info_attribute_groups_${newGroup.attribute_id}_attribute_group_name`,
         newGroup.attribute_group_name
       );
@@ -590,15 +644,15 @@ export default function RequirementDetail() {
         newGroup.label_info_attribute.length > 0
       ) {
         newGroup.label_info_attribute.forEach((attribute, attrIndex) => {
-          form2.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_cn`,
             attribute.attribute_name_cn
           );
-          form2.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${attribute?.label_info_id}_attribute_name_en`,
             attribute.attribute_name_en
           );
-          form2.setFieldValue(
+          labelToolForm.setFieldValue(
             `label_info_attribute_groups_${labelIndex}_${currentGroups.length}_label_info_attribute_${attrIndex}_input_type`,
             attribute.input_type
           );
@@ -637,7 +691,7 @@ export default function RequirementDetail() {
               );
               return entityRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
@@ -655,21 +709,21 @@ export default function RequirementDetail() {
 
               return relationRelationsFlag;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
       annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
         ? formType
             .validate()
-            .then((val) => {
+            .then(() => {
               return true;
             })
-            .catch((errorInfo) => {
+            .catch(() => {
               return false;
             })
         : true,
-      form1
+      basicForm
         .validate()
         .then(() => {
           if (selectedData?.length <= 0) {
@@ -682,7 +736,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (selectedData?.length <= 0) {
             setIsShowDataErrorInfo(true);
           }
@@ -692,20 +746,14 @@ export default function RequirementDetail() {
           }
           return false;
         }),
-      form2
+      labelToolForm
         .validate()
-        .then((val) => {
+        .then(() => {
           return true;
         })
-        .catch((errorInfo) => {}),
-      form2Child
-        .validate()
-        .then((value) => {
-          return true;
-        })
-        .catch((errorInfo) => {}),
+        .catch(() => {}),
       // 任务验证
-      form3
+      distributeForm
         .validate()
         .then(() => {
           // 验证通过，切换到下一步
@@ -715,7 +763,7 @@ export default function RequirementDetail() {
           }
           return true;
         })
-        .catch((errorInfo) => {
+        .catch(() => {
           if (taskAssignData?.length === 0) {
             setIsShowTypeErrorInfo(true);
             return;
@@ -762,32 +810,6 @@ export default function RequirementDetail() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-    const newSetLabels = datalist.map((item, index) => {
-      return {
-        ...item,
-        order_num: datalist?.length + 1,
-        label_info_attribute_groups: item.label_info_attribute_groups.map(
-          (group) => {
-            return {
-              ...group,
-              order_num: item?.label_info_attribute_groups?.length + 1,
-              label_info_attribute: group.label_info_attribute?.map(
-                (attribute) => {
-                  return {
-                    ...attribute,
-                    order_num: group?.label_info_attribute?.length + 1,
-                    attribute_name_en: attribute.attribute_name_en.replace(
-                      /\s+/g,
-                      '_'
-                    )
-                  };
-                }
-              )
-            };
-          }
-        )
-      };
-    });
 
     // 发布数据重置
     const new_publishData = {
@@ -816,7 +838,7 @@ export default function RequirementDetail() {
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_CLASSIFICATION
-            ? newSetLabels
+            ? generateLabels(labelDataList)
             : [],
       entity_relations:
         annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
@@ -829,9 +851,11 @@ export default function RequirementDetail() {
           org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
     };
+    if (model_name) {
+      new_publishData['model_name'] = model_name;
+    }
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
-    console.log(obj, 'top ---- 我是提交的数据', text_fl_data);
     // 发布数据
     try {
       const res = await publishRequirement(obj);
@@ -858,48 +882,90 @@ export default function RequirementDetail() {
               res?.data?.label_tool?.label_tool_code
             );
             setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
-            form1.setFieldValue('name', res?.data?.name);
-            form1.setFieldValue('description', res?.data?.description);
+            basicForm.setFieldValue('name', res?.data?.name);
+            basicForm.setFieldValue('description', res?.data?.description);
+            basicForm.setFieldValue('model_name', res?.data?.model_name);
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
-              form2.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_name_cn_${item?.id}`,
                 item?.label_name_cn
               );
-              form2.setFieldValue(
+              labelToolForm.setFieldValue(
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
-              form2.setFieldValue(`label_shape_${item?.id}`, item?.label_shape);
-              form2.setFieldValue(
+              if (item?.label_mapping) {
+                labelToolForm.setFieldValue(
+                  `label_mapping_${item?.id}`,
+                  item?.label_mapping
+                );
+              }
+              labelToolForm.setFieldValue(
+                `label_shape_${item?.id}`,
+                item?.label_shape
+              );
+              labelToolForm.setFieldValue(
                 `label_colour_${item?.id}`,
                 item?.label_colour
               );
               item?.label_info_attribute_groups?.map((group) => {
-                form2.setFieldValue(
+                labelToolForm.setFieldValue(
                   `label_info_attribute_groups_${group?.id}_attribute_group_name`,
                   group?.attribute_group_name
                 );
                 group?.label_info_attribute?.map((attribute) => {
-                  form2.setFieldValue(
+                  labelToolForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
                     attribute?.attribute_name_cn
                   );
-                  form2.setFieldValue(
+                  labelToolForm.setFieldValue(
                     `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
                     attribute?.attribute_name_en
                   );
                 });
               });
             });
-            setDatalist(res?.data?.labels);
+            setLabelDataList(res?.data?.labels);
           }
         } catch (error) {}
       };
       getDetail();
     }
   }, [requirementId]);
+
+  // 图片、文本问答展示预标注
+  const showPreLabeling = useMemo(() => {
+    return (
+      annotationTypeContentCode ===
+        AnnotationTypeContentCode.IMAGE_ANNOTATION ||
+      annotationTypeContentCode === AnnotationTypeContentCode.QA
+    );
+  }, [annotationTypeContentCode]);
+
+  const { data: modelList = [] } = useGetModelList({
+    enabled: showPreLabeling
+  });
+
+  const model_name = Form.useWatch('model_name', basicForm);
+
+  const { data: modelLabelList = [] } = useGetModelLabelList(
+    { model_name },
+    { enabled: !!model_name }
+  );
+
+  // 监听预标注模型变化，清空所有模型映射字段
+  useEffect(() => {
+    if (labelDataList && labelDataList.length > 0 && type !== 'detail') {
+      labelDataList.forEach((item) => {
+        const fieldName = `label_mapping_${item?.label_id}`;
+        labelToolForm.setFieldValue(fieldName, undefined);
+        item['label_mapping'] = '';
+      });
+    }
+  }, [model_name, type]);
+
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -932,27 +998,19 @@ export default function RequirementDetail() {
           </div>
         )}
       </div>
-      <Spin loading={pageLoading}>
+      <Spin loading={pageLoading} className="requirement-detail-content-spin">
         <div className="detail-content">
           {/* 基础配置部分 */}
           <div className="basic-configuration">
             <div className="basic-title">基础信息</div>
             <Form
-              form={form1}
+              form={basicForm}
               disabled={type === 'detail'}
               initialValues={{ name: publishData?.name }}
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, ...val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              layout="horizontal"
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="需求名称:"
@@ -975,7 +1033,7 @@ export default function RequirementDetail() {
               >
                 <Input
                   placeholder="请输入需求名称"
-                  style={{ width: 800 }}
+                  style={{ width: 900 }}
                   showWordLimit
                   maxLength={50}
                 />
@@ -1000,14 +1058,12 @@ export default function RequirementDetail() {
               >
                 <TextArea
                   placeholder="请输入描述内容"
-                  style={{ width: 800 }}
+                  style={{ width: 900 }}
                   showWordLimit
                   maxLength={200}
                 />
               </FormItem>
-              <div className="basic-title" style={{ marginLeft: '-20px' }}>
-                任务配置
-              </div>
+              <div className="basic-title">任务配置</div>
               <FormItem
                 label="标注类型:"
                 required
@@ -1035,7 +1091,6 @@ export default function RequirementDetail() {
               >
                 <div className="data-content-set">
                   <Button
-                    // disabled={type === 'detail'}
                     onClick={() => {
                       setModalVisible(true);
                     }}
@@ -1053,6 +1108,20 @@ export default function RequirementDetail() {
                   </div>
                 )}
               </FormItem>
+              {showPreLabeling && (
+                <FormItem
+                  field="model_name"
+                  label="预标注模型:"
+                  style={{ marginBottom: 24 }}
+                >
+                  <Select
+                    allowClear
+                    options={modelList}
+                    style={{ width: 900 }}
+                    placeholder="请选择预标注模型"
+                  />
+                </FormItem>
+              )}
             </Form>
             <DataSourceModal
               fileType={toolFileType[Number(annotationTypeVal)]}
@@ -1074,21 +1143,13 @@ export default function RequirementDetail() {
               AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
             <div className="tool-annotation-config">
               <Form
-                form={form2}
+                form={labelToolForm}
                 disabled={type === 'detail'}
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
                 }}
-                style={{
-                  marginLeft: '0',
-                  marginRight: 'auto',
-                  marginBottom: 24
-                }}
+                style={{ marginBottom: 24 }}
                 layout="inline"
-                labelCol={{
-                  span: 1,
-                  offset: 0
-                }}
               >
                 <FormItem
                   field="label_info_attribute_groups"
@@ -1145,8 +1206,8 @@ export default function RequirementDetail() {
                       {/* 原有的标签部分内容 */}
                       {activeTab === LabelInfoAttributeGroupType.LABEL && (
                         <div className="attribute-content">
-                          {datalist &&
-                            datalist?.map((item: any, labelIndex) => (
+                          {labelDataList &&
+                            labelDataList?.map((item: any, labelIndex) => (
                               <div
                                 className="sortable-item"
                                 key={item?.label_id}
@@ -1161,17 +1222,18 @@ export default function RequirementDetail() {
                                         validateTrigger: ['onChange', 'onBlur'],
                                         validator: (value, callback) => {
                                           // 检查是否有重复的标注名称（排除当前项）
-                                          const isDuplicate = datalist.some(
-                                            (otherItem, otherIndex) =>
-                                              otherIndex !== labelIndex &&
-                                              otherItem.label_name_en ===
-                                                value &&
-                                              value.trim() !== ''
-                                          );
+                                          const isDuplicate =
+                                            labelDataList.some(
+                                              (otherItem, otherIndex) =>
+                                                otherIndex !== labelIndex &&
+                                                otherItem.label_name_en ===
+                                                  value &&
+                                                value.trim() !== ''
+                                            );
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入标签名称');
                                           } else if (isDuplicate) {
-                                            callback('标注名称不能重复');
+                                            callback('标签名称不能重复');
                                           } else {
                                             callback();
                                           }
@@ -1182,7 +1244,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: 200
+                                        minWidth: !!model_name ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1226,17 +1288,18 @@ export default function RequirementDetail() {
                                         validateTrigger: ['onChange', 'onBlur'],
                                         validator: (value, callback) => {
                                           if (!value) {
-                                            callback('请输入标注展示名称');
+                                            callback('请输入展示名称');
                                             return;
                                           }
                                           // 检查是否有重复的展示名称（排除当前项）
-                                          const isDuplicate = datalist.some(
-                                            (otherItem, otherIndex) =>
-                                              otherIndex !== labelIndex &&
-                                              otherItem.label_name_cn ===
-                                                value &&
-                                              value.trim() !== ''
-                                          );
+                                          const isDuplicate =
+                                            labelDataList.some(
+                                              (otherItem, otherIndex) =>
+                                                otherIndex !== labelIndex &&
+                                                otherItem.label_name_cn ===
+                                                  value &&
+                                                value.trim() !== ''
+                                            );
                                           if (isDuplicate) {
                                             callback('展示名称不能重复');
                                           } else {
@@ -1248,7 +1311,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: 190
+                                        minWidth: !!model_name ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1257,9 +1320,9 @@ export default function RequirementDetail() {
                                         );
                                       }}
                                       onFocus={(e: any) => {
-                                        // 从 datalist 中获取最新的值
+                                        // 从 labelDataList 中获取最新的值
                                         const currentItem =
-                                          datalist[labelIndex];
+                                          labelDataList[labelIndex];
                                         // 判断展示名称是否为空（包括 undefined、null、空字符串或只有空格）
                                         if (
                                           !currentItem.label_name_cn?.trim() &&
@@ -1273,7 +1336,7 @@ export default function RequirementDetail() {
                                             currentItem.label_name_en
                                           );
                                           // 更新表单字段，使用 currentItem 的值
-                                          form2.setFieldValue(
+                                          labelToolForm.setFieldValue(
                                             fieldName,
                                             currentItem.label_name_en
                                           );
@@ -1290,6 +1353,48 @@ export default function RequirementDetail() {
                                       value={item.label_name_cn}
                                     />
                                   </FormItem>
+                                  {!!model_name && (
+                                    <FormItem
+                                      label="模型映射:"
+                                      field={`label_mapping_${type === 'detail' ? item?.id : item?.label_id}`}
+                                      style={{ padding: 0 }}
+                                    >
+                                      <Select
+                                        placeholder="请选择"
+                                        options={modelLabelList}
+                                        style={{ width: 110 }}
+                                        allowClear
+                                        onChange={(val: any) => {
+                                          // 根据模型映射选择的值设置对应的形状
+                                          if (!!val) {
+                                            updateNestedValue(
+                                              [labelIndex, 'label_mapping'],
+                                              val
+                                            );
+                                            // 使用 LABEL_MAPPING 将字符串形状转换为数字
+                                            const mappedShape =
+                                              LABEL_MAPPING[val];
+
+                                            if (mappedShape !== undefined) {
+                                              const shapeFieldName = `label_shape_${type === 'detail' ? item?.id : item?.label_id}`;
+
+                                              // 先更新表单字段
+                                              labelToolForm.setFieldValue(
+                                                shapeFieldName,
+                                                mappedShape
+                                              );
+
+                                              // 再更新 labelDataList 中的形状值
+                                              updateNestedValue(
+                                                [labelIndex, 'label_shape'],
+                                                mappedShape
+                                              );
+                                            }
+                                          }
+                                        }}
+                                      ></Select>
+                                    </FormItem>
+                                  )}
                                   <FormItem
                                     field={`label_shape_${type === 'detail' ? item?.id : item?.label_id}`}
                                     initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
@@ -1302,31 +1407,55 @@ export default function RequirementDetail() {
                                           [labelIndex, 'label_shape'],
                                           parseInt(val)
                                         );
+                                        updateNestedValue(
+                                          [labelIndex, 'label_mapping'],
+                                          ''
+                                        );
+                                        // 形状改变时，清空对应的模型映射值
+                                        if (model_name) {
+                                          const mappingFieldName = `label_mapping_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          labelToolForm.setFieldValue(
+                                            mappingFieldName,
+                                            undefined
+                                          );
+                                        }
                                       }}
-                                      style={{ width: 110, height: 32 }}
+                                      style={{ width: 64, height: 32 }}
+                                      triggerProps={{
+                                        autoAlignPopupWidth: false,
+                                        autoAlignPopupMinWidth: true,
+                                        position: 'bl'
+                                      }}
                                       renderFormat={(option, value) => {
                                         return (
-                                          <span className="label-shape-options">
-                                            <Image
-                                              width={20}
+                                          <Tooltip
+                                            content={
+                                              shapeOptions.find(
+                                                (opt) => opt.value === value
+                                              )?.label
+                                            }
+                                          >
+                                            <span
                                               style={{
-                                                marginRight: 4,
-                                                pointerEvents: 'none'
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                height: '100%'
                                               }}
-                                              src={
-                                                shapeOptions.find(
-                                                  (opt) => opt.value === value
-                                                )?.icon
-                                              }
-                                            />
-                                            <span>
-                                              {
-                                                shapeOptions.find(
-                                                  (opt) => opt.value === value
-                                                )?.label
-                                              }
+                                            >
+                                              <Image
+                                                width={20}
+                                                style={{
+                                                  pointerEvents: 'none',
+                                                  verticalAlign: 'middle'
+                                                }}
+                                                src={
+                                                  shapeOptions.find(
+                                                    (opt) => opt.value === value
+                                                  )?.icon
+                                                }
+                                              />
                                             </span>
-                                          </span>
+                                          </Tooltip>
                                         );
                                       }}
                                     >
@@ -1334,17 +1463,18 @@ export default function RequirementDetail() {
                                         <Option
                                           key={option.value}
                                           value={option.value}
-                                          className="label_shape_options"
                                         >
-                                          <Image
-                                            width={20}
-                                            src={option?.icon}
-                                            style={{
-                                              pointerEvents: 'none',
-                                              marginRight: 4
-                                            }}
-                                          />
-                                          {option.label}
+                                          <div className="label-shape-options">
+                                            <Image
+                                              width={20}
+                                              src={option?.icon}
+                                              style={{
+                                                pointerEvents: 'none',
+                                                marginRight: 4
+                                              }}
+                                            />
+                                            <span>{option.label}</span>
+                                          </div>
                                         </Option>
                                       ))}
                                     </Select>
@@ -1386,7 +1516,7 @@ export default function RequirementDetail() {
                                     </div>
                                   </FormItem>
                                   <FormItem>
-                                    {datalist.length > 1 && (
+                                    {labelDataList.length > 1 && (
                                       <Tooltip content="删除">
                                         <IconDelete
                                           className={`${type === 'detail' ? 'is-disabled' : 'icon-wrapper'}`}
@@ -1469,7 +1599,7 @@ export default function RequirementDetail() {
                                             >
                                               <Input
                                                 style={{
-                                                  width: 422,
+                                                  width: 522,
                                                   backgroundColor:
                                                     type === 'detail' ||
                                                     attrGroup?.isTemp
@@ -1497,11 +1627,6 @@ export default function RequirementDetail() {
                                               label={null}
                                               style={{ marginRight: 0 }}
                                             >
-                                              {console.log(
-                                                attrGroup.attribute_group_class,
-                                                datalist,
-                                                'top'
-                                              )}
                                               <Select
                                                 disabled={
                                                   type === 'detail' ||
@@ -1668,104 +1793,6 @@ export default function RequirementDetail() {
                                               </Tooltip>
                                             </FormItem>
                                           </div>
-                                          {/* 选项内容区域 */}
-                                          {/* {groupClassVal !== 3 && (
-                                          <div className="attribute-group-header-content">
-                                            <div className="attribute-group-info-title">
-                                              {1 ===
-                                              attrGroup.attribute_group_class
-                                                ? '单选选项'
-                                                : 2 ===
-                                                    attrGroup.attribute_group_class
-                                                  ? '多选选项'
-                                                  : ''}
-                                            </div>
-                                            <Checkbox
-                                              disabled={
-                                                type === 'detail' ||
-                                                attrGroup?.isTemp === true
-                                              }
-                                              style={{
-                                                whiteSpace: 'nowrap',
-                                                fontSize: 14,
-                                                marginLeft: 5
-                                              }}
-                                              checked={
-                                                attrGroup.label_info_attribute?.some(
-                                                  (item) =>
-                                                    item.input_type === 2
-                                                )
-                                                  ? true
-                                                  : false
-                                              }
-                                              onChange={(checked) => {
-                                                // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
-                                                if (checked) {
-                                                  const newData =
-                                                    _.cloneDeep(datalist);
-                                                  newData[
-                                                    labelIndex
-                                                  ].label_info_attribute_groups?.[
-                                                    groupIndex
-                                                  ]?.label_info_attribute.push({
-                                                    label_info_id: uuidV4(),
-                                                    attribute_name_cn:
-                                                      '标注时的输入内容',
-                                                    attribute_name_en: '其他',
-                                                    input_type: 2
-                                                  });
-                                                  // 把选项组最后一个的选项名称和展示名称的内重置
-                                                  const updatedAttrGroup =
-                                                    newData[labelIndex]
-                                                      ?.label_info_attribute_groups?.[
-                                                      groupIndex
-                                                    ];
-                                                  const lastIndex =
-                                                    updatedAttrGroup
-                                                      ?.label_info_attribute
-                                                      ?.length - 1;
-                                                  const lastAttr =
-                                                    updatedAttrGroup
-                                                      ?.label_info_attribute?.[
-                                                      lastIndex
-                                                    ];
-                                                  if (lastAttr?.label_info_id) {
-                                                    form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_en`,
-                                                      '标注时的输入内容'
-                                                    );
-                                                    form2?.setFieldValue(
-                                                      `label_info_attribute_groups_${type === 'detail' ? item?.id : lastAttr.label_info_id}_attribute_name_cn`,
-                                                      '其他'
-                                                    );
-                                                  }
-                                                  setDatalist(newData);
-                                                } else {
-                                                  // 取消选中的时候删除增加的内容，复选框恢复到未选中
-                                                  const newItems =
-                                                    _.cloneDeep(datalist);
-                                                  // 过滤掉所有input_type为2的元素
-                                                  newItems[
-                                                    labelIndex
-                                                  ].label_info_attribute_groups[
-                                                    groupIndex
-                                                  ].label_info_attribute =
-                                                    newItems[
-                                                      labelIndex
-                                                    ].label_info_attribute_groups[
-                                                      groupIndex
-                                                    ].label_info_attribute.filter(
-                                                      (item) =>
-                                                        item.input_type !== 2
-                                                    );
-                                                  setDatalist(newItems);
-                                                }
-                                              }}
-                                            >
-                                              支持手动输入
-                                            </Checkbox>
-                                          </div>
-                                        )} */}
                                           {attrGroup?.label_info_attribute?.map(
                                             (attr, attrIndex) => (
                                               <div
@@ -1777,9 +1804,6 @@ export default function RequirementDetail() {
                                                   2 ===
                                                     attrGroup.attribute_group_class) && (
                                                   <div className="attribute-info-item">
-                                                    {console.log(
-                                                      attrGroup.attribute_name_en
-                                                    )}
                                                     <FormItem
                                                       label={
                                                         <div
@@ -1864,7 +1888,7 @@ export default function RequirementDetail() {
                                                           attr.attribute_name_en
                                                         }
                                                         style={{
-                                                          width: 290,
+                                                          width: 340,
                                                           backgroundColor:
                                                             type === 'detail' ||
                                                             attrGroup?.isTemp ||
@@ -1978,7 +2002,7 @@ export default function RequirementDetail() {
                                                     >
                                                       <Input
                                                         style={{
-                                                          width: 268,
+                                                          width: 318,
                                                           backgroundColor:
                                                             type === 'detail' ||
                                                             attrGroup?.isTemp
@@ -2053,7 +2077,7 @@ export default function RequirementDetail() {
                                     }
                                   )}
                                 <div className="btn-content-items">
-                                  {labelIndex === datalist?.length - 1 && (
+                                  {labelIndex === labelDataList?.length - 1 && (
                                     <Button
                                       disabled={type === 'detail'}
                                       className={
@@ -2098,7 +2122,7 @@ export default function RequirementDetail() {
                                           {templateData?.length > 0 &&
                                             templateData?.map(
                                               (TempItem, index) => {
-                                                const isDis = datalist[
+                                                const isDis = labelDataList[
                                                   labelIndex
                                                 ]?.label_info_attribute_groups?.find(
                                                   (item) =>
@@ -2124,7 +2148,7 @@ export default function RequirementDetail() {
                                                       // 如果当前标签已经选择了模版，就不能再次选择
                                                       className={[
                                                         'menu-item-content',
-                                                        datalist[
+                                                        labelDataList[
                                                           labelIndex
                                                         ]?.label_info_attribute_groups?.find(
                                                           (item) =>
@@ -2135,7 +2159,7 @@ export default function RequirementDetail() {
                                                           : 'menu-item-content-active'
                                                       ].join(' ')}
                                                       disabled={
-                                                        datalist[
+                                                        labelDataList[
                                                           labelIndex
                                                         ]?.label_info_attribute_groups?.find(
                                                           (item) =>
@@ -2239,7 +2263,7 @@ export default function RequirementDetail() {
                                   <Input
                                     disabled={type === 'detail'}
                                     style={{
-                                      width: 446,
+                                      width: 546,
                                       height: 32
                                     }}
                                     value={attrGroup.attribute_group_name}
@@ -2448,7 +2472,7 @@ export default function RequirementDetail() {
                                               placeholder="用于存储标注结果"
                                               value={attr.attribute_name_en}
                                               style={{
-                                                width: 290,
+                                                width: 340,
                                                 height: 32,
                                                 backgroundColor: '#fff'
                                               }}
@@ -2541,7 +2565,7 @@ export default function RequirementDetail() {
                                               placeholder="展示在标注页面的名称"
                                               type="text"
                                               style={{
-                                                width: 290,
+                                                width: 340,
                                                 height: 32,
                                                 backgroundColor: '#fff'
                                               }}
@@ -2667,19 +2691,12 @@ export default function RequirementDetail() {
           <div className="task-configuration-content">
             <div className="basic-title">任务分配</div>
             <Form
-              form={form3}
+              form={distributeForm}
               disabled={type === 'detail'}
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
-              style={{
-                marginLeft: '20px',
-                marginRight: 'auto'
-              }}
-              labelCol={{
-                span: 1,
-                offset: 0
-              }}
+              className="configuration-form"
             >
               <FormItem
                 label="选择类型:"

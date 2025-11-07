@@ -1,6 +1,25 @@
 .requirement-detail {
   padding: 10px;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .configuration-form {
+    .arco-form-label-item {
+      width: 90px;
+      flex: none;
+    }
+  }
+
+  .requirement-detail-content-spin {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 15px;
+    padding-top: 24px;
+    padding-left: 24px;
+    margin: 16px 0;
+  }
 
   .arco-checkbox-text {
     margin-left: 4px;
@@ -28,39 +47,18 @@
     }
   }
 
-  .label_shape_options {
-    display: flex;
-    align-items: center;
-  }
-
-  .detail-content {
-    background-color: #fff;
-    border-radius: 15px;
-    padding-top: 24px;
-    padding-left: 24px;
-    margin-top: 16px;
-  }
-
   .basic-title {
     font-family: PingFang SC;
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
-    // margin-left: -12px;
     margin-bottom: 16px;
   }
 
   .label-shape-options {
     display: flex;
     align-items: center;
-  }
-
-  .basic-configuration {
-    min-width: 1700px;
-
-    .table-container {
-      margin-left: 77px;
-    }
+    width: 110px;
   }
 
   .data-content-set {
@@ -108,7 +106,8 @@
     width: 100%;
   }
 
-  .annotation-tool {
+  .annotation-tool,
+  .label_info_attribute_groups_content {
     position: relative;
   }
 
@@ -390,7 +389,7 @@
   }
 
   .labe-and-attribute-warp {
-    width: 800px;
+    width: 900px;
     border: 1px solid #cbd5e1;
     border-radius: 4px;
 
@@ -449,9 +448,9 @@
     }
   }
 
-  .task-configuration-content {
-    min-width: 1700px;
-  }
+  // .task-configuration-content {
+  //   max-width: 1700px;
+  // }
 
   .arco-textarea-wrapper {
     width: min-content;

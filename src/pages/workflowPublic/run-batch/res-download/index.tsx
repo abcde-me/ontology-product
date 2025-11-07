@@ -1,25 +1,20 @@
-import type { FC } from 'react'
-import React from 'react'
-import { RiDownloadLine } from '@remixicon/react'
-import {
-  useCSVDownloader,
-} from 'react-papaparse'
-import { useTranslation } from 'react-i18next'
-import ActionButton from '@/pages/workflowConfig/components/action-button'
-import Button from '@/pages/workflowConfig/components/button'
-import cn from '@/pages/workflowConfig/utils/classnames'
+import type { FC } from 'react';
+import React from 'react';
+import { RiDownloadLine } from '@remixicon/react';
+import { useCSVDownloader } from 'react-papaparse';
+import { useTranslation } from 'react-i18next';
+import ActionButton from '@/pages/workflowConfig/components/action-button';
+import Button from '@/pages/workflowConfig/components/button';
+import cn from '@/pages/workflowConfig/utils/classnames';
 
 export type IResDownloadProps = {
-  isMobile: boolean
-  values: Record<string, string>[]
-}
+  isMobile: boolean;
+  values: Record<string, string>[];
+};
 
-const ResDownload: FC<IResDownloadProps> = ({
-  isMobile,
-  values,
-}) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const { CSVDownloader, Type } = useCSVDownloader()
+const ResDownload: FC<IResDownloadProps> = ({ isMobile, values }) => {
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { CSVDownloader, Type } = useCSVDownloader();
 
   return (
     <CSVDownloader
@@ -27,23 +22,25 @@ const ResDownload: FC<IResDownloadProps> = ({
       type={Type.Link}
       filename={'result'}
       bom={true}
-      config={{
-        // delimiter: ';',
-      }}
+      config={
+        {
+          // delimiter: ';',
+        }
+      }
       data={values}
     >
       {isMobile && (
         <ActionButton>
-          <RiDownloadLine className='w-4 h-4' />
+          <RiDownloadLine className="h-4 w-4" />
         </ActionButton>
       )}
       {!isMobile && (
         <Button className={cn('space-x-1')}>
-          <RiDownloadLine className='w-4 h-4' />
+          <RiDownloadLine className="h-4 w-4" />
           <span>{t('common.operation.download')}</span>
         </Button>
       )}
     </CSVDownloader>
-  )
-}
-export default React.memo(ResDownload)
+  );
+};
+export default React.memo(ResDownload);

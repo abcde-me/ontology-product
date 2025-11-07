@@ -97,25 +97,17 @@ const defaultColumns = [
       idx: number,
       { onEditAsset, onEditTags, onDelete }: any
     ) => (
-      <Space>
-        <Button
-          type="text"
-          style={{ marginRight: 6 }}
-          onClick={() => onEditAsset?.(record)}
-        >
+      <div className="flex items-center">
+        <Button type="text" onClick={() => onEditAsset?.(record)}>
           修改资产
         </Button>
-        <Button
-          type="text"
-          style={{ marginRight: 6 }}
-          onClick={() => onEditTags?.(record)}
-        >
+        <Button type="text" onClick={() => onEditTags?.(record)}>
           修改标签
         </Button>
         <Button type="text" onClick={() => onDelete?.(record)}>
           删除
         </Button>
-      </Space>
+      </div>
     )
   }
 ];
@@ -153,7 +145,7 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   };
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col rounded-[12px] bg-white px-[16px] py-[16px]">
       <Table
         border={false}
         rowSelection={{

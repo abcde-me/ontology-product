@@ -1,89 +1,82 @@
-import React, {
-  memo,
-  useEffect,
-  useRef,
-} from 'react'
-import { useTranslation } from 'react-i18next'
-import { useClickAway } from 'ahooks'
-import Divider from '@/pages/workflowConfig/components/divider'
-import ShortcutsName from './shortcuts-name'
-import { useStore } from './store'
+import React, { memo, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useClickAway } from 'ahooks';
+import Divider from '@/pages/workflowConfig/components/divider';
+import ShortcutsName from './shortcuts-name';
+import { useStore } from './store';
 import {
   useDSL,
   useNodesInteractions,
   usePanelInteractions,
-  useWorkflowStartRun,
-} from './hooks'
-import AddBlock from './operator/add-block'
-import { useOperator } from './operator/hooks'
-import cn from '@/pages/workflowConfig/utils/classnames'
+  useWorkflowStartRun
+} from './hooks';
+import AddBlock from './operator/add-block';
+import { useOperator } from './operator/hooks';
+import cn from '@/pages/workflowConfig/utils/classnames';
 
 const PanelContextmenu = () => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
-  const ref = useRef(null)
-  const panelMenu = useStore(s => s.panelMenu)
-  const clipboardElements = useStore(s => s.clipboardElements)
-  const setShowImportDSLModal = useStore(s => s.setShowImportDSLModal)
-  const { handleNodesPaste } = useNodesInteractions()
-  const { handlePaneContextmenuCancel, handleNodeContextmenuCancel } = usePanelInteractions()
-  const { handleStartWorkflowRun } = useWorkflowStartRun()
-  const { handleAddNote } = useOperator()
-  const { exportCheck } = useDSL()
+  const { t } = useTranslation('plugin__console-plugin-appforge');
+  const ref = useRef(null);
+  const panelMenu = useStore((s) => s.panelMenu);
+  const clipboardElements = useStore((s) => s.clipboardElements);
+  const setShowImportDSLModal = useStore((s) => s.setShowImportDSLModal);
+  const { handleNodesPaste } = useNodesInteractions();
+  const { handlePaneContextmenuCancel, handleNodeContextmenuCancel } =
+    usePanelInteractions();
+  const { handleStartWorkflowRun } = useWorkflowStartRun();
+  const { handleAddNote } = useOperator();
+  const { exportCheck } = useDSL();
 
   useEffect(() => {
-    if (panelMenu)
-      handleNodeContextmenuCancel()
-  }, [panelMenu, handleNodeContextmenuCancel])
+    if (panelMenu) handleNodeContextmenuCancel();
+  }, [panelMenu, handleNodeContextmenuCancel]);
 
   useClickAway(() => {
-    handlePaneContextmenuCancel()
-  }, ref)
+    handlePaneContextmenuCancel();
+  }, ref);
 
   const renderTrigger = () => {
     return (
-      <div
-        className='flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer hover:bg-[#D9EAFF]'
-      >
+      <div className="flex h-[32px] cursor-pointer items-center justify-between rounded-none px-[12px] pb-[7px] pt-[5px] text-[14px]/[20px] text-[#151B26] hover:bg-[#D9EAFF]">
         {t('workflow.common.addBlock')}
       </div>
-    )
-  }
+    );
+  };
 
-  if (!panelMenu)
-    return null
+  if (!panelMenu) return null;
 
   return (
     <div
-      className='app-workflow-page-panel-contextmenu absolute w-[200px] rounded-[4px] border-[0.5px] border-components-panel-border bg-components-panel-bg-blur shadow-lg z-[9]'
+      className="app-workflow-page-panel-contextmenu absolute z-[9] w-[200px] rounded-[4px] border-[0.5px] border-components-panel-border bg-components-panel-bg-blur shadow-lg"
       style={{
         left: panelMenu.left,
-        top: panelMenu.top,
+        top: panelMenu.top
       }}
       ref={ref}
     >
-      <div className='py-[4px]'>
+      <div className="py-[4px]">
         <AddBlock
           renderTrigger={renderTrigger}
           offset={{
             mainAxis: -36,
-            crossAxis: -4,
+            crossAxis: -4
           }}
         />
         <div
-          className='flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer hover:bg-[#D9EAFF]'
+          className="flex h-[32px] cursor-pointer items-center justify-between rounded-none px-[12px] pb-[7px] pt-[5px] text-[14px]/[20px] text-[#151B26] hover:bg-[#D9EAFF]"
           onClick={(e) => {
-            e.stopPropagation()
-            handleAddNote()
-            handlePaneContextmenuCancel()
+            e.stopPropagation();
+            handleAddNote();
+            handlePaneContextmenuCancel();
           }}
         >
           {t('workflow.nodes.note.addNote')}
         </div>
         <div
-          className='flex items-center justify-between px-[12px] pt-[5px] pb-[7px] h-[32px] text-[14px]/[20px] text-[#151B26] rounded-none cursor-pointer hover:bg-[#D9EAFF]'
+          className="flex h-[32px] cursor-pointer items-center justify-between rounded-none px-[12px] pb-[7px] pt-[5px] text-[14px]/[20px] text-[#151B26] hover:bg-[#D9EAFF]"
           onClick={() => {
-            handleStartWorkflowRun()
-            handlePaneContextmenuCancel()
+            handleStartWorkflowRun();
+            handlePaneContextmenuCancel();
           }}
         >
           {t('workflow.common.run')}
@@ -124,7 +117,7 @@ const PanelContextmenu = () => {
         </div>
       </div> */}
     </div>
-  )
-}
+  );
+};
 
-export default memo(PanelContextmenu)
+export default memo(PanelContextmenu);

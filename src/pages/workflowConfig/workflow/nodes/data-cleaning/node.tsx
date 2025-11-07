@@ -22,7 +22,8 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
     case_uniformity,
     mg_duplicate_checkbox,
     mg_duplicate_ngram,
-    mg_duplicate
+    mg_duplicate,
+    written_correct
   } = props.data;
   // 特殊字符其中有一项为true显示
   const isChecked = () => {
@@ -40,6 +41,7 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
       qd_is,
       df_is,
       oh_is,
+      written_correct,
       mg_duplicate &&
         (mg_duplicate_checkbox === 'md5' ||
           (mg_duplicate_ngram !== undefined &&
@@ -70,6 +72,9 @@ const Node: FC<NodeProps<CodeNodeType>> = (props) => {
               mg_duplicate_checkbox === 'ngram')) && (
             <div className="node-item">数据去重</div>
           )}
+        {written_correct && written_correct && (
+          <div className="node-item">错别字改写</div>
+        )}
       </div>
     </div>
   ) : (
