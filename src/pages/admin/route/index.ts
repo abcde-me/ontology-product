@@ -55,6 +55,13 @@ export const routes: IRoute[] = [
         permission: DATA_LOAD_PERMISSIONS.LIST
       },
       {
+        // 创建数据载入任务
+        name: 'createDataLoad',
+        key: '/tenant/compute/modaforge/dataLoad/create',
+        component: React.lazy(async () => import('../../dataLoad/create')),
+        permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
         name: 'dataLoadDetail',
         key: '/tenant/compute/modaforge/dataLoad/detail',
         component: React.lazy(
