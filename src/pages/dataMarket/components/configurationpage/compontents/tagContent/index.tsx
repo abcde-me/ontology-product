@@ -1,5 +1,5 @@
 import React from 'react';
-import TextTruncate from '@/pages/dataMarket/components/components/TextTruncate';
+import TextTruncate from '../TextTruncate';
 import { Popover, Button } from '@arco-design/web-react';
 function TagContent(props) {
   const { tagList } = props;
