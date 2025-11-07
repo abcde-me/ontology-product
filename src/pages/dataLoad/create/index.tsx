@@ -22,12 +22,18 @@ import React, {
 } from 'react';
 import Styles from '../list/index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
-import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
+import {
+  addLoad,
+  getDirectoryList,
+  getTableName,
+  checkSQL,
+  CheckSQLStatus
+} from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
-import ComponentTree from '../list/component-tree';
+import ComponentTree from './component-tree';
 import '../list/db-tree.scss';
 import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
@@ -71,6 +77,9 @@ const DEFAULT_ONCE_CYCLE = {
   month: '*',
   week: ''
 };
+
+const placeholderValue = `如需多表关联后的表载入到系统中，请在此位置编写关联SQL语句
+SELECT filesname,B,C,D,E FROM table2,table3 WHERE t1.a=t2.a`;
 
 // 类型定义
 interface ConnectorOption {
@@ -143,7 +152,15 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const RunningInfoPanel = function () {
+interface RunningInfoPanelProps {
+  checkStatus: CheckSQLStatus;
+  checkMessage: string;
+}
+
+const RunningInfoPanel = function ({
+  checkStatus,
+  checkMessage
+}: RunningInfoPanelProps) {
   const CollapseItem = Collapse.Item;
   const TabPane = Tabs.TabPane;
   const { Text } = Typography;
@@ -153,8 +170,24 @@ const RunningInfoPanel = function () {
     setIsExpanded(newExpanded);
   };
 
+  // 根据校验状态渲染状态标签
+  const renderCheckStatus = () => {
+    switch (checkStatus) {
+      case CheckSQLStatus.CHECKING:
+        return <Tag color="blue">校验中</Tag>;
+      case CheckSQLStatus.SUCCESS:
+        return <Tag color="green">校验成功</Tag>;
+      case CheckSQLStatus.ERROR:
+        return <Tag color="red">校验失败</Tag>;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className={`running-info-panel ${styles['sql-running-info-panel']}`}>
+    <div
+      className={`running-info-panel border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
+    >
       <Collapse
         activeKey={isExpanded ? ['1'] : []}
         onChange={handlePanelChange}
@@ -199,13 +232,19 @@ const RunningInfoPanel = function () {
                 <Text style={{ fontSize: '14px', fontWeight: 500 }}>
                   校验信息
                 </Text>
-                {/* {renderRunStatus(runStatus)} */}
+                {renderCheckStatus()}
               </div>
             </div>
           }
           name="1"
         >
-          <div className={styles['panel-content']}></div>
+          <div className={styles['panel-content']}>
+            {checkMessage && (
+              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {checkMessage}
+              </div>
+            )}
+          </div>
         </CollapseItem>
       </Collapse>
     </div>
@@ -259,6 +298,11 @@ export default function DataLoadCreate() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [directoryData, setDirectoryData] = useState<TreeNodeData[]>([]);
   const [tableList, setTableList] = useState<string[]>([]);
+  const [sqlContent, setSqlContent] = useState<string>('');
+  const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
+    CheckSQLStatus.NONE
+  );
+  const [checkMessage, setCheckMessage] = useState<string>('');
 
   // 处理树形数据的通用函数
   const processTreeData = useCallback(
@@ -389,6 +433,20 @@ export default function DataLoadCreate() {
   // 处理表格名称选择（全部标签逻辑）
   const handleAllTagChange = useCallback(
     (value: string[]) => {
+      const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+
+      // 如果SQL处理为"关闭"，限制只能选一个
+      if (
+        currentSqlProcess === 'disable' &&
+        Array.isArray(value) &&
+        value.length > 1
+      ) {
+        // 只保留最后一个选择的值
+        const lastValue = value[value.length - 1];
+        form.setFieldsValue({ table_name: [lastValue] });
+        return;
+      }
+
       if (value.includes('all')) {
         form.setFieldsValue({ table_name: ['all'] });
       } else {
@@ -618,6 +676,57 @@ export default function DataLoadCreate() {
     return option.props.children?.toLowerCase().includes(input.toLowerCase());
   }, []);
 
+  // 处理SQL内容变化
+  const handleSqlContentChange = useCallback((value: string) => {
+    setSqlContent(value);
+    // 当SQL内容变化时，重置校验状态
+    setCheckStatus((prevStatus) => {
+      if (prevStatus !== CheckSQLStatus.NONE) {
+        setCheckMessage('');
+        return CheckSQLStatus.NONE;
+      }
+      return prevStatus;
+    });
+  }, []);
+
+  // 处理校验按钮点击
+  const handleCheckSQL = useCallback(async () => {
+    const currentConnectorId = form.getFieldValue('connector_id');
+
+    if (!currentConnectorId) {
+      Message.error('请先选择数据源连接器');
+      return;
+    }
+
+    if (!sqlContent || sqlContent.trim() === '') {
+      Message.error('请输入SQL语句');
+      return;
+    }
+
+    // 设置校验中状态
+    setCheckStatus(CheckSQLStatus.CHECKING);
+    setCheckMessage('');
+
+    try {
+      const res = await checkSQL({
+        sql: sqlContent,
+        connectorId: Number(currentConnectorId)
+      });
+
+      if (res?.status === 200 && res.data) {
+        // 根据返回的status更新校验状态
+        setCheckStatus(res.data.status);
+        setCheckMessage(res.data.msg || '');
+      } else {
+        setCheckStatus(CheckSQLStatus.ERROR);
+        setCheckMessage(res?.message || '校验失败');
+      }
+    } catch (error: any) {
+      setCheckStatus(CheckSQLStatus.ERROR);
+      setCheckMessage(error?.message || '校验异常，请稍后重试');
+    }
+  }, [sqlContent, form]);
+
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
   useEffect(() => {
@@ -628,6 +737,65 @@ export default function DataLoadCreate() {
       }
     }
   }, [connectorId, sourceType, form, getConnectorDetailList]);
+
+  // 监听载入位置变化，用于控制SQL处理选项的显示
+  const destPath = Form.useWatch('dest_path', form);
+
+  // 监听SQL处理开关状态
+  const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
+
+  // 监听表选择状态
+  const tableName = Form.useWatch('table_name', form);
+
+  // 计算是否禁用"关闭"选项：当选择了多个表时禁用
+  const isDisableOptionDisabled = useMemo(() => {
+    const currentTableName = form.getFieldValue('table_name') || [];
+    return (
+      Array.isArray(currentTableName) &&
+      currentTableName.length > 1 &&
+      !currentTableName.includes('all')
+    );
+  }, [tableName, form]);
+
+  // SQL处理和表选择的双向逻辑关联
+  useEffect(() => {
+    const currentTableName = form.getFieldValue('table_name') || [];
+    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+
+    // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
+    if (
+      Array.isArray(currentTableName) &&
+      currentTableName.length > 1 &&
+      !currentTableName.includes('all')
+    ) {
+      if (currentSqlProcess === 'disable') {
+        form.setFieldsValue({ sql_process_enabled: 'enable' });
+      }
+    }
+  }, [tableName, form]);
+
+  // 当SQL处理为"关闭"时，限制表选择只能选一个
+  useEffect(() => {
+    const currentTableName = form.getFieldValue('table_name') || [];
+    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+
+    if (
+      currentSqlProcess === 'disable' &&
+      Array.isArray(currentTableName) &&
+      currentTableName.length > 1
+    ) {
+      // 如果选择了多个表，只保留第一个
+      form.setFieldsValue({ table_name: [currentTableName[0]] });
+    }
+  }, [sqlProcessEnabled, form]);
+
+  // 初始化SQL处理默认值为"开启"
+  useEffect(() => {
+    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+    if (!currentSqlProcess) {
+      form.setFieldsValue({ sql_process_enabled: 'enable' });
+    }
+  }, [form]);
 
   // 监听数据源类型变化
   useEffect(() => {
@@ -958,55 +1126,107 @@ export default function DataLoadCreate() {
             />
           </FormItem>
 
-          <FormItem
-            label="SQL处理："
-            field="sql_process"
-            labelAlign="right"
-            rules={[{ required: true, message: '请输入SQL处理' }]}
-          >
-            <div
-              className={classNames(
-                styles['sql-editor-container'],
-                'rounded-[4px] border border-solid border-[#E2E8F0]'
-              )}
-            >
-              <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
-                <Button
-                  type="secondary"
-                  icon={<IconCaretRight className="mr-[4px]" />}
-                  className="h-[26px]"
-                  // onClick={handleRunClick}
+          {sourceType === SOURCE_TYPES.DB && destPath && (
+            <>
+              <FormItem
+                label="SQL处理："
+                field="sql_process_enabled"
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择SQL处理状态' }]}
+                initialValue="enable"
+              >
+                <Radio.Group
+                  onChange={(value) => {
+                    // 当切换到"关闭"时，如果选择了多个表，只保留第一个
+                    if (value === 'disable') {
+                      const currentTableName =
+                        form.getFieldValue('table_name') || [];
+                      if (
+                        Array.isArray(currentTableName) &&
+                        currentTableName.length > 1 &&
+                        !currentTableName.includes('all')
+                      ) {
+                        form.setFieldsValue({
+                          table_name: [currentTableName[0]]
+                        });
+                      }
+                    }
+                  }}
                 >
-                  校验
-                </Button>
+                  <Radio value="enable">开启</Radio>
+                  <Radio value="disable" disabled={isDisableOptionDisabled}>
+                    关闭
+                  </Radio>
+                </Radio.Group>
+              </FormItem>
 
-                <Button
-                  type="text"
-                  icon={<SQLFormatIcon />}
-                  // onClick={handleFormatCode}
-                  className="h-[26px]"
+              {sqlProcessEnabled === 'enable' && (
+                <FormItem
+                  label=" "
+                  field="sql_process"
+                  labelAlign="right"
+                  // rules={[
+                  //     {
+                  //         required: sqlProcessEnabled === 'enable',
+                  //         message: '请输入SQL处理'
+                  //     }
+                  // ]}
                 >
-                  格式化
-                </Button>
-              </div>
-              <CodeMirror
-                value={''}
-                // onChange={handleContentChange}
-                // placeholder={placeholderValue}
-                // readOnly={
-                //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-                // }
-                theme={myTheme}
-                extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLineGutter: false
-                }}
-                className={styles['code-editor']}
-              />
-              <RunningInfoPanel />
-            </div>
-          </FormItem>
+                  <div
+                    className={classNames(
+                      styles['sql-editor-container'],
+                      'rounded-[4px] border border-solid border-[#E2E8F0]'
+                    )}
+                  >
+                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                      <Button
+                        type="secondary"
+                        icon={<IconCaretRight className="mr-[4px]" />}
+                        className="h-[26px]"
+                        onClick={handleCheckSQL}
+                        loading={checkStatus === CheckSQLStatus.CHECKING}
+                      >
+                        校验
+                      </Button>
+
+                      <Button
+                        type="text"
+                        icon={<SQLFormatIcon />}
+                        // onClick={handleFormatCode}
+                        className="h-[26px]"
+                      >
+                        格式化
+                      </Button>
+                    </div>
+                    <CodeMirror
+                      value={sqlContent}
+                      onChange={handleSqlContentChange}
+                      placeholder={placeholderValue}
+                      // readOnly={
+                      //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+                      // }
+                      theme={myTheme}
+                      extensions={[
+                        sql({ upperCaseKeywords: true }),
+                        lintGutter()
+                      ]}
+                      basicSetup={{
+                        lineNumbers: true,
+                        highlightActiveLineGutter: false
+                      }}
+                      className={styles['code-editor']}
+                    />
+                    {checkStatus !== CheckSQLStatus.NONE && (
+                      <RunningInfoPanel
+                        checkStatus={checkStatus}
+                        checkMessage={checkMessage}
+                      />
+                    )}
+                  </div>
+                </FormItem>
+              )}
+            </>
+          )}
         </Form>
 
         <div className={Styles.footerBbtnBox}>

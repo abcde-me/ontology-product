@@ -390,6 +390,8 @@ export const ModaForgeResourceEndpoints = {
   reTryLoadApi: PrefixAimdp + '/RetryLoadTaskInstance',
   //载入获取表名
   getTableNameApi: PrefixAimdp + '/GenerateDBName',
+  // 校验SQL语句
+  checkSQLApi: PrefixAimdp + '/CheckSQL',
 
   // 数据标注接口
   // 数据标注配置 发布

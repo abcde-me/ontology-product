@@ -357,7 +357,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     const root_type = RootTypeEnum[activeTab];
     let res: Partial<ApiRes<any>> = {};
-    console.log(dataRef, 'dataRef111111111111');
 
     if (dataRef?.isNew) {
       // 新建节点
@@ -783,7 +782,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return (
       <div
         className="flex items-center overflow-hidden"
-        onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
+        // onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
         style={{ marginLeft: dataRef?.type_name === 'db' ? '-20px' : '0px' }}
       >
         {dataRef?.showInput ? (
@@ -911,12 +910,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   // 生成树节点
-  const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
+  const generatorTreeNodes = (treeData: TreeDataType[]) => {
     if (!Array.isArray(treeData)) {
       console.warn('treeData不是数组:', treeData);
       return null;
     }
-    return treeData
+    console.log('11111111', treeData);
+    const treeNodes = treeData
       ?.map?.((item) => {
         if (!item || !item.id) {
           return null;
@@ -939,7 +939,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         );
       })
       .filter(Boolean); // 过滤掉null值
-  }, []);
+    return treeNodes;
+  };
 
   // AddTree组件
   const AddTreeComponent = () => {
