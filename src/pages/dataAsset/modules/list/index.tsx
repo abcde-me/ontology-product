@@ -25,6 +25,7 @@ import SearchArea, { SearchField } from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
+import EditSingleAssetModal from '../../components/EditSingleAssetModal';
 import { getTagList } from '@/api/datasetManagement';
 import {
   listDataAssetSource,
@@ -77,9 +78,13 @@ export default function DataAssetList() {
   // 弹窗状态
   const [modifyAssetModalVisible, setModifyAssetModalVisible] = useState(false);
   const [modifyTagsModalVisible, setModifyTagsModalVisible] = useState(false);
+  const [editSingleAssetModalVisible, setEditSingleAssetModalVisible] =
+    useState(false);
+  const [editingRecord, setEditingRecord] = useState<any>(null); // 当前编辑的单条记录
   const [fieldsForModify, setFieldsForModify] = useState<
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
+  const [columnFields, setColumnFields] = useState<ApiColumnField[]>([]); // 列字段列表（用于单条编辑）
   const history = useHistory();
   // 吸顶状态
   const [isSticky, setIsSticky] = useState(false);
@@ -118,6 +123,9 @@ export default function DataAssetList() {
           })
         );
         setFieldsForModify(fieldsForModifyList);
+
+        // 保存列字段列表用于单条编辑弹窗
+        setColumnFields(fields || []);
 
         // 根据 fields 动态生成表格列
         const dynamicColumns = [
@@ -537,8 +545,56 @@ export default function DataAssetList() {
 
   // 处理单个修改资产
   const handleSingleEditAsset = (record: any) => {
-    setSelectedRowKeys([record.id]);
-    setModifyAssetModalVisible(true);
+    setEditingRecord(record);
+    setEditSingleAssetModalVisible(true);
+  };
+
+  // 确认单条编辑资产
+  const handleSingleEditAssetConfirm = async (data: Record<string, any>) => {
+    if (!editingRecord) return;
+
+    try {
+      // 构建修改数据，只包含有变化的字段
+      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      Object.keys(data).forEach((fieldEnName) => {
+        const newValue = data[fieldEnName];
+        const oldValue = editingRecord[fieldEnName];
+        // 如果值有变化，添加到修改列表
+        if (newValue !== oldValue) {
+          modifyContext.push({
+            fieldEnName,
+            fieldValue: Array.isArray(newValue)
+              ? newValue.join(',')
+              : String(newValue || '')
+          });
+        }
+      });
+
+      if (modifyContext.length === 0) {
+        Message.warning('没有需要修改的字段');
+        setEditSingleAssetModalVisible(false);
+        return;
+      }
+
+      const editData: EditDataAssetData = {
+        modifyMethod: ModifyMethod.COVER,
+        modifyIds: [editingRecord.id],
+        modifyContext
+      };
+      const res = await editDataAssetDataBatch(editData);
+      if (res.code === 0 || res.code === undefined) {
+        Message.success('修改成功');
+        setEditSingleAssetModalVisible(false);
+        setEditingRecord(null);
+        // 重新加载数据
+        loadListData(currentPage, pageSize);
+      } else {
+        Message.error('修改失败');
+      }
+    } catch (error) {
+      console.error('修改失败:', error);
+      Message.error('修改失败');
+    }
   };
 
   // 处理单个修改标签
@@ -787,6 +843,17 @@ export default function DataAssetList() {
         }
         onCancel={() => setModifyTagsModalVisible(false)}
         onConfirm={handleModifyTagsConfirm}
+      />
+      {/* 单条编辑资产弹窗 */}
+      <EditSingleAssetModal
+        visible={editSingleAssetModalVisible}
+        record={editingRecord}
+        fields={columnFields}
+        onCancel={() => {
+          setEditSingleAssetModalVisible(false);
+          setEditingRecord(null);
+        }}
+        onConfirm={handleSingleEditAssetConfirm}
       />
     </div>
   );
