@@ -239,7 +239,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           </Space>
         );
       }
-      if (status === RunningStatus.FAILED) {
+      if (status === RunningStatus.FAILED || status === RunningStatus.IDLE) {
         return (
           <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行失败</span>
