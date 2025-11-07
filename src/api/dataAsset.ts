@@ -181,29 +181,37 @@ export async function listDataAssetData(
           nameZh: '数据资产名称',
           nameEn: 'name',
           type: 'string',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: true,
+          displaySort: 1
         },
         {
           nameZh: '资产标签',
           nameEn: 'tags',
           type: 'string',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: true,
+          displaySort: 2
         },
         {
           nameZh: '来源',
           nameEn: 'source',
           type: 'string',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: true,
+          displaySort: 3
         },
         {
           nameZh: '更新时间',
           nameEn: 'updateTime',
           type: 'date',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: false,
+          displaySort: 4
         }
       ],
       records: paginatedRecords,
@@ -432,29 +440,37 @@ export async function findDataAssetFieldsDisplay(
           nameZh: '数据资产名称',
           nameEn: 'name',
           type: 'string',
-          isEnum: true,
-          isDisplay: true
+          default: '',
+          isEnumAble: true,
+          allowModify: true,
+          displaySort: 1
         },
         {
           nameZh: '资产标签',
           nameEn: 'tags',
           type: 'string',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: true,
+          displaySort: 2
         },
         {
           nameZh: '来源',
           nameEn: 'source',
           type: 'string',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: true,
+          displaySort: 3
         },
         {
           nameZh: '更新时间',
           nameEn: 'updateTime',
           type: 'date',
-          isEnum: false,
-          isDisplay: true
+          default: '',
+          isEnumAble: false,
+          allowModify: false,
+          displaySort: 4
         }
       ]
     },

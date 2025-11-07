@@ -9,7 +9,9 @@ import {
   Popover,
   Dropdown,
   Menu,
-  Modal
+  Modal,
+  Tag,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -139,14 +141,71 @@ export default function DataAssetList() {
           },
           // 根据 fields 生成列，保证每一列和表头一一对应
           ...(fields || [])
-            .filter((field: ApiColumnField) => field.isDisplay !== false)
-            .map((field: ApiColumnField) => ({
-              title: field.nameZh,
-              dataIndex: field.nameEn,
-              key: field.nameEn,
-              width: 150,
-              ellipsis: true
-            })),
+            .filter((field: ApiColumnField) => field.displaySort > 0)
+            .map((field: ApiColumnField) => {
+              // 如果是 tags 字段，使用 Tag 组件显示
+              if (field.nameEn === 'tags') {
+                return {
+                  title: field.nameZh,
+                  dataIndex: field.nameEn,
+                  key: field.nameEn,
+                  width: 150,
+                  render: (tagNames: string[] | string) => {
+                    // 处理字符串或数组格式
+                    let tags: string[] = [];
+                    if (Array.isArray(tagNames)) {
+                      tags = tagNames;
+                    } else if (typeof tagNames === 'string' && tagNames) {
+                      tags = tagNames
+                        .split(',')
+                        .map((tag) => tag.trim())
+                        .filter(Boolean);
+                    }
+
+                    if (!tags || tags.length === 0) return '-';
+
+                    return (
+                      <Space size="mini">
+                        {tags[0] && (
+                          <Tag>
+                            {tags[0].length > 5 ? (
+                              <Tooltip content={tags[0]}>
+                                {tags[0].substring(0, 5)}...
+                              </Tooltip>
+                            ) : (
+                              tags[0] || '-'
+                            )}
+                          </Tag>
+                        )}
+                        {tags.length > 1 && (
+                          <Tooltip
+                            content={tags.map((tag, index) => (
+                              <Tag
+                                key={`${tag}-${index}`}
+                                style={{ margin: '2px 2px' }}
+                              >
+                                {tag}
+                              </Tag>
+                            ))}
+                          >
+                            <Tag>+{tags.length - 1}</Tag>
+                          </Tooltip>
+                        )}
+                      </Space>
+                    );
+                  }
+                };
+              }
+
+              // 其他字段使用默认渲染
+              return {
+                title: field.nameZh,
+                dataIndex: field.nameEn,
+                key: field.nameEn,
+                width: 150,
+                ellipsis: true
+              };
+            }),
           {
             title: '操作',
             dataIndex: 'actions',
@@ -223,7 +282,7 @@ export default function DataAssetList() {
                     id: field.nameEn || String(index),
                     name: field.nameZh,
                     type: field.type,
-                    enumChecked: field.isEnum || false,
+                    enumChecked: field.isEnumAble || false,
                     enumLoading: false,
                     enumCount: 0
                   }));
