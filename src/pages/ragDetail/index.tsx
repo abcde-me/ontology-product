@@ -67,6 +67,13 @@ function RagDetail() {
           totalSegments={segments.length}
         />
       )}
+      {/* <SegmentDrawer
+        visible={true}
+        onClose={closeSegmentDrawer}
+        defaultActiveTab={segmentDrawerTab}
+        currentSegmentIndex={currentSegment?.segmentIndex}
+        totalSegments={segments.length}
+      /> */}
     </div>
   );
 }

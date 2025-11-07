@@ -48,7 +48,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
+      <div className="flex-1 overflow-y-auto  pb-6 pt-6">
         {/* 基本信息 */}
         <BasicInfo
           segmentId={localDetailData.segmentId}
