@@ -211,13 +211,6 @@ export const routes: IRoute[] = [
     permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
     children: []
   },
-  // 数据集市
-  {
-    name: 'dataMarketDetail',
-    key: '/tenant/compute/modaforge/dataMarketDetail',
-    component: React.lazy(async () => import('../../dataMarket/detail')),
-    children: []
-  },
   // 数据资产
   {
     name: 'dataAsset',
