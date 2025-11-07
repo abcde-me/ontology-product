@@ -188,7 +188,7 @@ export const useFileManager = (
         }
 
         const createRes = await createPythonItem({
-          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
+          path_id: Number(node?.dataRef?.parentKey),
           type: node?.dataRef?.type,
           name: finalName
         });
@@ -238,12 +238,12 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const fileId = node?.dataRef?.id;
+        const fileId = node?.dataRef?.id || node?.id;
         const renameRes = await renamePythonItem(fileId, {
           id: fileId,
           name: finalName,
           path: node?.dataRef?.path,
-          type: node?.dataRef?.type
+          type: node?.dataRef?.type || node?.type
         });
 
         if (renameRes.status !== 200) {

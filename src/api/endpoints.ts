@@ -408,6 +408,10 @@ export const ModaForgeResourceEndpoints = {
   getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
   getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
+  // 获取模型列表
+  getModelList: PrefixLabelService + '/modelList',
+  // 获取模型标签信息
+  getModelLabelList: PrefixLabelService + '/modelLabelList',
 
   // python开发
   // 获取python列表
@@ -500,7 +504,9 @@ export const ModaForgeResourceEndpoints = {
   getDataAssetTableDistinctFieldCount:
     PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
   // 批量修改数据资产表中的数据信息
-  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
+  // 获取标签列表
+  listAssetTags: PrefixAimdp + '/ListAssetTags'
 };
 
 /**

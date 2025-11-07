@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Table,
@@ -42,12 +42,14 @@ import {
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import { EditDataAssetData } from '@/types/dataAssetApi';
+import styles from './list.module.scss';
+import classNames from 'classnames';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
     ListDataAssetDataRes['records']
   >([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -64,7 +66,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(60); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -79,6 +81,10 @@ export default function DataAssetList() {
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
   const history = useHistory();
+  // 吸顶状态
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -136,7 +142,7 @@ export default function DataAssetList() {
           {
             title: '操作',
             dataIndex: 'actions',
-            width: 200,
+            width: 204,
             key: 'actions',
             fixed: 'right' as const,
             render: (
@@ -145,25 +151,29 @@ export default function DataAssetList() {
               idx: number,
               { onEditAsset, onEditTags, onDelete }: any
             ) => (
-              <Space>
+              <div className="flex items-center gap-[16px]">
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditAsset?.(record)}
+                  className="px-[0px]"
                 >
                   修改资产
                 </Button>
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditTags?.(record)}
+                  className="px-[0px]"
                 >
                   修改标签
                 </Button>
-                <Button type="text" onClick={() => onDelete?.(record)}>
+                <Button
+                  type="text"
+                  className="px-[0px]"
+                  onClick={() => onDelete?.(record)}
+                >
                   删除
                 </Button>
-              </Space>
+              </div>
             )
           }
         ];
@@ -217,7 +227,7 @@ export default function DataAssetList() {
               });
 
             // 加载列表数据
-            loadListData(1, 12);
+            loadListData(1, pageSize);
           }
         } else {
           // 接口失败时默认显示列表页
@@ -297,6 +307,43 @@ export default function DataAssetList() {
     setSearchFields(fields);
   }, [assetTags, assetSources]);
 
+  // 检测吸顶状态
+  useEffect(() => {
+    // 只有当 hasMapping 为 true 时，sentinel 元素才会渲染
+    if (hasMapping !== true) return;
+
+    let observer: IntersectionObserver | null = null;
+
+    // 使用 requestAnimationFrame 确保 DOM 已经渲染
+    const rafId = requestAnimationFrame(() => {
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            // 当占位元素离开视口时，说明标题栏已经吸顶
+            setIsSticky(!entry.isIntersecting);
+          });
+        },
+        {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0
+        }
+      );
+
+      observer.observe(sentinel);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [hasMapping]);
+
   const handleCreateDataAsset = () => {
     // TODO: 实现创建数据资产的逻辑
     console.log('创建数据资产');
@@ -327,7 +374,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 10 : 12;
+    const newPageSize = type === ViewType.LIST ? 50 : 48;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
@@ -546,8 +593,13 @@ export default function DataAssetList() {
 
   // 如果有mapping数据，显示带搜索区域的列表页
   return (
-    <div className="min-h-full w-full py-5 pr-5">
-      <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
+    <div className={classNames('min-h-full w-full', styles['data-asset-list'])}>
+      <div
+        className={classNames(
+          'box-border h-full w-full py-[24px]',
+          styles['data-asset-list-content']
+        )}
+      >
         {/* {dataAssetList.length !== 0 && (
           <div className="mb-4 h-[30px] w-full leading-[30px]">
             <p className="text-xl font-bold">
@@ -562,10 +614,20 @@ export default function DataAssetList() {
           onMainSearch={handleMainSearch}
           onFieldSearch={handleFieldSearch}
           onReset={handleReset}
+          className="px-[24px]"
         />
 
+        {/* 占位元素，用于检测吸顶状态 */}
+        <div ref={sentinelRef} style={{ height: '1px', marginTop: '-1px' }} />
+
         {/* 标题和视图切换区域 */}
-        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[32px]">
+        <div
+          ref={headerRef}
+          className={classNames(
+            'sticky top-0 z-10 flex w-full items-center justify-between px-[24px] pb-[16px] pt-[24px] leading-[30px]',
+            isSticky && 'bg-[var(--color-bg-4)]'
+          )}
+        >
           <p className="text-xl font-bold">数据资产（{total}）</p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
@@ -664,7 +726,7 @@ export default function DataAssetList() {
             })}
           </div>
         ) : ( */}
-        <div>
+        <div className="px-[24px]">
           {loading ? (
             <div className="flex h-[calc(100%-70px)] items-center justify-center">
               <Spin />

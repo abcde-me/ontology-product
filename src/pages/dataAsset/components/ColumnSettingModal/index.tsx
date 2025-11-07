@@ -13,6 +13,7 @@ import './index.module.scss'; // 确保引入样式文件
 // @ts-ignore
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
+import styles from './index.module.scss';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
@@ -31,49 +32,6 @@ export interface ColumnSettingModalProps {
   onCancel: () => void;
   onChange: (list: ColumnField[]) => void;
 }
-
-// const mockFields: ColumnField[] = [
-//   {
-//     id: '1',
-//     name: '数据资产名称',
-//     type: 'string',
-//     enumChecked: false,
-//     enumLoading: false,
-//     enumCount: 0
-//   },
-//   {
-//     id: '2',
-//     name: '资产标签',
-//     type: 'number',
-//     enumChecked: false,
-//     enumLoading: false,
-//     enumCount: 0
-//   },
-//   {
-//     id: '3',
-//     name: '资产来源',
-//     type: 'string',
-//     enumChecked: false,
-//     enumLoading: false,
-//     enumCount: 0
-//   },
-//   {
-//     id: '4',
-//     name: '更新时间',
-//     type: 'number',
-//     enumChecked: false,
-//     enumLoading: false,
-//     enumCount: 0
-//   },
-//   {
-//     id: '5',
-//     name: '数据血缘',
-//     type: 'string',
-//     enumChecked: false,
-//     enumLoading: false,
-//     enumCount: 0
-//   }
-// ];
 
 const defaultSelected = ['1', '2', '3', '4'];
 
@@ -154,7 +112,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       visible={visible}
       onOk={() => onOk(selectedFields)}
       onCancel={onCancel}
-      className="column-setting-modal"
+      className={styles['column-setting-modal']}
       style={{ width: 900, height: 800 }}
     >
       <div className="flex h-full justify-between gap-[16px] rounded-[12px] border-[1px] border-[var(--color-border-2)] pl-[16px]">
