@@ -240,7 +240,6 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           </Space>
         );
       }
-      console.log(runStartTime, '123', status, dayjs().toDate());
       if (status === RunningStatus.FAILED || status === RunningStatus.IDLE) {
         return (
           <div className={styles['run-status']}>
