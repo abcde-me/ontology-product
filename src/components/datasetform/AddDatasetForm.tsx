@@ -707,7 +707,7 @@ const DatasetForm = React.forwardRef<
               // style={{ marginLeft: 10 }}
             />
           </FormItem>
-          <FormItem
+          {/* <FormItem
             label="数据来源"
             field="dataSource"
             rules={[{ required: true, message: '请选择数据来源' }]}
@@ -716,13 +716,52 @@ const DatasetForm = React.forwardRef<
             <Radio.Group
               value={dataSource}
               onChange={handleDataSourceChange}
-              // style={{ marginLeft: 10 }}
+            // style={{ marginLeft: 10 }}
             >
               <Radio value="volume">数据目录卷</Radio>
               <Radio value="connector">连接器</Radio>
             </Radio.Group>
-          </FormItem>
+          </FormItem> */}
           <FormItem
+            label="数据来源"
+            field="targetDataSource"
+            rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+          >
+            <Cascader
+              placeholder="请选择"
+              renderFormat={(labels) => {
+                const value = `${labels.join(' / ')}`;
+                return (
+                  <div>
+                    <EllipsisPopover value={value}></EllipsisPopover>
+                  </div>
+                );
+              }}
+              options={targetDataSourceOptions}
+              onChange={handleTargetDataSourceChange}
+              expandTrigger="hover"
+              showSearch={{
+                retainInputValue: true
+              }}
+              renderOption={(node) => {
+                return (
+                  <div>
+                    <EllipsisPopover value={node.label} />
+                  </div>
+                );
+              }}
+              dropdownMenuColumnStyle={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '400px',
+                display: 'inline-block',
+                verticalAlign: 'middle'
+              }}
+              dropdownMenuClassName="showData"
+            />
+          </FormItem>
+          {/* <FormItem
             label="格式类型"
             field="storageType"
             rules={[{ required: true, message: '请选择格式类型' }]}
@@ -739,7 +778,7 @@ const DatasetForm = React.forwardRef<
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
             </Radio.Group>
-          </FormItem>
+          </FormItem> */}
           <FormItem
             label="场景分类"
             field="sceneType"
@@ -761,47 +800,6 @@ const DatasetForm = React.forwardRef<
                 // flexDirection: 'column'
               }}
             >
-              <FormItem
-                label="选择目标数据目录/卷"
-                field="targetDataSource"
-                rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-                labelCol={{ span: 5 }}
-                wrapperCol={{ span: 19 }}
-              >
-                <Cascader
-                  placeholder="请选择"
-                  renderFormat={(labels) => {
-                    const value = `${labels.join(' / ')}`;
-                    return (
-                      <div>
-                        <EllipsisPopover value={value}></EllipsisPopover>
-                      </div>
-                    );
-                  }}
-                  options={targetDataSourceOptions}
-                  onChange={handleTargetDataSourceChange}
-                  expandTrigger="hover"
-                  showSearch={{
-                    retainInputValue: true
-                  }}
-                  renderOption={(node) => {
-                    return (
-                      <div>
-                        <EllipsisPopover value={node.label} />
-                      </div>
-                    );
-                  }}
-                  dropdownMenuColumnStyle={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '400px',
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                  }}
-                  dropdownMenuClassName="showData"
-                />
-              </FormItem>
               <div
                 style={{
                   // marginLeft: 20,
