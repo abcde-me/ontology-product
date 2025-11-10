@@ -482,6 +482,9 @@ export const ModaForgeResourceEndpoints = {
   // 数据资产接口
   // 查询数据资产表字段和映射关系
   getDataAssetMapping: PrefixAimdp + '/GetDataAssetMapping',
+  // 自动映射
+  autoMapDataAssetFieldAndSource:
+    PrefixAimdp + '/AutoMapDataAssetFieldAndSource',
   // 获取数据资产列表
   listDataAssetData: PrefixAimdp + '/ListDataAssetData',
   // 查询数据来源

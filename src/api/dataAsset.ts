@@ -1,5 +1,7 @@
 import UAPI from '@/api';
 import {
+  AutoMapDataAssetFieldAndSourceReq,
+  AutoMapDataAssetFieldAndSourceResItem,
   CreateDataAssetAndMappingReq,
   CreateDataAssetRes,
   DataAssetField,
@@ -65,6 +67,16 @@ export async function findDataAssetMapping(): Promise<
   //   requestId: ''
   // });
   return await UAPI.RES.getDataAssetMapping({}).post({}).inRegion().do();
+}
+
+// 自动映射
+export async function autoMapDataAssetFieldAndSource(
+  params: AutoMapDataAssetFieldAndSourceReq
+): Promise<ApiRes<AutoMapDataAssetFieldAndSourceResItem[]>> {
+  return await UAPI.RES.autoMapDataAssetFieldAndSource({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 // 获取数据资产列表

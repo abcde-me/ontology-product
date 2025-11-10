@@ -106,6 +106,29 @@ export interface CreateDataAssetAndMappingReq
   autoMap?: boolean;
 }
 
+export interface AutoMapDataAssetFieldAndSourceReq {
+  fields: Partial<DataAssetField>[];
+  source: {
+    type: string;
+    name: string;
+    tableName: string;
+    fields: {
+      name: string;
+      type: string;
+    }[];
+  }[];
+}
+
+export interface AutoMapDataAssetFieldAndSourceResItem {
+  fieldNameEn: string;
+  mapping: {
+    type: string;
+    tableName: string;
+    fieldType: string;
+    feildName: string;
+  }[];
+}
+
 export interface ColumnField {
   /** 字段中文名 */
   nameZh: string;
