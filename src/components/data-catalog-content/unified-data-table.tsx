@@ -305,10 +305,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
         // 只有当时间存在时才添加时间参数，并转换为ISO字符串
         if (startTime) {
-          dbParams.start_time = startTime;
+          dbParams.start_time = new Date(startTime).toISOString();
         }
         if (endTime) {
-          dbParams.end_time = endTime;
+          dbParams.end_time = new Date(endTime).toISOString();
         }
         res = await getDbItemList(dbParams);
         console.log('调用数据库表API，参数:', dbParams);

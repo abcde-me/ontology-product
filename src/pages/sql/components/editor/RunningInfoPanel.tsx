@@ -229,7 +229,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
               <span className="mr-4 text-[14px]">运行成功</span>
               <RunSuccessIcon className="mr-[8px]" />
               <span className="text-[14px]">
-                {formatDateTime(runStartTime || '')}（
+                {formatDateTime(runStartTime ?? '')}（
                 {runDuration < 1000
                   ? `${runDuration}ms`
                   : `${(runDuration / 1000).toFixed(2)}s`}
