@@ -88,6 +88,8 @@ export interface ListDataAssetSourceResItem {
   type: string;
   /** 数据来源名称 */
   name: string;
+  /** 数据来源数据库名称 */
+  databaseName: string;
   /** 数据来源表名 */
   tableName: string;
   /** 数据来源字段列表 */

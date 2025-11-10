@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Steps, Message } from '@arco-design/web-react';
-import { findDataAssetMapping } from '@/api/dataAsset';
+import {
+  findDataAssetMapping,
+  listDataAssetSource,
+  createDataAssetAndMapping
+} from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
 import {
+  CreateDataAssetAndMappingReq,
   DataAssetField,
-  FindDataAssetMappingItemRes
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
@@ -23,7 +29,7 @@ export interface MetadataField extends DataAssetField {
 export interface FieldMapping {
   id: string;
   sequence: number;
-  assetName: string;
+  nameZh: string;
   // 动态的数据来源类型字段（键为接口返回的类型，值为映射值）
   [key: string]: string | number | undefined;
 }
@@ -48,25 +54,28 @@ export default function DataAssetFormContainer({
       allowModify: true
     }
   ]);
-  const [dataSources, setDataSources] = useState<Record<string, boolean>>({});
+  const [dataSources, setDataSources] = useState<
+    Record<string, ListDataAssetSourceResItem>
+  >({});
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [autoMapping, setAutoMapping] = useState(true);
   const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
-    FindDataAssetMappingItemRes[]
+    ListDataAssetSourceResItem[]
   >([]);
 
   // 获取数据资产映射数据
   const fetchDataAssetMapping = async () => {
     try {
       setLoading(true);
-      const res = await findDataAssetMapping();
+      const res = await listDataAssetSource();
 
-      if (res.status === 200) {
-        setFindDataAssetMappingData(res.data || []);
+      if (res.status !== 200) {
+        return;
       }
+
+      setFindDataAssetMappingData(res.data || []);
     } catch (error) {
-      console.error('获取数据资产映射失败:', error);
-      Message.error('获取数据失败，请重试');
+      Message.error('获取数据来源列表失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -93,15 +102,17 @@ export default function DataAssetFormContainer({
   };
 
   // 完成
-  const handleFinish = () => {
-    // TODO: 调用创建或更新API
-    console.log('提交数据:', {
-      metadataFields,
-      dataSources,
-      mappings,
-      autoMapping
-    });
-    // Message.success(isEditMode ? '更新成功' : '创建成功');
+  const handleFinish = async (
+    fieldsWithMappings: CreateDataAssetAndMappingReq
+  ) => {
+    const res = await createDataAssetAndMapping(fieldsWithMappings);
+
+    if (res.status !== 200) {
+      Message.error(res.message || '创建数据资产失败');
+      return;
+    }
+
+    Message.success('创建数据资产成功');
     history.push('/tenant/compute/modaforge/dataAsset/list');
   };
 
