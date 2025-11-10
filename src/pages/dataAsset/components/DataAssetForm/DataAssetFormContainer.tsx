@@ -23,6 +23,12 @@ interface DataAssetFormContainerProps {
 // 第一步的字段定义
 export interface MetadataField extends DataAssetField {
   id: string;
+  /** 系统默认字段标记：用于前端禁用编辑/删除等 */
+  system?: boolean;
+  /** 是否为枚举类型（用于后续列展示配置，非后端创建必需） */
+  isEnumAble?: boolean;
+  /** 列展示顺序（用于后续列展示配置，非后端创建必需） */
+  displaySort?: number;
 }
 
 // 第二步的映射定义
@@ -42,18 +48,62 @@ export default function DataAssetFormContainer({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 表单数据 - 默认包含一个字段
-  const [metadataFields, setMetadataFields] = useState<MetadataField[]>([
+  // 系统默认字段（表头）
+  const getDefaultSystemFields = (): MetadataField[] => [
     {
-      id: `field_${Date.now()}`,
-      nameZh: '',
-      nameEn: '',
-      type: undefined,
+      id: `field_system_data_asset_name`,
+      nameZh: '数据资产名称',
+      nameEn: 'data_asset_name',
+      type: 'string',
       default: '',
       required: true,
-      allowModify: true
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 1
+    },
+    {
+      id: `field_system_tags`,
+      nameZh: '标签',
+      nameEn: 'tags',
+      type: 'array<varchar(64)>',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 2
+    },
+    {
+      id: `field_system_data_update_time`,
+      nameZh: '数据更新时间',
+      nameEn: 'data_update_time',
+      type: 'datetime',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 3
+    },
+    {
+      id: `field_system_data_source`,
+      nameZh: '来源',
+      nameEn: 'data_source',
+      type: 'string',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 4
     }
-  ]);
+  ];
+
+  // 表单数据 - 默认包含四个系统字段
+  const [metadataFields, setMetadataFields] = useState<MetadataField[]>(
+    getDefaultSystemFields()
+  );
   const [dataSources, setDataSources] = useState<
     Record<string, ListDataAssetSourceResItem>
   >({});

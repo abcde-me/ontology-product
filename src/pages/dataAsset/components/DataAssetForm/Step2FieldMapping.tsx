@@ -171,11 +171,15 @@ export default function Step2FieldMapping({
             );
             const fieldType = metadataField?.type;
             const options = getMappingOptions(fieldType, sourceType);
+            const disableMappingForThisRow =
+              metadataField?.nameEn === 'tags' ||
+              metadataField?.nameEn === 'data_source';
 
             return (
               <Select
                 placeholder="请选择"
                 value={record[sourceType]}
+                disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceType]: value })
                 }

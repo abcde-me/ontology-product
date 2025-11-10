@@ -27,6 +27,14 @@ import { ImportType } from '../../types';
 
 const FormItem = Form.Item;
 
+// 系统保留字段（不允许编辑、删除、导入）
+const RESERVED_FIELD_ENS = new Set([
+  'data_asset_name',
+  'tags',
+  'data_update_time',
+  'data_source'
+]);
+
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
@@ -153,6 +161,9 @@ export default function Step1MetadataFields({
         <Input
           placeholder="请输入中文名称"
           value={record.nameZh}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
       )
@@ -165,6 +176,9 @@ export default function Step1MetadataFields({
         <Input
           placeholder="请输入英文名称"
           value={record.nameEn}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
       )
@@ -178,6 +192,9 @@ export default function Step1MetadataFields({
           placeholder="请选择"
           loading={fieldTypesLoading}
           value={record.type}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
           {fieldTypes.map((type) => (
@@ -195,6 +212,9 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Input
           value={record.default}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { default: value })}
         />
       )
@@ -207,6 +227,9 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.required}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(checked) =>
             handleUpdateField(record.id, { required: checked })
           }
@@ -221,6 +244,9 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.allowModify}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(checked) =>
             handleUpdateField(record.id, { allowModify: checked })
           }
@@ -237,11 +263,14 @@ export default function Step1MetadataFields({
           <Button type="text" onClick={() => handleAddField()}>
             添加行
           </Button>
-          {metadataFields.length > 1 && (
-            <Button type="text" onClick={() => handleDeleteField(record.id)}>
-              删除行
-            </Button>
-          )}
+          {metadataFields.length > 1 &&
+            !(
+              record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+            ) && (
+              <Button type="text" onClick={() => handleDeleteField(record.id)}>
+                删除行
+              </Button>
+            )}
         </div>
       )
     }
@@ -265,6 +294,13 @@ export default function Step1MetadataFields({
 
   // 删除字段行
   const handleDeleteField = (id: string) => {
+    const target = metadataFields.find((f) => f.id === id);
+    if (
+      target &&
+      (target.system === true || RESERVED_FIELD_ENS.has(target.nameEn))
+    ) {
+      return;
+    }
     const updatedFields = metadataFields.filter((field) => field.id !== id);
     setMetadataFields(updatedFields);
     form.setFieldValue('metadataFields', updatedFields);
@@ -294,7 +330,11 @@ export default function Step1MetadataFields({
     dataAssetFields: DataAssetField[]
   ) => {
     // 将外部数据转换为内部使用结构
-    const mapped: MetadataField[] = (dataAssetFields || []).map((f, idx) => ({
+    // 过滤掉系统保留字段（通过模板导入不追加这些字段）
+    const filtered = (dataAssetFields || []).filter(
+      (f) => !RESERVED_FIELD_ENS.has((f.nameEn || '').trim())
+    );
+    const mapped: MetadataField[] = filtered.map((f, idx) => ({
       id: `field_import_${Date.now()}_${idx}`,
       nameZh: f.nameZh ?? '',
       nameEn: f.nameEn ?? '',
