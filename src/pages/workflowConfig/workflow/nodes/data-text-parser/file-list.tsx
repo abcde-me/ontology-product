@@ -153,7 +153,7 @@ function FileList({
         // };
         result = await getLoadTaskFiles({
           data_path_id: sourcePath,
-          file_type: params?.file_type,
+          file_type: params?.file_type ?? formats,
           file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
           page_size: pagination.limit,
           page: params.page,

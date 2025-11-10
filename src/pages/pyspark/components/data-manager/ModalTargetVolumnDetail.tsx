@@ -204,7 +204,7 @@ const useTableList = (props) => {
   >({
     ...defaultSearchParams,
     path_id: volumn.id,
-    full_path: volumn.full_path ?? ''
+    full_path: volumn?.base_dir + volumn.full_path || ''
   });
   const [fileTypeList, setFileTypeList] =
     useState<{ text: string; value: string }[]>(defaultfileTypeList);
