@@ -18,53 +18,53 @@ import {
 export async function findDataAssetMapping(): Promise<
   ApiRes<FindDataAssetMappingItemRes[]>
 > {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: [
-      {
-        nameZh: '数据集',
-        nameEn: 'dataset',
-        type: 'string',
-        default: '',
-        required: false,
-        allowModify: true,
-        mapping: [
-          {
-            type: 'string',
-            tableName: 'table001',
-            fieldType: 'varchar(255)',
-            feildName: 'name'
-          }
-        ]
-      },
-      {
-        nameZh: '源数据目录-卷',
-        nameEn: 'datavolume',
-        type: 'string',
-        default: '',
-        required: false,
-        allowModify: true,
-        mapping: [
-          {
-            type: 'string',
-            tableName: 'table002',
-            fieldType: 'varchar(255)',
-            feildName: '源数据目录-卷-name1'
-          },
-          {
-            type: 'number',
-            tableName: 'table002',
-            fieldType: 'bigint',
-            feildName: 'id'
-          }
-        ]
-      }
-    ],
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.findDataAssetMapping({}).post({}).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: [
+  //     {
+  //       nameZh: '数据集',
+  //       nameEn: 'dataset',
+  //       type: 'string',
+  //       default: '',
+  //       required: false,
+  //       allowModify: true,
+  //       mapping: [
+  //         {
+  //           type: 'string',
+  //           tableName: 'table001',
+  //           fieldType: 'varchar(255)',
+  //           feildName: 'name'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       nameZh: '源数据目录-卷',
+  //       nameEn: 'datavolume',
+  //       type: 'string',
+  //       default: '',
+  //       required: false,
+  //       allowModify: true,
+  //       mapping: [
+  //         {
+  //           type: 'string',
+  //           tableName: 'table002',
+  //           fieldType: 'varchar(255)',
+  //           feildName: '源数据目录-卷-name1'
+  //         },
+  //         {
+  //           type: 'number',
+  //           tableName: 'table002',
+  //           fieldType: 'bigint',
+  //           feildName: 'id'
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.getDataAssetMapping({}).post({}).inRegion().do();
 }
 
 // 获取数据资产列表
@@ -309,7 +309,7 @@ export async function listDataAssetSource(): Promise<
         fields: [
           {
             name: 'id',
-            type: 'bigint'
+            type: 'string'
           },
           {
             name: 'name',
@@ -328,7 +328,7 @@ export async function listDataAssetSource(): Promise<
           },
           {
             name: 'name',
-            type: 'varchar(255)'
+            type: 'string'
           }
         ]
       },
@@ -378,7 +378,7 @@ export async function listDataAssetSource(): Promise<
         ]
       }
     ],
-    status: 0,
+    status: 200,
     code: 200,
     requestId: ''
   });

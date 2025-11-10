@@ -19,7 +19,8 @@ import styles from './Step1MetadataFields.module.scss';
 import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
 import {
   DataAssetField,
-  FindDataAssetMappingItemRes
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
@@ -31,7 +32,7 @@ interface Step1MetadataFieldsProps {
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
   dataSources: Record<string, boolean>;
   setDataSources: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  findDataAssetMappingData: FindDataAssetMappingItemRes[];
+  findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
   onNext: () => void;
 }
@@ -89,8 +90,8 @@ export default function Step1MetadataFields({
     // 使用 nameEn 字段作为数据源键
     const result: Record<string, boolean> = {};
     findDataAssetMappingData.forEach((field) => {
-      if (field.nameEn) {
-        result[field.nameEn] = true;
+      if (field.name) {
+        result[field.name] = true;
       }
     });
 
@@ -326,8 +327,8 @@ export default function Step1MetadataFields({
     const updatedDataSources: Record<string, boolean> = { ...dataSources };
     // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
     findDataAssetMappingData.forEach((field) => {
-      if (field.nameEn) {
-        updatedDataSources[field.nameEn] = checked;
+      if (field.name) {
+        updatedDataSources[field.name] = checked;
       }
     });
     setDataSources(updatedDataSources);
@@ -447,13 +448,13 @@ export default function Step1MetadataFields({
             {findDataAssetMappingData.length > 0 &&
               (() => {
                 // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
-                const nameEnArray = findDataAssetMappingData
-                  .map((field) => field.nameEn)
-                  .filter((nameEn): nameEn is string => !!nameEn);
+                const nameArray = findDataAssetMappingData
+                  .map((field) => field.name)
+                  .filter((name): name is string => !!name);
                 const allChecked =
-                  nameEnArray.length > 0 &&
-                  nameEnArray.every((nameEn) => dataSources[nameEn] === true);
-                const someChecked = nameEnArray.some(
+                  nameArray.length > 0 &&
+                  nameArray.every((name) => dataSources[name] === true);
+                const someChecked = nameArray.some(
                   (nameEn) => dataSources[nameEn] === true
                 );
 
@@ -472,14 +473,14 @@ export default function Step1MetadataFields({
                 );
               })()}
             {findDataAssetMappingData.map((field) => (
-              <Col key={field.nameEn} span={4}>
+              <Col key={field.name} span={4}>
                 <Checkbox
-                  checked={dataSources[field.nameEn] || false}
+                  checked={dataSources[field.name] || false}
                   onChange={(checked) =>
-                    handleDataSourceChange(field.nameEn, checked)
+                    handleDataSourceChange(field.name, checked)
                   }
                 >
-                  {field.nameZh}
+                  {field.name}
                 </Checkbox>
               </Col>
             ))}

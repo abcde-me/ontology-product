@@ -253,59 +253,55 @@ export default function DataAssetList() {
     }
   };
 
+  const loadColumnSettings = async () => {
+    const dataAssetFieldsDisplayRes = await findDataAssetFieldsDisplay({});
+    if (dataAssetFieldsDisplayRes.status !== 200) {
+      return;
+    }
+
+    // 处理列设置数据
+    const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
+      fields: []
+    };
+    // 将 API 返回的 ColumnField 格式转换为组件需要的格式
+    const convertedFields: ColumnField[] = (displayFields || []).map(
+      (field: ApiColumnField, index: number) => ({
+        id: field.nameEn || String(index),
+        name: field.nameZh,
+        type: field.type,
+        enumChecked: field.isEnumAble || false,
+        enumLoading: false,
+        enumCount: 0
+      })
+    );
+    setColumnSettingsFields(convertedFields);
+  };
+
   // 初始化：检查是否有mapping数据
   useEffect(() => {
-    findDataAssetMapping()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const mappingData = res.data || [];
-          // 检查mapping数组长度，判断是否有数据
-          // 如果返回数组长度为0，说明没有任何映射配置，显示无数据页面
-          // 如果返回数组长度不为0，说明有映射配置，显示列表页
-          const hasData = mappingData.length > 0;
-          setHasMapping(hasData);
-
-          // 如果有mapping数据，并行请求列设置和列表数据
-          if (hasData) {
-            // 获取列设置
-            findDataAssetFieldsDisplay({})
-              .then((displayRes) => {
-                // 处理列设置数据
-                if (displayRes.code === 0 || displayRes.code === undefined) {
-                  const { fields: displayFields } = displayRes.data || {
-                    fields: []
-                  };
-                  // 将 API 返回的 ColumnField 格式转换为组件需要的格式
-                  const convertedFields: ColumnField[] = (
-                    displayFields || []
-                  ).map((field: ApiColumnField, index: number) => ({
-                    id: field.nameEn || String(index),
-                    name: field.nameZh,
-                    type: field.type,
-                    enumChecked: field.isEnumAble || false,
-                    enumLoading: false,
-                    enumCount: 0
-                  }));
-                  setColumnSettingsFields(convertedFields);
-                }
-              })
-              .catch((err) => {
-                console.error('获取列设置失败:', err);
-              });
-
-            // 加载列表数据
-            loadListData(1, pageSize);
-          }
-        } else {
-          // 接口失败时默认显示列表页
-          setHasMapping(true);
+    const init = async () => {
+      try {
+        const findDataAssetMappingRes = await findDataAssetMapping();
+        console.log('findDataAssetMappingRes', findDataAssetMappingRes);
+        if (findDataAssetMappingRes.status !== 200) {
+          setHasMapping(false);
+          return;
         }
-      })
-      .catch((err) => {
-        console.error('获取数据资产映射失败:', err);
-        // 接口失败时默认显示列表页
-        setHasMapping(true);
-      });
+
+        // 获取数据资产映射数据
+        const dataAssetMapping = findDataAssetMappingRes.data || [];
+
+        setHasMapping(dataAssetMapping.length > 0);
+
+        if (dataAssetMapping.length > 0) {
+          Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
+        }
+      } catch {
+        setHasMapping(false);
+      }
+    };
+
+    init();
   }, []);
 
   // 初始化搜索字段配置

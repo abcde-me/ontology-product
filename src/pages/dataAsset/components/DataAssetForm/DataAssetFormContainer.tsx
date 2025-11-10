@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Steps, Message } from '@arco-design/web-react';
-import { findDataAssetMapping } from '@/api/dataAsset';
+import { findDataAssetMapping, listDataAssetSource } from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
 import {
   DataAssetField,
-  FindDataAssetMappingItemRes
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
@@ -52,21 +53,22 @@ export default function DataAssetFormContainer({
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [autoMapping, setAutoMapping] = useState(true);
   const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
-    FindDataAssetMappingItemRes[]
+    ListDataAssetSourceResItem[]
   >([]);
 
   // 获取数据资产映射数据
   const fetchDataAssetMapping = async () => {
     try {
       setLoading(true);
-      const res = await findDataAssetMapping();
+      const res = await listDataAssetSource();
 
-      if (res.status === 200) {
-        setFindDataAssetMappingData(res.data || []);
+      if (res.status !== 200) {
+        return;
       }
+
+      setFindDataAssetMappingData(res.data || []);
     } catch (error) {
-      console.error('获取数据资产映射失败:', error);
-      Message.error('获取数据失败，请重试');
+      Message.error('获取数据来源列表失败，请重试');
     } finally {
       setLoading(false);
     }

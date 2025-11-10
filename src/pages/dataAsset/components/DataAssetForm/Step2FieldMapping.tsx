@@ -15,7 +15,10 @@ import {
 import { FieldMapping, MetadataField } from './DataAssetFormContainer';
 import { IconDownload } from '@arco-design/web-react/icon';
 import styles from './Step2FieldMapping.module.scss';
-import { FindDataAssetMappingItemRes } from '@/types/dataAssetApi';
+import {
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
+} from '@/types/dataAssetApi';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -28,7 +31,7 @@ interface Step2FieldMappingProps {
   setAutoMapping: React.Dispatch<React.SetStateAction<boolean>>;
   metadataFields: MetadataField[];
   dataSources: Record<string, boolean>;
-  findDataAssetMappingData: FindDataAssetMappingItemRes[];
+  findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
   onPrev: () => void;
   onFinish: () => void;
@@ -60,19 +63,19 @@ export default function Step2FieldMapping({
   }, []);
 
   // 生成列配置（动态处理所有数据来源类型）
-  const columns = useMemo(() => {
-    const cols = ['序号', '数据资产名称'];
+  // const columns = useMemo(() => {
+  //   const cols = ['序号', '数据资产名称'];
 
-    // 遍历所有选中的数据来源类型，动态添加列
-    Object.keys(dataSources).forEach((sourceType) => {
-      if (dataSources[sourceType] === true) {
-        const displayName = sourceTypeToNameMap[sourceType] || sourceType;
-        cols.push(displayName);
-      }
-    });
+  //   // 遍历所有选中的数据来源类型，动态添加列
+  //   Object.keys(dataSources).forEach((sourceType) => {
+  //     if (dataSources[sourceType] === true) {
+  //       const displayName = sourceTypeToNameMap[sourceType] || sourceType;
+  //       cols.push(displayName);
+  //     }
+  //   });
 
-    return cols;
-  }, [dataSources, sourceTypeToNameMap]);
+  //   return cols;
+  // }, [dataSources, sourceTypeToNameMap]);
 
   // 更新映射
   const handleUpdateMapping = useCallback(
@@ -101,16 +104,16 @@ export default function Step2FieldMapping({
       }
 
       // 从匹配的字段中提取指定数据来源类型的映射选项
-      const options: FindDataAssetMappingItemRes['mapping'] = [];
+      const options: ListDataAssetSourceResItem['fields'] = [];
       findDataAssetMappingData.forEach((field) => {
         if (
-          field.mapping &&
-          Array.isArray(field.mapping) &&
-          field.nameEn === sourceType
+          field.fields &&
+          Array.isArray(field.fields) &&
+          field.name === sourceType
         ) {
-          field.mapping.forEach((mapping) => {
-            if (mapping.type === fieldType) {
-              options.push(mapping);
+          field.fields.forEach((field) => {
+            if (field.type === fieldType) {
+              options.push(field);
             }
           });
         }
@@ -174,11 +177,8 @@ export default function Step2FieldMapping({
                 }
               >
                 {options.map((option) => (
-                  <Select.Option
-                    key={option.feildName}
-                    value={option.feildName}
-                  >
-                    {option.feildName}
+                  <Select.Option key={option.name} value={option.name}>
+                    {option.name}
                   </Select.Option>
                 ))}
               </Select>
