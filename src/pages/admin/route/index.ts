@@ -108,7 +108,7 @@ export const routes: IRoute[] = [
     name: 'workflowConfig',
     key: '/tenant/compute/modaforge/workflowConfig',
     component: React.lazy(async () => import('../../workflowConfig')),
-    permission: [
+    anyPermission: [
       WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
       WORKFLOW_LIST_PERMISSIONS.GET
     ],
